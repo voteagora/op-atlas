@@ -1,6 +1,6 @@
 # OP Atlas
 
-Bring your identify to the OP collective and signup to get funded via RetroPGF.
+Bring your identity to the OP collective and signup to get funded via RetroPGF.
 
 Shepparded by the fine folks of [Agora](https://voteagora.com).
 
