@@ -1,9 +1,8 @@
+import AppProvider from "@/providers/AppProvider"
+import NextAuthProvider from "@/providers/NextAuthProvider"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import AppProvider from "@/providers/AppProvider"
-import NextAuthProvider from "@/providers/NextAuthProvider"
-import Header from "@/components/Header"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,10 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <NextAuthProvider>
-          <AppProvider>
-            <Header />
-            {children}
-          </AppProvider>
+          <AppProvider>{children}</AppProvider>
         </NextAuthProvider>
       </body>
     </html>
