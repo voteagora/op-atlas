@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 const config = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  siweUri: "http://example.com/login",
+  siweUri: "http://example.com/signin",
   domain: "example.com",
 }
 

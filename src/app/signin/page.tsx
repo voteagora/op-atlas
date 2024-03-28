@@ -52,6 +52,7 @@ function Profile() {
   return session ? (
     <div style={{ fontFamily: "sans-serif" }}>
       <p>Signed in as {session.user?.name}</p>
+      <button onClick={() => signIn("github")}>Sign in with github</button>
       <p>
         <button
           type="button"
@@ -64,7 +65,7 @@ function Profile() {
     </div>
   ) : (
     <p>
-      Click the `Sign in with Farcaster`` button above, then scan the QR code to
+      Click the `Sign in with Farcaster` button above, then scan the QR code to
       sign in.
     </p>
   )
