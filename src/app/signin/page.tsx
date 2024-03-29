@@ -48,11 +48,8 @@ export default function Page() {
 
 function Profile() {
   const { data: session } = useSession()
-
   return session ? (
     <div style={{ fontFamily: "sans-serif" }}>
-      <p>Signed in as {session.user?.name}</p>
-      <button onClick={() => signIn("github")}>Sign in with github</button>
       <p>
         <button
           type="button"

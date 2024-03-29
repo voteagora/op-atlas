@@ -1,15 +1,11 @@
 import { createAppClient, viemConnector } from "@farcaster/auth-client"
 import { NextApiRequest, NextApiResponse } from "next"
 import NextAuth from "next-auth"
-import GithubProvider from "next-auth/providers/github"
+
 import CredentialsProvider from "next-auth/providers/credentials"
 
 export const handler = NextAuth({
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID ?? "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
-    }),
     CredentialsProvider({
       name: "Sign in with Farcaster",
       credentials: {
