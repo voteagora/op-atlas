@@ -73,4 +73,20 @@
   body {
     @apply bg-background text-foreground;
   }
+  .card {
+    @apply bg-card text-card-foreground rounded-[24px] border border-solid border-border p-6;
+  
+  }
 }
+
+
+@layer utilities {
+  .bg-gradient {
+    background: linear-gradient(180deg, #FFE0CC 0%, rgba(255, 224, 204, 0) 100%);
+  }
+}
+
+.fc-authkit-signin-button button {
+  @apply !bg-red-500 px-4 py-2 text-sm font-semibold;
+}
+
