@@ -23,6 +23,14 @@ const config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
+        backgroundaccent: "hsl(var(--background-accent))",
+        backgroundSecondary: "hsl(var(--background-secondary))",
+        text: {
+          primary: "hsl(var(--text-primary))",
+          secondary: "hsl(var(--text-secondary))",
+          default: "hsl(var(--text-default))",
+        },
+
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",

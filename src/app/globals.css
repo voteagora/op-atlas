@@ -4,7 +4,14 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --text-primary:230 30% 96%;
+    --text-default:229 27% 8%;
+    --text-secondary:228 14% 29%;
+
+    --background-secondary: 230 30% 96%;
+    --background-accent: 220 100% 92%;
+
+    --background: 220 60% 99%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -74,7 +81,7 @@
     @apply bg-background text-foreground;
   }
   .card {
-    @apply bg-card text-card-foreground rounded-[24px] border border-solid border-border p-6;
+    @apply bg-card text-card-foreground rounded-3xl border border-solid border-border p-6;
   
   }
 }
@@ -86,7 +93,11 @@
   }
 }
 
+.fc-authkit-signin-button > button {
+  @apply !bg-red-500;
+}
+
 .fc-authkit-signin-button button {
-  @apply !bg-red-500 px-4 py-2 text-sm font-semibold;
+  @apply px-4 py-2 text-sm font-semibold;
 }
 
