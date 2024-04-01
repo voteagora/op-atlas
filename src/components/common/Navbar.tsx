@@ -45,10 +45,8 @@ const Navbar: React.FC = () => {
     }
   }, [error, toast])
 
-  console.log("rendering navbar")
-
   return (
-    <nav className="bg-white p-6 flex justify-between items-center">
+    <nav className="bg-white p-6 flex justify-between items-center shadow-sm">
       <Image
         src="/assets/images/logo.svg"
         height={24}

@@ -7,12 +7,13 @@
     --text-primary:230 30% 96%;
     --text-default:229 27% 8%;
     --text-secondary:228 14% 29%;
+    --text-muted:229 10% 43%;
 
     --background-secondary: 230 30% 96%;
     --background-accent: 220 100% 92%;
 
     --background: 220 60% 99%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 229 27% 8%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -23,8 +24,8 @@
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 229 22% 96%;
+    --secondary-foreground: 228 14% 29%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -32,7 +33,7 @@
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 353 100% 51%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
@@ -80,21 +81,34 @@
   body {
     @apply bg-background text-foreground;
   }
-  .card {
-    @apply bg-card text-card-foreground rounded-3xl border border-solid border-border p-6;
-  
+  h2{
+    @apply text-2xl font-semibold;
   }
+  h3{
+    @apply text-xl font-semibold
+  }
+  p{
+    @apply text-base font-normal;
+  }
+
 }
 
 
 @layer utilities {
+
+  .card {
+    @apply bg-card text-card-foreground rounded-3xl border border-solid border-border p-6;
+  }
   .bg-gradient {
     background: linear-gradient(180deg, #FFE0CC 0%, rgba(255, 224, 204, 0) 100%);
+  }
+  .bg-gradient-secondary {
+    background: linear-gradient(180deg, rgba(242, 243, 248, 0) 0%, #F2F3F8 100%);
   }
 }
 
 .fc-authkit-signin-button > button {
-  @apply !bg-red-500;
+  @apply !bg-destructive;
 }
 
 .fc-authkit-signin-button button {
