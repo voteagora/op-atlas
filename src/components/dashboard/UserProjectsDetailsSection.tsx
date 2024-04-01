@@ -2,8 +2,8 @@
 import React, { useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Button } from "../ui/button"
 import AddProjectDialogue from "./AddProjectDialogue"
+import { Button } from "../ui/button"
 
 const UserProjectsDetailsSection = () => {
   const router = useRouter()

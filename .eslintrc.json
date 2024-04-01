@@ -5,6 +5,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
     "plugin:jsx-a11y/recommended",
+    "plugin:import/errors",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
@@ -33,6 +34,26 @@
       "off",
       {
         "allowExpressions": true
+      }
+    ],
+    "sort-imports": [
+      "error",
+      {
+        "ignoreCase": true,
+        "ignoreDeclarationSort": true
+      }
+    ],
+    "import/order": [
+      1,
+      {
+        "groups": [
+          "external",
+          "builtin",
+          "internal",
+          "sibling",
+          "parent",
+          "index"
+        ]
       }
     ],
     "react-hooks/rules-of-hooks": "error",

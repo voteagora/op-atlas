@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useCallback, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 import { SignInButton, StatusAPIResponse } from "@farcaster/auth-kit"

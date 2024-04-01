@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --text-primary:230 30% 96%;
-    --text-default:229 27% 8%;
-    --text-secondary:228 14% 29%;
-    --text-muted:229 10% 43%;
+    --text-primary: 230 30% 96%;
+    --text-default: 229 27% 8%;
+    --text-secondary: 228 14% 29%;
+    --text-muted: 229 10% 43%;
 
     --background-secondary: 230 30% 96%;
     --background-accent: 220 100% 92%;
@@ -27,16 +27,19 @@
     --secondary: 229 22% 96%;
     --secondary-foreground: 228 14% 29%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 229 15% 77%;
+    --muted-foreground: 229 10% 43%;
 
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
+    --success: 129 65% 53%;
+    --success-foreground: 129 65% 53%;
+
     --destructive: 353 100% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
+    --border: 229 22% 90%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
@@ -65,6 +68,9 @@
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
+    --success: 129 65% 53%;
+    --success-foreground: 129 65% 53%;
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
@@ -81,29 +87,34 @@
   body {
     @apply bg-background text-foreground;
   }
-  h2{
+  h2 {
     @apply text-2xl font-semibold;
   }
-  h3{
-    @apply text-xl font-semibold
+  h3 {
+    @apply text-xl font-semibold;
   }
-  p{
+  p {
     @apply text-base font-normal;
   }
-
 }
 
-
 @layer utilities {
-
   .card {
-    @apply bg-card text-card-foreground rounded-3xl border border-solid border-border p-6;
+    @apply bg-background text-card-foreground rounded-3xl border border-solid border-border p-6;
   }
   .bg-gradient {
-    background: linear-gradient(180deg, #FFE0CC 0%, rgba(255, 224, 204, 0) 100%);
+    background: linear-gradient(
+      180deg,
+      #ffe0cc 0%,
+      rgba(255, 224, 204, 0) 100%
+    );
   }
   .bg-gradient-secondary {
-    background: linear-gradient(180deg, rgba(242, 243, 248, 0) 0%, #F2F3F8 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(242, 243, 248, 0) 0%,
+      #f2f3f8 100%
+    );
   }
 }
 
@@ -114,4 +125,3 @@
 .fc-authkit-signin-button button {
   @apply px-4 py-2 text-sm font-semibold;
 }
-
