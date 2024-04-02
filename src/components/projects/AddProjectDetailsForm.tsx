@@ -6,6 +6,7 @@ import Image from "next/image"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
 import {
   CardContent,
   CardDescription,
@@ -26,6 +27,7 @@ const formSchema = z.object({
 })
 
 export default function AddProjectDetailsForm() {
+  const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,7 +37,8 @@ export default function AddProjectDetailsForm() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    router.push("/projects/new/team")
+    console.log(values, "values")
   }
 
   return (
@@ -135,7 +138,11 @@ export default function AddProjectDetailsForm() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" variant="secondary">
+          <Button
+            disabled={!form.formState.isValid}
+            type="submit"
+            variant="destructive"
+          >
             Next
           </Button>
         </CardFooter>
