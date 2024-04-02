@@ -2,31 +2,45 @@ import React from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 
-const ProfileDetailCard = () => {
+interface IProps {
+  profileImageUrl?: string
+  userFullName: string
+  userBio: string
+  userName: string
+  fca: string
+  email?: string
+}
+
+const ProfileDetailCard: React.FC<IProps> = ({
+  profileImageUrl,
+  userFullName,
+  userBio,
+  userName,
+  fca,
+  email,
+}) => {
   return (
     <div className="flex gap-x-4">
       <Avatar className="w-20 h-20">
-        <AvatarImage src="https://github.com/shadcn.png" />
-        <AvatarFallback>CN</AvatarFallback>
+        <AvatarImage src={profileImageUrl ?? ""} />
+        <AvatarFallback>SL</AvatarFallback>
       </Avatar>
       <div>
-        <h2>Shaun Lind 🐰🥕</h2>
-        <p>Addicted to coffee and good design.</p>
+        <h2>{userFullName}</h2>
+        <p>{userBio}</p>
         <div className="flex items-center gap-x-4 text-sm mt-2">
           <div className="flex items-center gap-x-2">
             <span className="text-text-muted">Username</span>
-            <span className="font-medium text-text-secondary">shadcn</span>
+            <span className="font-medium text-text-secondary">{userName}</span>
           </div>
           <div className="flex items-center gap-x-2">
             <span className="text-text-muted">FCA</span>
-            <span className="font-medium text-text-secondary">
-              0xD7ce...3765
-            </span>
+            <span className="font-medium text-text-secondary">{fca}</span>
           </div>
           <div className="flex items-center gap-x-2">
             <span className="text-text-muted">Email</span>
             <span className="font-medium text-text-secondary">
-              Add your email
+              {email ? email : "Add your email"}
             </span>
           </div>
         </div>
