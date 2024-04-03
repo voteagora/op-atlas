@@ -7,6 +7,7 @@ interface TeamCardProps {
   username: string
   avatarSrc: string
   isOwner?: boolean
+  onButtonClick?: () => void
 }
 
 export const TeamMemberCard: React.FC<TeamCardProps> = ({
@@ -14,25 +15,37 @@ export const TeamMemberCard: React.FC<TeamCardProps> = ({
   username,
   avatarSrc,
   isOwner,
-}) => (
-  <div className="w-[172px] h-36 relative bg-white border rounded-xl p-3 ">
-    {isOwner && (
-      <Image
-        src="/assets/icons/starIcon.svg"
-        width={11}
-        height={10}
-        alt="img"
-        className="absolute top-2 right-2"
-      />
-    )}
+  onButtonClick,
+}) => {
+  return (
+    <div className="w-[172px] h-36 relative bg-white border rounded-xl p-3 ">
+      {isOwner ? (
+        <Image
+          src="/assets/icons/starIcon.svg"
+          width={11}
+          height={10}
+          alt="img"
+          className="absolute top-2 right-2"
+        />
+      ) : (
+        <Image
+          src="/assets/icons/crossIcon.svg"
+          width={11}
+          height={10}
+          alt="img"
+          className="absolute top-2 right-2 cursor-pointer"
+          onClick={onButtonClick}
+        />
+      )}
 
-    <div className="flex flex-col mt-2.5 justify-center items-center text-center">
-      <Avatar className="!w-12 !h-12">
-        <AvatarImage src={avatarSrc} alt="avatar" />
-        <AvatarFallback>{name[0]}</AvatarFallback>
-      </Avatar>
-      <p className="text-sm text-secondary-foreground mt-2">{name}</p>
-      <p className="text-xs text-muted-foreground">{username}</p>
+      <div className="flex flex-col mt-2.5 justify-center items-center text-center">
+        <Avatar className="!w-12 !h-12">
+          <AvatarImage src={avatarSrc} alt="avatar" />
+          <AvatarFallback>{name[0]}</AvatarFallback>
+        </Avatar>
+        <p className="text-sm text-secondary-foreground mt-2">{name}</p>
+        <p className="text-xs text-muted-foreground">{username}</p>
+      </div>
     </div>
-  </div>
-)
+  )
+}

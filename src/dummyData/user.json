@@ -1,0 +1,38 @@
+[
+    {
+        "username": "john_doe",
+        "fullName": "John Doe",
+        "profilePictureUrl": "/assets/images/ema.png",
+        "id": 1
+    },
+    {
+        "username": "jane_smith",
+        "fullName": "Jane Smith",
+        "profilePictureUrl": "/assets/images/emah.png",
+        "id": 2
+    },
+    {
+        "username": "alex_wilson",
+        "fullName": "Alex Wilson",
+        "profilePictureUrl": "/assets/images/emel.png",
+        "id": 3
+    },
+    {
+        "username": "michael_jackson",
+        "fullName": "Michael Jackson",
+        "profilePictureUrl": "/assets/images/emmy.png",
+        "id": 4
+    },
+    {
+        "username": "emma_watson",
+        "fullName": "Emma Watson",
+        "profilePictureUrl": "/assets/images/emee.png",
+        "id": 5
+    },
+    {
+        "username": "david_beckham",
+        "fullName": "David Beckham",
+        "profilePictureUrl": "/assets/images/emah.png",
+        "id": 6
+    }
+]

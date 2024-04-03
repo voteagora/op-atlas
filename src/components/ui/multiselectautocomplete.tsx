@@ -10,15 +10,13 @@ import { Badge } from "./badge"
 import { Command, CommandGroup, CommandItem, CommandList } from "./command"
 import { Input } from "./input"
 
-export type IMultiSelectOptions = Record<"value" | "label" | "image", string>
+export type IMultiSelectOptions = {
+  value: string | number
+  label: string
+  image: string
+}
 
-export function MultiSelect({
-  placeholder = "Select an item",
-  parentClassName,
-  options,
-  selectedOptions,
-  setSelectedOptions,
-}: {
+interface MultiSelectAutocompleteProps {
   image?: string
   placeholder?: string
   parentClassName?: string
@@ -27,15 +25,26 @@ export function MultiSelect({
   setSelectedOptions: React.Dispatch<
     React.SetStateAction<IMultiSelectOptions[]>
   >
-}) {
+}
+
+export function MultiSelect({
+  placeholder = "Select an item",
+  parentClassName,
+  options,
+  selectedOptions,
+  setSelectedOptions,
+}: MultiSelectAutocompleteProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState("")
   const [selectables, setSelectable] = React.useState(options)
 
-  const handleUnselect = React.useCallback((item: IMultiSelectOptions) => {
-    setSelectedOptions((prev) => prev.filter((s) => s.value !== item.value))
-  }, [])
+  const handleUnselect = React.useCallback(
+    (item: IMultiSelectOptions) => {
+      setSelectedOptions((prev) => prev.filter((s) => s.value !== item.value))
+    },
+    [setSelectedOptions],
+  )
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -47,7 +56,12 @@ export function MultiSelect({
   )
 
   React.useEffect(() => {
-    const filterData = options.filter((item) => !selectedOptions.includes(item))
+    const filterData = options.filter(
+      (item) =>
+        !selectedOptions.some(
+          (selectedItem) => selectedItem.value === item.value,
+        ),
+    )
     if (inputValue === "") {
       setSelectable(filterData)
     } else {
