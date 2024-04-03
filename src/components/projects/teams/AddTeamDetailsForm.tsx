@@ -7,21 +7,39 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { IMultiSelectOptions } from "@/components/ui/multiselectautocomplete"
 import { TeamMemberCard } from "./TeamMemberCard"
 import { AddTeamMemberCard } from "./AddTeamMemberCard"
 import { ConfirmTeamCheckbox } from "./ConfirmTeamCheckbox"
 import AddTeamMemberDialogue from "./AddTeamMemberDialogue"
+import DeleteTeamMemberDialogue from "./DeleteTeamMemberDialogue"
+
+export interface IUser {
+  id: number | string
+  username: string
+  profilePictureUrl: string
+  fullName: string
+}
 
 export default function AddTeamDetailsForm() {
   const [isTeamConfirmed, setIsTeamConfirmed] = React.useState(false)
   const [showAddTeamDialogue, setShowAddTeamDialogue] = React.useState(false)
-  const [selectedTeamMembers, setSelectedTeamMembers] = React.useState<
-    IMultiSelectOptions[]
-  >([])
-  const [addedTeamMembers, setAddedTeamMembers] = React.useState<
-    IMultiSelectOptions[]
-  >([])
+
+  const [addedTeamMembers, setAddedTeamMembers] = React.useState<IUser[]>([])
+  const [openDialog, setOpenDialog] = React.useState(false)
+  const [currentTeamMember, setCurrentTeamMember] =
+    React.useState<IUser | null>(null)
+
+  const handleOpenDialog = (member: IUser) => {
+    setCurrentTeamMember(member)
+    setOpenDialog(true)
+  }
+
+  const handleConfirmDelete = () => {
+    setAddedTeamMembers(
+      addedTeamMembers.filter((member) => member.id !== currentTeamMember?.id),
+    )
+    setOpenDialog(false)
+  }
 
   return (
     <div>
@@ -36,7 +54,7 @@ export default function AddTeamDetailsForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-x-2 my-12">
+        <div className="flex flex-wrap gap-2 my-12">
           <TeamMemberCard
             name="Shaun Lind"
             username="shausome"
@@ -45,10 +63,11 @@ export default function AddTeamDetailsForm() {
           />
           {addedTeamMembers.map((member) => (
             <TeamMemberCard
-              key={member.value}
-              name={member.label}
-              username={member.value}
-              avatarSrc={member.image}
+              key={member.id}
+              name={member.fullName}
+              username={`@${member.username}`}
+              avatarSrc={member.profilePictureUrl}
+              onButtonClick={() => handleOpenDialog(member)}
             />
           ))}
           <AddTeamMemberCard
@@ -68,12 +87,16 @@ export default function AddTeamDetailsForm() {
           Next
         </Button>
         <AddTeamMemberDialogue
-          setSelectedTeamMembers={setSelectedTeamMembers}
-          selectedTeamMembers={selectedTeamMembers}
           open={showAddTeamDialogue}
-          addedTeamMembers={addedTeamMembers}
           setAddedTeamMembers={setAddedTeamMembers}
           onOpenChange={(open) => setShowAddTeamDialogue(open)}
+          addedTeamMembers={addedTeamMembers}
+        />
+        <DeleteTeamMemberDialogue
+          open={openDialog}
+          onOpenChange={(open) => setOpenDialog(open)}
+          handleButtonClick={handleConfirmDelete}
+          member={currentTeamMember}
         />
       </CardContent>
     </div>

@@ -1,5 +1,5 @@
 "use client"
-import { memo, useEffect } from "react"
+import { memo, useEffect, useMemo, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -13,69 +13,69 @@ import {
   MultiSelect,
 } from "@/components/ui/multiselectautocomplete"
 import { Button } from "@/components/ui/button"
+import users from "@/dummyData/user.json"
+import { IUser } from "./AddTeamDetailsForm"
 
 interface IProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  selectedTeamMembers: IMultiSelectOptions[]
-  setSelectedTeamMembers: React.Dispatch<
-    React.SetStateAction<IMultiSelectOptions[]>
-  >
-  addedTeamMembers: IMultiSelectOptions[]
-  setAddedTeamMembers: React.Dispatch<
-    React.SetStateAction<IMultiSelectOptions[]>
-  >
+  addedTeamMembers: IUser[]
+  setAddedTeamMembers: React.Dispatch<React.SetStateAction<IUser[]>>
 }
-
-const options = [
-  {
-    value: "John",
-    label: "@john",
-    image: "/assets/images/ema.png",
-  },
-  {
-    value: "@jane",
-    label: "@jane",
-    image: "/assets/images/emah.png",
-  },
-  {
-    value: "@emma",
-    label: "@emma",
-    image: "/assets/images/emee.png",
-  },
-  {
-    value: "@alex",
-    label: "@alex",
-    image: "/assets/images/emel.png",
-  },
-  {
-    value: "@michael",
-    label: "@michael",
-    image: "/assets/images/emmy.png",
-  },
-  {
-    value: "@sarah",
-    label: "@sarah",
-    image: "/assets/images/emmy.png",
-  },
-]
 
 const AddTeamMemberDialogue: React.FC<IProps> = ({
   open,
   onOpenChange,
-  selectedTeamMembers,
-  setSelectedTeamMembers,
   addedTeamMembers,
   setAddedTeamMembers,
 }) => {
+  /**
+   * State to store the selected team members.
+   */
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<
+    IMultiSelectOptions[]
+  >([])
+
+  /**
+   * Handles the button click event.
+   * Closes the dialog and updates the added team members.
+   */
   const handleButtonClick = () => {
     onOpenChange(false)
-    setAddedTeamMembers(selectedTeamMembers)
+    setAddedTeamMembers(
+      selectedTeamMembers.map(
+        (member) => users.find((user) => user.id === member.value) as IUser,
+      ),
+    )
   }
 
+  /**
+   * Generates the options for the multi-select component.
+   * Maps the users array to an array of options with label, value, and image properties.
+   */
+  const options = useMemo(() => {
+    return users.map((user) => ({
+      label: `@${user.username}`,
+      value: user.id,
+      image: user.profilePictureUrl,
+    }))
+  }, [])
+
+  /**
+   * Updates the selected team members when the dialog is opened.
+   * Maps the added team members to options with label, value, and image properties.
+   */
   useEffect(() => {
-    setSelectedTeamMembers(addedTeamMembers)
-  }, [addedTeamMembers, setSelectedTeamMembers])
+    if (open) {
+      setSelectedTeamMembers(
+        addedTeamMembers.map((member) => ({
+          label: `@${member.username}`,
+          value: member.id,
+          image: member.profilePictureUrl,
+        })),
+      )
+    }
+  }, [addedTeamMembers, open])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
