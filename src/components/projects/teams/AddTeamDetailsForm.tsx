@@ -7,12 +7,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { TeamInfoCard } from "./TeamInfoCard"
-import { AddTeamCard } from "./AddTeamCard"
+import { IMultiSelectOptions } from "@/components/ui/multiselectautocomplete"
+import { TeamMemberCard } from "./TeamMemberCard"
+import { AddTeamMemberCard } from "./AddTeamMemberCard"
 import { ConfirmTeamCheckbox } from "./ConfirmTeamCheckbox"
+import AddTeamMemberDialogue from "./AddTeamMemberDialogue"
 
 export default function AddTeamDetailsForm() {
   const [isTeamConfirmed, setIsTeamConfirmed] = React.useState(false)
+  const [showAddTeamDialogue, setShowAddTeamDialogue] = React.useState(false)
+  const [selectedTeamMembers, setSelectedTeamMembers] = React.useState<
+    IMultiSelectOptions[]
+  >([])
+  const [addedTeamMembers, setAddedTeamMembers] = React.useState<
+    IMultiSelectOptions[]
+  >([])
+
   return (
     <div>
       <CardHeader>
@@ -27,13 +37,22 @@ export default function AddTeamDetailsForm() {
       </CardHeader>
       <CardContent>
         <div className="flex gap-x-2 my-12">
-          <TeamInfoCard
+          <TeamMemberCard
             name="Shaun Lind"
             username="shausome"
             avatarSrc="/assets/images/avatar.png"
+            isOwner={true}
           />
-          <AddTeamCard
-            onAddTeamBoxClicked={() => console.log("hitting form")}
+          {addedTeamMembers.map((member) => (
+            <TeamMemberCard
+              key={member.value}
+              name={member.label}
+              username={member.value}
+              avatarSrc={member.image}
+            />
+          ))}
+          <AddTeamMemberCard
+            onAddTeamBoxClicked={() => setShowAddTeamDialogue(true)}
           />
         </div>
 
@@ -48,6 +67,14 @@ export default function AddTeamDetailsForm() {
         >
           Next
         </Button>
+        <AddTeamMemberDialogue
+          setSelectedTeamMembers={setSelectedTeamMembers}
+          selectedTeamMembers={selectedTeamMembers}
+          open={showAddTeamDialogue}
+          addedTeamMembers={addedTeamMembers}
+          setAddedTeamMembers={setAddedTeamMembers}
+          onOpenChange={(open) => setShowAddTeamDialogue(open)}
+        />
       </CardContent>
     </div>
   )
