@@ -46,8 +46,6 @@ export const handler = NextAuth({
         })
         const { success, fid } = verifyResponse
 
-        console.log("success: ", success)
-
         if (!success) {
           return null
         }

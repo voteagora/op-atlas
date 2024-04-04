@@ -1,5 +1,6 @@
 "use client"
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   CardContent,
@@ -21,6 +22,7 @@ export interface IUser {
 }
 
 export default function AddTeamDetailsForm() {
+  const router = useRouter()
   const [isTeamConfirmed, setIsTeamConfirmed] = React.useState(false)
   const [showAddTeamDialogue, setShowAddTeamDialogue] = React.useState(false)
 
@@ -39,6 +41,10 @@ export default function AddTeamDetailsForm() {
       addedTeamMembers.filter((member) => member.id !== currentTeamMember?.id),
     )
     setOpenDialog(false)
+  }
+
+  const handleNextClicked = () => {
+    router.push("/projects/new/repos")
   }
 
   return (
@@ -80,7 +86,8 @@ export default function AddTeamDetailsForm() {
           isTeamConfirmed={isTeamConfirmed}
         />
         <Button
-          disabled={!isTeamConfirmed}
+          onClick={handleNextClicked}
+          disabled={!isTeamConfirmed || !!!addedTeamMembers.length}
           variant="destructive"
           className="mt-12"
         >

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 import { SignInButton, StatusAPIResponse } from "@farcaster/auth-kit"
-import { getCsrfToken, signIn, signOut } from "next-auth/react"
+import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react"
 
 import { useToast } from "../ui/use-toast"
 
@@ -13,6 +13,7 @@ const WelcomeDialog = dynamic(() => import("../WelcomeDialog"))
 
 const Navbar: React.FC = () => {
   const { toast } = useToast()
+  const { data, status } = useSession()
   const [error, setError] = useState(false)
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false)
 
@@ -22,9 +23,11 @@ const Navbar: React.FC = () => {
     return nonce
   }, [])
 
+  console.log(data, status, "data")
+
   const handleSuccess = useCallback(
-    (res: StatusAPIResponse) => {
-      signIn("credentials", {
+    async (res: StatusAPIResponse) => {
+      await signIn("credentials", {
         message: res.message,
         signature: res.signature,
         name: res.username,
