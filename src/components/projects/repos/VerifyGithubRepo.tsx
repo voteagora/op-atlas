@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { isValidGitHubRepoUrl } from "@/lib/utils"
 import MenuIcon from "@/components/icons/menuIcon"
+import CheckIcon from "@/components/icons/checkIcon"
 import AddGitRepoDialogue from "./AddGitRepoDialogue"
 
 const VerifyGithubRepo: React.FC = () => {
@@ -67,7 +68,13 @@ const VerifyGithubRepo: React.FC = () => {
         <div className="flex flex-col gap-2 mt-2">
           {addedRepos.map((repo, index) => (
             <div className="flex gap-x-2 w-full" key={index}>
-              <Input defaultValue={repo} readOnly />
+              <div className="flex items-center space-x-2 border border-input p-3 rounded-lg w-full">
+                <CheckIcon className="!fill-accent-foreground" />
+
+                <p className="text-sm font-medium text-foreground">
+                  {repo ? repo : "Add a URL"}
+                </p>
+              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <Button variant="secondary">
@@ -83,19 +90,25 @@ const VerifyGithubRepo: React.FC = () => {
         </div>
       )}
 
-      <Button onClick={handleOpenDialogue} className="mt-2" variant="secondary">
-        <Image
-          className="mr-2"
-          src="/assets/icons/plusIcon.svg"
-          width={9}
-          height={9}
-          alt=""
-        />
-        Add repo
-      </Button>
-
       {error && (
         <p className="text-sm font-medium text-destructive mt-2">{error}</p>
+      )}
+
+      {addedRepos.length > 0 && (
+        <Button
+          onClick={handleOpenDialogue}
+          className="mt-2"
+          variant="secondary"
+        >
+          <Image
+            className="mr-2"
+            src="/assets/icons/plusIcon.svg"
+            width={9}
+            height={9}
+            alt=""
+          />
+          Add repo
+        </Button>
       )}
 
       <AddGitRepoDialogue
