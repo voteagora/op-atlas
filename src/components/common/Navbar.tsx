@@ -23,8 +23,6 @@ const Navbar: React.FC = () => {
     return nonce
   }, [])
 
-  console.log(data, status, "data")
-
   const handleSuccess = useCallback(
     async (res: StatusAPIResponse) => {
       await signIn("credentials", {
