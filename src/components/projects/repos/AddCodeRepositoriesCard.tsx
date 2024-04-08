@@ -10,7 +10,6 @@ import { CodeRepoCheckbox } from "./CodeRepoCheckbox"
 import VerifyGithubRepo from "./VerifyGithubRepo"
 import NpmPackageManager from "./NpmPackageManager"
 import VerifyCodeRepoBanner from "./VerifyCodeRepoBanner"
-// import GitRepoDialogue from "./GitRepoDialogue"
 
 const AddCodeRepositoriesCard = () => {
   const [isCodeRepoConfirmed, setIsCodeRepoConfirmed] = React.useState(false)
@@ -35,7 +34,6 @@ const AddCodeRepositoriesCard = () => {
         </div>
         <VerifyGithubRepo />
         <NpmPackageManager />
-        {/* <GitRepoDialogue /> */}
       </CardContent>
     </div>
   )
