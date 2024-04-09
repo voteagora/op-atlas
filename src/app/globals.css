@@ -123,5 +123,5 @@
 }
 
 .fc-authkit-signin-button button {
-  @apply px-4 py-2 text-sm font-semibold;
+  @apply px-4 py-2 !text-sm !font-semibold !border;
 }

@@ -1,5 +1,4 @@
 import { createAppClient, viemConnector } from "@farcaster/auth-client"
-import { NextApiRequest, NextApiResponse } from "next"
 import NextAuth from "next-auth"
 
 import CredentialsProvider from "next-auth/providers/credentials"
@@ -41,7 +40,7 @@ export const handler = NextAuth({
         const verifyResponse = await appClient.verifySignInMessage({
           message: credentials?.message as string,
           signature: credentials?.signature as `0x${string}`,
-          domain: "example.com",
+          domain: "localhost:3000",
           nonce: credentials?.csrfToken,
         })
         const { success, fid } = verifyResponse

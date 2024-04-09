@@ -1,18 +1,12 @@
 "use client"
 import { AuthKitProvider } from "@farcaster/auth-kit"
 import "@farcaster/auth-kit/styles.css"
-import type { Metadata } from "next"
 
 const config = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  siweUri: "http://example.com/signin",
-  domain: "example.com",
-}
-
-export const metadata: Metadata = {
-  title: "OP Atlas",
-  description: "",
+  siweUri: window.location.href,
+  domain: window.location.host,
 }
 
 export default function AppProvider({
