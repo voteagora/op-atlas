@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// TODO: Should we unique email? What if two people put the same one but have different FC accounts?
+// TODO: Cache farcaster account metadata? Probably fine to just pull on login/token validation?
+// TODO: Do we need to handle deletion of accounts? (This is a GDPR thing, right?)
+model User {
+  id          String  @id @default(uuid())
+  email       String?
+  farcasterId String  @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects UserProjects[]
+}
+
+// TODO: We'll use the round number as the ID
+model FundingRound {
+  id          String   @id
+  name        String
+  imageUrl    String
+  description String
+  rewards     String?
+  startDate   DateTime
+  endDate     DateTime
+
+  applications Application[]
+}
+
+// TODO: Multiple websites and farcaster accounts feels kind of weird...
+// TODO: Didn't include the attestation yet, let's talk about it
+model Project {
+  id           String @id @default(uuid())
+  name         String
+  description  String
+  category     String
+  thumbnailUrl String
+  bannerUrl    String
+
+  website   String[]
+  farcaster String[]
+  twitter   String?
+  mirror    String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  team         UserProjects[]
+  repos        ProjectRepository[]
+  contracts    ProjectContract[]
+  funding      ProjectFunding[]
+  applications Application[]
+}
+
+// TODO: These are immutable, right? So we don't need update timestamps
+model Application {
+  id        String @id @default(uuid())
+  status    String
+  recipient String
+
+  createdAt DateTime @default(now())
+
+  roundId   String
+  projectId String
+
+  round   FundingRound @relation(fields: [roundId], references: [id])
+  project Project      @relation(fields: [projectId], references: [id])
+}
+
+model UserProjects {
+  id    String  @id @default(uuid())
+  owner Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  projectId String
+
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+// TODO: It should be fine to only create/attach these to projects after verification, right?
+// TODO: NPM repos seems kind of weird...
+model ProjectRepository {
+  id       String  @id @default(uuid())
+  type     String
+  url      String
+  verified Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+// TODO: Not super well-defined yet... there's stuff about deployer keys and OS Observer in the design to talk through
+model ProjectContract {
+  id              String @id @default(uuid())
+  contractAddress String
+  deployerAddress String
+  deploymentHash  String
+  chainId         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+// TODO: Feels like it might change as well, but we can try and include fields for each type of funding in one entity
+model ProjectFunding {
+  id         String   @id @default(uuid())
+  type       String
+  grant      String?
+  grantUrl   String?
+  amount     String
+  receivedAt DateTime
+  details    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
+}
