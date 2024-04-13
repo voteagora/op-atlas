@@ -7,9 +7,9 @@ interface IProps {
 
 const LayoutProvider: React.FC<IProps> = ({ children }) => {
   return (
-    <div className="h-screen flex flex-col ">
+    <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
       <Navbar />
-      <div className="flex-1">{children}</div>
+      {children}
     </div>
   )
 }
