@@ -3,6 +3,10 @@ import NextAuth from "next-auth"
 
 import CredentialsProvider from "next-auth/providers/credentials"
 
+if (!process.env.NEXT_PUBLIC_APP_DOMAIN) {
+  throw new Error("Please define NEXT_PUBLIC_APP_DOMAIN in .env")
+}
+
 export const handler = NextAuth({
   providers: [
     CredentialsProvider({
@@ -40,7 +44,7 @@ export const handler = NextAuth({
         const verifyResponse = await appClient.verifySignInMessage({
           message: credentials?.message as string,
           signature: credentials?.signature as `0x${string}`,
-          domain: "localhost:3000",
+          domain: process.env.NEXT_PUBLIC_APP_DOMAIN!,
           nonce: credentials?.csrfToken,
         })
         const { success, fid } = verifyResponse
