@@ -1,5 +1,5 @@
 "use client"
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import dynamic from "next/dynamic"
 import {
@@ -20,7 +20,6 @@ import { Button } from "../ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
 const WelcomeDialog = dynamic(() => import("../WelcomeDialog"))
-const MemorizedSignInButton = React.memo(SignInButton)
 
 const Navbar: React.FC = () => {
   const { toast } = useToast()
@@ -51,14 +50,6 @@ const Navbar: React.FC = () => {
       })
     }
   }, [error, toast])
-
-  const handleGetExpiryTime = useMemo(() => {
-    const currentDatetime = new Date()
-    const expirationDatetime = new Date(currentDatetime)
-    expirationDatetime.setDate(expirationDatetime.getDate() + 1)
-    const expirationTimeString = expirationDatetime.toISOString()
-    return expirationTimeString
-  }, [])
 
   return (
     <nav className="bg-white p-6 flex justify-between items-center shadow-sm">
@@ -104,13 +95,10 @@ const Navbar: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <MemorizedSignInButton
+          <SignInButton
             nonce={getNonce}
-            expirationTime={handleGetExpiryTime}
             onSuccess={handleSuccess}
-            onError={() => {
-              setError(true)
-            }}
+            onError={() => setError(true)}
             onSignOut={() => signOut()}
           />
         )}
