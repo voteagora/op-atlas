@@ -37,7 +37,6 @@ export const handler = NextAuth({
         },
       },
       async authorize(credentials: any) {
-        console.log("Calling authorize", credentials)
         const appClient = createAppClient({
           ethereum: viemConnector(),
         })
