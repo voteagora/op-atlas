@@ -5,6 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function titlecase(str: string) {
+  return str.charAt(0).toLocaleUpperCase() + str.slice(1)
+}
+
 export function isValidGitHubRepoUrl(url: string) {
   // Regular expression to match GitHub repository URLs
   const githubRepoRegex =

@@ -11,7 +11,7 @@ import "@farcaster/auth-kit/styles.css"
 
 const WelcomeDialog = dynamic(() => import("../WelcomeDialog"))
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const { toast } = useToast()
   const { data, status } = useSession()
   const [error, setError] = useState(false)
@@ -47,7 +47,7 @@ const Navbar: React.FC = () => {
   }, [error, toast])
 
   return (
-    <nav className="bg-white p-6 flex justify-between items-center shadow-sm">
+    <nav className="fixed inset-x-0 top-0 h-18 bg-white flex items-center justify-between px-6 shadow-sm z-20">
       <Image
         src="/assets/images/logo.svg"
         height={24}
