@@ -102,6 +102,16 @@
   .card {
     @apply bg-background text-card-foreground rounded-3xl border border-solid border-border p-6;
   }
+  .bg-rainbow {
+    background: linear-gradient(
+      180deg,
+      rgba(255,239,209,1) 0%,
+      rgba(255,209,214,1) 25%,
+      rgba(210,203,255,1) 50%, 
+      rgba(156,255,231,1) 75%,
+      rgba(166,255,180,1) 100%
+    );
+  }
   .bg-gradient {
     background: linear-gradient(
       180deg,
