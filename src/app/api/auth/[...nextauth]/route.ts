@@ -37,6 +37,7 @@ export const handler = NextAuth({
         },
       },
       async authorize(credentials: any) {
+        console.log("Calling authorize", credentials)
         const appClient = createAppClient({
           ethereum: viemConnector(),
         })
@@ -47,7 +48,9 @@ export const handler = NextAuth({
           domain: process.env.NEXT_PUBLIC_APP_DOMAIN!,
           nonce: credentials?.csrfToken,
         })
+        console.log("verifyResponse", verifyResponse)
         const { success, fid } = verifyResponse
+        console.log("success", success, fid)
 
         if (!success) {
           return null
