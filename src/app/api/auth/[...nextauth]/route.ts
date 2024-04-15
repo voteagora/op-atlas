@@ -1,8 +1,11 @@
 import { createAppClient, viemConnector } from "@farcaster/auth-client"
-import { NextApiRequest, NextApiResponse } from "next"
 import NextAuth from "next-auth"
 
 import CredentialsProvider from "next-auth/providers/credentials"
+
+if (!process.env.NEXT_PUBLIC_APP_DOMAIN) {
+  throw new Error("Please define NEXT_PUBLIC_APP_DOMAIN in .env")
+}
 
 export const handler = NextAuth({
   providers: [
@@ -41,10 +44,12 @@ export const handler = NextAuth({
         const verifyResponse = await appClient.verifySignInMessage({
           message: credentials?.message as string,
           signature: credentials?.signature as `0x${string}`,
-          domain: "example.com",
+          domain: process.env.NEXT_PUBLIC_APP_DOMAIN!,
           nonce: credentials?.csrfToken,
         })
+        console.log("verifyResponse", verifyResponse)
         const { success, fid } = verifyResponse
+        console.log("success", success, fid)
 
         if (!success) {
           return null

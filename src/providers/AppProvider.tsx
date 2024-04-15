@@ -1,18 +1,17 @@
 "use client"
+
 import { AuthKitProvider } from "@farcaster/auth-kit"
 import "@farcaster/auth-kit/styles.css"
-import type { Metadata } from "next"
+
+if (!process.env.NEXT_PUBLIC_APP_DOMAIN) {
+  throw new Error("Please define NEXT_PUBLIC_APP_DOMAIN in env.")
+}
 
 const config = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  siweUri: "http://example.com/signin",
-  domain: "example.com",
-}
-
-export const metadata: Metadata = {
-  title: "OP Atlas",
-  description: "",
+  siweUri: process.env.NEXT_PUBLIC_APP_DOMAIN,
+  domain: process.env.NEXT_PUBLIC_APP_DOMAIN,
 }
 
 export default function AppProvider({
