@@ -101,7 +101,7 @@ export function Account() {
     <SignInButton
       onSuccess={handleSuccess}
       onError={() => setError(true)}
-      onSignOut={() => signOut()}
+      onSignOut={logOut}
     />
   )
 }
