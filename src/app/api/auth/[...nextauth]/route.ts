@@ -45,11 +45,9 @@ export const handler = NextAuth({
           message: credentials?.message as string,
           signature: credentials?.signature as `0x${string}`,
           domain: process.env.NEXT_PUBLIC_APP_DOMAIN!,
-          nonce: credentials?.csrfToken,
+          nonce: credentials?.nonce,
         })
-        console.log("verifyResponse", verifyResponse)
         const { success, fid } = verifyResponse
-        console.log("success", success, fid)
 
         if (!success) {
           return null
