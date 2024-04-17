@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "../ui/input"
 
 interface IProps {
   open: boolean
@@ -23,16 +24,20 @@ const EmailDialog: React.FC<IProps> = ({ open, onOpenChange }) => {
           <DialogTitle className="text-center text-lg font-semibold text-text-default">
             Please add email for important messages
           </DialogTitle>
-          <DialogDescription className="text-center text-base font-normal text-text-secondary mt-1">
+          <DialogDescription className="text-center text-base font-normal text-text-secondary mt-1 flex flex-col gap-6">
             This step is required to apply for Retro Funding. It should be a
             personal email where we can reliably reach you. Don’t worry, we’ll
             keep it private.
+            <div className="flex flex-col gap-2">
+              <div className="font-500 self-start">Email</div>
+              <Input type="email" placeholder="Enter email address" />
+            </div>
           </DialogDescription>
         </DialogHeader>
 
         <DialogFooter className="w-full">
           <Button
-            onClick={() => console.log("print email")}
+            onClick={() => onOpenChange(false)}
             className="w-full"
             type="button"
             variant="destructive"
