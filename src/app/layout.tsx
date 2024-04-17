@@ -5,6 +5,8 @@ import NextAuthProvider from "@/providers/NextAuthProvider"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import LayoutProvider from "@/providers/LayoutProvider"
+import { DialogProvider } from "@/providers/DialogProvider"
+import AppDialogs from "@/components/dialogs/AppDialogs"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,10 +28,14 @@ export default function RootLayout({
       <body className={`${inter.className}`}>
         <NextAuthProvider>
           <AppProvider>
-            <LayoutProvider>
-              {children}
-              <Toaster />
-            </LayoutProvider>
+            <DialogProvider>
+              <LayoutProvider>
+                <AppDialogs />
+                {children}
+
+                <Toaster />
+              </LayoutProvider>
+            </DialogProvider>
           </AppProvider>
         </NextAuthProvider>
       </body>
