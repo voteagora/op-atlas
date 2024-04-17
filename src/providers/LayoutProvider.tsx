@@ -1,5 +1,6 @@
 import React from "react"
 import Navbar from "@/components/common/Navbar"
+
 interface IProps {
   children: React.ReactNode
 }
