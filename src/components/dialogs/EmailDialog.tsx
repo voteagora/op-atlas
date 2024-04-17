@@ -46,6 +46,7 @@ const EmailDialog: React.FC<IProps> = ({ open, onOpenChange }) => {
 
         <DialogFooter className="w-full">
           <Button
+            // TODO: Save email to backend
             onClick={() => onOpenChange(false)}
             className="w-full"
             type="button"
