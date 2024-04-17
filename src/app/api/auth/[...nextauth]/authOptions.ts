@@ -35,7 +35,7 @@ const authOptions = {
           label: "Nonce",
           type: "text",
           placeholder: "0x0",
-        }
+        },
       },
       async authorize(credentials) {
         const appClient = createAppClient({
