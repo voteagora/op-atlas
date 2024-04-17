@@ -1,4 +1,4 @@
-// This file has to be its own file because of a weird NextJS build constraint
+// This object has to be in its own file because of a weird NextJS build constraint
 // https://github.com/vercel/next.js/discussions/50511
 import CredentialsProvider from "next-auth/providers/credentials"
 import { createAppClient, viemConnector } from "@farcaster/auth-client"
