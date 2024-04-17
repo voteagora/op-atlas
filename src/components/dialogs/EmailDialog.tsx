@@ -13,39 +13,31 @@ import {
 interface IProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  handleButtonClick: () => void
 }
 
-const WelcomeDialog: React.FC<IProps> = ({
-  open,
-  onOpenChange,
-  handleButtonClick,
-}) => {
+const EmailDialog: React.FC<IProps> = ({ open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center sm:max-w-md">
-        <div className="px-2 py-0.5 text-base font-medium rounded-full bg-backgroundSecondary">
-          Welcome
-        </div>
-        <div className="bg-backgroundaccent w-full rounded-xl h-36"></div>
         <DialogHeader>
           <DialogTitle className="text-center text-lg font-semibold text-text-default">
-            Welcome to your Optimist Profile!
+            Please add email for important messages
           </DialogTitle>
           <DialogDescription className="text-center text-base font-normal text-text-secondary mt-1">
-            Start building your profile by adding or joining projects you’re
-            involved in.
+            This step is required to apply for Retro Funding. It should be a
+            personal email where we can reliably reach you. Don’t worry, we’ll
+            keep it private.
           </DialogDescription>
         </DialogHeader>
 
         <DialogFooter className="w-full">
           <Button
-            onClick={handleButtonClick}
+            onClick={() => console.log("print email")}
             className="w-full"
             type="button"
             variant="destructive"
           >
-            Let’s go
+            Continue
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -53,4 +45,4 @@ const WelcomeDialog: React.FC<IProps> = ({
   )
 }
 
-export default memo(WelcomeDialog)
+export default memo(EmailDialog)

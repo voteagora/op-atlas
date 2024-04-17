@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { isFirstTimeUser, saveLogInDate } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
 import { useToast } from "../ui/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
@@ -21,6 +22,8 @@ export function Account() {
   const { data: session, status } = useSession()
   const [error, setError] = useState(false)
   const router = useRouter()
+  const { setOpenDialog } = useAppDialogs()
+  console.log("setOpenDialog", setOpenDialog)
 
   const logOut = useCallback(() => {
     signOut()
@@ -46,10 +49,14 @@ export function Account() {
       }
       if (isFirstTimeUser()) {
         router.push("/welcome")
+      } else {
+        router.push("/dashboard")
+        // TODO: check that the user doesnt already have email set
+        setOpenDialog("email")
       }
       saveLogInDate()
     },
-    [router, logOut],
+    [router, logOut, setOpenDialog],
   )
 
   useEffect(() => {

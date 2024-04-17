@@ -1,6 +1,7 @@
 import React from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 interface IProps {
   profileImageUrl?: string
@@ -19,6 +20,7 @@ const ProfileDetailCard: React.FC<IProps> = ({
   fca,
   email,
 }) => {
+  const { setOpenDialog } = useAppDialogs()
   return (
     <div className="flex gap-x-4">
       <Avatar className="w-20 h-20">
@@ -39,9 +41,13 @@ const ProfileDetailCard: React.FC<IProps> = ({
           </div>
           <div className="flex items-center gap-x-2">
             <span className="text-text-muted">Email</span>
-            <span className="font-medium text-text-secondary">
+            <Button
+              variant="link"
+              onClick={() => setOpenDialog("email")}
+              className="font-medium text-text-secondary p-0"
+            >
               {email ? email : "Add your email"}
-            </span>
+            </Button>
           </div>
         </div>
       </div>
