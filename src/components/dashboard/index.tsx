@@ -7,6 +7,7 @@ import UserProjectStatusDetailCard from "./UserProjectStatusDetailCard"
 // import AddFirstProjectSection from "./AddFirstProjectSection"
 import AddProjectDialogue from "./AddProjectDialogue"
 import ProfileDetailCard from "./ProfileDetailCard"
+import AddFirstProjectSection from "./AddFirstProjectSection"
 
 const Dashboard = () => {
   const router = useRouter()
@@ -31,25 +32,23 @@ const Dashboard = () => {
           fca="0xD7ce...3765"
           email=""
         />
-        <ApplyRetroFundingRoundInfoBanner />
-
-        <div>
+        <div className="flex flex-col gap-6">
           <h3 className="text-foreground">Your Projects</h3>
-          <div className="card flex flex-col gap-6 mt-6">
+          <div className="card flex flex-col gap-6">
             {/* this component will be shown when user don't have any project yet */}
-            {/* <AddFirstProjectSection onButtonClick={handleOpenDialog} /> */}
-            <UserProjectStatusDetailCard
+            <AddFirstProjectSection onButtonClick={handleOpenDialog} />
+            {/* <UserProjectStatusDetailCard
               projectAvatar=""
               projectName="project 1"
               projectProgress={13}
-            />
+            /> */}
           </div>
-        </div>
-        <div className="flex items-center gap-x-2">
-          <Button variant="secondary" onClick={handleOpenDialog}>
-            Add
-          </Button>
-          <Button variant="secondary">Join</Button>
+          <div className="flex items-center gap-x-2">
+            <Button variant="destructive" onClick={handleOpenDialog}>
+              Add a project
+            </Button>
+            <Button variant="secondary">Join a project</Button>
+          </div>
         </div>
       </div>
       <AddProjectDialogue

@@ -1,7 +1,6 @@
 "use client"
 import React from "react"
 import Image from "next/image"
-import { Button } from "../ui/button"
 
 interface IProps {
   onButtonClick: () => void
@@ -9,22 +8,14 @@ interface IProps {
 
 const AddFirstProjectSection: React.FC<IProps> = ({ onButtonClick }) => {
   return (
-    <div className="flex items-center gap-6">
+    <button className="flex items-center gap-6" onClick={onButtonClick}>
       <div className="card flex items-center justify-center !bg-secondary h-40 w-40">
-        <Image
-          src="/assets/icons/uploadIcon.png"
-          width={20}
-          height={20}
-          alt=""
-        />
+        <Image src="/assets/icons/plus.svg" width={14} height={14} alt="Plus" />
       </div>
-      <h3 className="text-text-default">Add your first project</h3>
-      <div className="flex-1 flex justify-end">
-        <Button variant="destructive" onClick={onButtonClick}>
-          Add
-        </Button>
-      </div>
-    </div>
+      <h3 className="text-text-default font-semibold">
+        Add your first project
+      </h3>
+    </button>
   )
 }
 
