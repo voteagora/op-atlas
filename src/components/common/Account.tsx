@@ -23,7 +23,6 @@ export function Account() {
   const [error, setError] = useState(false)
   const router = useRouter()
   const { setOpenDialog } = useAppDialogs()
-  console.log("setOpenDialog", setOpenDialog)
 
   const logOut = useCallback(() => {
     signOut()
