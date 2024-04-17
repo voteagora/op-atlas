@@ -1,5 +1,6 @@
 "use client"
 import { memo } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,7 +21,15 @@ const EmailDialog: React.FC<IProps> = ({ open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center sm:max-w-md">
-        <DialogHeader>
+        <DialogHeader className="flex flex-col items-center gap-4">
+          <div className="bg-backgroundSecondary rounded-full h-20 w-20 flex flex-col items-center justify-center">
+            <Image
+              src="/assets/icons/email.svg"
+              width={20}
+              height={20}
+              alt="img"
+            />
+          </div>
           <DialogTitle className="text-center text-lg font-semibold text-text-default">
             Please add email for important messages
           </DialogTitle>
