@@ -27,19 +27,21 @@ const ProfileDetailCard: React.FC<IProps> = ({
         <AvatarImage src={profileImageUrl ?? ""} />
         <AvatarFallback>SL</AvatarFallback>
       </Avatar>
-      <div>
-        <h2>{userFullName}</h2>
-        <p>{userBio}</p>
-        <div className="flex items-center gap-x-4 text-sm mt-2">
-          <div className="flex items-center gap-x-2">
+      <div className="gap-2 flex flex-col">
+        <div>
+          <h2>{userFullName}</h2>
+          <p>{userBio}</p>
+        </div>
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
             <span className="text-text-muted">Username</span>
             <span className="font-medium text-text-secondary">{userName}</span>
           </div>
-          <div className="flex items-center gap-x-2">
+          <div className="flex items-center gap-2">
             <span className="text-text-muted">FCA</span>
             <span className="font-medium text-text-secondary">{fca}</span>
           </div>
-          <div className="flex items-center gap-x-2">
+          <div className="flex items-center gap-2">
             <span className="text-text-muted">Email</span>
             <Button
               variant="link"
