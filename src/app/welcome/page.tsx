@@ -9,6 +9,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel"
 import { Badge } from "@/components/common/Badge"
+import { Button } from "@/components/ui/button"
 
 export default function Welcome() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
@@ -40,14 +41,16 @@ export default function Welcome() {
           </CarouselContent>
         </Carousel>
         <Dots total={3} current={currIndex} />
-        <button
-          className={`py-2 px-4 rounded-md ${
-            isLastCard ? "bg-optimismRed text-white" : "bg-backgroundSecondary"
-          }`}
+        <Button
+          className={
+            isLastCard
+              ? "bg-optimismRed hover:bg-optimismRed w-24"
+              : "bg-backgroundSecondary hover:bg-backgroundSecondary w-24 text-black"
+          }
           onClick={onNext}
         >
           {isLastCard ? "Let’s go" : "Next"}
-        </button>
+        </Button>
       </div>
     </div>
   )
