@@ -8,6 +8,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel"
+import { Badge } from "@/components/common/Badge"
 
 export default function Welcome() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
@@ -30,9 +31,7 @@ export default function Welcome() {
   return (
     <div className="flex flex-col items-center pt-20 pb-4 bg-backgroundSecondary min-h-lvh">
       <div className="bg-background w-2/3 p-16 text-center rounded-3xl items-center flex flex-col gap-6">
-        <div className="py-0.5 px-2 bg-backgroundSecondary rounded-full">
-          Welcome
-        </div>
+        <Badge text="Welcome" size="lg" />
         <Carousel setApi={setCarouselApi}>
           <CarouselContent>
             <WelcomeCard card="intro" />
