@@ -25,8 +25,8 @@ const EmailDialog: React.FC<IProps> = ({ open, onOpenChange }) => {
           <div className="bg-backgroundSecondary rounded-full h-20 w-20 flex flex-col items-center justify-center">
             <Image
               src="/assets/icons/email.svg"
-              width={20}
-              height={20}
+              width={24}
+              height={27}
               alt="img"
             />
           </div>
