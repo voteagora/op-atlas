@@ -3,6 +3,7 @@
 import { useAppDialogs } from "@/providers/DialogProvider"
 import EmailDialog from "./EmailDialog"
 import { DialogType } from "./types"
+import EditProfileDialog from "./EditProfileDialog"
 
 export default function AppDialogs() {
   const { openDialog, setOpenDialog } = useAppDialogs()
@@ -10,9 +11,15 @@ export default function AppDialogs() {
     setOpenDialog(open ? type : undefined)
 
   return (
-    <EmailDialog
-      open={openDialog === "email"}
-      onOpenChange={onOpenChange("email")}
-    />
+    <>
+      <EmailDialog
+        open={openDialog === "email"}
+        onOpenChange={onOpenChange("email")}
+      />
+      <EditProfileDialog
+        open={openDialog === "edit_profile"}
+        onOpenChange={onOpenChange("edit_profile")}
+      />
+    </>
   )
 }

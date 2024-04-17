@@ -54,7 +54,12 @@ const ProfileDetailCard: React.FC<IProps> = ({
         </div>
       </div>
       <div className="flex-1 flex justify-end">
-        <Button variant="secondary">Edit Profile</Button>
+        <Button
+          onClick={() => setOpenDialog("edit_profile")}
+          variant="secondary"
+        >
+          Edit Profile
+        </Button>
       </div>
     </div>
   )
