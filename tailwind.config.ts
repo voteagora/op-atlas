@@ -67,6 +67,7 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        optimismRed: "hsl(var(--destructive))",
       },
       borderRadius: {
         lg: "var(--radius)",
