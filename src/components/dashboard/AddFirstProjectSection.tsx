@@ -3,12 +3,12 @@ import React from "react"
 import Image from "next/image"
 
 interface IProps {
-  onButtonClick: () => void
+  onClick: () => void
 }
 
-const AddFirstProjectSection: React.FC<IProps> = ({ onButtonClick }) => {
+const AddFirstProjectSection: React.FC<IProps> = ({ onClick }) => {
   return (
-    <button className="flex items-center gap-6" onClick={onButtonClick}>
+    <button className="flex items-center gap-6" onClick={onClick}>
       <div className="card flex items-center justify-center !bg-secondary h-40 w-40">
         <Image src="/assets/icons/plus.svg" width={14} height={14} alt="Plus" />
       </div>

@@ -2,9 +2,6 @@
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import ApplyRetroFundingRoundInfoBanner from "./ApplyRetroFundingRoundInfoBanner"
-import UserProjectStatusDetailCard from "./UserProjectStatusDetailCard"
-// import AddFirstProjectSection from "./AddFirstProjectSection"
 import AddProjectDialogue from "./AddProjectDialogue"
 import ProfileDetailCard from "./ProfileDetailCard"
 import AddFirstProjectSection from "./AddFirstProjectSection"
@@ -36,7 +33,7 @@ const Dashboard = () => {
           <h3 className="text-foreground">Your Projects</h3>
           <div className="card flex flex-col gap-6">
             {/* this component will be shown when user don't have any project yet */}
-            <AddFirstProjectSection onButtonClick={handleOpenDialog} />
+            <AddFirstProjectSection onClick={handleOpenDialog} />
             {/* <UserProjectStatusDetailCard
               projectAvatar=""
               projectName="project 1"
