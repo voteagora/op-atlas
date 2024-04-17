@@ -1,1 +1,1 @@
-export type DialogType = "email"
+export type DialogType = "email" | "edit_profile"
