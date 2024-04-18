@@ -32,7 +32,6 @@ export default function RootLayout({
               <LayoutProvider>
                 <AppDialogs />
                 {children}
-
                 <Toaster />
               </LayoutProvider>
             </DialogProvider>

@@ -10,7 +10,7 @@ if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
 const config = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  siweUri: process.env.NEXT_PUBLIC_VERCEL_URL,
+  siweUri: `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`,
   domain: process.env.NEXT_PUBLIC_VERCEL_URL,
 }
 
