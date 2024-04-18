@@ -5,6 +5,5 @@ if (!process.env.NEXT_PUBLIC_APP_DOMAIN) {
   throw new Error("Please define NEXT_PUBLIC_APP_DOMAIN in .env")
 }
 
-export const handler = NextAuth(authOptions)
-
+const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }
