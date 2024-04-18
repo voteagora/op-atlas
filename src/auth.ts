@@ -1,7 +1,10 @@
-// This object has to be in its own file because of a weird NextJS build constraint
-// https://github.com/vercel/next.js/discussions/50511
 import CredentialsProvider from "next-auth/providers/credentials"
 import { createAppClient, viemConnector } from "@farcaster/auth-client"
+import NextAuth from "next-auth/next"
+
+if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
+  throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in .env")
+}
 
 export const authOptions = {
   providers: [
@@ -63,3 +66,5 @@ export const authOptions = {
     }),
   ],
 }
+
+export const handler = NextAuth(authOptions)
