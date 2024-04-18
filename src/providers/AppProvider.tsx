@@ -3,15 +3,15 @@
 import { AuthKitProvider } from "@farcaster/auth-kit"
 import "@farcaster/auth-kit/styles.css"
 
-if (!process.env.NEXT_PUBLIC_APP_DOMAIN) {
-  throw new Error("Please define NEXT_PUBLIC_APP_DOMAIN in env.")
+if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
+  throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in env.")
 }
 
 const config = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  siweUri: process.env.NEXT_PUBLIC_APP_DOMAIN,
-  domain: process.env.NEXT_PUBLIC_APP_DOMAIN,
+  siweUri: `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`,
+  domain: process.env.NEXT_PUBLIC_VERCEL_URL,
 }
 
 export default function AppProvider({
