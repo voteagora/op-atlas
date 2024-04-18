@@ -45,7 +45,7 @@ export const authOptions = {
         const verifyResponse = await appClient.verifySignInMessage({
           message: credentials?.message as string,
           signature: credentials?.signature as `0x${string}`,
-          domain: process.env.NEXT_PUBLIC_APP_DOMAIN!,
+          domain: process.env.NEXT_PUBLIC_VERCEL_URL!,
           nonce: credentials?.nonce ?? "",
         })
         const { success, fid } = verifyResponse
