@@ -6,8 +6,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <div className="h-full bg-secondary flex">
-      <div className="flex items-start w-3/4 mx-auto my-16 gap-x-12">
+    <div className="h-full bg-secondary flex flex-1">
+      <div className="flex items-start w-full max-w-6xl mx-auto my-18 gap-x-10">
         <ProjectFormStatusSidebar />
         <div className="card flex-1">{children}</div>
       </div>
