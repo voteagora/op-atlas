@@ -120,7 +120,6 @@ export const GrantsForm = () => {
   const onAddFundingType = async (type: FundingType) => {
     if (type === "venture") {
       const valid = await form.trigger("venture")
-      console.log("Valid:", valid)
       if (valid) {
         addVentureField({
           amount: "",
