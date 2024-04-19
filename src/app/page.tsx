@@ -5,7 +5,7 @@ import { FUNDING_ROUNDS } from "@/dummyData/mocks"
 
 export default function Home() {
   return (
-    <main className="flex flex-col flex-1 h-full items-center pt-18 pb-12">
+    <main className="flex flex-col flex-1 h-full items-center pb-12">
       {/* Gradient backdrop */}
       <div className="absolute inset-x-0 top-18 h-[500px] bg-rainbow" />
       <div className="absolute inset-x-0 top-18 h-[500px] bg-gradient-to-b from-background/0 to-background/100" />
