@@ -7,21 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// TODO: Should we unique email? What if two people put the same one but have different FC accounts?
-// TODO: Cache farcaster account metadata? Probably fine to just pull on login/token validation?
-// TODO: Do we need to handle deletion of accounts? (This is a GDPR thing, right?)
 model User {
-  id          String  @id @default(uuid())
-  email       String?
-  farcasterId String  @unique
+  id            String  @id @default(uuid())
+  email         String?
+  emailVerified Boolean @default(false)
+  farcasterId   String  @unique
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   projects UserProjects[]
 }
 
-// TODO: We'll use the round number as the ID
 model FundingRound {
   id          String   @id
   name        String
@@ -34,8 +32,6 @@ model FundingRound {
   applications Application[]
 }
 
-// TODO: Multiple websites and farcaster accounts feels kind of weird...
-// TODO: Didn't include the attestation yet, let's talk about it
 model Project {
   id           String @id @default(uuid())
   name         String
@@ -44,10 +40,13 @@ model Project {
   thumbnailUrl String
   bannerUrl    String
 
-  website   String[]
-  farcaster String[]
+  website   String?
+  farcaster String?
   twitter   String?
   mirror    String?
+
+  attestationId      String?
+  metadataSnapshotId String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -60,13 +59,14 @@ model Project {
   applications Application[]
 }
 
-// TODO: These are immutable, right? So we don't need update timestamps
 model Application {
-  id        String @id @default(uuid())
-  status    String
-  recipient String
+  id            String  @id @default(uuid())
+  status        String
+  recipient     String
+  attestationId String?
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   roundId   String
   projectId String
@@ -89,8 +89,6 @@ model UserProjects {
   project Project @relation(fields: [projectId], references: [id])
 }
 
-// TODO: It should be fine to only create/attach these to projects after verification, right?
-// TODO: NPM repos seems kind of weird...
 model ProjectRepository {
   id       String  @id @default(uuid())
   type     String
@@ -105,13 +103,13 @@ model ProjectRepository {
   project Project @relation(fields: [projectId], references: [id])
 }
 
-// TODO: Not super well-defined yet... there's stuff about deployer keys and OS Observer in the design to talk through
 model ProjectContract {
-  id              String @id @default(uuid())
-  contractAddress String
-  deployerAddress String
-  deploymentHash  String
-  chainId         Int
+  id                String @id @default(uuid())
+  contractAddress   String
+  deployerAddress   String
+  deploymentHash    String
+  verificationProof String
+  chainId           Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -121,7 +119,6 @@ model ProjectContract {
   project Project @relation(fields: [projectId], references: [id])
 }
 
-// TODO: Feels like it might change as well, but we can try and include fields for each type of funding in one entity
 model ProjectFunding {
   id         String   @id @default(uuid())
   type       String
