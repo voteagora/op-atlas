@@ -1,68 +1,65 @@
-import React from "react"
+import React, { memo } from "react"
+import { User } from "@prisma/client"
+import { useAppDialogs } from "@/providers/DialogProvider"
+import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
-interface IProps {
-  profileImageUrl?: string
-  userFullName: string
-  userBio: string
-  userName: string
-  fca: string
-  email?: string
-}
-
-const ProfileDetailCard: React.FC<IProps> = ({
-  profileImageUrl,
-  userFullName,
-  userBio,
-  userName,
-  fca,
-  email,
+const ProfileDetailCard = ({
+  className,
+  user,
+}: {
+  className?: string
+  user: User
 }) => {
   const { setOpenDialog } = useAppDialogs()
+
+  const initials = (user?.name ?? "")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+
   return (
-    <div className="flex gap-x-4">
-      <Avatar className="w-20 h-20">
-        <AvatarImage src={profileImageUrl ?? ""} />
-        <AvatarFallback>SL</AvatarFallback>
+    <div className={cn("flex gap-x-4", className)}>
+      <Avatar className="w-20 h-20 my-0.5">
+        <AvatarImage src={user?.imageUrl ?? ""} />
+        <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
-      <div className="gap-2 flex flex-col">
-        <div>
-          <h2>{userFullName}</h2>
-          <p>{userBio}</p>
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-text-muted">Username</span>
-            <span className="font-medium text-text-secondary">{userName}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-text-muted">FCA</span>
-            <span className="font-medium text-text-secondary">{fca}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-text-muted">Email</span>
+
+      <div className="flex flex-col">
+        <h2>{user.name ?? ""}</h2>
+        {user.bio && <p>{user.bio}</p>}
+
+        <div className="mt-2 mr-4 flex items-center gap-x-4">
+          <p className="text-sm text-muted-foreground">
+            Username{" "}
+            <span className="font-medium text-secondary-foreground">
+              @{user.username}
+            </span>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Email
             <Button
               variant="link"
               onClick={() => setOpenDialog("email")}
-              className="font-medium text-text-secondary p-0"
+              className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
             >
-              {email ? email : "Add your email"}
+              {user.email ? user.email : "Add your email"}
             </Button>
-          </div>
+          </p>
         </div>
       </div>
-      <div className="flex-1 flex justify-end">
-        <Button
-          onClick={() => setOpenDialog("edit_profile")}
-          variant="secondary"
-        >
-          Edit Profile
-        </Button>
-      </div>
+
+      <Button
+        variant="secondary"
+        onClick={() => setOpenDialog("edit_profile")}
+        className="ml-auto"
+      >
+        Edit Profile
+      </Button>
     </div>
   )
 }
 
-export default ProfileDetailCard
+export default memo(ProfileDetailCard)

@@ -1,9 +1,17 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { FundingRounds } from "@/components/home/FundingRounds"
 import { Sidebar } from "@/components/home/Sidebar"
 import { FUNDING_ROUNDS } from "@/dummyData/mocks"
+import { auth } from "@/auth"
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth()
+
+  if (session?.user) {
+    redirect("/dashboard")
+  }
+
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12">
       {/* Gradient backdrop */}
