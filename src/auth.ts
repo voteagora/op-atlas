@@ -1,12 +1,21 @@
+import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { createAppClient, viemConnector } from "@farcaster/auth-client"
-import NextAuth from "next-auth/next"
+import { upsertUser } from "./db/users"
 
 if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
   throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in .env")
 }
 
-export const authOptions = {
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string
+    } & DefaultSession["user"]
+  }
+}
+
+export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
     CredentialsProvider({
       name: "Sign in with Farcaster",
@@ -24,8 +33,18 @@ export const authOptions = {
         // In a production app with a server, these should be fetched from
         // your Farcaster data indexer rather than have them accepted as part
         // of credentials.
+        username: {
+          label: "Username",
+          type: "text",
+          placeholder: "0x0",
+        },
         name: {
           label: "Name",
+          type: "text",
+          placeholder: "0x0",
+        },
+        bio: {
+          label: "Bio",
           type: "text",
           placeholder: "0x0",
         },
@@ -49,22 +68,44 @@ export const authOptions = {
           message: credentials?.message as string,
           signature: credentials?.signature as `0x${string}`,
           domain: process.env.NEXT_PUBLIC_VERCEL_URL!,
-          nonce: credentials?.nonce ?? "",
+          nonce: (credentials?.nonce as string) ?? "",
         })
+
         const { success, fid } = verifyResponse
 
         if (!success) {
           return null
         }
 
+        // Create or update the user in our database
+        await upsertUser({
+          farcasterId: fid.toString(),
+          name: credentials?.name as string | undefined,
+          username: credentials?.username as string | undefined,
+          imageUrl: credentials?.pfp as string | undefined,
+          bio: credentials?.bio as string | undefined,
+        })
+
         return {
-          id: fid.toString(),
-          name: credentials?.name,
-          image: credentials?.pfp,
+          id: fid.toString() as string,
+          name: credentials?.name as string | undefined,
+          image: credentials?.pfp as string | undefined,
         }
       },
     }),
   ],
-}
+  callbacks: {
+    async jwt({ token, account, user }) {
+      if (account) {
+        token.id = user?.id
+      }
 
-export const handler = NextAuth(authOptions)
+      return token
+    },
+    async session({ session, token }) {
+      // Include the user ID in the session
+      session.user.id = token.id as string
+      return session
+    },
+  },
+})

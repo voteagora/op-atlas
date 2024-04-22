@@ -34,7 +34,9 @@ export function Account() {
       const signInResponse = await signIn("credentials", {
         message: res.message,
         signature: res.signature,
-        name: res.username,
+        username: res.username,
+        name: res.displayName,
+        bio: res.bio,
         pfp: res.pfpUrl,
         nonce: res.nonce,
         redirect: false,

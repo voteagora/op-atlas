@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String  @id @default(uuid())
+  name          String?
+  username      String?
+  farcasterId   String  @unique
+  imageUrl      String?
+  bio           String?
+  email         String?
+  emailVerified Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  projects UserProjects[]
+}
+
+model FundingRound {
+  id          String   @id
+  name        String
+  imageUrl    String
+  description String
+  rewards     String?
+  startDate   DateTime
+  endDate     DateTime
+
+  applications Application[]
+}
+
+model Project {
+  id           String @id @default(uuid())
+  name         String
+  description  String
+  category     String
+  thumbnailUrl String
+  bannerUrl    String
+
+  website   String?
+  farcaster String?
+  twitter   String?
+  mirror    String?
+
+  attestationId      String?
+  metadataSnapshotId String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  team         UserProjects[]
+  repos        ProjectRepository[]
+  contracts    ProjectContract[]
+  funding      ProjectFunding[]
+  applications Application[]
+}
+
+model Application {
+  id            String  @id @default(uuid())
+  status        String
+  recipient     String
+  attestationId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roundId   String
+  projectId String
+
+  round   FundingRound @relation(fields: [roundId], references: [id])
+  project Project      @relation(fields: [projectId], references: [id])
+}
+
+model UserProjects {
+  id    String  @id @default(uuid())
+  owner Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  projectId String
+
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectRepository {
+  id       String  @id @default(uuid())
+  type     String
+  url      String
+  verified Boolean
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectContract {
+  id                String @id @default(uuid())
+  contractAddress   String
+  deployerAddress   String
+  deploymentHash    String
+  verificationProof String
+  chainId           Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectFunding {
+  id         String   @id @default(uuid())
+  type       String
+  grant      String?
+  grantUrl   String?
+  amount     String
+  receivedAt DateTime
+  details    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
+}

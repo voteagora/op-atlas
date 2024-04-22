@@ -1,23 +1,38 @@
 import React from "react"
 import Image from "next/image"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
+import { Button } from "../ui/button"
 
-const ApplyRetroFundingRoundInfoBanner = () => {
+const ApplyRetroFundingRoundInfoBanner = ({
+  className,
+}: {
+  className?: string
+}) => {
   return (
-    <div className="bg-secondary flex items-center gap-x-4 rounded-xl p-4">
+    <div
+      className={cn(
+        "flex items-center gap-x-4 border rounded-xl p-4",
+        className,
+      )}
+    >
       <Image
+        alt=""
         src="/assets/icons/applyTileIcon.svg"
         width={64}
         height={67}
-        alt=""
       />
-      <div>
-        <h2 className="text-base font-semibold text-foreground">
+      <div className="flex flex-col">
+        <p className="font-semibold">
           Apply for Retro Funding Round 4: Onchain Builders
-        </h2>
+        </p>
         <p className="text-secondary-foreground">
-          Submit your application by April 20
+          The deadline for submissions is May 31
         </p>
       </div>
+      <Link href="/application" className="ml-auto">
+        <Button variant="destructive">Apply</Button>
+      </Link>
     </div>
   )
 }
