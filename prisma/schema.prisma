@@ -40,9 +40,9 @@ model Project {
   id           String @id @default(uuid())
   name         String
   description  String
-  category     String
-  thumbnailUrl String
-  bannerUrl    String
+  category     String?
+  thumbnailUrl String?
+  bannerUrl    String?
 
   website   String?
   farcaster String?
