@@ -1,6 +1,6 @@
 "use client"
 
-import { User } from "@prisma/client"
+import { Project, User } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -8,17 +8,34 @@ import { cn } from "@/lib/utils"
 import ProfileDetailCard from "./ProfileDetailCard"
 import AddFirstProjectSection from "./AddFirstProjectSection"
 import ApplyRetroFundingRoundInfoBanner from "./ApplyRetroFundingRoundInfoBanner"
+import UserProjectCard from "./UserProjectCard"
 
-const Dashboard = ({ className, user }: { className?: string; user: User }) => {
+const Dashboard = ({
+  className,
+  user,
+  projects,
+}: {
+  className?: string
+  user: User
+  projects: Project[]
+}) => {
   return (
     <div className={cn("card flex flex-col w-full gap-y-12", className)}>
       <ProfileDetailCard user={user} />
 
       <div className="flex flex-col gap-6">
         <h3>Your Projects</h3>
-        <Link href="/projects/new">
-          <AddFirstProjectSection />
-        </Link>
+        {projects.length > 0 ? (
+          <>
+            {projects.map((project) => (
+              <UserProjectCard key={project.id} project={project} />
+            ))}
+          </>
+        ) : (
+          <Link href="/projects/new">
+            <AddFirstProjectSection />
+          </Link>
+        )}
 
         <div className="flex items-center gap-x-2">
           <Link href="/projects/new">

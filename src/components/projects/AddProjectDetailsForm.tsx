@@ -1,4 +1,5 @@
 "use client"
+
 import * as React from "react"
 
 import Image from "next/image"
@@ -17,13 +18,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { createNewProject } from "@/lib/actions"
 import FileUploadInput from "../common/FileUploadInput"
 import { Button } from "../ui/button"
 import { Form, FormField, FormItem, FormMessage } from "../ui/form"
 
 const formSchema = z.object({
-  name: z.string().nonempty("Name is required"),
-  description: z.string().nonempty("Description is required"),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
 })
 
 export default function AddProjectDetailsForm() {
@@ -37,9 +39,18 @@ export default function AddProjectDetailsForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    router.push("/projects/new/team")
-    console.log(values, "values")
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await createNewProject(values)
+      if (!response.project || response.error) {
+        throw new Error(response.error)
+      }
+
+      router.push(`/projects/${response.project.id}/team`)
+    } catch (error) {
+      // TODO: Error handling
+      console.error("Error creating project", error)
+    }
   }
 
   return (
