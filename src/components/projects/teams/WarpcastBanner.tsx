@@ -9,6 +9,7 @@ export function WarpcastBanner() {
   const onCopy = () => {
     navigator.clipboard.writeText(WARPCAST)
     setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
