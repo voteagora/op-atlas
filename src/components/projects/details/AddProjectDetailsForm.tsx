@@ -19,8 +19,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { createNewProject } from "@/lib/actions"
-import FileUploadInput from "../common/FileUploadInput"
-import { Button } from "../ui/button"
+import FileUploadInput from "../../common/FileUploadInput"
+import { Button } from "../../ui/button"
 import {
   Form,
   FormControl,
@@ -28,8 +28,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form"
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
+} from "../../ui/form"
+import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../../ui/accordion"
+import { CategoryDefinitions } from "./CategoryDefinitions"
 
 const CategoryEnum = z.enum([
   "CeFi",
@@ -45,6 +52,8 @@ const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
   category: CategoryEnum,
+  twitter: z.string().optional(),
+  mirror: z.string().optional(),
 })
 
 export default function AddProjectDetailsForm() {
@@ -56,6 +65,8 @@ export default function AddProjectDetailsForm() {
       name: "",
       description: "",
       category: "CeFi",
+      twitter: undefined,
+      mirror: undefined,
     },
   })
 
@@ -146,7 +157,7 @@ export default function AddProjectDetailsForm() {
               )}
             />
             <div className="flex flex-col w-full gap-1.5">
-              <p className="mt-1 text-sm font-medium">Description</p>
+              <p className="text-sm font-medium">Description</p>
               <FormField
                 control={form.control}
                 name="description"
@@ -171,7 +182,7 @@ export default function AddProjectDetailsForm() {
               />
             </div>
             <div className="flex flex-col w-full gap-1.5">
-              <p className="mt-1 text-sm font-medium">Category</p>
+              <p className="text-sm font-medium">Category</p>
               <FormField
                 control={form.control}
                 name="category"
@@ -199,16 +210,51 @@ export default function AddProjectDetailsForm() {
                   </FormItem>
                 )}
               />
-              {/* TODO: Finish category definitions */}
-              <button
-                className="self-start"
-                onClick={(e) => e.preventDefault()}
-              >
-                <p className="mt-1 text-sm font-medium">
-                  View category definitions
-                </p>
-              </button>
+              <Accordion type="single" collapsible className="self-">
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>
+                    <p className="text-sm font-medium">
+                      View category definitions
+                    </p>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <CategoryDefinitions />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
+
+            <FormField
+              control={form.control}
+              name="twitter"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    <p className="text-sm font-medium">Twitter</p>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Add a link" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="mirror"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    <p className="text-sm font-medium">Mirror</p>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Add a link" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </CardContent>
         <CardFooter>

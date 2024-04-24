@@ -1,4 +1,4 @@
-import ProjectDetailsForm from "@/components/projects/AddProjectDetailsForm"
+import ProjectDetailsForm from "@/components/projects/details/AddProjectDetailsForm"
 
 const Page = () => {
   return <ProjectDetailsForm />
