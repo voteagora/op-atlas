@@ -21,11 +21,30 @@ import { Textarea } from "@/components/ui/textarea"
 import { createNewProject } from "@/lib/actions"
 import FileUploadInput from "../common/FileUploadInput"
 import { Button } from "../ui/button"
-import { Form, FormField, FormItem, FormMessage } from "../ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form"
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
+
+const CategoryEnum = z.enum([
+  "CeFi",
+  "Cross Chain",
+  "DeFi",
+  "Governance",
+  "NFT",
+  "Social",
+  "Utility",
+])
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
+  category: CategoryEnum,
 })
 
 export default function AddProjectDetailsForm() {
@@ -36,6 +55,7 @@ export default function AddProjectDetailsForm() {
     defaultValues: {
       name: "",
       description: "",
+      category: "CeFi",
     },
   })
 
@@ -73,30 +93,35 @@ export default function AddProjectDetailsForm() {
               Images must be no larger than 5MB.
             </CardDescription>
           </div>
-          <div className="flex gap-x-4 mt-3">
+          <div className="flex flex-1 gap-x-4 mt-3 items-stretch">
             <FileUploadInput
-              className="!w-[unset]"
+              className="flex-1"
               onChange={() => console.log("file uploaded")}
             >
-              <div className="w-40 h-40 card !bg-secondary !rounded-xl flex flex-col justify-center items-center">
+              <div className="border border-solid rounded-xl p-7 h-40 flex-1 bg-secondary flex flex-col justify-center items-center gap-2">
                 <Image
-                  src="/assets/icons/uploadIcon.png"
+                  src="/assets/icons/upload.svg"
                   width={20}
                   height={20}
                   alt="img"
                 />
-                <p className="text-muted-foreground mt-2">Add an avatar</p>
+                <p className="text-muted-foreground text-xs">
+                  Add project avatar
+                </p>
               </div>
             </FileUploadInput>
-            <FileUploadInput onChange={() => console.log("file uploaded")}>
-              <div className="h-40 w-[90%] card !bg-secondary !rounded-xl flex flex-col justify-center items-center">
+            <FileUploadInput
+              className="flex-[4]"
+              onChange={() => console.log("file uploaded")}
+            >
+              <div className="border border-solid h-40 p-7 bg-secondary rounded-xl flex flex-col justify-center items-center gap-2">
                 <Image
-                  src="/assets/icons/uploadIcon.png"
+                  src="/assets/icons/upload.svg"
                   width={20}
                   height={20}
                   alt="img"
                 />
-                <p className="leading-7 text-muted-foreground mt-2">
+                <p className="leading-7 text-muted-foreground text-xs">
                   Add a cover image
                 </p>
               </div>
@@ -108,7 +133,7 @@ export default function AddProjectDetailsForm() {
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className="grid w-full  gap-2">
+                <FormItem className="grid w-full gap-1.5">
                   <Label htmlFor="name">Name</Label>
                   <Input
                     type=""
@@ -116,25 +141,23 @@ export default function AddProjectDetailsForm() {
                     placeholder="Add a project name"
                     {...field}
                   />
-
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="grid w-full gap-2">
-              <p className="mt-1 text-sm font-medium ">Description</p>
-
+            <div className="flex flex-col w-full gap-1.5">
+              <p className="mt-1 text-sm font-medium">Description</p>
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
-                  <FormItem className="grid w-full gap-2">
+                  <FormItem className="flex flex-col w-full gap-1.5">
                     <Label
                       htmlFor="description"
                       className="text-sm font-normal text-secondary-foreground"
                     >
-                      Introduce your project to the Optimism Collective. What
-                      problem(s) are you solving?
+                      Introduce your project to the Optimism Collective. Share
+                      who you are and what you do.
                     </Label>
                     <Textarea
                       placeholder="Add a description"
@@ -146,6 +169,45 @@ export default function AddProjectDetailsForm() {
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="flex flex-col w-full gap-1.5">
+              <p className="mt-1 text-sm font-medium">Category</p>
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem className="gap-3">
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="grid md:grid-cols-3 grid-cols-1 gap-2"
+                      >
+                        {CategoryEnum.options.map((category) => (
+                          <FormItem key={category}>
+                            <FormLabel className="flex-1 min-w-6 basis-0 p-3 flex items-center gap-3 border rounded-sm">
+                              <FormControl>
+                                <RadioGroupItem value={category} />
+                              </FormControl>
+                              {category}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* TODO: Finish category definitions */}
+              <button
+                className="self-start"
+                onClick={(e) => e.preventDefault()}
+              >
+                <p className="mt-1 text-sm font-medium">
+                  View category definitions
+                </p>
+              </button>
             </div>
           </div>
         </CardContent>
