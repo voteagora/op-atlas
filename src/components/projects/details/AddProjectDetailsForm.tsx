@@ -157,7 +157,7 @@ export default function AddProjectDetailsForm() {
               )}
             />
             <div className="flex flex-col w-full gap-1.5">
-              <p className="mt-1 text-sm font-medium">Description</p>
+              <p className="text-sm font-medium">Description</p>
               <FormField
                 control={form.control}
                 name="description"
@@ -182,7 +182,7 @@ export default function AddProjectDetailsForm() {
               />
             </div>
             <div className="flex flex-col w-full gap-1.5">
-              <p className="mt-1 text-sm font-medium">Category</p>
+              <p className="text-sm font-medium">Category</p>
               <FormField
                 control={form.control}
                 name="category"
@@ -230,7 +230,7 @@ export default function AddProjectDetailsForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <p className="mt-1 text-sm font-medium">Twitter</p>
+                    <p className="text-sm font-medium">Twitter</p>
                   </FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Add a link" />
@@ -246,7 +246,7 @@ export default function AddProjectDetailsForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <p className="mt-1 text-sm font-medium">Mirror</p>
+                    <p className="text-sm font-medium">Mirror</p>
                   </FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Add a link" />
