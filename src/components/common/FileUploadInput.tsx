@@ -26,12 +26,11 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
   }
 
   return (
-    <div
-      className={`${className} w-full`}
+    <button
+      className={className}
       onClick={selectImage}
       onKeyDown={selectImage}
-      role="button"
-      tabIndex={0}
+      type="button"
     >
       {children}
       <input
@@ -43,7 +42,7 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
         size={10000}
         accept={accept}
       />
-    </div>
+    </button>
   )
 }
 
