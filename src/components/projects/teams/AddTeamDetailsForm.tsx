@@ -13,6 +13,7 @@ import { AddTeamMemberCard } from "./AddTeamMemberCard"
 import { ConfirmTeamCheckbox } from "./ConfirmTeamCheckbox"
 import AddTeamMemberDialogue from "./AddTeamMemberDialogue"
 import DeleteTeamMemberDialogue from "./DeleteTeamMemberDialogue"
+import { WarpcastBanner } from "./WarpcastBanner"
 
 export interface IUser {
   id: number | string
@@ -49,15 +50,14 @@ export default function AddTeamDetailsForm() {
 
   return (
     <div>
-      <CardHeader>
-        <CardTitle className="text-2xl font-semibold text-foreground">
-          Team
-        </CardTitle>
-        <CardDescription className="text-base font-normal text-text-secondary !mt-6">
+      <CardHeader className="gap-6">
+        <CardTitle className="text-foreground">Team</CardTitle>
+        <CardDescription className="text-base font-normal text-text-secondary">
           All team members will have edit access to this project. Only the
           project owner can delete the project, remove team members, or receive
           grants.
         </CardDescription>
+        <WarpcastBanner />
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2 my-12">
@@ -65,7 +65,7 @@ export default function AddTeamDetailsForm() {
             name="Shaun Lind"
             username="shausome"
             avatarSrc="/assets/images/avatar.png"
-            isOwner={true}
+            isOwner
           />
           {addedTeamMembers.map((member) => (
             <TeamMemberCard
@@ -87,7 +87,7 @@ export default function AddTeamDetailsForm() {
         />
         <Button
           onClick={handleNextClicked}
-          disabled={!isTeamConfirmed || !!!addedTeamMembers.length}
+          disabled={!isTeamConfirmed}
           variant="destructive"
           className="mt-12"
         >
