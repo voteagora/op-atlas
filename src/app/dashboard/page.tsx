@@ -16,7 +16,7 @@ export default async function Page() {
     redirect("/")
   }
 
-  const projects =  await getProjects(session.user.id)
+  const projects = await getProjects(session.user.id)
 
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">

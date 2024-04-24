@@ -24,7 +24,7 @@ const UserProjectCard = ({
 
           <Progress value={50} className="ml-auto h-2 w-16" />
           <p className="ml-3 text-sm text-secondary-foreground">{32}% setup </p>
-          <Link href={`/projects/${project.id}/team`} className="ml-6">
+          <Link href={`/projects/${project.id}/details`} className="ml-6">
             <Button size="sm" variant="secondary">
               Edit
             </Button>

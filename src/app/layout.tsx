@@ -1,12 +1,9 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import AppProvider from "@/providers/AppProvider"
-import NextAuthProvider from "@/providers/NextAuthProvider"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
-import LayoutProvider from "@/providers/LayoutProvider"
-import { DialogProvider } from "@/providers/DialogProvider"
 import AppDialogs from "@/components/dialogs/AppDialogs"
+import Providers from "@/providers/Providers"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,17 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className}`}>
-        <NextAuthProvider>
-          <AppProvider>
-            <DialogProvider>
-              <LayoutProvider>
-                <AppDialogs />
-                {children}
-                <Toaster />
-              </LayoutProvider>
-            </DialogProvider>
-          </AppProvider>
-        </NextAuthProvider>
+        <Providers>
+          <AppDialogs />
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   )
