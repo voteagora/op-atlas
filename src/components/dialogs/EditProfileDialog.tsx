@@ -12,14 +12,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import { DialogProps } from "./types"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
-interface IProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-const EditProfileDialog: React.FC<IProps> = ({ open, onOpenChange }) => {
+function EditProfileDialog({ open, onOpenChange }: DialogProps<object>) {
   const { setOpenDialog } = useAppDialogs()
   const { data: session } = useSession()
 

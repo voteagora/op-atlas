@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState } from "react"
 
 import Image from "next/image"
 import { Plus } from "lucide-react"
@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
 import { CategoryDefinitions } from "./CategoryDefinitions"
+import { PhotoCropModal } from "./PhotoCropModal"
 import FileUploadInput from "../../common/FileUploadInput"
 import { Button } from "../../ui/button"
 import {
@@ -120,8 +121,44 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
     }
   }
 
+  const [avatarSrc, setAvatarSrc] = useState<string>()
+  const [bannerSrc, setBannerSrc] = useState<string>()
+
+  const onCloseCropModal = (type: "avatar" | "banner") => {
+    if (avatarSrc && type === "avatar") {
+      URL.revokeObjectURL(avatarSrc)
+      setAvatarSrc(undefined)
+    }
+
+    if (bannerSrc && type === "banner") {
+      URL.revokeObjectURL(bannerSrc)
+      setBannerSrc(undefined)
+    }
+  }
+
   return (
     <Form {...form}>
+      {bannerSrc && (
+        <PhotoCropModal
+          title="Project cover image"
+          image={bannerSrc}
+          open
+          onOpenChange={(open) => {
+            if (!open) onCloseCropModal("banner")
+          }}
+        />
+      )}
+      {avatarSrc && (
+        <PhotoCropModal
+          title="Project avatar"
+          aspectRatio={1}
+          image={avatarSrc}
+          open
+          onOpenChange={(open) => {
+            if (!open) onCloseCropModal("avatar")
+          }}
+        />
+      )}
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-text-default">
@@ -143,7 +180,12 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
           <div className="flex flex-1 gap-x-4 mt-3 items-stretch">
             <FileUploadInput
               className="flex-1"
-              onChange={() => console.log("file uploaded")}
+              onChange={(e) => {
+                if (!e.target.files || e.target.files.length < 1) return
+
+                const file = e.target.files[0]
+                setAvatarSrc(URL.createObjectURL(file))
+              }}
             >
               <div className="border border-solid rounded-xl p-7 h-40 flex-1 bg-secondary flex flex-col justify-center items-center gap-2">
                 <Image
@@ -159,7 +201,12 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             </FileUploadInput>
             <FileUploadInput
               className="flex-[4]"
-              onChange={() => console.log("file uploaded")}
+              onChange={(e) => {
+                if (!e.target.files || e.target.files.length < 1) return
+
+                const file = e.target.files[0]
+                setBannerSrc(URL.createObjectURL(file))
+              }}
             >
               <div className="border border-solid h-40 p-7 bg-secondary rounded-xl flex flex-col justify-center items-center gap-2">
                 <Image
