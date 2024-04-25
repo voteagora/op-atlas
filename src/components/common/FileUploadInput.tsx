@@ -21,6 +21,9 @@ const FileUploadInput: React.FC<FileUploadInputProps> = ({
 
   const selectImage = () => {
     if (ref.current) {
+      // reset the current value so that the input's onChange handler fires even if the
+      // user keeps selecting the same file
+      ref.current.value = ""
       ref.current.click()
     }
   }
