@@ -1,5 +1,9 @@
-import ReactCrop, { type Crop } from "react-image-crop"
-import { useState } from "react"
+import ReactCrop, {
+  centerCrop,
+  type Crop,
+  makeAspectCrop,
+} from "react-image-crop"
+import { ReactEventHandler, useState } from "react"
 import { DialogProps } from "@/components/dialogs/types"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -14,6 +18,26 @@ export function PhotoCropModal({
   title,
 }: DialogProps<{ image: string; aspectRatio?: number; title: string }>) {
   const [crop, setCrop] = useState<Crop>()
+
+  const onImageLoad: ReactEventHandler<HTMLImageElement> = (e) => {
+    const { naturalWidth: width, naturalHeight: height } = e.currentTarget
+    const defaultCrop = centerCrop(
+      makeAspectCrop(
+        {
+          unit: "%",
+          width: 90,
+        },
+        aspectRatio ?? 16 / 9,
+        width,
+        height,
+      ),
+      width,
+      height,
+    )
+
+    setCrop(defaultCrop)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="px-0 flex flex-col">
@@ -27,7 +51,7 @@ export function PhotoCropModal({
           <ReactCrop aspect={aspectRatio} crop={crop} onChange={setCrop}>
             {/* ReactCrop does not play nicely with NextJS Image */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={image} alt="Uploaded" />
+            <img src={image} alt="Uploaded" onLoad={onImageLoad} />
           </ReactCrop>
         </div>
         <div className="flex gap-2 px-6">
