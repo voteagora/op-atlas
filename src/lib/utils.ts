@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -34,4 +35,29 @@ export function isFirstTimeUser(): boolean {
 
 export function saveLogInDate() {
   localStorage.setItem(LAST_SIGN_IN_LOCALSTORAGE_KEY, Date.now().toString())
+}
+
+export type ProjectWithDetails = Prisma.ProjectGetPayload<{
+  include: { team: true; repos: true; contracts: true; funding: true }
+}>
+
+export function getProjectStatus(project: ProjectWithDetails) {
+  const hasDetails =
+    project.name &&
+    project.description &&
+    project.thumbnailUrl &&
+    project.bannerUrl
+
+  const hasTeam = project.team?.length > 1
+  const hasRepos = project.repos?.length > 0
+  const hasContracts = project.contracts?.length > 0
+  const hasFunding = project.funding?.length > 0
+
+  let progress = hasDetails ? 20 : 0
+  progress += hasTeam ? 20 : 0
+  progress += hasRepos ? 20 : 0
+  progress += hasContracts ? 20 : 0
+  progress += hasFunding ? 20 : 0
+
+  return progress
 }

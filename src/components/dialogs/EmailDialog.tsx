@@ -1,5 +1,6 @@
 "use client"
-import { memo } from "react"
+
+import { memo, useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,13 +11,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { updateEmail } from "@/lib/actions/users"
 import { DialogProps } from "./types"
 import { Input } from "../ui/input"
 
 function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  const saveEmail = async () => {
+    try {
+      await updateEmail(email)
+      onOpenChange(false)
+    } catch (error) {
+      console.error("Error updating email", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col items-center sm:max-w-md">
+      <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         <DialogHeader className="flex flex-col items-center gap-4">
           <div className="bg-backgroundSecondary rounded-full h-20 w-20 flex flex-col items-center justify-center">
             <Image
@@ -31,19 +47,24 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
           </DialogTitle>
           <DialogDescription className="text-center text-base font-normal text-text-secondary mt-1 flex flex-col gap-6">
             This step is required to apply for Retro Funding. It should be a
-            personal email where we can reliably reach you. Don’t worry, we’ll
-            keep it private.
+            personal email where we can reliably reach you. Don&apos;t worry,
+            we&apos;ll keep it private.
             <div className="flex flex-col gap-2">
-              <div className="font-500 self-start">Email</div>
-              <Input type="email" placeholder="Enter email address" />
+              <div className="text-sm font-medium self-start">Email</div>
+              <Input
+                type="email"
+                placeholder="Enter email address"
+                value={email}
+                onChange={({ target }) => setEmail(target.value)}
+              />
             </div>
           </DialogDescription>
         </DialogHeader>
 
         <DialogFooter className="w-full">
           <Button
-            // TODO: Save email to backend
-            onClick={() => onOpenChange(false)}
+            disabled={loading}
+            onClick={saveEmail}
             className="w-full"
             type="button"
             variant="destructive"
