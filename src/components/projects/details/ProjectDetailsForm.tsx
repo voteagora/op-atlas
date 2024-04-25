@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { createNewProject, updateProjectDetails } from "@/lib/actions"
+import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
 import { CategoryDefinitions } from "./CategoryDefinitions"
 import FileUploadInput from "../../common/FileUploadInput"
 import { Button } from "../../ui/button"
