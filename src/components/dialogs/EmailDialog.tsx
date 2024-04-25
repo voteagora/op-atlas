@@ -10,14 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { DialogProps } from "./types"
 import { Input } from "../ui/input"
 
-interface IProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-const EmailDialog: React.FC<IProps> = ({ open, onOpenChange }) => {
+function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center sm:max-w-md">
