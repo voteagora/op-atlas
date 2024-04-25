@@ -33,3 +33,20 @@ export async function upsertUser({
     },
   })
 }
+
+export async function updateUserEmail({
+  id,
+  email,
+}: {
+  id: string
+  email?: string | null
+}) {
+  return prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      email,
+    },
+  })
+}

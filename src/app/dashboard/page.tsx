@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import Dashboard from "@/components/dashboard"
 import { getUserByFarcasterId } from "@/db/users"
-import { getProjects } from "@/lib/actions"
+import { getProjects } from "@/lib/actions/projects"
 
 export default async function Page() {
   const session = await auth()

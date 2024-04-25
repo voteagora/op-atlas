@@ -73,6 +73,17 @@ export async function updateProject({
   })
 }
 
+export async function deleteProject({ id }: { id: string }) {
+  return prisma.project.update({
+    where: {
+      id,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  })
+}
+
 export async function getProject({ id }: { id: string }) {
   return prisma.project.findUnique({
     where: {
@@ -80,6 +91,10 @@ export async function getProject({ id }: { id: string }) {
     },
     include: {
       team: true,
+      repos: true,
+      contracts: true,
+      funding: true,
+      applications: true,
     },
   })
 }

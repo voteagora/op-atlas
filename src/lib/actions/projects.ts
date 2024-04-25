@@ -5,6 +5,7 @@ import { auth } from "@/auth"
 import {
   createProject,
   CreateProjectParams,
+  deleteProject,
   getUserProjects,
   updateProject,
 } from "@/db/projects"
@@ -61,5 +62,39 @@ export const updateProjectDetails = async (
   return {
     error: null,
     project: updated,
+  }
+}
+
+/**
+ * Deletes a project.
+ * Only the owner is allowed to delete the project.
+ */
+export const deleteUserProject = async (projectId: string) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const userProjects = await getUserProjects({ farcasterId: session.user.id })
+  const membership = userProjects?.projects.find(
+    ({ project }) => project.id === projectId,
+  )
+
+  if (!membership?.owner) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  await deleteProject({ id: projectId })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+  return {
+    error: null,
+    projectId,
   }
 }
