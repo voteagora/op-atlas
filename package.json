@@ -10,7 +10,15 @@
     "lint": "next lint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,md}": "prettier --write"
   },
   "dependencies": {
     "@farcaster/auth-kit": "^0.1.4",
@@ -34,7 +42,7 @@
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.0.2",
     "lucide-react": "^0.363.0",
-    "next": "14.1.4",
+    "next": "14.2.3",
     "next-auth": "^5.0.0-beta.16",
     "prisma": "^5.12.1",
     "react": "^18",
@@ -61,6 +69,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "postcss": "^8",
     "prettier": "^2.8.8",
     "tailwindcss": "^3.3.0",

@@ -44,8 +44,8 @@ model Project {
   thumbnailUrl String?
   bannerUrl    String?
 
-  website   String?
-  farcaster String?
+  website   String[]
+  farcaster String[]
   twitter   String?
   mirror    String?
 

@@ -1,7 +1,5 @@
-import ProjectDetailsForm from "@/components/projects/details/AddProjectDetailsForm"
+import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 
-const Page = () => {
+export default function Page() {
   return <ProjectDetailsForm />
 }
-
-export default Page

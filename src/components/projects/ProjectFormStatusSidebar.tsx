@@ -11,8 +11,8 @@ const ProjectFormStatusSidebarOptions = [
   "Repos",
   "Contracts",
   "Grants",
-  "Addresses",
 ]
+
 const ProjectFormStatusSidebar = () => {
   const router = useRouter()
   const [progress, setProgress] = useState(0)

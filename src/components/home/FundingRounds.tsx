@@ -2,7 +2,7 @@ import { format } from "date-fns"
 import { useMemo } from "react"
 import Image from "next/image"
 import { cn, titlecase } from "@/lib/utils"
-import { FundingRound } from "@/dummyData/mocks"
+import { FundingRound } from "@/lib/mocks"
 import { Button } from "../ui/button"
 import { Badge } from "../common/Badge"
 

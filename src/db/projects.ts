@@ -57,3 +57,29 @@ export async function createProject({
     },
   })
 }
+
+export async function updateProject({
+  id,
+  project,
+}: {
+  id: string
+  project: CreateProjectParams
+}) {
+  return prisma.project.update({
+    where: {
+      id,
+    },
+    data: project,
+  })
+}
+
+export async function getProject({ id }: { id: string }) {
+  return prisma.project.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      team: true,
+    },
+  })
+}

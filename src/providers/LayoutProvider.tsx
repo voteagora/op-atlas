@@ -1,11 +1,7 @@
 import React from "react"
 import Navbar from "@/components/common/Navbar"
 
-interface IProps {
-  children: React.ReactNode
-}
-
-const LayoutProvider: React.FC<IProps> = ({ children }) => {
+const LayoutProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
       <Navbar />

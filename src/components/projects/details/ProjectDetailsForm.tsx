@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
+import { Project } from "@prisma/client"
 import {
   CardContent,
   CardDescription,
@@ -18,7 +19,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { createNewProject } from "@/lib/actions"
+import { createNewProject, updateProjectDetails } from "@/lib/actions"
+import { CategoryDefinitions } from "./CategoryDefinitions"
 import FileUploadInput from "../../common/FileUploadInput"
 import { Button } from "../../ui/button"
 import {
@@ -36,7 +38,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../ui/accordion"
-import { CategoryDefinitions } from "./CategoryDefinitions"
 
 const CategoryEnum = z.enum([
   "CeFi",
@@ -56,23 +57,28 @@ const formSchema = z.object({
   mirror: z.string().optional(),
 })
 
-export default function AddProjectDetailsForm() {
+export default function ProjectDetailsForm({ project }: { project?: Project }) {
   const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      category: "CeFi",
-      twitter: undefined,
-      mirror: undefined,
+      name: project?.name ?? "",
+      description: project?.description ?? "",
+      category: project?.category
+        ? (project.category as z.infer<typeof CategoryEnum>)
+        : "CeFi",
+      twitter: project?.twitter ?? undefined,
+      mirror: project?.mirror ?? undefined,
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await createNewProject(values)
+      const response = project
+        ? await updateProjectDetails(project.id, values)
+        : await createNewProject(values)
+
       if (!response.project || response.error) {
         throw new Error(response.error)
       }
@@ -92,7 +98,7 @@ export default function AddProjectDetailsForm() {
             Project details
           </CardTitle>
           <CardDescription className="text-base font-normal text-text-secondary mt-1">
-            This information will be visible on your project’s public page.{" "}
+            This information will be visible on your project&apos;s public page.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -171,8 +177,9 @@ export default function AddProjectDetailsForm() {
                       who you are and what you do.
                     </Label>
                     <Textarea
-                      placeholder="Add a description"
                       id="description"
+                      placeholder="Add a description"
+                      className="resize-none"
                       {...field}
                     />
 
