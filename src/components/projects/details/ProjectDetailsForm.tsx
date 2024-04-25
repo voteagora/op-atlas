@@ -3,8 +3,9 @@
 import * as React from "react"
 
 import Image from "next/image"
+import { Plus } from "lucide-react"
 
-import { useForm } from "react-hook-form"
+import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
@@ -49,13 +50,25 @@ const CategoryEnum = z.enum([
   "Utility",
 ])
 
+const StringValue = z.object({ value: z.string() }) // use a intermediate object to represent String arrays because useFieldArray only works on object arrays
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
   category: CategoryEnum,
+  website: z.array(StringValue),
+  farcaster: z.array(StringValue),
   twitter: z.string().optional(),
   mirror: z.string().optional(),
 })
+
+function toStringObjectArr(strings: string[]) {
+  if (!strings.length) return [{ value: "" }] // default to at least 1 line item
+  return strings.map((str) => ({ value: str }))
+}
+
+function fromStringObjectArr(objs: { value: string }[]) {
+  return objs.map(({ value }) => value).filter(Boolean) // remove empty strings
+}
 
 export default function ProjectDetailsForm({ project }: { project?: Project }) {
   const router = useRouter()
@@ -68,16 +81,33 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       category: project?.category
         ? (project.category as z.infer<typeof CategoryEnum>)
         : "CeFi",
+      website: toStringObjectArr(project?.website ?? [""]),
+      farcaster: toStringObjectArr(project?.farcaster ?? [""]),
       twitter: project?.twitter ?? undefined,
       mirror: project?.mirror ?? undefined,
     },
   })
 
+  const { fields: websiteFields, append: addWebsiteField } = useFieldArray({
+    control: form.control,
+    name: "website",
+  })
+
+  const { fields: farcasterFields, append: addFarcasterField } = useFieldArray({
+    control: form.control,
+    name: "farcaster",
+  })
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const newValues = {
+      ...values,
+      website: fromStringObjectArr(values.website),
+      farcaster: fromStringObjectArr(values.farcaster),
+    }
     try {
       const response = project
-        ? await updateProjectDetails(project.id, values)
-        : await createNewProject(values)
+        ? await updateProjectDetails(project.id, newValues)
+        : await createNewProject(newValues)
 
       if (!response.project || response.error) {
         throw new Error(response.error)
@@ -229,6 +259,67 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div>
+                <p className="text-sm font-medium">Website</p>
+                <div className="text-sm font-normal text-secondary-foreground">
+                  If your project has more than one website, you can add rows.
+                </div>
+              </div>
+              {websiteFields.map((field, index) => (
+                <FormField
+                  key={field.id}
+                  control={form.control}
+                  name={`website.${index}.value`}
+                  render={({ field: innerField }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...innerField} placeholder="Add a link" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => addWebsiteField({ value: "" })}
+                className="w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add
+              </Button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div>
+                <p className="text-sm font-medium">Farcaster</p>
+              </div>
+              {farcasterFields.map((field, index) => (
+                <FormField
+                  key={field.id}
+                  control={form.control}
+                  name={`farcaster.${index}.value`}
+                  render={({ field: innerField }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...innerField} placeholder="Add a link" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => addFarcasterField({ value: "" })}
+                className="w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add
+              </Button>
             </div>
 
             <FormField
