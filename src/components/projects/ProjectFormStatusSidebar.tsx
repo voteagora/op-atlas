@@ -27,7 +27,7 @@ const ProjectFormStatusSidebar = () => {
   }
 
   return (
-    <div>
+    <div className="sm:flex flex-col gap-6 items-start hidden">
       <Button
         onClick={handleGoBack}
         variant="outline"
@@ -35,27 +35,33 @@ const ProjectFormStatusSidebar = () => {
       >
         Profile
       </Button>
-      <h2 className="text-muted mt-6 ">Project 1</h2>
-      <Progress value={progress} className="w-[228px] h-2 mt-6" />
-      <p className="mt-2 text-sm font-normal">{progress}% complete</p>
+      <h2 className="text-muted">Project 1</h2>
+      <div className="flex flex-col gap-2">
+        <Progress value={progress} className="w-[228px] h-2" />
+        <p className="text-sm font-normal">{progress}% complete</p>
+      </div>
 
-      <div className="mt-6">
+      <div className="gap-2">
         {ProjectFormStatusSidebarOptions.map((option, index) => (
           <div
             key={index}
-            className="flex justify-start items-start flex-row gap-x-2 py-2"
+            className="flex justify-start items-center flex-row gap-2 py-2"
           >
-            <div className=" w-4">
+            <div className="w-4 flex justify-center">
               {index === 0 || index === 1 ? (
                 <Image
                   src="/assets/icons/tickIcon.svg"
                   width={20}
                   height={20}
-                  alt="img"
-                  className="mt-2"
+                  alt="Check"
                 />
               ) : (
-                <div className="h-2 w-2 rounded-full bg-muted mt-2"></div>
+                <Image
+                  src="/assets/icons/circle-fill.svg"
+                  width={6.67}
+                  height={6.67}
+                  alt="Dot"
+                />
               )}
             </div>
 
