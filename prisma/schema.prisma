@@ -131,7 +131,7 @@ model ProjectFunding {
   grant      String?
   grantUrl   String?
   amount     String
-  receivedAt DateTime
+  receivedAt String
   details    String?
 
   createdAt DateTime @default(now())

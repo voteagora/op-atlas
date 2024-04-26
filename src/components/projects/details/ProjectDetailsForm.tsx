@@ -110,8 +110,8 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         ? await updateProjectDetails(project.id, newValues)
         : await createNewProject(newValues)
 
-      if (!response.project || response.error) {
-        throw new Error(response.error)
+      if (response.error !== null || !response.project) {
+        throw new Error(response.error ?? "Failed to save project")
       }
 
       router.push(`/projects/${response.project.id}/team`)

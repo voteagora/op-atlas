@@ -1,6 +1,6 @@
 "use server"
 
-import { Project } from "@prisma/client"
+import { Prisma, Project } from "@prisma/client"
 import { TeamRole } from "@/lib/types"
 import { prisma } from "./client"
 
@@ -228,4 +228,28 @@ export async function removeTeamMember({
       },
     },
   })
+}
+
+export async function updateProjectFunding({
+  projectId,
+  funding,
+}: {
+  projectId: string
+  funding: Prisma.ProjectFundingCreateManyInput[]
+}) {
+  // Delete the existing funding and replace it
+  const remove = prisma.projectFunding.deleteMany({
+    where: {
+      projectId,
+    },
+  })
+
+  const create = prisma.projectFunding.createMany({
+    data: funding.map((f) => ({
+      ...f,
+      projectId,
+    })),
+  })
+
+  return prisma.$transaction([remove, create])
 }

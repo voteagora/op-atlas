@@ -5,10 +5,14 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useState } from "react"
+import { format, toDate } from "date-fns-tz"
+import { Prisma } from "@prisma/client"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { Form } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
+import { ProjectWithDetails } from "@/lib/types"
+import { setProjectFunding } from "@/lib/actions/projects"
 import { FUNDING_TYPES, FundingFormSchema, FundingType } from "./schema"
 import {
   OptimismFundingForm,
@@ -16,16 +20,91 @@ import {
   VentureFundingForm,
 } from "./FundingForm"
 
-export const GrantsForm = () => {
+function toFormValues(
+  project: ProjectWithDetails,
+): z.infer<typeof FundingFormSchema> {
+  const venture: z.infer<typeof FundingFormSchema>["venture"] = []
+  const optimism: z.infer<typeof FundingFormSchema>["optimism"] = []
+  const other: z.infer<typeof FundingFormSchema>["other"] = []
+
+  project.funding.forEach((funding) => {
+    if (funding.type === "venture") {
+      venture.push({
+        amount: funding.amount,
+        year: funding.receivedAt,
+        details: funding.details ?? "",
+      })
+    } else if (funding.type === "optimism") {
+      optimism.push({
+        type: funding.grant ?? "",
+        link: funding.grantUrl ?? "",
+        amount: parseFloat(funding.amount),
+        date: format(toDate(funding.receivedAt), "yyyy-MM-dd"), // date-fns does really stupid timezone conversions by default...
+        details: funding.details ?? "",
+      })
+    } else if (funding.type === "other") {
+      other.push({
+        name: funding.grant ?? "",
+        amount: funding.amount,
+        year: funding.receivedAt,
+        details: funding.details ?? "",
+      })
+    }
+  })
+
+  return {
+    venture,
+    optimism,
+    other,
+  }
+}
+
+function fromFormValues(
+  projectId: string,
+  values: z.infer<typeof FundingFormSchema>,
+): Prisma.ProjectFundingCreateManyInput[] {
+  const funding: Prisma.ProjectFundingCreateManyInput[] = []
+
+  values.venture.forEach((venture) => {
+    funding.push({
+      type: "venture",
+      amount: venture.amount,
+      receivedAt: venture.year,
+      details: venture.details,
+      projectId,
+    })
+  })
+  values.optimism.forEach((optimism) => {
+    funding.push({
+      type: "optimism",
+      amount: optimism.amount.toString(),
+      receivedAt: optimism.date,
+      grant: optimism.type,
+      grantUrl: optimism.link,
+      details: optimism.details,
+      projectId,
+    })
+  })
+  values.other.forEach((other) => {
+    funding.push({
+      type: "other",
+      grant: other.name,
+      amount: other.amount,
+      receivedAt: other.year,
+      details: other.details,
+      projectId,
+    })
+  })
+
+  return funding
+}
+
+export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const form = useForm<z.infer<typeof FundingFormSchema>>({
     resolver: zodResolver(FundingFormSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
-    defaultValues: {
-      venture: [],
-      optimism: [],
-      other: [],
-    },
+    defaultValues: toFormValues(project),
   })
 
   const [selectedNone, setSelectedNone] = useState(false)
@@ -151,8 +230,11 @@ export const GrantsForm = () => {
     }
   }
 
-  const onSubmit = (values: z.infer<typeof FundingFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof FundingFormSchema>) => {
     console.log("Submitting:", values)
+    await setProjectFunding(project.id, fromFormValues(project.id, values))
+
+    // TODO: Navigate to publish step once it's ready
   }
 
   const canSubmit =
@@ -165,7 +247,7 @@ export const GrantsForm = () => {
     <div className="flex flex-col gap-y-12 w-full">
       <div className="flex flex-col gap-y-6">
         <h2 className="text-2xl font-semibold">Grants & Funding</h2>
-        <p className="text-muted-foreground">
+        <p className="text-secondary-foreground">
           List any funding your project has received. This does not include past
           rounds of Retro Funding.
         </p>
@@ -241,7 +323,7 @@ export const GrantsForm = () => {
           <Button
             type="submit"
             disabled={!canSubmit}
-            variant="secondary"
+            variant="destructive"
             className="w-fit"
           >
             Next
