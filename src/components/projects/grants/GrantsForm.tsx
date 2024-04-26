@@ -5,7 +5,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useState } from "react"
-import { format } from "date-fns"
+import { format, toDate } from "date-fns-tz"
 import { Prisma } from "@prisma/client"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
@@ -39,7 +39,7 @@ function toFormValues(
         type: funding.grant ?? "",
         link: funding.grantUrl ?? "",
         amount: parseFloat(funding.amount),
-        date: format(funding.receivedAt, "yyyy-MM-dd"),
+        date: format(toDate(funding.receivedAt), "yyyy-MM-dd"), // date-fns does really stupid timezone conversions by default...
         details: funding.details ?? "",
       })
     } else if (funding.type === "other") {
@@ -247,7 +247,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     <div className="flex flex-col gap-y-12 w-full">
       <div className="flex flex-col gap-y-6">
         <h2 className="text-2xl font-semibold">Grants & Funding</h2>
-        <p className="text-muted-foreground">
+        <p className="text-secondary-foreground">
           List any funding your project has received. This does not include past
           rounds of Retro Funding.
         </p>
@@ -323,7 +323,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           <Button
             type="submit"
             disabled={!canSubmit}
-            variant="secondary"
+            variant="destructive"
             className="w-fit"
           >
             Next
