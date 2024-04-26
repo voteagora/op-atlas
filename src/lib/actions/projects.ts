@@ -7,10 +7,13 @@ import {
   createProject,
   CreateProjectParams,
   deleteProject,
+  getProjectTeam,
   getUserProjects,
   removeTeamMember,
+  updateMemberRole,
   updateProject,
 } from "@/db/projects"
+import { TeamRole } from "../types"
 
 const verifyAdminStatus = async (projectId: string, farcasterId: string) => {
   const userProjects = await getUserProjects({ farcasterId })
@@ -145,6 +148,38 @@ export const removeMemberFromProject = async (
 ) => {
   const session = await auth()
 
+  if (!session?.user?.id || session.user.id === userId) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  // Can't remove the final team member
+  const team = await getProjectTeam({ id: projectId })
+  if (team?.team.length === 1) {
+    return {
+      error: "Cannot remove the final team member",
+    }
+  }
+
+  await removeTeamMember({ projectId, userId })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+}
+
+export const setMemberRole = async (
+  projectId: string,
+  userId: string,
+  role: TeamRole,
+) => {
+  const session = await auth()
+
   if (!session?.user?.id) {
     return {
       error: "Unauthorized",
@@ -156,7 +191,7 @@ export const removeMemberFromProject = async (
     return isInvalid
   }
 
-  await removeTeamMember({ projectId, userId })
+  await updateMemberRole({ projectId, userId, role })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")

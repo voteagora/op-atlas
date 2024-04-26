@@ -1,15 +1,20 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { User } from "@prisma/client"
 import { Button } from "@/components/ui/button"
 import { ProjectWithTeam, TeamRole } from "@/lib/types"
+import {
+  addMembersToProject,
+  removeMemberFromProject,
+  setMemberRole,
+} from "@/lib/actions/projects"
 import { TeamMemberCard } from "./TeamMemberCard"
 import { AddTeamMemberCard } from "./AddTeamMemberCard"
 import ConfirmTeamCheckbox from "./ConfirmTeamCheckbox"
 import AddTeamMemberDialog from "./AddTeamMemberDialog"
-import DeleteTeamMemberDialog from "./DeleteTeamMemberDialogue"
+import DeleteTeamMemberDialog from "./DeleteTeamMemberDialog"
 import { WarpcastBanner } from "./WarpcastBanner"
 
 export default function AddTeamDetailsForm({
@@ -26,19 +31,32 @@ export default function AddTeamDetailsForm({
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
 
   const handleAddMembers = async (userIds: string[]) => {
-    console.log("Adding members:", userIds)
+    // TODO: Optimistic UI
+    await addMembersToProject(project.id, userIds)
+    setIsShowingAdd(false)
+  }
+
+  const handleToggleRole = async (user: User, role: TeamRole) => {
+    // TODO: Optimistic UI
+    const newRole = role === "member" ? "admin" : "member"
+    await setMemberRole(project.id, user.id, newRole)
   }
 
   const handleConfirmDelete = async () => {
+    if (!isShowingRemove) return
+
+    // TODO: Optimistic UI
+    await removeMemberFromProject(project.id, isShowingRemove.id)
     setIsShowingRemove(null)
-    setTeam((current) =>
-      current.filter((member) => member.id !== isShowingRemove?.id),
-    )
   }
 
-  const handleNextClicked = async () => {
+  const handleNextClicked = () => {
     router.push("/projects/new/repos")
   }
+
+  useEffect(() => {
+    setTeam(project.team)
+  }, [project.team])
 
   return (
     <>
@@ -58,6 +76,7 @@ export default function AddTeamDetailsForm({
               key={user.id}
               user={user}
               role={role as TeamRole}
+              onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
               onRemove={() => setIsShowingRemove(user)}
             />
           ))}
@@ -88,7 +107,7 @@ export default function AddTeamDetailsForm({
       <DeleteTeamMemberDialog
         open={!!isShowingRemove}
         onOpenChange={() => setIsShowingRemove(null)}
-        handleButtonClick={handleConfirmDelete}
+        onRemove={handleConfirmDelete}
         member={isShowingRemove}
       />
     </>

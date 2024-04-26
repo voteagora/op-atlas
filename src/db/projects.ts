@@ -28,6 +28,38 @@ export async function getUserProjects({
   })
 }
 
+export async function getUserProjectsWithDetails({
+  farcasterId,
+}: {
+  farcasterId: string
+}) {
+  return prisma.user.findUnique({
+    where: {
+      farcasterId,
+    },
+    select: {
+      projects: {
+        where: {
+          project: {
+            deletedAt: null,
+          },
+        },
+        include: {
+          project: {
+            include: {
+              team: true,
+              repos: true,
+              contracts: true,
+              funding: true,
+              applications: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
 export type CreateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
 > & {
