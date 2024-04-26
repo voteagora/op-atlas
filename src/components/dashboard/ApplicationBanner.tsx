@@ -4,11 +4,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "../ui/button"
 
-const ApplyRetroFundingRoundInfoBanner = ({
-  className,
-}: {
-  className?: string
-}) => {
+const ApplicationBanner = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
@@ -23,9 +19,7 @@ const ApplyRetroFundingRoundInfoBanner = ({
         height={67}
       />
       <div className="flex flex-col">
-        <p className="font-semibold">
-          Apply for Retro Funding Round 4: Onchain Builders
-        </p>
+        <p className="font-medium">Retro Funding Round 4: Onchain Builders</p>
         <p className="text-secondary-foreground">
           The deadline for submissions is May 31
         </p>
@@ -37,4 +31,4 @@ const ApplyRetroFundingRoundInfoBanner = ({
   )
 }
 
-export default ApplyRetroFundingRoundInfoBanner
+export default ApplicationBanner

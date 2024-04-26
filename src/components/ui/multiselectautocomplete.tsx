@@ -1,11 +1,8 @@
 "use client"
 
 import { X } from "lucide-react"
-import * as React from "react"
-import Image from "next/image"
-
 import clsx from "clsx"
-
+import { useCallback, useRef, useState } from "react"
 import { Badge } from "./badge"
 import { Command, CommandGroup, CommandItem, CommandList } from "./command"
 import { Input } from "./input"
@@ -13,14 +10,15 @@ import { Input } from "./input"
 export type IMultiSelectOptions = {
   value: string | number
   label: string
-  image: string
+  image?: string | null
 }
 
 interface MultiSelectAutocompleteProps {
-  image?: string
   placeholder?: string
   parentClassName?: string
   options: IMultiSelectOptions[]
+  inputValue: string
+  setInputValue: React.Dispatch<React.SetStateAction<string>>
   selectedOptions: IMultiSelectOptions[]
   setSelectedOptions: React.Dispatch<
     React.SetStateAction<IMultiSelectOptions[]>
@@ -31,22 +29,22 @@ export function MultiSelect({
   placeholder = "Select an item",
   parentClassName,
   options,
+  inputValue,
+  setInputValue,
   selectedOptions,
   setSelectedOptions,
 }: MultiSelectAutocompleteProps) {
-  const inputRef = React.useRef<HTMLInputElement>(null)
-  const [open, setOpen] = React.useState(false)
-  const [inputValue, setInputValue] = React.useState("")
-  const [selectables, setSelectable] = React.useState(options)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [, setOpen] = useState(false)
 
-  const handleUnselect = React.useCallback(
+  const handleUnselect = useCallback(
     (item: IMultiSelectOptions) => {
       setSelectedOptions((prev) => prev.filter((s) => s.value !== item.value))
     },
     [setSelectedOptions],
   )
 
-  const handleKeyDown = React.useCallback(
+  const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Escape") {
         inputRef.current?.blur()
@@ -55,26 +53,8 @@ export function MultiSelect({
     [],
   )
 
-  React.useEffect(() => {
-    const filterData = options.filter(
-      (item) =>
-        !selectedOptions.some(
-          (selectedItem) => selectedItem.value === item.value,
-        ),
-    )
-    if (inputValue === "") {
-      setSelectable(filterData)
-    } else {
-      setSelectable(
-        filterData.filter((item) =>
-          item.label.toLowerCase().includes(inputValue.toLowerCase()),
-        ),
-      )
-    }
-  }, [options, inputValue, selectedOptions])
-
   return (
-    <div className={clsx(parentClassName, "grid w-full items-center ")}>
+    <div className={clsx(parentClassName, "grid w-full items-center")}>
       <Command className="overflow-visible bg-transparent">
         <Input
           onKeyDown={handleKeyDown}
@@ -83,47 +63,53 @@ export function MultiSelect({
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={() => setOpen(false)}
           onClick={() => setOpen(true)}
+          onFocus={() => setOpen(true)}
           placeholder={placeholder}
-          className="!focus-visible:ring-offset-0"
+          className="!focus-visible:ring-0"
         />
 
-        <div className="relative mt-2">
-          {open ? (
+        <div className="relative">
+          {options.length > 0 ? (
             <div
               onBlur={() => setOpen(false)}
               className="absolute w-full top-0 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in"
             >
               <CommandGroup>
-                <CommandList className="gap-3 p-3 bg-white">
-                  {selectables.length > 0
-                    ? selectables.map((framework) => {
-                        return (
-                          <CommandItem
-                            className="px-3 py-2"
-                            key={framework.value}
-                            onSelect={() => {
-                              setInputValue("")
-                              setSelectedOptions((prev) => [...prev, framework])
-                              setOpen(false)
-                            }}
-                            onMouseDown={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                            }}
-                          >
-                            <Image
-                              src={framework.image}
-                              alt={framework.label}
-                              width={24}
-                              height={24}
-                              style={{ marginRight: "8px" }}
-                            />
+                <CommandList className="p-3 bg-white">
+                  {options.length > 0 ? (
+                    options.map((option, idx) => {
+                      return (
+                        <CommandItem
+                          className="h-10 px-3 py-2"
+                          key={idx}
+                          onSelect={() => {
+                            setInputValue("")
+                            setSelectedOptions((prev) => [...prev, option])
+                            setOpen(false)
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={option.image ?? ""}
+                            alt={option.label}
+                            width={24}
+                            height={24}
+                            className="rounded-full h-6 w-6 object-center object-cover mr-2"
+                          />
 
-                            {framework.label}
-                          </CommandItem>
-                        )
-                      })
-                    : "No options available"}
+                          {option.label}
+                        </CommandItem>
+                      )
+                    })
+                  ) : (
+                    <p className="text-sm text-center text-secondary-foreground">
+                      No users found
+                    </p>
+                  )}
                 </CommandList>
               </CommandGroup>
             </div>
@@ -131,30 +117,44 @@ export function MultiSelect({
         </div>
       </Command>
 
-      <div className="flex flex-wrap items-center gap-2 mt-3">
-        {selectedOptions.map((item) => {
-          return (
-            <Badge
-              key={item.value}
-              className="py-2 px-3 gap-1 rounded-md"
-              variant="secondary"
-            >
-              <Image src={item.image} alt={item.label} width={24} height={24} />
-              {item.label}
-              <button
-                className="ring-offset-background rounded-full outline-none"
-                onMouseDown={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                }}
-                onClick={() => handleUnselect(item)}
+      {selectedOptions.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 mt-2.5">
+          {selectedOptions.map((item) => {
+            return (
+              <Badge
+                key={item.value}
+                className="py-2 px-3 rounded-md shrink-0"
+                variant="secondary"
               >
-                <X className="ml-1 h-3 w-3 text-muted-foreground hover:text-foreground" />
-              </button>
-            </Badge>
-          )
-        })}
-      </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.image ?? ""}
+                  alt={item.label}
+                  width={24}
+                  height={24}
+                  className="rounded-full h-6 w-6 object-center object-cover shrink-0"
+                />
+                <p className="ml-1 text-sm text-secondary-foreground">
+                  {item.label}
+                </p>
+                <button
+                  className="ring-offset-background rounded-full outline-none ml-2"
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                  onClick={() => handleUnselect(item)}
+                >
+                  <X
+                    size={16}
+                    className="text-secondary-foreground hover:text-foreground"
+                  />
+                </button>
+              </Badge>
+            )
+          })}
+        </div>
+      ) : null}
     </div>
   )
 }

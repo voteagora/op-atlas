@@ -10,6 +10,20 @@ export async function getUserByFarcasterId(farcasterId: string) {
   })
 }
 
+export async function searchUsersByUsername({
+  username,
+}: {
+  username: string
+}) {
+  return prisma.user.findMany({
+    where: {
+      username: {
+        contains: username,
+      },
+    },
+  })
+}
+
 export async function upsertUser({
   farcasterId,
   ...user

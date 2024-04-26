@@ -37,7 +37,7 @@ model FundingRound {
 }
 
 model Project {
-  id           String @id @default(uuid())
+  id           String  @id @default(uuid())
   name         String
   description  String
   category     String?
@@ -80,8 +80,8 @@ model Application {
 }
 
 model UserProjects {
-  id    String  @id @default(uuid())
-  owner Boolean
+  id   String @id @default(uuid())
+  role String @default("member")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -91,6 +91,8 @@ model UserProjects {
 
   user    User    @relation(fields: [userId], references: [id])
   project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([userId, projectId])
 }
 
 model ProjectRepository {

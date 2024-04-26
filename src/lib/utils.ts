@@ -1,6 +1,6 @@
-import { Prisma } from "@prisma/client"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { ProjectWithDetails } from "./types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -36,10 +36,6 @@ export function isFirstTimeUser(): boolean {
 export function saveLogInDate() {
   localStorage.setItem(LAST_SIGN_IN_LOCALSTORAGE_KEY, Date.now().toString())
 }
-
-export type ProjectWithDetails = Prisma.ProjectGetPayload<{
-  include: { team: true; repos: true; contracts: true; funding: true }
-}>
 
 export function getProjectStatus(project: ProjectWithDetails) {
   const hasDetails =

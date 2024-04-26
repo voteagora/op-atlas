@@ -6,8 +6,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import ProfileDetailCard from "./ProfileDetailCard"
-import AddFirstProjectSection from "./AddFirstProjectSection"
-import ApplyRetroFundingRoundInfoBanner from "./ApplyRetroFundingRoundInfoBanner"
+import AddFirstProject from "./AddFirstProject"
+import ApplicationBanner from "./ApplicationBanner"
 import UserProjectCard from "./UserProjectCard"
 
 const Dashboard = ({
@@ -33,7 +33,7 @@ const Dashboard = ({
           </>
         ) : (
           <Link href="/projects/new">
-            <AddFirstProjectSection />
+            <AddFirstProject />
           </Link>
         )}
 
@@ -47,7 +47,7 @@ const Dashboard = ({
 
       <div className="flex flex-col gap-y-6">
         <h3>Your Retro Funding applications</h3>
-        <ApplyRetroFundingRoundInfoBanner />
+        <ApplicationBanner />
 
         <Link
           href="#"
