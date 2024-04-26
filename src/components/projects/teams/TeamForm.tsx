@@ -31,11 +31,13 @@ export default function AddTeamDetailsForm({
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
 
   const handleAddMembers = async (userIds: string[]) => {
+    // TODO: Optimistic UI
     await addMembersToProject(project.id, userIds)
     setIsShowingAdd(false)
   }
 
   const handleToggleRole = async (user: User, role: TeamRole) => {
+    // TODO: Optimistic UI
     const newRole = role === "member" ? "admin" : "member"
     await setMemberRole(project.id, user.id, newRole)
   }
@@ -43,6 +45,7 @@ export default function AddTeamDetailsForm({
   const handleConfirmDelete = async () => {
     if (!isShowingRemove) return
 
+    // TODO: Optimistic UI
     await removeMemberFromProject(project.id, isShowingRemove.id)
     setIsShowingRemove(null)
   }
