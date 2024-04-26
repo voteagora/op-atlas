@@ -25,7 +25,7 @@ function EditProfileDialog({ open, onOpenChange }: DialogProps<object>) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col items-center sm:max-w-md">
+      <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         <DialogHeader className="flex flex-col items-center gap-4">
           <Avatar className="!w-20 !h-20">
             <AvatarImage src={session?.user?.image || ""} alt="avatar" />

@@ -1,6 +1,7 @@
 "use server"
 
 import { Project } from "@prisma/client"
+import { TeamRole } from "@/lib/types"
 import { prisma } from "./client"
 
 export async function getUserProjects({
@@ -46,7 +47,7 @@ export async function createProject({
       ...project,
       team: {
         create: {
-          owner: true,
+          role: "owner" satisfies TeamRole,
           user: {
             connect: {
               farcasterId,
@@ -95,6 +96,104 @@ export async function getProject({ id }: { id: string }) {
       contracts: true,
       funding: true,
       applications: true,
+    },
+  })
+}
+
+export async function getProjectTeam({ id }: { id: string }) {
+  return prisma.project.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      team: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  })
+}
+
+export async function addTeamMember({
+  projectId,
+  userId,
+  role = "member",
+}: {
+  projectId: string
+  userId: string
+  role?: TeamRole
+}) {
+  return prisma.userProjects.create({
+    data: {
+      role,
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      project: {
+        connect: {
+          id: projectId,
+        },
+      },
+    },
+  })
+}
+
+export async function addTeamMembers({
+  projectId,
+  userIds,
+  role = "member",
+}: {
+  projectId: string
+  userIds: string[]
+  role?: TeamRole
+}) {
+  return prisma.userProjects.createMany({
+    data: userIds.map((userId) => ({
+      role,
+      userId,
+      projectId,
+    })),
+  })
+}
+
+export async function updateMemberRole({
+  projectId,
+  userId,
+  role,
+}: {
+  projectId: string
+  userId: string
+  role: TeamRole
+}) {
+  return prisma.userProjects.update({
+    where: {
+      userId_projectId: {
+        projectId,
+        userId,
+      },
+    },
+    data: {
+      role,
+    },
+  })
+}
+
+export async function removeTeamMember({
+  projectId,
+  userId,
+}: {
+  projectId: string
+  userId: string
+}) {
+  return prisma.userProjects.delete({
+    where: {
+      userId_projectId: {
+        projectId,
+        userId,
+      },
     },
   })
 }

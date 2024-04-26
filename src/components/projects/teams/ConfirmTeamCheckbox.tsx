@@ -1,14 +1,11 @@
-import * as React from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 
-interface IProps {
-  setIsTeamConfirmed: React.Dispatch<React.SetStateAction<boolean>>
-  isTeamConfirmed: boolean
-}
-
-export const ConfirmTeamCheckbox: React.FC<IProps> = ({
+const ConfirmTeamCheckbox = ({
   setIsTeamConfirmed,
   isTeamConfirmed,
+}: {
+  setIsTeamConfirmed: React.Dispatch<React.SetStateAction<boolean>>
+  isTeamConfirmed: boolean
 }) => (
   <div className="flex items-center gap-2 border border-input p-4 rounded-lg">
     <Checkbox
@@ -25,3 +22,5 @@ export const ConfirmTeamCheckbox: React.FC<IProps> = ({
     </label>
   </div>
 )
+
+export default ConfirmTeamCheckbox

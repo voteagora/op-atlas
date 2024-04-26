@@ -1,111 +1,96 @@
 "use client"
-import * as React from "react"
+
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { User } from "@prisma/client"
 import { Button } from "@/components/ui/button"
-import {
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { ProjectWithTeam, TeamRole } from "@/lib/types"
 import { TeamMemberCard } from "./TeamMemberCard"
 import { AddTeamMemberCard } from "./AddTeamMemberCard"
-import { ConfirmTeamCheckbox } from "./ConfirmTeamCheckbox"
-import AddTeamMemberDialogue from "./AddTeamMemberDialogue"
-import DeleteTeamMemberDialogue from "./DeleteTeamMemberDialogue"
+import ConfirmTeamCheckbox from "./ConfirmTeamCheckbox"
+import AddTeamMemberDialog from "./AddTeamMemberDialog"
+import DeleteTeamMemberDialog from "./DeleteTeamMemberDialogue"
 import { WarpcastBanner } from "./WarpcastBanner"
 
-export interface IUser {
-  id: number | string
-  username: string
-  profilePictureUrl: string
-  fullName: string
-}
-
-export default function AddTeamDetailsForm() {
+export default function AddTeamDetailsForm({
+  project,
+}: {
+  project: ProjectWithTeam
+}) {
   const router = useRouter()
-  const [isTeamConfirmed, setIsTeamConfirmed] = React.useState(false)
-  const [showAddTeamDialogue, setShowAddTeamDialogue] = React.useState(false)
+  const [team, setTeam] = useState(project.team)
 
-  const [addedTeamMembers, setAddedTeamMembers] = React.useState<IUser[]>([])
-  const [openDialog, setOpenDialog] = React.useState(false)
-  const [currentTeamMember, setCurrentTeamMember] =
-    React.useState<IUser | null>(null)
+  const [isTeamConfirmed, setIsTeamConfirmed] = useState(false)
+  const [isShowingAdd, setIsShowingAdd] = useState(false)
 
-  const handleOpenDialog = (member: IUser) => {
-    setCurrentTeamMember(member)
-    setOpenDialog(true)
+  const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
+
+  const handleAddMembers = async (userIds: string[]) => {
+    console.log("Adding members:", userIds)
   }
 
-  const handleConfirmDelete = () => {
-    setAddedTeamMembers(
-      addedTeamMembers.filter((member) => member.id !== currentTeamMember?.id),
+  const handleConfirmDelete = async () => {
+    setIsShowingRemove(null)
+    setTeam((current) =>
+      current.filter((member) => member.id !== isShowingRemove?.id),
     )
-    setOpenDialog(false)
   }
 
-  const handleNextClicked = () => {
+  const handleNextClicked = async () => {
     router.push("/projects/new/repos")
   }
 
   return (
-    <div>
-      <CardHeader className="gap-6">
-        <CardTitle className="text-foreground">Team</CardTitle>
-        <CardDescription className="text-base font-normal text-text-secondary">
-          All team members will have edit access to this project. Only the
-          project owner can delete the project, remove team members, or receive
-          grants.
-        </CardDescription>
-        <WarpcastBanner />
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-2 my-12">
-          <TeamMemberCard
-            name="Shaun Lind"
-            username="shausome"
-            avatarSrc="/assets/images/avatar.png"
-            isOwner
-          />
-          {addedTeamMembers.map((member) => (
+    <>
+      <div className="flex flex-col gap-y-12">
+        <div className="flex flex-col gap-y-6">
+          <h2>Team</h2>
+          <p className="text-secondary-foreground">
+            All team members will have edit access to this project. Only the
+            project owner can delete the project or remove team members.
+          </p>
+          <WarpcastBanner />
+        </div>
+
+        <div className="grid grid-cols-4 gap-2">
+          {team.map(({ user, role }) => (
             <TeamMemberCard
-              key={member.id}
-              name={member.fullName}
-              username={`@${member.username}`}
-              avatarSrc={member.profilePictureUrl}
-              onButtonClick={() => handleOpenDialog(member)}
+              key={user.id}
+              user={user}
+              role={role as TeamRole}
+              onRemove={() => setIsShowingRemove(user)}
             />
           ))}
-          <AddTeamMemberCard
-            onAddTeamBoxClicked={() => setShowAddTeamDialogue(true)}
-          />
+          <AddTeamMemberCard onClick={() => setIsShowingAdd(true)} />
         </div>
 
         <ConfirmTeamCheckbox
           setIsTeamConfirmed={setIsTeamConfirmed}
           isTeamConfirmed={isTeamConfirmed}
         />
+
         <Button
           onClick={handleNextClicked}
           disabled={!isTeamConfirmed}
           variant="destructive"
-          className="mt-12"
+          className="w-fit"
         >
           Next
         </Button>
-        <AddTeamMemberDialogue
-          open={showAddTeamDialogue}
-          setAddedTeamMembers={setAddedTeamMembers}
-          onOpenChange={(open) => setShowAddTeamDialogue(open)}
-          addedTeamMembers={addedTeamMembers}
-        />
-        <DeleteTeamMemberDialogue
-          open={openDialog}
-          onOpenChange={(open) => setOpenDialog(open)}
-          handleButtonClick={handleConfirmDelete}
-          member={currentTeamMember}
-        />
-      </CardContent>
-    </div>
+      </div>
+
+      <AddTeamMemberDialog
+        open={isShowingAdd}
+        onOpenChange={(open) => setIsShowingAdd(open)}
+        team={team.map((member) => member.user)}
+        addMembers={handleAddMembers}
+      />
+      <DeleteTeamMemberDialog
+        open={!!isShowingRemove}
+        onOpenChange={() => setIsShowingRemove(null)}
+        handleButtonClick={handleConfirmDelete}
+        member={isShowingRemove}
+      />
+    </>
   )
 }

@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
-const AddFirstProjectSection = ({ className }: { className?: string }) => {
+const AddFirstProject = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
@@ -17,4 +17,4 @@ const AddFirstProjectSection = ({ className }: { className?: string }) => {
   )
 }
 
-export default AddFirstProjectSection
+export default AddFirstProject

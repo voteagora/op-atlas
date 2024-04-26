@@ -3,12 +3,29 @@
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import {
+  addTeamMembers,
   createProject,
   CreateProjectParams,
   deleteProject,
   getUserProjects,
+  removeTeamMember,
   updateProject,
 } from "@/db/projects"
+
+const verifyAdminStatus = async (projectId: string, farcasterId: string) => {
+  const userProjects = await getUserProjects({ farcasterId })
+  const membership = userProjects?.projects.find(
+    ({ project }) => project.id === projectId,
+  )
+
+  if (membership?.role !== "owner" && membership?.role !== "admin") {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  return null
+}
 
 export const getProjects = async (farcasterId: string) => {
   const teams = await getUserProjects({ farcasterId })
@@ -80,10 +97,10 @@ export const deleteUserProject = async (projectId: string) => {
 
   const userProjects = await getUserProjects({ farcasterId: session.user.id })
   const membership = userProjects?.projects.find(
-    ({ project }) => project.id === projectId,
+    ({ project, role }) => project.id === projectId && role === "admin",
   )
 
-  if (!membership?.owner) {
+  if (!membership) {
     return {
       error: "Unauthorized",
     }
@@ -97,4 +114,50 @@ export const deleteUserProject = async (projectId: string) => {
     error: null,
     projectId,
   }
+}
+
+export const addMembersToProject = async (
+  projectId: string,
+  userIds: string[],
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  await addTeamMembers({ projectId, userIds })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+}
+
+export const removeMemberFromProject = async (
+  projectId: string,
+  userId: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  await removeTeamMember({ projectId, userId })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
 }

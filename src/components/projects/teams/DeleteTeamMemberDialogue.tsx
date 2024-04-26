@@ -1,5 +1,6 @@
 "use client"
 import { memo } from "react"
+import { User } from "@prisma/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -8,13 +9,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { IUser } from "./AddTeamDetailsForm"
 
 interface IProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   handleButtonClick: () => void
-  member: IUser | null
+  member: User | null
 }
 
 const DeleteTeamMemberDialogue: React.FC<IProps> = ({
@@ -29,7 +29,7 @@ const DeleteTeamMemberDialogue: React.FC<IProps> = ({
         <div className="flex items-center justify-center mt-4">
           <Avatar className="!w-20 !h-20">
             <AvatarImage
-              src={member?.profilePictureUrl}
+              src={member?.imageUrl ?? undefined}
               alt="avatar"
               className="w-full h-full rounded-full"
             />
@@ -39,7 +39,7 @@ const DeleteTeamMemberDialogue: React.FC<IProps> = ({
 
         <DialogHeader>
           <DialogTitle className="text-center text-lg font-semibold text-text-default">
-            Are you sure you want to remove {member?.fullName} from the team?
+            Are you sure you want to remove {member?.name} from the team?
           </DialogTitle>
         </DialogHeader>
         <Button
