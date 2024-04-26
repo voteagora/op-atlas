@@ -32,19 +32,23 @@ const AddTeamMemberDialog = ({
   addMembers,
 }: Props) => {
   const [searchText, setSearchText] = useState("")
+  const [loading, setLoading] = useState(false)
+
   const [searchResults, setSearchResults] = useState<User[]>([])
   const [selectedUsers, setSelectedUsers] = useState<IMultiSelectOptions[]>([])
 
-  const [debouncedSearchText] = useDebounceValue(searchText, 100)
+  const [debouncedSearchText] = useDebounceValue(searchText, 150)
 
   const onAddMembers = useCallback(async () => {
     try {
+      setLoading(true)
       await addMembers(selectedUsers.map((user) => user.value.toString()))
-      onOpenChange(false)
     } catch (error) {
       console.error("Error adding team members", error)
+    } finally {
+      setLoading(false)
     }
-  }, [addMembers, selectedUsers, onOpenChange])
+  }, [addMembers, selectedUsers])
 
   const options = useMemo(() => {
     const selectedUserIds = [
@@ -104,6 +108,7 @@ const AddTeamMemberDialog = ({
             Team members must have a Farcaster account.
           </DialogDescription>
         </DialogHeader>
+
         <MultiSelect
           parentClassName="z-10"
           selectedOptions={selectedUsers}
@@ -113,10 +118,11 @@ const AddTeamMemberDialog = ({
           inputValue={searchText}
           setInputValue={setSearchText}
         />
+
         <Button
           className="w-full"
           variant="destructive"
-          disabled={!selectedUsers.length}
+          disabled={!selectedUsers.length || loading}
           onClick={onAddMembers}
         >
           Add

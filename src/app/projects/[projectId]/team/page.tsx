@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/auth"
-import AddTeamDetailsForm from "@/components/projects/teams/AddTeamDetailsForm"
+import TeamForm from "@/components/projects/teams/TeamForm"
 import { getUserByFarcasterId } from "@/db/users"
 import { getProjectTeam } from "@/db/projects"
 
@@ -28,5 +28,5 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  return <AddTeamDetailsForm project={project} />
+  return <TeamForm project={project} />
 }

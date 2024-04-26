@@ -2,13 +2,13 @@ import Image from "next/image"
 import { useState } from "react"
 import ExternalLink from "@/components/ExternalLink"
 
-const WARPCAST = "https://warpcast.com/"
+const WARPCAST_URL = "https://warpcast.com/"
 
 export function WarpcastBanner() {
   const [copied, setCopied] = useState(false)
 
   const onCopy = () => {
-    navigator.clipboard.writeText(WARPCAST)
+    navigator.clipboard.writeText(WARPCAST_URL)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -23,7 +23,10 @@ export function WarpcastBanner() {
       />
       <div>
         If your team members are not on Farcaster, they can{" "}
-        <ExternalLink className="underline underline-offset-4" href={WARPCAST}>
+        <ExternalLink
+          className="underline underline-offset-4"
+          href={WARPCAST_URL}
+        >
           create a free account
         </ExternalLink>{" "}
         with Warpcast.
