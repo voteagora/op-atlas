@@ -1,26 +1,25 @@
 "use client"
-import { useEffect, useState } from "react"
+
+import { useMemo } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { ProjectWithDetails } from "@/lib/types"
+import { getProjectStatus, ProjectSection } from "@/lib/utils"
 
-const ProjectFormStatusSidebarOptions = [
-  "Details",
-  "Team",
-  "Repos",
-  "Contracts",
-  "Grants",
-]
-
-const ProjectFormStatusSidebar = () => {
+export default function ProjectFormStatusSidebar({
+  project,
+}: {
+  project?: ProjectWithDetails
+}) {
   const router = useRouter()
-  const [progress, setProgress] = useState(0)
 
-  useEffect(() => {
-    const timer = setTimeout(() => setProgress(20), 500)
-    return () => clearTimeout(timer)
-  }, [])
+  const { progressPercent, completedSections } = useMemo(() => {
+    return project
+      ? getProjectStatus(project)
+      : { progressPercent: 0, completedSections: [] }
+  }, [project])
 
   const handleGoBack = () => {
     router.push("/dashboard")
@@ -35,20 +34,26 @@ const ProjectFormStatusSidebar = () => {
       >
         Profile
       </Button>
-      <h2 className="text-muted">Project 1</h2>
+      <h2
+        className={`${
+          project?.name ? "text-secondary-foreground" : "text-muted"
+        } max-w-48 text-ellipsis text-nowrap overflow-hidden`}
+      >
+        {project?.name ?? "New project"}
+      </h2>
       <div className="flex flex-col gap-2">
-        <Progress value={progress} className="w-[228px] h-2" />
-        <p className="text-sm font-normal">{progress}% complete</p>
+        <Progress value={progressPercent} className="w-[228px] h-2" />
+        <p className="text-sm font-normal">{progressPercent}% complete</p>
       </div>
 
       <div className="gap-2">
-        {ProjectFormStatusSidebarOptions.map((option, index) => (
+        {Object.values(ProjectSection).map((option, index) => (
           <div
             key={index}
             className="flex justify-start items-center flex-row gap-2 py-2"
           >
             <div className="w-4 flex justify-center">
-              {index === 0 || index === 1 ? (
+              {completedSections.includes(option) ? (
                 <Image
                   src="/assets/icons/tickIcon.svg"
                   width={20}
@@ -72,5 +77,3 @@ const ProjectFormStatusSidebar = () => {
     </div>
   )
 }
-
-export default ProjectFormStatusSidebar
