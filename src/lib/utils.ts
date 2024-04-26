@@ -37,17 +37,48 @@ export function saveLogInDate() {
   localStorage.setItem(LAST_SIGN_IN_LOCALSTORAGE_KEY, Date.now().toString())
 }
 
-export function getProjectStatus(project: ProjectWithDetails) {
+export enum ProjectSection {
+  Details = "Details",
+  Team = "Team",
+  Repos = "Repos",
+  Contracts = "Contracts",
+  Grants = "Grants",
+}
+export type ProjectStatus = {
+  completedSections: ProjectSection[]
+  progressPercent: number
+}
+export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
+  const completedSections: ProjectSection[] = []
+
   const hasDetails =
     project.name &&
     project.description &&
     project.thumbnailUrl &&
     project.bannerUrl
+  if (hasDetails) {
+    completedSections.push(ProjectSection.Details)
+  }
 
   const hasTeam = project.team?.length > 1
+  if (hasTeam) {
+    completedSections.push(ProjectSection.Team)
+  }
+
   const hasRepos = project.repos?.length > 0
+  if (hasRepos) {
+    completedSections.push(ProjectSection.Repos)
+  }
+
   const hasContracts = project.contracts?.length > 0
+  if (hasContracts) {
+    completedSections.push(ProjectSection.Contracts)
+  }
+
   const hasFunding = project.funding?.length > 0
+  if (hasFunding) {
+    completedSections.push(ProjectSection.Grants)
+  }
 
   let progress = hasDetails ? 20 : 0
   progress += hasTeam ? 20 : 0
@@ -55,5 +86,5 @@ export function getProjectStatus(project: ProjectWithDetails) {
   progress += hasContracts ? 20 : 0
   progress += hasFunding ? 20 : 0
 
-  return progress
+  return { completedSections, progressPercent: progress }
 }
