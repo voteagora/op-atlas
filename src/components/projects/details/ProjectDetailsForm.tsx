@@ -110,7 +110,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         ? await updateProjectDetails(project.id, newValues)
         : await createNewProject(newValues)
 
-      if (!response.project || response.error) {
+      if (response.error || !response.project) {
         throw new Error(response.error)
       }
 

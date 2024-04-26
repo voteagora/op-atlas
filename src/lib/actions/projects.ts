@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { Prisma } from "@prisma/client"
 import { auth } from "@/auth"
 import {
   addTeamMembers,
@@ -12,23 +13,10 @@ import {
   removeTeamMember,
   updateMemberRole,
   updateProject,
+  updateProjectFunding,
 } from "@/db/projects"
+import { verifyAdminStatus, verifyMembership } from "./utils"
 import { TeamRole } from "../types"
-
-const verifyAdminStatus = async (projectId: string, farcasterId: string) => {
-  const userProjects = await getUserProjects({ farcasterId })
-  const membership = userProjects?.projects.find(
-    ({ project }) => project.id === projectId,
-  )
-
-  if (membership?.role !== "owner" && membership?.role !== "admin") {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  return null
-}
 
 export const getProjects = async (farcasterId: string) => {
   const teams = await getUserProjects({ farcasterId })
@@ -68,11 +56,9 @@ export const updateProjectDetails = async (
     }
   }
 
-  const userProjects = await getUserProjects({ farcasterId: session.user.id })
-  if (!userProjects?.projects.some(({ project }) => project.id === projectId)) {
-    return {
-      error: "Unauthorized",
-    }
+  const isInvalid = await verifyMembership(projectId, session.user.id)
+  if (isInvalid?.error) {
+    return isInvalid
   }
 
   const updated = await updateProject({ id: projectId, project: details })
@@ -85,10 +71,6 @@ export const updateProjectDetails = async (
   }
 }
 
-/**
- * Deletes a project.
- * Only the owner is allowed to delete the project.
- */
 export const deleteUserProject = async (projectId: string) => {
   const session = await auth()
 
@@ -98,15 +80,9 @@ export const deleteUserProject = async (projectId: string) => {
     }
   }
 
-  const userProjects = await getUserProjects({ farcasterId: session.user.id })
-  const membership = userProjects?.projects.find(
-    ({ project, role }) => project.id === projectId && role === "admin",
-  )
-
-  if (!membership) {
-    return {
-      error: "Unauthorized",
-    }
+  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+  if (isInvalid?.error) {
+    return isInvalid
   }
 
   await deleteProject({ id: projectId })
@@ -148,6 +124,7 @@ export const removeMemberFromProject = async (
 ) => {
   const session = await auth()
 
+  // Can't remove yourself (?)
   if (!session?.user?.id || session.user.id === userId) {
     return {
       error: "Unauthorized",
@@ -192,6 +169,29 @@ export const setMemberRole = async (
   }
 
   await updateMemberRole({ projectId, userId, role })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+}
+
+export const setProjectFunding = async (
+  projectId: string,
+  funding: Prisma.ProjectFundingCreateManyInput[],
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.id)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  await updateProjectFunding({ projectId, funding })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")

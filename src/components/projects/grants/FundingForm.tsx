@@ -88,7 +88,7 @@ export const VentureFundingForm = ({
         control={form.control}
         name={`venture.${index}.amount`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               How much funding did you receive?{" "}
               <span className="text-destructive">*</span>
@@ -115,7 +115,7 @@ export const VentureFundingForm = ({
         control={form.control}
         name={`venture.${index}.year`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               When did you receive this funding?{" "}
               <span className="text-destructive">*</span>
@@ -142,7 +142,7 @@ export const VentureFundingForm = ({
         control={form.control}
         name={`venture.${index}.details`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel>Details</FormLabel>
             <FormDescription className="!mt-0">
               Include any details you&apos;d like to about this funding.
@@ -175,7 +175,7 @@ export const OptimismFundingForm = ({
         control={form.control}
         name={`optimism.${index}.type`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               Type of grant <span className="text-destructive">*</span>
             </FormLabel>
@@ -206,7 +206,7 @@ export const OptimismFundingForm = ({
         control={form.control}
         name={`optimism.${index}.link`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               Grant specifics <span className="text-destructive">*</span>
             </FormLabel>
@@ -224,7 +224,7 @@ export const OptimismFundingForm = ({
         control={form.control}
         name={`optimism.${index}.amount`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               How much OP did you receive?{" "}
               <span className="text-destructive">*</span>
@@ -254,7 +254,7 @@ export const OptimismFundingForm = ({
         control={form.control}
         name={`optimism.${index}.date`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               When did you sign your grant agreement?{" "}
               <span className="text-destructive">*</span>
@@ -273,7 +273,7 @@ export const OptimismFundingForm = ({
         control={form.control}
         name={`optimism.${index}.details`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel>Details</FormLabel>
             <FormDescription className="!mt-0">
               Include any details you&apos;d like to about this funding.
@@ -306,7 +306,7 @@ export const OtherFundingForm = ({
         control={form.control}
         name={`other.${index}.name`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               Name <span className="text-destructive">*</span>
             </FormLabel>
@@ -321,7 +321,7 @@ export const OtherFundingForm = ({
         control={form.control}
         name={`other.${index}.amount`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               How much funding did you receive?{" "}
               <span className="text-destructive">*</span>
@@ -348,7 +348,7 @@ export const OtherFundingForm = ({
         control={form.control}
         name={`other.${index}.year`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
               When did you receive this funding?{" "}
               <span className="text-destructive">*</span>

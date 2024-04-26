@@ -1,5 +1,32 @@
+import { redirect } from "next/navigation"
+import { auth } from "@/auth"
 import { GrantsForm } from "@/components/projects/grants/GrantsForm"
+import { getProject } from "@/db/projects"
+import { getUserByFarcasterId } from "@/db/users"
 
-export default function Page() {
-  return <GrantsForm />
+export default async function Page({
+  params,
+}: {
+  params: { projectId: string }
+}) {
+  const session = await auth()
+  if (!session) {
+    redirect("/")
+  }
+
+  const [user, project] = await Promise.all([
+    getUserByFarcasterId(session.user.id),
+    getProject({ id: params.projectId }),
+  ])
+
+  if (!user || !project) {
+    redirect("/dashboard")
+  }
+
+  // Validate that the current user is part of the project
+  if (!project.team.some((member) => member.userId === user.id)) {
+    redirect("/dashboard")
+  }
+
+  return <GrantsForm project={project} />
 }
