@@ -170,7 +170,7 @@ export const OptimismFundingForm = ({
   index: number
 }) => {
   return (
-    <div className={cn("flex flex-col gap-y-6 p-6 border rounded-xl")}>
+    <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
       <FormField
         control={form.control}
         name={`optimism.${index}.type`}
@@ -301,7 +301,7 @@ export const OtherFundingForm = ({
   index: number
 }) => {
   return (
-    <div className={cn("flex flex-col gap-y-6 p-6 border rounded-xl")}>
+    <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
       <FormField
         control={form.control}
         name={`other.${index}.name`}
