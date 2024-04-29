@@ -37,7 +37,7 @@
     --success-foreground: 129 65% 53%;
 
     --destructive: 353 100% 51%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 352, 100%, 36%;
 
     --border: 229 22% 90%;
     --input: 214.3 31.8% 91.4%;
@@ -105,11 +105,11 @@
   .bg-rainbow {
     background: linear-gradient(
       180deg,
-      rgba(255,239,209,1) 0%,
-      rgba(255,209,214,1) 25%,
-      rgba(210,203,255,1) 50%, 
-      rgba(156,255,231,1) 75%,
-      rgba(166,255,180,1) 100%
+      rgba(255, 239, 209, 1) 0%,
+      rgba(255, 209, 214, 1) 25%,
+      rgba(210, 203, 255, 1) 50%,
+      rgba(156, 255, 231, 1) 75%,
+      rgba(166, 255, 180, 1) 100%
     );
   }
   .bg-gradient {

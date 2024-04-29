@@ -1,5 +1,5 @@
+import { isAddress, isHex } from "viem"
 import { z } from "zod"
-import { ProjectWithDetails } from "@/lib/types"
 
 export const Chain = z.enum([
   "Base",
@@ -11,21 +11,46 @@ export const Chain = z.enum([
   "Zora",
 ])
 
-const ContractSchema = z.object({
-  contractAddress: z.string().min(1, "Contract address is required"),
-  deploymentTxHash: z
-    .string()
-    .min(1, "Deployment transaction hash is required"),
-  deployerAddress: z.string().min(1, "Deployer address is required"),
+const AddressSchema = z.custom<string>(
+  (val) => typeof val === "string" && isAddress(val),
+  "Valid address is required",
+)
+
+const HexStringSchema = z.custom<string>(
+  (val) => typeof val === "string" && isHex(val),
+  "Valid hash is required",
+)
+
+export const ContractSchema = z.object({
+  contractAddress: AddressSchema,
+  deploymentTxHash: HexStringSchema,
+  deployerAddress: AddressSchema,
   chain: Chain,
   signature: z.string().optional(),
 })
 
 export const HasDeployerKeysOption = z.enum(["Yes", "No", "Some, but not all"])
 
-export const ContractsSchema = z.object({
-  isOnChain: z.boolean(),
-  hasDeployerKeys: HasDeployerKeysOption,
-  contracts: z.array(ContractSchema).optional(),
+const OffChainSchema = z.object({
+  isOffChain: z.literal(true),
+  hasDeployerKeys: z.any(),
+  contracts: z.any(),
+  submittedToOSO: z.any(),
+})
+
+const HasContractsSchema = z.object({
+  isOffChain: z.literal(false),
+  hasDeployerKeys: HasDeployerKeysOption.exclude(["No"]),
+  contracts: z.array(ContractSchema),
   submittedToOSO: z.boolean(),
 })
+
+const NoContractsSchema = z.object({
+  isOffChain: z.literal(false),
+  hasDeployerKeys: HasDeployerKeysOption.extract(["No"]),
+  contracts: z.any(),
+  submittedToOSO: z.literal(true),
+})
+
+export const ContractsSchema =
+  OffChainSchema.or(NoContractsSchema).or(HasContractsSchema)
