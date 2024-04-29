@@ -9,13 +9,14 @@ export function ChainLogo({
   size?: number
 }) {
   const chainInfo = CHAIN_INFO[chainId]
-  if (!chainInfo) throw new Error(`chain info not found for chainId ${chainId}`)
+  if (!chainInfo) return null
+
   return (
     <Image
-      src={CHAIN_INFO[chainId]?.logo}
+      src={chainInfo.logo}
       height={size}
       width={size}
-      alt={``}
+      alt={`${chainInfo.name} logo`}
     />
   )
 }
