@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ChainLogo } from "@/components/common/ChainLogo"
+import { CHAIN_INFO } from "@/components/common/chain"
 import { Chain, ContractsSchema } from "./schema"
 
 export function ChainSelector({
@@ -39,7 +41,10 @@ export function ChainSelector({
             <SelectContent>
               {Chain.options.map((chain) => (
                 <SelectItem key={chain} value={chain}>
-                  {chain}
+                  <div className="flex gap-2 items-center py-1">
+                    <ChainLogo chainId={chain} />
+                    <div>{CHAIN_INFO[chain]?.name}</div>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>

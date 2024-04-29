@@ -1,4 +1,4 @@
-import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form"
+import { UseFormReturn, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { useState } from "react"
 import { type Address, isAddress, isAddressEqual, isHex } from "viem"
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { ChainLogo } from "@/components/common/ChainLogo"
 import { ContractSchema, ContractsSchema } from "./schema"
 import { ChainSelector } from "./ChainSelector"
 import { VerifyAddressModal } from "./VerifyAddressModal"
@@ -31,20 +32,22 @@ export function ContractForm({
     control: form.control,
   })
 
-  const { contractAddress, deployerAddress, deploymentTxHash, signature } =
-    contracts[index]
+  const {
+    contractAddress,
+    deployerAddress,
+    deploymentTxHash,
+    signature,
+    chain,
+  } = contracts[index]
 
   const onVerify = () => {
     if (!isAddress(deployerAddress)) return
 
-    const otherVerifiedContract: z.infer<typeof ContractSchema> | undefined =
-      contracts.find(
-        (contract: z.infer<typeof ContractSchema>) =>
-          isAddressEqual(
-            contract.deployerAddress as Address,
-            deployerAddress,
-          ) && Boolean(contract.signature),
-      )
+    const otherVerifiedContract = contracts.find(
+      (contract: z.infer<typeof ContractSchema>) =>
+        isAddressEqual(contract.deployerAddress as Address, deployerAddress) &&
+        Boolean(contract.signature),
+    )
 
     if (otherVerifiedContract) {
       form.setValue(
@@ -79,7 +82,8 @@ export function ContractForm({
               alt="Verified"
             />
           </div>
-          <div className="px-2 text-secondary-foreground">
+          <div className="px-2 text-secondary-foreground flex items-center gap-1.5">
+            <ChainLogo chainId={chain} size={18} />
             {contractAddress}
           </div>
         </div>

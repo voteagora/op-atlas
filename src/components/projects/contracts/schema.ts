@@ -1,14 +1,15 @@
 import { isAddress, isHex } from "viem"
+import { base, fraxtal, liskSepolia, mode, optimism, zora } from "viem/chains"
 import { z } from "zod"
 
 export const Chain = z.enum([
-  "Base",
-  "Fraxtal",
-  "Lisk",
-  "Mode",
-  "OP Mainnet",
-  "Redstone",
-  "Zora",
+  base.id.toString(),
+  fraxtal.id.toString(),
+  liskSepolia.id.toString(),
+  mode.id.toString(),
+  optimism.id.toString(),
+  "17001",
+  zora.id.toString(),
 ])
 
 const AddressSchema = z.custom<string>(
