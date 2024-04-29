@@ -23,9 +23,27 @@ const ContractSchema = z.object({
 
 export const HasDeployerKeysOption = z.enum(["Yes", "No", "Some, but not all"])
 
-export const ContractsSchema = z.object({
-  isOnChain: z.boolean(),
-  hasDeployerKeys: HasDeployerKeysOption,
-  contracts: z.array(ContractSchema).optional(),
+const OffChainSchema = z.object({
+  isOffChain: z.literal(true),
+  hasDeployerKeys: z.any(),
+  contracts: z.any(),
+  submittedToOSO: z.any(),
+})
+
+const HasContractsSchema = z.object({
+  isOffChain: z.literal(false),
+  hasDeployerKeys: HasDeployerKeysOption.exclude(["No"]),
+  contracts: z.array(ContractSchema),
   submittedToOSO: z.boolean(),
 })
+
+const NoContractsSchema = z.object({
+  isOffChain: z.literal(false),
+  hasDeployerKeys: HasDeployerKeysOption.extract(["No"]),
+  contracts: z.any(),
+  submittedToOSO: z.literal(true),
+})
+
+export const ContractsSchema = OffChainSchema.or(NoContractsSchema)
+  .or(HasContractsSchema)
+  .or(NoContractsSchema)
