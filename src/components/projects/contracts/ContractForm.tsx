@@ -77,25 +77,24 @@ export function ContractForm({
 
   if (signature) {
     return (
-      <DropdownMenu>
-        <div className="flex flex-col gap-2">
-          <FormLabel>Contract {index + 1}</FormLabel>
-          <div className="flex gap-1">
-            <div className="flex flex-1 px-3 py-2 border items-center rounded-lg">
-              <div className="pr-2 border-r">
-                <Image
-                  src="/assets/icons/circle-check-green.svg"
-                  height={16.67}
-                  width={16.67}
-                  alt="Verified"
-                />
-              </div>
-              <div className="px-2 text-secondary-foreground flex items-center gap-1.5">
-                <ChainLogo chainId={chain} size={18} />
-                {contractAddress}
-              </div>
+      <div className="flex flex-col gap-2">
+        <FormLabel>Contract {index + 1}</FormLabel>
+        <div className="flex gap-1">
+          <div className="flex flex-1 px-3 py-2 border items-center rounded-lg">
+            <div className="pr-2 border-r">
+              <Image
+                src="/assets/icons/circle-check-green.svg"
+                height={16.67}
+                width={16.67}
+                alt="Verified"
+              />
             </div>
-
+            <div className="px-2 text-secondary-foreground flex items-center gap-1.5">
+              <ChainLogo chainId={chain} size={18} />
+              {contractAddress}
+            </div>
+          </div>
+          <DropdownMenu>
             <DropdownMenuTrigger>
               <div className="flex p-3 bg-secondary rounded-lg w-full h-full justify-center items-center">
                 <Ellipsis className="h-3 w-3" />
@@ -127,9 +126,9 @@ export function ContractForm({
                 Remove
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </div>
+          </DropdownMenu>
         </div>
-      </DropdownMenu>
+      </div>
     )
   }
 
