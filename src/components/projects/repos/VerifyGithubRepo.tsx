@@ -39,85 +39,89 @@ const VerifyGithubRepo: React.FC = () => {
   }
 
   return (
-    <div>
-      <h3 className=" text-lg font-semibold mt-12">Github</h3>
-      <p className=" text-sm font-medium mt-6">Verify your Github repo*</p>
-      <p className=" text-sm font-normal text-secondary-foreground">
-        Your project repo must be public. If you have multiple repos, first
-        verify one then you can add more.
-      </p>
+    <div className="flex flex-col gap-6">
+      <h3 className="text-lg font-semibold">Github</h3>
+      <div>
+        <p className="text-sm font-medium">
+          Verify your Github repo<span className="text-destructive">*</span>
+        </p>
+        <p className="text-sm font-normal text-secondary-foreground">
+          Your project repo must be public. If you have multiple repos, first
+          verify one then you can add more.
+        </p>
 
-      {addedRepos.length === 0 ? (
-        <div className="flex flex-row mt-2 gap-x-2 w-full">
-          <Input
-            type="text"
-            placeholder="Add a URL"
-            className="w-full"
-            value={repoUrl}
-            onChange={handleUrlChange}
-          />
-          <Button
-            variant="destructive"
-            onClick={handleOpenDialogue}
-            disabled={!isValidUrl}
-          >
-            Search
-          </Button>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2 mt-2">
-          {addedRepos.map((repo, index) => (
-            <div className="flex gap-x-2 w-full" key={index}>
-              <div className="flex items-center space-x-2 border border-input p-3 rounded-lg w-full">
-                <CheckIcon className="!fill-accent-foreground" />
+        {addedRepos.length === 0 ? (
+          <div className="flex flex-row mt-2 gap-x-2 w-full">
+            <Input
+              type="text"
+              placeholder="Add a URL"
+              className="w-full"
+              value={repoUrl}
+              onChange={handleUrlChange}
+            />
+            <Button
+              variant="destructive"
+              onClick={handleOpenDialogue}
+              disabled={!isValidUrl}
+            >
+              Search
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2 mt-2">
+            {addedRepos.map((repo, index) => (
+              <div className="flex gap-x-2 w-full" key={index}>
+                <div className="flex items-center space-x-2 border border-input p-3 rounded-lg w-full">
+                  <CheckIcon className="!fill-accent-foreground" />
 
-                <p className="text-sm font-medium text-foreground">
-                  {repo ? repo : "Add a URL"}
-                </p>
+                  <p className="text-sm font-medium text-foreground">
+                    {repo ? repo : "Add a URL"}
+                  </p>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Button variant="secondary">
+                      <MenuIcon />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuLabel>Delete Repo</DropdownMenuLabel>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Button variant="secondary">
-                    <MenuIcon />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>Delete Repo</DropdownMenuLabel>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {error && (
-        <p className="text-sm font-medium text-destructive mt-2">{error}</p>
-      )}
+        {error && (
+          <p className="text-sm font-medium text-destructive mt-2">{error}</p>
+        )}
 
-      {addedRepos.length > 0 && (
-        <Button
-          onClick={handleOpenDialogue}
-          className="mt-2"
-          variant="secondary"
-        >
-          <Image
-            className="mr-2"
-            src="/assets/icons/plusIcon.svg"
-            width={9}
-            height={9}
-            alt=""
-          />
-          Add repo
-        </Button>
-      )}
+        {addedRepos.length > 0 && (
+          <Button
+            onClick={handleOpenDialogue}
+            className="mt-2"
+            variant="secondary"
+          >
+            <Image
+              className="mr-2"
+              src="/assets/icons/plusIcon.svg"
+              width={9}
+              height={9}
+              alt=""
+            />
+            Add repo
+          </Button>
+        )}
 
-      <AddGitRepoDialogue
-        setAddedRepos={setAddedRepos}
-        addedRepos={addedRepos}
-        open={openDialogue}
-        repoUrl={repoUrl}
-        onOpenChange={(open) => setOpenDialogue(open)}
-      />
+        <AddGitRepoDialogue
+          setAddedRepos={setAddedRepos}
+          addedRepos={addedRepos}
+          open={openDialogue}
+          repoUrl={repoUrl}
+          onOpenChange={(open) => setOpenDialogue(open)}
+        />
+      </div>
     </div>
   )
 }
