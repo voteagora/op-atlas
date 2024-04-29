@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
+import { deleteUserProject } from "@/lib/actions/projects"
+import { useIsAdmin } from "@/lib/hooks"
+import { DeleteProjectDialog } from "./DeleteProjectDialog"
+import { toast } from "../ui/use-toast"
 
 export default function ProjectFormStatusSidebar({
   project,
@@ -16,6 +20,9 @@ export default function ProjectFormStatusSidebar({
 }) {
   const router = useRouter()
   const pathname = usePathname()
+  const isAdmin = useIsAdmin(project)
+
+  const [deletingProject, setDeletingProject] = useState(false)
 
   const { progressPercent, completedSections } = useMemo(() => {
     return project
@@ -25,6 +32,20 @@ export default function ProjectFormStatusSidebar({
 
   const handleGoBack = () => {
     router.push("/dashboard")
+  }
+
+  const deleteProject = async () => {
+    if (!project) return
+
+    const result = await deleteUserProject(project.id)
+    if (result.error) {
+      toast({
+        title: "There was an error deleting this project.",
+      })
+    }
+
+    setDeletingProject(false)
+    router.push("/")
   }
 
   const currentPage = pathname.split("/").slice(-1)[0]
@@ -89,6 +110,24 @@ export default function ProjectFormStatusSidebar({
           </div>
         ))}
       </div>
+
+      {project && isAdmin && (
+        <Button
+          type="button"
+          variant="link"
+          className="p-0 text-sm text-muted-foreground font-normal decoration-muted-foreground"
+          onClick={() => setDeletingProject(true)}
+        >
+          Delete project
+        </Button>
+      )}
+      {deletingProject && (
+        <DeleteProjectDialog
+          open
+          onConfirm={deleteProject}
+          onOpenChange={(open) => !open && setDeletingProject(false)}
+        />
+      )}
     </div>
   )
 }

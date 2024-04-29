@@ -17,7 +17,7 @@ export default async function Layout({
   }
 
   const [user, project] = await Promise.all([
-    getUserByFarcasterId(session.user.id),
+    getUserByFarcasterId(session.user.farcasterId),
     getProject({ id: params.projectId }),
   ])
 

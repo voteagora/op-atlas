@@ -17,7 +17,7 @@ export const updateEmail = async (email: string) => {
     }
   }
 
-  const user = await getUserByFarcasterId(session.user.id)
+  const user = await getUserByFarcasterId(session.user.farcasterId)
   if (!user) {
     return {
       error: "Unauthorized",

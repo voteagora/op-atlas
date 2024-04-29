@@ -33,7 +33,7 @@ export const createNewProject = async (details: CreateProjectParams) => {
   }
 
   const project = await createProject({
-    farcasterId: session.user.id,
+    farcasterId: session.user.farcasterId,
     project: details,
   })
 
@@ -56,7 +56,7 @@ export const updateProjectDetails = async (
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.id)
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -80,7 +80,7 @@ export const deleteUserProject = async (projectId: string) => {
     }
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -107,7 +107,7 @@ export const addMembersToProject = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -131,7 +131,7 @@ export const removeMemberFromProject = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -163,7 +163,7 @@ export const setMemberRole = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -186,7 +186,7 @@ export const setProjectFunding = async (
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.id)
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }

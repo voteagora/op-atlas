@@ -7,16 +7,18 @@ import { getProjects } from "@/lib/actions/projects"
 export default async function Page() {
   const session = await auth()
 
+  console.log("session", session)
   if (!session?.user?.id) {
     redirect("/")
   }
 
-  const user = await getUserByFarcasterId(session.user.id)
+  const user = await getUserByFarcasterId(session.user.farcasterId)
+  console.log("no farcaster id", session.user.farcasterId)
   if (!user) {
     redirect("/")
   }
 
-  const projects = await getProjects(session.user.id)
+  const projects = await getProjects(session.user.farcasterId)
 
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
