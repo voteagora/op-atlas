@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -15,6 +15,7 @@ export default function ProjectFormStatusSidebar({
   project?: ProjectWithDetails
 }) {
   const router = useRouter()
+  const pathname = usePathname()
 
   const { progressPercent, completedSections } = useMemo(() => {
     return project
@@ -25,6 +26,8 @@ export default function ProjectFormStatusSidebar({
   const handleGoBack = () => {
     router.push("/dashboard")
   }
+
+  const currentPage = pathname.split("/").slice(-1)[0]
 
   return (
     <div className="sm:flex flex-col gap-6 items-start hidden">
@@ -74,7 +77,9 @@ export default function ProjectFormStatusSidebar({
             {project ? (
               <Link
                 href={`/projects/${project.id}/${option.toLowerCase()}`}
-                className=""
+                className={
+                  currentPage === option.toLowerCase() ? "font-medium" : ""
+                }
               >
                 {option}
               </Link>
