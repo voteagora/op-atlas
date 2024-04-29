@@ -5,6 +5,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Image from "next/image"
 import Link from "next/link"
+import { Plus } from "lucide-react"
 import {
   Form,
   FormControl,
@@ -43,7 +44,11 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     },
   })
 
-  const { fields: contractsFields } = useFieldArray({
+  const {
+    fields: contractsFields,
+    append: addContractsFields,
+    remove: removeContractsFields,
+  } = useFieldArray({
     control: form.control,
     name: "contracts",
   })
@@ -72,6 +77,11 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     )
   })()
 
+  // can add a new contract once the previous one is verified
+  const canAddContract =
+    formValues.contracts.length < 1 ||
+    Boolean(formValues.contracts[formValues.contracts.length - 1].signature)
+
   return (
     <div>
       <Form {...form}>
@@ -99,9 +109,10 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                       />
                     </FormControl>
                     <div className="text-sm">
-                      <FormLabel>This project isn&apos;t onchain</FormLabel>
+                      <FormLabel className="text-foreground">
+                        This project isn&apos;t onchain
+                      </FormLabel>
                     </div>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -166,7 +177,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                           >
                             {HasDeployerKeysOption.options.map((option) => (
                               <FormItem key={option}>
-                                <FormLabel className="flex-1 min-w-6 basis-0 p-4 text-sm font-medium flex items-center gap-3 border rounded-sm">
+                                <FormLabel className="flex-1 min-w-6 basis-0 p-4 text-sm font-medium flex items-center gap-3 border rounded-sm text-foreground">
                                   <FormControl>
                                     <RadioGroupItem value={option} />
                                   </FormControl>
@@ -176,7 +187,6 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                             ))}
                           </RadioGroup>
                         </FormControl>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -194,8 +204,23 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                     </div>
                   </div>
                   {contractsFields.map((field, index) => (
-                    <ContractForm key={field.id} form={form} index={index} />
+                    <ContractForm
+                      remove={() => removeContractsFields(index)}
+                      key={field.id}
+                      form={form}
+                      index={index}
+                    />
                   ))}
+                  {canAddContract && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => addContractsFields({ ...EMPTY_CONTRACT })}
+                      className="w-fit"
+                    >
+                      <Plus size={16} className="mr-2.5" /> Add contract
+                    </Button>
+                  )}
                 </div>
               )}
 
