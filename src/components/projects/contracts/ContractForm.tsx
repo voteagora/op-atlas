@@ -3,7 +3,8 @@ import { z } from "zod"
 import { useState } from "react"
 import { type Address, isAddress, isAddressEqual, isHex } from "viem"
 import Image from "next/image"
-import { X } from "lucide-react"
+import { Ellipsis, X } from "lucide-react"
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
 import {
   FormControl,
   FormField,
@@ -14,6 +15,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ChainLogo } from "@/components/common/ChainLogo"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
 import { ContractSchema, ContractsSchema } from "./schema"
 import { ChainSelector } from "./ChainSelector"
 import { VerifyAddressModal } from "./VerifyAddressModal"
@@ -73,19 +79,54 @@ export function ContractForm({
     return (
       <div className="flex flex-col gap-2">
         <FormLabel>Contract {index + 1}</FormLabel>
-        <div className="flex px-3 py-2 border items-center rounded-lg">
-          <div className="pr-2 border-r">
-            <Image
-              src="/assets/icons/circle-check-green.svg"
-              height={16.67}
-              width={16.67}
-              alt="Verified"
-            />
+        <div className="flex gap-1">
+          <div className="flex flex-1 px-3 py-2 border items-center rounded-lg">
+            <div className="pr-2 border-r">
+              <Image
+                src="/assets/icons/circle-check-green.svg"
+                height={16.67}
+                width={16.67}
+                alt="Verified"
+              />
+            </div>
+            <div className="px-2 text-secondary-foreground flex items-center gap-1.5">
+              <ChainLogo chainId={chain} size={18} />
+              {contractAddress}
+            </div>
           </div>
-          <div className="px-2 text-secondary-foreground flex items-center gap-1.5">
-            <ChainLogo chainId={chain} size={18} />
-            {contractAddress}
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <div className="flex p-3 bg-secondary rounded-lg w-full h-full justify-center items-center">
+                <Ellipsis className="h-3 w-3" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="text-text-secondary">
+              <DropdownMenuItem
+                className="cursor-pointer py-3 px-2"
+                onClick={() => navigator.clipboard.writeText(contractAddress)}
+              >
+                Copy contract address
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer py-3 px-2"
+                onClick={() => navigator.clipboard.writeText(deploymentTxHash)}
+              >
+                Copy deployment tx hash
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer py-3 px-2"
+                onClick={() => navigator.clipboard.writeText(deployerAddress)}
+              >
+                Copy deployer address
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer py-3 px-2"
+                onClick={remove}
+              >
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     )
