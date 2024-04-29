@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { ProjectWithDetails } from "@/lib/types"
 
 export const Chain = z.enum([
   "Base",

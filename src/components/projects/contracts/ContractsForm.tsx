@@ -43,11 +43,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     },
   })
 
-  const {
-    fields: contractsFields,
-    replace: replaceContractsFields,
-    append: addContractsFields,
-  } = useFieldArray({
+  const { fields: contractsFields } = useFieldArray({
     control: form.control,
     name: "contracts",
   })
