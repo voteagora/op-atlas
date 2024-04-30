@@ -1,10 +1,12 @@
 import { format } from "date-fns"
-import { useMemo } from "react"
 import Image from "next/image"
-import { cn, titlecase } from "@/lib/utils"
+import { useMemo } from "react"
+
 import { FundingRound } from "@/lib/mocks"
-import { Button } from "../ui/button"
+import { cn, titlecase } from "@/lib/utils"
+
 import { Badge } from "../common/Badge"
+import { Button } from "../ui/button"
 
 export const FundingRounds = ({
   className,

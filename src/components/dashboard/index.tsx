@@ -3,11 +3,13 @@
 import { Project, User } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
+
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import ProfileDetailCard from "./ProfileDetailCard"
+
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
+import ProfileDetailCard from "./ProfileDetailCard"
 import UserProjectCard from "./UserProjectCard"
 
 const Dashboard = ({

@@ -1,22 +1,26 @@
 "use client"
 
-import { useState } from "react"
-
-import Image from "next/image"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Project } from "@prisma/client"
 import { Plus } from "lucide-react"
-
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
-import { Project } from "@prisma/client"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
-import { CategoryDefinitions } from "./CategoryDefinitions"
-import { PhotoCropModal } from "./PhotoCropModal"
+
 import FileUploadInput from "../../common/FileUploadInput"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../../ui/accordion"
 import { Button } from "../../ui/button"
 import {
   Form,
@@ -27,12 +31,8 @@ import {
   FormMessage,
 } from "../../ui/form"
 import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../../ui/accordion"
+import { CategoryDefinitions } from "./CategoryDefinitions"
+import { PhotoCropModal } from "./PhotoCropModal"
 
 const CategoryEnum = z.enum([
   "CeFi",

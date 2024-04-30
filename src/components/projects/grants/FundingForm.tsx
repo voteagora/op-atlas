@@ -1,7 +1,7 @@
-import { z } from "zod"
-import { UseFormReturn } from "react-hook-form"
 import Image from "next/image"
-import { cn } from "@/lib/utils"
+import { UseFormReturn } from "react-hook-form"
+import { z } from "zod"
+
 import {
   FormControl,
   FormDescription,
@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+
 import { FundingFormSchema } from "./schema"
 
 const FUNDING_AMOUNTS = [

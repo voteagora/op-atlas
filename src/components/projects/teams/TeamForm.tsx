@@ -1,20 +1,22 @@
 "use client"
 
+import { User } from "@prisma/client"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { User } from "@prisma/client"
+
 import { Button } from "@/components/ui/button"
-import { ProjectWithTeam, TeamRole } from "@/lib/types"
 import {
   addMembersToProject,
   removeMemberFromProject,
   setMemberRole,
 } from "@/lib/actions/projects"
-import { TeamMemberCard } from "./TeamMemberCard"
+import { ProjectWithTeam, TeamRole } from "@/lib/types"
+
 import { AddTeamMemberCard } from "./AddTeamMemberCard"
-import ConfirmTeamCheckbox from "./ConfirmTeamCheckbox"
 import AddTeamMemberDialog from "./AddTeamMemberDialog"
+import ConfirmTeamCheckbox from "./ConfirmTeamCheckbox"
 import DeleteTeamMemberDialog from "./DeleteTeamMemberDialog"
+import { TeamMemberCard } from "./TeamMemberCard"
 import { WarpcastBanner } from "./WarpcastBanner"
 
 export default function AddTeamDetailsForm({

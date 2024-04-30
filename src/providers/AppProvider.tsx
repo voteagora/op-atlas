@@ -1,7 +1,8 @@
 "use client"
 
-import { AuthKitProvider } from "@farcaster/auth-kit"
 import "@farcaster/auth-kit/styles.css"
+
+import { AuthKitProvider } from "@farcaster/auth-kit"
 
 if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
   throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in env.")

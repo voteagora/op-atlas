@@ -1,7 +1,8 @@
 "use client"
-import { memo } from "react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
+import { memo } from "react"
+
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -12,8 +13,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { DialogProps } from "./types"
+
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { DialogProps } from "./types"
 
 function EditProfileDialog({ open, onOpenChange }: DialogProps<object>) {
   const { setOpenDialog } = useAppDialogs()

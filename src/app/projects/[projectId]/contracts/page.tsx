@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
-import { getProject } from "@/db/projects"
+
 import { ContractsForm } from "@/components/projects/contracts/ContractsForm"
+import { getProject } from "@/db/projects"
 
 export default async function Page({
   params,

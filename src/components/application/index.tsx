@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
+
 import { Project } from "@/lib/mocks"
-import { FundingApplication } from "./FundingApplication"
+
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
+import { FundingApplication } from "./FundingApplication"
 
 export const Application = ({
   className,

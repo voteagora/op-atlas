@@ -1,6 +1,7 @@
+import Image from "next/image"
 import { useMemo, useState } from "react"
 import { type Address, checksumAddress, verifyMessage } from "viem"
-import Image from "next/image"
+
 import { Badge } from "@/components/common/Badge"
 import { DialogProps } from "@/components/dialogs/types"
 import { Button } from "@/components/ui/button"

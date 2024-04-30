@@ -1,4 +1,5 @@
 import React from "react"
+
 import Navbar from "@/components/common/Navbar"
 
 const LayoutProvider = ({ children }: { children: React.ReactNode }) => {

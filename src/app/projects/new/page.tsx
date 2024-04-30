@@ -1,5 +1,5 @@
-import ProjectFormStatusSidebar from "@/components/projects/ProjectSidebar"
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
+import ProjectFormStatusSidebar from "@/components/projects/ProjectSidebar"
 
 export default function Page() {
   return (

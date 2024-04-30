@@ -1,15 +1,16 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+
+import { Badge } from "@/components/common/Badge"
+import { Button } from "@/components/ui/button"
 import {
   Carousel,
   CarouselApi,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel"
-import { Badge } from "@/components/common/Badge"
-import { Button } from "@/components/ui/button"
 
 export default function Welcome() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()

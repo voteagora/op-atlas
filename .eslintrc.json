@@ -1,76 +1,20 @@
 {
-  "plugins": ["react", "prettier", "jsx-a11y"],
+  "plugins": ["prettier", "jsx-a11y", "simple-import-sort"],
   "extends": [
     "next/core-web-vitals",
-    "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
     "plugin:jsx-a11y/recommended",
-    "plugin:import/errors",
     "prettier"
   ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module"
-  },
   "rules": {
     "prettier/prettier": "warn",
-    "no-const-assign": "error",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "react/jsx-uses-react": "off",
-    "react/prop-types": "off",
-    "react/react-in-jsx-scope": "off",
-    "no-use-before-define": "off",
-    "@typescript-eslint/no-use-before-define": "off",
-    "react/jsx-filename-extension": [
-      1,
-      {
-        "extensions": [".js", ".ts", "tsx"]
-      }
-    ],
-    "no-shadow": "off",
-    "@typescript-eslint/no-shadow": "warn",
-    "@typescript-eslint/explicit-function-return-type": [
-      "off",
-      {
-        "allowExpressions": true
-      }
-    ],
-    "sort-imports": [
-      "error",
-      {
-        "ignoreCase": true,
-        "ignoreDeclarationSort": true
-      }
-    ],
-    "import/order": [
-      1,
-      {
-        "groups": [
-          "external",
-          "builtin",
-          "internal",
-          "sibling",
-          "parent",
-          "index"
-        ]
-      }
-    ],
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
-    "import/prefer-default-export": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": "warn"
+    "simple-import-sort/imports": "warn",
+    "simple-import-sort/exports": "warn"
   },
-  "settings": {
-    "react": {
-      "version": "detect"
-    },
-    "import/extensions": [".js", ".jsx", ".ts", ".tsx"],
-    "import/resolver": {
-      "node": {
-        "extensions": [".js", ".jsx", ".ts", ".tsx"]
-      }
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parser": "@typescript-eslint/parser"
     }
-  }
+  ]
 }
