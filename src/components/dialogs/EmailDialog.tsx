@@ -2,6 +2,7 @@
 
 import { memo, useState } from "react"
 import Image from "next/image"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,10 +17,14 @@ import { DialogProps } from "./types"
 import { Input } from "../ui/input"
 
 function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
-  const [email, setEmail] = useState("")
+  const { data: session } = useSession()
+  const [email, setEmail] = useState(session?.user.email ?? "")
   const [loading, setLoading] = useState(false)
 
   const saveEmail = async () => {
+    if (!email) return
+
+    setLoading(true)
     try {
       await updateEmail(email)
       onOpenChange(false)
@@ -63,13 +68,13 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
 
         <DialogFooter className="w-full">
           <Button
-            disabled={loading}
+            disabled={loading || !email}
             onClick={saveEmail}
             className="w-full"
             type="button"
             variant="destructive"
           >
-            Continue
+            {loading ? "Saving..." : "Continue"}
           </Button>
         </DialogFooter>
       </DialogContent>
