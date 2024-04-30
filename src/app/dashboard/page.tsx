@@ -7,13 +7,11 @@ import { getProjects } from "@/lib/actions/projects"
 export default async function Page() {
   const session = await auth()
 
-  console.log("session", session)
   if (!session?.user?.id) {
     redirect("/")
   }
 
   const user = await getUserByFarcasterId(session.user.farcasterId)
-  console.log("no farcaster id", session.user.farcasterId)
   if (!user) {
     redirect("/")
   }
