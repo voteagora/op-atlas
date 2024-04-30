@@ -1,11 +1,12 @@
 "use client"
 
-import { memo, useState } from "react"
 import { User } from "@prisma/client"
+import { memo, useState } from "react"
+
+import { DialogProps } from "@/components/dialogs/types"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DialogProps } from "@/components/dialogs/types"
 
 const DeleteTeamMemberDialog = ({
   open,

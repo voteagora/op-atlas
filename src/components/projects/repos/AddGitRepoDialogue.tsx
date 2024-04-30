@@ -1,4 +1,7 @@
 "use client"
+
+import { Copy } from "lucide-react"
+import Image from "next/image"
 import {
   Dispatch,
   memo,
@@ -8,7 +11,9 @@ import {
   useMemo,
   useState,
 } from "react"
-import Image from "next/image"
+
+import CheckIcon from "@/components/icons/checkIcon"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -17,11 +22,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { copyTextToClipBoard } from "@/lib/utils"
-import CheckIcon from "@/components/icons/checkIcon"
 
 interface IProps {
   open: boolean
@@ -244,13 +247,10 @@ const JsonFileCard: React.FC<{
         retrofunding.json
       </p>
       <div className="relative w-full">
-        <Image
-          onClick={handleCopyText}
+        <Copy
+          size={20}
           className="absolute right-4 top-3 cursor-pointer"
-          src="/assets/images/copyIcon.png"
-          width={20}
-          height={20}
-          alt=""
+          onClick={handleCopyText}
         />
         <Textarea readOnly defaultValue={dummyJson} className="min-h-40" />
       </div>

@@ -1,7 +1,9 @@
-import React, { memo } from "react"
 import { User } from "@prisma/client"
-import { useAppDialogs } from "@/providers/DialogProvider"
+import React, { memo } from "react"
+
 import { cn } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
+
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 

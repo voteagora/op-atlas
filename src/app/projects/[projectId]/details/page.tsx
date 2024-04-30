@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation"
+
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { getProject } from "@/db/projects"
 

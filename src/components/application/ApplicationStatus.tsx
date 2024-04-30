@@ -1,6 +1,8 @@
-import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
+import Link from "next/link"
+
 import { cn } from "@/lib/utils"
+
 import { CheckIconFilled } from "../icons/checkIconFilled"
 import { Button } from "../ui/button"
 

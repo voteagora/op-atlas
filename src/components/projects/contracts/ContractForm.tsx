@@ -1,9 +1,12 @@
-import { UseFormReturn, useWatch } from "react-hook-form"
-import { z } from "zod"
-import { useState } from "react"
-import { type Address, isAddress, isAddressEqual, isHex } from "viem"
-import Image from "next/image"
 import { X } from "lucide-react"
+import Image from "next/image"
+import { useState } from "react"
+import { UseFormReturn, useWatch } from "react-hook-form"
+import { type Address, isAddress, isAddressEqual, isHex } from "viem"
+import { z } from "zod"
+
+import { ChainLogo } from "@/components/common/ChainLogo"
+import { Button } from "@/components/ui/button"
 import {
   FormControl,
   FormField,
@@ -12,10 +15,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { ChainLogo } from "@/components/common/ChainLogo"
-import { ContractSchema, ContractsSchema } from "./schema"
+
 import { ChainSelector } from "./ChainSelector"
+import { ContractSchema, ContractsSchema } from "./schema"
 import { VerifyAddressDialog } from "./VerifyAddressDialog"
 
 export function ContractForm({

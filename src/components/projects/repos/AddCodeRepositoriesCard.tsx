@@ -1,9 +1,10 @@
 "use client"
 import * as React from "react"
+
 import { CodeRepoCheckbox } from "./CodeRepoCheckbox"
-import VerifyGithubRepo from "./VerifyGithubRepo"
 import NpmPackageManager from "./NpmPackageManager"
 import VerifyCodeRepoBanner from "./VerifyCodeRepoBanner"
+import VerifyGithubRepo from "./VerifyGithubRepo"
 
 const AddCodeRepositoriesCard = () => {
   const [isCodeRepoConfirmed, setIsCodeRepoConfirmed] = React.useState(false)

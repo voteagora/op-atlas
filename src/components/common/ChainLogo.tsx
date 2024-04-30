@@ -1,4 +1,5 @@
 import Image from "next/image"
+
 import { CHAIN_INFO } from "./chain"
 
 export function ChainLogo({

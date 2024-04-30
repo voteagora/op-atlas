@@ -8,6 +8,7 @@ import {
   useContext,
   useState,
 } from "react"
+
 import { DialogType } from "@/components/dialogs/types"
 
 type AppDialog = {

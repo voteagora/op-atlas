@@ -1,13 +1,15 @@
 "use client"
 
-import Image from "next/image"
 import { ArrowDownToLine } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { useLayoutEffect } from "react"
+
 import { cn } from "@/lib/utils"
-import { ApplicationStatus } from "./ApplicationStatus"
-import { Button } from "../ui/button"
+
 import { Discord, DiscussionForum, Twitter } from "../icons/socials"
+import { Button } from "../ui/button"
+import { ApplicationStatus } from "./ApplicationStatus"
 
 const SOCIALS = [
   {

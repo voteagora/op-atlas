@@ -1,14 +1,15 @@
+import "react-image-crop/dist/ReactCrop.css"
+
+import { ReactEventHandler, useState } from "react"
 import ReactCrop, {
   centerCrop,
   type Crop,
   makeAspectCrop,
 } from "react-image-crop"
-import { ReactEventHandler, useState } from "react"
-import { DialogProps } from "@/components/dialogs/types"
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 
-import "react-image-crop/dist/ReactCrop.css"
+import { DialogProps } from "@/components/dialogs/types"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
 
 export function PhotoCropModal({
   image,

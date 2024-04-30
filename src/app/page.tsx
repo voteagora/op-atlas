@@ -1,9 +1,10 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
+
+import { auth } from "@/auth"
 import { FundingRounds } from "@/components/home/FundingRounds"
 import { Sidebar } from "@/components/home/Sidebar"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
-import { auth } from "@/auth"
 
 export default async function Home() {
   const session = await auth()

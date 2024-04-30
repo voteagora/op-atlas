@@ -1,24 +1,26 @@
 "use client"
 
-import { useFieldArray, useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Prisma } from "@prisma/client"
+import { format, toDate } from "date-fns-tz"
 import { Plus } from "lucide-react"
 import { useState } from "react"
-import { format, toDate } from "date-fns-tz"
-import { Prisma } from "@prisma/client"
-import { Checkbox } from "@/components/ui/checkbox"
-import { cn } from "@/lib/utils"
-import { Form } from "@/components/ui/form"
+import { useFieldArray, useForm } from "react-hook-form"
+import { z } from "zod"
+
 import { Button } from "@/components/ui/button"
-import { ProjectWithDetails } from "@/lib/types"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Form } from "@/components/ui/form"
 import { setProjectFunding } from "@/lib/actions/projects"
-import { FUNDING_TYPES, FundingFormSchema, FundingType } from "./schema"
+import { ProjectWithDetails } from "@/lib/types"
+import { cn } from "@/lib/utils"
+
 import {
   OptimismFundingForm,
   OtherFundingForm,
   VentureFundingForm,
 } from "./FundingForm"
+import { FUNDING_TYPES, FundingFormSchema, FundingType } from "./schema"
 
 function toFormValues(
   project: ProjectWithDetails,

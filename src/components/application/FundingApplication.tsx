@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowUpRight } from "lucide-react"
+import { useState } from "react"
 import { getAddress } from "viem"
+
 import { Project } from "@/lib/mocks"
 import { cn } from "@/lib/utils"
+
 import { Badge } from "../common/Badge"
-import { Checkbox } from "../ui/checkbox"
 import { Button } from "../ui/button"
+import { Checkbox } from "../ui/checkbox"
 import { Input } from "../ui/input"
 
 const TERMS = [

@@ -1,8 +1,10 @@
-import Image from "next/image"
 import { Project } from "@prisma/client"
+import Image from "next/image"
 import Link from "next/link"
+
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
+
 import { Button } from "../ui/button"
 
 const UserProjectCard = ({
