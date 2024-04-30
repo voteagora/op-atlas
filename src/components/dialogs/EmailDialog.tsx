@@ -17,7 +17,7 @@ import { DialogProps } from "./types"
 import { Input } from "../ui/input"
 
 function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
-  const { data: session } = useSession()
+  const { data: session, update } = useSession()
   const [email, setEmail] = useState(session?.user.email ?? "")
   const [loading, setLoading] = useState(false)
 
@@ -27,6 +27,7 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
     setLoading(true)
     try {
       await updateEmail(email)
+      update({ email })
       onOpenChange(false)
     } catch (error) {
       console.error("Error updating email", error)

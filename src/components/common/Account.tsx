@@ -14,12 +14,14 @@ import {
 
 import { isFirstTimeUser, saveLogInDate } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import usePrevious from "@/lib/hooks"
 import { useToast } from "../ui/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
 export function Account() {
   const { toast } = useToast()
   const { data: session, status } = useSession()
+  const previousAuthStatus = usePrevious(status)
   const [error, setError] = useState(false)
   const router = useRouter()
   const { setOpenDialog } = useAppDialogs()
@@ -48,17 +50,25 @@ export function Account() {
         setError(true)
         return
       }
-      if (isFirstTimeUser()) {
-        router.push("/welcome")
-      } else {
-        router.push("/dashboard")
-        // TODO: check that the user doesnt already have email set
-        setOpenDialog("email")
-      }
       saveLogInDate()
     },
-    [router, logOut, setOpenDialog],
+    [logOut],
   )
+
+  useEffect(() => {
+    // only run this useEffect when the user logs in
+    if (status !== "authenticated" || status === previousAuthStatus) return
+
+    if (isFirstTimeUser()) {
+      router.push("/welcome")
+    } else {
+      router.push("/dashboard")
+
+      if (!session.user.email) {
+        setOpenDialog("email")
+      }
+    }
+  }, [status, router, setOpenDialog, session, previousAuthStatus])
 
   useEffect(() => {
     if (error) {

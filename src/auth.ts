@@ -98,7 +98,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, account, user }) {
+    async jwt({ token, account, user, trigger, session }) {
       if (account) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore farcasterId is added above
@@ -106,14 +106,22 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         token.id = user?.id
       }
 
+      if (trigger === "update" && session?.email) {
+        token.email = session.email
+      }
+
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token, trigger }) {
       // Include the user ID in the session
       session.user.id = token.id as string
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       session.user.farcasterId = token.farcasterId
+
+      if (trigger == "update" && token?.email) {
+        session.user.email = token.email
+      }
       return session
     },
   },
