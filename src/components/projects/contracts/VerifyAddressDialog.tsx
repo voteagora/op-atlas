@@ -1,16 +1,16 @@
 import { useMemo, useState } from "react"
-import { type Address, checksumAddress, isAddress, verifyMessage } from "viem"
+import { type Address, checksumAddress, verifyMessage } from "viem"
 import Image from "next/image"
 import { Badge } from "@/components/common/Badge"
 import { DialogProps } from "@/components/dialogs/types"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { FormLabel } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 
 const getMessage = (address: string) =>
   `I verify that I’m the owner of ${address} and I’m an optimist.`
-export function VerifyAddressModal({
+export function VerifyAddressDialog({
   open,
   onOpenChange,
   deployerAddress,

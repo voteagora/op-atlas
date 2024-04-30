@@ -11,6 +11,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string
+      farcasterId: string
     } & DefaultSession["user"]
   }
 }
@@ -78,7 +79,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         // Create or update the user in our database
-        await upsertUser({
+        const { id, email, farcasterId } = await upsertUser({
           farcasterId: fid.toString(),
           name: credentials?.name as string | undefined,
           username: credentials?.username as string | undefined,
@@ -87,7 +88,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         })
 
         return {
-          id: fid.toString() as string,
+          id,
+          email,
+          farcasterId,
           name: credentials?.name as string | undefined,
           image: credentials?.pfp as string | undefined,
         }
@@ -97,6 +100,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, account, user }) {
       if (account) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore farcasterId is added above
+        token.farcasterId = user?.farcasterId
         token.id = user?.id
       }
 
@@ -105,6 +111,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       // Include the user ID in the session
       session.user.id = token.id as string
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      session.user.farcasterId = token.farcasterId
       return session
     },
   },
