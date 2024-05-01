@@ -49,7 +49,7 @@ export async function getUserProjectsWithDetails({
         include: {
           project: {
             include: {
-              team: true,
+              team: { include: { user: true } },
               repos: true,
               contracts: true,
               funding: true,
@@ -125,7 +125,7 @@ export async function getProject({ id }: { id: string }) {
       id,
     },
     include: {
-      team: true,
+      team: { include: { user: true } },
       repos: true,
       contracts: true,
       funding: true,

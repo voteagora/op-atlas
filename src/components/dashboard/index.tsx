@@ -5,6 +5,7 @@ import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
+import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import AddFirstProject from "./AddFirstProject"
@@ -19,7 +20,7 @@ const Dashboard = ({
 }: {
   className?: string
   user: User
-  projects: Project[]
+  projects: ProjectWithDetails[]
 }) => {
   return (
     <div className={cn("card flex flex-col w-full gap-y-12", className)}>
