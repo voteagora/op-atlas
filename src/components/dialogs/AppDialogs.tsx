@@ -13,14 +13,12 @@ export default function AppDialogs() {
 
   return (
     <>
-      <EmailDialog
-        open={openDialog === "email"}
-        onOpenChange={onOpenChange("email")}
-      />
-      <EditProfileDialog
-        open={openDialog === "edit_profile"}
-        onOpenChange={onOpenChange("edit_profile")}
-      />
+      {openDialog === "email" && (
+        <EmailDialog open onOpenChange={onOpenChange("email")} />
+      )}
+      {openDialog === "edit_profile" && (
+        <EditProfileDialog open onOpenChange={onOpenChange("edit_profile")} />
+      )}
     </>
   )
 }
