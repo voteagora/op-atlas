@@ -10,7 +10,7 @@ import {
   CreateProjectParams,
   deleteProject,
   getProjectTeam,
-  getUserProjects,
+  getUserProjectsWithDetails,
   removeTeamMember,
   updateMemberRole,
   updateProject,
@@ -21,7 +21,7 @@ import { TeamRole } from "../types"
 import { verifyAdminStatus, verifyMembership } from "./utils"
 
 export const getProjects = async (farcasterId: string) => {
-  const teams = await getUserProjects({ farcasterId })
+  const teams = await getUserProjectsWithDetails({ farcasterId })
   return (teams?.projects ?? []).map(({ project }) => project)
 }
 
