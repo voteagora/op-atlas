@@ -1,22 +1,23 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
-import Image from "next/image"
 import { SignInButton, StatusAPIResponse } from "@farcaster/auth-kit"
-import { signIn, signOut, useSession } from "next-auth/react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { signIn, signOut, useSession } from "next-auth/react"
+import { useCallback, useEffect, useState } from "react"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
+import usePrevious from "@/lib/hooks"
 import { isFirstTimeUser, saveLogInDate } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import usePrevious from "@/lib/hooks"
-import { useToast } from "../ui/use-toast"
+
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { useToast } from "../ui/use-toast"
 
 export function Account() {
   const { toast } = useToast()

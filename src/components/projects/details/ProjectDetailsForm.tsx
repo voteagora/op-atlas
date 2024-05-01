@@ -1,38 +1,39 @@
 "use client"
 
-import { useState } from "react"
-
-import Image from "next/image"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Project } from "@prisma/client"
 import { Plus } from "lucide-react"
-
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
-import { Project } from "@prisma/client"
+
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
-import { CategoryDefinitions } from "./CategoryDefinitions"
-import { PhotoCropModal } from "./PhotoCropModal"
+import { uploadImage } from "@/lib/imageUtils"
+
 import FileUploadInput from "../../common/FileUploadInput"
-import { Button } from "../../ui/button"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../../ui/form"
-import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "../../ui/accordion"
+import { Button } from "../../ui/button"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../../ui/form"
+import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
+import { CategoryDefinitions } from "./CategoryDefinitions"
+import { PhotoCropModal } from "./PhotoCropModal"
 
 const CategoryEnum = z.enum([
   "CeFi",
@@ -92,9 +93,54 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
     name: "farcaster",
   })
 
+  const [avatarSrc, setAvatarSrc] = useState<string>()
+  const [bannerSrc, setBannerSrc] = useState<string>()
+
+  const [newAvatarImg, setNewAvatarImg] = useState<Blob>()
+  const [newBannerImg, setNewBannerImg] = useState<Blob>()
+
+  const avatarUrl = useMemo(() => {
+    if (!newAvatarImg) return project?.thumbnailUrl
+    return URL.createObjectURL(newAvatarImg)
+  }, [newAvatarImg, project?.thumbnailUrl])
+
+  const bannerUrl = useMemo(() => {
+    if (!newBannerImg) return project?.bannerUrl
+    return URL.createObjectURL(newBannerImg)
+  }, [newBannerImg, project?.bannerUrl])
+
+  const onCloseCropModal = (type: "avatar" | "banner") => {
+    if (avatarSrc && type === "avatar") {
+      URL.revokeObjectURL(avatarSrc)
+      setAvatarSrc(undefined)
+    }
+
+    if (bannerSrc && type === "banner") {
+      URL.revokeObjectURL(bannerSrc)
+      setBannerSrc(undefined)
+    }
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    let thumbnailUrl = project?.thumbnailUrl
+    let bannerUrl = project?.bannerUrl
+
+    try {
+      if (newAvatarImg) {
+        thumbnailUrl = await uploadImage(newAvatarImg)
+      }
+      if (newBannerImg) {
+        bannerUrl = await uploadImage(newBannerImg)
+      }
+    } catch (error) {
+      // TODO: Error handling
+      console.error("Error uploading images", error)
+    }
+
     const newValues = {
       ...values,
+      thumbnailUrl,
+      bannerUrl,
       website: fromStringObjectArr(values.website),
       farcaster: fromStringObjectArr(values.farcaster),
     }
@@ -114,28 +160,16 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
     }
   }
 
-  const [avatarSrc, setAvatarSrc] = useState<string>()
-  const [bannerSrc, setBannerSrc] = useState<string>()
-
-  const onCloseCropModal = (type: "avatar" | "banner") => {
-    if (avatarSrc && type === "avatar") {
-      URL.revokeObjectURL(avatarSrc)
-      setAvatarSrc(undefined)
-    }
-
-    if (bannerSrc && type === "banner") {
-      URL.revokeObjectURL(bannerSrc)
-      setBannerSrc(undefined)
-    }
-  }
+  const canSubmit = form.formState.isValid && !form.formState.isSubmitting
 
   return (
     <Form {...form}>
       {bannerSrc && (
         <PhotoCropModal
+          open
           title="Project cover image"
           image={bannerSrc}
-          open
+          onComplete={setNewBannerImg}
           onOpenChange={(open) => {
             if (!open) onCloseCropModal("banner")
           }}
@@ -143,10 +177,11 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       )}
       {avatarSrc && (
         <PhotoCropModal
+          open
           title="Project avatar"
           aspectRatio={1}
           image={avatarSrc}
-          open
+          onComplete={setNewAvatarImg}
           onOpenChange={(open) => {
             if (!open) onCloseCropModal("avatar")
           }}
@@ -160,12 +195,15 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
           <h2>Project details</h2>
           <div>
             <div>
-              <FormLabel>Avatar and cover image</FormLabel>
-              <div className="text-sm text-text-secondary">
+              <FormLabel>
+                Project avatar and cover image
+                <span className="ml-0.5 text-destructive">*</span>
+              </FormLabel>
+              <div className="text-sm text-muted-foreground">
                 Images must be no larger than 5MB.
               </div>
             </div>
-            <div className="flex flex-1 gap-x-4 mt-3 items-stretch">
+            <div className="flex flex-1 gap-x-2 mt-2">
               <FileUploadInput
                 className="flex-1"
                 onChange={(e) => {
@@ -175,16 +213,29 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                   setAvatarSrc(URL.createObjectURL(file))
                 }}
               >
-                <div className="border border-solid rounded-xl p-7 h-40 flex-1 bg-secondary flex flex-col justify-center items-center gap-2">
-                  <Image
-                    src="/assets/icons/upload.svg"
-                    width={20}
-                    height={20}
-                    alt="img"
-                  />
-                  <p className="text-muted-foreground text-xs">
-                    Add project avatar
-                  </p>
+                <div className="border border-solid rounded-xl overflow-hidden h-40 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={avatarUrl}
+                      alt="project avatar"
+                      className="w-full h-full object-cover object-center"
+                    />
+                  ) : (
+                    <>
+                      <Image
+                        src="/assets/icons/upload.svg"
+                        width={20}
+                        height={20}
+                        alt="img"
+                      />
+                      <p className="text-muted-foreground text-xs">
+                        Add project
+                        <br />
+                        avatar
+                      </p>
+                    </>
+                  )}
                 </div>
               </FileUploadInput>
               <FileUploadInput
@@ -196,16 +247,29 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                   setBannerSrc(URL.createObjectURL(file))
                 }}
               >
-                <div className="border border-solid h-40 p-7 bg-secondary rounded-xl flex flex-col justify-center items-center gap-2">
-                  <Image
-                    src="/assets/icons/upload.svg"
-                    width={20}
-                    height={20}
-                    alt="img"
-                  />
-                  <p className="leading-7 text-muted-foreground text-xs">
-                    Add a cover image
-                  </p>
+                <div className="border border-solid h-40 overflow-hidden bg-secondary rounded-xl flex flex-col justify-center items-center gap-2 select-none">
+                  {bannerUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={bannerUrl}
+                      alt="project avatar"
+                      className="w-full h-full object-cover object-center"
+                    />
+                  ) : (
+                    <>
+                      <Image
+                        src="/assets/icons/upload.svg"
+                        width={20}
+                        height={20}
+                        alt="img"
+                      />
+                      <p className="text-muted-foreground text-xs">
+                        Add project cover
+                        <br />
+                        image
+                      </p>
+                    </>
+                  )}
                 </div>
               </FileUploadInput>
             </div>
@@ -215,8 +279,10 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="grid w-full gap-1.5">
-                <Label htmlFor="name">Name</Label>
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel className="text-foreground">
+                  Name<span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
                 <Input
                   type=""
                   id="name"
@@ -227,34 +293,32 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
               </FormItem>
             )}
           />
-          <div className="flex flex-col w-full gap-1.5">
-            <p className="text-sm font-medium">Description</p>
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem className="flex flex-col w-full gap-1.5">
-                  <Label
-                    htmlFor="description"
-                    className="text-sm font-normal text-secondary-foreground"
-                  >
-                    Introduce your project to the Optimism Collective. Share who
-                    you are and what you do.
-                  </Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Add a description"
-                    className="resize-none"
-                    {...field}
-                  />
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex flex-col w-full gap-1.5">
-            <p className="text-sm font-medium">Category</p>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel className="text-foreground">
+                  Description<span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
+                <FormDescription className="!mt-0">
+                  Introduce your project to the Optimism Collective. Share who
+                  you are and what you do.
+                </FormDescription>
+                <Textarea
+                  id="description"
+                  placeholder="Add a description"
+                  className="resize-none"
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex flex-col gap-1.5">
+            <p className="text-sm font-medium">
+              Category<span className="ml-0.5 text-destructive">*</span>
+            </p>
             <FormField
               control={form.control}
               name="category"
@@ -282,7 +346,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                 </FormItem>
               )}
             />
-            <Accordion type="single" collapsible className="self-">
+            <Accordion type="single" collapsible className="w-fit">
               <AccordionItem value="item-1">
                 <AccordionTrigger>
                   <p className="text-sm font-medium">
@@ -296,10 +360,10 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             </Accordion>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <div>
-              <p className="text-sm font-medium">Website</p>
-              <div className="text-sm font-normal text-secondary-foreground">
+              <FormLabel className="text-sm font-medium">Website</FormLabel>
+              <div className="text-sm text-muted-foreground">
                 If your project has more than one website, you can add rows.
               </div>
             </div>
@@ -328,7 +392,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             </Button>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <div>
               <p className="text-sm font-medium">Farcaster</p>
             </div>
@@ -361,10 +425,8 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             control={form.control}
             name="twitter"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  <p className="text-sm font-medium">Twitter</p>
-                </FormLabel>
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel>Twitter</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="Add a link" />
                 </FormControl>
@@ -377,10 +439,8 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             control={form.control}
             name="mirror"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  <p className="text-sm font-medium">Mirror</p>
-                </FormLabel>
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel>Mirror</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="Add a link" />
                 </FormControl>
@@ -390,7 +450,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
           />
         </div>
         <Button
-          disabled={!form.formState.isValid}
+          disabled={!canSubmit}
           type="submit"
           variant="destructive"
           className="self-start"

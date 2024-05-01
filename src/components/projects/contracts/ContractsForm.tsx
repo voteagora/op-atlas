@@ -1,11 +1,14 @@
 "use client"
 
-import { useFieldArray, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { Plus } from "lucide-react"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
+
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Form,
   FormControl,
@@ -14,12 +17,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ProjectWithDetails } from "@/lib/types"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Button } from "@/components/ui/button"
-import { Chain, ContractsSchema, HasDeployerKeysOption } from "./schema"
+import { ProjectWithDetails } from "@/lib/types"
+
 import { ContractForm } from "./ContractForm"
+import { Chain, ContractsSchema, HasDeployerKeysOption } from "./schema"
 
 const EMPTY_CONTRACT = {
   contractAddress: "",

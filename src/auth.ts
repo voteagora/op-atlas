@@ -1,6 +1,7 @@
+import { createAppClient, viemConnector } from "@farcaster/auth-client"
 import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { createAppClient, viemConnector } from "@farcaster/auth-client"
+
 import { upsertUser } from "./db/users"
 
 if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
@@ -100,7 +101,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, account, user, trigger, session }) {
       if (account) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore farcasterId is added above
         token.farcasterId = user?.farcasterId
         token.id = user?.id
@@ -115,7 +115,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     async session({ session, token, trigger }) {
       // Include the user ID in the session
       session.user.id = token.id as string
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       session.user.farcasterId = token.farcasterId
 

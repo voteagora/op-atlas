@@ -1,7 +1,9 @@
 "use server"
 
 import { Prisma, Project } from "@prisma/client"
+
 import { TeamRole } from "@/lib/types"
+
 import { prisma } from "./client"
 
 export async function getUserProjects({
@@ -47,7 +49,7 @@ export async function getUserProjectsWithDetails({
         include: {
           project: {
             include: {
-              team: true,
+              team: { include: { user: true } },
               repos: true,
               contracts: true,
               funding: true,
@@ -123,7 +125,7 @@ export async function getProject({ id }: { id: string }) {
       id,
     },
     include: {
-      team: true,
+      team: { include: { user: true } },
       repos: true,
       contracts: true,
       funding: true,

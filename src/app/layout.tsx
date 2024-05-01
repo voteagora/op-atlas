@@ -1,8 +1,10 @@
+import "./globals.css"
+
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import "./globals.css"
-import { Toaster } from "@/components/ui/toaster"
+
 import AppDialogs from "@/components/dialogs/AppDialogs"
+import { Toaster } from "@/components/ui/toaster"
 import Providers from "@/providers/Providers"
 
 const inter = Inter({
@@ -11,8 +13,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "OP Atlas app",
-  description: "OP Atlas",
+  title: "Retro Funding",
+  description: "Applications are now open for Round 4: Onchain Builders",
+  icons: "/favicon.ico",
 }
 
 export default function RootLayout({

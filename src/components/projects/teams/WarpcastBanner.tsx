@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { useState } from "react"
+
 import ExternalLink from "@/components/ExternalLink"
 
 const WARPCAST_URL = "https://warpcast.com/"

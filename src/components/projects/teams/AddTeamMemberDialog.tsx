@@ -1,8 +1,11 @@
 "use client"
 
-import { useDebounceValue } from "usehooks-ts"
-import { memo, useCallback, useEffect, useMemo, useState } from "react"
 import { User } from "@prisma/client"
+import { memo, useCallback, useEffect, useMemo, useState } from "react"
+import { useDebounceValue } from "usehooks-ts"
+
+import { DialogProps } from "@/components/dialogs/types"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -10,13 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-
 import {
   IMultiSelectOptions,
   MultiSelect,
 } from "@/components/ui/multiselectautocomplete"
-import { Button } from "@/components/ui/button"
-import { DialogProps } from "@/components/dialogs/types"
 import { searchUsers } from "@/lib/actions/users"
 
 type Props = DialogProps<{

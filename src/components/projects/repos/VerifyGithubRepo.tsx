@@ -1,16 +1,18 @@
-import React, { useState } from "react"
 import Image from "next/image"
-import { Input } from "@/components/ui/input"
+import React, { useState } from "react"
+
+import CheckIcon from "@/components/icons/checkIcon"
+import MenuIcon from "@/components/icons/menuIcon"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { isValidGitHubRepoUrl } from "@/lib/utils"
-import MenuIcon from "@/components/icons/menuIcon"
-import CheckIcon from "@/components/icons/checkIcon"
+
 import AddGitRepoDialogue from "./AddGitRepoDialogue"
 
 const VerifyGithubRepo: React.FC = () => {

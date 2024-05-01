@@ -1,8 +1,9 @@
 "use client"
 
-import { memo, useState } from "react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
+import { memo, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,8 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { updateEmail } from "@/lib/actions/users"
-import { DialogProps } from "./types"
+
 import { Input } from "../ui/input"
+import { DialogProps } from "./types"
 
 function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
   const { data: session, update } = useSession()

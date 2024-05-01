@@ -1,9 +1,10 @@
 "use client"
 
 import { useAppDialogs } from "@/providers/DialogProvider"
+
+import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
 import { DialogType } from "./types"
-import EditProfileDialog from "./EditProfileDialog"
 
 export default function AppDialogs() {
   const { openDialog, setOpenDialog } = useAppDialogs()

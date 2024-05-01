@@ -1,14 +1,15 @@
 import { User } from "@prisma/client"
 import { Check, Ellipsis } from "lucide-react"
 import { useState } from "react"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { TeamRole } from "@/lib/types"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { TeamRole } from "@/lib/types"
 
 export const TeamMemberCard = ({
   user,

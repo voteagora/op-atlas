@@ -1,6 +1,13 @@
 import { type ClassValue, clsx } from "clsx"
+import { customAlphabet } from "nanoid"
 import { twMerge } from "tailwind-merge"
+
 import { ProjectWithDetails } from "./types"
+
+export const nanoid = customAlphabet(
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  10,
+)
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

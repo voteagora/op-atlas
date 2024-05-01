@@ -1,7 +1,8 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
+import { revalidatePath } from "next/cache"
+
 import { auth } from "@/auth"
 import {
   addTeamMembers,
@@ -9,17 +10,18 @@ import {
   CreateProjectParams,
   deleteProject,
   getProjectTeam,
-  getUserProjects,
+  getUserProjectsWithDetails,
   removeTeamMember,
   updateMemberRole,
   updateProject,
   updateProjectFunding,
 } from "@/db/projects"
-import { verifyAdminStatus, verifyMembership } from "./utils"
+
 import { TeamRole } from "../types"
+import { verifyAdminStatus, verifyMembership } from "./utils"
 
 export const getProjects = async (farcasterId: string) => {
-  const teams = await getUserProjects({ farcasterId })
+  const teams = await getUserProjectsWithDetails({ farcasterId })
   return (teams?.projects ?? []).map(({ project }) => project)
 }
 

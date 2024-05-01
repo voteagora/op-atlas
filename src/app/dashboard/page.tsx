@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation"
+
 import { auth } from "@/auth"
 import Dashboard from "@/components/dashboard"
 import { getUserByFarcasterId } from "@/db/users"

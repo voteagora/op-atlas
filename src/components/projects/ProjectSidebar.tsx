@@ -1,17 +1,19 @@
 "use client"
 
-import { useMemo, useState } from "react"
 import Image from "next/image"
-import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { ProjectWithDetails } from "@/lib/types"
-import { getProjectStatus, ProjectSection } from "@/lib/utils"
 import { deleteUserProject } from "@/lib/actions/projects"
 import { useIsAdmin } from "@/lib/hooks"
-import { DeleteProjectDialog } from "./DeleteProjectDialog"
+import { ProjectWithDetails } from "@/lib/types"
+import { getProjectStatus, ProjectSection } from "@/lib/utils"
+
 import { toast } from "../ui/use-toast"
+import { DeleteProjectDialog } from "./DeleteProjectDialog"
 
 export default function ProjectFormStatusSidebar({
   project,
