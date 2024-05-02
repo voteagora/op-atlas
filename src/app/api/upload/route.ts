@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { uploadImage } from "@/lib/storage"
+import { uploadImage } from "@/lib/actions/storage"
 
 export async function POST(request: Request) {
   // Don't want this to be public

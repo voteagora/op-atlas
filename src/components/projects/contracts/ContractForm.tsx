@@ -2,7 +2,13 @@ import { X } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { UseFormReturn, useWatch } from "react-hook-form"
-import { type Address, isAddress, isAddressEqual, isHex } from "viem"
+import {
+  type Address,
+  getAddress,
+  isAddress,
+  isAddressEqual,
+  isHex,
+} from "viem"
 import { z } from "zod"
 
 import { ChainLogo } from "@/components/common/ChainLogo"
@@ -15,21 +21,26 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { verifyContract } from "@/lib/actions/contracts"
 
 import { ChainSelector } from "./ChainSelector"
 import { ContractSchema, ContractsSchema } from "./schema"
 import { VerifyAddressDialog } from "./VerifyAddressDialog"
 
 export function ContractForm({
+  projectId,
   index,
   form,
   remove,
 }: {
+  projectId: string
   form: UseFormReturn<z.infer<typeof ContractsSchema>>
   index: number
   remove: () => void
 }) {
   const [isVerifying, setIsVerifying] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
   const { contracts } = useWatch({
     control: form.control,
   })
@@ -42,22 +53,47 @@ export function ContractForm({
     chain,
   } = contracts[index]
 
-  const onVerify = () => {
+  const onVerify = async () => {
     if (!isAddress(deployerAddress)) return
 
-    const otherVerifiedContract = contracts.find(
-      (contract: z.infer<typeof ContractSchema>) =>
-        isAddressEqual(contract.deployerAddress as Address, deployerAddress) &&
-        Boolean(contract.signature),
-    )
+    setIsLoading(true)
 
-    if (otherVerifiedContract) {
-      form.setValue(
-        `contracts.${index}.signature`,
-        otherVerifiedContract.signature,
+    try {
+      const otherVerifiedContract = contracts.find(
+        (contract: z.infer<typeof ContractSchema>) =>
+          isAddressEqual(
+            contract.deployerAddress as Address,
+            deployerAddress,
+          ) && Boolean(contract.signature),
       )
-    } else {
-      setIsVerifying(true)
+
+      if (otherVerifiedContract) {
+        // We can shortcut and verify here
+        const verificationResult = await verifyContract({
+          projectId,
+          contractAddress,
+          deployerAddress,
+          deploymentTxHash,
+          signature: "0x0",
+          chain,
+        })
+
+        if (!verificationResult.error) {
+          form.setValue(
+            `contracts.${index}.signature`,
+            otherVerifiedContract.signature,
+          )
+        } else {
+          // Fall back to full verification
+          setIsVerifying(true)
+        }
+      } else {
+        setIsVerifying(true)
+      }
+    } catch (error) {
+      console.error("Error verifying contract", error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -99,24 +135,29 @@ export function ContractForm({
         <VerifyAddressDialog
           open
           onOpenChange={(open) => !open && setIsVerifying(false)}
+          projectId={projectId}
           deployerAddress={deployerAddress}
+          contractAddress={getAddress(contractAddress)}
+          deploymentTxHash={deploymentTxHash}
           onSubmit={onValidSignature}
+          chain={chain}
         />
       )}
       <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
         <div className="flex flex-col">
           <div className="flex justify-between">
-            <h3>Add a contract</h3>
+            <div>
+              <h3>Add a contract</h3>
+              <p className="text-secondary-foreground">
+                Sign a message onchain to verify that you own this contract.
+              </p>
+            </div>
             {index > 0 && (
-              <Button onClick={remove} className="self-end p-2" variant="ghost">
+              <Button onClick={remove} className="p-2" variant="ghost">
                 <X className="h-4 w-4" />
                 <span className="sr-only">Delete</span>
               </Button>
             )}
-          </div>
-
-          <div className="text-text-secondary">
-            Sign a message onchain to verify that you own this contract.
           </div>
         </div>
         <FormField
@@ -165,7 +206,7 @@ export function ContractForm({
         <div className="flex justify-between items-end">
           <ChainSelector form={form} index={index} />
           <Button
-            disabled={!canVerify}
+            disabled={!canVerify || isLoading}
             variant="destructive"
             type="button"
             onClick={onVerify}

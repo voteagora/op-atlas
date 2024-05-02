@@ -15,6 +15,7 @@ import {
   updateMemberRole,
   updateProject,
   updateProjectFunding,
+  UpdateProjectParams,
 } from "@/db/projects"
 
 import { TeamRole } from "../types"
@@ -48,7 +49,7 @@ export const createNewProject = async (details: CreateProjectParams) => {
 
 export const updateProjectDetails = async (
   projectId: string,
-  details: CreateProjectParams,
+  details: UpdateProjectParams,
 ) => {
   const session = await auth()
 

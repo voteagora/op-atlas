@@ -9,6 +9,7 @@ import {
   addMembersToProject,
   removeMemberFromProject,
   setMemberRole,
+  updateProjectDetails,
 } from "@/lib/actions/projects"
 import { ProjectWithTeam, TeamRole } from "@/lib/types"
 
@@ -28,8 +29,9 @@ export default function AddTeamDetailsForm({
   const [team, setTeam] = useState(project.team)
 
   const [isTeamConfirmed, setIsTeamConfirmed] = useState(false)
-  const [isShowingAdd, setIsShowingAdd] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
 
   const handleAddMembers = async (userIds: string[]) => {
@@ -52,8 +54,15 @@ export default function AddTeamDetailsForm({
     setIsShowingRemove(null)
   }
 
-  const handleNextClicked = () => {
-    router.push("/projects/new/repos")
+  const handleNextClicked = async () => {
+    try {
+      setIsSubmitting(true)
+      await updateProjectDetails(project.id, { addedTeamMembers: true })
+      router.push("/projects/new/repos")
+    } catch (error) {
+      console.error("Error updating project", error)
+      setIsSubmitting(false)
+    }
   }
 
   useEffect(() => {
@@ -92,7 +101,7 @@ export default function AddTeamDetailsForm({
 
         <Button
           onClick={handleNextClicked}
-          disabled={!isTeamConfirmed}
+          disabled={!isTeamConfirmed || isSubmitting}
           variant="destructive"
           className="w-fit"
         >

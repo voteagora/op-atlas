@@ -3,9 +3,11 @@ import Image from "next/image"
 import { CHAIN_INFO } from "./chain"
 
 export function ChainLogo({
+  className,
   chainId,
   size = 24,
 }: {
+  className?: string
   chainId: string
   size?: number
 }) {
@@ -18,6 +20,7 @@ export function ChainLogo({
       height={size}
       width={size}
       alt={`${chainInfo.name} logo`}
+      className={className}
     />
   )
 }

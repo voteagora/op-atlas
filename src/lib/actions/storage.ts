@@ -4,7 +4,7 @@
 
 "use server"
 
-import { uploadToBucket } from "./google"
+import { uploadToBucket } from "../google"
 
 export const uploadImage = async (image: Blob): Promise<string> => {
   const arrayBuffer = await image.arrayBuffer()

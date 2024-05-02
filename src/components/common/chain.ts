@@ -1,4 +1,12 @@
-import { base, fraxtal, liskSepolia, mode, optimism, zora } from "viem/chains"
+import {
+  base,
+  fraxtal,
+  liskSepolia,
+  mainnet,
+  mode,
+  optimism,
+  zora,
+} from "viem/chains"
 
 export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
   {
