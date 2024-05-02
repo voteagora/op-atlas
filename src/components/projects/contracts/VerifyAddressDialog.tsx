@@ -46,12 +46,6 @@ export function VerifyAddressDialog({
 
   const onConfirmSignature = async () => {
     try {
-      // const isValidSignature = await verifyMessage({
-      //   address: deployerAddress,
-      //   message: messageToSign,
-      //   signature: signature as `0x${string}`,
-      // })
-
       const verificationResult = await verifyContract({
         projectId,
         contractAddress,

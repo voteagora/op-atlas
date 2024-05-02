@@ -9,8 +9,6 @@ import { addProjectContract, getProjectContracts } from "@/db/projects"
 import { Chain, getMessage } from "../contractUtils"
 import { getTransaction } from "../eth"
 
-// TODO: See if the project has used this deployer address before
-
 export const verifyContract = async ({
   projectId,
   contractAddress: contractAddressRaw,
