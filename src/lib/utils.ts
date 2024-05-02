@@ -67,7 +67,7 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
     completedSections.push(ProjectSection.Details)
   }
 
-  const hasTeam = project.team?.length > 1
+  const hasTeam = project.team?.length > 1 && project.addedTeamMembers
   if (hasTeam) {
     completedSections.push(ProjectSection.Team)
   }
@@ -77,7 +77,8 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
     completedSections.push(ProjectSection.Repos)
   }
 
-  const hasContracts = project.contracts?.length > 0
+  const hasContracts =
+    project.contracts?.length > 0 || !!project.openSourceObserverSlug
   if (hasContracts) {
     completedSections.push(ProjectSection.Contracts)
   }

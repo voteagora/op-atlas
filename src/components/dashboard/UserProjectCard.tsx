@@ -1,11 +1,13 @@
 import Image from "next/image"
 import Link from "next/link"
 import { reverse } from "ramda"
+import { useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
 import { ProjectWithDetails } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn, getProjectStatus } from "@/lib/utils"
 
+import { ChainLogo } from "../common/ChainLogo"
 import ExternalLink from "../ExternalLink"
 import { Avatar, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
@@ -17,6 +19,11 @@ const UserProjectCard = ({
   className?: string
   project: ProjectWithDetails
 }) => {
+  const progress = useMemo(() => {
+    const { progressPercent } = getProjectStatus(project)
+    return progressPercent
+  }, [project])
+
   return (
     <div className={cn("flex gap-x-6 border rounded-2xl p-6", className)}>
       <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-40 w-40 shrink-0">
@@ -42,9 +49,9 @@ const UserProjectCard = ({
           <h3 className="mr-3 pt-1 truncate">{project.name}</h3>
 
           <div className="ml-auto flex items-center shrink-0">
-            <Progress value={50} className="h-2 w-16" />
+            <Progress value={progress} className="h-2 w-16" />
             <p className="ml-3 text-sm text-secondary-foreground">
-              {32}% setup{" "}
+              {progress}% setup{" "}
             </p>
             <Link href={`/projects/${project.id}/details`} className="ml-6">
               <Button size="sm" variant="secondary">
@@ -61,7 +68,21 @@ const UserProjectCard = ({
         </div>
 
         <div className="mt-auto h-6 flex items-center">
-          <div className="h-full flex flex-row-reverse items-center w-fit ml-1">
+          {project.contracts.length > 0 ? (
+            <div className="h-full flex flex-row-reverse items-center w-fit mr-3 ml-1.5">
+              {reverse(project.contracts).map((contract, idx) => (
+                <div
+                  key={contract.id}
+                  className="w-6 h-6 -ml-1.5"
+                  style={{ zIndex: idx }}
+                >
+                  <ChainLogo chainId={contract.chainId.toString()} />
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="h-full flex flex-row-reverse items-center w-fit ml-1.5">
             {reverse(project.team).map(({ user }) => (
               <Avatar key={user.id} className="w-6 h-6 -ml-1.5 bg-background">
                 <AvatarImage src={user?.imageUrl ?? ""} />

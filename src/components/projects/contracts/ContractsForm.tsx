@@ -1,6 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ProjectContract } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -15,19 +16,63 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ContractForm } from "./ContractForm"
-import { Chain, ContractsSchema, HasDeployerKeysOption } from "./schema"
+import {
+  Chain,
+  ContractSchema,
+  ContractsSchema,
+  HasDeployerKeysOption,
+} from "./schema"
 
 const EMPTY_CONTRACT = {
   contractAddress: "",
   deploymentTxHash: "",
   deployerAddress: "",
-  chain: Chain.Enum["OP Mainnet"],
+  chain: Chain.options[0],
+} satisfies z.infer<typeof ContractSchema>
+
+function toFormValues(
+  contract: ProjectContract,
+): z.infer<typeof ContractSchema> {
+  return {
+    contractAddress: contract.contractAddress,
+    deploymentTxHash: contract.deploymentHash,
+    deployerAddress: contract.deployerAddress,
+    chain: contract.chainId.toString(),
+    signature: contract.verificationProof,
+  }
+}
+
+function getDefaultValues(
+  project?: ProjectWithDetails,
+): z.infer<typeof ContractsSchema> {
+  if (!project) {
+    return {
+      isOffChain: false,
+      hasDeployerKeys: "Yes" as const,
+      submittedToOSO: false,
+      contracts: [
+        {
+          ...EMPTY_CONTRACT,
+        },
+      ],
+    }
+  }
+
+  const contracts = project.contracts.map(toFormValues)
+
+  return {
+    isOffChain: false,
+    hasDeployerKeys: project.openSourceObserverSlug
+      ? ("Some, but not all" as const)
+      : ("Yes" as const),
+    contracts: contracts.length > 0 ? contracts : [{ ...EMPTY_CONTRACT }],
+    submittedToOSO: !!project.openSourceObserverSlug,
+  }
 }
 
 export function ContractsForm({ project }: { project: ProjectWithDetails }) {
@@ -35,15 +80,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     resolver: zodResolver(ContractsSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
-    defaultValues: {
-      isOffChain: false,
-      hasDeployerKeys: "Yes",
-      contracts: [
-        {
-          ...EMPTY_CONTRACT,
-        },
-      ],
-    },
+    defaultValues: getDefaultValues(project),
   })
 
   const {
@@ -93,7 +130,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
         >
           <div className="flex flex-col gap-6">
             <h3 className="text-2xl">Contracts</h3>
-            <div className="text-text-secondary">
+            <div className="text-secondary-foreground">
               Add your project&apos;s contracts and verify ownership. Your
               contract&apos;s onchain metrics will help badgeholders make
               objective decisions during voting.
@@ -161,7 +198,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-3">
                   <h3>Deployer keys</h3>
-                  <div className="text-text-secondary">
+                  <div className="text-secondary-foreground">
                     To verify ownership, you&apos;ll need your deployer keys for
                     each contract. This includes contract address, deployment tx
                     hash, and deployer address.
@@ -179,7 +216,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                           >
                             {HasDeployerKeysOption.options.map((option) => (
                               <FormItem key={option}>
-                                <FormLabel className="flex-1 min-w-6 basis-0 p-4 text-sm font-medium flex items-center gap-3 border rounded-sm text-foreground">
+                                <FormLabel className="flex-1 min-w-6 basis-0 p-4 text-sm font-medium flex items-center gap-3 border rounded-sm text-foreground cursor-pointer">
                                   <FormControl>
                                     <RadioGroupItem value={option} />
                                   </FormControl>
@@ -199,7 +236,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col gap-3">
                     <h3>Onchain verification</h3>
-                    <div className="text-text-secondary">
+                    <div className="text-secondary-foreground">
                       First verify one contract, then you&apos;ll be able to add
                       more. Additional contracts with the same deployer address
                       will be automatically verified.
@@ -211,6 +248,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                       key={field.id}
                       form={form}
                       index={index}
+                      projectId={project.id}
                     />
                   ))}
                   {canAddContract && (
@@ -229,13 +267,13 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
               {formValues.hasDeployerKeys !== "Yes" && (
                 <div className="flex flex-col gap-6">
                   <h3>Add this project to Open Source Observer</h3>
-                  <div className="text-text-secondary">
+                  <div className="text-secondary-foreground">
                     It is highly encouraged that projects verify contracts
                     onchain. However, if you&apos;ve lost your deployer keys,
                     you can complete this step by adding your project to{" "}
                     <span className="font-medium">Open Source Observer.</span>
                   </div>
-                  <div className="text-text-secondary">
+                  <div className="text-secondary-foreground">
                     Follow{" "}
                     <Link className="font-medium" href="#">
                       these instructions

@@ -49,8 +49,10 @@ model Project {
   twitter   String?
   mirror    String?
 
-  attestationId      String?
-  metadataSnapshotId String?
+  attestationId          String?
+  metadataSnapshotId     String?
+  openSourceObserverSlug String?
+  addedTeamMembers       Boolean @default(false)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -126,7 +128,7 @@ model ProjectContract {
 }
 
 model ProjectFunding {
-  id         String   @id @default(uuid())
+  id         String  @id @default(uuid())
   type       String
   grant      String?
   grantUrl   String?

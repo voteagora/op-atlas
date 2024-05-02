@@ -3,6 +3,7 @@
 import { Prisma, Project } from "@prisma/client"
 
 import { TeamRole } from "@/lib/types"
+import { nanoid } from "@/lib/utils"
 
 import { prisma } from "./client"
 
@@ -78,6 +79,7 @@ export async function createProject({
 }) {
   return prisma.project.create({
     data: {
+      id: nanoid(),
       ...project,
       team: {
         create: {
@@ -93,12 +95,16 @@ export async function createProject({
   })
 }
 
+export type UpdateProjectParams = Partial<
+  Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
+>
+
 export async function updateProject({
   id,
   project,
 }: {
   id: string
-  project: CreateProjectParams
+  project: UpdateProjectParams
 }) {
   return prisma.project.update({
     where: {
@@ -228,6 +234,43 @@ export async function removeTeamMember({
         projectId,
         userId,
       },
+    },
+  })
+}
+
+export async function addProjectContract({
+  projectId,
+  contract,
+}: {
+  projectId: string
+  contract: Omit<Prisma.ProjectContractCreateInput, "project">
+}) {
+  return prisma.projectContract.create({
+    data: {
+      ...contract,
+      project: {
+        connect: {
+          id: projectId,
+        },
+      },
+    },
+  })
+}
+
+export async function getProjectContracts({
+  projectId,
+  deployerAddress,
+}: {
+  projectId: string
+  deployerAddress: string
+}) {
+  return prisma.projectContract.findMany({
+    where: {
+      projectId,
+      deployerAddress,
+    },
+    include: {
+      project: true,
     },
   })
 }
