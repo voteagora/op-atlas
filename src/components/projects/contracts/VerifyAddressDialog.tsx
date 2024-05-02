@@ -4,6 +4,7 @@ import { type Address, checksumAddress } from "viem"
 
 import { Badge } from "@/components/common/Badge"
 import { DialogProps } from "@/components/dialogs/types"
+import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { FormLabel } from "@/components/ui/form"
@@ -79,6 +80,15 @@ export function VerifyAddressDialog({
                 </h3>
                 <p className="text-secondary-foreground">
                   Then, return here and continue to the next step.
+                  <br />
+                  You can{" "}
+                  <ExternalLink
+                    href="https://etherscan.io/verifiedSignatures"
+                    className="underline"
+                  >
+                    use Etherscan
+                  </ExternalLink>{" "}
+                  to generate a signature.
                 </p>
               </div>
             </div>
