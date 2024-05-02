@@ -51,18 +51,21 @@ export function Account() {
         setError(true)
         return
       }
-      saveLogInDate()
     },
     [logOut],
   )
 
   useEffect(() => {
     // only run this useEffect when the user logs in
-    if (status !== "authenticated" || status === previousAuthStatus) return
+    if (
+      !(status === "authenticated" && previousAuthStatus === "unauthenticated")
+    )
+      return
 
     if (isFirstTimeUser()) {
       router.push("/welcome")
     } else {
+      saveLogInDate()
       router.push("/dashboard")
 
       if (!session.user.email) {
