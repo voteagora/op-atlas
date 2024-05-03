@@ -10,7 +10,3 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     funding: true
   }
 }>
-
-export type ProjectWithTeam = Prisma.ProjectGetPayload<{
-  include: { team: { include: { user: true } } }
-}>

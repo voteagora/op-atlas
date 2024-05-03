@@ -2,8 +2,7 @@
 
 import { User } from "@prisma/client"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -12,7 +11,8 @@ import {
   setMemberRole,
   updateProjectDetails,
 } from "@/lib/actions/projects"
-import { ProjectWithTeam, TeamRole } from "@/lib/types"
+import { useIsAdmin } from "@/lib/hooks"
+import { ProjectWithDetails, TeamRole } from "@/lib/types"
 
 import { AddTeamMemberCard } from "./AddTeamMemberCard"
 import AddTeamMemberDialog from "./AddTeamMemberDialog"
@@ -24,9 +24,8 @@ import { WarpcastBanner } from "./WarpcastBanner"
 export default function AddTeamDetailsForm({
   project,
 }: {
-  project: ProjectWithTeam
+  project: ProjectWithDetails
 }) {
-  const { data: session } = useSession()
   const router = useRouter()
   const [team, setTeam] = useState(project.team)
 
@@ -34,16 +33,7 @@ export default function AddTeamDetailsForm({
     project.addedTeamMembers,
   )
 
-  const userRole = useMemo(() => {
-    // Should never happen
-    if (!session) return "member"
-
-    const role = project.team.find(
-      (member) => member.user.id === session?.user.id,
-    )?.role as TeamRole
-
-    return role
-  }, [project.team, session])
+  const isAdmin = useIsAdmin(project)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isShowingAdd, setIsShowingAdd] = useState(false)
@@ -102,7 +92,7 @@ export default function AddTeamDetailsForm({
               key={user.id}
               user={user}
               role={role as TeamRole}
-              isUserAdmin={userRole !== "member"}
+              isUserAdmin={!!isAdmin}
               onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
               onRemove={() => setIsShowingRemove(user)}
             />
