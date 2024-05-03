@@ -10,7 +10,6 @@ import {
 } from "@/db/projects"
 
 import { getFundingFile, getRepository } from "../github"
-import { isValidFundingFile } from "../repoUtils"
 import { verifyMembership } from "./utils"
 
 export const findRepo = async (owner: string, slug: string) => {
@@ -45,6 +44,15 @@ const fetchFundingFile = async (owner: string, slug: string) => {
     // This will also happen if the file doesn't exist
     console.info("Error fetching funding file", (error as Error).message)
     return null
+  }
+}
+
+const isValidFundingFile = (contents: string, projectId: string) => {
+  try {
+    const parsed = JSON.parse(contents)
+    return parsed.opRetro && parsed.opRetro.projectId === projectId
+  } catch (error) {
+    return false
   }
 }
 
