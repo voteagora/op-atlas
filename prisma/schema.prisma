@@ -100,8 +100,8 @@ model UserProjects {
 model ProjectRepository {
   id       String  @id @default(uuid())
   type     String
-  url      String
-  verified Boolean
+  url      String  @unique
+  verified Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -125,6 +125,8 @@ model ProjectContract {
   projectId String
 
   project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([contractAddress, chainId])
 }
 
 model ProjectFunding {

@@ -58,6 +58,11 @@ export async function getUserProjectsWithDetails({
             },
           },
         },
+        orderBy: {
+          project: {
+            createdAt: "asc",
+          },
+        },
       },
     },
   })
@@ -273,6 +278,67 @@ export async function getProjectContracts({
       project: true,
     },
   })
+}
+
+export async function addProjectRepository({
+  projectId,
+  repo,
+}: {
+  projectId: string
+  repo: Omit<Prisma.ProjectRepositoryCreateInput, "project">
+}) {
+  return prisma.projectRepository.create({
+    data: {
+      ...repo,
+      project: {
+        connect: {
+          id: projectId,
+        },
+      },
+    },
+  })
+}
+
+export async function removeProjectRepository({
+  projectId,
+  repositoryUrl,
+}: {
+  projectId: string
+  repositoryUrl: string
+}) {
+  return prisma.projectRepository.delete({
+    where: {
+      projectId: projectId,
+      url: repositoryUrl,
+    },
+  })
+}
+
+export async function updateProjectRepositories({
+  projectId,
+  type,
+  repositories,
+}: {
+  projectId: string
+  type: string
+  repositories: Prisma.ProjectRepositoryCreateManyInput[]
+}) {
+  // Delete the existing repositories and replace it
+  const remove = prisma.projectRepository.deleteMany({
+    where: {
+      projectId,
+      type,
+    },
+  })
+
+  const create = prisma.projectRepository.createMany({
+    data: repositories.map((r) => ({
+      ...r,
+      projectId,
+    })),
+  })
+
+  return prisma.$transaction([remove, create])
 }
 
 export async function updateProjectFunding({

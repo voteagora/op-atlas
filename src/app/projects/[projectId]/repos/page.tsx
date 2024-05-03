@@ -1,9 +1,18 @@
-import React from "react"
+import { redirect } from "next/navigation"
 
-import AddCodeRepositoriesCard from "@/components/projects/repos/AddCodeRepositoriesCard"
+import { ReposForm } from "@/components/projects/repos/ReposForm"
+import { getProject } from "@/db/projects"
 
-const page = () => {
-  return <AddCodeRepositoriesCard />
+export default async function Page({
+  params,
+}: {
+  params: { projectId: string }
+}) {
+  const project = await getProject({ id: params.projectId })
+
+  if (!project) {
+    redirect("/dashboard")
+  }
+
+  return <ReposForm project={project} />
 }
-
-export default page

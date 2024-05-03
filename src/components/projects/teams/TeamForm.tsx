@@ -2,7 +2,8 @@
 
 import { User } from "@prisma/client"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import { useEffect, useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -25,12 +26,26 @@ export default function AddTeamDetailsForm({
 }: {
   project: ProjectWithTeam
 }) {
+  const { data: session } = useSession()
   const router = useRouter()
   const [team, setTeam] = useState(project.team)
 
-  const [isTeamConfirmed, setIsTeamConfirmed] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isTeamConfirmed, setIsTeamConfirmed] = useState(
+    project.addedTeamMembers,
+  )
 
+  const userRole = useMemo(() => {
+    // Should never happen
+    if (!session) return "member"
+
+    const role = project.team.find(
+      (member) => member.user.id === session?.user.id,
+    )?.role as TeamRole
+
+    return role
+  }, [project.team, session])
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
 
@@ -58,7 +73,7 @@ export default function AddTeamDetailsForm({
     try {
       setIsSubmitting(true)
       await updateProjectDetails(project.id, { addedTeamMembers: true })
-      router.push("/projects/new/repos")
+      router.push(`/projects/${project.id}/repos`)
     } catch (error) {
       console.error("Error updating project", error)
       setIsSubmitting(false)
@@ -87,6 +102,7 @@ export default function AddTeamDetailsForm({
               key={user.id}
               user={user}
               role={role as TeamRole}
+              isUserAdmin={userRole !== "member"}
               onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
               onRemove={() => setIsShowingRemove(user)}
             />

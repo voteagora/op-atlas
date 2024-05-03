@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { reverse } from "ramda"
-import { useMemo } from "react"
+import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
 import { ProjectWithDetails } from "@/lib/types"
@@ -106,4 +106,4 @@ const UserProjectCard = ({
   )
 }
 
-export default UserProjectCard
+export default memo(UserProjectCard)
