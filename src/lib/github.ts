@@ -1,5 +1,6 @@
 import { Octokit } from "octokit"
 
+// TODO: Add API key for higher rate limits
 const octokit = new Octokit({})
 
 export async function getRepository(owner: string, slug: string) {

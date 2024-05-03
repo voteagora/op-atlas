@@ -1,5 +1,3 @@
-"use client"
-
 import { Copy } from "lucide-react"
 import Image from "next/image"
 import { memo, useEffect, useMemo, useState } from "react"
