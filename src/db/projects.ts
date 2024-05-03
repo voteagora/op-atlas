@@ -365,7 +365,17 @@ export async function updateProjectFunding({
     })),
   })
 
-  return prisma.$transaction([remove, create])
+  // Mark that the project was funded
+  const update = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      addedFunding: true,
+    },
+  })
+
+  return prisma.$transaction([remove, create, update])
 }
 
 export async function addProjectSnapshot({
