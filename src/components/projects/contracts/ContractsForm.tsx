@@ -5,6 +5,7 @@ import { ProjectContract } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
@@ -76,6 +77,8 @@ function getDefaultValues(
 }
 
 export function ContractsForm({ project }: { project: ProjectWithDetails }) {
+  const router = useRouter()
+
   const form = useForm<z.infer<typeof ContractsSchema>>({
     resolver: zodResolver(ContractsSchema),
     mode: "onSubmit",
@@ -94,6 +97,8 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
 
   const onSubmit = async (values: z.infer<typeof ContractsSchema>) => {
     console.log("Submitting:", values)
+    // TODO: Persist OSO slug once we have UI
+    router.push(`/projects/${project.id}/grants`)
   }
 
   const formValues = useWatch({

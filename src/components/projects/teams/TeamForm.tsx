@@ -11,7 +11,8 @@ import {
   setMemberRole,
   updateProjectDetails,
 } from "@/lib/actions/projects"
-import { ProjectWithTeam, TeamRole } from "@/lib/types"
+import { useIsAdmin } from "@/lib/hooks"
+import { ProjectWithDetails, TeamRole } from "@/lib/types"
 
 import { AddTeamMemberCard } from "./AddTeamMemberCard"
 import AddTeamMemberDialog from "./AddTeamMemberDialog"
@@ -23,14 +24,18 @@ import { WarpcastBanner } from "./WarpcastBanner"
 export default function AddTeamDetailsForm({
   project,
 }: {
-  project: ProjectWithTeam
+  project: ProjectWithDetails
 }) {
   const router = useRouter()
   const [team, setTeam] = useState(project.team)
 
-  const [isTeamConfirmed, setIsTeamConfirmed] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isTeamConfirmed, setIsTeamConfirmed] = useState(
+    project.addedTeamMembers,
+  )
 
+  const isAdmin = useIsAdmin(project)
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
 
@@ -58,7 +63,7 @@ export default function AddTeamDetailsForm({
     try {
       setIsSubmitting(true)
       await updateProjectDetails(project.id, { addedTeamMembers: true })
-      router.push("/projects/new/repos")
+      router.push(`/projects/${project.id}/repos`)
     } catch (error) {
       console.error("Error updating project", error)
       setIsSubmitting(false)
@@ -87,6 +92,7 @@ export default function AddTeamDetailsForm({
               key={user.id}
               user={user}
               role={role as TeamRole}
+              isUserAdmin={!!isAdmin}
               onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
               onRemove={() => setIsShowingRemove(user)}
             />

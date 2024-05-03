@@ -51,10 +51,12 @@ export enum ProjectSection {
   Contracts = "Contracts",
   Grants = "Grants",
 }
+
 export type ProjectStatus = {
   completedSections: ProjectSection[]
   progressPercent: number
 }
+
 export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   const completedSections: ProjectSection[] = []
 
@@ -67,23 +69,24 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
     completedSections.push(ProjectSection.Details)
   }
 
-  const hasTeam = project.team?.length > 1 && project.addedTeamMembers
+  const hasTeam = project.team.length > 1 && project.addedTeamMembers
   if (hasTeam) {
     completedSections.push(ProjectSection.Team)
   }
 
-  const hasRepos = project.repos?.length > 0
+  const hasRepos =
+    project.repos.filter((r) => r.type === "github" && r.verified).length > 0
   if (hasRepos) {
     completedSections.push(ProjectSection.Repos)
   }
 
   const hasContracts =
-    project.contracts?.length > 0 || !!project.openSourceObserverSlug
+    project.contracts.length > 0 || !!project.openSourceObserverSlug
   if (hasContracts) {
     completedSections.push(ProjectSection.Contracts)
   }
 
-  const hasFunding = project.funding?.length > 0
+  const hasFunding = project.funding.length > 0
   if (hasFunding) {
     completedSections.push(ProjectSection.Grants)
   }
