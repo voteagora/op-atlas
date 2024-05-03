@@ -18,11 +18,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form"
-import {
-  addGithubRepo,
-  removeGithubRepo,
-  updatePackageRepos,
-} from "@/lib/actions/repos"
+import { removeGithubRepo, updatePackageRepos } from "@/lib/actions/repos"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { GithubForm } from "./GithubForm"
@@ -87,6 +83,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     setVerifyingUrl(url)
   }
 
+  // Optimistically update the UI state
   const onVerificationComplete = async (url: string) => {
     const repo = form
       .getValues("githubRepos")
@@ -95,13 +92,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
       return
     }
 
-    try {
-      form.setValue(`githubRepos.${repo}.verified`, true)
-      await addGithubRepo(project.id, url)
-      setVerifyingUrl("")
-    } catch (error) {
-      console.error("Error removing repo", error)
-    }
+    form.setValue(`githubRepos.${repo}.verified`, true)
+    setVerifyingUrl("")
   }
 
   const onAddGithubField = async () => {
@@ -129,6 +121,12 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
   const onAddPackageField = async () => {
     const packages = form.getValues("packages").map((field) => field.url)
+
+    // If the previous URL is blank, do nothing
+    if (packages[packages.length - 1] === "") {
+      return
+    }
+
     const valid = packages.every(
       (url) => z.string().url().safeParse(url).success,
     )

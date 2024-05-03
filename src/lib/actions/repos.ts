@@ -10,6 +10,7 @@ import {
 } from "@/db/projects"
 
 import { getFundingFile, getRepository } from "../github"
+import { isValidFundingFile } from "../repoUtils"
 import { verifyMembership } from "./utils"
 
 export const findRepo = async (owner: string, slug: string) => {
@@ -36,33 +37,22 @@ export const findRepo = async (owner: string, slug: string) => {
   }
 }
 
-export const fetchFundingFile = async (owner: string, slug: string) => {
-  const session = await auth()
-  if (!session) {
-    return {
-      error: "Not authenticated",
-    }
-  }
-
+const fetchFundingFile = async (owner: string, slug: string) => {
   try {
     const { data } = await getFundingFile(owner, slug)
-    const contents = Buffer.from(
-      (data as any).content ?? "",
-      "base64",
-    ).toString("utf-8")
-    return {
-      error: null,
-      contents: contents ?? null,
-    }
+    return Buffer.from((data as any).content ?? "", "base64").toString("utf-8")
   } catch (error: unknown) {
-    console.warn("Error fetching funding file", (error as Error).message)
-    return {
-      error: "Error fetching funding file",
-    }
+    // This will also happen if the file doesn't exist
+    console.info("Error fetching funding file", (error as Error).message)
+    return null
   }
 }
 
-export const addGithubRepo = async (projectId: string, url: string) => {
+export const verifyGithubRepo = async (
+  projectId: string,
+  owner: string,
+  slug: string,
+) => {
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -77,11 +67,25 @@ export const addGithubRepo = async (projectId: string, url: string) => {
   }
 
   try {
+    const funding = await fetchFundingFile(owner, slug)
+    if (!funding) {
+      return {
+        error: "No funding file found",
+      }
+    }
+
+    const isValid = isValidFundingFile(funding, projectId)
+    if (!isValid) {
+      return {
+        error: "Invalid funding file",
+      }
+    }
+
     const repo = await addProjectRepository({
       projectId,
       repo: {
         type: "github",
-        url,
+        url: `https://github.com/${owner}/${slug}`,
         verified: true,
       },
     })

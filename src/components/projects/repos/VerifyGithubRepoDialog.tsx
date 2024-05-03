@@ -15,7 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
-import { fetchFundingFile, findRepo } from "@/lib/actions/repos"
+import { findRepo, verifyGithubRepo } from "@/lib/actions/repos"
+import { isValidFundingFile } from "@/lib/repoUtils"
 import { copyTextToClipBoard } from "@/lib/utils"
 
 const sampleFullJson = `\
@@ -37,15 +38,6 @@ const requiredJson = `\
 "opRetro": {
   "projectId": "[projectId]"
 }`
-
-function isValidFundingFile(contents: string, projectId: string) {
-  try {
-    const parsed = JSON.parse(contents)
-    return parsed.opRetro && parsed.opRetro.projectId === projectId
-  } catch (error) {
-    return false
-  }
-}
 
 type Props = DialogProps<{ projectId: string; url?: string }> & {
   onVerificationComplete: (url: string) => void
@@ -87,20 +79,21 @@ const VerifyGithubRepoDialog = ({
 
   const onFoundRepo = async () => {
     try {
-      const result = await fetchFundingFile(owner, slug)
-      if (result.error || !result.contents) {
-        setHasFundingFile(false)
-        setStep("json")
+      const result = await verifyGithubRepo(projectId, owner, slug)
+      if (!result.error) {
+        onVerified()
+        return
       }
 
-      const content = result.contents ?? "{}"
-      // If the file is valid, we can skip the JSON step
-      if (isValidFundingFile(content, projectId)) {
-        onVerified()
-      } else {
+      if (result.error === "Invalid funding file") {
         setHasFundingFile(true)
         setStep("json")
+        return
       }
+
+      // Assume there isn't a file and we should show the instructions
+      setHasFundingFile(false)
+      setStep("json")
     } catch (error) {
       console.error("Error fetching funding file", error)
       setHasFundingFile(false)
@@ -161,6 +154,7 @@ const SearchRepoStep = ({
     async function searchRepo() {
       const result = await findRepo(owner, slug)
       if (result?.error) {
+        // Sometimes the API is so fast it's jarring
         setTimeout(() => {
           onNotFound()
         }, 1000)
@@ -271,14 +265,13 @@ const VerifyFundingStep = ({
     try {
       setIsLoading(true)
 
-      const result = await fetchFundingFile(owner, slug)
-      if (result.contents && isValidFundingFile(result.contents, projectId)) {
-        setError(null)
-        onVerified()
-        return
+      const result = await verifyGithubRepo(projectId, owner, slug)
+      if (result.error) {
+        throw new Error(result.error)
       }
 
-      throw new Error("")
+      setError(null)
+      onVerified()
     } catch (error) {
       setError(
         "Unable to validate funding.json file. Please make sure the changes have been merged into the default branch and try again",
