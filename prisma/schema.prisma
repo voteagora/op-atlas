@@ -50,9 +50,9 @@ model Project {
   mirror    String?
 
   attestationId          String?
-  metadataSnapshotId     String?
   openSourceObserverSlug String?
   addedTeamMembers       Boolean @default(false)
+  addedFunding           Boolean @default(false)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -62,14 +62,15 @@ model Project {
   repos        ProjectRepository[]
   contracts    ProjectContract[]
   funding      ProjectFunding[]
+  snapshots    ProjectSnapshot[]
   applications Application[]
 }
 
 model Application {
-  id            String  @id @default(uuid())
+  id            String @id @default(uuid())
   status        String
   recipient     String
-  attestationId String?
+  attestationId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -79,6 +80,8 @@ model Application {
 
   round   FundingRound @relation(fields: [roundId], references: [id])
   project Project      @relation(fields: [projectId], references: [id])
+
+  @@unique([roundId, projectId])
 }
 
 model UserProjects {
@@ -95,6 +98,18 @@ model UserProjects {
   project Project @relation(fields: [projectId], references: [id])
 
   @@unique([userId, projectId])
+}
+
+model ProjectSnapshot {
+  id            String @id @default(uuid())
+  ipfsHash      String
+  attestationId String
+
+  createdAt DateTime @default(now())
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
 }
 
 model ProjectRepository {

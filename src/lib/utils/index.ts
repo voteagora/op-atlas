@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx"
 import { customAlphabet } from "nanoid"
 import { twMerge } from "tailwind-merge"
 
-import { ProjectWithDetails } from "./types"
+import { ProjectWithDetails } from "../types"
 
 export const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
@@ -50,6 +50,7 @@ export enum ProjectSection {
   Repos = "Repos",
   Contracts = "Contracts",
   Grants = "Grants",
+  Publish = "Publish",
 }
 
 export type ProjectStatus = {
@@ -86,16 +87,22 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
     completedSections.push(ProjectSection.Contracts)
   }
 
-  const hasFunding = project.funding.length > 0
+  const hasFunding = project.funding.length > 0 || project.addedFunding
   if (hasFunding) {
     completedSections.push(ProjectSection.Grants)
   }
 
-  let progress = hasDetails ? 20 : 0
-  progress += hasTeam ? 20 : 0
-  progress += hasRepos ? 20 : 0
-  progress += hasContracts ? 20 : 0
-  progress += hasFunding ? 20 : 0
+  const hasSnapshots = project.snapshots.length > 0
+  if (hasSnapshots) {
+    completedSections.push(ProjectSection.Publish)
+  }
 
-  return { completedSections, progressPercent: progress }
+  let progress = hasDetails ? 16.67 : 0
+  progress += hasTeam ? 16.67 : 0
+  progress += hasRepos ? 16.67 : 0
+  progress += hasContracts ? 16.67 : 0
+  progress += hasFunding ? 16.67 : 0
+  progress += hasSnapshots ? 16.67 : 0
+
+  return { completedSections, progressPercent: Math.round(progress) }
 }

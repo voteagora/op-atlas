@@ -12,7 +12,7 @@ import { z } from "zod"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
-import { uploadImage } from "@/lib/imageUtils"
+import { uploadImage } from "@/lib/utils/images"
 
 import FileUploadInput from "../../common/FileUploadInput"
 import {

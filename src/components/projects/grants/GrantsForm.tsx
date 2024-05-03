@@ -235,7 +235,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const onSubmit = async (values: z.infer<typeof FundingFormSchema>) => {
     console.log("Submitting:", values)
     await setProjectFunding(project.id, fromFormValues(project.id, values))
-    // TODO: Navigate to publish step once it's ready
+    // TODO: Flip addedFunding boolean and navigate to publish step once it's ready
   }
 
   const canSubmit =

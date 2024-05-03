@@ -10,7 +10,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { FormLabel } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { verifyContract } from "@/lib/actions/contracts"
-import { Chain, getMessage } from "@/lib/contractUtils"
+import { Chain, getMessage } from "@/lib/utils/contracts"
 
 export function VerifyAddressDialog({
   open,

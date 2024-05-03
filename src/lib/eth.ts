@@ -1,7 +1,7 @@
 import { createPublicClient, http } from "viem"
 import { base, fraxtal, mainnet, mode, optimism, zora } from "viem/chains"
 
-import { Chain } from "./contractUtils"
+import { Chain } from "./utils/contracts"
 
 const clients = {
   [Chain.Eth]: createPublicClient({ chain: mainnet, transport: http() }),
