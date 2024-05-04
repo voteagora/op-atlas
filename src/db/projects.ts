@@ -3,7 +3,6 @@
 import { Prisma, Project } from "@prisma/client"
 
 import { TeamRole } from "@/lib/types"
-import { nanoid } from "@/lib/utils"
 
 import { prisma } from "./client"
 
@@ -54,6 +53,7 @@ export async function getUserProjectsWithDetails({
               repos: true,
               contracts: true,
               funding: true,
+              snapshots: true,
               applications: true,
             },
           },
@@ -77,14 +77,16 @@ export type CreateProjectParams = Partial<
 
 export async function createProject({
   farcasterId,
+  projectId,
   project,
 }: {
   farcasterId: string
+  projectId: string
   project: CreateProjectParams
 }) {
   return prisma.project.create({
     data: {
-      id: nanoid(),
+      id: projectId,
       ...project,
       team: {
         create: {
@@ -140,6 +142,7 @@ export async function getProject({ id }: { id: string }) {
       repos: true,
       contracts: true,
       funding: true,
+      snapshots: true,
       applications: true,
     },
   })
@@ -362,5 +365,37 @@ export async function updateProjectFunding({
     })),
   })
 
-  return prisma.$transaction([remove, create])
+  // Mark that the project was funded
+  const update = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      addedFunding: true,
+    },
+  })
+
+  return prisma.$transaction([remove, create, update])
+}
+
+export async function addProjectSnapshot({
+  projectId,
+  ipfsHash,
+  attestationId,
+}: {
+  projectId: string
+  ipfsHash: string
+  attestationId: string
+}) {
+  return prisma.projectSnapshot.create({
+    data: {
+      ipfsHash,
+      attestationId,
+      project: {
+        connect: {
+          id: projectId,
+        },
+      },
+    },
+  })
 }

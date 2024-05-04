@@ -1,6 +1,7 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
+import { nanoid } from "nanoid"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -18,6 +19,7 @@ import {
   UpdateProjectParams,
 } from "@/db/projects"
 
+import { createProjectAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { verifyAdminStatus, verifyMembership } from "./utils"
 
@@ -29,15 +31,26 @@ export const getProjects = async (farcasterId: string) => {
 export const createNewProject = async (details: CreateProjectParams) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  if (!session?.user?.id || !session.user.farcasterId) {
     return {
       error: "Unauthorized",
     }
   }
 
+  // Create project attestation
+  const attestationId = await createProjectAttestation({
+    farcasterId: session.user.farcasterId,
+  })
+
+  const projectId = nanoid()
+
   const project = await createProject({
     farcasterId: session.user.farcasterId,
-    project: details,
+    projectId,
+    project: {
+      ...details,
+      attestationId,
+    },
   })
 
   revalidatePath("/dashboard")

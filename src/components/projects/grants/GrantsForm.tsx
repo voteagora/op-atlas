@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Prisma } from "@prisma/client"
 import { format, toDate } from "date-fns-tz"
 import { Plus } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -102,6 +103,8 @@ function fromFormValues(
 }
 
 export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
+  const router = useRouter()
+
   const form = useForm<z.infer<typeof FundingFormSchema>>({
     resolver: zodResolver(FundingFormSchema),
     mode: "onSubmit",
@@ -109,7 +112,9 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     defaultValues: toFormValues(project),
   })
 
-  const [selectedNone, setSelectedNone] = useState(false)
+  const [selectedNone, setSelectedNone] = useState(
+    project.funding.length === 0 && project.addedFunding,
+  )
 
   const {
     fields: ventureFields,
@@ -235,7 +240,8 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const onSubmit = async (values: z.infer<typeof FundingFormSchema>) => {
     console.log("Submitting:", values)
     await setProjectFunding(project.id, fromFormValues(project.id, values))
-    // TODO: Navigate to publish step once it's ready
+
+    router.push(`/projects/${project.id}/publish`)
   }
 
   const canSubmit =
@@ -322,8 +328,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           ) : null}
 
           <Button
-            type="submit"
-            disabled={!canSubmit}
+            disabled={!canSubmit || form.formState.isSubmitting}
             variant="destructive"
             className="w-fit"
           >

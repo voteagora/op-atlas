@@ -21,9 +21,11 @@
     "*.{css,md}": "prettier --write"
   },
   "dependencies": {
+    "@ethereum-attestation-service/eas-sdk": "^2.1.4",
     "@farcaster/auth-kit": "^0.1.4",
     "@google-cloud/storage": "^7.10.2",
     "@hookform/resolvers": "^3.3.4",
+    "@pinata/sdk": "^2.1.0",
     "@prisma/client": "^5.12.1",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-avatar": "^1.0.4",

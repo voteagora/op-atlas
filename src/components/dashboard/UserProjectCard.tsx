@@ -49,10 +49,28 @@ const UserProjectCard = ({
           <h3 className="mr-3 pt-1 truncate">{project.name}</h3>
 
           <div className="ml-auto flex items-center shrink-0">
-            <Progress value={progress} className="h-2 w-16" />
-            <p className="ml-3 text-sm text-secondary-foreground">
-              {progress}% setup{" "}
-            </p>
+            {progress === 100 ? (
+              <>
+                <Image
+                  alt="Checkmark"
+                  src="/assets/icons/circle-check-green.svg"
+                  height={16}
+                  width={16}
+                  className="w-4 h-4 object-center object-cover"
+                />
+                <p className="ml-2 text-sm text-secondary-foreground">
+                  Onchain
+                </p>
+              </>
+            ) : (
+              <>
+                <Progress value={progress} className="h-2 w-16" />
+                <p className="ml-2 text-sm text-secondary-foreground">
+                  {progress}% setup{" "}
+                </p>
+              </>
+            )}
+
             <Link href={`/projects/${project.id}/details`} className="ml-6">
               <Button size="sm" variant="secondary">
                 Edit

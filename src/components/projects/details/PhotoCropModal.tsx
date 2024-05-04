@@ -11,7 +11,7 @@ import ReactCrop, {
 import { DialogProps } from "@/components/dialogs/types"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
-import { canvasPreview, toBlob } from "@/lib/imageUtils"
+import { canvasPreview, toBlob } from "@/lib/utils/images"
 
 type Props = DialogProps<{
   image: string

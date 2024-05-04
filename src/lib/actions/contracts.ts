@@ -6,8 +6,8 @@ import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 import { auth } from "@/auth"
 import { addProjectContract, getProjectContracts } from "@/db/projects"
 
-import { Chain, getMessage } from "../contractUtils"
 import { getTransaction } from "../eth"
+import { Chain, getMessage } from "../utils/contracts"
 
 export const verifyContract = async ({
   projectId,
