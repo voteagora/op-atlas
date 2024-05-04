@@ -15,7 +15,6 @@ export const Snapshot = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
         src="/assets/icons/circle-check-green.svg"
         height={20}
         width={20}
-        className=""
       />
       <p className="text-sm font-medium">
         {format(snapshot.createdAt, "yyyy-MM-dd, HH:mm a")}
