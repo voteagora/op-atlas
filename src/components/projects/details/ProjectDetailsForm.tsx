@@ -68,6 +68,8 @@ function fromStringObjectArr(objs: { value: string }[]) {
 export default function ProjectDetailsForm({ project }: { project?: Project }) {
   const router = useRouter()
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -122,6 +124,8 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true)
+
     let thumbnailUrl = project?.thumbnailUrl
     let bannerUrl = project?.bannerUrl
 
@@ -144,6 +148,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       website: fromStringObjectArr(values.website),
       farcaster: fromStringObjectArr(values.farcaster),
     }
+
     try {
       const response = project
         ? await updateProjectDetails(project.id, newValues)
@@ -157,6 +162,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
     } catch (error) {
       // TODO: Error handling
       console.error("Error creating project", error)
+      setIsLoading(false)
     }
   }
 
@@ -450,7 +456,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
           />
         </div>
         <Button
-          disabled={!canSubmit}
+          disabled={!canSubmit || isLoading}
           type="submit"
           variant="destructive"
           className="self-start"
