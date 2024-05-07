@@ -4,6 +4,7 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
+import { GetStartedDialog } from "./GetStartedDialog"
 import { DialogType } from "./types"
 
 export default function AppDialogs() {
@@ -18,6 +19,9 @@ export default function AppDialogs() {
       )}
       {openDialog === "edit_profile" && (
         <EditProfileDialog open onOpenChange={onOpenChange("edit_profile")} />
+      )}
+      {openDialog === "get_started" && (
+        <GetStartedDialog open onOpenChange={onOpenChange("get_started")} />
       )}
     </>
   )

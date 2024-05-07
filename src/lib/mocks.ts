@@ -6,18 +6,27 @@ export type FundingRound = {
   details: string
   status: "now" | "upcoming" | "past"
   accentColor?: string
+  link?: string
   iconUrl?: string
   startsAt: Date
   endsAt?: Date
+  funding?: {
+    op?: string
+    projects?: number
+  }
 }
 
 export const FUNDING_ROUNDS: FundingRound[] = [
   {
     name: "Onchain Builders",
     number: 4,
+    funding: {
+      op: "10M",
+    },
     details:
       "This category will reward onchain builders who contribute to the success of Optimism. This round seeks to expand the...",
     status: "now",
+    link: "/projects/new",
     accentColor: "#F0F4FF",
     iconUrl: "/assets/images/sunny-violet.png",
     startsAt: new Date("2024-05-14T21:53:13.300Z"),
@@ -59,6 +68,11 @@ export const FUNDING_ROUNDS: FundingRound[] = [
   {
     name: "Welcome, Optimists!",
     number: 3,
+    funding: {
+      op: "30M",
+      projects: 501,
+    },
+    link: "https://optimism.mirror.xyz/Bbu5M1mTNV2Z637QxOiF7Qt7R9hy6nxghbZiFbtZOBA",
     details:
       "Supporting Optimism builders with developer tooling is the focus of this category. From SDKs to testing frameworks...",
     status: "past",
@@ -68,6 +82,11 @@ export const FUNDING_ROUNDS: FundingRound[] = [
   {
     name: "Welcome, Optimists!",
     number: 2,
+    funding: {
+      op: "30M",
+      projects: 501,
+    },
+    link: "https://optimism.mirror.xyz/7v1DehEY3dpRcYFhqWrVNc9Qj94H2L976LKlWH1FX-8",
     details:
       "Improving the capture resistance and resource allocation of Optimism Governance is the primary objective of this...",
     status: "past",
@@ -77,6 +96,10 @@ export const FUNDING_ROUNDS: FundingRound[] = [
   {
     name: "Welcome, Optimists!",
     number: 1,
+    funding: {
+      op: "30M",
+      projects: 501,
+    },
     details:
       "The OP Stack is the heart of Optimism, and the Superchain. Contributions to the OP Stack and improvements to the...",
     status: "past",

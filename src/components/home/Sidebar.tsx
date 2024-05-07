@@ -1,6 +1,9 @@
+"use client"
+
 import Image from "next/image"
 
 import { cn } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Button } from "../ui/button"
 
@@ -11,6 +14,12 @@ export const Sidebar = ({
   className?: string
   funding?: string
 }) => {
+  const { setOpenDialog } = useAppDialogs()
+
+  const onGetStarted = () => {
+    setOpenDialog("get_started")
+  }
+
   return (
     <div className={cn("flex flex-col gap-y-12", className)}>
       <div className="flex flex-col items-center gap-y-4 p-6 border border-[#D6E4FF] bg-[#F0F4FF] rounded-3xl">
@@ -34,7 +43,7 @@ export const Sidebar = ({
           Create your profile, add projects, and apply for Retro Funding.
         </p>
 
-        <Button variant="outline" className="mt-5">
+        <Button onClick={onGetStarted} variant="outline" className="mt-5">
           Get started
         </Button>
       </div>
