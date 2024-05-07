@@ -8,6 +8,7 @@ import { addProjectContract, getProjectContracts } from "@/db/projects"
 
 import { getTransaction } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"
+import { verifyMembership } from "./utils"
 
 export const verifyContract = async ({
   projectId,
@@ -29,6 +30,11 @@ export const verifyContract = async ({
     return {
       error: "Not authenticated",
     }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
   }
 
   const contractAddress = getAddress(contractAddressRaw)

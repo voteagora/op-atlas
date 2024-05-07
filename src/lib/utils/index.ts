@@ -4,6 +4,8 @@ import { twMerge } from "tailwind-merge"
 
 import { ProjectWithDetails } from "../types"
 
+export const EAS_URL_PREFIX = "https://optimism.easscan.org/attestation/view/"
+
 export const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
   10,
@@ -15,15 +17,6 @@ export function cn(...inputs: ClassValue[]) {
 
 export function titlecase(str: string) {
   return str.charAt(0).toLocaleUpperCase() + str.slice(1)
-}
-
-export function isValidGitHubRepoUrl(url: string) {
-  // Regular expression to match GitHub repository URLs
-  const githubRepoRegex =
-    /^(https?:\/\/)?(www\.)?github\.com\/([a-zA-Z0-9-]+)\/([a-zA-Z0-9-]+)$/
-
-  // Test the URL against the regex
-  return githubRepoRegex.test(url)
 }
 
 export const copyTextToClipBoard = async (url: string) => {

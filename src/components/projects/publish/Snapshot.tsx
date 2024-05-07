@@ -4,8 +4,7 @@ import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 
 import ExternalLink from "@/components/ExternalLink"
-
-const EAS_URL_PREFIX = "https://optimism.easscan.org/attestation/view/"
+import { EAS_URL_PREFIX } from "@/lib/utils"
 
 export const Snapshot = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
   return (

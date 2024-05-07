@@ -399,3 +399,61 @@ export async function addProjectSnapshot({
     },
   })
 }
+
+export async function createApplication({
+  projectId,
+  attestationId,
+  round,
+}: {
+  projectId: string
+  attestationId: string
+  round: number
+}) {
+  return prisma.application.create({
+    data: {
+      attestationId,
+      project: {
+        connect: {
+          id: projectId,
+        },
+      },
+      round: {
+        connect: {
+          id: round.toString(),
+        },
+      },
+    },
+  })
+}
+
+export async function getUserApplications({
+  farcasterId,
+}: {
+  farcasterId: string
+}) {
+  return prisma.user.findUnique({
+    where: {
+      farcasterId,
+    },
+    select: {
+      projects: {
+        where: {
+          project: {
+            deletedAt: null,
+          },
+        },
+        include: {
+          project: {
+            include: {
+              applications: {
+                orderBy: {
+                  createdAt: "desc",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+}

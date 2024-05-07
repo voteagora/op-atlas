@@ -1,12 +1,13 @@
 "use client"
 
-import { Project, User } from "@prisma/client"
+import { Application, Project, User } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
+import { useMemo } from "react"
 
 import { Button } from "@/components/ui/button"
 import { ProjectWithDetails } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn, getProjectStatus } from "@/lib/utils"
 
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
@@ -17,11 +18,19 @@ const Dashboard = ({
   className,
   user,
   projects,
+  applications,
 }: {
   className?: string
   user: User
   projects: ProjectWithDetails[]
+  applications: Application[]
 }) => {
+  const canApply = useMemo(() => {
+    return projects.some(
+      (project) => getProjectStatus(project).progressPercent === 100,
+    )
+  }, [projects])
+
   return (
     <div className={cn("card flex flex-col w-full gap-y-12", className)}>
       <ProfileDetailCard user={user} />
@@ -50,7 +59,7 @@ const Dashboard = ({
 
       <div className="flex flex-col gap-y-6">
         <h3>Your Retro Funding applications</h3>
-        <ApplicationBanner />
+        <ApplicationBanner application={applications[0]} canApply={canApply} />
 
         <Link
           href="#"

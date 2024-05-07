@@ -1,40 +1,41 @@
-"use client"
-
-import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
-import { getAddress } from "viem"
 
-import { Project } from "@/lib/mocks"
+import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import { Badge } from "../common/Badge"
+import { Callout } from "../common/Callout"
 import { Button } from "../ui/button"
 import { Checkbox } from "../ui/checkbox"
-import { Input } from "../ui/input"
+import { ProjectCard } from "./ProjectCard"
 
 const TERMS = [
-  "I understand that retroPGF grant recipients must complete KYC with the Optimism Foundation.",
-  "I understand that any retroPGF funds that are distributed must be claimed within a year of results being announced, or risk forfeiture.",
-  "I certify that the potential beneficiary of the grant is not a citizen or resident of, or incorporated in, any jurisdiction designated, blocked, or sanctioned by the United Nations, the European Union, the U.K. Treasury, or the U.S. Treasury's Office of Foreign Assets Control, including but not limited to Cuba, the Democratic Republic of Congo, Iran, North Korea, Russia, Syria, Yemen, or the Crimea, Donetsk, or Luhansk regions of Ukraine.",
+  "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
+  "I understand that any Retro Funding rewards that are distributed must be claimed within a year of results being announced, or risk forfeiture.",
+  "I certify that the potential beneficiary of the grant is not a citizen or resident of, or incorporated in, any jurisdiction designated, blocked, or sanctioned by the United Nations, the European Union, the U.K. Treasury, or the U.S. Treasury’s Office of Foreign Assets Control, including but not limited to Cuba, the Democratic Republic of Congo, Iran, North Korea, Russia, Syria, Yemen, or the Crimea, Donetsk, or Luhansk regions of Ukraine.",
   "I certify that the potential beneficiary of the grant is not barred from participating in Optimism's grant program under applicable law.",
   "I understand that access to my Optimist Profile is required to claim Retro Funding rewards.",
 ]
 
 export const FundingApplication = ({
   className,
+  projects,
   onApply,
 }: {
   className?: string
-  projects: Project[]
-  onApply: () => void
+  projects: ProjectWithDetails[]
+  onApply: (projectId: string) => Promise<void>
 }) => {
-  const [recipient, setRecipient] = useState("")
-  const [isRecipientValid, setIsRecipientValid] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   const [agreedTerms, setAgreedTerms] = useState(
     Array.from({ length: TERMS.length }, () => false),
+  )
+
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null,
   )
 
   const toggleAgreedTerm = (idx: number) => {
@@ -45,17 +46,25 @@ export const FundingApplication = ({
     })
   }
 
-  const validateAddress = (address: string) => {
+  const toggleProjectSelection = (projectId: string) => {
+    setSelectedProjectId((current) => {
+      return projectId === current ? null : projectId
+    })
+  }
+
+  const submitApplication = async () => {
+    if (!selectedProjectId) return
+
     try {
-      getAddress(address)
-      setIsRecipientValid(true)
-    } catch (err) {
-      setIsRecipientValid(false)
+      setIsLoading(true)
+      await onApply(selectedProjectId)
+    } catch (error) {
+      console.error("Error submitting application", error)
+      setIsLoading(false)
     }
   }
 
-  const canSubmit =
-    agreedTerms.every((term) => term) && recipient.length && isRecipientValid
+  const canSubmit = agreedTerms.every((term) => term) && !!selectedProjectId
 
   return (
     <div
@@ -72,91 +81,124 @@ export const FundingApplication = ({
           height={80}
           width={80}
         />
-        <h2 className="text-2xl font-semibold text-center">
-          Retro Funding Round 4: Onchain Builders
-        </h2>
-        <Badge size="lg" text="Application" />
+        <h2 className="text-center">Retro Funding Round 4: Onchain Builders</h2>
+        <Badge
+          size="lg"
+          text="Submit this application by June 6th at 23:59 UTC"
+        />
       </div>
 
       {/* Information */}
-      <div className="flex flex-col gap-y-6 text-muted-foreground">
+      <div className="flex flex-col gap-y-6 text-secondary-foreground">
         <p>
-          Retro Funding Round 4 will reward onchain builders who contribute to
-          the success of Optimism. This round seeks to expand the reach and
-          impact of the network by rewarding those building across the
-          Superchain, increasing demand for blockspace, and driving value to the
-          Collective.
+          Retro Funding 4 will reward onchain builders who have deployed
+          contracts to the Superchain and contributed to the success of
+          Optimism. This round seeks to expand the reach and impact of the
+          network by rewarding those building across the Superchain who have
+          increased demand for blockspace and driven value to the Collective.
         </p>
-        <p className="">Important information for this round:</p>
-
-        <ul className="list-disc space-y-6 pl-5">
-          <li>
-            <span className="font-medium">
-              Impact assessment via objective data:
-            </span>{" "}
-            Your project&apos;s code repos and onchain contracts will be
-            analyzed against target metrics. Badgeholders will vote on the
-            metrics that matter most to them, not on individual projects.
-          </li>
-          <li>
-            <span className="font-medium">Submission deadline:</span> The
-            deadline for submissions in May 31 at 23:59 UTC. Please note that
-            after you submit your application, you can still make edits to your
-            submitted projects until the deadline.
-          </li>
-        </ul>
-
-        <Link href="#" className="flex items-center gap-x-2 no-underline">
-          <p className="font-medium">Learn more about Retro Funding Round 4</p>
-          <ArrowUpRight size={20} />
-        </Link>
+        <p>
+          In an effort to make voting in this round as objective as possible,
+          your project&apos;s code and contracts will be analyzed using
+          quality-metrics. Citizen badgeholders will vote on the quality-metrics
+          that matter most to them, not on individual projects.{" "}
+          <Link href="#" className="font-medium">
+            Learn more
+          </Link>
+        </p>
       </div>
 
-      {/* Recipient address */}
+      {/* Timeline */}
       <div className="flex flex-col gap-y-6">
-        <div className="flex items-center gap-x-3">
-          <h3 className="text-lg font-semibold">Recipient address</h3>
-          <Badge text="Private" />
-        </div>
+        <h3>Timeline</h3>
+        <p className="text-secondary-foreground">
+          The deadline for applications is June 6th at 19:00 UTC. After you
+          apply, you can still make edits to your projects until the deadline.
+          You do not need to resubmit your application if you make edits, but
+          you do need to republish your metadata onchain.
+        </p>
+      </div>
 
-        <p className="text-muted-foreground">
-          If this project is awarded Retro Funding, then we&apos;ll send tokens
-          to this address. You&apos;ll have a chance to change this before token
-          distribution.
+      {/* Eligibility */}
+      <div className="flex flex-col gap-y-6">
+        <h3>Eligibility</h3>
+
+        <p>
+          Builders who are eligible for Round 4 have met the following criteria:
         </p>
 
-        <div className="flex flex-col">
-          <p className="font-medium">
-            Enter an address that can receive funds on OP Mainnet
-            <span className="text-destructive">*</span>
-          </p>
-          <Input
-            className="mt-2"
-            placeholder="0x..."
-            onChange={(e) => setRecipient(e.target.value)}
-            onBlur={() => validateAddress(recipient)}
-            value={recipient}
+        <ul className="list-disc space-y-4 pl-5 text-secondary-foreground">
+          <li>
+            Deployed their onchain contracts on one or multiple of the following
+            OP chains: OP Mainnet, Base, Zora, Mode, Frax, and Metal.
+          </li>
+          <li>
+            Onchain contracts have interactions from at least 420 unique
+            addresses between Jan 1st - May 1st 2024.
+          </li>
+          <li>
+            Onchain contracts had their first transaction before April 1st 2024.
+          </li>
+          <li>
+            Onchain contracts had more than 10 days of activity between Jan 1st
+            - May 1st 2024.
+          </li>
+          <li>
+            Verified their onchain contracts in the Retro Funding sign up
+            process.
+          </li>
+          <li>
+            Made their contract code available in a public Github repo, for
+            which ownership has been verified in the Retro Funding sign up
+            process.
+          </li>
+          <li>
+            Confirmed that they will comply with Optimism Foundation KYC
+            requirements and are not residing in a sanctioned country.
+          </li>
+          <li>
+            Submitted a Retro Funding application before June 6th, 2024 and
+            comply with application rules.
+          </li>
+        </ul>
+      </div>
+
+      {/* Projects */}
+      <div className="flex flex-col gap-y-6">
+        <h3>Projects for submission</h3>
+
+        {projects.length === 0 ? (
+          <Callout
+            type="error"
+            text="You haven't created or joined any projects"
+            linkText="View projects"
+            linkHref="/dashboard"
           />
-          {!isRecipientValid && (
-            <p className="mt-1.5 text-sm text-destructive">
-              This doesn&apos;t appear to be a valid address, please check it
-              again
-            </p>
-          )}
-        </div>
+        ) : (
+          <div className="flex flex-col gap-y-2">
+            {projects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                isSelected={selectedProjectId === project.id}
+                onSelect={toggleProjectSelection}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Terms */}
       <div className="flex flex-col gap-y-6">
-        <h3 className="text-lg font-semibold">Terms</h3>
+        <h3>Terms</h3>
 
-        <div className="flex flex-col gap-y-4">
+        <div className="flex flex-col gap-y-4 ml-px">
           {TERMS.map((term, idx) => (
             <div key={idx} className="flex gap-x-4">
               <Checkbox
                 checked={agreedTerms[idx]}
                 onCheckedChange={() => toggleAgreedTerm(idx)}
-                className="mt-1 border-[1.5px] rounded-none"
+                className="mt-1 border-2 rounded-[2px]"
               />
               <p className="">{term}</p>
             </div>
@@ -168,14 +210,14 @@ export const FundingApplication = ({
           <Link href="#" className="font-medium">
             Optimism&apos;s Privacy Policy
           </Link>{" "}
-          for information about RetroPGF signup data is used.
+          for information about how Retro Funding signup data is used.
         </p>
       </div>
 
       <Button
         size="lg"
-        onClick={onApply}
-        disabled={!canSubmit}
+        onClick={submitApplication}
+        disabled={!canSubmit || isLoading}
         className="font-medium bg-destructive hover:bg-destructive"
       >
         Submit application
