@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 
-import { clickSignInWithFarcasterButton } from "@/lib/actions/utils"
+import { clickSignInWithFarcasterButton } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 

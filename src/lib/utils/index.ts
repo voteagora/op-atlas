@@ -99,3 +99,14 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
 
   return { completedSections, progressPercent: Math.round(progress) }
 }
+
+/*
+  Ultra jank way to mock clicking on the Farcaster button because SignInButton doesn't
+  accept an id or className argument :/
+*/
+export function clickSignInWithFarcasterButton() {
+  const farcasterButton = document
+    .getElementsByClassName("fc-authkit-signin-button")[0]
+    ?.getElementsByTagName("button")[0]
+  farcasterButton?.click()
+}

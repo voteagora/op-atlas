@@ -1,5 +1,5 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { clickSignInWithFarcasterButton } from "@/lib/actions/utils"
+import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 import { DialogProps } from "./types"
@@ -16,10 +16,6 @@ const ELIGIBILITY = [
 ]
 
 export function GetStartedDialog(props: DialogProps<object>) {
-  /*
-     Ultra jank way to mock clicking on the Farcaster button because SignInButton doesn't
-     accept an id or className argument :/
-  */
   const onGetStarted = () => {
     clickSignInWithFarcasterButton()
     props.onOpenChange(false)

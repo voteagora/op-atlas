@@ -35,10 +35,3 @@ export const verifyAdminStatus = async (
 
   return null
 }
-
-export function clickSignInWithFarcasterButton() {
-  const farcasterButton = document
-    .getElementsByClassName("fc-authkit-signin-button")[0]
-    ?.getElementsByTagName("button")[0]
-  farcasterButton?.click()
-}
