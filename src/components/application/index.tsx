@@ -23,7 +23,7 @@ export const ApplicationFlow = ({
 
   const onApply = useCallback(async (projectId: string) => {
     const result = await submitApplication(projectId)
-    if (result.error || !result.application) return
+    if (result.error !== null || !result.application) return
 
     setSubmittedApplication(result.application)
   }, [])
