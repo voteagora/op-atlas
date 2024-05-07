@@ -24,7 +24,7 @@ export const Badge = ({
         className={cn(
           "font-medium",
           size === "lg" ? "text-sm" : "text-xs",
-          accent ? "text-background" : "text-foreground",
+          accent ? "text-background" : "text-secondary-foreground",
         )}
       >
         {text}

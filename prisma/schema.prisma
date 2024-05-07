@@ -68,8 +68,7 @@ model Project {
 
 model Application {
   id            String @id @default(uuid())
-  status        String
-  recipient     String
+  status        String @default("submitted")
   attestationId String
 
   createdAt DateTime @default(now())

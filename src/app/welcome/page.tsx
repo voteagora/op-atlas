@@ -32,7 +32,7 @@ export default function Welcome() {
 
   return (
     <div className="flex flex-col items-center pt-20 pb-4 bg-backgroundSecondary min-h-lvh">
-      <div className="bg-background w-2/3 p-16 text-center rounded-3xl items-center flex flex-col gap-6">
+      <div className="bg-background w-2/3 max-w-4xl p-16 text-center rounded-3xl items-center flex flex-col gap-6">
         <Badge text="Welcome" size="lg" />
         <Carousel setApi={setCarouselApi}>
           <CarouselContent>

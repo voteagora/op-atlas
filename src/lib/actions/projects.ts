@@ -11,6 +11,7 @@ import {
   CreateProjectParams,
   deleteProject,
   getProjectTeam,
+  getUserApplications,
   getUserProjectsWithDetails,
   removeTeamMember,
   updateMemberRole,
@@ -26,6 +27,11 @@ import { verifyAdminStatus, verifyMembership } from "./utils"
 export const getProjects = async (farcasterId: string) => {
   const teams = await getUserProjectsWithDetails({ farcasterId })
   return (teams?.projects ?? []).map(({ project }) => project)
+}
+
+export const getApplications = async (farcasterId: string) => {
+  const teams = await getUserApplications({ farcasterId })
+  return (teams?.projects ?? []).flatMap(({ project }) => project.applications)
 }
 
 export const createNewProject = async (details: CreateProjectParams) => {

@@ -1,20 +1,31 @@
 "use client"
 
-import { useState } from "react"
+import { Application } from "@prisma/client"
+import { useCallback, useState } from "react"
 
-import { Project } from "@/lib/mocks"
+import { submitApplication } from "@/lib/actions/applications"
+import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { FundingApplication } from "./FundingApplication"
 
-export const Application = ({
+export const ApplicationFlow = ({
   className,
   projects,
+  applications,
 }: {
   className?: string
-  projects: Project[]
+  projects: ProjectWithDetails[]
+  applications: Application[]
 }) => {
   const [hasApplied, setHasApplied] = useState(false)
+
+  const onApply = useCallback(async (projectId: string) => {
+    const { error } = await submitApplication(projectId)
+    if (!error) {
+      setHasApplied(true)
+    }
+  }, [])
 
   return hasApplied ? (
     <ApplicationSubmitted className={className} />
@@ -22,7 +33,7 @@ export const Application = ({
     <FundingApplication
       className={className}
       projects={projects}
-      onApply={() => setHasApplied(true)}
+      onApply={onApply}
     />
   )
 }

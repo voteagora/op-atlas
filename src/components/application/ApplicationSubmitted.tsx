@@ -1,8 +1,7 @@
-"use client"
-
 import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 import { useLayoutEffect } from "react"
 
 import { cn } from "@/lib/utils"
@@ -27,10 +26,14 @@ const SOCIALS = [
 ] as const
 
 export const ApplicationSubmitted = ({ className }: { className?: string }) => {
+  const { data: session } = useSession()
+
   // Scroll to top on mount
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
   }, [])
+
+  const email = session?.user?.email
 
   return (
     <div
@@ -47,14 +50,17 @@ export const ApplicationSubmitted = ({ className }: { className?: string }) => {
           height={80}
           width={90}
         />
-        <h2 className="text-2xl font-semibold text-center">
-          Application Submitted!
-        </h2>
-        <p className="text-center">
-          You&apos;ll receive an email at{" "}
-          <span className="font-medium text-muted-foreground">
-            shaun@optimism.io
-          </span>{" "}
+        <h2 className="text-center">Application Submitted!</h2>
+        <p className="text-center text-lg font-semibold max-w-lg">
+          You&apos;ll receive an email{" "}
+          {email ? (
+            <>
+              at{" "}
+              <span className="text-accent-foreground">shaun@optimism.io</span>{" "}
+            </>
+          ) : (
+            ""
+          )}
           when your application is approved.
         </p>
       </div>
@@ -65,7 +71,7 @@ export const ApplicationSubmitted = ({ className }: { className?: string }) => {
       <div className="flex flex-col gap-y-6">
         <h3 className="text-lg font-semibold">What to expect</h3>
 
-        <ul className="list-disc text-muted-foreground space-y-6 pl-5">
+        <ul className="list-disc text-secondary-foreground space-y-4 pl-5">
           <li>
             <span className="font-medium">
               Your application is under review:
@@ -74,26 +80,25 @@ export const ApplicationSubmitted = ({ className }: { className?: string }) => {
             updates regarding your application status.
           </li>
           <li>
-            <span className="font-medium">Voting starts on April 15:</span> At
-            vero eos et accusamus et iusto odio dignissimos ducimus qui
-            blanditiis praesentium voluptatum deleniti atque.
+            <span className="font-medium">Voting starts on June 27:</span>{" "}
+            Badgeholders will evaluate the impact of your project by voting on
+            the quality-metrics that matter most to them. How voting works in
+            this round:{" "}
+            <Link href="#" className="font-medium">
+              Learn more
+            </Link>
           </li>
           <li>
-            <span className="font-medium">Results will be shared May 31:</span>{" "}
-            Similique sunt in culpa qui officia deserunt mollitia animi, id est
-            laborum et dolorum fuga Aug 31.
+            <span className="font-medium">Results will be shared July 18:</span>{" "}
+            You will receive instructions on how to claim your Retro Funding
+            rewards via email.
           </li>
         </ul>
-
-        <p className="text-muted-foreground">
-          At vero eos et accusamus et iusto odio dignissimos ducimus qui
-          blanditiis praesentium voluptatum deleniti atque.
-        </p>
       </div>
 
       {/* Social share */}
       <div className="flex flex-col gap-y-6">
-        <h3 className="text-lg font-semibold">Share with your community</h3>
+        <h3>Share with your community</h3>
         <div className="w-full h-[356px] rounded-xl bg-secondary" />
 
         <Button variant="secondary" className="w-fit">

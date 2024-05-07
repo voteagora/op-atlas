@@ -1,6 +1,8 @@
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import ProjectFormStatusSidebar from "@/components/projects/ProjectSidebar"
 
+// TODO: May need longer runtime since creating projects is slow
+
 export default function Page() {
   return (
     <div className="h-full bg-secondary flex flex-1 px-6">
