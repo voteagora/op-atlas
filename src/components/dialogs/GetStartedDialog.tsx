@@ -31,7 +31,7 @@ export function GetStartedDialog(props: DialogProps<object>) {
   return (
     <Dialog {...props}>
       <DialogContent className="max-w-md max-h-[80vh]">
-        <div className="flex flex-col gap-4 max-h-[calc(80vh_-_48px)]">
+        <div className="flex flex-col gap-2 max-h-[calc(80vh_-_48px)]">
           <div className="flex flex-col text-center gap-1">
             <h3>Apply for Retro Funding Round 4: Onchain Builders</h3>
             <div className="text-secondary-foreground">
@@ -40,14 +40,18 @@ export function GetStartedDialog(props: DialogProps<object>) {
               have met the following criteria:
             </div>
           </div>
-          <div className="overflow-y-auto pr-2">
-            <ul className="list-disc ml-6 text-start text-secondary-foreground">
-              {ELIGIBILITY.map((item, i) => (
-                <li className={i > 0 ? "mt-4" : ""} key={item}>
-                  {item}
-                </li>
-              ))}
-            </ul>
+          <div className="overflow-hidden relative">
+            <div className="absolute z-10 bg-gradient-to-t from-[rgba(251,252,254,0)_0%] to-[#FBFCFE_100%] w-full h-8"></div>
+            <div className="overflow-y-auto py-4 pr-2 relative h-full">
+              <ul className="list-disc ml-6 text-start text-secondary-foreground">
+                {ELIGIBILITY.map((item, i) => (
+                  <li className={i > 0 ? "mt-4" : ""} key={item}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="absolute z-10 bottom-0 bg-[linear-gradient(180deg,rgba(251,252,254,0)_0%,#FBFCFE_100%)] w-full h-8"></div>
           </div>
           <div className="flex flex-col gap-2">
             <Button
