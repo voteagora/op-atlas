@@ -1,3 +1,5 @@
+import { Application } from "@prisma/client"
+import { format } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
@@ -7,6 +9,7 @@ import { cn } from "@/lib/utils"
 
 import { Badge } from "../common/Badge"
 import { Callout } from "../common/Callout"
+import { CheckIconFilled } from "../icons/checkIconFilled"
 import { Button } from "../ui/button"
 import { Checkbox } from "../ui/checkbox"
 import { ProjectCard } from "./ProjectCard"
@@ -22,10 +25,12 @@ const TERMS = [
 export const FundingApplication = ({
   className,
   projects,
+  applications,
   onApply,
 }: {
   className?: string
   projects: ProjectWithDetails[]
+  applications: Application[]
   onApply: (projectId: string) => Promise<void>
 }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -36,6 +41,11 @@ export const FundingApplication = ({
 
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null,
+  )
+
+  const hasApplied = applications.length > 0
+  const appliedProjectIds = applications.map(
+    (application) => application.projectId,
   )
 
   const toggleAgreedTerm = (idx: number) => {
@@ -82,10 +92,25 @@ export const FundingApplication = ({
           width={80}
         />
         <h2 className="text-center">Retro Funding Round 4: Onchain Builders</h2>
-        <Badge
-          size="lg"
-          text="Submit this application by June 6th at 23:59 UTC"
-        />
+        {hasApplied ? (
+          <div className="flex items-center gap-1 py-1 px-3 bg-success rounded-full">
+            <Image
+              src="/assets/icons/circle-check-green.svg"
+              height={16}
+              width={16}
+              alt="Submitted"
+            />
+            <p className="font-medium text-success-foreground">
+              Application submitted on{" "}
+              {format(applications[0].createdAt, "MMMM d, h:mm a")}
+            </p>
+          </div>
+        ) : (
+          <Badge
+            size="lg"
+            text="Submit this application by June 6th at 23:59 UTC"
+          />
+        )}
       </div>
 
       {/* Information */}
@@ -180,7 +205,11 @@ export const FundingApplication = ({
               <ProjectCard
                 key={project.id}
                 project={project}
-                isSelected={selectedProjectId === project.id}
+                disabled={hasApplied}
+                isSelected={
+                  selectedProjectId === project.id ||
+                  appliedProjectIds.includes(project.id)
+                }
                 onSelect={toggleProjectSelection}
               />
             ))}
@@ -196,7 +225,8 @@ export const FundingApplication = ({
           {TERMS.map((term, idx) => (
             <div key={idx} className="flex gap-x-4">
               <Checkbox
-                checked={agreedTerms[idx]}
+                disabled={hasApplied}
+                checked={agreedTerms[idx] || hasApplied}
                 onCheckedChange={() => toggleAgreedTerm(idx)}
                 className="mt-1 border-2 rounded-[2px]"
               />
