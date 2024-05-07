@@ -1,12 +1,18 @@
+"use client"
+
 import { format } from "date-fns"
+import { ArrowRight } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
+import { optimism } from "viem/chains"
 
 import { FundingRound } from "@/lib/mocks"
 import { cn, titlecase } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Badge } from "../common/Badge"
-import { Button } from "../ui/button"
+import { ChainLogo } from "../common/ChainLogo"
 
 export const FundingRounds = ({
   className,
@@ -47,7 +53,11 @@ export const FundingRounds = ({
           <h3 className="text-lg font-semibold">{titlecase(status)}</h3>
         </div>
         {rounds.map((fundingRound) => (
-          <Round key={fundingRound.number} fundingRound={fundingRound} />
+          <Round
+            key={fundingRound.number}
+            fundingRound={fundingRound}
+            link={fundingRound.link}
+          />
         ))}
       </div>
     )
@@ -65,12 +75,34 @@ export const FundingRounds = ({
 const Round = ({
   className,
   fundingRound,
+  link,
 }: {
   className?: string
   fundingRound: FundingRound
+  link?: string
 }) => {
+  const router = useRouter()
+  const { setOpenDialog } = useAppDialogs()
+
+  const onClick = () => {
+    if (fundingRound.status === "now") {
+      setOpenDialog("get_started")
+      return
+    }
+
+    link && router.push(link)
+  }
+
   return (
-    <div className={cn("flex gap-x-6 border rounded-3xl p-10", className)}>
+    <button
+      onClick={onClick}
+      type="button"
+      className={cn(
+        "flex gap-x-6 border rounded-3xl p-10",
+        (link || fundingRound.status === "now") && "hover:shadow-md",
+        className,
+      )}
+    >
       {fundingRound.status !== "past" && (
         <div
           className="flex items-center justify-center h-[124px] w-[124px] rounded-md shrink-0"
@@ -90,41 +122,57 @@ const Round = ({
       <div className="flex flex-col gap-y-4">
         <div className="flex justify-between">
           <div className="flex flex-col gap-y-1">
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-2xl font-semibold text-start">
               Round {fundingRound.number}
               {fundingRound.status !== "past" ? ": " + fundingRound.name : ""}
             </h2>
 
-            {fundingRound.status === "past" && fundingRound.endsAt ? (
-              <p className="font-medium">
-                Closed in {format(fundingRound.endsAt, "MMM yyyy")}
+            <div className="flex items-center gap-x-1.5">
+              <Badge
+                text={titlecase(fundingRound.status)}
+                accent={fundingRound.status === "now"}
+              />
+              <p className="text-muted-foreground">
+                {fundingRound.status === "now" && fundingRound.endsAt ? (
+                  <>Apply by {format(fundingRound.endsAt, "MMM d")}</>
+                ) : (
+                  <>{format(fundingRound.startsAt, "MMM yyyy")}</>
+                )}
               </p>
-            ) : null}
-
-            {fundingRound.status !== "past" && (
-              <div className="flex items-center gap-x-1.5">
-                <Badge
-                  text={titlecase(fundingRound.status)}
-                  accent={fundingRound.status === "now"}
-                />
-                <p className="text-muted-foreground">
-                  {fundingRound.status === "now" ? (
-                    <>Apply by {format(fundingRound.startsAt, "MMM do")}</>
-                  ) : (
-                    <>{format(fundingRound.startsAt, "MMM yyyy")}</>
-                  )}
-                </p>
-              </div>
-            )}
+            </div>
           </div>
-
-          {fundingRound.status === "past" && (
-            <Button variant="outline">View</Button>
-          )}
         </div>
 
-        <p className="text-muted-foreground">{fundingRound.details}</p>
+        {fundingRound.status === "past" ? (
+          <div className="flex items-center gap-2 text-sm text-secondary-foreground">
+            <ChainLogo chainId={optimism.id.toString()} />
+            <div>
+              <span className="font-medium">{fundingRound.funding?.op} OP</span>{" "}
+              to{" "}
+              <span className="font-medium">
+                {fundingRound.funding?.projects} projects
+              </span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-secondary-foreground text-start">
+            {fundingRound.details}
+          </p>
+        )}
+
+        {fundingRound.status === "now" && (
+          <div className="flex text-secondary-foreground text-sm font-medium">
+            <div className="items-center flex gap-2 pr-4 border-r border-border">
+              <ChainLogo chainId={optimism.id.toString()} />
+              <div>10M OP</div>
+            </div>
+            <div className="flex gap-1 items-center pl-4">
+              <div>Apply</div>
+              <ArrowRight size={16} />
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </button>
   )
 }

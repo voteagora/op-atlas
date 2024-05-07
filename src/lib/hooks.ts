@@ -1,5 +1,6 @@
 import { useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
+
 import { ProjectWithDetails } from "./types"
 
 export function useIsAdmin(project?: ProjectWithDetails) {
