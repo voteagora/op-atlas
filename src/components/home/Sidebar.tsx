@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 
+import { clickSignInWithFarcasterButton } from "@/lib/actions/utils"
 import { cn } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -43,7 +44,11 @@ export const Sidebar = ({
           Create your profile, add projects, and apply for Retro Funding.
         </p>
 
-        <Button onClick={onGetStarted} variant="outline" className="mt-5">
+        <Button
+          onClick={clickSignInWithFarcasterButton}
+          variant="outline"
+          className="mt-5"
+        >
           Get started
         </Button>
       </div>

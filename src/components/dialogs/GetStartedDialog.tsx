@@ -1,4 +1,5 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { clickSignInWithFarcasterButton } from "@/lib/actions/utils"
 
 import { Button } from "../ui/button"
 import { DialogProps } from "./types"
@@ -20,11 +21,7 @@ export function GetStartedDialog(props: DialogProps<object>) {
      accept an id or className argument :/
   */
   const onGetStarted = () => {
-    const farcasterButton = document
-      .getElementsByClassName("fc-authkit-signin-button")[0]
-      ?.getElementsByTagName("button")[0]
-    farcasterButton?.click()
-
+    clickSignInWithFarcasterButton()
     props.onOpenChange(false)
   }
 
