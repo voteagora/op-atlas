@@ -1,7 +1,8 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { redirect, useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
 
 import { Badge } from "@/components/common/Badge"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,14 @@ export default function Welcome() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currIndex, setCurrIndex] = useState(0)
   const router = useRouter()
+
+  const { status } = useSession()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      redirect("/")
+    }
+  }, [status])
 
   const onNext = () => {
     if (!carouselApi) return
