@@ -18,21 +18,26 @@ export const ApplicationFlow = ({
   projects: ProjectWithDetails[]
   applications: Application[]
 }) => {
-  const [hasApplied, setHasApplied] = useState(false)
+  const [submittedApplication, setSubmittedApplication] =
+    useState<Application | null>(null)
 
   const onApply = useCallback(async (projectId: string) => {
-    const { error } = await submitApplication(projectId)
-    if (!error) {
-      setHasApplied(true)
-    }
+    const result = await submitApplication(projectId)
+    if (result.error || !result.application) return
+
+    setSubmittedApplication(result.application)
   }, [])
 
-  return hasApplied ? (
-    <ApplicationSubmitted className={className} />
+  return submittedApplication ? (
+    <ApplicationSubmitted
+      className={className}
+      application={submittedApplication}
+    />
   ) : (
     <FundingApplication
       className={className}
       projects={projects}
+      applications={applications}
       onApply={onApply}
     />
   )

@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { useMemo } from "react"
+import { memo, useMemo } from "react"
 
 import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
@@ -7,17 +7,19 @@ import { cn, getProjectStatus } from "@/lib/utils"
 import { Badge } from "../common/Badge"
 import { Checkbox } from "../ui/checkbox"
 
-export const ProjectCard = ({
+export const ProjectCard = memo(function ProjectCard({
   className,
   project,
+  disabled,
   isSelected,
   onSelect,
 }: {
   className?: string
   project: ProjectWithDetails
+  disabled?: boolean
   isSelected: boolean
   onSelect: (projectId: string) => void
-}) => {
+}) {
   const isEligible = useMemo(() => {
     return getProjectStatus(project).progressPercent === 100
   }, [project])
@@ -30,7 +32,7 @@ export const ProjectCard = ({
       )}
     >
       <Checkbox
-        disabled={!isEligible}
+        disabled={!isEligible || disabled}
         checked={isSelected}
         onCheckedChange={() => onSelect(project.id)}
         className="mt-1 border-2 rounded-[2px]"
@@ -63,4 +65,4 @@ export const ProjectCard = ({
       )}
     </div>
   )
-}
+})

@@ -1,3 +1,4 @@
+import { Application } from "@prisma/client"
 import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -25,7 +26,13 @@ const SOCIALS = [
   },
 ] as const
 
-export const ApplicationSubmitted = ({ className }: { className?: string }) => {
+export const ApplicationSubmitted = ({
+  className,
+  application,
+}: {
+  className?: string
+  application: Application
+}) => {
   const { data: session } = useSession()
 
   // Scroll to top on mount
@@ -65,7 +72,7 @@ export const ApplicationSubmitted = ({ className }: { className?: string }) => {
         </p>
       </div>
 
-      <ApplicationStatus />
+      <ApplicationStatus application={application} />
 
       {/* Expectations */}
       <div className="flex flex-col gap-y-6">
