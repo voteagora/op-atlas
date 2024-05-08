@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { UseFormReturn } from "react-hook-form"
+import { UseFormReturn, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 import {
@@ -164,18 +164,28 @@ export const VentureFundingForm = ({
   )
 }
 
-export const OptimismFundingForm = ({
+export const GrantsFundingForm = ({
   form,
   index,
 }: {
   form: UseFormReturn<z.infer<typeof FundingFormSchema>>
   index: number
 }) => {
+  const formValues = useWatch({
+    control: form.control,
+  })
+
+  const isOptimism =
+    Boolean(formValues.grants?.[index].type) &&
+    formValues.grants![index].type !== "other"
+
+  const isOther = formValues.grants?.[index].type === "other"
+
   return (
     <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
       <FormField
         control={form.control}
-        name={`optimism.${index}.type`}
+        name={`grants.${index}.type`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -204,9 +214,24 @@ export const OptimismFundingForm = ({
           </FormItem>
         )}
       />
+
+      {isOptimism && <OptimismFundingForm form={form} index={index} />}
+      {isOther && <OtherFundingForm form={form} index={index} />}
+    </div>
+  )
+}
+export const OptimismFundingForm = ({
+  form,
+  index,
+}: {
+  form: UseFormReturn<z.infer<typeof FundingFormSchema>>
+  index: number
+}) => {
+  return (
+    <>
       <FormField
         control={form.control}
-        name={`optimism.${index}.link`}
+        name={`grants.${index}.link`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -224,7 +249,7 @@ export const OptimismFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`optimism.${index}.amount`}
+        name={`grants.${index}.amount`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -235,6 +260,7 @@ export const OptimismFundingForm = ({
               <div className="relative">
                 <Input
                   {...field}
+                  type="number"
                   placeholder="Enter a number"
                   className="pl-11"
                 />
@@ -254,7 +280,7 @@ export const OptimismFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`optimism.${index}.date`}
+        name={`grants.${index}.date`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -273,7 +299,7 @@ export const OptimismFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`optimism.${index}.details`}
+        name={`grants.${index}.details`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel>Details</FormLabel>
@@ -291,7 +317,7 @@ export const OptimismFundingForm = ({
           </FormItem>
         )}
       />
-    </div>
+    </>
   )
 }
 
@@ -303,10 +329,10 @@ export const OtherFundingForm = ({
   index: number
 }) => {
   return (
-    <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
+    <>
       <FormField
         control={form.control}
-        name={`other.${index}.name`}
+        name={`grants.${index}.name`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -321,7 +347,7 @@ export const OtherFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`other.${index}.amount`}
+        name={`grants.${index}.amount`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -329,7 +355,10 @@ export const OtherFundingForm = ({
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={String(field.value)}
+              >
                 <SelectTrigger className="">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -348,7 +377,7 @@ export const OtherFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`other.${index}.year`}
+        name={`grants.${index}.year`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -375,7 +404,7 @@ export const OtherFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`other.${index}.details`}
+        name={`grants.${index}.details`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Details</FormLabel>
@@ -393,6 +422,6 @@ export const OtherFundingForm = ({
           </FormItem>
         )}
       />
-    </div>
+    </>
   )
 }
