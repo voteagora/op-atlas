@@ -2,8 +2,10 @@
 
 import { User } from "@prisma/client"
 import { useRouter } from "next/navigation"
+import { sortBy } from "ramda"
 import { useEffect, useState } from "react"
 
+import { Callout } from "@/components/common/Callout"
 import { Button } from "@/components/ui/button"
 import {
   addMembersToProject,
@@ -19,7 +21,6 @@ import AddTeamMemberDialog from "./AddTeamMemberDialog"
 import ConfirmTeamCheckbox from "./ConfirmTeamCheckbox"
 import DeleteTeamMemberDialog from "./DeleteTeamMemberDialog"
 import { TeamMemberCard } from "./TeamMemberCard"
-import { WarpcastBanner } from "./WarpcastBanner"
 
 export default function AddTeamDetailsForm({
   project,
@@ -27,7 +28,9 @@ export default function AddTeamDetailsForm({
   project: ProjectWithDetails
 }) {
   const router = useRouter()
-  const [team, setTeam] = useState(project.team)
+  const [team, setTeam] = useState(
+    sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
+  )
 
   const [isTeamConfirmed, setIsTeamConfirmed] = useState(
     project.addedTeamMembers,
@@ -71,7 +74,9 @@ export default function AddTeamDetailsForm({
   }
 
   useEffect(() => {
-    setTeam(project.team)
+    setTeam(
+      sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
+    )
   }, [project.team])
 
   return (
@@ -80,10 +85,13 @@ export default function AddTeamDetailsForm({
         <div className="flex flex-col gap-y-6">
           <h2>Team</h2>
           <p className="text-secondary-foreground">
-            All team members will have edit access to this project. Only the
-            project owner can delete the project or remove team members.
+            All team members will have edit access to this project. Only project
+            admins can delete the project or remove team members.
           </p>
-          <WarpcastBanner />
+          <Callout
+            type="info"
+            text="Access to an admin account is needed to claim Retro Funding rewards"
+          />
         </div>
 
         <div className="grid grid-cols-4 gap-2">

@@ -27,7 +27,7 @@ export const verifyAdminStatus = async (
     ({ project }) => project.id === projectId,
   )
 
-  if (membership?.role !== "owner" && membership?.role !== "admin") {
+  if (membership?.role !== "admin") {
     return {
       error: "Unauthorized",
     }
