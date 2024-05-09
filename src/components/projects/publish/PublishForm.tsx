@@ -63,6 +63,7 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
 
       <div className="flex items-center gap-4">
         <Button
+          isLoading={isPublishing}
           variant="destructive"
           disabled={!canPublish || isPublishing}
           onClick={onPublish}

@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { reverse } from "ramda"
-import { memo, useMemo } from "react"
+import { memo, useMemo, useState } from "react"
 
 import { Progress } from "@/components/ui/progress"
 import { ProjectWithDetails } from "@/lib/types"
@@ -23,6 +23,8 @@ const UserProjectCard = ({
     const { progressPercent } = getProjectStatus(project)
     return progressPercent
   }, [project])
+
+  const [loadingProject, setLoadingProject] = useState(false)
 
   return (
     <div className={cn("flex gap-x-6 border rounded-2xl p-6", className)}>
@@ -71,8 +73,12 @@ const UserProjectCard = ({
               </>
             )}
 
-            <Link href={`/projects/${project.id}/details`} className="ml-6">
-              <Button size="sm" variant="secondary">
+            <Link
+              href={`/projects/${project.id}/details`}
+              className="ml-6"
+              onClick={() => setLoadingProject(true)}
+            >
+              <Button isLoading={loadingProject} size="sm" variant="secondary">
                 Edit
               </Button>
             </Link>

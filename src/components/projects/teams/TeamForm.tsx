@@ -114,6 +114,7 @@ export default function AddTeamDetailsForm({
         />
 
         <Button
+          isLoading={isSubmitting}
           onClick={handleNextClicked}
           disabled={!isTeamConfirmed || isSubmitting}
           variant="destructive"

@@ -6,6 +6,7 @@ import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
@@ -78,6 +79,7 @@ function getDefaultValues(
 
 export function ContractsForm({ project }: { project: ProjectWithDetails }) {
   const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<z.infer<typeof ContractsSchema>>({
     resolver: zodResolver(ContractsSchema),
@@ -96,7 +98,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
   })
 
   const onSubmit = async (values: z.infer<typeof ContractsSchema>) => {
-    console.log("Submitting:", values)
+    setIsSubmitting(true)
     // TODO: Persist OSO slug once we have UI
     router.push(`/projects/${project.id}/grants`)
   }
@@ -333,8 +335,9 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
           )}
 
           <Button
+            isLoading={isSubmitting}
             className="self-start"
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
             type="submit"
             variant="destructive"
           >
