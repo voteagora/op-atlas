@@ -288,8 +288,8 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
       <div className="flex flex-col gap-y-6">
         <h2 className="text-2xl font-semibold">Grants & Funding</h2>
         <p className="text-secondary-foreground">
-          List any funding your project has received. This does not include past
-          rounds of Retro Funding.
+          List any grants, funding, or revenue your project has received. This
+          does not include past rounds of Retro Funding.
         </p>
         <div className="flex flex-col gap-y-1.5">
           <p className="text-sm font-medium">

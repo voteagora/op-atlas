@@ -137,7 +137,7 @@ export const RevenueFundingForm = ({
             <FormControl>
               <Textarea
                 {...field}
-                placeholder="Add a description"
+                placeholder="Type your message here"
                 className="resize-none"
               />
             </FormControl>
@@ -234,7 +234,7 @@ export const VentureFundingForm = ({
             <FormControl>
               <Textarea
                 {...field}
-                placeholder="Add a description"
+                placeholder="Type your message here"
                 className="resize-none"
               />
             </FormControl>
@@ -407,7 +407,7 @@ export const OptimismFundingForm = ({
             <FormControl>
               <Textarea
                 {...field}
-                placeholder="Add a description"
+                placeholder="Type your message here"
                 className="resize-none"
               />
             </FormControl>
@@ -512,7 +512,7 @@ export const OtherFundingForm = ({
             <FormControl>
               <Textarea
                 {...field}
-                placeholder="Add a description"
+                placeholder="Type your message here"
                 className="resize-none"
               />
             </FormControl>
