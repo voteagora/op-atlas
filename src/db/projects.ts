@@ -76,11 +76,11 @@ export type CreateProjectParams = Partial<
 }
 
 export async function createProject({
-  farcasterId,
+  userId,
   projectId,
   project,
 }: {
-  farcasterId: string
+  userId: string
   projectId: string
   project: CreateProjectParams
 }) {
@@ -90,10 +90,10 @@ export async function createProject({
       ...project,
       team: {
         create: {
-          role: "owner" satisfies TeamRole,
+          role: "admin" satisfies TeamRole,
           user: {
             connect: {
-              farcasterId,
+              id: userId,
             },
           },
         },
