@@ -67,7 +67,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <div className="absolute top-0 bottom-0 left-0 right-0 flex justify-center items-center">
               <Spinner />
             </div>
-            {/* Keep the orginal width of the button with showing the spinner icon */}
+            {/* Keep the orginal width of the button while showing the spinner icon */}
             <div className="invisible">{children}</div>
           </div>
         ) : (
