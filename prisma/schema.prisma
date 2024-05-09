@@ -49,7 +49,6 @@ model Project {
   twitter   String?
   mirror    String?
 
-  attestationId          String?
   openSourceObserverSlug String?
   addedTeamMembers       Boolean @default(false)
   addedFunding           Boolean @default(false)

@@ -51,7 +51,11 @@ const Dashboard = ({
 
         <div className="flex items-center gap-x-2">
           <Link href="/projects/new">
-            <Button variant="destructive">Add a project</Button>
+            <Button
+              variant={projects.length === 0 ? "destructive" : "secondary"}
+            >
+              Add a project
+            </Button>
           </Link>
           <Button variant="secondary">Join a project</Button>
         </div>

@@ -49,12 +49,9 @@ export const createNewProject = async (details: CreateProjectParams) => {
   })
 
   const project = await createProject({
-    farcasterId: session.user.farcasterId,
+    userId: session.user.id,
     projectId: attestationId,
-    project: {
-      ...details,
-      attestationId,
-    },
+    project: details,
   })
 
   revalidatePath("/dashboard")
