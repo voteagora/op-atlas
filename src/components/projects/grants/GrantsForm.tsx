@@ -18,8 +18,7 @@ import { cn } from "@/lib/utils"
 
 import {
   GrantsFundingForm,
-  OptimismFundingForm,
-  OtherFundingForm,
+  RevenueFundingForm,
   VentureFundingForm,
 } from "./FundingForm"
 import {
@@ -44,25 +43,23 @@ function toFormValues(
         year: funding.receivedAt,
         details: funding.details ?? "",
       })
-    } else if (funding.type === "grants") {
-      if (funding.grant === "other") {
-        grants.push({
-          type: "other",
-          name: funding.grant ?? "",
-          amount: funding.amount,
-          year: funding.receivedAt,
-          details: funding.details ?? "",
-        })
-      } else if (funding.grant) {
-        grants.push({
-          // @ts-ignore TODO: coerce to correct type here
-          type: funding.grant,
-          link: funding.grantUrl ?? "",
-          amount: funding.amount,
-          date: format(toDate(funding.receivedAt), "yyyy-MM-dd"), // date-fns does really stupid timezone conversions by default...
-          details: funding.details ?? "",
-        })
-      }
+    } else if (funding.type === "other-grant") {
+      grants.push({
+        type: "other-grant",
+        name: funding.grant ?? "",
+        amount: funding.amount,
+        year: funding.receivedAt,
+        details: funding.details ?? "",
+      })
+    } else if (funding.grant) {
+      grants.push({
+        // @ts-ignore TODO: coerce to correct type here
+        type: funding.grant,
+        link: funding.grantUrl ?? "",
+        amount: funding.amount,
+        date: format(toDate(funding.receivedAt), "yyyy-MM-dd"), // date-fns does really stupid timezone conversions by default...
+        details: funding.details ?? "",
+      })
     } else if (funding.type === "revenue") {
       revenue.push({
         amount: funding.amount,
@@ -95,12 +92,14 @@ function fromFormValues(
   })
 
   const optimismGrants = values.grants.filter(
-    (grant) => grant.type !== "other",
+    (grant) => grant.type !== "other-grant",
   ) as z.infer<typeof OptimismGrantSchema>[]
 
   optimismGrants.forEach((optimism) => {
+    if (!optimism.type) return
+
     funding.push({
-      type: "optimism",
+      type: optimism.type,
       amount: optimism.amount.toString(),
       receivedAt: optimism.date,
       grant: optimism.type,
@@ -111,12 +110,12 @@ function fromFormValues(
   })
 
   const otherGrants = values.grants.filter(
-    (grant) => grant.type === "other",
+    (grant) => grant.type === "other-grant",
   ) as z.infer<typeof OtherGrantSchema>[]
 
   otherGrants.forEach((other) => {
     funding.push({
-      type: "other",
+      type: other.type,
       grant: other.name,
       amount: other.amount,
       receivedAt: other.year,
@@ -125,14 +124,15 @@ function fromFormValues(
     })
   })
 
-  // TODO: figure out where to store revenue?
-  // values.revenue.forEach((revenue) => {
-  //   funding.push({
-  //     type: "revenue",
-  //     amount: revenue.amount,
-  //     details: revenue.details,
-  //   })
-  // })
+  values.revenue.forEach((revenue) => {
+    funding.push({
+      type: "revenue",
+      amount: revenue.amount,
+      details: revenue.details,
+      receivedAt: "",
+      projectId,
+    })
+  })
 
   return funding
 }
@@ -155,6 +155,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     fields: ventureFields,
     replace: setVentureFields,
     append: addVentureField,
+    remove: removeVentureField,
   } = useFieldArray({
     control: form.control,
     name: "venture",
@@ -164,6 +165,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     fields: grantsFields,
     replace: setGrantsFields,
     append: addGrantsField,
+    remove: removeGrantsField,
   } = useFieldArray({
     control: form.control,
     name: "grants",
@@ -173,6 +175,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     fields: revenueFields,
     replace: setRevenueFields,
     append: addRevenueField,
+    remove: removeRevenueField,
   } = useFieldArray({
     control: form.control,
     name: "revenue",
@@ -269,7 +272,6 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   }
 
   const onSubmit = async (values: z.infer<typeof FundingFormSchema>) => {
-    console.log("Submitting:", values)
     await setProjectFunding(project.id, fromFormValues(project.id, values))
 
     router.push(`/projects/${project.id}/publish`)
@@ -309,27 +311,16 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-y-12"
         >
-          {ventureFields.length > 0 ? (
-            <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold">Venture Funding</h3>
-              {ventureFields.map((field, index) => (
-                <VentureFundingForm key={field.id} form={form} index={index} />
-              ))}
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => onAddFundingType("venture")}
-                className="w-fit"
-              >
-                <Plus size={16} className="mr-2.5" /> Add venture capital
-              </Button>
-            </div>
-          ) : null}
           {grantsFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
               <h3 className="text-lg font-semibold">Grants</h3>
               {grantsFields.map((field, index) => (
-                <GrantsFundingForm key={field.id} form={form} index={index} />
+                <GrantsFundingForm
+                  key={field.id}
+                  form={form}
+                  index={index}
+                  remove={() => removeGrantsField(index)}
+                />
               ))}
               <Button
                 type="button"
@@ -341,11 +332,37 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
               </Button>
             </div>
           ) : null}
+          {ventureFields.length > 0 ? (
+            <div className="flex flex-col gap-y-6">
+              <h3 className="text-lg font-semibold">Venture Funding</h3>
+              {ventureFields.map((field, index) => (
+                <VentureFundingForm
+                  key={field.id}
+                  form={form}
+                  index={index}
+                  remove={() => removeVentureField(index)}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => onAddFundingType("venture")}
+                className="w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add venture capital
+              </Button>
+            </div>
+          ) : null}
           {revenueFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold">Other Grants</h3>
+              <h3 className="text-lg font-semibold">Revenue</h3>
               {revenueFields.map((field, index) => (
-                <div key={index}>Revenue form goes here!</div>
+                <RevenueFundingForm
+                  key={field.id}
+                  form={form}
+                  index={index}
+                  remove={() => removeRevenueField(index)}
+                />
               ))}
               <Button
                 type="button"

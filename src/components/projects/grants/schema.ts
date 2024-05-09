@@ -56,7 +56,7 @@ export const RevenueSchema = z.object({
 })
 
 export const OtherGrantSchema = z.object({
-  type: z.literal("other"),
+  type: z.literal("other-grant"),
   name: z.string().min(1, "Please enter a grant name"),
   amount: z.string().min(1, "Please select an amount"),
   year: z.string().min(1, "Please select a year"),
