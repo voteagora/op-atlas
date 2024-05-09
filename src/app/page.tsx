@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
@@ -14,10 +15,17 @@ export default async function Home() {
   }
 
   return (
-    <main className="flex flex-col flex-1 h-full items-center pb-12">
-      {/* Gradient backdrop */}
-      <div className="absolute inset-x-0 top-18 h-[500px] bg-rainbow" />
-      <div className="absolute inset-x-0 top-18 h-[500px] bg-gradient-to-b from-background/0 to-background/100" />
+    <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
+      {/* Background image */}
+      <div className="absolute h-[500px] w-full">
+        <div className="relative h-[500px] w-full">
+          <Image
+            src="/assets/images/gradient-background.svg"
+            fill
+            alt="Gradient"
+          />
+        </div>
+      </div>
 
       {/* Main content */}
       <div className="mt-36 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
