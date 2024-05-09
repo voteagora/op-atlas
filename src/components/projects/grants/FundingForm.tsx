@@ -1,7 +1,9 @@
+import { X } from "lucide-react"
 import Image from "next/image"
-import { UseFormReturn } from "react-hook-form"
+import { UseFormReturn, useWatch } from "react-hook-form"
 import { z } from "zod"
 
+import { Button } from "@/components/ui/button"
 import {
   FormControl,
   FormDescription,
@@ -77,15 +79,95 @@ const FUNDING_YEARS = [
   },
 ] as const
 
-export const VentureFundingForm = ({
+export const RevenueFundingForm = ({
   form,
   index,
+  remove,
 }: {
   form: UseFormReturn<z.infer<typeof FundingFormSchema>>
   index: number
+  remove: () => void
 }) => {
   return (
-    <div className={cn("flex flex-col gap-y-6 p-6 border rounded-xl")}>
+    <div className="group flex flex-col gap-y-6 p-6 border rounded-xl relative">
+      <Button
+        onClick={remove}
+        className="hidden p-2 absolute top-1 right-1 group-hover:block"
+        variant="ghost"
+      >
+        <X className="h-4 w-4" />
+        <span className="sr-only">Delete</span>
+      </Button>
+      <FormField
+        control={form.control}
+        name={`revenue.${index}.amount`}
+        render={({ field }) => (
+          <FormItem className="flex flex-col gap-1.5">
+            <FormLabel className="text-foreground">
+              How much revenue have you earned since the start of 2023?{" "}
+              <span className="text-destructive">*</span>
+            </FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger className="">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FUNDING_AMOUNTS.map((amount) => (
+                    <SelectItem key={amount.value} value={amount.value}>
+                      {amount.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name={`revenue.${index}.details`}
+        render={({ field }) => (
+          <FormItem className="flex flex-col gap-1.5">
+            <FormLabel>Details</FormLabel>
+            <FormDescription className="!mt-0">
+              Include any details you&apos;d like to about this funding.
+            </FormDescription>
+            <FormControl>
+              <Textarea
+                {...field}
+                placeholder="Type your message here"
+                className="resize-none"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
+  )
+}
+
+export const VentureFundingForm = ({
+  form,
+  index,
+  remove,
+}: {
+  form: UseFormReturn<z.infer<typeof FundingFormSchema>>
+  index: number
+  remove: () => void
+}) => {
+  return (
+    <div className="group flex flex-col gap-y-6 p-6 border rounded-xl relative">
+      <Button
+        onClick={remove}
+        className="hidden p-2 absolute top-1 right-1 group-hover:block"
+        variant="ghost"
+      >
+        <X className="h-4 w-4" />
+        <span className="sr-only">Delete</span>
+      </Button>
       <FormField
         control={form.control}
         name={`venture.${index}.amount`}
@@ -152,7 +234,7 @@ export const VentureFundingForm = ({
             <FormControl>
               <Textarea
                 {...field}
-                placeholder="Add a description"
+                placeholder="Type your message here"
                 className="resize-none"
               />
             </FormControl>
@@ -164,18 +246,38 @@ export const VentureFundingForm = ({
   )
 }
 
-export const OptimismFundingForm = ({
+export const GrantsFundingForm = ({
   form,
   index,
+  remove,
 }: {
   form: UseFormReturn<z.infer<typeof FundingFormSchema>>
   index: number
+  remove: () => void
 }) => {
+  const formValues = useWatch({
+    control: form.control,
+  })
+
+  const isOptimism =
+    Boolean(formValues.grants?.[index].type) &&
+    formValues.grants![index].type !== "other-grant"
+
+  const isOther = formValues.grants?.[index].type === "other-grant"
+
   return (
-    <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
+    <div className="flex flex-col gap-y-6 p-6 border rounded-xl relative group">
+      <Button
+        onClick={remove}
+        className="hidden p-2 absolute top-1 right-1 group-hover:block"
+        variant="ghost"
+      >
+        <X className="h-4 w-4" />
+        <span className="sr-only">Delete</span>
+      </Button>
       <FormField
         control={form.control}
-        name={`optimism.${index}.type`}
+        name={`grants.${index}.type`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -196,7 +298,7 @@ export const OptimismFundingForm = ({
                   <SelectItem value="foundation-grant">
                     Foundation Grant (Partner fund & other)
                   </SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="other-grant">Other</SelectItem>
                 </SelectContent>
               </Select>
             </FormControl>
@@ -204,9 +306,30 @@ export const OptimismFundingForm = ({
           </FormItem>
         )}
       />
+      {!isOptimism && !isOther && (
+        <FormItem className="flex flex-col gap-1.5">
+          <FormLabel className="text-[#85868C]">Additional details</FormLabel>
+          <Input disabled placeholder="Add details" />
+        </FormItem>
+      )}
+
+      {isOptimism && <OptimismFundingForm form={form} index={index} />}
+      {isOther && <OtherFundingForm form={form} index={index} />}
+    </div>
+  )
+}
+export const OptimismFundingForm = ({
+  form,
+  index,
+}: {
+  form: UseFormReturn<z.infer<typeof FundingFormSchema>>
+  index: number
+}) => {
+  return (
+    <>
       <FormField
         control={form.control}
-        name={`optimism.${index}.link`}
+        name={`grants.${index}.link`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -224,7 +347,7 @@ export const OptimismFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`optimism.${index}.amount`}
+        name={`grants.${index}.amount`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -235,6 +358,7 @@ export const OptimismFundingForm = ({
               <div className="relative">
                 <Input
                   {...field}
+                  type="number"
                   placeholder="Enter a number"
                   className="pl-11"
                 />
@@ -254,7 +378,7 @@ export const OptimismFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`optimism.${index}.date`}
+        name={`grants.${index}.date`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -273,7 +397,7 @@ export const OptimismFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`optimism.${index}.details`}
+        name={`grants.${index}.details`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel>Details</FormLabel>
@@ -283,7 +407,7 @@ export const OptimismFundingForm = ({
             <FormControl>
               <Textarea
                 {...field}
-                placeholder="Add a description"
+                placeholder="Type your message here"
                 className="resize-none"
               />
             </FormControl>
@@ -291,7 +415,7 @@ export const OptimismFundingForm = ({
           </FormItem>
         )}
       />
-    </div>
+    </>
   )
 }
 
@@ -303,10 +427,10 @@ export const OtherFundingForm = ({
   index: number
 }) => {
   return (
-    <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
+    <>
       <FormField
         control={form.control}
-        name={`other.${index}.name`}
+        name={`grants.${index}.name`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -321,7 +445,7 @@ export const OtherFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`other.${index}.amount`}
+        name={`grants.${index}.amount`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -329,7 +453,10 @@ export const OtherFundingForm = ({
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={String(field.value)}
+              >
                 <SelectTrigger className="">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -348,7 +475,7 @@ export const OtherFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`other.${index}.year`}
+        name={`grants.${index}.year`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
@@ -375,7 +502,7 @@ export const OtherFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`other.${index}.details`}
+        name={`grants.${index}.details`}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Details</FormLabel>
@@ -385,7 +512,7 @@ export const OtherFundingForm = ({
             <FormControl>
               <Textarea
                 {...field}
-                placeholder="Add a description"
+                placeholder="Type your message here"
                 className="resize-none"
               />
             </FormControl>
@@ -393,6 +520,6 @@ export const OtherFundingForm = ({
           </FormItem>
         )}
       />
-    </div>
+    </>
   )
 }

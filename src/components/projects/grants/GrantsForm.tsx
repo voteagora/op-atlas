@@ -17,18 +17,24 @@ import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import {
-  OptimismFundingForm,
-  OtherFundingForm,
+  GrantsFundingForm,
+  RevenueFundingForm,
   VentureFundingForm,
 } from "./FundingForm"
-import { FUNDING_TYPES, FundingFormSchema, FundingType } from "./schema"
+import {
+  FUNDING_TYPES,
+  FundingFormSchema,
+  FundingType,
+  OptimismGrantSchema,
+  OtherGrantSchema,
+} from "./schema"
 
 function toFormValues(
   project: ProjectWithDetails,
 ): z.infer<typeof FundingFormSchema> {
   const venture: z.infer<typeof FundingFormSchema>["venture"] = []
-  const optimism: z.infer<typeof FundingFormSchema>["optimism"] = []
-  const other: z.infer<typeof FundingFormSchema>["other"] = []
+  const grants: z.infer<typeof FundingFormSchema>["grants"] = []
+  const revenue: z.infer<typeof FundingFormSchema>["revenue"] = []
 
   project.funding.forEach((funding) => {
     if (funding.type === "venture") {
@@ -37,28 +43,35 @@ function toFormValues(
         year: funding.receivedAt,
         details: funding.details ?? "",
       })
-    } else if (funding.type === "optimism") {
-      optimism.push({
-        type: funding.grant ?? "",
-        link: funding.grantUrl ?? "",
-        amount: parseFloat(funding.amount),
-        date: format(toDate(funding.receivedAt), "yyyy-MM-dd"), // date-fns does really stupid timezone conversions by default...
-        details: funding.details ?? "",
-      })
-    } else if (funding.type === "other") {
-      other.push({
+    } else if (funding.type === "other-grant") {
+      grants.push({
+        type: "other-grant",
         name: funding.grant ?? "",
         amount: funding.amount,
         year: funding.receivedAt,
         details: funding.details ?? "",
+      })
+    } else if (funding.grant) {
+      grants.push({
+        // @ts-ignore TODO: coerce to correct type here
+        type: funding.grant,
+        link: funding.grantUrl ?? "",
+        amount: funding.amount,
+        date: format(toDate(funding.receivedAt), "yyyy-MM-dd"), // date-fns does really stupid timezone conversions by default...
+        details: funding.details ?? "",
+      })
+    } else if (funding.type === "revenue") {
+      revenue.push({
+        amount: funding.amount,
+        details: funding.details ?? undefined,
       })
     }
   })
 
   return {
     venture,
-    optimism,
-    other,
+    grants,
+    revenue,
   }
 }
 
@@ -77,9 +90,16 @@ function fromFormValues(
       projectId,
     })
   })
-  values.optimism.forEach((optimism) => {
+
+  const optimismGrants = values.grants.filter(
+    (grant) => grant.type !== "other-grant",
+  ) as z.infer<typeof OptimismGrantSchema>[]
+
+  optimismGrants.forEach((optimism) => {
+    if (!optimism.type) return
+
     funding.push({
-      type: "optimism",
+      type: optimism.type,
       amount: optimism.amount.toString(),
       receivedAt: optimism.date,
       grant: optimism.type,
@@ -88,13 +108,28 @@ function fromFormValues(
       projectId,
     })
   })
-  values.other.forEach((other) => {
+
+  const otherGrants = values.grants.filter(
+    (grant) => grant.type === "other-grant",
+  ) as z.infer<typeof OtherGrantSchema>[]
+
+  otherGrants.forEach((other) => {
     funding.push({
-      type: "other",
+      type: other.type,
       grant: other.name,
       amount: other.amount,
       receivedAt: other.year,
       details: other.details,
+      projectId,
+    })
+  })
+
+  values.revenue.forEach((revenue) => {
+    funding.push({
+      type: "revenue",
+      amount: revenue.amount,
+      details: revenue.details,
+      receivedAt: "",
       projectId,
     })
   })
@@ -120,37 +155,40 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     fields: ventureFields,
     replace: setVentureFields,
     append: addVentureField,
+    remove: removeVentureField,
   } = useFieldArray({
     control: form.control,
     name: "venture",
   })
 
   const {
-    fields: optimismFields,
-    replace: setOptimismFields,
-    append: addOptimismField,
+    fields: grantsFields,
+    replace: setGrantsFields,
+    append: addGrantsField,
+    remove: removeGrantsField,
   } = useFieldArray({
     control: form.control,
-    name: "optimism",
+    name: "grants",
   })
 
   const {
-    fields: otherFields,
-    replace: setOtherFields,
-    append: addOtherField,
+    fields: revenueFields,
+    replace: setRevenueFields,
+    append: addRevenueField,
+    remove: removeRevenueField,
   } = useFieldArray({
     control: form.control,
-    name: "other",
+    name: "revenue",
   })
 
   const hasFundingType = (type: FundingType) => {
     switch (type) {
       case "venture":
         return ventureFields.length > 0
-      case "optimism":
-        return optimismFields.length > 0
-      case "other":
-        return otherFields.length > 0
+      case "grants":
+        return grantsFields.length > 0
+      case "revenue":
+        return revenueFields.length > 0
       case "none":
         return selectedNone
       default:
@@ -170,35 +208,33 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
       } else {
         setVentureFields([])
       }
-    } else if (type === "optimism") {
-      if (optimismFields.length === 0) {
+    } else if (type === "grants") {
+      if (grantsFields.length === 0) {
         setSelectedNone(false)
-        addOptimismField({
-          type: "",
+        addGrantsField({
+          type: undefined,
           link: "",
-          amount: "" as unknown as number, // We coerce it with zod, so this is a better empty UI
+          amount: "",
           date: "",
           details: "",
         })
       } else {
-        setOptimismFields([])
+        setGrantsFields([])
       }
-    } else if (type === "other") {
-      if (otherFields.length === 0) {
+    } else if (type === "revenue") {
+      if (revenueFields.length === 0) {
         setSelectedNone(false)
-        addOtherField({
-          name: "",
+        addRevenueField({
           amount: "",
-          year: "",
           details: "",
         })
       } else {
-        setOtherFields([])
+        setRevenueFields([])
       }
     } else if (type === "none") {
       setVentureFields([])
-      setOptimismFields([])
-      setOtherFields([])
+      setGrantsFields([])
+      setRevenueFields([])
       setSelectedNone(!selectedNone)
     }
   }
@@ -213,24 +249,22 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           details: "",
         })
       }
-    } else if (type === "optimism") {
-      const valid = await form.trigger("optimism")
+    } else if (type === "grants") {
+      const valid = await form.trigger("grants")
       if (valid) {
-        addOptimismField({
-          type: "",
+        addGrantsField({
+          type: undefined,
           link: "",
-          amount: "" as unknown as number, // We coerce it with zod, so this is a better empty UI
+          amount: "",
           date: "",
           details: "",
         })
       }
-    } else if (type === "other") {
-      const valid = await form.trigger("other")
+    } else if (type === "revenue") {
+      const valid = await form.trigger("revenue")
       if (valid) {
-        addOtherField({
-          name: "",
+        addRevenueField({
           amount: "",
-          year: "",
           details: "",
         })
       }
@@ -238,7 +272,6 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   }
 
   const onSubmit = async (values: z.infer<typeof FundingFormSchema>) => {
-    console.log("Submitting:", values)
     await setProjectFunding(project.id, fromFormValues(project.id, values))
 
     router.push(`/projects/${project.id}/publish`)
@@ -247,16 +280,16 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const canSubmit =
     selectedNone ||
     ventureFields.length > 0 ||
-    optimismFields.length > 0 ||
-    otherFields.length > 0
+    grantsFields.length > 0 ||
+    revenueFields.length > 0
 
   return (
     <div className="flex flex-col gap-y-12 w-full">
       <div className="flex flex-col gap-y-6">
         <h2 className="text-2xl font-semibold">Grants & Funding</h2>
         <p className="text-secondary-foreground">
-          List any funding your project has received. This does not include past
-          rounds of Retro Funding.
+          List any grants, funding, or revenue your project has received. This
+          does not include past rounds of Retro Funding.
         </p>
         <div className="flex flex-col gap-y-1.5">
           <p className="text-sm font-medium">
@@ -278,11 +311,37 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-y-12"
         >
+          {grantsFields.length > 0 ? (
+            <div className="flex flex-col gap-y-6">
+              <h3 className="text-lg font-semibold">Grants</h3>
+              {grantsFields.map((field, index) => (
+                <GrantsFundingForm
+                  key={field.id}
+                  form={form}
+                  index={index}
+                  remove={() => removeGrantsField(index)}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => onAddFundingType("grants")}
+                className="w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add grant
+              </Button>
+            </div>
+          ) : null}
           {ventureFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
               <h3 className="text-lg font-semibold">Venture Funding</h3>
               {ventureFields.map((field, index) => (
-                <VentureFundingForm key={field.id} form={form} index={index} />
+                <VentureFundingForm
+                  key={field.id}
+                  form={form}
+                  index={index}
+                  remove={() => removeVentureField(index)}
+                />
               ))}
               <Button
                 type="button"
@@ -294,32 +353,21 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
               </Button>
             </div>
           ) : null}
-          {optimismFields.length > 0 ? (
+          {revenueFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold">Optimism Grants</h3>
-              {optimismFields.map((field, index) => (
-                <OptimismFundingForm key={field.id} form={form} index={index} />
+              <h3 className="text-lg font-semibold">Revenue</h3>
+              {revenueFields.map((field, index) => (
+                <RevenueFundingForm
+                  key={field.id}
+                  form={form}
+                  index={index}
+                  remove={() => removeRevenueField(index)}
+                />
               ))}
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => onAddFundingType("optimism")}
-                className="w-fit"
-              >
-                <Plus size={16} className="mr-2.5" /> Add grant
-              </Button>
-            </div>
-          ) : null}
-          {otherFields.length > 0 ? (
-            <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold">Other Grants</h3>
-              {otherFields.map((field, index) => (
-                <OtherFundingForm key={field.id} form={form} index={index} />
-              ))}
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => onAddFundingType("other")}
+                onClick={() => onAddFundingType("revenue")}
                 className="w-fit"
               >
                 <Plus size={16} className="mr-2.5" /> Add grant

@@ -15,12 +15,6 @@ export const Sidebar = ({
   className?: string
   funding?: string
 }) => {
-  const { setOpenDialog } = useAppDialogs()
-
-  const onGetStarted = () => {
-    setOpenDialog("get_started")
-  }
-
   return (
     <div className={cn("flex flex-col gap-y-12", className)}>
       <div className="flex flex-col items-center gap-y-4 p-6 border border-[#D6E4FF] bg-[#F0F4FF] rounded-3xl">
