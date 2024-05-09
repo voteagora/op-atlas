@@ -10,9 +10,7 @@ export function useIsAdmin(project?: ProjectWithDetails) {
     project &&
     session &&
     project.team.find(
-      (member) =>
-        member.userId === session.user.id &&
-        (member.role === "owner" || member.role === "admin"),
+      (member) => member.userId === session.user.id && member.role === "admin",
     )
   )
 }

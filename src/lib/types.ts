@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client"
 
-export type TeamRole = "member" | "admin" | "owner"
+export type TeamRole = "member" | "admin"
 
 export type ProjectWithDetails = Prisma.ProjectGetPayload<{
   include: {
