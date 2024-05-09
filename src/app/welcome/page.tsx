@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { redirect, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
@@ -86,16 +87,19 @@ const CARD_DETAILS = {
     title: "Welcome to your Optimist profile!",
     description:
       "This is where you’ll manage your projects and apply for Retro Funding.",
+    image: "/assets/images/welcome-graphic-1.png",
   },
   projects: {
     title: "Add or join projects",
     description:
       "In projects you can add team members, add code repos, and verify your onchain contracts.",
+    image: "/assets/images/welcome-graphic-2.png",
   },
   funding: {
     title: "Apply for Retro Funding",
     description:
       "Once you’ve setup your projects, you can apply for Retro Funding.",
+    image: "/assets/images/welcome-graphic-3.png",
   },
 }
 
@@ -103,7 +107,12 @@ function WelcomeCard({ card }: { card: keyof typeof CARD_DETAILS }) {
   return (
     <CarouselItem>
       <div className="flex flex-col gap-6 items-center text-center">
-        <div className="bg-backgroundaccent w-1/2 rounded-xl h-36"></div>
+        <Image
+          src={CARD_DETAILS[card].image}
+          alt="Cute little blobs doing cute little things"
+          width={300}
+          height={150}
+        />
         <div className="flex flex-col gap-3">
           <div className="text-lg font-semibold">
             {CARD_DETAILS[card].title}
