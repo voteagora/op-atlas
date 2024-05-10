@@ -103,20 +103,14 @@ const Round = ({
         className,
       )}
     >
-      {fundingRound.status !== "past" && (
-        <div
-          className="flex items-center justify-center h-[124px] w-[124px] rounded-md shrink-0"
-          style={{ backgroundColor: fundingRound.accentColor ?? "#F2F3F8" }}
-        >
-          {fundingRound.iconUrl && (
-            <Image
-              src={fundingRound.iconUrl}
-              width={92}
-              height={92}
-              alt="h-[92px] w-[92px] object-center object-contain"
-            />
-          )}
-        </div>
+      {fundingRound.status !== "past" && fundingRound.iconUrl && (
+        <Image
+          src={fundingRound.iconUrl}
+          width={124}
+          height={124}
+          className="rounded-md"
+          alt="Sunny blobs"
+        />
       )}
 
       <div className="flex flex-col gap-y-4">
