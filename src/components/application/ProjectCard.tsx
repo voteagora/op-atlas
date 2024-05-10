@@ -1,11 +1,12 @@
 import Image from "next/image"
-import { memo, useMemo } from "react"
+import { memo, useMemo, useState } from "react"
 
 import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 
 import { Badge } from "../common/Badge"
 import { Checkbox } from "../ui/checkbox"
+import IneligibleDialog from "./IneligibleDialog"
 
 export const ProjectCard = memo(function ProjectCard({
   className,
@@ -24,45 +25,54 @@ export const ProjectCard = memo(function ProjectCard({
     return getProjectStatus(project).progressPercent === 100
   }, [project])
 
+  const [ineligibleDialogOpen, setIneligibleDialogOpen] = useState(false)
+
   return (
-    <div
-      className={cn(
-        "flex items-center gap-4 border rounded-2xl p-6",
-        className,
+    <>
+      {ineligibleDialogOpen && (
+        <IneligibleDialog open onOpenChange={setIneligibleDialogOpen} />
       )}
-    >
-      <Checkbox
-        disabled={!isEligible || disabled}
-        checked={isSelected}
-        onCheckedChange={() => onSelect(project.id)}
-        className="mt-1 border-2 rounded-[2px]"
-      />
-      {project.thumbnailUrl ? (
-        <Image
-          alt={project.name}
-          src={project.thumbnailUrl ?? undefined}
-          height={64}
-          width={64}
-          className={cn(
-            "h-16 w-16 rounded-lg bg-secondary",
-            !isEligible && "opacity-50",
-          )}
-        />
-      ) : (
-        <div className="h-16 w-16 rounded-lg bg-secondary" />
-      )}
-      <p
+      <button
+        onClick={() => !isEligible && setIneligibleDialogOpen(true)}
         className={cn(
-          "text-lg font-semibold truncate",
-          !isEligible && "opacity-50",
+          "flex items-center gap-4 border rounded-2xl p-6",
+          className,
+          !isEligible ? "cursor-pointer" : "cursor-default",
         )}
       >
-        {project.name}
-      </p>
+        <Checkbox
+          disabled={!isEligible || disabled}
+          checked={isSelected}
+          onCheckedChange={() => onSelect(project.id)}
+          className="mt-1 border-2 rounded-[2px]"
+        />
+        {project.thumbnailUrl ? (
+          <Image
+            alt={project.name}
+            src={project.thumbnailUrl ?? undefined}
+            height={64}
+            width={64}
+            className={cn(
+              "h-16 w-16 rounded-lg bg-secondary",
+              !isEligible && "opacity-50",
+            )}
+          />
+        ) : (
+          <div className="h-16 w-16 rounded-lg bg-secondary" />
+        )}
+        <p
+          className={cn(
+            "text-lg font-semibold truncate",
+            !isEligible && "opacity-50",
+          )}
+        >
+          {project.name}
+        </p>
 
-      {!isEligible && (
-        <Badge size="lg" text="Not eligible" className="ml-auto" />
-      )}
-    </div>
+        {!isEligible && (
+          <Badge size="lg" text="Not eligible" className="ml-auto" />
+        )}
+      </button>
+    </>
   )
 })
