@@ -29,30 +29,3 @@ export default function usePrevious<T>(value: T) {
   // Return previous value (happens before update in useEffect above)
   return ref.current
 }
-
-type WindowSize = {
-  width: number
-  height: number
-}
-
-export function useWindowSize(): WindowSize {
-  const [windowSize, setWindowSize] = useState<WindowSize>(() => {
-    return {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    }
-  })
-
-  function handleSize() {
-    setWindowSize({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    })
-  }
-
-  useEffect(() => {
-    window.addEventListener("resize", handleSize)
-  }, [])
-
-  return windowSize
-}

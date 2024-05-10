@@ -1,10 +1,10 @@
 "use client"
 
 import React from "react"
+import { useWindowSize } from "usehooks-ts"
 
 import { MobileViewportWarning } from "@/components/common/MobileViewportWarning"
 import Navbar from "@/components/common/Navbar"
-import { useWindowSize } from "@/lib/hooks"
 
 const MOBILE_BREAKPOINT = 640 // Tailwind's `sm` breakpoint
 
