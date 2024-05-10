@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils"
 
 import { Account } from "./Account"
 
+const activeClass = "border-b-4 border-[#0F111A] text-text-default"
+
 const Navbar = () => {
   const pathname = usePathname()
   const isRounds = pathname === "/" || pathname === "/rounds"
@@ -25,12 +27,15 @@ const Navbar = () => {
         </Link>
         <div
           className={cn(
-            "flex gap-10 font-semibold text-text-muted h-full self-stretch",
+            "group flex gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
             isRounds ? "border-b-4 border-[#0F111A] text-text-default" : "",
           )}
         >
           <div className="flex items-center">
-            <Link className={isRounds ? "mt-1" : ""} href="/rounds">
+            <Link
+              className={isRounds ? "mt-1" : "group-hover:mt-1"}
+              href="/rounds"
+            >
               Rounds
             </Link>
           </div>
