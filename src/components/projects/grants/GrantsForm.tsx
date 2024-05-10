@@ -139,6 +139,7 @@ function fromFormValues(
 
 export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<z.infer<typeof FundingFormSchema>>({
     resolver: zodResolver(FundingFormSchema),
@@ -272,6 +273,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   }
 
   const onSubmit = async (values: z.infer<typeof FundingFormSchema>) => {
+    setIsSubmitting(true)
     await setProjectFunding(project.id, fromFormValues(project.id, values))
 
     router.push(`/projects/${project.id}/publish`)
@@ -376,7 +378,8 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           ) : null}
 
           <Button
-            disabled={!canSubmit || form.formState.isSubmitting}
+            isLoading={isSubmitting}
+            disabled={!canSubmit || isSubmitting}
             variant="destructive"
             className="w-fit"
           >
