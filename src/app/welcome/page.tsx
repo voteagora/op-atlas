@@ -18,6 +18,7 @@ export default function Welcome() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currIndex, setCurrIndex] = useState(0)
   const router = useRouter()
+  const [loadingDashboard, setLoadingDashboard] = useState(false)
 
   const { status } = useSession()
 
@@ -34,6 +35,7 @@ export default function Welcome() {
       carouselApi.scrollNext()
       setCurrIndex((i) => i + 1)
     } else {
+      setLoadingDashboard(true)
       router.push("/dashboard")
     }
   }
@@ -53,6 +55,7 @@ export default function Welcome() {
         </Carousel>
         <Dots total={3} current={currIndex} />
         <Button
+          isLoading={loadingDashboard}
           className={
             isLastCard
               ? "bg-optimismRed hover:bg-optimismRed w-24"

@@ -53,9 +53,9 @@ export const ApplicationSubmitted = ({
       <div className="flex flex-col items-center gap-y-6">
         <Image
           alt="sunny"
-          src="/assets/images/sunny-yay.png"
-          height={80}
-          width={90}
+          src="/assets/images/round-4-transparent.svg"
+          height={156}
+          width={158}
         />
         <h2 className="text-center">Application Submitted!</h2>
         <p className="text-center text-lg font-semibold max-w-lg">

@@ -456,6 +456,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
           />
         </div>
         <Button
+          isLoading={isLoading}
           disabled={!canSubmit || isLoading}
           type="submit"
           variant="destructive"

@@ -32,7 +32,10 @@ export default function ProjectFormStatusSidebar({
       : { progressPercent: 0, completedSections: [] }
   }, [project])
 
+  const [dashboardLoading, setDashboardLoading] = useState(false)
+
   const handleGoBack = () => {
+    setDashboardLoading(true)
     router.push("/dashboard")
   }
 
@@ -55,6 +58,7 @@ export default function ProjectFormStatusSidebar({
   return (
     <div className="sm:flex flex-col gap-6 items-start hidden">
       <Button
+        isLoading={dashboardLoading}
         onClick={handleGoBack}
         variant="outline"
         className="bg-white text-sm font-medium"

@@ -3,7 +3,7 @@
 import { Application, Project, User } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { ProjectWithDetails } from "@/lib/types"
@@ -31,6 +31,8 @@ const Dashboard = ({
     )
   }, [projects])
 
+  const [loadingNewProject, setLoadingNewProject] = useState(false)
+
   return (
     <div className={cn("card flex flex-col w-full gap-y-12", className)}>
       <ProfileDetailCard user={user} />
@@ -50,8 +52,9 @@ const Dashboard = ({
         )}
 
         <div className="flex items-center gap-x-2">
-          <Link href="/projects/new">
+          <Link href="/projects/new" onClick={() => setLoadingNewProject(true)}>
             <Button
+              isLoading={loadingNewProject}
               variant={projects.length === 0 ? "destructive" : "secondary"}
             >
               Add a project

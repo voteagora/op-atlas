@@ -51,6 +51,7 @@ function toFormValues(project: ProjectWithDetails) {
 
 export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   const [verifyingUrl, setVerifyingUrl] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const router = useRouter()
 
@@ -143,6 +144,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
   const onSubmit = useCallback(
     async (values: z.infer<typeof ReposFormSchema>) => {
+      setIsSubmitting(true)
+
       // We only need to handle updates to the packages
       const packageUrls = values.packages
         .map((field) => field.url)
@@ -153,6 +156,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         router.push(`/projects/${project.id}/contracts`)
       } catch (error) {
         // TODO: Error handling
+        setIsSubmitting(false)
         console.error("Error saving packages", error)
       }
     },
@@ -261,7 +265,12 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
               </>
             )}
 
-            <Button type="submit" variant="destructive" className="w-fit">
+            <Button
+              isLoading={isSubmitting}
+              type="submit"
+              variant="destructive"
+              className="w-fit"
+            >
               Next
             </Button>
           </form>

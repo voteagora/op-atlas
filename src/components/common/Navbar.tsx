@@ -17,7 +17,9 @@ const Navbar = () => {
           alt=""
         />
       </Link>
-      <Account />
+      <div className="hidden sm:block">
+        <Account />
+      </div>
     </nav>
   )
 }
