@@ -14,7 +14,9 @@ const Navbar = () => {
         priority
         alt=""
       />
-      <Account />
+      <div className="hidden sm:block">
+        <Account />
+      </div>
     </nav>
   )
 }
