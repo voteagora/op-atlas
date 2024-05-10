@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils"
 
 import { Badge } from "../common/Badge"
 import { Callout } from "../common/Callout"
-import { CheckIconFilled } from "../icons/checkIconFilled"
 import { Button } from "../ui/button"
 import { Checkbox } from "../ui/checkbox"
 import { ProjectCard } from "./ProjectCard"
@@ -87,9 +86,9 @@ export const FundingApplication = ({
       <div className="flex flex-col items-center gap-y-6">
         <Image
           alt="sunny"
-          src="/assets/images/sunny-eth.png"
-          height={80}
-          width={80}
+          src="/assets/images/round-4-transparent.svg"
+          height={156}
+          width={158}
         />
         <h2 className="text-center">Retro Funding Round 4: Onchain Builders</h2>
         {hasApplied ? (
@@ -126,10 +125,7 @@ export const FundingApplication = ({
           In an effort to make voting in this round as objective as possible,
           your project&apos;s code and contracts will be analyzed using
           quality-metrics. Citizen badgeholders will vote on the quality-metrics
-          that matter most to them, not on individual projects.{" "}
-          <Link href="#" className="font-medium">
-            Learn more
-          </Link>
+          that matter most to them, not on individual projects.
         </p>
       </div>
 
@@ -158,8 +154,8 @@ export const FundingApplication = ({
             OP chains: OP Mainnet, Base, Zora, Mode, Frax, and Metal.
           </li>
           <li>
-            Onchain contracts have interactions from at least 420 unique
-            addresses between Jan 1st - May 1st 2024.
+            Onchain contracts have interactions from 420 unique addresses during
+            Jan 1st - May 1st 2024.
           </li>
           <li>
             Onchain contracts had their first transaction before April 1st 2024.
