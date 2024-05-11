@@ -1,3 +1,6 @@
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
+
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
@@ -16,8 +19,16 @@ const ELIGIBILITY = [
 ]
 
 export function GetStartedDialog(props: DialogProps<object>) {
+  const { status } = useSession()
+  const router = useRouter()
+
   const onGetStarted = () => {
-    clickSignInWithFarcasterButton()
+    if (status === "authenticated") {
+      router.push("/dashboard")
+    } else {
+      clickSignInWithFarcasterButton()
+    }
+
     props.onOpenChange(false)
   }
 

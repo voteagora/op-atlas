@@ -4,7 +4,7 @@ import { Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import React, { memo } from "react"
+import React, { memo, useState } from "react"
 
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
 
@@ -26,8 +26,10 @@ const ApplicationBanner = ({
   canApply: boolean
 }) => {
   const router = useRouter()
+  const [nextPageLoading, setNextPageLoading] = useState(false)
 
   const onViewApplication = () => {
+    setNextPageLoading(true)
     router.push("/application")
   }
 
@@ -96,8 +98,15 @@ const ApplicationBanner = ({
           </DropdownMenu>
         </>
       ) : (
-        <Link href="/application" className="ml-auto">
-          <Button variant={canApply ? "destructive" : "secondary"}>
+        <Link
+          href="/application"
+          className="ml-auto"
+          onClick={() => setNextPageLoading(true)}
+        >
+          <Button
+            isLoading={nextPageLoading}
+            variant={canApply ? "destructive" : "secondary"}
+          >
             {canApply ? "Apply" : "View application"}
           </Button>
         </Link>

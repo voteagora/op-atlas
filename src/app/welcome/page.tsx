@@ -89,7 +89,7 @@ const CARD_DETAILS = {
   intro: {
     title: "Welcome to your Optimist profile!",
     description:
-      "This is where you’ll manage your projects and apply for Retro Funding.",
+      "This is where you’ll manage your projects and apply for Retroactive Public Goods Funding (Retro Funding).",
     image: "/assets/images/welcome-graphic-1.png",
   },
   projects: {
