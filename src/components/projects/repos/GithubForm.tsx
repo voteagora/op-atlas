@@ -46,7 +46,7 @@ export const GithubForm = ({
   const onCopy = async () => {
     try {
       await copyTextToClipBoard(url)
-      toast({ title: "Copied to clipboard " })
+      toast({ title: "Copied to clipboard" })
     } catch (error) {
       toast({ title: "Error copying URL", variant: "destructive" })
     }

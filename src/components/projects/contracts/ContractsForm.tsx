@@ -4,12 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { ProjectContract } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
+import { Callout } from "@/components/common/Callout"
+import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -19,7 +20,9 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { removeContract, updateProjectOSOStatus } from "@/lib/actions/contracts"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ContractForm } from "./ContractForm"
@@ -57,6 +60,7 @@ function getDefaultValues(
       isOffChain: false,
       hasDeployerKeys: "Yes" as const,
       submittedToOSO: false,
+      osoSlug: "",
       contracts: [
         {
           ...EMPTY_CONTRACT,
@@ -74,6 +78,7 @@ function getDefaultValues(
       : ("Yes" as const),
     contracts: contracts.length > 0 ? contracts : [{ ...EMPTY_CONTRACT }],
     submittedToOSO: !!project.openSourceObserverSlug,
+    osoSlug: project.openSourceObserverSlug ?? "",
   }
 }
 
@@ -97,10 +102,46 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     name: "contracts",
   })
 
+  const onRemoveContract = async (index: number) => {
+    try {
+      const isOnlyContract = contractsFields.length === 1
+      const contract = form.getValues(`contracts.${index}`)
+
+      await removeContract({
+        projectId: project.id,
+        address: contract.contractAddress,
+        chainId: parseInt(contract.chain),
+      })
+
+      removeContractsFields(index)
+
+      if (isOnlyContract) {
+        addContractsFields({ ...EMPTY_CONTRACT })
+      }
+    } catch (error) {
+      console.error("Error removing repo", error)
+    }
+  }
+
   const onSubmit = async (values: z.infer<typeof ContractsSchema>) => {
     setIsSubmitting(true)
-    // TODO: Persist OSO slug once we have UI
-    router.push(`/projects/${project.id}/grants`)
+
+    try {
+      const result = await updateProjectOSOStatus({
+        projectId: project.id,
+        osoProjectName: values.osoSlug,
+      })
+
+      if (result.error) {
+        throw new Error(result.error)
+      }
+
+      router.push(`/projects/${project.id}/grants`)
+    } catch (error) {
+      // TODO: Show error
+      console.error("Error updating project OSO status")
+      setIsSubmitting(false)
+    }
   }
 
   const formValues = useWatch({
@@ -109,7 +150,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
 
   const canSubmit = (function () {
     if (formValues.hasDeployerKeys === "No") {
-      return !!formValues.submittedToOSO
+      return !!formValues.submittedToOSO && !!formValues.osoSlug
     }
 
     if (formValues.hasDeployerKeys === "Yes") {
@@ -147,56 +188,28 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                 control={form.control}
                 name="isOffChain"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center gap-3 rounded-md border p-4">
+                  <FormItem className="flex items-center space-x-2 border border-input p-4 rounded-lg w-full">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        className="border-black border-2 rounded-[2px]"
                       />
                     </FormControl>
-                    <div className="text-sm">
-                      <FormLabel className="text-foreground">
-                        This project isn&apos;t onchain
-                      </FormLabel>
-                    </div>
+                    <FormLabel className="text-foreground">
+                      This project isn&apos;t onchain
+                    </FormLabel>
                   </FormItem>
                 )}
               />
-              {formValues.isOffChain ? (
-                <div className="bg-red-200 p-4 gap-3 flex items-center rounded-xl text-destructive-foreground font-medium text-sm">
-                  <Image
-                    src="/assets/icons/info-red.svg"
-                    width={16.5}
-                    height={16.5}
-                    alt="Information"
-                  />
-                  <div className="flex items-center flex-1 gap-6">
-                    <div className="flex-1">
-                      This project is not eligible for Retro Funding Round 4.
-                      However, it may be eligible for future rounds. You can
-                      continue to the next step.
-                    </div>
-                    <Link className="text-sm" href="#">
-                      Learn more
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-accent p-4 gap-3 flex items-center rounded-xl text-accent-foreground font-medium text-sm">
-                  <Image
-                    src="/assets/icons/info-blue.svg"
-                    width={16.5}
-                    height={16.5}
-                    alt="Information"
-                  />
-                  <div className="flex-1">
-                    Projects must be onchain for Retro Funding Round 4
-                  </div>
-                  <Link className="text-sm" href="#">
-                    Learn more
-                  </Link>
-                </div>
-              )}
+              <Callout
+                type={formValues.isOffChain ? "error" : "info"}
+                text={
+                  formValues.isOffChain
+                    ? "This project is not eligible for Retro Funding Round 4. However, it may be eligible for future rounds. You can continue to the next step."
+                    : "Projects must be onchain for Retro Funding Round 4"
+                }
+              />
             </div>
           </div>
 
@@ -223,7 +236,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                           >
                             {HasDeployerKeysOption.options.map((option) => (
                               <FormItem key={option}>
-                                <FormLabel className="flex-1 min-w-6 basis-0 p-4 text-sm font-medium flex items-center gap-3 border rounded-sm text-foreground cursor-pointer">
+                                <FormLabel className="flex-1 min-w-6 basis-0 p-4 text-sm font-medium flex items-center gap-3 border rounded-lg text-foreground cursor-pointer">
                                   <FormControl>
                                     <RadioGroupItem value={option} />
                                   </FormControl>
@@ -246,16 +259,18 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                     <div className="text-secondary-foreground">
                       First verify one contract, then you&apos;ll be able to add
                       more. Additional contracts with the same deployer address
-                      will be automatically verified.
+                      will be automatically verified. If you have factory
+                      contracts, you only need to verify that deployer.
                     </div>
                   </div>
                   {contractsFields.map((field, index) => (
                     <ContractForm
-                      remove={() => removeContractsFields(index)}
                       key={field.id}
                       form={form}
                       index={index}
                       projectId={project.id}
+                      removeEmpty={() => removeContractsFields(index)}
+                      removeVerified={() => onRemoveContract(index)}
                     />
                   ))}
                   {canAddContract && (
@@ -278,13 +293,18 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                     It is highly encouraged that projects verify contracts
                     onchain. However, if you&apos;ve lost your deployer keys,
                     you can complete this step by adding your project to{" "}
-                    <span className="font-medium">Open Source Observer.</span>
+                    <ExternalLink
+                      href="https://www.opensource.observer"
+                      className="font-medium"
+                    >
+                      Open Source Observer.
+                    </ExternalLink>
                   </div>
                   <div className="text-secondary-foreground">
                     Follow{" "}
-                    <Link className="font-medium" href="#">
+                    <ExternalLink href="#" className="font-medium">
                       these instructions
-                    </Link>{" "}
+                    </ExternalLink>{" "}
                     for adding your project. Make sure that your project has
                     been added before the Retro Funding submission deadline.
                   </div>
@@ -293,7 +313,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                     type="button"
                     variant="secondary"
                   >
-                    <Link
+                    <ExternalLink
                       className="flex items-center gap-2.5 w-full h-full py-2 px-3 font-medium"
                       href="#"
                     >
@@ -304,27 +324,41 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                         width={8}
                         alt="Arrow up right"
                       />
-                    </Link>
+                    </ExternalLink>
                   </Button>
+
+                  <FormField
+                    control={form.control}
+                    name="osoSlug"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormLabel>Open Source Observer project name</FormLabel>
+                        <Input placeholder="Add a name" {...field} />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={form.control}
                     name="submittedToOSO"
                     render={({ field }) => (
                       <FormItem className="flex flex-col gap-2">
-                        <FormLabel>Confirmation</FormLabel>
-                        <FormItem className="flex flex-row items-center gap-3 rounded-md border p-4">
+                        <FormLabel>
+                          Confirmation
+                          <span className="ml-0.5 text-destructive">*</span>
+                        </FormLabel>
+                        <FormItem className="flex flex-row items-center gap-2 py-3 px-4 rounded-lg border">
                           <FormControl>
                             <Checkbox
                               checked={field.value}
                               onCheckedChange={field.onChange}
+                              className="border-black border-[1.5px] rounded-[2px]"
                             />
                           </FormControl>
-                          <div className="text-sm">
-                            <FormLabel className="font-normal text-sm">
-                              This project has been submitted to Open Source
-                              Observer
-                            </FormLabel>
-                          </div>
+                          <FormLabel className="font-normal text-sm">
+                            This project has been submitted to Open Source
+                            Observer
+                          </FormLabel>
                         </FormItem>
                       </FormItem>
                     )}

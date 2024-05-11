@@ -265,6 +265,26 @@ export async function addProjectContract({
   })
 }
 
+export async function removeProjectContract({
+  projectId,
+  address,
+  chainId,
+}: {
+  projectId: string
+  address: string
+  chainId: number
+}) {
+  return prisma.projectContract.delete({
+    where: {
+      projectId,
+      contractAddress_chainId: {
+        contractAddress: address,
+        chainId,
+      },
+    },
+  })
+}
+
 export async function getProjectContracts({
   projectId,
   deployerAddress,

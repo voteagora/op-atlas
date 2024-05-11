@@ -37,6 +37,7 @@ const OffChainSchema = z.object({
   hasDeployerKeys: z.any(),
   contracts: z.any(),
   submittedToOSO: z.any(),
+  osoSlug: z.any(),
 })
 
 const HasContractsSchema = z.object({
@@ -44,6 +45,7 @@ const HasContractsSchema = z.object({
   hasDeployerKeys: HasDeployerKeysOption.exclude(["No"]),
   contracts: z.array(ContractSchema),
   submittedToOSO: z.boolean(),
+  osoSlug: z.string().optional(),
 })
 
 const NoContractsSchema = z.object({
@@ -51,6 +53,7 @@ const NoContractsSchema = z.object({
   hasDeployerKeys: HasDeployerKeysOption.extract(["No"]),
   contracts: z.any(),
   submittedToOSO: z.literal(true),
+  osoSlug: z.string().optional(),
 })
 
 export const ContractsSchema =
