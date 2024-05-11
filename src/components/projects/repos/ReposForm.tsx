@@ -288,7 +288,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                       type="button"
                       variant="secondary"
                       onClick={onAddGithubField}
-                      className="w-fit"
+                      className="mt-4 w-fit"
                     >
                       <Plus size={16} className="mr-2.5" /> Add repo
                     </Button>
@@ -313,7 +313,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                       type="button"
                       variant="secondary"
                       onClick={onAddPackageField}
-                      className="w-fit"
+                      className="mt-4 w-fit"
                     >
                       <Plus size={16} className="mr-2.5" /> Add link
                     </Button>

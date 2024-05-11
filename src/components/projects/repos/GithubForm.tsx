@@ -124,23 +124,23 @@ export const GithubForm = ({
         )}
       </div>
 
-      {isVerified && (
-        <div className="flex items-center h-6 gap-2">
+      {isVerified && (isOpenSource || containsContracts) ? (
+        <div className="flex items-center gap-2">
           {isOpenSource && (
-            <div className="flex items-center gap-1 py-1 px-2 bg-secondary rounded-full">
+            <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
               <Check size={12} />
               <p className="text-xs font-medium">Open source</p>
             </div>
           )}
 
           {containsContracts && (
-            <div className="flex items-center gap-1 py-1 px-2 bg-secondary rounded-full">
+            <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
               <Check size={12} />
               <p className="text-xs font-medium">Contains contracts</p>
             </div>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
