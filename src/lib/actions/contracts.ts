@@ -1,13 +1,19 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { project } from "ramda"
 import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
 import { auth } from "@/auth"
-import { addProjectContract, getProjectContracts } from "@/db/projects"
+import {
+  addProjectContract,
+  getProjectContracts,
+  removeProjectContract,
+} from "@/db/projects"
 
 import { getTransaction } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"
+import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
 
 export const verifyContract = async ({
@@ -96,5 +102,74 @@ export const verifyContract = async ({
   return {
     error: null,
     contract,
+  }
+}
+
+export const removeContract = async ({
+  projectId,
+  address: contractAddressRaw,
+  chainId,
+}: {
+  projectId: string
+  address: Address
+  chainId: number
+}) => {
+  const session = await auth()
+  if (!session) {
+    return {
+      error: "Not authenticated",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  const contractAddress = getAddress(contractAddressRaw)
+
+  await removeProjectContract({
+    projectId,
+    address: contractAddress,
+    chainId,
+  })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+  }
+}
+
+export const updateProjectOSOStatus = async ({
+  projectId,
+  osoProjectName,
+}: {
+  projectId: string
+  osoProjectName: string | null
+}) => {
+  const session = await auth()
+  if (!session) {
+    return {
+      error: "Not authenticated",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  const project = await updateProjectDetails(projectId, {
+    openSourceObserverSlug: osoProjectName,
+  })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+    project,
   }
 }
