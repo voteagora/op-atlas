@@ -31,13 +31,13 @@ export async function getUserProjects({
 }
 
 export async function getUserProjectsWithDetails({
-  farcasterId,
+  userId,
 }: {
-  farcasterId: string
+  userId: string
 }) {
   return prisma.user.findUnique({
     where: {
-      farcasterId,
+      id: userId,
     },
     select: {
       projects: {
@@ -464,14 +464,10 @@ export async function createApplication({
   })
 }
 
-export async function getUserApplications({
-  farcasterId,
-}: {
-  farcasterId: string
-}) {
+export async function getUserApplications({ userId }: { userId: string }) {
   return prisma.user.findUnique({
     where: {
-      farcasterId,
+      id: userId,
     },
     select: {
       projects: {

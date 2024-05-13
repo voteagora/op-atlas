@@ -1,5 +1,5 @@
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
-import ProjectFormStatusSidebar from "@/components/projects/ProjectSidebar"
+import { ProjectStatusSidebar } from "@/components/projects/ProjectStatusSidebar"
 
 // TODO: May need longer runtime since creating projects is slow
 
@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <div className="h-full bg-secondary flex flex-1 px-6">
       <div className="flex items-start w-full max-w-6xl mx-auto my-18 gap-x-10">
-        <ProjectFormStatusSidebar />
+        <ProjectStatusSidebar />
         <div className="card flex-1">
           <ProjectDetailsForm />
         </div>
