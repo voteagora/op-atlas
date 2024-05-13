@@ -3,6 +3,8 @@ import { z } from "zod"
 export const GithubRepoSchema = z.object({
   url: z.string(),
   verified: z.boolean().default(false),
+  openSource: z.boolean().default(false),
+  containsContracts: z.boolean().default(false),
 })
 
 export type GithubRepo = z.infer<typeof GithubRepoSchema>

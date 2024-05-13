@@ -2,7 +2,6 @@ import { Application } from "@prisma/client"
 import { format } from "date-fns"
 import { Ellipsis } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React, { memo, useState } from "react"
@@ -33,6 +32,7 @@ const ApplicationBanner = ({
   const [loadingNextPage, setLoadingNextPage] = useState(false)
 
   const onViewApplication = () => {
+    setLoadingNextPage(true)
     router.push("/application")
   }
 

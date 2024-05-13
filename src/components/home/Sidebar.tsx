@@ -1,10 +1,11 @@
 "use client"
 
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 import { clickSignInWithFarcasterButton } from "@/lib/utils"
 import { cn } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Button } from "../ui/button"
 
@@ -15,6 +16,17 @@ export const Sidebar = ({
   className?: string
   funding?: string
 }) => {
+  const { status } = useSession()
+  const router = useRouter()
+
+  const onClickGetStarted = () => {
+    if (status === "authenticated") {
+      router.push("/dashboard")
+    } else {
+      clickSignInWithFarcasterButton()
+    }
+  }
+
   return (
     <div className={cn("flex flex-col gap-y-12", className)}>
       <div className="flex flex-col items-center gap-y-4 p-6 border border-[#D6E4FF] bg-[#F0F4FF] rounded-3xl">
@@ -38,11 +50,7 @@ export const Sidebar = ({
           Create your profile, add projects, and apply for Retro Funding.
         </p>
 
-        <Button
-          onClick={clickSignInWithFarcasterButton}
-          variant="outline"
-          className="mt-5"
-        >
+        <Button onClick={onClickGetStarted} variant="outline" className="mt-5">
           Get started
         </Button>
       </div>

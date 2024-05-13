@@ -2,12 +2,15 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { partition } from "ramda"
 import { useCallback, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 
+import { Callout } from "@/components/common/Callout"
+import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -24,7 +27,6 @@ import { ProjectWithDetails } from "@/lib/types"
 import { GithubForm } from "./GithubForm"
 import { PackageForm } from "./PackageForm"
 import { ReposFormSchema } from "./schema"
-import { VerifyRepoBanner } from "./VerifyCodeRepoBanner"
 import VerifyGithubRepoDialog from "./VerifyGithubRepoDialog"
 
 function toFormValues(project: ProjectWithDetails) {
@@ -42,9 +44,11 @@ function toFormValues(project: ProjectWithDetails) {
     githubRepos:
       githubs.length === 0
         ? [{ url: "", verified: false }]
-        : githubs.map(({ url, verified }) => ({
+        : githubs.map(({ url, verified, openSource, containsContracts }) => ({
             url,
             verified,
+            openSource,
+            containsContracts,
           })),
   }
 }
@@ -85,7 +89,11 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   }
 
   // Optimistically update the UI state
-  const onVerificationComplete = async (url: string) => {
+  const onVerificationComplete = async (
+    url: string,
+    openSource: boolean,
+    containsContracts: boolean,
+  ) => {
     const repo = form
       .getValues("githubRepos")
       .findIndex((field) => field.url === url)
@@ -94,13 +102,20 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     }
 
     form.setValue(`githubRepos.${repo}.verified`, true)
+    form.setValue(`githubRepos.${repo}.openSource`, openSource)
+    form.setValue(`githubRepos.${repo}.containsContracts`, containsContracts)
     setVerifyingUrl("")
   }
 
   const onAddGithubField = async () => {
     const valid = form.getValues("githubRepos").every((repo) => repo.verified)
     if (valid) {
-      addGithubField({ url: "", verified: false })
+      addGithubField({
+        url: "",
+        verified: false,
+        openSource: false,
+        containsContracts: false,
+      })
     }
   }
 
@@ -113,7 +128,12 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
       removeGithubField(index)
 
       if (isOnlyRepo) {
-        addGithubField({ url: "", verified: false })
+        addGithubField({
+          url: "",
+          verified: false,
+          openSource: false,
+          containsContracts: false,
+        })
       }
     } catch (error) {
       console.error("Error removing repo", error)
@@ -169,8 +189,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         <div className="flex flex-col gap-6">
           <h2>Code Repositories</h2>
           <p className="text-secondary-foreground">
-            Verify your project&apos;s Github repos and published packages. Your
-            code may be reviewed by badgeholders to aid in voting decisions.
+            Verify your project&apos;s Github repos. Your code may be reviewed
+            by badgeholders to aid in voting decisions.
           </p>
         </div>
 
@@ -198,11 +218,48 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                   </FormItem>
                 )}
               />
-              <VerifyRepoBanner noRepo={!hasRepo} />
+              <Callout
+                type={hasRepo ? "info" : "error"}
+                text={
+                  hasRepo
+                    ? "Projects must verify a code repo for Retro Funding Round 4"
+                    : "This project is not eligible for Retro Funding Round 4. However, it may be eligible for future rounds. You can continue to the next step."
+                }
+                linkHref="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+                linkText="Learn more"
+              />
             </div>
 
             {hasRepo && (
               <>
+                <div className="flex flex-col gap-y-6">
+                  <h3>About open source licensing</h3>
+                  <p className="text-secondary-foreground">
+                    Voters can add additional rewards for open source projects.
+                    If your project is open source, then make sure you have a
+                    license in your Github repo. If you don&apos;t have a
+                    license in your repo, your project will not qualify as open
+                    source and won&apos;t be rewarded as such.
+                  </p>
+                  <p className="text-secondary-foreground">
+                    To get a license, visit the{" "}
+                    <ExternalLink
+                      href="https://opensource.org/"
+                      className="text-foreground font-medium"
+                    >
+                      Open Source Initiative
+                    </ExternalLink>
+                    . For more information, view{" "}
+                    <ExternalLink
+                      href="#"
+                      className="text-foreground font-medium"
+                    >
+                      frequently asked questions
+                    </ExternalLink>
+                    .
+                  </p>
+                </div>
+
                 <div className="flex flex-col">
                   <h3>Github</h3>
                   <div className="mt-6 flex flex-col gap-2">
@@ -231,7 +288,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                       type="button"
                       variant="secondary"
                       onClick={onAddGithubField}
-                      className="w-fit"
+                      className="mt-4 w-fit"
                     >
                       <Plus size={16} className="mr-2.5" /> Add repo
                     </Button>
@@ -256,7 +313,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                       type="button"
                       variant="secondary"
                       onClick={onAddPackageField}
-                      className="w-fit"
+                      className="mt-4 w-fit"
                     >
                       <Plus size={16} className="mr-2.5" /> Add link
                     </Button>

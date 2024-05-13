@@ -1,3 +1,4 @@
+import { ProjectRepository } from "@prisma/client"
 import { Copy } from "lucide-react"
 import Image from "next/image"
 import { memo, useEffect, useMemo, useState } from "react"
@@ -5,6 +6,7 @@ import { memo, useEffect, useMemo, useState } from "react"
 import { DialogProps } from "@/components/dialogs/types"
 import CheckIcon from "@/components/icons/checkIcon"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -15,7 +17,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
-import { findRepo, verifyGithubRepo } from "@/lib/actions/repos"
+import {
+  findRepo,
+  updateGithubRepo,
+  verifyGithubRepo,
+} from "@/lib/actions/repos"
 import { copyTextToClipBoard } from "@/lib/utils"
 
 const sampleFullJson = `\
@@ -39,10 +45,14 @@ const requiredJson = `\
 }`
 
 type Props = DialogProps<{ projectId: string; url?: string }> & {
-  onVerificationComplete: (url: string) => void
+  onVerificationComplete: (
+    url: string,
+    openSource: boolean,
+    containsContracts: boolean,
+  ) => void
 }
 
-type Step = "searching" | "json"
+type Step = "searching" | "json" | "contracts"
 
 const VerifyGithubRepoDialog = ({
   open,
@@ -55,16 +65,23 @@ const VerifyGithubRepoDialog = ({
 
   const [step, setStep] = useState<Step>("searching")
   const [hasFundingFile, setHasFundingFile] = useState(false)
+  const [openSource, setOpenSource] = useState(false)
+  const [containsContracts, setContainsContracts] = useState(false)
 
   const urlParts = url?.split("/") ?? []
   const owner = urlParts[urlParts.length - 2]
   const slug = urlParts[urlParts.length - 1]
 
-  const onVerified = () => {
+  const onAdded = () => {
     if (url) {
-      onVerificationComplete(url)
+      onVerificationComplete(url, openSource, containsContracts)
       onOpenChange(false)
     }
+  }
+
+  const onVerified = (repo: ProjectRepository) => {
+    setOpenSource(repo.openSource)
+    setStep("contracts")
   }
 
   const onRepoNotFound = () => {
@@ -79,8 +96,8 @@ const VerifyGithubRepoDialog = ({
   const onFoundRepo = async () => {
     try {
       const result = await verifyGithubRepo(projectId, owner, slug)
-      if (!result.error) {
-        onVerified()
+      if (result.error === null && result.repo) {
+        onVerified(result.repo)
         return
       }
 
@@ -122,11 +139,20 @@ const VerifyGithubRepoDialog = ({
         ) : null}
         {owner && slug && step === "json" ? (
           <VerifyFundingStep
-            slug={slug}
             owner={owner}
+            slug={slug}
             projectId={projectId}
             hasFundingFile={hasFundingFile}
             onVerified={onVerified}
+          />
+        ) : null}
+        {url && step === "contracts" ? (
+          <ContractCodeStep
+            repoUrl={url}
+            projectId={projectId}
+            onConfirmed={onAdded}
+            containsContracts={containsContracts}
+            setContainsContracts={setContainsContracts}
           />
         ) : null}
       </DialogContent>
@@ -236,7 +262,7 @@ const VerifyFundingStep = ({
   slug: string
   projectId: string
   hasFundingFile: boolean
-  onVerified: () => void
+  onVerified: (repo: ProjectRepository) => void
 }) => {
   const { toast } = useToast()
 
@@ -265,12 +291,13 @@ const VerifyFundingStep = ({
       setIsLoading(true)
 
       const result = await verifyGithubRepo(projectId, owner, slug)
-      if (result.error) {
-        throw new Error(result.error)
+      if (result.error === null && result.repo) {
+        setError(null)
+        onVerified(result.repo)
+        return
       }
 
-      setError(null)
-      onVerified()
+      throw new Error(result.error ?? "Unknown error")
     } catch (error) {
       setError(
         "Unable to validate funding.json file. Please make sure the changes have been merged into the default branch and try again",
@@ -318,12 +345,73 @@ const VerifyFundingStep = ({
             {error}
           </p>
         )}
-        <Button
-          className=""
-          disabled={isLoading}
-          variant="destructive"
-          onClick={onVerify}
-        >
+        <Button disabled={isLoading} variant="destructive" onClick={onVerify}>
+          Verify
+        </Button>
+      </div>
+    </>
+  )
+}
+
+const ContractCodeStep = ({
+  repoUrl,
+  projectId,
+  onConfirmed,
+  containsContracts,
+  setContainsContracts,
+}: {
+  repoUrl: string
+  projectId: string
+  containsContracts: boolean
+  setContainsContracts: (value: boolean) => void
+  onConfirmed: () => void
+}) => {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const toggleContainsContracts = () => {
+    setContainsContracts(!containsContracts)
+  }
+
+  const onConfirm = async () => {
+    if (!containsContracts) {
+      onConfirmed()
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await updateGithubRepo(projectId, repoUrl, { containsContracts })
+      onConfirmed()
+    } catch (error) {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle className="text-center text-lg font-semibold text-text-default">
+          Confirmation
+        </DialogTitle>
+        <DialogDescription className="text-center text-base font-normal text-secondary-foreground mt-1">
+          Your repo has been verified! One final question: does it contain smart
+          contract code?
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="flex flex-col w-full gap-2">
+        <div className="flex items-center gap-2 px-4 py-3 border rounded-md">
+          <Checkbox
+            checked={containsContracts}
+            onCheckedChange={toggleContainsContracts}
+            className="border-2 rounded-[2px]"
+          />
+          <p className="text-sm font-medium">
+            This repo contains contract code
+          </p>
+        </div>
+
+        <Button disabled={isLoading} variant="destructive" onClick={onConfirm}>
           Verify
         </Button>
       </div>

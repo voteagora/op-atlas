@@ -1,4 +1,4 @@
-import { X } from "lucide-react"
+import { Ellipsis, X } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { UseFormReturn, useWatch } from "react-hook-form"
@@ -14,6 +14,12 @@ import { z } from "zod"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { Button } from "@/components/ui/button"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   FormControl,
   FormField,
   FormItem,
@@ -21,7 +27,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useToast } from "@/components/ui/use-toast"
 import { verifyContract } from "@/lib/actions/contracts"
+import { copyTextToClipBoard } from "@/lib/utils"
 
 import { ChainSelector } from "./ChainSelector"
 import { ContractSchema, ContractsSchema } from "./schema"
@@ -31,13 +39,17 @@ export function ContractForm({
   projectId,
   index,
   form,
-  remove,
+  removeVerified,
+  removeEmpty,
 }: {
   projectId: string
   form: UseFormReturn<z.infer<typeof ContractsSchema>>
   index: number
-  remove: () => void
+  removeVerified: () => void
+  removeEmpty: () => void
 }) {
+  const { toast } = useToast()
+
   const [isVerifying, setIsVerifying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -52,6 +64,15 @@ export function ContractForm({
     signature,
     chain,
   } = contracts[index]
+
+  const onCopyValue = async (value: string) => {
+    try {
+      await copyTextToClipBoard(value)
+      toast({ title: "Copied to clipboard" })
+    } catch (error) {
+      toast({ title: "Error copying to clipboard", variant: "destructive" })
+    }
+  }
 
   const onVerify = async () => {
     if (!isAddress(deployerAddress)) return
@@ -111,19 +132,55 @@ export function ContractForm({
     return (
       <div className="flex flex-col gap-2">
         <FormLabel>Contract {index + 1}</FormLabel>
-        <div className="flex px-3 py-2 border items-center rounded-lg">
-          <div className="pr-2 border-r">
-            <Image
-              src="/assets/icons/circle-check-green.svg"
-              height={16.67}
-              width={16.67}
-              alt="Verified"
-            />
+        <div className="flex items-center gap-1.5">
+          <div className="flex flex-1 px-3 py-2 border items-center rounded-lg">
+            <div className="pr-2 border-r">
+              <Image
+                src="/assets/icons/circle-check-green.svg"
+                height={16.67}
+                width={16.67}
+                alt="Verified"
+              />
+            </div>
+            <div className="px-2 text-secondary-foreground flex items-center gap-1.5">
+              <ChainLogo chainId={chain} size={18} />
+              {contractAddress}
+            </div>
           </div>
-          <div className="px-2 text-secondary-foreground flex items-center gap-1.5">
-            <ChainLogo chainId={chain} size={18} />
-            {contractAddress}
-          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">
+                <Ellipsis size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => onCopyValue(contractAddress)}
+              >
+                Copy contract address
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => onCopyValue(deploymentTxHash)}
+              >
+                Copy deployment tx hash
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => onCopyValue(deployerAddress)}
+              >
+                Copy deployer address
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={removeVerified}
+              >
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     )
@@ -153,7 +210,7 @@ export function ContractForm({
               </p>
             </div>
             {index > 0 && (
-              <Button onClick={remove} className="p-2" variant="ghost">
+              <Button onClick={removeEmpty} className="p-2" variant="ghost">
                 <X className="h-4 w-4" />
                 <span className="sr-only">Delete</span>
               </Button>
