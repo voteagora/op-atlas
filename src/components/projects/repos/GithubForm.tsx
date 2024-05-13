@@ -1,10 +1,11 @@
-import { Ellipsis } from "lucide-react"
+import { Check, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import { useMemo } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -36,8 +38,10 @@ export const GithubForm = ({
 }) => {
   const { toast } = useToast()
 
-  const isVerified = form.watch(`githubRepos.${index}.verified`)
   const url = form.watch(`githubRepos.${index}.url`)
+  const isVerified = form.watch(`githubRepos.${index}.verified`)
+  const isOpenSource = form.watch(`githubRepos.${index}.openSource`)
+  const containsContracts = form.watch(`githubRepos.${index}.containsContracts`)
 
   const onCopy = async () => {
     try {
@@ -58,65 +62,85 @@ export const GithubForm = ({
   }, [url])
 
   return (
-    <div className="flex items-start gap-1.5">
-      <FormField
-        control={form.control}
-        name={`githubRepos.${index}.url`}
-        render={({ field }) => (
-          <FormItem className="flex flex-col gap-1.5 w-full">
-            <FormControl>
-              <div className="relative">
-                <Input
-                  {...field}
-                  readOnly={isVerified}
-                  placeholder="Repository URL"
-                  className={isVerified ? "pl-10" : ""}
-                />
-                {isVerified && (
-                  <Image
-                    alt="Verified"
-                    src="/assets/icons/circle-check-green.svg"
-                    height={20}
-                    width={20}
-                    className="absolute left-3 top-2.5"
+    <div className="flex flex-col gap-2">
+      <div className="flex items-start gap-1.5">
+        <FormField
+          control={form.control}
+          name={`githubRepos.${index}.url`}
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-1.5 w-full">
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    {...field}
+                    readOnly={isVerified}
+                    placeholder="Repository URL"
+                    className={isVerified ? "pl-10" : ""}
                   />
-                )}
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+                  {isVerified && (
+                    <Image
+                      alt="Verified"
+                      src="/assets/icons/circle-check-green.svg"
+                      height={20}
+                      width={20}
+                      className="absolute left-3 top-2.5"
+                    />
+                  )}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      {isVerified ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary">
-              <Ellipsis size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer" onClick={onCopy}>
-              Copy URL
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() => onRemove(index)}
-            >
-              Remove
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <Button
-          type="button"
-          variant="destructive"
-          disabled={!isValid}
-          onClick={() => onVerify(index)}
-        >
-          Verify
-        </Button>
-      )}
+        {isVerified ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">
+                <Ellipsis size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="cursor-pointer" onClick={onCopy}>
+                Copy URL
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => onRemove(index)}
+              >
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={!isValid}
+            onClick={() => onVerify(index)}
+          >
+            Verify
+          </Button>
+        )}
+      </div>
+
+      {isVerified && (isOpenSource || containsContracts) ? (
+        <div className="flex items-center gap-2">
+          {isOpenSource && (
+            <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
+              <Check size={12} />
+              <p className="text-xs font-medium">Open source</p>
+            </div>
+          )}
+
+          {containsContracts && (
+            <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
+              <Check size={12} />
+              <p className="text-xs font-medium">Contains contracts</p>
+            </div>
+          )}
+        </div>
+      ) : null}
     </div>
   )
 }

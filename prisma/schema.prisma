@@ -111,10 +111,12 @@ model ProjectSnapshot {
 }
 
 model ProjectRepository {
-  id       String  @id @default(uuid())
-  type     String
-  url      String  @unique
-  verified Boolean @default(false)
+  id                String  @id @default(uuid())
+  type              String
+  url               String  @unique
+  verified          Boolean @default(false)
+  openSource        Boolean @default(false)
+  containsContracts Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

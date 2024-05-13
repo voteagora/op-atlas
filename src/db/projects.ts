@@ -317,6 +317,24 @@ export async function removeProjectRepository({
   })
 }
 
+export async function updateProjectRepository({
+  projectId,
+  url,
+  updates,
+}: {
+  projectId: string
+  url: string
+  updates: Prisma.ProjectRepositoryUpdateInput
+}) {
+  return prisma.projectRepository.update({
+    where: {
+      projectId,
+      url,
+    },
+    data: updates,
+  })
+}
+
 export async function updateProjectRepositories({
   projectId,
   type,

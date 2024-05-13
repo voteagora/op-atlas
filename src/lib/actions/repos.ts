@@ -7,9 +7,11 @@ import {
   addProjectRepository,
   removeProjectRepository,
   updateProjectRepositories,
+  updateProjectRepository,
 } from "@/db/projects"
 
-import { getFundingFile, getRepository } from "../github"
+import { getFundingFile, getLicense, getRepository } from "../github"
+import { OPEN_SOURCE_LICENSES } from "../licenses"
 import { verifyMembership } from "./utils"
 
 export const findRepo = async (owner: string, slug: string) => {
@@ -89,12 +91,17 @@ export const verifyGithubRepo = async (
       }
     }
 
+    // Fetch license to determine open source status
+    const license = await getLicense(owner, slug)
+    const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
+
     const repo = await addProjectRepository({
       projectId,
       repo: {
         type: "github",
         url: `https://github.com/${owner}/${slug}`,
         verified: true,
+        openSource: !!isOpenSource,
       },
     })
 
@@ -109,6 +116,47 @@ export const verifyGithubRepo = async (
     console.error("Error creating repo", error)
     return {
       error: "Error creating repo",
+    }
+  }
+}
+
+// Only allows very limited property updates
+export const updateGithubRepo = async (
+  projectId: string,
+  url: string,
+  updates: { containsContracts: boolean },
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  try {
+    const repo = await updateProjectRepository({
+      projectId,
+      url,
+      updates,
+    })
+
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
+
+    return {
+      error: null,
+      repo,
+    }
+  } catch (error) {
+    console.error("Error updating repo", error)
+    return {
+      error: "Error updating repo",
     }
   }
 }
