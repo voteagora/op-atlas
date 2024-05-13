@@ -2,11 +2,12 @@ import { Application } from "@prisma/client"
 import { format } from "date-fns"
 import { Ellipsis } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import React, { memo, useState } from "react"
 
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Button } from "../ui/button"
 import {
@@ -26,10 +27,12 @@ const ApplicationBanner = ({
   canApply: boolean
 }) => {
   const router = useRouter()
-  const [nextPageLoading, setNextPageLoading] = useState(false)
+  const { data } = useSession()
+  const { setOpenDialog } = useAppDialogs()
+  const [loadingNextPage, setLoadingNextPage] = useState(false)
 
   const onViewApplication = () => {
-    setNextPageLoading(true)
+    setLoadingNextPage(true)
     router.push("/application")
   }
 
@@ -39,38 +42,49 @@ const ApplicationBanner = ({
     }
   }
 
+  const onClickApply = () => {
+    if (data?.user?.email) {
+      setLoadingNextPage(true)
+      router.push("/application")
+    } else {
+      setOpenDialog("email")
+    }
+  }
+
   return (
     <div
       className={cn(
-        "flex items-center gap-x-4 border rounded-xl p-4",
+        "flex items-center gap-x-4 border rounded-xl p-4 justify-between",
         className,
       )}
     >
-      <Image
-        alt=""
-        src="/assets/icons/applyTileIcon.svg"
-        width={64}
-        height={67}
-      />
-      <div className="flex flex-col">
-        <p className="font-medium">Retro Funding Round 4: Onchain Builders</p>
-        {application ? (
-          <div className="flex items-center gap-1">
-            <Image
-              src="/assets/icons/circle-check-green.svg"
-              height={16}
-              width={16}
-              alt="Submitted"
-            />
+      <div className="flex items-center gap-4">
+        <Image
+          alt=""
+          src="/assets/icons/applyTileIcon.svg"
+          width={64}
+          height={67}
+        />
+        <div className="flex flex-col">
+          <p className="font-medium">Retro Funding Round 4: Onchain Builders</p>
+          {application ? (
+            <div className="flex items-center gap-1">
+              <Image
+                src="/assets/icons/circle-check-green.svg"
+                height={16}
+                width={16}
+                alt="Submitted"
+              />
+              <p className="text-secondary-foreground">
+                Applied, {format(application.createdAt, "MMM d, h:mm a")}
+              </p>
+            </div>
+          ) : (
             <p className="text-secondary-foreground">
-              Applied, {format(application.createdAt, "MMM d, h:mm a")}
+              Submit your application by June 6.
             </p>
-          </div>
-        ) : (
-          <p className="text-secondary-foreground">
-            Submit your application by June 6.
-          </p>
-        )}
+          )}
+        </div>
       </div>
 
       {application ? (
@@ -98,18 +112,13 @@ const ApplicationBanner = ({
           </DropdownMenu>
         </>
       ) : (
-        <Link
-          href="/application"
-          className="ml-auto"
-          onClick={() => setNextPageLoading(true)}
+        <Button
+          isLoading={loadingNextPage}
+          onClick={onClickApply}
+          variant={canApply ? "destructive" : "secondary"}
         >
-          <Button
-            isLoading={nextPageLoading}
-            variant={canApply ? "destructive" : "secondary"}
-          >
-            {canApply ? "Apply" : "View application"}
-          </Button>
-        </Link>
+          {canApply ? "Apply" : "View application"}
+        </Button>
       )}
     </div>
   )
