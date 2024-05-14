@@ -2,7 +2,6 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import { ApplicationFlow } from "@/components/application"
-import { getUserByFarcasterId } from "@/db/users"
 import { getApplications, getProjects } from "@/lib/actions/projects"
 
 // TODO: Increase API timeout since attestation creation is slow
@@ -14,14 +13,9 @@ export default async function Page() {
     redirect("/")
   }
 
-  const user = await getUserByFarcasterId(session.user.farcasterId)
-  if (!user) {
-    redirect("/")
-  }
-
   const [projects, applications] = await Promise.all([
-    getProjects(session.user.farcasterId),
-    getApplications(session.user.farcasterId),
+    getProjects(session.user.id),
+    getApplications(session.user.id),
   ])
 
   return (

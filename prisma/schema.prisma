@@ -79,6 +79,7 @@ model Application {
   round   FundingRound @relation(fields: [roundId], references: [id])
   project Project      @relation(fields: [projectId], references: [id])
 
+  @@index([projectId])
   @@unique([roundId, projectId])
 }
 
@@ -95,6 +96,8 @@ model UserProjects {
   user    User    @relation(fields: [userId], references: [id])
   project Project @relation(fields: [projectId], references: [id])
 
+  @@index([userId])
+  @@index([projectId])
   @@unique([userId, projectId])
 }
 
@@ -108,6 +111,8 @@ model ProjectSnapshot {
   projectId String
 
   project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model ProjectRepository {
@@ -124,6 +129,8 @@ model ProjectRepository {
   projectId String
 
   project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }
 
 model ProjectContract {
@@ -141,6 +148,7 @@ model ProjectContract {
 
   project Project @relation(fields: [projectId], references: [id])
 
+  @@index([projectId])
   @@unique([contractAddress, chainId])
 }
 
@@ -159,4 +167,6 @@ model ProjectFunding {
   projectId String
 
   project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
 }

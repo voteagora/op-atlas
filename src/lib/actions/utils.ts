@@ -1,5 +1,14 @@
 import { getUserProjects } from "@/db/projects"
 
+import { ProjectWithDetails } from "../types"
+
+export const isUserMember = async (
+  projectId: ProjectWithDetails,
+  userId?: string,
+) => {
+  return userId && projectId.team.some((member) => member.userId === userId)
+}
+
 export const verifyMembership = async (
   projectId: string,
   farcasterId: string,

@@ -24,13 +24,13 @@ import { createProjectAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { verifyAdminStatus, verifyMembership } from "./utils"
 
-export const getProjects = async (farcasterId: string) => {
-  const teams = await getUserProjectsWithDetails({ farcasterId })
+export const getProjects = async (userId: string) => {
+  const teams = await getUserProjectsWithDetails({ userId })
   return (teams?.projects ?? []).map(({ project }) => project)
 }
 
-export const getApplications = async (farcasterId: string) => {
-  const teams = await getUserApplications({ farcasterId })
+export const getApplications = async (userId: string) => {
+  const teams = await getUserApplications({ userId })
   return (teams?.projects ?? []).flatMap(({ project }) => project.applications)
 }
 

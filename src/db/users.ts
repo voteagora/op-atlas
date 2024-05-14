@@ -2,6 +2,14 @@
 
 import { prisma } from "./client"
 
+export async function getUserById(userId: string) {
+  return prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  })
+}
+
 export async function getUserByFarcasterId(farcasterId: string) {
   return prisma.user.findUnique({
     where: {
