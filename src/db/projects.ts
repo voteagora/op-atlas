@@ -358,7 +358,12 @@ export async function addProjectRepository({
     },
   })
 
-  return prisma.$transaction([repoCreate, projectUpdate])
+  const [repository, project] = await prisma.$transaction([
+    repoCreate,
+    projectUpdate,
+  ])
+
+  return repository
 }
 
 export async function removeProjectRepository({
