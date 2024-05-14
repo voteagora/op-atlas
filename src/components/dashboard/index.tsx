@@ -11,6 +11,7 @@ import { cn, getProjectStatus } from "@/lib/utils"
 
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
+import JoinProjectDialog from "./JoinProjectDialog"
 import ProfileDetailCard from "./ProfileDetailCard"
 import UserProjectCard from "./UserProjectCard"
 
@@ -25,6 +26,8 @@ const Dashboard = ({
   projects: ProjectWithDetails[]
   applications: Application[]
 }) => {
+  const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
+
   const canApply = useMemo(() => {
     return projects.some(
       (project) => getProjectStatus(project).progressPercent === 100,
@@ -35,6 +38,12 @@ const Dashboard = ({
 
   return (
     <div className={cn("card flex flex-col w-full gap-y-12", className)}>
+      {joinProjectDialogOpen && (
+        <JoinProjectDialog
+          open
+          onOpenChange={(open) => setJoinProjectDialogOpen(open)}
+        />
+      )}
       <ProfileDetailCard user={user} />
 
       <div className="flex flex-col gap-6">
@@ -60,7 +69,12 @@ const Dashboard = ({
               Add a project
             </Button>
           </Link>
-          <Button variant="secondary">Join a project</Button>
+          <Button
+            onClick={() => setJoinProjectDialogOpen(true)}
+            variant="secondary"
+          >
+            Join a project
+          </Button>
         </div>
       </div>
 
