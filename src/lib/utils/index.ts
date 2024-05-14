@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { customAlphabet } from "nanoid"
+import { sortBy } from "ramda"
 import { twMerge } from "tailwind-merge"
 
 import { ProjectWithDetails } from "../types"
@@ -19,9 +20,9 @@ export function titlecase(str: string) {
   return str.charAt(0).toLocaleUpperCase() + str.slice(1)
 }
 
-export const copyTextToClipBoard = async (url: string) => {
+export const copyToClipboard = async (value: string) => {
   try {
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(value)
   } catch (error) {
     throw new Error("Failed to copy text to clipboard")
   }
@@ -98,6 +99,15 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   progress += hasSnapshots ? 16.67 : 0
 
   return { completedSections, progressPercent: Math.round(progress) }
+}
+
+export function projectHasUnpublishedChanges(
+  project: ProjectWithDetails,
+): boolean {
+  const latestSnapshot = sortBy((s) => -s.createdAt, project.snapshots)[0]
+  if (!latestSnapshot) return false
+
+  return latestSnapshot.createdAt < project.lastMetadataUpdate
 }
 
 /*
