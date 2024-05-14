@@ -1,6 +1,7 @@
 import { MoveUpRight } from "lucide-react"
 import Link from "next/link"
 
+import ExternalLink from "../ExternalLink"
 import {
   Accordion,
   AccordionContent,
@@ -20,14 +21,13 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
             More
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-6 py-6">
-            <Link
+            <ExternalLink
               className="flex items-center text-sm font-medium gap-1"
-              href="#"
-              onClick={onClose}
+              href="https://app.optimism.io/retropgf"
             >
               <div>About Retro Funding</div>
               <MoveUpRight size={12} />
-            </Link>
+            </ExternalLink>
             <Link
               className="flex items-center text-sm font-medium gap-1"
               href="#"
