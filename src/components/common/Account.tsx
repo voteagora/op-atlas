@@ -2,6 +2,7 @@
 
 import { SignInButton, StatusAPIResponse } from "@farcaster/auth-kit"
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
@@ -112,8 +113,13 @@ export function Account() {
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <Link href="/dashboard">
+            <DropdownMenuItem className="cursor-pointer">
+              View profile
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem className="cursor-pointer" onClick={logOut}>
-            Logout
+            Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
