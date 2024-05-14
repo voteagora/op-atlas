@@ -322,9 +322,16 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             )}
           />
           <div className="flex flex-col gap-1.5">
-            <p className="text-sm font-medium">
-              Category<span className="ml-0.5 text-destructive">*</span>
-            </p>
+            <div>
+              <FormLabel className="text-sm font-medium">
+                Category<span className="ml-0.5 text-destructive">*</span>
+              </FormLabel>
+              <div className="text-secondary-foreground text-sm">
+                Choose a single category that best applies to this project. Your
+                selection won&apos;t be visible to voters and has no impact on
+                Retro Funding.
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="category"

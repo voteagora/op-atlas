@@ -97,8 +97,8 @@ export const ApplicationSubmitted = ({
           </li>
           <li>
             <span className="font-medium">Results will be shared July 18:</span>{" "}
-            You will receive instructions on how to claim your Retro Funding
-            rewards via email.
+            If you receive rewards, you will receive instructions on how to
+            claim your Retro Funding rewards via email.
           </li>
         </ul>
       </div>
@@ -106,12 +106,20 @@ export const ApplicationSubmitted = ({
       {/* Social share */}
       <div className="flex flex-col gap-y-6">
         <h3>Share with your community</h3>
-        <div className="w-full h-[356px] rounded-xl bg-secondary" />
+        <div className="w-full h-[400px] relative">
+          <Image
+            src="/assets/images/submitted-retro-funding.png"
+            fill
+            alt="Social share"
+          />
+        </div>
 
-        <Button variant="secondary" className="w-fit">
-          Download image
-          <ArrowDownToLine size={16} className="ml-2.5" />
-        </Button>
+        <a href="/assets/images/submitted-retro-funding.png" download>
+          <Button variant="secondary" className="w-fit">
+            Download image
+            <ArrowDownToLine size={16} className="ml-2.5" />
+          </Button>
+        </a>
       </div>
 
       {/* Join the conversation */}
