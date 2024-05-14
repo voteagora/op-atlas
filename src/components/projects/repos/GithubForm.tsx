@@ -5,7 +5,6 @@ import { UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +20,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
-import { copyTextToClipBoard } from "@/lib/utils"
+import { copyToClipboard } from "@/lib/utils"
 
 import { ReposFormSchema } from "./schema"
 
@@ -45,7 +44,7 @@ export const GithubForm = ({
 
   const onCopy = async () => {
     try {
-      await copyTextToClipBoard(url)
+      await copyToClipboard(url)
       toast({ title: "Copied to clipboard" })
     } catch (error) {
       toast({ title: "Error copying URL", variant: "destructive" })

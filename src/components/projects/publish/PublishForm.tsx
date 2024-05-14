@@ -6,7 +6,11 @@ import { useCallback, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { createProjectSnapshot } from "@/lib/actions/snapshots"
 import { ProjectWithDetails } from "@/lib/types"
-import { getProjectStatus, ProjectSection } from "@/lib/utils"
+import {
+  getProjectStatus,
+  projectHasUnpublishedChanges,
+  ProjectSection,
+} from "@/lib/utils"
 
 import { Snapshot } from "./Snapshot"
 
@@ -27,6 +31,10 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
         completedSections,
       ).length === 5
     )
+  }, [project])
+
+  const hasUnpublishedChanges = useMemo(() => {
+    return projectHasUnpublishedChanges(project)
   }, [project])
 
   const onPublish = useCallback(async () => {
@@ -75,6 +83,11 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
         {!canPublish && (
           <p className="text-sm text-destructive">
             You haven&apos;t completed all the previous steps
+          </p>
+        )}
+        {hasUnpublishedChanges && (
+          <p className="text-sm text-destructive">
+            Your recent edits haven&apos;t been published onchain
           </p>
         )}
       </div>

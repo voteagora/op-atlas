@@ -117,7 +117,10 @@ export async function updateProject({
     where: {
       id,
     },
-    data: project,
+    data: {
+      ...project,
+      lastMetadataUpdate: new Date(),
+    },
   })
 }
 
@@ -154,37 +157,7 @@ export async function getProjectTeam({ id }: { id: string }) {
       id,
     },
     include: {
-      team: {
-        include: {
-          user: true,
-        },
-      },
-    },
-  })
-}
-
-export async function addTeamMember({
-  projectId,
-  userId,
-  role = "member",
-}: {
-  projectId: string
-  userId: string
-  role?: TeamRole
-}) {
-  return prisma.userProjects.create({
-    data: {
-      role,
-      user: {
-        connect: {
-          id: userId,
-        },
-      },
-      project: {
-        connect: {
-          id: projectId,
-        },
-      },
+      team: true,
     },
   })
 }
@@ -198,13 +171,24 @@ export async function addTeamMembers({
   userIds: string[]
   role?: TeamRole
 }) {
-  return prisma.userProjects.createMany({
+  const memberCreate = prisma.userProjects.createMany({
     data: userIds.map((userId) => ({
       role,
       userId,
       projectId,
     })),
   })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([memberCreate, projectUpdate])
 }
 
 export async function updateMemberRole({
@@ -216,7 +200,7 @@ export async function updateMemberRole({
   userId: string
   role: TeamRole
 }) {
-  return prisma.userProjects.update({
+  const memberUpdate = prisma.userProjects.update({
     where: {
       userId_projectId: {
         projectId,
@@ -227,6 +211,17 @@ export async function updateMemberRole({
       role,
     },
   })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([memberUpdate, projectUpdate])
 }
 
 export async function removeTeamMember({
@@ -236,7 +231,7 @@ export async function removeTeamMember({
   projectId: string
   userId: string
 }) {
-  return prisma.userProjects.delete({
+  const memberDelete = prisma.userProjects.delete({
     where: {
       userId_projectId: {
         projectId,
@@ -244,6 +239,17 @@ export async function removeTeamMember({
       },
     },
   })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([memberDelete, projectUpdate])
 }
 
 export async function addProjectContract({
@@ -253,7 +259,7 @@ export async function addProjectContract({
   projectId: string
   contract: Omit<Prisma.ProjectContractCreateInput, "project">
 }) {
-  return prisma.projectContract.create({
+  const contractCreate = prisma.projectContract.create({
     data: {
       ...contract,
       project: {
@@ -263,6 +269,17 @@ export async function addProjectContract({
       },
     },
   })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([contractCreate, projectUpdate])
 }
 
 export async function removeProjectContract({
@@ -274,7 +291,7 @@ export async function removeProjectContract({
   address: string
   chainId: number
 }) {
-  return prisma.projectContract.delete({
+  const contractDelete = prisma.projectContract.delete({
     where: {
       projectId,
       contractAddress_chainId: {
@@ -283,6 +300,17 @@ export async function removeProjectContract({
       },
     },
   })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([contractDelete, projectUpdate])
 }
 
 export async function getProjectContracts({
@@ -310,7 +338,7 @@ export async function addProjectRepository({
   projectId: string
   repo: Omit<Prisma.ProjectRepositoryCreateInput, "project">
 }) {
-  return prisma.projectRepository.create({
+  const repoCreate = prisma.projectRepository.create({
     data: {
       ...repo,
       project: {
@@ -320,6 +348,22 @@ export async function addProjectRepository({
       },
     },
   })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  const [repository, project] = await prisma.$transaction([
+    repoCreate,
+    projectUpdate,
+  ])
+
+  return repository
 }
 
 export async function removeProjectRepository({
@@ -329,12 +373,23 @@ export async function removeProjectRepository({
   projectId: string
   repositoryUrl: string
 }) {
-  return prisma.projectRepository.delete({
+  const repoDelete = prisma.projectRepository.delete({
     where: {
       projectId: projectId,
       url: repositoryUrl,
     },
   })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([repoDelete, projectUpdate])
 }
 
 export async function updateProjectRepository({
@@ -346,13 +401,24 @@ export async function updateProjectRepository({
   url: string
   updates: Prisma.ProjectRepositoryUpdateInput
 }) {
-  return prisma.projectRepository.update({
+  const repoUpdate = prisma.projectRepository.update({
     where: {
       projectId,
       url,
     },
     data: updates,
   })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([repoUpdate, projectUpdate])
 }
 
 export async function updateProjectRepositories({
@@ -379,7 +445,16 @@ export async function updateProjectRepositories({
     })),
   })
 
-  return prisma.$transaction([remove, create])
+  const update = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([remove, create, update])
 }
 
 export async function updateProjectFunding({
@@ -410,6 +485,7 @@ export async function updateProjectFunding({
     },
     data: {
       addedFunding: true,
+      lastMetadataUpdate: new Date(),
     },
   })
 

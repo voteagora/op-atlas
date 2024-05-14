@@ -22,7 +22,7 @@ import {
   updateGithubRepo,
   verifyGithubRepo,
 } from "@/lib/actions/repos"
-import { copyTextToClipBoard } from "@/lib/utils"
+import { copyToClipboard } from "@/lib/utils"
 
 const sampleFullJson = `\
 {
@@ -279,7 +279,7 @@ const VerifyFundingStep = ({
 
   const onCopy = async () => {
     try {
-      await copyTextToClipBoard(requiredJson.replace("[projectId]", projectId))
+      await copyToClipboard(requiredJson.replace("[projectId]", projectId))
       toast({ title: "Copied to clipboard " })
     } catch (error) {
       toast({ title: "Error copying JSON", variant: "destructive" })

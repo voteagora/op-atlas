@@ -50,8 +50,9 @@ model Project {
   mirror    String?
 
   openSourceObserverSlug String?
-  addedTeamMembers       Boolean @default(false)
-  addedFunding           Boolean @default(false)
+  addedTeamMembers       Boolean  @default(false)
+  addedFunding           Boolean  @default(false)
+  lastMetadataUpdate     DateTime @default(now())
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -79,8 +80,8 @@ model Application {
   round   FundingRound @relation(fields: [roundId], references: [id])
   project Project      @relation(fields: [projectId], references: [id])
 
-  @@index([projectId])
   @@unique([roundId, projectId])
+  @@index([projectId])
 }
 
 model UserProjects {
@@ -96,9 +97,9 @@ model UserProjects {
   user    User    @relation(fields: [userId], references: [id])
   project Project @relation(fields: [projectId], references: [id])
 
+  @@unique([userId, projectId])
   @@index([userId])
   @@index([projectId])
-  @@unique([userId, projectId])
 }
 
 model ProjectSnapshot {
@@ -148,8 +149,8 @@ model ProjectContract {
 
   project Project @relation(fields: [projectId], references: [id])
 
-  @@index([projectId])
   @@unique([contractAddress, chainId])
+  @@index([projectId])
 }
 
 model ProjectFunding {

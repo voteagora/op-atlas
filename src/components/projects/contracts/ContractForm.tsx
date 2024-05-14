@@ -29,7 +29,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { verifyContract } from "@/lib/actions/contracts"
-import { copyTextToClipBoard } from "@/lib/utils"
+import { copyToClipboard } from "@/lib/utils"
 
 import { ChainSelector } from "./ChainSelector"
 import { ContractSchema, ContractsSchema } from "./schema"
@@ -67,7 +67,7 @@ export function ContractForm({
 
   const onCopyValue = async (value: string) => {
     try {
-      await copyTextToClipBoard(value)
+      await copyToClipboard(value)
       toast({ title: "Copied to clipboard" })
     } catch (error) {
       toast({ title: "Error copying to clipboard", variant: "destructive" })
