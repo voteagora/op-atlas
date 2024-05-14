@@ -55,6 +55,7 @@
     "ramda": "^0.30.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-dom-confetti": "^0.2.0",
     "react-hook-form": "^7.51.2",
     "react-image-crop": "^11.0.5",
     "tailwind-merge": "^2.2.2",
