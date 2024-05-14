@@ -1,7 +1,8 @@
 import { Octokit } from "octokit"
 
-// TODO: Add API key for higher rate limits
-const octokit = new Octokit({})
+const octokit = new Octokit({
+  auth: process.env.GITHUB_AUTH_TOKEN,
+})
 
 export async function getRepository(owner: string, slug: string) {
   return await octokit.rest.repos.get({ owner, repo: slug })
