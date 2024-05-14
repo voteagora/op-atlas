@@ -28,8 +28,11 @@ export const ApplicationFlow = ({
     setSubmittedApplication(result.application)
   }, [])
 
-  return applications.length > 0 ? (
-    <ApplicationSubmitted className={className} application={applications[0]} />
+  return submittedApplication ? (
+    <ApplicationSubmitted
+      className={className}
+      application={submittedApplication}
+    />
   ) : (
     <FundingApplication
       className={className}
