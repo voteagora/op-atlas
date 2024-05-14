@@ -113,14 +113,14 @@ export function Account() {
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem className="cursor-pointer" onClick={logOut}>
-            Logout
-          </DropdownMenuItem>
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
-              Profile
+              View profile
             </DropdownMenuItem>
           </Link>
+          <DropdownMenuItem className="cursor-pointer" onClick={logOut}>
+            Log out
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )
