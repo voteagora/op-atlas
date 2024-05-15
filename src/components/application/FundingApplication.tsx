@@ -87,27 +87,34 @@ export const FundingApplication = ({
         <Image
           alt="sunny"
           src="/assets/images/round-4-transparent.svg"
-          height={156}
-          width={158}
+          height={124}
+          width={124}
         />
         <h2 className="text-center">Retro Funding Round 4: Onchain Builders</h2>
         {hasApplied ? (
-          <div className="flex items-center gap-1 py-1 px-3 bg-success rounded-full">
+          <div className="flex items-center gap-2 p-4 bg-success rounded-xl w-full">
             <Image
               src="/assets/icons/circle-check-green.svg"
               height={16}
               width={16}
               alt="Submitted"
             />
-            <p className="font-medium text-success-foreground">
-              Application submitted on{" "}
-              {format(applications[0].createdAt, "MMMM d, h:mm a")}
-            </p>
+            <div className="flex flex-col text-success-foreground">
+              <p className="font-medium text-sm">
+                Application submitted on{" "}
+                {format(applications[0].createdAt, "MMMM d, h:mm a")}
+              </p>
+              <p className="text-sm">
+                You can resubmit with additional projects until June 6th at
+                19:00 UTC.
+              </p>
+            </div>
           </div>
         ) : (
           <Badge
             size="lg"
-            text="Submit this application by June 6th at 23:59 UTC"
+            text="Submit this application by June 6th at 19:00 UTC"
+            className="py-1.5 px-4 text-base"
           />
         )}
       </div>
@@ -201,7 +208,7 @@ export const FundingApplication = ({
               <ProjectCard
                 key={project.id}
                 project={project}
-                disabled={hasApplied}
+                hasApplied={appliedProjectIds.includes(project.id)}
                 isSelected={
                   selectedProjectId === project.id ||
                   appliedProjectIds.includes(project.id)
@@ -221,8 +228,7 @@ export const FundingApplication = ({
           {TERMS.map((term, idx) => (
             <div key={idx} className="flex gap-x-4">
               <Checkbox
-                disabled={hasApplied}
-                checked={agreedTerms[idx] || hasApplied}
+                checked={agreedTerms[idx]}
                 onCheckedChange={() => toggleAgreedTerm(idx)}
                 className="mt-1 border-2 rounded-[2px]"
               />
