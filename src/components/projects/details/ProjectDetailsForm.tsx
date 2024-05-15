@@ -198,9 +198,9 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-12"
       >
-        <h2>Project details</h2>
-
         <div className="flex flex-col gap-6">
+          <h2>Project details</h2>
+
           <FormField
             control={form.control}
             name="name"

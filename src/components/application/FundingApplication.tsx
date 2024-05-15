@@ -30,7 +30,7 @@ export const FundingApplication = ({
   className?: string
   projects: ProjectWithDetails[]
   applications: Application[]
-  onApply: (projectId: string) => Promise<void>
+  onApply: (projectIds: string[]) => Promise<void>
 }) => {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -38,9 +38,7 @@ export const FundingApplication = ({
     Array.from({ length: TERMS.length }, () => false),
   )
 
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null,
-  )
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([])
 
   const hasApplied = applications.length > 0
   const appliedProjectIds = applications.map(
@@ -56,24 +54,30 @@ export const FundingApplication = ({
   }
 
   const toggleProjectSelection = (projectId: string) => {
-    setSelectedProjectId((current) => {
-      return projectId === current ? null : projectId
+    setSelectedProjectIds((current) => {
+      const idx = current.indexOf(projectId)
+      if (idx === -1) {
+        return [...current, projectId]
+      } else {
+        return current.filter((id) => id !== projectId)
+      }
     })
   }
 
   const submitApplication = async () => {
-    if (!selectedProjectId) return
+    if (selectedProjectIds.length === 0) return
 
     try {
       setIsLoading(true)
-      await onApply(selectedProjectId)
+      await onApply(selectedProjectIds)
     } catch (error) {
       console.error("Error submitting application", error)
       setIsLoading(false)
     }
   }
 
-  const canSubmit = agreedTerms.every((term) => term) && !!selectedProjectId
+  const canSubmit =
+    agreedTerms.every((term) => term) && selectedProjectIds.length > 0
 
   return (
     <div
@@ -210,7 +214,7 @@ export const FundingApplication = ({
                 project={project}
                 hasApplied={appliedProjectIds.includes(project.id)}
                 isSelected={
-                  selectedProjectId === project.id ||
+                  selectedProjectIds.includes(project.id) ||
                   appliedProjectIds.includes(project.id)
                 }
                 onSelect={toggleProjectSelection}

@@ -3,7 +3,7 @@
 import { Application } from "@prisma/client"
 import { useCallback, useState } from "react"
 
-import { submitApplication } from "@/lib/actions/applications"
+import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
@@ -21,11 +21,14 @@ export const ApplicationFlow = ({
   const [submittedApplication, setSubmittedApplication] =
     useState<Application | null>(null)
 
-  const onApply = useCallback(async (projectId: string) => {
-    const result = await submitApplication(projectId)
-    if (result.error !== null || !result.application) return
+  const onApply = useCallback(async (projectIds: string[]) => {
+    const result = await submitApplications(projectIds)
+    if (result.error !== null || result.applications.length === 0) {
+      // TODO: handle error
+      return
+    }
 
-    setSubmittedApplication(result.application)
+    setSubmittedApplication(result.applications[0])
   }, [])
 
   return submittedApplication ? (
