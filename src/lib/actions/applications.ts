@@ -1,5 +1,6 @@
 "use server"
 
+import { Application } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { sortBy } from "ramda"
 
@@ -10,16 +11,11 @@ import { createApplicationAttestation } from "../eas"
 import { getProjectStatus } from "../utils"
 import { verifyAdminStatus } from "./utils"
 
-export const submitApplication = async (projectId: string) => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
+const createProjectApplication = async (
+  projectId: string,
+  farcasterId: string,
+) => {
+  const isInvalid = await verifyAdminStatus(projectId, farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -60,10 +56,42 @@ export const submitApplication = async (projectId: string) => {
     round: 4,
   })
 
-  revalidatePath("/dashboard")
-
   return {
     application,
     error: null,
+  }
+}
+
+export const submitApplications = async (projectIds: string[]) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const results = await Promise.all(
+    projectIds.map((projectId) =>
+      createProjectApplication(projectId, session.user.farcasterId),
+    ),
+  )
+
+  const applications: Application[] = []
+  let error: Error | null = null
+
+  results.forEach((result) => {
+    if (result.error === null && result.application) {
+      applications.push(result.application)
+    } else if (result.error) {
+      error = new Error(result.error)
+    }
+  })
+
+  revalidatePath("/dashboard")
+
+  return {
+    applications,
+    error,
   }
 }

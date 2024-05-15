@@ -81,8 +81,7 @@ export const ApplicationSubmitted = ({
           You&apos;ll receive an email{" "}
           {email ? (
             <>
-              at{" "}
-              <span className="text-accent-foreground">shaun@optimism.io</span>{" "}
+              at <span className="text-accent-foreground">{email}</span>{" "}
             </>
           ) : (
             ""
