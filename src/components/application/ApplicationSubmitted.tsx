@@ -73,8 +73,8 @@ export const ApplicationSubmitted = ({
         <Image
           alt="sunny"
           src="/assets/images/round-4-transparent.svg"
-          height={156}
-          width={158}
+          height={124}
+          width={124}
         />
         <h2 className="text-center">Application Submitted!</h2>
         <p className="text-center text-lg font-semibold max-w-lg">
