@@ -72,7 +72,6 @@ export type CreateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
 > & {
   name: string
-  description: string
 }
 
 export async function createProject({

@@ -46,9 +46,10 @@ const CategoryEnum = z.enum([
 ])
 
 const StringValue = z.object({ value: z.string() }) // use a intermediate object to represent String arrays because useFieldArray only works on object arrays
+
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().optional(),
   category: CategoryEnum,
   website: z.array(StringValue),
   farcaster: z.array(StringValue),
@@ -197,8 +198,50 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-12"
       >
+        <h2>Project details</h2>
+
         <div className="flex flex-col gap-6">
-          <h2>Project details</h2>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel className="text-foreground">
+                  Name<span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
+                <Input
+                  type=""
+                  id="name"
+                  placeholder="Add a project name"
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel className="text-foreground">
+                  Description<span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
+                <FormDescription className="!mt-0">
+                  Introduce your project to the Optimism Collective. Share who
+                  you are and what you do.
+                </FormDescription>
+                <Textarea
+                  id="description"
+                  placeholder="Add a description"
+                  className="resize-none"
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div>
             <div>
               <FormLabel>
@@ -281,46 +324,6 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             </div>
           </div>
 
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Name<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
-                <Input
-                  type=""
-                  id="name"
-                  placeholder="Add a project name"
-                  {...field}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Description<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
-                <FormDescription className="!mt-0">
-                  Introduce your project to the Optimism Collective. Share who
-                  you are and what you do.
-                </FormDescription>
-                <Textarea
-                  id="description"
-                  placeholder="Add a description"
-                  className="resize-none"
-                  {...field}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <div className="flex flex-col gap-1.5">
             <div>
               <FormLabel className="text-sm font-medium">
@@ -462,6 +465,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             )}
           />
         </div>
+
         <Button
           isLoading={isLoading}
           disabled={!canSubmit || isLoading}

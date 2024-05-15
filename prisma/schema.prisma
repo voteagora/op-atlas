@@ -39,7 +39,7 @@ model FundingRound {
 model Project {
   id           String  @id @default(uuid())
   name         String
-  description  String
+  description  String?
   category     String?
   thumbnailUrl String?
   bannerUrl    String?
