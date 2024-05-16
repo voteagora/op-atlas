@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { memo, useMemo, useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -12,7 +13,6 @@ import { useIsAdmin } from "@/lib/hooks"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 
-import { toast } from "../ui/use-toast"
 import { DeleteProjectDialog } from "./DeleteProjectDialog"
 
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
@@ -44,9 +44,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
 
     const result = await deleteUserProject(project.id)
     if (result.error) {
-      toast({
-        title: "There was an error deleting this project.",
-      })
+      toast.error("There was an error deleting this project.")
     }
 
     setDeletingProject(false)

@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { memo, useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -29,6 +30,7 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
     setLoading(true)
     try {
       await updateEmail(email)
+      toast.success("Email added")
       update({ email })
       onOpenChange(false)
     } catch (error) {

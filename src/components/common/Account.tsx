@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
 
 import {
   DropdownMenu,
@@ -18,10 +19,8 @@ import { isFirstTimeUser, saveLogInDate } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { useToast } from "../ui/use-toast"
 
 export function Account() {
-  const { toast } = useToast()
   const { data: session, status } = useSession()
   const previousAuthStatus = usePrevious(status)
   const [error, setError] = useState(false)
@@ -78,12 +77,9 @@ export function Account() {
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Unable to sign in at this time.",
-        variant: "destructive",
-      })
+      toast.error("Unable to sign in at this time.")
     }
-  }, [error, toast])
+  }, [error])
 
   if (status === "loading") {
     return null

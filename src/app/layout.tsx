@@ -4,7 +4,9 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 
 import AppDialogs from "@/components/dialogs/AppDialogs"
-import { Toaster } from "@/components/ui/toaster"
+import { CheckIconFilled } from "@/components/icons/checkIconFilled"
+import { InfoIconFilled } from "@/components/icons/infoIconFilled"
+import { Toaster } from "@/components/ui/sonner"
 import Providers from "@/providers/Providers"
 
 const inter = Inter({
@@ -29,7 +31,12 @@ export default function RootLayout({
         <Providers>
           <AppDialogs />
           {children}
-          <Toaster />
+          <Toaster
+            icons={{
+              success: <CheckIconFilled size={18} />,
+              info: <InfoIconFilled size={18} />,
+            }}
+          />
         </Providers>
       </body>
     </html>

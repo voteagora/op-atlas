@@ -2,6 +2,7 @@
 
 import { User } from "@prisma/client"
 import { memo, useState } from "react"
+import { toast } from "sonner"
 
 import { DialogProps } from "@/components/dialogs/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -21,7 +22,7 @@ const DeleteTeamMemberDialog = ({
       setLoading(true)
       await onRemove()
     } catch (error) {
-      // TODO: Toast
+      toast.error("Error removing team member")
     } finally {
       setLoading(false)
     }
