@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { reverse } from "ramda"
+import { reverse, uniqBy } from "ramda"
 import { memo, useMemo, useState } from "react"
 
 import { Progress } from "@/components/ui/progress"
@@ -94,15 +94,17 @@ const UserProjectCard = ({
         <div className="mt-auto h-6 flex items-center">
           {project.contracts.length > 0 ? (
             <div className="h-full flex flex-row-reverse items-center w-fit mr-3 ml-1.5">
-              {reverse(project.contracts).map((contract, idx) => (
-                <div
-                  key={contract.id}
-                  className="w-6 h-6 -ml-1.5"
-                  style={{ zIndex: idx }}
-                >
-                  <ChainLogo chainId={contract.chainId.toString()} />
-                </div>
-              ))}
+              {reverse(uniqBy((c) => c.chainId, project.contracts)).map(
+                (contract, idx) => (
+                  <div
+                    key={contract.id}
+                    className="w-6 h-6 -ml-1.5"
+                    style={{ zIndex: idx }}
+                  >
+                    <ChainLogo chainId={contract.chainId.toString()} />
+                  </div>
+                ),
+              )}
             </div>
           ) : null}
 

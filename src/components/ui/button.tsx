@@ -1,10 +1,9 @@
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Loader2 } from "lucide-react"
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-
-import { Spinner } from "./spinner"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -65,7 +64,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {isLoading ? (
           <div className="relative">
             <div className="absolute top-0 bottom-0 left-0 right-0 flex justify-center items-center">
-              <Spinner />
+              <Loader2 className="h-5 w-5 animate-spin" />
             </div>
             {/* Keep the orginal width of the button while showing the spinner icon */}
             <div className="invisible">{children}</div>
