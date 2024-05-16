@@ -100,7 +100,7 @@ const Round = ({
         onClick={onClick}
         type="button"
         className={cn(
-          "flex gap-x-6 border rounded-3xl p-10",
+          "flex gap-x-6 border rounded-3xl p-10 transition-all",
           (fundingRound.link || fundingRound.status === "now") &&
             "hover:shadow-md",
           className,
