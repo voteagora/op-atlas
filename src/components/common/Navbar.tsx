@@ -9,6 +9,12 @@ import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card"
 import { Account } from "./Account"
 import { MobileNav } from "./MobileNav"
@@ -49,39 +55,47 @@ const Navbar = () => {
           >
             <div className="flex items-center">
               <Link
-                className={isRounds ? "mt-1" : "group-hover:mt-1"}
+                className={`${
+                  isRounds ? "mt-1" : "group-hover:mt-1"
+                } focus:outline-none focus:opacity-80`}
                 href="/rounds"
               >
                 Rounds
               </Link>
             </div>
           </div>
-          <HoverCard openDelay={0} closeDelay={0}>
-            <HoverCardTrigger className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
-              <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
-                <button>More</button>
-                <ChevronUp size={12} />
+          <DropdownMenu>
+            <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
+              <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
+                <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
+                  <div>More</div>
+                  <ChevronUp size={12} />
+                </div>
               </div>
-            </HoverCardTrigger>
-            <HoverCardContent
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
               className="w-64 py-3 px-4 flex flex-col gap-4 text-text-secondary rounded-2xl"
               sideOffset={0}
               side="bottom"
               align="start"
             >
-              <ExternalLink
-                className="flex items-center gap-1"
-                href="https://app.optimism.io/retropgf"
-              >
-                <div>About Retro Funding</div>
-                <MoveUpRight size={12} />
-              </ExternalLink>
-              <ExternalLink className="flex items-center gap-1" href="#">
-                <div>Voting</div>
-                <MoveUpRight size={12} />
-              </ExternalLink>
-            </HoverCardContent>
-          </HoverCard>
+              <DropdownMenuItem className="focus:bg-none! focus:opacity-80 text-base">
+                <ExternalLink
+                  className="flex items-center gap-1"
+                  href="https://app.optimism.io/retropgf"
+                >
+                  <div>About Retro Funding</div>
+                  <MoveUpRight size={12} />
+                </ExternalLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="focus:bg-none! focus:opacity-80 text-base">
+                <ExternalLink className="flex items-center gap-1" href="#">
+                  <div>Voting</div>
+                  <MoveUpRight size={12} />
+                </ExternalLink>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="hidden sm:flex items-center">
