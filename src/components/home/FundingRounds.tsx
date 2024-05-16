@@ -106,7 +106,7 @@ const Round = ({
           className,
         )}
       >
-        <RoundContent fundingRound={fundingRound} />
+        <FundingRoundContent fundingRound={fundingRound} />
       </button>
     )
   }
@@ -114,7 +114,7 @@ const Round = ({
   if (!fundingRound.link) {
     return (
       <div className={cn("flex gap-x-6 border rounded-3xl p-10", className)}>
-        <RoundContent fundingRound={fundingRound} />
+        <FundingRoundContent fundingRound={fundingRound} />
       </div>
     )
   }
@@ -124,12 +124,12 @@ const Round = ({
       href={fundingRound.link}
       className={cn("flex gap-x-6 border rounded-3xl p-10", className)}
     >
-      <RoundContent fundingRound={fundingRound} />
+      <FundingRoundContent fundingRound={fundingRound} />
     </ExternalLink>
   )
 }
 
-function RoundContent({ fundingRound }: { fundingRound: FundingRound }) {
+function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
   return (
     <>
       {fundingRound.status !== "past" && fundingRound.iconUrl && (
