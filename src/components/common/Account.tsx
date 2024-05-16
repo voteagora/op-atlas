@@ -65,6 +65,7 @@ export function Account() {
 
     if (isFirstTimeUser()) {
       router.push("/welcome")
+      saveLogInDate()
     } else {
       saveLogInDate()
       router.push("/dashboard")
@@ -97,7 +98,7 @@ export function Account() {
   if (session)
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
             <Avatar className="!w-6 !h-6">
               <AvatarImage src={session.user?.image || ""} alt="avatar" />
@@ -112,7 +113,7 @@ export function Account() {
             />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="w-56">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               View profile
