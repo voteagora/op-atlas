@@ -144,7 +144,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
 
       router.push(`/projects/${project.id}/grants`)
     } catch (error) {
-      toast.error("There was an error updating your OSO status.")
+      toast.error("There was an error updating project OSO status.")
       setIsSubmitting(false)
     }
   }
