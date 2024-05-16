@@ -112,7 +112,7 @@ export function Account() {
             />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="w-56">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               View profile

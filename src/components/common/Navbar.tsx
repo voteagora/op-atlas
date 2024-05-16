@@ -1,6 +1,6 @@
 "use client"
 
-import { AlignJustify, X } from "lucide-react"
+import { AlignJustify, ChevronUp, MoveUpRight, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -8,6 +8,8 @@ import React, { useState } from "react"
 
 import { cn } from "@/lib/utils"
 
+import ExternalLink from "../ExternalLink"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card"
 import { Account } from "./Account"
 import { MobileNav } from "./MobileNav"
 
@@ -20,7 +22,10 @@ const Navbar = () => {
     <>
       <nav className="sticky inset-x-0 top-0 h-18 bg-white flex justify-between px-6 shadow-sm z-20">
         <div className="flex gap-12 items-center">
-          <button onClick={() => setShowMobileNav(!showMobileNav)}>
+          <button
+            className={showMobileNav ? "block" : "sm:hidden"}
+            onClick={() => setShowMobileNav(!showMobileNav)}
+          >
             {showMobileNav ? (
               <X />
             ) : (
@@ -51,7 +56,34 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
+          <HoverCard openDelay={0} closeDelay={0}>
+            <HoverCardTrigger className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
+              <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
+                <button>More</button>
+                <ChevronUp size={12} />
+              </div>
+            </HoverCardTrigger>
+            <HoverCardContent
+              className="w-64 py-3 px-4 flex flex-col gap-4 text-text-secondary rounded-2xl"
+              sideOffset={0}
+              side="bottom"
+              align="start"
+            >
+              <ExternalLink
+                className="flex items-center gap-1"
+                href="https://app.optimism.io/retropgf"
+              >
+                <div>About Retro Funding</div>
+                <MoveUpRight size={12} />
+              </ExternalLink>
+              <ExternalLink className="flex items-center gap-1" href="#">
+                <div>Voting</div>
+                <MoveUpRight size={12} />
+              </ExternalLink>
+            </HoverCardContent>
+          </HoverCard>
         </div>
+
         <div className="hidden sm:flex items-center">
           <Account />
         </div>
