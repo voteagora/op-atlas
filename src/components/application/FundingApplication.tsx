@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 
 import { Badge } from "../common/Badge"
 import { Callout } from "../common/Callout"
+import ExternalLink from "../ExternalLink"
 import { Button } from "../ui/button"
 import { Checkbox } from "../ui/checkbox"
 import { ProjectCard } from "./ProjectCard"
@@ -243,9 +244,12 @@ export const FundingApplication = ({
 
         <p className="">
           See{" "}
-          <Link href="#" className="font-medium">
+          <ExternalLink
+            href="https://www.optimism.io/data-privacy-policy"
+            className="font-medium"
+          >
             Optimism&apos;s Privacy Policy
-          </Link>{" "}
+          </ExternalLink>{" "}
           for information about how Retro Funding signup data is used.
         </p>
       </div>

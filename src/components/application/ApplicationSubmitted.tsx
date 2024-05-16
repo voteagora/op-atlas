@@ -8,6 +8,7 @@ import Confetti from "react-dom-confetti"
 
 import { cn } from "@/lib/utils"
 
+import ExternalLink from "../ExternalLink"
 import { Discord, DiscussionForum, Twitter } from "../icons/socials"
 import { Button } from "../ui/button"
 import { ApplicationStatus } from "./ApplicationStatus"
@@ -16,14 +17,17 @@ const SOCIALS = [
   {
     name: "Discord",
     icon: <Discord />,
+    link: "https://discord.com/invite/optimism",
   },
   {
     name: "Twitter",
     icon: <Twitter />,
+    link: "https://twitter.com/Optimism",
   },
   {
     name: "Governance Forum",
     icon: <DiscussionForum />,
+    link: "https://gov.optimism.io/",
   },
 ] as const
 
@@ -144,14 +148,15 @@ export const ApplicationSubmitted = ({
       <div className="flex flex-col gap-y-6">
         <h3 className="text-lg font-semibold">Join the conversation</h3>
         <div className="grid grid-cols-3 gap-4">
-          {SOCIALS.map(({ name, icon }) => (
-            <div
+          {SOCIALS.map(({ name, icon, link }) => (
+            <ExternalLink
+              href={link}
               key={name}
-              className="flex flex-col items-center justify-center gap-y-2 h-[104px] border rounded-2xl"
+              className="flex flex-col items-center justify-center gap-y-2 h-[104px] border rounded-2xl cursor-pointer hover:opacity-80"
             >
               {icon}
               <p className="text-sm font-semibold">{name}</p>
-            </div>
+            </ExternalLink>
           ))}
         </div>
       </div>
