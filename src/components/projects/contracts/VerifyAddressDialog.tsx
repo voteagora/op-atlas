@@ -32,7 +32,8 @@ export function VerifyAddressDialog({
   const [page, setPage] = useState(0)
   const [copied, setCopied] = useState(false)
   const [signature, setSignature] = useState("")
-  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string>()
 
   const messageToSign = useMemo(() => {
     const checksummedAddress = checksumAddress(deployerAddress)
@@ -47,6 +48,8 @@ export function VerifyAddressDialog({
 
   const onConfirmSignature = async () => {
     try {
+      setLoading(true)
+
       const verificationResult = await verifyContract({
         projectId,
         contractAddress,
@@ -56,14 +59,17 @@ export function VerifyAddressDialog({
         chain,
       })
 
-      if (!verificationResult.error) {
-        onSubmit(signature)
+      if (verificationResult.error !== null) {
+        setError(verificationResult.error)
         return
-      } else {
-        setError(true)
       }
+
+      setError(undefined)
+      onSubmit(signature)
     } catch (_) {
-      setError(true)
+      setError("An error occurred, please try again")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -142,16 +148,14 @@ export function VerifyAddressDialog({
                 className="resize-none"
               />
               {error && (
-                <div className="text-destructive text-sm font-medium">
-                  Invalid signature
-                </div>
+                <p className="text-destructive text-sm font-medium">{error}</p>
               )}
             </div>
             <Button
               className="self-stretch"
               variant="destructive"
               type="button"
-              disabled={!signature}
+              disabled={!signature || loading}
               onClick={onConfirmSignature}
             >
               Continue

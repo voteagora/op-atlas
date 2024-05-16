@@ -32,12 +32,34 @@ export const createProjectSnapshot = async (projectId: string) => {
 
   try {
     // Upload metadata to IPFS
-    // TODO: Finalize data payload
-    const { team, ...rest } = project
-    const ipfsHash = await uploadToPinata(projectId, rest)
+    // Some fields have sensitive data and need to be sanitized
+    const { team, contracts, snapshots, applications, ...rest } = project
+
+    const redactedContracts = contracts.map((contract) => ({
+      id: contract.id,
+      contractAddress: contract.contractAddress,
+      deployerAddress: contract.deployerAddress,
+      deploymentHash: contract.deploymentHash,
+      chainId: contract.chainId,
+    }))
+
+    const redactedTeam = team.map(({ user }) => ({
+      farcasterId: user.farcasterId,
+      username: user.username,
+      avatar: user.imageUrl,
+      name: user.name,
+      bio: user.bio,
+    }))
+
+    const metadata = {
+      ...rest,
+      contracts: redactedContracts,
+      team: redactedTeam,
+    }
+
+    const ipfsHash = await uploadToPinata(projectId, metadata)
 
     // Create attestation
-    // TODO: Real pinata gateway URL
     const attestationId = await createProjectMetadataAttestation({
       projectId: project.id,
       name: project.name,
