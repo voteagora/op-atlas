@@ -1,18 +1,35 @@
 "use client"
 
-import AppProvider from "./AppProvider"
+import "@farcaster/auth-kit/styles.css"
+
+import { AuthKitProvider } from "@farcaster/auth-kit"
+import { SessionProvider } from "next-auth/react"
+
+import { AnalyticsProvider } from "./AnalyticsProvider"
 import { DialogProvider } from "./DialogProvider"
-import LayoutProvider from "./LayoutProvider"
-import NextAuthProvider from "./NextAuthProvider"
+import { LayoutWrapper } from "./LayoutProvider"
+
+if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
+  throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in env.")
+}
+
+const farcasterConfig = {
+  relay: "https://relay.farcaster.xyz",
+  rpcUrl: "https://mainnet.optimism.io",
+  siweUri: `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`,
+  domain: process.env.NEXT_PUBLIC_VERCEL_URL,
+}
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <NextAuthProvider>
-      <AppProvider>
-        <DialogProvider>
-          <LayoutProvider>{children}</LayoutProvider>
-        </DialogProvider>
-      </AppProvider>
-    </NextAuthProvider>
+    <SessionProvider>
+      <AuthKitProvider config={farcasterConfig}>
+        <AnalyticsProvider>
+          <DialogProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </DialogProvider>
+        </AnalyticsProvider>
+      </AuthKitProvider>
+    </SessionProvider>
   )
 }
