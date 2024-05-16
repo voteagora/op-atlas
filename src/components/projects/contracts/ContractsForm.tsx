@@ -5,8 +5,9 @@ import { ProjectContract } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Callout } from "@/components/common/Callout"
@@ -102,6 +103,11 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     name: "contracts",
   })
 
+  // Locally, this runs twice because of strict mode but dw about it
+  useEffect(() => {
+    toast.info("We recommend asking your developer to complete this step")
+  }, [])
+
   const onRemoveContract = async (index: number) => {
     try {
       const isOnlyContract = contractsFields.length === 1
@@ -138,8 +144,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
 
       router.push(`/projects/${project.id}/grants`)
     } catch (error) {
-      // TODO: Show error
-      console.error("Error updating project OSO status")
+      toast.error("There was an error updating your OSO status.")
       setIsSubmitting(false)
     }
   }

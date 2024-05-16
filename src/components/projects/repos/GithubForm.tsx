@@ -2,6 +2,7 @@ import { Check, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import { useMemo } from "react"
 import { UseFormReturn } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -19,7 +20,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
 import { copyToClipboard } from "@/lib/utils"
 
 import { ReposFormSchema } from "./schema"
@@ -35,8 +35,6 @@ export const GithubForm = ({
   onVerify: (index: number) => void
   onRemove: (index: number) => void
 }) => {
-  const { toast } = useToast()
-
   const url = form.watch(`githubRepos.${index}.url`)
   const isVerified = form.watch(`githubRepos.${index}.verified`)
   const isOpenSource = form.watch(`githubRepos.${index}.openSource`)
@@ -45,9 +43,9 @@ export const GithubForm = ({
   const onCopy = async () => {
     try {
       await copyToClipboard(url)
-      toast({ title: "Copied to clipboard" })
+      toast("Copied to clipboard")
     } catch (error) {
-      toast({ title: "Error copying URL", variant: "destructive" })
+      toast.error("Error copying URL")
     }
   }
 

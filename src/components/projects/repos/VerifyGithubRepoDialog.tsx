@@ -2,6 +2,7 @@ import { ProjectRepository } from "@prisma/client"
 import { Copy } from "lucide-react"
 import Image from "next/image"
 import { memo, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 
 import { DialogProps } from "@/components/dialogs/types"
 import CheckIcon from "@/components/icons/checkIcon"
@@ -16,7 +17,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
 import {
   findRepo,
   updateGithubRepo,
@@ -61,8 +61,6 @@ const VerifyGithubRepoDialog = ({
   projectId,
   onVerificationComplete,
 }: Props) => {
-  const { toast } = useToast()
-
   const [step, setStep] = useState<Step>("searching")
   const [hasFundingFile, setHasFundingFile] = useState(false)
   const [openSource, setOpenSource] = useState(false)
@@ -86,10 +84,8 @@ const VerifyGithubRepoDialog = ({
 
   const onRepoNotFound = () => {
     onOpenChange(false)
-    toast({
-      title: "Repository not found",
+    toast.error("Repository not found", {
       description: "Please double check that it's public and try again",
-      variant: "destructive",
     })
   }
 
@@ -264,8 +260,6 @@ const VerifyFundingStep = ({
   hasFundingFile: boolean
   onVerified: (repo: ProjectRepository) => void
 }) => {
-  const { toast } = useToast()
-
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -280,9 +274,9 @@ const VerifyFundingStep = ({
   const onCopy = async () => {
     try {
       await copyToClipboard(requiredJson.replace("[projectId]", projectId))
-      toast({ title: "Copied to clipboard " })
+      toast("Copied to clipboard")
     } catch (error) {
-      toast({ title: "Error copying JSON", variant: "destructive" })
+      toast.error("Error copying JSON")
     }
   }
 

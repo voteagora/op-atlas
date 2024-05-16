@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { partition } from "ramda"
 import { useCallback, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Callout } from "@/components/common/Callout"
@@ -101,6 +102,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
       return
     }
 
+    toast.success("Github repo verified")
     form.setValue(`githubRepos.${repo}.verified`, true)
     form.setValue(`githubRepos.${repo}.openSource`, openSource)
     form.setValue(`githubRepos.${repo}.containsContracts`, containsContracts)

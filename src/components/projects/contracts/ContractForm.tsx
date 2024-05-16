@@ -2,6 +2,7 @@ import { Ellipsis, X } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { UseFormReturn, useWatch } from "react-hook-form"
+import { toast } from "sonner"
 import {
   type Address,
   getAddress,
@@ -27,7 +28,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
 import { verifyContract } from "@/lib/actions/contracts"
 import { copyToClipboard } from "@/lib/utils"
 
@@ -48,8 +48,6 @@ export function ContractForm({
   removeVerified: () => void
   removeEmpty: () => void
 }) {
-  const { toast } = useToast()
-
   const [isVerifying, setIsVerifying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -68,9 +66,9 @@ export function ContractForm({
   const onCopyValue = async (value: string) => {
     try {
       await copyToClipboard(value)
-      toast({ title: "Copied to clipboard" })
+      toast("Copied to clipboard")
     } catch (error) {
-      toast({ title: "Error copying to clipboard", variant: "destructive" })
+      toast.error("Error copying to clipboard")
     }
   }
 
@@ -104,6 +102,7 @@ export function ContractForm({
             `contracts.${index}.signature`,
             otherVerifiedContract.signature,
           )
+          toast.success("Contract verified")
         } else {
           // Fall back to full verification
           setIsVerifying(true)
@@ -112,13 +111,14 @@ export function ContractForm({
         setIsVerifying(true)
       }
     } catch (error) {
-      console.error("Error verifying contract", error)
+      toast.error("There was an error verifying your contract.")
     } finally {
       setIsLoading(false)
     }
   }
 
   const onValidSignature = (sig: string) => {
+    toast.success("Contract verified")
     form.setValue(`contracts.${index}.signature`, sig)
     setIsVerifying(false)
   }

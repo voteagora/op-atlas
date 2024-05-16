@@ -29,6 +29,7 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
     setLoading(true)
     try {
       await updateEmail(email)
+      toast.success("Email added")
       update({ email })
       onOpenChange(false)
     } catch (error) {
