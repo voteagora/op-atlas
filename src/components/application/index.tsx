@@ -2,6 +2,7 @@
 
 import { Application } from "@prisma/client"
 import { useCallback, useState } from "react"
+import { toast } from "sonner"
 
 import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
@@ -24,7 +25,7 @@ export const ApplicationFlow = ({
   const onApply = useCallback(async (projectIds: string[]) => {
     const result = await submitApplications(projectIds)
     if (result.error !== null || result.applications.length === 0) {
-      // TODO: handle error
+      toast.error("There was an error submitting your application")
       return
     }
 

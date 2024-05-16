@@ -7,6 +7,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Input } from "@/components/ui/input"
@@ -138,7 +139,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         bannerUrl = await uploadImage(newBannerImg)
       }
     } catch (error) {
-      // TODO: Error handling
+      toast.error("There was an error uploading your image")
       console.error("Error uploading images", error)
     }
 
@@ -161,7 +162,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
 
       router.push(`/projects/${response.project.id}/team`)
     } catch (error) {
-      // TODO: Error handling
+      toast.error("There was an error creating your project")
       console.error("Error creating project", error)
       setIsLoading(false)
     }

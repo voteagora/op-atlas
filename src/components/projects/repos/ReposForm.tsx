@@ -177,7 +177,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         await updatePackageRepos(project.id, packageUrls)
         router.push(`/projects/${project.id}/contracts`)
       } catch (error) {
-        // TODO: Error handling
+        toast.error("There was an error updating your packages")
         setIsSubmitting(false)
         console.error("Error saving packages", error)
       }
