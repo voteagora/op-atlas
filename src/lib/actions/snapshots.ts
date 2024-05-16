@@ -32,6 +32,7 @@ export const createProjectSnapshot = async (projectId: string) => {
 
   try {
     // Upload metadata to IPFS
+    // Some fields have sensitive data and need to be sanitized
     const { team, contracts, snapshots, applications, ...rest } = project
 
     const redactedContracts = contracts.map((contract) => ({
