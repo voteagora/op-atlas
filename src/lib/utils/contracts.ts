@@ -1,8 +1,6 @@
-import { base, fraxtal, mainnet, mode, optimism, zora } from "viem/chains"
+import { base, fraxtal, mode, optimism, zora } from "viem/chains"
 
-// TODO: Add lisk and redstone
 export enum Chain {
-  Eth = mainnet.id,
   Base = base.id,
   Fraxtal = fraxtal.id,
   Mode = mode.id,
