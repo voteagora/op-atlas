@@ -4,6 +4,8 @@ import { memo } from "react"
 
 import { cn } from "@/lib/utils"
 
+import ExternalLink from "../ExternalLink"
+
 export const Callout = memo(function Callout({
   className,
   type,
@@ -39,12 +41,12 @@ export const Callout = memo(function Callout({
       />
       <p className="ml-2 mr-5 text-sm font-medium">{text}</p>
       {linkText && (
-        <Link
+        <ExternalLink
           href={linkHref ?? "#"}
           className="ml-auto text-sm font-medium shrink-0"
         >
           {linkText}
-        </Link>
+        </ExternalLink>
       )}
     </div>
   )
