@@ -14,6 +14,7 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Badge } from "../common/Badge"
 import { ChainLogo } from "../common/ChainLogo"
+import ExternalLink from "../ExternalLink"
 
 export const FundingRounds = ({
   className,
@@ -54,11 +55,7 @@ export const FundingRounds = ({
           <h3 className="text-lg font-semibold">{titlecase(status)}</h3>
         </div>
         {rounds.map((fundingRound) => (
-          <Round
-            key={fundingRound.number}
-            fundingRound={fundingRound}
-            link={fundingRound.link}
-          />
+          <Round key={fundingRound.number} fundingRound={fundingRound} />
         ))}
       </div>
     )
@@ -76,11 +73,9 @@ export const FundingRounds = ({
 const Round = ({
   className,
   fundingRound,
-  link,
 }: {
   className?: string
   fundingRound: FundingRound
-  link?: string
 }) => {
   const router = useRouter()
   const { status } = useSession()
@@ -96,19 +91,47 @@ const Round = ({
       return
     }
 
-    link && router.push(link)
+    fundingRound.link && router.push(fundingRound.link)
+  }
+
+  if (fundingRound.status === "now") {
+    return (
+      <button
+        onClick={onClick}
+        type="button"
+        className={cn(
+          "flex gap-x-6 border rounded-3xl p-10 transition-all",
+          (fundingRound.link || fundingRound.status === "now") &&
+            "hover:shadow-md",
+          className,
+        )}
+      >
+        <FundingRoundContent fundingRound={fundingRound} />
+      </button>
+    )
+  }
+
+  if (!fundingRound.link) {
+    return (
+      <div className={cn("flex gap-x-6 border rounded-3xl p-10", className)}>
+        <FundingRoundContent fundingRound={fundingRound} />
+      </div>
+    )
   }
 
   return (
-    <button
-      onClick={onClick}
-      type="button"
-      className={cn(
-        "flex gap-x-6 border rounded-3xl p-10",
-        (link || fundingRound.status === "now") && "hover:shadow-md",
-        className,
-      )}
+    <ExternalLink
+      href={fundingRound.link}
+      className={cn("flex gap-x-6 border rounded-3xl p-10", className)}
     >
+      <FundingRoundContent fundingRound={fundingRound} />
+    </ExternalLink>
+  )
+}
+
+function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
+  return (
+    <>
       {fundingRound.status !== "past" && fundingRound.iconUrl && (
         <Image
           src={fundingRound.iconUrl}
@@ -173,6 +196,6 @@ const Round = ({
           </div>
         )}
       </div>
-    </button>
+    </>
   )
 }
