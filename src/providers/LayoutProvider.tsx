@@ -8,7 +8,7 @@ import Navbar from "@/components/common/Navbar"
 
 const MOBILE_BREAKPOINT = 640 // Tailwind's `sm` breakpoint
 
-const LayoutProvider = ({ children }: { children: React.ReactNode }) => {
+export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   const { width } = useWindowSize()
 
   return (
@@ -18,5 +18,3 @@ const LayoutProvider = ({ children }: { children: React.ReactNode }) => {
     </div>
   )
 }
-
-export default LayoutProvider
