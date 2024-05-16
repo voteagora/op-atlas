@@ -65,6 +65,7 @@ export function Account() {
 
     if (isFirstTimeUser()) {
       router.push("/welcome")
+      saveLogInDate()
     } else {
       saveLogInDate()
       router.push("/dashboard")
