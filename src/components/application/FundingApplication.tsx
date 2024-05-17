@@ -1,9 +1,10 @@
 import { Application } from "@prisma/client"
 import { format } from "date-fns"
 import Image from "next/image"
-import Link from "next/link"
 import { useState } from "react"
+import { toast } from "sonner"
 
+import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -26,12 +27,12 @@ export const FundingApplication = ({
   className,
   projects,
   applications,
-  onApply,
+  onApplied,
 }: {
   className?: string
   projects: ProjectWithDetails[]
   applications: Application[]
-  onApply: (projectIds: string[]) => Promise<void>
+  onApplied: (application: Application) => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -68,13 +69,35 @@ export const FundingApplication = ({
   const submitApplication = async () => {
     if (selectedProjectIds.length === 0) return
 
-    try {
-      setIsLoading(true)
-      await onApply(selectedProjectIds)
-    } catch (error) {
-      console.error("Error submitting application", error)
-      setIsLoading(false)
-    }
+    setIsLoading(true)
+
+    const promise: Promise<Application> = new Promise(
+      async (resolve, reject) => {
+        try {
+          const result = await submitApplications(selectedProjectIds)
+          if (result.error !== null || result.applications.length === 0) {
+            throw new Error(result.error ?? "Error submitting application")
+          }
+
+          resolve(result.applications[0])
+        } catch (error) {
+          console.error("Error submitting application", error)
+          reject(error)
+        }
+      },
+    )
+
+    toast.promise(promise, {
+      loading: "Submitting application...",
+      success: (application) => {
+        onApplied(application)
+        return "Application submitted"
+      },
+      error: (error) => {
+        setIsLoading(false)
+        return error.message
+      },
+    })
   }
 
   const canSubmit =

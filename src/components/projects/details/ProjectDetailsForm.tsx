@@ -139,7 +139,6 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         bannerUrl = await uploadImage(newBannerImg)
       }
     } catch (error) {
-      toast.error("There was an error uploading your image")
       console.error("Error uploading images", error)
     }
 
@@ -151,21 +150,36 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       farcaster: fromStringObjectArr(values.farcaster),
     }
 
-    try {
-      const response = project
-        ? await updateProjectDetails(project.id, newValues)
-        : await createNewProject(newValues)
+    const isCreating = !project
 
-      if (response.error !== null || !response.project) {
-        throw new Error(response.error ?? "Failed to save project")
+    const promise: Promise<Project> = new Promise(async (resolve, reject) => {
+      try {
+        const response = project
+          ? await updateProjectDetails(project.id, newValues)
+          : await createNewProject(newValues)
+
+        if (response.error !== null || !response.project) {
+          throw new Error(response.error ?? "Failed to save project")
+        }
+
+        resolve(response.project)
+      } catch (error) {
+        console.error("Error creating project", error)
+        reject(error)
       }
+    })
 
-      router.push(`/projects/${response.project.id}/team`)
-    } catch (error) {
-      toast.error("There was an error creating your project")
-      console.error("Error creating project", error)
-      setIsLoading(false)
-    }
+    toast.promise(promise, {
+      loading: isCreating ? "Creating project..." : "Saving project...",
+      success: (project) => {
+        router.push(`/projects/${project.id}/team`)
+        return isCreating ? "Project created!" : "Project saved"
+      },
+      error: () => {
+        setIsLoading(false)
+        return "Failed to save project"
+      },
+    })
   }
 
   const canSubmit = form.formState.isValid && !form.formState.isSubmitting

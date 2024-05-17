@@ -1,10 +1,8 @@
 "use client"
 
 import { Application } from "@prisma/client"
-import { useCallback, useState } from "react"
-import { toast } from "sonner"
+import { useState } from "react"
 
-import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
@@ -19,30 +17,16 @@ export const ApplicationFlow = ({
   projects: ProjectWithDetails[]
   applications: Application[]
 }) => {
-  const [submittedApplication, setSubmittedApplication] =
-    useState<Application | null>(null)
+  const [submittedApp, setSubmittedApp] = useState<Application | null>(null)
 
-  const onApply = useCallback(async (projectIds: string[]) => {
-    const result = await submitApplications(projectIds)
-    if (result.error !== null || result.applications.length === 0) {
-      toast.error("There was an error submitting your application")
-      return
-    }
-
-    setSubmittedApplication(result.applications[0])
-  }, [])
-
-  return submittedApplication ? (
-    <ApplicationSubmitted
-      className={className}
-      application={submittedApplication}
-    />
+  return submittedApp ? (
+    <ApplicationSubmitted className={className} application={submittedApp} />
   ) : (
     <FundingApplication
       className={className}
       projects={projects}
       applications={applications}
-      onApply={onApply}
+      onApplied={setSubmittedApp}
     />
   )
 }

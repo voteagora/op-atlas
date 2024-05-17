@@ -1,7 +1,8 @@
 "use client"
 
 import { intersection, sortBy } from "ramda"
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { createProjectSnapshot } from "@/lib/actions/snapshots"
@@ -17,7 +18,7 @@ import { Snapshot } from "./Snapshot"
 export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
   const [isPublishing, setIsPublishing] = useState(false)
 
-  const canPublish = useMemo(() => {
+  const isReadyToPublish = useMemo(() => {
     const { completedSections } = getProjectStatus(project)
     return (
       intersection(
@@ -33,20 +34,34 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
     )
   }, [project])
 
+  const hasPublishedLatestChanges = useMemo(() => {
+    const latestSnapshot = sortBy((s) => -s.createdAt, project.snapshots)[0]
+    if (!latestSnapshot) return false
+
+    return latestSnapshot.createdAt >= project.lastMetadataUpdate
+  }, [project])
+
   const hasUnpublishedChanges = useMemo(() => {
     return projectHasUnpublishedChanges(project)
   }, [project])
 
-  const onPublish = useCallback(async () => {
-    try {
-      setIsPublishing(true)
-      await createProjectSnapshot(project.id)
-    } catch (error) {
-      console.error("Error publishing snapshot", error)
-    } finally {
-      setIsPublishing(false)
-    }
-  }, [project])
+  const onPublish = async () => {
+    setIsPublishing(true)
+
+    toast.promise(createProjectSnapshot(project.id), {
+      loading: "Publishing snapshot onchain...",
+      success: () => {
+        setIsPublishing(false)
+        return "Snapshot published"
+      },
+      error: () => {
+        setIsPublishing(false)
+        return "Error publishing snapshot, please try again."
+      },
+    })
+  }
+
+  const canPublish = isReadyToPublish && !hasPublishedLatestChanges
 
   return (
     <div className="flex flex-col gap-12">
@@ -80,7 +95,7 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
           Publish
         </Button>
 
-        {!canPublish && (
+        {!isReadyToPublish && (
           <p className="text-sm text-destructive">
             You haven&apos;t completed all the previous steps
           </p>

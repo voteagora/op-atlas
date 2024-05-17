@@ -1,7 +1,7 @@
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { ProjectStatusSidebar } from "@/components/projects/ProjectStatusSidebar"
 
-// TODO: May need longer runtime since creating projects is slow
+export const maxDuration = 60
 
 export default function Page() {
   return (
