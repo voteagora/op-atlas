@@ -5,7 +5,7 @@ import { PublishForm } from "@/components/projects/publish/PublishForm"
 import { getProject } from "@/db/projects"
 import { isUserMember } from "@/lib/actions/utils"
 
-// TODO: Increase API timeout since attestation creation is slow
+export const maxDuration = 60
 
 export default async function Page({
   params,

@@ -1,5 +1,6 @@
 import "./globals.css"
 
+import { Loader2 } from "lucide-react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 
@@ -33,6 +34,7 @@ export default function RootLayout({
           {children}
           <Toaster
             icons={{
+              loading: <Loader2 size={18} className="animate-spin" />,
               success: <CheckIconFilled size={18} />,
               info: <InfoIconFilled size={18} />,
             }}
