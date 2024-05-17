@@ -88,8 +88,9 @@ model UserProjects {
   id   String @id @default(uuid())
   role String @default("member")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   userId    String
   projectId String
@@ -98,8 +99,8 @@ model UserProjects {
   project Project @relation(fields: [projectId], references: [id])
 
   @@unique([userId, projectId])
-  @@index([userId])
-  @@index([projectId])
+  @@index([userId, deletedAt])
+  @@index([projectId, deletedAt])
 }
 
 model ProjectSnapshot {

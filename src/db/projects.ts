@@ -18,6 +18,7 @@ export async function getUserProjects({
     select: {
       projects: {
         where: {
+          deletedAt: null,
           project: {
             deletedAt: null,
           },
@@ -42,6 +43,7 @@ export async function getUserProjectsWithDetails({
     select: {
       projects: {
         where: {
+          deletedAt: null,
           project: {
             deletedAt: null,
           },
@@ -49,7 +51,7 @@ export async function getUserProjectsWithDetails({
         include: {
           project: {
             include: {
-              team: { include: { user: true } },
+              team: { where: { deletedAt: null }, include: { user: true } },
               repos: true,
               contracts: true,
               funding: true,
@@ -140,7 +142,7 @@ export async function getProject({ id }: { id: string }) {
       id,
     },
     include: {
-      team: { include: { user: true } },
+      team: { where: { deletedAt: null }, include: { user: true } },
       repos: true,
       contracts: true,
       funding: true,
@@ -156,7 +158,11 @@ export async function getProjectTeam({ id }: { id: string }) {
       id,
     },
     include: {
-      team: true,
+      team: {
+        where: {
+          deletedAt: null,
+        },
+      },
     },
   })
 }
@@ -170,8 +176,33 @@ export async function addTeamMembers({
   userIds: string[]
   role?: TeamRole
 }) {
+  // There may be users who were previously soft deleted, so this is complex
+  const deletedMembers = await prisma.userProjects.findMany({
+    where: {
+      projectId,
+      userId: {
+        in: userIds,
+      },
+    },
+  })
+
+  const updateMemberIds = deletedMembers.map((m) => m.userId)
+  const createMemberIds = userIds.filter((id) => !updateMemberIds.includes(id))
+
+  const memberUpdate = prisma.userProjects.updateMany({
+    where: {
+      projectId,
+      userId: {
+        in: updateMemberIds,
+      },
+    },
+    data: {
+      deletedAt: null,
+    },
+  })
+
   const memberCreate = prisma.userProjects.createMany({
-    data: userIds.map((userId) => ({
+    data: createMemberIds.map((userId) => ({
       role,
       userId,
       projectId,
@@ -187,7 +218,7 @@ export async function addTeamMembers({
     },
   })
 
-  return prisma.$transaction([memberCreate, projectUpdate])
+  return prisma.$transaction([memberUpdate, memberCreate, projectUpdate])
 }
 
 export async function updateMemberRole({
@@ -230,12 +261,16 @@ export async function removeTeamMember({
   projectId: string
   userId: string
 }) {
-  const memberDelete = prisma.userProjects.delete({
+  const memberDelete = prisma.userProjects.update({
     where: {
       userId_projectId: {
         projectId,
         userId,
       },
+    },
+    data: {
+      role: "member",
+      deletedAt: new Date(),
     },
   })
 
