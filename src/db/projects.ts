@@ -269,6 +269,7 @@ export async function removeTeamMember({
       },
     },
     data: {
+      role: "member",
       deletedAt: new Date(),
     },
   })
