@@ -2,11 +2,17 @@
 
 Bring your identity to the OP collective and signup to get funded via RetroPGF.
 
-Shepparded by the fine folks of [Agora](https://voteagora.com).
+Shepherded by the fine folks of [Agora](https://voteagora.com).
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+yarn
+```
+
+Then, run the development server:
 
 ```bash
 yarn dev
@@ -15,7 +21,6 @@ yarn dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
 
 ## Learn More
 
