@@ -150,6 +150,8 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       farcaster: fromStringObjectArr(values.farcaster),
     }
 
+    const isCreating = !project
+
     const promise: Promise<Project> = new Promise(async (resolve, reject) => {
       try {
         const response = project
@@ -168,10 +170,10 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
     })
 
     toast.promise(promise, {
-      loading: project ? "Saving project..." : "Creating project...",
+      loading: isCreating ? "Creating project..." : "Saving project...",
       success: (project) => {
         router.push(`/projects/${project.id}/team`)
-        return project ? "Project saved" : "Project created!"
+        return isCreating ? "Project created!" : "Project saved"
       },
       error: () => {
         setIsLoading(false)
