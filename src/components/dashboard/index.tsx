@@ -8,6 +8,7 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
@@ -36,6 +37,8 @@ const Dashboard = ({
 
   const [loadingNewProject, setLoadingNewProject] = useState(false)
 
+  const { track } = useAnalytics()
+
   return (
     <div className={cn("card flex flex-col w-full gap-y-12", className)}>
       {joinProjectDialogOpen && (
@@ -61,7 +64,13 @@ const Dashboard = ({
         )}
 
         <div className="flex items-center gap-x-2">
-          <Link href="/projects/new" onClick={() => setLoadingNewProject(true)}>
+          <Link
+            href="/projects/new"
+            onClick={() => {
+              track("Add new project clicked")
+              setLoadingNewProject(true)
+            }}
+          >
             <Button
               isLoading={loadingNewProject}
               variant={projects.length === 0 ? "destructive" : "secondary"}

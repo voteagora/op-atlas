@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react"
 import React, { memo, useState } from "react"
 
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Button } from "../ui/button"
@@ -42,9 +43,11 @@ const ApplicationBanner = ({
     }
   }
 
+  const { track } = useAnalytics()
   const onClickApply = () => {
     if (data?.user?.email) {
       setLoadingNextPage(true)
+      track("Start Application")
       router.push("/application")
     } else {
       setOpenDialog("email")

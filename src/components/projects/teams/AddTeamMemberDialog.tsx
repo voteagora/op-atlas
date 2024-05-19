@@ -18,6 +18,7 @@ import {
   MultiSelect,
 } from "@/components/ui/multiselectautocomplete"
 import { searchUsers } from "@/lib/actions/users"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 type Props = DialogProps<{
   team: User[]
@@ -39,16 +40,20 @@ const AddTeamMemberDialog = ({
 
   const [debouncedSearchText] = useDebounceValue(searchText, 150)
 
+  const { track } = useAnalytics()
   const onAddMembers = useCallback(async () => {
     try {
       setLoading(true)
       await addMembers(selectedUsers.map((user) => user.value.toString()))
+      track("Add Collaborators", {
+        userIds: selectedUsers.map((user) => user.farcasterId),
+      })
     } catch (error) {
       console.error("Error adding team members", error)
     } finally {
       setLoading(false)
     }
-  }, [addMembers, selectedUsers])
+  }, [addMembers, selectedUsers, track])
 
   const options = useMemo(() => {
     const selectedUserIds = [
@@ -61,6 +66,7 @@ const AddTeamMemberDialog = ({
       .map((user) => ({
         label: `@${user.username}`,
         value: user.id,
+        farcasterId: user.farcasterId,
         image: user.imageUrl,
       }))
   }, [searchResults, selectedUsers, team])

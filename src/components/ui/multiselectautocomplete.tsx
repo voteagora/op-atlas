@@ -11,6 +11,7 @@ import { Input } from "./input"
 export type IMultiSelectOptions = {
   value: string | number
   label: string
+  farcasterId: string | null
   image?: string | null
 }
 

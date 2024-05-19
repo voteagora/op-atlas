@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { Badge } from "../common/Badge"
 import { Callout } from "../common/Callout"
@@ -66,6 +67,7 @@ export const FundingApplication = ({
     })
   }
 
+  const { track } = useAnalytics()
   const submitApplication = async () => {
     if (selectedProjectIds.length === 0) return
 
@@ -79,7 +81,12 @@ export const FundingApplication = ({
             throw new Error(result.error ?? "Error submitting application")
           }
 
-          resolve(result.applications[0])
+          const application = result.applications[0]
+          track("Apply", {
+            projectIds: application.projectId,
+            attestationId: application.attestationId,
+          })
+          resolve(application)
         } catch (error) {
           console.error("Error submitting application", error)
           reject(error)

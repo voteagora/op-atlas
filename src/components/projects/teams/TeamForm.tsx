@@ -15,6 +15,7 @@ import {
 } from "@/lib/actions/projects"
 import { useIsAdmin } from "@/lib/hooks"
 import { ProjectWithDetails, TeamRole } from "@/lib/types"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { AddTeamMemberCard } from "./AddTeamMemberCard"
 import AddTeamMemberDialog from "./AddTeamMemberDialog"
@@ -42,8 +43,11 @@ export default function AddTeamDetailsForm({
   const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
 
+  const { track } = useAnalytics()
+
   const handleAddMembers = async (userIds: string[]) => {
     // TODO: Optimistic UI
+    // TODO: Analytics to track adding team members by farcasterId
     await addMembersToProject(project.id, userIds)
     setIsShowingAdd(false)
   }
@@ -105,7 +109,12 @@ export default function AddTeamDetailsForm({
               onRemove={() => setIsShowingRemove(user)}
             />
           ))}
-          <AddTeamMemberCard onClick={() => setIsShowingAdd(true)} />
+          <AddTeamMemberCard
+            onClick={() => {
+              track("Add Collaborators")
+              setIsShowingAdd(true)
+            }}
+          />
         </div>
 
         <ConfirmTeamCheckbox

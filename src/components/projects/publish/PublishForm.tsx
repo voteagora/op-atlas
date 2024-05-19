@@ -12,11 +12,13 @@ import {
   projectHasUnpublishedChanges,
   ProjectSection,
 } from "@/lib/utils"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { Snapshot } from "./Snapshot"
 
 export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
   const [isPublishing, setIsPublishing] = useState(false)
+  const { track } = useAnalytics()
 
   const isReadyToPublish = useMemo(() => {
     const { completedSections } = getProjectStatus(project)
@@ -50,8 +52,12 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
 
     toast.promise(createProjectSnapshot(project.id), {
       loading: "Publishing snapshot onchain...",
-      success: () => {
+      success: ({ snapshot }) => {
         setIsPublishing(false)
+        track("Publish Project", {
+          projectId: project.id,
+          attestationId: snapshot?.attestationId,
+        })
         return "Snapshot published"
       },
       error: () => {
