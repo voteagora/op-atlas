@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
 import { uploadImage } from "@/lib/utils/images"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import FileUploadInput from "../../common/FileUploadInput"
 import {
@@ -69,6 +70,7 @@ function fromStringObjectArr(objs: { value: string }[]) {
 
 export default function ProjectDetailsForm({ project }: { project?: Project }) {
   const router = useRouter()
+  const { track } = useAnalytics()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -142,6 +144,11 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       console.error("Error uploading images", error)
     }
 
+    track("Project Categorisation", {
+      category: values.category,
+      projectId: project?.id,
+    })
+
     const newValues = {
       ...values,
       thumbnailUrl,
@@ -160,6 +167,10 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
 
         if (response.error !== null || !response.project) {
           throw new Error(response.error ?? "Failed to save project")
+        }
+
+        if (isCreating) {
+          track("Add Project", { projectId: response.project.id })
         }
 
         resolve(response.project)

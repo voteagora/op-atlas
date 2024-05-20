@@ -44,8 +44,8 @@ export function useAnalytics() {
 export function AnalyticsProvider({ children }: PropsWithChildren) {
   const { data: session } = useSession()
 
-  const userId = session?.user?.id
-  const previousUserId = usePrevious(session?.user?.id)
+  const farcasterId = session?.user?.farcasterId
+  const previousUserId = usePrevious(session?.user?.farcasterId)
 
   const track = useCallback((event: string, data?: Record<string, unknown>) => {
     mixpanel.track(event, data)
@@ -53,13 +53,13 @@ export function AnalyticsProvider({ children }: PropsWithChildren) {
 
   // Identify user when session changes
   useEffect(() => {
-    if (userId && !previousUserId) {
-      mixpanel.identify(userId)
+    if (farcasterId && !previousUserId) {
+      mixpanel.identify(farcasterId)
     }
-    if (!userId && previousUserId) {
+    if (!farcasterId && previousUserId) {
       mixpanel.reset()
     }
-  }, [userId, previousUserId])
+  }, [farcasterId, previousUserId])
 
   return (
     <AnalyticsContext.Provider value={{ track }}>

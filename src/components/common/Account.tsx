@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import usePrevious from "@/lib/hooks"
 import { isFirstTimeUser, saveLogInDate } from "@/lib/utils"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
@@ -26,6 +27,7 @@ export function Account() {
   const [error, setError] = useState(false)
   const router = useRouter()
   const { setOpenDialog } = useAppDialogs()
+  const { track } = useAnalytics()
 
   const logOut = useCallback(() => {
     signOut()
@@ -62,6 +64,7 @@ export function Account() {
     )
       return
 
+    track("Successful Sign In", { userId: session.user.farcasterId })
     if (isFirstTimeUser()) {
       router.push("/welcome")
       saveLogInDate()
@@ -73,7 +76,7 @@ export function Account() {
         setOpenDialog("email")
       }
     }
-  }, [status, router, setOpenDialog, session, previousAuthStatus])
+  }, [status, router, setOpenDialog, session, previousAuthStatus, track])
 
   useEffect(() => {
     if (error) {
