@@ -81,12 +81,14 @@ export const FundingApplication = ({
             throw new Error(result.error ?? "Error submitting application")
           }
 
-          const application = result.applications[0]
-          track("Apply", {
-            projectIds: application.projectId,
-            attestationId: application.attestationId,
-          })
-          resolve(application)
+          for (const application of applications) {
+            track("Apply", {
+              projectIds: application.projectId,
+              attestationId: application.attestationId,
+            })
+          }
+
+          resolve(result.applications[0])
         } catch (error) {
           console.error("Error submitting application", error)
           reject(error)
