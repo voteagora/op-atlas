@@ -81,7 +81,7 @@ export const FundingApplication = ({
             throw new Error(result.error ?? "Error submitting application")
           }
 
-          for (const application of applications) {
+          for (const application of result.applications) {
             track("Apply", {
               projectIds: application.projectId,
               attestationId: application.attestationId,
