@@ -52,7 +52,10 @@ export const GithubForm = ({
   const isValid = useMemo(() => {
     try {
       const parsed = new URL(url)
-      return parsed.hostname === "github.com"
+      return (
+        parsed.hostname === "github.com" &&
+        parsed.pathname.split("/").filter((s) => s.length).length === 2
+      )
     } catch (error) {
       return false
     }

@@ -8,11 +8,11 @@ export async function getRepository(owner: string, slug: string) {
   return await octokit.rest.repos.get({ owner, repo: slug })
 }
 
-export async function getFundingFile(owner: string, slug: string) {
+export async function getFile(owner: string, slug: string, path: string) {
   return await octokit.rest.repos.getContent({
     owner,
     repo: slug,
-    path: "funding.json",
+    path,
   })
 }
 

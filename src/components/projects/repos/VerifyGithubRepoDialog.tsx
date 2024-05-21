@@ -66,9 +66,9 @@ const VerifyGithubRepoDialog = ({
   const [openSource, setOpenSource] = useState(false)
   const [containsContracts, setContainsContracts] = useState(false)
 
-  const urlParts = url?.split("/") ?? []
-  const owner = urlParts[urlParts.length - 2]
-  const slug = urlParts[urlParts.length - 1]
+  const urlParts = url?.replace(/.*github.com\//, "").split("/") ?? []
+  const owner = urlParts[0]
+  const slug = urlParts[1]
 
   const onAdded = () => {
     if (url) {
@@ -273,7 +273,11 @@ const VerifyFundingStep = ({
 
   const onCopy = async () => {
     try {
-      await copyToClipboard(requiredJson.replace("[projectId]", projectId))
+      const jsonToCopy = hasFundingFile
+        ? requiredJson.replace("[projectId]", projectId)
+        : sampleFullJson.replace("[projectId]", projectId)
+      await copyToClipboard(jsonToCopy)
+
       toast("Copied to clipboard")
     } catch (error) {
       toast.error("Error copying JSON")
@@ -292,10 +296,30 @@ const VerifyFundingStep = ({
       }
 
       throw new Error(result.error ?? "Unknown error")
-    } catch (error) {
-      setError(
-        "Unable to validate funding.json file. Please make sure the changes have been merged into the default branch and try again",
-      )
+    } catch (error: unknown) {
+      console.error("Error verifying funding file", error)
+
+      if (error instanceof Error) {
+        if (error.message === "No funding file found") {
+          setError(
+            "We couldn't find a funding.json or FUNDING.json file in this repo.",
+          )
+        } else if (error.message === "Invalid funding file") {
+          setError(
+            "The funding.json file is not valid JSON or is missing the project ID.",
+          )
+        } else if (error.message === "Repo already exists") {
+          setError("This repo has already been added to another project.")
+        } else {
+          setError(
+            "Unable to validate funding.json file. Please make sure the changes have been merged into the default branch and try again",
+          )
+        }
+      } else {
+        setError(
+          "Unable to validate funding.json file. Please make sure the changes have been merged into the default branch and try again",
+        )
+      }
       setIsLoading(false)
     }
   }
@@ -328,7 +352,7 @@ const VerifyFundingStep = ({
             readOnly
             className="border rounded-md min-h-fit resize-none font-mono"
             value={json}
-            style={{ height: hasFundingFile ? "140px" : "120px" }}
+            style={{ height: hasFundingFile ? "178px" : "158px" }}
           />
         </div>
       </div>

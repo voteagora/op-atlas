@@ -10,7 +10,7 @@ import {
   updateProjectRepository,
 } from "@/db/projects"
 
-import { getFundingFile, getLicense, getRepository } from "../github"
+import { getFile, getLicense, getRepository } from "../github"
 import { OPEN_SOURCE_LICENSES } from "../licenses"
 import { verifyMembership } from "./utils"
 
@@ -40,12 +40,19 @@ export const findRepo = async (owner: string, slug: string) => {
 
 const fetchFundingFile = async (owner: string, slug: string) => {
   try {
-    const { data } = await getFundingFile(owner, slug)
+    const { data } = await getFile(owner, slug, "funding.json")
     return Buffer.from((data as any).content ?? "", "base64").toString("utf-8")
   } catch (error: unknown) {
-    // This will also happen if the file doesn't exist
-    console.info("Error fetching funding file", (error as Error).message)
-    return null
+    // This will also happen if the file doesn't exist - try the all-caps name
+    try {
+      const { data } = await getFile(owner, slug, "FUNDING.json")
+      return Buffer.from((data as any).content ?? "", "base64").toString(
+        "utf-8",
+      )
+    } catch (error: unknown) {
+      console.info("Error fetching funding file", (error as Error).message)
+      return null
+    }
   }
 }
 
@@ -112,8 +119,18 @@ export const verifyGithubRepo = async (
       error: null,
       repo,
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error creating repo", error)
+    // Handle the case where another project has used this repo
+    if (
+      error instanceof Error &&
+      error.message.includes("Unique constraint failed on the fields: (`url`)")
+    ) {
+      return {
+        error: "Repo already exists",
+      }
+    }
+
     return {
       error: "Error creating repo",
     }
