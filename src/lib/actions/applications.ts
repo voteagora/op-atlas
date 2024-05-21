@@ -44,6 +44,7 @@ const createProjectApplication = async (
   )[0]
 
   const attestationId = await createApplicationAttestation({
+    farcasterId: parseInt(farcasterId),
     projectId: project.id,
     round: 4,
     snapshotRef: latestSnapshot.attestationId,
