@@ -114,7 +114,7 @@ export const createProjectSnapshot = async (projectId: string) => {
       projectId: project.id,
       name: project.name,
       category: project.category ?? "",
-      ipfsUrl: `https://op-atlas-test.mypinata.cloud/ipfs/${ipfsHash}`,
+      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
     })
 
     const snapshot = await addProjectSnapshot({
