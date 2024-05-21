@@ -137,9 +137,15 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       if (newAvatarImg) {
         thumbnailUrl = await uploadImage(newAvatarImg)
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      let message = "Failed to upload avatar image"
+      if (error instanceof Error && error.message === "Image size too large") {
+        message = "Avatar image too large"
+      }
+
       console.error("Error uploading avatar", error)
-      toast.error("Failed to upload avatar image")
+      toast.error(message)
+      setIsLoading(false)
       return
     }
 
@@ -147,9 +153,15 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       if (newBannerImg) {
         bannerUrl = await uploadImage(newBannerImg)
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      let message = "Failed to upload avatar image"
+      if (error instanceof Error && error.message === "Image size too large") {
+        message = "Cover image too large"
+      }
+
       console.error("Error uploading banner", error)
-      toast.error("Failed to upload cover image")
+      toast.error(message)
+      setIsLoading(false)
       return
     }
 
