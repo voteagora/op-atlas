@@ -17,6 +17,7 @@ type Props = DialogProps<{
   image: string
   aspectRatio?: number
   title: string
+  subtitle?: string
 }> & {
   onComplete: (image: Blob) => void
 }
@@ -28,6 +29,7 @@ export function PhotoCropModal({
   onComplete,
   aspectRatio,
   title,
+  subtitle,
 }: Props) {
   const imageRef = useRef<HTMLImageElement>(null)
   const [crop, setCrop] = useState<Crop>()
@@ -77,7 +79,7 @@ export function PhotoCropModal({
         <DialogHeader className="items-center px-6">
           <h3>{title}</h3>
           <div className="text-secondary-foreground">
-            At least 280w x 280h px. No larger than 5MB.
+            {subtitle ?? "At least 280w x 280h px. No larger than 4.5 MB."}
           </div>
         </DialogHeader>
         <div className="flex items-center justify-center h-96 w-full relative bg-black">

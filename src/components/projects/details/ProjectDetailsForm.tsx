@@ -222,6 +222,8 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         <PhotoCropModal
           open
           title="Project cover image"
+          subtitle="At least 2048w x 512h px. No larger than 4.5 MB."
+          aspectRatio={4}
           image={bannerSrc}
           onComplete={setNewBannerImg}
           onOpenChange={(open) => {
