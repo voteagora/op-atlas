@@ -14,6 +14,11 @@ export async function uploadImage(image: Blob) {
     body: image,
   })
 
+  if (result.status === 413) {
+    // Image was too large
+    throw new Error("Image size too large")
+  }
+
   const { url } = await result.json()
   return url as string
 }

@@ -137,11 +137,32 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       if (newAvatarImg) {
         thumbnailUrl = await uploadImage(newAvatarImg)
       }
+    } catch (error: unknown) {
+      let message = "Failed to upload avatar image"
+      if (error instanceof Error && error.message === "Image size too large") {
+        message = "Avatar image too large"
+      }
+
+      console.error("Error uploading avatar", error)
+      toast.error(message)
+      setIsLoading(false)
+      return
+    }
+
+    try {
       if (newBannerImg) {
         bannerUrl = await uploadImage(newBannerImg)
       }
-    } catch (error) {
-      console.error("Error uploading images", error)
+    } catch (error: unknown) {
+      let message = "Failed to upload avatar image"
+      if (error instanceof Error && error.message === "Image size too large") {
+        message = "Cover image too large"
+      }
+
+      console.error("Error uploading banner", error)
+      toast.error(message)
+      setIsLoading(false)
+      return
     }
 
     track("Project Categorisation", {
@@ -201,6 +222,8 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         <PhotoCropModal
           open
           title="Project cover image"
+          subtitle="At least 2048w x 512h px. No larger than 4.5 MB."
+          aspectRatio={4}
           image={bannerSrc}
           onComplete={setNewBannerImg}
           onOpenChange={(open) => {
@@ -275,7 +298,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                 <span className="ml-0.5 text-destructive">*</span>
               </FormLabel>
               <div className="text-sm text-muted-foreground">
-                Images must be no larger than 5MB.
+                Images must be no larger than 4.5 MB.
               </div>
             </div>
             <div className="flex flex-1 gap-x-2 mt-2">
