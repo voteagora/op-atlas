@@ -137,11 +137,20 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       if (newAvatarImg) {
         thumbnailUrl = await uploadImage(newAvatarImg)
       }
+    } catch (error) {
+      console.error("Error uploading avatar", error)
+      toast.error("Failed to upload avatar image")
+      return
+    }
+
+    try {
       if (newBannerImg) {
         bannerUrl = await uploadImage(newBannerImg)
       }
     } catch (error) {
-      console.error("Error uploading images", error)
+      console.error("Error uploading banner", error)
+      toast.error("Failed to upload cover image")
+      return
     }
 
     track("Project Categorisation", {
@@ -275,7 +284,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                 <span className="ml-0.5 text-destructive">*</span>
               </FormLabel>
               <div className="text-sm text-muted-foreground">
-                Images must be no larger than 5MB.
+                Images must be no larger than 4.5 MB.
               </div>
             </div>
             <div className="flex flex-1 gap-x-2 mt-2">
