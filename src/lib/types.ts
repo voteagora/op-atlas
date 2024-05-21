@@ -7,7 +7,8 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     team: { include: { user: true } }
     repos: true
     contracts: true
-    snapshots: true
     funding: true
+    snapshots: true
+    applications: true
   }
 }>

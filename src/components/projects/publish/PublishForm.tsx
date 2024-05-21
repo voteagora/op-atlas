@@ -106,7 +106,7 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
             You haven&apos;t completed all the previous steps
           </p>
         )}
-        {hasUnpublishedChanges && (
+        {isReadyToPublish && hasUnpublishedChanges && (
           <p className="text-sm text-destructive">
             Your recent edits haven&apos;t been published onchain
           </p>

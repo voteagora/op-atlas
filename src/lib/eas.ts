@@ -4,16 +4,16 @@ import { ethers, Wallet } from "ethers"
 const PROJECT_SCHEMA_ID =
   "0x0e5d439a46d50507c63ea277b75c4d87711cc9d1754103393066927ee9be9fe3"
 const METADATA_SCHEMA_ID =
-  "0x9a384502b07bb8dfe65a784d0abee1dc22ff541024a9965d78ef7934dda7b6ca"
+  "0xe035e3fe27a64c8d7291ae54c6e85676addcbc2d179224fe7fc1f7f05a8c6eac"
 const APPLICATION_SCHEMA_ID =
-  "0x5a2187bc9d5f9a35b18538f30614ea92fc31c7f704707161de395f2ce6c09cab"
+  "0x88b62595c76fbcd261710d0930b5f1cc2e56758e155dea537f82bf0baadd9a32"
 
 const projectSchema = new SchemaEncoder("uint256 farcasterID")
 const metadataSchema = new SchemaEncoder(
-  "bytes32 projectRefUID,string name,string category,bytes32 parentProjectRefUID,uint8 metadataType,string metadataUrl",
+  "bytes32 projectRefUID,uint256 farcasterID,string name,string category,bytes32 parentProjectRefUID,uint8 metadataType,string metadataUrl",
 )
 const applicationSchema = new SchemaEncoder(
-  "uint8 round,bytes32 projectRefUID,bytes32 metadataSnapshotRefUID",
+  "uint32 round,bytes32 projectRefUID,uint256 farcasterID,bytes32 metadataSnapshotRefUID",
 )
 
 const EAS_SIGNER_PRIVATE_KEY = process.env.EAS_SIGNER_PRIVATE_KEY
@@ -63,11 +63,13 @@ export async function createProjectAttestation({
 }
 
 export async function createProjectMetadataAttestation({
+  farcasterId,
   projectId,
   name,
   category,
   ipfsUrl,
 }: {
+  farcasterId: number
   projectId: string
   name: string
   category: string
@@ -75,6 +77,7 @@ export async function createProjectMetadataAttestation({
 }) {
   const data = metadataSchema.encodeData([
     { name: "projectRefUID", value: projectId, type: "bytes32" },
+    { name: "farcasterID", value: farcasterId, type: "uint256" },
     { name: "name", value: name, type: "string" },
     { name: "category", value: category, type: "string" },
     { name: "parentProjectRefUID", value: "", type: "bytes32" },
@@ -89,17 +92,20 @@ export async function createProjectMetadataAttestation({
 }
 
 export async function createApplicationAttestation({
+  farcasterId,
   projectId,
   round,
   snapshotRef,
 }: {
+  farcasterId: number
   projectId: string
   round: number
   snapshotRef: string
 }) {
   const data = applicationSchema.encodeData([
-    { name: "round", value: round, type: "uint8" },
+    { name: "round", value: round, type: "uint32" },
     { name: "projectRefUID", value: projectId, type: "bytes32" },
+    { name: "farcasterID", value: farcasterId, type: "uint256" },
     { name: "metadataSnapshotRefUID", value: snapshotRef, type: "bytes32" },
   ])
 
