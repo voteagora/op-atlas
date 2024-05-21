@@ -112,7 +112,7 @@ const AddTeamMemberDialog = ({
           </DialogTitle>
           <DialogDescription className="text-center text-base text-secondary-foreground font-normal mt-1">
             You can add team members by their Farcaster username. Team members
-            must have created a Retro Funding profile.
+            must have an Optimist profile.
           </DialogDescription>
         </DialogHeader>
 

@@ -64,7 +64,7 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
     completedSections.push(ProjectSection.Details)
   }
 
-  const hasTeam = project.team.length > 1 && project.addedTeamMembers
+  const hasTeam = project.addedTeamMembers
   if (hasTeam) {
     completedSections.push(ProjectSection.Team)
   }
