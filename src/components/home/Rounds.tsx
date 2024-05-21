@@ -10,15 +10,13 @@ export function Rounds() {
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       {/* Background image */}
-      <div className="absolute h-[500px] w-full">
-        <div className="relative h-[500px] w-full">
-          <Image
-            src="/assets/images/gradient-background.svg"
-            fill
-            alt="Gradient"
-          />
-        </div>
-      </div>
+      <div
+        className="absolute h-[500px] w-full"
+        style={{
+          backgroundImage: 'url("/assets/images/gradient-background.svg")',
+          backgroundSize: "cover",
+        }}
+      />
 
       {/* Main content */}
       <div className="mt-36 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
