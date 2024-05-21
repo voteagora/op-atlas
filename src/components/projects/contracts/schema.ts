@@ -5,10 +5,8 @@ import { z } from "zod"
 export const Chain = z.enum([
   base.id.toString(),
   fraxtal.id.toString(),
-  liskSepolia.id.toString(),
   mode.id.toString(),
   optimism.id.toString(),
-  "17001",
   zora.id.toString(),
 ])
 
