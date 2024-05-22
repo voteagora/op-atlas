@@ -10,6 +10,7 @@ import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
+import ExternalLink from "../ExternalLink"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -91,7 +92,7 @@ const Dashboard = ({
         <h3>Your Retro Funding applications</h3>
         <ApplicationBanner application={applications[0]} canApply={canApply} />
 
-        <Link
+        <ExternalLink
           href="https://app.optimism.io/retropgf"
           className="flex items-center gap-x-2 no-underline text-secondary-foreground"
         >
@@ -99,7 +100,7 @@ const Dashboard = ({
             Learn more about Retro Funding Round 4
           </p>
           <ArrowUpRight size={16} />
-        </Link>
+        </ExternalLink>
       </div>
     </div>
   )
