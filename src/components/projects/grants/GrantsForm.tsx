@@ -10,6 +10,7 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { Callout } from "@/components/common/Callout"
+import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form } from "@/components/ui/form"
@@ -292,10 +293,18 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   return (
     <div className="flex flex-col gap-y-12 w-full">
       <div className="flex flex-col gap-y-6">
-        <h2 className="text-2xl font-semibold">Grants & Funding</h2>
+        <h2 className="text-2xl font-semibold">Grants, funding, and revenue</h2>
         <p className="text-secondary-foreground">
-          List any grants, funding, or revenue your project has received. This
-          does not include past rounds of Retro Funding.
+          List any grants, funding, or revenue your project has received since
+          January 2023—not including past rounds of Retro Funding. Learn more
+          about how badgeholders apply this information{" "}
+          <ExternalLink
+            className="font-medium"
+            href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+          >
+            here
+          </ExternalLink>
+          .
         </p>
         <Callout
           type="info"
