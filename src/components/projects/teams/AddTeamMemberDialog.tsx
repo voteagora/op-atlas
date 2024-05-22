@@ -38,7 +38,10 @@ const AddTeamMemberDialog = ({
   const [searchResults, setSearchResults] = useState<User[]>([])
   const [selectedUsers, setSelectedUsers] = useState<IMultiSelectOptions[]>([])
 
-  const [debouncedSearchText] = useDebounceValue(searchText, 150)
+  const [debouncedSearchText] = useDebounceValue(
+    searchText.startsWith("@") ? searchText.substring(1) : searchText,
+    150,
+  )
 
   const { track } = useAnalytics()
   const onAddMembers = useCallback(async () => {
