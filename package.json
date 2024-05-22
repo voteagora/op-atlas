@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build && prisma migrate deploy",
     "start": "next start",
     "format": "prettier --write .",
     "lint": "next lint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "prepare": "husky"
   },
