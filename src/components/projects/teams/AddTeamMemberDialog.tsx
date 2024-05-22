@@ -39,7 +39,7 @@ const AddTeamMemberDialog = ({
   const [selectedUsers, setSelectedUsers] = useState<IMultiSelectOptions[]>([])
 
   const [debouncedSearchText] = useDebounceValue(
-    searchText.replace("@", ""),
+    searchText.startsWith("@") ? searchText.substring(1) : searchText,
     150,
   )
 
