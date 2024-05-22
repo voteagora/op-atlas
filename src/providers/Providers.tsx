@@ -16,8 +16,8 @@ if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
 const farcasterConfig = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  siweUri: `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`,
-  domain: process.env.NEXT_PUBLIC_VERCEL_URL,
+  siweUri: "https://retrofunding.optimism.io/",
+  domain: "https://retrofunding.optimism.io/",
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
