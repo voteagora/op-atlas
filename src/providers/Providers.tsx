@@ -24,12 +24,13 @@ const farcasterDomain =
 const farcasterConfig = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  siweUri: farcasterDomain,
+  siweUri: `https://${farcasterDomain}`,
   domain: farcasterDomain,
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   console.log("farcasterConfig", farcasterConfig)
+  console.log("vercel env", process.env.VERCEL_ENV)
   return (
     <SessionProvider>
       <AuthKitProvider config={farcasterConfig}>
