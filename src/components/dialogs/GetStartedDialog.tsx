@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
+import ExternalLink from "../ExternalLink"
 import { Button } from "../ui/button"
 import { DialogProps } from "./types"
 
@@ -67,9 +68,18 @@ export function GetStartedDialog(props: DialogProps<object>) {
             >
               Get started
             </Button>
-            <Button className="py-3 text-base" type="button" variant="outline">
-              Learn more
-            </Button>
+            <ExternalLink
+              className="w-full"
+              href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+            >
+              <Button
+                className="py-3 text-base w-full"
+                type="button"
+                variant="outline"
+              >
+                Learn more
+              </Button>
+            </ExternalLink>
           </div>
         </div>
       </DialogContent>
