@@ -295,7 +295,8 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
         </p>
         <div className="flex flex-col gap-y-1.5">
           <p className="text-sm font-medium">
-            What kind of funding have you received?
+            What kinds of funding have you received since Jan 2023?
+            <span className="text-destructive">*</span>
           </p>
           {FUNDING_TYPES.map((fundingType) => (
             <FundingTypeOption

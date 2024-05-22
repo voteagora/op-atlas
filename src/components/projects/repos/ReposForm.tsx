@@ -253,7 +253,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                     </ExternalLink>
                     . For more information, view{" "}
                     <ExternalLink
-                      href="#"
+                      href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
                       className="text-foreground font-medium"
                     >
                       frequently asked questions

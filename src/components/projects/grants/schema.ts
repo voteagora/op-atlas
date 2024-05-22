@@ -7,7 +7,7 @@ export const FUNDING_TYPES = [
     type: "grants",
     label: "Grants",
     description:
-      "This project has received grants from Optimism or another entity. Examples: Token House Missions, Foundation Missions, Foundation Grants.",
+      "This project has received grants from Optimism (not including past rounds of Retro Funding) or another entity. Examples: Token House Missions, Foundation Missions, Foundation Grants.",
   },
   {
     type: "venture",

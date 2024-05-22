@@ -113,7 +113,10 @@ export const ApplicationSubmitted = ({
             Badgeholders will evaluate the impact of your project by voting on
             the quality-metrics that matter most to them. How voting works in
             this round:{" "}
-            <Link href="#" className="font-medium">
+            <Link
+              href="https://app.optimism.io/retropgf"
+              className="font-medium"
+            >
               Learn more
             </Link>
           </li>

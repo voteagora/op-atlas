@@ -11,6 +11,7 @@ export type FundingRound = {
   startsAt: Date
   endsAt?: Date
   funding?: {
+    dollar?: string
     op?: string
     projects?: number
   }
@@ -83,8 +84,8 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     name: "Welcome, Optimists!",
     number: 2,
     funding: {
-      op: "30M",
-      projects: 501,
+      op: "10M",
+      projects: 195,
     },
     link: "https://optimism.mirror.xyz/7v1DehEY3dpRcYFhqWrVNc9Qj94H2L976LKlWH1FX-8",
     details:
@@ -97,8 +98,8 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     name: "Welcome, Optimists!",
     number: 1,
     funding: {
-      op: "30M",
-      projects: 501,
+      dollar: "$1M",
+      projects: 58,
     },
     details:
       "The OP Stack is the heart of Optimism, and the Superchain. Contributions to the OP Stack and improvements to the...",

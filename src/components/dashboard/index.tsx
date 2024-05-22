@@ -92,7 +92,7 @@ const Dashboard = ({
         <ApplicationBanner application={applications[0]} canApply={canApply} />
 
         <Link
-          href="#"
+          href="https://app.optimism.io/retropgf"
           className="flex items-center gap-x-2 no-underline text-secondary-foreground"
         >
           <p className="text-sm font-medium">
