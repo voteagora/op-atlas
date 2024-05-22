@@ -4,6 +4,7 @@ import { intersection, sortBy } from "ramda"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { Callout } from "@/components/common/Callout"
 import { Button } from "@/components/ui/button"
 import { createProjectSnapshot } from "@/lib/actions/snapshots"
 import { ProjectWithDetails } from "@/lib/types"
@@ -87,6 +88,15 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
           {sortBy((s) => -s.createdAt, project.snapshots).map((snapshot) => (
             <Snapshot key={snapshot.id} snapshot={snapshot} />
           ))}
+
+          {project.snapshots.length > 0 ? (
+            <Callout
+              type="info"
+              text="You can apply for Retro Funding Round 4"
+              linkHref="/application"
+              linkText="Apply"
+            />
+          ) : null}
         </div>
       ) : null}
 
