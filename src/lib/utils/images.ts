@@ -1,6 +1,5 @@
+import imageCompression from "browser-image-compression"
 import { PixelCrop } from "react-image-crop"
-
-const TO_RADIANS = Math.PI / 180
 
 export function toBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
   return new Promise((resolve) => {
@@ -9,9 +8,11 @@ export function toBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
 }
 
 export async function uploadImage(image: Blob) {
+  const compressed = await compressImage(image)
+
   const result = await fetch("/api/upload", {
     method: "POST",
-    body: image,
+    body: compressed,
   })
 
   if (result.status === 413) {
@@ -38,13 +39,13 @@ export async function canvasPreview(
   const scaleX = image.naturalWidth / image.width
   const scaleY = image.naturalHeight / image.height
 
-  const pixelRatio = 0.3
+  const pixelRatio = window.devicePixelRatio
 
   canvas.width = Math.floor(crop.width * scaleX * pixelRatio)
   canvas.height = Math.floor(crop.height * scaleY * pixelRatio)
 
   ctx.scale(pixelRatio, pixelRatio)
-  ctx.imageSmoothingQuality = "medium"
+  ctx.imageSmoothingQuality = "high"
 
   const cropX = crop.x * scaleX
   const cropY = crop.y * scaleY
@@ -73,4 +74,14 @@ export async function canvasPreview(
   )
 
   ctx.restore()
+}
+
+export async function compressImage(image: Blob) {
+  const options = {
+    maxSizeMB: 4,
+    maxWidthOrHeight: 4096,
+    useWebWorker: true,
+  }
+
+  return await imageCompression(image as File, options)
 }
