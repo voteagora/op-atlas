@@ -7,6 +7,7 @@ import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Callout } from "@/components/common/Callout"
@@ -278,10 +279,14 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const onSubmit =
     (isSave: boolean) => async (values: z.infer<typeof FundingFormSchema>) => {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
-      await setProjectFunding(project.id, fromFormValues(project.id, values))
-
-      !isSave && router.push(`/projects/${project.id}/publish`)
-      setIsSaving(false)
+      try {
+        await setProjectFunding(project.id, fromFormValues(project.id, values))
+        !isSave && router.push(`/projects/${project.id}/publish`)
+        setIsSaving(false)
+      } catch (_) {
+        toast.error("There was an error saving your changes.")
+        isSave ? setIsSaving(false) : setIsSubmitting(false)
+      }
     }
 
   const canSubmit =
