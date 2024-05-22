@@ -212,7 +212,9 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       toast.promise(promise, {
         loading: isCreating ? "Creating project..." : "Saving project...",
         success: (project) => {
-          !isSave && router.push(`/projects/${project.id}/team`)
+          isSave
+            ? router.replace(`/projects/${project.id}/details`)
+            : router.push(`/projects/${project.id}/team`)
           setIsSaving(false)
           return isCreating ? "Project created!" : "Project saved"
         },
