@@ -460,7 +460,7 @@ export const OtherFundingForm = ({
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              How much funding did you receive?{" "}
+              How much did you receive?{" "}
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
@@ -518,7 +518,7 @@ export const OtherFundingForm = ({
           <FormItem>
             <FormLabel>Details</FormLabel>
             <FormDescription className="!mt-0">
-              Include any details you&apos;d like to about this funding.
+              Include any details you&apos;d like to about this grant.
             </FormDescription>
             <FormControl>
               <Textarea

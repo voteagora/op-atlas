@@ -9,6 +9,7 @@ import { useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 
+import { Callout } from "@/components/common/Callout"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form } from "@/components/ui/form"
@@ -293,6 +294,10 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           List any grants, funding, or revenue your project has received. This
           does not include past rounds of Retro Funding.
         </p>
+        <Callout
+          type="info"
+          text="Failure to report could result in disqualification from Retro Funding"
+        />
         <div className="flex flex-col gap-y-1.5">
           <p className="text-sm font-medium">
             What kinds of funding have you received since Jan 2023?
