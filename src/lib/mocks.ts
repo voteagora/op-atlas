@@ -31,7 +31,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     accentColor: "#F0F4FF",
     iconUrl: "/assets/images/round-4.svg",
     startsAt: new Date("2024-05-14T21:53:13.300Z"),
-    endsAt: new Date("2023-05-31T21:53:13.300Z"),
+    endsAt: new Date("2023-06-06T21:53:13.300Z"),
   },
   {
     name: "OP Stack",
