@@ -45,7 +45,7 @@ export const createNewProject = async (details: CreateProjectParams) => {
 
   // Create project attestation
   const attestationId = await createProjectAttestation({
-    farcasterId: session.user.farcasterId,
+    farcasterId: parseInt(session.user.farcasterId),
   })
 
   const project = await createProject({
