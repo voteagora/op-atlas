@@ -51,7 +51,7 @@ const StringValue = z.object({ value: z.string() }) // use a intermediate object
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
+  description: z.string(),
   category: CategoryEnum,
   website: z.array(StringValue),
   farcaster: z.array(StringValue),
@@ -73,6 +73,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
   const { track } = useAnalytics()
 
   const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -127,92 +128,100 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
     }
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
+  const onSubmit =
+    (isSave: boolean) => async (values: z.infer<typeof formSchema>) => {
+      isSave ? setIsSaving(true) : setIsLoading(true)
 
-    let thumbnailUrl = project?.thumbnailUrl
-    let bannerUrl = project?.bannerUrl
+      let thumbnailUrl = project?.thumbnailUrl
+      let bannerUrl = project?.bannerUrl
 
-    try {
-      if (newAvatarImg) {
-        thumbnailUrl = await uploadImage(newAvatarImg)
-      }
-    } catch (error: unknown) {
-      let message = "Failed to upload avatar image"
-      if (error instanceof Error && error.message === "Image size too large") {
-        message = "Avatar image too large"
-      }
-
-      console.error("Error uploading avatar", error)
-      toast.error(message)
-      setIsLoading(false)
-      return
-    }
-
-    try {
-      if (newBannerImg) {
-        bannerUrl = await uploadImage(newBannerImg)
-      }
-    } catch (error: unknown) {
-      let message = "Failed to upload avatar image"
-      if (error instanceof Error && error.message === "Image size too large") {
-        message = "Cover image too large"
-      }
-
-      console.error("Error uploading banner", error)
-      toast.error(message)
-      setIsLoading(false)
-      return
-    }
-
-    track("Project Categorisation", {
-      category: values.category,
-      projectId: project?.id,
-    })
-
-    const newValues = {
-      ...values,
-      thumbnailUrl,
-      bannerUrl,
-      website: fromStringObjectArr(values.website),
-      farcaster: fromStringObjectArr(values.farcaster),
-    }
-
-    const isCreating = !project
-
-    const promise: Promise<Project> = new Promise(async (resolve, reject) => {
       try {
-        const response = project
-          ? await updateProjectDetails(project.id, newValues)
-          : await createNewProject(newValues)
-
-        if (response.error !== null || !response.project) {
-          throw new Error(response.error ?? "Failed to save project")
+        if (newAvatarImg) {
+          thumbnailUrl = await uploadImage(newAvatarImg)
+        }
+      } catch (error: unknown) {
+        let message = "Failed to upload avatar image"
+        if (
+          error instanceof Error &&
+          error.message === "Image size too large"
+        ) {
+          message = "Avatar image too large"
         }
 
-        if (isCreating) {
-          track("Add Project", { projectId: response.project.id })
-        }
-
-        resolve(response.project)
-      } catch (error) {
-        console.error("Error creating project", error)
-        reject(error)
+        console.error("Error uploading avatar", error)
+        toast.error(message)
+        isSave ? setIsSaving(false) : setIsLoading(false)
+        return
       }
-    })
 
-    toast.promise(promise, {
-      loading: isCreating ? "Creating project..." : "Saving project...",
-      success: (project) => {
-        router.push(`/projects/${project.id}/team`)
-        return isCreating ? "Project created!" : "Project saved"
-      },
-      error: () => {
-        setIsLoading(false)
-        return "Failed to save project"
-      },
-    })
-  }
+      try {
+        if (newBannerImg) {
+          bannerUrl = await uploadImage(newBannerImg)
+        }
+      } catch (error: unknown) {
+        let message = "Failed to upload avatar image"
+        if (
+          error instanceof Error &&
+          error.message === "Image size too large"
+        ) {
+          message = "Cover image too large"
+        }
+
+        console.error("Error uploading banner", error)
+        toast.error(message)
+        isSave ? setIsSaving(false) : setIsLoading(false)
+        return
+      }
+
+      track("Project Categorisation", {
+        category: values.category,
+        projectId: project?.id,
+      })
+
+      const newValues = {
+        ...values,
+        thumbnailUrl,
+        bannerUrl,
+        website: fromStringObjectArr(values.website),
+        farcaster: fromStringObjectArr(values.farcaster),
+      }
+
+      const isCreating = !project
+
+      const promise: Promise<Project> = new Promise(async (resolve, reject) => {
+        try {
+          const response = project
+            ? await updateProjectDetails(project.id, newValues)
+            : await createNewProject(newValues)
+
+          if (response.error !== null || !response.project) {
+            throw new Error(response.error ?? "Failed to save project")
+          }
+
+          if (isCreating) {
+            track("Add Project", { projectId: response.project.id })
+          }
+
+          resolve(response.project)
+        } catch (error) {
+          console.error("Error creating project", error)
+          reject(error)
+        }
+      })
+
+      toast.promise(promise, {
+        loading: isCreating ? "Creating project..." : "Saving project...",
+        success: (project) => {
+          !isSave && router.push(`/projects/${project.id}/team`)
+          setIsSaving(false)
+          return isCreating ? "Project created!" : "Project saved"
+        },
+        error: () => {
+          isSave ? setIsSaving(false) : setIsLoading(false)
+          return "Failed to save project"
+        },
+      })
+    }
 
   const canSubmit = form.formState.isValid && !form.formState.isSubmitting
 
@@ -244,7 +253,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         />
       )}
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit(false))}
         className="flex flex-col gap-12"
       >
         <div className="flex flex-col gap-6">
@@ -515,15 +524,27 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
           />
         </div>
 
-        <Button
-          isLoading={isLoading}
-          disabled={!canSubmit || isLoading}
-          type="submit"
-          variant="destructive"
-          className="self-start"
-        >
-          Next
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            isLoading={isSaving}
+            disabled={!canSubmit || isSaving}
+            onClick={form.handleSubmit(onSubmit(true))}
+            type="button"
+            variant="destructive"
+            className="self-start"
+          >
+            Save
+          </Button>
+          <Button
+            isLoading={isLoading}
+            disabled={!canSubmit || isLoading}
+            type="submit"
+            variant="secondary"
+            className="self-start"
+          >
+            Next
+          </Button>
+        </div>
       </form>
     </Form>
   )

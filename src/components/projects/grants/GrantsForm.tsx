@@ -7,9 +7,11 @@ import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Callout } from "@/components/common/Callout"
+import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form } from "@/components/ui/form"
@@ -141,6 +143,7 @@ function fromFormValues(
 export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const form = useForm<z.infer<typeof FundingFormSchema>>({
     resolver: zodResolver(FundingFormSchema),
@@ -273,12 +276,18 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     }
   }
 
-  const onSubmit = async (values: z.infer<typeof FundingFormSchema>) => {
-    setIsSubmitting(true)
-    await setProjectFunding(project.id, fromFormValues(project.id, values))
-
-    router.push(`/projects/${project.id}/publish`)
-  }
+  const onSubmit =
+    (isSave: boolean) => async (values: z.infer<typeof FundingFormSchema>) => {
+      isSave ? setIsSaving(true) : setIsSubmitting(true)
+      try {
+        await setProjectFunding(project.id, fromFormValues(project.id, values))
+        !isSave && router.push(`/projects/${project.id}/publish`)
+        setIsSaving(false)
+      } catch (_) {
+        toast.error("There was an error saving your changes.")
+        isSave ? setIsSaving(false) : setIsSubmitting(false)
+      }
+    }
 
   const canSubmit =
     selectedNone ||
@@ -289,10 +298,18 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   return (
     <div className="flex flex-col gap-y-12 w-full">
       <div className="flex flex-col gap-y-6">
-        <h2 className="text-2xl font-semibold">Grants & Funding</h2>
+        <h2 className="text-2xl font-semibold">Grants, funding, and revenue</h2>
         <p className="text-secondary-foreground">
-          List any grants, funding, or revenue your project has received. This
-          does not include past rounds of Retro Funding.
+          List any grants, funding, or revenue your project has received since
+          January 2023—not including past rounds of Retro Funding. Learn more
+          about how badgeholders apply this information{" "}
+          <ExternalLink
+            className="font-medium"
+            href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+          >
+            here
+          </ExternalLink>
+          .
         </p>
         <Callout
           type="info"
@@ -316,7 +333,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
 
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit(false))}
           className="flex flex-col gap-y-12"
         >
           {grantsFields.length > 0 ? (
@@ -383,14 +400,27 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
             </div>
           ) : null}
 
-          <Button
-            isLoading={isSubmitting}
-            disabled={!canSubmit || isSubmitting}
-            variant="destructive"
-            className="w-fit"
-          >
-            Next
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              isLoading={isSaving}
+              disabled={!canSubmit || isSaving}
+              type="button"
+              onClick={form.handleSubmit(onSubmit(true))}
+              variant="destructive"
+              className="w-fit"
+            >
+              Save
+            </Button>
+            <Button
+              type="submit"
+              isLoading={isSubmitting}
+              disabled={!canSubmit || isSubmitting}
+              variant="secondary"
+              className="w-fit"
+            >
+              Next
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

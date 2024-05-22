@@ -90,6 +90,7 @@ function getDefaultValues(
 export function ContractsForm({ project }: { project: ProjectWithDetails }) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const form = useForm<z.infer<typeof ContractsSchema>>({
     resolver: zodResolver(ContractsSchema),
@@ -133,25 +134,27 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     }
   }
 
-  const onSubmit = async (values: z.infer<typeof ContractsSchema>) => {
-    setIsSubmitting(true)
+  const onSubmit =
+    (isSave: boolean) => async (values: z.infer<typeof ContractsSchema>) => {
+      isSave ? setIsSaving(true) : setIsSubmitting(true)
 
-    try {
-      const result = await updateProjectOSOStatus({
-        projectId: project.id,
-        osoProjectName: values.osoSlug,
-      })
+      try {
+        const result = await updateProjectOSOStatus({
+          projectId: project.id,
+          osoProjectName: values.osoSlug,
+        })
 
-      if (result.error) {
-        throw new Error(result.error)
+        if (result.error) {
+          throw new Error(result.error)
+        }
+
+        !isSave && router.push(`/projects/${project.id}/grants`)
+        setIsSaving(false)
+      } catch (error) {
+        toast.error("There was an error updating project OSO status.")
+        isSave ? setIsSaving(false) : setIsSubmitting(false)
       }
-
-      router.push(`/projects/${project.id}/grants`)
-    } catch (error) {
-      toast.error("There was an error updating project OSO status.")
-      setIsSubmitting(false)
     }
-  }
 
   const formValues = useWatch({
     control: form.control,
@@ -182,7 +185,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     <div>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit(false))}
           className="flex flex-col gap-12"
         >
           <div className="flex flex-col gap-6">
@@ -344,7 +347,10 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                     name="osoSlug"
                     render={({ field }) => (
                       <FormItem className="flex flex-col gap-2">
-                        <FormLabel>Open Source Observer project name</FormLabel>
+                        <FormLabel>
+                          Open Source Observer project name
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
                         <Input placeholder="Add a name" {...field} />
                       </FormItem>
                     )}
@@ -380,15 +386,25 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
             </>
           )}
 
-          <Button
-            isLoading={isSubmitting}
-            className="self-start"
-            disabled={!canSubmit || isSubmitting}
-            type="submit"
-            variant="destructive"
-          >
-            Next
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              isLoading={isSaving}
+              disabled={!canSubmit || isSubmitting}
+              type="button"
+              onClick={form.handleSubmit(onSubmit(true))}
+              variant="destructive"
+            >
+              Save
+            </Button>
+            <Button
+              isLoading={isSubmitting}
+              disabled={!canSubmit || isSubmitting}
+              type="submit"
+              variant="secondary"
+            >
+              Next
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

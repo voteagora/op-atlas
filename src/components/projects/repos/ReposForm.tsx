@@ -57,6 +57,7 @@ function toFormValues(project: ProjectWithDetails) {
 export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   const [verifyingUrl, setVerifyingUrl] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const router = useRouter()
 
@@ -165,8 +166,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   }
 
   const onSubmit = useCallback(
-    async (values: z.infer<typeof ReposFormSchema>) => {
-      setIsSubmitting(true)
+    (isSave: boolean) => async (values: z.infer<typeof ReposFormSchema>) => {
+      isSave ? setIsSaving(true) : setIsSubmitting(true)
 
       // We only need to handle updates to the packages
       const packageUrls = values.packages
@@ -175,10 +176,11 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
       try {
         await updatePackageRepos(project.id, packageUrls)
-        router.push(`/projects/${project.id}/contracts`)
+        !isSave && router.push(`/projects/${project.id}/contracts`)
+        setIsSaving(false)
       } catch (error) {
         toast.error("There was an error updating your packages")
-        setIsSubmitting(false)
+        isSave ? setIsSaving(false) : setIsSubmitting(false)
         console.error("Error saving packages", error)
       }
     },
@@ -198,7 +200,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit(false))}
             className="mt-6 flex flex-col gap-12"
           >
             <div className="flex flex-col gap-2">
@@ -324,14 +326,25 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
               </>
             )}
 
-            <Button
-              isLoading={isSubmitting}
-              type="submit"
-              variant="destructive"
-              className="w-fit"
-            >
-              Next
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                isLoading={isSaving}
+                onClick={form.handleSubmit(onSubmit(true))}
+                type="button"
+                variant="destructive"
+                className="w-fit"
+              >
+                Save
+              </Button>
+              <Button
+                isLoading={isSubmitting}
+                type="submit"
+                variant="secondary"
+                className="w-fit"
+              >
+                Next
+              </Button>
+            </div>
           </form>
         </Form>
       </div>

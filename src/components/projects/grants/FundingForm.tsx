@@ -393,7 +393,7 @@ export const OptimismFundingForm = ({
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              When did you sign your grant agreement?{" "}
+              When did you sign your grant approval?{" "}
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormDescription className="!mt-0">
@@ -413,7 +413,7 @@ export const OptimismFundingForm = ({
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel>Details</FormLabel>
             <FormDescription className="!mt-0">
-              Include any details you&apos;d like to about this funding.
+              Include any details you&apos;d like to about this grant.
             </FormDescription>
             <FormControl>
               <Textarea
