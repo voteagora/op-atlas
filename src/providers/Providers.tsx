@@ -29,6 +29,7 @@ const farcasterConfig = {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  console.log("farcasterConfig", farcasterConfig)
   return (
     <SessionProvider>
       <AuthKitProvider config={farcasterConfig}>
