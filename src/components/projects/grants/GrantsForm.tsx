@@ -313,7 +313,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
         </p>
         <Callout
           type="info"
-          text="Failure to report could result in disqualification from Retro Funding"
+          text="Failure to report will result in disqualification from Retro Funding"
         />
         <div className="flex flex-col gap-y-1.5">
           <p className="text-sm font-medium">
