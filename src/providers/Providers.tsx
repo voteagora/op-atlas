@@ -9,15 +9,23 @@ import { AnalyticsProvider } from "./AnalyticsProvider"
 import { DialogProvider } from "./DialogProvider"
 import { LayoutWrapper } from "./LayoutProvider"
 
-if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
-  throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in env.")
+if (
+  process.env.VERCEL_ENV === "production" &&
+  !process.env.NEXT_PUBLIC_APP_DOMAIN
+) {
+  throw new Error("Please define NEXT_PUBLIC_APP_DOMAIN in env.")
 }
+
+const farcasterDomain =
+  process.env.VERCEL_ENV === "production"
+    ? process.env.NEXT_PUBLIC_APP_DOMAIN
+    : process.env.NEXT_PUBLIC_VERCEL_URL
 
 const farcasterConfig = {
   relay: "https://relay.farcaster.xyz",
   rpcUrl: "https://mainnet.optimism.io",
-  siweUri: "https://retrofunding.optimism.io/",
-  domain: "https://retrofunding.optimism.io/",
+  siweUri: farcasterDomain,
+  domain: farcasterDomain,
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
