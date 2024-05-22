@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^2.1.4",
-    "@farcaster/auth-kit": "^0.1.4",
+    "@farcaster/auth-kit": "^0.3.0",
     "@google-cloud/storage": "^7.10.2",
     "@hookform/resolvers": "^3.3.4",
     "@pinata/sdk": "^2.1.0",
@@ -41,6 +41,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
     "@types/ramda": "^0.29.12",
+    "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
