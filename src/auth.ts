@@ -66,10 +66,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           ethereum: viemConnector(),
         })
 
+        const farcasterDomain =
+          process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+            ? process.env.NEXT_PUBLIC_APP_DOMAIN
+            : process.env.NEXT_PUBLIC_VERCEL_URL
+
         const verifyResponse = await appClient.verifySignInMessage({
           message: credentials?.message as string,
           signature: credentials?.signature as `0x${string}`,
-          domain: process.env.NEXT_PUBLIC_VERCEL_URL!,
+          domain: farcasterDomain!,
           nonce: (credentials?.nonce as string) ?? "",
         })
 
