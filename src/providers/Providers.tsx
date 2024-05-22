@@ -10,14 +10,14 @@ import { DialogProvider } from "./DialogProvider"
 import { LayoutWrapper } from "./LayoutProvider"
 
 if (
-  process.env.NEXT_PUBLICVERCEL_ENV === "production" &&
+  process.env.NEXT_PUBLIC_VERCEL_ENV === "production" &&
   !process.env.NEXT_PUBLIC_APP_DOMAIN
 ) {
   throw new Error("Please define NEXT_PUBLIC_APP_DOMAIN in env.")
 }
 
 const farcasterDomain =
-  process.env.NEXT_PUBLICVERCEL_ENV === "production"
+  process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
     ? process.env.NEXT_PUBLIC_APP_DOMAIN
     : process.env.NEXT_PUBLIC_VERCEL_URL
 
