@@ -67,6 +67,7 @@ export function PhotoCropModal({
     )
 
     const blob = await toBlob(canvas)
+
     if (blob) {
       onComplete(blob)
       onOpenChange(false)
@@ -113,7 +114,6 @@ export function PhotoCropModal({
             type="button"
             variant="destructive"
             onClick={() => {
-              console.log("crop values", crop)
               onSave()
             }}
           >
