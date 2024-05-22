@@ -141,6 +141,7 @@ function fromFormValues(
 export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const form = useForm<z.infer<typeof FundingFormSchema>>({
     resolver: zodResolver(FundingFormSchema),
@@ -273,12 +274,14 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     }
   }
 
-  const onSubmit = async (values: z.infer<typeof FundingFormSchema>) => {
-    setIsSubmitting(true)
-    await setProjectFunding(project.id, fromFormValues(project.id, values))
+  const onSubmit =
+    (isSave: boolean) => async (values: z.infer<typeof FundingFormSchema>) => {
+      isSave ? setIsSaving(true) : setIsSubmitting(true)
+      await setProjectFunding(project.id, fromFormValues(project.id, values))
 
-    router.push(`/projects/${project.id}/publish`)
-  }
+      !isSave && router.push(`/projects/${project.id}/publish`)
+      setIsSaving(false)
+    }
 
   const canSubmit =
     selectedNone ||
@@ -316,7 +319,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
 
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit(false))}
           className="flex flex-col gap-y-12"
         >
           {grantsFields.length > 0 ? (
@@ -383,14 +386,27 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
             </div>
           ) : null}
 
-          <Button
-            isLoading={isSubmitting}
-            disabled={!canSubmit || isSubmitting}
-            variant="destructive"
-            className="w-fit"
-          >
-            Next
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              isLoading={isSaving}
+              disabled={!canSubmit || isSaving}
+              type="button"
+              onClick={form.handleSubmit(onSubmit(true))}
+              variant="destructive"
+              className="w-fit"
+            >
+              Save
+            </Button>
+            <Button
+              type="submit"
+              isLoading={isSubmitting}
+              disabled={!canSubmit || isSubmitting}
+              variant="secondary"
+              className="w-fit"
+            >
+              Next
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
