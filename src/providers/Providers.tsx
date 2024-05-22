@@ -10,14 +10,14 @@ import { DialogProvider } from "./DialogProvider"
 import { LayoutWrapper } from "./LayoutProvider"
 
 if (
-  process.env.VERCEL_ENV === "production" &&
+  process.env.NEXT_PUBLICVERCEL_ENV === "production" &&
   !process.env.NEXT_PUBLIC_APP_DOMAIN
 ) {
   throw new Error("Please define NEXT_PUBLIC_APP_DOMAIN in env.")
 }
 
 const farcasterDomain =
-  process.env.VERCEL_ENV === "production"
+  process.env.NEXT_PUBLICVERCEL_ENV === "production"
     ? process.env.NEXT_PUBLIC_APP_DOMAIN
     : process.env.NEXT_PUBLIC_VERCEL_URL
 
@@ -29,8 +29,6 @@ const farcasterConfig = {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  console.log("farcasterConfig", farcasterConfig)
-  console.log("vercel env", process.env.VERCEL_ENV)
   return (
     <SessionProvider>
       <AuthKitProvider config={farcasterConfig}>
