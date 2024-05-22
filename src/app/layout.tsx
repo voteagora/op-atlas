@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Retro Funding",
     description: "Applications are now open for Round 4: Onchain Builders",
+    url: "https://retrofunding.optimism.io",
     images: [
       {
         url: "/og-image.png",
