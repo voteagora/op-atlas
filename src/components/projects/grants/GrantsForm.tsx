@@ -359,7 +359,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           ) : null}
           {ventureFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold">Venture Funding</h3>
+              <h3 className="text-lg font-semibold">Funding</h3>
               {ventureFields.map((field, index) => (
                 <VentureFundingForm
                   key={field.id}

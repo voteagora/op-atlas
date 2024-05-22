@@ -52,17 +52,6 @@ const FUNDING_AMOUNTS = [
   },
 ] as const
 
-const VENTURE_FUNDING_YEARS = [
-  {
-    label: "2024",
-    value: "2024",
-  },
-  {
-    label: "2023",
-    value: "2023",
-  },
-]
-
 const FUNDING_YEARS = [
   {
     label: "2024",
@@ -71,22 +60,6 @@ const FUNDING_YEARS = [
   {
     label: "2023",
     value: "2023",
-  },
-  {
-    label: "2022",
-    value: "2022",
-  },
-  {
-    label: "2021",
-    value: "2021",
-  },
-  {
-    label: "2020",
-    value: "2020",
-  },
-  {
-    label: "Before 2020",
-    value: "before-2020",
   },
 ] as const
 
@@ -143,7 +116,7 @@ export const RevenueFundingForm = ({
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel>Details</FormLabel>
             <FormDescription className="!mt-0">
-              Include any details you&apos;d like to about this funding.
+              Include any details you&apos;d like to about this revenue.
             </FormDescription>
             <FormControl>
               <Textarea
@@ -221,7 +194,7 @@ export const VentureFundingForm = ({
                   <SelectValue placeholder="Select a year" />
                 </SelectTrigger>
                 <SelectContent>
-                  {VENTURE_FUNDING_YEARS.map((year) => (
+                  {FUNDING_YEARS.map((year) => (
                     <SelectItem key={year.value} value={year.value}>
                       {year.label}
                     </SelectItem>
@@ -309,7 +282,7 @@ export const GrantsFundingForm = ({
                   <SelectItem value="foundation-grant">
                     Foundation Grant (Partner fund & other)
                   </SelectItem>
-                  <SelectItem value="other-grant">Other</SelectItem>
+                  <SelectItem value="other-grant">Other Entities</SelectItem>
                 </SelectContent>
               </Select>
             </FormControl>
