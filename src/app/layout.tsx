@@ -16,9 +16,23 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://retrofunding.optimism.io"),
   title: "Retro Funding",
   description: "Applications are now open for Round 4: Onchain Builders",
   icons: "/favicon.ico",
+  openGraph: {
+    title: "Retro Funding",
+    description: "Applications are now open for Round 4: Onchain Builders",
+    url: "https://retrofunding.optimism.io",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Retro Funding",
+      },
+    ],
+  },
 }
 
 export default function RootLayout({
