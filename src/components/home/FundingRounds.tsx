@@ -157,9 +157,13 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
               />
               <p className="text-muted-foreground">
                 {fundingRound.status === "now" && fundingRound.endsAt ? (
-                  <>Apply by {format(fundingRound.endsAt, "MMM d")}</>
+                  <span className="font-medium">
+                    Apply by {format(fundingRound.endsAt, "MMMM d")}
+                  </span>
                 ) : (
-                  <>{format(fundingRound.startsAt, "MMM yyyy")}</>
+                  <span className="font-medium">
+                    {format(fundingRound.startsAt, "MMM yyyy")}
+                  </span>
                 )}
               </p>
             </div>

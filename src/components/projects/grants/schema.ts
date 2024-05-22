@@ -11,7 +11,7 @@ export const FUNDING_TYPES = [
   },
   {
     type: "venture",
-    label: "Venture Funding",
+    label: "Funding",
     description:
       "This project has received funding provided by individuals or investment firms in exchange for equity ownership.",
   },
