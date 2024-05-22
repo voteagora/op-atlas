@@ -518,7 +518,7 @@ export const OtherFundingForm = ({
           <FormItem>
             <FormLabel>Details</FormLabel>
             <FormDescription className="!mt-0">
-              Include any details you&apos;d like to about this funding.
+              Include any details you&apos;d like to about this grant.
             </FormDescription>
             <FormControl>
               <Textarea
