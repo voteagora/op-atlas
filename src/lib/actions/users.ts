@@ -28,6 +28,10 @@ export const updateEmail = async (email: string) => {
   const updated = await updateUserEmail({ id: user.id, email })
   revalidatePath("/dashboard")
 
+  console.info(
+    `Email updated for user farcasterId ${session.user.farcasterId}: ${email}`,
+  )
+
   return {
     error: null,
     user: updated,
