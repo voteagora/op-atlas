@@ -56,7 +56,7 @@ export const Sidebar = ({ className }: { className?: string }) => {
         />
 
         <p className="text-sm font-semibold text-center font-mono">
-          40,00,000 OP
+          40,000,000 OP
         </p>
         <p className="text-sm text-muted-foreground text-center">
           Retro Funding rewarded to Optimism Collective contributors since 2022
