@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 
+import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
 
@@ -21,7 +22,7 @@ export function Rounds() {
       {/* Main content */}
       <div className="mt-36 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
         <div className="flex flex-col w-full">
-          <h1 className="text-4xl font-semibold">Retro Funding Rounds</h1>
+          <h1 className="text-4xl font-semibold">Rounds</h1>
           <p className="mt-2 text-muted-foreground">
             Build together, benefit together.
           </p>
@@ -33,12 +34,17 @@ export function Rounds() {
             <div className="flex flex-col">
               <h2 className="text-2xl font-semibold">About Retro Funding</h2>
               <p className="mt-6 text-muted-foreground">
-                Retroactive Public Goods Funding (RetroPGF) is based on the idea
-                that it&apos;s easier to agree on what was useful in the past
-                than what might be useful in the future. This is a series of
-                experiments where members of the Citizens&apos; House allocate
-                protocol revenue or portions of the RetroPGF token allocation to
-                projects they deem have provided positive impact to the Optimism
+                Retroactive Public Goods Funding (Retro Funding) offers a
+                sustainable model for individuals to receive rewards for their
+                contributions to Optimism&apos;s success, ensuring that efforts
+                are not only recognized but also effectively rewarded.
+              </p>
+              <p className="mt-6 text-muted-foreground">
+                Retroactive Funding is based on the idea that it&apos;s easier
+                to agree on what was useful in the past than what might be
+                useful in the future. This is a series of experiments where
+                members of the Citizens&apos; House allocate rewards to projects
+                they deem have provided positive impact to the Optimism
                 Collective.
               </p>
               <p className="mt-6 text-muted-foreground">
@@ -46,11 +52,15 @@ export function Rounds() {
                 idea that that positive impact to the collective should be
                 rewarded proportionally with profit to the individual.
               </p>
+
               <p className="mt-6 text-muted-foreground">
                 Want to go deeper?{" "}
-                <Link href="#" className="font-semibold no-underline">
+                <ExternalLink
+                  href="https://app.optimism.io/retropgf"
+                  className="font-semibold no-underline"
+                >
                   Learn more
-                </Link>
+                </ExternalLink>
               </p>
             </div>
           </div>

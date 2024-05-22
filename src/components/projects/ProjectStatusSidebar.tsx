@@ -13,6 +13,7 @@ import { useIsAdmin } from "@/lib/hooks"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 
+import ExternalLink from "../ExternalLink"
 import { DeleteProjectDialog } from "./DeleteProjectDialog"
 
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
@@ -115,16 +116,26 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         ))}
       </div>
 
-      {project && isAdmin && (
-        <Button
-          type="button"
-          variant="link"
-          className="p-0 text-sm text-muted-foreground font-normal decoration-muted-foreground"
-          onClick={() => setDeletingProject(true)}
+      <div className="flex flex-col gap-4">
+        <ExternalLink
+          className="text-sm text-muted-foreground font-normal decoration-muted-foreground"
+          href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
         >
-          Delete project
-        </Button>
-      )}
+          Get help
+        </ExternalLink>
+        {project && isAdmin && (
+          <Button
+            type="button"
+            variant="link"
+            className="p-0 text-sm text-muted-foreground font-normal decoration-muted-foreground"
+            style={{ height: "unset" }}
+            onClick={() => setDeletingProject(true)}
+          >
+            Delete project
+          </Button>
+        )}
+      </div>
+
       {deletingProject && (
         <DeleteProjectDialog
           open

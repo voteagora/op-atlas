@@ -52,6 +52,17 @@ const FUNDING_AMOUNTS = [
   },
 ] as const
 
+const VENTURE_FUNDING_YEARS = [
+  {
+    label: "2024",
+    value: "2024",
+  },
+  {
+    label: "2023",
+    value: "2023",
+  },
+]
+
 const FUNDING_YEARS = [
   {
     label: "2024",
@@ -104,7 +115,7 @@ export const RevenueFundingForm = ({
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              How much revenue have you earned since the start of 2023?{" "}
+              How much revenue have you earned since Jan 2023?{" "}
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
@@ -174,7 +185,7 @@ export const VentureFundingForm = ({
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              How much funding did you receive?{" "}
+              How much funding did you receive since Jan 2023?{" "}
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
@@ -210,7 +221,7 @@ export const VentureFundingForm = ({
                   <SelectValue placeholder="Select a year" />
                 </SelectTrigger>
                 <SelectContent>
-                  {FUNDING_YEARS.map((year) => (
+                  {VENTURE_FUNDING_YEARS.map((year) => (
                     <SelectItem key={year.value} value={year.value}>
                       {year.label}
                     </SelectItem>
@@ -434,7 +445,7 @@ export const OtherFundingForm = ({
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              Name <span className="text-destructive">*</span>
+              Grant name<span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
               <Input {...field} placeholder="Title of grant" className="" />
@@ -479,7 +490,7 @@ export const OtherFundingForm = ({
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              When did you receive this funding?{" "}
+              When did you receive this grant?{" "}
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>

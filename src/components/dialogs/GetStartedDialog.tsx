@@ -37,11 +37,12 @@ export function GetStartedDialog(props: DialogProps<object>) {
       <DialogContent className="max-w-md max-h-[80vh]">
         <div className="flex flex-col gap-2 max-h-[calc(80vh_-_48px)]">
           <div className="flex flex-col text-center gap-1">
-            <h3>Apply for Retro Funding Round 4: Onchain Builders</h3>
+            <h3>
+              Create a profile and add projects to apply for Retro Funding
+            </h3>
             <div className="text-secondary-foreground">
-              Create a profile and add projects, then you&apos;ll be able to
-              apply for Retro Funding. Builders who are eligible for Round 4
-              have met the following criteria:
+              Builders who are eligible for Round 4 have met the following
+              criteria:
             </div>
           </div>
           <div className="overflow-hidden relative">

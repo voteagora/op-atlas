@@ -307,7 +307,10 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                   </div>
                   <div className="text-secondary-foreground">
                     Follow{" "}
-                    <ExternalLink href="#" className="font-medium">
+                    <ExternalLink
+                      href="https://docs.opensource.observer/docs/contribute/project-data"
+                      className="font-medium"
+                    >
                       these instructions
                     </ExternalLink>{" "}
                     for adding your project. Make sure that your project has
@@ -320,7 +323,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                   >
                     <ExternalLink
                       className="flex items-center gap-2.5 w-full h-full py-2 px-3 font-medium"
-                      href="#"
+                      href="https://docs.opensource.observer/docs/contribute/project-data"
                     >
                       View instructions{" "}
                       <Image

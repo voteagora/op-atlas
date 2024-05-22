@@ -168,9 +168,20 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
 
         {fundingRound.status === "past" ? (
           <div className="flex items-center gap-2 text-sm text-secondary-foreground">
-            <ChainLogo chainId={optimism.id.toString()} />
+            {fundingRound.funding?.op && (
+              <ChainLogo chainId={optimism.id.toString()} />
+            )}
             <div>
-              <span className="font-medium">{fundingRound.funding?.op} OP</span>{" "}
+              {fundingRound.funding?.op && (
+                <span className="font-medium">
+                  {fundingRound.funding.op} OP
+                </span>
+              )}{" "}
+              {fundingRound.funding?.dollar && (
+                <span className="font-medium">
+                  {fundingRound.funding.dollar}
+                </span>
+              )}{" "}
               to{" "}
               <span className="font-medium">
                 {fundingRound.funding?.projects} projects

@@ -19,7 +19,7 @@ import { ProjectCard } from "./ProjectCard"
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
   "I understand that any Retro Funding rewards that are distributed must be claimed within a year of results being announced, or risk forfeiture.",
-  "I certify that the potential beneficiary of the grant is not a citizen or resident of, or incorporated in, any jurisdiction designated, blocked, or sanctioned by the United Nations, the European Union, the U.K. Treasury, or the U.S. Treasury’s Office of Foreign Assets Control, including but not limited to Cuba, the Democratic Republic of Congo, Iran, North Korea, Russia, Syria, Yemen, or the Crimea, Donetsk, or Luhansk regions of Ukraine.",
+  "I certify that no member of the team receiving the grant is a citizen or resident of, or incorporated in, any jurisdiction designated, blocked, or sanctioned by the United Nations, the European Union, the U.K. Treasury, or the U.S. Treasury’s Office of Foreign Assets Control, including but not limited to Cuba, Belarus, the Democratic Republic of Congo, Iran, North Korea, the Russian Federation, Syria, Yemen, or the Crimea, Donetsk, or Luhansk regions of Ukraine.",
   "I certify that the potential beneficiary of the grant is not barred from participating in Optimism's grant program under applicable law.",
   "I understand that access to my Optimist Profile is required to claim Retro Funding rewards.",
 ]
@@ -38,7 +38,7 @@ export const FundingApplication = ({
   const [isLoading, setIsLoading] = useState(false)
 
   const [agreedTerms, setAgreedTerms] = useState(
-    Array.from({ length: TERMS.length }, () => false),
+    Array.from({ length: TERMS.length + 1 }, () => false),
   )
 
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([])
@@ -218,8 +218,9 @@ export const FundingApplication = ({
             process.
           </li>
           <li>
-            Confirmed that they will comply with Optimism Foundation KYC
-            requirements and are not residing in a sanctioned country.
+            Confirm that you and your team will comply with the Optimism
+            Foundation&apos;s KYC requirements, and that you understand the
+            geographic restrictions.
           </li>
           <li>
             Submitted a Retro Funding application before June 6th, 2024 and
@@ -272,6 +273,23 @@ export const FundingApplication = ({
               <p className="">{term}</p>
             </div>
           ))}
+          <div className="flex gap-x-4">
+            <Checkbox
+              checked={agreedTerms[TERMS.length]}
+              onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
+              className="mt-1 border-2 rounded-[2px]"
+            />
+            <p className="">
+              I agree to the{" "}
+              <ExternalLink
+                href="https://www.optimism.io/data-privacy-policy"
+                className="font-medium"
+              >
+                Optimism Foundation&apos;s Privacy Policy
+              </ExternalLink>
+              .
+            </p>
+          </div>
         </div>
 
         <p className="">

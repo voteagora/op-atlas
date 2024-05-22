@@ -9,13 +9,7 @@ import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 
-export const Sidebar = ({
-  className,
-  funding,
-}: {
-  className?: string
-  funding?: string
-}) => {
+export const Sidebar = ({ className }: { className?: string }) => {
   const { status } = useSession()
   const router = useRouter()
 
@@ -43,9 +37,7 @@ export const Sidebar = ({
           />
         </div>
 
-        <p className="text-sm font-semibold text-center">
-          Create your Optimist profile
-        </p>
+        <p className="text-sm font-semibold text-center">Optimist Profiles</p>
         <p className="text-sm text-muted-foreground text-center">
           Create your profile, add projects, and apply for Retro Funding.
         </p>
@@ -64,7 +56,7 @@ export const Sidebar = ({
         />
 
         <p className="text-sm font-semibold text-center font-mono">
-          {funding ?? "40,00,000"} OP
+          40,00,000 OP
         </p>
         <p className="text-sm text-muted-foreground text-center">
           Retro Funding rewarded to Optimism Collective contributors since 2022

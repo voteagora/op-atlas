@@ -89,12 +89,6 @@ const Navbar = () => {
                     <MoveUpRight size={12} />
                   </ExternalLink>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-none! focus:opacity-80 text-base">
-                  <ExternalLink className="flex items-center gap-1" href="#">
-                    <div>Voting</div>
-                    <MoveUpRight size={12} />
-                  </ExternalLink>
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

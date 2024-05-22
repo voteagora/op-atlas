@@ -28,14 +28,6 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
               <div>About Retro Funding</div>
               <MoveUpRight size={12} />
             </ExternalLink>
-            <Link
-              className="flex items-center text-sm font-medium gap-1"
-              href="#"
-              onClick={onClose}
-            >
-              <div>Voting</div>
-              <MoveUpRight size={12} />
-            </Link>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
