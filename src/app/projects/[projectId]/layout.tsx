@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 
+import { FeedbackButton } from "@/components/common/FeedbackButton"
 import { ProjectSidebar } from "@/components/projects/ProjectSidebar"
 
 export default function Layout({
@@ -12,6 +13,9 @@ export default function Layout({
   return (
     <div className="h-full bg-secondary flex flex-1 px-6">
       <div className="flex items-start w-full max-w-6xl mx-auto my-18 gap-x-10">
+        <div className="fixed bottom-4 left-4">
+          <FeedbackButton />
+        </div>
         <Suspense
           fallback={<div className="hidden sm:flex flex-col w-[228px]" />}
         >
