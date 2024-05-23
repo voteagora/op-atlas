@@ -309,7 +309,7 @@ const VerifyFundingStep = ({
             "The funding.json file is not valid JSON or is missing the project ID.",
           )
         } else if (error.message === "Repo already exists") {
-          setError("This repo has already been added to another project.")
+          setError("This repo is already verified.")
         } else {
           setError(
             "Unable to validate funding.json file. Please make sure the changes have been merged into the default branch and try again",
