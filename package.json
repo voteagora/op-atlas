@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^2.1.4",
-    "@farcaster/auth-kit": "^0.3.0",
+    "@farcaster/auth-kit": "^0.3.1",
     "@google-cloud/storage": "^7.10.2",
     "@hookform/resolvers": "^3.3.4",
     "@pinata/sdk": "^2.1.0",
