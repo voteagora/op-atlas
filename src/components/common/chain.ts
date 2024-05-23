@@ -16,7 +16,7 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     },
     [optimism.id.toString()]: {
       logo: "/assets/chain-logos/optimism.png",
-      name: "Optimism",
+      name: "OP Mainnet",
     },
     [zora.id.toString()]: {
       logo: "/assets/chain-logos/zora.png",
