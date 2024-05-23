@@ -118,23 +118,42 @@ export const verifyContract = async ({
 
   // Must be valid!
 
-  const contract = await addProjectContract({
-    projectId,
-    contract: {
-      contractAddress,
-      deployerAddress,
-      deploymentHash: deploymentTxHash,
-      verificationProof: signature,
-      chainId: parseInt(chain.toString()),
-    },
-  })
+  try {
+    const contract = await addProjectContract({
+      projectId,
+      contract: {
+        contractAddress,
+        deployerAddress,
+        deploymentHash: deploymentTxHash,
+        verificationProof: signature,
+        chainId: parseInt(chain.toString()),
+      },
+    })
 
-  revalidatePath("/dashboard")
-  revalidatePath("/projects", "layout")
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
 
-  return {
-    error: null,
-    contract,
+    return {
+      error: null,
+      contract,
+    }
+  } catch (error: unknown) {
+    console.error("Error creating contract", error)
+    // Handle the case where another project has used this contract
+    if (
+      error instanceof Error &&
+      error.message.includes(
+        "Unique constraint failed on the fields: (`contractAddress`,`chainId`)",
+      )
+    ) {
+      return {
+        error: "This contract is already verified",
+      }
+    }
+
+    return {
+      error: "Error creating contract",
+    }
   }
 }
 

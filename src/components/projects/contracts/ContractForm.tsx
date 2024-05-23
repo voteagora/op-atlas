@@ -104,8 +104,7 @@ export function ContractForm({
           )
           toast.success("Contract verified")
         } else {
-          // Fall back to full verification
-          setIsVerifying(true)
+          toast.error(verificationResult.error ?? "Error verifying contract")
         }
       } else {
         setIsVerifying(true)
