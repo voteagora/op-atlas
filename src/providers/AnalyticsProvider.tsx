@@ -1,5 +1,7 @@
 "use client"
 
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import mixpanel from "mixpanel-browser"
 import { useSession } from "next-auth/react"
 import {
@@ -63,6 +65,8 @@ export function AnalyticsProvider({ children }: PropsWithChildren) {
 
   return (
     <AnalyticsContext.Provider value={{ track }}>
+      <VercelAnalytics />
+      <SpeedInsights />
       {children}
     </AnalyticsContext.Provider>
   )
