@@ -284,10 +284,10 @@
     neverthrow "^6.1.0"
     siwe "^2.1.4"
 
-"@farcaster/auth-kit@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@farcaster/auth-kit/-/auth-kit-0.3.0.tgz#79f6d44d06dedec8c76ec620b894b36df5861e7b"
-  integrity sha512-M1RBWUoT+9y0GZFXDzFXfI2iqTqboPU66ABHMGZHx77ZXZf2uFwSU81m63tQk3y5ZFyYn+Dfnn+czHNiNRq07Q==
+"@farcaster/auth-kit@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@farcaster/auth-kit/-/auth-kit-0.3.1.tgz#77523b3551132a319643552a69f281db3337e45d"
+  integrity sha512-BlT5rgyIFy6/Lle4nrDOUrvz0GaHdQduStuEWc5KuU6Dub/NsKrliEJVDo1MzfJGh3DLOq1nz+7L2A00VU+UnQ==
   dependencies:
     "@farcaster/auth-client" "^0.1.1"
     "@vanilla-extract/css" "^1.14.0"
