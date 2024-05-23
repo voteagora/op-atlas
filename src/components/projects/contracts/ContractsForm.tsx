@@ -71,7 +71,7 @@ function getDefaultValues(
   }
 
   const contracts = project.contracts.map(toFormValues)
-  let hasDeployerKeys = "No"
+  let hasDeployerKeys = project.openSourceObserverSlug ? "No" : "Yes"
   if (contracts.length > 0) {
     hasDeployerKeys = project.openSourceObserverSlug
       ? "Some, but not all"
