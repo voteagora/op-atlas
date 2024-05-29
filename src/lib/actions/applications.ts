@@ -11,6 +11,31 @@ import { createApplicationAttestation } from "../eas"
 import { getProjectStatus } from "../utils"
 import { verifyAdminStatus } from "./utils"
 
+export const publishAndSaveApplication = async ({
+  projectId,
+  farcasterId,
+  metadataSnapshotId,
+}: {
+  projectId: string
+  farcasterId: string
+  metadataSnapshotId: string
+}): Promise<Application> => {
+  // Publish attestation
+  const attestationId = await createApplicationAttestation({
+    farcasterId: parseInt(farcasterId),
+    projectId,
+    round: 4,
+    snapshotRef: metadataSnapshotId,
+  })
+
+  // Create application in database
+  return await createApplication({
+    projectId,
+    attestationId,
+    round: 4,
+  })
+}
+
 const createProjectApplication = async (
   projectId: string,
   farcasterId: string,
@@ -43,18 +68,10 @@ const createProjectApplication = async (
     project.snapshots,
   )[0]
 
-  const attestationId = await createApplicationAttestation({
-    farcasterId: parseInt(farcasterId),
-    projectId: project.id,
-    round: 4,
-    snapshotRef: latestSnapshot.attestationId,
-  })
-
-  // Create application
-  const application = await createApplication({
+  const application = await publishAndSaveApplication({
     projectId,
-    attestationId,
-    round: 4,
+    farcasterId,
+    metadataSnapshotId: latestSnapshot.id,
   })
 
   return {

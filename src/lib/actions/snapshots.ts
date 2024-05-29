@@ -8,6 +8,7 @@ import { addProjectSnapshot, getProject } from "@/db/projects"
 import { createProjectMetadataAttestation } from "../eas"
 import { uploadToPinata } from "../pinata"
 import { ProjectWithDetails } from "../types"
+import { publishAndSaveApplication } from "./applications"
 import { verifyMembership } from "./utils"
 
 function formatProjectMetadata(
@@ -122,6 +123,15 @@ export const createProjectSnapshot = async (projectId: string) => {
       ipfsHash,
       attestationId,
     })
+
+    // If the project has an application, we need to publish a new one to reference this snapshot.
+    if (project.applications.length > 0) {
+      await publishAndSaveApplication({
+        projectId,
+        farcasterId: session.user.farcasterId,
+        metadataSnapshotId: snapshot.attestationId,
+      })
+    }
 
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")

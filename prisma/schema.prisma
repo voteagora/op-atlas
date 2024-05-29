@@ -80,7 +80,6 @@ model Application {
   round   FundingRound @relation(fields: [roundId], references: [id])
   project Project      @relation(fields: [projectId], references: [id])
 
-  @@unique([roundId, projectId])
   @@index([projectId])
 }
 
