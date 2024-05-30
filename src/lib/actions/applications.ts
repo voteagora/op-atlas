@@ -71,7 +71,7 @@ const createProjectApplication = async (
   const application = await publishAndSaveApplication({
     projectId,
     farcasterId,
-    metadataSnapshotId: latestSnapshot.id,
+    metadataSnapshotId: latestSnapshot.attestationId,
   })
 
   return {
