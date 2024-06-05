@@ -9,7 +9,7 @@ import { createApplication, getProject } from "@/db/projects"
 
 import { createApplicationAttestation } from "../eas"
 import { getProjectStatus } from "../utils"
-import { verifyAdminStatus } from "./utils"
+import { verifyMembership } from "./utils"
 
 export const publishAndSaveApplication = async ({
   projectId,
@@ -40,7 +40,7 @@ const createProjectApplication = async (
   projectId: string,
   farcasterId: string,
 ) => {
-  const isInvalid = await verifyAdminStatus(projectId, farcasterId)
+  const isInvalid = await verifyMembership(projectId, farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
