@@ -85,26 +85,25 @@ export const submitApplications = async (projectIds: string[]) => {
 
   if (!session?.user?.id) {
     return {
+      applications: [],
       error: "Unauthorized",
     }
   }
 
-  const results = await Promise.all(
-    projectIds.map((projectId) =>
-      createProjectApplication(projectId, session.user.farcasterId),
-    ),
-  )
-
   const applications: Application[] = []
-  let error: Error | null = null
+  let error: string | null = null
 
-  results.forEach((result) => {
+  for (const projectId of projectIds) {
+    const result = await createProjectApplication(
+      projectId,
+      session.user.farcasterId,
+    )
     if (result.error === null && result.application) {
       applications.push(result.application)
     } else if (result.error) {
-      error = new Error(result.error)
+      error = result.error
     }
-  })
+  }
 
   revalidatePath("/dashboard")
 

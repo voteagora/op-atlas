@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import { ApplicationFlow } from "@/components/application"
 import { getApplications, getProjects } from "@/lib/actions/projects"
 
-export const maxDuration = 60
+export const maxDuration = 120
 
 export default async function Page() {
   const session = await auth()
