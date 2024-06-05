@@ -5,7 +5,7 @@ import { PublishForm } from "@/components/projects/publish/PublishForm"
 import { getProject } from "@/db/projects"
 import { isUserMember } from "@/lib/actions/utils"
 
-export const maxDuration = 60
+export const maxDuration = 120
 
 export default async function Page({
   params,
