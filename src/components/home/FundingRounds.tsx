@@ -3,18 +3,20 @@
 import { format } from "date-fns"
 import { ArrowRight } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useMemo } from "react"
 import { optimism } from "viem/chains"
 
 import { FundingRound } from "@/lib/mocks"
-import { cn, titlecase } from "@/lib/utils"
+import { clickSignInWithFarcasterButton, cn, titlecase } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Badge } from "../common/Badge"
 import { ChainLogo } from "../common/ChainLogo"
 import ExternalLink from "../ExternalLink"
+import { Button } from "../ui/button"
 
 export const FundingRounds = ({
   className,
@@ -96,18 +98,9 @@ const Round = ({
 
   if (fundingRound.status === "now") {
     return (
-      <button
-        onClick={onClick}
-        type="button"
-        className={cn(
-          "flex gap-x-6 border rounded-3xl p-10 transition-all",
-          (fundingRound.link || fundingRound.status === "now") &&
-            "hover:shadow-md",
-          className,
-        )}
-      >
+      <div className={cn("flex gap-x-6 border rounded-3xl p-10", className)}>
         <FundingRoundContent fundingRound={fundingRound} />
-      </button>
+      </div>
     )
   }
 
@@ -130,6 +123,8 @@ const Round = ({
 }
 
 function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
+  const router = useRouter()
+  const { status } = useSession()
   return (
     <>
       {fundingRound.status !== "past" && fundingRound.iconUrl && (
@@ -137,7 +132,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
           src={fundingRound.iconUrl}
           width={124}
           height={124}
-          className="rounded-md"
+          className="rounded-md self-center"
           alt="Sunny blobs"
         />
       )}
@@ -151,14 +146,20 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
             </h2>
 
             <div className="flex items-center gap-x-1.5">
-              <Badge
-                text={titlecase(fundingRound.status)}
-                accent={fundingRound.status === "now"}
-              />
+              {(fundingRound.status !== "now" ||
+                !fundingRound.endsAt ||
+                fundingRound.endsAt >= new Date()) && (
+                <Badge
+                  text={titlecase(fundingRound.status)}
+                  accent={fundingRound.status === "now"}
+                />
+              )}
               <p className="text-muted-foreground">
                 {fundingRound.status === "now" && fundingRound.endsAt ? (
                   <span className="font-medium">
-                    Apply by {format(fundingRound.endsAt, "MMMM d")}
+                    {fundingRound.endsAt < new Date()
+                      ? "Applications are closed"
+                      : `Apply by ${format(fundingRound.endsAt, "MMMM d")}`}
                   </span>
                 ) : (
                   <span className="font-medium">
@@ -204,10 +205,20 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
               <ChainLogo chainId={optimism.id.toString()} />
               <div>10M OP</div>
             </div>
-            <div className="flex gap-1 items-center pl-4">
-              <div>Apply</div>
+            <Button
+              variant="ghost"
+              onClick={(e) => {
+                if (status === "authenticated") {
+                  router.push("/dashboard")
+                } else {
+                  clickSignInWithFarcasterButton()
+                }
+              }}
+              className="flex gap-1 items-center pl-4"
+            >
+              <div>Sign in</div>
               <ArrowRight size={16} />
-            </div>
+            </Button>
           </div>
         )}
       </div>

@@ -83,9 +83,7 @@ const ApplicationBanner = ({
               </p>
             </div>
           ) : (
-            <p className="text-secondary-foreground">
-              Submit your application by June 6.
-            </p>
+            <p className="text-secondary-foreground">Applications are closed</p>
           )}
         </div>
       </div>
@@ -114,15 +112,15 @@ const ApplicationBanner = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </>
-      ) : (
+      ) : canApply ? (
         <Button
           isLoading={loadingNextPage}
           onClick={onClickApply}
-          variant={canApply ? "destructive" : "secondary"}
+          variant={"destructive"}
         >
-          {canApply ? "Apply" : "View application"}
+          Apply
         </Button>
-      )}
+      ) : null}
     </div>
   )
 }

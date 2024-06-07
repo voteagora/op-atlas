@@ -8,6 +8,7 @@ import { addProjectSnapshot, getProject } from "@/db/projects"
 import { createProjectMetadataAttestation } from "../eas"
 import { uploadToPinata } from "../pinata"
 import { ProjectWithDetails } from "../types"
+import { APPLICATIONS_CLOSED } from "../utils"
 import { publishAndSaveApplication } from "./applications"
 import { verifyMembership } from "./utils"
 
@@ -125,7 +126,7 @@ export const createProjectSnapshot = async (projectId: string) => {
     })
 
     // If the project has an application, we need to publish a new one to reference this snapshot.
-    if (project.applications.length > 0) {
+    if (project.applications.length > 0 && !APPLICATIONS_CLOSED) {
       await publishAndSaveApplication({
         projectId,
         farcasterId: session.user.farcasterId,
