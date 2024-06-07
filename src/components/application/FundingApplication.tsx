@@ -270,6 +270,7 @@ export const FundingApplication = ({
           {TERMS.map((term, idx) => (
             <div key={idx} className="flex gap-x-4">
               <Checkbox
+                disabled
                 checked={agreedTerms[idx]}
                 onCheckedChange={() => toggleAgreedTerm(idx)}
                 className="mt-1 border-2 rounded-[2px]"
@@ -279,6 +280,7 @@ export const FundingApplication = ({
           ))}
           <div className="flex gap-x-4">
             <Checkbox
+              disabled
               checked={agreedTerms[TERMS.length]}
               onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
               className="mt-1 border-2 rounded-[2px]"
@@ -307,15 +309,6 @@ export const FundingApplication = ({
           for information about how Retro Funding signup data is used.
         </p>
       </div>
-
-      <Button
-        size="lg"
-        onClick={submitApplication}
-        disabled={!canSubmit || isLoading}
-        className="font-medium bg-destructive hover:bg-destructive"
-      >
-        Submit application
-      </Button>
     </div>
   )
 }
