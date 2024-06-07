@@ -5,6 +5,8 @@ import { twMerge } from "tailwind-merge"
 
 import { ProjectWithDetails } from "../types"
 
+export const APPLICATIONS_CLOSED = true
+
 export const EAS_URL_PREFIX = "https://optimism.easscan.org/attestation/view/"
 
 export const nanoid = customAlphabet(

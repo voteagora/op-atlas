@@ -8,7 +8,7 @@ import { auth } from "@/auth"
 import { createApplication, getProject } from "@/db/projects"
 
 import { createApplicationAttestation } from "../eas"
-import { getProjectStatus } from "../utils"
+import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { verifyMembership } from "./utils"
 
 export const publishAndSaveApplication = async ({
@@ -88,6 +88,10 @@ export const submitApplications = async (projectIds: string[]) => {
       applications: [],
       error: "Unauthorized",
     }
+  }
+
+  if (APPLICATIONS_CLOSED) {
+    throw new Error("Applications are closed")
   }
 
   const applications: Application[] = []

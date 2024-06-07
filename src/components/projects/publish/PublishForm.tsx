@@ -89,14 +89,15 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
             <Snapshot key={snapshot.id} snapshot={snapshot} />
           ))}
 
-          {project.snapshots.length > 0 ? (
+          {/* Only show this when applications are open */}
+          {/* {project.snapshots.length > 0 ? (
             <Callout
               type="info"
               text="You can apply for Retro Funding Round 4"
               linkHref="/application"
               linkText="Apply"
             />
-          ) : null}
+          ) : null} */}
         </div>
       ) : null}
 
