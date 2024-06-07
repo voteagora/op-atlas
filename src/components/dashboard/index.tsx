@@ -30,12 +30,6 @@ const Dashboard = ({
 }) => {
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
 
-  const canApply = useMemo(() => {
-    return projects.some(
-      (project) => getProjectStatus(project).progressPercent === 100,
-    )
-  }, [projects])
-
   const [loadingNewProject, setLoadingNewProject] = useState(false)
 
   const { track } = useAnalytics()
@@ -90,7 +84,8 @@ const Dashboard = ({
 
       <div className="flex flex-col gap-y-6">
         <h3>Your Retro Funding applications</h3>
-        <ApplicationBanner application={applications[0]} canApply={canApply} />
+        {/* canApply is false now that applications are closed */}
+        <ApplicationBanner application={applications[0]} canApply={false} />
 
         <ExternalLink
           href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
