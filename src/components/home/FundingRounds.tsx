@@ -208,7 +208,6 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
             <Button
               variant="ghost"
               onClick={(e) => {
-                e.stopPropagation()
                 if (status === "authenticated") {
                   router.push("/dashboard")
                 } else {
