@@ -132,7 +132,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
           src={fundingRound.iconUrl}
           width={124}
           height={124}
-          className="rounded-md"
+          className="rounded-md self-center"
           alt="Sunny blobs"
         />
       )}
