@@ -72,3 +72,20 @@ export async function updateUserEmail({
     },
   })
 }
+
+export async function updateUserGithub({
+  id,
+  github,
+}: {
+  id: string
+  github?: string | null
+}) {
+  return prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      github,
+    },
+  })
+}

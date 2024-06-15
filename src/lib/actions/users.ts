@@ -2,12 +2,16 @@
 
 import { revalidatePath } from "next/cache"
 
-import { auth } from "@/auth"
+import { auth, signIn } from "@/auth"
 import {
   getUserByFarcasterId,
   searchUsersByUsername,
   updateUserEmail,
 } from "@/db/users"
+
+export const connectGithub = async () => {
+  await signIn("github")
+}
 
 export const updateEmail = async (email: string) => {
   const session = await auth()
