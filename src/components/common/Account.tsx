@@ -112,12 +112,29 @@ export function Account() {
             />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-56 flex flex-col gap-1">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               View profile
             </DropdownMenuItem>
           </Link>
+          <hr className="w-full border-[0.5px] border-border" />
+          <Link href="/profile/details">
+            <DropdownMenuItem className="cursor-pointer">
+              Profile details
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/profile/connected-apps">
+            <DropdownMenuItem className="cursor-pointer">
+              Connected apps
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/profile/verified-addresses">
+            <DropdownMenuItem className="cursor-pointer">
+              Verified addresses
+            </DropdownMenuItem>
+          </Link>
+          <hr className="w-full border-[0.5px] border-border" />
           <DropdownMenuItem className="cursor-pointer" onClick={logOut}>
             Log out
           </DropdownMenuItem>
