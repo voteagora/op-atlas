@@ -11,6 +11,7 @@ import { cn, getProjectStatus } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import ExternalLink from "../ExternalLink"
+import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -43,6 +44,7 @@ const Dashboard = ({
         />
       )}
       <ProfileDetailCard user={user} />
+      <CompleteProfileCallout user={user} />
 
       <div className="flex flex-col gap-6">
         <h3>Your Projects</h3>
