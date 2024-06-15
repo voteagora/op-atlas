@@ -2,7 +2,6 @@ import { createAppClient, viemConnector } from "@farcaster/auth-client"
 import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
-import { getSession } from "next-auth/react"
 
 import { updateUserGithub, upsertUser } from "./db/users"
 
@@ -116,7 +115,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           return "/dashboard"
         }
 
-        console.log("Connecting GitHub profile", handle)
         const session = await auth()
         if (!session) {
           // Should never happen
