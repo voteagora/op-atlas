@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import usePrevious from "@/lib/hooks"
+import { usePrevious } from "@/lib/hooks"
 import { isFirstTimeUser, saveLogInDate } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"

@@ -14,13 +14,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { updateEmail } from "@/lib/actions/users"
+import { useUpdateEmail } from "@/lib/hooks"
 
 import { Input } from "../ui/input"
 import { DialogProps } from "./types"
 
 function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
-  const { data: session, update } = useSession()
+  const { data: session } = useSession()
+  const updateEmail = useUpdateEmail()
   const [email, setEmail] = useState(session?.user.email ?? "")
   const [loading, setLoading] = useState(false)
 
@@ -31,7 +32,6 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
     try {
       await updateEmail(email)
       toast.success("Email added")
-      update({ email })
       onOpenChange(false)
     } catch (error) {
       console.error("Error updating email", error)

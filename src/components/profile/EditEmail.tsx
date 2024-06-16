@@ -4,7 +4,7 @@ import { User } from "@prisma/client"
 import { useState } from "react"
 import { toast } from "sonner"
 
-import { updateEmail } from "@/lib/actions/users"
+import { useUpdateEmail } from "@/lib/hooks"
 
 import { Badge } from "../common/Badge"
 import { Button } from "../ui/button"
@@ -12,6 +12,7 @@ import { Input } from "../ui/input"
 
 export function EditEmail({ user }: { user: User }) {
   const [email, setEmail] = useState(user.email)
+  const updateEmail = useUpdateEmail()
 
   const onEditEmail = async () => {
     if (!email) return
