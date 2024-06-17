@@ -34,7 +34,7 @@ export function GithubConnection() {
         </Button>
         <div
           className={cn(
-            "text-sm font-medium self-start text-foreground px-3 py-[10px] flex gap-1 items-center border border-border rounded-md",
+            "text-sm font-medium text-foreground px-3 flex gap-1 items-center border border-border rounded-md",
             !isDeveloper && "bg-secondary",
           )}
         >
