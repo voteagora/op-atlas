@@ -1,5 +1,7 @@
 "use server"
 
+import { UserAddressSource } from "@/lib/types"
+
 import { prisma } from "./client"
 
 export async function getUserById(userId: string) {
@@ -14,6 +16,17 @@ export async function getUserByFarcasterId(farcasterId: string) {
   return prisma.user.findUnique({
     where: {
       farcasterId,
+    },
+  })
+}
+
+export async function getUserAddresses(userId: string) {
+  return prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      addresses: true,
     },
   })
 }
@@ -103,6 +116,41 @@ export async function updateUserGithub({
     },
     data: {
       github,
+    },
+  })
+}
+
+export async function addUserAddresses({
+  id,
+  addresses,
+  source,
+}: {
+  id: string
+  addresses: string[]
+  source: UserAddressSource
+}) {
+  return prisma.userAddress.createMany({
+    data: addresses.map((address) => ({
+      userId: id,
+      address,
+      source,
+    })),
+  })
+}
+
+export async function removeUserAddress({
+  id,
+  address,
+}: {
+  id: string
+  address: string
+}) {
+  return prisma.userAddress.delete({
+    where: {
+      address_userId: {
+        address,
+        userId: id,
+      },
     },
   })
 }

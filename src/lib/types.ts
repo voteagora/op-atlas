@@ -12,3 +12,5 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     applications: true
   }
 }>
+
+export type UserAddressSource = "farcaster" | "atlas"
