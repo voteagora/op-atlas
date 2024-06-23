@@ -23,7 +23,22 @@ model User {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  projects UserProjects[]
+  projects  UserProjects[]
+  addresses UserAddress[]
+}
+
+model UserAddress {
+  address String
+  userId  String
+  source  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([address, userId])
+  @@index([userId])
 }
 
 model FundingRound {
