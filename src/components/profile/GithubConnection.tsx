@@ -1,7 +1,9 @@
 "use client"
 
 import { User } from "@prisma/client"
+import { setCookie } from "cookies-next"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -10,12 +12,14 @@ import {
   removeGithub,
   setUserIsNotDeveloper,
 } from "@/lib/actions/users"
-import { cn } from "@/lib/utils"
+import { cn, GITHUB_REDIRECT_COOKIE } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 import { Checkbox } from "../ui/checkbox"
 
 export function GithubConnection({ user }: { user: User }) {
+  const pathname = usePathname()
+
   const [userNotDeveloper, setUserNotDeveloper] = useState(user.notDeveloper)
   const [loading, setLoading] = useState(false)
 
@@ -39,6 +43,12 @@ export function GithubConnection({ user }: { user: User }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  const authorizeGithub = async () => {
+    // Set a cookie so that we know to redirect back to this page
+    setCookie(GITHUB_REDIRECT_COOKIE, pathname)
+    return connectGithub()
   }
 
   const disconnectGitHub = async () => {
@@ -109,7 +119,7 @@ export function GithubConnection({ user }: { user: User }) {
         <Button
           disabled={userNotDeveloper || !!user.github}
           variant="destructive"
-          onClick={() => connectGithub()}
+          onClick={authorizeGithub}
         >
           Connect Github
         </Button>
