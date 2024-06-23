@@ -2,6 +2,8 @@
 
 import { useAppDialogs } from "@/providers/DialogProvider"
 
+import { VerifyAddressDialog } from "../projects/contracts/VerifyAddressDialog"
+import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
@@ -22,6 +24,12 @@ export default function AppDialogs() {
       )}
       {openDialog === "get_started" && (
         <GetStartedDialog open onOpenChange={onOpenChange("get_started")} />
+      )}
+      {openDialog === "verify_address" && (
+        <AddVerifiedAddressDialog
+          open
+          onOpenChange={onOpenChange("verify_address")}
+        />
       )}
     </>
   )

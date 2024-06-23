@@ -1,6 +1,6 @@
 "use server"
 
-import { UserAddressSource } from "@/lib/types"
+import { UserAddressSource, UserWithAddresses } from "@/lib/types"
 
 import { prisma } from "./client"
 
