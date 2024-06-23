@@ -1,9 +1,14 @@
 import { User } from "@prisma/client"
-import { Check, Mail, X } from "lucide-react"
+import { Check, Github, GithubIcon, Mail, Plus, X } from "lucide-react"
+import Image from "next/image"
 import { useState } from "react"
+import { toast } from "sonner"
 
-import { UserWithAddresses } from "@/lib/types"
-import { cn, profileProgress } from "@/lib/utils"
+import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
+import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
+import { isBadgeholderAddress } from "@/lib/badgeholders"
+import { UserAddressSource, UserWithAddresses } from "@/lib/types"
+import { cn, profileProgress, shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Badge } from "../common/Badge"
@@ -31,7 +36,7 @@ export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
             <div className="text-xl">{isComplete ? "👏" : "👋"}</div>
             <div className="p-3 font-semibold">
               {isComplete
-                ? "Profile complete!?"
+                ? "Profile complete!"
                 : "Complete your Optimist Profile"}
             </div>
           </div>
@@ -78,7 +83,7 @@ function GreenCheck() {
   )
 }
 
-function ProfileSteps({ user }: { user: User }) {
+function ProfileSteps({ user }: { user: UserWithAddresses }) {
   return (
     <div className="flex flex-col px-8">
       <AddYourEmailStep user={user} />
@@ -129,15 +134,36 @@ function AddYourEmailStep({ user }: { user: User }) {
   )
 }
 
-// TODO: update when there is a user.github field
 function ConnectYourGithubStep({ user }: { user: User }) {
-  const [isDeveloper, setIsDeveloper] = useState(true) // TODO: read from user object
+  const [isDeveloper, setIsDeveloper] = useState(!user.notDeveloper)
+  const [loading, setLoading] = useState(false)
+
+  const toggleIsDeveloper = async (isDeveloper: boolean) => {
+    if (loading) {
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      setIsDeveloper(isDeveloper)
+      const result = await setUserIsNotDeveloper(!isDeveloper)
+      if (result.error !== null) {
+        throw result.error
+      }
+      toast.success("Developer status updated")
+    } catch (error) {
+      console.error("Error toggling developer status", error)
+      toast.error("Error updating developer status")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="flex justify-between py-6 gap-6">
       <div className="flex gap-4">
-        {/* TODO: add user.github check here too */}
-        {!isDeveloper ? <GreenCheck /> : <StepNumber num={2} />}
+        {!isDeveloper || user.github ? <GreenCheck /> : <StepNumber num={2} />}
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col gap-[2px]">
             <div className="font-medium">Connect your GitHub</div>
@@ -146,12 +172,17 @@ function ConnectYourGithubStep({ user }: { user: User }) {
               is required for developers wanting to vote in Round 5.
             </div>
           </div>
-          {/* {user.github && (
+          {user.github && (
             <div className="flex items-center self-start p-3 border border-border rounded-md gap-1">
-              <Mail size={14} />
+              <Image
+                src="/assets/icons/githubIcon.svg"
+                height={14}
+                width={14}
+                alt="Github"
+              />
               <div className="text-secondary-foreground">{user.github}</div>
             </div>
-          )} */}
+          )}
           <div
             className={cn(
               "text-sm font-medium self-start text-foreground p-3 flex gap-1 items-center border border-border rounded-md",
@@ -161,42 +192,89 @@ function ConnectYourGithubStep({ user }: { user: User }) {
             <input
               type="checkbox"
               checked={!isDeveloper}
-              onChange={(e) => setIsDeveloper(!e.target.checked)}
+              onChange={(e) => toggleIsDeveloper(!e.target.checked)}
             />
             I&apos;m not a developer
           </div>
         </div>
       </div>
-      <Button variant="destructive" disabled={!isDeveloper}>
-        Connect Github
-      </Button>
+      {!user.github && (
+        <Button
+          variant="destructive"
+          onClick={() => connectGithub()}
+          disabled={!isDeveloper}
+        >
+          Connect Github
+        </Button>
+      )}
     </div>
   )
 }
 
-function AddVerifiedAddressesStep({ user }: { user: User }) {
+function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
   const { setOpenDialog } = useAppDialogs()
+
+  const onCopy = (address: string) => {
+    navigator.clipboard.writeText(address)
+    toast.success("Address copied")
+  }
+
   return (
     <div className="flex justify-between py-6 gap-6">
       <div className="flex gap-4">
-        <StepNumber num={3} />
-        <div className="flex flex-1 flex-col gap-4">
-          <div className="flex flex-col gap-[2px]">
-            <div className="font-medium">Add verified addresses</div>
-            <div className="text-secondary-foreground">
-              Add a proof of ownership of an Ethereum account to your public
-              profile, so ENS and attestations can be displayed. Required for
-              Badgeholders.
+        {user.addresses.length ? <GreenCheck /> : <StepNumber num={3} />}
+        <div className="flex flex-col gap-6 flex-1">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-[2px]">
+              <div className="font-medium">Add verified addresses</div>
+              <div className="text-secondary-foreground">
+                Add a proof of ownership of an Ethereum account to your public
+                profile, so ENS and attestations can be displayed. Required for
+                Badgeholders.
+              </div>
+            </div>
+            <div className="text-sm text-secondary-foreground">
+              You can also verify addresses directly to your Farcaster account,
+              and we’ll display them here. To do so, open Warpcast and choose
+              Settings. Then choose Verified addresses and proceed.
             </div>
           </div>
+
+          {user.addresses.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <div className="text-sm text-foreground font-medium">
+                Your verified addresses
+              </div>
+              <div className="flex gap-[6px] flex-wrap">
+                {user.addresses.map(({ address, source }) => (
+                  <VerifiedAddress
+                    key={address}
+                    address={shortenAddress(address)}
+                    showCheckmark={false}
+                    source={source as UserAddressSource}
+                    isBadgeholder={isBadgeholderAddress(address)}
+                    onCopy={onCopy}
+                  />
+                ))}
+                <button
+                  className="h-10 w-10 flex items-center justify-center bg-backgroundSecondary rounded-sm"
+                  onClick={() => setOpenDialog("verify_address")}
+                >
+                  <Plus className="stroke-foreground" size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      <Button
-        onClick={() => setOpenDialog("verify_address")}
-        variant="destructive"
-      >
-        Verify Address
-      </Button>
+      {user.addresses.length < 1 && (
+        <Button
+          onClick={() => setOpenDialog("verify_address")}
+          variant="destructive"
+        >
+          Verify Address
+        </Button>
+      )}
     </div>
   )
 }
