@@ -25,9 +25,9 @@ export function EditEmail({ user }: { user: User }) {
     <div className="flex flex-col gap-6">
       <div className="text-foreground text-xl font-semibold">Email</div>
       <div>
-        Please add email for important messaged. This step is required to apply
-        for Retro Funding. It should be a personal email where we can reliably
-        reach you. Don&apos;t worry, we&apos;ll keep it private.
+        Please add an email for important messages. This is required to apply
+        for and receive Retro Funding. It should be a personal email where we
+        can reliably reach you. Don&apos;t worry, we&apos;ll keep it private.
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex gap-[6px] items-center">

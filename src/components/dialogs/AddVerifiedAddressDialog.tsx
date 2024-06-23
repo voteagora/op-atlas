@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { useSession } from "next-auth/react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import { isAddress } from "viem"
 
 import { Badge } from "@/components/common/Badge"
@@ -9,6 +10,7 @@ import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { verifyUserAddress } from "@/lib/actions/addresses"
 
 import { Input } from "../ui/input"
 
@@ -36,15 +38,52 @@ export function AddVerifiedAddressDialog({
   }
 
   const onConfirmSignature = async () => {
+    if (!address || !signature) {
+      return
+    }
+
     try {
       setLoading(true)
-    } catch (_) {
-      setError("An error occurred, please try again")
-    } finally {
-      setLoading(false)
+      if (!isAddress(address)) {
+        throw new Error("Invalid address")
+      }
+      if (!signature.startsWith("0x")) {
+        throw new Error("Invalid signature")
+      }
+
+      const result = await verifyUserAddress(
+        address,
+        signature as `0x${string}`,
+      )
+
+      if (result.error !== null) {
+        throw new Error(result.error)
+      }
+
       onOpenChange(false)
+      toast.success("Address verified")
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError("An error occurred, please try again")
+      }
+      setLoading(false)
     }
   }
+
+  // Clear state after closing
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        setPage(0)
+        setSignature("")
+        setAddress("")
+        setError(undefined)
+        setLoading(false)
+      }, 500)
+    }
+  }, [open])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
