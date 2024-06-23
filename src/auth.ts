@@ -1,9 +1,12 @@
 import { createAppClient, viemConnector } from "@farcaster/auth-client"
+import { deleteCookie, getCookie } from "cookies-next"
+import { cookies } from "next/headers"
 import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
 
 import { updateUserGithub, upsertUser } from "./db/users"
+import { GITHUB_REDIRECT_COOKIE } from "./lib/utils"
 
 if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
   throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in .env")
@@ -106,7 +109,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
+    async signIn({ user, account, profile }) {
       // If we're authenticating via GitHub OAuth, link the handle to the existing session
       if (account?.provider === "github") {
         const handle = profile?.login as string | undefined
@@ -127,7 +130,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           github: handle,
         })
 
-        // Proceed to the dashboard
+        // Check to see if we set a redirect
+        const redirect = getCookie(GITHUB_REDIRECT_COOKIE, { cookies })
+        if (redirect && redirect !== "/") {
+          deleteCookie(GITHUB_REDIRECT_COOKIE, { cookies })
+          return redirect
+        }
+
+        // Default to redirecting to the dashboard
         return "/dashboard"
       }
 

@@ -7,6 +7,8 @@ import { ProjectWithDetails, UserWithAddresses } from "../types"
 
 export const APPLICATIONS_CLOSED = true
 
+export const GITHUB_REDIRECT_COOKIE = "github-auth-redirect"
+
 export const EAS_URL_PREFIX = "https://optimism.easscan.org/attestation/view/"
 
 export const nanoid = customAlphabet(

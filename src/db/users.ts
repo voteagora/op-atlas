@@ -1,6 +1,8 @@
 "use server"
 
-import { UserAddressSource, UserWithAddresses } from "@/lib/types"
+import { User } from "@prisma/client"
+
+import { UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
 
@@ -105,13 +107,18 @@ export async function updateUserGithub({
   id: string
   github?: string | null
 }) {
+  const updates: Partial<User> = {
+    github,
+  }
+  if (github) {
+    updates.notDeveloper = false
+  }
+
   return prisma.user.update({
     where: {
       id,
     },
-    data: {
-      github,
-    },
+    data: updates,
   })
 }
 
