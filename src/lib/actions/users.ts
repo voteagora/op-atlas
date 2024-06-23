@@ -32,7 +32,9 @@ export const updateEmail = async (email: string) => {
   }
 
   const updated = await updateUserEmail({ id: user.id, email })
+
   revalidatePath("/dashboard")
+  revalidatePath("/profile/details")
 
   console.info(
     `Email updated for user farcasterId ${session.user.farcasterId}: ${email}`,
@@ -54,7 +56,9 @@ export const removeGithub = async () => {
   }
 
   const updated = await updateUserGithub({ id: session.user.id, github: null })
+
   revalidatePath("/dashboard")
+  revalidatePath("/profile/connected-apps")
 
   return {
     error: null,
@@ -77,6 +81,7 @@ export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
   })
 
   revalidatePath("/dashboard")
+  revalidatePath("/profile/connected-apps")
 
   return {
     error: null,
