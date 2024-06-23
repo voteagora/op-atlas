@@ -1,15 +1,66 @@
 "use client"
 
+import { User } from "@prisma/client"
 import Image from "next/image"
 import { useState } from "react"
+import { toast } from "sonner"
 
+import {
+  connectGithub,
+  removeGithub,
+  setUserIsNotDeveloper,
+} from "@/lib/actions/users"
 import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
+import { Checkbox } from "../ui/checkbox"
 
-export function GithubConnection() {
-  // TODO: read from user.isDeveloper
-  const [isDeveloper, setIsDeveloper] = useState(false)
+export function GithubConnection({ user }: { user: User }) {
+  const [userNotDeveloper, setUserNotDeveloper] = useState(user.notDeveloper)
+  const [loading, setLoading] = useState(false)
+
+  const toggleIsDeveloper = async () => {
+    if (loading) {
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const isNotDeveloper = !user.notDeveloper
+      setUserNotDeveloper(isNotDeveloper)
+      const result = await setUserIsNotDeveloper(isNotDeveloper)
+      if (result.error !== null) {
+        throw result.error
+      }
+    } catch (error) {
+      console.error("Error toggling developer status", error)
+      toast.error("Error updating developer status")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const disconnectGitHub = async () => {
+    if (loading) {
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const result = await removeGithub()
+      if (result.error !== null) {
+        throw result.error
+      }
+    } catch (error) {
+      console.error("Error disconnecting GitHub", error)
+      toast.error("Error disconnecting GitHub")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-[6px]">
@@ -19,29 +70,60 @@ export function GithubConnection() {
           height={20}
           width={20}
         />
-        <div className="text-xl font-semibold text-foreground">Github</div>
+        <h3 className="text-xl font-semibold">Github</h3>
       </div>
-      <div>
+      <p className="text-secondary-foreground">
         Connecting your GitHub account to your profile allows you to show your
-        code contributions to the Optimism Collective. <br />
+        code contributions to the Optimism Collective.
+        <br />
         <br />
         Doing so opens up new opportunities, such as applying to participate in
         Retro Funding 5 as a guest voter.
-      </div>
+      </p>
+
+      {user.github && (
+        <div className="flex flex-col gap-2">
+          <p className="font-medium text-sm text-foreground">
+            Your GitHub username
+          </p>
+          <div className="flex items-center gap-1.5">
+            <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
+              <Image
+                src="/assets/icons/circle-check-green.svg"
+                height={16.67}
+                width={16.67}
+                alt="Verified"
+              />
+
+              <p className="text-sm">{user.github}</p>
+            </div>
+
+            <Button variant="secondary" onClick={disconnectGitHub}>
+              Disconnect
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2">
-        <Button disabled={!isDeveloper} variant="destructive">
+        <Button
+          disabled={userNotDeveloper || !!user.github}
+          variant="destructive"
+          onClick={() => connectGithub()}
+        >
           Connect Github
         </Button>
+
         <div
           className={cn(
-            "text-sm font-medium text-foreground px-3 flex gap-1 items-center border border-border rounded-md",
-            !isDeveloper && "bg-secondary",
+            "text-sm h-10 px-3 flex gap-1.5 items-center border border-border rounded-md",
+            userNotDeveloper && "bg-secondary",
           )}
         >
-          <input
-            type="checkbox"
-            checked={!isDeveloper}
-            onChange={(e) => setIsDeveloper(!e.target.checked)}
+          <Checkbox
+            checked={userNotDeveloper}
+            onCheckedChange={toggleIsDeveloper}
+            className="rounded-none border-[1.5px]"
           />
           I&apos;m not a developer
         </div>

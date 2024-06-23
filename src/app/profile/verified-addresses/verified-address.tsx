@@ -8,14 +8,12 @@ import { UserAddressSource } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 export const VerifiedAddress = ({
-  className,
   address,
   source,
   isBadgeholder = false,
   onCopy,
   onRemove,
 }: {
-  className?: string
   address: string
   source: UserAddressSource
   isBadgeholder?: boolean
@@ -24,12 +22,7 @@ export const VerifiedAddress = ({
 }) => {
   return (
     <div className="flex items-center gap-1.5">
-      <div
-        className={cn(
-          "flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10",
-          className,
-        )}
-      >
+      <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
         <Image
           src="/assets/icons/circle-check-green.svg"
           height={16.67}
