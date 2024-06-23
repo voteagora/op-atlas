@@ -3,15 +3,12 @@
 import { verifyMessage } from "viem"
 
 import { auth } from "@/auth"
-import {
-  addUserAddresses,
-  getUserAddresses,
-  removeUserAddress,
-} from "@/db/users"
+import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
 
 import { getUserConnectedAddresses } from "../neynar"
 
-const getMessage = (address: string) => `${address}`
+const getMessage = (farcasterId: string) =>
+  `I verify that I am ${farcasterId} on Farcaster and I'm an optimist.`
 
 export const verifyUserAddress = async (
   address: `0x${string}`,
@@ -25,7 +22,7 @@ export const verifyUserAddress = async (
     }
   }
 
-  const user = await getUserAddresses(session.user.id)
+  const user = await getUserById(session.user.id)
   if (!user) {
     return {
       error: "Unauthorized",
@@ -41,7 +38,7 @@ export const verifyUserAddress = async (
   // Verify signature
   const isValidSignature = await verifyMessage({
     address,
-    message: getMessage(address),
+    message: getMessage(user.farcasterId),
     signature: signature as `0x${string}`,
   })
 
@@ -57,7 +54,7 @@ export const verifyUserAddress = async (
     source: "atlas",
   })
 
-  const updated = await getUserAddresses(user.id)
+  const updated = await getUserById(user.id)
   return {
     error: null,
     user: updated,
@@ -78,7 +75,7 @@ export const deleteUserAddress = async (address: string) => {
     address,
   })
 
-  const updated = await getUserAddresses(session.user.id)
+  const updated = await getUserById(session.user.id)
   return {
     error: null,
     user: updated,
@@ -88,22 +85,20 @@ export const deleteUserAddress = async (address: string) => {
 export const syncFarcasterAddresses = async () => {
   const session = await auth()
 
-  if (!session?.user?.id || !session.user.farcasterId) {
+  if (!session?.user?.id) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const user = await getUserAddresses(session.user.id)
+  const user = await getUserById(session.user.id)
   if (!user) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const farcasterAddresses = await getUserConnectedAddresses(
-    session.user.farcasterId,
-  )
+  const farcasterAddresses = await getUserConnectedAddresses(user.farcasterId)
 
   // No action needed if the response is empty
   if (!farcasterAddresses || farcasterAddresses.length === 0) {
@@ -125,7 +120,7 @@ export const syncFarcasterAddresses = async () => {
     source: "farcaster",
   })
 
-  const updated = await getUserAddresses(user.id)
+  const updated = await getUserById(user.id)
   return {
     error: null,
     user: updated,

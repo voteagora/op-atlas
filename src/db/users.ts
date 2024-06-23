@@ -9,6 +9,9 @@ export async function getUserById(userId: string) {
     where: {
       id: userId,
     },
+    include: {
+      addresses: true,
+    },
   })
 }
 
@@ -16,14 +19,6 @@ export async function getUserByFarcasterId(farcasterId: string) {
   return prisma.user.findUnique({
     where: {
       farcasterId,
-    },
-  })
-}
-
-export async function getUserAddresses(userId: string) {
-  return prisma.user.findUnique({
-    where: {
-      id: userId,
     },
     include: {
       addresses: true,
