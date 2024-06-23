@@ -7,6 +7,8 @@ import {
   getUserByFarcasterId,
   searchUsersByUsername,
   updateUserEmail,
+  updateUserGithub,
+  updateUserHasGithub,
 } from "@/db/users"
 
 export const connectGithub = async () => {
@@ -35,6 +37,46 @@ export const updateEmail = async (email: string) => {
   console.info(
     `Email updated for user farcasterId ${session.user.farcasterId}: ${email}`,
   )
+
+  return {
+    error: null,
+    user: updated,
+  }
+}
+
+export const removeGithub = async () => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const updated = await updateUserGithub({ id: session.user.id, github: null })
+  revalidatePath("/dashboard")
+
+  return {
+    error: null,
+    user: updated,
+  }
+}
+
+export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const updated = await updateUserHasGithub({
+    id: session.user.id,
+    notDeveloper: isNotDeveloper,
+  })
+
+  revalidatePath("/dashboard")
 
   return {
     error: null,
