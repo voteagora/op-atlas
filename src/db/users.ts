@@ -73,6 +73,23 @@ export async function updateUserEmail({
   })
 }
 
+export async function updateUserHasGithub({
+  id,
+  notDeveloper = false,
+}: {
+  id: string
+  notDeveloper?: boolean
+}) {
+  return prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      notDeveloper,
+    },
+  })
+}
+
 export async function updateUserGithub({
   id,
   github,
