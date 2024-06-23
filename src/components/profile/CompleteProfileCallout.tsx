@@ -169,6 +169,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
 }
 
 function AddVerifiedAddressesStep({ user }: { user: User }) {
+  const { setOpenDialog } = useAppDialogs()
   return (
     <div className="flex justify-between py-6 gap-6">
       <div className="flex gap-4">
@@ -184,7 +185,12 @@ function AddVerifiedAddressesStep({ user }: { user: User }) {
           </div>
         </div>
       </div>
-      <Button variant="destructive">Connect wallet</Button>
+      <Button
+        onClick={() => setOpenDialog("verify_address")}
+        variant="destructive"
+      >
+        Verify Address
+      </Button>
     </div>
   )
 }
