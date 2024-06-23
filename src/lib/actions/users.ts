@@ -75,10 +75,14 @@ export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
     }
   }
 
-  const updated = await updateUserHasGithub({
+  let updated = await updateUserHasGithub({
     id: session.user.id,
     notDeveloper: isNotDeveloper,
   })
+
+  if (isNotDeveloper && !!updated.github) {
+    await updateUserGithub({ id: session.user.id, github: null })
+  }
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/connected-apps")

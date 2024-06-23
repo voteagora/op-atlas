@@ -15,7 +15,7 @@ export function ProfileSidebar() {
       <div className="py-2.5 px-3 border-b border-border text-sm font-semibold">
         Profile settings
       </div>
-      <div className="flex flex-col gap-1 text-secondary-foreground text-sm py-2.5">
+      <div className="flex flex-col gap-0.5 text-secondary-foreground text-sm py-2.5">
         <Link
           href="/profile/details"
           className={cn(
@@ -24,7 +24,10 @@ export function ProfileSidebar() {
           )}
         >
           <div
-            className={cn(currentPage !== "details" && "invisible", "text-lg")}
+            className={cn(
+              currentPage !== "details" && "invisible",
+              "text-lg pb-0.5",
+            )}
           >
             •
           </div>
@@ -40,7 +43,7 @@ export function ProfileSidebar() {
           <div
             className={cn(
               currentPage !== "connected-apps" && "invisible",
-              "text-lg",
+              "text-lg pb-0.5",
             )}
           >
             •
@@ -57,7 +60,7 @@ export function ProfileSidebar() {
           <div
             className={cn(
               currentPage !== "verified-addresses" && "invisible",
-              "text-lg",
+              "text-lg pb-0.5",
             )}
           >
             •
