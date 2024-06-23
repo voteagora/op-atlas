@@ -10,7 +10,7 @@ export function BadgeholderCallout() {
     <ExternalLink
       href="https://optimism.deform.cc/season-6-citizen-opt-in/"
       className={cn(
-        "flex items-center rounded-xl py-8 px-6 w-full",
+        "flex items-center rounded-xl px-8 py-6 w-full",
         "bg-accent text-accent-foreground",
       )}
     >
