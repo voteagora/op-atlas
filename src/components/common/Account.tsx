@@ -14,8 +14,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getUserById } from "@/db/users"
+import { isBadgeholder } from "@/lib/badgeholders"
 import { usePrevious } from "@/lib/hooks"
-import { isFirstTimeUser, saveLogInDate } from "@/lib/utils"
+import { UserWithAddresses } from "@/lib/types"
+import {
+  hasShownWelcomeBadgeholderDialog,
+  isFirstTimeUser,
+  saveHasShownWelcomeBadgeholderDialog,
+  saveLogInDate,
+} from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -57,6 +65,16 @@ export function Account() {
     [logOut],
   )
 
+  async function checkBadgeholderStatus(id: string) {
+    const user = await getUserById(id)
+    if (!user) return
+
+    if (!hasShownWelcomeBadgeholderDialog()) {
+      setOpenDialog("welcome_badgeholder")
+      saveHasShownWelcomeBadgeholderDialog()
+    }
+  }
+
   useEffect(() => {
     // only run this useEffect when the user logs in
     if (
@@ -72,8 +90,11 @@ export function Account() {
       saveLogInDate()
       router.push("/dashboard")
 
+      console.log("got here 0")
       if (!session.user.email) {
         setOpenDialog("email")
+      } else {
+        checkBadgeholderStatus(session.user.id)
       }
     }
   }, [status, router, setOpenDialog, session, previousAuthStatus, track])

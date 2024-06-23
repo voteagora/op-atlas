@@ -31,6 +31,8 @@ export const copyToClipboard = async (value: string) => {
 }
 
 const LAST_SIGN_IN_LOCALSTORAGE_KEY = "op_atlas_last_signed_in"
+const WELCOME_BADGEHOLDER_DIALOG_LOCALSTORAGE_KEY =
+  "op_atlas_welcome_badgeholder_dialog_shown"
 
 export function isFirstTimeUser(): boolean {
   return !Boolean(localStorage.getItem(LAST_SIGN_IN_LOCALSTORAGE_KEY))
@@ -38,6 +40,16 @@ export function isFirstTimeUser(): boolean {
 
 export function saveLogInDate() {
   localStorage.setItem(LAST_SIGN_IN_LOCALSTORAGE_KEY, Date.now().toString())
+}
+
+export function hasShownWelcomeBadgeholderDialog(): boolean {
+  return Boolean(
+    localStorage.getItem(WELCOME_BADGEHOLDER_DIALOG_LOCALSTORAGE_KEY),
+  )
+}
+
+export function saveHasShownWelcomeBadgeholderDialog() {
+  localStorage.setItem(WELCOME_BADGEHOLDER_DIALOG_LOCALSTORAGE_KEY, "true")
 }
 
 export enum ProjectSection {

@@ -8,6 +8,7 @@ import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import { DialogType } from "./types"
+import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
 export default function AppDialogs() {
   const { openDialog, setOpenDialog } = useAppDialogs()
@@ -29,6 +30,12 @@ export default function AppDialogs() {
         <AddVerifiedAddressDialog
           open
           onOpenChange={onOpenChange("verify_address")}
+        />
+      )}
+      {openDialog === "welcome_badgeholder" && (
+        <WelcomeBadgeholderDialog
+          open
+          onOpenChange={onOpenChange("welcome_badgeholder")}
         />
       )}
     </>
