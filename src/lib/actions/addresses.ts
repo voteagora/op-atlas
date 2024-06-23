@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { verifyMessage } from "viem"
 
 import { auth } from "@/auth"
@@ -55,6 +56,10 @@ export const verifyUserAddress = async (
   })
 
   const updated = await getUserById(user.id)
+
+  revalidatePath("/dashboard")
+  revalidatePath("/profile/verified-addresses")
+
   return {
     error: null,
     user: updated,
@@ -76,6 +81,10 @@ export const deleteUserAddress = async (address: string) => {
   })
 
   const updated = await getUserById(session.user.id)
+
+  revalidatePath("/dashboard")
+  revalidatePath("/profile/verified-addresses")
+
   return {
     error: null,
     user: updated,
@@ -121,6 +130,10 @@ export const syncFarcasterAddresses = async () => {
   })
 
   const updated = await getUserById(user.id)
+
+  revalidatePath("/dashboard")
+  revalidatePath("/profile/verified-addresses")
+
   return {
     error: null,
     user: updated,

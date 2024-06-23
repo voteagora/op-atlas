@@ -2,7 +2,8 @@ import { User } from "@prisma/client"
 import { Check, Mail, X } from "lucide-react"
 import { useState } from "react"
 
-import { cn } from "@/lib/utils"
+import { UserWithAddresses } from "@/lib/types"
+import { cn, profileProgress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Badge } from "../common/Badge"
@@ -14,7 +15,10 @@ import {
 } from "../ui/accordion"
 import { Button } from "../ui/button"
 
-export function CompleteProfileCallout({ user }: { user: User }) {
+export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
+  const progress = profileProgress(user)
+  const isComplete = progress === 100
+
   return (
     <Accordion
       type="single"
@@ -24,17 +28,19 @@ export function CompleteProfileCallout({ user }: { user: User }) {
       <AccordionItem value="item-1">
         <AccordionTrigger className="p-8 justify-between">
           <div className="flex items-center gap-1 flex-1">
-            <div className="text-xl">👋</div>
+            <div className="text-xl">{isComplete ? "👏" : "👋"}</div>
             <div className="p-3 font-semibold">
-              Complete your Optimist Profile
+              {isComplete
+                ? "Profile complete!?"
+                : "Complete your Optimist Profile"}
             </div>
           </div>
-          <ProgressIndicator stepsCompleted={1} />
+          <ProgressIndicator progress={progress} />
         </AccordionTrigger>
         <AccordionContent>
           <ProfileSteps user={user} />
           <AccordionTrigger
-            className="p-8 text-xs font-medium text-secondary-foreground"
+            className="p-8 py-4 text-xs font-medium text-secondary-foreground"
             hideChevron
           >
             <X size={14} /> Dismiss — you can always add this info later!
@@ -45,12 +51,12 @@ export function CompleteProfileCallout({ user }: { user: User }) {
   )
 }
 
-function ProgressIndicator({ stepsCompleted }: { stepsCompleted: number }) {
+function ProgressIndicator({ progress }: { progress: number }) {
   return (
     <div className="h-2 w-20 rounded-[640px] bg-neutral-200 overflow-hidden">
       <div
         className="bg-green-500 h-full transition-all duration-300"
-        style={{ width: `${(stepsCompleted / 3) * 100}%` }}
+        style={{ width: `${progress}%` }}
       />
     </div>
   )

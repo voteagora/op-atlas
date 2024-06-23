@@ -3,7 +3,7 @@ import { customAlphabet } from "nanoid"
 import { sortBy } from "ramda"
 import { twMerge } from "tailwind-merge"
 
-import { ProjectWithDetails } from "../types"
+import { ProjectWithDetails, UserWithAddresses } from "../types"
 
 export const APPLICATIONS_CLOSED = true
 
@@ -133,4 +133,30 @@ export function clickSignInWithFarcasterButton() {
     .getElementsByClassName("fc-authkit-signin-button")[0]
     ?.getElementsByTagName("button")[0]
   farcasterButton?.click()
+}
+
+export function profileProgress(user: UserWithAddresses): number {
+  // check email, github (or not developer), and addresses
+  if (
+    user.email &&
+    (user.github || user.notDeveloper) &&
+    user.addresses.length
+  ) {
+    return 100
+  }
+
+  let progress = 0
+  if (user.email) {
+    progress += 33.33
+  }
+
+  if (user.github || user.notDeveloper) {
+    progress += 33.33
+  }
+
+  if (user.addresses.length) {
+    progress += 33.33
+  }
+
+  return progress
 }

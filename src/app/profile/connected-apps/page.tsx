@@ -19,9 +19,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
-      <div className="text-foreground text-2xl font-semibold">
-        Connected apps
-      </div>
+      <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
       <GithubConnection />
     </div>
   )

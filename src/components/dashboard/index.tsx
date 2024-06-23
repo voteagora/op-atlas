@@ -3,19 +3,19 @@
 import { Application, Project, User } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { isBadgeholder } from "@/lib/badgeholders"
 import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn, profileProgress } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import ExternalLink from "../ExternalLink"
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import { BadgeholderCallout } from "./BadgeholderCallout"
+import { BadgeholderCallout, DeveloperCallout } from "./Callouts"
 import JoinProjectDialog from "./JoinProjectDialog"
 import ProfileDetailCard from "./ProfileDetailCard"
 import UserProjectCard from "./UserProjectCard"
@@ -41,15 +41,11 @@ const Dashboard = ({
     return isBadgeholder(user)
   }, [user])
 
+  const profileInitiallyComplete = useRef(profileProgress(user) === 100)
+
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-y-6",
-        userIsBadgeholder ? "mt-6" : "mt-18",
-        className,
-      )}
-    >
-      {userIsBadgeholder && <BadgeholderCallout />}
+    <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
+      {userIsBadgeholder ? <BadgeholderCallout /> : <DeveloperCallout />}
       <div className="card flex flex-col w-full gap-y-12">
         {joinProjectDialogOpen && (
           <JoinProjectDialog
@@ -58,7 +54,9 @@ const Dashboard = ({
           />
         )}
         <ProfileDetailCard user={user} />
-        <CompleteProfileCallout user={user} />
+        {!profileInitiallyComplete.current && (
+          <CompleteProfileCallout user={user} />
+        )}
 
         <div className="flex flex-col gap-6">
           <h3>Your Projects</h3>

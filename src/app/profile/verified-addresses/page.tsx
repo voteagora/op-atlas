@@ -1,10 +1,7 @@
 import { redirect } from "next/navigation"
-import { toast } from "sonner"
 
 import { auth } from "@/auth"
-import { Button } from "@/components/ui/button"
 import { getUserById } from "@/db/users"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { VerifiedAddressesContent } from "./content"
 

@@ -12,10 +12,10 @@ export function ProfileSidebar() {
 
   return (
     <div className="flex flex-col">
-      <div className="py-1 px-3 border-b border-border text-sm font-semibold">
+      <div className="py-2.5 px-3 border-b border-border text-sm font-semibold">
         Profile settings
       </div>
-      <div className="flex flex-col gap-3 text-secondary-foreground text-sm py-2">
+      <div className="flex flex-col gap-1 text-secondary-foreground text-sm py-2.5">
         <Link
           href="/profile/details"
           className={cn(
