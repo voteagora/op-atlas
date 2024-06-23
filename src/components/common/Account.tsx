@@ -135,7 +135,7 @@ export function Account() {
         <DropdownMenuContent align="end" className="w-56 flex flex-col gap-1">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
-              View profile
+              Dashboard
             </DropdownMenuItem>
           </Link>
           <hr className="w-full border-[0.5px] border-border" />
