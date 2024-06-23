@@ -90,7 +90,6 @@ export function Account() {
       saveLogInDate()
       router.push("/dashboard")
 
-      console.log("got here 0")
       if (!session.user.email) {
         setOpenDialog("email")
       } else {
