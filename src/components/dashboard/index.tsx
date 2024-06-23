@@ -16,7 +16,7 @@ import ExternalLink from "../ExternalLink"
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import { BadgeholderCallout } from "./BadgeholderCallout"
+import { BadgeholderCallout, DeveloperCallout } from "./Callouts"
 import JoinProjectDialog from "./JoinProjectDialog"
 import ProfileDetailCard from "./ProfileDetailCard"
 import UserProjectCard from "./UserProjectCard"
@@ -45,14 +45,8 @@ const Dashboard = ({
   const profileInitiallyComplete = useRef(profileProgress(user) === 100)
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-y-6",
-        userIsBadgeholder ? "mt-6" : "mt-18",
-        className,
-      )}
-    >
-      {userIsBadgeholder && <BadgeholderCallout />}
+    <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
+      {userIsBadgeholder ? <BadgeholderCallout /> : <DeveloperCallout />}
       <div className="card flex flex-col w-full gap-y-12">
         {joinProjectDialogOpen && (
           <JoinProjectDialog
