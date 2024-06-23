@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
+import { Callout } from "@/components/common/Callout"
 import Dashboard from "@/components/dashboard"
+import { BadgeholderCallout } from "@/components/dashboard/BadgeholderCallout"
 import { getUserById } from "@/db/users"
 import { getApplications, getProjects } from "@/lib/actions/projects"
 
@@ -28,7 +30,7 @@ export default async function Page() {
         user={user}
         projects={projects}
         applications={applications}
-        className="mt-18 max-w-4xl"
+        className="max-w-4xl"
       />
     </main>
   )
