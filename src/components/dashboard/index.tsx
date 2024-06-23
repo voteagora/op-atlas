@@ -3,12 +3,12 @@
 import { Application, Project, User } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { isBadgeholder } from "@/lib/badgeholders"
 import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
-import { cn, getProjectStatus } from "@/lib/utils"
+import { cn, getProjectStatus, profileProgress } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { Callout } from "../common/Callout"
@@ -42,6 +42,8 @@ const Dashboard = ({
     return isBadgeholder(user)
   }, [user])
 
+  const profileInitiallyComplete = useRef(profileProgress(user) === 100)
+
   return (
     <div
       className={cn(
@@ -59,7 +61,9 @@ const Dashboard = ({
           />
         )}
         <ProfileDetailCard user={user} />
-        <CompleteProfileCallout user={user} />
+        {!profileInitiallyComplete.current && (
+          <CompleteProfileCallout user={user} />
+        )}
 
         <div className="flex flex-col gap-6">
           <h3>Your Projects</h3>
