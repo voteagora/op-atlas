@@ -57,6 +57,7 @@ const Dashboard = ({
         {!profileInitiallyComplete.current && (
           <CompleteProfileCallout user={user} />
         )}
+        <CompleteProfileCallout user={user} />
         <div className="flex flex-col gap-6">
           <h3>Your Projects</h3>
           {projects.length > 0 ? (

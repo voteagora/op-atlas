@@ -5,7 +5,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
-import { connectGithub } from "@/lib/actions/users"
+import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
 import { isBadgeholderAddress } from "@/lib/badgeholders"
 import { UserAddressSource, UserWithAddresses } from "@/lib/types"
 import { cn, profileProgress, shortenAddress } from "@/lib/utils"
@@ -136,6 +136,29 @@ function AddYourEmailStep({ user }: { user: User }) {
 
 function ConnectYourGithubStep({ user }: { user: User }) {
   const [isDeveloper, setIsDeveloper] = useState(!user.notDeveloper)
+  const [loading, setLoading] = useState(false)
+
+  const toggleIsDeveloper = async (isDeveloper: boolean) => {
+    if (loading) {
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      setIsDeveloper(isDeveloper)
+      const result = await setUserIsNotDeveloper(!isDeveloper)
+      if (result.error !== null) {
+        throw result.error
+      }
+      toast.success("Developer status updated")
+    } catch (error) {
+      console.error("Error toggling developer status", error)
+      toast.error("Error updating developer status")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="flex justify-between py-6 gap-6">
@@ -169,19 +192,21 @@ function ConnectYourGithubStep({ user }: { user: User }) {
             <input
               type="checkbox"
               checked={!isDeveloper}
-              onChange={(e) => setIsDeveloper(!e.target.checked)}
+              onChange={(e) => toggleIsDeveloper(!e.target.checked)}
             />
             I&apos;m not a developer
           </div>
         </div>
       </div>
-      <Button
-        variant="destructive"
-        onClick={() => connectGithub()}
-        disabled={!isDeveloper}
-      >
-        Connect Github
-      </Button>
+      {!user.github && (
+        <Button
+          variant="destructive"
+          onClick={() => connectGithub()}
+          disabled={!isDeveloper}
+        >
+          Connect Github
+        </Button>
+      )}
     </div>
   )
 }
