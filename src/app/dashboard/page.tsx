@@ -30,7 +30,7 @@ export default async function Page() {
         user={user}
         projects={projects}
         applications={applications}
-        className="max-w-4xl"
+        className="w-full max-w-4xl"
       />
     </main>
   )
