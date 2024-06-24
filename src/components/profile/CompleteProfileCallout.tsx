@@ -1,6 +1,7 @@
 import { User } from "@prisma/client"
 import { Check, Github, GithubIcon, Mail, Plus, X } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -235,8 +236,12 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
             </div>
             <div className="text-sm text-secondary-foreground">
               You can also verify addresses directly to your Farcaster account,
-              and we’ll display them here. To do so, open Warpcast and choose
-              Settings. Then choose Verified addresses and proceed.
+              and{" "}
+              <Link href="/profile/verified-addresses" className="underline">
+                import them to your profile
+              </Link>
+              . To do so, open Warpcast and choose Settings. Then choose
+              Verified addresses and proceed.
             </div>
           </div>
 
