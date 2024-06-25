@@ -69,6 +69,8 @@ export function Account() {
     const user = await getUserById(id)
     if (!user) return
 
+    if (!isBadgeholder(user)) return
+
     if (!hasShownWelcomeBadgeholderDialog()) {
       setOpenDialog("welcome_badgeholder")
       saveHasShownWelcomeBadgeholderDialog()
