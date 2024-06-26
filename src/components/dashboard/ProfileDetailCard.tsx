@@ -1,4 +1,5 @@
 import { User } from "@prisma/client"
+import Link from "next/link"
 import React, { memo } from "react"
 
 import { cn } from "@/lib/utils"
@@ -53,13 +54,9 @@ const ProfileDetailCard = ({
         </div>
       </div>
 
-      <Button
-        variant="secondary"
-        onClick={() => setOpenDialog("edit_profile")}
-        className="ml-auto"
-      >
-        Edit Profile
-      </Button>
+      <Link href="/profile/details" className="ml-auto">
+        <Button variant="secondary">Edit Profile</Button>
+      </Link>
     </div>
   )
 }

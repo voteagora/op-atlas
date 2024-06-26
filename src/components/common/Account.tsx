@@ -14,8 +14,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import usePrevious from "@/lib/hooks"
-import { isFirstTimeUser, saveLogInDate } from "@/lib/utils"
+import { getUserById } from "@/db/users"
+import { isBadgeholder } from "@/lib/badgeholders"
+import { usePrevious } from "@/lib/hooks"
+import { UserWithAddresses } from "@/lib/types"
+import {
+  hasShownWelcomeBadgeholderDialog,
+  isFirstTimeUser,
+  saveHasShownWelcomeBadgeholderDialog,
+  saveLogInDate,
+} from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -57,6 +65,16 @@ export function Account() {
     [logOut],
   )
 
+  async function checkBadgeholderStatus(id: string) {
+    const user = await getUserById(id)
+    if (!user || !isBadgeholder(user)) return
+
+    if (!hasShownWelcomeBadgeholderDialog()) {
+      setOpenDialog("welcome_badgeholder")
+      saveHasShownWelcomeBadgeholderDialog()
+    }
+  }
+
   useEffect(() => {
     // only run this useEffect when the user logs in
     if (
@@ -74,6 +92,8 @@ export function Account() {
 
       if (!session.user.email) {
         setOpenDialog("email")
+      } else {
+        checkBadgeholderStatus(session.user.id)
       }
     }
   }, [status, router, setOpenDialog, session, previousAuthStatus, track])
@@ -112,12 +132,29 @@ export function Account() {
             />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-56 flex flex-col gap-1">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
-              View profile
+              Dashboard
             </DropdownMenuItem>
           </Link>
+          <hr className="w-full border-[0.5px] border-border" />
+          <Link href="/profile/details">
+            <DropdownMenuItem className="cursor-pointer">
+              Profile details
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/profile/connected-apps">
+            <DropdownMenuItem className="cursor-pointer">
+              Connected apps
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/profile/verified-addresses">
+            <DropdownMenuItem className="cursor-pointer">
+              Verified addresses
+            </DropdownMenuItem>
+          </Link>
+          <hr className="w-full border-[0.5px] border-border" />
           <DropdownMenuItem className="cursor-pointer" onClick={logOut}>
             Log out
           </DropdownMenuItem>

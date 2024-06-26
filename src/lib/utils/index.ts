@@ -3,9 +3,11 @@ import { customAlphabet } from "nanoid"
 import { sortBy } from "ramda"
 import { twMerge } from "tailwind-merge"
 
-import { ProjectWithDetails } from "../types"
+import { ProjectWithDetails, UserWithAddresses } from "../types"
 
 export const APPLICATIONS_CLOSED = true
+
+export const GITHUB_REDIRECT_COOKIE = "github-auth-redirect"
 
 export const EAS_URL_PREFIX = "https://optimism.easscan.org/attestation/view/"
 
@@ -31,6 +33,8 @@ export const copyToClipboard = async (value: string) => {
 }
 
 const LAST_SIGN_IN_LOCALSTORAGE_KEY = "op_atlas_last_signed_in"
+const WELCOME_BADGEHOLDER_DIALOG_LOCALSTORAGE_KEY =
+  "op_atlas_welcome_badgeholder_dialog_shown"
 
 export function isFirstTimeUser(): boolean {
   return !Boolean(localStorage.getItem(LAST_SIGN_IN_LOCALSTORAGE_KEY))
@@ -38,6 +42,16 @@ export function isFirstTimeUser(): boolean {
 
 export function saveLogInDate() {
   localStorage.setItem(LAST_SIGN_IN_LOCALSTORAGE_KEY, Date.now().toString())
+}
+
+export function hasShownWelcomeBadgeholderDialog(): boolean {
+  return Boolean(
+    localStorage.getItem(WELCOME_BADGEHOLDER_DIALOG_LOCALSTORAGE_KEY),
+  )
+}
+
+export function saveHasShownWelcomeBadgeholderDialog() {
+  localStorage.setItem(WELCOME_BADGEHOLDER_DIALOG_LOCALSTORAGE_KEY, "true")
 }
 
 export enum ProjectSection {
@@ -121,4 +135,37 @@ export function clickSignInWithFarcasterButton() {
     .getElementsByClassName("fc-authkit-signin-button")[0]
     ?.getElementsByTagName("button")[0]
   farcasterButton?.click()
+}
+
+export function profileProgress(user: UserWithAddresses): number {
+  // check email, github (or not developer), and addresses
+  if (
+    user.email &&
+    (user.github || user.notDeveloper) &&
+    user.addresses.length
+  ) {
+    return 100
+  }
+
+  let progress = 0
+  if (user.email) {
+    progress += 33.33
+  }
+
+  if (user.github || user.notDeveloper) {
+    progress += 33.33
+  }
+
+  if (user.addresses.length) {
+    progress += 33.33
+  }
+
+  return progress
+}
+
+export function shortenAddress(address: string) {
+  return `${address.substring(0, 6)}...${address.substring(
+    address.length - 4,
+    address.length,
+  )}`
 }
