@@ -2,10 +2,11 @@ import { User } from "@prisma/client"
 import { Check, Github, GithubIcon, Mail, Plus, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
+import { syncFarcasterAddresses } from "@/lib/actions/addresses"
 import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
 import { isBadgeholderAddress } from "@/lib/badgeholders"
 import { UserAddressSource, UserWithAddresses } from "@/lib/types"
@@ -24,6 +25,13 @@ import { Button } from "../ui/button"
 export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
   const progress = profileProgress(user)
   const isComplete = progress === 100
+
+  // Attempt to sync Farcaster accounts one time
+  useEffect(() => {
+    if (user.addresses.length === 0) {
+      syncFarcasterAddresses()
+    }
+  }, [user])
 
   return (
     <Accordion
