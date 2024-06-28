@@ -10,6 +10,7 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     funding: true
     snapshots: true
     applications: true
+    rewards: { include: { claim: true } }
   }
 }>
 
