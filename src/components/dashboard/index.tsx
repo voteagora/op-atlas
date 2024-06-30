@@ -66,6 +66,11 @@ const Dashboard = ({
     }
   }, [projects])
 
+  // TODO: hide rewards section if all rewards are claimed
+  const showRewardsSection = Boolean(
+    projects.find((project) => project.applications.length),
+  )
+
   return (
     <div className={cn("flex flex-col gap-y-6 mt-18", className)}>
       {showNoRewardsDialog && (
@@ -128,12 +133,14 @@ const Dashboard = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <h3>Your Retro Funding Round 4 rewards</h3>
-          {projects.map((project) => (
-            <ProjectRewardRow key={project.id} project={project} />
-          ))}
-        </div>
+        {showRewardsSection && (
+          <div className="flex flex-col gap-6">
+            <h3>Your Retro Funding Round 4 rewards</h3>
+            {projects.map((project) => (
+              <ProjectRewardRow key={project.id} project={project} />
+            ))}
+          </div>
+        )}
 
         <div className="flex flex-col gap-y-6">
           <h3>Your Retro Funding applications</h3>
