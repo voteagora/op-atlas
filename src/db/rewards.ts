@@ -41,6 +41,14 @@ export async function insertRewards(
   })
 }
 
+export async function getClaimByAddress({ address }: { address: string }) {
+  return prisma.rewardClaim.findFirst({
+    where: {
+      address: address.toLowerCase(),
+    },
+  })
+}
+
 export async function startClaim({
   rewardId,
   address,
@@ -50,15 +58,24 @@ export async function startClaim({
   userId: string
   address: string
 }) {
-  return prisma.rewardClaim.create({
+  // Deletes any existing claim for the reward
+  const deleteClaim = prisma.rewardClaim.deleteMany({
+    where: {
+      rewardId,
+    },
+  })
+
+  const createClaim = prisma.rewardClaim.create({
     data: {
       rewardId,
-      address,
+      address: address.toLowerCase(),
       addressSetById: userId,
       addressSetAt: new Date(),
       status: "pending",
     },
   })
+
+  return prisma.$transaction([deleteClaim, createClaim])
 }
 
 export async function updateClaim({
