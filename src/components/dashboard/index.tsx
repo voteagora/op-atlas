@@ -25,6 +25,7 @@ import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import ProfileDetailCard from "./ProfileDetailCard"
+import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserProjectCard from "./UserProjectCard"
 
 const Dashboard = ({
@@ -50,7 +51,12 @@ const Dashboard = ({
   const profileInitiallyComplete = useRef(profileProgress(user) === 100)
 
   useEffect(() => {
-    if (!hasShownNoRewardsDialog() && noRewards(projects)) {
+    // User has submitted at least one application but didn't receive any rewards
+    if (
+      !hasShownNoRewardsDialog() &&
+      projects.find((project) => project.applications.length > 1) &&
+      noRewards(projects)
+    ) {
       saveHasShownNoRewardsDialog()
       setShowNoRewardsDialog(true)
       return
@@ -60,6 +66,11 @@ const Dashboard = ({
       setShowUnclaimedRewardsDialog(true)
     }
   }, [projects])
+
+  // TODO: hide rewards section if all rewards are claimed
+  const showRewardsSection = Boolean(
+    projects.find((project) => project.applications.length),
+  )
 
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
@@ -123,6 +134,15 @@ const Dashboard = ({
             </Button>
           </div>
         </div>
+
+        {showRewardsSection && (
+          <div className="flex flex-col gap-6">
+            <h3>Your Retro Funding Round 4 rewards</h3>
+            {projects.map((project) => (
+              <ProjectRewardRow key={project.id} project={project} />
+            ))}
+          </div>
+        )}
 
         <div className="flex flex-col gap-y-6">
           <h3>Your Retro Funding applications</h3>
