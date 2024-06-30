@@ -20,6 +20,7 @@ import ExternalLink from "../ExternalLink"
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
+import { SurveyCallout } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -61,7 +62,8 @@ const Dashboard = ({
   }, [projects])
 
   return (
-    <div className={cn("flex flex-col gap-y-6 mt-18", className)}>
+    <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
+      <SurveyCallout />
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
