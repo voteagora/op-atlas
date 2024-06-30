@@ -1,6 +1,6 @@
 "use client"
 
-import { Application, Project, User } from "@prisma/client"
+import { Application } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"

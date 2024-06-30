@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { deleteUserProject } from "@/lib/actions/projects"
 import { useIsAdmin } from "@/lib/hooks"
+import { unclaimedRewards } from "@/lib/rewards"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 
@@ -115,6 +116,15 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
           </div>
         ))}
       </div>
+
+      {project && (
+        <div className="border-t border-b border-border w-full py-4 text-sm font-medium flex items-center gap-2">
+          <Link href={`/projects/${project.id}/rewards`}>Rewards</Link>
+          {unclaimedRewards(project) && (
+            <div className="h-[6.7px] w-[6.7px] rounded-full bg-destructive" />
+          )}
+        </div>
+      )}
 
       <div className="flex flex-col gap-4">
         <ExternalLink
