@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
+import RewardClaimFlow from "@/components/rewards/RewardClaimFlow"
 import { getReward } from "@/db/rewards"
 
 export default async function Page({
@@ -18,5 +19,9 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  return <div />
+  return (
+    <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
+      <RewardClaimFlow className="mt-18 max-w-4xl" reward={claim} />
+    </main>
+  )
 }
