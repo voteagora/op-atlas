@@ -8,6 +8,10 @@ import { numberWithCommas } from "@/lib/utils"
 import { Button } from "../ui/button"
 
 export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
+  if (!project.applications.length) {
+    return null
+  }
+
   if (noRewards([project])) {
     return (
       <div className="border border-border bg-background rounded-xl p-8 flex items-center gap-4 max-w-full">
