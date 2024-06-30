@@ -61,6 +61,9 @@ model FundingReward {
   projectId String
   amount    Int
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   round   FundingRound @relation(fields: [roundId], references: [id])
   project Project      @relation(fields: [projectId], references: [id])
   claim   RewardClaim?
@@ -77,15 +80,14 @@ model RewardClaim {
   addressSetAt   DateTime?
   addressSetById String?
 
-  addressSetBy User? @relation(fields: [addressSetById], references: [id])
-
   tokenStreamStatus String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  reward FundingReward @relation(fields: [rewardId], references: [id])
- }
+  reward       FundingReward @relation(fields: [rewardId], references: [id])
+  addressSetBy User?         @relation(fields: [addressSetById], references: [id])
+}
 
 model Project {
   id           String  @id @default(uuid())
