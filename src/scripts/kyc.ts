@@ -5,6 +5,8 @@ import { getReward, updateClaim } from "@/db/rewards"
 
 const CSV_PATH = "kyc.csv"
 
+// const CSV_URL = https://raw.githubusercontent.com/akathm/hippos/master/rpgf_status.csv
+
 /**
  * Expecting a format of:
  * form_id,project_id,grant_id,l2_address,status
