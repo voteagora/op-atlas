@@ -1,3 +1,4 @@
+import { useRive } from "@rive-app/react-canvas-lite"
 import { Copy, Pencil } from "lucide-react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
@@ -10,6 +11,15 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
+
+// TODO: Replace with final animation code
+const AnimatedSunny = () => {
+  const { RiveComponent } = useRive({
+    src: "https://public.rive.app/hosted/86773/146592/QOdj6rChHEWfZuMkcMInNQ.riv",
+    autoplay: true,
+  })
+  return <RiveComponent />
+}
 
 const ClaimHeader = ({
   reward,
@@ -45,12 +55,15 @@ const ClaimHeader = ({
 
   return (
     <div className={cn("flex flex-col items-center gap-6", className)}>
-      <Image
-        alt="sunny"
-        src="/assets/images/big-sunny.png"
-        height={120}
-        width={120}
-      />
+      <div className="h-[120px] w-[120px] relative">
+        <Image
+          alt="sunny"
+          src="/assets/images/big-sunny.png"
+          height={120}
+          width={120}
+        />
+      </div>
+
       <h2 className="text-center">Congratulations</h2>
 
       <div className="flex items-center gap-4 border rounded-xl p-8 w-full">

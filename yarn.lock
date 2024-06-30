@@ -1578,6 +1578,18 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
 
+"@rive-app/canvas-lite@2.19.0":
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/@rive-app/canvas-lite/-/canvas-lite-2.19.0.tgz#39d959897e60586c48b763b46c83f4b1422b08df"
+  integrity sha512-Jc/HkQ6SlLxHHmRxTkVHLVvYzF6uq0E88CPd0Lz0DN1y5VnMpE2x4a2J/VAne61HIzdqKSHNmLH6IWtJ3uNFlQ==
+
+"@rive-app/react-canvas-lite@^4.13.0":
+  version "4.13.0"
+  resolved "https://registry.yarnpkg.com/@rive-app/react-canvas-lite/-/react-canvas-lite-4.13.0.tgz#25ca46aa0ae72d66cf02b822e3d66e9eefb96969"
+  integrity sha512-k+LQZmEOLpyCTFjCYYJJ0CGlSS6v6cO9eva71EVbjdavU5aMDNk2UsJxJWsOWnUooWqvimOeeXUIxVYUIxK44g==
+  dependencies:
+    "@rive-app/canvas-lite" "2.19.0"
+
 "@rrweb/types@^2.0.0-alpha.4":
   version "2.0.0-alpha.13"
   resolved "https://registry.yarnpkg.com/@rrweb/types/-/types-2.0.0-alpha.13.tgz#f6fb7741bc4640beb3f14f15b83cc94289a199fb"
