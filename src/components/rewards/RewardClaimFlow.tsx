@@ -10,6 +10,7 @@ import ExternalLink from "../ExternalLink"
 import { StarIcon } from "../icons/star"
 import { Button } from "../ui/button"
 import ClaimHeader from "./ClaimHeader"
+import { SocialShareImage } from "./SocialShareImage"
 
 const RewardClaimFlow = ({
   className,
@@ -36,8 +37,11 @@ const RewardClaimFlow = ({
         <StarIcon className="mx-auto" />
 
         {/* Share image */}
-        <div className="flex flex-col items-center border rounded-2xl p-10">
+        <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
           <h4 className="font-semibold text-xl">Share your achievement</h4>
+          <div className="border border-border rounded-xl overflow-hidden">
+            <SocialShareImage reward={reward} />
+          </div>
         </div>
 
         <StarIcon className="mx-auto" />
