@@ -85,81 +85,79 @@ const ClaimHeader = ({
         days.
       </p>
 
-      {/* For some reason the session is populated after a delay... 🙄 */}
-      {session?.user &&
-        (isUserAdmin ? (
-          <div className="flex items-center gap-6">
+      {session?.user && isUserAdmin ? (
+        <div className="flex items-center gap-6">
+          <p className="text-secondary-foreground text-sm">
+            Claim by <span className="font-medium">Aug 01, 2025</span>
+          </p>
+
+          <div className="w-px h-10 bg-border" />
+
+          <div className="flex items-center gap-1">
             <p className="text-secondary-foreground text-sm">
-              Claim by <span className="font-medium">Aug 01, 2025</span>
+              Grant ID <span className="font-medium">{reward.id}</span>
             </p>
 
-            <div className="w-px h-10 bg-border" />
+            <Button
+              variant="ghost"
+              className="h-[14px] w-fit p-0"
+              onClick={copyGrantId}
+            >
+              <Copy size={14} />
+            </Button>
+          </div>
 
-            <div className="flex items-center gap-1">
-              <p className="text-secondary-foreground text-sm">
-                Grant ID <span className="font-medium">{reward.id}</span>
-              </p>
+          <div className="w-px h-10 bg-border" />
 
+          <div className="flex items-center gap-1">
+            <p className="text-sm text-muted-foreground">
+              Email
               <Button
-                variant="ghost"
-                className="h-[14px] w-fit p-0"
-                onClick={copyGrantId}
-              >
-                <Copy size={14} />
-              </Button>
-            </div>
-
-            <div className="w-px h-10 bg-border" />
-
-            <div className="flex items-center gap-1">
-              <p className="text-sm text-muted-foreground">
-                Email
-                <Button
-                  variant="link"
-                  onClick={editEmail}
-                  className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
-                >
-                  {session.user.email || "Add your email"}
-                </Button>
-              </p>
-              <Button
-                variant="ghost"
-                className="h-[14px] w-fit p-0"
+                variant="link"
                 onClick={editEmail}
+                className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
               >
-                <Pencil size={14} />
+                {session.user.email || "Add your email"}
               </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <p className="text-[#B80018] text-sm text-center">
-              You are not an admin and cannot claim this grant. These are the
-              project admins:
             </p>
-            <div className="mx-auto flex items-center flex-wrap gap-4">
-              {reward.project.team
-                .filter(({ role }) => role === "admin")
-                .map(({ user }) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center gap-1.5 shrink-0"
-                  >
-                    <Avatar className="h-6 w-6 rounded-full">
-                      <AvatarImage
-                        src={user.imageUrl ?? undefined}
-                        alt={user.username ?? user.farcasterId}
-                      />
-                      <AvatarFallback>{user.name?.[0]}</AvatarFallback>
-                    </Avatar>
-                    <p className="text-secondary-foreground text-sm font-medium">
-                      {user.name}
-                    </p>
-                  </div>
-                ))}
-            </div>
+            <Button
+              variant="ghost"
+              className="h-[14px] w-fit p-0"
+              onClick={editEmail}
+            >
+              <Pencil size={14} />
+            </Button>
           </div>
-        ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <p className="text-[#B80018] text-sm text-center">
+            You are not an admin and cannot claim this grant. These are the
+            project admins:
+          </p>
+          <div className="mx-auto flex items-center flex-wrap gap-4">
+            {reward.project.team
+              .filter(({ role }) => role === "admin")
+              .map(({ user }) => (
+                <div
+                  key={user.id}
+                  className="flex items-center gap-1.5 shrink-0"
+                >
+                  <Avatar className="h-6 w-6 rounded-full">
+                    <AvatarImage
+                      src={user.imageUrl ?? undefined}
+                      alt={user.username ?? user.farcasterId}
+                    />
+                    <AvatarFallback>{user.name?.[0]}</AvatarFallback>
+                  </Avatar>
+                  <p className="text-secondary-foreground text-sm font-medium">
+                    {user.name}
+                  </p>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
