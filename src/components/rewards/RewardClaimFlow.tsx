@@ -48,6 +48,7 @@ const RewardClaimFlow = ({
             Help make Retro Funding better
           </h4>
 
+          {/* TODO: Add survey link */}
           <Button variant="secondary" className="">
             Take 4 minute survey
             <ArrowUpRight size={16} className="ml-2.5" />
@@ -64,7 +65,7 @@ const RewardClaimFlow = ({
           >
             View frequently asked questions
           </ExternalLink>{" "}
-          or{" "}
+          or {/* TODO: Final support link */}
           <ExternalLink
             href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
             className="font-medium"
