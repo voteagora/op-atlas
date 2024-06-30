@@ -2,6 +2,7 @@
 
 import { ArrowUpRight } from "lucide-react"
 import { useSession } from "next-auth/react"
+import { useState } from "react"
 
 import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils"
 import ExternalLink from "../ExternalLink"
 import { StarIcon } from "../icons/star"
 import { Button } from "../ui/button"
+import { ClaimForm } from "./ClaimForm"
 import ClaimHeader from "./ClaimHeader"
 
 const RewardClaimFlow = ({
@@ -31,7 +33,7 @@ const RewardClaimFlow = ({
         <ClaimHeader reward={reward} />
 
         {/* Claim form */}
-        <p className="mx-auto">tina form go here yay</p>
+        <ClaimForm reward={reward} />
 
         <StarIcon className="mx-auto" />
 
