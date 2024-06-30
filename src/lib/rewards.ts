@@ -1,8 +1,9 @@
 import { ProjectWithDetails } from "./types"
 
 export function unclaimedRewards(project: ProjectWithDetails) {
-  // TODO: use final enum here
-  return project.rewards.map((reward) => reward.claim?.status === "cleared")
+  return project.rewards.map(
+    (reward) => !reward.claim || reward.claim.status !== "claimed",
+  )
 }
 
 export function noRewards(projects: ProjectWithDetails[]) {
