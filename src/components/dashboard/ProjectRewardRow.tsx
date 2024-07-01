@@ -34,39 +34,41 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
     )
   }
 
-  if (unclaimedRewards(project)) {
-    return (
-      <div className="border border-border bg-background rounded-xl p-8 flex items-center gap-4 max-w-full">
-        {project.thumbnailUrl && (
-          <Image
-            src={project.thumbnailUrl}
-            height={48}
-            width={48}
-            className="rounded-md"
-            alt="Project thumbnail"
-          />
-        )}
-        <div className="flex-1 min-w-0 text-nowrap overflow-hidden overflow-ellipsis mr-8 flex-col">
-          <div className="font-semibold ">{project.name}</div>
-          <div className="text-sm text-secondary-foreground">
-            Claim by Aug 1, 2025
-          </div>
+  return (
+    <div className="border border-border bg-background rounded-xl p-8 flex items-center gap-4 max-w-full">
+      {project.thumbnailUrl && (
+        <Image
+          src={project.thumbnailUrl}
+          height={48}
+          width={48}
+          className="rounded-md"
+          alt="Project thumbnail"
+        />
+      )}
+      <div className="flex-1 min-w-0 text-nowrap overflow-hidden overflow-ellipsis mr-8 flex-col">
+        <div className="font-semibold ">{project.name}</div>
+        <div className="text-sm text-secondary-foreground">
+          Claim by Aug 1, 2025
         </div>
-        <div className="flex items-center gap-2">
-          <Image
-            src="/assets/chain-logos/optimism.png"
-            height={24}
-            width={24}
-            alt="Optimism"
-          />
-          <div className="font-semibold">
-            {numberWithCommas(project.rewards[0].amount)}
-          </div>
-        </div>
-        <Link href={`/rewards/${project.rewards[0].id}`}>
-          <Button variant="destructive">Claim</Button>
-        </Link>
       </div>
-    )
-  }
+      <div className="flex items-center gap-2">
+        <Image
+          src="/assets/chain-logos/optimism.png"
+          height={24}
+          width={24}
+          alt="Optimism"
+        />
+        <div className="font-semibold">
+          {numberWithCommas(project.rewards[0].amount)}
+        </div>
+      </div>
+      <Link href={`/rewards/${project.rewards[0].id}`}>
+        <Button
+          variant={unclaimedRewards(project) ? "destructive" : "secondary"}
+        >
+          {unclaimedRewards(project) ? "Claim" : "Claimed"}
+        </Button>
+      </Link>
+    </div>
+  )
 }
