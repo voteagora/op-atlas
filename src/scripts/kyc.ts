@@ -71,6 +71,8 @@ async function processKYC(entries: string[]) {
     console.log(
       `Updated KYC status for reward ${rewardId} (project ${projectId})`,
     )
+
+    // TODO: Set the date at which the superfluid stream is claimable
   }
 
   console.log(
