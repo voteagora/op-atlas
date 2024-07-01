@@ -15,7 +15,6 @@ import { getReward, updateClaim } from "@/db/rewards"
 export const processKYC = async (entries: string[]) => {
   let counter = 0
 
-  // Skip the header row
   for (const row of entries) {
     const fields = row.split(",")
     if (fields.length !== 5) {
