@@ -28,6 +28,8 @@ import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserProjectCard from "./UserProjectCard"
 
+const SHOW_APPLICATIONS = false
+
 const Dashboard = ({
   className,
   user,
@@ -143,21 +145,23 @@ const Dashboard = ({
           </div>
         )}
 
-        <div className="flex flex-col gap-y-6">
-          <h3>Your Retro Funding applications</h3>
-          {/* canApply is false now that applications are closed */}
-          <ApplicationBanner application={applications[0]} canApply={false} />
+        {SHOW_APPLICATIONS && (
+          <div className="flex flex-col gap-y-6">
+            <h3>Your Retro Funding applications</h3>
+            {/* canApply is false now that applications are closed */}
+            <ApplicationBanner application={applications[0]} canApply={false} />
 
-          <ExternalLink
-            href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
-            className="flex items-center gap-x-2 no-underline text-secondary-foreground"
-          >
-            <p className="text-sm font-medium">
-              Learn more about Retro Funding Round 4
-            </p>
-            <ArrowUpRight size={16} />
-          </ExternalLink>
-        </div>
+            <ExternalLink
+              href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+              className="flex items-center gap-x-2 no-underline text-secondary-foreground"
+            >
+              <p className="text-sm font-medium">
+                Learn more about Retro Funding Round 4
+              </p>
+              <ArrowUpRight size={16} />
+            </ExternalLink>
+          </div>
+        )}
       </div>
     </div>
   )
