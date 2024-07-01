@@ -16,6 +16,10 @@ export const nanoid = customAlphabet(
   10,
 )
 
+export function numberWithCommas(x: number) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -35,6 +39,7 @@ export const copyToClipboard = async (value: string) => {
 const LAST_SIGN_IN_LOCALSTORAGE_KEY = "op_atlas_last_signed_in"
 const WELCOME_BADGEHOLDER_DIALOG_LOCALSTORAGE_KEY =
   "op_atlas_welcome_badgeholder_dialog_shown"
+const NO_REWARDS_DIALOG_LOCALSTORAGE_KEY = "op_atlas_no_rewards_dialog_shown"
 
 export function isFirstTimeUser(): boolean {
   return !Boolean(localStorage.getItem(LAST_SIGN_IN_LOCALSTORAGE_KEY))
@@ -52,6 +57,14 @@ export function hasShownWelcomeBadgeholderDialog(): boolean {
 
 export function saveHasShownWelcomeBadgeholderDialog() {
   localStorage.setItem(WELCOME_BADGEHOLDER_DIALOG_LOCALSTORAGE_KEY, "true")
+}
+
+export function hasShownNoRewardsDialog(): boolean {
+  return Boolean(localStorage.getItem(NO_REWARDS_DIALOG_LOCALSTORAGE_KEY))
+}
+
+export function saveHasShownNoRewardsDialog() {
+  localStorage.setItem(NO_REWARDS_DIALOG_LOCALSTORAGE_KEY, "true")
 }
 
 export enum ProjectSection {

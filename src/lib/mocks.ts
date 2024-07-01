@@ -1,5 +1,3 @@
-export type Project = Record<string, never>
-
 export type FundingRound = {
   number: number
   name: string

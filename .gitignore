@@ -29,6 +29,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# misc data
+*.csv
+
 # vercel
 .vercel
 

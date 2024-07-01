@@ -57,6 +57,7 @@ export async function getUserProjectsWithDetails({
               funding: true,
               snapshots: true,
               applications: true,
+              rewards: { include: { claim: true } },
             },
           },
         },
@@ -148,6 +149,7 @@ export async function getProject({ id }: { id: string }) {
       funding: true,
       snapshots: true,
       applications: true,
+      rewards: { include: { claim: true } },
     },
   })
 }
