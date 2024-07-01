@@ -1,7 +1,13 @@
+import { isAfter } from "date-fns"
 import { ArrowUpRight, Check } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { toast } from "sonner"
 import { isAddress } from "viem"
 
+import {
+  addAddressToRewardsClaim,
+  completeRewardsClaim,
+} from "@/lib/actions/rewards"
 import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -36,21 +42,37 @@ export function ClaimForm({ reward }: { reward: RewardWithProject }) {
 
 function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
   const [address, setAddress] = useState(reward.claim?.address)
+
   const [confirmedOnOpMainnet, setConfirmedOnOpMainnet] = useState(
     Boolean(reward.claim?.address),
   )
   const [confirmedCanMakeContractCalls, setConfirmedCanMakeContractCalls] =
     useState(Boolean(reward.claim?.address))
+
+  const [loading, setLoading] = useState(false)
   const [addressError, setAddressError] = useState("")
 
-  const onConfirmAddress = () => {
+  const onConfirmAddress = async () => {
     if (!address || !isAddress(address)) {
       setAddressError("Invalid address")
+      return
     }
 
-    // TODO: submit here
-    // If stream_exists error:
-    // setAddressError("This address is already receiving a stream")
+    setLoading(true)
+
+    try {
+      const result = await addAddressToRewardsClaim(reward.id, address)
+      if (result.error !== null) {
+        setAddressError(result.error)
+      } else {
+        toast.success("Address confirmed")
+      }
+    } catch (error) {
+      console.error("Error confirming address", error)
+      setAddressError("Something went wrong, please try again")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -120,7 +142,13 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
             disabled={
               !address ||
               !confirmedOnOpMainnet ||
-              !confirmedCanMakeContractCalls
+              !confirmedCanMakeContractCalls ||
+              loading ||
+              Boolean(
+                address &&
+                  reward.claim?.address &&
+                  address.toLowerCase() === reward.claim.address.toLowerCase(),
+              )
             }
             className="self-start"
             variant="destructive"
@@ -152,8 +180,8 @@ function ClaimFormKYC({
           <div className="flex items-center gap-1 flex-1 text-sm font-medium">
             Step 2. Complete KYC
           </div>
-          {reward.claim?.status === "cleared" ||
-            (reward.claim?.status === "claimed" && <Completed />)}
+          {(reward.claim?.status === "cleared" ||
+            reward.claim?.status === "claimed") && <Completed />}
         </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-12">
           <div className="flex flex-col gap-6">
@@ -191,6 +219,22 @@ function ClaimFormSuperfluid({
   reward: RewardWithProject
   disabled: boolean
 }) {
+  const canStartStream = useMemo(() => {
+    if (!reward.claim?.tokenStreamClaimableAt) {
+      return false
+    }
+
+    return isAfter(new Date(), reward.claim.tokenStreamClaimableAt)
+  }, [reward])
+
+  const onStartStream = async () => {
+    try {
+      await completeRewardsClaim(reward.id)
+    } catch (error) {
+      console.error("Error recording stream start", error)
+    }
+  }
+
   return (
     <Accordion
       type="single"
@@ -210,11 +254,13 @@ function ClaimFormSuperfluid({
               Tokens will be streamed over 100 days on Superfluid.
             </div>
 
-            <ExternalLink href="superfluid-link-here">
+            {/* TODO: Final superfluid link */}
+            <ExternalLink href="https://www.superfluid.finance/">
               <Button
-                disabled={disabled}
+                disabled={disabled || !canStartStream}
                 variant="destructive"
                 className="flex gap-[10px] items-center"
+                onClick={onStartStream}
               >
                 <div>Claim with Superfluid</div>
                 <ArrowUpRight size={16} />
