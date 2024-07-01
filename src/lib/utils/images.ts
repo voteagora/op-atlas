@@ -85,3 +85,41 @@ export async function compressImage(image: Blob) {
 
   return await imageCompression(image as File, options)
 }
+
+export const svgToDataUrl = (svg: string) => {
+  return new Promise<string>((resolve, reject) => {
+    const img = new Image()
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = img.naturalWidth
+      canvas.height = img.naturalHeight
+      const ctx = canvas.getContext("2d")
+      ctx?.drawImage(img, 0, 0)
+      resolve(canvas.toDataURL("image/png"))
+      URL.revokeObjectURL(img.src)
+    }
+
+    img.onerror = (e) => {
+      reject(e)
+      URL.revokeObjectURL(img.src)
+    }
+
+    img.src = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }))
+  })
+}
+
+export const downloadImageAsPNG = async (svg: string) => {
+  const imageUrl = await svgToDataUrl(svg)
+
+  try {
+    const a = document.createElement("a")
+    a.href = imageUrl
+    a.download = "Image.png"
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  } finally {
+    URL.revokeObjectURL(imageUrl)
+  }
+}
