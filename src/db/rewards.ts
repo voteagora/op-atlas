@@ -8,7 +8,11 @@ export async function getReward({ id }: { id: string }) {
       id,
     },
     include: {
-      claim: true,
+      claim: {
+        include: {
+          addressSetBy: true,
+        },
+      },
       project: {
         include: {
           team: {

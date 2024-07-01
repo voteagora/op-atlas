@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build && prisma migrate deploy",
     "start": "next start",
     "format": "prettier --write .",
     "lint": "next lint . --ext .js,.jsx,.ts,.tsx",
