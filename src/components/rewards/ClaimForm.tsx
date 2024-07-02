@@ -1,5 +1,6 @@
 import { isAfter } from "date-fns"
 import { ArrowUpRight, Check } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { isAddress } from "viem"
@@ -10,6 +11,7 @@ import {
 } from "@/lib/actions/rewards"
 import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 import ExternalLink from "../ExternalLink"
 import {
@@ -41,7 +43,10 @@ export function ClaimForm({ reward }: { reward: RewardWithProject }) {
 }
 
 function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
+  const { data: session } = useSession()
   const [address, setAddress] = useState(reward.claim?.address)
+
+  const { setOpenDialog } = useAppDialogs()
 
   const [confirmedOnOpMainnet, setConfirmedOnOpMainnet] = useState(
     Boolean(reward.claim?.address),
@@ -55,6 +60,11 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
   const onConfirmAddress = async () => {
     if (!address || !isAddress(address)) {
       setAddressError("Invalid address")
+      return
+    }
+    if (!session?.user?.email) {
+      // Ensure we have an email for contacting projects
+      setOpenDialog("email")
       return
     }
 
