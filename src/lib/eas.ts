@@ -22,10 +22,13 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
 }
 
 // Optimism address
-const eas = new EAS("0x4200000000000000000000000000000000000021")
+// const eas = new EAS("0x4200000000000000000000000000000000000021")
+
+// Sepolia address
+const eas = new EAS("0xC2679fBD37d54388Ce493F1DB75320D236e1815e")
 
 const provider = new ethers.AlchemyProvider(
-  "optimism",
+  "sepolia",
   process.env.ALCHEMY_API_KEY,
 )
 
