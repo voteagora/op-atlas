@@ -52,12 +52,14 @@ async function createAttestation(schemaId: string, data: string) {
 
 export async function createProjectAttestation({
   farcasterId,
+  issuer = "OP Atlas",
 }: {
   farcasterId: number
+  issuer?: string
 }) {
   const data = projectSchema.encodeData([
     { name: "farcasterID", value: farcasterId, type: "uint256" },
-    { name: "issuer", value: "OP Atlas", type: "string" },
+    { name: "issuer", value: issuer, type: "string" },
   ])
 
   const attestationId = await createAttestation(PROJECT_SCHEMA_ID, data)
