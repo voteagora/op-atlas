@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
 import { createProjectSnapshotOnBehalf } from "@/lib/actions/snapshots"
+import { authenticateApiUser } from "@/serverAuth"
 
 const ProjectMetadataValidator = z.object({
   name: z.string(),
@@ -58,6 +59,12 @@ export const POST = async (
   req: NextRequest,
   route: { params: { projectId: string } },
 ) => {
+  const authResponse = await authenticateApiUser(req)
+
+  if (!authResponse.authenticated) {
+    return new Response(authResponse.failReason, { status: 401 })
+  }
+
   const { projectId } = route.params
   const { farcasterId, metadata } = await req.json()
 
