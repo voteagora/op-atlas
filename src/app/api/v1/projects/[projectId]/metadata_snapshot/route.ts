@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
 import { getProject } from "@/db/projects"
-import {
-  createProjectSnapshotOnBehalf,
-  formatProjectMetadata,
-} from "@/lib/actions/snapshots"
+import { createProjectSnapshotOnBehalf } from "@/lib/actions/snapshots"
+import { formatProjectMetadata } from "@/lib/utils/metadata"
 import { authenticateApiUser } from "@/serverAuth"
 
 const ProjectMetadataValidator = z.object({
@@ -99,7 +97,7 @@ export const GET = async (
     return new Response("Project not found", { status: 404 })
   }
 
-  const metadata = await formatProjectMetadata(project)
+  const metadata = formatProjectMetadata(project)
 
   return NextResponse.json({
     metadata,

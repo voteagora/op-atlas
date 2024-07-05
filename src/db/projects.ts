@@ -2,8 +2,8 @@
 
 import { Prisma, Project } from "@prisma/client"
 
-import { ProjectMetadata } from "@/lib/actions/snapshots"
 import { TeamRole } from "@/lib/types"
+import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
 
