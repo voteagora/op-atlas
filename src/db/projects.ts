@@ -147,7 +147,11 @@ export async function getProject({ id }: { id: string }) {
       repos: true,
       contracts: true,
       funding: true,
-      snapshots: true,
+      snapshots: {
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
       applications: true,
     },
   })

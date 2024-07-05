@@ -59,7 +59,9 @@ export type ProjectMetadata = {
   }
 }
 
-function formatProjectMetadata(project: ProjectWithDetails): ProjectMetadata {
+export async function formatProjectMetadata(
+  project: ProjectWithDetails,
+): Promise<ProjectMetadata> {
   // Eliminate extraneous data from IPFS snapshots
 
   const team = project.team.map(({ user }) => user.farcasterId)
@@ -153,7 +155,7 @@ export const createProjectSnapshot = async (projectId: string) => {
 
   try {
     // Upload metadata to IPFS
-    const metadata = formatProjectMetadata(project)
+    const metadata = await formatProjectMetadata(project)
     const ipfsHash = await uploadToPinata(projectId, metadata)
 
     // Create attestation

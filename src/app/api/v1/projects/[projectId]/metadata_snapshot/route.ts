@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-import { createProjectSnapshotOnBehalf } from "@/lib/actions/snapshots"
+import { getProject } from "@/db/projects"
+import {
+  createProjectSnapshotOnBehalf,
+  formatProjectMetadata,
+} from "@/lib/actions/snapshots"
 import { authenticateApiUser } from "@/serverAuth"
 
 const ProjectMetadataValidator = z.object({
@@ -75,4 +79,32 @@ export const POST = async (
   )
 
   return NextResponse.json({ ipfsHash, attestationId, projectId })
+}
+
+export const GET = async (
+  req: NextRequest,
+  route: { params: { projectId: string } },
+) => {
+  const authResponse = await authenticateApiUser(req)
+
+  if (!authResponse.authenticated) {
+    return new Response(authResponse.failReason, { status: 401 })
+  }
+
+  const { projectId } = route.params
+
+  const project = await getProject({ id: projectId })
+
+  if (!project) {
+    return new Response("Project not found", { status: 404 })
+  }
+
+  const metadata = await formatProjectMetadata(project)
+
+  return NextResponse.json({
+    metadata,
+    projectId,
+    projectMetadataId:
+      project.snapshots[project.snapshots.length - 1].attestationId,
+  })
 }
