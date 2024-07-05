@@ -27,5 +27,5 @@ export const POST = async (req: NextRequest) => {
     authResponse.name ?? "Unknown",
   )
 
-  return NextResponse.json(project)
+  return NextResponse.json({ attestationId: project.id })
 }
