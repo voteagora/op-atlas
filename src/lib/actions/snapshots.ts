@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
-import { addProjectSnapshot, getProject, updateProject } from "@/db/projects"
+import {
+  addProjectSnapshot,
+  getProject,
+  updateAllForProject,
+} from "@/db/projects"
 
 import { createProjectMetadataAttestation } from "../eas"
 import { uploadToPinata } from "../pinata"
@@ -12,7 +16,7 @@ import { APPLICATIONS_CLOSED } from "../utils"
 import { publishAndSaveApplication } from "./applications"
 import { verifyMembership } from "./utils"
 
-type ProjectMetadata = {
+export type ProjectMetadata = {
   name: string
   description: string | null
   projectAvatarUrl: string | null
@@ -32,6 +36,7 @@ type ProjectMetadata = {
     address: string
     deploymentTxHash: string
     deployerAddress: string
+    verficationProof: string | null
     chainId: number
   }[]
   grantsAndFunding: {
@@ -69,6 +74,7 @@ function formatProjectMetadata(project: ProjectWithDetails): ProjectMetadata {
     address: contract.contractAddress,
     deploymentTxHash: contract.deploymentHash,
     deployerAddress: contract.deployerAddress,
+    verficationProof: contract.verificationProof,
     chainId: contract.chainId,
   }))
 
@@ -194,24 +200,33 @@ export const createProjectSnapshotOnBehalf = async (
   projectId: string,
   farcasterId: string,
 ) => {
-  //await updateProject({ id: projectId, project }) // Replace with updateAllForProject
+  // Update project details in the database
+  const updateProjectPromise = updateAllForProject(project, projectId)
 
-  // Upload metadata to IPFS
-  const ipfsHash = await uploadToPinata(projectId, project)
+  const attestationPromise = (async () => {
+    // Upload metadata to IPFS
+    const ipfsHash = await uploadToPinata(projectId, project)
 
-  const attestationId = await createProjectMetadataAttestation({
-    farcasterId: parseInt(farcasterId),
-    projectId: projectId,
-    name: project.name,
-    category: project.category ?? "",
-    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
-  })
+    // Create attestation
+    const attestationId = await createProjectMetadataAttestation({
+      farcasterId: parseInt(farcasterId),
+      projectId: projectId,
+      name: project.name,
+      category: project.category ?? "",
+      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    })
 
-  const snapshot = await addProjectSnapshot({
+    return { ipfsHash, attestationId }
+  })()
+
+  const [{ ipfsHash, attestationId }, _] = await Promise.all([
+    attestationPromise,
+    updateProjectPromise,
+  ])
+
+  return addProjectSnapshot({
     projectId,
     ipfsHash,
     attestationId,
   })
-
-  return new Response(JSON.stringify({ ipfsHash, attestationId, projectId }))
 }

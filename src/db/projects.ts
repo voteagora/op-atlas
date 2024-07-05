@@ -2,6 +2,7 @@
 
 import { Prisma, Project } from "@prisma/client"
 
+import { ProjectMetadata } from "@/lib/actions/snapshots"
 import { TeamRole } from "@/lib/types"
 
 import { prisma } from "./client"
@@ -600,4 +601,109 @@ export async function getUserApplications({ userId }: { userId: string }) {
       },
     },
   })
+}
+
+export async function updateAllForProject(
+  project: ProjectMetadata,
+  projectId: string,
+) {
+  // Update project
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      name: project.name,
+      description: project.description,
+      category: project.category,
+      thumbnailUrl: project.projectAvatarUrl,
+      bannerUrl: project.proejctCoverImageUrl,
+      website: project.socialLinks.website,
+      twitter: project.socialLinks.twitter,
+      mirror: project.socialLinks.mirror,
+      farcaster: project.socialLinks.farcaster,
+      openSourceObserverSlug: project.osoSlug,
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  const cleanupContracts = prisma.projectContract.deleteMany({
+    where: {
+      projectId,
+    },
+  })
+
+  const contractsCreate = prisma.projectContract.createMany({
+    data: project.contracts.map((contract) => ({
+      contractAddress: contract.address,
+      deploymentHash: contract.deploymentTxHash,
+      deployerAddress: contract.deployerAddress,
+      verificationProof: contract.verficationProof ?? "",
+      chainId: contract.chainId,
+      projectId,
+    })),
+  })
+
+  const cleanupRepositories = prisma.projectRepository.deleteMany({
+    where: {
+      projectId,
+    },
+  })
+
+  const createRepositories = prisma.projectRepository.createMany({
+    data: [
+      ...project.github.map((repo) => ({
+        url: repo,
+        type: "github",
+        projectId,
+      })),
+      ...project.packages.map((repo) => ({
+        url: repo,
+        type: "package",
+        projectId,
+      })),
+    ],
+  })
+
+  const cleanupFunding = prisma.projectFunding.deleteMany({
+    where: {
+      projectId,
+    },
+  })
+
+  const createFunding = prisma.projectFunding.createMany({
+    data: [
+      ...project.grantsAndFunding.ventureFunding.map((funding) => ({
+        amount: funding.amount,
+        receivedAt: funding.year,
+        details: funding.details,
+        type: "venture",
+        projectId,
+      })),
+      ...project.grantsAndFunding.revenue.map((funding) => ({
+        amount: funding.amount,
+        receivedAt: "",
+        details: funding.details,
+        type: "revenue",
+        projectId,
+      })),
+      ...project.grantsAndFunding.grants.map((funding) => ({
+        amount: funding.amount,
+        receivedAt: funding.date,
+        details: funding.details,
+        type: "grant",
+        projectId,
+      })),
+    ],
+  })
+
+  return prisma.$transaction([
+    projectUpdate,
+    cleanupContracts,
+    contractsCreate,
+    cleanupRepositories,
+    createRepositories,
+    cleanupFunding,
+    createFunding,
+  ])
 }

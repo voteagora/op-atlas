@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
 import { createProjectSnapshotOnBehalf } from "@/lib/actions/snapshots"
@@ -24,6 +24,7 @@ const ProjectMetadataValidator = z.object({
       address: z.string(),
       deploymentTxHash: z.string(),
       deployerAddress: z.string(),
+      verficationProof: z.string().nullable().default(null),
       chainId: z.number().min(1),
     }),
   ),
@@ -60,9 +61,11 @@ export const POST = async (
   const { projectId } = route.params
   const { farcasterId, metadata } = await req.json()
 
-  return createProjectSnapshotOnBehalf(
+  const { ipfsHash, attestationId } = await createProjectSnapshotOnBehalf(
     ProjectMetadataValidator.parse(metadata),
     projectId,
     farcasterId,
   )
+
+  return NextResponse.json({ ipfsHash, attestationId, projectId })
 }
