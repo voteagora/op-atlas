@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
-import { addProjectSnapshot, getProject } from "@/db/projects"
+import { addProjectSnapshot, getProject, updateProject } from "@/db/projects"
 
 import { createProjectMetadataAttestation } from "../eas"
 import { uploadToPinata } from "../pinata"
@@ -12,9 +12,49 @@ import { APPLICATIONS_CLOSED } from "../utils"
 import { publishAndSaveApplication } from "./applications"
 import { verifyMembership } from "./utils"
 
-function formatProjectMetadata(
-  project: ProjectWithDetails,
-): Record<string, unknown> {
+type ProjectMetadata = {
+  name: string
+  description: string | null
+  projectAvatarUrl: string | null
+  proejctCoverImageUrl: string | null
+  category: string | null
+  osoSlug: string | null
+  socialLinks: {
+    website: string[]
+    farcaster: string[]
+    twitter: string | null
+    mirror: string | null
+  }
+  team: string[]
+  github: string[]
+  packages: string[]
+  contracts: {
+    address: string
+    deploymentTxHash: string
+    deployerAddress: string
+    chainId: number
+  }[]
+  grantsAndFunding: {
+    ventureFunding: {
+      amount: string
+      year: string
+      details: string | null
+    }[]
+    grants: {
+      grant: string | null
+      link: string | null
+      amount: string
+      date: string
+      details: string | null
+    }[]
+    revenue: {
+      amount: string
+      details: string | null
+    }[]
+  }
+}
+
+function formatProjectMetadata(project: ProjectWithDetails): ProjectMetadata {
   // Eliminate extraneous data from IPFS snapshots
 
   const team = project.team.map(({ user }) => user.farcasterId)
@@ -147,4 +187,31 @@ export const createProjectSnapshot = async (projectId: string) => {
       error,
     }
   }
+}
+
+export const createProjectSnapshotOnBehalf = async (
+  project: ProjectMetadata,
+  projectId: string,
+  farcasterId: string,
+) => {
+  //await updateProject({ id: projectId, project }) // Replace with updateAllForProject
+
+  // Upload metadata to IPFS
+  const ipfsHash = await uploadToPinata(projectId, project)
+
+  const attestationId = await createProjectMetadataAttestation({
+    farcasterId: parseInt(farcasterId),
+    projectId: projectId,
+    name: project.name,
+    category: project.category ?? "",
+    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+  })
+
+  const snapshot = await addProjectSnapshot({
+    projectId,
+    ipfsHash,
+    attestationId,
+  })
+
+  return new Response(JSON.stringify({ ipfsHash, attestationId, projectId }))
 }
