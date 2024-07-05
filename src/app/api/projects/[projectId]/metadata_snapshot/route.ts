@@ -64,7 +64,7 @@ export const POST = async (
   const { ipfsHash, attestationId } = await createProjectSnapshotOnBehalf(
     ProjectMetadataValidator.parse(metadata),
     projectId,
-    farcasterId,
+    z.string().parse(farcasterId),
   )
 
   return NextResponse.json({ ipfsHash, attestationId, projectId })
