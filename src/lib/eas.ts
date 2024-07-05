@@ -23,12 +23,12 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
 
 // Optimism address
 const eas =
-  process.env.NODE_ENV === "production"
-    ? new EAS("0x4200000000000000000000000000000000000021")
-    : new EAS("0xC2679fBD37d54388Ce493F1DB75320D236e1815e")
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? new EAS("0xC2679fBD37d54388Ce493F1DB75320D236e1815e")
+    : new EAS("0x4200000000000000000000000000000000000021")
 
 const provider = new ethers.AlchemyProvider(
-  process.env.NODE_ENV === "production" ? "optimism" : "sepolia",
+  process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",
   process.env.ALCHEMY_API_KEY,
 )
 
