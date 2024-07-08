@@ -188,3 +188,19 @@ model ProjectFunding {
 
   @@index([projectId])
 }
+
+model ApiUser {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  api_key       String  @unique
+  email         String?
+  address       String?
+  chain_id      Int?
+  description   String?
+  enabled       Boolean @default(true)
+  created_at    DateTime? @default(now()) @db.Date
+  updated_at    DateTime? @default(now()) @db.Date
+
+  @@map("api_users")
+  @@index([api_key])
+}

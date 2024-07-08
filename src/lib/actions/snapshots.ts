@@ -3,86 +3,18 @@
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
-import { addProjectSnapshot, getProject } from "@/db/projects"
+import {
+  addProjectSnapshot,
+  getProject,
+  updateAllForProject,
+} from "@/db/projects"
 
 import { createProjectMetadataAttestation } from "../eas"
 import { uploadToPinata } from "../pinata"
-import { ProjectWithDetails } from "../types"
 import { APPLICATIONS_CLOSED } from "../utils"
+import { formatProjectMetadata, ProjectMetadata } from "../utils/metadata"
 import { publishAndSaveApplication } from "./applications"
 import { verifyMembership } from "./utils"
-
-function formatProjectMetadata(
-  project: ProjectWithDetails,
-): Record<string, unknown> {
-  // Eliminate extraneous data from IPFS snapshots
-
-  const team = project.team.map(({ user }) => user.farcasterId)
-  const github = project.repos
-    .filter((repo) => repo.type === "github")
-    .map((repo) => repo.url)
-  const packages = project.repos
-    .filter((repo) => repo.type === "package")
-    .map((repo) => repo.url)
-
-  const contracts = project.contracts.map((contract) => ({
-    address: contract.contractAddress,
-    deploymentTxHash: contract.deploymentHash,
-    deployerAddress: contract.deployerAddress,
-    chainId: contract.chainId,
-  }))
-
-  const venture = project.funding
-    .filter((funding) => funding.type === "venture")
-    .map((funding) => ({
-      amount: funding.amount,
-      year: funding.receivedAt,
-      details: funding.details,
-    }))
-  const revenue = project.funding
-    .filter((funding) => funding.type === "revenue")
-    .map((funding) => ({
-      amount: funding.amount,
-      details: funding.details,
-    }))
-  const grants = project.funding
-    .filter(
-      (funding) => funding.type !== "venture" && funding.type !== "revenue",
-    )
-    .map((funding) => ({
-      grant: funding.grant,
-      link: funding.grantUrl,
-      amount: funding.amount,
-      date: funding.receivedAt,
-      details: funding.details,
-    }))
-
-  const metadata = {
-    name: project.name,
-    description: project.description,
-    projectAvatarUrl: project.thumbnailUrl,
-    proejctCoverImageUrl: project.bannerUrl,
-    category: project.category,
-    osoSlug: project.openSourceObserverSlug,
-    socialLinks: {
-      website: project.website,
-      farcaster: project.farcaster,
-      twitter: project.twitter,
-      mirror: project.mirror,
-    },
-    team,
-    github,
-    packages,
-    contracts,
-    grantsAndFunding: {
-      ventureFunding: venture,
-      grants,
-      revenue,
-    },
-  }
-
-  return metadata
-}
 
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()
@@ -147,4 +79,40 @@ export const createProjectSnapshot = async (projectId: string) => {
       error,
     }
   }
+}
+
+export const createProjectSnapshotOnBehalf = async (
+  project: ProjectMetadata,
+  projectId: string,
+  farcasterId: string,
+) => {
+  // Update project details in the database
+  const updateProjectPromise = updateAllForProject(project, projectId)
+
+  const attestationPromise = (async () => {
+    // Upload metadata to IPFS
+    const ipfsHash = await uploadToPinata(projectId, project)
+
+    // Create attestation
+    const attestationId = await createProjectMetadataAttestation({
+      farcasterId: parseInt(farcasterId),
+      projectId: projectId,
+      name: project.name,
+      category: project.category ?? "",
+      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    })
+
+    return { ipfsHash, attestationId }
+  })()
+
+  const [{ ipfsHash, attestationId }, _] = await Promise.all([
+    attestationPromise,
+    updateProjectPromise,
+  ])
+
+  return addProjectSnapshot({
+    projectId,
+    ipfsHash,
+    attestationId,
+  })
 }
