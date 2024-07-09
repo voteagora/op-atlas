@@ -1,4 +1,4 @@
-import { isAfter } from "date-fns"
+import { format, isAfter } from "date-fns"
 import { ArrowUpRight, Check } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
@@ -13,7 +13,8 @@ import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import ExternalLink from "../ExternalLink"
+import { Callout } from "../common/Callout"
+import ExternalLink, { MaybeLink } from "../ExternalLink"
 import {
   Accordion,
   AccordionContent,
@@ -30,7 +31,9 @@ export function ClaimForm({ reward }: { reward: RewardWithProject }) {
       <ClaimFormAddress reward={reward} />
       <ClaimFormKYC
         reward={reward}
-        disabled={!Boolean(reward.claim?.address)}
+        disabled={
+          !Boolean(reward.claim?.address) || reward.claim?.status !== "pending"
+        }
       />
       <ClaimFormSuperfluid
         reward={reward}
@@ -179,6 +182,17 @@ function ClaimFormKYC({
   reward: RewardWithProject
   disabled: boolean
 }) {
+  const formLink = useMemo<string | null>(() => {
+    if (disabled) {
+      return null
+    }
+    if (!reward.id || !reward.projectId || !reward.claim?.address) {
+      return null
+    }
+
+    return `https://superchain.typeform.com/to/KoPTjofd#grant_id=${reward.id}&project_id=${reward.projectId}&l2_address=${reward.claim.address}`
+  }, [reward, disabled])
+
   return (
     <Accordion
       type="single"
@@ -196,26 +210,67 @@ function ClaimFormKYC({
         <AccordionContent className="flex flex-col gap-12">
           <div className="flex flex-col gap-6">
             <div className="text-secondary-foreground text-sm">
-              First, submit the grant eligibility form. Only one project admin
-              needs to submit the form. Please note that it could take up to 2
-              business days after form submission to see your status updated
-              here.
+              <span className="text-foreground font-medium">
+                First, submit the grant eligibility form.
+              </span>{" "}
+              Only one project admin needs to submit the form.
             </div>
 
-            <ExternalLink href="kyc-link-here">
+            <MaybeLink url={formLink} className="self-start">
               <Button
-                disabled={disabled}
+                disabled={disabled || !formLink}
                 variant="destructive"
                 className="flex gap-[10px] items-center"
               >
-                <div>Get started</div>
+                <div>Fill out the form</div>
                 <ArrowUpRight size={16} />
               </Button>
+            </MaybeLink>
+          </div>
+          <div className="flex flex-col gap-6">
+            <div className="text-secondary-foreground text-sm">
+              <span className="text-foreground font-medium">
+                Next, verify your identity.
+              </span>{" "}
+              Each person or business identified in the form must verify their
+              identity. Individuals should verify at kyc.optimism.io while
+              businesses should verify at kyb.optimism.io.
+            </div>
+
+            <div className="flex items-center gap-2">
+              <MaybeLink url={disabled ? null : "https://kyb.optimism.io"}>
+                <Button
+                  disabled={disabled}
+                  variant="secondary"
+                  className="flex gap-[10px] items-center"
+                >
+                  <div>Verify my business</div>
+                  <ArrowUpRight size={16} />
+                </Button>
+              </MaybeLink>
+
+              <MaybeLink url={disabled ? null : "https://kyc.optimism.io"}>
+                <Button
+                  disabled={disabled}
+                  variant="secondary"
+                  className="flex gap-[10px] items-center"
+                >
+                  <div>Verify my ID</div>
+                  <ArrowUpRight size={16} />
+                </Button>
+              </MaybeLink>
+            </div>
+          </div>
+
+          <p className="text-secondary-foreground text-xs">
+            Need help? Contact{" "}
+            <ExternalLink
+              href="mailto:retrofunding.optimism.io"
+              className="text-foreground font-medium"
+            >
+              retrofunding@optimism.io
             </ExternalLink>
-          </div>
-          <div className="text-secondary-foreground text-sm">
-            Then, each responsible individual must verify their identity.
-          </div>
+          </p>
         </AccordionContent>
       </AccordionItem>
     </Accordion>
@@ -264,18 +319,32 @@ function ClaimFormSuperfluid({
               Tokens will be streamed over 100 days on Superfluid.
             </div>
 
-            {/* TODO: Final superfluid link */}
-            <ExternalLink href="https://www.superfluid.finance/">
-              <Button
-                disabled={disabled || !canStartStream}
-                variant="destructive"
-                className="flex gap-[10px] items-center"
-                onClick={onStartStream}
+            {reward.claim?.tokenStreamClaimableAt && !canStartStream ? (
+              <Callout
+                type="info"
+                showIcon={false}
+                text={`You can start your token stream on or after ${format(
+                  reward.claim.tokenStreamClaimableAt,
+                  "eeee, MMMM d",
+                )}`}
+              />
+            ) : (
+              // TODO: Final superfluid link
+              <ExternalLink
+                href="https://www.superfluid.finance/"
+                className="self-start"
               >
-                <div>Claim with Superfluid</div>
-                <ArrowUpRight size={16} />
-              </Button>
-            </ExternalLink>
+                <Button
+                  disabled={disabled || !canStartStream}
+                  variant="destructive"
+                  className="flex gap-[10px] items-center"
+                  onClick={onStartStream}
+                >
+                  <div>Claim with Superfluid</div>
+                  <ArrowUpRight size={16} />
+                </Button>
+              </ExternalLink>
+            )}
           </div>
         </AccordionContent>
       </AccordionItem>

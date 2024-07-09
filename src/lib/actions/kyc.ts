@@ -10,7 +10,10 @@ import { getReward, updateClaim } from "@/db/rewards"
  *
  * status can be:
  * - not started
+ * - pending
+ * - in review
  * - cleared
+ * - rejected
  */
 export const processKYC = async (entries: string[]) => {
   let counter = 0

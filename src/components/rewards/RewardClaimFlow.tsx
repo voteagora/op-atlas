@@ -67,9 +67,9 @@ const RewardClaimFlow = ({
           >
             View frequently asked questions
           </ExternalLink>{" "}
-          or {/* TODO: Final support link */}
+          or{" "}
           <ExternalLink
-            href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+            href="mailto:retrofunding@optimism.io"
             className="font-medium"
           >
             contact support
