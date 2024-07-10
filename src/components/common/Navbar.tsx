@@ -22,6 +22,8 @@ import { MobileNav } from "./MobileNav"
 const Navbar = () => {
   const pathname = usePathname()
   const isRounds = pathname === "/" || pathname === "/rounds"
+  const isProjects = pathname.includes("/round/")
+
   const [showMobileNav, setShowMobileNav] = useState(false)
 
   return (
@@ -62,6 +64,25 @@ const Navbar = () => {
                   href="/rounds"
                 >
                   Rounds
+                </Link>
+              </div>
+            </div>
+            <div
+              className={cn(
+                "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
+                isProjects
+                  ? "border-b-4 border-[#0F111A] text-text-default"
+                  : "",
+              )}
+            >
+              <div className="flex items-center">
+                <Link
+                  className={`${
+                    isProjects ? "mt-1" : "group-hover:mt-1"
+                  } focus:outline-none focus:opacity-80`}
+                  href="/round/4/results"
+                >
+                  Projects
                 </Link>
               </div>
             </div>
