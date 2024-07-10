@@ -15,6 +15,13 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
       <Link className="text-2xl font-semibold" href="/rounds" onClick={onClose}>
         Rounds
       </Link>
+      <Link
+        className="text-2xl font-semibold"
+        href="/projects"
+        onClick={onClose}
+      >
+        Projects
+      </Link>
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
           <AccordionTrigger className="text-2xl font-semibold hover:no-underline">
