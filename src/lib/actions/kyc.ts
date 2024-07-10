@@ -19,7 +19,7 @@ function getClaimableTimestamp() {
       "yyyy-MM-dd",
       new Date("2024-07-01T07:00:00.000Z"),
     )
-    if (isAfter(now, parsed)) {
+    if (isAfter(parsed, now)) {
       return parsed
     }
   }
