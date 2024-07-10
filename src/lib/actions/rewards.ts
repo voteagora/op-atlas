@@ -123,7 +123,7 @@ export const completeRewardsClaim = async (rewardId: string) => {
     return isInvalid
   }
 
-  const claim = await updateClaim({ rewardId, status: "claimed" })
+  const claim = await updateClaim(rewardId, { status: "claimed" })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")

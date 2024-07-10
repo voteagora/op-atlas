@@ -1,8 +1,32 @@
 "use server"
 
+import { isAfter, parse } from "date-fns"
 import { isAddress } from "viem"
 
 import { getReward, updateClaim } from "@/db/rewards"
+
+const SUPERFLUID_CLAIM_DATES = [
+  "2024-07-12",
+  // TODO: Add the rest
+]
+
+// Find the next eligible claim date
+function getClaimableTimestamp() {
+  const now = new Date()
+  for (const day of SUPERFLUID_CLAIM_DATES) {
+    const parsed = parse(
+      day,
+      "yyyy-MM-dd",
+      new Date("2024-07-01T07:00:00.000Z"),
+    )
+    if (isAfter(now, parsed)) {
+      return parsed
+    }
+  }
+
+  console.error("No next claimable date found for Superfluid rewards")
+  return null
+}
 
 /**
  * Expecting a format of:
@@ -32,14 +56,6 @@ export const processKYC = async (entries: string[]) => {
     counter += 1
     const [formId, projectId, rewardId, address, status] = fields
 
-    // TODO: Get final status list and see if other action is needed
-    if (status !== "cleared") {
-      console.log(
-        `Skipping reward ${rewardId} (project ${projectId}) - KYC not ready`,
-      )
-      continue
-    }
-
     const reward = await getReward({ id: rewardId })
     if (!reward) {
       console.warn(
@@ -53,9 +69,12 @@ export const processKYC = async (entries: string[]) => {
       )
       continue
     }
-    if (reward.claim.status === "claimed") {
+    if (
+      reward.claim.status === "cleared" ||
+      reward.claim.status === "claimed"
+    ) {
       console.log(
-        `Reward ${rewardId} (project ${projectId}) already claimed, skipping`,
+        `Reward ${rewardId} (project ${projectId}) already through KYC, skipping`,
       )
       continue
     }
@@ -71,13 +90,26 @@ export const processKYC = async (entries: string[]) => {
       continue
     }
 
-    // Valid, update the status
-    await updateClaim({ rewardId, status: "cleared" })
-    console.log(
-      `Updated KYC status for reward ${rewardId} (project ${projectId})`,
-    )
-
-    // TODO: Set the date at which the superfluid stream is claimable
+    if (status === "cleared") {
+      // Valid, set the claim date
+      console.log(`Reward ${rewardId} (project ${projectId}) now claimable`)
+      await updateClaim(rewardId, {
+        status: "cleared",
+        kycStatus: status,
+        kycStatusUpdatedAt: new Date(),
+        tokenStreamClaimableAt: getClaimableTimestamp(),
+      })
+    } else {
+      // TODO: Just updating status for now, see if further action is needed
+      await updateClaim(rewardId, {
+        status: status === "rejected" ? "rejected" : "pending",
+        kycStatus: status,
+        kycStatusUpdatedAt: new Date(),
+      })
+      console.log(
+        `KYC status for reward ${rewardId} (project ${projectId}) now ${status}`,
+      )
+    }
   }
 
   console.log(

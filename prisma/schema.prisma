@@ -80,6 +80,9 @@ model RewardClaim {
   addressSetAt   DateTime?
   addressSetById String?
 
+  kycStatus          String?
+  kycStatusUpdatedAt DateTime?
+
   tokenStreamStatus      String?
   tokenStreamClaimableAt DateTime?
 

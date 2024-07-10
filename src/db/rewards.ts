@@ -1,5 +1,7 @@
 "use server"
 
+import { Prisma } from "@prisma/client"
+
 import { prisma } from "./client"
 
 export async function getReward({ id }: { id: string }) {
@@ -82,19 +84,14 @@ export async function startClaim({
   return prisma.$transaction([deleteClaim, createClaim])
 }
 
-export async function updateClaim({
-  rewardId,
-  status,
-}: {
-  rewardId: string
-  status: string
-}) {
+export async function updateClaim(
+  rewardId: string,
+  data: Prisma.RewardClaimUpdateInput,
+) {
   return prisma.rewardClaim.update({
     where: {
       rewardId,
     },
-    data: {
-      status,
-    },
+    data,
   })
 }
