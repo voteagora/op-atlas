@@ -15,8 +15,7 @@ export function Results() {
   const roundId = params.roundId.toString()
 
   const [searchText, setSearchText] = useState("")
-  const [sortByAmount, setSortByAmount] = useState<"asc" | "desc">("asc")
-  const [projectRound, setProjectRound] = useState("")
+  const [sortByAmount, setSortByAmount] = useState<"asc" | "desc">("desc")
   const [projectRewards, setProjectRewards] = useState<FundingRewardDetails[]>(
     [],
   )
@@ -24,9 +23,10 @@ export function Results() {
   const [error, setError] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
 
   const pageSize = 10
-  const debouncedSearchText = useDebounce<string>(searchText, 2000) // 2-second debounce
+  const debouncedSearchText = useDebounce<string>(searchText, 300) // 2-second debounce
 
   useEffect(() => {
     // Fetch initial data
@@ -56,7 +56,7 @@ export function Results() {
 
   const loadMore = useCallback(async () => {
     try {
-      setLoading(true)
+      setIsFetchingMore(true)
       setError("")
       const nextPage = currentPage + 1
       const fetchedRewards = await findFundingRewards({
@@ -75,7 +75,7 @@ export function Results() {
     } catch (error) {
       setError("Failed to fetch projectRewards")
     } finally {
-      setLoading(false)
+      setIsFetchingMore(false)
     }
   }, [currentPage, roundId, debouncedSearchText, sortByAmount, pageSize])
 
@@ -98,7 +98,6 @@ export function Results() {
           searchText={searchText}
           sortByAmount={sortByAmount}
           setSortByAmount={setSortByAmount}
-          setProjectRound={setProjectRound}
         />
         <ProjectsList
           handleLoadMore={loadMore}
@@ -106,6 +105,7 @@ export function Results() {
           projectRewards={projectRewards}
           loading={loading}
           round={roundId}
+          isFetchingMore={isFetchingMore}
         />
       </div>
     </main>
