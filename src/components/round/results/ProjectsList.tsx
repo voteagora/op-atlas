@@ -1,96 +1,65 @@
 "use client"
+import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import React from "react"
 
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { Button } from "@/components/ui/button"
+import { FundingRewardDetails } from "@/lib/types"
 
-const projectsList = [
-  {
-    title: "Defi Llama",
-    description: "Open and transparent DeFi analytics.",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 1999999,
-  },
-  {
-    title: "Protocol Guild",
-    description:
-      "A collective of Ethereum's active core protocol contributors.",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 1450986,
-  },
-  {
-    title: "Solidity",
-    description:
-      "Solidity is a statically-typed curly-braces programming language for EVM chains.",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 1200343,
-  },
-  {
-    title: "Puky Cats Dapp",
-    description:
-      "We built a purrfect world for cat engineers onchain! It's a universe where engineers have whiskers, tails...",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 900890,
-  },
-  {
-    title: "Infura",
-    description: "A leading Ethereum consensus client written in rust.",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 850340,
-  },
-  {
-    title: "Title of project",
-    description: "Description",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 2999.5,
-  },
-  {
-    title: "Title of project",
-    description: "Description",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 2999.5,
-  },
-  {
-    title: "Title of project",
-    description: "Description",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 2999.5,
-  },
-  {
-    title: "Title of project",
-    description: "Description",
-    ProjectImage: "/assets/images/dummy-project-image.png",
-    funding: 2999.5,
-  },
-]
+interface IProjectListProps {
+  projectRewards: FundingRewardDetails[]
+  loading: boolean
+  round: string | number
+  totalCount: number
+  handleLoadMore: () => void
+}
 
-const ProjectsList = () => {
+const ProjectsList = ({
+  projectRewards,
+  loading,
+  round,
+  totalCount,
+  handleLoadMore,
+}: IProjectListProps) => {
+  if (!projectRewards.length && loading) {
+    return (
+      <div className="flex justify-center items-center mt-4">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div>
       <div className="flex flex-row justify-between w-full mt-6 pb-4">
         <h1 className="text-xl font-semibold">
-          516 projects applied to Round 4
+          {totalCount} projects applied to Round {round}
         </h1>
         <h1 className="text-xl font-semibold">Rewards</h1>
       </div>
       <hr />
-      {projectsList.map((project, index) => (
+      {projectRewards?.map((project: any, index: any) => (
         <React.Fragment key={index}>
           <div className="flex flex-row justify-between py-8">
             <div className="flex flex-row items-center">
               <Image
-                src={project.ProjectImage}
-                alt={project.title}
-                width={64}
+                className="rounded-md"
+                src={
+                  project?.Project?.thumbnailUrl
+                    ? project?.Project?.thumbnailUrl
+                    : "/assets/images/dummy-project-image.png"
+                }
+                alt={project?.Project?.name}
                 height={64}
+                width={64}
               />
               <div className="ml-4">
                 <h5 className="text-base font-semibold text-text-default">
-                  {project.title}
+                  {project?.Project?.name}
                 </h5>
                 <p className="text-base font-normal text-secondary-foreground">
-                  {project.description}
+                  {project?.Project?.description}
                 </p>
               </div>
             </div>
@@ -102,20 +71,24 @@ const ProjectsList = () => {
                 height={24}
               />
               <span className="ml-2 text-base font-medium text-foreground">
-                {project.funding}
+                {project?.amount}
               </span>
             </div>
           </div>
           <hr />
         </React.Fragment>
       ))}
-      <Button
-        variant="outline"
-        className="mt-6 text-base font-medium flex justify-center items-center gap-2 mx-auto "
-      >
-        Show more
-        <ArrowLeftIcon fill="#0F111A" className=" -rotate-90" />
-      </Button>
+      {projectRewards !== null && totalCount < projectRewards?.length && (
+        <Button
+          variant="outline"
+          className="mt-6 text-base font-medium flex justify-center items-center gap-2 mx-auto"
+          onClick={handleLoadMore}
+          isLoading={loading}
+        >
+          Show more
+          <ArrowLeftIcon fill="#0F111A" className=" -rotate-90" />
+        </Button>
+      )}
     </div>
   )
 }

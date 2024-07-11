@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React from "react"
 
@@ -10,6 +11,8 @@ import { Button } from "@/components/ui/button"
 
 const ResultsHeader = () => {
   const { data: session, status } = useSession()
+  const params = useParams()
+  const roundId = params.roundId.toString()
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -26,7 +29,7 @@ const ResultsHeader = () => {
             className="flex items-center gap-2.5 w-full h-full py-2 px-3 text-sm font-medium"
             href="https://docs.opensource.observer/docs/contribute/project-data"
           >
-            Round 4 analytics
+            Round {roundId} analytics
             <Image
               src="/assets/icons/arrow-up-right.svg"
               height={8}
