@@ -22,10 +22,13 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
 }
 
 // Optimism address
-const eas = new EAS("0x4200000000000000000000000000000000000021")
+const eas =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? new EAS("0xC2679fBD37d54388Ce493F1DB75320D236e1815e")
+    : new EAS("0x4200000000000000000000000000000000000021")
 
 const provider = new ethers.AlchemyProvider(
-  "optimism",
+  process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",
   process.env.ALCHEMY_API_KEY,
 )
 
@@ -49,12 +52,14 @@ async function createAttestation(schemaId: string, data: string) {
 
 export async function createProjectAttestation({
   farcasterId,
+  issuer = "OP Atlas",
 }: {
   farcasterId: number
+  issuer?: string
 }) {
   const data = projectSchema.encodeData([
     { name: "farcasterID", value: farcasterId, type: "uint256" },
-    { name: "issuer", value: "OP Atlas", type: "string" },
+    { name: "issuer", value: issuer, type: "string" },
   ])
 
   const attestationId = await createAttestation(PROJECT_SCHEMA_ID, data)
