@@ -52,7 +52,7 @@ export function DeveloperCallout() {
           Calling all developers! We need your vote in Retro Funding Round 5: OP
           Stack
         </p>
-        <div>Apply to vote by July 18.</div>
+        <div>Apply to vote by July 31.</div>
       </div>
       <ArrowRight size={24} />
     </ExternalLink>
