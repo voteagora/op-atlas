@@ -8,99 +8,111 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
+  id            String  @id @default(uuid())
   name          String?
   username      String?
-  farcasterId   String         @unique
+  farcasterId   String  @unique
   imageUrl      String?
   bio           String?
   email         String?
-  emailVerified Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  deletedAt     DateTime?
+  emailVerified Boolean @default(false)
   github        String?
-  notDeveloper  Boolean        @default(false)
-  RewardClaim   RewardClaim[]
-  addresses     UserAddress[]
-  projects      UserProjects[]
+  notDeveloper  Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  projects  UserProjects[]
+  addresses UserAddress[]
 }
 
 model UserAddress {
-  address   String
-  userId    String
-  source    String
+  address String
+  userId  String
+  source  String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
 
   @@id([address, userId])
   @@index([userId])
 }
 
 model FundingRound {
-  id            String          @id
-  name          String
-  imageUrl      String
-  description   String
-  rewards       String?
-  startDate     DateTime
-  endDate       DateTime
-  applications  Application[]
-  FundingReward FundingReward[]
+  id          String   @id
+  name        String
+  imageUrl    String
+  description String
+  rewards     String?
+  startDate   DateTime
+  endDate     DateTime
+
+  applications Application[]
 }
 
 model Project {
-  id                     String              @id @default(uuid())
-  name                   String
-  description            String?
-  category               String?
-  thumbnailUrl           String?
-  bannerUrl              String?
-  twitter                String?
-  mirror                 String?
-  createdAt              DateTime            @default(now())
-  updatedAt              DateTime            @updatedAt
-  deletedAt              DateTime?
-  website                String[]
-  farcaster              String[]
-  addedTeamMembers       Boolean             @default(false)
+  id           String  @id @default(uuid())
+  name         String
+  description  String?
+  category     String?
+  thumbnailUrl String?
+  bannerUrl    String?
+
+  website   String[]
+  farcaster String[]
+  twitter   String?
+  mirror    String?
+
   openSourceObserverSlug String?
-  addedFunding           Boolean             @default(false)
-  lastMetadataUpdate     DateTime            @default(now())
-  applications           Application[]
-  FundingReward          FundingReward[]
-  contracts              ProjectContract[]
-  funding                ProjectFunding[]
-  repos                  ProjectRepository[]
-  snapshots              ProjectSnapshot[]
-  team                   UserProjects[]
+  addedTeamMembers       Boolean  @default(false)
+  addedFunding           Boolean  @default(false)
+  lastMetadataUpdate     DateTime @default(now())
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  team         UserProjects[]
+  repos        ProjectRepository[]
+  contracts    ProjectContract[]
+  funding      ProjectFunding[]
+  snapshots    ProjectSnapshot[]
+  applications Application[]
 }
 
 model Application {
-  id            String       @id @default(uuid())
-  status        String       @default("submitted")
+  id            String @id @default(uuid())
+  status        String @default("submitted")
   attestationId String
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  roundId       String
-  projectId     String
-  project       Project      @relation(fields: [projectId], references: [id])
-  round         FundingRound @relation(fields: [roundId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roundId   String
+  projectId String
+
+  round   FundingRound @relation(fields: [roundId], references: [id])
+  project Project      @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
 }
 
 model UserProjects {
-  id        String    @id @default(uuid())
+  id   String @id @default(uuid())
+  role String @default("member")
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
   userId    String
   projectId String
-  role      String    @default("member")
-  deletedAt DateTime?
-  project   Project   @relation(fields: [projectId], references: [id])
-  user      User      @relation(fields: [userId], references: [id])
+
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
 
   @@unique([userId, projectId])
   @@index([userId, deletedAt])
@@ -108,90 +120,73 @@ model UserProjects {
 }
 
 model ProjectSnapshot {
-  id            String   @id @default(uuid())
+  id            String @id @default(uuid())
   ipfsHash      String
   attestationId String
-  createdAt     DateTime @default(now())
-  projectId     String
-  project       Project  @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
 }
 
 model ProjectRepository {
-  id                String   @id @default(uuid())
+  id                String  @id @default(uuid())
   type              String
-  url               String   @unique
-  verified          Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  projectId         String
-  containsContracts Boolean  @default(false)
-  openSource        Boolean  @default(false)
-  project           Project  @relation(fields: [projectId], references: [id])
+  url               String  @unique
+  verified          Boolean @default(false)
+  openSource        Boolean @default(false)
+  containsContracts Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
 }
 
 model ProjectContract {
-  id                String   @id @default(uuid())
+  id                String @id @default(uuid())
   contractAddress   String
   deployerAddress   String
   deploymentHash    String
-  chainId           Int
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  projectId         String
   verificationProof String
-  project           Project  @relation(fields: [projectId], references: [id])
+  chainId           Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
 
   @@unique([contractAddress, chainId])
   @@index([projectId])
 }
 
 model ProjectFunding {
-  id         String   @id @default(uuid())
+  id         String  @id @default(uuid())
   type       String
   grant      String?
   grantUrl   String?
   amount     String
   receivedAt String
   details    String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  projectId  String
-  project    Project  @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
-}
-
-model FundingReward {
-  id           String       @id
-  roundId      String
-  projectId    String
-  amount       Int
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime
-  Project      Project      @relation(fields: [projectId], references: [id])
-  FundingRound FundingRound @relation(fields: [roundId], references: [id])
-  RewardClaim  RewardClaim?
-
-  @@unique([roundId, projectId])
-  @@index([projectId])
-}
-
-model RewardClaim {
-  rewardId               String        @id
-  status                 String
-  address                String?
-  addressSetAt           DateTime?
-  addressSetById         String?
-  tokenStreamStatus      String?
-  createdAt              DateTime      @default(now())
-  updatedAt              DateTime
-  tokenStreamClaimableAt DateTime?
-  User                   User?         @relation(fields: [addressSetById], references: [id])
-  FundingReward          FundingReward @relation(fields: [rewardId], references: [id])
 }
 
 model ApiUser {

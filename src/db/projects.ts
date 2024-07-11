@@ -610,15 +610,15 @@ export async function getUserApplications({ userId }: { userId: string }) {
 export async function getFundingRewardsByRoundIdAndSearch({
   roundId,
   search,
-  sortByAmount,
-  page,
-  pageSize,
+  sortBy,
+  page = 1,
+  pageSize = 10,
 }: {
   roundId: string
   search: string
-  sortByAmount: "asc" | "desc"
-  page: number
-  pageSize: number
+  sortBy: "asc" | "desc"
+  page?: number
+  pageSize?: number
 }) {
   const skip = (page - 1) * pageSize
   const take = pageSize
@@ -666,7 +666,7 @@ export async function getFundingRewardsByRoundIdAndSearch({
         },
       },
       orderBy: {
-        amount: sortByAmount,
+        amount: sortBy,
       },
       skip,
       take,

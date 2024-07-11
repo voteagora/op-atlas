@@ -1,19 +1,13 @@
-"use client"
 import React from "react"
 
-interface IProps {
+interface Props {
   fill?: string
   className?: string
   height?: number
   width?: number
 }
 
-const ArrowLeftIcon: React.FC<IProps> = ({
-  fill,
-  className,
-  height,
-  width,
-}) => {
+const ArrowLeftIcon = ({ fill, className, height, width }: Props) => {
   return (
     <svg
       className={className}

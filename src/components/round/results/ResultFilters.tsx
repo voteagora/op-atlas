@@ -1,7 +1,7 @@
 "use client"
 import { Search } from "lucide-react"
 import Image from "next/image"
-import { Dispatch, SetStateAction, useState } from "react"
+import { Dispatch, SetStateAction } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -20,25 +20,25 @@ const options = [
   { label: "Lowest rewards", state: "asc" },
 ]
 
-interface ResultFiltersProps {
+interface Props {
   setSearchText: Dispatch<SetStateAction<string>>
   searchText: string
-  sortByAmount: "asc" | "desc"
-  setSortByAmount: Dispatch<SetStateAction<"asc" | "desc">>
+  sortBy: "asc" | "desc"
+  setSortBy: Dispatch<SetStateAction<"asc" | "desc">>
 }
-const ResultFilters: React.FC<ResultFiltersProps> = ({
+const ResultFilters = ({
   searchText,
   setSearchText,
-  sortByAmount,
-  setSortByAmount,
-}) => {
+  sortBy,
+  setSortBy,
+}: Props) => {
   const handleSortOptionChange = (state: string) => {
-    setSortByAmount(state as "asc" | "desc")
+    setSortBy(state as "asc" | "desc")
   }
 
   return (
     <div className="flex flex-row gap-2 mt-10">
-      <div className="max-w[576px] w-full flex items-center border px-3 rounded-md">
+      <div className="w-full flex items-center border px-3 rounded-md">
         <Search className="mr-2 h-4 w-4" />
         <Input
           value={searchText}
@@ -53,7 +53,7 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
             variant="secondary"
             className="text-sm font-normal gap-2 text-muted-foreground focus-visible:ring-0"
           >
-            {options.find((option) => option.state === sortByAmount)?.label}
+            {options.find((option) => option.state === sortBy)?.label}
             <Image
               src="/assets/icons/arrowDownIcon.svg"
               height={8}
@@ -70,7 +70,7 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
           {options.map((option) => (
             <DropdownMenuCheckboxItem
               className="text-sm font-normal"
-              checked={sortByAmount === option.state}
+              checked={sortBy === option.state}
               key={option.label}
               onCheckedChange={(checked) =>
                 checked && handleSortOptionChange(option.state)

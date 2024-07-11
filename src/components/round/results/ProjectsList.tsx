@@ -7,7 +7,7 @@ import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { Button } from "@/components/ui/button"
 import { FundingRewardDetails } from "@/lib/types"
 
-interface IProjectListProps {
+interface Props {
   projectRewards: FundingRewardDetails[]
   loading: boolean
   round: string | number
@@ -23,7 +23,7 @@ const ProjectsList = ({
   totalCount,
   handleLoadMore,
   isFetchingMore,
-}: IProjectListProps) => {
+}: Props) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center mt-4">
@@ -41,17 +41,13 @@ const ProjectsList = ({
         <h1 className="text-xl font-semibold">Rewards</h1>
       </div>
       <hr />
-      {projectRewards?.map((project: any, index: any) => (
-        <React.Fragment key={index}>
+      {projectRewards?.map((project, index) => (
+        <React.Fragment key={project.id}>
           <div className="flex flex-row justify-between py-8">
             <div className="flex flex-row items-center">
               <Image
                 className="rounded-md"
-                src={
-                  project?.Project?.thumbnailUrl
-                    ? project?.Project?.thumbnailUrl
-                    : "/assets/images/dummy-project-image.png"
-                }
+                src={project?.Project?.thumbnailUrl ?? ""}
                 alt={project?.Project?.name}
                 height={64}
                 width={64}

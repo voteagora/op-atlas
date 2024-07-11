@@ -5,21 +5,21 @@ import { getFundingRewardsByRoundIdAndSearch } from "@/db/projects"
 export const findFundingRewards = async ({
   roundId,
   search,
-  sortByAmount,
+  sortBy,
   page,
   pageSize,
 }: {
   roundId: string
   search: string
-  sortByAmount: "asc" | "desc"
-  page: number
-  pageSize: number
+  sortBy: "asc" | "desc"
+  page?: number
+  pageSize?: number
 }) => {
   try {
     const fundingRewardsData = await getFundingRewardsByRoundIdAndSearch({
       roundId,
       search,
-      sortByAmount,
+      sortBy,
       page,
       pageSize,
     })

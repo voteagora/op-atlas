@@ -70,9 +70,7 @@ const Navbar = () => {
             <div
               className={cn(
                 "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
-                isProjects
-                  ? "border-b-4 border-[#0F111A] text-text-default"
-                  : "",
+                isProjects && "border-b-4 border-[#0F111A] text-text-default",
               )}
             >
               <div className="flex items-center">

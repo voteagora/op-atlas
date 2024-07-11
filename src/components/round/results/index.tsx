@@ -1,9 +1,9 @@
 "use client"
 import { useParams } from "next/navigation"
 import React, { useCallback, useEffect, useState } from "react"
+import { useDebounceValue } from "usehooks-ts"
 
-import useDebounce from "@/hooks/useDebounce"
-import { findFundingRewards } from "@/lib/actions/projectandrewards"
+import { findFundingRewards } from "@/lib/actions/results"
 import { FundingRewardDetails } from "@/lib/types"
 
 import ProjectsList from "./ProjectsList"
@@ -15,7 +15,7 @@ export function Results() {
   const roundId = params.roundId.toString()
 
   const [searchText, setSearchText] = useState("")
-  const [sortByAmount, setSortByAmount] = useState<"asc" | "desc">("desc")
+  const [sortBy, setSortBy] = useState<"asc" | "desc">("desc")
   const [projectRewards, setProjectRewards] = useState<FundingRewardDetails[]>(
     [],
   )
@@ -26,58 +26,51 @@ export function Results() {
   const [isFetchingMore, setIsFetchingMore] = useState(false)
 
   const pageSize = 10
-  const debouncedSearchText = useDebounce<string>(searchText, 300) // 2-second debounce
+  const [debouncedSearchText] = useDebounceValue(searchText, 300)
 
-  useEffect(() => {
-    // Fetch initial data
-    async function fetchData() {
+  const fetchData = useCallback(
+    async (page: number) => {
       try {
-        setLoading(true)
+        if (page === 1) setLoading(true)
+        else setIsFetchingMore(true)
+
         setError("")
         const fetchedRewards = await findFundingRewards({
           roundId,
           search: debouncedSearchText,
-          sortByAmount,
-          page: 1,
+          sortBy,
+          page,
           pageSize,
         })
 
-        setProjectRewards(fetchedRewards.fundingRewards?.rewards ?? [])
+        if (page === 1) {
+          setProjectRewards(fetchedRewards.fundingRewards?.rewards ?? [])
+        } else {
+          setProjectRewards((prevRewards) => [
+            ...prevRewards,
+            ...(fetchedRewards.fundingRewards?.rewards ?? []),
+          ])
+        }
+
         setTotalCount(fetchedRewards.fundingRewards?.totalCount || 0)
-        setCurrentPage(1)
+        setCurrentPage(page)
       } catch (error) {
-        setError("Failed to fetch projectRewards")
+        setError("Failed to fetch project rewards")
       } finally {
         setLoading(false)
+        setIsFetchingMore(false)
       }
-    }
-    fetchData()
-  }, [debouncedSearchText, roundId, sortByAmount])
+    },
+    [roundId, debouncedSearchText, sortBy, pageSize],
+  )
 
-  const loadMore = useCallback(async () => {
-    try {
-      setIsFetchingMore(true)
-      setError("")
-      const nextPage = currentPage + 1
-      const fetchedRewards = await findFundingRewards({
-        roundId,
-        search: debouncedSearchText,
-        sortByAmount,
-        page: nextPage,
-        pageSize,
-      })
+  useEffect(() => {
+    fetchData(1)
+  }, [fetchData])
 
-      setProjectRewards((prevRewards) => [
-        ...prevRewards,
-        ...(fetchedRewards.fundingRewards?.rewards ?? []),
-      ])
-      setCurrentPage(nextPage)
-    } catch (error) {
-      setError("Failed to fetch projectRewards")
-    } finally {
-      setIsFetchingMore(false)
-    }
-  }, [currentPage, roundId, debouncedSearchText, sortByAmount, pageSize])
+  const loadMore = useCallback(() => {
+    fetchData(currentPage + 1)
+  }, [fetchData, currentPage])
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -96,8 +89,8 @@ export function Results() {
         <ResultFilters
           setSearchText={setSearchText}
           searchText={searchText}
-          sortByAmount={sortByAmount}
-          setSortByAmount={setSortByAmount}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
         />
         <ProjectsList
           handleLoadMore={loadMore}
