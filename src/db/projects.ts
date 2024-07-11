@@ -621,7 +621,7 @@ export async function updateAllForProject(
       description: project.description,
       category: project.category,
       thumbnailUrl: project.projectAvatarUrl,
-      bannerUrl: project.proejctCoverImageUrl,
+      bannerUrl: project.projectCoverImageUrl,
       website: project.socialLinks.website,
       twitter: project.socialLinks.twitter,
       mirror: project.socialLinks.mirror,
