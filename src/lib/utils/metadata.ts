@@ -4,7 +4,7 @@ export type ProjectMetadata = {
   name: string
   description: string | null
   projectAvatarUrl: string | null
-  proejctCoverImageUrl: string | null
+  projectCoverImageUrl: string | null
   category: string | null
   osoSlug: string | null
   socialLinks: {
@@ -93,7 +93,7 @@ export function formatProjectMetadata(
     name: project.name,
     description: project.description,
     projectAvatarUrl: project.thumbnailUrl,
-    proejctCoverImageUrl: project.bannerUrl,
+    projectCoverImageUrl: project.bannerUrl,
     category: project.category,
     osoSlug: project.openSourceObserverSlug,
     socialLinks: {
