@@ -13,6 +13,7 @@ interface IProjectListProps {
   round: string | number
   totalCount: number
   handleLoadMore: () => void
+  isFetchingMore: boolean
 }
 
 const ProjectsList = ({
@@ -21,8 +22,9 @@ const ProjectsList = ({
   round,
   totalCount,
   handleLoadMore,
+  isFetchingMore,
 }: IProjectListProps) => {
-  if (!projectRewards.length && loading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center mt-4">
         <Loader2 className="h-10 w-10 animate-spin" />
@@ -71,19 +73,19 @@ const ProjectsList = ({
                 height={24}
               />
               <span className="ml-2 text-base font-medium text-foreground">
-                {project?.amount}
+                {Number(project?.amount).toLocaleString("en-US")}
               </span>
             </div>
           </div>
           <hr />
         </React.Fragment>
       ))}
-      {projectRewards !== null && totalCount < projectRewards?.length && (
+      {totalCount > projectRewards?.length && (
         <Button
           variant="outline"
           className="mt-6 text-base font-medium flex justify-center items-center gap-2 mx-auto"
           onClick={handleLoadMore}
-          isLoading={loading}
+          isLoading={isFetchingMore}
         >
           Show more
           <ArrowLeftIcon fill="#0F111A" className=" -rotate-90" />

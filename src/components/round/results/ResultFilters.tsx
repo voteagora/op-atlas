@@ -20,38 +20,20 @@ const options = [
   { label: "Lowest rewards", state: "asc" },
 ]
 
-const projectRoundOptions = [
-  { label: "Round 4", state: "Round4", disabled: false },
-  { label: "Round 5", state: "Round5", disabled: true },
-  { label: "Round 6", state: "Round6", disabled: true },
-  { label: "Round 7", state: "Round7", disabled: true },
-]
-
 interface ResultFiltersProps {
   setSearchText: Dispatch<SetStateAction<string>>
   searchText: string
   sortByAmount: "asc" | "desc"
   setSortByAmount: Dispatch<SetStateAction<"asc" | "desc">>
-  setProjectRound: Dispatch<SetStateAction<string>>
 }
 const ResultFilters: React.FC<ResultFiltersProps> = ({
   searchText,
   setSearchText,
   sortByAmount,
   setSortByAmount,
-  setProjectRound,
 }) => {
-  const [activeProjectRoundOption, setActiveProjectRoundOption] = useState<
-    string | null
-  >(projectRoundOptions[0].state)
-
   const handleSortOptionChange = (state: string) => {
     setSortByAmount(state as "asc" | "desc")
-  }
-
-  const handleProjectRoundChange = (state: string) => {
-    setActiveProjectRoundOption(state)
-    setProjectRound(state)
   }
 
   return (
@@ -95,47 +77,6 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
               }
             >
               {option.label}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="secondary"
-            className="text-sm font-normal gap-2 text-muted-foreground focus-visible:ring-0"
-          >
-            Show projects from{" "}
-            {
-              projectRoundOptions.find(
-                (projectRoundOption) =>
-                  projectRoundOption.state === activeProjectRoundOption,
-              )?.label
-            }
-            <Image
-              src="/assets/icons/arrowDownIcon.svg"
-              height={8}
-              width={10}
-              alt="Arrow up"
-            />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
-          <DropdownMenuLabel className="text-sm font-semibold">
-            Show projects from
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {projectRoundOptions.map((projectRoundOption) => (
-            <DropdownMenuCheckboxItem
-              className="text-sm font-normal"
-              checked={activeProjectRoundOption === projectRoundOption.state}
-              key={projectRoundOption.label}
-              onCheckedChange={(checked) =>
-                checked && handleProjectRoundChange(projectRoundOption.state)
-              }
-              disabled={projectRoundOption.disabled}
-            >
-              {projectRoundOption.label}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
