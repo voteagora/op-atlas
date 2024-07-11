@@ -20,7 +20,7 @@ export type ProjectMetadata = {
     address: string
     deploymentTxHash: string
     deployerAddress: string
-    verficationProof: string | null
+    verificationProof: string | null
     chainId: number
   }[]
   grantsAndFunding: {
@@ -60,7 +60,7 @@ export function formatProjectMetadata(
     address: contract.contractAddress,
     deploymentTxHash: contract.deploymentHash,
     deployerAddress: contract.deployerAddress,
-    verficationProof: contract.verificationProof,
+    verificationProof: contract.verificationProof,
     chainId: contract.chainId,
   }))
 

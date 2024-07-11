@@ -27,7 +27,7 @@ const ProjectMetadataValidator = z.object({
       address: z.string(),
       deploymentTxHash: z.string(),
       deployerAddress: z.string(),
-      verficationProof: z.string().nullable().default(null),
+      verificationProof: z.string().nullable().default(null),
       chainId: z.number().min(1),
     }),
   ),

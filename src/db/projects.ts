@@ -642,7 +642,7 @@ export async function updateAllForProject(
       contractAddress: contract.address,
       deploymentHash: contract.deploymentTxHash,
       deployerAddress: contract.deployerAddress,
-      verificationProof: contract.verficationProof ?? "",
+      verificationProof: contract.verificationProof ?? "",
       chainId: contract.chainId,
       projectId,
     })),
