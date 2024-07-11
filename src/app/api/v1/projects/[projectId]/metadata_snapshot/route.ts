@@ -10,7 +10,7 @@ const ProjectMetadataValidator = z.object({
   name: z.string(),
   description: z.string().nullable().default(null),
   projectAvatarUrl: z.string().nullable().default(null),
-  proejctCoverImageUrl: z.string().nullable().default(null),
+  projectCoverImageUrl: z.string().nullable().default(null),
   category: z.string().nullable().default(null),
   osoSlug: z.string().nullable().default(null),
   socialLinks: z.object({
