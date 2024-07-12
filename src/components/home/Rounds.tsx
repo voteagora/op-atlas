@@ -1,5 +1,6 @@
-import Image from "next/image"
-import Link from "next/link"
+"use client"
+
+import { useSession } from "next-auth/react"
 
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 
@@ -8,8 +9,15 @@ import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
 
 export function Rounds() {
+  const { data } = useSession()
+
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
+      {!data && (
+        <div className="z-10 w-full py-3 text-center text-background text-sm font-medium bg-accent-foreground">
+          The results are in! Sign in to see your Retro Funding Round 4 results.
+        </div>
+      )}
       {/* Background image */}
       <div
         className="absolute h-[500px] w-full"

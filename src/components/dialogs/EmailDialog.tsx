@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { memo, useState } from "react"
 import { toast } from "sonner"
+import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,22 +20,35 @@ import { useUpdateEmail } from "@/lib/hooks"
 import { Input } from "../ui/input"
 import { DialogProps } from "./types"
 
+const schema = z.object({
+  email: z.string().email(),
+})
+
 function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
   const { data: session } = useSession()
   const updateEmail = useUpdateEmail()
+
   const [email, setEmail] = useState(session?.user.email ?? "")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string>()
 
   const saveEmail = async () => {
     if (!email) return
 
     setLoading(true)
     try {
+      if (!schema.safeParse({ email }).success) {
+        setError("Invalid email address")
+        return
+      }
+
       await updateEmail(email)
       toast.success("Email added")
       onOpenChange(false)
+      setError(undefined)
     } catch (error) {
       console.error("Error updating email", error)
+      setError("Something went wrong, please try again")
     } finally {
       setLoading(false)
     }
@@ -56,7 +70,7 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
             Please add email for important messages
           </DialogTitle>
           <DialogDescription className="text-center text-base font-normal text-text-secondary mt-1 flex flex-col gap-6">
-            This step is required to apply for Retro Funding. It should be a
+            This step is required to claim Retro Funding. It should be a
             personal email where we can reliably reach you. Don&apos;t worry,
             we&apos;ll keep it private.
             <div className="flex flex-col gap-2">
@@ -67,6 +81,11 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
                 value={email}
                 onChange={({ target }) => setEmail(target.value)}
               />
+              {error && (
+                <p className="text-destructive text-sm font-medium self-start">
+                  {error}
+                </p>
+              )}
             </div>
           </DialogDescription>
         </DialogHeader>

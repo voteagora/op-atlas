@@ -10,6 +10,7 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     funding: true
     snapshots: true
     applications: true
+    rewards: { include: { claim: true } }
   }
 }>
 
@@ -40,6 +41,25 @@ export type FundingRewardDetails = Prisma.FundingRewardGetPayload<{
       select: {
         status: true
         address: true
+      }
+    }
+  }
+}>
+
+export type RewardWithProject = Prisma.FundingRewardGetPayload<{
+  include: {
+    claim: {
+      include: {
+        addressSetBy: true
+      }
+    }
+    project: {
+      include: {
+        team: {
+          include: {
+            user: true
+          }
+        }
       }
     }
   }
