@@ -6,8 +6,19 @@ import { isAddress } from "viem"
 import { getReward, updateClaim } from "@/db/rewards"
 
 const SUPERFLUID_CLAIM_DATES = [
-  "2024-07-12",
-  // TODO: Add the rest
+  "2024-08-05",
+  "2024-09-04",
+  "2024-10-03",
+  "2024-11-05",
+  "2024-12-04",
+  "2025-01-06",
+  "2025-02-05",
+  "2025-03-05",
+  "2025-04-03",
+  "2025-05-06",
+  "2025-06-04",
+  "2025-07-07",
+  "2025-08-05",
 ]
 
 // Find the next eligible claim date
@@ -79,11 +90,15 @@ export const processKYC = async (entries: string[]) => {
       continue
     }
 
-    // TODO: Do we need to take action on address mismatch?
     if (
       !isAddress(address) ||
       reward.claim.address?.toLowerCase() !== address.toLowerCase()
     ) {
+      await updateClaim(rewardId, {
+        status: "address_mismatch",
+        kycStatus: status,
+        kycStatusUpdatedAt: new Date(),
+      })
       console.warn(
         `Address mismatch for reward ${rewardId} (address ${address}), skipping`,
       )
@@ -100,7 +115,6 @@ export const processKYC = async (entries: string[]) => {
         tokenStreamClaimableAt: getClaimableTimestamp(),
       })
     } else {
-      // TODO: Just updating status for now, see if further action is needed
       await updateClaim(rewardId, {
         status: status === "rejected" ? "rejected" : "pending",
         kycStatus: status,
