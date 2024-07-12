@@ -47,7 +47,7 @@ export type FundingRewardDetails = Prisma.FundingRewardGetPayload<{
     amount: true
     createdAt: true
     updatedAt: true
-    Project: {
+    project: {
       select: {
         id: true
         name: true
@@ -55,8 +55,7 @@ export type FundingRewardDetails = Prisma.FundingRewardGetPayload<{
         thumbnailUrl: true
       }
     }
-    FundingRound: true
-    RewardClaim: {
+    claim: {
       select: {
         status: true
         address: true
