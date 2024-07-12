@@ -47,17 +47,17 @@ const ProjectsList = ({
             <div className="flex flex-row items-center">
               <Image
                 className="rounded-md"
-                src={project?.Project?.thumbnailUrl ?? ""}
-                alt={project?.Project?.name}
+                src={project?.project?.thumbnailUrl ?? ""}
+                alt={project?.project?.name}
                 height={64}
                 width={64}
               />
               <div className="ml-4">
                 <h5 className="text-base font-semibold text-text-default">
-                  {project?.Project?.name}
+                  {project?.project?.name}
                 </h5>
                 <p className="text-base font-normal text-secondary-foreground">
-                  {project?.Project?.description}
+                  {project?.project?.description}
                 </p>
               </div>
             </div>

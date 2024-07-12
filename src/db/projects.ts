@@ -629,7 +629,7 @@ export async function getFundingRewardsByRoundIdAndSearch({
     prisma.fundingReward.findMany({
       where: {
         roundId: roundId,
-        Project: {
+        project: {
           OR: [
             {
               name: {
@@ -651,7 +651,7 @@ export async function getFundingRewardsByRoundIdAndSearch({
         amount: true,
         createdAt: true,
         updatedAt: true,
-        Project: {
+        project: {
           select: {
             id: true,
             name: true,
@@ -659,8 +659,8 @@ export async function getFundingRewardsByRoundIdAndSearch({
             thumbnailUrl: true,
           },
         },
-        FundingRound: true,
-        RewardClaim: {
+
+        claim: {
           select: {
             status: true,
             address: true,
@@ -676,7 +676,7 @@ export async function getFundingRewardsByRoundIdAndSearch({
     prisma.fundingReward.count({
       where: {
         roundId: roundId,
-        Project: {
+        project: {
           OR: [
             {
               name: {
