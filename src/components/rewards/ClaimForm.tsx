@@ -329,21 +329,26 @@ function ClaimFormSuperfluid({
                 )}`}
               />
             ) : (
-              // TODO: Final superfluid link
-              <ExternalLink
-                href="https://www.superfluid.finance/"
+              <MaybeLink
                 className="self-start"
+                url={
+                  reward.claim?.address
+                    ? `https://app.superfluid.finance/vesting?view=${reward.claim.address}`
+                    : null
+                }
               >
                 <Button
-                  disabled={disabled || !canStartStream}
                   variant="destructive"
                   className="flex gap-[10px] items-center"
                   onClick={onStartStream}
+                  disabled={
+                    disabled || !reward.claim?.address || !canStartStream
+                  }
                 >
                   <div>Claim with Superfluid</div>
                   <ArrowUpRight size={16} />
                 </Button>
-              </ExternalLink>
+              </MaybeLink>
             )}
           </div>
         </AccordionContent>
