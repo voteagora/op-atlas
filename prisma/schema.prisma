@@ -244,5 +244,4 @@ model ApiUser {
 
   @@map("api_users")
   @@index([api_key])
-
 }
