@@ -21,13 +21,13 @@ const ResultsHeader = () => {
             Projects & Rewards
           </h1>
           <p className="mt-2 text-base font-normal text-text-secondary">
-            Explore the projects that have applied for Retro Funding
+            Explore the projects that have received Retro Funding
           </p>
         </div>
         <Button variant="secondary">
           <ExternalLink
             className="flex items-center gap-2.5 w-full h-full py-2 px-3 text-sm font-medium"
-            href="https://docs.opensource.observer/docs/contribute/project-data"
+            href="https://retropgfhub.com/explore/RetroPGF4/"
           >
             Round {roundId} analytics
             <Image

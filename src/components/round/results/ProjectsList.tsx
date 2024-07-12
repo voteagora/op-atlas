@@ -3,11 +3,12 @@ import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import React from "react"
 
+import ExternalLink from "@/components/ExternalLink"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { Button } from "@/components/ui/button"
 import { FundingRewardDetails } from "@/lib/types"
 
-interface IProjectListProps {
+interface Props {
   projectRewards: FundingRewardDetails[]
   loading: boolean
   round: string | number
@@ -23,7 +24,12 @@ const ProjectsList = ({
   totalCount,
   handleLoadMore,
   isFetchingMore,
-}: IProjectListProps) => {
+}: Props) => {
+  const getProjectUrl = (projectName: string) => {
+    const formattedName = projectName.replace(/\s+/g, "-")
+    return `https://retropgfhub.com/explore/RetroPGF4/${formattedName}`
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center mt-4">
@@ -36,13 +42,13 @@ const ProjectsList = ({
     <div>
       <div className="flex flex-row justify-between w-full mt-6 pb-4">
         <h1 className="text-xl font-semibold">
-          {totalCount} projects applied to Round {round}
+          {totalCount} projects rewarded in Round {round}
         </h1>
         <h1 className="text-xl font-semibold">Rewards</h1>
       </div>
       <hr />
-      {projectRewards?.map((project: any, index: any) => (
-        <React.Fragment key={index}>
+      {projectRewards?.map((project) => (
+        <React.Fragment key={project.id}>
           <div className="flex flex-row justify-between py-8">
             <div className="flex flex-row items-center">
               <Image
@@ -53,9 +59,14 @@ const ProjectsList = ({
                 width={64}
               />
               <div className="ml-4">
-                <h5 className="text-base font-semibold text-text-default">
-                  {project?.project?.name}
-                </h5>
+                <ExternalLink
+                  className="hover:underline"
+                  href={getProjectUrl(project.project.name)}
+                >
+                  <h5 className="text-base font-semibold text-text-default">
+                    {project?.project?.name}
+                  </h5>
+                </ExternalLink>
                 <p className="text-base font-normal text-secondary-foreground">
                   {project?.project?.description}
                 </p>

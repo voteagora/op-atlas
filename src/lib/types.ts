@@ -53,6 +53,7 @@ export type FundingRewardDetails = Prisma.FundingRewardGetPayload<{
         name: true
         description: true
         thumbnailUrl: true
+        website: true
       }
     }
     claim: {
