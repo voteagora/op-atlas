@@ -1,7 +1,8 @@
 "use client"
-
+import { toPng } from "html-to-image"
 import { ArrowDownToLine, ArrowUpRight } from "lucide-react"
 import { useSession } from "next-auth/react"
+import { forwardRef, useEffect, useRef, useState } from "react"
 
 import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -11,7 +12,7 @@ import { StarIcon } from "../icons/star"
 import { Button } from "../ui/button"
 import { ClaimForm } from "./ClaimForm"
 import ClaimHeader from "./ClaimHeader"
-import { generateShareImage, ShareImage } from "./ShareImage"
+import { htmlToImageConvert, ShareImage } from "./ShareImage"
 
 const RewardClaimFlow = ({
   className,
@@ -21,6 +22,7 @@ const RewardClaimFlow = ({
   className?: string
 }) => {
   const { status } = useSession()
+  const [thumbnailUrl, setThumbnailUrl] = useState("")
 
   const onShareImage = () => {
     // downloadShareImage(
@@ -28,8 +30,29 @@ const RewardClaimFlow = ({
     //   reward.amount,
     //   reward.project.thumbnailUrl,
     // )
-    generateShareImage()
+    htmlToImageConvert()
   }
+
+  useEffect(() => {
+    const fetchImage = async (url: string): Promise<void> => {
+      try {
+        const response = await fetch(
+          `/api/download-image?url=${encodeURIComponent(url)}`,
+        )
+        const data = await response.json()
+
+        if (response.ok) {
+          setThumbnailUrl(`data:image/png;base64,${data.imageData}`)
+        } else {
+          console.error("Failed to fetch image", data.error)
+        }
+      } catch (error) {
+        console.error("Failed to fetch image", error)
+      }
+    }
+
+    if (reward.project.thumbnailUrl) fetchImage(reward.project.thumbnailUrl)
+  }, [reward.project.thumbnailUrl])
 
   if (status === "loading") {
     return null
@@ -53,7 +76,7 @@ const RewardClaimFlow = ({
             <ShareImage
               name={reward.project.name}
               amount={reward.amount}
-              thumbnailUrl={reward.project.thumbnailUrl}
+              thumbnailUrl={thumbnailUrl}
             />
           </div>
 
