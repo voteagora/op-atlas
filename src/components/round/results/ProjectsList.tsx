@@ -49,8 +49,8 @@ const ProjectsList = ({
       <hr />
       {projectRewards?.map((project) => (
         <React.Fragment key={project.id}>
-          <div className="flex flex-row justify-between py-8">
-            <div className="flex flex-row items-center">
+          <div className="flex flex-row justify-between py-8 gap-1">
+            <div className="flex flex-[2] items-center">
               <Image
                 className="rounded-md"
                 src={project?.project?.thumbnailUrl ?? ""}
@@ -63,23 +63,23 @@ const ProjectsList = ({
                   className="hover:underline"
                   href={getProjectUrl(project.project.name)}
                 >
-                  <h5 className="text-base font-semibold text-text-default">
+                  <h5 className="text-xs sm:text-base font-semibold text-text-default">
                     {project?.project?.name}
                   </h5>
                 </ExternalLink>
-                <p className="text-base font-normal text-secondary-foreground">
+                <p className="text-xs sm:text-base font-normal text-secondary-foreground">
                   {project?.project?.description}
                 </p>
               </div>
             </div>
-            <div className="flex flex-row items-center">
+            <div className="flex flex-[1] items-center justify-end">
               <Image
                 src="/assets/images/optimism-small.png"
                 alt="Optimism"
                 width={24}
                 height={24}
               />
-              <span className="ml-2 text-base font-medium text-foreground">
+              <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
                 {Number(project?.amount).toLocaleString("en-US")}
               </span>
             </div>

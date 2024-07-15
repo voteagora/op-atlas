@@ -19,6 +19,17 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card"
 import { Account } from "./Account"
 import { MobileNav } from "./MobileNav"
 
+export const menuList = [
+  {
+    title: "Voting App",
+    href: "https://round4.optimism.io/",
+  },
+  {
+    title: "About Retro Funding",
+    href: "https://app.optimism.io/retropgf",
+  },
+]
+
 const Navbar = () => {
   const pathname = usePathname()
   const isRounds = pathname === "/" || pathname === "/rounds"
@@ -80,7 +91,7 @@ const Navbar = () => {
                   className={`${
                     isProjects ? "mt-1" : "group-hover:mt-1"
                   } focus:outline-none focus:opacity-80`}
-                  href="/round/4/results"
+                  href="/round/results"
                 >
                   Projects
                 </Link>
@@ -101,15 +112,20 @@ const Navbar = () => {
                 side="bottom"
                 align="start"
               >
-                <DropdownMenuItem className="focus:bg-none! focus:opacity-80 text-base">
-                  <ExternalLink
-                    className="flex items-center gap-1"
-                    href="https://app.optimism.io/retropgf"
+                {menuList.map((item, index) => (
+                  <DropdownMenuItem
+                    key={index}
+                    className="focus:bg-none! focus:opacity-80 text-base"
                   >
-                    <div>About Retro Funding</div>
-                    <MoveUpRight size={12} />
-                  </ExternalLink>
-                </DropdownMenuItem>
+                    <ExternalLink
+                      className="flex items-center gap-1"
+                      href={item.href}
+                    >
+                      <div>{item.title}</div>
+                      <MoveUpRight size={12} />
+                    </ExternalLink>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

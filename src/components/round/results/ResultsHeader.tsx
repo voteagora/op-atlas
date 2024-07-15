@@ -9,13 +9,12 @@ import { Account } from "@/components/common/Account"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 
-const ResultsHeader = () => {
+const ResultsHeader = ({ roundId }: { roundId: string | number }) => {
   const { data: session, status } = useSession()
-  const params = useParams()
-  const roundId = params.roundId.toString()
+
   return (
     <div>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap sm:flex-nowrap gap-4">
         <div className="flex flex-col w-full">
           <h1 className="text-4xl font-semibold text-text-default">
             Projects & Rewards
