@@ -1,5 +1,5 @@
 "use client"
-import { useParams } from "next/navigation"
+
 import React, { useCallback, useEffect, useState } from "react"
 import { useDebounceValue } from "usehooks-ts"
 
@@ -11,9 +11,6 @@ import ResultFilters from "./ResultFilters"
 import ResultsHeader from "./ResultsHeader"
 
 export function Results() {
-  const params = useParams()
-  const roundId = params.roundId.toString()
-
   const [searchText, setSearchText] = useState("")
   const [sortBy, setSortBy] = useState<"asc" | "desc">("desc")
   const [projectRewards, setProjectRewards] = useState<FundingRewardDetails[]>(
@@ -24,6 +21,7 @@ export function Results() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
+  const [round, setRound] = useState(4)
 
   const pageSize = 10
   const [debouncedSearchText] = useDebounceValue(searchText, 300)
@@ -36,7 +34,7 @@ export function Results() {
 
         setError("")
         const fetchedRewards = await findFundingRewards({
-          roundId,
+          roundId: round.toString(),
           search: debouncedSearchText,
           sortBy,
           page,
@@ -61,7 +59,7 @@ export function Results() {
         setIsFetchingMore(false)
       }
     },
-    [roundId, debouncedSearchText, sortBy, pageSize],
+    [round, debouncedSearchText, sortBy, pageSize],
   )
 
   useEffect(() => {
@@ -84,8 +82,8 @@ export function Results() {
       />
 
       {/* Main content */}
-      <div className="mt-36 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
-        <ResultsHeader />
+      <div className="mt-20 p-6 sm:mt-36 sm:p-16 bg-background flex flex-col w-full max-w-6xl rounded-3xl z-10">
+        <ResultsHeader roundId={round} />
         <ResultFilters
           setSearchText={setSearchText}
           searchText={searchText}
@@ -97,7 +95,7 @@ export function Results() {
           totalCount={totalCount}
           projectRewards={projectRewards}
           loading={loading}
-          round={roundId}
+          round={round}
           isFetchingMore={isFetchingMore}
         />
       </div>
