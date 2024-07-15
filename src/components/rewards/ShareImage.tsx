@@ -1,5 +1,6 @@
 /* eslint @next/next/no-img-element: 0 */
 
+import { toPng } from "html-to-image"
 import html2canvas from "html2canvas"
 import { Sora } from "next/font/google"
 import satori from "satori"
@@ -253,4 +254,19 @@ export async function downloadShareImage(
   )
 
   await downloadImageAsPNG(svg)
+}
+export const htmlToImageConvert = () => {
+  const node = document.getElementById("share-image")
+
+  if (node)
+    toPng(node)
+      .then((dataUrl) => {
+        const link = document.createElement("a")
+        link.download = "image.png"
+        link.href = dataUrl
+        link.click()
+      })
+      .catch((err) => {
+        console.log(err)
+      })
 }
