@@ -47,6 +47,7 @@ export function RewardsSection({ project }: { project: ProjectWithDetails }) {
                     alt="Optimism"
                   />
                   <div className="text-sm">
+                    {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
                     {numberWithCommas(round4Reward.amount)}
                   </div>
                 </div>
