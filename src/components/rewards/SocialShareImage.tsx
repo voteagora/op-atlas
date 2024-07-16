@@ -59,7 +59,7 @@ export function SocialShareImage({ reward }: { reward: RewardWithProject }) {
             }}
             className="text-[45px] font-semibold text-[#8D33DB] tracking-tighter"
           >
-            {numberWithCommas(reward.amount)} OP
+            {numberWithCommas(Number(reward.amount))} OP
           </div>
         </div>
       </div>
