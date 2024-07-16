@@ -30,6 +30,13 @@ const ProjectsList = ({
     return `https://retropgfhub.com/explore/RetroPGF4/${formattedName}`
   }
 
+  function formatAmount(amount: number) {
+    return amount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center mt-4">
@@ -80,7 +87,7 @@ const ProjectsList = ({
                 height={24}
               />
               <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
-                {Number(project?.amount).toLocaleString("en-US")}
+                {formatAmount(Number(project?.amount))}
               </span>
             </div>
           </div>
