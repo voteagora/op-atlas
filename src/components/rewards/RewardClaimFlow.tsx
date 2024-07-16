@@ -1,8 +1,8 @@
 "use client"
-
-import { ArrowUpRight } from "lucide-react"
+import { toPng } from "html-to-image"
+import { ArrowDownToLine, ArrowUpRight } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useState } from "react"
+import { forwardRef, useEffect, useRef, useState } from "react"
 
 import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -12,6 +12,7 @@ import { StarIcon } from "../icons/star"
 import { Button } from "../ui/button"
 import { ClaimForm } from "./ClaimForm"
 import ClaimHeader from "./ClaimHeader"
+import { htmlToImageConvert, ShareImage } from "./ShareImage"
 
 const RewardClaimFlow = ({
   className,
@@ -21,6 +22,37 @@ const RewardClaimFlow = ({
   className?: string
 }) => {
   const { status } = useSession()
+  const [thumbnailUrl, setThumbnailUrl] = useState("")
+
+  const onShareImage = () => {
+    // downloadShareImage(
+    //   reward.project.name,
+    //   reward.amount,
+    //   reward.project.thumbnailUrl,
+    // )
+    htmlToImageConvert()
+  }
+
+  useEffect(() => {
+    const fetchImage = async (url: string): Promise<void> => {
+      try {
+        const response = await fetch(
+          `/api/download-image?url=${encodeURIComponent(url)}`,
+        )
+        const data = await response.json()
+
+        if (response.ok) {
+          setThumbnailUrl(`data:image/png;base64,${data.imageData}`)
+        } else {
+          console.error("Failed to fetch image", data.error)
+        }
+      } catch (error) {
+        console.error("Failed to fetch image", error)
+      }
+    }
+
+    if (reward.project.thumbnailUrl) fetchImage(reward.project.thumbnailUrl)
+  }, [reward.project.thumbnailUrl])
 
   if (status === "loading") {
     return null
@@ -38,8 +70,20 @@ const RewardClaimFlow = ({
         <StarIcon className="mx-auto" />
 
         {/* Share image */}
-        <div className="flex flex-col items-center border rounded-2xl p-10">
+        <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
           <h4 className="font-semibold text-xl">Share your achievement</h4>
+          <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
+            <ShareImage
+              name={reward.project.name}
+              amount={reward.amount}
+              thumbnailUrl={thumbnailUrl}
+            />
+          </div>
+
+          <Button variant="secondary" onClick={onShareImage}>
+            Download image
+            <ArrowDownToLine size={16} className="ml-2.5" />
+          </Button>
         </div>
 
         <StarIcon className="mx-auto" />
