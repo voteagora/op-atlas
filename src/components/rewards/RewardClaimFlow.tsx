@@ -65,7 +65,7 @@ const RewardClaimFlow = ({
         <p className="text-center text-secondary-foreground text-sm">
           Need help?{" "}
           <ExternalLink
-            href="https://www.notion.so/Retrofunding-FAQ-3eeb66a7dbca48479bc41ef09a164b0e"
+            href="https://plaid-cement-e44.notion.site/Retro-Funding-Grant-claiming-FAQ-3eeb66a7dbca48479bc41ef09a164b0e?pvs=4"
             className="font-medium"
           >
             View frequently asked questions
