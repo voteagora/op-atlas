@@ -83,6 +83,7 @@ const ClaimHeader = ({
             width={24}
           />
           <p className="font-semibold">
+            {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
             {new Intl.NumberFormat("en-US").format(reward.amount)}
           </p>
         </div>

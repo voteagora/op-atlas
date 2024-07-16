@@ -59,11 +59,14 @@ export function DeveloperCallout() {
   )
 }
 
-export function SurveyCallout() {
-  // TODO: update with final survey link
+export function SurveyCallout({ projectId }: { projectId?: string }) {
+  const link = `https://optimismfnd.typeform.com/to/wTJYUOSd${
+    projectId ? `#projectid=${projectId}` : ""
+  }`
+
   return (
     <ExternalLink
-      href=""
+      href={link}
       className={cn(
         "flex items-center rounded-xl px-8 py-6 w-full",
         "bg-accent text-accent-foreground",
