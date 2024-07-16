@@ -20,7 +20,7 @@ async function ingestRewards() {
   const rewards: { id: string; projectId: string; amount: number }[] = []
   for (const row of entries) {
     const fields = row.split(",")
-    if (fields.length !== 2) {
+    if (fields.length !== 4) {
       if (row.trim() !== "") {
         console.error("Invalid reward row:", row)
       }
@@ -28,12 +28,12 @@ async function ingestRewards() {
       continue
     }
 
-    const [projectId, amount] = fields
+    const [projectId, grantId, name, amount] = fields
 
     rewards.push({
-      id: nanoid(),
+      id: grantId,
       projectId,
-      amount: parseInt(amount),
+      amount: parseFloat(amount),
     })
   }
 

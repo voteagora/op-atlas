@@ -59,7 +59,7 @@ model FundingReward {
   id        String @id
   roundId   String
   projectId String
-  amount    Int
+  amount    Decimal
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

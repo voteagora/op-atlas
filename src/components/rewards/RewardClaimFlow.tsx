@@ -50,11 +50,14 @@ const RewardClaimFlow = ({
             Help make Retro Funding better
           </h4>
 
-          {/* TODO: Add survey link */}
-          <Button variant="secondary" className="">
-            Take 4 minute survey
-            <ArrowUpRight size={16} className="ml-2.5" />
-          </Button>
+          <ExternalLink
+            href={`https://optimismfnd.typeform.com/to/wTJYUOSd#projectid=${reward.projectId}`}
+          >
+            <Button variant="secondary" className="">
+              Take 4 minute survey
+              <ArrowUpRight size={16} className="ml-2.5" />
+            </Button>
+          </ExternalLink>
         </div>
       </div>
 
@@ -62,7 +65,7 @@ const RewardClaimFlow = ({
         <p className="text-center text-secondary-foreground text-sm">
           Need help?{" "}
           <ExternalLink
-            href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+            href="https://www.notion.so/Retrofunding-FAQ-3eeb66a7dbca48479bc41ef09a164b0e"
             className="font-medium"
           >
             View frequently asked questions

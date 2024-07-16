@@ -76,7 +76,7 @@ const Dashboard = ({
 
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
-      <SurveyCallout />
+      <SurveyCallout projectId={projects[0]?.id} />
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
