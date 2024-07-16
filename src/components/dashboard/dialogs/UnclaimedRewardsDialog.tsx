@@ -92,6 +92,7 @@ function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
           alt="Optimism"
         />
         <div className="font-semibold">
+          {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
           {numberWithCommas(project.rewards[0].amount)}
         </div>
       </div>
