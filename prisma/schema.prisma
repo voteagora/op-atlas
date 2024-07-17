@@ -23,8 +23,9 @@ model User {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  projects  UserProjects[]
-  addresses UserAddress[]
+  projects    UserProjects[]
+  addresses   UserAddress[]
+  RewardClaim RewardClaim[]
 }
 
 model UserAddress {
@@ -51,6 +52,45 @@ model FundingRound {
   endDate     DateTime
 
   applications Application[]
+  recipients   FundingReward[]
+}
+
+model FundingReward {
+  id        String @id
+  roundId   String
+  projectId String
+  amount    Decimal
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  round   FundingRound @relation(fields: [roundId], references: [id])
+  project Project      @relation(fields: [projectId], references: [id])
+  claim   RewardClaim?
+
+  @@unique([roundId, projectId])
+  @@index([projectId])
+}
+
+model RewardClaim {
+  rewardId String @id
+  status   String
+
+  address        String?
+  addressSetAt   DateTime?
+  addressSetById String?
+
+  kycStatus          String?
+  kycStatusUpdatedAt DateTime?
+
+  tokenStreamStatus      String?
+  tokenStreamClaimableAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reward       FundingReward @relation(fields: [rewardId], references: [id])
+  addressSetBy User?         @relation(fields: [addressSetById], references: [id])
 }
 
 model Project {
@@ -81,6 +121,7 @@ model Project {
   funding      ProjectFunding[]
   snapshots    ProjectSnapshot[]
   applications Application[]
+  rewards      FundingReward[]
 }
 
 model Application {

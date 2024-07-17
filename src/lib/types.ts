@@ -10,6 +10,7 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     funding: true
     snapshots: true
     applications: true
+    rewards: { include: { claim: true } }
   }
 }>
 
@@ -20,3 +21,22 @@ export type UserWithAddresses = Prisma.UserGetPayload<{
 }>
 
 export type UserAddressSource = "farcaster" | "atlas"
+
+export type RewardWithProject = Prisma.FundingRewardGetPayload<{
+  include: {
+    claim: {
+      include: {
+        addressSetBy: true
+      }
+    }
+    project: {
+      include: {
+        team: {
+          include: {
+            user: true
+          }
+        }
+      }
+    }
+  }
+}>

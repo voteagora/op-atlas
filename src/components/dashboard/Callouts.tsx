@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 
 import { cn } from "@/lib/utils"
@@ -55,6 +55,34 @@ export function DeveloperCallout() {
         <div>Apply to vote by July 31.</div>
       </div>
       <ArrowRight size={24} />
+    </ExternalLink>
+  )
+}
+
+export function SurveyCallout({ projectId }: { projectId?: string }) {
+  const link = `https://optimismfnd.typeform.com/to/wTJYUOSd${
+    projectId ? `#projectid=${projectId}` : ""
+  }`
+
+  return (
+    <ExternalLink
+      href={link}
+      className={cn(
+        "flex items-center rounded-xl px-8 py-6 w-full",
+        "bg-accent text-accent-foreground",
+      )}
+    >
+      <Image
+        alt="Info"
+        src="/assets/icons/sunny-callout-purple.png"
+        width={48}
+        height={48}
+      />
+      <div className="ml-4 mr-5 flex-1">
+        <p className="font-medium">Make Retro Funding better!</p>
+        <div>Help us improve future rounds by taking a 4 minute survey.</div>
+      </div>
+      <ArrowUpRight size={20} />
     </ExternalLink>
   )
 }
