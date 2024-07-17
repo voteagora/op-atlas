@@ -26,7 +26,9 @@ const ProjectsList = ({
   isFetchingMore,
 }: Props) => {
   const getProjectUrl = (projectName: string) => {
-    const formattedName = projectName.replace(/\s+/g, "-")
+    const formattedName = projectName
+      .replace(/ /g, "-")
+      .replace(/[^a-zA-Z0-9-]/g, "")
     return `https://retropgfhub.com/explore/RetroPGF4/${formattedName}`
   }
 

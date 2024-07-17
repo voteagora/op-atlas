@@ -26,9 +26,9 @@ const ResultsHeader = ({ roundId }: { roundId: string | number }) => {
         <Button variant="secondary">
           <ExternalLink
             className="flex items-center gap-2.5 w-full h-full py-2 px-3 text-sm font-medium"
-            href="https://retropgfhub.com/explore/RetroPGF4/"
+            href="https://github.com/ethereum-optimism/op-analytics/tree/main/rpgf/rpgf4"
           >
-            Round {roundId} analytics
+            Results calculation
             <Image
               src="/assets/icons/arrow-up-right.svg"
               height={8}
