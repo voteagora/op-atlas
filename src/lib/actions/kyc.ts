@@ -90,8 +90,9 @@ export const processKYC = async (entries: string[]) => {
     }
 
     if (
-      !isAddress(address) ||
-      reward.claim.address?.toLowerCase() !== address.toLowerCase()
+      address !== "" &&
+      (!isAddress(address) ||
+        reward.claim.address?.toLowerCase() !== address.toLowerCase())
     ) {
       await updateClaim(rewardId, {
         status: "address_mismatch",
