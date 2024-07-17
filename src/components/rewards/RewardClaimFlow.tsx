@@ -2,7 +2,6 @@
 
 import { ArrowUpRight } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useState } from "react"
 
 import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -38,11 +37,24 @@ const RewardClaimFlow = ({
         <StarIcon className="mx-auto" />
 
         {/* Share image */}
-        <div className="flex flex-col items-center border rounded-2xl p-10">
+        {/* <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
           <h4 className="font-semibold text-xl">Share your achievement</h4>
+          <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
+            <ShareImage
+              name={reward.project.name}
+              // @ts-expect-error Next converts Decimal to number bc Server Components suck
+              amount={reward.amount}
+              thumbnailUrl={reward.project.thumbnailUrl}
+            />
+          </div>
+
+          <Button variant="secondary" onClick={onShareImage}>
+            Download image
+            <ArrowDownToLine size={16} className="ml-2.5" />
+          </Button>
         </div>
 
-        <StarIcon className="mx-auto" />
+        <StarIcon className="mx-auto" /> */}
 
         {/* Survey */}
         <div className="flex flex-col items-center gap-6">

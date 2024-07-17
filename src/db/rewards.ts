@@ -4,6 +4,97 @@ import { Prisma } from "@prisma/client"
 
 import { prisma } from "./client"
 
+export async function getFundingRewardsByRoundIdAndSearch({
+  roundId,
+  search,
+  sortBy,
+  page = 1,
+  pageSize = 10,
+}: {
+  roundId: string
+  search: string
+  sortBy: "asc" | "desc"
+  page?: number
+  pageSize?: number
+}) {
+  const skip = (page - 1) * pageSize
+  const take = pageSize
+
+  const [rewards, totalCount] = await prisma.$transaction([
+    prisma.fundingReward.findMany({
+      where: {
+        roundId: roundId,
+        project: {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+            {
+              description: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+      },
+      select: {
+        id: true,
+        amount: true,
+        createdAt: true,
+        updatedAt: true,
+        project: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            thumbnailUrl: true,
+            website: true,
+          },
+        },
+
+        claim: {
+          select: {
+            status: true,
+            address: true,
+          },
+        },
+      },
+      orderBy: {
+        amount: sortBy,
+      },
+      skip,
+      take,
+    }),
+    prisma.fundingReward.count({
+      where: {
+        roundId: roundId,
+        project: {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+            {
+              description: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+      },
+    }),
+  ])
+
+  return { rewards, totalCount }
+}
+
 export async function getReward({ id }: { id: string }) {
   return prisma.fundingReward.findUnique({
     where: {
