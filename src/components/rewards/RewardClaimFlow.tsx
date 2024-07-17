@@ -1,8 +1,7 @@
 "use client"
-import { toPng } from "html-to-image"
 import { ArrowDownToLine, ArrowUpRight } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { forwardRef, useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
