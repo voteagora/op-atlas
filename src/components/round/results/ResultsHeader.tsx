@@ -8,9 +8,11 @@ import React from "react"
 import { Account } from "@/components/common/Account"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 const ResultsHeader = ({ roundId }: { roundId: string | number }) => {
   const { data: session, status } = useSession()
+  const { track } = useAnalytics()
 
   return (
     <div>
@@ -23,7 +25,12 @@ const ResultsHeader = ({ roundId }: { roundId: string | number }) => {
             Explore the projects that have received Retro Funding
           </p>
         </div>
-        <Button variant="secondary">
+        <Button
+          variant="secondary"
+          onClick={() => {
+            track("Results calculation")
+          }}
+        >
           <ExternalLink
             className="flex items-center gap-2.5 w-full h-full py-2 px-3 text-sm font-medium"
             href="https://github.com/ethereum-optimism/op-analytics/tree/main/rpgf/rpgf4"

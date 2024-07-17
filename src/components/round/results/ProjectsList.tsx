@@ -7,6 +7,7 @@ import ExternalLink from "@/components/ExternalLink"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { Button } from "@/components/ui/button"
 import { FundingRewardDetails } from "@/lib/types"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 interface Props {
   projectRewards: FundingRewardDetails[]
@@ -31,6 +32,7 @@ const ProjectsList = ({
       .replace(/[^a-zA-Z0-9-]/g, "")
     return `https://retropgfhub.com/explore/RetroPGF4/${formattedName}`
   }
+  const { track } = useAnalytics()
 
   function formatAmount(amount: number) {
     return amount.toLocaleString("en-US", {
@@ -71,12 +73,18 @@ const ProjectsList = ({
                 <ExternalLink
                   className="hover:underline"
                   href={getProjectUrl(project.project.name)}
+                  onClick={() => {
+                    track("Project rewarded", {
+                      projectId: project.project.id,
+                      projectName: project.project.name,
+                    })
+                  }}
                 >
                   <h5 className="text-xs sm:text-base font-semibold text-text-default">
                     {project?.project?.name}
                   </h5>
                 </ExternalLink>
-                <p className="text-xs sm:text-base font-normal text-secondary-foreground">
+                <p className="text-xs sm:text-base font-normal text-secondary-foreground line-clamp-3">
                   {project?.project?.description}
                 </p>
               </div>
