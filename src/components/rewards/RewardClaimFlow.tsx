@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowDownToLine, ArrowUpRight } from "lucide-react"
+import { ArrowUpRight } from "lucide-react"
 import { useSession } from "next-auth/react"
 
 import { RewardWithProject } from "@/lib/types"
@@ -11,7 +11,6 @@ import { StarIcon } from "../icons/star"
 import { Button } from "../ui/button"
 import { ClaimForm } from "./ClaimForm"
 import ClaimHeader from "./ClaimHeader"
-import { generateShareImage, ShareImage } from "./ShareImage"
 
 const RewardClaimFlow = ({
   className,
@@ -21,15 +20,6 @@ const RewardClaimFlow = ({
   className?: string
 }) => {
   const { status } = useSession()
-
-  const onShareImage = () => {
-    // downloadShareImage(
-    //   reward.project.name,
-    //   reward.amount,
-    //   reward.project.thumbnailUrl,
-    // )
-    generateShareImage()
-  }
 
   if (status === "loading") {
     return null
@@ -47,7 +37,7 @@ const RewardClaimFlow = ({
         <StarIcon className="mx-auto" />
 
         {/* Share image */}
-        <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
+        {/* <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
           <h4 className="font-semibold text-xl">Share your achievement</h4>
           <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
             <ShareImage
@@ -58,13 +48,13 @@ const RewardClaimFlow = ({
             />
           </div>
 
-          {/* <Button variant="secondary" onClick={onShareImage}>
+          <Button variant="secondary" onClick={onShareImage}>
             Download image
             <ArrowDownToLine size={16} className="ml-2.5" />
-          </Button> */}
+          </Button>
         </div>
 
-        <StarIcon className="mx-auto" />
+        <StarIcon className="mx-auto" /> */}
 
         {/* Survey */}
         <div className="flex flex-col items-center gap-6">
