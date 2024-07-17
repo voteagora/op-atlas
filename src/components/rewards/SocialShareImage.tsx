@@ -59,6 +59,7 @@ export function SocialShareImage({ reward }: { reward: RewardWithProject }) {
             }}
             className="text-[45px] font-semibold text-[#8D33DB] tracking-tighter"
           >
+            {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
             {numberWithCommas(reward.amount)} OP
           </div>
         </div>

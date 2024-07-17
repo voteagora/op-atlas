@@ -52,15 +52,16 @@ const RewardClaimFlow = ({
           <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
             <ShareImage
               name={reward.project.name}
+              // @ts-expect-error Next converts Decimal to number bc Server Components suck
               amount={reward.amount}
               thumbnailUrl={reward.project.thumbnailUrl}
             />
           </div>
 
-          <Button variant="secondary" onClick={onShareImage}>
+          {/* <Button variant="secondary" onClick={onShareImage}>
             Download image
             <ArrowDownToLine size={16} className="ml-2.5" />
-          </Button>
+          </Button> */}
         </div>
 
         <StarIcon className="mx-auto" />

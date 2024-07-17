@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react"
 
 import useDebounce from "@/hooks/useDebounce"
-import { findFundingRewards } from "@/lib/actions/projectandrewards"
+import { findFundingRewards } from "@/lib/actions/results"
 import { FundingRewardDetails } from "@/lib/types"
 
 import ProjectsList from "./ProjectsList"
@@ -35,7 +35,7 @@ export function Results() {
         const fetchedRewards = await findFundingRewards({
           roundId: round.toString(),
           search: debouncedSearchText,
-          sortByAmount,
+          sortBy: sortByAmount,
           page: 1,
           pageSize,
         })
@@ -60,7 +60,7 @@ export function Results() {
       const fetchedRewards = await findFundingRewards({
         roundId: round.toString(),
         search: debouncedSearchText,
-        sortByAmount,
+        sortBy: sortByAmount,
         page: nextPage,
         pageSize,
       })
