@@ -64,9 +64,9 @@ export const processKYC = async (entries: string[]) => {
     }
 
     counter += 1
-    const [formId, projectId, rewardId, address, status] = fields
+    const [formId, projectId, rewardId, address, rawStatus] = fields
 
-    const reward = await getReward({ id: rewardId })
+    const reward = rewardId ? await getReward({ id: rewardId }) : null
     if (!reward) {
       console.warn(
         `Reward ${rewardId} (project ${projectId}) not found, skipping`,
@@ -88,6 +88,8 @@ export const processKYC = async (entries: string[]) => {
       )
       continue
     }
+
+    const status = rawStatus.trim().toLowerCase().replace("_", " ")
 
     if (
       address !== "" &&
