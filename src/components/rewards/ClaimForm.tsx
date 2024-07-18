@@ -235,6 +235,12 @@ function ClaimFormKYC({
               Each person or business identified in the form must verify their
               identity. Individuals should verify at kyc.optimism.io while
               businesses should verify at kyb.optimism.io.
+              <br />
+              <br />
+              Once all team members have completed their own KYC,{" "}
+              <span className="text-foreground font-medium">
+                you will be notified of the outcome within 48 hours.
+              </span>
             </div>
 
             <div className="flex items-center gap-2">
