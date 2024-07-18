@@ -28,19 +28,55 @@ export const ShareImage = ({
         flexDirection: "column",
         width: "100%",
         height: "100%",
-        padding: 28,
+        padding: 22,
         backgroundImage: "url(/assets/images/social-share-background.png)",
         backgroundSize: "cover",
         overflow: "hidden",
       }}
     >
-      {/* OP Wordmark */}
-      <img
-        alt=""
-        src="/assets/images/optimism-wordmark.png"
-        width={138}
-        height={19}
-      />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <p
+          style={{
+            fontWeight: 600,
+            fontSize: 24,
+            lineHeight: "34px",
+            letterSpacing: "-0.06em",
+            backgroundImage:
+              "linear-gradient(91.16deg, #9E3CE9 5.19%, #523EFF 132.43%)",
+
+            // backgroundImage: "linear-gradient(90deg, #9E3CE9 0%, #523EFF 100%)",
+            backgroundClip: "text",
+            // @ts-ignore TS doesn't know about webkit prefixes
+            "-webkit-background-clip": "text",
+            color: "transparent",
+            margin: 0,
+          }}
+        >
+          Retro Funding 4
+        </p>
+        <p
+          style={{
+            fontWeight: 600,
+            fontSize: 34,
+            lineHeight: "34px",
+            letterSpacing: "-0.06em",
+            backgroundImage:
+              "linear-gradient(90.8deg, #9E3CE9 -16.44%, #523EFF 134.15%)",
+            backgroundClip: "text",
+            // @ts-ignore TS doesn't know about webkit prefixes
+            "-webkit-background-clip": "text",
+            color: "transparent",
+            margin: 0,
+          }}
+        >
+          Onchain Builders
+        </p>
+      </div>
 
       {/* Image, project name, and reward */}
       <div
@@ -81,18 +117,6 @@ export const ShareImage = ({
                 objectFit: "cover",
               }}
             />
-            {/* <div
-              style={{
-                display: "flex",
-                backgroundImage: `url(${thumbnailUrl})`,
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "cover",
-                borderRadius: 15.83,
-                overflow: "hidden",
-                height: 138,
-                width: 138,
-              }}
-            /> */}
           </div>
         )}
 
@@ -139,16 +163,23 @@ export const ShareImage = ({
         style={{
           marginTop: "auto",
           display: "flex",
-          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
         }}
       >
+        <img
+          alt=""
+          src="/assets/images/optimism-small.png"
+          width={34}
+          height={34}
+        />
         <p
           style={{
-            fontWeight: 600,
-            fontSize: 24,
-            lineHeight: "28px",
-            letterSpacing: "-0.02em",
-            backgroundImage: "linear-gradient(90deg, #9E3CE9 0%, #523EFF 100%)",
+            fontWeight: 400,
+            fontSize: 12,
+            lineHeight: "normal",
+            letterSpacing: "-0.06em",
+            backgroundImage: "linear-gradient(90deg, #8D33DB 0%, #523EFF 100%)",
             backgroundClip: "text",
             // @ts-ignore TS doesn't know about webkit prefixes
             "-webkit-background-clip": "text",
@@ -156,23 +187,7 @@ export const ShareImage = ({
             margin: 0,
           }}
         >
-          Retro Funding Round 4
-        </p>
-        <p
-          style={{
-            fontWeight: 600,
-            fontSize: 32,
-            lineHeight: "36px",
-            letterSpacing: "-0.02em",
-            backgroundImage: "linear-gradient(90deg, #9E3CE9 0%, #523EFF 100%)",
-            backgroundClip: "text",
-            // @ts-ignore TS doesn't know about webkit prefixes
-            "-webkit-background-clip": "text",
-            color: "transparent",
-            margin: 0,
-          }}
-        >
-          Onchain Builders
+          retrofunding.optimism.io
         </p>
       </div>
     </div>
