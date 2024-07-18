@@ -108,18 +108,3 @@ export const svgToDataUrl = (svg: string) => {
     img.src = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }))
   })
 }
-
-export const downloadImageAsPNG = async (svg: string) => {
-  const imageUrl = await svgToDataUrl(svg)
-
-  try {
-    const a = document.createElement("a")
-    a.href = imageUrl
-    a.download = "Image.png"
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-  } finally {
-    URL.revokeObjectURL(imageUrl)
-  }
-}
