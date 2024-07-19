@@ -115,6 +115,7 @@ export const ShareImage = ({
                 borderRadius: 15.83,
                 // overflow: "hidden",
                 objectFit: "cover",
+                background: "#FBFCFE",
               }}
             />
           </div>
