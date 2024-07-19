@@ -55,7 +55,7 @@ export const processKYC = async (entries: string[]) => {
 
   for (const row of entries) {
     const fields = row.split(",")
-    if (fields.length !== 5) {
+    if (fields.length < 5) {
       if (row.trim() !== "") {
         console.error("Invalid KYC row:", row)
       }
