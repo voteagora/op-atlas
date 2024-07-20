@@ -3,9 +3,10 @@
 import { Application } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { isBadgeholder } from "@/lib/badgeholders"
 import { noRewards, unclaimedRewards } from "@/lib/rewards"
 import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
 import {
@@ -20,7 +21,7 @@ import ExternalLink from "../ExternalLink"
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import { SurveyCallout } from "./Callouts"
+import { DeveloperCallout, SurveyCallout } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -52,6 +53,10 @@ const Dashboard = ({
 
   const profileInitiallyComplete = useRef(profileProgress(user) === 100)
 
+  const userIsBadgeholder = useMemo(() => {
+    return isBadgeholder(user)
+  }, [user])
+
   useEffect(() => {
     // User has submitted at least one application but didn't receive any rewards
     if (
@@ -76,7 +81,11 @@ const Dashboard = ({
 
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
-      <SurveyCallout projectId={projects[0]?.id} />
+      {userIsBadgeholder ? (
+        <SurveyCallout projectId={projects[0]?.id} />
+      ) : (
+        <DeveloperCallout />
+      )}
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
