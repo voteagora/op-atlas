@@ -21,7 +21,7 @@ import ExternalLink from "../ExternalLink"
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import { DeveloperCallout, SurveyCallout } from "./Callouts"
+import { BadgeholderCallout, DeveloperCallout } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -81,11 +81,7 @@ const Dashboard = ({
 
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
-      {userIsBadgeholder ? (
-        <SurveyCallout projectId={projects[0]?.id} />
-      ) : (
-        <DeveloperCallout />
-      )}
+      {userIsBadgeholder ? <BadgeholderCallout /> : <DeveloperCallout />}
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
