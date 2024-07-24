@@ -5,6 +5,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceValue } from "usehooks-ts"
 
 import { DialogProps } from "@/components/dialogs/types"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -22,6 +23,8 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 type Props = DialogProps<{
   team: User[]
+  avatar?: string
+  onSkip?: () => void
 }> & {
   addMembers: (userIds: string[]) => Promise<void>
 }
@@ -31,6 +34,8 @@ const AddTeamMemberDialog = ({
   onOpenChange,
   team,
   addMembers,
+  avatar,
+  onSkip,
 }: Props) => {
   const [searchText, setSearchText] = useState("")
   const [loading, setLoading] = useState(false)
@@ -110,6 +115,12 @@ const AddTeamMemberDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         <DialogHeader>
+          {avatar && (
+            <Avatar className="!w-20 !h-20 mx-auto">
+              <AvatarImage src={avatar || ""} alt="avatar" />
+              <AvatarFallback>{avatar}</AvatarFallback>
+            </Avatar>
+          )}
           <DialogTitle className="text-center text-lg font-semibold">
             Add team members
           </DialogTitle>
@@ -137,6 +148,11 @@ const AddTeamMemberDialog = ({
         >
           Add
         </Button>
+        {onSkip && (
+          <Button className="w-full" variant="outline" onClick={onSkip}>
+            Skip
+          </Button>
+        )}
       </DialogContent>
     </Dialog>
   )

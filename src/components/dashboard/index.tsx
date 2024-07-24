@@ -2,6 +2,7 @@
 
 import { Application } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 
@@ -17,6 +18,8 @@ import {
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import ExternalLink from "../ExternalLink"
+import CreateOrganizationDialog from "../organizations/CreateOrganizationDialog"
+import OrganizationOnboardingDialog from "../organizations/OrganizationOnboardingDialog"
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
@@ -24,8 +27,10 @@ import { SurveyCallout } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
+import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
+import UserOrganizationTitleRow from "./UserOrganizationTitleRow"
 import UserProjectCard from "./UserProjectCard"
 
 const SHOW_APPLICATIONS = false
@@ -47,6 +52,9 @@ const Dashboard = ({
     useState(false)
 
   const [loadingNewProject, setLoadingNewProject] = useState(false)
+  const [showOnBoarding, setShowOnBoarding] = useState(false)
+  const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] =
+    useState(false)
 
   const { track } = useAnalytics()
 
@@ -87,6 +95,23 @@ const Dashboard = ({
           projects={projects}
         />
       )}
+
+      {showOnBoarding && (
+        <OrganizationOnboardingDialog
+          open
+          onOpenChange={setShowOnBoarding}
+          onConfirm={() => {
+            setShowCreateOrganizationDialog(true)
+            setShowOnBoarding(false)
+          }}
+        />
+      )}
+      {showCreateOrganizationDialog && (
+        <CreateOrganizationDialog
+          open
+          onOpenChange={setShowCreateOrganizationDialog}
+        />
+      )}
       <div className="card flex flex-col w-full gap-y-12">
         {joinProjectDialogOpen && (
           <JoinProjectDialog
@@ -98,21 +123,10 @@ const Dashboard = ({
         {!profileInitiallyComplete.current && (
           <CompleteProfileCallout user={user} />
         )}
-        <div className="flex flex-col gap-6">
-          <h3>Your Projects</h3>
-          {projects.length > 0 ? (
-            <>
-              {projects.map((project) => (
-                <UserProjectCard key={project.id} project={project} />
-              ))}
-            </>
-          ) : (
-            <Link href="/projects/new">
-              <AddFirstProject />
-            </Link>
-          )}
 
-          <div className="flex items-center gap-x-2">
+        <div className="flex flex-col gap-6">
+          <div className="flex justify-between items-center">
+            <h3>Your Projects</h3>
             <Link
               href="/projects/new"
               onClick={() => {
@@ -127,13 +141,19 @@ const Dashboard = ({
                 Add a project
               </Button>
             </Link>
-            <Button
-              onClick={() => setJoinProjectDialogOpen(true)}
-              variant="secondary"
-            >
-              Join a project
-            </Button>
           </div>
+
+          {projects.length > 0 ? (
+            <>
+              {projects.map((project) => (
+                <UserProjectCard key={project.id} project={project} />
+              ))}
+            </>
+          ) : (
+            <Link href="/projects/new">
+              <AddFirstProject />
+            </Link>
+          )}
         </div>
 
         {showRewardsSection && (
@@ -144,6 +164,14 @@ const Dashboard = ({
             ))}
           </div>
         )}
+
+        <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
+        <div className="flex flex-col gap-6">
+          <UserOrganizationTitleRow />
+          <Link href="/projects/new">
+            <AddFirstProject />
+          </Link>
+        </div>
 
         {SHOW_APPLICATIONS && (
           <div className="flex flex-col gap-y-6">
@@ -161,6 +189,25 @@ const Dashboard = ({
               <ArrowUpRight size={16} />
             </ExternalLink>
           </div>
+        )}
+
+        {true && (
+          <Button
+            variant="ghost"
+            onClick={() => setJoinProjectDialogOpen(true)}
+            className="flex items-center justify-center gap-x-2 no-underline text-secondary-foreground"
+          >
+            <p className="text-sm font-medium">
+              I’m looking to join an existing project or organization
+            </p>
+            <Image
+              src="/assets/icons/arrow-left.svg"
+              className="h-3"
+              height={12}
+              width={12}
+              alt="left"
+            />
+          </Button>
         )}
       </div>
     </div>

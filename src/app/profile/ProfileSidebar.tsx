@@ -1,5 +1,6 @@
 "use client"
 
+import { Plus } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -66,6 +67,23 @@ export function ProfileSidebar() {
             •
           </div>
           Verified addresses
+        </Link>
+      </div>
+      <div className="py-2.5 px-3 border-b border-border text-sm font-semibold">
+        Your organizations
+      </div>
+      <div className="flex flex-col gap-0.5 text-secondary-foreground text-sm py-2.5">
+        <Link
+          href="/profile/organizations/new"
+          className={cn(
+            currentPage === "new" && "text-foreground",
+            "flex gap-2 items-center",
+          )}
+        >
+          <div className="text-lg pb-0.5">
+            {currentPage === "new" ? "•" : <Plus size={16} />}
+          </div>
+          Make an organization
         </Link>
       </div>
     </div>
