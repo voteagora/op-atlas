@@ -69,7 +69,7 @@ export function saveHasShownNoRewardsDialog() {
 
 export enum ProjectSection {
   Details = "Details",
-  Team = "Team",
+  Team = "Contributor",
   Repos = "Repos",
   Contracts = "Contracts",
   Grants = "Grants",

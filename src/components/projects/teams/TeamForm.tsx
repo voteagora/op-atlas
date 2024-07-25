@@ -1,7 +1,9 @@
 "use client"
 
 import { User } from "@prisma/client"
+import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { sortBy } from "ramda"
 import { useEffect, useState } from "react"
 
@@ -17,7 +19,6 @@ import { useIsAdmin } from "@/lib/hooks"
 import { ProjectWithDetails, TeamRole } from "@/lib/types"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
-import { AddTeamMemberCard } from "./AddTeamMemberCard"
 import AddTeamMemberDialog from "./AddTeamMemberDialog"
 import ConfirmTeamCheckbox from "./ConfirmTeamCheckbox"
 import DeleteTeamMemberDialog from "./DeleteTeamMemberDialog"
@@ -29,9 +30,12 @@ export default function AddTeamDetailsForm({
   project: ProjectWithDetails
 }) {
   const router = useRouter()
+  const { data } = useSession()
   const [team, setTeam] = useState(
     sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
   )
+
+  const currentUser = data?.user
 
   const [isTeamConfirmed, setIsTeamConfirmed] = useState(
     project.addedTeamMembers,
@@ -82,39 +86,49 @@ export default function AddTeamDetailsForm({
       sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
     )
   }, [project.team])
+  console.log(team, "team")
 
   return (
     <>
-      <div className="flex flex-col gap-y-12">
+      <div className="flex flex-col gap-y-6">
         <div className="flex flex-col gap-y-6">
-          <h2>Team</h2>
+          <h2>Contributors</h2>
           <p className="text-secondary-foreground">
-            All team members will have edit access to this project. Only project
-            admins can delete the project or remove team members.
+            You can edit contributors here, and it won’t effect your
+            organization’s settings. All contributors will have edit access to
+            this project. Only project admins can delete the project or remove
+            contributors.
           </p>
           <Callout
             type="info"
             text="Access to an admin account is needed to claim Retro Funding rewards"
           />
         </div>
-
-        <div className="grid grid-cols-4 gap-2">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-foreground text-sm font-medium">Contributors</p>
           {team.map(({ user, role }) => (
             <TeamMemberCard
               key={user.id}
               user={user}
               role={role as TeamRole}
               isUserAdmin={!!isAdmin}
+              isCurrentUser={currentUser?.id === user.id}
               onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
               onRemove={() => setIsShowingRemove(user)}
             />
           ))}
-          <AddTeamMemberCard
+
+          <Button
             onClick={() => {
               track("Add Collaborators")
               setIsShowingAdd(true)
             }}
-          />
+            type="button"
+            variant="secondary"
+            className="w-fit font-medium"
+          >
+            <Plus size={16} className="mr-2.5" /> Add contributors
+          </Button>
         </div>
 
         <ConfirmTeamCheckbox

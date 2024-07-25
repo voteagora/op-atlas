@@ -1,12 +1,16 @@
 import { User } from "@prisma/client"
-import { Check, Ellipsis } from "lucide-react"
+import Image from "next/image"
 import { memo, useState } from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { TeamRole } from "@/lib/types"
@@ -17,10 +21,12 @@ export const TeamMemberCard = memo(function TeamMemberCard({
   isUserAdmin,
   onToggleAdmin,
   onRemove,
+  isCurrentUser,
 }: {
   user: User
   role: TeamRole
   isUserAdmin: boolean
+  isCurrentUser: boolean
   onToggleAdmin: () => void
   onRemove: () => void
 }) {
@@ -31,44 +37,70 @@ export const TeamMemberCard = memo(function TeamMemberCard({
     <div
       onMouseEnter={() => setMouseEntered(true)}
       onMouseLeave={() => setMouseEntered(false)}
-      className="aspect-square flex flex-col items-center justify-center gap-y-2 flex-1 relative border rounded-xl px-4 select-none"
     >
-      {isUserAdmin && (
+      <div className="py-2 px-3 rounded-md border border-input flex items-center gap-2 w-full">
+        <Avatar className="!w-6 !h-6">
+          <AvatarImage src={user.imageUrl || ""} alt="team avatar" />
+          <AvatarFallback>{user.username} </AvatarFallback>
+        </Avatar>
+        <p className="text-sm text-foreground">
+          {user.username} {isCurrentUser && "(You)"}
+        </p>
+        {/* this badge will be shown when according to project organization for now I am just showing dummy */}
+        {true && (
+          <Badge
+            variant="secondary"
+            className="text-xs font-medium text-secondary-foreground"
+          >
+            The Puky Cats
+          </Badge>
+        )}
+
         <DropdownMenu onOpenChange={setShowingMenu}>
           <DropdownMenuTrigger
-            className="invisible absolute top-1.5 right-1.5 h-8 w-8 flex items-center justify-center border rounded-md focus-visible:ring-0 focus:outline-none"
+            className="ml-auto"
+            asChild
             style={showingMenu || mouseEntered ? { visibility: "visible" } : {}}
           >
-            <Ellipsis size={14} />
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              className="flex items-center cursor-pointer"
-              onClick={onToggleAdmin}
+            <Button
+              variant="ghost"
+              className="text-sm font-normal text-secondary-foreground focus-visible:ring-0"
             >
-              {role !== "member" && <Check size={14} className="mr-1" />}
-              Admin
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer" onClick={onRemove}>
-              Remove
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+              {role === "admin" ? "Admin" : "Contributor"}
+              {isUserAdmin && (
+                <Image
+                  src="/assets/icons/arrowDownIcon.svg"
+                  height={8}
+                  width={10}
+                  alt="Arrow up"
+                  className="ml-2"
+                />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          {isUserAdmin && (
+            <DropdownMenuContent align="end">
+              <DropdownMenuCheckboxItem
+                onClick={onToggleAdmin}
+                className="text-sm font-normal"
+                checked={role !== "member"}
+              >
+                Admin
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                onClick={onToggleAdmin}
+                className="text-sm font-normal"
+                checked={role === "member"}
+              >
+                Contributor
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onRemove} className="cursor-pointer">
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          )}
         </DropdownMenu>
-      )}
-
-      <div className="relative w-12 h-12">
-        <Avatar className="w-full h-full">
-          <AvatarImage src={user.imageUrl ?? undefined} alt="avatar" />
-          <AvatarFallback>{user.name?.[0]}</AvatarFallback>
-        </Avatar>
-      </div>
-
-      <div className="flex flex-col items-center text-center">
-        <p className="text-sm">{user.name}</p>
-        {role !== "member" && (
-          <p className="text-xs text-muted-foreground">Admin</p>
-        )}
       </div>
     </div>
   )

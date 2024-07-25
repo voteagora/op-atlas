@@ -17,6 +17,7 @@ import {
 } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
+import ApplicationInterruptiveDialogue from "../application/ApplicationInterruptiveDialogue"
 import ExternalLink from "../ExternalLink"
 import CreateOrganizationDialog from "../organizations/CreateOrganizationDialog"
 import OrganizationOnboardingDialog from "../organizations/OrganizationOnboardingDialog"
@@ -53,6 +54,7 @@ const Dashboard = ({
 
   const [loadingNewProject, setLoadingNewProject] = useState(false)
   const [showOnBoarding, setShowOnBoarding] = useState(false)
+  const [showApplicationDialogue, setShowApplicationDialogue] = useState(false)
   const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] =
     useState(false)
 
@@ -95,6 +97,12 @@ const Dashboard = ({
           projects={projects}
         />
       )}
+      {showApplicationDialogue && (
+        <ApplicationInterruptiveDialogue
+          open
+          onOpenChange={setShowApplicationDialogue}
+        />
+      )}
 
       {showOnBoarding && (
         <OrganizationOnboardingDialog
@@ -127,20 +135,12 @@ const Dashboard = ({
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
             <h3>Your Projects</h3>
-            <Link
-              href="/projects/new"
-              onClick={() => {
-                track("Add new project clicked")
-                setLoadingNewProject(true)
-              }}
+            <Button
+              variant="secondary"
+              onClick={() => setShowApplicationDialogue(true)}
             >
-              <Button
-                isLoading={loadingNewProject}
-                variant={projects.length === 0 ? "destructive" : "secondary"}
-              >
-                Add a project
-              </Button>
-            </Link>
+              Add a project
+            </Button>
           </div>
 
           {projects.length > 0 ? (

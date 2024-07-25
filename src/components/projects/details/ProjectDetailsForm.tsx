@@ -4,12 +4,21 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Project } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
@@ -37,6 +46,18 @@ import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
 
+const organizations = [
+  {
+    image: "/assets/images/dummy-project-image.png",
+    label: "Puky Cats",
+    id: 1,
+  },
+  {
+    image: "/assets/images/dummy-project-image.png",
+    label: "Degen Dogs",
+    id: 2,
+  },
+]
 const CategoryEnum = z.enum([
   "CeFi",
   "Cross Chain",
@@ -106,6 +127,10 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
   const [newAvatarImg, setNewAvatarImg] = useState<Blob>()
   const [newBannerImg, setNewBannerImg] = useState<Blob>()
 
+  const [selectedOrganization, setSelectedOrganization] = useState<
+    (typeof organizations)[0] | null
+  >(null)
+
   const avatarUrl = useMemo(() => {
     if (!newAvatarImg) return project?.thumbnailUrl
     return URL.createObjectURL(newAvatarImg)
@@ -126,6 +151,10 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       URL.revokeObjectURL(bannerSrc)
       setBannerSrc(undefined)
     }
+  }
+
+  const handleSelect = (organization: (typeof organizations)[0] | null) => {
+    setSelectedOrganization(organization)
   }
 
   const onSubmit =
@@ -260,6 +289,68 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       >
         <div className="flex flex-col gap-6">
           <h2>Project details</h2>
+          <DropdownMenu>
+            <div className="w-full">
+              <FormLabel className="text-foreground">
+                Organization<span className="ml-0.5 text-destructive">*</span>
+              </FormLabel>
+              <DropdownMenuTrigger asChild>
+                <div className="px-3 py-2.5 flex items-center rounded-lg border border-input mt-2">
+                  {selectedOrganization?.image && (
+                    <Avatar className="w-5 h-5 mr-2">
+                      <AvatarImage
+                        src={
+                          selectedOrganization?.image ??
+                          "/assets/images/welcome-graphic-1.png"
+                        }
+                        alt="avatar"
+                      />
+                      <AvatarFallback>
+                        {selectedOrganization?.label}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                  <p>{selectedOrganization?.label ?? "No Organization"}</p>
+                  <Image
+                    className="ml-auto"
+                    src="/assets/icons/arrowDownIcon.svg"
+                    height={8}
+                    width={10}
+                    alt="Arrow up"
+                  />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="!w-[750px]">
+                {organizations.map((org) => (
+                  <DropdownMenuCheckboxItem
+                    className="text-sm font-normal w-full"
+                    checked={selectedOrganization?.id === org.id}
+                    key={org.label}
+                    onCheckedChange={() => handleSelect(org)}
+                  >
+                    <Avatar className="w-5 h-5 mr-2">
+                      <AvatarImage src={org.image} alt="avatar" />
+                      <AvatarFallback>{org.label}</AvatarFallback>
+                    </Avatar>
+                    {org.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+
+                <DropdownMenuCheckboxItem
+                  checked={selectedOrganization === null}
+                  onCheckedChange={() => handleSelect(null)}
+                >
+                  No organization
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem>
+                  <Link href="/profile/organizations/new">
+                    Make an organization
+                  </Link>
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </div>
+          </DropdownMenu>
 
           <FormField
             control={form.control}
@@ -312,9 +403,9 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                 Images must be no larger than 4.5 MB.
               </div>
             </div>
-            <div className="flex flex-1 gap-x-2 mt-2">
+            <div className="flex flex-1 gap-x-2 mt-2 relative pb-10">
               <FileUploadInput
-                className="flex-1"
+                className="absolute bottom-0 left-6"
                 onChange={(e) => {
                   if (!e.target.files || e.target.files.length < 1) return
 
@@ -322,7 +413,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                   setAvatarSrc(URL.createObjectURL(file))
                 }}
               >
-                <div className="border border-solid rounded-xl overflow-hidden h-40 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
+                <div className="border border-solid rounded-xl overflow-hidden h-32 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -338,17 +429,13 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                         height={20}
                         alt="img"
                       />
-                      <p className="text-muted-foreground text-xs">
-                        Add project
-                        <br />
-                        avatar
-                      </p>
+                      <p className="text-muted-foreground text-xs">Avatar</p>
                     </>
                   )}
                 </div>
               </FileUploadInput>
               <FileUploadInput
-                className="flex-[4]"
+                className="w-full"
                 onChange={(e) => {
                   if (!e.target.files || e.target.files.length < 1) return
 
@@ -373,9 +460,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                         alt="img"
                       />
                       <p className="text-muted-foreground text-xs">
-                        Add project cover
-                        <br />
-                        image
+                        Cover image
                       </p>
                     </>
                   )}
