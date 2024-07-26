@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { User } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -57,7 +57,7 @@ export default function MakeOrganizationForm({
 }: {
   user: UserWithAddresses
 }) {
-  const router = useRouter()
+  const { orgId } = useParams()
 
   const [team, setTeam] = useState<{ user: User; role: TeamRole }[]>([])
 
@@ -70,7 +70,7 @@ export default function MakeOrganizationForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      name: orgId ? "The Puky Cats" : "",
       description: "",
 
       website: toStringObjectArr([""]),

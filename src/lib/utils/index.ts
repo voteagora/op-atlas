@@ -69,7 +69,7 @@ export function saveHasShownNoRewardsDialog() {
 
 export enum ProjectSection {
   Details = "Details",
-  Team = "Team",
+  Contributors = "Contributors",
   Repos = "Repos",
   Contracts = "Contracts",
   Grants = "Grants",
@@ -95,7 +95,7 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
 
   const hasTeam = project.addedTeamMembers
   if (hasTeam) {
-    completedSections.push(ProjectSection.Team)
+    completedSections.push(ProjectSection.Contributors)
   }
 
   const hasRepos =

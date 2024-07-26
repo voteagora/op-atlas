@@ -167,14 +167,14 @@ const Dashboard = ({
           </div>
         )}
 
-        <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
-
         <div className="flex flex-col gap-6">
           <UserOrganizationTitleRow />
-          <Link href="/projects/new">
+          <Link href="/projects/787344">
             <AddFirstProject />
           </Link>
         </div>
+
+        <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
 
         {showUnclaimedRewardsDialog && (
           <div className="flex flex-col">

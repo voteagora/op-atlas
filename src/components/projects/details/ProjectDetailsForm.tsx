@@ -243,7 +243,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         success: (project) => {
           isSave
             ? router.replace(`/projects/${project.id}/details`)
-            : router.push(`/projects/${project.id}/team`)
+            : router.push(`/projects/${project.id}/contributors`)
           setIsSaving(false)
           return isCreating ? "Project created!" : "Project saved"
         },

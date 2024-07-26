@@ -27,7 +27,7 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
       intersection(
         [
           ProjectSection.Details,
-          ProjectSection.Team,
+          ProjectSection.Contributors,
           ProjectSection.Repos,
           ProjectSection.Contracts,
           ProjectSection.Grants,
