@@ -49,7 +49,7 @@ function ApplicationInterruptiveDialogue({
         </DialogHeader>
 
         <DialogFooter className="w-full sm:flex-col gap-2">
-          <Link href="/application">
+          <Link href="/application/5">
             <Button className="w-full" type="button" variant="destructive">
               Review the application
             </Button>

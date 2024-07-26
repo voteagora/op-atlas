@@ -29,12 +29,10 @@ export const LinkForm = ({
       <div className="flex flex-col gap-6">
         <FormField
           control={form.control}
-          name={`packages.${index}.url`}
+          name={`links.${index}.url`}
           render={({ field }) => (
             <FormItem className="flex flex-col gap-1.5">
-              <FormLabel className="text-foreground">
-                Verify your Github repo
-              </FormLabel>
+              <FormLabel className="text-foreground">Link URL</FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Add a URL" />
               </FormControl>
@@ -47,7 +45,7 @@ export const LinkForm = ({
           <div className="flex flex-col gap-6">
             <FormField
               control={form.control}
-              name={`packages.${index}.name`}
+              name={`links.${index}.name`}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-1.5">
                   <FormLabel className="text-foreground">Name</FormLabel>
@@ -62,7 +60,7 @@ export const LinkForm = ({
             />
             <FormField
               control={form.control}
-              name={`packages.${index}.description`}
+              name={`links.${index}.description`}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-1.5">
                   <FormLabel className="text-foreground">Description</FormLabel>

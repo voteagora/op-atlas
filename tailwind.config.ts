@@ -68,6 +68,9 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
         optimismRed: "hsl(var(--destructive))",
+        callout: {
+          foreground: "#3374DB",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -5,7 +5,7 @@ import { User } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -30,7 +30,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form"
-import TeamMemberListItem from "./TeamMemberListItem"
+import { TeamMemberRow } from "./TeamMemberRow"
 
 const StringValue = z.object({ value: z.string() }) // use a intermediate object to represent String arrays because useFieldArray only works on object arrays
 
@@ -59,7 +59,7 @@ export default function MakeOrganizationForm({
 }) {
   const router = useRouter()
 
-  const [team, setTeam] = useState([])
+  const [team, setTeam] = useState<{ user: User; role: TeamRole }[]>([])
 
   const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
@@ -186,6 +186,17 @@ export default function MakeOrganizationForm({
 
     setIsShowingRemove(null)
   }
+
+  //setting user as admin in local state for now
+  useEffect(() => {
+    setTeam([
+      {
+        user: user,
+        role: "admin",
+      },
+    ])
+  }, [user])
+
   const canSubmit = form.formState.isValid && !form.formState.isSubmitting
 
   return (
@@ -238,7 +249,17 @@ export default function MakeOrganizationForm({
             <FormItem className="flex flex-col gap-1.5">
               <FormLabel>Team members</FormLabel>
 
-              <TeamMemberListItem onRemove={() => setIsShowingRemove(user)} />
+              {team?.map(({ user: teamUser, role }, index) => (
+                <TeamMemberRow
+                  key={index}
+                  user={user}
+                  role={role as TeamRole}
+                  isUserAdmin={false}
+                  isCurrentUser={teamUser?.id === user.id}
+                  onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
+                  onRemove={() => setIsShowingRemove(user)}
+                />
+              ))}
             </FormItem>
             <Button
               onClick={() => setIsShowingAdd(true)}

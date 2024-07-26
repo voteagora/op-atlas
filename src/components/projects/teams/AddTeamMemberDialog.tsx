@@ -139,20 +139,21 @@ const AddTeamMemberDialog = ({
           inputValue={searchText}
           setInputValue={setSearchText}
         />
-
-        <Button
-          className="w-full"
-          variant="destructive"
-          disabled={!selectedUsers.length || loading}
-          onClick={onAddMembers}
-        >
-          Add
-        </Button>
-        {onSkip && (
-          <Button className="w-full" variant="outline" onClick={onSkip}>
-            Skip
+        <div className="flex flex-col gap-2 w-full">
+          <Button
+            className="w-full"
+            variant="destructive"
+            disabled={!selectedUsers.length || loading}
+            onClick={onAddMembers}
+          >
+            Add
           </Button>
-        )}
+          {onSkip && (
+            <Button className="w-full" variant="outline" onClick={onSkip}>
+              Skip
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )

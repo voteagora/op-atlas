@@ -41,7 +41,12 @@ function toFormValues(project: ProjectWithDetails) {
     packages:
       packages.length === 0
         ? [{ url: "" }]
-        : packages.map(({ url }) => ({ url })),
+        : packages.map(({ url }) => ({ url: url })),
+    links:
+      packages.length === 0
+        ? [{ url: "", name: "", description: "" }]
+        : //this name and description with be replace with live data
+          packages.map(({ url }) => ({ url, name: "", description: "" })),
     githubRepos:
       githubs.length === 0
         ? [{ url: "", name: "", description: "", verified: false }]
@@ -80,6 +85,11 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   const { fields: packageFields, append: addPackageField } = useFieldArray({
     control: form.control,
     name: "packages",
+  })
+
+  const { fields: linkFields, append: addLinkField } = useFieldArray({
+    control: form.control,
+    name: "links",
   })
 
   const hasRepo = !form.watch("noRepos")
@@ -161,9 +171,27 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
     if (valid) {
       form.clearErrors(`packages.${packages.length - 1}.url`)
-      addPackageField({ url: "", name: "", description: "" })
+      addPackageField({ url: "" })
     } else {
       form.setError(`packages.${packages.length - 1}.url`, {
+        message: "Invalid URL",
+      })
+    }
+  }
+
+  const onAddLinkField = async () => {
+    const links = form.getValues("links").map((field) => field.url)
+    // If the previous URL is blank, do nothing
+    if (links[links.length - 1] === "") {
+      return
+    }
+
+    const valid = links.every((url) => z.string().url().safeParse(url).success)
+    if (valid) {
+      form.clearErrors(`links.${links.length - 1}.url`)
+      addLinkField({ url: "", name: "", description: "" })
+    } else {
+      form.setError(`links.${links.length - 1}.url`, {
         message: "Invalid URL",
       })
     }
@@ -275,7 +303,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                     to verify ownership. If you have multiple repos, first
                     verify one then you can add more.
                   </p>
-                  <div className="mt-6 flex flex-col gap-2">
+                  <div className="mt-6 flex flex-col gap-6">
                     {githubFields.map((field, index) => (
                       <GithubForm
                         key={field.id}
@@ -285,16 +313,15 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                         onRemove={onRemoveGithubField}
                       />
                     ))}
-
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={onAddGithubField}
-                      className="mt-4 w-fit"
-                    >
-                      <Plus size={16} className="mr-2.5" /> Add another repo
-                    </Button>
                   </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={onAddGithubField}
+                    className="mt-4 w-fit"
+                  >
+                    <Plus size={16} className="mr-2.5" /> Add another repo
+                  </Button>
                 </div>
 
                 <div className="flex flex-col">
@@ -322,15 +349,23 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                   </div>
                 </div>
 
-                <div className="mt-6 flex flex-col gap-2">
-                  {packageFields.map((field, index) => (
-                    <LinkForm key={field.id} form={form} index={index} />
-                  ))}
+                <div className="flex flex-col">
+                  <h3>Repos</h3>
+                  <p className="mt-4 mb-6 text-text-secondary">
+                    Enter your project’s GitHub repo URL and complete the steps
+                    to verify ownership. If you have multiple repos, first
+                    verify one then you can add more.
+                  </p>
+                  <div className="mt-6 flex flex-col gap-6">
+                    {linkFields.map((field, index) => (
+                      <LinkForm key={field.id} form={form} index={index} />
+                    ))}
+                  </div>
 
                   <Button
                     type="button"
                     variant="secondary"
-                    onClick={onAddGithubField}
+                    onClick={onAddLinkField}
                     className="mt-4 w-fit"
                   >
                     <Plus size={16} className="mr-2.5" /> Add another link

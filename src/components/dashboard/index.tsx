@@ -31,6 +31,7 @@ import JoinProjectDialog from "./JoinProjectDialog"
 import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
+import UnclaimedRewardsCard from "./UnclaimedRewardsCard"
 import UserOrganizationTitleRow from "./UserOrganizationTitleRow"
 import UserProjectCard from "./UserProjectCard"
 
@@ -90,13 +91,14 @@ const Dashboard = ({
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
-      {showUnclaimedRewardsDialog && (
+
+      {/* {showUnclaimedRewardsDialog && (
         <UnclaimedRewardsDialog
           open
           onOpenChange={setShowUnclaimedRewardsDialog}
           projects={projects}
         />
-      )}
+      )} */}
       {showApplicationDialogue && (
         <ApplicationInterruptiveDialogue
           open
@@ -166,12 +168,23 @@ const Dashboard = ({
         )}
 
         <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
+
         <div className="flex flex-col gap-6">
           <UserOrganizationTitleRow />
           <Link href="/projects/new">
             <AddFirstProject />
           </Link>
         </div>
+
+        {showUnclaimedRewardsDialog && (
+          <div className="flex flex-col">
+            <h3>Your Retro Funding Round 4 rewards</h3>
+            <p className="text-base font-normal text-secondary-foreground mb-6">
+              Claim by Aug 1, 2025
+            </p>
+            <UnclaimedRewardsCard projects={projects} />
+          </div>
+        )}
 
         {SHOW_APPLICATIONS && (
           <div className="flex flex-col gap-y-6">
