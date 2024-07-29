@@ -350,11 +350,11 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <h3>Repos</h3>
+                  <h3>Links</h3>
                   <p className="mt-4 mb-6 text-text-secondary">
-                    Enter your project’s GitHub repo URL and complete the steps
-                    to verify ownership. If you have multiple repos, first
-                    verify one then you can add more.
+                    Link to anything relevant to this project’s impact. For
+                    example, a data analysis project might link to a metrics
+                    dashboard.
                   </p>
                   <div className="mt-6 flex flex-col gap-6">
                     {linkFields.map((field, index) => (

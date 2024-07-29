@@ -1,4 +1,3 @@
-import {} from "lucide-react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
 import React from "react"
