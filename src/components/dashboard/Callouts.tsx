@@ -25,7 +25,7 @@ export function BadgeholderCallout() {
           Calling all badgeholders! Confirm your citizenship for Governance
           Season 6
         </p>
-        <div>Apply to vote by July 18.</div>
+        <div>Apply to vote by July 31.</div>
       </div>
       <ArrowRight size={24} />
     </ExternalLink>

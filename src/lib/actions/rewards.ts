@@ -11,7 +11,7 @@ import {
   updateClaim,
 } from "@/db/rewards"
 
-import { getStreams } from "../superfluid"
+import { getActiveStreams } from "../superfluid"
 import { verifyAdminStatus } from "./utils"
 
 // TODO: Can filter by sender once we have it
@@ -23,7 +23,7 @@ export const getActiveStream = async (address: string) => {
   }
 
   try {
-    const { streams } = await getStreams({ recipient: address.toLowerCase() })
+    const streams = await getActiveStreams(address.toLowerCase())
     return {
       error: null,
       stream: streams[0] ?? null,
@@ -68,8 +68,8 @@ export const addAddressToRewardsClaim = async (
     }
   }
 
-  // Address can't already have a superfluid stream
-  const { streams } = await getStreams({ recipient: address.toLowerCase() })
+  // Address can't already have an active superfluid stream
+  const streams = await getActiveStreams(address.toLowerCase())
   if (streams.length > 0) {
     return {
       error: "Address already has a stream",

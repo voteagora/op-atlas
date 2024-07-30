@@ -47,3 +47,9 @@ export async function getStreams({ recipient }: { recipient: string }) {
 
   return client.request<{ streams: Stream[] }>(query)
 }
+
+// We consider a stream active if the flow rate is greater than zero
+export async function getActiveStreams(recipient: string) {
+  const { streams } = await getStreams({ recipient })
+  return streams.filter((stream) => parseFloat(stream.currentFlowRate) > 0)
+}
