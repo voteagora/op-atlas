@@ -113,7 +113,7 @@ const UserProjectCard = ({
       </div>
       <div className="m-auto">
         {progress === 100 ? (
-          <>
+          <div className="flex">
             <Image
               alt="Checkmark"
               src="/assets/icons/circle-check-green.svg"
@@ -122,7 +122,7 @@ const UserProjectCard = ({
               className="w-4 h-4 object-center object-cover"
             />
             <p className="ml-2 text-sm text-secondary-foreground">Onchain</p>
-          </>
+          </div>
         ) : (
           <>
             <Progress value={progress} className="h-2 w-16" />

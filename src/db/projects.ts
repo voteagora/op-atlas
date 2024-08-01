@@ -48,7 +48,7 @@ export async function getUserProjectsWithDetails({
           deletedAt: null,
           project: {
             deletedAt: null,
-            organization: { none: {} },
+            organization: { deletedAt: null },
           },
         },
         include: {

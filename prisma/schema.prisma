@@ -136,7 +136,7 @@ model ProjectOrganization {
   updatedAt      DateTime @updatedAt
   deletedAt      DateTime?
 
-  projectId      String
+  projectId      String @unique
   organizationId String
 
   project       Project      @relation(fields: [projectId], references: [id])
@@ -169,7 +169,7 @@ model Project {
   deletedAt DateTime?
 
   team         UserProjects[]
-  organization ProjectOrganization[]
+  organization ProjectOrganization?
   repos        ProjectRepository[]
   contracts    ProjectContract[]
   funding      ProjectFunding[]

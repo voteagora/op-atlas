@@ -128,7 +128,7 @@ export default function ProjectDetailsForm({
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(
       organizations.find(
-        (org) => org.id === project?.organization[0]?.organizationId,
+        (org) => org.id === project?.organization?.organizationId,
       ) || null,
     )
 
