@@ -1,3 +1,4 @@
+import { Organization } from "@prisma/client"
 import { type ClassValue, clsx } from "clsx"
 import { customAlphabet } from "nanoid"
 import { sortBy } from "ramda"
@@ -181,4 +182,13 @@ export function shortenAddress(address: string) {
     address.length - 4,
     address.length,
   )}`
+}
+
+export function isOrganizationSetupComplete(organization: Organization) {
+  return (
+    organization.name &&
+    organization.description &&
+    organization.avatarUrl &&
+    organization.coverUrl
+  )
 }

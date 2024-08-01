@@ -86,7 +86,6 @@ export default function AddTeamDetailsForm({
       sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
     )
   }, [project.team])
-  console.log(team, "team")
 
   return (
     <>

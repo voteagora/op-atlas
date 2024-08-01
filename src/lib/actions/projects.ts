@@ -34,7 +34,10 @@ export const getApplications = async (userId: string) => {
   return (teams?.projects ?? []).flatMap(({ project }) => project.applications)
 }
 
-export const createNewProject = async (details: CreateProjectParams) => {
+export const createNewProject = async (
+  details: CreateProjectParams,
+  organizationId?: string,
+) => {
   const session = await auth()
 
   if (!session?.user?.id || !session.user.farcasterId) {
@@ -52,6 +55,7 @@ export const createNewProject = async (details: CreateProjectParams) => {
     userId: session.user.id,
     projectId: attestationId,
     project: details,
+    organizationId,
   })
 
   revalidatePath("/dashboard")
@@ -83,6 +87,7 @@ export const createNewProjectOnBehalf = async (
 export const updateProjectDetails = async (
   projectId: string,
   details: UpdateProjectParams,
+  organizationId?: string,
 ) => {
   const session = await auth()
 
@@ -97,7 +102,11 @@ export const updateProjectDetails = async (
     return isInvalid
   }
 
-  const updated = await updateProject({ id: projectId, project: details })
+  const updated = await updateProject({
+    id: projectId,
+    project: details,
+    organizationId,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")

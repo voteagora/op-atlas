@@ -24,6 +24,7 @@ model User {
   deletedAt DateTime?
 
   projects    UserProjects[]
+  organizations UserOrganization[]
   addresses   UserAddress[]
   RewardClaim RewardClaim[]
 }
@@ -93,6 +94,58 @@ model RewardClaim {
   addressSetBy User?         @relation(fields: [addressSetById], references: [id])
 }
 
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  avatarUrl   String?
+  coverUrl    String?
+  website     String[]
+  farcaster   String[]
+  twitter     String?
+  mirror      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  team     UserOrganization[]
+  projects  ProjectOrganization[]
+}
+
+model UserOrganization {
+  id             String   @id @default(uuid())
+  role String @default("member")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  userId         String
+  organizationId String
+
+  user          User         @relation(fields: [userId], references: [id])
+  organization  Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model ProjectOrganization {
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  projectId      String
+  organizationId String
+
+  project       Project      @relation(fields: [projectId], references: [id])
+  organization  Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([projectId, organizationId])
+  @@index([organizationId])
+}
+
 model Project {
   id           String  @id @default(uuid())
   name         String
@@ -116,6 +169,7 @@ model Project {
   deletedAt DateTime?
 
   team         UserProjects[]
+  organization ProjectOrganization[]
   repos        ProjectRepository[]
   contracts    ProjectContract[]
   funding      ProjectFunding[]

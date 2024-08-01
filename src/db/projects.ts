@@ -1,6 +1,7 @@
 "use server"
 
 import { Prisma, Project } from "@prisma/client"
+import { update } from "ramda"
 
 import { TeamRole } from "@/lib/types"
 import { ProjectMetadata } from "@/lib/utils/metadata"
@@ -47,6 +48,7 @@ export async function getUserProjectsWithDetails({
           deletedAt: null,
           project: {
             deletedAt: null,
+            organization: { none: {} },
           },
         },
         include: {
@@ -57,6 +59,7 @@ export async function getUserProjectsWithDetails({
               contracts: true,
               funding: true,
               snapshots: true,
+              organization: true,
               applications: true,
               rewards: { include: { claim: true } },
             },
@@ -81,10 +84,12 @@ export type CreateProjectParams = Partial<
 export async function createProject({
   userId,
   projectId,
+  organizationId,
   project,
 }: {
   userId: string
   projectId: string
+  organizationId?: string
   project: CreateProjectParams
 }) {
   return prisma.project.create({
@@ -101,6 +106,17 @@ export async function createProject({
           },
         },
       },
+      organization: organizationId
+        ? {
+            create: {
+              organization: {
+                connect: {
+                  id: organizationId,
+                },
+              },
+            },
+          }
+        : undefined,
     },
   })
 }
@@ -112,30 +128,64 @@ export type UpdateProjectParams = Partial<
 export async function updateProject({
   id,
   project,
+  organizationId,
 }: {
   id: string
   project: UpdateProjectParams
+  organizationId?: string
 }) {
-  return prisma.project.update({
-    where: {
-      id,
-    },
-    data: {
-      ...project,
-      lastMetadataUpdate: new Date(),
-    },
+  return prisma.$transaction(async (prisma) => {
+    // Update the main project fields
+    const updatedProject = await prisma.project.update({
+      where: { id },
+      data: {
+        ...project,
+        lastMetadataUpdate: new Date(),
+      },
+    })
+
+    if (!!!organizationId) {
+      await prisma.projectOrganization.deleteMany({
+        where: { projectId: id },
+      })
+    } else if (organizationId) {
+      // Remove any existing organization associations
+      await prisma.projectOrganization.deleteMany({
+        where: { projectId: id },
+      })
+
+      // Create a new organization association
+      await prisma.projectOrganization.create({
+        data: {
+          projectId: id,
+          organizationId,
+        },
+      })
+    }
+    return updatedProject
   })
 }
 
 export async function deleteProject({ id }: { id: string }) {
-  return prisma.project.update({
-    where: {
-      id,
-    },
-    data: {
-      deletedAt: new Date(),
-    },
-  })
+  return prisma.$transaction([
+    prisma.project.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    }),
+    prisma.projectOrganization.updateMany({
+      where: {
+        projectId: id,
+        deletedAt: null, // Ensures only non-deleted records are updated
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    }),
+  ])
 }
 
 export async function getProject({ id }: { id: string }) {
@@ -154,6 +204,7 @@ export async function getProject({ id }: { id: string }) {
         },
       },
       applications: true,
+      organization: true,
       rewards: { include: { claim: true } },
     },
   })

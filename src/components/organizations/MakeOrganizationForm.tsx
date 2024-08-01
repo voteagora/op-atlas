@@ -1,10 +1,11 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { User } from "@prisma/client"
+import { Organization, User } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { sortBy } from "ramda"
 import { useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -12,9 +13,16 @@ import { z } from "zod"
 
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { TeamRole, UserWithAddresses } from "@/lib/types"
+import {
+  addMemberToOrganization,
+  createNewOrganization,
+  removeMemberFromOrganization,
+  setOrganizationMemberRole,
+  updateOrganizationDetails,
+} from "@/lib/actions/organizations"
+import { useIsOrganizationAdmin } from "@/lib/hooks"
+import { OrganizationWithDetails, TeamRole } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
-import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import FileUploadInput from "../common/FileUploadInput"
 import { PhotoCropModal } from "../projects/details/PhotoCropModal"
@@ -54,29 +62,35 @@ function fromStringObjectArr(objs: { value: string }[]) {
 
 export default function MakeOrganizationForm({
   user,
+  organization,
 }: {
-  user: UserWithAddresses
+  user: User
+  organization?: OrganizationWithDetails
 }) {
-  const { orgId } = useParams()
+  const router = useRouter()
+  const isAdmin = useIsOrganizationAdmin(organization)
 
-  const [team, setTeam] = useState<{ user: User; role: TeamRole }[]>([])
+  const [team, setTeam] = useState<{ user: User; role: TeamRole }[]>(
+    organization?.team.map(({ user, role }) => ({
+      user,
+      role: role as TeamRole,
+    })) ?? [{ user, role: "admin" }],
+  )
 
   const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
 
-  const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: orgId ? "The Puky Cats" : "",
-      description: "",
-
-      website: toStringObjectArr([""]),
-      farcaster: toStringObjectArr([""]),
-      twitter: undefined,
-      mirror: undefined,
+      name: organization?.name ?? "",
+      description: organization?.description ?? "",
+      website: toStringObjectArr(organization?.website ?? [""]),
+      farcaster: toStringObjectArr(organization?.farcaster ?? [""]),
+      twitter: organization?.twitter ?? undefined,
+      mirror: organization?.mirror ?? undefined,
     },
   })
 
@@ -97,14 +111,14 @@ export default function MakeOrganizationForm({
   const [newBannerImg, setNewBannerImg] = useState<Blob>()
 
   const avatarUrl = useMemo(() => {
-    if (!newAvatarImg) return ""
+    if (!newAvatarImg) return organization?.avatarUrl
     return URL.createObjectURL(newAvatarImg)
-  }, [newAvatarImg])
+  }, [newAvatarImg, organization?.avatarUrl])
 
   const bannerUrl = useMemo(() => {
-    if (!newBannerImg) return ""
+    if (!newBannerImg) return organization?.coverUrl
     return URL.createObjectURL(newBannerImg)
-  }, [newBannerImg])
+  }, [newBannerImg, organization?.coverUrl])
 
   const onCloseCropModal = (type: "avatar" | "banner") => {
     if (avatarSrc && type === "avatar") {
@@ -118,84 +132,161 @@ export default function MakeOrganizationForm({
     }
   }
 
-  const onSubmit =
-    (isSave: boolean) => async (values: z.infer<typeof formSchema>) => {
-      isSave ? setIsSaving(true) : setIsLoading(true)
-      //thumb nail url
-      let thumbnailUrl = ""
-      let bannerUrl = ""
-
-      try {
-        if (newAvatarImg) {
-          thumbnailUrl = await uploadImage(newAvatarImg)
-        }
-      } catch (error: unknown) {
-        let message = "Failed to upload avatar image"
-        if (
-          error instanceof Error &&
-          error.message === "Image size too large"
-        ) {
-          message = "Avatar image too large"
-        }
-
-        console.error("Error uploading avatar", error)
-        toast.error(message)
-        isSave ? setIsSaving(false) : setIsLoading(false)
-        return
-      }
-
-      try {
-        if (newBannerImg) {
-          bannerUrl = await uploadImage(newBannerImg)
-        }
-      } catch (error: unknown) {
-        let message = "Failed to upload avatar image"
-        if (
-          error instanceof Error &&
-          error.message === "Image size too large"
-        ) {
-          message = "Cover image too large"
-        }
-
-        console.error("Error uploading banner", error)
-        toast.error(message)
-        isSave ? setIsSaving(false) : setIsLoading(false)
-        return
-      }
-
-      const newValues = {
-        ...values,
-        thumbnailUrl,
-        bannerUrl,
-        website: fromStringObjectArr(values.website),
-        farcaster: fromStringObjectArr(values.farcaster),
-      }
+  const handleAddMembers = async (
+    userIds: string[],
+    allSelectedUsers: User[],
+  ) => {
+    if (organization) {
+      await addMemberToOrganization(organization.id, userIds)
+    } else {
+      allSelectedUsers.forEach((user) => {
+        setTeam((prev) => [...prev, { user, role: "member" }])
+      })
     }
 
-  const handleAddMembers = async (userIds: string[]) => {
     setIsShowingAdd(false)
   }
 
-  const handleToggleRole = async (user: User, role: TeamRole) => {
-    // TODO: Optimistic UI
-    const newRole = role === "member" ? "admin" : "member"
+  const handleToggleRole = async (selectedUser: User, role: TeamRole) => {
+    if (organization) {
+      await setOrganizationMemberRole(organization.id, selectedUser.id, role)
+    } else {
+      setTeam((prev) => {
+        const updatedTeam = prev.map((item) => {
+          if (item.user.id === selectedUser.id) {
+            const newRole = role
+            return { ...item, role: newRole }
+          }
+          return item
+        })
+        return updatedTeam
+      })
+    }
   }
 
   const handleConfirmDelete = async () => {
     if (!isShowingRemove) return
-
+    if (organization) {
+      await removeMemberFromOrganization(organization.id, isShowingRemove.id)
+    } else {
+      setTeam((prev) =>
+        prev.filter((item) => item.user.id !== isShowingRemove.id),
+      )
+    }
     setIsShowingRemove(null)
   }
 
-  //setting user as admin in local state for now
-  useEffect(() => {
-    setTeam([
-      {
-        user: user,
-        role: "admin",
+  const onSubmit = () => async (values: z.infer<typeof formSchema>) => {
+    setIsSaving(true)
+
+    let avatarUrl = organization?.avatarUrl
+    let coverUrl = organization?.coverUrl
+
+    try {
+      if (newAvatarImg) {
+        avatarUrl = await uploadImage(newAvatarImg)
+      }
+    } catch (error: unknown) {
+      let message = "Failed to upload avatar image"
+      if (error instanceof Error && error.message === "Image size too large") {
+        message = "Avatar image too large"
+      }
+
+      console.error("Error uploading avatar", error)
+      toast.error(message)
+      setIsSaving(false)
+      return
+    }
+
+    try {
+      if (newBannerImg) {
+        coverUrl = await uploadImage(newBannerImg)
+      }
+    } catch (error: unknown) {
+      let message = "Failed to upload avatar image"
+      if (error instanceof Error && error.message === "Image size too large") {
+        message = "Cover image too large"
+      }
+
+      console.error("Error uploading banner", error)
+      toast.error(message)
+      setIsSaving(false)
+      return
+    }
+
+    const newValues = {
+      ...values,
+      avatarUrl,
+      coverUrl,
+      website: fromStringObjectArr(values.website),
+      farcaster: fromStringObjectArr(values.farcaster),
+    }
+
+    const isCreating = !organization
+
+    const promise: Promise<Organization> = new Promise(
+      async (resolve, reject) => {
+        try {
+          const response = organization
+            ? await updateOrganizationDetails({
+                id: organization.id,
+                organization: newValues,
+              })
+            : await createNewOrganization({
+                organization: newValues,
+                teamMembers: team.map(({ user, role }) => ({
+                  userId: user.id,
+                  role,
+                })),
+              })
+
+          if (response?.error !== null || !response) {
+            throw new Error(response?.error ?? "Failed to save project")
+          }
+
+          // if (isCreating) {
+          //   track("Add Project", { projectId: response.id })
+          // }
+
+          resolve(response.organizationData)
+        } catch (error) {
+          console.error("Error creating project", error)
+          reject(error)
+        }
       },
-    ])
-  }, [user])
+    )
+
+    toast.promise(promise, {
+      loading: isCreating
+        ? "Creating organization..."
+        : "Saving organization...",
+      success: (organization) => {
+        if (isCreating) {
+          router.replace(`/profile/organizations/${organization.id}`)
+        }
+        setIsSaving(false)
+        return isCreating ? "Organization created!" : "organization saved"
+      },
+      error: () => {
+        setIsSaving(false)
+        return "Failed to save organization"
+      },
+    })
+  }
+
+  useEffect(() => {
+    if (organization?.team) {
+      setTeam(
+        sortBy(
+          (member) => member.user.name?.toLowerCase() ?? "",
+          organization?.team.map(({ user, role }) => ({
+            user,
+            role: role as TeamRole,
+          })),
+        ),
+      )
+    }
+  }, [organization?.team])
 
   const canSubmit = form.formState.isValid && !form.formState.isSubmitting
 
@@ -227,7 +318,7 @@ export default function MakeOrganizationForm({
         />
       )}
       <form
-        onSubmit={form.handleSubmit(onSubmit(false))}
+        onSubmit={form.handleSubmit(onSubmit())}
         className="flex flex-col gap-12"
       >
         <div className="flex flex-col gap-6">
@@ -252,12 +343,14 @@ export default function MakeOrganizationForm({
               {team?.map(({ user: teamUser, role }, index) => (
                 <TeamMemberRow
                   key={index}
-                  user={user}
+                  user={teamUser}
                   role={role as TeamRole}
-                  isUserAdmin={false}
+                  isUserAdmin={!organization ? true : !!isAdmin}
                   isCurrentUser={teamUser?.id === user.id}
-                  onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
-                  onRemove={() => setIsShowingRemove(user)}
+                  onToggleAdmin={(selectedRole) =>
+                    handleToggleRole(teamUser, selectedRole as TeamRole)
+                  }
+                  onRemove={() => setIsShowingRemove(teamUser)}
                 />
               ))}
             </FormItem>
@@ -266,6 +359,7 @@ export default function MakeOrganizationForm({
               type="button"
               variant="secondary"
               className="w-fit"
+              disabled={!organization ? false : !!!isAdmin}
             >
               <Plus size={16} className="mr-2.5" /> Add team members
             </Button>
@@ -285,7 +379,7 @@ export default function MakeOrganizationForm({
                 <Textarea
                   id="description"
                   placeholder="Add a description"
-                  className="resize-none"
+                  className="resize-y min-h-[100px]"
                   {...field}
                 />
                 <FormMessage />
@@ -463,7 +557,7 @@ export default function MakeOrganizationForm({
           <Button
             isLoading={isSaving}
             disabled={!canSubmit || isSaving}
-            onClick={form.handleSubmit(onSubmit(true))}
+            onClick={form.handleSubmit(onSubmit())}
             type="button"
             variant="destructive"
             className="self-start"
@@ -476,7 +570,6 @@ export default function MakeOrganizationForm({
       <AddTeamMemberDialog
         open={isShowingAdd}
         onOpenChange={(open) => setIsShowingAdd(open)}
-        //@ts-ignore
         team={team.map((member) => member.user)}
         addMembers={handleAddMembers}
       />

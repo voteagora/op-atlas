@@ -1,12 +1,12 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Project } from "@prisma/client"
+import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
+import { ProjectWithDetails } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -46,18 +47,6 @@ import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
 
-const organizations = [
-  {
-    image: "/assets/images/dummy-project-image.png",
-    label: "Puky Cats",
-    id: 1,
-  },
-  {
-    image: "/assets/images/dummy-project-image.png",
-    label: "Degen Dogs",
-    id: 2,
-  },
-]
 const CategoryEnum = z.enum([
   "CeFi",
   "Cross Chain",
@@ -89,9 +78,18 @@ function fromStringObjectArr(objs: { value: string }[]) {
   return objs.map(({ value }) => value).filter(Boolean) // remove empty strings
 }
 
-export default function ProjectDetailsForm({ project }: { project?: Project }) {
+export default function ProjectDetailsForm({
+  project,
+  organizations,
+}: {
+  project?: ProjectWithDetails
+  organizations: Organization[]
+}) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { track } = useAnalytics()
+
+  const orgId = searchParams.get("orgId")
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -127,9 +125,12 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
   const [newAvatarImg, setNewAvatarImg] = useState<Blob>()
   const [newBannerImg, setNewBannerImg] = useState<Blob>()
 
-  const [selectedOrganization, setSelectedOrganization] = useState<
-    (typeof organizations)[0] | null
-  >(null)
+  const [selectedOrganization, setSelectedOrganization] =
+    useState<Organization | null>(
+      organizations.find(
+        (org) => org.id === project?.organization[0]?.organizationId,
+      ) || null,
+    )
 
   const avatarUrl = useMemo(() => {
     if (!newAvatarImg) return project?.thumbnailUrl
@@ -220,8 +221,12 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       const promise: Promise<Project> = new Promise(async (resolve, reject) => {
         try {
           const response = project
-            ? await updateProjectDetails(project.id, newValues)
-            : await createNewProject(newValues)
+            ? await updateProjectDetails(
+                project.id,
+                newValues,
+                selectedOrganization?.id,
+              )
+            : await createNewProject(newValues, selectedOrganization?.id)
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
@@ -253,6 +258,14 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
         },
       })
     }
+
+  useEffect(() => {
+    if (orgId) {
+      setSelectedOrganization(
+        organizations.find((org) => org.id === orgId) || null,
+      )
+    }
+  }, [orgId, organizations])
 
   const canSubmit = form.formState.isValid && !form.formState.isSubmitting
 
@@ -296,21 +309,18 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
               </FormLabel>
               <DropdownMenuTrigger asChild>
                 <div className="px-3 py-2.5 flex items-center rounded-lg border border-input mt-2">
-                  {selectedOrganization?.image && (
+                  {selectedOrganization?.avatarUrl && (
                     <Avatar className="w-5 h-5 mr-2">
                       <AvatarImage
-                        src={
-                          selectedOrganization?.image ??
-                          "/assets/images/welcome-graphic-1.png"
-                        }
+                        src={selectedOrganization?.avatarUrl ?? ""}
                         alt="avatar"
                       />
                       <AvatarFallback>
-                        {selectedOrganization?.label}
+                        {selectedOrganization?.name}
                       </AvatarFallback>
                     </Avatar>
                   )}
-                  <p>{selectedOrganization?.label ?? "No Organization"}</p>
+                  <p>{selectedOrganization?.name ?? "No Organization"}</p>
                   <Image
                     className="ml-auto"
                     src="/assets/icons/arrowDownIcon.svg"
@@ -321,18 +331,21 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="!w-[750px]">
-                {organizations.map((org) => (
+                {organizations?.map((organization) => (
                   <DropdownMenuCheckboxItem
                     className="text-sm font-normal w-full"
-                    checked={selectedOrganization?.id === org.id}
-                    key={org.label}
-                    onCheckedChange={() => handleSelect(org)}
+                    checked={selectedOrganization?.id === organization.id}
+                    key={organization.id}
+                    onCheckedChange={() => handleSelect(organization)}
                   >
                     <Avatar className="w-5 h-5 mr-2">
-                      <AvatarImage src={org.image} alt="avatar" />
-                      <AvatarFallback>{org.label}</AvatarFallback>
+                      <AvatarImage
+                        src={organization.avatarUrl || ""}
+                        alt="avatar"
+                      />
+                      <AvatarFallback>{organization.name}</AvatarFallback>
                     </Avatar>
-                    {org.label}
+                    {organization.name}
                   </DropdownMenuCheckboxItem>
                 ))}
 

@@ -73,7 +73,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         />
       </Button>
 
-      <h2 className="max-w-48 text-ellipsis  text-2xl font-semibold text-secondary-foreground text-nowrap overflow-hidden">
+      <h2 className="max-w-48 text-ellipsis text-2xl font-semibold text-secondary-foreground text-nowrap overflow-hidden">
         {project?.name ?? "New project"}
       </h2>
       <div className="flex flex-col gap-2">

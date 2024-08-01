@@ -1,6 +1,6 @@
 "use client"
 
-import { Application } from "@prisma/client"
+import { Application, Organization, UserOrganization } from "@prisma/client"
 import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -9,7 +9,11 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { isBadgeholder } from "@/lib/badgeholders"
 import { noRewards, unclaimedRewards } from "@/lib/rewards"
-import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
+import {
+  ProjectWithDetails,
+  UserOrganizationsWithDetails,
+  UserWithAddresses,
+} from "@/lib/types"
 import {
   cn,
   hasShownNoRewardsDialog,
@@ -33,7 +37,7 @@ import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
 import UnclaimedRewardsCard from "./UnclaimedRewardsCard"
-import UserOrganizationTitleRow from "./UserOrganizationTitleRow"
+import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
 
 const SHOW_APPLICATIONS = false
@@ -43,18 +47,19 @@ const Dashboard = ({
   user,
   projects,
   applications,
+  organizations,
 }: {
   className?: string
   user: UserWithAddresses
   projects: ProjectWithDetails[]
   applications: Application[]
+  organizations?: UserOrganizationsWithDetails[]
 }) => {
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
   const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
     useState(false)
 
-  const [loadingNewProject, setLoadingNewProject] = useState(false)
   const [showOnBoarding, setShowOnBoarding] = useState(false)
   const [showApplicationDialogue, setShowApplicationDialogue] = useState(false)
   const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] =
@@ -172,14 +177,33 @@ const Dashboard = ({
           </div>
         )}
 
-        <div className="flex flex-col gap-6">
-          <UserOrganizationTitleRow />
-          <Link href="/projects/787344">
-            <AddFirstProject />
-          </Link>
-        </div>
+        {organizations?.map((organization) => {
+          return (
+            <div key={organization.id} className="flex flex-col gap-6">
+              <UserOrganizationInfoRow organization={organization} />
+              {organization.organization.projects?.length > 0 ? (
+                <>
+                  {organization.organization.projects?.map((project) => (
+                    <UserProjectCard
+                      key={project.id}
+                      project={project.project as ProjectWithDetails}
+                    />
+                  ))}
+                </>
+              ) : (
+                <Link
+                  href={`/projects/new?orgId=${organization.organizationId}`}
+                >
+                  <AddFirstProject />
+                </Link>
+              )}
+            </div>
+          )
+        })}
 
-        <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
+        {!!!organizations?.length && (
+          <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
+        )}
 
         {showUnclaimedRewardsDialog && (
           <div className="flex flex-col">

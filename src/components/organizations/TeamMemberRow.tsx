@@ -26,7 +26,7 @@ export const TeamMemberRow = memo(function TeamMemberRow({
   role: TeamRole
   isUserAdmin: boolean
   isCurrentUser: boolean
-  onToggleAdmin: () => void
+  onToggleAdmin: (selectedRole: TeamRole) => void
   onRemove: () => void
 }) {
   const [showingMenu, setShowingMenu] = useState(false)
@@ -71,14 +71,14 @@ export const TeamMemberRow = memo(function TeamMemberRow({
           {isUserAdmin && (
             <DropdownMenuContent align="end">
               <DropdownMenuCheckboxItem
-                onClick={onToggleAdmin}
+                onClick={() => onToggleAdmin("admin")}
                 className="text-sm font-normal"
                 checked={role !== "member"}
               >
                 Admin
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
-                onClick={onToggleAdmin}
+                onClick={() => onToggleAdmin("member")}
                 className="text-sm font-normal"
                 checked={role === "member"}
               >

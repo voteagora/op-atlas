@@ -1,3 +1,7 @@
+import {
+  getUserOrganizationsWithDetails,
+  isUserAdminOfOrganization,
+} from "@/db/organizations"
 import { getUserProjects } from "@/db/projects"
 
 import { ProjectWithDetails } from "../types"
@@ -37,6 +41,38 @@ export const verifyAdminStatus = async (
   )
 
   if (membership?.role !== "admin") {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  return null
+}
+
+export const verifyOrganizationMembership = async (
+  organizationId: string,
+  userId: string,
+) => {
+  const userOrganization = await getUserOrganizationsWithDetails(userId)
+  const membership = userOrganization?.organizations.find(
+    ({ organization }) => organization.id === organizationId,
+  )
+
+  if (!membership) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+  return null
+}
+
+export const verifyOrganizationAdmin = async (
+  organizationId: string,
+  userId: string,
+) => {
+  const isAdmin = await isUserAdminOfOrganization(userId, organizationId)
+
+  if (!isAdmin) {
     return {
       error: "Unauthorized",
     }
