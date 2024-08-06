@@ -27,7 +27,7 @@ export async function getStreams({ recipient }: { recipient: string }) {
   const query = gql`
     {
       streams(
-        where: { receiver: "${recipient}" }
+        where: { sender: "0xC68f72d6b90cA1cf8DfC7fde6c4d452b309d86BB", receiver: "${recipient}" }
       ) {
         id
         deposit

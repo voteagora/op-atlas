@@ -30,11 +30,7 @@ import OrganizationOnboardingDialog from "../organizations/OrganizationOnboardin
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import {
-  BadgeholderCallout,
-  DeveloperCallout,
-  FundingRoundAnnouncementCallout,
-} from "./Callouts"
+import { FundingRoundAnnouncementCallout } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -102,7 +98,6 @@ const Dashboard = ({
 
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
-      {userIsBadgeholder ? <BadgeholderCallout /> : <DeveloperCallout />}
       <FundingRoundAnnouncementCallout />
 
       {showNoRewardsDialog && (

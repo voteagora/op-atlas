@@ -49,6 +49,7 @@ function getClaimableTimestamp() {
  * - in review
  * - cleared
  * - rejected
+ * - delivered
  */
 export const processKYC = async (entries: string[]) => {
   let counter = 0
@@ -79,30 +80,12 @@ export const processKYC = async (entries: string[]) => {
       )
       continue
     }
-    if (
-      reward.claim.status === "cleared" ||
-      reward.claim.status === "claimed"
-    ) {
-      console.log(
-        `Reward ${rewardId} (project ${projectId}) already through KYC, skipping`,
-      )
-      continue
-    }
 
     const status = rawStatus.trim().toLowerCase().replace("_", " ")
 
-    if (
-      address !== "" &&
-      (!isAddress(address) ||
-        reward.claim.address?.toLowerCase() !== address.toLowerCase())
-    ) {
-      await updateClaim(rewardId, {
-        status: "address_mismatch",
-        kycStatus: status,
-        kycStatusUpdatedAt: new Date(),
-      })
-      console.warn(
-        `Address mismatch for reward ${rewardId} (address ${address}), skipping`,
+    if (status === reward.claim.kycStatus) {
+      console.log(
+        `KYC status for reward ${rewardId} (project ${projectId}) unchanged: ${status}`,
       )
       continue
     }
@@ -117,8 +100,15 @@ export const processKYC = async (entries: string[]) => {
         tokenStreamClaimableAt: getClaimableTimestamp(),
       })
     } else {
+      let internalStatus = "pending"
+      if (status === "rejected") {
+        internalStatus = "rejected"
+      } else if (status === "delivered") {
+        internalStatus = "claimed"
+      }
+
       await updateClaim(rewardId, {
-        status: status === "rejected" ? "rejected" : "pending",
+        status: internalStatus,
         kycStatus: status,
         kycStatusUpdatedAt: new Date(),
       })
