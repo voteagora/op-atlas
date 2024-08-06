@@ -152,13 +152,23 @@ const Dashboard = ({
         )}
 
         <div className="flex flex-col gap-6">
+          {!!!organizations?.length && (
+            <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
+          )}
           <div className="flex justify-between items-center">
             <h3>Your Projects</h3>
             <Button
+              className="flex items-center gap-2"
               variant="secondary"
               onClick={() => setShowApplicationDialogue(true)}
             >
-              Add a project
+              <Image
+                src="/assets/icons/plus.svg"
+                width={9}
+                height={9}
+                alt="Plus"
+              />
+              Add project
             </Button>
           </div>
 
@@ -208,10 +218,6 @@ const Dashboard = ({
           )
         })}
 
-        {!!!organizations?.length && (
-          <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
-        )}
-
         {showUnclaimedRewardsDialog && (
           <div className="flex flex-col">
             <h3>Your Retro Funding Round 4 rewards</h3>
@@ -247,7 +253,8 @@ const Dashboard = ({
             className="flex items-center justify-center gap-x-2 no-underline text-secondary-foreground"
           >
             <p className="text-sm font-medium">
-              I’m looking to join an existing project or organization
+              To join an existing project or organization, please have their
+              admin add you.
             </p>
             <Image
               src="/assets/icons/arrow-left.svg"

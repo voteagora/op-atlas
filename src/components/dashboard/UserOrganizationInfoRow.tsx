@@ -20,10 +20,10 @@ const UserOrganizationInfoRow = ({
         href={`/profile/organizations/${organization.organizationId}`}
         className="flex gap-2 justify-center items-center "
       >
-        <h3 className="max-w-48 ml-1 text-xl font-semibold text-ellipsis overflow-hidden text-nowrap">
+        <h3 className="max-w-48 ml-1 text-xl font-semibold text-ellipsis overflow-hidden text-nowrap capitalize">
           {organization?.organization.name}
         </h3>
-        <Badge variant="outline" className="h-[24px] shrink-0">
+        <Badge variant="outline" className="h-[24px] shrink-0 capitalize">
           {organization?.role}
         </Badge>
         <div className="h-full flex flex-row-reverse items-center w-fit ml-1.5">

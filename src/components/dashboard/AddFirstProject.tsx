@@ -6,11 +6,11 @@ const AddFirstProject = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-6 border rounded-2xl p-6 select-none",
+        "flex items-center gap-6 border rounded-2xl p-6 select-none hover:shadow-sm",
         className,
       )}
     >
-      <div className="flex items-center justify-center border rounded-xl bg-secondary h-40 w-40">
+      <div className="flex items-center justify-center border rounded-xl bg-secondary h-32 w-32">
         <Image src="/assets/icons/plus.svg" width={14} height={14} alt="Plus" />
       </div>
       <h3>Add your first project</h3>

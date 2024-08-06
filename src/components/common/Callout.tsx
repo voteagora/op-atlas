@@ -24,7 +24,7 @@ export const Callout = memo(function Callout({
   return (
     <div
       className={cn(
-        "flex items-center rounded-xl p-4 w-full",
+        "flex items-center rounded-md p-4 h-10 w-full",
         type === "error"
           ? "bg-red-200 text-destructive-foreground"
           : "bg-accent text-accent-foreground",

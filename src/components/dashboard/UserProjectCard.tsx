@@ -28,11 +28,15 @@ const UserProjectCard = ({
     return progressPercent
   }, [project])
 
-  const [loadingProject, setLoadingProject] = useState(false)
-
   return (
-    <div className={cn("flex gap-x-6 border rounded-2xl p-6", className)}>
-      <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-40 w-40 shrink-0">
+    <Link
+      href={`/projects/${project.id}/details`}
+      className={cn(
+        "flex gap-x-6 border rounded-2xl hover:shadow-md p-6",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-32 w-32 shrink-0">
         {project.thumbnailUrl ? (
           <Image
             src={project.thumbnailUrl}
@@ -52,14 +56,7 @@ const UserProjectCard = ({
 
       <div className="flex flex-col flex-1 min-w-0">
         <div className="flex items-start">
-          <Link
-            href={`/projects/${project.id}/details`}
-            onClick={() => setLoadingProject(true)}
-          >
-            <h3 className="mr-3 pt-1 truncate hover:underline">
-              {project.name}
-            </h3>
-          </Link>
+          <h3 className="mr-3 pt-1 truncate">{project.name}</h3>
         </div>
 
         <div className="mt-4 flex flex-col">
@@ -129,7 +126,7 @@ const UserProjectCard = ({
           </>
         )}
       </div>
-    </div>
+    </Link>
   )
 }
 
