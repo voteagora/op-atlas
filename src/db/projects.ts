@@ -1,7 +1,6 @@
 "use server"
 
 import { Prisma, Project } from "@prisma/client"
-import { update } from "ramda"
 
 import { TeamRole } from "@/lib/types"
 import { ProjectMetadata } from "@/lib/utils/metadata"
@@ -27,6 +26,49 @@ export async function getUserProjects({
         },
         include: {
           project: true,
+        },
+      },
+    },
+  })
+}
+
+export async function getUserAdminProjectsWithDetail({
+  userId,
+}: {
+  userId: string
+}) {
+  return prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      projects: {
+        where: {
+          deletedAt: null,
+          role: "admin" satisfies TeamRole,
+          project: {
+            deletedAt: null,
+          },
+        },
+        include: {
+          project: {
+            include: {
+              team: { where: { deletedAt: null }, include: { user: true } },
+              repos: true,
+              contracts: true,
+              funding: true,
+              snapshots: true,
+              organization: true,
+              applications: true,
+              links: true,
+              rewards: { include: { claim: true } },
+            },
+          },
+        },
+        orderBy: {
+          project: {
+            createdAt: "asc",
+          },
         },
       },
     },
@@ -63,6 +105,7 @@ export async function getUserProjectsWithDetails({
               snapshots: true,
               organization: true,
               applications: true,
+              links: true,
               rewards: { include: { claim: true } },
             },
           },
@@ -199,6 +242,7 @@ export async function getProject({ id }: { id: string }) {
       team: { where: { deletedAt: null }, include: { user: true } },
       repos: true,
       contracts: true,
+      links: true,
       funding: true,
       snapshots: {
         orderBy: {
@@ -551,6 +595,39 @@ export async function updateProjectRepositories({
   return prisma.$transaction([remove, create, update])
 }
 
+export async function updateProjectLinks({
+  projectId,
+  links,
+}: {
+  projectId: string
+  links: Prisma.ProjectLinksCreateManyInput[]
+}) {
+  // Delete the existing links and replace it
+  const remove = prisma.projectLinks.deleteMany({
+    where: {
+      projectId,
+    },
+  })
+
+  const create = prisma.projectLinks.createMany({
+    data: links.map((l) => ({
+      ...l,
+      projectId,
+    })),
+  })
+
+  const update = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return await prisma.$transaction([remove, create, update])
+}
+
 export async function updateProjectFunding({
   projectId,
   funding,
@@ -609,32 +686,55 @@ export async function addProjectSnapshot({
 }
 
 export async function createApplication({
-  projectId,
-  attestationId,
   round,
+  projects,
 }: {
-  projectId: string
-  attestationId: string
   round: number
+  projects: {
+    projectId: string
+    categories: string[]
+    dependentEntities: string
+    successMetrics: string
+    additionalComments?: string
+    attestationId: string
+  }[]
 }) {
-  return prisma.application.create({
-    data: {
-      attestationId,
-      project: {
-        connect: {
-          id: projectId,
+  return prisma.$transaction(async (prisma) => {
+    // Create the application first
+    const application = await prisma.application.create({
+      data: {
+        round: {
+          connect: {
+            id: round.toString(),
+          },
         },
       },
-      round: {
-        connect: {
-          id: round.toString(),
-        },
-      },
-    },
+    })
+
+    // Create ApplicationProject entries
+    const applicationProjects = await prisma.applicationProject.createMany({
+      data: projects.map((project) => ({
+        applicationId: application.id,
+        projectId: project.projectId,
+        categories: project.categories,
+        dependentEntities: project.dependentEntities,
+        successMetrics: project.successMetrics,
+        additionalComments: project.additionalComments,
+        attestationId: project.attestationId,
+      })),
+    })
+
+    return { ...application, projects: applicationProjects }
   })
 }
 
-export async function getUserApplications({ userId }: { userId: string }) {
+export async function getUserApplications({
+  userId,
+  roundId,
+}: {
+  userId: string
+  roundId?: string
+}) {
   return prisma.user.findUnique({
     where: {
       id: userId,
@@ -650,8 +750,12 @@ export async function getUserApplications({ userId }: { userId: string }) {
           project: {
             include: {
               applications: {
+                where: roundId ? { roundId } : {}, // Apply filter only if round is provided
                 orderBy: {
                   createdAt: "desc",
+                },
+                include: {
+                  projects: true,
                 },
               },
             },

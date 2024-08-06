@@ -1,21 +1,30 @@
-import { Application } from "@prisma/client"
 import { format } from "date-fns"
+import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
 import { Badge } from "@/components/ui/badge"
+import { ApplicationWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX } from "@/lib/utils"
 
 interface ApplicationHeaderProps {
   hasApplied: boolean
-  applications: Application[]
+  applications: ApplicationWithDetails[]
 }
 
 const ApplicationHeader = ({
   applications,
   hasApplied,
 }: ApplicationHeaderProps) => {
+  const handleDownload = () => {
+    const link = document.createElement("a")
+    link.href = "/assets/images/organization-create-graphic.png"
+    link.download = "organization-create-graphic.png"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
   return (
     <div className="flex flex-col items-center">
       <Image
@@ -26,7 +35,7 @@ const ApplicationHeader = ({
       />
       <h2 className="text-center">Apply for Retro Funding Round 5: OP Stack</h2>
       {hasApplied ? (
-        <div className="flex justify-between items-center mt-6 gap-2 p-4 bg-success rounded-xl w-full">
+        <div className="mt-6 flex justify-between items-center gap-2 p-4 bg-success rounded-xl w-full">
           <div className="flex items-center gap-2">
             <Image
               src="/assets/icons/circle-check-green.svg"
@@ -34,19 +43,33 @@ const ApplicationHeader = ({
               width={16}
               alt="Submitted"
             />
-            <div className="flex flex-col text-success-foreground">
+            <div className="flex flex-col text-success-foreground max-w-[445px]">
               <p className="font-medium text-sm">
-                Application submitted on{" "}
+                Your application was submitted on Aug 16 at 4:12 PM. You can
+                resubmit with additional projects until Aug 29 at 19:00 UTC.
                 {format(applications[0].createdAt, "MMMM d, h:mm a")}
               </p>
+              <ExternalLink
+                href={`${EAS_URL_PREFIX}${applications[0]?.projects[0].attestationId}`}
+                className="text-sm font-medium mt-2"
+              >
+                View attestation
+              </ExternalLink>
             </div>
           </div>
-          <ExternalLink
-            className="text-sm text-success-foreground font-medium"
-            href={`${EAS_URL_PREFIX}${applications[0].attestationId}`}
-          >
-            View attestation
-          </ExternalLink>
+          <div className="flex justify-center items-center gap-x-6">
+            <Image
+              alt="sunny"
+              src="/assets/images/organization-create-graphic.png"
+              height={80}
+              width={142}
+            />
+            <ArrowDownToLine
+              onClick={handleDownload}
+              size={11}
+              className="text-success-foreground cursor-pointer"
+            />
+          </div>
         </div>
       ) : (
         <p className="text-secondary-foreground">

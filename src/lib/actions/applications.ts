@@ -8,53 +8,54 @@ import { auth } from "@/auth"
 import { createApplication, getProject } from "@/db/projects"
 
 import { createApplicationAttestation } from "../eas"
+import { ProjectWithDetails } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { verifyMembership } from "./utils"
 
 export const publishAndSaveApplication = async ({
-  projectId,
-  farcasterId,
-  metadataSnapshotId,
+  projects,
 }: {
-  projectId: string
-  farcasterId: string
-  metadataSnapshotId: string
+  projects: {
+    projectId: string
+    categories: string[]
+    dependentEntities: string
+    successMetrics: string
+    additionalComments?: string
+    attestationId: string
+  }[]
 }): Promise<Application> => {
-  // Publish attestation
-  const attestationId = await createApplicationAttestation({
-    farcasterId: parseInt(farcasterId),
-    projectId,
-    round: 4,
-    snapshotRef: metadataSnapshotId,
-  })
-
   // Create application in database
   return await createApplication({
-    projectId,
-    attestationId,
-    round: 4,
+    projects,
+    round: 5,
   })
 }
 
 const createProjectApplication = async (
-  projectId: string,
+  project: {
+    projectId: string
+    categories: string[]
+    dependentEntities: string
+    successMetrics: string
+    additionalComments?: string
+  },
   farcasterId: string,
 ) => {
-  const isInvalid = await verifyMembership(projectId, farcasterId)
+  const isInvalid = await verifyMembership(project.projectId, farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
 
-  const project = await getProject({ id: projectId })
+  const projectData = await getProject({ id: project.projectId })
 
-  if (!project) {
+  if (!projectData) {
     return {
       error: "Project not found",
     }
   }
 
   // Project must be 100% complete
-  const { progressPercent } = getProjectStatus(project)
+  const { progressPercent } = getProjectStatus(projectData)
 
   if (progressPercent !== 100) {
     return {
@@ -65,13 +66,18 @@ const createProjectApplication = async (
   // Issue attestation
   const latestSnapshot = sortBy(
     (snapshot) => -snapshot.createdAt,
-    project.snapshots,
+    projectData.snapshots,
   )[0]
 
+  const attestationId = await createApplicationAttestation({
+    farcasterId: parseInt(farcasterId),
+    projectId: project.projectId,
+    round: 5,
+    snapshotRef: latestSnapshot.attestationId,
+  })
+
   const application = await publishAndSaveApplication({
-    projectId,
-    farcasterId,
-    metadataSnapshotId: latestSnapshot.attestationId,
+    projects: [{ ...project, attestationId }],
   })
 
   return {
@@ -80,7 +86,15 @@ const createProjectApplication = async (
   }
 }
 
-export const submitApplications = async (projectIds: string[]) => {
+export const submitApplications = async (
+  projects: {
+    categories: string[]
+    dependentEntities: string
+    successMetrics: string
+    additionalComments?: string
+    projectId: string
+  }[],
+) => {
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -90,16 +104,16 @@ export const submitApplications = async (projectIds: string[]) => {
     }
   }
 
-  if (APPLICATIONS_CLOSED) {
+  if (!APPLICATIONS_CLOSED) {
     throw new Error("Applications are closed")
   }
 
   const applications: Application[] = []
   let error: string | null = null
 
-  for (const projectId of projectIds) {
+  for (const project of projects) {
     const result = await createProjectApplication(
-      projectId,
+      project,
       session.user.farcasterId,
     )
     if (result.error === null && result.application) {

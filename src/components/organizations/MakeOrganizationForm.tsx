@@ -44,7 +44,7 @@ const StringValue = z.object({ value: z.string() }) // use a intermediate object
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string(),
+  description: z.string().min(1, "Name is required"),
   website: z.array(StringValue),
   farcaster: z.array(StringValue),
   twitter: z.string().optional(),
@@ -243,10 +243,6 @@ export default function MakeOrganizationForm({
           if (response?.error !== null || !response) {
             throw new Error(response?.error ?? "Failed to save project")
           }
-
-          // if (isCreating) {
-          //   track("Add Project", { projectId: response.id })
-          // }
 
           resolve(response.organizationData)
         } catch (error) {

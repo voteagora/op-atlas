@@ -1,12 +1,35 @@
 import React from "react"
+import { useFieldArray, UseFormReturn } from "react-hook-form"
+import { z } from "zod"
 
 import { Callout } from "@/components/common/Callout"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 
+import { ApplicationFormSchema } from "./ApplicationFormTabs"
 import ProjectImpactForm from "./ProjectImpactForm"
 
-const ApplicationProjectImpactForm = () => {
+const ApplicationProjectImpactForm = ({
+  projects,
+  applications,
+  form,
+  onSave,
+}: {
+  projects: ProjectWithDetails[]
+  applications: ApplicationWithDetails[]
+  form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
+  onSave: () => void
+}) => {
+  const { fields } = useFieldArray({
+    control: form.control,
+    name: "projects",
+  })
+
+  const hasSelectedProjects = form
+    .watch("projects")
+    .some((project) => project.selected)
+
   return (
     <div className="flex flex-col gap-y-6">
       <h4 className="text-xl font-semibold">
@@ -20,19 +43,31 @@ const ApplicationProjectImpactForm = () => {
           view our guidelines.
         </ExternalLink>
       </p>
-      <Callout
-        type="error"
-        text="You haven’t added or joined any projects"
-        linkText="View projects"
-        linkHref="/dashboard"
-      />
+
+      {!!!projects.length && (
+        <Callout
+          type="error"
+          text="You haven’t added or joined any projects"
+          linkText="View projects"
+          linkHref="/dashboard"
+        />
+      )}
 
       {/* Project Impact Form */}
-      <ProjectImpactForm />
+      {fields.map((field, index) => (
+        <ProjectImpactForm
+          key={field.id}
+          index={index}
+          project={projects.find((project) => project.id === field.projectId)!}
+          applications={applications}
+          form={form}
+        />
+      ))}
 
       <Button
         variant="destructive"
-        disabled
+        disabled={!hasSelectedProjects}
+        onClick={onSave}
         className="disabled:bg-destructive disabled:!text-white"
       >
         Save and continue

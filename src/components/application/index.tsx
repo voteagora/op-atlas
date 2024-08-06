@@ -3,7 +3,7 @@
 import { Application } from "@prisma/client"
 import { useState } from "react"
 
-import { ProjectWithDetails } from "@/lib/types"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { FundingApplication } from "./FundingApplication"
@@ -15,7 +15,7 @@ export const ApplicationFlow = ({
 }: {
   className?: string
   projects: ProjectWithDetails[]
-  applications: Application[]
+  applications: ApplicationWithDetails[]
 }) => {
   const [submittedApp, setSubmittedApp] = useState<Application | null>(null)
 

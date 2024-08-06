@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import { ApplicationFlow } from "@/components/application/5"
-import { getApplications, getProjects } from "@/lib/actions/projects"
+import { getAdminProjects, getRoundApplications } from "@/lib/actions/projects"
 
 export const maxDuration = 120
 
@@ -14,8 +14,8 @@ export default async function Page() {
   }
 
   const [projects, applications] = await Promise.all([
-    getProjects(session.user.id),
-    getApplications(session.user.id),
+    getAdminProjects(session.user.id),
+    getRoundApplications(session.user.id, 5),
   ])
 
   return (

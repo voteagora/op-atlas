@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { isBadgeholder } from "@/lib/badgeholders"
 import { noRewards, unclaimedRewards } from "@/lib/rewards"
 import {
+  ApplicationWithDetails,
   ProjectWithDetails,
   UserOrganizationsWithDetails,
   UserWithAddresses,
@@ -29,7 +30,11 @@ import OrganizationOnboardingDialog from "../organizations/OrganizationOnboardin
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import { BadgeholderCallout, DeveloperCallout } from "./Callouts"
+import {
+  BadgeholderCallout,
+  DeveloperCallout,
+  FundingRoundAnnouncementCallout,
+} from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -52,7 +57,7 @@ const Dashboard = ({
   className?: string
   user: UserWithAddresses
   projects: ProjectWithDetails[]
-  applications: Application[]
+  applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
 }) => {
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
@@ -98,6 +103,8 @@ const Dashboard = ({
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
       {userIsBadgeholder ? <BadgeholderCallout /> : <DeveloperCallout />}
+      <FundingRoundAnnouncementCallout />
+
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}

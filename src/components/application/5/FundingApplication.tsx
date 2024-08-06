@@ -1,6 +1,4 @@
-import { Application } from "@prisma/client"
-
-import { ProjectWithDetails } from "@/lib/types"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ApplicationFormTabs from "./ApplicationFormTabs"
@@ -14,8 +12,8 @@ export const FundingApplication = ({
 }: {
   className?: string
   projects: ProjectWithDetails[]
-  applications: Application[]
-  onApplied: (application: Application) => void
+  applications: ApplicationWithDetails[]
+  onApplied: (application: ApplicationWithDetails) => void
 }) => {
   const hasApplied = applications.length > 0
 
@@ -30,7 +28,11 @@ export const FundingApplication = ({
       <ApplicationHeader hasApplied={hasApplied} applications={applications} />
 
       {/* Tabs */}
-      <ApplicationFormTabs />
+      <ApplicationFormTabs
+        onApplied={onApplied}
+        applications={applications}
+        projects={projects}
+      />
     </div>
   )
 }

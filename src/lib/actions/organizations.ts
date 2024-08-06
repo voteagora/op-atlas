@@ -126,7 +126,7 @@ export const addMemberToOrganization = async (
   await addOrganizationMembers({ organizationId, userIds })
 
   revalidatePath("/dashboard")
-  revalidatePath("/profile/organizations", "layout")
+  revalidatePath("/profile", "layout")
 }
 
 export const setOrganizationMemberRole = async (
@@ -186,5 +186,5 @@ export const removeMemberFromOrganization = async (
 
   await removeOrganizationMember({ organizationId, userId })
   revalidatePath("/dashboard")
-  revalidatePath("/profile/organizations/[organizationId]", "page")
+  revalidatePath("/profile", "layout")
 }

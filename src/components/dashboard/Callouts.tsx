@@ -1,5 +1,6 @@
 import { ArrowRight, ArrowUpRight } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 
@@ -84,5 +85,30 @@ export function SurveyCallout({ projectId }: { projectId?: string }) {
       </div>
       <ArrowUpRight size={20} />
     </ExternalLink>
+  )
+}
+export function FundingRoundAnnouncementCallout() {
+  return (
+    <Link
+      href="/application/5"
+      className={cn(
+        "flex items-center rounded-xl px-8 py-6 w-full",
+        "bg-accent text-accent-foreground",
+      )}
+    >
+      <Image
+        alt="Info"
+        src="/assets/icons/sunny-callout.png"
+        width={48}
+        height={48}
+      />
+      <div className="ml-4 mr-5 flex-1">
+        <p className="font-medium">
+          Now taking applications for Retro Funding Round 5: OP Stack
+        </p>
+        <div>Learn about the round, then apply by Aug 1.</div>
+      </div>
+      <ArrowRight size={20} />
+    </Link>
   )
 }

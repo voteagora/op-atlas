@@ -21,7 +21,11 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form"
-import { removeGithubRepo, updatePackageRepos } from "@/lib/actions/repos"
+import {
+  removeGithubRepo,
+  setProjectLinks,
+  updatePackageRepos,
+} from "@/lib/actions/repos"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { GithubForm } from "./GithubForm"
@@ -42,11 +46,14 @@ function toFormValues(project: ProjectWithDetails) {
       packages.length === 0
         ? [{ url: "" }]
         : packages.map(({ url }) => ({ url: url })),
-    links:
-      packages.length === 0
-        ? [{ url: "", name: "", description: "" }]
-        : //this name and description with be replace with live data
-          packages.map(({ url }) => ({ url, name: "", description: "" })),
+    links: !!!project?.links?.length
+      ? [{ url: "", name: "", description: "" }]
+      : //this name and description with be replace with live data
+        project.links?.map(({ url, name, description }) => ({
+          url,
+          name: name ?? "",
+          description: description ?? "",
+        })),
     githubRepos:
       githubs.length === 0
         ? [{ url: "", name: "", description: "", verified: false }]
@@ -206,8 +213,21 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         .map((field) => field.url)
         .filter((url) => z.string().url().safeParse(url).success)
 
+      const links = values.links
+        .map((field) => ({
+          url: field.url,
+          name: field.name,
+          description: field.description,
+          projectId: project.id,
+        }))
+        .filter((field) => z.string().url().safeParse(field.url).success)
+
       try {
-        await updatePackageRepos(project.id, packageUrls)
+        await Promise.all([
+          updatePackageRepos(project.id, packageUrls),
+          setProjectLinks(project.id, links),
+        ])
+
         !isSave && router.push(`/projects/${project.id}/contracts`)
         setIsSaving(false)
       } catch (error) {

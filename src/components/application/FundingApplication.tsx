@@ -5,7 +5,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { submitApplications } from "@/lib/actions/applications"
-import { ProjectWithDetails } from "@/lib/types"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -32,7 +32,7 @@ export const FundingApplication = ({
 }: {
   className?: string
   projects: ProjectWithDetails[]
-  applications: Application[]
+  applications: ApplicationWithDetails[]
   onApplied: (application: Application) => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -44,9 +44,8 @@ export const FundingApplication = ({
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([])
 
   const hasApplied = applications.length > 0
-  const appliedProjectIds = applications.map(
-    (application) => application.projectId,
-  )
+  const appliedProjectIds =
+    applications.map((application) => application.projects[0].id) ?? []
 
   const toggleAgreedTerm = (idx: number) => {
     setAgreedTerms((prev) => {
@@ -76,16 +75,16 @@ export const FundingApplication = ({
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
         try {
-          const result = await submitApplications(selectedProjectIds)
+          const result = await submitApplications([])
           if (result.error !== null || result.applications.length === 0) {
             throw new Error(result.error ?? "Error submitting application")
           }
 
           for (const application of result.applications) {
-            track("Apply", {
-              projectIds: application.projectId,
-              attestationId: application.attestationId,
-            })
+            // track("Apply", {
+            //   projectIds: application.projectId,
+            //   attestationId: application.attestationId,
+            // })
           }
 
           resolve(result.applications[0])
@@ -146,7 +145,7 @@ export const FundingApplication = ({
             </div>
             <ExternalLink
               className="text-sm text-success-foreground font-medium"
-              href={`${EAS_URL_PREFIX}${applications[0].attestationId}`}
+              href={`${EAS_URL_PREFIX}${applications[0].projects[0].attestationId}`}
             >
               View attestation
             </ExternalLink>

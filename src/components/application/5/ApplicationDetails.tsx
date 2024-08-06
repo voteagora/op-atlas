@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React from "react"
 
@@ -21,6 +22,7 @@ interface ContributionsSectionProps {
 // CATEGORIES array
 export const CATEGORIES = [
   {
+    id: "Ethereum Core Contributions",
     title: "Ethereum Core Contributions",
     icon: "/assets/icons/shapes.svg",
     description:
@@ -45,6 +47,7 @@ export const CATEGORIES = [
     className: "bg-blue-200",
   },
   {
+    id: "OP Stack Research & Development",
     title: "OP Stack Research & Development",
     icon: "/assets/icons/microscope.svg",
     description:
@@ -73,6 +76,7 @@ export const CATEGORIES = [
     className: "bg-green-200",
   },
   {
+    id: "OP Stack Tooling",
     title: "OP Stack Tooling",
     icon: "/assets/icons/tools.svg",
     description:
@@ -156,6 +160,7 @@ const RULES = [
 ]
 
 const ApplicationDetails = () => {
+  const router = useRouter()
   const { data } = useSession()
   const user = data?.user
   return (
@@ -238,7 +243,8 @@ const ApplicationDetails = () => {
 
       <Button
         variant="destructive"
-        disabled={!!user}
+        disabled={!!!user}
+        onClick={() => router.push("/application/5?tab=projects")}
         className="w-full disabled:bg-destructive disabled:!text-white"
       >
         {user ? "Next" : " Sign in to apply for Retro Funding"}

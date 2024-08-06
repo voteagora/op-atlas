@@ -11,6 +11,7 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     snapshots: true
     applications: true
     organization: true
+    links: true
     rewards: { include: { claim: true } }
   }
 }>
@@ -104,5 +105,11 @@ export type UserOrganizationsWithDetails = Prisma.UserOrganizationGetPayload<{
         }
       }
     }
+  }
+}>
+
+export type ApplicationWithDetails = Prisma.ApplicationGetPayload<{
+  include: {
+    projects: true
   }
 }>
