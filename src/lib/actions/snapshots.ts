@@ -58,13 +58,15 @@ export const createProjectSnapshot = async (projectId: string) => {
     })
 
     // If the project has an application, we need to publish a new one to reference this snapshot.
-    if (project.applications.length > 0 && !APPLICATIONS_CLOSED) {
-      await publishAndSaveApplication({
-        projectId,
-        farcasterId: session.user.farcasterId,
-        metadataSnapshotId: snapshot.attestationId,
-      })
-    }
+
+    // TODO: Re-enable this when applications are open
+    // if (project.applications.length > 0 && !APPLICATIONS_CLOSED) {
+    //   await publishAndSaveApplication({
+    //     projectId,
+    //     farcasterId: session.user.farcasterId,
+    //     metadataSnapshotId: snapshot.attestationId,
+    //   })
+    // }
 
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")

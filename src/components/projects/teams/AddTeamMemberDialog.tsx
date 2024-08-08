@@ -5,6 +5,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react"
 import { useDebounceValue } from "usehooks-ts"
 
 import { DialogProps } from "@/components/dialogs/types"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -22,8 +23,11 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 type Props = DialogProps<{
   team: User[]
+  avatar?: string
+  onSkip?: () => void
 }> & {
-  addMembers: (userIds: string[]) => Promise<void>
+  addMembers: (userIds: string[], selectedUser: User[]) => Promise<void>
+  isUpdating?: boolean
 }
 
 const AddTeamMemberDialog = ({
@@ -31,12 +35,16 @@ const AddTeamMemberDialog = ({
   onOpenChange,
   team,
   addMembers,
+  avatar,
+  onSkip,
+  isUpdating,
 }: Props) => {
   const [searchText, setSearchText] = useState("")
   const [loading, setLoading] = useState(false)
 
   const [searchResults, setSearchResults] = useState<User[]>([])
   const [selectedUsers, setSelectedUsers] = useState<IMultiSelectOptions[]>([])
+  const [selectedFullUsers, setSelectedFullUsers] = useState<User[]>([])
 
   const [debouncedSearchText] = useDebounceValue(
     searchText.startsWith("@") ? searchText.substring(1) : searchText,
@@ -47,7 +55,10 @@ const AddTeamMemberDialog = ({
   const onAddMembers = useCallback(async () => {
     try {
       setLoading(true)
-      await addMembers(selectedUsers.map((user) => user.value.toString()))
+      await addMembers(
+        selectedUsers.map((user) => user.value.toString()),
+        selectedFullUsers,
+      )
       track("Add Collaborators", {
         userIds: selectedUsers.map((user) => user.farcasterId),
       })
@@ -56,7 +67,7 @@ const AddTeamMemberDialog = ({
     } finally {
       setLoading(false)
     }
-  }, [addMembers, selectedUsers, track])
+  }, [addMembers, selectedFullUsers, selectedUsers, track])
 
   const options = useMemo(() => {
     const selectedUserIds = [
@@ -96,6 +107,15 @@ const AddTeamMemberDialog = ({
     }
   }, [debouncedSearchText, open])
 
+  const handleSelect = (selectedOption: IMultiSelectOptions) => {
+    const selectedUser = searchResults.find(
+      (user) => user.id === selectedOption.value,
+    )
+    if (selectedUser) {
+      setSelectedFullUsers((prev) => [...prev, selectedUser])
+    }
+  }
+
   // Clear state after closing
   useEffect(() => {
     if (!open) {
@@ -110,6 +130,12 @@ const AddTeamMemberDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         <DialogHeader>
+          {avatar && (
+            <Avatar className="!w-20 !h-20 mx-auto">
+              <AvatarImage src={avatar || ""} alt="avatar" />
+              <AvatarFallback>{avatar}</AvatarFallback>
+            </Avatar>
+          )}
           <DialogTitle className="text-center text-lg font-semibold">
             Add team members
           </DialogTitle>
@@ -126,17 +152,25 @@ const AddTeamMemberDialog = ({
           placeholder="@username"
           options={options}
           inputValue={searchText}
+          onSelect={handleSelect}
           setInputValue={setSearchText}
         />
-
-        <Button
-          className="w-full"
-          variant="destructive"
-          disabled={!selectedUsers.length || loading}
-          onClick={onAddMembers}
-        >
-          Add
-        </Button>
+        <div className="flex flex-col gap-2 w-full">
+          <Button
+            className="w-full"
+            variant="destructive"
+            disabled={!selectedUsers.length || loading}
+            onClick={onAddMembers}
+            isLoading={isUpdating}
+          >
+            Add
+          </Button>
+          {onSkip && (
+            <Button className="w-full" variant="outline" onClick={onSkip}>
+              Skip
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )

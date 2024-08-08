@@ -52,7 +52,7 @@ const Navbar = () => {
                 <AlignJustify className="block sm:hidden" />
               )}
             </button>
-            <Link href="/">
+            <Link href="/rounds">
               <Image
                 src="/assets/images/logo.svg"
                 height={24}

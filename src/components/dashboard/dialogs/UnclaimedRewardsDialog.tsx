@@ -69,7 +69,7 @@ function UnclaimedRewardsDialog({
 
 export default memo(UnclaimedRewardsDialog)
 
-function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
+export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
   return (
     <div className="border border-border bg-background rounded-xl p-8 flex items-center gap-4 max-w-full">
       {project.thumbnailUrl && (

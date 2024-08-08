@@ -80,7 +80,7 @@ export function GithubConnection({ user }: { user: User }) {
           height={20}
           width={20}
         />
-        <h3 className="text-xl font-semibold">Github</h3>
+        <h3 className="text-xl font-semibold text-foreground">Github</h3>
       </div>
       <p className="text-secondary-foreground">
         Connecting your GitHub account to your profile allows you to show your
@@ -134,6 +134,7 @@ export function GithubConnection({ user }: { user: User }) {
             checked={userNotDeveloper}
             onCheckedChange={toggleIsDeveloper}
             className="rounded-none border-[1.5px]"
+            disabled={loading}
           />
           I&apos;m not a developer
         </div>

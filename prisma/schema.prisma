@@ -24,6 +24,7 @@ model User {
   deletedAt DateTime?
 
   projects    UserProjects[]
+  organizations UserOrganization[]
   addresses   UserAddress[]
   RewardClaim RewardClaim[]
 }
@@ -93,6 +94,58 @@ model RewardClaim {
   addressSetBy User?         @relation(fields: [addressSetById], references: [id])
 }
 
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  avatarUrl   String?
+  coverUrl    String?
+  website     String[]
+  farcaster   String[]
+  twitter     String?
+  mirror      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  team     UserOrganization[]
+  projects  ProjectOrganization[]
+}
+
+model UserOrganization {
+  id             String   @id @default(uuid())
+  role String @default("member")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  userId         String
+  organizationId String
+
+  user          User         @relation(fields: [userId], references: [id])
+  organization  Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model ProjectOrganization {
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  projectId      String @unique
+  organizationId String
+
+  project       Project      @relation(fields: [projectId], references: [id])
+  organization  Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([projectId, organizationId])
+  @@index([organizationId])
+}
+
 model Project {
   id           String  @id @default(uuid())
   name         String
@@ -109,6 +162,8 @@ model Project {
   openSourceObserverSlug String?
   addedTeamMembers       Boolean  @default(false)
   addedFunding           Boolean  @default(false)
+  hasCodeRepositories    Boolean  @default(true)
+  isOnChainContract      Boolean  @default(true)
   lastMetadataUpdate     DateTime @default(now())
 
   createdAt DateTime  @default(now())
@@ -116,29 +171,50 @@ model Project {
   deletedAt DateTime?
 
   team         UserProjects[]
+  organization ProjectOrganization?
   repos        ProjectRepository[]
   contracts    ProjectContract[]
   funding      ProjectFunding[]
   snapshots    ProjectSnapshot[]
   applications Application[]
   rewards      FundingReward[]
+  links        ProjectLinks[]
+
+  applicationProject ApplicationProject[]
 }
 
 model Application {
   id            String @id @default(uuid())
   status        String @default("submitted")
-  attestationId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   roundId   String
-  projectId String
 
   round   FundingRound @relation(fields: [roundId], references: [id])
-  project Project      @relation(fields: [projectId], references: [id])
+  projects  ApplicationProject[]
 
-  @@index([projectId])
+
+  Project Project[]
+}
+
+model ApplicationProject {
+  id             String   @id @default(uuid())
+  categories     String[]
+  attestationId  String
+
+  dependentEntities   String
+  successMetrics      String
+  additionalComments  String?
+
+  applicationId  String
+  projectId      String
+
+  application    Application  @relation(fields: [applicationId], references: [id])
+  project        Project      @relation(fields: [projectId], references: [id])
+
+  @@unique([applicationId, projectId])
 }
 
 model UserProjects {
@@ -178,9 +254,26 @@ model ProjectRepository {
   id                String  @id @default(uuid())
   type              String
   url               String  @unique
+  name              String?
+  description       String?
   verified          Boolean @default(false)
   openSource        Boolean @default(false)
   containsContracts Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+}
+model ProjectLinks {
+  id                String  @id @default(uuid())
+  url               String
+  name              String?
+  description       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

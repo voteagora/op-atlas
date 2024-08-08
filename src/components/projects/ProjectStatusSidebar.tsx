@@ -60,16 +60,20 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
       <Button
         isLoading={dashboardLoading}
         onClick={handleGoBack}
-        variant="outline"
-        className="bg-white text-sm font-medium"
+        variant="ghost"
+        className="text-sm font-medium !p-0"
       >
-        Profile
+        {project?.organization?.organization?.name ?? "Your projects"}
+        <Image
+          src="/assets/icons/arrow-left.svg"
+          height={8}
+          width={6}
+          alt="arrow"
+          className="ml-2"
+        />
       </Button>
-      <h2
-        className={`${
-          project?.name ? "text-secondary-foreground" : "text-muted"
-        } max-w-48 text-ellipsis text-nowrap overflow-hidden`}
-      >
+
+      <h2 className="max-w-48 line-clamp-2 text-2xl font-semibold text-secondary-foreground">
         {project?.name ?? "New project"}
       </h2>
       <div className="flex flex-col gap-2">
@@ -87,8 +91,8 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               {completedSections.includes(option) ? (
                 <Image
                   src="/assets/icons/tickIcon.svg"
-                  width={20}
-                  height={20}
+                  width={16}
+                  height={16}
                   alt="Check"
                 />
               ) : (
@@ -108,7 +112,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
                   currentPage === option.toLowerCase() ? "font-medium" : ""
                 }
               >
-                {option}
+                {option === "Repos" ? "Repos & Links" : option}
               </Link>
             ) : (
               <p>{option}</p>
@@ -129,7 +133,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
       <div className="flex flex-col gap-4">
         <ExternalLink
           className="text-sm text-muted-foreground font-normal decoration-muted-foreground"
-          href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+          href="https://discord.com/invite/optimism"
         >
           Get help
         </ExternalLink>

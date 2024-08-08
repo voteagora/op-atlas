@@ -22,6 +22,7 @@ interface MultiSelectAutocompleteProps {
   inputValue: string
   setInputValue: React.Dispatch<React.SetStateAction<string>>
   selectedOptions: IMultiSelectOptions[]
+  onSelect?: (option: IMultiSelectOptions) => void
   setSelectedOptions: React.Dispatch<
     React.SetStateAction<IMultiSelectOptions[]>
   >
@@ -35,6 +36,7 @@ export function MultiSelect({
   setInputValue,
   selectedOptions,
   setSelectedOptions,
+  onSelect,
 }: MultiSelectAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [, setOpen] = useState(false)
@@ -88,6 +90,7 @@ export function MultiSelect({
                             setInputValue("")
                             setSelectedOptions((prev) => [...prev, option])
                             setOpen(false)
+                            onSelect?.(option)
                           }}
                           onMouseDown={(e) => {
                             e.preventDefault()

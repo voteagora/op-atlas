@@ -1,3 +1,4 @@
+import { Organization } from "@prisma/client"
 import { type ClassValue, clsx } from "clsx"
 import { customAlphabet } from "nanoid"
 import { sortBy } from "ramda"
@@ -5,7 +6,7 @@ import { twMerge } from "tailwind-merge"
 
 import { ProjectWithDetails, UserWithAddresses } from "../types"
 
-export const APPLICATIONS_CLOSED = true
+export const APPLICATIONS_CLOSED = false
 
 export const GITHUB_REDIRECT_COOKIE = "github-auth-redirect"
 
@@ -69,7 +70,7 @@ export function saveHasShownNoRewardsDialog() {
 
 export enum ProjectSection {
   Details = "Details",
-  Team = "Team",
+  Contributors = "Contributors",
   Repos = "Repos",
   Contracts = "Contracts",
   Grants = "Grants",
@@ -95,17 +96,20 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
 
   const hasTeam = project.addedTeamMembers
   if (hasTeam) {
-    completedSections.push(ProjectSection.Team)
+    completedSections.push(ProjectSection.Contributors)
   }
 
   const hasRepos =
-    project.repos.filter((r) => r.type === "github" && r.verified).length > 0
+    project.repos.filter((r) => r.type === "github" && r.verified).length > 0 ||
+    project.hasCodeRepositories === false
   if (hasRepos) {
     completedSections.push(ProjectSection.Repos)
   }
 
   const hasContracts =
-    project.contracts.length > 0 || !!project.openSourceObserverSlug
+    project.contracts.length > 0 ||
+    !!project.openSourceObserverSlug ||
+    project.isOnChainContract === false
   if (hasContracts) {
     completedSections.push(ProjectSection.Contracts)
   }
@@ -181,4 +185,13 @@ export function shortenAddress(address: string) {
     address.length - 4,
     address.length,
   )}`
+}
+
+export function isOrganizationSetupComplete(organization: Organization) {
+  return (
+    organization.name &&
+    organization.description &&
+    organization.avatarUrl &&
+    organization.coverUrl
+  )
 }

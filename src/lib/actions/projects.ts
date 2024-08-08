@@ -11,6 +11,7 @@ import {
   CreateProjectParams,
   deleteProject,
   getProjectTeam,
+  getUserAdminProjectsWithDetail,
   getUserApplications,
   getUserProjectsWithDetails,
   removeTeamMember,
@@ -29,12 +30,28 @@ export const getProjects = async (userId: string) => {
   return (teams?.projects ?? []).map(({ project }) => project)
 }
 
-export const getApplications = async (userId: string) => {
-  const teams = await getUserApplications({ userId })
-  return (teams?.projects ?? []).flatMap(({ project }) => project.applications)
+export const getAdminProjects = async (userId: string) => {
+  const teams = await getUserAdminProjectsWithDetail({ userId })
+  return (teams?.projects ?? []).map(({ project }) => project)
 }
 
-export const createNewProject = async (details: CreateProjectParams) => {
+export const getApplications = async (userId: string) => {
+  const userApplications = await getUserApplications({ userId })
+  return userApplications
+}
+
+export const getRoundApplications = async (userId: string, roundId: number) => {
+  const userApplications = await getUserApplications({
+    userId,
+    roundId: roundId.toString(),
+  })
+  return userApplications
+}
+
+export const createNewProject = async (
+  details: CreateProjectParams,
+  organizationId?: string,
+) => {
   const session = await auth()
 
   if (!session?.user?.id || !session.user.farcasterId) {
@@ -52,6 +69,7 @@ export const createNewProject = async (details: CreateProjectParams) => {
     userId: session.user.id,
     projectId: attestationId,
     project: details,
+    organizationId,
   })
 
   revalidatePath("/dashboard")
@@ -83,6 +101,7 @@ export const createNewProjectOnBehalf = async (
 export const updateProjectDetails = async (
   projectId: string,
   details: UpdateProjectParams,
+  organizationId?: string,
 ) => {
   const session = await auth()
 
@@ -97,7 +116,11 @@ export const updateProjectDetails = async (
     return isInvalid
   }
 
-  const updated = await updateProject({ id: projectId, project: details })
+  const updated = await updateProject({
+    id: projectId,
+    project: details,
+    organizationId,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")

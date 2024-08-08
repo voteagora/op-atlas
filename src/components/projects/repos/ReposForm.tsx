@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { partition } from "ramda"
 import { useCallback, useState } from "react"
@@ -22,10 +21,16 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form"
-import { removeGithubRepo, updatePackageRepos } from "@/lib/actions/repos"
+import { updateProjectDetails } from "@/lib/actions/projects"
+import {
+  removeGithubRepo,
+  setProjectLinks,
+  updatePackageRepos,
+} from "@/lib/actions/repos"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { GithubForm } from "./GithubForm"
+import { LinkForm } from "./LinkForm"
 import { PackageForm } from "./PackageForm"
 import { ReposFormSchema } from "./schema"
 import VerifyGithubRepoDialog from "./VerifyGithubRepoDialog"
@@ -37,14 +42,22 @@ function toFormValues(project: ProjectWithDetails) {
   )
 
   return {
-    noRepos: false,
+    noRepos: project.hasCodeRepositories === false,
     packages:
       packages.length === 0
         ? [{ url: "" }]
-        : packages.map(({ url }) => ({ url })),
+        : packages.map(({ url }) => ({ url: url })),
+    links: !!!project?.links?.length
+      ? [{ url: "", name: "", description: "" }]
+      : //this name and description with be replace with live data
+        project.links?.map(({ url, name, description }) => ({
+          url,
+          name: name ?? "",
+          description: description ?? "",
+        })),
     githubRepos:
       githubs.length === 0
-        ? [{ url: "", verified: false }]
+        ? [{ url: "", name: "", description: "", verified: false }]
         : githubs.map(({ url, verified, openSource, containsContracts }) => ({
             url,
             verified,
@@ -80,6 +93,11 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   const { fields: packageFields, append: addPackageField } = useFieldArray({
     control: form.control,
     name: "packages",
+  })
+
+  const { fields: linkFields, append: addLinkField } = useFieldArray({
+    control: form.control,
+    name: "links",
   })
 
   const hasRepo = !form.watch("noRepos")
@@ -118,6 +136,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         verified: false,
         openSource: false,
         containsContracts: false,
+        name: "",
+        description: "",
       })
     }
   }
@@ -136,6 +156,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
           verified: false,
           openSource: false,
           containsContracts: false,
+          name: "",
+          description: "",
         })
       }
     } catch (error) {
@@ -165,6 +187,24 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     }
   }
 
+  const onAddLinkField = async () => {
+    const links = form.getValues("links").map((field) => field.url)
+    // If the previous URL is blank, do nothing
+    if (links[links.length - 1] === "") {
+      return
+    }
+
+    const valid = links.every((url) => z.string().url().safeParse(url).success)
+    if (valid) {
+      form.clearErrors(`links.${links.length - 1}.url`)
+      addLinkField({ url: "", name: "", description: "" })
+    } else {
+      form.setError(`links.${links.length - 1}.url`, {
+        message: "Invalid URL",
+      })
+    }
+  }
+
   const onSubmit = useCallback(
     (isSave: boolean) => async (values: z.infer<typeof ReposFormSchema>) => {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
@@ -174,27 +214,48 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         .map((field) => field.url)
         .filter((url) => z.string().url().safeParse(url).success)
 
+      const links = values.links
+        .map((field) => ({
+          url: field.url,
+          name: field.name,
+          description: field.description,
+          projectId: project.id,
+        }))
+        .filter((field) => z.string().url().safeParse(field.url).success)
+
       try {
-        await updatePackageRepos(project.id, packageUrls)
+        await Promise.all([
+          updatePackageRepos(project.id, packageUrls),
+          setProjectLinks(project.id, links),
+          updateProjectDetails(
+            project.id,
+            {
+              hasCodeRepositories: !values.noRepos,
+            },
+            project.organization?.organizationId,
+          ),
+        ])
+
         !isSave && router.push(`/projects/${project.id}/contracts`)
         setIsSaving(false)
+        toast.success("Project saved")
       } catch (error) {
         toast.error("There was an error updating your packages")
         isSave ? setIsSaving(false) : setIsSubmitting(false)
         console.error("Error saving packages", error)
       }
     },
-    [project.id, router],
+    [project.id, project.organization?.organizationId, router],
   )
 
   return (
     <>
       <div className="flex flex-col">
         <div className="flex flex-col gap-6">
-          <h2>Code Repositories</h2>
+          <h2>Repos & Links</h2>
           <p className="text-secondary-foreground">
-            Verify your project&apos;s Github repos. Your code may be reviewed
-            by badgeholders to aid in voting decisions.
+            Verify your project&apos;s Github repos, and add links to anything
+            else that&apos;s relevant to this project&apos;s impact.
           </p>
         </div>
 
@@ -265,19 +326,13 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                 </div>
 
                 <div className="flex flex-col">
-                  <h3>Github</h3>
-                  <div className="mt-6 flex flex-col gap-2">
-                    <div>
-                      <FormLabel className="text-foreground">
-                        Verify your Github repo
-                        <span className="ml-0.5 text-destructive">*</span>
-                      </FormLabel>
-                      <FormDescription>
-                        Your project repo must be public. If you have multiple
-                        repos, first verify one then you can add more.
-                      </FormDescription>
-                    </div>
-
+                  <h3>Repos</h3>
+                  <p className="mt-4 text-text-secondary">
+                    Enter your project’s GitHub repo URL and complete the steps
+                    to verify ownership. If you have multiple repos, first
+                    verify one then you can add more.
+                  </p>
+                  <div className="mt-6 flex flex-col gap-6">
                     {githubFields.map((field, index) => (
                       <GithubForm
                         key={field.id}
@@ -287,16 +342,15 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                         onRemove={onRemoveGithubField}
                       />
                     ))}
-
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={onAddGithubField}
-                      className="mt-4 w-fit"
-                    >
-                      <Plus size={16} className="mr-2.5" /> Add repo
-                    </Button>
                   </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={onAddGithubField}
+                    className="mt-4 w-fit"
+                  >
+                    <Plus size={16} className="mr-2.5" /> Add another repo
+                  </Button>
                 </div>
 
                 <div className="flex flex-col">
@@ -322,6 +376,29 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                       <Plus size={16} className="mr-2.5" /> Add link
                     </Button>
                   </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <h3>Links</h3>
+                  <p className="mt-4 text-text-secondary">
+                    Link to anything relevant to this project’s impact. For
+                    example, a data analysis project might link to a metrics
+                    dashboard.
+                  </p>
+                  <div className="mt-6 flex flex-col gap-6">
+                    {linkFields.map((field, index) => (
+                      <LinkForm key={field.id} form={form} index={index} />
+                    ))}
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={onAddLinkField}
+                    className="mt-4 w-fit"
+                  >
+                    <Plus size={16} className="mr-2.5" /> Add another link
+                  </Button>
                 </div>
               </>
             )}

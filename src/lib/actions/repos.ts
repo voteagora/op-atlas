@@ -1,11 +1,13 @@
 "use server"
 
+import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
 import {
   addProjectRepository,
   removeProjectRepository,
+  updateProjectLinks,
   updateProjectRepositories,
   updateProjectRepository,
 } from "@/db/projects"
@@ -254,4 +256,27 @@ export const updatePackageRepos = async (projectId: string, urls: string[]) => {
       error: "Error updating packages",
     }
   }
+}
+
+export const setProjectLinks = async (
+  projectId: string,
+  links: Prisma.ProjectLinksCreateManyInput[],
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  await updateProjectLinks({ projectId, links })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
 }

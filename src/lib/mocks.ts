@@ -24,7 +24,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     },
     details:
       "This category will reward onchain builders who contribute to the success of Optimism. This round seeks to expand the...",
-    status: "now",
+    status: "past",
     link: "/projects/new",
     accentColor: "#F0F4FF",
     iconUrl: "/assets/images/round-4.svg",
@@ -36,7 +36,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     number: 5,
     details:
       "The OP Stack is the heart of Optimism, and the Superchain. Contributions to the OP Stack and improvements to the...",
-    status: "upcoming",
+    status: "now",
     accentColor: "#FFF0F1",
     iconUrl: "/assets/images/round-5.svg",
     startsAt: new Date("2024-08-14T21:53:13.300Z"),

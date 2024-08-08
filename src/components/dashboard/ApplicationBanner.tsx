@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React, { memo, useState } from "react"
 
+import { ApplicationWithDetails } from "@/lib/types"
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -24,7 +25,7 @@ const ApplicationBanner = ({
   canApply,
 }: {
   className?: string
-  application?: Application
+  application?: ApplicationWithDetails
   canApply: boolean
 }) => {
   const router = useRouter()
@@ -39,7 +40,10 @@ const ApplicationBanner = ({
 
   const onViewAttestation = () => {
     if (application) {
-      window.open(`${EAS_URL_PREFIX}${application.attestationId}`, "_blank")
+      window.open(
+        `${EAS_URL_PREFIX}${application.projects[0].attestationId}`,
+        "_blank",
+      )
     }
   }
 

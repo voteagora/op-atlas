@@ -32,6 +32,52 @@ export async function getUserProjects({
   })
 }
 
+export async function getUserAdminProjectsWithDetail({
+  userId,
+}: {
+  userId: string
+}) {
+  return prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      projects: {
+        where: {
+          deletedAt: null,
+          role: "admin" satisfies TeamRole,
+          project: {
+            deletedAt: null,
+          },
+        },
+        include: {
+          project: {
+            include: {
+              team: { where: { deletedAt: null }, include: { user: true } },
+              repos: true,
+              contracts: true,
+              funding: true,
+              snapshots: true,
+              organization: {
+                where: { deletedAt: null },
+                include: { organization: true },
+              },
+              applications: true,
+              links: true,
+              rewards: { include: { claim: true } },
+            },
+          },
+        },
+        orderBy: {
+          project: {
+            createdAt: "asc",
+          },
+        },
+      },
+    },
+  })
+}
+
 export async function getUserProjectsWithDetails({
   userId,
 }: {
@@ -47,6 +93,9 @@ export async function getUserProjectsWithDetails({
           deletedAt: null,
           project: {
             deletedAt: null,
+            organization: {
+              is: null,
+            },
           },
         },
         include: {
@@ -57,7 +106,12 @@ export async function getUserProjectsWithDetails({
               contracts: true,
               funding: true,
               snapshots: true,
+              organization: {
+                where: { deletedAt: null },
+                include: { organization: true },
+              },
               applications: true,
+              links: true,
               rewards: { include: { claim: true } },
             },
           },
@@ -81,10 +135,12 @@ export type CreateProjectParams = Partial<
 export async function createProject({
   userId,
   projectId,
+  organizationId,
   project,
 }: {
   userId: string
   projectId: string
+  organizationId?: string
   project: CreateProjectParams
 }) {
   return prisma.project.create({
@@ -101,6 +157,17 @@ export async function createProject({
           },
         },
       },
+      organization: organizationId
+        ? {
+            create: {
+              organization: {
+                connect: {
+                  id: organizationId,
+                },
+              },
+            },
+          }
+        : undefined,
     },
   })
 }
@@ -112,30 +179,64 @@ export type UpdateProjectParams = Partial<
 export async function updateProject({
   id,
   project,
+  organizationId,
 }: {
   id: string
   project: UpdateProjectParams
+  organizationId?: string
 }) {
-  return prisma.project.update({
-    where: {
-      id,
-    },
-    data: {
-      ...project,
-      lastMetadataUpdate: new Date(),
-    },
+  return prisma.$transaction(async (prisma) => {
+    // Update the main project fields
+    const updatedProject = await prisma.project.update({
+      where: { id },
+      data: {
+        ...project,
+        lastMetadataUpdate: new Date(),
+      },
+    })
+
+    if (!!!organizationId) {
+      await prisma.projectOrganization.deleteMany({
+        where: { projectId: id },
+      })
+    } else if (organizationId) {
+      // Remove any existing organization associations
+      await prisma.projectOrganization.deleteMany({
+        where: { projectId: id },
+      })
+
+      // Create a new organization association
+      await prisma.projectOrganization.create({
+        data: {
+          projectId: id,
+          organizationId,
+        },
+      })
+    }
+    return updatedProject
   })
 }
 
 export async function deleteProject({ id }: { id: string }) {
-  return prisma.project.update({
-    where: {
-      id,
-    },
-    data: {
-      deletedAt: new Date(),
-    },
-  })
+  return prisma.$transaction([
+    prisma.project.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    }),
+    prisma.projectOrganization.updateMany({
+      where: {
+        projectId: id,
+        deletedAt: null, // Ensures only non-deleted records are updated
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    }),
+  ])
 }
 
 export async function getProject({ id }: { id: string }) {
@@ -147,6 +248,7 @@ export async function getProject({ id }: { id: string }) {
       team: { where: { deletedAt: null }, include: { user: true } },
       repos: true,
       contracts: true,
+      links: true,
       funding: true,
       snapshots: {
         orderBy: {
@@ -154,6 +256,10 @@ export async function getProject({ id }: { id: string }) {
         },
       },
       applications: true,
+      organization: {
+        where: { deletedAt: null },
+        include: { organization: true },
+      },
       rewards: { include: { claim: true } },
     },
   })
@@ -498,6 +604,39 @@ export async function updateProjectRepositories({
   return prisma.$transaction([remove, create, update])
 }
 
+export async function updateProjectLinks({
+  projectId,
+  links,
+}: {
+  projectId: string
+  links: Prisma.ProjectLinksCreateManyInput[]
+}) {
+  // Delete the existing links and replace it
+  const remove = prisma.projectLinks.deleteMany({
+    where: {
+      projectId,
+    },
+  })
+
+  const create = prisma.projectLinks.createMany({
+    data: links.map((l) => ({
+      ...l,
+      projectId,
+    })),
+  })
+
+  const update = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return await prisma.$transaction([remove, create, update])
+}
+
 export async function updateProjectFunding({
   projectId,
   funding,
@@ -556,57 +695,83 @@ export async function addProjectSnapshot({
 }
 
 export async function createApplication({
-  projectId,
-  attestationId,
   round,
+  projects,
 }: {
-  projectId: string
-  attestationId: string
   round: number
+  projects: {
+    projectId: string
+    categories: string[]
+    dependentEntities: string
+    successMetrics: string
+    additionalComments?: string
+    attestationId: string
+  }[]
 }) {
-  return prisma.application.create({
-    data: {
-      attestationId,
-      project: {
-        connect: {
-          id: projectId,
+  return prisma.$transaction(async (prisma) => {
+    // Create the application first
+    const application = await prisma.application.create({
+      data: {
+        round: {
+          connect: {
+            id: round.toString(),
+          },
         },
       },
-      round: {
-        connect: {
-          id: round.toString(),
-        },
+    })
+
+    // Create ApplicationProject entries
+    await prisma.applicationProject.createMany({
+      data: projects.map((project) => ({
+        applicationId: application.id,
+        projectId: project.projectId,
+        categories: project.categories,
+        dependentEntities: project.dependentEntities,
+        successMetrics: project.successMetrics,
+        additionalComments: project.additionalComments,
+        attestationId: project.attestationId,
+      })),
+    })
+
+    const applicationProjects = await prisma.applicationProject.findMany({
+      where: {
+        applicationId: application.id,
       },
-    },
+    })
+
+    return { ...application, projects: applicationProjects }
   })
 }
 
-export async function getUserApplications({ userId }: { userId: string }) {
-  return prisma.user.findUnique({
+export async function getUserApplications({
+  userId,
+  roundId,
+}: {
+  userId: string
+  roundId?: string
+}) {
+  const applications = await prisma.application.findMany({
     where: {
-      id: userId,
-    },
-    select: {
+      roundId: roundId ?? undefined,
       projects: {
-        where: {
+        some: {
           project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: {
-            include: {
-              applications: {
-                orderBy: {
-                  createdAt: "desc",
-                },
+            team: {
+              some: {
+                userId: userId,
+                deletedAt: null,
               },
             },
           },
         },
       },
     },
+    include: {
+      projects: true,
+    },
   })
+
+  return applications
 }
 
 export async function updateAllForProject(
