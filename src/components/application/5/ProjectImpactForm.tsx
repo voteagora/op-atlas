@@ -74,59 +74,78 @@ const ProjectImpactForm = ({
                 alt=""
               />
               <div className="flex flex-col text-start">
-                <h5 className="text-base font-semibold text-secondary-foreground">
+                <h5 className="text-base font-semibold text-secondary-foreground truncate w-96 ">
                   {project.name}
                 </h5>
                 <p>Admin</p>
               </div>
+
+              {hasApplied > -1 && (
+                <div className="ml-auto flex items-center gap-1 py-1 px-3 rounded-full bg-success">
+                  <Image
+                    alt="Checkmark"
+                    src="/assets/icons/circle-check-green.svg"
+                    height={14}
+                    width={14}
+                  />
+                  <p className="font-medium text-sm text-success-foreground">
+                    Submitted
+                  </p>
+                </div>
+              )}
             </div>
           </AccordionTrigger>
-          <AccordionContent>
-            <div className="mt-12 flex flex-col gap-4">
-              <h5 className="text-sm font-medium">
-                Choose a category of impact for this project
-                <span className="text-destructive">*</span>
-              </h5>
+          <AccordionContent className="pb-0">
+            <div className="mt-12 flex flex-col gap-y-12">
+              <div className="flex flex-col gap-2">
+                <h5 className="text-sm font-medium">
+                  Choose a category of impact for this project
+                  <span className="text-destructive">*</span>
+                </h5>
 
-              <Controller
-                control={form.control}
-                name={`projects.${index}.categories`}
-                render={({ field }) => (
-                  <FormItem className="flex flex-col gap-4">
-                    {CATEGORIES.map((category) => (
-                      <CategoryItem
-                        key={category.id}
-                        checked={(field.value as string[]).includes(
-                          category.id,
-                        )}
-                        onCheckboxChange={(checked) => {
-                          const newValue = checked
-                            ? [...field.value, category.id]
-                            : field.value.filter(
-                                (id: string) => id !== category.id,
-                              )
-                          field.onChange(newValue)
-                        }}
-                        title={category.title}
-                        description={category.description}
-                        className={category.className}
-                        icon={category.icon}
-                      />
-                    ))}
-                  </FormItem>
-                )}
-              />
+                <Controller
+                  control={form.control}
+                  name={`projects.${index}.categories`}
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2">
+                      {CATEGORIES.map((category) => (
+                        <CategoryItem
+                          key={category.id}
+                          checked={(field.value as string[]).includes(
+                            category.id,
+                          )}
+                          onCheckboxChange={(checked) => {
+                            const newValue = checked
+                              ? [...field.value, category.id]
+                              : field.value.filter(
+                                  (id: string) => id !== category.id,
+                                )
+                            field.onChange(newValue)
+                          }}
+                          title={category.title}
+                          description={category.description}
+                          className={category.className}
+                          icon={category.icon}
+                        />
+                      ))}
+                    </FormItem>
+                  )}
+                />
 
-              <p className="text-sm text-secondary-foreground">
-                Unsure which category to choose?
-                <ExternalLink className="underline" href="#">
-                  {" "}
-                  Get help in Discord.
-                </ExternalLink>
-              </p>
+                <p className="text-sm text-secondary-foreground ">
+                  Unsure which category to choose?
+                  <ExternalLink
+                    className="underline"
+                    href="https://discord.com/invite/optimism"
+                  >
+                    {" "}
+                    Get help in Discord.
+                  </ExternalLink>
+                </p>
+              </div>
 
               <div className="flex flex-col gap-6">
-                <h4 className="text-xl font-semibold">Impact</h4>
+                <h4 className="text-xl font-semibold">Impact statement</h4>
                 <p className="text-sm">
                   Describe this project’s impact on the OP Stack from Oct 1,
                   2023 - July 31, 2024. Please only describe the impact that was
@@ -222,14 +241,6 @@ const ProjectImpactForm = ({
                   />
                 </div>
               </div>
-
-              <p className="text-sm text-secondary-foreground">
-                To add new repos, links, or contracts,
-                <ExternalLink className="underline" href="/dashboard">
-                  {" "}
-                  visit your project settings.
-                </ExternalLink>
-              </p>
             </div>
           </AccordionContent>
         </AccordionItem>

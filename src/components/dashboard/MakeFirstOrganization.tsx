@@ -18,7 +18,7 @@ const MakeFirstOrganization = ({
       onClick={onClick}
       variant="ghost"
       className={cn(
-        "flex gap-x-6 border rounded-2xl p-8 items-center justify-start h-fit",
+        "flex gap-x-6 border rounded-xl p-8 items-center justify-start h-fit",
         className,
       )}
     >
@@ -33,7 +33,7 @@ const MakeFirstOrganization = ({
             />
           </div>
           <div className=" flex flex-col justify-start text-start">
-            <h3>Make an organization</h3>
+            <h3 className="text-base font-semibold">Make an organization</h3>
             <p className="text-base font-normal text-secondary-foreground">
               Group your team&apos;s projects in one place.
             </p>

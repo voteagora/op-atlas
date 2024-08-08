@@ -104,7 +104,7 @@ export const submitApplications = async (
     }
   }
 
-  if (!APPLICATIONS_CLOSED) {
+  if (APPLICATIONS_CLOSED) {
     throw new Error("Applications are closed")
   }
 

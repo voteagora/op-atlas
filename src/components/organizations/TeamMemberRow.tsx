@@ -37,7 +37,7 @@ export const TeamMemberRow = memo(function TeamMemberRow({
       onMouseEnter={() => setMouseEntered(true)}
       onMouseLeave={() => setMouseEntered(false)}
     >
-      <div className="py-2 px-3 rounded-md border border-input flex items-center gap-2 w-full">
+      <div className="py-2 px-3 h-10 rounded-md border border-input flex items-center gap-2 w-full">
         <Avatar className="!w-6 !h-6">
           <AvatarImage src={user.imageUrl || ""} alt="team avatar" />
           <AvatarFallback>{user.username} </AvatarFallback>
@@ -54,7 +54,7 @@ export const TeamMemberRow = memo(function TeamMemberRow({
           >
             <Button
               variant="ghost"
-              className="text-sm font-normal text-secondary-foreground focus-visible:ring-0"
+              className="text-sm p-0 h-fit font-normal text-secondary-foreground focus-visible:ring-0"
             >
               {role === "admin" ? "Admin" : "Contributor"}
               {isUserAdmin && (

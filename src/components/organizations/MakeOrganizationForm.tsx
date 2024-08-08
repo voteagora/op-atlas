@@ -44,7 +44,7 @@ const StringValue = z.object({ value: z.string() }) // use a intermediate object
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
   website: z.array(StringValue),
   farcaster: z.array(StringValue),
   twitter: z.string().optional(),
@@ -69,6 +69,8 @@ export default function MakeOrganizationForm({
 }) {
   const router = useRouter()
   const isAdmin = useIsOrganizationAdmin(organization)
+
+  console.log(user, "user")
 
   const [team, setTeam] = useState<{ user: User; role: TeamRole }[]>(
     organization?.team.map(({ user, role }) => ({
@@ -365,9 +367,7 @@ export default function MakeOrganizationForm({
             name="description"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Description<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
+                <FormLabel className="text-foreground">Description</FormLabel>
                 <FormDescription className="!mt-0">
                   Introduce your organization to the Optimism Collective. Share
                   who you are and what you do.
@@ -385,10 +385,7 @@ export default function MakeOrganizationForm({
 
           <div>
             <div>
-              <FormLabel>
-                Avatar and cover image
-                <span className="ml-0.5 text-destructive">*</span>
-              </FormLabel>
+              <FormLabel>Avatar and cover image</FormLabel>
               <div className="text-sm text-muted-foreground">
                 Images must be no larger than 5MB.
               </div>

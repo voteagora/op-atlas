@@ -4,7 +4,6 @@ import Image from "next/image"
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { Badge } from "@/components/ui/badge"
 import { ApplicationWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX } from "@/lib/utils"
 
@@ -26,7 +25,7 @@ const ApplicationHeader = ({
     document.body.removeChild(link)
   }
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col gap-y-6 items-center">
       <Image
         alt="sunny"
         src="/assets/images/round-5-transparent.svg"
@@ -35,7 +34,7 @@ const ApplicationHeader = ({
       />
       <h2 className="text-center">Apply for Retro Funding Round 5: OP Stack</h2>
       {hasApplied ? (
-        <div className="mt-6 flex justify-between items-center gap-2 p-4 bg-success rounded-xl w-full">
+        <div className="flex justify-between items-center gap-2 p-4 bg-success rounded-xl w-full">
           <div className="flex items-center gap-2">
             <Image
               src="/assets/icons/circle-check-green.svg"
@@ -45,9 +44,10 @@ const ApplicationHeader = ({
             />
             <div className="flex flex-col text-success-foreground max-w-[445px]">
               <p className="font-medium text-sm">
-                Your application was submitted on Aug 16 at 4:12 PM. You can
-                resubmit with additional projects until Aug 29 at 19:00 UTC.
-                {format(applications[0].createdAt, "MMMM d, h:mm a")}
+                Your application was submitted on{" "}
+                {format(applications[0].createdAt, "MMMM d, h:mm a")}. You can
+                resubmit with additional projects until{" "}
+                {format(applications[0].createdAt, "MMMM d, h:mm a")} UTC.
               </p>
               <ExternalLink
                 href={`${EAS_URL_PREFIX}${applications[0]?.projects[0].attestationId}`}
@@ -60,9 +60,9 @@ const ApplicationHeader = ({
           <div className="flex justify-center items-center gap-x-6">
             <Image
               alt="sunny"
-              src="/assets/images/organization-create-graphic.png"
+              src="/assets/images/submitted-retro-5-funding.png"
               height={80}
-              width={142}
+              width={143}
             />
             <ArrowDownToLine
               onClick={handleDownload}

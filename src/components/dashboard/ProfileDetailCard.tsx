@@ -81,7 +81,7 @@ const ProfileDetailCard = ({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="ml-auto">
+          <Button variant="ghost" className="ml-auto">
             <Ellipsis size={16} />
           </Button>
         </DropdownMenuTrigger>

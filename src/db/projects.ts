@@ -58,7 +58,10 @@ export async function getUserAdminProjectsWithDetail({
               contracts: true,
               funding: true,
               snapshots: true,
-              organization: true,
+              organization: {
+                where: { deletedAt: null },
+                include: { organization: true },
+              },
               applications: true,
               links: true,
               rewards: { include: { claim: true } },
@@ -103,7 +106,10 @@ export async function getUserProjectsWithDetails({
               contracts: true,
               funding: true,
               snapshots: true,
-              organization: true,
+              organization: {
+                where: { deletedAt: null },
+                include: { organization: true },
+              },
               applications: true,
               links: true,
               rewards: { include: { claim: true } },
@@ -250,7 +256,10 @@ export async function getProject({ id }: { id: string }) {
         },
       },
       applications: true,
-      organization: true,
+      organization: {
+        where: { deletedAt: null },
+        include: { organization: true },
+      },
       rewards: { include: { claim: true } },
     },
   })
@@ -712,7 +721,7 @@ export async function createApplication({
     })
 
     // Create ApplicationProject entries
-    const applicationProjects = await prisma.applicationProject.createMany({
+    await prisma.applicationProject.createMany({
       data: projects.map((project) => ({
         applicationId: application.id,
         projectId: project.projectId,
@@ -722,6 +731,12 @@ export async function createApplication({
         additionalComments: project.additionalComments,
         attestationId: project.attestationId,
       })),
+    })
+
+    const applicationProjects = await prisma.applicationProject.findMany({
+      where: {
+        applicationId: application.id,
+      },
     })
 
     return { ...application, projects: applicationProjects }
@@ -735,35 +750,28 @@ export async function getUserApplications({
   userId: string
   roundId?: string
 }) {
-  return prisma.user.findUnique({
+  const applications = await prisma.application.findMany({
     where: {
-      id: userId,
-    },
-    select: {
+      roundId: roundId ?? undefined,
       projects: {
-        where: {
+        some: {
           project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: {
-            include: {
-              applications: {
-                where: roundId ? { roundId } : {}, // Apply filter only if round is provided
-                orderBy: {
-                  createdAt: "desc",
-                },
-                include: {
-                  projects: true,
-                },
+            team: {
+              some: {
+                userId: userId,
+                deletedAt: null,
               },
             },
           },
         },
       },
     },
+    include: {
+      projects: true,
+    },
   })
+
+  return applications
 }
 
 export async function updateAllForProject(

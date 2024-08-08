@@ -162,6 +162,8 @@ model Project {
   openSourceObserverSlug String?
   addedTeamMembers       Boolean  @default(false)
   addedFunding           Boolean  @default(false)
+  hasCodeRepositories    Boolean  @default(true)
+  isOnChainContract      Boolean  @default(true)
   lastMetadataUpdate     DateTime @default(now())
 
   createdAt DateTime  @default(now())

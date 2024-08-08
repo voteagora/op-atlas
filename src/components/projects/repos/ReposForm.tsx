@@ -21,6 +21,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form"
+import { updateProjectDetails } from "@/lib/actions/projects"
 import {
   removeGithubRepo,
   setProjectLinks,
@@ -41,7 +42,7 @@ function toFormValues(project: ProjectWithDetails) {
   )
 
   return {
-    noRepos: false,
+    noRepos: project.hasCodeRepositories === false,
     packages:
       packages.length === 0
         ? [{ url: "" }]
@@ -226,17 +227,25 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         await Promise.all([
           updatePackageRepos(project.id, packageUrls),
           setProjectLinks(project.id, links),
+          updateProjectDetails(
+            project.id,
+            {
+              hasCodeRepositories: !values.noRepos,
+            },
+            project.organization?.organizationId,
+          ),
         ])
 
         !isSave && router.push(`/projects/${project.id}/contracts`)
         setIsSaving(false)
+        toast.success("Project saved")
       } catch (error) {
         toast.error("There was an error updating your packages")
         isSave ? setIsSaving(false) : setIsSubmitting(false)
         console.error("Error saving packages", error)
       }
     },
-    [project.id, router],
+    [project.id, project.organization?.organizationId, router],
   )
 
   return (
@@ -371,7 +380,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
                 <div className="flex flex-col">
                   <h3>Links</h3>
-                  <p className="mt-4 mb-6 text-text-secondary">
+                  <p className="mt-4 text-text-secondary">
                     Link to anything relevant to this project’s impact. For
                     example, a data analysis project might link to a metrics
                     dashboard.

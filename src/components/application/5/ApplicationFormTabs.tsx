@@ -63,14 +63,21 @@ const ApplicationFormTabs = ({
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
-      projects: projects.map((project) => ({
-        projectId: project.id,
-        categories: [],
-        entities: "",
-        results: "",
-        additionalInfo: "",
-        selected: false,
-      })),
+      projects: projects.map((project) => {
+        const application = applications[0]?.projects.find(
+          (p) => p.projectId === project.id,
+        )
+        return {
+          projectId: project.id,
+          categories: application?.categories ?? [],
+          entities: application?.dependentEntities ?? "",
+          results: application?.successMetrics ?? "",
+          additionalInfo: application?.additionalComments ?? "",
+          selected:
+            applications[0]?.projects.some((p) => p.projectId === project.id) ||
+            false,
+        }
+      }),
     },
   })
 
@@ -87,7 +94,7 @@ const ApplicationFormTabs = ({
   }
 
   const submitApplication = async () => {
-    const projects = form
+    const filterProjects = form
       .getValues()
       .projects.filter((project) => project.selected)
 
@@ -97,7 +104,7 @@ const ApplicationFormTabs = ({
       async (resolve, reject) => {
         try {
           const result = await submitApplications(
-            projects.map((project) => ({
+            filterProjects.map((project) => ({
               categories: project.categories,
               dependentEntities: project.entities,
               successMetrics: project.results,
@@ -105,6 +112,7 @@ const ApplicationFormTabs = ({
               projectId: project.projectId,
             })),
           )
+
           if (result.error !== null || result.applications.length === 0) {
             throw new Error(result.error ?? "Error submitting application")
           }

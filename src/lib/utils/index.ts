@@ -6,7 +6,7 @@ import { twMerge } from "tailwind-merge"
 
 import { ProjectWithDetails, UserWithAddresses } from "../types"
 
-export const APPLICATIONS_CLOSED = true
+export const APPLICATIONS_CLOSED = false
 
 export const GITHUB_REDIRECT_COOKIE = "github-auth-redirect"
 
@@ -100,13 +100,16 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   }
 
   const hasRepos =
-    project.repos.filter((r) => r.type === "github" && r.verified).length > 0
+    project.repos.filter((r) => r.type === "github" && r.verified).length > 0 ||
+    project.hasCodeRepositories === false
   if (hasRepos) {
     completedSections.push(ProjectSection.Repos)
   }
 
   const hasContracts =
-    project.contracts.length > 0 || !!project.openSourceObserverSlug
+    project.contracts.length > 0 ||
+    !!project.openSourceObserverSlug ||
+    project.isOnChainContract === false
   if (hasContracts) {
     completedSections.push(ProjectSection.Contracts)
   }

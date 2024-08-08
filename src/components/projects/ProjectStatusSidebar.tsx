@@ -63,7 +63,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         variant="ghost"
         className="text-sm font-medium !p-0"
       >
-        Your projects{" "}
+        {project?.organization?.organization?.name ?? "Your projects"}
         <Image
           src="/assets/icons/arrow-left.svg"
           height={8}
@@ -73,7 +73,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         />
       </Button>
 
-      <h2 className="max-w-48 text-ellipsis text-2xl font-semibold text-secondary-foreground text-nowrap overflow-hidden">
+      <h2 className="max-w-48 line-clamp-2 text-2xl font-semibold text-secondary-foreground">
         {project?.name ?? "New project"}
       </h2>
       <div className="flex flex-col gap-2">
@@ -112,7 +112,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
                   currentPage === option.toLowerCase() ? "font-medium" : ""
                 }
               >
-                {option}
+                {option === "Repos" ? "Repos & Links" : option}
               </Link>
             ) : (
               <p>{option}</p>
@@ -133,7 +133,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
       <div className="flex flex-col gap-4">
         <ExternalLink
           className="text-sm text-muted-foreground font-normal decoration-muted-foreground"
-          href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+          href="https://discord.com/invite/optimism"
         >
           Get help
         </ExternalLink>

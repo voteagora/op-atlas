@@ -1,11 +1,9 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
 import { Organization } from "@prisma/client"
 import { useSession } from "next-auth/react"
 import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -160,7 +158,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
           <DialogFooter className="w-full sm:flex-col gap-2">
             <Button
               disabled={!!!organizationName.length}
-              className="w-full disabled:opacity-50 disabled:bg-destructive disabled:text-text-default"
+              className="w-full disabled:opacity-50"
               type="button"
               variant="destructive"
             >

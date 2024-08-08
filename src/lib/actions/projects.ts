@@ -36,16 +36,16 @@ export const getAdminProjects = async (userId: string) => {
 }
 
 export const getApplications = async (userId: string) => {
-  const teams = await getUserApplications({ userId })
-  return (teams?.projects ?? []).flatMap(({ project }) => project.applications)
+  const userApplications = await getUserApplications({ userId })
+  return userApplications
 }
 
 export const getRoundApplications = async (userId: string, roundId: number) => {
-  const teams = await getUserApplications({
+  const userApplications = await getUserApplications({
     userId,
     roundId: roundId.toString(),
   })
-  return (teams?.projects ?? []).flatMap(({ project }) => project.applications)
+  return userApplications
 }
 
 export const createNewProject = async (

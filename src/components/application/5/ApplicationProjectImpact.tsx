@@ -31,38 +31,43 @@ const ApplicationProjectImpactForm = ({
     .some((project) => project.selected)
 
   return (
-    <div className="flex flex-col gap-y-6">
-      <h4 className="text-xl font-semibold">
-        Choose projects and add impact statements
-      </h4>
-      <p className="text-secondary-foreground">
-        This part of your application helps badgeholders understand how your
-        work has benefitted the Optimism Collective. If you need help,{" "}
-        <ExternalLink className="underline" href="#">
-          {" "}
-          view our guidelines.
-        </ExternalLink>
-      </p>
+    <div className="flex flex-col gap-y-12">
+      <div className="flex flex-col gap-y-6">
+        <h4 className="text-xl font-semibold">
+          Choose projects and add impact statements
+        </h4>
+        <p className="text-secondary-foreground">
+          This part of your application helps badgeholders understand how your
+          work has benefitted the Optimism Collective. If you need help,{" "}
+          <ExternalLink className="underline" href="#">
+            {" "}
+            view our guidelines.
+          </ExternalLink>
+        </p>
+      </div>
+      <div className="flex flex-col gap-y-4">
+        {!!!projects.length && (
+          <Callout
+            type="error"
+            text="You haven’t added or joined any projects"
+            linkText="View projects"
+            linkHref="/dashboard"
+          />
+        )}
 
-      {!!!projects.length && (
-        <Callout
-          type="error"
-          text="You haven’t added or joined any projects"
-          linkText="View projects"
-          linkHref="/dashboard"
-        />
-      )}
-
-      {/* Project Impact Form */}
-      {fields.map((field, index) => (
-        <ProjectImpactForm
-          key={field.id}
-          index={index}
-          project={projects.find((project) => project.id === field.projectId)!}
-          applications={applications}
-          form={form}
-        />
-      ))}
+        {/* Project Impact Form */}
+        {fields.map((field, index) => (
+          <ProjectImpactForm
+            key={field.id}
+            index={index}
+            project={
+              projects.find((project) => project.id === field.projectId)!
+            }
+            applications={applications}
+            form={form}
+          />
+        ))}
+      </div>
 
       <Button
         variant="destructive"

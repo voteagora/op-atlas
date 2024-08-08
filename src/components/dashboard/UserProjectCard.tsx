@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { reverse, uniqBy } from "ramda"
-import { memo, useMemo, useState } from "react"
+import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
 import { useIsAdmin } from "@/lib/hooks"
@@ -32,7 +32,7 @@ const UserProjectCard = ({
     <Link
       href={`/projects/${project.id}/details`}
       className={cn(
-        "flex gap-x-6 border rounded-2xl hover:shadow-md p-6",
+        "flex gap-x-6 border rounded-xl hover:shadow-md p-8",
         className,
       )}
     >
@@ -56,14 +56,12 @@ const UserProjectCard = ({
 
       <div className="flex flex-col flex-1 min-w-0">
         <div className="flex items-start">
-          <h3 className="mr-3 pt-1 truncate">{project.name}</h3>
+          <h3 className="mr-3 text-base truncate">{project.name}</h3>
         </div>
 
-        <div className="mt-4 flex flex-col">
-          <p className="text-secondary-foreground line-clamp-3">
-            {project.description}
-          </p>
-        </div>
+        <p className="text-base text-secondary-foreground mt-3 line-clamp-2">
+          {project.description}
+        </p>
 
         <div className="mt-auto h-6 flex items-center gap-x-2">
           {isAdmin && (
@@ -110,7 +108,7 @@ const UserProjectCard = ({
       </div>
       <div className="m-auto">
         {progress === 100 ? (
-          <div className="flex">
+          <div className="flex items-center">
             <Image
               alt="Checkmark"
               src="/assets/icons/circle-check-green.svg"

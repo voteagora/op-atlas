@@ -5,7 +5,7 @@ import { ProjectContract } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { removeContract, updateProjectOSOStatus } from "@/lib/actions/contracts"
+import { updateProjectDetails } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ContractForm } from "./ContractForm"
@@ -79,7 +80,7 @@ function getDefaultValues(
   }
 
   return {
-    isOffChain: false,
+    isOffChain: project.isOnChainContract === false,
     hasDeployerKeys: hasDeployerKeys as "Yes" | "Some, but not all",
     contracts: contracts.length > 0 ? contracts : [{ ...EMPTY_CONTRACT }],
     submittedToOSO: !!project.openSourceObserverSlug,
@@ -139,10 +140,19 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
 
       try {
-        const result = await updateProjectOSOStatus({
-          projectId: project.id,
-          osoProjectName: values.osoSlug,
-        })
+        const [result] = await Promise.all([
+          updateProjectOSOStatus({
+            projectId: project.id,
+            osoProjectName: values.osoSlug,
+          }),
+          updateProjectDetails(
+            project.id,
+            {
+              isOnChainContract: !values.isOffChain,
+            },
+            project.organization?.organizationId,
+          ),
+        ])
 
         if (result.error) {
           throw new Error(result.error)
@@ -150,6 +160,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
 
         !isSave && router.push(`/projects/${project.id}/grants`)
         setIsSaving(false)
+        toast.success("Project saved")
       } catch (error) {
         toast.error("There was an error updating project OSO status.")
         isSave ? setIsSaving(false) : setIsSubmitting(false)

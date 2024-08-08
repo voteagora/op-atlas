@@ -43,7 +43,7 @@ function OrganizationOnboardingDialog({
               Introducing Organizations
             </DialogTitle>
             <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">
-              Make an Organization to group your team’s projects in one place.
+              Make an organization to group your team’s projects in one place.
             </DialogDescription>
           </div>
         </DialogHeader>

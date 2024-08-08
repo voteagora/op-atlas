@@ -5,7 +5,7 @@ import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -377,6 +377,7 @@ export default function ProjectDetailsForm({
                   type=""
                   id="name"
                   placeholder="Add a project name"
+                  className="line-clamp-2"
                   {...field}
                 />
                 <FormMessage />
@@ -538,7 +539,8 @@ export default function ProjectDetailsForm({
             <div>
               <FormLabel className="text-sm font-medium">Website</FormLabel>
               <div className="text-sm text-muted-foreground">
-                If your project has more than one website, you can add rows.
+                If your organization has more than one website, you can add
+                rows.
               </div>
             </div>
             {websiteFields.map((field, index) => (
