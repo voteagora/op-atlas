@@ -33,7 +33,7 @@ export const FundingApplication = ({
   className?: string
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
-  onApplied: (application: Application) => void
+  onApplied: (application: ApplicationWithDetails) => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -98,7 +98,7 @@ export const FundingApplication = ({
     toast.promise(promise, {
       loading: "Submitting application...",
       success: (application) => {
-        onApplied(application)
+        // onApplied(application)
         return "Application submitted"
       },
       error: (error) => {

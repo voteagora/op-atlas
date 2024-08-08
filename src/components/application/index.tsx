@@ -1,6 +1,5 @@
 "use client"
 
-import { Application } from "@prisma/client"
 import { useState } from "react"
 
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
@@ -17,7 +16,8 @@ export const ApplicationFlow = ({
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
 }) => {
-  const [submittedApp, setSubmittedApp] = useState<Application | null>(null)
+  const [submittedApp, setSubmittedApp] =
+    useState<ApplicationWithDetails | null>(null)
 
   return submittedApp ? (
     <ApplicationSubmitted className={className} application={submittedApp} />
