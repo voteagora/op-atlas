@@ -133,7 +133,7 @@ export function GithubConnection({ user }: { user: User }) {
           <Checkbox
             checked={userNotDeveloper}
             onCheckedChange={toggleIsDeveloper}
-            className="rounded-none border-[1.5px]"
+            className=""
             disabled={loading}
           />
           I&apos;m not a developer

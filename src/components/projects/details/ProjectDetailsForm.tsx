@@ -308,7 +308,7 @@ export default function ProjectDetailsForm({
                 Organization<span className="ml-0.5 text-destructive">*</span>
               </FormLabel>
               <DropdownMenuTrigger asChild>
-                <div className="px-3 py-2.5 flex items-center rounded-lg border border-input mt-2">
+                <div className="px-3 py-2.5 flex  text-foreground items-center rounded-lg border border-input mt-2">
                   {selectedOrganization?.avatarUrl && (
                     <Avatar className="w-5 h-5 mr-2">
                       <AvatarImage
@@ -377,7 +377,7 @@ export default function ProjectDetailsForm({
                   type=""
                   id="name"
                   placeholder="Add a project name"
-                  className="line-clamp-2"
+                  className="line-clamp-2 text-muted-foreground"
                   {...field}
                 />
                 <FormMessage />
@@ -392,14 +392,14 @@ export default function ProjectDetailsForm({
                 <FormLabel className="text-foreground">
                   Description<span className="ml-0.5 text-destructive">*</span>
                 </FormLabel>
-                <FormDescription className="!mt-0">
+                <FormDescription className="!mt-0 text-secondary-foreground">
                   Introduce your project to the Optimism Collective. Share who
                   you are and what you do.
                 </FormDescription>
                 <Textarea
                   id="description"
                   placeholder="Add a description"
-                  className="resize-none"
+                  className="resize-none text-muted-foreground"
                   {...field}
                 />
                 <FormMessage />
@@ -551,7 +551,11 @@ export default function ProjectDetailsForm({
                 render={({ field: innerField }) => (
                   <FormItem>
                     <FormControl>
-                      <Input {...innerField} placeholder="Add a link" />
+                      <Input
+                        {...innerField}
+                        placeholder="Add a link"
+                        className="text-muted-foreground"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -580,7 +584,11 @@ export default function ProjectDetailsForm({
                 render={({ field: innerField }) => (
                   <FormItem>
                     <FormControl>
-                      <Input {...innerField} placeholder="Add a link" />
+                      <Input
+                        {...innerField}
+                        placeholder="Add a link"
+                        className="text-muted-foreground"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -604,7 +612,11 @@ export default function ProjectDetailsForm({
               <FormItem className="flex flex-col gap-1.5">
                 <FormLabel>Twitter</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Add a link" />
+                  <Input
+                    {...field}
+                    placeholder="Add a link"
+                    className="text-muted-foreground"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -618,7 +630,11 @@ export default function ProjectDetailsForm({
               <FormItem className="flex flex-col gap-1.5">
                 <FormLabel>Mirror</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Add a link" />
+                  <Input
+                    {...field}
+                    placeholder="Add a link"
+                    className="text-muted-foreground"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -28,6 +28,7 @@ const config = {
         background: "hsl(var(--background))",
         backgroundaccent: "hsl(var(--background-accent))",
         backgroundSecondary: "hsl(var(--background-secondary))",
+        tertiary: "#E0E2EB",
         text: {
           primary: "hsl(var(--text-primary))",
           secondary: "hsl(var(--text-secondary))",

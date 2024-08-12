@@ -70,8 +70,6 @@ export default function MakeOrganizationForm({
   const router = useRouter()
   const isAdmin = useIsOrganizationAdmin(organization)
 
-  console.log(user, "user")
-
   const [team, setTeam] = useState<{ user: User; role: TeamRole }[]>(
     organization?.team.map(({ user, role }) => ({
       user,

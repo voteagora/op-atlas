@@ -40,7 +40,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     accentColor: "#FFF0F1",
     iconUrl: "/assets/images/round-5.svg",
     startsAt: new Date("2024-08-14T21:53:13.300Z"),
-    endsAt: new Date("2023-05-31T21:53:13.300Z"),
+    endsAt: new Date("2024-08-31T21:53:13.300Z"),
   },
   {
     name: "Governance",

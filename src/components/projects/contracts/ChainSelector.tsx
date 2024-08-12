@@ -32,8 +32,11 @@ export function ChainSelector({
       control={form.control}
       name={`contracts.${index}.chain`}
       render={({ field }) => (
-        <FormItem className="w-60">
-          <FormLabel>Chain</FormLabel>
+        <FormItem className="w-full">
+          <FormLabel>
+            Chain
+            <span className="ml-0.5 text-destructive">*</span>
+          </FormLabel>
           <Select onValueChange={field.onChange} defaultValue={field.value}>
             <FormControl>
               <SelectTrigger>

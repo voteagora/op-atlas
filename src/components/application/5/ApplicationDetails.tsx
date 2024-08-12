@@ -173,7 +173,7 @@ const ApplicationDetails = () => {
         <p>
           The round will reward impact which has been generated between October
           2023 - July 2024. Impact will be rewarded within the following three
-          CATEGORIES: Ethereum Core Contributions, OP Stack Research &
+          categories: Ethereum Core Contributions, OP Stack Research &
           Development, and OP Stack Tooling.
         </p>
         <p>
@@ -195,7 +195,7 @@ const ApplicationDetails = () => {
       {/* Eligibility */}
       <div className="flex flex-col gap-y-6">
         <h3>Eligibility</h3>
-        <p>
+        <p className="text-secondary-foreground">
           The round will reward impact which has been generated between October
           2023 - July 2024. Impact will be rewarded within the following three
           CATEGORIES: Ethereum Core Contributions, OP Stack Research &
@@ -205,7 +205,7 @@ const ApplicationDetails = () => {
           Each category has it’s own eligibility criteria. Please review the
           following category descriptions carefully.
         </p>
-        <Separator />
+        <Separator className="m-6" />
         {CATEGORIES.map((category, index) => (
           <React.Fragment key={index}>
             <ContributionsSection
@@ -285,7 +285,7 @@ const ContributionsSection = ({
     </h4>
 
     <h4 className="font-semibold text-base text-secondary-foreground">
-      Eligibility:
+      Eligibility:{" "}
       <span className="font-normal">
         Projects are eligible who can be described as one of the following:
       </span>

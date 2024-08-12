@@ -46,7 +46,7 @@ export const ProjectCard = memo(function ProjectCard({
           disabled={!isEligible || hasApplied}
           checked={isSelected}
           onCheckedChange={() => onSelect(project.id)}
-          className="mt-1 border-2 rounded-[2px]"
+          className="mt-1"
         />
         {project.thumbnailUrl ? (
           <Image

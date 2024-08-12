@@ -3,7 +3,6 @@
 import { format } from "date-fns"
 import { ArrowRight } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useMemo } from "react"

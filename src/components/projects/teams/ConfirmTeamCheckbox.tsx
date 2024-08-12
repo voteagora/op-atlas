@@ -12,7 +12,6 @@ const ConfirmTeamCheckbox = ({
       id="team-confirmed"
       checked={isTeamConfirmed}
       onCheckedChange={(e) => setIsTeamConfirmed(e.valueOf() as boolean)}
-      className="border-black border-2 rounded-[2px]"
     />
     <label
       htmlFor="team-confirmed"

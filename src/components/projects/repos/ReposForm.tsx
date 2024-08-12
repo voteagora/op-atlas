@@ -274,7 +274,6 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="border-black border-2 rounded-[2px]"
                       />
                     </FormControl>
                     <FormLabel>
@@ -283,28 +282,20 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                   </FormItem>
                 )}
               />
-              <Callout
-                type={hasRepo ? "info" : "error"}
-                text={
-                  hasRepo
-                    ? "Projects must verify a code repo for Retro Funding Round 4"
-                    : "This project is not eligible for Retro Funding Round 4. However, it may be eligible for future rounds. You can continue to the next step."
-                }
-                linkHref="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
-                linkText="Learn more"
-              />
             </div>
 
             {hasRepo && (
               <>
                 <div className="flex flex-col gap-y-6">
-                  <h3>About open source licensing</h3>
-                  <p className="text-secondary-foreground">
+                  <h3 className="text-text-default">
+                    About open source licensing in Retro Funding rounds{" "}
+                  </h3>
+                  <p className="text-text-secondary">
                     Voters can add additional rewards for open source projects.
                     If your project is open source, then make sure you have a
-                    license in your Github repo. If you don&apos;t have a
-                    license in your repo, your project will not qualify as open
-                    source and won&apos;t be rewarded as such.
+                    license in your Github repo. If you don’t have a license in
+                    your repo, your project will not qualify as open source and
+                    won’t be rewarded as such.
                   </p>
                   <p className="text-secondary-foreground">
                     To get a license, visit the{" "}
@@ -314,20 +305,12 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                     >
                       Open Source Initiative
                     </ExternalLink>
-                    . For more information, view{" "}
-                    <ExternalLink
-                      href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
-                      className="text-foreground font-medium"
-                    >
-                      frequently asked questions
-                    </ExternalLink>
-                    .
                   </p>
                 </div>
 
                 <div className="flex flex-col">
-                  <h3>Repos</h3>
-                  <p className="mt-4 text-text-secondary">
+                  <h3 className="text-text-default">Repos</h3>
+                  <p className="mt-4 text-base font-normal text-text-secondary">
                     Enter your project’s GitHub repo URL and complete the steps
                     to verify ownership. If you have multiple repos, first
                     verify one then you can add more.

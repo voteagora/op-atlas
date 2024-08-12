@@ -31,7 +31,7 @@ const SOCIALS = [
   {
     name: "@optimism",
     icon: <Optimism />,
-    link: "https://optimism.optimism.io/",
+    link: "https://www.optimism.io/",
   },
 ] as const
 

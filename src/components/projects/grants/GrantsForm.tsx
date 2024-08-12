@@ -14,7 +14,8 @@ import { Callout } from "@/components/common/Callout"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Form } from "@/components/ui/form"
+import { Form, FormField } from "@/components/ui/form"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { setProjectFunding } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -30,6 +31,8 @@ import {
   FundingType,
   OptimismGrantSchema,
   OtherGrantSchema,
+  PRICING_MODEL_TYPES,
+  PRICINGMODELTYPES,
 } from "./schema"
 
 function toFormValues(
@@ -38,6 +41,7 @@ function toFormValues(
   const venture: z.infer<typeof FundingFormSchema>["venture"] = []
   const grants: z.infer<typeof FundingFormSchema>["grants"] = []
   const revenue: z.infer<typeof FundingFormSchema>["revenue"] = []
+  const pricingModel = ""
 
   project.funding.forEach((funding) => {
     if (funding.type === "venture") {
@@ -75,6 +79,7 @@ function toFormValues(
     venture,
     grants,
     revenue,
+    pricingModel: "",
   }
 }
 
@@ -296,44 +301,74 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     revenueFields.length > 0
 
   return (
-    <div className="flex flex-col gap-y-12 w-full">
-      <div className="flex flex-col gap-y-6">
-        <h2 className="text-2xl font-semibold">Grants, funding, and revenue</h2>
-        <p className="text-secondary-foreground">
-          List any grants, funding, or revenue your project has received since
-          January 2023—not including past rounds of Retro Funding. Learn more
-          about how badgeholders apply this information{" "}
-          <ExternalLink
-            className="font-medium"
-            href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
-          >
-            here
-          </ExternalLink>
-          .
-        </p>
-        <Callout
-          type="info"
-          text="Failure to report will result in disqualification from Retro Funding"
-        />
-        <div className="flex flex-col gap-y-1.5">
-          <p className="text-sm font-medium">
-            What kinds of funding have you received since Jan 2023?
-            <span className="text-destructive">*</span>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit(false))}
+        className="flex flex-col gap-y-12 w-full"
+      >
+        <div className="flex flex-col gap-y-6">
+          <h2 className="text-2xl font-semibold">
+            Grants, funding, and revenue
+          </h2>
+          <p className="text-secondary-foreground">
+            List any grants, funding, or revenue your project has received since
+            January 2023—not including past rounds of Retro Funding. Learn more
+            about how badgeholders apply this information{" "}
+            <ExternalLink
+              className="font-medium"
+              href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+            >
+              here
+            </ExternalLink>
+            .
           </p>
-          {FUNDING_TYPES.map((fundingType) => (
-            <FundingTypeOption
-              {...fundingType}
-              key={fundingType.type}
-              isSelected={hasFundingType(fundingType.type)}
-              onSelect={onToggleFundingType}
-            />
-          ))}
-        </div>
-      </div>
+          <Callout
+            type="info"
+            text="Failure to report will result in disqualification from Retro Funding"
+          />
+          <div className="flex flex-col gap-y-1.5">
+            <p className="text-sm font-medium">
+              What kinds of funding have you received since Jan 2023?
+              <span className="text-destructive">*</span>
+            </p>
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit(false))}
+            <FormField
+              control={form.control}
+              name="pricingModel"
+              render={({ field }) => (
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  {PRICING_MODEL_TYPES.map((PRICINGMODELTYPES) => (
+                    <PricingModelTypeOption
+                      {...PRICINGMODELTYPES}
+                      key={PRICINGMODELTYPES.type}
+                    />
+                  ))}
+                </RadioGroup>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-y-1.5">
+            <p className="text-sm font-medium">
+              Which best describes your project’s pricing model?
+              <span className="text-destructive">*</span>
+            </p>
+            {FUNDING_TYPES.map((fundingType) => (
+              <FundingTypeOption
+                {...fundingType}
+                key={fundingType.type}
+                isSelected={hasFundingType(fundingType.type)}
+                onSelect={onToggleFundingType}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* <Form {...form}> */}
+        <div
+          // onSubmit={form.handleSubmit(onSubmit(false))}
           className="flex flex-col gap-y-12"
         >
           {grantsFields.length > 0 ? (
@@ -421,9 +456,9 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
               Next
             </Button>
           </div>
-        </form>
-      </Form>
-    </div>
+        </div>
+      </form>
+    </Form>
   )
 }
 
@@ -447,8 +482,31 @@ const FundingTypeOption = ({
       <Checkbox
         checked={isSelected}
         onCheckedChange={() => onSelect(type)}
-        className="mt-0.5 rounded-none border-[1.5px]"
+        className="mt-0.5"
       />
+      <div className="flex flex-col">
+        <p className="text-sm font-medium">{label}</p>
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+      </div>
+    </div>
+  )
+}
+const PricingModelTypeOption = ({
+  className,
+  type,
+  label,
+  description,
+}: {
+  className?: string
+  type: PRICINGMODELTYPES
+  label: string
+  description?: string
+}) => {
+  return (
+    <div className={cn("group flex gap-x-2 p-4 border rounded-xl", className)}>
+      <RadioGroupItem value={type} id="r1" className="mt-0.5" />
       <div className="flex flex-col">
         <p className="text-sm font-medium">{label}</p>
         {description && (

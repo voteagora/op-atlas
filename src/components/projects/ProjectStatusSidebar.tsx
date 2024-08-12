@@ -15,6 +15,7 @@ import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
+import { Separator } from "../ui/separator"
 import { DeleteProjectDialog } from "./DeleteProjectDialog"
 
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
@@ -56,12 +57,12 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   const currentPage = pathname.split("/").slice(-1)[0]
 
   return (
-    <div className="sm:flex flex-col gap-6 items-start hidden">
+    <div className="sm:flex flex-col gap-4 items-start hidden">
       <Button
         isLoading={dashboardLoading}
         onClick={handleGoBack}
         variant="ghost"
-        className="text-sm font-medium !p-0"
+        className="text-sm font-medium !p-0 ml-2"
       >
         {project?.organization?.organization?.name ?? "Your projects"}
         <Image
@@ -73,21 +74,21 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         />
       </Button>
 
-      <h2 className="max-w-48 line-clamp-2 text-2xl font-semibold text-secondary-foreground">
+      <h2 className="max-w-48 line-clamp-2 text-2xl font-semibold text-secondary-foreground pl-2">
         {project?.name ?? "New project"}
       </h2>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 pl-2">
         <Progress value={progressPercent} className="w-[228px] h-2" />
         <p className="text-sm font-normal">{progressPercent}% complete</p>
       </div>
 
-      <div className="gap-2">
+      <div className="w-full gap-2">
         {Object.values(ProjectSection).map((option, index) => (
           <div
             key={index}
-            className="flex justify-start items-center flex-row gap-2 py-2"
+            className="flex justify-start items-center flex-row gap-2 px-2 py-1.5 rounded-md hover:bg-tertiary w-full"
           >
-            <div className="w-4 flex justify-center">
+            <div className="w-4 flex justify-center ">
               {completedSections.includes(option) ? (
                 <Image
                   src="/assets/icons/tickIcon.svg"
@@ -120,19 +121,22 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
           </div>
         ))}
       </div>
+      <div className="w-full flex flex-col gap-2 pl-2">
+        <Separator />
+        {project && (
+          <div className="w-full px-2 py-1.5 text-sm font-medium text-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:font-normal hover:text-muted-foreground">
+            <Link href={`/projects/${project.id}/rewards`}>Rewards</Link>
+            {/* {unclaimedRewards(project) && (
+              <div className="h-[6.7px] w-[6.7px] rounded-full bg-destructive" />
+            )} */}
+          </div>
+        )}
+        <Separator />
+      </div>
 
-      {project && (
-        <div className="border-t border-b border-border w-full py-4 text-sm font-medium flex items-center gap-2">
-          <Link href={`/projects/${project.id}/rewards`}>Rewards</Link>
-          {unclaimedRewards(project) && (
-            <div className="h-[6.7px] w-[6.7px] rounded-full bg-destructive" />
-          )}
-        </div>
-      )}
-
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col w-full ml-2">
         <ExternalLink
-          className="text-sm text-muted-foreground font-normal decoration-muted-foreground"
+          className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary"
           href="https://discord.com/invite/optimism"
         >
           Get help
@@ -140,8 +144,8 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         {project && isAdmin && (
           <Button
             type="button"
-            variant="link"
-            className="p-0 text-sm text-muted-foreground font-normal decoration-muted-foreground"
+            variant="ghost"
+            className=" justify-start px-2 py-1.5 font-normal text-sm text-secondary-foreground w-full rounded-md hover:opacity-100 hover:bg-tertiary"
             style={{ height: "unset" }}
             onClick={() => setDeletingProject(true)}
           >

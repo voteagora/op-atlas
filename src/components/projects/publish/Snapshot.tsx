@@ -8,23 +8,22 @@ import { EAS_URL_PREFIX } from "@/lib/utils"
 
 export const Snapshot = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
   return (
-    <div className="flex items-center gap-2 border rounded-lg py-3 px-4">
+    <div className="flex items-center gap-2 border rounded-lg  py-2 px-3 h-10">
       <Image
         alt="Checkmark"
         src="/assets/icons/circle-check-green.svg"
         height={20}
         width={20}
       />
-      <p className="text-sm font-medium">
+      <p className="text-sm font-normal text-foreground">
         {format(snapshot.createdAt, "yyyy-MM-dd, HH:mm a")}
       </p>
 
       <ExternalLink
         href={`${EAS_URL_PREFIX}${snapshot.attestationId}`}
-        className="ml-auto text-sm font-medium flex items-center shrink-0"
+        className="ml-auto text-sm font-medium  shrink-0 text-text"
       >
-        View
-        <ArrowUpRight size={16} className="ml-2.5" />
+        View attestation
       </ExternalLink>
     </div>
   )

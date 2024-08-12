@@ -196,7 +196,6 @@ const ApplicationFormTabs = ({
                     <Checkbox
                       checked={agreedTerms[idx]}
                       onCheckedChange={() => toggleAgreedTerm(idx)}
-                      className="mt-1 border-2 rounded-[2px]"
                     />
                     <p className="">{term}</p>
                   </div>
@@ -205,7 +204,6 @@ const ApplicationFormTabs = ({
                   <Checkbox
                     checked={agreedTerms[TERMS.length]}
                     onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
-                    className="mt-1 border-2 rounded-[2px]"
                   />
                   <p className="">
                     I agree to the{" "}

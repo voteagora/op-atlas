@@ -58,7 +58,6 @@ const ProjectImpactForm = ({
                     name={field.name}
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="border-2 rounded-[2px]"
                   />
                 )}
               />
@@ -266,11 +265,7 @@ const CategoryItem = ({
 }) => {
   return (
     <div className="p-6 flex items-center gap-4 border border-input rounded-xl">
-      <Checkbox
-        checked={checked}
-        onCheckedChange={onCheckboxChange}
-        className="mt-1 border-2 rounded-[2px]"
-      />
+      <Checkbox checked={checked} onCheckedChange={onCheckboxChange} />
       <div>
         <h6 className="text-sm font-medium">{title}</h6>
         <p className="text-sm text-secondary-foreground">{description}</p>

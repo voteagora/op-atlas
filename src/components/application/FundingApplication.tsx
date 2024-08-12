@@ -272,7 +272,7 @@ export const FundingApplication = ({
                 disabled
                 checked={agreedTerms[idx]}
                 onCheckedChange={() => toggleAgreedTerm(idx)}
-                className="mt-1 border-2 rounded-[2px]"
+                className="mt-1"
               />
               <p className="">{term}</p>
             </div>
@@ -282,7 +282,7 @@ export const FundingApplication = ({
               disabled
               checked={agreedTerms[TERMS.length]}
               onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
-              className="mt-1 border-2 rounded-[2px]"
+              className="mt-1"
             />
             <p className="">
               I agree to the{" "}

@@ -1,6 +1,27 @@
 import { z } from "zod"
 
 export type FundingType = "venture" | "revenue" | "grants" | "none"
+export type PRICINGMODELTYPES = "free" | "freemium" | "pay_to_use"
+
+export const PRICING_MODEL_TYPES = [
+  {
+    type: "free",
+    label: "Free",
+    description:
+      "The product or service is completely free to use without any charges",
+  },
+  {
+    type: "freemium",
+    label: "Freemium",
+    description:
+      "Part of the product or service is free to use while some features or services require payment",
+  },
+  {
+    type: "pay_to_use",
+    label: "Pay to use",
+    description: "Users have to pay to access the product or service",
+  },
+] as const
 
 export const FUNDING_TYPES = [
   {
@@ -69,4 +90,5 @@ export const FundingFormSchema = z.object({
   venture: z.array(VentureSchema),
   grants: GrantsSchema,
   revenue: z.array(RevenueSchema),
+  pricingModel: z.string(),
 })
