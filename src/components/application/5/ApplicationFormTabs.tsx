@@ -187,7 +187,7 @@ const ApplicationFormTabs = ({
               <p className="my-2">
                 Optimism will issue an onchain attestation on your behalf when
                 you submit this application. You can make edits and resubmit
-                this application until the deadline (Aug 1 at 19:00 UTC).{" "}
+                this application until the deadline (Sep 5 at 19:00 UTC).{" "}
               </p>
 
               <div className="flex flex-col gap-y-4 ml-px">
@@ -197,7 +197,7 @@ const ApplicationFormTabs = ({
                       checked={agreedTerms[idx]}
                       onCheckedChange={() => toggleAgreedTerm(idx)}
                     />
-                    <p className="">{term}</p>
+                    <p className="text-secondary-foreground">{term}</p>
                   </div>
                 ))}
                 <div className="flex gap-x-4">

@@ -220,10 +220,7 @@ export function ContractForm({
                     <span className="ml-0.5 text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="0xA2C6277931328e2028C3DB10625D76de19151e92"
-                    />
+                    <Input {...field} placeholder="0x…" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

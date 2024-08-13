@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react"
 
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 
+import { Account } from "../common/Account"
 import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
@@ -34,6 +35,11 @@ export function Rounds() {
           <p className="mt-2 text-muted-foreground">
             Build together, benefit together.
           </p>
+          {!data?.user && (
+            <div className="hidden sm:flex items-center mt-6">
+              <Account />
+            </div>
+          )}
         </div>
 
         <div className="mt-10 flex flex-1 gap-x-6">

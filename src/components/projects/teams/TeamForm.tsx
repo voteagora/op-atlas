@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { sortBy } from "ramda"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 import { Callout } from "@/components/common/Callout"
 import { Button } from "@/components/ui/button"
@@ -44,6 +45,7 @@ export default function AddTeamDetailsForm({
   const isAdmin = useIsAdmin(project)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isShowingRemove, setIsShowingRemove] = useState<User | null>(null)
 
@@ -70,13 +72,20 @@ export default function AddTeamDetailsForm({
     setIsShowingRemove(null)
   }
 
-  const handleNextClicked = async () => {
+  const handleNextClicked = async (isSave?: boolean) => {
     try {
-      setIsSubmitting(true)
-      await updateProjectDetails(project.id, { addedTeamMembers: true })
-      router.push(`/projects/${project.id}/repos`)
+      isSave ? setIsSaving(true) : setIsSubmitting(true)
+
+      await updateProjectDetails(project.id, {
+        addedTeamMembers: isTeamConfirmed,
+      })
+      toast.success("Project saved")
+
+      !isSave && router.push(`/projects/${project.id}/repos`)
     } catch (error) {
       console.error("Error updating project", error)
+    } finally {
+      setIsSaving(false)
       setIsSubmitting(false)
     }
   }
@@ -135,15 +144,27 @@ export default function AddTeamDetailsForm({
           isTeamConfirmed={isTeamConfirmed}
         />
 
-        <Button
-          isLoading={isSubmitting}
-          onClick={handleNextClicked}
-          disabled={!isTeamConfirmed || isSubmitting}
-          variant="destructive"
-          className="w-fit"
-        >
-          Next
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            isLoading={isSaving}
+            onClick={() => handleNextClicked(true)}
+            disabled={isSaving}
+            type="button"
+            variant="destructive"
+            className="self-start"
+          >
+            Save
+          </Button>
+          <Button
+            isLoading={isSubmitting}
+            onClick={() => handleNextClicked()}
+            disabled={isSubmitting}
+            variant="secondary"
+            className="w-fit"
+          >
+            Next
+          </Button>
+        </div>
       </div>
 
       <AddTeamMemberDialog

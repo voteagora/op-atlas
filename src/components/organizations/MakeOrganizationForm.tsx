@@ -357,7 +357,7 @@ export default function MakeOrganizationForm({
               className="w-fit"
               disabled={!organization ? false : !!!isAdmin}
             >
-              <Plus size={16} className="mr-2.5" /> Add team members
+              <Plus size={16} className="mr-2.5" /> Add contributors
             </Button>
           </div>
           <FormField

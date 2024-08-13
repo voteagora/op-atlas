@@ -485,9 +485,9 @@ const FundingTypeOption = ({
         className="mt-0.5"
       />
       <div className="flex flex-col">
-        <p className="text-sm font-medium">{label}</p>
+        <p className="text-sm font-medium text-secondary-foreground">{label}</p>
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-sm text-secondary-foreground">{description}</p>
         )}
       </div>
     </div>
@@ -508,7 +508,7 @@ const PricingModelTypeOption = ({
     <div className={cn("group flex gap-x-2 p-4 border rounded-xl", className)}>
       <RadioGroupItem value={type} id="r1" className="mt-0.5" />
       <div className="flex flex-col">
-        <p className="text-sm font-medium">{label}</p>
+        <p className="text-sm font-medium text-secondary-foreground">{label}</p>
         {description && (
           <p className="text-sm text-muted-foreground">{description}</p>
         )}

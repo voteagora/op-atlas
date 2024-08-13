@@ -137,10 +137,10 @@ const AddTeamMemberDialog = ({
             </Avatar>
           )}
           <DialogTitle className="text-center text-lg font-semibold">
-            Add team members
+            Add contributors
           </DialogTitle>
           <DialogDescription className="text-center text-base text-secondary-foreground font-normal mt-1">
-            You can add team members by their Farcaster username. Team members
+            You can add contributors by their Farcaster username. Team members
             must have an Optimist profile.
           </DialogDescription>
         </DialogHeader>

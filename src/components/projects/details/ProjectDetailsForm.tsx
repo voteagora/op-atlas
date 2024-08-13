@@ -302,13 +302,33 @@ export default function ProjectDetailsForm({
       >
         <div className="flex flex-col gap-6">
           <h2>Project details</h2>
+
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel className="text-foreground">
+                  Name<span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
+                <Input
+                  type=""
+                  id="name"
+                  placeholder="Add a project name"
+                  className="line-clamp-2"
+                  {...field}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <DropdownMenu>
             <div className="w-full">
               <FormLabel className="text-foreground">
                 Organization<span className="ml-0.5 text-destructive">*</span>
               </FormLabel>
               <DropdownMenuTrigger asChild>
-                <div className="px-3 py-2.5 flex  text-foreground items-center rounded-lg border border-input mt-2">
+                <div className="h-10 py-2.5 px-3 flex  text-foreground items-center rounded-lg border border-input mt-2">
                   {selectedOrganization?.avatarUrl && (
                     <Avatar className="w-5 h-5 mr-2">
                       <AvatarImage
@@ -320,7 +340,9 @@ export default function ProjectDetailsForm({
                       </AvatarFallback>
                     </Avatar>
                   )}
-                  <p>{selectedOrganization?.name ?? "No Organization"}</p>
+                  <p className="text-sm text-foreground">
+                    {selectedOrganization?.name ?? "No Organization"}
+                  </p>
                   <Image
                     className="ml-auto"
                     src="/assets/icons/arrowDownIcon.svg"
@@ -333,7 +355,7 @@ export default function ProjectDetailsForm({
               <DropdownMenuContent className="!w-[750px]">
                 {organizations?.map((organization) => (
                   <DropdownMenuCheckboxItem
-                    className="text-sm font-normal w-full"
+                    className="text-sm font-normal text-secondary-foreground w-full"
                     checked={selectedOrganization?.id === organization.id}
                     key={organization.id}
                     onCheckedChange={() => handleSelect(organization)}
@@ -350,13 +372,14 @@ export default function ProjectDetailsForm({
                 ))}
 
                 <DropdownMenuCheckboxItem
+                  className="text-sm font-normal text-secondary-foreground w-full"
                   checked={selectedOrganization === null}
                   onCheckedChange={() => handleSelect(null)}
                 >
                   No organization
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
                   <Link href="/profile/organizations/new">
                     Make an organization
                   </Link>
@@ -364,26 +387,6 @@ export default function ProjectDetailsForm({
               </DropdownMenuContent>
             </div>
           </DropdownMenu>
-
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Name<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
-                <Input
-                  type=""
-                  id="name"
-                  placeholder="Add a project name"
-                  className="line-clamp-2 text-muted-foreground"
-                  {...field}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="description"
@@ -399,7 +402,7 @@ export default function ProjectDetailsForm({
                 <Textarea
                   id="description"
                   placeholder="Add a description"
-                  className="resize-none text-muted-foreground"
+                  className="resize-none"
                   {...field}
                 />
                 <FormMessage />
@@ -427,7 +430,7 @@ export default function ProjectDetailsForm({
                   setAvatarSrc(URL.createObjectURL(file))
                 }}
               >
-                <div className="border border-solid rounded-xl overflow-hidden h-32 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
+                <div className="border border-solid rounded-md overflow-hidden h-32 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -457,7 +460,7 @@ export default function ProjectDetailsForm({
                   setBannerSrc(URL.createObjectURL(file))
                 }}
               >
-                <div className="border border-solid h-40 overflow-hidden bg-secondary rounded-xl flex flex-col justify-center items-center gap-2 select-none">
+                <div className="border border-solid h-40 overflow-hidden bg-secondary rounded-md flex flex-col justify-center items-center gap-2 select-none">
                   {bannerUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -551,11 +554,7 @@ export default function ProjectDetailsForm({
                 render={({ field: innerField }) => (
                   <FormItem>
                     <FormControl>
-                      <Input
-                        {...innerField}
-                        placeholder="Add a link"
-                        className="text-muted-foreground"
-                      />
+                      <Input {...innerField} placeholder="Add a link" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -584,11 +583,7 @@ export default function ProjectDetailsForm({
                 render={({ field: innerField }) => (
                   <FormItem>
                     <FormControl>
-                      <Input
-                        {...innerField}
-                        placeholder="Add a link"
-                        className="text-muted-foreground"
-                      />
+                      <Input {...innerField} placeholder="Add a link" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -612,11 +607,7 @@ export default function ProjectDetailsForm({
               <FormItem className="flex flex-col gap-1.5">
                 <FormLabel>Twitter</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Add a link"
-                    className="text-muted-foreground"
-                  />
+                  <Input {...field} placeholder="Add a link" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -630,11 +621,7 @@ export default function ProjectDetailsForm({
               <FormItem className="flex flex-col gap-1.5">
                 <FormLabel>Mirror</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Add a link"
-                    className="text-muted-foreground"
-                  />
+                  <Input {...field} placeholder="Add a link" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

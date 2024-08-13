@@ -24,7 +24,7 @@ export const CATEGORIES = [
   {
     id: "Ethereum Core Contributions",
     title: "Ethereum Core Contributions",
-    icon: "/assets/icons/shapes.svg",
+    icon: "/assets/icons/shapes.png",
     description:
       "Ethereum Core Contributions are infrastructure which supports, or is a dependency, of the OP Stack.",
     examples:
@@ -49,7 +49,7 @@ export const CATEGORIES = [
   {
     id: "OP Stack Research & Development",
     title: "OP Stack Research & Development",
-    icon: "/assets/icons/microscope.svg",
+    icon: "/assets/icons/microscope.png",
     description:
       "Direct research & development contributions to the OP Stack, and contributions that support protocol upgrades.",
     examples:
@@ -78,7 +78,7 @@ export const CATEGORIES = [
   {
     id: "OP Stack Tooling",
     title: "OP Stack Tooling",
-    icon: "/assets/icons/tools.svg",
+    icon: "/assets/icons/tools.png",
     description:
       "Efforts that improve the usability and accessibility of the OP Stack through tooling enhancements.",
     examples:
@@ -186,7 +186,7 @@ const ApplicationDetails = () => {
       <div className="flex flex-col gap-y-6">
         <h3>Timeline</h3>
         <p className="text-secondary-foreground">
-          The deadline for applications is Aug 1 at 19:00 UTC. After you apply,
+          The deadline for applications is Sep 5 at 19:00 UTC. After you apply,
           you can still make edits to your projects until the deadline. You do
           not need to resubmit your application if you make edits, but you do
           need to republish your metadata onchain.
@@ -198,7 +198,7 @@ const ApplicationDetails = () => {
         <p className="text-secondary-foreground">
           The round will reward impact which has been generated between October
           2023 - July 2024. Impact will be rewarded within the following three
-          CATEGORIES: Ethereum Core Contributions, OP Stack Research &
+          categories: Ethereum Core Contributions, OP Stack Research &
           Development, and OP Stack Tooling.
         </p>
         <p>
@@ -267,11 +267,17 @@ const ContributionsSection = ({
     <header className="flex items-center gap-x-6">
       <div
         className={cn(
-          "min-w-[120px] h-[120px] flex justify-center items-center rounded-lg",
+          "min-w-[120px] h-[120px] flex justify-center items-center rounded-2xl",
           className,
         )}
       >
-        <Image src={icon} alt={title} width={30} height={35} />
+        <Image
+          src={icon}
+          alt={title}
+          width={120}
+          height={120}
+          className="rounded-2xl"
+        />
       </div>
       <div>
         <p className="font-semibold text-foreground">Category {category}</p>

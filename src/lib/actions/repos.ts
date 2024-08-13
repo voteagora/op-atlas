@@ -71,6 +71,8 @@ export const verifyGithubRepo = async (
   projectId: string,
   owner: string,
   slug: string,
+  name?: string,
+  description?: string,
 ) => {
   const session = await auth()
 
@@ -111,6 +113,8 @@ export const verifyGithubRepo = async (
         url: `https://github.com/${owner}/${slug}`,
         verified: true,
         openSource: !!isOpenSource,
+        name,
+        description,
       },
     })
 
@@ -143,7 +147,7 @@ export const verifyGithubRepo = async (
 export const updateGithubRepo = async (
   projectId: string,
   url: string,
-  updates: { containsContracts: boolean },
+  updates: { containsContracts: boolean; name?: string; description?: string },
 ) => {
   const session = await auth()
 
@@ -176,6 +180,56 @@ export const updateGithubRepo = async (
     console.error("Error updating repo", error)
     return {
       error: "Error updating repo",
+    }
+  }
+}
+
+// Update multiple repo update
+export const updateGithubRepos = async (
+  projectId: string,
+  repos: {
+    url: string
+    updates: {
+      containsContracts?: boolean
+      name?: string
+      description?: string
+    }
+  }[],
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  try {
+    const updatedRepos = await Promise.all(
+      repos.map((repo) =>
+        updateProjectRepository({
+          projectId,
+          url: repo.url,
+          updates: repo.updates,
+        }),
+      ),
+    )
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
+
+    return {
+      error: null,
+      repos: updatedRepos,
+    }
+  } catch (error) {
+    console.error("Error updating repos", error)
+    return {
+      error: "Error updating repos",
     }
   }
 }

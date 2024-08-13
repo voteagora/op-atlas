@@ -226,7 +226,7 @@ const Dashboard = ({
           <div className="flex flex-col">
             <h3>Your Retro Funding Round 4 rewards</h3>
             <p className="text-base font-normal text-secondary-foreground mb-6">
-              Claim by Aug 1, 2025
+              Claim by Sep 5, 2025
             </p>
             <UnclaimedRewardsCard projects={projects} />
           </div>

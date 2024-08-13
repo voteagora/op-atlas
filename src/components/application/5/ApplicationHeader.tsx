@@ -73,7 +73,7 @@ const ApplicationHeader = ({
         </div>
       ) : (
         <p className="text-secondary-foreground">
-          Submit this application by Aug 1 at 19:00 UTC
+          Submit this application by Sep 5 at 19:00 UTC
         </p>
       )}
     </div>

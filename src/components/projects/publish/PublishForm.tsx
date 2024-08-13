@@ -56,7 +56,7 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
     setIsPublishing(true)
 
     toast.promise(createProjectSnapshot(project.id), {
-      loading: "Publishing snapshot onchain...",
+      loading: "Publishing metadata onchain...",
       success: ({ snapshot }) => {
         setIsPublishing(false)
         setShowMetadataPublishedDialogue(true)

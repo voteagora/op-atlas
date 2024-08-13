@@ -66,7 +66,7 @@ function MetadataPublishedConfirmationDialog({
               />
               <div className="ml-4 mr-5 flex-1">
                 <p className="text-base font-semibold">Round 5: OP Stack</p>
-                <div className="text-base font-normal">Apply by Aug 1</div>
+                <div className="text-base font-normal">Apply by Sep 5</div>
               </div>
               <ArrowRight size={20} />
             </Link>

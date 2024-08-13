@@ -4,6 +4,7 @@ import React, { useMemo } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 
+import { Badge } from "@/components/common/Badge"
 import { Callout } from "@/components/common/Callout"
 import ExternalLink from "@/components/ExternalLink"
 import {
@@ -45,7 +46,12 @@ const ProjectImpactForm = ({
 
   return (
     <div className="p-8 border border-input rounded-xl">
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion
+        type="single"
+        collapsible
+        disabled={!isEligible}
+        className="w-full"
+      >
         <AccordionItem value="item-1">
           <AccordionTrigger className="!p-0">
             <div className="flex gap-4 items-center w-full">
@@ -91,6 +97,10 @@ const ProjectImpactForm = ({
                     Submitted
                   </p>
                 </div>
+              )}
+
+              {isIneligible && hasApplied === -1 && (
+                <Badge size="lg" text="Not eligible" className="ml-auto" />
               )}
             </div>
           </AccordionTrigger>
@@ -272,11 +282,17 @@ const CategoryItem = ({
       </div>
       <div
         className={cn(
-          "min-w-16 h-16 flex justify-center items-center rounded-lg",
+          "min-w-[64px] h-[64px] flex justify-center items-center rounded-2xl",
           className,
         )}
       >
-        <Image src={icon} alt={title} width={16} height={18} />
+        <Image
+          src={icon}
+          alt={title}
+          width={64}
+          height={64}
+          className="rounded-2xl"
+        />
       </div>
     </div>
   )

@@ -64,10 +64,10 @@ export const TeamMemberCard = memo(function TeamMemberCard({
           >
             <Button
               variant="ghost"
-              className="text-sm font-normal text-secondary-foreground focus-visible:ring-0"
+              className="text-sm font-normal text-secondary-foreground focus-visible:ring-0 p-0"
             >
               {role === "admin" ? "Admin" : "Contributor"}
-              {isUserAdmin && (
+              {isUserAdmin && !isCurrentUser && (
                 <Image
                   src="/assets/icons/arrowDownIcon.svg"
                   height={8}
@@ -78,7 +78,7 @@ export const TeamMemberCard = memo(function TeamMemberCard({
               )}
             </Button>
           </DropdownMenuTrigger>
-          {isUserAdmin && (
+          {isUserAdmin && !isCurrentUser && (
             <DropdownMenuContent align="end">
               <DropdownMenuCheckboxItem
                 onClick={onToggleAdmin}

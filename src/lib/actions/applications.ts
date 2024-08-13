@@ -104,6 +104,13 @@ export const submitApplications = async (
     }
   }
 
+  if (!session.user.email) {
+    return {
+      applications: [],
+      error: "You must have an email to apply for application",
+    }
+  }
+
   if (APPLICATIONS_CLOSED) {
     throw new Error("Applications are closed")
   }

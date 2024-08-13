@@ -4,12 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { partition } from "ramda"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { Callout } from "@/components/common/Callout"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -25,6 +24,7 @@ import { updateProjectDetails } from "@/lib/actions/projects"
 import {
   removeGithubRepo,
   setProjectLinks,
+  updateGithubRepos,
   updatePackageRepos,
 } from "@/lib/actions/repos"
 import { ProjectWithDetails } from "@/lib/types"
@@ -58,12 +58,23 @@ function toFormValues(project: ProjectWithDetails) {
     githubRepos:
       githubs.length === 0
         ? [{ url: "", name: "", description: "", verified: false }]
-        : githubs.map(({ url, verified, openSource, containsContracts }) => ({
-            url,
-            verified,
-            openSource,
-            containsContracts,
-          })),
+        : githubs.map(
+            ({
+              url,
+              verified,
+              openSource,
+              containsContracts,
+              name,
+              description,
+            }) => ({
+              url,
+              verified,
+              openSource,
+              containsContracts,
+              name: name ?? "",
+              description: description ?? "",
+            }),
+          ),
   }
 }
 
@@ -223,9 +234,18 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         }))
         .filter((field) => z.string().url().safeParse(field.url).success)
 
+      const projectRepos = values.githubRepos.map((field) => ({
+        url: field.url,
+        updates: {
+          name: field.name,
+          description: field.description,
+        },
+      }))
+
       try {
-        await Promise.all([
+        await Promise.allSettled([
           updatePackageRepos(project.id, packageUrls),
+          updateGithubRepos(project.id, projectRepos),
           setProjectLinks(project.id, links),
           updateProjectDetails(
             project.id,
@@ -247,6 +267,17 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     },
     [project.id, project.organization?.organizationId, router],
   )
+
+  const links = form.watch("links")
+  const isValidToAddLink = useMemo(() => {
+    return (
+      links[links.length - 1].url !== "" &&
+      z
+        .string()
+        .url()
+        .safeParse(links[links.length - 1].url).success
+    )
+  }, [links])
 
   return (
     <>
@@ -329,6 +360,11 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                   <Button
                     type="button"
                     variant="secondary"
+                    disabled={
+                      !form
+                        .getValues("githubRepos")
+                        .every((repo) => repo.verified)
+                    }
                     onClick={onAddGithubField}
                     className="mt-4 w-fit"
                   >
@@ -360,31 +396,31 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                     </Button>
                   </div>
                 </div>
-
-                <div className="flex flex-col">
-                  <h3>Links</h3>
-                  <p className="mt-4 text-text-secondary">
-                    Link to anything relevant to this project’s impact. For
-                    example, a data analysis project might link to a metrics
-                    dashboard.
-                  </p>
-                  <div className="mt-6 flex flex-col gap-6">
-                    {linkFields.map((field, index) => (
-                      <LinkForm key={field.id} form={form} index={index} />
-                    ))}
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={onAddLinkField}
-                    className="mt-4 w-fit"
-                  >
-                    <Plus size={16} className="mr-2.5" /> Add another link
-                  </Button>
-                </div>
               </>
             )}
+
+            <div className="flex flex-col">
+              <h3>Links</h3>
+              <p className="mt-4 text-text-secondary">
+                Link to anything relevant to this project’s impact. For example,
+                a data analysis project might link to a metrics dashboard.
+              </p>
+              <div className="mt-6 flex flex-col gap-6">
+                {linkFields.map((field, index) => (
+                  <LinkForm key={field.id} form={form} index={index} />
+                ))}
+              </div>
+
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!isValidToAddLink}
+                onClick={onAddLinkField}
+                className="mt-4 w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add another link
+              </Button>
+            </div>
 
             <div className="flex gap-2">
               <Button
