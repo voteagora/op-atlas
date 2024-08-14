@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 
 import { Account } from "../common/Account"
+import { FeedbackButton } from "../common/FeedbackButton"
 import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
@@ -81,6 +82,11 @@ export function Rounds() {
           <Sidebar className="ml-auto w-[260px] pt-12" />
         </div>
       </div>
+      {data?.user && (
+        <div className="fixed bottom-4 left-4">
+          <FeedbackButton />
+        </div>
+      )}
     </main>
   )
 }

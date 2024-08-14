@@ -22,6 +22,11 @@ import {
   FormLabel,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { removeContract, updateProjectOSOStatus } from "@/lib/actions/contracts"
 import { updateProjectDetails } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
@@ -241,16 +246,27 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                 removeVerified={() => onRemoveContract(index)}
               />
             ))}
-            {canAddContract && (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => addContractsFields({ ...EMPTY_CONTRACT })}
-                className="w-fit"
-              >
-                <Plus size={16} className="mr-2.5" /> Add another contract
-              </Button>
-            )}
+
+            <Tooltip>
+              <TooltipTrigger type="button" className="w-fit">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={!canAddContract}
+                  onClick={() => addContractsFields({ ...EMPTY_CONTRACT })}
+                  className="w-fit"
+                >
+                  <Plus size={16} className="mr-2.5" /> Add another contract
+                </Button>
+              </TooltipTrigger>
+              {!canAddContract && (
+                <TooltipContent>
+                  <p className="text-sm">
+                    First add one, then you can add more
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           </div>
 
           <div className="flex flex-col gap-6">

@@ -1,6 +1,9 @@
+import { useSession } from "next-auth/react"
+
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
+import ApplicationDetails from "./ApplicationDetails"
 import ApplicationFormTabs from "./ApplicationFormTabs"
 import ApplicationHeader from "./ApplicationHeader"
 
@@ -11,10 +14,11 @@ export const FundingApplication = ({
   onApplied,
 }: {
   className?: string
-  projects: ProjectWithDetails[]
+  projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   onApplied: (application: ApplicationWithDetails) => void
 }) => {
+  const { data } = useSession()
   const hasApplied = applications.length > 0
 
   return (
@@ -28,11 +32,16 @@ export const FundingApplication = ({
       <ApplicationHeader hasApplied={hasApplied} applications={applications} />
 
       {/* Tabs */}
-      <ApplicationFormTabs
-        onApplied={onApplied}
-        applications={applications}
-        projects={projects}
-      />
+
+      {data?.user ? (
+        <ApplicationFormTabs
+          onApplied={onApplied}
+          applications={applications}
+          projects={projects}
+        />
+      ) : (
+        <ApplicationDetails />
+      )}
     </div>
   )
 }

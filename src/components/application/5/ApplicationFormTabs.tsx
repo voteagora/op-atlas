@@ -48,7 +48,7 @@ const ApplicationFormTabs = ({
   applications,
   onApplied,
 }: {
-  projects: ProjectWithDetails[]
+  projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   onApplied: (application: ApplicationWithDetails) => void
 }) => {
@@ -63,7 +63,7 @@ const ApplicationFormTabs = ({
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
-      projects: projects.map((project) => {
+      projects: projects?.map((project) => {
         const application = applications[0]?.projects.find(
           (p) => p.projectId === project.id,
         )

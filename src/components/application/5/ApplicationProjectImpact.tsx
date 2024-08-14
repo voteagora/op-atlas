@@ -16,7 +16,7 @@ const ApplicationProjectImpactForm = ({
   form,
   onSave,
 }: {
-  projects: ProjectWithDetails[]
+  projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   onSave: () => void
@@ -46,7 +46,7 @@ const ApplicationProjectImpactForm = ({
         </p>
       </div>
       <div className="flex flex-col gap-y-4">
-        {!!!projects.length && (
+        {!!!projects?.length && (
           <Callout
             type="error"
             text="You haven’t added or joined any projects"
@@ -61,7 +61,7 @@ const ApplicationProjectImpactForm = ({
             key={field.id}
             index={index}
             project={
-              projects.find((project) => project.id === field.projectId)!
+              projects?.find((project) => project.id === field.projectId)!
             }
             applications={applications}
             form={form}

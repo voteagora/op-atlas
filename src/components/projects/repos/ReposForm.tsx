@@ -20,6 +20,11 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { updateProjectDetails } from "@/lib/actions/projects"
 import {
   removeGithubRepo,
@@ -357,19 +362,32 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                       />
                     ))}
                   </div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={
-                      !form
-                        .getValues("githubRepos")
-                        .every((repo) => repo.verified)
-                    }
-                    onClick={onAddGithubField}
-                    className="mt-4 w-fit"
-                  >
-                    <Plus size={16} className="mr-2.5" /> Add another repo
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger type="button" className="w-fit">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        disabled={
+                          !form
+                            .getValues("githubRepos")
+                            .every((repo) => repo.verified)
+                        }
+                        onClick={onAddGithubField}
+                        className="mt-4 w-fit"
+                      >
+                        <Plus size={16} className="mr-2.5" /> Add another repo
+                      </Button>
+                    </TooltipTrigger>
+                    {!form
+                      .getValues("githubRepos")
+                      .every((repo) => repo.verified) && (
+                      <TooltipContent>
+                        <p className="text-sm">
+                          First add one, then you can add more
+                        </p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
                 </div>
 
                 <div className="flex flex-col">
@@ -411,15 +429,26 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                 ))}
               </div>
 
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={!isValidToAddLink}
-                onClick={onAddLinkField}
-                className="mt-4 w-fit"
-              >
-                <Plus size={16} className="mr-2.5" /> Add another link
-              </Button>
+              <Tooltip>
+                <TooltipTrigger type="button" className="w-fit">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={!isValidToAddLink}
+                    onClick={onAddLinkField}
+                    className="mt-4 w-fit"
+                  >
+                    <Plus size={16} className="mr-2.5" /> Add another link
+                  </Button>
+                </TooltipTrigger>
+                {!isValidToAddLink && (
+                  <TooltipContent>
+                    <p className="text-sm">
+                      First add one, then you can add more
+                    </p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
             </div>
 
             <div className="flex gap-2">

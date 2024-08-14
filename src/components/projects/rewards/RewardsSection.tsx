@@ -19,7 +19,7 @@ export function RewardsSection({ project }: { project: ProjectWithDetails }) {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-6">
-        <h3>Project rewards</h3>
+        <h2>Project rewards</h2>
         <div className="text-text-secondary">
           If this project receives any Retro Funding, we&apos;ll record it here.
         </div>

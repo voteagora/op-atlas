@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
+import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
 import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
@@ -34,6 +35,9 @@ export default async function Page() {
         organizations={organizations}
         className="w-full max-w-4xl"
       />
+      <div className="fixed bottom-4 left-4">
+        <FeedbackButton />
+      </div>
     </main>
   )
 }

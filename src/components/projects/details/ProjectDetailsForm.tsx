@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useOnLeavePageConfirmation } from "@/hooks/useOnLeavePageConfirmation"
 import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"

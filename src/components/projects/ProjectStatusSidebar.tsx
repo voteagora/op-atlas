@@ -12,7 +12,7 @@ import { deleteUserProject } from "@/lib/actions/projects"
 import { useIsAdmin } from "@/lib/hooks"
 import { unclaimedRewards } from "@/lib/rewards"
 import { ProjectWithDetails } from "@/lib/types"
-import { getProjectStatus, ProjectSection } from "@/lib/utils"
+import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
@@ -86,52 +86,71 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         {Object.values(ProjectSection).map((option, index) => (
           <div
             key={index}
-            className="flex justify-start items-center flex-row gap-2 px-2 py-1.5 rounded-md hover:bg-tertiary w-full"
+            className="text-sm text-secondary-foreground flex-row gap-2 px-2 py-1.5 rounded-md hover:bg-tertiary w-full"
           >
-            <div className="w-4 flex justify-center ">
-              {completedSections.includes(option) ? (
-                <Image
-                  src="/assets/icons/tickIcon.svg"
-                  width={16}
-                  height={16}
-                  alt="Check"
-                />
-              ) : (
-                <Image
-                  src="/assets/icons/circle-fill.svg"
-                  width={6.67}
-                  height={6.67}
-                  alt="Dot"
-                />
-              )}
-            </div>
-
             {project ? (
               <Link
                 href={`/projects/${project.id}/${option.toLowerCase()}`}
-                className={
-                  currentPage === option.toLowerCase() ? "font-medium" : ""
-                }
+                className={cn(
+                  "flex items-center justify-start gap-2",
+                  currentPage === option.toLowerCase()
+                    ? "font-medium text-foreground"
+                    : "",
+                )}
               >
+                <div className="w-4 flex justify-center">
+                  {completedSections.includes(option) ? (
+                    <Image
+                      src="/assets/icons/tickIcon.svg"
+                      width={16}
+                      height={16}
+                      alt="Check"
+                    />
+                  ) : (
+                    <Image
+                      src="/assets/icons/circle-fill.svg"
+                      width={6.67}
+                      height={6.67}
+                      alt="Dot"
+                    />
+                  )}
+                </div>
                 {option === "Repos" ? "Repos & Links" : option}
               </Link>
             ) : (
-              <p>{option}</p>
+              <div className="flex justify-start items-center gap-2">
+                <div className="w-4 flex justify-center">
+                  <Image
+                    src="/assets/icons/circle-fill.svg"
+                    width={6.67}
+                    height={6.67}
+                    alt="Dot"
+                  />
+                </div>
+
+                <p className="text-sm">{option}</p>
+              </div>
             )}
           </div>
         ))}
       </div>
-      <div className="w-full flex flex-col gap-2 pl-2">
+      <div className="w-full flex flex-col gap-2 px-2">
         <Separator />
         {project && (
-          <div className="w-full px-2 py-1.5 text-sm font-medium text-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:font-normal hover:text-muted-foreground">
-            <Link href={`/projects/${project.id}/rewards`}>Rewards</Link>
-            {/* {unclaimedRewards(project) && (
-              <div className="h-[6.7px] w-[6.7px] rounded-full bg-destructive" />
-            )} */}
-          </div>
+          <>
+            <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
+              <Link
+                className={
+                  currentPage === "rewards" ? "font-medium text-foreground" : ""
+                }
+                href={`/projects/${project.id}/rewards`}
+              >
+                Rewards
+              </Link>
+            </div>
+            <Separator />
+          </>
         )}
-        <Separator />
       </div>
 
       <div className="flex flex-col w-full ml-2">

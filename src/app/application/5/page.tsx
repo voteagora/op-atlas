@@ -9,14 +9,12 @@ export const maxDuration = 120
 export default async function Page() {
   const session = await auth()
 
-  if (!session?.user?.id) {
-    redirect("/")
-  }
-
-  const [projects, applications] = await Promise.all([
-    getAdminProjects(session.user.id),
-    getRoundApplications(session.user.id, 5),
-  ])
+  const [projects, applications] = session
+    ? await Promise.all([
+        getAdminProjects(session.user.id),
+        getRoundApplications(session.user.id, 5),
+      ])
+    : [[], []]
 
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">

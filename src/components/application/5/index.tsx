@@ -13,7 +13,7 @@ export const ApplicationFlow = ({
   applications,
 }: {
   className?: string
-  projects: ProjectWithDetails[]
+  projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
 }) => {
   const [submittedApp, setSubmittedApp] =
