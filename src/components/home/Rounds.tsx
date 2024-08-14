@@ -1,5 +1,6 @@
 "use client"
 
+import { Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
 import { FUNDING_ROUNDS } from "@/lib/mocks"
@@ -10,7 +11,7 @@ import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
 
-export function Rounds() {
+export function Rounds({ projects }: { projects: Project[] }) {
   const { data } = useSession()
 
   return (
@@ -37,7 +38,7 @@ export function Rounds() {
             Build together, benefit together.
           </p>
           {!data?.user && (
-            <div className="hidden sm:flex items-center mt-6">
+            <div className="mt-6">
               <Account />
             </div>
           )}
@@ -47,14 +48,16 @@ export function Rounds() {
           <div className="flex flex-col flex-1 gap-y-12">
             <FundingRounds fundingRounds={FUNDING_ROUNDS} />
             <div className="flex flex-col">
-              <h2 className="text-2xl font-semibold">About Retro Funding</h2>
-              <p className="mt-6 text-muted-foreground">
+              <h2 className="text-xl font-semibold text-text-default">
+                About Retro Funding
+              </h2>
+              <p className="mt-6 text-base font-normal text-text-secondary">
                 Retroactive Public Goods Funding (Retro Funding) offers a
                 sustainable model for individuals to receive rewards for their
                 contributions to Optimism&apos;s success, ensuring that efforts
                 are not only recognized but also effectively rewarded.
               </p>
-              <p className="mt-6 text-muted-foreground">
+              <p className="mt-6 text-base font-normal text-text-secondary">
                 Retroactive Funding is based on the idea that it&apos;s easier
                 to agree on what was useful in the past than what might be
                 useful in the future. This is a series of experiments where
@@ -62,24 +65,24 @@ export function Rounds() {
                 they deem have provided positive impact to the Optimism
                 Collective.
               </p>
-              <p className="mt-6 text-muted-foreground">
+              <p className="mt-6 text-base font-normal text-text-secondary">
                 This is core to Optimism&apos;s value of impact = profit: the
                 idea that that positive impact to the collective should be
                 rewarded proportionally with profit to the individual.
               </p>
 
-              <p className="mt-6 text-muted-foreground">
+              <p className="mt-6 text-base font-normal text-text-secondary">
                 Want to go deeper?{" "}
                 <ExternalLink
                   href="https://app.optimism.io/retropgf"
-                  className="font-semibold no-underline"
+                  className="text-base font-normal text-text-secondary underline"
                 >
                   Learn more
                 </ExternalLink>
               </p>
             </div>
           </div>
-          <Sidebar className="ml-auto w-[260px] pt-12" />
+          <Sidebar className="ml-auto w-[260px] pt-12" projects={projects} />
         </div>
       </div>
       {data?.user && (

@@ -78,6 +78,15 @@ export async function getUserAdminProjectsWithDetail({
   })
 }
 
+export const getRandomProjects = () => {
+  return prisma.project.findMany({
+    where: {
+      deletedAt: null,
+    },
+    take: 5,
+  })
+}
+
 export async function getUserProjectsWithDetails({
   userId,
 }: {

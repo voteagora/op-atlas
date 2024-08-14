@@ -30,7 +30,6 @@ import {
   removeGithubRepo,
   setProjectLinks,
   updateGithubRepos,
-  updatePackageRepos,
 } from "@/lib/actions/repos"
 import { ProjectWithDetails } from "@/lib/types"
 
@@ -41,17 +40,10 @@ import { ReposFormSchema } from "./schema"
 import VerifyGithubRepoDialog from "./VerifyGithubRepoDialog"
 
 function toFormValues(project: ProjectWithDetails) {
-  const [githubs, packages] = partition(
-    (repo) => repo.type === "github",
-    project.repos,
-  )
+  const [githubs] = partition((repo) => repo.type === "github", project.repos)
 
   return {
     noRepos: project.hasCodeRepositories === false,
-    packages:
-      packages.length === 0
-        ? [{ url: "" }]
-        : packages.map(({ url }) => ({ url: url })),
     links: !!!project?.links?.length
       ? [{ url: "", name: "", description: "" }]
       : //this name and description with be replace with live data
@@ -104,11 +96,6 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   } = useFieldArray({
     control: form.control,
     name: "githubRepos",
-  })
-
-  const { fields: packageFields, append: addPackageField } = useFieldArray({
-    control: form.control,
-    name: "packages",
   })
 
   const { fields: linkFields, append: addLinkField } = useFieldArray({
@@ -181,28 +168,6 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     }
   }
 
-  const onAddPackageField = async () => {
-    const packages = form.getValues("packages").map((field) => field.url)
-
-    // If the previous URL is blank, do nothing
-    if (packages[packages.length - 1] === "") {
-      return
-    }
-
-    const valid = packages.every(
-      (url) => z.string().url().safeParse(url).success,
-    )
-
-    if (valid) {
-      form.clearErrors(`packages.${packages.length - 1}.url`)
-      addPackageField({ url: "" })
-    } else {
-      form.setError(`packages.${packages.length - 1}.url`, {
-        message: "Invalid URL",
-      })
-    }
-  }
-
   const onAddLinkField = async () => {
     const links = form.getValues("links").map((field) => field.url)
     // If the previous URL is blank, do nothing
@@ -225,11 +190,6 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     (isSave: boolean) => async (values: z.infer<typeof ReposFormSchema>) => {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
 
-      // We only need to handle updates to the packages
-      const packageUrls = values.packages
-        .map((field) => field.url)
-        .filter((url) => z.string().url().safeParse(url).success)
-
       const links = values.links
         .map((field) => ({
           url: field.url,
@@ -249,7 +209,6 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
       try {
         await Promise.allSettled([
-          updatePackageRepos(project.id, packageUrls),
           updateGithubRepos(project.id, projectRepos),
           setProjectLinks(project.id, links),
           updateProjectDetails(
@@ -265,7 +224,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         setIsSaving(false)
         toast.success("Project saved")
       } catch (error) {
-        toast.error("There was an error updating your packages")
+        toast.error("There was an error updating your Repos and Links")
         isSave ? setIsSaving(false) : setIsSubmitting(false)
         console.error("Error saving packages", error)
       }
@@ -388,31 +347,6 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                       </TooltipContent>
                     )}
                   </Tooltip>
-                </div>
-
-                <div className="flex flex-col">
-                  <h3>Packages</h3>
-                  <div className="mt-6 flex flex-col gap-2">
-                    <div>
-                      <FormLabel className="text-foreground">Links</FormLabel>
-                      <FormDescription>
-                        Add any published packages or artifacts.
-                      </FormDescription>
-                    </div>
-
-                    {packageFields.map((field, index) => (
-                      <PackageForm key={field.id} form={form} index={index} />
-                    ))}
-
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={onAddPackageField}
-                      className="mt-4 w-fit"
-                    >
-                      <Plus size={16} className="mr-2.5" /> Add link
-                    </Button>
-                  </div>
                 </div>
               </>
             )}

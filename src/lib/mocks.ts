@@ -2,11 +2,12 @@ export type FundingRound = {
   number: number
   name: string
   details: string
-  status: "now" | "upcoming" | "past"
+  status: "open" | "upcoming" | "past"
   accentColor?: string
   link?: string
+  resultsLink?: string
   iconUrl?: string
-  startsAt: Date
+  startsAt: Date | string
   endsAt?: Date
   funding?: {
     dollar?: string
@@ -26,6 +27,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
       "This category will reward onchain builders who contribute to the success of Optimism. This round seeks to expand the...",
     status: "past",
     link: "/projects/new",
+    resultsLink: "/round/results",
     accentColor: "#F0F4FF",
     iconUrl: "/assets/images/round-4.svg",
     startsAt: new Date("2024-05-14T21:53:13.300Z"),
@@ -35,10 +37,10 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     name: "OP Stack",
     number: 5,
     details:
-      "The OP Stack is the heart of Optimism, and the Superchain. Contributions to the OP Stack and improvements to the...",
-    status: "now",
+      "Round 5 will reward OP Stack contributions. This includes direct contributions to the OP Stack, as well as its key dependencies. The round will reward impact which has been generated between October 2023 - July 2024. Impact will be rewarded within the following three categories: Ethereum Core Contributions, OP Stack Research & Development, and OP Stack Tooling. ",
+    status: "open",
     accentColor: "#FFF0F1",
-    iconUrl: "/assets/images/round-5.svg",
+    iconUrl: "/assets/images/round-5-transparent.svg",
     startsAt: new Date("2024-08-14T21:53:13.300Z"),
     endsAt: new Date("2024-08-31T21:53:13.300Z"),
   },
@@ -46,18 +48,18 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     name: "Governance",
     number: 6,
     details:
-      "Improving the capture resistance and resource allocation of Optimism Governance is the primary objective of this...",
+      "Improving the capture resistance and resource allocation of Optimism Governance is the primary objective of this category. By incentivizing contributions that enhance governance tools, mechanisms, and processes, Retro Funding aims to foster a more robust and resilient governance framework within the ecosystem.",
     status: "upcoming",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/round-6.svg",
-    startsAt: new Date("2024-09-14T21:53:13.300Z"),
+    startsAt: `Planned for ${new Date("2024-09-14T21:53:13.300Z")}`,
     endsAt: new Date("2023-05-31T21:53:13.300Z"),
   },
   {
     name: "Dev Tooling",
     number: 7,
     details:
-      "Supporting Optimism builders with developer tooling is the focus of this category. From SDKs to testing frameworks...",
+      "Supporting Optimism builders with developer tooling is the focus of this category. From SDKs to testing frameworks, contributions that streamline the development process and empower builders will be rewarded, ensuring a more efficient and productive development environment.",
     status: "upcoming",
     accentColor: "#FFF6F0",
     iconUrl: "/assets/images/round-7.svg",
