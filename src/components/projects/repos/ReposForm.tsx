@@ -35,7 +35,6 @@ import { ProjectWithDetails } from "@/lib/types"
 
 import { GithubForm } from "./GithubForm"
 import { LinkForm } from "./LinkForm"
-import { PackageForm } from "./PackageForm"
 import { ReposFormSchema } from "./schema"
 import VerifyGithubRepoDialog from "./VerifyGithubRepoDialog"
 
