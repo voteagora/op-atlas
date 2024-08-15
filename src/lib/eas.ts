@@ -1,15 +1,17 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
-const PROJECT_SCHEMA_ID =
-  "0x7ae9f4adabd9214049df72f58eceffc48c4a69e920882f5b06a6c69a3157e5bd"
-const METADATA_SCHEMA_ID =
+const ENTITY_SCHEMA_ID =
+  "0x4222d050383fadf18ce0ccd8f37a569a655c05e07d6bdc638c1472da01842ef8"
+const PROJECT_METADATA_SCHEMA_ID =
   "0xe035e3fe27a64c8d7291ae54c6e85676addcbc2d179224fe7fc1f7f05a8c6eac"
+const ORGANIZATION_METADATA_SCHEMA_ID =
+  "0x9039564787fb32c75c224c977ba9f4c4af53fa0a6e917cb6c0eb6f4a6eaf2055"
 const APPLICATION_SCHEMA_ID =
   "0x88b62595c76fbcd261710d0930b5f1cc2e56758e155dea537f82bf0baadd9a32"
 
-const projectSchema = new SchemaEncoder("uint256 farcasterID,string issuer")
-const metadataSchema = new SchemaEncoder(
+const entitySchema = new SchemaEncoder("uint256 farcasterID,string type")
+const projectMetadataSchema = new SchemaEncoder(
   "bytes32 projectRefUID,uint256 farcasterID,string name,string category,bytes32 parentProjectRefUID,uint8 metadataType,string metadataUrl",
 )
 const applicationSchema = new SchemaEncoder(
@@ -52,17 +54,15 @@ async function createAttestation(schemaId: string, data: string) {
 
 export async function createProjectAttestation({
   farcasterId,
-  issuer = "OP Atlas",
 }: {
   farcasterId: number
-  issuer?: string
 }) {
-  const data = projectSchema.encodeData([
+  const data = entitySchema.encodeData([
     { name: "farcasterID", value: farcasterId, type: "uint256" },
-    { name: "issuer", value: issuer, type: "string" },
+    { name: "type", value: "project", type: "string" },
   ])
 
-  const attestationId = await createAttestation(PROJECT_SCHEMA_ID, data)
+  const attestationId = await createAttestation(ENTITY_SCHEMA_ID, data)
   console.info("Created project attestation:", attestationId)
 
   return attestationId
@@ -81,7 +81,7 @@ export async function createProjectMetadataAttestation({
   category: string
   ipfsUrl: string
 }) {
-  const data = metadataSchema.encodeData([
+  const data = projectMetadataSchema.encodeData([
     { name: "projectRefUID", value: projectId, type: "bytes32" },
     { name: "farcasterID", value: farcasterId, type: "uint256" },
     { name: "name", value: name, type: "string" },
@@ -91,7 +91,10 @@ export async function createProjectMetadataAttestation({
     { name: "metadataUrl", value: ipfsUrl, type: "string" },
   ])
 
-  const attestationId = await createAttestation(METADATA_SCHEMA_ID, data)
+  const attestationId = await createAttestation(
+    PROJECT_METADATA_SCHEMA_ID,
+    data,
+  )
   console.info("Created project metadata attestation:", attestationId)
 
   return attestationId

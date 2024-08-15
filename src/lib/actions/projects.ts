@@ -83,12 +83,10 @@ export const createNewProjectOnBehalf = async (
   details: CreateProjectParams,
   userId: string,
   farcasterId: string,
-  issuer: string,
 ) => {
   // Create project attestation
   const attestationId = await createProjectAttestation({
     farcasterId: parseInt(farcasterId),
-    issuer,
   })
 
   return createProject({
