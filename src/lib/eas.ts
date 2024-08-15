@@ -52,18 +52,20 @@ async function createAttestation(schemaId: string, data: string) {
   return await tx.wait()
 }
 
-export async function createProjectAttestation({
+export async function createEntityAttestation({
   farcasterId,
+  type,
 }: {
   farcasterId: number
+  type: "project" | "organization"
 }) {
   const data = entitySchema.encodeData([
     { name: "farcasterID", value: farcasterId, type: "uint256" },
-    { name: "type", value: "project", type: "string" },
+    { name: "type", value: type, type: "string" },
   ])
 
   const attestationId = await createAttestation(ENTITY_SCHEMA_ID, data)
-  console.info("Created project attestation:", attestationId)
+  console.info("Created entity attestation:", attestationId)
 
   return attestationId
 }

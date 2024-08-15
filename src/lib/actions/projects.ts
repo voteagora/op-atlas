@@ -1,7 +1,6 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
-import { nanoid } from "nanoid"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -21,7 +20,7 @@ import {
   UpdateProjectParams,
 } from "@/db/projects"
 
-import { createProjectAttestation } from "../eas"
+import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { verifyAdminStatus, verifyMembership } from "./utils"
 
@@ -61,8 +60,9 @@ export const createNewProject = async (
   }
 
   // Create project attestation
-  const attestationId = await createProjectAttestation({
+  const attestationId = await createEntityAttestation({
     farcasterId: parseInt(session.user.farcasterId),
+    type: "project",
   })
 
   const project = await createProject({
@@ -85,8 +85,9 @@ export const createNewProjectOnBehalf = async (
   farcasterId: string,
 ) => {
   // Create project attestation
-  const attestationId = await createProjectAttestation({
+  const attestationId = await createEntityAttestation({
     farcasterId: parseInt(farcasterId),
+    type: "project",
   })
 
   return createProject({
