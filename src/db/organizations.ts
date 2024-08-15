@@ -154,11 +154,34 @@ export async function deleteOrganization({
 }
 
 // Get detailed information about an organization
-export async function getOrganization(id: string) {
+export async function getOrganization({ id }: { id: string }) {
   return prisma.organization.findUnique({
     where: { id },
     include: {
       team: { where: { deletedAt: null }, include: { user: true } },
+      projects: true,
+    },
+  })
+}
+
+export async function addOrganizationSnapshot({
+  organizationId,
+  ipfsHash,
+  attestationId,
+}: {
+  organizationId: string
+  ipfsHash: string
+  attestationId: string
+}) {
+  return prisma.organizationSnapshot.create({
+    data: {
+      ipfsHash,
+      attestationId,
+      organization: {
+        connect: {
+          id: organizationId,
+        },
+      },
     },
   })
 }
