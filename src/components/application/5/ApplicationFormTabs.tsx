@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Application } from "@prisma/client"
 import { useSearchParams } from "next/navigation"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -14,6 +14,7 @@ import { Form } from "@/components/ui/form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { submitApplications } from "@/lib/actions/applications"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import { getProjectStatus } from "@/lib/utils"
 
 import ApplicationDetails from "./ApplicationDetails"
 import ApplicationProjectImpact from "./ApplicationProjectImpact"
@@ -60,10 +61,20 @@ const ApplicationFormTabs = ({
     searchParams.get("tab") || "details",
   )
 
+  const completedProjects = useMemo(() => {
+    return projects?.filter((project) => {
+      console.log(
+        getProjectStatus(project).progressPercent === 100,
+        "getProjectStatus(project).progressPercent === 100",
+      )
+      return getProjectStatus(project).progressPercent === 100
+    })
+  }, [projects])
+
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
-      projects: projects?.map((project) => {
+      projects: completedProjects?.map((project) => {
         const application = applications[0]?.projects.find(
           (p) => p.projectId === project.id,
         )
@@ -174,7 +185,7 @@ const ApplicationFormTabs = ({
               onSave={() => {
                 setCurrentTab("application")
               }}
-              projects={projects}
+              projects={completedProjects}
               applications={applications}
               form={form}
             />

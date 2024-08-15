@@ -27,6 +27,20 @@ model User {
   organizations UserOrganization[]
   addresses   UserAddress[]
   RewardClaim RewardClaim[]
+  interaction UserInteraction?
+}
+
+model UserInteraction {
+  id                     String   @id @default(uuid())
+  userId                 String @unique
+  user                   User     @relation(fields: [userId], references: [id])
+  finishSetupLinkClicked Boolean  @default(false)
+  orgSettingsVisited     Boolean  @default(false)
+  profileVisitCount      Int      @default(0)
+  viewProfileClicked     Boolean  @default(false)
+  homePageViewCount      Int      @default(0)
+  lastInteracted         DateTime @default(now())
+
 }
 
 model UserAddress {

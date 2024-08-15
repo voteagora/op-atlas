@@ -6,6 +6,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 
+import { updateInteractions } from "@/lib/actions/users"
+import { UserWithAddresses } from "@/lib/types"
 import { clickSignInWithFarcasterButton } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
@@ -14,9 +16,11 @@ import { Button } from "../ui/button"
 export const Sidebar = ({
   className,
   projects,
+  user,
 }: {
   className?: string
   projects: Project[]
+  user?: UserWithAddresses | null
 }) => {
   const { status, data } = useSession()
   const router = useRouter()
@@ -37,34 +41,43 @@ export const Sidebar = ({
     4: "rounded-md absolute right-3 top-1/2 transform -translate-y-1/2 m-auto w-7 h-7 z-20",
   }
 
+  const handleViewProfileClicked = () => {
+    if (user) {
+      updateInteractions({ userId: user?.id, viewProfileClicked: true })
+    }
+  }
+
   return (
     <div className={cn("flex flex-col gap-y-6", className)}>
       {/* Your project not received card */}
-      {data?.user && (
-        <div className="flex flex-col items-center gap-y-3 p-6 border border-[#E0E2EB] bg-[#FBFCFE] rounded-xl">
-          <Image
-            alt="empty profile"
-            src="/assets/images/big-sunny.png"
-            width={76}
-            height={76}
-          />
+      {data?.user &&
+        !user?.interaction?.viewProfileClicked &&
+        +(user?.interaction?.homePageViewCount ?? 0) < 3 && (
+          <div className="flex flex-col items-center gap-y-3 p-6 border border-[#E0E2EB] bg-[#FBFCFE] rounded-xl">
+            <Image
+              alt="empty profile"
+              src="/assets/images/big-sunny.png"
+              width={76}
+              height={76}
+            />
 
-          <p className="text-sm font-medium text-foreground text-center">
-            Your project did not receive rewards in Round 5
-          </p>
-          <Link href="/profile/details">
-            <Button
-              variant="outline"
-              className="text-sm font-medium text-foreground justify-center  w-full"
-            >
-              View profile
-            </Button>
-          </Link>
-        </div>
-      )}
+            <p className="text-sm font-medium text-foreground text-center">
+              Your project did not receive rewards in Round 5
+            </p>
+            <Link className="w-full" href="/profile/details">
+              <Button
+                onClick={handleViewProfileClicked}
+                variant="outline"
+                className="text-sm font-medium text-foreground justify-center  w-full"
+              >
+                View profile
+              </Button>
+            </Link>
+          </div>
+        )}
 
       {/* Welcome too retro funding app */}
-      {!data?.user && (
+      {user && (
         <div className="flex flex-col items-center gap-y-3 p-6 border border-[#D6E4FF] bg-[#F0F4FF] rounded-xl">
           <Image
             alt="empty profile"

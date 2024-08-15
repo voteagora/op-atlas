@@ -2,7 +2,8 @@ import Image from "next/image"
 import Link from "next/link"
 import React from "react"
 
-import { UserOrganizationsWithDetails } from "@/lib/types"
+import { updateInteractions } from "@/lib/actions/users"
+import { UserOrganizationsWithDetails, UserWithAddresses } from "@/lib/types"
 import { isOrganizationSetupComplete } from "@/lib/utils"
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
@@ -11,12 +12,22 @@ import { Button } from "../ui/button"
 
 const UserOrganizationInfoRow = ({
   organization,
+  user,
 }: {
   organization: UserOrganizationsWithDetails
+  user: UserWithAddresses
 }) => {
+  const handleOrgSettingClicked = () => {
+    //track user has clicked the link
+    if (!user.interaction?.finishSetupLinkClicked) {
+      updateInteractions({ userId: user.id, finishSetupLinkClicked: true })
+    }
+  }
+
   return (
     <div className="flex justify-between">
       <Link
+        onClick={handleOrgSettingClicked}
         href={`/profile/organizations/${organization.organizationId}`}
         className="flex gap-2 justify-center items-center "
       >
@@ -34,11 +45,14 @@ const UserOrganizationInfoRow = ({
             </Avatar>
           ))}
         </div>
-        {!isOrganizationSetupComplete(organization.organization) && (
-          <p className="text-sm font-medium text-secondary-foreground">
-            Finish setting up your org
-          </p>
-        )}
+        {!isOrganizationSetupComplete(organization.organization) &&
+          !user?.interaction?.finishSetupLinkClicked &&
+          +(user?.interaction?.profileVisitCount ?? 0) < 3 &&
+          !user?.interaction?.orgSettingsVisited && (
+            <p className="text-sm font-medium text-secondary-foreground">
+              Finish setting up your org
+            </p>
+          )}
 
         <Image
           src="/assets/icons/arrow-left.svg"

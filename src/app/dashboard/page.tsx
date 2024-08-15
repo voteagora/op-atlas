@@ -6,7 +6,6 @@ import Dashboard from "@/components/dashboard"
 import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import { getApplications, getProjects } from "@/lib/actions/projects"
-import { ProjectWithDetails } from "@/lib/types"
 
 export default async function Page() {
   const session = await auth()
@@ -30,7 +29,7 @@ export default async function Page() {
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
       <Dashboard
         user={user}
-        projects={projects as ProjectWithDetails[]}
+        projects={projects}
         applications={applications}
         organizations={organizations}
         className="w-full max-w-4xl"

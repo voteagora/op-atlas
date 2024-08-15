@@ -19,6 +19,7 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
 export type UserWithAddresses = Prisma.UserGetPayload<{
   include: {
     addresses: true
+    interaction: true
   }
 }>
 

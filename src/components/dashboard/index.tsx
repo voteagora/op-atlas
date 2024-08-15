@@ -93,7 +93,7 @@ const Dashboard = ({
 
   // TODO: hide rewards section if all rewards are claimed
   const showRewardsSection = Boolean(
-    projects.find((project) => project.applications.length),
+    projects?.find((project) => project.applications.length),
   )
 
   return (
@@ -143,9 +143,9 @@ const Dashboard = ({
         )}
         <ProfileDetailCard user={user} />
 
-        {!!!projects.length ||
-          !!!organizations?.length ||
-          (!!!projects.length && (
+        {!!!projects ||
+          !!!organizations ||
+          (!!!projects && (
             <div className="flex flex-col gap-4">
               {!profileInitiallyComplete.current && (
                 <CompleteProfileCallout user={user} />
@@ -156,7 +156,7 @@ const Dashboard = ({
                 />
               )}
 
-              {!!!projects.length && (
+              {!!!projects && (
                 <Link href="/projects/new">
                   <AddFirstProject />
                 </Link>
@@ -201,7 +201,10 @@ const Dashboard = ({
         {organizations?.map((organization) => {
           return (
             <div key={organization.id} className="flex flex-col gap-4">
-              <UserOrganizationInfoRow organization={organization} />
+              <UserOrganizationInfoRow
+                user={user}
+                organization={organization}
+              />
               {organization.organization.projects?.length > 0 ? (
                 <>
                   {organization.organization.projects?.map((project) => (

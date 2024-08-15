@@ -174,9 +174,10 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
 
   const canSubmit = (function () {
     return (
-      !!formValues.submittedToOSO &&
-      formValues.contracts &&
-      formValues.contracts.length > 0
+      (!!formValues.submittedToOSO &&
+        formValues.contracts &&
+        formValues.contracts.length > 0) ||
+      formValues.isOffChain
     )
   })()
 

@@ -1,6 +1,6 @@
 "use server"
 
-import { User } from "@prisma/client"
+import { Prisma, User } from "@prisma/client"
 
 import { UserAddressSource } from "@/lib/types"
 
@@ -13,6 +13,7 @@ export async function getUserById(userId: string) {
     },
     include: {
       addresses: true,
+      interaction: true,
     },
   })
 }
@@ -154,5 +155,20 @@ export async function removeUserAddress({
         userId: id,
       },
     },
+  })
+}
+
+export async function updateUserInteraction(
+  userId: string,
+  data: Prisma.UserInteractionUncheckedCreateInput,
+) {
+  return await prisma.userInteraction.upsert({
+    where: { userId },
+    update: {
+      ...data,
+      ...(data.homePageViewCount && { homePageViewCount: { increment: 1 } }),
+      ...(data.profileVisitCount && { profileVisitCount: { increment: 1 } }),
+    },
+    create: { ...data, userId },
   })
 }
