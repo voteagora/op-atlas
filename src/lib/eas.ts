@@ -6,13 +6,16 @@ const ENTITY_SCHEMA_ID =
 const PROJECT_METADATA_SCHEMA_ID =
   "0xe035e3fe27a64c8d7291ae54c6e85676addcbc2d179224fe7fc1f7f05a8c6eac"
 const ORGANIZATION_METADATA_SCHEMA_ID =
-  "0x9039564787fb32c75c224c977ba9f4c4af53fa0a6e917cb6c0eb6f4a6eaf2055"
+  "0xd3d49ab0975ce911ba1c6ef3b1bef3d454bbc9abf64500e37bebde67527fe5e9"
 const APPLICATION_SCHEMA_ID =
   "0x88b62595c76fbcd261710d0930b5f1cc2e56758e155dea537f82bf0baadd9a32"
 
 const entitySchema = new SchemaEncoder("uint256 farcasterID,string type")
 const projectMetadataSchema = new SchemaEncoder(
   "bytes32 projectRefUID,uint256 farcasterID,string name,string category,bytes32 parentProjectRefUID,uint8 metadataType,string metadataUrl",
+)
+const organizationMetadataSchema = new SchemaEncoder(
+  "bytes32 refUID, uint256 farcasterID, string name, bytes32 parentOrgUID, bytes32[] projects, uint8 metadataType, string metadataUrl",
 )
 const applicationSchema = new SchemaEncoder(
   "uint32 round,bytes32 projectRefUID,uint256 farcasterID,bytes32 metadataSnapshotRefUID",
@@ -98,6 +101,38 @@ export async function createProjectMetadataAttestation({
     data,
   )
   console.info("Created project metadata attestation:", attestationId)
+
+  return attestationId
+}
+
+export async function createOrganizationMetadataAttestation({
+  farcasterId,
+  organizationId,
+  name,
+  projectIds,
+  ipfsUrl,
+}: {
+  farcasterId: number
+  organizationId: string
+  name: string
+  projectIds: string[]
+  ipfsUrl: string
+}) {
+  const data = organizationMetadataSchema.encodeData([
+    { name: "refUID", value: organizationId, type: "bytes32" },
+    { name: "farcasterID", value: farcasterId, type: "uint256" },
+    { name: "name", value: name, type: "string" },
+    { name: "parentOrgUID", value: "", type: "bytes32" },
+    { name: "projects", value: projectIds, type: "bytes32[]" },
+    { name: "metadataType", value: "0", type: "uint8" },
+    { name: "metadataUrl", value: ipfsUrl, type: "string" },
+  ])
+
+  const attestationId = await createAttestation(
+    ORGANIZATION_METADATA_SCHEMA_ID,
+    data,
+  )
+  console.info("Created organization metadata attestation:", attestationId)
 
   return attestationId
 }
