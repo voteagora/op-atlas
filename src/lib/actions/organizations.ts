@@ -18,6 +18,7 @@ import {
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
+import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"
 
 export const getUserOrganizations = async (userId: string) => {
@@ -73,6 +74,9 @@ export const updateOrganizationDetails = async ({
       error: "Unauthorized",
     }
   }
+
+  await createOrganizationSnapshot(id)
+
   const organizationData = await updateOrganization({
     id,
     organization,
