@@ -173,6 +173,9 @@ model Project {
   twitter   String?
   mirror    String?
 
+  pricingModel String?
+  pricingModelDetails String?
+
   openSourceObserverSlug String?
   addedTeamMembers       Boolean  @default(false)
   addedFunding           Boolean  @default(false)
@@ -328,6 +331,7 @@ model ProjectFunding {
   amount     String
   receivedAt String
   details    String?
+  fundingRound String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

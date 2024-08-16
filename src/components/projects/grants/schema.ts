@@ -1,6 +1,12 @@
 import { z } from "zod"
 
-export type FundingType = "venture" | "revenue" | "grants" | "none"
+export type FundingType =
+  | "venture"
+  | "revenue"
+  | "grants"
+  | "retroFunding"
+  | "investment"
+  | "none"
 export type PRICINGMODELTYPES = "free" | "freemium" | "pay_to_use"
 
 export const PRICING_MODEL_TYPES = [
@@ -26,20 +32,20 @@ export const PRICING_MODEL_TYPES = [
 export const FUNDING_TYPES = [
   {
     type: "grants",
-    label: "Grants",
+    label: "Optimism Grants (since Jan 2023)",
     description:
-      "This project has received grants from Optimism (not including past rounds of Retro Funding) or another entity. Examples: Token House Missions, Foundation Missions, Foundation Grants.",
+      "This project has received grants from Optimism. Examples: Token House Missions, Foundation Missions, Foundation Grants.",
   },
   {
-    type: "venture",
-    label: "Funding",
+    type: "retroFunding",
+    label: "Optimism Retro Funding (excluding round 1)",
+    description: "",
+  },
+  {
+    type: "investment",
+    label: "Investment (since Jan 2020)",
     description:
       "This project has received funding provided by individuals or investment firms in exchange for equity ownership.",
-  },
-  {
-    type: "revenue",
-    label: "Revenue",
-    description: "This project has earned revenue.",
   },
   {
     type: "none",
@@ -71,8 +77,14 @@ export const OptimismGrantSchema = z.object({
   details: z.string().max(280).optional(),
 })
 
-export const RevenueSchema = z.object({
+export const RetroFundingSchema = z.object({
   amount: z.string().min(1, "Please include revenue"),
+  fundingRound: z.string().min(1, "Please select a funding round"),
+})
+
+export const InvestmentSchema = z.object({
+  amount: z.string().min(1, "Please include revenue"),
+  year: z.string().min(1, "Please select a year"),
   details: z.string().optional(),
 })
 
@@ -86,9 +98,22 @@ export const OtherGrantSchema = z.object({
 
 export const GrantsSchema = z.array(OptimismGrantSchema.or(OtherGrantSchema))
 
-export const FundingFormSchema = z.object({
-  venture: z.array(VentureSchema),
-  grants: GrantsSchema,
-  revenue: z.array(RevenueSchema),
-  pricingModel: z.string(),
-})
+export const FundingFormSchema = z
+  .object({
+    retroFunding: z.array(RetroFundingSchema),
+    grants: GrantsSchema,
+    investment: z.array(InvestmentSchema),
+    pricingModel: z.string(),
+    pricingModelDetail: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      return ["freemium", "paytouse"].includes(data.pricingModel)
+        ? !!data.pricingModelDetail
+        : true
+    },
+    {
+      message: "Pricing detail is required",
+      path: ["pricingModelDetail"],
+    },
+  )

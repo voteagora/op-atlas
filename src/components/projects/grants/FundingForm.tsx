@@ -21,34 +21,52 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { cn } from "@/lib/utils"
 
 import { FundingFormSchema } from "./schema"
 
 const FUNDING_AMOUNTS = [
   {
-    label: "Less than $250K",
-    value: "under-250k",
+    label: "Less than $1M",
+    value: "under-1m",
   },
   {
-    label: "$250K - $500K",
-    value: "250k-500k",
+    label: "$1M - $5M",
+    value: "1m-5m",
   },
   {
     label: "$500K - $1M",
     value: "500k-1m",
   },
   {
-    label: "$1M - $3M",
-    value: "1m-3m",
+    label: "$5M - $10M",
+    value: "5m-10m",
   },
   {
-    label: "$3M - $5M",
-    value: "3m-5m",
+    label: "$10M - $25M",
+    value: "10m-25m",
   },
   {
-    label: "Greater than $5M",
-    value: "above-5m",
+    label: "$25M - $50M",
+    value: "25m-50m",
+  },
+  {
+    label: "Greater than $50M",
+    value: "above-50m",
+  },
+] as const
+
+const FUNDING_ROUNDS = [
+  {
+    label: "Round 2",
+    value: "2",
+  },
+  {
+    label: "Round 3",
+    value: "3",
+  },
+  {
+    label: "Round 4",
+    value: "4",
   },
 ] as const
 
@@ -84,11 +102,11 @@ export const RevenueFundingForm = ({
       </Button>
       <FormField
         control={form.control}
-        name={`revenue.${index}.amount`}
+        name={`investment.${index}.amount`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              How much revenue have you earned since Jan 2023?{" "}
+              How much funding did you receive?
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
@@ -98,7 +116,11 @@ export const RevenueFundingForm = ({
                 </SelectTrigger>
                 <SelectContent>
                   {FUNDING_AMOUNTS.map((amount) => (
-                    <SelectItem key={amount.value} value={amount.value}>
+                    <SelectItem
+                      className="text-text-secondary"
+                      key={amount.value}
+                      value={amount.value}
+                    >
                       {amount.label}
                     </SelectItem>
                   ))}
@@ -111,19 +133,52 @@ export const RevenueFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`revenue.${index}.details`}
+        name={`investment.${index}.year`}
+        render={({ field }) => (
+          <FormItem className="flex flex-col gap-1.5">
+            <FormLabel className="text-foreground">
+              When did you receive this funding?
+              <span className="text-destructive">*</span>
+            </FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger className="">
+                  <SelectValue placeholder="Select a year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FUNDING_YEARS.map((year) => (
+                    <SelectItem key={year.value} value={year.value}>
+                      {year.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name={`investment.${index}.details`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel>Details</FormLabel>
-            <FormDescription className="!mt-0">
-              Include any details you&apos;d like to about this revenue.
+            <FormDescription className="!mt-0 text-sm font-normal text-secondary-foreground">
+              Include any details you&apos;d like to about this funding.
             </FormDescription>
             <FormControl>
-              <Textarea
-                {...field}
-                placeholder="Type your message here"
-                className="resize-none"
-              />
+              <div className="relative">
+                <Textarea
+                  {...field}
+                  placeholder="Type your message here"
+                  className="resize-none min-h-[100px]"
+                />
+                <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
+                  {field?.value?.length}/280
+                </span>
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -154,11 +209,11 @@ export const VentureFundingForm = ({
       </Button>
       <FormField
         control={form.control}
-        name={`venture.${index}.amount`}
+        name={`retroFunding.${index}.fundingRound`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              How much funding did you receive since Jan 2023?{" "}
+              Retro Funding round
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
@@ -167,8 +222,12 @@ export const VentureFundingForm = ({
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  {FUNDING_AMOUNTS.map((amount) => (
-                    <SelectItem key={amount.value} value={amount.value}>
+                  {FUNDING_ROUNDS.map((amount) => (
+                    <SelectItem
+                      className="text-text-secondary"
+                      key={amount.value}
+                      value={amount.value}
+                    >
                       {amount.label}
                     </SelectItem>
                   ))}
@@ -181,46 +240,30 @@ export const VentureFundingForm = ({
       />
       <FormField
         control={form.control}
-        name={`venture.${index}.year`}
+        name={`retroFunding.${index}.amount`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              When did you receive this funding?{" "}
+              How much OP did you receive?{" "}
               <span className="text-destructive">*</span>
             </FormLabel>
             <FormControl>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger className="">
-                  <SelectValue placeholder="Select a year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FUNDING_YEARS.map((year) => (
-                    <SelectItem key={year.value} value={year.value}>
-                      {year.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name={`venture.${index}.details`}
-        render={({ field }) => (
-          <FormItem className="flex flex-col gap-1.5">
-            <FormLabel>Details</FormLabel>
-            <FormDescription className="!mt-0">
-              Include any details you&apos;d like to about this funding.
-            </FormDescription>
-            <FormControl>
-              <Textarea
-                {...field}
-                placeholder="Type your message here"
-                className="resize-none"
-              />
+              <div className="relative">
+                <Input
+                  {...field}
+                  type="number"
+                  placeholder="Enter a number"
+                  className="pl-11 text-sm"
+                />
+                <Image
+                  priority
+                  alt="optimism logo"
+                  src="/assets/images/optimism-small.png"
+                  height={24}
+                  width={24}
+                  className="absolute left-2.5 top-2"
+                />
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -269,10 +312,10 @@ export const GrantsFundingForm = ({
             </FormLabel>
             <FormControl>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger className="">
+                <SelectTrigger className="text-foreground">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="text-base font-normal text-text-secondary">
                   <SelectItem value="token-house-mission">
                     Token House Mission
                   </SelectItem>
@@ -282,7 +325,6 @@ export const GrantsFundingForm = ({
                   <SelectItem value="foundation-grant">
                     Foundation Grant (Partner fund & other)
                   </SelectItem>
-                  <SelectItem value="other-grant">Other Entities</SelectItem>
                 </SelectContent>
               </Select>
             </FormControl>
@@ -292,7 +334,7 @@ export const GrantsFundingForm = ({
       />
       {!isOptimism && !isOther && (
         <FormItem className="flex flex-col gap-1.5">
-          <FormLabel className="text-[#85868C]">Additional details</FormLabel>
+          <FormLabel className="text-foreground">Additional details</FormLabel>
           <Input disabled placeholder="Add details" />
         </FormItem>
       )}
@@ -319,7 +361,7 @@ export const OptimismFundingForm = ({
             <FormLabel className="text-foreground">
               Grant specifics <span className="text-destructive">*</span>
             </FormLabel>
-            <FormDescription className="!mt-0">
+            <FormDescription className="!mt-0 text-secondary-foreground">
               Add a link to the grant website or github issue.
             </FormDescription>
             <FormControl>
@@ -366,10 +408,10 @@ export const OptimismFundingForm = ({
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
             <FormLabel className="text-foreground">
-              When did you sign your grant approval?{" "}
+              When did you receive your grant approval?
               <span className="text-destructive">*</span>
             </FormLabel>
-            <FormDescription className="!mt-0">
+            <FormDescription className="!mt-0 text-secondary-foreground">
               Please use the format YYYY-MM-DD
             </FormDescription>
             <FormControl>
@@ -384,16 +426,22 @@ export const OptimismFundingForm = ({
         name={`grants.${index}.details`}
         render={({ field }) => (
           <FormItem className="flex flex-col gap-1.5">
-            <FormLabel>Details</FormLabel>
-            <FormDescription className="!mt-0">
+            <FormLabel className="text-foreground">Details</FormLabel>
+            <FormDescription className="!mt-0 text-secondary-foreground">
               Include any details you&apos;d like to about this grant.
             </FormDescription>
+
             <FormControl>
-              <Textarea
-                {...field}
-                placeholder="Type your message here"
-                className="resize-none"
-              />
+              <div className="relative">
+                <Textarea
+                  {...field}
+                  placeholder="Type your message here"
+                  className="resize-none pb-6 h-[100px] overflow-y-auto"
+                />
+                <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
+                  {field?.value?.length}/280
+                </span>
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -499,6 +547,9 @@ export const OtherFundingForm = ({
                 placeholder="Type your message here"
                 className="resize-none"
               />
+              {/* <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
+          {field?.value?.length}/1000
+        </span> */}
             </FormControl>
             <FormMessage />
           </FormItem>
