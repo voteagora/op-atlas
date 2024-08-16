@@ -16,6 +16,7 @@ import {
   UpdateOrganizationParams,
 } from "@/db/organizations"
 
+import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { verifyOrganizationAdmin } from "./utils"
 
@@ -39,7 +40,14 @@ export const createNewOrganization = async ({
     }
   }
 
+  // Create entity attestation
+  const organizationId = await createEntityAttestation({
+    farcasterId: parseInt(session.user.farcasterId),
+    type: "organization",
+  })
+
   const organizationData = await createOrganization({
+    organizationId,
     organization,
     teamMembers,
   })

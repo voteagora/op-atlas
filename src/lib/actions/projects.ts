@@ -59,7 +59,7 @@ export const createNewProject = async (
     }
   }
 
-  // Create project attestation
+  // Create entity attestation
   const attestationId = await createEntityAttestation({
     farcasterId: parseInt(session.user.farcasterId),
     type: "project",
