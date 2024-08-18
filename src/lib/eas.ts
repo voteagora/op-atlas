@@ -2,11 +2,11 @@ import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
 const ENTITY_SCHEMA_ID =
-  "0x4222d050383fadf18ce0ccd8f37a569a655c05e07d6bdc638c1472da01842ef8"
+  "0x5eefb359bc596699202474fd99e92172d1b788aa34280f385c498875d1bfb424"
 const PROJECT_METADATA_SCHEMA_ID =
   "0xe035e3fe27a64c8d7291ae54c6e85676addcbc2d179224fe7fc1f7f05a8c6eac"
 const ORGANIZATION_METADATA_SCHEMA_ID =
-  "0xd3d49ab0975ce911ba1c6ef3b1bef3d454bbc9abf64500e37bebde67527fe5e9"
+  "0x9c181f1e683fd2d79287d0b4fe1832f571fb4f5815ff9c1d0ed5b7a9bd067a03"
 const APPLICATION_SCHEMA_ID =
   "0x88b62595c76fbcd261710d0930b5f1cc2e56758e155dea537f82bf0baadd9a32"
 
