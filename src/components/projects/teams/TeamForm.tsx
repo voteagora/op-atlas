@@ -114,10 +114,12 @@ export default function AddTeamDetailsForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <p className="text-foreground text-sm font-medium">Contributors</p>
-          {team.map(({ user, role }) => (
+          {team.map(({ user, role, isOrganizationMember }) => (
             <TeamMemberCard
               key={user.id}
               user={user}
+              organizationName={project.organization?.organization.name}
+              isOrganizationMember={isOrganizationMember}
               role={role as TeamRole}
               isUserAdmin={!!isAdmin}
               isCurrentUser={currentUser?.id === user.id}

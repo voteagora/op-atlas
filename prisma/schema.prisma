@@ -127,6 +127,7 @@ model Organization {
   projects  ProjectOrganization[]
 }
 
+
 model UserOrganization {
   id             String   @id @default(uuid())
   role String @default("member")
@@ -218,25 +219,64 @@ model Application {
 
 model ApplicationProject {
   id             String   @id @default(uuid())
-  categories     String[]
   attestationId  String
-
-  dependentEntities   String
-  successMetrics      String
-  additionalComments  String?
-
+  categoryId     String?
+  projectDescriptionOption   String @default("0")
   applicationId  String
   projectId      String
 
+  impactStatementAnswers ImpactStatementAnswer[]
+
   application    Application  @relation(fields: [applicationId], references: [id])
   project        Project      @relation(fields: [projectId], references: [id])
+  category       Category?    @relation(fields: [categoryId], references: [id])
 
   @@unique([applicationId, projectId])
+}
+
+model Category {
+  id          String           @id @default(uuid())
+  name        String
+  description String
+  imageUrl    String?
+  question    String
+  options     String[]
+
+  impactStatements ImpactStatement[]
+  ApplicationProject ApplicationProject[]
+}
+
+model ImpactStatement {
+  id          String           @id @default(uuid())
+  categoryId  String
+  question    String
+  subtext     String?
+
+  isRequired  Boolean @default(true)
+  isMarkdownSupported Boolean @default(true)
+
+  ImpactStatementAnswer ImpactStatementAnswer[]
+
+  category    Category         @relation(fields: [categoryId], references: [id])
+  @@index([categoryId])
+}
+
+model ImpactStatementAnswer {
+  id                 String          @id @default(uuid())
+  applicationProjectId String
+  impactStatementId   String
+  answer             String
+
+  applicationProject ApplicationProject @relation(fields: [applicationProjectId], references: [id])
+  impactStatement   ImpactStatement  @relation(fields: [impactStatementId], references: [id])
+
+  @@index([applicationProjectId, impactStatementId])
 }
 
 model UserProjects {
   id   String @id @default(uuid())
   role String @default("member")
+  isOrganizationMember Boolean @default(false)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

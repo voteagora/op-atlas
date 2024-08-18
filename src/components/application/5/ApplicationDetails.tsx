@@ -24,7 +24,7 @@ export const CATEGORIES = [
   {
     id: "Ethereum Core Contributions",
     title: "Ethereum Core Contributions",
-    icon: "/assets/icons/shapes.png",
+    icon: "/assets/images/application-category-1.png",
     description:
       "Ethereum Core Contributions are infrastructure which supports, or is a dependency, of the OP Stack.",
     examples:
@@ -49,7 +49,7 @@ export const CATEGORIES = [
   {
     id: "OP Stack Research & Development",
     title: "OP Stack Research & Development",
-    icon: "/assets/icons/microscope.png",
+    icon: "/assets/images/application-category-2.png",
     description:
       "Direct research & development contributions to the OP Stack, and contributions that support protocol upgrades.",
     examples:
@@ -78,7 +78,7 @@ export const CATEGORIES = [
   {
     id: "OP Stack Tooling",
     title: "OP Stack Tooling",
-    icon: "/assets/icons/tools.png",
+    icon: "/assets/images/application-category-3.png",
     description:
       "Efforts that improve the usability and accessibility of the OP Stack through tooling enhancements.",
     examples:

@@ -157,8 +157,6 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  console.log(project, "project")
-
   const form = useForm<z.infer<typeof FundingFormSchema>>({
     resolver: zodResolver(FundingFormSchema),
     mode: "onSubmit",
@@ -308,7 +306,6 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
         toast.success("Saved.")
         setIsSaving(false)
       } catch (error) {
-        console.log(error, "errors")
         toast.error("There was an error saving your changes.")
         isSave ? setIsSaving(false) : setIsSubmitting(false)
       }

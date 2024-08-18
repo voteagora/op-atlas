@@ -1,7 +1,8 @@
 import { CheckedState } from "@radix-ui/react-checkbox"
+import { watch } from "fs"
 import Image from "next/image"
-import React, { useMemo } from "react"
-import { Controller, UseFormReturn } from "react-hook-form"
+import React, { useEffect, useMemo } from "react"
+import { Controller, UseFormReturn, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 import { Badge } from "@/components/common/Badge"
@@ -15,23 +16,26 @@ import {
 } from "@/components/ui/accordion"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FormField, FormItem, FormMessage } from "@/components/ui/form"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
-import { cn, getProjectStatus } from "@/lib/utils"
-
-import { CATEGORIES } from "./ApplicationDetails"
-import { ApplicationFormSchema } from "./ApplicationFormTabs"
+import {
+  ApplicationWithDetails,
+  CategoryWithImpact,
+  ProjectWithDetails,
+} from "@/lib/types"
+import { getProjectStatus } from "@/lib/utils"
 
 const ProjectImpactForm = ({
   project,
   applications,
-
+  categories,
   form,
   index,
 }: {
   project: ProjectWithDetails
   applications: ApplicationWithDetails[]
-  form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
+  form: UseFormReturn<any>
+  categories: CategoryWithImpact[]
   index: number
 }) => {
   const isEligible = useMemo(() => {
@@ -42,6 +46,38 @@ const ProjectImpactForm = ({
     (p) => p.projectId === project.id,
   )
 
+  const categoryId = form.watch(`projects.${index}.category`)
+
+  useEffect(() => {
+    const watchedProjects = form.watch("projects")
+    watchedProjects.forEach((project: any, index: number) => {
+      const selectedCategory = categories.find(
+        (category) => category.id === project.category,
+      )
+      if (selectedCategory) {
+        // Update the impactStatement object with new fields
+        const updatedImpactStatements =
+          selectedCategory.impactStatements.reduce(
+            (acc: Record<string, any>, statement) => {
+              acc[statement.id] = project.impactStatement[statement.id] || ""
+              return acc
+            },
+            {},
+          )
+        // Update the form state with the new impactStatement structure
+        form.setValue(
+          `projects.${index}.impactStatement`,
+          updatedImpactStatements,
+        )
+        form.setValue(
+          `projects.${index}.projectDescription`,
+          project.projectDescription || "",
+        )
+        form.setValue(`projects.${index}.selected`, true)
+      }
+    })
+  }, [categories, categoryId, form])
+
   const isIneligible = !isEligible || hasApplied > -1
 
   return (
@@ -49,7 +85,7 @@ const ProjectImpactForm = ({
       <Accordion
         type="single"
         collapsible
-        disabled={!isEligible}
+        disabled={isIneligible}
         className="w-full"
       >
         <AccordionItem value="item-1">
@@ -104,39 +140,39 @@ const ProjectImpactForm = ({
               )}
             </div>
           </AccordionTrigger>
+
           <AccordionContent className="pb-0">
             <div className="mt-12 flex flex-col gap-y-12">
               <div className="flex flex-col gap-2">
-                <h5 className="text-sm font-medium">
+                <h3 className="text-xl font-semibold text-text-default">
+                  Category
+                </h3>
+                <h5 className="text-sm font-medium text-foreground mt-4">
                   Choose a category of impact for this project
                   <span className="text-destructive">*</span>
                 </h5>
-
                 <Controller
                   control={form.control}
-                  name={`projects.${index}.categories`}
+                  name={`projects.${index}.category`}
                   render={({ field }) => (
                     <FormItem className="flex flex-col gap-2">
-                      {CATEGORIES.map((category) => (
-                        <CategoryItem
-                          key={category.id}
-                          checked={(field.value as string[]).includes(
-                            category.id,
-                          )}
-                          onCheckboxChange={(checked) => {
-                            const newValue = checked
-                              ? [...field.value, category.id]
-                              : field.value.filter(
-                                  (id: string) => id !== category.id,
-                                )
-                            field.onChange(newValue)
-                          }}
-                          title={category.title}
-                          description={category.description}
-                          className={category.className}
-                          icon={category.icon}
-                        />
-                      ))}
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        {categories.map((category) => {
+                          return (
+                            <CategoryItem
+                              key={category.id}
+                              value={category.id}
+                              selectedValue={field.value}
+                              category={category}
+                              index={index}
+                              form={form}
+                            />
+                          )
+                        })}
+                      </RadioGroup>
                     </FormItem>
                   )}
                 />
@@ -154,16 +190,19 @@ const ProjectImpactForm = ({
               </div>
 
               <div className="flex flex-col gap-6">
-                <h4 className="text-xl font-semibold">Impact statement</h4>
-                <p className="text-sm">
+                <h4 className="text-xl font-semibold text-text-default">
+                  Impact statement
+                </h4>
+                <p className="text-sm text-secondary-foreground">
                   Describe this project’s impact on the OP Stack from Oct 1,
                   2023 - July 31, 2024. Please only describe the impact that was
                   delivered during that specific time period.
                 </p>
-                <p className="text-sm">
-                  You’ve already given your project a description in your
-                  project setup. There’s no need to repeat that information
-                  here. Instead, focus on communicating your project’s impact.
+                <p className="text-sm text-secondary-foreground">
+                  You’ve already given your project a description in your{" "}
+                  <span className="underline">project setup</span>. There’s no
+                  need to repeat that information here. Instead, focus on
+                  communicating your project’s impact.
                 </p>
                 <Callout
                   className="!text-sm"
@@ -171,84 +210,39 @@ const ProjectImpactForm = ({
                   text="Promises of future deliverables or impact are not allowed."
                 />
 
-                <div>
-                  <h6 className="text-sm font-medium">
-                    What entities or infrastructure depend on this project (Oct
-                    1, 2023 - July 31, 2024)?
-                    <span className="text-destructive">*</span>
-                  </h6>
-                  <p className="text-sm text-secondary-foreground mb-2">
-                    Aka: who gets value from this project?
-                  </p>
+                {categories
+                  .find((category) => category.id === categoryId)
+                  ?.impactStatements.map((impactStatement) => (
+                    <div key={impactStatement.id}>
+                      <h6 className="text-sm font-medium">
+                        {impactStatement.question}
+                        <span className="text-destructive">*</span>
+                      </h6>
+                      <p className="text-sm text-secondary-foreground mb-2">
+                        {impactStatement.subtext}
+                      </p>
 
-                  <FormField
-                    control={form.control}
-                    name={`projects.${index}.entities`}
-                    render={({ field }) => (
-                      <FormItem className="relative">
-                        <Textarea
-                          {...field}
-                          className="min-h-60"
-                          placeholder="Add a response"
-                        />
-                        <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
-                          {field?.value?.length}/1000
-                        </span>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div>
-                  <h6 className="text-sm font-medium">
-                    How do you measure impact and what were your results (Oct 1,
-                    2023 - July 31, 2024)?
-                    <span className="text-destructive">*</span>
-                  </h6>
-                  <p className="text-sm text-secondary-foreground mb-2">
-                    Aka: what are your success metrics?
-                  </p>
-                  <FormField
-                    name={`projects.${index}.results`}
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem className="relative">
-                        <Textarea
-                          {...field}
-                          className="min-h-60"
-                          placeholder="Add a response"
-                        />
-                        <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
-                          {field?.value?.length}/1000
-                        </span>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div>
-                  <h6 className="text-sm font-medium">
-                    Is there anything else you’d like to add?
-                  </h6>
-                  <FormField
-                    name={`projects.${index}.additionalInfo`}
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem className="mt-2 relative">
-                        <Textarea
-                          {...field}
-                          className="min-h-60"
-                          placeholder="Add a response"
-                        />
-                        <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
-                          {field?.value?.length}/1000
-                        </span>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                      <FormField
+                        control={form.control}
+                        name={`projects.${index}.impactStatement.${impactStatement.id}`}
+                        render={({ field }) => (
+                          <FormItem className="relative">
+                            <div className="relative">
+                              <Textarea
+                                {...field}
+                                className="min-h-60"
+                                placeholder="Add a response"
+                              />
+                              <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
+                                {field?.value?.length}/1000
+                              </span>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))}
               </div>
             </div>
           </AccordionContent>
@@ -259,41 +253,72 @@ const ProjectImpactForm = ({
 }
 
 const CategoryItem = ({
-  checked,
-  onCheckboxChange,
-  title,
-  description,
-  icon,
-  className,
+  category: { description, name, options, imageUrl },
+  value,
+  selectedValue,
+  form,
+  index,
 }: {
-  title: string
-  description: string
-  icon: string
-  className?: string
-  checked: boolean
-  onCheckboxChange: (checked: CheckedState) => void
+  selectedValue: string
+  value: string
+  category: CategoryWithImpact
+  index: number
+  form: UseFormReturn<z.infer<any>>
 }) => {
   return (
-    <div className="p-6 flex items-center gap-4 border border-input rounded-xl">
-      <Checkbox checked={checked} onCheckedChange={onCheckboxChange} />
-      <div>
-        <h6 className="text-sm font-medium">{title}</h6>
-        <p className="text-sm text-secondary-foreground">{description}</p>
+    <div className="p-6 border border-input rounded-xl">
+      <div className=" flex items-center gap-4 ">
+        <span>
+          <RadioGroupItem value={value} />
+        </span>
+
+        <div>
+          <h6 className="text-sm font-medium">{name}</h6>
+          <p className="text-sm text-secondary-foreground">{description}</p>
+        </div>
+        <div className="min-w-[64px] h-[64px] flex justify-center items-center rounded-2xl">
+          <Image
+            src={imageUrl ?? ""}
+            alt={name}
+            width={64}
+            height={64}
+            className="rounded-2xl"
+          />
+        </div>
       </div>
-      <div
-        className={cn(
-          "min-w-[64px] h-[64px] flex justify-center items-center rounded-2xl",
-          className,
-        )}
-      >
-        <Image
-          src={icon}
-          alt={title}
-          width={64}
-          height={64}
-          className="rounded-2xl"
-        />
-      </div>
+      {selectedValue === value && (
+        <div className="flex flex-col gap-y-1.5 pl-8 w-full">
+          <h5 className="text-sm font-medium text-foreground mt-4 w-full">
+            Which option describes your project?
+            <span className="text-destructive">*</span>
+          </h5>
+
+          <FormField
+            control={form.control}
+            name={`projects.${index}.projectDescription`}
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-2">
+                <RadioGroup onValueChange={field.onChange} value={field.value}>
+                  {options.map((option) => (
+                    <div
+                      key={option}
+                      className="py-2.5 px-3 flex items-center gap-x-2 border border-input rounded-lg w-full"
+                    >
+                      <span>
+                        <RadioGroupItem value={option} />
+                      </span>
+                      <div>
+                        <p className="text-sm">{option}</p>
+                      </div>
+                    </div>
+                  ))}
+                </RadioGroup>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
     </div>
   )
 }

@@ -113,7 +113,7 @@ export const ApplicationSubmitted = ({
             updates regarding your application status.
           </li>
           <li>
-            <span className="font-medium"> Voting starts on Sep 14:</span>{" "}
+            <span className="font-medium"> Voting starts on Sep 5:</span>{" "}
             Badgeholders will evaluate the impact of your project.
           </li>
           <li>
@@ -127,7 +127,7 @@ export const ApplicationSubmitted = ({
       {/* Social share */}
       <div className="flex flex-col justify-center items-center gap-y-6 p-10 bg-background border rounded-2xl ">
         <h3 className="text-xl font-semibold">Share with your community</h3>
-        <div className="w-full h-[400px] relative">
+        <div className="w-full h-[356px] relative">
           <Image
             src="/assets/images/submitted-retro-5-funding.png"
             fill
@@ -147,10 +147,10 @@ export const ApplicationSubmitted = ({
       <div className="flex flex-col gap-y-6">
         <h3 className="text-lg font-semibold">Join the conversation</h3>
         <div className="grid grid-cols-4 gap-2">
-          {SOCIALS.map(({ name, icon, link }) => (
+          {SOCIALS.map(({ name, icon, link }, index) => (
             <ExternalLink
               href={link}
-              key={name}
+              key={index}
               className="flex flex-col items-center justify-center gap-y-2 h-[96px] w-[172px] rounded-xl cursor-pointer bg-secondary hover:opacity-80"
             >
               {icon}

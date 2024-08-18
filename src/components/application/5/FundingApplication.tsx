@@ -1,6 +1,10 @@
 import { useSession } from "next-auth/react"
 
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  CategoryWithImpact,
+  ProjectWithDetails,
+} from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ApplicationDetails from "./ApplicationDetails"
@@ -12,10 +16,12 @@ export const FundingApplication = ({
   projects,
   applications,
   onApplied,
+  categories,
 }: {
   className?: string
   projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
+  categories: CategoryWithImpact[]
   onApplied: (application: ApplicationWithDetails) => void
 }) => {
   const { data } = useSession()
@@ -38,6 +44,7 @@ export const FundingApplication = ({
           onApplied={onApplied}
           applications={applications}
           projects={projects}
+          categories={categories}
         />
       ) : (
         <ApplicationDetails />

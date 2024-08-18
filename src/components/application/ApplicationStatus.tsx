@@ -25,8 +25,8 @@ export const ApplicationStatus = ({
           <p className="font-medium text-sm">
             Your application was submitted on{" "}
             {format(application.createdAt, "MMM d, h:mm a")}
-            You can resubmit with additional projects until{" "}
-            {format(application.createdAt, "MMM d, h:mm a")}
+            <br /> You can resubmit with additional projects until Sep 5 at
+            19:00 UTC
           </p>
         </div>
       </div>

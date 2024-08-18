@@ -5,39 +5,45 @@ import { revalidatePath } from "next/cache"
 import { sortBy } from "ramda"
 
 import { auth } from "@/auth"
-import { createApplication, getProject } from "@/db/projects"
+import { createApplication, getProject, updateApplication } from "@/db/projects"
 
 import { createApplicationAttestation } from "../eas"
-import { ProjectWithDetails } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { verifyMembership } from "./utils"
 
+interface SubmitApplicationRequest {
+  projectId: string
+  attestationId: string
+  categoryId: string
+  impactStatement: Record<string, string>
+  projectDescriptionOption: string
+}
+
 export const publishAndSaveApplication = async ({
   projects,
+  applicationId,
 }: {
-  projects: {
-    projectId: string
-    categories: string[]
-    dependentEntities: string
-    successMetrics: string
-    additionalComments?: string
-    attestationId: string
-  }[]
+  applicationId?: string
+  projects: SubmitApplicationRequest[]
 }): Promise<Application> => {
   // Create application in database
-  return await createApplication({
-    projects,
-    round: 5,
-  })
+  return applicationId
+    ? await updateApplication({
+        applicationId,
+        projects,
+      })
+    : await createApplication({
+        projects,
+        round: 5,
+      })
 }
 
 const createProjectApplication = async (
   project: {
     projectId: string
-    categories: string[]
-    dependentEntities: string
-    successMetrics: string
-    additionalComments?: string
+    categoryId: string
+    impactStatement: Record<string, string>
+    projectDescriptionOption: string
   },
   farcasterId: string,
 ) => {
@@ -76,24 +82,20 @@ const createProjectApplication = async (
     snapshotRef: latestSnapshot.attestationId,
   })
 
-  const application = await publishAndSaveApplication({
-    projects: [{ ...project, attestationId }],
-  })
-
   return {
-    application,
+    projects: { ...project, attestationId },
     error: null,
   }
 }
 
 export const submitApplications = async (
   projects: {
-    categories: string[]
-    dependentEntities: string
-    successMetrics: string
-    additionalComments?: string
     projectId: string
+    categoryId: string
+    impactStatement: Record<string, string>
+    projectDescriptionOption: string
   }[],
+  applicationId?: string,
 ) => {
   const session = await auth()
 
@@ -118,16 +120,27 @@ export const submitApplications = async (
   const applications: Application[] = []
   let error: string | null = null
 
+  const applicationFormData = <SubmitApplicationRequest[]>[]
+
   for (const project of projects) {
     const result = await createProjectApplication(
       project,
       session.user.farcasterId,
     )
-    if (result.error === null && result.application) {
-      applications.push(result.application)
+
+    if (result.error === null && result.projects) {
+      applicationFormData.push(result.projects)
     } else if (result.error) {
       error = result.error
     }
+  }
+
+  if (!!applicationFormData.length) {
+    const applicationData = await publishAndSaveApplication({
+      projects: applicationFormData,
+      applicationId,
+    })
+    applications.push(applicationData)
   }
 
   revalidatePath("/dashboard")

@@ -2,7 +2,11 @@
 
 import { useState } from "react"
 
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  CategoryWithImpact,
+  ProjectWithDetails,
+} from "@/lib/types"
 
 import { FundingApplication } from "../5/FundingApplication"
 import { ApplicationSubmitted } from "../ApplicationSubmitted"
@@ -11,10 +15,12 @@ export const ApplicationFlow = ({
   className,
   projects,
   applications,
+  categories,
 }: {
   className?: string
   projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
+  categories: CategoryWithImpact[]
 }) => {
   const [submittedApp, setSubmittedApp] =
     useState<ApplicationWithDetails | null>(null)
@@ -26,6 +32,7 @@ export const ApplicationFlow = ({
       className={className}
       projects={projects}
       applications={applications}
+      categories={categories}
       onApplied={setSubmittedApp}
     />
   )
