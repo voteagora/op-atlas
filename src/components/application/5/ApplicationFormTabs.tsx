@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Application } from "@prisma/client"
 import { useSearchParams } from "next/navigation"
 import React, { useEffect, useMemo, useState } from "react"
-import { useForm } from "react-hook-form"
+import { SubmitHandler, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -31,22 +31,87 @@ const TERMS = [
   "I understand that access to my Optimist Profile is required to claim Retro Funding rewards.",
 ]
 
-const createImpactStatementSchemas = (categories: CategoryWithImpact[]) => {
-  return categories.reduce((acc: Record<string, any>, category) => {
-    const impactStatementShape = category.impactStatements.reduce(
-      (statementAcc, statement) => {
-        statementAcc[statement.id] = z
-          .string()
-          .min(1, "This field is required")
-          .max(1000, "This field is too long")
-        return statementAcc
-      },
-      {} as Record<string, any>,
+export const ApplicationFormSchema = z.object({
+  projects: z
+    .array(
+      z
+        .object({
+          projectId: z.string(),
+          category: z.string(),
+          projectDescription: z.string(),
+          impactStatement: z.record(z.string(), z.string()),
+          selected: z.boolean(),
+        })
+        .superRefine((data, ctx) => {
+          // Category validation
+          if (
+            data.selected &&
+            (!data.category || data.category.trim() === "")
+          ) {
+            ctx.addIssue({
+              path: ["category"],
+              message: "Category is required",
+              code: z.ZodIssueCode.custom,
+            })
+          }
+
+          // Project description validation
+          if (
+            data.selected &&
+            (!data.projectDescription || data.projectDescription.trim() === "")
+          ) {
+            ctx.addIssue({
+              path: ["projectDescription"],
+              message: "Project description is required",
+              code: z.ZodIssueCode.custom,
+            })
+          }
+
+          // Impact statement validation
+          if (data.selected) {
+            for (const [key, value] of Object.entries(data.impactStatement)) {
+              if (
+                !value ||
+                value.trim() === "" ||
+                value.length < 200 ||
+                value.length > 1000
+              ) {
+                ctx.addIssue({
+                  path: ["impactStatement", key],
+                  message:
+                    "Impact statement is required and should be between 200 and 1000 characters",
+                  code: z.ZodIssueCode.custom,
+                })
+              }
+            }
+          }
+        }),
     )
-    acc[category.id] = z.object(impactStatementShape)
-    return acc
-  }, {})
-}
+    .superRefine((projects, ctx) => {
+      // Ensure all selected projects have required fields filled out
+      projects.forEach((project, index) => {
+        if (project.selected) {
+          if (
+            !project.category?.trim() ||
+            !project.projectDescription?.trim() ||
+            !Object.values(project.impactStatement).every(
+              (answer) =>
+                answer &&
+                answer.trim() !== "" &&
+                answer.length >= 200 &&
+                answer.length <= 1000,
+            )
+          ) {
+            ctx.addIssue({
+              path: ["projects", index],
+              message: "All fields must be filled out for selected projects",
+              code: z.ZodIssueCode.custom,
+            })
+          }
+        }
+      })
+    }),
+})
 
 const ApplicationFormTabs = ({
   projects,
@@ -67,35 +132,12 @@ const ApplicationFormTabs = ({
   const [agreedTerms, setAgreedTerms] = useState(
     Array.from({ length: TERMS.length + 1 }, () => false),
   )
-  const impactStatementSchemas = useMemo(
-    () => createImpactStatementSchemas(categories),
-    [categories],
-  )
 
   const completedProjects = useMemo(() => {
     return projects?.filter((project) => {
       return getProjectStatus(project).progressPercent === 100
     })
   }, [projects])
-
-  const ApplicationFormSchema = z.object({
-    projects: z.array(
-      z.object({
-        projectId: z.string(),
-        selected: z.boolean(),
-        projectDescription: z
-          .string()
-          .min(1, "You need to select a one option"),
-        category: z.string(),
-        additionalInfo: z.string().optional(),
-        impactStatement: z.union([
-          impactStatementSchemas["1"],
-          impactStatementSchemas["2"],
-          impactStatementSchemas["3"],
-        ]),
-      }),
-    ),
-  })
 
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
@@ -114,13 +156,14 @@ const ApplicationFormTabs = ({
               return acc
             },
             {},
-          ),
+          ) ?? { "1": "", "2": "" },
           selected:
             applications[0]?.projects.some((p) => p.projectId === project.id) ||
             false,
         }
       }),
     },
+    shouldFocusError: true,
   })
 
   const toggleAgreedTerm = (idx: number) => {
@@ -140,8 +183,6 @@ const ApplicationFormTabs = ({
           (p) => p.projectId === project.projectId,
         ),
     )
-
-  console.log("hasSelectedProjects", hasSelectedProjects)
 
   const submitApplication = async () => {
     setIsLoading(true)
@@ -201,6 +242,10 @@ const ApplicationFormTabs = ({
     }
   }, [searchParams])
 
+  const onSave = () => {
+    setCurrentTab("application")
+  }
+
   const canSubmitForm = agreedTerms.every((term) => term)
   return (
     <Form {...form}>
@@ -210,7 +255,7 @@ const ApplicationFormTabs = ({
           <TabsTrigger value="projects">Projects and impact</TabsTrigger>
           <TabsTrigger value="application">Submit application</TabsTrigger>
         </TabsList>
-        <div className="mt-12">
+        <form onSubmit={form.handleSubmit(onSave)} className="mt-12">
           {/* application details content */}
           <TabsContent value="details">
             <ApplicationDetails />
@@ -219,10 +264,9 @@ const ApplicationFormTabs = ({
           {/* project and impact content */}
           <TabsContent value="projects">
             <ApplicationProjectImpact
-              onSave={() => {
-                form.trigger("projects")
-                setCurrentTab("application")
-              }}
+              // onSave={() => {
+              //   form.trigger("projects")
+              // }}
               projects={completedProjects}
               applications={applications}
               categories={categories}
@@ -244,6 +288,7 @@ const ApplicationFormTabs = ({
                 {TERMS.map((term, idx) => (
                   <div key={idx} className="flex gap-x-4">
                     <Checkbox
+                      className="mt-1"
                       checked={agreedTerms[idx]}
                       onCheckedChange={() => toggleAgreedTerm(idx)}
                     />
@@ -252,6 +297,7 @@ const ApplicationFormTabs = ({
                 ))}
                 <div className="flex gap-x-4">
                   <Checkbox
+                    className="mt-1"
                     checked={agreedTerms[TERMS.length]}
                     onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
                   />
@@ -279,7 +325,7 @@ const ApplicationFormTabs = ({
               </Button>
             </div>
           </TabsContent>
-        </div>
+        </form>
       </Tabs>
     </Form>
   )

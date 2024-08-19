@@ -11,34 +11,32 @@ import {
   ProjectWithDetails,
 } from "@/lib/types"
 
+import { ApplicationFormSchema } from "./ApplicationFormTabs"
 import ProjectImpactForm from "./ProjectImpactForm"
 
 const ApplicationProjectImpactForm = ({
   projects,
   applications,
   form,
-  onSave,
   categories,
 }: {
   projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
-  form: UseFormReturn<z.infer<any>>
+  form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   categories: CategoryWithImpact[]
-  onSave: () => void
 }) => {
   const { fields } = useFieldArray({
     control: form.control,
     name: "projects",
   })
 
-  const hasSelectedProjects = form
+  const hasSelectedProjects = !form
     .watch("projects")
-    .some(
-      (project: any) =>
-        project.selected &&
-        !applications[0]?.projects.some(
-          (p) => p.projectId === project.projectId,
-        ),
+    .filter((project) => project.selected)
+    .every((selectedProject) =>
+      applications[0]?.projects.some(
+        (p) => p.projectId === selectedProject.projectId,
+      ),
     )
 
   return (
@@ -67,7 +65,7 @@ const ApplicationProjectImpactForm = ({
         )}
 
         {/* Project Impact Form */}
-        {fields.map((field: any, index) => (
+        {fields.map((field, index) => (
           <ProjectImpactForm
             categories={categories}
             key={field.id}
@@ -83,8 +81,8 @@ const ApplicationProjectImpactForm = ({
 
       <Button
         variant="destructive"
-        disabled={!hasSelectedProjects && !form.formState.isValid}
-        onClick={onSave}
+        type="submit"
+        disabled={!hasSelectedProjects}
         className="disabled:bg-destructive disabled:!text-white"
       >
         Save and continue

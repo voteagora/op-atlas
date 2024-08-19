@@ -25,6 +25,8 @@ import {
 } from "@/lib/types"
 import { getProjectStatus } from "@/lib/utils"
 
+import { ApplicationFormSchema } from "./ApplicationFormTabs"
+
 const ProjectImpactForm = ({
   project,
   applications,
@@ -34,7 +36,7 @@ const ProjectImpactForm = ({
 }: {
   project: ProjectWithDetails
   applications: ApplicationWithDetails[]
-  form: UseFormReturn<any>
+  form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   categories: CategoryWithImpact[]
   index: number
 }) => {
@@ -58,9 +60,9 @@ const ProjectImpactForm = ({
         // Update the impactStatement object with new fields
         const updatedImpactStatements =
           selectedCategory.impactStatements.reduce(
-            (acc: Record<string, any>, statement) => {
+            (acc: Record<string, string>, statement) => {
               acc[statement.id] = project.impactStatement[statement.id] || ""
-              return acc
+              return acc ?? { "1": "", "2": "" }
             },
             {},
           )
@@ -151,7 +153,7 @@ const ProjectImpactForm = ({
                   Choose a category of impact for this project
                   <span className="text-destructive">*</span>
                 </h5>
-                <Controller
+                <FormField
                   control={form.control}
                   name={`projects.${index}.category`}
                   render={({ field }) => (
@@ -173,6 +175,7 @@ const ProjectImpactForm = ({
                           )
                         })}
                       </RadioGroup>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -268,7 +271,7 @@ const CategoryItem = ({
   value: string
   category: CategoryWithImpact
   index: number
-  form: UseFormReturn<z.infer<any>>
+  form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
 }) => {
   return (
     <div className="p-6 border border-input rounded-xl">
