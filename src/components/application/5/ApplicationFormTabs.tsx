@@ -258,15 +258,12 @@ const ApplicationFormTabs = ({
         <form onSubmit={form.handleSubmit(onSave)} className="mt-12">
           {/* application details content */}
           <TabsContent value="details">
-            <ApplicationDetails />
+            <ApplicationDetails onNext={() => setCurrentTab("projects")} />
           </TabsContent>
 
           {/* project and impact content */}
           <TabsContent value="projects">
             <ApplicationProjectImpact
-              // onSave={() => {
-              //   form.trigger("projects")
-              // }}
               projects={completedProjects}
               applications={applications}
               categories={categories}

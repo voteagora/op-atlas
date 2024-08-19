@@ -15,8 +15,8 @@ interface ContributionsSectionProps {
   description: string
   examples: string
   eligibility: string[]
+  notEligibility: string[] | React.JSX.Element[]
   endingText?: React.JSX.Element
-  className?: string
 }
 
 // CATEGORIES array
@@ -31,49 +31,56 @@ export const CATEGORIES = [
       "Smart contract languages, Ethereum consensus & execution clients, EVM, Ethereum testnets, Cryptography research.",
     eligibility: [
       "Ethereum client implementations",
-      "Ethereum test networks",
       "Infrastructure to test and deploy chains",
-      "Languages which are dedicated to develop smart contracts",
+      "Languages that are dedicated to the development of smart contracts",
       "Research which informs Ethereum core development",
     ],
-    endingText: (
-      <p className="text-secondary-foreground">
-        Projects which are used to develop or deploy contracts or apps,
-        including in the development and deployment of Optimism contracts, will
-        be rewarded in Retro Funding 7: Dev Tooling and are not in scope for
-        this category.
-      </p>
-    ),
-    className: "bg-blue-200",
+    notEligibility: [
+      "Projects that are used to develop or deploy contracts or apps, including in the development and deployment of Optimism contracts, may be rewarded in Retro Funding 7: Dev Tooling, and are not in scope for this category.",
+      "Extended Ethereum related tooling that is not listed under eligibility, including analytics/data infrastructure, frontend libraries, indexers and more. These may be rewarded in Retro Funding 7: Dev Tooling and are not in scope for this category.",
+      "Generic Ethereum related research that does not inform Ethereum core development",
+    ],
   },
   {
     id: "OP Stack Research & Development",
     title: "OP Stack Research & Development",
     icon: "/assets/images/application-category-2.png",
-    description:
-      "Direct research & development contributions to the OP Stack, and contributions that support protocol upgrades.",
     examples:
       "Optimism Protocol upgrades, OP Stack Client Implementations, modules & mods, audits and Fault Proof VM implementations",
+    description:
+      "Direct research & development contributions to the OP Stack, and contributions that support protocol upgrades.",
     eligibility: [
-      "Work on core components of the OP Stack",
-      "Research or development that introduces new features",
-      "Security audits specifically on the OP Stack",
+      "Work on core components of the OP Stack, including client implementations, modules, and modifications.",
+      "Research or development that introduced features, improvements, or capabilities to the OP Stack.",
+      "Security audits specifically on the OP Stack or its components.",
     ],
-    endingText: (
-      <p className="text-secondary-foreground">
+    notEligibility: [
+      <li key={1}>
+        Optimism Monorepo contributions by non-core devs: Only{" "}
         <ExternalLink
           className="underline"
           href="https://github.com/ethereum-optimism/optimism"
         >
-          Optimism Monorepo
+          Optimism Monorepo 11
         </ExternalLink>{" "}
-        contributions are not rewarded within Retro Funding 5. Commits to the
-        monorepo are mainly done by Optimism core devs and the core dev program
-        is not developed enough to support outside contributions to the monorepo
-        yet.
-      </p>
-    ),
-    className: "bg-green-200",
+        contributions by core devs may be rewarded within Retro Funding 5.
+        Commits to the monorepo are currently mainly done by Optimism core devs
+        and the core dev program is not developed enough to support outside
+        contributions to the monorepo yet. As the core dev program evolves, more
+        contributions to the monorepo may become eligible.
+      </li>,
+      <li key={2}>
+        Submissions to the
+        <ExternalLink
+          className="underline"
+          href="https://immunefi.com/bug-bounty/optimism/information/"
+        >
+          {" "}
+          Optimism Bug Bounty Programs{" "}
+        </ExternalLink>
+        are not eligible to participate in this round.
+      </li>,
+    ],
   },
   {
     id: "OP Stack Tooling",
@@ -82,12 +89,17 @@ export const CATEGORIES = [
     description:
       "Efforts that improve the usability and accessibility of the OP Stack through tooling enhancements.",
     examples:
-      "Integration and load testing infrastructure, scripts for running an Optimism node, RaaS providers.",
+      "Integration and load testing infrastructure, scripts for running an Optimism node, RaaS providers, OP Stack tutorials & documentation",
     eligibility: [
-      "Tools that facilitate the deployment, operation, or testing of the OP Stack",
+      " Tools that facilitate the deployment, operation, or testing of the OP Stack. This includes integration tools, load testing infrastructure, and scripts for node management.",
       "Services for deploying and hosting an OP Chain",
+      "Documentation and tutorials which aid in understanding of the OP Stack’s components and its development",
     ],
-    className: "bg-orange-200",
+    notEligibility: [
+      "Projects that are used to develop or deploy contracts or apps, including in the development and deployment of Optimism contracts, may be rewarded in Retro Funding 7: Dev Tooling, and are not in scope for this category.",
+      " Extended tooling that is not listed under eligibility, including analytics/data infrastructure, frontend libraries, indexers and more. These may be rewarded in Retro Funding 7: Dev Tooling and are not in scope for this category.",
+      " Documentation and tutorials which are not about the OP Stack’s components or development, such as non technical tutorials about Optimism.",
+    ],
   },
 ]
 
@@ -159,7 +171,7 @@ const RULES = [
   },
 ]
 
-const ApplicationDetails = () => {
+const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
   const router = useRouter()
   const { data, status } = useSession()
   const user = data?.user
@@ -173,18 +185,10 @@ const ApplicationDetails = () => {
       <div className="flex flex-col gap-y-6 text-secondary-foreground">
         <p>
           Round 5 will reward OP Stack contributions. This includes direct
-          contributions to the OP Stack, as well as its key dependencies.
-        </p>
-        <p>
-          The round will reward impact which has been generated between October
-          2023 - July 2024. Impact will be rewarded within the following three
-          categories: Ethereum Core Contributions, OP Stack Research &
-          Development, and OP Stack Tooling.
-        </p>
-        <p>
-          A single project can only apply to one OP Stack category. This means
-          that each distinct contribution you have to the OP Stack should be
-          setup as its own project.
+          contributions to the OP Stack, as well as its key dependencies. A
+          single project can only apply to one OP Stack category (listed below).
+          This means that each distinct contribution you have to the OP Stack
+          should be setup as its own project.
         </p>
       </div>
       {/* Timeline */}
@@ -202,7 +206,7 @@ const ApplicationDetails = () => {
         <h3>Eligibility</h3>
         <p className="text-secondary-foreground">
           The round will reward impact which has been generated between October
-          2023 - July 2024. Impact will be rewarded within the following three
+          2023 - August 2024. Impact will be rewarded within the following three
           categories: Ethereum Core Contributions, OP Stack Research &
           Development, and OP Stack Tooling.
         </p>
@@ -210,7 +214,7 @@ const ApplicationDetails = () => {
           Each category has it’s own eligibility criteria. Please review the
           following category descriptions carefully.
         </p>
-        <Separator className="m-6" />
+        <Separator className="my-6" />
         {CATEGORIES.map((category, index) => (
           <React.Fragment key={index}>
             <ContributionsSection
@@ -220,10 +224,11 @@ const ApplicationDetails = () => {
               description={category.description}
               examples={category.examples}
               eligibility={category.eligibility}
-              endingText={category.endingText}
-              className={category.className}
+              notEligibility={category.notEligibility}
             />
-            <Separator />
+            <Separator
+              className={CATEGORIES.length - 1 === index ? "mt-6" : "my-6"}
+            />
           </React.Fragment>
         ))}
       </div>
@@ -233,11 +238,11 @@ const ApplicationDetails = () => {
       <div className="flex flex-col gap-y-6">
         <h3>Rules</h3>
         <p>
-          Failure to adhere to the RULES listed below will result in
+          Failure to adhere to the rules listed below will result in
           disqualification.
         </p>
 
-        <ul className="list-disc list-outside pl-2 text-base font-normal text-secondary-foreground">
+        <ul className="list-disc list-outside pl-4 text-base font-normal text-secondary-foreground">
           {RULES.map((rule, index) => (
             <li key={index} className="">
               {rule.title}:{rule.description}
@@ -248,10 +253,14 @@ const ApplicationDetails = () => {
 
       <Button
         variant="destructive"
+        type="button"
         onClick={() => {
-          status === "unauthenticated"
-            ? onClickGetStarted()
-            : router.push("/application/5?tab=projects")
+          if (status === "unauthenticated") {
+            onClickGetStarted()
+          } else {
+            onNext?.()
+            router.push("/application/5?tab=projects")
+          }
         }}
         className="w-full disabled:bg-destructive disabled:!text-white"
       >
@@ -268,17 +277,12 @@ const ContributionsSection = ({
   description,
   examples,
   eligibility,
+  notEligibility,
   endingText,
-  className,
 }: ContributionsSectionProps) => (
   <section className="flex flex-col gap-6">
     <header className="flex items-center gap-x-6">
-      <div
-        className={cn(
-          "min-w-[120px] h-[120px] flex justify-center items-center rounded-2xl",
-          className,
-        )}
-      >
+      <div className="min-w-[120px] h-[120px] flex justify-center items-center rounded-2xl">
         <Image
           src={icon}
           alt={title}
@@ -301,13 +305,28 @@ const ContributionsSection = ({
     <h4 className="font-semibold text-base text-secondary-foreground">
       Eligibility:{" "}
       <span className="font-normal">
-        Projects are eligible who can be described as one of the following:
+        The following types of projects are eligible.
       </span>
     </h4>
-    <ul className="list-disc list-inside mt-2 text-secondary-foreground">
+    <ul className="list-disc list-outside pl-4  text-secondary-foreground">
       {eligibility.map((criteria, index) => (
         <li key={index}>{criteria}</li>
       ))}
+    </ul>
+    <h4 className="font-semibold text-base text-secondary-foreground">
+      Not eligibile:
+      <span className="font-normal">
+        The following types of projects are not eligible.
+      </span>
+    </h4>
+    <ul className="list-disc list-outside pl-4 text-secondary-foreground">
+      {notEligibility?.map((criteria, index) => {
+        return typeof criteria === "string" ? (
+          <li key={index}>{criteria}</li>
+        ) : (
+          criteria
+        )
+      })}
     </ul>
     {endingText}
   </section>
