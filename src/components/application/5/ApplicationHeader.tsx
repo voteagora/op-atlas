@@ -46,8 +46,7 @@ const ApplicationHeader = ({
               <p className="font-medium text-sm">
                 Your application was submitted on{" "}
                 {format(applications[0].createdAt, "MMMM d, h:mm a")}. You can
-                resubmit with additional projects until{" "}
-                {format(applications[0].createdAt, "MMMM d, h:mm a")} UTC.
+                resubmit with additional projects until Sep 5 at 19:00 UTC
               </p>
               <ExternalLink
                 href={`${EAS_URL_PREFIX}${applications[0]?.projects[0].attestationId}`}

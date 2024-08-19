@@ -77,7 +77,7 @@ export const Sidebar = ({
         )}
 
       {/* Welcome too retro funding app */}
-      {user && (
+      {!user && (
         <div className="flex flex-col items-center gap-y-3 p-6 border border-[#D6E4FF] bg-[#F0F4FF] rounded-xl">
           <Image
             alt="empty profile"
@@ -125,18 +125,15 @@ export const Sidebar = ({
           ))}
         </div>
 
-        <p className="text-sm font-medium text-foreground text-center">
-          Explore projects
-        </p>
         <p className="text-sm font-normal text-secondary-foreground text-center">
-          Explore the projects that have received Retro Funding.
+          Explore the projects that have received Retro Funding
         </p>
-        <Link className="w-full" href="/dashboard">
+        <Link className="w-full" href="/round/results">
           <Button
             variant="outline"
             className="text-sm font-medium text-foreground justify-center mt-1 w-full"
           >
-            View projects
+            View Recipients
           </Button>
         </Link>
       </div>

@@ -43,6 +43,8 @@ import UserProjectCard from "./UserProjectCard"
 
 const SHOW_APPLICATIONS = false
 
+const cardComponents = [<FundingRoundAnnouncementCallout key="fundingRound" />]
+
 const Dashboard = ({
   className,
   user,
@@ -65,6 +67,7 @@ const Dashboard = ({
   const [showApplicationDialogue, setShowApplicationDialogue] = useState(false)
   const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] =
     useState(false)
+  const [visibleCardsCount, setVisibleCardsCount] = useState(1)
 
   const { track } = useAnalytics()
 
@@ -96,9 +99,32 @@ const Dashboard = ({
     projects?.find((project) => project.applications.length),
   )
 
+  const handleShowMore = () => {
+    setVisibleCardsCount((prevCount) =>
+      Math.min(prevCount + 1, cardComponents.length),
+    )
+  }
+
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
-      <FundingRoundAnnouncementCallout />
+      {cardComponents.slice(0, visibleCardsCount)}
+
+      {visibleCardsCount < cardComponents.length && (
+        <Button
+          variant="ghost"
+          className="text-sm font-medium text-secondary-foreground !p-0 justify-center"
+          onClick={handleShowMore}
+        >
+          Show 1 more
+          <Image
+            src="/assets/icons/arrowDownIcon.svg"
+            height={4.54}
+            width={7.42}
+            alt="arrow"
+            className="ml-2"
+          />
+        </Button>
+      )}
 
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />

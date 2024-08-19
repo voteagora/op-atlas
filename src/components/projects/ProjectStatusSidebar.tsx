@@ -115,7 +115,11 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
                     />
                   )}
                 </div>
-                {option === "Repos" ? "Repos & Links" : option}
+                {option === "Repos"
+                  ? "Repos & Links"
+                  : option === "Grants"
+                  ? "Pricing & Grants"
+                  : option}
               </Link>
             ) : (
               <div className="flex justify-start items-center gap-2">

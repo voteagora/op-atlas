@@ -22,7 +22,11 @@ import {
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
-import { verifyAdminStatus, verifyMembership } from "./utils"
+import {
+  verifyAdminStatus,
+  verifyMembership,
+  verifyOrganizationMembership,
+} from "./utils"
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
@@ -111,7 +115,13 @@ export const updateProjectDetails = async (
   }
 
   const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  if (isInvalid?.error) {
+  const isOrganizationAdmin = organizationId
+    ? await verifyOrganizationMembership(organizationId, session.user.id)
+    : {
+        error: "Unauthorized",
+      }
+
+  if (isInvalid?.error && isOrganizationAdmin?.error) {
     return isInvalid
   }
 

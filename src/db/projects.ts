@@ -157,14 +157,37 @@ export async function createProject({
       id: projectId,
       ...project,
       team: {
-        create: {
-          role: "admin" satisfies TeamRole,
-          user: {
-            connect: {
-              id: userId,
+        create: [
+          {
+            role: "admin" satisfies TeamRole,
+            user: {
+              connect: {
+                id: userId,
+              },
             },
           },
-        },
+          ...(organizationId
+            ? await prisma.userOrganization
+                .findMany({
+                  where: { organizationId, deletedAt: null },
+                  select: { userId: true },
+                })
+                .then((members) =>
+                  members
+                    .filter((member) => member.userId !== userId)
+                    .map((member) => ({
+                      role: "member",
+
+                      user: {
+                        connect: {
+                          id: member.userId,
+                        },
+                      },
+                      isOrganizationMember: true, // Mark members as joined through organization
+                    })),
+                )
+            : []),
+        ],
       },
       organization: organizationId
         ? {
@@ -195,7 +218,7 @@ export async function updateProject({
   organizationId?: string
 }) {
   return prisma.$transaction(async (prisma) => {
-    // Update the main project fields
+    // Update the project with only necessary fields and update timestamp
     const updatedProject = await prisma.project.update({
       where: { id },
       data: {
@@ -204,24 +227,58 @@ export async function updateProject({
       },
     })
 
-    if (!!!organizationId) {
-      await prisma.projectOrganization.deleteMany({
+    // Fetch the current organization ID linked to the project (if any)
+    const currentOrganizationId = await prisma.projectOrganization
+      .findUnique({
         where: { projectId: id },
+        select: { organizationId: true },
       })
-    } else if (organizationId) {
-      // Remove any existing organization associations
-      await prisma.projectOrganization.deleteMany({
-        where: { projectId: id },
-      })
+      .then((org) => org?.organizationId)
 
-      // Create a new organization association
-      await prisma.projectOrganization.create({
-        data: {
-          projectId: id,
-          organizationId,
-        },
-      })
+    if (organizationId !== currentOrganizationId) {
+      // If the organization is changing or being removed, handle the user project updates
+      if (currentOrganizationId) {
+        await prisma.userProjects.deleteMany({
+          where: {
+            projectId: id,
+            isOrganizationMember: true, // Only remove members who joined through the previous organization
+          },
+        })
+      }
+
+      if (organizationId) {
+        // Upsert the organization association (delete old one if it exists, and insert a new one)
+        await prisma.projectOrganization.upsert({
+          where: { projectId: id },
+          update: { organizationId },
+          create: { projectId: id, organizationId },
+        })
+
+        // Fetch new organization members and batch insert them
+        const newOrganizationMembers = await prisma.userOrganization.findMany({
+          where: { organizationId, deletedAt: null },
+          select: { userId: true },
+        })
+
+        if (newOrganizationMembers.length > 0) {
+          await prisma.userProjects.createMany({
+            data: newOrganizationMembers.map((member) => ({
+              projectId: id,
+              userId: member.userId,
+              role: "member",
+              isOrganizationMember: true, // Mark members as joined through the organization
+            })),
+            skipDuplicates: true, // Avoid inserting duplicates
+          })
+        }
+      } else {
+        // Remove the organization association if `organizationId` is now undefined
+        await prisma.projectOrganization.deleteMany({
+          where: { projectId: id },
+        })
+      }
     }
+
     return updatedProject
   })
 }
@@ -710,15 +767,14 @@ export async function createApplication({
   round: number
   projects: {
     projectId: string
-    categories: string[]
-    dependentEntities: string
-    successMetrics: string
-    additionalComments?: string
     attestationId: string
+    categoryId: string
+    impactStatement: Record<string, string>
+    projectDescriptionOption: string
   }[]
 }) {
   return prisma.$transaction(async (prisma) => {
-    // Create the application first
+    // Create the application
     const application = await prisma.application.create({
       data: {
         round: {
@@ -729,17 +785,17 @@ export async function createApplication({
       },
     })
 
-    // Create ApplicationProject entries
+    // Prepare ProjectApplications and ImpactStatements data
+    const projectApplicationsData = projects.map((project) => ({
+      applicationId: application.id,
+      projectId: project.projectId,
+      categoryId: project.categoryId,
+      attestationId: project.attestationId,
+      projectDescriptionOption: project.projectDescriptionOption,
+    }))
+
     await prisma.applicationProject.createMany({
-      data: projects.map((project) => ({
-        applicationId: application.id,
-        projectId: project.projectId,
-        categories: project.categories,
-        dependentEntities: project.dependentEntities,
-        successMetrics: project.successMetrics,
-        additionalComments: project.additionalComments,
-        attestationId: project.attestationId,
-      })),
+      data: projectApplicationsData,
     })
 
     const applicationProjects = await prisma.applicationProject.findMany({
@@ -748,7 +804,111 @@ export async function createApplication({
       },
     })
 
+    // Collect ImpactStatementAnswers data
+    const impactStatementAnswersData = projects.flatMap((project, index) =>
+      Object.entries(project.impactStatement).map(
+        ([impactStatementId, answer]) => ({
+          applicationProjectId: applicationProjects[index].id,
+          impactStatementId,
+          answer,
+        }),
+      ),
+    )
+
+    // Batch create ImpactStatementAnswers
+    await prisma.impactStatementAnswer.createMany({
+      data: impactStatementAnswersData,
+    })
+
     return { ...application, projects: applicationProjects }
+  })
+}
+
+export async function updateApplication({
+  applicationId,
+  projects,
+}: {
+  applicationId: string
+  projects: {
+    projectId: string
+    attestationId: string
+    categoryId: string
+    impactStatement: Record<string, string>
+    projectDescriptionOption: string
+  }[]
+}) {
+  return prisma.$transaction(async (prisma) => {
+    // Update the existing application
+    const updatedApplication = await prisma.application.update({
+      where: { id: applicationId },
+      data: {},
+    })
+
+    // Prepare updated ProjectApplications data
+    const projectApplicationsData = projects.map((project) => ({
+      applicationId: updatedApplication.id,
+      projectId: project.projectId,
+      categoryId: project.categoryId,
+      attestationId: project.attestationId,
+      projectDescriptionOption: project.projectDescriptionOption,
+    }))
+
+    // Update or create ProjectApplications
+    for (const projectData of projectApplicationsData) {
+      await prisma.applicationProject.upsert({
+        where: {
+          applicationId_projectId: {
+            applicationId: projectData.applicationId,
+            projectId: projectData.projectId,
+          },
+        },
+        update: projectData,
+        create: projectData,
+      })
+    }
+
+    const applicationProjects = await prisma.applicationProject.findMany({
+      where: {
+        applicationId: updatedApplication.id,
+      },
+    })
+
+    // Collect updated ImpactStatementAnswers data
+    for (const project of projects) {
+      const applicationProject = applicationProjects.find(
+        (ap) => ap.projectId === project.projectId,
+      )
+
+      if (applicationProject) {
+        for (const [impactStatementId, answer] of Object.entries(
+          project.impactStatement,
+        )) {
+          const existingAnswer = await prisma.impactStatementAnswer.findFirst({
+            where: {
+              applicationProjectId: applicationProject.id,
+              impactStatementId,
+            },
+          })
+
+          if (existingAnswer) {
+            await prisma.impactStatementAnswer.update({
+              where: { id: existingAnswer.id },
+              data: { answer },
+            })
+          } else {
+            await prisma.impactStatementAnswer.create({
+              data: {
+                applicationProjectId: applicationProject.id,
+                impactStatementId,
+                answer,
+              },
+            })
+          }
+        }
+      }
+    }
+
+    return { ...updatedApplication, projects: applicationProjects }
   })
 }
 
@@ -776,7 +936,11 @@ export async function getUserApplications({
       },
     },
     include: {
-      projects: true,
+      projects: {
+        include: {
+          impactStatementAnswers: true,
+        },
+      },
     },
   })
 

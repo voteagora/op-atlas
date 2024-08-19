@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Application } from "@prisma/client"
 import { useSearchParams } from "next/navigation"
 import React, { useEffect, useMemo, useState } from "react"
-import { useForm } from "react-hook-form"
+import { SubmitHandler, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -13,7 +13,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Form } from "@/components/ui/form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { submitApplications } from "@/lib/actions/applications"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  CategoryWithImpact,
+  ProjectWithDetails,
+} from "@/lib/types"
 import { getProjectStatus } from "@/lib/utils"
 
 import ApplicationDetails from "./ApplicationDetails"
@@ -28,45 +32,109 @@ const TERMS = [
 ]
 
 export const ApplicationFormSchema = z.object({
-  projects: z.array(
-    z.object({
-      projectId: z.string(),
-      selected: z.boolean(),
-      categories: z.array(z.string()),
-      entities: z
-        .string()
-        .nonempty("Entities or infrastructure field is required"),
-      results: z
-        .string()
-        .nonempty("Impact measurement results field is required"),
-      additionalInfo: z.string().optional(),
+  projects: z
+    .array(
+      z
+        .object({
+          projectId: z.string(),
+          category: z.string(),
+          projectDescription: z.string(),
+          impactStatement: z.record(z.string(), z.string()),
+          selected: z.boolean(),
+        })
+        .superRefine((data, ctx) => {
+          // Category validation
+          if (
+            data.selected &&
+            (!data.category || data.category.trim() === "")
+          ) {
+            ctx.addIssue({
+              path: ["category"],
+              message: "Category is required",
+              code: z.ZodIssueCode.custom,
+            })
+          }
+
+          // Project description validation
+          if (
+            data.selected &&
+            (!data.projectDescription || data.projectDescription.trim() === "")
+          ) {
+            ctx.addIssue({
+              path: ["projectDescription"],
+              message: "Project description is required",
+              code: z.ZodIssueCode.custom,
+            })
+          }
+
+          // Impact statement validation
+          if (data.selected) {
+            for (const [key, value] of Object.entries(data.impactStatement)) {
+              if (
+                !value ||
+                value.trim() === "" ||
+                value.length < 200 ||
+                value.length > 1000
+              ) {
+                ctx.addIssue({
+                  path: ["impactStatement", key],
+                  message:
+                    "Impact statement is required and should be between 200 and 1000 characters",
+                  code: z.ZodIssueCode.custom,
+                })
+              }
+            }
+          }
+        }),
+    )
+    .superRefine((projects, ctx) => {
+      // Ensure all selected projects have required fields filled out
+      projects.forEach((project, index) => {
+        if (project.selected) {
+          if (
+            !project.category?.trim() ||
+            !project.projectDescription?.trim() ||
+            !Object.values(project.impactStatement).every(
+              (answer) =>
+                answer &&
+                answer.trim() !== "" &&
+                answer.length >= 200 &&
+                answer.length <= 1000,
+            )
+          ) {
+            ctx.addIssue({
+              path: ["projects", index],
+              message: "All fields must be filled out for selected projects",
+              code: z.ZodIssueCode.custom,
+            })
+          }
+        }
+      })
     }),
-  ),
 })
 
 const ApplicationFormTabs = ({
   projects,
   applications,
   onApplied,
+  categories,
 }: {
   projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   onApplied: (application: ApplicationWithDetails) => void
+  categories: CategoryWithImpact[]
 }) => {
-  // const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
-
   const [currentTab, setCurrentTab] = useState(
     searchParams.get("tab") || "details",
+  )
+  const [agreedTerms, setAgreedTerms] = useState(
+    Array.from({ length: TERMS.length + 1 }, () => false),
   )
 
   const completedProjects = useMemo(() => {
     return projects?.filter((project) => {
-      console.log(
-        getProjectStatus(project).progressPercent === 100,
-        "getProjectStatus(project).progressPercent === 100",
-      )
       return getProjectStatus(project).progressPercent === 100
     })
   }, [projects])
@@ -80,21 +148,23 @@ const ApplicationFormTabs = ({
         )
         return {
           projectId: project.id,
-          categories: application?.categories ?? [],
-          entities: application?.dependentEntities ?? "",
-          results: application?.successMetrics ?? "",
-          additionalInfo: application?.additionalComments ?? "",
+          category: application?.categoryId ?? "",
+          projectDescription: application?.projectDescriptionOption ?? "",
+          impactStatement: application?.impactStatementAnswers.reduce(
+            (acc: Record<string, any>, statement) => {
+              acc[statement.impactStatementId] = statement.answer
+              return acc
+            },
+            {},
+          ) ?? { "1": "", "2": "" },
           selected:
             applications[0]?.projects.some((p) => p.projectId === project.id) ||
             false,
         }
       }),
     },
+    shouldFocusError: true,
   })
-
-  const [agreedTerms, setAgreedTerms] = useState(
-    Array.from({ length: TERMS.length + 1 }, () => false),
-  )
 
   const toggleAgreedTerm = (idx: number) => {
     setAgreedTerms((prev) => {
@@ -104,36 +174,45 @@ const ApplicationFormTabs = ({
     })
   }
 
+  const hasSelectedProjects = form
+    .watch("projects")
+    .some(
+      (project) =>
+        project.selected &&
+        !applications[0]?.projects.some(
+          (p) => p.projectId === project.projectId,
+        ),
+    )
+
   const submitApplication = async () => {
+    setIsLoading(true)
+
     const filterProjects = form
       .getValues()
-      .projects.filter((project) => project.selected)
-
-    setIsLoading(true)
+      .projects.filter(
+        (project) =>
+          project.selected &&
+          !applications[0]?.projects.some(
+            (p) => p.projectId === project.projectId,
+          ),
+      )
 
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
         try {
           const result = await submitApplications(
             filterProjects.map((project) => ({
-              categories: project.categories,
-              dependentEntities: project.entities,
-              successMetrics: project.results,
-              additionalComments: project.additionalInfo,
+              categoryId: project.category,
               projectId: project.projectId,
+              projectDescriptionOption: project.projectDescription,
+              impactStatement: project.impactStatement,
             })),
+            applications[0]?.id,
           )
 
           if (result.error !== null || result.applications.length === 0) {
             throw new Error(result.error ?? "Error submitting application")
           }
-
-          // for (const application of result.applications) {
-          //   track("Apply", {
-          //     projectIds: application.projectId,
-          //     attestationId: application.attestationId,
-          //   })
-          // }
 
           resolve(result.applications[0])
         } catch (error) {
@@ -163,8 +242,11 @@ const ApplicationFormTabs = ({
     }
   }, [searchParams])
 
-  const canSubmitForm = agreedTerms.every((term) => term)
+  const onSave = () => {
+    setCurrentTab("application")
+  }
 
+  const canSubmitForm = agreedTerms.every((term) => term)
   return (
     <Form {...form}>
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
@@ -173,20 +255,18 @@ const ApplicationFormTabs = ({
           <TabsTrigger value="projects">Projects and impact</TabsTrigger>
           <TabsTrigger value="application">Submit application</TabsTrigger>
         </TabsList>
-        <div className="mt-12">
+        <form onSubmit={form.handleSubmit(onSave)} className="mt-12">
           {/* application details content */}
           <TabsContent value="details">
-            <ApplicationDetails />
+            <ApplicationDetails onNext={() => setCurrentTab("projects")} />
           </TabsContent>
 
           {/* project and impact content */}
           <TabsContent value="projects">
             <ApplicationProjectImpact
-              onSave={() => {
-                setCurrentTab("application")
-              }}
               projects={completedProjects}
               applications={applications}
+              categories={categories}
               form={form}
             />
           </TabsContent>
@@ -205,6 +285,7 @@ const ApplicationFormTabs = ({
                 {TERMS.map((term, idx) => (
                   <div key={idx} className="flex gap-x-4">
                     <Checkbox
+                      className="mt-1"
                       checked={agreedTerms[idx]}
                       onCheckedChange={() => toggleAgreedTerm(idx)}
                     />
@@ -213,6 +294,7 @@ const ApplicationFormTabs = ({
                 ))}
                 <div className="flex gap-x-4">
                   <Checkbox
+                    className="mt-1"
                     checked={agreedTerms[TERMS.length]}
                     onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
                   />
@@ -229,7 +311,7 @@ const ApplicationFormTabs = ({
                 </div>
               </div>
               <Button
-                disabled={!canSubmitForm || isLoading}
+                disabled={!canSubmitForm || isLoading || !hasSelectedProjects}
                 onClick={submitApplication}
                 className="w-full mt-2"
                 type="button"
@@ -240,7 +322,7 @@ const ApplicationFormTabs = ({
               </Button>
             </div>
           </TabsContent>
-        </div>
+        </form>
       </Tabs>
     </Form>
   )

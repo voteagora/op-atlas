@@ -5,7 +5,11 @@ import { z } from "zod"
 import { Callout } from "@/components/common/Callout"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  CategoryWithImpact,
+  ProjectWithDetails,
+} from "@/lib/types"
 
 import { ApplicationFormSchema } from "./ApplicationFormTabs"
 import ProjectImpactForm from "./ProjectImpactForm"
@@ -14,21 +18,26 @@ const ApplicationProjectImpactForm = ({
   projects,
   applications,
   form,
-  onSave,
+  categories,
 }: {
   projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
-  onSave: () => void
+  categories: CategoryWithImpact[]
 }) => {
   const { fields } = useFieldArray({
     control: form.control,
     name: "projects",
   })
 
-  const hasSelectedProjects = form
+  const hasSelectedProjects = !form
     .watch("projects")
-    .some((project) => project.selected)
+    .filter((project) => project.selected)
+    .every((selectedProject) =>
+      applications[0]?.projects.some(
+        (p) => p.projectId === selectedProject.projectId,
+      ),
+    )
 
   return (
     <div className="flex flex-col gap-y-12">
@@ -58,6 +67,7 @@ const ApplicationProjectImpactForm = ({
         {/* Project Impact Form */}
         {fields.map((field, index) => (
           <ProjectImpactForm
+            categories={categories}
             key={field.id}
             index={index}
             project={
@@ -71,8 +81,8 @@ const ApplicationProjectImpactForm = ({
 
       <Button
         variant="destructive"
+        type="submit"
         disabled={!hasSelectedProjects}
-        onClick={onSave}
         className="disabled:bg-destructive disabled:!text-white"
       >
         Save and continue

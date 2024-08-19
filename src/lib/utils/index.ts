@@ -114,7 +114,8 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
     completedSections.push(ProjectSection.Contracts)
   }
 
-  const hasFunding = project.funding.length > 0 || project.addedFunding
+  const hasFunding =
+    (project.funding.length > 0 || project.addedFunding) && project.pricingModel
   if (hasFunding) {
     completedSections.push(ProjectSection.Grants)
   }
