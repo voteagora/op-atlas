@@ -1,7 +1,7 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
-import { nanoid } from "nanoid"
+import { error } from "console"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -23,7 +23,11 @@ import {
 
 import { createProjectAttestation } from "../eas"
 import { TeamRole } from "../types"
-import { verifyAdminStatus, verifyMembership } from "./utils"
+import {
+  verifyAdminStatus,
+  verifyMembership,
+  verifyOrganizationMembership,
+} from "./utils"
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
@@ -112,7 +116,13 @@ export const updateProjectDetails = async (
   }
 
   const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  if (isInvalid?.error) {
+  const isOrganizationAdmin = organizationId
+    ? await verifyOrganizationMembership(organizationId, session.user.id)
+    : {
+        error: "Unauthorized",
+      }
+
+  if (isInvalid?.error && isOrganizationAdmin?.error) {
     return isInvalid
   }
 

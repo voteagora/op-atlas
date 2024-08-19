@@ -6,7 +6,7 @@ import React from "react"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
+import { clickSignInWithFarcasterButton, cn } from "@/lib/utils"
 
 interface ContributionsSectionProps {
   category: number
@@ -161,8 +161,13 @@ const RULES = [
 
 const ApplicationDetails = () => {
   const router = useRouter()
-  const { data } = useSession()
+  const { data, status } = useSession()
   const user = data?.user
+
+  const onClickGetStarted = () => {
+    clickSignInWithFarcasterButton()
+  }
+
   return (
     <div className="flex flex-col gap-y-12">
       <div className="flex flex-col gap-y-6 text-secondary-foreground">
@@ -243,8 +248,11 @@ const ApplicationDetails = () => {
 
       <Button
         variant="destructive"
-        disabled={!!!user}
-        onClick={() => router.push("/application/5?tab=projects")}
+        onClick={() => {
+          status === "unauthenticated"
+            ? onClickGetStarted()
+            : router.push("/application/5?tab=projects")
+        }}
         className="w-full disabled:bg-destructive disabled:!text-white"
       >
         {user ? "Next" : " Sign in to apply for Retro Funding"}

@@ -200,9 +200,14 @@ const ProjectImpactForm = ({
                 </p>
                 <p className="text-sm text-secondary-foreground">
                   You’ve already given your project a description in your{" "}
-                  <span className="underline">project setup</span>. There’s no
-                  need to repeat that information here. Instead, focus on
-                  communicating your project’s impact.
+                  <ExternalLink
+                    href={`/projects/${project.id}/details`}
+                    className="underline"
+                  >
+                    project setup
+                  </ExternalLink>
+                  . There’s no need to repeat that information here. Instead,
+                  focus on communicating your project’s impact.
                 </p>
                 <Callout
                   className="!text-sm"

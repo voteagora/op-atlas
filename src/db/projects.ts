@@ -176,7 +176,7 @@ export async function createProject({
                   members
                     .filter((member) => member.userId !== userId)
                     .map((member) => ({
-                      role: "contributor",
+                      role: "member",
 
                       user: {
                         connect: {
@@ -265,7 +265,7 @@ export async function updateProject({
             data: newOrganizationMembers.map((member) => ({
               projectId: id,
               userId: member.userId,
-              role: "contributor",
+              role: "member",
               isOrganizationMember: true, // Mark members as joined through the organization
             })),
             skipDuplicates: true, // Avoid inserting duplicates
