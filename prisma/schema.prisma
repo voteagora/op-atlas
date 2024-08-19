@@ -23,16 +23,16 @@ model User {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  projects    UserProjects[]
+  projects      UserProjects[]
   organizations UserOrganization[]
-  addresses   UserAddress[]
-  RewardClaim RewardClaim[]
-  interaction UserInteraction?
+  addresses     UserAddress[]
+  RewardClaim   RewardClaim[]
+  interaction   UserInteraction?
 }
 
 model UserInteraction {
   id                     String   @id @default(uuid())
-  userId                 String @unique
+  userId                 String   @unique
   user                   User     @relation(fields: [userId], references: [id])
   finishSetupLinkClicked Boolean  @default(false)
   orgSettingsVisited     Boolean  @default(false)
@@ -40,7 +40,6 @@ model UserInteraction {
   viewProfileClicked     Boolean  @default(false)
   homePageViewCount      Int      @default(0)
   lastInteracted         DateTime @default(now())
-
 }
 
 model UserAddress {
@@ -71,7 +70,7 @@ model FundingRound {
 }
 
 model FundingReward {
-  id        String @id
+  id        String  @id
   roundId   String
   projectId String
   amount    Decimal
@@ -119,13 +118,13 @@ model Organization {
   twitter     String?
   mirror      String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  team        UserOrganization[]
-  projects    ProjectOrganization[]
-  snapshots   OrganizationSnapshot[]
+  team      UserOrganization[]
+  projects  ProjectOrganization[]
+  snapshots OrganizationSnapshot[]
 }
 
 model OrganizationSnapshot {
@@ -142,35 +141,34 @@ model OrganizationSnapshot {
   @@index([organizationId])
 }
 
-
 model UserOrganization {
-  id             String   @id @default(uuid())
-  role String @default("member")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  deletedAt      DateTime?
+  id        String    @id @default(uuid())
+  role      String    @default("member")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   userId         String
   organizationId String
 
-  user          User         @relation(fields: [userId], references: [id])
-  organization  Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
 
   @@unique([userId, organizationId])
   @@index([organizationId])
 }
 
 model ProjectOrganization {
-  id             String   @id @default(uuid())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  deletedAt      DateTime?
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   projectId      String @unique
   organizationId String
 
-  project       Project      @relation(fields: [projectId], references: [id])
-  organization  Organization @relation(fields: [organizationId], references: [id])
+  project      Project      @relation(fields: [projectId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
 
   @@unique([projectId, organizationId])
   @@index([organizationId])
@@ -189,7 +187,7 @@ model Project {
   twitter   String?
   mirror    String?
 
-  pricingModel String?
+  pricingModel        String?
   pricingModelDetails String?
 
   openSourceObserverSlug String?
@@ -212,45 +210,29 @@ model Project {
   applications Application[]
   rewards      FundingReward[]
   links        ProjectLinks[]
-
-  applicationProject ApplicationProject[]
 }
 
 model Application {
   id            String @id @default(uuid())
   status        String @default("submitted")
-
+  attestationId String
+  projectDescriptionOption   String @default("0")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  roundId   String
+  roundId    String
+  projectId  String
+  categoryId String?
 
-  round   FundingRound @relation(fields: [roundId], references: [id])
-  projects  ApplicationProject[]
-
-
-  Project Project[]
-}
-
-model ApplicationProject {
-  id             String   @id @default(uuid())
-  attestationId  String
-  categoryId     String?
-  projectDescriptionOption   String @default("0")
-  applicationId  String
-  projectId      String
-
-  impactStatementAnswers ImpactStatementAnswer[]
-
-  application    Application  @relation(fields: [applicationId], references: [id])
-  project        Project      @relation(fields: [projectId], references: [id])
-  category       Category?    @relation(fields: [categoryId], references: [id])
-
-  @@unique([applicationId, projectId])
+  round                 FundingRound            @relation(fields: [roundId], references: [id])
+  project               Project                 @relation(fields: [projectId], references: [id])
+  category              Category?                @relation(fields: [categoryId], references: [id])
+  impactStatementAnswer ImpactStatementAnswer[]
 }
 
 model Category {
-  id          String           @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   description String
   imageUrl    String?
@@ -258,39 +240,40 @@ model Category {
   options     String[]
 
   impactStatements ImpactStatement[]
-  ApplicationProject ApplicationProject[]
+  application      Application[]
 }
 
 model ImpactStatement {
-  id          String           @id @default(uuid())
-  categoryId  String
-  question    String
-  subtext     String?
+  id         String  @id @default(uuid())
+  categoryId String
+  question   String
+  subtext    String?
 
-  isRequired  Boolean @default(true)
+  isRequired          Boolean @default(true)
   isMarkdownSupported Boolean @default(true)
 
-  ImpactStatementAnswer ImpactStatementAnswer[]
+  impactStatementAnswer ImpactStatementAnswer[]
 
-  category    Category         @relation(fields: [categoryId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
   @@index([categoryId])
 }
 
 model ImpactStatementAnswer {
-  id                 String          @id @default(uuid())
-  applicationProjectId String
-  impactStatementId   String
-  answer             String
+  id                String @id @default(uuid())
+  applicationId     String
+  impactStatementId String
+  answer            String
 
-  applicationProject ApplicationProject @relation(fields: [applicationProjectId], references: [id])
-  impactStatement   ImpactStatement  @relation(fields: [impactStatementId], references: [id])
+  application     Application     @relation(fields: [applicationId], references: [id])
+  impactStatement ImpactStatement @relation(fields: [impactStatementId], references: [id])
 
-  @@index([applicationProjectId, impactStatementId])
+  @@index([applicationId, impactStatementId])
 }
 
 model UserProjects {
-  id   String @id @default(uuid())
-  role String @default("member")
+  id                   String  @id @default(uuid())
+  role                 String  @default("member")
   isOrganizationMember Boolean @default(false)
 
   createdAt DateTime  @default(now())
@@ -341,11 +324,12 @@ model ProjectRepository {
 
   @@index([projectId])
 }
+
 model ProjectLinks {
-  id                String  @id @default(uuid())
-  url               String
-  name              String?
-  description       String?
+  id          String  @id @default(uuid())
+  url         String
+  name        String?
+  description String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -358,7 +342,7 @@ model ProjectLinks {
 }
 
 model ProjectContract {
-  id                String @id @default(uuid())
+  id                String  @id @default(uuid())
   contractAddress   String
   deployerAddress   String
   deploymentHash    String
@@ -379,13 +363,13 @@ model ProjectContract {
 }
 
 model ProjectFunding {
-  id         String  @id @default(uuid())
-  type       String
-  grant      String?
-  grantUrl   String?
-  amount     String
-  receivedAt String
-  details    String?
+  id           String  @id @default(uuid())
+  type         String
+  grant        String?
+  grantUrl     String?
+  amount       String
+  receivedAt   String
+  details      String?
   fundingRound String?
 
   createdAt DateTime @default(now())
@@ -399,17 +383,17 @@ model ProjectFunding {
 }
 
 model ApiUser {
-  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name          String
-  api_key       String  @unique
-  email         String?
-  address       String?
-  chain_id      Int?
-  description   String?
-  enabled       Boolean @default(true)
-  created_at    DateTime? @default(now()) @db.Date
-  updated_at    DateTime? @default(now()) @db.Date
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  api_key     String    @unique
+  email       String?
+  address     String?
+  chain_id    Int?
+  description String?
+  enabled     Boolean   @default(true)
+  created_at  DateTime? @default(now()) @db.Date
+  updated_at  DateTime? @default(now()) @db.Date
 
-  @@map("api_users")
   @@index([api_key])
+  @@map("api_users")
 }
