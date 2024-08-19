@@ -75,12 +75,13 @@ export const updateOrganizationDetails = async ({
     }
   }
 
-  await createOrganizationSnapshot(id)
-
   const organizationData = await updateOrganization({
     id,
     organization,
   })
+
+  await createOrganizationSnapshot(id)
+
   revalidatePath("/dashboard")
   revalidatePath("/profile", "layout")
   return {
