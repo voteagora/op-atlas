@@ -16,7 +16,9 @@ import {
   UpdateOrganizationParams,
 } from "@/db/organizations"
 
+import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
+import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"
 
 export const getUserOrganizations = async (userId: string) => {
@@ -39,7 +41,14 @@ export const createNewOrganization = async ({
     }
   }
 
+  // Create entity attestation
+  const organizationId = await createEntityAttestation({
+    farcasterId: parseInt(session.user.farcasterId),
+    type: "organization",
+  })
+
   const organizationData = await createOrganization({
+    organizationId,
     organization,
     teamMembers,
   })
@@ -65,10 +74,14 @@ export const updateOrganizationDetails = async ({
       error: "Unauthorized",
     }
   }
+
   const organizationData = await updateOrganization({
     id,
     organization,
   })
+
+  await createOrganizationSnapshot(id)
+
   revalidatePath("/dashboard")
   revalidatePath("/profile", "layout")
   return {

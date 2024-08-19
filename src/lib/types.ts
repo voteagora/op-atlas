@@ -72,6 +72,7 @@ export type FundingRewardDetails = Prisma.FundingRewardGetPayload<{
 export type OrganizationWithDetails = Prisma.OrganizationGetPayload<{
   include: {
     team: { include: { user: true } }
+    projects: true
   }
 }>
 

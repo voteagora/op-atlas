@@ -20,7 +20,7 @@ export default async function Page({
 
   const [user, organization] = await Promise.all([
     getUserById(session.user.id),
-    getOrganization(params.organizationId),
+    getOrganization({ id: params.organizationId }),
   ])
 
   if (!organization || !user) {

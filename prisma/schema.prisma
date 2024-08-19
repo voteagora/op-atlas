@@ -119,12 +119,27 @@ model Organization {
   twitter     String?
   mirror      String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
 
-  team     UserOrganization[]
-  projects  ProjectOrganization[]
+  team        UserOrganization[]
+  projects    ProjectOrganization[]
+  snapshots   OrganizationSnapshot[]
+}
+
+model OrganizationSnapshot {
+  id            String @id @default(uuid())
+  ipfsHash      String
+  attestationId String
+
+  createdAt DateTime @default(now())
+
+  organizationId String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
 }
 
 

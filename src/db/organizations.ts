@@ -76,32 +76,28 @@ export type CreateTeamMemberParams = {
 }
 
 export async function createOrganization({
+  organizationId,
   organization,
   teamMembers,
 }: {
+  organizationId: string
   organization: CreateOrganizationParams
   teamMembers: CreateTeamMemberParams[]
 }) {
   // Start a transaction to ensure atomicity
-  return prisma.$transaction(async (prisma) => {
-    // Create the organization
-    const createdOrganization = await prisma.organization.create({
-      data: organization,
-    })
-
-    // Prepare team member data for batch insertion
-    const teamMemberData = teamMembers.map((member) => ({
-      role: member.role,
-      userId: member.userId,
-      organizationId: createdOrganization.id,
-    }))
-
-    // Create the team members
-    await prisma.userOrganization.createMany({
-      data: teamMemberData,
-    })
-
-    return createdOrganization
+  return prisma.organization.create({
+    data: {
+      id: organizationId,
+      ...organization,
+      team: {
+        createMany: {
+          data: teamMembers.map((member) => ({
+            role: member.role,
+            userId: member.userId,
+          })),
+        },
+      },
+    },
   })
 }
 
@@ -154,11 +150,34 @@ export async function deleteOrganization({
 }
 
 // Get detailed information about an organization
-export async function getOrganization(id: string) {
+export async function getOrganization({ id }: { id: string }) {
   return prisma.organization.findUnique({
     where: { id },
     include: {
       team: { where: { deletedAt: null }, include: { user: true } },
+      projects: true,
+    },
+  })
+}
+
+export async function addOrganizationSnapshot({
+  organizationId,
+  ipfsHash,
+  attestationId,
+}: {
+  organizationId: string
+  ipfsHash: string
+  attestationId: string
+}) {
+  return prisma.organizationSnapshot.create({
+    data: {
+      ipfsHash,
+      attestationId,
+      organization: {
+        connect: {
+          id: organizationId,
+        },
+      },
     },
   })
 }

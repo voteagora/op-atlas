@@ -1,4 +1,4 @@
-import { ProjectWithDetails } from "../types"
+import { OrganizationWithDetails, ProjectWithDetails } from "../types"
 
 export type ProjectMetadata = {
   name: string
@@ -111,6 +111,44 @@ export function formatProjectMetadata(
       grants,
       revenue,
     },
+  }
+
+  return metadata
+}
+
+export type OrganizationMetadata = {
+  name: string
+  description: string | null
+  organizationAvatarUrl: string | null
+  organizationCoverImageUrl: string | null
+  socialLinks: {
+    website: string[]
+    farcaster: string[]
+    twitter: string | null
+    mirror: string | null
+  }
+  team: string[]
+}
+
+export function formatOrganizationMetadata(
+  organization: OrganizationWithDetails,
+): OrganizationMetadata {
+  // Eliminate extraneous data from IPFS snapshots
+
+  const team = organization.team.map(({ user }) => user.farcasterId)
+
+  const metadata = {
+    name: organization.name,
+    description: organization.description,
+    organizationAvatarUrl: organization.avatarUrl,
+    organizationCoverImageUrl: organization.coverUrl,
+    socialLinks: {
+      website: organization.website,
+      farcaster: organization.farcaster,
+      twitter: organization.twitter,
+      mirror: organization.mirror,
+    },
+    team,
   }
 
   return metadata
