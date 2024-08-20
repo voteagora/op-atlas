@@ -212,15 +212,6 @@ const Dashboard = ({
           </div>
         )}
 
-        {showRewardsSection && (
-          <div className="flex flex-col gap-6">
-            <h3>Your Retro Funding Round 4 rewards</h3>
-            {projects.map((project) => (
-              <ProjectRewardRow key={project.id} project={project} />
-            ))}
-          </div>
-        )}
-
         {organizations?.map((organization) => {
           return (
             <div key={organization.id} className="flex flex-col gap-4">
@@ -247,6 +238,15 @@ const Dashboard = ({
             </div>
           )
         })}
+
+        {showRewardsSection && (
+          <div className="flex flex-col gap-6">
+            <h3>Your Retro Funding Round 4 rewards</h3>
+            {projects.map((project) => (
+              <ProjectRewardRow key={project.id} project={project} />
+            ))}
+          </div>
+        )}
 
         {showUnclaimedRewardsDialog && (
           <div className="flex flex-col">
