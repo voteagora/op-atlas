@@ -208,15 +208,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
       try {
         await Promise.allSettled([
-          updateGithubRepos(project.id, projectRepos),
+          updateGithubRepos(project.id, values.noRepos, projectRepos),
           setProjectLinks(project.id, links),
-          updateProjectDetails(
-            project.id,
-            {
-              hasCodeRepositories: !values.noRepos,
-            },
-            project.organization?.organizationId,
-          ),
         ])
 
         !isSave && router.push(`/projects/${project.id}/contracts`)
