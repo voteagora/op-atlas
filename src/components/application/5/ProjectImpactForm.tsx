@@ -42,7 +42,7 @@ const ProjectImpactForm = ({
     return getProjectStatus(project).progressPercent === 100
   }, [project])
 
-  const hasApplied = project.applications[0].status === "submitted"
+  const hasApplied = project.applications[0]?.status === "submitted"
 
   const categoryId = form.watch(`projects.${index}.category`)
 
