@@ -34,9 +34,7 @@ const ApplicationProjectImpactForm = ({
     .watch("projects")
     .filter((project) => project.selected)
     .every((selectedProject) =>
-      applications[0]?.projects.some(
-        (p) => p.projectId === selectedProject.projectId,
-      ),
+      applications.some((o) => o.project.id === selectedProject.projectId),
     )
 
   return (
@@ -73,7 +71,6 @@ const ApplicationProjectImpactForm = ({
             project={
               projects?.find((project) => project.id === field.projectId)!
             }
-            applications={applications}
             form={form}
           />
         ))}

@@ -2,7 +2,7 @@
 
 import { Prisma, Project } from "@prisma/client"
 
-import { TeamRole } from "@/lib/types"
+import { ApplicationWithDetails, TeamRole } from "@/lib/types"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
@@ -321,7 +321,17 @@ export async function getProject({ id }: { id: string }) {
           createdAt: "asc",
         },
       },
-      applications: true,
+      applications: {
+        include: {
+          category: {
+            include: {
+              impactStatements: true,
+            },
+          },
+          impactStatementAnswer: true,
+          round: true,
+        },
+      },
       organization: {
         where: { deletedAt: null },
         include: { organization: true },
@@ -762,153 +772,85 @@ export async function addProjectSnapshot({
 
 export async function createApplication({
   round,
-  projects,
+  projectId,
+  attestationId,
+  categoryId,
+  impactStatement,
 }: {
   round: number
-  projects: {
-    projectId: string
-    attestationId: string
-    categoryId: string
-    impactStatement: Record<string, string>
-    projectDescriptionOption: string
-  }[]
+  projectId: string
+  attestationId: string
+  categoryId: string
+  impactStatement: Record<string, string>
 }) {
-  return prisma.$transaction(async (prisma) => {
-    // Create the application
-    const application = await prisma.application.create({
-      data: {
-        round: {
-          connect: {
-            id: round.toString(),
-          },
+  return prisma.application.create({
+    data: {
+      attestationId,
+      project: {
+        connect: {
+          id: projectId,
         },
       },
-    })
-
-    // Prepare ProjectApplications and ImpactStatements data
-    const projectApplicationsData = projects.map((project) => ({
-      applicationId: application.id,
-      projectId: project.projectId,
-      categoryId: project.categoryId,
-      attestationId: project.attestationId,
-      projectDescriptionOption: project.projectDescriptionOption,
-    }))
-
-    await prisma.applicationProject.createMany({
-      data: projectApplicationsData,
-    })
-
-    const applicationProjects = await prisma.applicationProject.findMany({
-      where: {
-        applicationId: application.id,
+      round: {
+        connect: {
+          id: round.toString(),
+        },
       },
-    })
-
-    // Collect ImpactStatementAnswers data
-    const impactStatementAnswersData = projects.flatMap((project, index) =>
-      Object.entries(project.impactStatement).map(
-        ([impactStatementId, answer]) => ({
-          applicationProjectId: applicationProjects[index].id,
-          impactStatementId,
-          answer,
-        }),
-      ),
-    )
-
-    // Batch create ImpactStatementAnswers
-    await prisma.impactStatementAnswer.createMany({
-      data: impactStatementAnswersData,
-    })
-
-    return { ...application, projects: applicationProjects }
+      category: {
+        connect: {
+          id: categoryId,
+        },
+      },
+      impactStatementAnswer: {
+        createMany: {
+          data: Object.entries(impactStatement).map(
+            ([impactStatementId, answer]) => ({
+              impactStatementId,
+              answer,
+            }),
+          ),
+        },
+      },
+    },
   })
 }
 
 export async function updateApplication({
   applicationId,
-  projects,
+  categoryId,
+  impactStatement,
+  attestationId,
 }: {
   applicationId: string
-  projects: {
-    projectId: string
-    attestationId: string
-    categoryId: string
-    impactStatement: Record<string, string>
-    projectDescriptionOption: string
-  }[]
+  categoryId: string
+  impactStatement: Record<string, string>
+  attestationId: string
 }) {
-  return prisma.$transaction(async (prisma) => {
-    // Update the existing application
-    const updatedApplication = await prisma.application.update({
-      where: { id: applicationId },
-      data: {},
-    })
-
-    // Prepare updated ProjectApplications data
-    const projectApplicationsData = projects.map((project) => ({
-      applicationId: updatedApplication.id,
-      projectId: project.projectId,
-      categoryId: project.categoryId,
-      attestationId: project.attestationId,
-      projectDescriptionOption: project.projectDescriptionOption,
-    }))
-
-    // Update or create ProjectApplications
-    for (const projectData of projectApplicationsData) {
-      await prisma.applicationProject.upsert({
-        where: {
-          applicationId_projectId: {
-            applicationId: projectData.applicationId,
-            projectId: projectData.projectId,
-          },
+  return prisma.application.update({
+    where: { id: applicationId },
+    data: {
+      attestationId,
+      category: {
+        connect: {
+          id: categoryId,
         },
-        update: projectData,
-        create: projectData,
-      })
-    }
-
-    const applicationProjects = await prisma.applicationProject.findMany({
-      where: {
-        applicationId: updatedApplication.id,
       },
-    })
-
-    // Collect updated ImpactStatementAnswers data
-    for (const project of projects) {
-      const applicationProject = applicationProjects.find(
-        (ap) => ap.projectId === project.projectId,
-      )
-
-      if (applicationProject) {
-        for (const [impactStatementId, answer] of Object.entries(
-          project.impactStatement,
-        )) {
-          const existingAnswer = await prisma.impactStatementAnswer.findFirst({
-            where: {
-              applicationProjectId: applicationProject.id,
+      impactStatementAnswer: {
+        deleteMany: {
+          applicationId,
+        },
+        createMany: {
+          data: Object.entries(impactStatement).map(
+            ([impactStatementId, answer]) => ({
+              applicationId,
               impactStatementId,
-            },
-          })
-
-          if (existingAnswer) {
-            await prisma.impactStatementAnswer.update({
-              where: { id: existingAnswer.id },
-              data: { answer },
-            })
-          } else {
-            await prisma.impactStatementAnswer.create({
-              data: {
-                applicationProjectId: applicationProject.id,
-                impactStatementId,
-                answer,
-              },
-            })
-          }
-        }
-      }
-    }
-
-    return { ...updatedApplication, projects: applicationProjects }
+              answer,
+            }),
+          ),
+        },
+      },
+      updatedAt: new Date(),
+    },
   })
 }
 
@@ -918,31 +860,87 @@ export async function getUserApplications({
 }: {
   userId: string
   roundId?: string
-}) {
-  const applications = await prisma.application.findMany({
+}): Promise<ApplicationWithDetails[]> {
+  const user = await prisma.user.findUnique({
     where: {
-      roundId: roundId ?? undefined,
+      id: userId,
+    },
+    select: {
       projects: {
-        some: {
+        where: {
           project: {
-            team: {
-              some: {
-                userId: userId,
-                deletedAt: null,
+            deletedAt: null,
+          },
+        },
+        include: {
+          project: {
+            include: {
+              applications: {
+                include: {
+                  impactStatementAnswer: true,
+                  project: true,
+                },
+                where: {
+                  roundId,
+                },
+                orderBy: {
+                  createdAt: "desc",
+                },
+              },
+            },
+          },
+        },
+      },
+      organizations: {
+        where: {
+          organization: {
+            deletedAt: null,
+          },
+        },
+        include: {
+          organization: {
+            include: {
+              projects: {
+                where: {
+                  project: {
+                    deletedAt: null,
+                  },
+                },
+                include: {
+                  project: {
+                    include: {
+                      applications: {
+                        include: {
+                          impactStatementAnswer: true,
+                          project: true,
+                        },
+                        where: {
+                          roundId,
+                        },
+                        orderBy: {
+                          createdAt: "desc",
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
         },
       },
     },
-    include: {
-      projects: {
-        include: {
-          impactStatementAnswers: true,
-        },
-      },
-    },
   })
+
+  // merge organization applications with user applications
+  if (!user) return []
+
+  const applications = [
+    ...user.projects.flatMap((p) => p.project.applications),
+    ...user.organizations.flatMap((o) =>
+      o.organization.projects.flatMap((p) => p.project.applications),
+    ),
+  ]
 
   return applications
 }

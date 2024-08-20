@@ -40,10 +40,7 @@ const ApplicationBanner = ({
 
   const onViewAttestation = () => {
     if (application) {
-      window.open(
-        `${EAS_URL_PREFIX}${application.projects[0].attestationId}`,
-        "_blank",
-      )
+      window.open(`${EAS_URL_PREFIX}${application.attestationId}`, "_blank")
     }
   }
 

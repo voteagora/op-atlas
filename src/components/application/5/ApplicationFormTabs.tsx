@@ -143,14 +143,14 @@ const ApplicationFormTabs = ({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
       projects: completedProjects?.map((project) => {
-        const application = applications[0]?.projects.find(
-          (p) => p.projectId === project.id,
+        const application = applications.find(
+          (a) => a.project.id === project.id,
         )
         return {
           projectId: project.id,
           category: application?.categoryId ?? "",
           projectDescription: application?.projectDescriptionOption ?? "",
-          impactStatement: application?.impactStatementAnswers.reduce(
+          impactStatement: application?.impactStatementAnswer.reduce(
             (acc: Record<string, any>, statement) => {
               acc[statement.impactStatementId] = statement.answer
               return acc
@@ -158,8 +158,7 @@ const ApplicationFormTabs = ({
             {},
           ) ?? { "1": "", "2": "" },
           selected:
-            applications[0]?.projects.some((p) => p.projectId === project.id) ||
-            false,
+            applications.some((o) => o.project.id === project.id) || false,
         }
       }),
     },
@@ -179,9 +178,7 @@ const ApplicationFormTabs = ({
     .some(
       (project) =>
         project.selected &&
-        !applications[0]?.projects.some(
-          (p) => p.projectId === project.projectId,
-        ),
+        !applications.some((o) => o.project.id === project.projectId),
     )
 
   const submitApplication = async () => {
@@ -192,9 +189,7 @@ const ApplicationFormTabs = ({
       .projects.filter(
         (project) =>
           project.selected &&
-          !applications[0]?.projects.some(
-            (p) => p.projectId === project.projectId,
-          ),
+          !applications.some((o) => o.project.id === project.projectId),
       )
 
     const promise: Promise<Application> = new Promise(
@@ -207,7 +202,6 @@ const ApplicationFormTabs = ({
               projectDescriptionOption: project.projectDescription,
               impactStatement: project.impactStatement,
             })),
-            applications[0]?.id,
           )
 
           if (result.error !== null || result.applications.length === 0) {

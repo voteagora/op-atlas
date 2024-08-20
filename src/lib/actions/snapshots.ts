@@ -67,14 +67,27 @@ export const createProjectSnapshot = async (projectId: string) => {
 
     // If the project has an application, we need to publish a new one to reference this snapshot.
 
-    // TODO: Re-enable this when applications are open
-    // if (project.applications.length > 0 && !APPLICATIONS_CLOSED) {
-    //   await publishAndSaveApplication({
-    //     projectId,
-    //     farcasterId: session.user.farcasterId,
-    //     metadataSnapshotId: snapshot.attestationId,
-    //   })
-    // }
+    const application = project.applications.find((a) => a.roundId === "5")
+
+    if (application && !APPLICATIONS_CLOSED) {
+      await publishAndSaveApplication({
+        project: {
+          projectId: project.id,
+          categoryId: application.categoryId ?? "",
+          impactStatement: application.impactStatementAnswer.reduce(
+            (acc, { id, answer }) => {
+              acc[id] = answer
+              return acc
+            },
+            {} as Record<string, string>,
+          ),
+          projectDescriptionOption: application.projectDescriptionOption,
+        },
+        applicationId: application.id,
+        farcasterId: session.user.farcasterId,
+        metadataSnapshotId: snapshot.attestationId,
+      })
+    }
 
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")

@@ -113,11 +113,9 @@ export type UserOrganizationsWithDetails = Prisma.UserOrganizationGetPayload<{
 
 export type ApplicationWithDetails = Prisma.ApplicationGetPayload<{
   include: {
-    projects: {
-      include: {
-        impactStatementAnswers: true
-      }
-    }
+    impactStatementAnswer: true
+    project: true
+    projectDescriptionOption: true
   }
 }>
 

@@ -29,13 +29,11 @@ import { ApplicationFormSchema } from "./ApplicationFormTabs"
 
 const ProjectImpactForm = ({
   project,
-  applications,
   categories,
   form,
   index,
 }: {
   project: ProjectWithDetails
-  applications: ApplicationWithDetails[]
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   categories: CategoryWithImpact[]
   index: number
@@ -44,9 +42,7 @@ const ProjectImpactForm = ({
     return getProjectStatus(project).progressPercent === 100
   }, [project])
 
-  const hasApplied = applications[0]?.projects.findIndex(
-    (p) => p.projectId === project.id,
-  )
+  const hasApplied = project.applications[0]?.status === "submitted"
 
   const categoryId = form.watch(`projects.${index}.category`)
 
@@ -80,7 +76,7 @@ const ProjectImpactForm = ({
     })
   }, [categories, categoryId, form])
 
-  const isIneligible = !isEligible || hasApplied > -1
+  const isIneligible = !isEligible || hasApplied
 
   return (
     <div className="p-8 border border-input rounded-xl">
@@ -123,7 +119,7 @@ const ProjectImpactForm = ({
                 <p>Admin</p>
               </div>
 
-              {hasApplied > -1 && (
+              {hasApplied && (
                 <div className="ml-auto flex items-center gap-1 py-1 px-3 rounded-full bg-success">
                   <Image
                     alt="Checkmark"
@@ -137,7 +133,7 @@ const ProjectImpactForm = ({
                 </div>
               )}
 
-              {isIneligible && hasApplied === -1 && (
+              {isIneligible && !hasApplied && (
                 <Badge size="lg" text="Not eligible" className="ml-auto" />
               )}
             </div>

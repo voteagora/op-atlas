@@ -44,8 +44,9 @@ export const FundingApplication = ({
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([])
 
   const hasApplied = applications.length > 0
-  const appliedProjectIds =
-    applications.map((application) => application.projects[0].id) ?? []
+  const appliedProjectIds = applications.map(
+    (application) => application.projectId,
+  )
 
   const toggleAgreedTerm = (idx: number) => {
     setAgreedTerms((prev) => {
@@ -145,7 +146,7 @@ export const FundingApplication = ({
             </div>
             <ExternalLink
               className="text-sm text-success-foreground font-medium"
-              href={`${EAS_URL_PREFIX}${applications[0].projects[0].attestationId}`}
+              href={`${EAS_URL_PREFIX}${applications[0].attestationId}`}
             >
               View attestation
             </ExternalLink>

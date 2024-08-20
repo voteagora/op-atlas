@@ -32,7 +32,7 @@ export const ApplicationStatus = ({
       </div>
       <ExternalLink
         className="text-sm text-success-foreground font-medium"
-        href={`${EAS_URL_PREFIX}${application.projects[0].attestationId}`}
+        href={`${EAS_URL_PREFIX}${application.attestationId}`}
       >
         View attestation
       </ExternalLink>
