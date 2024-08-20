@@ -48,12 +48,6 @@ const ApplicationHeader = ({
                 {format(applications[0].createdAt, "MMMM d, h:mm a")}. You can
                 resubmit with additional projects until Sep 5 at 19:00 UTC
               </p>
-              <ExternalLink
-                href={`${EAS_URL_PREFIX}${applications[0].attestationId}`}
-                className="text-sm font-medium mt-2"
-              >
-                View attestation
-              </ExternalLink>
             </div>
           </div>
           <div className="flex justify-center items-center gap-x-6">

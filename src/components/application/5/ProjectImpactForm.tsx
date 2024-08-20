@@ -1,8 +1,7 @@
 import { CheckedState } from "@radix-ui/react-checkbox"
-import { watch } from "fs"
 import Image from "next/image"
-import React, { useEffect, useMemo } from "react"
-import { Controller, UseFormReturn, useWatch } from "react-hook-form"
+import React, { memo, useEffect, useMemo } from "react"
+import { UseFormReturn, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 import { Badge } from "@/components/common/Badge"
@@ -18,12 +17,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  ApplicationWithDetails,
-  CategoryWithImpact,
-  ProjectWithDetails,
-} from "@/lib/types"
-import { getProjectStatus } from "@/lib/utils"
+import { CategoryWithImpact, ProjectWithDetails } from "@/lib/types"
+import { EAS_URL_PREFIX, getProjectStatus } from "@/lib/utils"
 
 import { ApplicationFormSchema } from "./ApplicationFormTabs"
 
@@ -43,12 +38,14 @@ const ProjectImpactForm = ({
   }, [project])
 
   const hasApplied = project.applications[0]?.status === "submitted"
+  const attestationId = project.applications[0]?.attestationId
 
-  const categoryId = form.watch(`projects.${index}.category`)
+  const categoryId = useWatch({ name: `projects.${index}.category` })
 
   useEffect(() => {
-    const watchedProjects = form.watch("projects")
-    watchedProjects.forEach((project: any, index: number) => {
+    const watchedProjects = form.getValues("projects")
+
+    watchedProjects.forEach((project, index: number) => {
       const selectedCategory = categories.find(
         (category) => category.id === project.category,
       )
@@ -67,10 +64,9 @@ const ProjectImpactForm = ({
           `projects.${index}.impactStatement`,
           updatedImpactStatements,
         )
-        form.setValue(
-          `projects.${index}.projectDescription`,
-          project.projectDescription || "",
-        )
+        if (!watchedProjects[index].isSubmitted) {
+          form.setValue(`projects.${index}.projectDescriptionOptions`, [])
+        }
         form.setValue(`projects.${index}.selected`, true)
       }
     })
@@ -120,17 +116,20 @@ const ProjectImpactForm = ({
               </div>
 
               {hasApplied && (
-                <div className="ml-auto flex items-center gap-1 py-1 px-3 rounded-full bg-success">
+                <ExternalLink
+                  href={`${EAS_URL_PREFIX}${attestationId}`}
+                  className="ml-auto flex items-center gap-1 mr-2"
+                >
                   <Image
                     alt="Checkmark"
                     src="/assets/icons/circle-check-green.svg"
-                    height={14}
-                    width={14}
+                    height={11.6}
+                    width={11.6}
                   />
                   <p className="font-medium text-sm text-success-foreground">
-                    Submitted
+                    View attestation
                   </p>
-                </div>
+                </ExternalLink>
               )}
 
               {isIneligible && !hasApplied && (
@@ -299,24 +298,31 @@ const CategoryItem = ({
 
           <FormField
             control={form.control}
-            name={`projects.${index}.projectDescription`}
+            name={`projects.${index}.projectDescriptionOptions`}
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
-                <RadioGroup onValueChange={field.onChange} value={field.value}>
-                  {options.map((option) => (
-                    <div
-                      key={option}
-                      className="py-2.5 px-3 flex items-center gap-x-2 border border-input rounded-lg w-full"
-                    >
-                      <span>
-                        <RadioGroupItem value={option} />
-                      </span>
-                      <div>
-                        <p className="text-sm">{option}</p>
-                      </div>
+                {options.map((option) => (
+                  <div
+                    key={option}
+                    className="py-2.5 px-3 flex items-center gap-x-2 border border-input rounded-lg w-full"
+                  >
+                    <span>
+                      <Checkbox
+                        checked={(field.value as string[]).includes(option)}
+                        onCheckedChange={(checked) => {
+                          const newValue = checked
+                            ? [...field.value, option]
+                            : field.value.filter((id: string) => id !== option)
+                          field.onChange(newValue)
+                        }}
+                      />
+                    </span>
+                    <div>
+                      <p className="text-sm">{option}</p>
                     </div>
-                  ))}
-                </RadioGroup>
+                  </div>
+                ))}
+
                 <FormMessage />
               </FormItem>
             )}
@@ -327,4 +333,4 @@ const CategoryItem = ({
   )
 }
 
-export default ProjectImpactForm
+export default memo(ProjectImpactForm)

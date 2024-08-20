@@ -778,16 +778,19 @@ export async function createApplication({
   attestationId,
   categoryId,
   impactStatement,
+  projectDescriptionOptions,
 }: {
   round: number
   projectId: string
   attestationId: string
   categoryId: string
+  projectDescriptionOptions: string[]
   impactStatement: Record<string, string>
 }) {
   return prisma.application.create({
     data: {
       attestationId,
+      projectDescriptionOptions,
       project: {
         connect: {
           id: projectId,
@@ -822,16 +825,19 @@ export async function updateApplication({
   categoryId,
   impactStatement,
   attestationId,
+  projectDescriptionOptions,
 }: {
   applicationId: string
   categoryId: string
   impactStatement: Record<string, string>
   attestationId: string
+  projectDescriptionOptions: string[]
 }) {
   return prisma.application.update({
     where: { id: applicationId },
     data: {
       attestationId,
+      projectDescriptionOptions,
       category: {
         connect: {
           id: categoryId,

@@ -216,8 +216,8 @@ model Application {
   id            String @id @default(uuid())
   status        String @default("submitted")
   attestationId String
-  projectDescriptionOption   String @default("0")
-  
+  projectDescriptionOptions   String[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

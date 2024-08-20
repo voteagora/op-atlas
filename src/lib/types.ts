@@ -1,5 +1,4 @@
 import { Prisma } from "@prisma/client"
-import exp from "constants"
 
 export type TeamRole = "member" | "admin"
 
@@ -115,7 +114,7 @@ export type ApplicationWithDetails = Prisma.ApplicationGetPayload<{
   include: {
     impactStatementAnswer: true
     project: true
-    projectDescriptionOption: true
+    projectDescriptionOptions: true
   }
 }>
 

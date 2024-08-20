@@ -6,6 +6,7 @@ import { sortBy } from "ramda"
 
 import { auth } from "@/auth"
 import { createApplication, getProject, updateApplication } from "@/db/projects"
+import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
@@ -15,7 +16,7 @@ interface SubmitApplicationRequest {
   projectId: string
   categoryId: string
   impactStatement: Record<string, string>
-  projectDescriptionOption: string
+  projectDescriptionOptions: string[]
 }
 
 export const publishAndSaveApplication = async ({
@@ -91,7 +92,7 @@ const createProjectApplication = async (
       projectId: project.id,
       categoryId: applicationData.categoryId,
       impactStatement: applicationData.impactStatement,
-      projectDescriptionOption: applicationData.projectDescriptionOption,
+      projectDescriptionOptions: applicationData.projectDescriptionOptions,
     },
     farcasterId,
     metadataSnapshotId: latestSnapshot.attestationId,
@@ -108,7 +109,7 @@ export const submitApplications = async (
     projectId: string
     categoryId: string
     impactStatement: Record<string, string>
-    projectDescriptionOption: string
+    projectDescriptionOptions: string[]
   }[],
 ) => {
   const session = await auth()
@@ -117,6 +118,15 @@ export const submitApplications = async (
     return {
       applications: [],
       error: "Unauthorized",
+    }
+  }
+
+  const user = await getUserById(session.user.id)
+
+  if (!user?.email) {
+    return {
+      applications: [],
+      error: "You must provide an email to apply.",
     }
   }
 

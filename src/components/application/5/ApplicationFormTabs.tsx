@@ -38,9 +38,10 @@ export const ApplicationFormSchema = z.object({
         .object({
           projectId: z.string(),
           category: z.string(),
-          projectDescription: z.string(),
+          projectDescriptionOptions: z.array(z.string()),
           impactStatement: z.record(z.string(), z.string()),
           selected: z.boolean(),
+          isSubmitted: z.boolean(),
         })
         .superRefine((data, ctx) => {
           // Category validation
@@ -56,12 +57,9 @@ export const ApplicationFormSchema = z.object({
           }
 
           // Project description validation
-          if (
-            data.selected &&
-            (!data.projectDescription || data.projectDescription.trim() === "")
-          ) {
+          if (data.selected && !data.projectDescriptionOptions.length) {
             ctx.addIssue({
-              path: ["projectDescription"],
+              path: ["projectDescriptionOptions"],
               message: "Project description is required",
               code: z.ZodIssueCode.custom,
             })
@@ -93,7 +91,7 @@ export const ApplicationFormSchema = z.object({
         if (project.selected) {
           if (
             !project.category?.trim() ||
-            !project.projectDescription?.trim() ||
+            !project.projectDescriptionOptions.length ||
             !Object.values(project.impactStatement).every(
               (answer) =>
                 answer &&
@@ -149,7 +147,8 @@ const ApplicationFormTabs = ({
         return {
           projectId: project.id,
           category: application?.categoryId ?? "",
-          projectDescription: application?.projectDescriptionOption ?? "",
+          projectDescriptionOptions:
+            application?.projectDescriptionOptions ?? [],
           impactStatement: application?.impactStatementAnswer.reduce(
             (acc: Record<string, any>, statement) => {
               acc[statement.impactStatementId] = statement.answer
@@ -157,6 +156,8 @@ const ApplicationFormTabs = ({
             },
             {},
           ) ?? { "1": "", "2": "" },
+          isSubmitted:
+            applications.some((o) => o.project.id === project.id) ?? false,
           selected:
             applications.some((o) => o.project.id === project.id) || false,
         }
@@ -199,7 +200,7 @@ const ApplicationFormTabs = ({
             filterProjects.map((project) => ({
               categoryId: project.category,
               projectId: project.projectId,
-              projectDescriptionOption: project.projectDescription,
+              projectDescriptionOptions: project.projectDescriptionOptions,
               impactStatement: project.impactStatement,
             })),
           )
