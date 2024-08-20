@@ -19,7 +19,7 @@ const ResultsHeader = ({ roundId }: { roundId: string | number }) => {
       <div className="flex justify-between items-center flex-wrap sm:flex-nowrap gap-4">
         <div className="flex flex-col w-full">
           <h1 className="text-4xl font-semibold text-text-default">
-            Projects & Rewards
+            Recipients
           </h1>
           <p className="mt-2 text-base font-normal text-text-secondary">
             Explore the projects that have received Retro Funding

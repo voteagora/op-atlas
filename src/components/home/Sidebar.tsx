@@ -77,7 +77,7 @@ export const Sidebar = ({
         )}
 
       {/* Welcome too retro funding app */}
-      {!user && (
+      {status === "unauthenticated" && (
         <div className="flex flex-col items-center gap-y-3 p-6 border border-[#D6E4FF] bg-[#F0F4FF] rounded-xl">
           <Image
             alt="empty profile"

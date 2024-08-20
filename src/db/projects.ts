@@ -79,12 +79,14 @@ export async function getUserAdminProjectsWithDetail({
 }
 
 export const getRandomProjects = () => {
-  return prisma.project.findMany({
-    where: {
-      deletedAt: null,
-    },
-    take: 5,
-  })
+  return prisma.$queryRaw<Project[]>`
+    SELECT * 
+    FROM "Project" 
+    WHERE "deletedAt" IS NULL 
+    AND "thumbnailUrl" IS NOT NULL 
+    ORDER BY RANDOM() 
+    LIMIT 5;
+  `
 }
 
 export async function getUserProjectsWithDetails({

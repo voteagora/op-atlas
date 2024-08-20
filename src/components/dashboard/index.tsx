@@ -104,7 +104,6 @@ const Dashboard = ({
       Math.min(prevCount + 1, cardComponents.length),
     )
   }
-
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
       {cardComponents.slice(0, visibleCardsCount)}
@@ -169,26 +168,24 @@ const Dashboard = ({
         )}
         <ProfileDetailCard user={user} />
 
-        {!!!projects ||
-          !!!organizations ||
-          (!!!projects && (
-            <div className="flex flex-col gap-4">
-              {!profileInitiallyComplete.current && (
-                <CompleteProfileCallout user={user} />
-              )}
-              {!!!organizations?.length && (
-                <MakeFirstOrganization
-                  onClick={() => setShowOnBoarding(true)}
-                />
-              )}
+        {(!projects.length ||
+          !!!organizations?.length ||
+          !profileInitiallyComplete.current) && (
+          <div className="flex flex-col gap-4">
+            {!profileInitiallyComplete.current && (
+              <CompleteProfileCallout user={user} />
+            )}
+            {!organizations?.length && (
+              <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
+            )}
 
-              {!!!projects && (
-                <Link href="/projects/new">
-                  <AddFirstProject />
-                </Link>
-              )}
-            </div>
-          ))}
+            {!projects.length && (
+              <Link href="/projects/new">
+                <AddFirstProject />
+              </Link>
+            )}
+          </div>
+        )}
 
         {projects.length > 0 && (
           <div className="flex flex-col gap-4">
