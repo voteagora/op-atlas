@@ -49,7 +49,7 @@ const ApplicationHeader = ({
                 resubmit with additional projects until Sep 5 at 19:00 UTC
               </p>
               <ExternalLink
-                href={`${EAS_URL_PREFIX}${applications[0]?.projects[0].attestationId}`}
+                href={`${EAS_URL_PREFIX}${applications[0].attestationId}`}
                 className="text-sm font-medium mt-2"
               >
                 View attestation
