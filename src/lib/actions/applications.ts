@@ -13,55 +13,66 @@ import { verifyMembership } from "./utils"
 
 interface SubmitApplicationRequest {
   projectId: string
-  attestationId: string
   categoryId: string
   impactStatement: Record<string, string>
   projectDescriptionOption: string
 }
 
 export const publishAndSaveApplication = async ({
-  projects,
+  project,
   applicationId,
+  farcasterId,
+  metadataSnapshotId,
 }: {
+  project: SubmitApplicationRequest
   applicationId?: string
-  projects: SubmitApplicationRequest[]
+  farcasterId: string
+  metadataSnapshotId: string
 }): Promise<Application> => {
+  // Publish attestation
+  const attestationId = await createApplicationAttestation({
+    farcasterId: parseInt(farcasterId),
+    projectId: project.projectId,
+    round: 4,
+    snapshotRef: metadataSnapshotId,
+  })
+
   // Create application in database
   return applicationId
     ? await updateApplication({
+        ...project,
+        attestationId,
         applicationId,
-        projects,
       })
     : await createApplication({
-        projects,
         round: 5,
+        ...project,
+        attestationId,
       })
 }
 
 const createProjectApplication = async (
-  project: {
-    projectId: string
-    categoryId: string
-    impactStatement: Record<string, string>
-    projectDescriptionOption: string
-  },
+  applicationData: SubmitApplicationRequest,
   farcasterId: string,
 ) => {
-  const isInvalid = await verifyMembership(project.projectId, farcasterId)
+  const isInvalid = await verifyMembership(
+    applicationData.projectId,
+    farcasterId,
+  )
   if (isInvalid?.error) {
     return isInvalid
   }
 
-  const projectData = await getProject({ id: project.projectId })
+  const project = await getProject({ id: applicationData.projectId })
 
-  if (!projectData) {
+  if (!project) {
     return {
       error: "Project not found",
     }
   }
 
   // Project must be 100% complete
-  const { progressPercent } = getProjectStatus(projectData)
+  const { progressPercent } = getProjectStatus(project)
 
   if (progressPercent !== 100) {
     return {
@@ -72,18 +83,22 @@ const createProjectApplication = async (
   // Issue attestation
   const latestSnapshot = sortBy(
     (snapshot) => -snapshot.createdAt,
-    projectData.snapshots,
+    project.snapshots,
   )[0]
 
-  const attestationId = await createApplicationAttestation({
-    farcasterId: parseInt(farcasterId),
-    projectId: project.projectId,
-    round: 5,
-    snapshotRef: latestSnapshot.attestationId,
+  const application = await publishAndSaveApplication({
+    project: {
+      projectId: project.id,
+      categoryId: applicationData.categoryId,
+      impactStatement: applicationData.impactStatement,
+      projectDescriptionOption: applicationData.projectDescriptionOption,
+    },
+    farcasterId,
+    metadataSnapshotId: latestSnapshot.attestationId,
   })
 
   return {
-    projects: { ...project, attestationId },
+    application,
     error: null,
   }
 }
@@ -95,7 +110,6 @@ export const submitApplications = async (
     impactStatement: Record<string, string>
     projectDescriptionOption: string
   }[],
-  applicationId?: string,
 ) => {
   const session = await auth()
 
@@ -106,13 +120,6 @@ export const submitApplications = async (
     }
   }
 
-  if (!session.user.email) {
-    return {
-      applications: [],
-      error: "You must have an email to apply for application",
-    }
-  }
-
   if (APPLICATIONS_CLOSED) {
     throw new Error("Applications are closed")
   }
@@ -120,27 +127,16 @@ export const submitApplications = async (
   const applications: Application[] = []
   let error: string | null = null
 
-  const applicationFormData = <SubmitApplicationRequest[]>[]
-
   for (const project of projects) {
     const result = await createProjectApplication(
       project,
       session.user.farcasterId,
     )
-
-    if (result.error === null && result.projects) {
-      applicationFormData.push(result.projects)
+    if (result.error === null && result.application) {
+      applications.push(result.application)
     } else if (result.error) {
       error = result.error
     }
-  }
-
-  if (!!applicationFormData.length) {
-    const applicationData = await publishAndSaveApplication({
-      projects: applicationFormData,
-      applicationId,
-    })
-    applications.push(applicationData)
   }
 
   revalidatePath("/dashboard")

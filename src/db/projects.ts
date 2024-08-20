@@ -321,7 +321,17 @@ export async function getProject({ id }: { id: string }) {
           createdAt: "asc",
         },
       },
-      applications: true,
+      applications: {
+        include: {
+          category: {
+            include: {
+              impactStatements: true,
+            },
+          },
+          impactStatementAnswer: true,
+          round: true,
+        },
+      },
       organization: {
         where: { deletedAt: null },
         include: { organization: true },
@@ -809,14 +819,17 @@ export async function updateApplication({
   applicationId,
   categoryId,
   impactStatement,
+  attestationId,
 }: {
   applicationId: string
   categoryId: string
   impactStatement: Record<string, string>
+  attestationId: string
 }) {
   return prisma.application.update({
     where: { id: applicationId },
     data: {
+      attestationId,
       category: {
         connect: {
           id: categoryId,
@@ -836,6 +849,7 @@ export async function updateApplication({
           ),
         },
       },
+      updatedAt: new Date(),
     },
   })
 }
