@@ -41,6 +41,13 @@ export type ProjectMetadata = {
       details: string | null
     }[]
   }
+  pricingModel: string | null
+  pricingModelDetails: string | null
+  links: {
+    url: string
+    name: string | null
+    description: string | null
+  }[]
 }
 
 export function formatProjectMetadata(
@@ -111,6 +118,13 @@ export function formatProjectMetadata(
       grants,
       revenue,
     },
+    pricingModel: project.pricingModel,
+    pricingModelDetails: project.pricingModelDetails,
+    links: project.links.map((link) => ({
+      url: link.url,
+      name: link.name,
+      description: link.description,
+    })),
   }
 
   return metadata

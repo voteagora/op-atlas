@@ -55,6 +55,15 @@ const ProjectMetadataValidator = z.object({
       }),
     ),
   }),
+  pricingModel: z.string().nullable().default(null),
+  pricingModelDetails: z.string().nullable().default(null),
+  links: z.array(
+    z.object({
+      url: z.string(),
+      name: z.string().nullable().default(null),
+      description: z.string().nullable().default(null),
+    }),
+  ),
 })
 
 export const POST = async (
