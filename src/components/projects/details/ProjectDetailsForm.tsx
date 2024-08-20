@@ -62,6 +62,13 @@ const StringValue = z.object({ value: z.string() }) // use a intermediate object
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string(),
+  organization: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      avatarUrl: z.string().optional(),
+    })
+    .nullable(),
   category: CategoryEnum,
   website: z.array(StringValue),
   farcaster: z.array(StringValue),
@@ -99,6 +106,7 @@ export default function ProjectDetailsForm({
     defaultValues: {
       name: project?.name ?? "",
       description: project?.description ?? "",
+      organization: project?.organization,
       category: project?.category
         ? (project.category as z.infer<typeof CategoryEnum>)
         : "CeFi",
@@ -125,13 +133,6 @@ export default function ProjectDetailsForm({
   const [newAvatarImg, setNewAvatarImg] = useState<Blob>()
   const [newBannerImg, setNewBannerImg] = useState<Blob>()
 
-  const [selectedOrganization, setSelectedOrganization] =
-    useState<Organization | null>(
-      organizations.find(
-        (org) => org.id === project?.organization?.organizationId,
-      ) || null,
-    )
-
   const avatarUrl = useMemo(() => {
     if (!newAvatarImg) return project?.thumbnailUrl
     return URL.createObjectURL(newAvatarImg)
@@ -152,10 +153,6 @@ export default function ProjectDetailsForm({
       URL.revokeObjectURL(bannerSrc)
       setBannerSrc(undefined)
     }
-  }
-
-  const handleSelect = (organization: (typeof organizations)[0] | null) => {
-    setSelectedOrganization(organization)
   }
 
   const onSubmit =
@@ -221,12 +218,8 @@ export default function ProjectDetailsForm({
       const promise: Promise<Project> = new Promise(async (resolve, reject) => {
         try {
           const response = project
-            ? await updateProjectDetails(
-                project.id,
-                newValues,
-                selectedOrganization?.id,
-              )
-            : await createNewProject(newValues, selectedOrganization?.id)
+            ? await updateProjectDetails(project.id, newValues)
+            : await createNewProject(newValues)
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
@@ -258,14 +251,6 @@ export default function ProjectDetailsForm({
         },
       })
     }
-
-  useEffect(() => {
-    if (orgId) {
-      setSelectedOrganization(
-        organizations.find((org) => org.id === orgId) || null,
-      )
-    }
-  }, [orgId, organizations])
 
   const canSubmit = form.formState.isValid && !form.formState.isSubmitting
 
@@ -322,71 +307,80 @@ export default function ProjectDetailsForm({
               </FormItem>
             )}
           />
-          <DropdownMenu>
-            <div className="w-full">
-              <FormLabel className="text-foreground">
-                Organization<span className="ml-0.5 text-destructive">*</span>
-              </FormLabel>
-              <DropdownMenuTrigger asChild>
-                <div className="h-10 py-2.5 px-3 flex  text-foreground items-center rounded-lg border border-input mt-2">
-                  {selectedOrganization?.avatarUrl && (
-                    <Avatar className="w-5 h-5 mr-2">
-                      <AvatarImage
-                        src={selectedOrganization?.avatarUrl ?? ""}
-                        alt="avatar"
+          <FormField
+            control={form.control}
+            name="organization"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel className="text-foreground">
+                  Organization<span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="h-10 py-2.5 px-3 flex text-foreground items-center rounded-lg border border-input mt-2 cursor-pointer">
+                      {field.value?.avatarUrl && (
+                        <Avatar className="w-5 h-5 mr-2">
+                          <AvatarImage
+                            src={field.value?.avatarUrl ?? ""}
+                            alt="avatar"
+                          />
+                          <AvatarFallback>{field.value?.name}</AvatarFallback>
+                        </Avatar>
+                      )}
+                      <p className="text-sm text-foreground">
+                        {field.value?.name ?? "No Organization"}
+                      </p>
+                      <Image
+                        className="ml-auto"
+                        src="/assets/icons/arrowDownIcon.svg"
+                        height={8}
+                        width={10}
+                        alt="Arrow up"
                       />
-                      <AvatarFallback>
-                        {selectedOrganization?.name}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                  <p className="text-sm text-foreground">
-                    {selectedOrganization?.name ?? "No Organization"}
-                  </p>
-                  <Image
-                    className="ml-auto"
-                    src="/assets/icons/arrowDownIcon.svg"
-                    height={8}
-                    width={10}
-                    alt="Arrow up"
-                  />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="!w-[750px]">
-                {organizations?.map((organization) => (
-                  <DropdownMenuCheckboxItem
-                    className="text-sm font-normal text-secondary-foreground w-full"
-                    checked={selectedOrganization?.id === organization.id}
-                    key={organization.id}
-                    onCheckedChange={() => handleSelect(organization)}
-                  >
-                    <Avatar className="w-5 h-5 mr-2">
-                      <AvatarImage
-                        src={organization.avatarUrl || ""}
-                        alt="avatar"
-                      />
-                      <AvatarFallback>{organization.name}</AvatarFallback>
-                    </Avatar>
-                    {organization.name}
-                  </DropdownMenuCheckboxItem>
-                ))}
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="!w-[750px]">
+                    {organizations?.map((organization) => (
+                      <DropdownMenuCheckboxItem
+                        className="text-sm font-normal text-secondary-foreground w-full"
+                        checked={field.value?.id === organization.id}
+                        key={organization.id}
+                        onCheckedChange={() => {
+                          field.onChange(organization)
+                        }}
+                      >
+                        <Avatar className="w-5 h-5 mr-2">
+                          <AvatarImage
+                            src={organization.avatarUrl || ""}
+                            alt="avatar"
+                          />
+                          <AvatarFallback>{organization.name}</AvatarFallback>
+                        </Avatar>
+                        {organization.name}
+                      </DropdownMenuCheckboxItem>
+                    ))}
 
-                <DropdownMenuCheckboxItem
-                  className="text-sm font-normal text-secondary-foreground w-full"
-                  checked={selectedOrganization === null}
-                  onCheckedChange={() => handleSelect(null)}
-                >
-                  No organization
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
-                  <Link href="/profile/organizations/new">
-                    Make an organization
-                  </Link>
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </div>
-          </DropdownMenu>
+                    <DropdownMenuCheckboxItem
+                      className="text-sm font-normal text-secondary-foreground w-full"
+                      checked={field.value === null}
+                      onCheckedChange={() => {
+                        field.onChange(null)
+                      }}
+                    >
+                      No organization
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
+                      <Link href="/profile/organizations/new">
+                        Make an organization
+                      </Link>
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="description"
