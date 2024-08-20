@@ -71,7 +71,6 @@ const ApplicationProjectImpactForm = ({
             project={
               projects?.find((project) => project.id === field.projectId)!
             }
-            applications={applications}
             form={form}
           />
         ))}

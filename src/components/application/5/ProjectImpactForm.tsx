@@ -29,13 +29,11 @@ import { ApplicationFormSchema } from "./ApplicationFormTabs"
 
 const ProjectImpactForm = ({
   project,
-  applications,
   categories,
   form,
   index,
 }: {
   project: ProjectWithDetails
-  applications: ApplicationWithDetails[]
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   categories: CategoryWithImpact[]
   index: number
