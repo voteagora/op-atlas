@@ -15,18 +15,40 @@ export const isUserMember = async (
 }
 
 export const projectMembers = (project: ProjectWithDetails) => {
-  const projectTeam = project.team
-  const organizationTeam = project.organization?.organization?.team
+  const projectTeam = project.team.map((user) => {
+    return {
+      ...user,
+      organizationId: undefined,
+    }
+  })
+  const organizationTeam = (project.organization?.organization?.team || []).map(
+    (user) => {
+      return {
+        ...user,
+        organizationId: project.organization?.organizationId,
+      }
+    },
+  )
 
-  // filter out duplicates
   return [
-    ...projectTeam,
-    ...(organizationTeam || []).filter(
-      (member) =>
-        !projectTeam.some(
-          (projectMember) => projectMember.userId === member.userId,
-        ),
-    ),
+    // filter out project memeber if they are admin of organization
+    ...projectTeam.filter((user) => {
+      return !organizationTeam.some((organizationUser) => {
+        return (
+          user.userId === organizationUser.userId &&
+          organizationUser.role === "admin"
+        )
+      })
+    }),
+    // filter out organization contributor if they are admin or contributor of project
+    ...organizationTeam.filter((user) => {
+      if (user.role === "admin") {
+        return true
+      }
+      return !projectTeam.some((projectUser) => {
+        return user.userId === projectUser.userId
+      })
+    }),
   ]
 }
 

@@ -5,7 +5,7 @@ import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { sortBy } from "ramda"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { Callout } from "@/components/common/Callout"
@@ -111,11 +111,13 @@ export default function AddTeamDetailsForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <p className="text-foreground text-sm font-medium">Contributors</p>
-          {team.map(({ user, role }) => (
+          {team.map(({ user, role, organizationId }) => (
             <TeamMemberCard
               key={user.id}
               user={user}
-              organizationName={project.organization?.organization.name}
+              organizationName={
+                organizationId && project.organization?.organization.name
+              }
               role={role as TeamRole}
               isUserAdmin={!!isAdmin}
               isCurrentUser={currentUser?.id === user.id}
