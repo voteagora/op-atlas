@@ -5,7 +5,7 @@ import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { sortBy } from "ramda"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { Callout } from "@/components/common/Callout"
@@ -16,6 +16,7 @@ import {
   setMemberRole,
   updateProjectDetails,
 } from "@/lib/actions/projects"
+import { projectMembers } from "@/lib/actions/utils"
 import { useIsAdmin } from "@/lib/hooks"
 import { ProjectWithDetails, TeamRole } from "@/lib/types"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
@@ -30,11 +31,13 @@ export default function AddTeamDetailsForm({
 }: {
   project: ProjectWithDetails
 }) {
+  const team = sortBy(
+    (member) => member.user.name?.toLowerCase() ?? "",
+    projectMembers(project),
+  )
+
   const router = useRouter()
   const { data } = useSession()
-  const [team, setTeam] = useState(
-    sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
-  )
 
   const currentUser = data?.user
 
@@ -90,12 +93,6 @@ export default function AddTeamDetailsForm({
     }
   }
 
-  useEffect(() => {
-    setTeam(
-      sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
-    )
-  }, [project.team])
-
   return (
     <>
       <div className="flex flex-col gap-y-6">
@@ -114,11 +111,13 @@ export default function AddTeamDetailsForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <p className="text-foreground text-sm font-medium">Contributors</p>
-          {team.map(({ user, role }) => (
+          {team.map(({ user, role, organizationId }) => (
             <TeamMemberCard
               key={user.id}
               user={user}
-              organizationName={project.organization?.organization.name}
+              organizationName={
+                organizationId && project.organization?.organization.name
+              }
               role={role as TeamRole}
               isUserAdmin={!!isAdmin}
               isCurrentUser={currentUser?.id === user.id}
@@ -171,7 +170,9 @@ export default function AddTeamDetailsForm({
       <AddTeamMemberDialog
         open={isShowingAdd}
         onOpenChange={(open) => setIsShowingAdd(open)}
-        team={team.map((member) => member.user)}
+        team={team
+          .filter((user) => user.organizationId && user.role === "admin")
+          .map((member) => member.user)}
         addMembers={handleAddMembers}
       />
       <DeleteTeamMemberDialog

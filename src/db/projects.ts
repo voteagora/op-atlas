@@ -269,6 +269,19 @@ export async function getProject({ id }: { id: string }) {
     },
     include: {
       team: { where: { deletedAt: null }, include: { user: true } },
+      organization: {
+        where: { deletedAt: null },
+        include: {
+          organization: {
+            include: {
+              team: {
+                where: { deletedAt: null },
+                include: { user: true },
+              },
+            },
+          },
+        },
+      },
       repos: true,
       contracts: true,
       links: true,
@@ -288,10 +301,6 @@ export async function getProject({ id }: { id: string }) {
           impactStatementAnswer: true,
           round: true,
         },
-      },
-      organization: {
-        where: { deletedAt: null },
-        include: { organization: true },
       },
       rewards: { include: { claim: true } },
     },
