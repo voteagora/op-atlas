@@ -60,7 +60,16 @@ export async function getUserAdminProjectsWithDetail({
               snapshots: true,
               organization: {
                 where: { deletedAt: null },
-                include: { organization: true },
+                include: {
+                  organization: {
+                    include: {
+                      team: {
+                        where: { deletedAt: null },
+                        include: { user: true },
+                      },
+                    },
+                  },
+                },
               },
               applications: true,
               links: true,
@@ -119,7 +128,16 @@ export async function getUserProjectsWithDetails({
               snapshots: true,
               organization: {
                 where: { deletedAt: null },
-                include: { organization: true },
+                include: {
+                  organization: {
+                    include: {
+                      team: {
+                        where: { deletedAt: null },
+                        include: { user: true },
+                      },
+                    },
+                  },
+                },
               },
               applications: true,
               links: true,
