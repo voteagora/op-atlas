@@ -185,7 +185,6 @@ export async function createProject({
                           id: member.userId,
                         },
                       },
-                      isOrganizationMember: true, // Mark members as joined through organization
                     })),
                 )
             : []),
