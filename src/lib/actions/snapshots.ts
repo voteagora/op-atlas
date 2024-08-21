@@ -75,8 +75,8 @@ export const createProjectSnapshot = async (projectId: string) => {
           projectId: project.id,
           categoryId: application.categoryId ?? "",
           impactStatement: application.impactStatementAnswer.reduce(
-            (acc, { id, answer }) => {
-              acc[id] = answer
+            (acc, { impactStatementId, answer }) => {
+              acc[impactStatementId] = answer
               return acc
             },
             {} as Record<string, string>,

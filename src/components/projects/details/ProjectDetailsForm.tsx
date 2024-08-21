@@ -162,8 +162,6 @@ export default function ProjectDetailsForm({
     }
   }
 
-  console.log(project?.organization, "organiztion")
-
   const onSubmit =
     (isSave: boolean) => async (values: z.infer<typeof formSchema>) => {
       isSave ? setIsSaving(true) : setIsLoading(true)
@@ -229,8 +227,6 @@ export default function ProjectDetailsForm({
       const isCreating = !project
 
       const promise: Promise<Project> = new Promise(async (resolve, reject) => {
-        console.log("values", values)
-
         try {
           const [response, res] = project
             ? await Promise.all([
