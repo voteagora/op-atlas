@@ -207,7 +207,11 @@ export default function ProjectDetailsForm({
       })
 
       const newValues = {
-        ...values,
+        name: values.name,
+        description: values.description,
+        category: values.category,
+        twitter: values.twitter,
+        mirror: values.mirror,
         thumbnailUrl,
         bannerUrl,
         website: fromStringObjectArr(values.website),
@@ -217,14 +221,16 @@ export default function ProjectDetailsForm({
       const isCreating = !project
 
       const promise: Promise<Project> = new Promise(async (resolve, reject) => {
+        console.log("values", values)
+
         try {
           const [response, res] = project
             ? await Promise.all([
                 updateProjectDetails(project.id, newValues),
                 setProjectOrganization(
                   project.id,
-                  project.organization?.id,
-                  newValues.organization?.id,
+                  project.organization?.organizationId,
+                  values.organization?.id,
                 ),
               ])
             : await Promise.all([createNewProject(newValues)])
