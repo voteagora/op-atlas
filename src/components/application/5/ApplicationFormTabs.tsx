@@ -237,10 +237,6 @@ const ApplicationFormTabs = ({
     }
   }, [searchParams])
 
-  const onSave = () => {
-    setCurrentTab("application")
-  }
-
   const canSubmitForm = agreedTerms.every((term) => term)
   return (
     <Form {...form}>
@@ -250,7 +246,7 @@ const ApplicationFormTabs = ({
           <TabsTrigger value="projects">Projects and impact</TabsTrigger>
           <TabsTrigger value="application">Submit application</TabsTrigger>
         </TabsList>
-        <form onSubmit={form.handleSubmit(onSave)} className="mt-12">
+        <div className="mt-12">
           {/* application details content */}
           <TabsContent value="details">
             <ApplicationDetails onNext={() => setCurrentTab("projects")} />
@@ -259,6 +255,7 @@ const ApplicationFormTabs = ({
           {/* project and impact content */}
           <TabsContent value="projects">
             <ApplicationProjectImpact
+              onNext={() => setCurrentTab("application")}
               projects={completedProjects}
               applications={applications}
               categories={categories}
@@ -317,7 +314,7 @@ const ApplicationFormTabs = ({
               </Button>
             </div>
           </TabsContent>
-        </form>
+        </div>
       </Tabs>
     </Form>
   )

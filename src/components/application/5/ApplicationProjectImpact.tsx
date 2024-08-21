@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation"
 import React from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { z } from "zod"
@@ -15,11 +16,13 @@ import { ApplicationFormSchema } from "./ApplicationFormTabs"
 import ProjectImpactForm from "./ProjectImpactForm"
 
 const ApplicationProjectImpactForm = ({
+  onNext,
   projects,
   applications,
   form,
   categories,
 }: {
+  onNext?: () => void
   projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
@@ -29,6 +32,7 @@ const ApplicationProjectImpactForm = ({
     control: form.control,
     name: "projects",
   })
+  const router = useRouter()
 
   const hasSelectedProjects = !form
     .watch("projects")
@@ -81,6 +85,10 @@ const ApplicationProjectImpactForm = ({
         type="submit"
         disabled={!hasSelectedProjects}
         className="disabled:bg-destructive disabled:!text-white"
+        onClick={() => {
+          onNext?.()
+          router.push("/application/5?tab=application")
+        }}
       >
         Save and continue
       </Button>
