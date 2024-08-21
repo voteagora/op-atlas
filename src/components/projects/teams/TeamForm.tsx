@@ -170,7 +170,9 @@ export default function AddTeamDetailsForm({
       <AddTeamMemberDialog
         open={isShowingAdd}
         onOpenChange={(open) => setIsShowingAdd(open)}
-        team={team.map((member) => member.user)}
+        team={team
+          .filter((user) => user.organizationId && user.role === "admin")
+          .map((member) => member.user)}
         addMembers={handleAddMembers}
       />
       <DeleteTeamMemberDialog
