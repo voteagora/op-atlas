@@ -13,15 +13,18 @@ import {
   getUserAdminProjectsWithDetail,
   getUserApplications,
   getUserProjectsWithDetails,
+  removeProjectOrganization,
   removeTeamMember,
   updateMemberRole,
   updateProject,
   updateProjectFunding,
+  updateProjectOrganization,
   UpdateProjectParams,
 } from "@/db/projects"
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
+import { createOrganizationSnapshot } from "./snapshots"
 import {
   verifyAdminStatus,
   verifyMembership,
@@ -104,7 +107,6 @@ export const createNewProjectOnBehalf = async (
 export const updateProjectDetails = async (
   projectId: string,
   details: UpdateProjectParams,
-  organizationId?: string,
 ) => {
   const session = await auth()
 
@@ -115,20 +117,14 @@ export const updateProjectDetails = async (
   }
 
   const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  const isOrganizationAdmin = organizationId
-    ? await verifyOrganizationMembership(organizationId, session.user.id)
-    : {
-        error: "Unauthorized",
-      }
 
-  if (isInvalid?.error && isOrganizationAdmin?.error) {
+  if (isInvalid?.error) {
     return isInvalid
   }
 
   const updated = await updateProject({
     id: projectId,
     project: details,
-    organizationId,
   })
 
   revalidatePath("/dashboard")
@@ -136,6 +132,70 @@ export const updateProjectDetails = async (
   return {
     error: null,
     project: updated,
+  }
+}
+
+export const setProjectOrganization = async (
+  projectId: string,
+  oldOrganizationId?: string,
+  organizationId?: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  // Skip if the organization hasn't changed
+  if (oldOrganizationId === organizationId) {
+    return {
+      error: null,
+      organizationId,
+    }
+  }
+
+  // Only project admins can set the organization
+  const projectAdmin = verifyAdminStatus(projectId, session.user.farcasterId)
+
+  // Only organization admins can remove the organization
+  const oldOrganizationAdmin = oldOrganizationId
+    ? verifyOrganizationMembership(oldOrganizationId, session.user.id)
+    : null
+
+  const isInvalid = (
+    await Promise.all([projectAdmin, oldOrganizationAdmin])
+  ).reduce((acc, val) => acc || val, null)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  if (!organizationId) {
+    await removeProjectOrganization({ projectId })
+  } else {
+    // Only organization admins can set the organization
+    const isOrganizationAdmin = await verifyOrganizationMembership(
+      organizationId,
+      session.user.id,
+    )
+
+    if (isOrganizationAdmin?.error) {
+      return isOrganizationAdmin
+    }
+
+    await updateProjectOrganization({ projectId, organizationId })
+
+    // Create organization snapshot
+    await createOrganizationSnapshot(organizationId)
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+    organizationId,
   }
 }
 

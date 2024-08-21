@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { ProjectStatusSidebar } from "@/components/projects/ProjectStatusSidebar"
-import { getOrganizations } from "@/db/organizations"
+import { getAdminOrganizations } from "@/db/organizations"
 
 export const maxDuration = 60
 
@@ -15,7 +15,7 @@ export default async function Page() {
     redirect("/dashboard")
   }
 
-  const userOrganizations = await getOrganizations(session?.user.id)
+  const userOrganizations = await getAdminOrganizations(session?.user.id)
 
   return (
     <div className="h-full bg-secondary flex flex-1 px-6">

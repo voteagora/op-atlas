@@ -7,6 +7,7 @@ import { auth } from "@/auth"
 import {
   addProjectRepository,
   removeProjectRepository,
+  updateProject,
   updateProjectLinks,
   updateProjectRepositories,
   updateProjectRepository,
@@ -187,6 +188,7 @@ export const updateGithubRepo = async (
 // Update multiple repo update
 export const updateGithubRepos = async (
   projectId: string,
+  noRepos: boolean,
   repos: {
     url: string
     updates: {
@@ -210,15 +212,31 @@ export const updateGithubRepos = async (
   }
 
   try {
-    const updatedRepos = await Promise.all(
-      repos.map((repo) =>
-        updateProjectRepository({
-          projectId,
+    const projectUpdate = updateProject({
+      id: projectId,
+      project: {
+        hasCodeRepositories: !noRepos,
+      },
+    })
+
+    const repoUpdates = updateProjectRepositories({
+      projectId,
+      type: "github",
+      repositories: repos.map((repo) => {
+        return {
           url: repo.url,
-          updates: repo.updates,
-        }),
-      ),
-    )
+          type: "github",
+          verified: false,
+          projectId,
+          containsContracts: repo.updates.containsContracts,
+          name: repo.updates.name,
+          description: repo.updates.description,
+        }
+      }),
+    })
+
+    const [_, updatedRepos] = await Promise.all([projectUpdate, repoUpdates])
+
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")
 

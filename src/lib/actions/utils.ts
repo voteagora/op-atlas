@@ -1,5 +1,6 @@
 import {
   getUserOrganizationsWithDetails,
+  getUserProjectOrganizations,
   isUserAdminOfOrganization,
 } from "@/db/organizations"
 import { getUserProjects } from "@/db/projects"
@@ -17,12 +18,19 @@ export const verifyMembership = async (
   projectId: string,
   farcasterId: string,
 ) => {
-  const userProjects = await getUserProjects({ farcasterId })
-  const membership = userProjects?.projects.find(
+  const [userProjects, userProjectOrganizations] = await Promise.all([
+    getUserProjects({ farcasterId }),
+    getUserProjectOrganizations(farcasterId, projectId),
+  ])
+  const projectMembership = userProjects?.projects.find(
     ({ project }) => project.id === projectId,
   )
 
-  if (!membership) {
+  const organizationMembership = userProjectOrganizations?.organizations.find(
+    ({ organization }) => organization.projects.length > 0,
+  )
+
+  if (!organizationMembership && !projectMembership) {
     return {
       error: "Unauthorized",
     }
@@ -35,12 +43,22 @@ export const verifyAdminStatus = async (
   projectId: string,
   farcasterId: string,
 ) => {
-  const userProjects = await getUserProjects({ farcasterId })
-  const membership = userProjects?.projects.find(
+  const [userProjects, userProjectOrganizations] = await Promise.all([
+    getUserProjects({ farcasterId }),
+    getUserProjectOrganizations(farcasterId, projectId),
+  ])
+  const projectMembership = userProjects?.projects.find(
     ({ project }) => project.id === projectId,
   )
 
-  if (membership?.role !== "admin") {
+  const organizationMembership = userProjectOrganizations?.organizations.find(
+    ({ organization }) => organization.projects.length > 0,
+  )
+
+  if (
+    projectMembership?.role !== "admin" &&
+    organizationMembership?.role !== "admin"
+  ) {
     return {
       error: "Unauthorized",
     }

@@ -185,7 +185,6 @@ export async function createProject({
                           id: member.userId,
                         },
                       },
-                      isOrganizationMember: true, // Mark members as joined through organization
                     })),
                 )
             : []),
@@ -213,98 +212,54 @@ export type UpdateProjectParams = Partial<
 export async function updateProject({
   id,
   project,
-  organizationId,
 }: {
   id: string
   project: UpdateProjectParams
-  organizationId?: string
 }) {
-  return prisma.$transaction(async (prisma) => {
-    // Update the project with only necessary fields and update timestamp
-    const updatedProject = await prisma.project.update({
-      where: { id },
-      data: {
-        ...project,
-        lastMetadataUpdate: new Date(),
-      },
-    })
+  return prisma.project.update({
+    where: {
+      id,
+    },
+    data: {
+      ...project,
+      lastMetadataUpdate: new Date(),
+    },
+  })
+}
 
-    // Fetch the current organization ID linked to the project (if any)
-    const currentOrganizationId = await prisma.projectOrganization
-      .findUnique({
-        where: { projectId: id },
-        select: { organizationId: true },
-      })
-      .then((org) => org?.organizationId)
+export async function updateProjectOrganization({
+  projectId,
+  organizationId,
+}: {
+  projectId: string
+  organizationId: string
+}) {
+  return prisma.projectOrganization.upsert({
+    where: { projectId },
+    update: { organizationId },
+    create: { projectId, organizationId },
+  })
+}
 
-    if (organizationId !== currentOrganizationId) {
-      // If the organization is changing or being removed, handle the user project updates
-      if (currentOrganizationId) {
-        await prisma.userProjects.deleteMany({
-          where: {
-            projectId: id,
-            isOrganizationMember: true, // Only remove members who joined through the previous organization
-          },
-        })
-      }
-
-      if (organizationId) {
-        // Upsert the organization association (delete old one if it exists, and insert a new one)
-        await prisma.projectOrganization.upsert({
-          where: { projectId: id },
-          update: { organizationId },
-          create: { projectId: id, organizationId },
-        })
-
-        // Fetch new organization members and batch insert them
-        const newOrganizationMembers = await prisma.userOrganization.findMany({
-          where: { organizationId, deletedAt: null },
-          select: { userId: true },
-        })
-
-        if (newOrganizationMembers.length > 0) {
-          await prisma.userProjects.createMany({
-            data: newOrganizationMembers.map((member) => ({
-              projectId: id,
-              userId: member.userId,
-              role: "member",
-              isOrganizationMember: true, // Mark members as joined through the organization
-            })),
-            skipDuplicates: true, // Avoid inserting duplicates
-          })
-        }
-      } else {
-        // Remove the organization association if `organizationId` is now undefined
-        await prisma.projectOrganization.deleteMany({
-          where: { projectId: id },
-        })
-      }
-    }
-
-    return updatedProject
+export async function removeProjectOrganization({
+  projectId,
+}: {
+  projectId: string
+}) {
+  return prisma.projectOrganization.deleteMany({
+    where: { projectId },
   })
 }
 
 export async function deleteProject({ id }: { id: string }) {
-  return prisma.$transaction([
-    prisma.project.update({
-      where: {
-        id,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    }),
-    prisma.projectOrganization.updateMany({
-      where: {
-        projectId: id,
-        deletedAt: null, // Ensures only non-deleted records are updated
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    }),
-  ])
+  return prisma.project.update({
+    where: {
+      id,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  })
 }
 
 export async function getProject({ id }: { id: string }) {

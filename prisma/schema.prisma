@@ -276,7 +276,6 @@ model ImpactStatementAnswer {
 model UserProjects {
   id                   String  @id @default(uuid())
   role                 String  @default("member")
-  isOrganizationMember Boolean @default(false)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

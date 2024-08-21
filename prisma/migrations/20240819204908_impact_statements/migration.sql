@@ -25,9 +25,6 @@ ALTER TABLE "ProjectFunding" ADD COLUMN     "fundingRound" TEXT;
 ALTER TABLE "ProjectRepository" ADD COLUMN     "description" TEXT,
 ADD COLUMN     "name" TEXT;
 
--- AlterTable
-ALTER TABLE "UserProjects" ADD COLUMN     "isOrganizationMember" BOOLEAN NOT NULL DEFAULT false;
-
 -- CreateTable
 CREATE TABLE "UserInteraction" (
     "id" TEXT NOT NULL,

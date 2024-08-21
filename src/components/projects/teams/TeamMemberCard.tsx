@@ -23,7 +23,6 @@ export const TeamMemberCard = memo(function TeamMemberCard({
   onRemove,
   isCurrentUser,
   organizationName,
-  isOrganizationMember,
 }: {
   user: User
   role: TeamRole
@@ -32,7 +31,6 @@ export const TeamMemberCard = memo(function TeamMemberCard({
   onToggleAdmin: () => void
   onRemove: () => void
   organizationName?: string
-  isOrganizationMember: boolean
 }) {
   const [showingMenu, setShowingMenu] = useState(false)
   const [mouseEntered, setMouseEntered] = useState(false)
@@ -51,7 +49,7 @@ export const TeamMemberCard = memo(function TeamMemberCard({
           {user.username} {isCurrentUser && "(You)"}
         </p>
         {/* this badge will be shown when according to project organization for now I am just showing dummy */}
-        {isOrganizationMember && (
+        {organizationName && (
           <Badge
             variant="secondary"
             className="text-xs font-medium text-secondary-foreground"
