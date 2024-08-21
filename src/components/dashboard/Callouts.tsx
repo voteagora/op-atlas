@@ -105,7 +105,7 @@ export function FundingRoundAnnouncementCallout() {
         <p className="font-medium">
           Now taking applications for Retro Funding 5: OP Stack
         </p>
-        <div>Learn about the , then apply by Sep 5.</div>
+        <div>Learn about the round, then apply by Sep 5.</div>
       </div>
       <ArrowRight size={20} />
     </Link>

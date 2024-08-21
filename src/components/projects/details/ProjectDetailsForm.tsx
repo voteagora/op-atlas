@@ -107,7 +107,11 @@ export default function ProjectDetailsForm({
     defaultValues: {
       name: project?.name ?? "",
       description: project?.description ?? "",
-      organization: project?.organization,
+      organization: {
+        name: project?.organization?.organization.name ?? "",
+        id: project?.organization?.organizationId ?? "",
+        avatarUrl: project?.organization?.organization?.avatarUrl ?? "",
+      },
       category: project?.category
         ? (project.category as z.infer<typeof CategoryEnum>)
         : "CeFi",
@@ -155,6 +159,8 @@ export default function ProjectDetailsForm({
       setBannerSrc(undefined)
     }
   }
+
+  console.log(project?.organization, "organiztion")
 
   const onSubmit =
     (isSave: boolean) => async (values: z.infer<typeof formSchema>) => {
