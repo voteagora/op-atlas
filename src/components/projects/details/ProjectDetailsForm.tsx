@@ -107,11 +107,13 @@ export default function ProjectDetailsForm({
     defaultValues: {
       name: project?.name ?? "",
       description: project?.description ?? "",
-      organization: {
-        name: project?.organization?.organization.name ?? "",
-        id: project?.organization?.organizationId ?? "",
-        avatarUrl: project?.organization?.organization?.avatarUrl ?? "",
-      },
+      organization: project?.organization?.organization
+        ? {
+            name: project?.organization?.organization.name,
+            id: project?.organization?.organizationId,
+            avatarUrl: project?.organization?.organization.avatarUrl ?? "",
+          }
+        : null,
       category: project?.category
         ? (project.category as z.infer<typeof CategoryEnum>)
         : "CeFi",
