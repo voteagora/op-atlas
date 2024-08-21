@@ -1,4 +1,4 @@
-import { getProject } from "@/db/projects"
+import { getProject } from "@/app/api/db/projects"
 
 import { ProjectStatusSidebar } from "./ProjectStatusSidebar"
 

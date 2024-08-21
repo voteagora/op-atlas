@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-import { getProject } from "@/db/projects"
+import { getProject } from "@/app/api/db/projects"
 import { createProjectSnapshotOnBehalf } from "@/lib/actions/snapshots"
 import { formatProjectMetadata } from "@/lib/utils/metadata"
 import { authenticateApiUser } from "@/serverAuth"

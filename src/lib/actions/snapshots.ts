@@ -2,13 +2,16 @@
 
 import { revalidatePath } from "next/cache"
 
-import { auth } from "@/auth"
-import { addOrganizationSnapshot, getOrganization } from "@/db/organizations"
+import {
+  addOrganizationSnapshot,
+  getOrganization,
+} from "@/app/api/db/organizations"
 import {
   addProjectSnapshot,
   getProject,
   updateAllForProject,
-} from "@/db/projects"
+} from "@/app/api/db/projects"
+import { auth } from "@/auth"
 
 import {
   createOrganizationMetadataAttestation,

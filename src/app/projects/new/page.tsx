@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation"
 
+import { getAdminOrganizations } from "@/app/api/db/organizations"
 import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { ProjectStatusSidebar } from "@/components/projects/ProjectStatusSidebar"
-import { getAdminOrganizations } from "@/db/organizations"
 
 export const maxDuration = 60
 

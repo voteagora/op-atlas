@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import { GithubConnection } from "@/components/profile/GithubConnection"
-import { getUserById } from "@/db/users"
+import { getUser } from "@/lib/actions/users"
 
 export default async function Page() {
   const session = await auth()
@@ -11,7 +11,7 @@ export default async function Page() {
     redirect("/")
   }
 
-  const user = await getUserById(session.user.id)
+  const user = await getUser(session.user.id)
 
   if (!user) {
     redirect("/")

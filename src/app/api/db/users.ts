@@ -1,12 +1,13 @@
 "use server"
 
 import { Prisma, User } from "@prisma/client"
+import { cache } from "react"
 
 import { UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
 
-export async function getUserById(userId: string) {
+async function getUserByIdFn(userId: string) {
   return prisma.user.findUnique({
     where: {
       id: userId,
@@ -18,7 +19,9 @@ export async function getUserById(userId: string) {
   })
 }
 
-export async function getUserByFarcasterId(farcasterId: string) {
+export const getUserById = cache(getUserByIdFn)
+
+async function getUserByFarcasterIdFn(farcasterId: string) {
   return prisma.user.findUnique({
     where: {
       farcasterId,
@@ -29,11 +32,9 @@ export async function getUserByFarcasterId(farcasterId: string) {
   })
 }
 
-export async function searchUsersByUsername({
-  username,
-}: {
-  username: string
-}) {
+export const getUserByFarcasterId = cache(getUserByFarcasterIdFn)
+
+async function searchUsersByUsernameFn({ username }: { username: string }) {
   return prisma.user.findMany({
     where: {
       username: {
@@ -42,6 +43,8 @@ export async function searchUsersByUsername({
     },
   })
 }
+
+export const searchUsersByUsername = cache(searchUsersByUsernameFn)
 
 export async function upsertUser({
   farcasterId,

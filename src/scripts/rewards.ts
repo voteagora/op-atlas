@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises"
 import { splitEvery } from "ramda"
 
-import { insertRewards } from "@/db/rewards"
+import { insertRewards } from "@/app/api/db/rewards"
 import { nanoid } from "@/lib/utils"
 
 const CSV_PATH = "rewards.csv"

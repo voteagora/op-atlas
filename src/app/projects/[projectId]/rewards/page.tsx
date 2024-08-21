@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
 
+import { getProject } from "@/app/api/db/projects"
 import { auth } from "@/auth"
 import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
-import { getProject } from "@/db/projects"
 import { isUserMember } from "@/lib/actions/utils"
 
 export default async function Page({

@@ -1,7 +1,7 @@
 import { createHash } from "crypto"
 import { NextRequest } from "next/server"
 
-import { getApiUser } from "./db/apiUser"
+import { getApiUser } from "./app/api/db/apiUser"
 
 const HASH_FN = "sha256"
 

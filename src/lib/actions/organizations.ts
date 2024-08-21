@@ -1,7 +1,6 @@
 "use server"
 import { revalidatePath } from "next/cache"
 
-import { auth } from "@/auth"
 import {
   addOrganizationMembers,
   createOrganization,
@@ -14,7 +13,8 @@ import {
   updateOrganization,
   updateOrganizationMemberRole,
   UpdateOrganizationParams,
-} from "@/db/organizations"
+} from "@/app/api/db/organizations"
+import { auth } from "@/auth"
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"

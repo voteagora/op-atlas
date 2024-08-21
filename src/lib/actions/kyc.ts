@@ -3,7 +3,7 @@
 import { isAfter, parse } from "date-fns"
 import { isAddress } from "viem"
 
-import { getReward, updateClaim } from "@/db/rewards"
+import { getReward, updateClaim } from "@/app/api/db/rewards"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",

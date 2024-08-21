@@ -4,9 +4,9 @@ import { Application } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { sortBy } from "ramda"
 
+import { createApplication, getProject } from "@/app/api/db/projects"
+import { getUserById } from "@/app/api/db/users"
 import { auth } from "@/auth"
-import { createApplication, getProject } from "@/db/projects"
-import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"

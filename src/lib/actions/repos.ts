@@ -3,7 +3,6 @@
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-import { auth } from "@/auth"
 import {
   addProjectRepository,
   removeProjectRepository,
@@ -11,7 +10,8 @@ import {
   updateProjectLinks,
   updateProjectRepositories,
   updateProjectRepository,
-} from "@/db/projects"
+} from "@/app/api/db/projects"
+import { auth } from "@/auth"
 
 import { getFile, getLicense, getRepository } from "../github"
 import { OPEN_SOURCE_LICENSES } from "../licenses"

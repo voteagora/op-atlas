@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation"
 
+import { getOrganization } from "@/app/api/db/organizations"
 import { auth } from "@/auth"
 import MakeOrganizationForm from "@/components/organizations/MakeOrganizationForm"
 import MakeOrganizationFormHeader from "@/components/organizations/MakeOrganizationFormHeader"
-import { getOrganization } from "@/db/organizations"
-import { getUserById } from "@/db/users"
-import { updateInteractions } from "@/lib/actions/users"
+import { getUser, updateInteractions } from "@/lib/actions/users"
 
 export const maxDuration = 120
 
@@ -21,7 +20,7 @@ export default async function Page({
   }
 
   const [user, organization] = await Promise.all([
-    getUserById(session.user.id),
+    getUser(session.user.id),
     getOrganization({ id: params.organizationId }),
   ])
 

@@ -3,7 +3,6 @@
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-import { auth } from "@/auth"
 import {
   addTeamMembers,
   createProject,
@@ -20,7 +19,8 @@ import {
   updateProjectFunding,
   updateProjectOrganization,
   UpdateProjectParams,
-} from "@/db/projects"
+} from "@/app/api/db/projects"
+import { auth } from "@/auth"
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"

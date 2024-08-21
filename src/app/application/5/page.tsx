@@ -1,6 +1,6 @@
+import { getCategories } from "@/app/api/db/category"
 import { auth } from "@/auth"
 import { ApplicationFlow } from "@/components/application/5"
-import { getCategories } from "@/db/category"
 import { getAdminProjects, getRoundApplications } from "@/lib/actions/projects"
 
 export const maxDuration = 120

@@ -3,12 +3,12 @@
 import { revalidatePath } from "next/cache"
 import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
-import { auth } from "@/auth"
 import {
   addProjectContract,
   getProjectContracts,
   removeProjectContract,
-} from "@/db/projects"
+} from "@/app/api/db/projects"
+import { auth } from "@/auth"
 
 import { getTransaction, getTransactionTrace, TraceCall } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"

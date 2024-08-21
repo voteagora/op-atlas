@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 
+import { getOrganizations } from "@/app/api/db/organizations"
 import { auth } from "@/auth"
-import { getOrganizations } from "@/db/organizations"
 
 import { UserProfileSidebar } from "./UserProfileSidebar"
 

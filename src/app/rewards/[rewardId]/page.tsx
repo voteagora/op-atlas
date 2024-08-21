@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
 
+import { getReward } from "@/app/api/db/rewards"
 import { auth } from "@/auth"
 import RewardClaimFlow from "@/components/rewards/RewardClaimFlow"
-import { getReward } from "@/db/rewards"
 
 export default async function Page({
   params,

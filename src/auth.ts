@@ -5,7 +5,7 @@ import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
 
-import { updateUserGithub, upsertUser } from "./db/users"
+import { updateUserGithub, upsertUser } from "./app/api/db/users"
 import { GITHUB_REDIRECT_COOKIE } from "./lib/utils"
 
 if (!process.env.NEXT_PUBLIC_VERCEL_URL) {

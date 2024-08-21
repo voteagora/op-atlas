@@ -3,13 +3,13 @@
 import { revalidatePath } from "next/cache"
 import { isAddress } from "viem"
 
-import { auth } from "@/auth"
 import {
   getClaimByAddress,
   getReward,
   startClaim,
   updateClaim,
-} from "@/db/rewards"
+} from "@/app/api/db/rewards"
+import { auth } from "@/auth"
 
 import { getActiveStreams } from "../superfluid"
 import { verifyAdminStatus } from "./utils"

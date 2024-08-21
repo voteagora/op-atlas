@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-import { upsertUser } from "@/db/users"
+import { upsertUser } from "@/app/api/db/users"
 import { createNewProjectOnBehalf } from "@/lib/actions/projects"
 import { authenticateApiUser } from "@/serverAuth"
 

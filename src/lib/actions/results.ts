@@ -1,6 +1,6 @@
 "use server"
 
-import { getFundingRewardsByRoundIdAndSearch } from "@/db/rewards"
+import { getFundingRewardsByRoundIdAndSearch } from "@/app/api/db/rewards"
 
 export const findFundingRewards = async ({
   roundId,

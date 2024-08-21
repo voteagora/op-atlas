@@ -3,8 +3,12 @@
 import { revalidatePath } from "next/cache"
 import { verifyMessage } from "viem"
 
+import {
+  addUserAddresses,
+  getUserById,
+  removeUserAddress,
+} from "@/app/api/db/users"
 import { auth } from "@/auth"
-import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
 
 import { getUserConnectedAddresses } from "../neynar"
 

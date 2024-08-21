@@ -3,15 +3,21 @@
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-import { auth, signIn } from "@/auth"
 import {
   getUserByFarcasterId,
+  getUserById,
   searchUsersByUsername,
   updateUserEmail,
   updateUserGithub,
   updateUserHasGithub,
   updateUserInteraction,
-} from "@/db/users"
+} from "@/app/api/db/users"
+import { auth, signIn } from "@/auth"
+
+export const getUser = async (userId: string) => {
+  const user = await getUserById(userId)
+  return user
+}
 
 export const connectGithub = async () => {
   await signIn("github")

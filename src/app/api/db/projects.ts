@@ -1,17 +1,14 @@
 "use server"
 
 import { Prisma, Project } from "@prisma/client"
+import { cache } from "react"
 
 import { ApplicationWithDetails, TeamRole } from "@/lib/types"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
 
-export async function getUserProjects({
-  farcasterId,
-}: {
-  farcasterId: string
-}) {
+async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
   return prisma.user.findUnique({
     where: {
       farcasterId,
@@ -32,7 +29,9 @@ export async function getUserProjects({
   })
 }
 
-export async function getUserAdminProjectsWithDetail({
+export const getUserProjects = cache(getUserProjectsFn)
+
+async function getUserAdminProjectsWithDetailFn({
   userId,
 }: {
   userId: string
@@ -87,7 +86,11 @@ export async function getUserAdminProjectsWithDetail({
   })
 }
 
-export const getRandomProjects = () => {
+export const getUserAdminProjectsWithDetail = cache(
+  getUserAdminProjectsWithDetailFn,
+)
+
+const getRandomProjectsFn = () => {
   return prisma.$queryRaw<Project[]>`
     SELECT * 
     FROM "Project" 
@@ -98,11 +101,9 @@ export const getRandomProjects = () => {
   `
 }
 
-export async function getUserProjectsWithDetails({
-  userId,
-}: {
-  userId: string
-}) {
+export const getRandomProjects = cache(getRandomProjectsFn)
+
+async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
   return prisma.user.findUnique({
     where: {
       id: userId,
@@ -154,6 +155,8 @@ export async function getUserProjectsWithDetails({
     },
   })
 }
+
+export const getUserProjectsWithDetails = cache(getUserProjectsWithDetailsFn)
 
 export type CreateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
@@ -280,7 +283,7 @@ export async function deleteProject({ id }: { id: string }) {
   })
 }
 
-export async function getProject({ id }: { id: string }) {
+async function getProjectFn({ id }: { id: string }) {
   return prisma.project.findUnique({
     where: {
       id,
@@ -325,7 +328,9 @@ export async function getProject({ id }: { id: string }) {
   })
 }
 
-export async function getProjectTeam({ id }: { id: string }) {
+export const getProject = cache(getProjectFn)
+
+async function getProjectTeamFn({ id }: { id: string }) {
   return prisma.project.findUnique({
     where: {
       id,
@@ -339,6 +344,8 @@ export async function getProjectTeam({ id }: { id: string }) {
     },
   })
 }
+
+export const getProjectTeam = cache(getProjectTeamFn)
 
 export async function addTeamMembers({
   projectId,
@@ -520,7 +527,7 @@ export async function removeProjectContract({
   return prisma.$transaction([contractDelete, projectUpdate])
 }
 
-export async function getProjectContracts({
+async function getProjectContractsFn({
   projectId,
   deployerAddress,
 }: {
@@ -537,6 +544,8 @@ export async function getProjectContracts({
     },
   })
 }
+
+export const getProjectContracts = cache(getProjectContractsFn)
 
 export async function addProjectRepository({
   projectId,
@@ -802,7 +811,7 @@ export async function createApplication({
   })
 }
 
-export async function getUserApplications({
+async function getUserApplicationsFn({
   userId,
   roundId,
 }: {
@@ -892,6 +901,8 @@ export async function getUserApplications({
 
   return applications
 }
+
+export const getUserApplications = cache(getUserApplicationsFn)
 
 export async function updateAllForProject(
   project: ProjectMetadata,

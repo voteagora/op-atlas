@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-import { getUserById } from "@/db/users"
+import { getUser } from "@/lib/actions/users"
 
 import { VerifiedAddressesContent } from "./content"
 
@@ -12,7 +12,7 @@ export default async function Page() {
     redirect("/")
   }
 
-  const user = await getUserById(session.user.id)
+  const user = await getUser(session.user.id)
 
   if (!user) {
     redirect("/")

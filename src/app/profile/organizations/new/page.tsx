@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import MakeOrganizationForm from "@/components/organizations/MakeOrganizationForm"
-import { getUserById } from "@/db/users"
+import { getUser } from "@/lib/actions/users"
 
 export const maxDuration = 120
 
@@ -13,7 +13,7 @@ export default async function Page() {
     redirect("/")
   }
 
-  const user = await getUserById(session.user.id)
+  const user = await getUser(session.user.id)
 
   if (!user) {
     redirect("/")

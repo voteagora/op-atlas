@@ -14,10 +14,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getUserById } from "@/db/users"
+import { getUser } from "@/lib/actions/users"
 import { isBadgeholder } from "@/lib/badgeholders"
 import { usePrevious } from "@/lib/hooks"
-import { UserWithAddresses } from "@/lib/types"
 import {
   hasShownWelcomeBadgeholderDialog,
   isFirstTimeUser,
@@ -66,7 +65,7 @@ export function Account() {
   )
 
   async function checkBadgeholderStatus(id: string) {
-    const user = await getUserById(id)
+    const user = await getUser(id)
     if (!user || !isBadgeholder(user)) return
 
     if (!hasShownWelcomeBadgeholderDialog()) {

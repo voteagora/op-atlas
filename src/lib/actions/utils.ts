@@ -2,8 +2,8 @@ import {
   getUserOrganizationsWithDetails,
   getUserProjectOrganizations,
   isUserAdminOfOrganization,
-} from "@/db/organizations"
-import { getUserProjects } from "@/db/projects"
+} from "@/app/api/db/organizations"
+import { getUserProjects } from "@/app/api/db/projects"
 
 import { ProjectWithDetails } from "../types"
 

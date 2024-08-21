@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation"
 
+import { getAdminOrganizations } from "@/app/api/db/organizations"
+import { getProject } from "@/app/api/db/projects"
 import { auth } from "@/auth"
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
-import { getAdminOrganizations } from "@/db/organizations"
-import { getProject } from "@/db/projects"
 import { isUserMember } from "@/lib/actions/utils"
 
 export default async function Page({
