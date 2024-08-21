@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { sortBy } from "ramda"
 
 import { auth } from "@/auth"
-import { createApplication, getProject, updateApplication } from "@/db/projects"
+import { createApplication, getProject } from "@/db/projects"
 import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
@@ -39,17 +39,11 @@ export const publishAndSaveApplication = async ({
   })
 
   // Create application in database
-  return applicationId
-    ? await updateApplication({
-        ...project,
-        attestationId,
-        applicationId,
-      })
-    : await createApplication({
-        round: 5,
-        ...project,
-        attestationId,
-      })
+  return createApplication({
+    round: 5,
+    ...project,
+    attestationId,
+  })
 }
 
 const createProjectApplication = async (

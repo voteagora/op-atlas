@@ -775,48 +775,6 @@ export async function createApplication({
   })
 }
 
-export async function updateApplication({
-  applicationId,
-  categoryId,
-  impactStatement,
-  attestationId,
-  projectDescriptionOptions,
-}: {
-  applicationId: string
-  categoryId: string
-  impactStatement: Record<string, string>
-  attestationId: string
-  projectDescriptionOptions: string[]
-}) {
-  return prisma.application.update({
-    where: { id: applicationId },
-    data: {
-      attestationId,
-      projectDescriptionOptions,
-      category: {
-        connect: {
-          id: categoryId,
-        },
-      },
-      impactStatementAnswer: {
-        deleteMany: {
-          applicationId,
-        },
-        createMany: {
-          data: Object.entries(impactStatement).map(
-            ([impactStatementId, answer]) => ({
-              applicationId,
-              impactStatementId,
-              answer,
-            }),
-          ),
-        },
-      },
-      updatedAt: new Date(),
-    },
-  })
-}
-
 export async function getUserApplications({
   userId,
   roundId,
