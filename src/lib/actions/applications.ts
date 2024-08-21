@@ -10,7 +10,7 @@ import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
-import { verifyMembership } from "./utils"
+import { verifyAdminStatus } from "./utils"
 
 interface SubmitApplicationRequest {
   projectId: string
@@ -48,7 +48,16 @@ const createProjectApplication = async (
   applicationData: SubmitApplicationRequest,
   farcasterId: string,
 ) => {
-  const isInvalid = await verifyMembership(
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      applications: [],
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(
     applicationData.projectId,
     farcasterId,
   )
