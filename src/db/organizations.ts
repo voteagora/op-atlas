@@ -20,6 +20,20 @@ export async function getOrganizations(userId: string) {
   })
 }
 
+export async function getAdminOrganizations(userId: string) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      organizations: {
+        where: { deletedAt: null, role: "admin" },
+        include: {
+          organization: true,
+        },
+      },
+    },
+  })
+}
+
 // Get all organizations with detail a user is part of
 export async function getUserOrganizationsWithDetails(userId: string) {
   return prisma.user.findUnique({

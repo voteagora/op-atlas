@@ -25,7 +25,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { updateProjectDetails } from "@/lib/actions/projects"
 import {
   removeGithubRepo,
   setProjectLinks,

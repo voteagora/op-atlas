@@ -146,13 +146,9 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
             projectId: project.id,
             osoProjectName: values.osoSlug,
           }),
-          updateProjectDetails(
-            project.id,
-            {
-              isOnChainContract: !values.isOffChain,
-            },
-            project.organization?.organizationId,
-          ),
+          updateProjectDetails(project.id, {
+            isOnChainContract: !values.isOffChain,
+          }),
         ])
 
         if (result.error) {

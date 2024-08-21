@@ -21,7 +21,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
+import {
+  createNewProject,
+  setProjectOrganization,
+  updateProjectDetails,
+} from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
@@ -93,10 +97,7 @@ export default function ProjectDetailsForm({
   organizations: Organization[]
 }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { track } = useAnalytics()
-
-  const orgId = searchParams.get("orgId")
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -217,12 +218,23 @@ export default function ProjectDetailsForm({
 
       const promise: Promise<Project> = new Promise(async (resolve, reject) => {
         try {
-          const response = project
-            ? await updateProjectDetails(project.id, newValues)
-            : await createNewProject(newValues)
+          const [response, res] = project
+            ? await Promise.all([
+                updateProjectDetails(project.id, newValues),
+                setProjectOrganization(
+                  project.id,
+                  project.organization?.id,
+                  newValues.organization?.id,
+                ),
+              ])
+            : await Promise.all([createNewProject(newValues)])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
+          }
+
+          if (res && res?.error !== null) {
+            throw new Error(res.error ?? "Failed to update organization")
           }
 
           if (isCreating) {
