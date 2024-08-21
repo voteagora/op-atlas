@@ -25,15 +25,15 @@ import AddTeamMemberDialog from "../projects/teams/AddTeamMemberDialog"
 
 function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
   const { data: currentUser } = useSession()
-  const user = currentUser?.user
 
   const [organizationName, setOrganizationName] = useState("")
+  const [isDialogOpen, setIsDialogOpen] = useState(open)
   const [avatarSrc, setAvatarSrc] = useState<string>()
   const [newAvatarImg, setNewAvatarImg] = useState<Blob>()
-
   const [isShowingAdd, setIsShowingAdd] = useState(false)
-
   const [isSaving, setIsSaving] = useState(false)
+
+  const user = currentUser?.user
 
   const avatarUrl = useMemo(() => {
     if (!newAvatarImg) return ""
@@ -128,7 +128,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
 
   return (
     <div>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open && isDialogOpen} onOpenChange={onOpenChange}>
         <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
           <DialogHeader className="flex flex-col items-center gap-4">
             <div className="flex flex-col gap-2">
@@ -165,9 +165,9 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
               <FileUploadInput
                 onChange={(e) => {
                   if (!e.target.files || e.target.files.length < 1) return
-
                   const file = e.target.files[0]
                   setAvatarSrc(URL.createObjectURL(file))
+                  setIsDialogOpen(false)
                 }}
               >
                 Choose avatar
@@ -182,24 +182,24 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
               Close
             </Button>
           </DialogFooter>
-
-          {avatarSrc && (
-            <PhotoCropModal
-              open
-              title="Organization avatar"
-              aspectRatio={1}
-              image={avatarSrc}
-              onComplete={(image) => {
-                setNewAvatarImg(image)
-                setIsShowingAdd(true)
-              }}
-              onOpenChange={(open) => {
-                if (!open) onCloseCropModal()
-              }}
-            />
-          )}
         </DialogContent>
       </Dialog>
+
+      {avatarSrc && (
+        <PhotoCropModal
+          open
+          title="Organization avatar"
+          aspectRatio={1}
+          image={avatarSrc}
+          onComplete={(image) => {
+            setNewAvatarImg(image)
+            setIsShowingAdd(true)
+          }}
+          onOpenChange={(open) => {
+            if (!open) onCloseCropModal()
+          }}
+        />
+      )}
 
       <AddTeamMemberDialog
         avatar={avatarUrl}
@@ -208,7 +208,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
         onOpenChange={(open) => setIsShowingAdd(open)}
         team={[]}
         addMembers={handleAddMembers}
-        title="team members"
+        title="Add team members"
         subtitle="You can add team members by their Farcaster username. They must have an Optimist profile."
         onSkip={() => {
           onSubmit()
