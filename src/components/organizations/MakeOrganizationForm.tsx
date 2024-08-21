@@ -254,8 +254,8 @@ export default function MakeOrganizationForm({
 
     toast.promise(promise, {
       loading: isCreating
-        ? "Creating organization..."
-        : "Saving organization...",
+        ? "Creating organization onchain..."
+        : "Saving organization onchain...",
       success: (organization) => {
         if (isCreating) {
           router.replace(`/profile/organizations/${organization.id}`)
