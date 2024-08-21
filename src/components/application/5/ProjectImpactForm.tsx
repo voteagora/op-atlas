@@ -63,10 +63,8 @@ const ProjectImpactForm = ({
         form.setValue(
           `projects.${index}.impactStatement`,
           updatedImpactStatements,
+          { shouldValidate: true },
         )
-        if (!watchedProjects[index].isSubmitted) {
-          form.setValue(`projects.${index}.projectDescriptionOptions`, [])
-        }
         form.setValue(`projects.${index}.selected`, true)
       }
     })
@@ -308,11 +306,11 @@ const CategoryItem = ({
                   >
                     <span>
                       <Checkbox
-                        checked={(field.value as string[]).includes(option)}
+                        checked={field.value.includes(option)}
                         onCheckedChange={(checked) => {
                           const newValue = checked
                             ? [...field.value, option]
-                            : field.value.filter((id: string) => id !== option)
+                            : field.value.filter((id) => id !== option)
                           field.onChange(newValue)
                         }}
                       />
