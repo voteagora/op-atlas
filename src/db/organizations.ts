@@ -1,6 +1,6 @@
 "use server"
 
-import { Organization, Prisma } from "@prisma/client"
+import { Organization } from "@prisma/client"
 
 import { TeamRole } from "@/lib/types"
 
@@ -34,10 +34,44 @@ export async function getAdminOrganizations(userId: string) {
   })
 }
 
-// Get all organizations with detail a user is part of
-export async function getUserOrganizationsWithDetails(userId: string) {
+export async function getUserProjectOrganizations(
+  farcasterId: string,
+  projectId: string,
+) {
   return prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: farcasterId },
+    select: {
+      organizations: {
+        where: { deletedAt: null },
+        include: {
+          organization: {
+            include: {
+              team: {
+                include: {
+                  user: {},
+                },
+                where: {
+                  deletedAt: null,
+                },
+              },
+              projects: {
+                where: {
+                  deletedAt: null,
+                  id: projectId,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+// Get all organizations with detail a user is part of
+export async function getUserOrganizationsWithDetails(farcasterId: string) {
+  return prisma.user.findUnique({
+    where: { id: farcasterId },
     select: {
       organizations: {
         where: { deletedAt: null },

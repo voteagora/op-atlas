@@ -118,8 +118,6 @@ export const updateProjectDetails = async (
 
   const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
 
-  // TODO: Must be either project member or organization member to update project
-
   if (isInvalid?.error) {
     return isInvalid
   }
