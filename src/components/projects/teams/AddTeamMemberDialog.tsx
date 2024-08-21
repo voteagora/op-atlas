@@ -28,6 +28,8 @@ type Props = DialogProps<{
 }> & {
   addMembers: (userIds: string[], selectedUser: User[]) => Promise<void>
   isUpdating?: boolean
+  title?: string
+  subtitle?: string
 }
 
 const AddTeamMemberDialog = ({
@@ -38,6 +40,8 @@ const AddTeamMemberDialog = ({
   avatar,
   onSkip,
   isUpdating,
+  title,
+  subtitle,
 }: Props) => {
   const [searchText, setSearchText] = useState("")
   const [loading, setLoading] = useState(false)
@@ -137,11 +141,11 @@ const AddTeamMemberDialog = ({
             </Avatar>
           )}
           <DialogTitle className="text-center text-lg font-semibold">
-            Add contributors
+            {title ?? "Add contributors"}
           </DialogTitle>
           <DialogDescription className="text-center text-base text-secondary-foreground font-normal mt-1">
-            You can add contributors by their Farcaster username. Team members
-            must have an Optimist profile.
+            {subtitle ??
+              "You can add contributors by their Farcaster username. They must have an Optimist profile."}
           </DialogDescription>
         </DialogHeader>
 

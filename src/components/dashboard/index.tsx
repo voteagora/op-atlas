@@ -179,7 +179,7 @@ const Dashboard = ({
               <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
             )}
 
-            {!projects.length && (
+            {!projects.length && !organizations?.length && (
               <Link href="/projects/new">
                 <AddFirstProject />
               </Link>

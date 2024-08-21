@@ -563,6 +563,8 @@ export default function MakeOrganizationForm({
         onOpenChange={(open) => setIsShowingAdd(open)}
         team={team.map((member) => member.user)}
         addMembers={handleAddMembers}
+        title="team members"
+        subtitle="You can add team members by their Farcaster username. They must have an Optimist profile."
       />
       <DeleteTeamMemberDialog
         open={!!isShowingRemove}

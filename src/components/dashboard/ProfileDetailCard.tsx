@@ -2,7 +2,6 @@ import { User } from "@prisma/client"
 import { Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { is } from "ramda"
 import React, { memo } from "react"
 
 import { isBadgeholderAddress } from "@/lib/badgeholders"
@@ -89,6 +88,11 @@ const ProfileDetailCard = ({
           <Link href="/profile/details">
             <DropdownMenuItem className="cursor-pointer">
               Edit your profile
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/projects/new">
+            <DropdownMenuItem className="cursor-pointer">
+              Add a project
             </DropdownMenuItem>
           </Link>
           <Link href="profile/organizations/new">

@@ -208,6 +208,8 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
         onOpenChange={(open) => setIsShowingAdd(open)}
         team={[]}
         addMembers={handleAddMembers}
+        title="team members"
+        subtitle="You can add team members by their Farcaster username. They must have an Optimist profile."
         onSkip={() => {
           onSubmit()
         }}
