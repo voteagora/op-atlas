@@ -7,6 +7,8 @@ import { getOrganization } from "@/db/organizations"
 import { getUserById } from "@/db/users"
 import { updateInteractions } from "@/lib/actions/users"
 
+export const maxDuration = 120
+
 export default async function Page({
   params,
 }: {

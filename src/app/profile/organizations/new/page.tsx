@@ -4,6 +4,8 @@ import { auth } from "@/auth"
 import MakeOrganizationForm from "@/components/organizations/MakeOrganizationForm"
 import { getUserById } from "@/db/users"
 
+export const maxDuration = 120
+
 export default async function Page() {
   const session = await auth()
 
