@@ -4,10 +4,5 @@
       "path": "/api/cron",
       "schedule": "30 * * * *"
     }
-  ],
-  "functions": {
-    "src/lib/actions/*.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }

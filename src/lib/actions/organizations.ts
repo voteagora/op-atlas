@@ -21,6 +21,8 @@ import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"
 
+export const maxDuration = 30
+
 export const getUserOrganizations = async (userId: string) => {
   const user = await getUserOrganizationsWithDetails(userId)
   return user?.organizations
