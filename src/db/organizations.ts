@@ -2,8 +2,6 @@
 
 import { Organization } from "@prisma/client"
 
-import { TeamRole } from "@/lib/types"
-
 import { prisma } from "./client"
 
 export async function getOrganizations(userId: string) {
@@ -176,25 +174,14 @@ export async function deleteOrganization({
 }: {
   organizationId: string
 }) {
-  return await prisma.$transaction([
-    prisma.organization.update({
-      where: {
-        id: organizationId,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    }),
-    prisma.userOrganization.updateMany({
-      where: {
-        organizationId: organizationId,
-        deletedAt: null, // Ensures only non-deleted records are updated
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    }),
-  ])
+  return prisma.organization.update({
+    where: {
+      id: organizationId,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  })
 }
 
 // Get detailed information about an organization
@@ -240,33 +227,13 @@ export async function addOrganizationMembers({
   userIds: string[]
   role?: string
 }) {
-  const deletedMembers = await prisma.userOrganization.findMany({
-    where: {
+  return prisma.userOrganization.createMany({
+    data: userIds.map((userId) => ({
       organizationId,
-      userId: { in: userIds },
-    },
-  })
-
-  const updateMemberIds = deletedMembers.map((m) => m.userId)
-  const createMemberIds = userIds.filter((id) => !updateMemberIds.includes(id))
-
-  const memberUpdate = prisma.userOrganization.updateMany({
-    where: {
-      organizationId,
-      userId: { in: updateMemberIds },
-    },
-    data: { deletedAt: null },
-  })
-
-  const memberCreate = prisma.userOrganization.createMany({
-    data: createMemberIds.map((userId) => ({
-      role,
       userId,
-      organizationId,
+      role,
     })),
   })
-
-  return prisma.$transaction([memberUpdate, memberCreate])
 }
 
 // Update a member's role within an organization
@@ -290,62 +257,7 @@ export async function updateOrganizationMemberRole({
   })
 }
 
-// Update a member's role within an organization
-export async function addProjectMember({
-  organizationId,
-  userIds,
-  role = "member",
-}: {
-  organizationId: string
-  userIds: string[]
-  role?: TeamRole
-}) {
-  // There may be users who were previously soft deleted, so this is complex
-  const deletedMembers = await prisma.userOrganization.findMany({
-    where: {
-      organizationId,
-      userId: {
-        in: userIds,
-      },
-    },
-  })
-
-  const updateMemberIds = deletedMembers.map((m) => m.userId)
-  const createMemberIds = userIds.filter((id) => !updateMemberIds.includes(id))
-
-  const memberUpdate = prisma.userOrganization.updateMany({
-    where: {
-      organizationId,
-      userId: {
-        in: updateMemberIds,
-      },
-    },
-    data: {
-      deletedAt: null,
-    },
-  })
-
-  const memberCreate = prisma.userOrganization.createMany({
-    data: createMemberIds.map((userId) => ({
-      role,
-      userId,
-      organizationId,
-    })),
-  })
-
-  const organizationUpdate = prisma.project.update({
-    where: {
-      id: organizationId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
-  })
-
-  return prisma.$transaction([memberUpdate, memberCreate, organizationUpdate])
-}
-
-// Remove a member from an organization (soft delete)
+// Remove a member from an organization
 export async function removeOrganizationMember({
   organizationId,
   userId,
@@ -353,16 +265,12 @@ export async function removeOrganizationMember({
   organizationId: string
   userId: string
 }) {
-  return prisma.userOrganization.update({
+  return prisma.userOrganization.delete({
     where: {
       userId_organizationId: {
         organizationId,
         userId,
       },
-    },
-    data: {
-      role: "member",
-      deletedAt: new Date(),
     },
   })
 }

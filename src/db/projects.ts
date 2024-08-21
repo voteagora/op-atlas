@@ -252,25 +252,14 @@ export async function removeProjectOrganization({
 }
 
 export async function deleteProject({ id }: { id: string }) {
-  return prisma.$transaction([
-    prisma.project.update({
-      where: {
-        id,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    }),
-    prisma.projectOrganization.updateMany({
-      where: {
-        projectId: id,
-        deletedAt: null, // Ensures only non-deleted records are updated
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    }),
-  ])
+  return prisma.project.update({
+    where: {
+      id,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  })
 }
 
 export async function getProject({ id }: { id: string }) {
