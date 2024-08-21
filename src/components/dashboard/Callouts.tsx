@@ -50,8 +50,7 @@ export function DeveloperCallout() {
       />
       <div className="ml-4 mr-5 flex-1">
         <p className="font-medium">
-          Calling all developers! We need your vote in Retro Funding Round 5: OP
-          Stack
+          Calling all developers! We need your vote in Retro Funding 5: OP Stack
         </p>
         <div>Apply to vote by July 31.</div>
       </div>
@@ -104,9 +103,9 @@ export function FundingRoundAnnouncementCallout() {
       />
       <div className="ml-4 mr-5 flex-1">
         <p className="font-medium">
-          Now taking applications for Retro Funding Round 5: OP Stack
+          Now taking applications for Retro Funding 5: OP Stack
         </p>
-        <div>Learn about the round, then apply by Sep 5.</div>
+        <div>Learn about the , then apply by Sep 5.</div>
       </div>
       <ArrowRight size={20} />
     </Link>

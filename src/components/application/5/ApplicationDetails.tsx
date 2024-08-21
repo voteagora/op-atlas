@@ -237,7 +237,7 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
 
       <div className="flex flex-col gap-y-6">
         <h3>Rules</h3>
-        <p>
+        <p className="text-secondary-foreground">
           Failure to adhere to the rules listed below will result in
           disqualification.
         </p>
@@ -245,7 +245,7 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
         <ul className="list-disc list-outside pl-4 text-base font-normal text-secondary-foreground">
           {RULES.map((rule, index) => (
             <li key={index} className="">
-              {rule.title}:{rule.description}
+              {rule.title}: {rule.description}
             </li>
           ))}
         </ul>

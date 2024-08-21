@@ -32,7 +32,7 @@ const ApplicationHeader = ({
         height={120}
         width={120}
       />
-      <h2 className="text-center">Apply for Retro Funding Round 5: OP Stack</h2>
+      <h2 className="text-center">Apply for Retro Funding 5: OP Stack</h2>
       {hasApplied ? (
         <div className="flex justify-between items-center gap-2 p-4 bg-success rounded-xl w-full">
           <div className="flex items-center gap-2">
