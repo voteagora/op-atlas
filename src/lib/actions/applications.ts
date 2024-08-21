@@ -21,12 +21,10 @@ interface SubmitApplicationRequest {
 
 export const publishAndSaveApplication = async ({
   project,
-  applicationId,
   farcasterId,
   metadataSnapshotId,
 }: {
   project: SubmitApplicationRequest
-  applicationId?: string
   farcasterId: string
   metadataSnapshotId: string
 }): Promise<Application> => {
