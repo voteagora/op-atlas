@@ -8,10 +8,26 @@ import { getUserProjects } from "@/db/projects"
 import { ProjectWithDetails } from "../types"
 
 export const isUserMember = async (
-  projectId: ProjectWithDetails,
+  project: ProjectWithDetails,
   userId?: string,
 ) => {
-  return userId && projectId.team.some((member) => member.userId === userId)
+  return userId && project.team.some((member) => member.userId === userId)
+}
+
+export const projectMembers = (project: ProjectWithDetails) => {
+  const projectTeam = project.team
+  const organizationTeam = project.organization?.organization?.team
+
+  // filter out duplicates
+  return [
+    ...projectTeam,
+    ...(organizationTeam || []).filter(
+      (member) =>
+        !projectTeam.some(
+          (projectMember) => projectMember.userId === member.userId,
+        ),
+    ),
+  ]
 }
 
 export const verifyMembership = async (

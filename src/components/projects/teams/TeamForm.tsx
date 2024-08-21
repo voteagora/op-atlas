@@ -16,6 +16,7 @@ import {
   setMemberRole,
   updateProjectDetails,
 } from "@/lib/actions/projects"
+import { projectMembers } from "@/lib/actions/utils"
 import { useIsAdmin } from "@/lib/hooks"
 import { ProjectWithDetails, TeamRole } from "@/lib/types"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
@@ -30,11 +31,13 @@ export default function AddTeamDetailsForm({
 }: {
   project: ProjectWithDetails
 }) {
+  const team = sortBy(
+    (member) => member.user.name?.toLowerCase() ?? "",
+    projectMembers(project),
+  )
+
   const router = useRouter()
   const { data } = useSession()
-  const [team, setTeam] = useState(
-    sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
-  )
 
   const currentUser = data?.user
 
@@ -89,12 +92,6 @@ export default function AddTeamDetailsForm({
       setIsSubmitting(false)
     }
   }
-
-  useEffect(() => {
-    setTeam(
-      sortBy((member) => member.user.name?.toLowerCase() ?? "", project.team),
-    )
-  }, [project.team])
 
   return (
     <>
