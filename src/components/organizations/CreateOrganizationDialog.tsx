@@ -111,7 +111,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
       },
     )
     toast.promise(promise, {
-      loading: "Creating organization...",
+      loading: "Creating organization onchain...",
 
       success: () => {
         setIsSaving(false)
@@ -121,7 +121,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
       },
       error: () => {
         setIsSaving(false)
-        return "Failed to save organization"
+        return "Failed to save organization onchain"
       },
     })
   }
