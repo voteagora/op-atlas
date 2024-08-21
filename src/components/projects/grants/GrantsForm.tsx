@@ -293,14 +293,10 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
       try {
         await setProjectFunding(project.id, fromFormValues(project.id, values))
-        await updateProjectDetails(
-          project.id,
-          {
-            pricingModel: values.pricingModel,
-            pricingModelDetails: values.pricingModelDetail,
-          },
-          project?.organization?.organizationId,
-        )
+        await updateProjectDetails(project.id, {
+          pricingModel: values.pricingModel,
+          pricingModelDetails: values.pricingModelDetail,
+        })
 
         !isSave && router.push(`/projects/${project.id}/publish`)
         toast.success("Saved.")
