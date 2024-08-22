@@ -130,7 +130,7 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   progress += hasRepos ? 16.67 : 0
   progress += hasContracts ? 16.67 : 0
   progress += hasFunding ? 16.67 : 0
-  progress += hasUnpublishedChanges ? 16.67 : 0
+  progress += !hasUnpublishedChanges ? 16.67 : 0
 
   return { completedSections, progressPercent: Math.round(progress) }
 }
@@ -139,7 +139,7 @@ export function projectHasUnpublishedChanges(
   project: ProjectWithDetails,
 ): boolean {
   const latestSnapshot = sortBy((s) => -s.createdAt, project.snapshots)[0]
-  if (!latestSnapshot) return false
+  if (!latestSnapshot) return true
 
   return latestSnapshot.createdAt < project.lastMetadataUpdate
 }
