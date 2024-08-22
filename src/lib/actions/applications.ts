@@ -32,7 +32,7 @@ export const publishAndSaveApplication = async ({
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId: project.projectId,
-    round: 4,
+    round: 5,
     snapshotRef: metadataSnapshotId,
   })
 
