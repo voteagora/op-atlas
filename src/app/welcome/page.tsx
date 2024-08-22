@@ -95,7 +95,7 @@ const CARD_DETAILS = {
   projects: {
     title: "Add or join projects",
     description:
-      "In projects you can add team members, add code repos, and verify your onchain contracts.",
+      "In projects you can add contributors, add code repos, and verify your onchain contracts.",
     image: "/assets/images/welcome-graphic-2.png",
   },
   funding: {

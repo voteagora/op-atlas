@@ -2,7 +2,7 @@ import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { updateEmail } from "./actions/users"
-import { ProjectWithDetails } from "./types"
+import { OrganizationWithDetails, ProjectWithDetails } from "./types"
 
 export function useIsAdmin(project?: ProjectWithDetails) {
   const { data: session } = useSession()
@@ -11,6 +11,18 @@ export function useIsAdmin(project?: ProjectWithDetails) {
     project &&
     session &&
     project.team.find(
+      (member) => member.userId === session.user.id && member.role === "admin",
+    )
+  )
+}
+
+export function useIsOrganizationAdmin(organization?: OrganizationWithDetails) {
+  const { data: session } = useSession()
+
+  return (
+    organization &&
+    session &&
+    organization.team.find(
       (member) => member.userId === session.user.id && member.role === "admin",
     )
   )

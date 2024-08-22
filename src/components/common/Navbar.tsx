@@ -52,7 +52,7 @@ const Navbar = () => {
                 <AlignJustify className="block sm:hidden" />
               )}
             </button>
-            <Link href="/">
+            <Link href="/rounds">
               <Image
                 src="/assets/images/logo.svg"
                 height={24}
@@ -93,7 +93,7 @@ const Navbar = () => {
                   } focus:outline-none focus:opacity-80`}
                   href="/round/results"
                 >
-                  Projects
+                  Recipients
                 </Link>
               </div>
             </div>

@@ -11,11 +11,19 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 import { Callout } from "@/components/common/Callout"
-import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Form } from "@/components/ui/form"
-import { setProjectFunding } from "@/lib/actions/projects"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Textarea } from "@/components/ui/textarea"
+import { setProjectFunding, updateProjectDetails } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -30,21 +38,22 @@ import {
   FundingType,
   OptimismGrantSchema,
   OtherGrantSchema,
+  PRICING_MODEL_TYPES,
+  PRICINGMODELTYPES,
 } from "./schema"
 
 function toFormValues(
   project: ProjectWithDetails,
 ): z.infer<typeof FundingFormSchema> {
-  const venture: z.infer<typeof FundingFormSchema>["venture"] = []
+  const retroFunding: z.infer<typeof FundingFormSchema>["retroFunding"] = []
   const grants: z.infer<typeof FundingFormSchema>["grants"] = []
-  const revenue: z.infer<typeof FundingFormSchema>["revenue"] = []
+  const investment: z.infer<typeof FundingFormSchema>["investment"] = []
 
   project.funding.forEach((funding) => {
-    if (funding.type === "venture") {
-      venture.push({
+    if (funding.type === "retroFunding") {
+      retroFunding.push({
         amount: funding.amount,
-        year: funding.receivedAt,
-        details: funding.details ?? "",
+        fundingRound: funding.fundingRound ?? "",
       })
     } else if (funding.type === "other-grant") {
       grants.push({
@@ -63,18 +72,21 @@ function toFormValues(
         date: format(toDate(funding.receivedAt), "yyyy-MM-dd"), // date-fns does really stupid timezone conversions by default...
         details: funding.details ?? "",
       })
-    } else if (funding.type === "revenue") {
-      revenue.push({
+    } else if (funding.type === "investment") {
+      investment.push({
         amount: funding.amount,
         details: funding.details ?? undefined,
+        year: funding.receivedAt,
       })
     }
   })
 
   return {
-    venture,
+    retroFunding,
     grants,
-    revenue,
+    investment,
+    pricingModel: project.pricingModel ?? "",
+    pricingModelDetail: project.pricingModelDetails ?? "",
   }
 }
 
@@ -84,12 +96,12 @@ function fromFormValues(
 ): Prisma.ProjectFundingCreateManyInput[] {
   const funding: Prisma.ProjectFundingCreateManyInput[] = []
 
-  values.venture.forEach((venture) => {
+  values.retroFunding.forEach((retroFunding) => {
     funding.push({
-      type: "venture",
-      amount: venture.amount,
-      receivedAt: venture.year,
-      details: venture.details,
+      type: "retroFunding",
+      amount: retroFunding.amount,
+      receivedAt: "",
+      fundingRound: retroFunding.fundingRound,
       projectId,
     })
   })
@@ -127,12 +139,12 @@ function fromFormValues(
     })
   })
 
-  values.revenue.forEach((revenue) => {
+  values.investment.forEach((investment) => {
     funding.push({
-      type: "revenue",
-      amount: revenue.amount,
-      details: revenue.details,
-      receivedAt: "",
+      type: "investment",
+      amount: investment.amount,
+      details: investment.details,
+      receivedAt: investment.year,
       projectId,
     })
   })
@@ -158,12 +170,12 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
 
   const {
     fields: ventureFields,
-    replace: setVentureFields,
-    append: addVentureField,
-    remove: removeVentureField,
+    replace: setRetroFunding,
+    append: addRetroFunding,
+    remove: removeRetroFunding,
   } = useFieldArray({
     control: form.control,
-    name: "venture",
+    name: "retroFunding",
   })
 
   const {
@@ -183,16 +195,16 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     remove: removeRevenueField,
   } = useFieldArray({
     control: form.control,
-    name: "revenue",
+    name: "investment",
   })
 
   const hasFundingType = (type: FundingType) => {
     switch (type) {
-      case "venture":
+      case "retroFunding":
         return ventureFields.length > 0
       case "grants":
         return grantsFields.length > 0
-      case "revenue":
+      case "investment":
         return revenueFields.length > 0
       case "none":
         return selectedNone
@@ -202,16 +214,15 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   }
 
   const onToggleFundingType = (type: FundingType) => {
-    if (type === "venture") {
+    if (type === "retroFunding") {
       if (ventureFields.length === 0) {
         setSelectedNone(false)
-        addVentureField({
+        addRetroFunding({
           amount: "",
-          year: "",
-          details: "",
+          fundingRound: "",
         })
       } else {
-        setVentureFields([])
+        setRetroFunding([])
       }
     } else if (type === "grants") {
       if (grantsFields.length === 0) {
@@ -226,18 +237,19 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
       } else {
         setGrantsFields([])
       }
-    } else if (type === "revenue") {
+    } else if (type === "investment") {
       if (revenueFields.length === 0) {
         setSelectedNone(false)
         addRevenueField({
           amount: "",
           details: "",
+          year: "",
         })
       } else {
         setRevenueFields([])
       }
     } else if (type === "none") {
-      setVentureFields([])
+      setRetroFunding([])
       setGrantsFields([])
       setRevenueFields([])
       setSelectedNone(!selectedNone)
@@ -245,13 +257,12 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   }
 
   const onAddFundingType = async (type: FundingType) => {
-    if (type === "venture") {
-      const valid = await form.trigger("venture")
+    if (type === "retroFunding") {
+      const valid = await form.trigger("retroFunding")
       if (valid) {
-        addVentureField({
+        addRetroFunding({
           amount: "",
-          year: "",
-          details: "",
+          fundingRound: "",
         })
       }
     } else if (type === "grants") {
@@ -265,12 +276,13 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           details: "",
         })
       }
-    } else if (type === "revenue") {
-      const valid = await form.trigger("revenue")
+    } else if (type === "investment") {
+      const valid = await form.trigger("investment")
       if (valid) {
         addRevenueField({
           amount: "",
           details: "",
+          year: "",
         })
       }
     }
@@ -281,64 +293,130 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
       try {
         await setProjectFunding(project.id, fromFormValues(project.id, values))
+        await updateProjectDetails(project.id, {
+          pricingModel: values.pricingModel,
+          pricingModelDetails: values.pricingModelDetail,
+        })
+
         !isSave && router.push(`/projects/${project.id}/publish`)
+        toast.success("Saved.")
         setIsSaving(false)
-      } catch (_) {
+      } catch (error) {
         toast.error("There was an error saving your changes.")
         isSave ? setIsSaving(false) : setIsSubmitting(false)
       }
     }
 
+  const pricingModel = form.watch("pricingModel")
+
   const canSubmit =
-    selectedNone ||
-    ventureFields.length > 0 ||
-    grantsFields.length > 0 ||
-    revenueFields.length > 0
+    (selectedNone ||
+      ventureFields.length > 0 ||
+      grantsFields.length > 0 ||
+      revenueFields.length > 0) &&
+    pricingModel
+
+  console.log(ventureFields, grantsFields, revenueFields, "data")
 
   return (
-    <div className="flex flex-col gap-y-12 w-full">
-      <div className="flex flex-col gap-y-6">
-        <h2 className="text-2xl font-semibold">Grants, funding, and revenue</h2>
-        <p className="text-secondary-foreground">
-          List any grants, funding, or revenue your project has received since
-          January 2023—not including past rounds of Retro Funding. Learn more
-          about how badgeholders apply this information{" "}
-          <ExternalLink
-            className="font-medium"
-            href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
-          >
-            here
-          </ExternalLink>
-          .
-        </p>
-        <Callout
-          type="info"
-          text="Failure to report will result in disqualification from Retro Funding"
-        />
-        <div className="flex flex-col gap-y-1.5">
-          <p className="text-sm font-medium">
-            What kinds of funding have you received since Jan 2023?
-            <span className="text-destructive">*</span>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit(false))}
+        className="flex flex-col gap-y-12 w-full"
+      >
+        <div className="flex flex-col gap-y-6">
+          <h2 className="text-2xl font-semibold text-text-default">
+            Pricing, grants, and investment
+          </h2>
+          <p className="text-text-secondary">
+            Describe your pricing model, and list any Optimism Grants, Optimism
+            Retro Funding, or investment your project has received.
           </p>
-          {FUNDING_TYPES.map((fundingType) => (
-            <FundingTypeOption
-              {...fundingType}
-              key={fundingType.type}
-              isSelected={hasFundingType(fundingType.type)}
-              onSelect={onToggleFundingType}
-            />
-          ))}
-        </div>
-      </div>
+          <Callout
+            type="info"
+            text="Failure to report will result in disqualification from Retro Funding"
+          />
+          <div className="flex flex-col gap-y-2">
+            <p className="text-sm font-medium text-foreground">
+              Which best describes your project’s pricing model?
+              <span className="text-destructive">*</span>
+            </p>
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit(false))}
-          className="flex flex-col gap-y-12"
-        >
+            <FormField
+              control={form.control}
+              name="pricingModel"
+              render={({ field }) => (
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  {PRICING_MODEL_TYPES.map((PRICINGMODELTYPES) => (
+                    <PricingModelTypeOption
+                      {...PRICINGMODELTYPES}
+                      key={PRICINGMODELTYPES.type}
+                    />
+                  ))}
+                </RadioGroup>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-y-1.5">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                What kinds of grants and investment have you received?
+                <span className="text-destructive">*</span>
+              </p>
+              <p className="text-sm font-normal text-secondary-foreground">
+                Select all that apply.
+              </p>
+            </div>
+
+            {FUNDING_TYPES.map((fundingType) => (
+              <FundingTypeOption
+                {...fundingType}
+                key={fundingType.type}
+                isSelected={hasFundingType(fundingType.type)}
+                onSelect={onToggleFundingType}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-y-12">
+          {pricingModel && pricingModel !== "free" && (
+            <div className="flex flex-col gap-y-6 ">
+              <p className="text-lg font-semibold text-text-default">Pricing</p>
+              <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
+                <FormField
+                  control={form.control}
+                  name="pricingModelDetail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-normal text-foreground">
+                        Please provide details about your pricing model and how
+                        much it costs to use your product
+                        <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Add details "
+                          className="resize-none mt-2"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          )}
+
           {grantsFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold">Grants</h3>
+              <h3 className="text-lg font-semibold text-text-default">
+                Optimism Grants (since Jan 2023)
+              </h3>
               {grantsFields.map((field, index) => (
                 <GrantsFundingForm
                   key={field.id}
@@ -347,40 +425,45 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
                   remove={() => removeGrantsField(index)}
                 />
               ))}
+
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => onAddFundingType("grants")}
-                className="w-fit"
+                className="w-fit text-sm font-medium text-foreground"
               >
-                <Plus size={16} className="mr-2.5" /> Add grant
+                <Plus size={16} className="mr-2.5" /> Add Optimism Grant
               </Button>
             </div>
           ) : null}
           {ventureFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold">Funding</h3>
+              <h3 className="text-lg font-semibold text-text-default">
+                Optimism Retro Funding
+              </h3>
               {ventureFields.map((field, index) => (
                 <VentureFundingForm
                   key={field.id}
                   form={form}
                   index={index}
-                  remove={() => removeVentureField(index)}
+                  remove={() => removeRetroFunding(index)}
                 />
               ))}
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => onAddFundingType("venture")}
-                className="w-fit"
+                onClick={() => onAddFundingType("retroFunding")}
+                className="w-fit text-sm font-medium text-foreground"
               >
-                <Plus size={16} className="mr-2.5" /> Add venture capital
+                <Plus size={16} className="mr-2.5" /> Add Retro Funding
               </Button>
             </div>
           ) : null}
           {revenueFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold">Revenue</h3>
+              <h3 className="text-lg font-semibold text-text-default">
+                Investment (since Jan 2020)
+              </h3>
               {revenueFields.map((field, index) => (
                 <RevenueFundingForm
                   key={field.id}
@@ -392,10 +475,10 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => onAddFundingType("revenue")}
-                className="w-fit"
+                onClick={() => onAddFundingType("investment")}
+                className="w-fit text-sm font-medium text-foreground"
               >
-                <Plus size={16} className="mr-2.5" /> Add grant
+                <Plus size={16} className="mr-2.5" /> Add investment
               </Button>
             </div>
           ) : null}
@@ -421,9 +504,9 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
               Next
             </Button>
           </div>
-        </form>
-      </Form>
-    </div>
+        </div>
+      </form>
+    </Form>
   )
 }
 
@@ -447,12 +530,35 @@ const FundingTypeOption = ({
       <Checkbox
         checked={isSelected}
         onCheckedChange={() => onSelect(type)}
-        className="mt-0.5 rounded-none border-[1.5px]"
+        className="mt-0.5"
       />
       <div className="flex flex-col">
-        <p className="text-sm font-medium">{label}</p>
+        <p className="text-sm font-medium text-foreground">{label}</p>
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-sm text-secondary-foreground">{description}</p>
+        )}
+      </div>
+    </div>
+  )
+}
+const PricingModelTypeOption = ({
+  className,
+  type,
+  label,
+  description,
+}: {
+  className?: string
+  type: PRICINGMODELTYPES
+  label: string
+  description?: string
+}) => {
+  return (
+    <div className={cn("group flex gap-x-2 p-4 border rounded-xl", className)}>
+      <RadioGroupItem value={type} id="r1" className="mt-0.5" />
+      <div className="flex flex-col">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        {description && (
+          <p className="text-sm text-secondary-foreground">{description}</p>
         )}
       </div>
     </div>

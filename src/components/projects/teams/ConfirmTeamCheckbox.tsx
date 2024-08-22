@@ -7,12 +7,11 @@ const ConfirmTeamCheckbox = ({
   setIsTeamConfirmed: React.Dispatch<React.SetStateAction<boolean>>
   isTeamConfirmed: boolean
 }) => (
-  <div className="flex items-center gap-2 border border-input p-4 rounded-lg">
+  <div className="flex items-center gap-2 border border-input p-4 h-10 rounded-lg">
     <Checkbox
       id="team-confirmed"
       checked={isTeamConfirmed}
       onCheckedChange={(e) => setIsTeamConfirmed(e.valueOf() as boolean)}
-      className="border-black border-2 rounded-[2px]"
     />
     <label
       htmlFor="team-confirmed"

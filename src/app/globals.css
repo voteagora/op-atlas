@@ -94,7 +94,7 @@
     @apply text-lg font-semibold;
   }
   p {
-    @apply text-base font-normal;
+    @apply text-base font-normal text-inherit;
   }
 }
 

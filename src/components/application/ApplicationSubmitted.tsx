@@ -1,15 +1,14 @@
-import { Application } from "@prisma/client"
 import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
 
+import { ApplicationWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
-import { Discord, DiscussionForum, Twitter } from "../icons/socials"
+import { Discord, DiscussionForum, Optimism, XOptimism } from "../icons/socials"
 import { Button } from "../ui/button"
 import { ApplicationStatus } from "./ApplicationStatus"
 
@@ -20,14 +19,19 @@ const SOCIALS = [
     link: "https://discord.com/invite/optimism",
   },
   {
-    name: "Twitter",
-    icon: <Twitter />,
+    name: "Gov Forum",
+    icon: <DiscussionForum />,
+    link: "https://gov.optimism.io/",
+  },
+  {
+    name: "@optimism",
+    icon: <XOptimism />,
     link: "https://twitter.com/Optimism",
   },
   {
-    name: "Governance Forum",
-    icon: <DiscussionForum />,
-    link: "https://gov.optimism.io/",
+    name: "@optimism",
+    icon: <Optimism />,
+    link: "https://www.optimism.io/",
   },
 ] as const
 
@@ -50,7 +54,7 @@ export const ApplicationSubmitted = ({
   application,
 }: {
   className?: string
-  application: Application
+  application: ApplicationWithDetails
 }) => {
   const { data: session } = useSession()
   const [showConfetti, setShowConfetti] = useState(false)
@@ -109,19 +113,11 @@ export const ApplicationSubmitted = ({
             updates regarding your application status.
           </li>
           <li>
-            <span className="font-medium">Voting starts on June 27:</span>{" "}
-            Badgeholders will evaluate the impact of your project by voting on
-            the quality-metrics that matter most to them. How voting works in
-            this round:{" "}
-            <ExternalLink
-              href="https://app.optimism.io/retropgf"
-              className="font-medium"
-            >
-              Learn more
-            </ExternalLink>
+            <span className="font-medium"> Voting starts on Sep 5:</span>{" "}
+            Badgeholders will evaluate the impact of your project.
           </li>
           <li>
-            <span className="font-medium">Results will be shared July 18:</span>{" "}
+            <span className="font-medium"> Results will be shared Oct 3:</span>{" "}
             If you receive rewards, you will receive instructions on how to
             claim your Retro Funding rewards via email.
           </li>
@@ -129,17 +125,17 @@ export const ApplicationSubmitted = ({
       </div>
 
       {/* Social share */}
-      <div className="flex flex-col gap-y-6">
-        <h3>Share with your community</h3>
-        <div className="w-full h-[400px] relative">
+      <div className="flex flex-col justify-center items-center gap-y-6 p-10 bg-background border rounded-2xl ">
+        <h3 className="text-xl font-semibold">Share with your community</h3>
+        <div className="w-full h-[356px] relative">
           <Image
-            src="/assets/images/submitted-retro-funding.png"
+            src="/assets/images/submitted-retro-5-funding.png"
             fill
             alt="Social share"
           />
         </div>
 
-        <a href="/assets/images/submitted-retro-funding.png" download>
+        <a href="/assets/images/submitted-retro-5-funding.png" download>
           <Button variant="secondary" className="w-fit">
             Download image
             <ArrowDownToLine size={16} className="ml-2.5" />
@@ -150,12 +146,12 @@ export const ApplicationSubmitted = ({
       {/* Join the conversation */}
       <div className="flex flex-col gap-y-6">
         <h3 className="text-lg font-semibold">Join the conversation</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {SOCIALS.map(({ name, icon, link }) => (
+        <div className="grid grid-cols-4 gap-2">
+          {SOCIALS.map(({ name, icon, link }, index) => (
             <ExternalLink
               href={link}
-              key={name}
-              className="flex flex-col items-center justify-center gap-y-2 h-[104px] border rounded-2xl cursor-pointer hover:opacity-80"
+              key={index}
+              className="flex flex-col items-center justify-center gap-y-2 h-[96px] w-[172px] rounded-xl cursor-pointer bg-secondary hover:opacity-80"
             >
               {icon}
               <p className="text-sm font-semibold">{name}</p>
@@ -163,12 +159,6 @@ export const ApplicationSubmitted = ({
           ))}
         </div>
       </div>
-
-      <Link href="/dashboard">
-        <Button variant="secondary" className="w-fit">
-          Back to profile
-        </Button>
-      </Link>
     </div>
   )
 }

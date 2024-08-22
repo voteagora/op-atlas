@@ -5,6 +5,8 @@ import "@farcaster/auth-kit/styles.css"
 import { AuthKitProvider } from "@farcaster/auth-kit"
 import { SessionProvider } from "next-auth/react"
 
+import { TooltipProvider } from "@/components/ui/tooltip"
+
 import { AnalyticsProvider } from "./AnalyticsProvider"
 import { DialogProvider } from "./DialogProvider"
 import { LayoutWrapper } from "./LayoutProvider"
@@ -34,7 +36,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <AuthKitProvider config={farcasterConfig}>
         <AnalyticsProvider>
           <DialogProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <TooltipProvider>
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </TooltipProvider>
           </DialogProvider>
         </AnalyticsProvider>
       </AuthKitProvider>

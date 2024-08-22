@@ -22,6 +22,8 @@ export const verifyContract = async ({
   deploymentTxHash,
   signature,
   chain,
+  name,
+  description,
 }: {
   projectId: string
   contractAddress: Address
@@ -29,6 +31,8 @@ export const verifyContract = async ({
   deploymentTxHash: `0x${string}`
   signature: `0x${string}`
   chain: Chain
+  name?: string
+  description?: string
 }) => {
   const session = await auth()
   if (!session) {
@@ -127,6 +131,8 @@ export const verifyContract = async ({
         deploymentHash: deploymentTxHash,
         verificationProof: signature,
         chainId: parseInt(chain.toString()),
+        name,
+        description,
       },
     })
 

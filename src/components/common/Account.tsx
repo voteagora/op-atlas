@@ -154,9 +154,14 @@ export function Account() {
               Verified addresses
             </DropdownMenuItem>
           </Link>
+          <Link href="/profile/organizations/new">
+            <DropdownMenuItem className="cursor-pointer">
+              Organizations
+            </DropdownMenuItem>
+          </Link>
           <hr className="w-full border-[0.5px] border-border" />
           <DropdownMenuItem className="cursor-pointer" onClick={logOut}>
-            Log out
+            Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

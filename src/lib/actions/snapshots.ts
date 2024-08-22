@@ -3,16 +3,24 @@
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
+import { addOrganizationSnapshot, getOrganization } from "@/db/organizations"
 import {
   addProjectSnapshot,
   getProject,
   updateAllForProject,
 } from "@/db/projects"
 
-import { createProjectMetadataAttestation } from "../eas"
+import {
+  createOrganizationMetadataAttestation,
+  createProjectMetadataAttestation,
+} from "../eas"
 import { uploadToPinata } from "../pinata"
 import { APPLICATIONS_CLOSED } from "../utils"
-import { formatProjectMetadata, ProjectMetadata } from "../utils/metadata"
+import {
+  formatOrganizationMetadata,
+  formatProjectMetadata,
+  ProjectMetadata,
+} from "../utils/metadata"
 import { publishAndSaveApplication } from "./applications"
 import { verifyMembership } from "./utils"
 
@@ -58,9 +66,23 @@ export const createProjectSnapshot = async (projectId: string) => {
     })
 
     // If the project has an application, we need to publish a new one to reference this snapshot.
-    if (project.applications.length > 0 && !APPLICATIONS_CLOSED) {
+
+    const application = project.applications.find((a) => a.roundId === "5")
+
+    if (application && !APPLICATIONS_CLOSED) {
       await publishAndSaveApplication({
-        projectId,
+        project: {
+          projectId: project.id,
+          categoryId: application.categoryId ?? "",
+          impactStatement: application.impactStatementAnswer.reduce(
+            (acc, { impactStatementId, answer }) => {
+              acc[impactStatementId] = answer
+              return acc
+            },
+            {} as Record<string, string>,
+          ),
+          projectDescriptionOptions: application.projectDescriptionOptions,
+        },
         farcasterId: session.user.farcasterId,
         metadataSnapshotId: snapshot.attestationId,
       })
@@ -115,4 +137,55 @@ export const createProjectSnapshotOnBehalf = async (
     ipfsHash,
     attestationId,
   })
+}
+
+export const createOrganizationSnapshot = async (organizationId: string) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const organization = await getOrganization({ id: organizationId })
+  if (!organization) {
+    return {
+      error: "Organization not found",
+    }
+  }
+
+  try {
+    // Upload metadata to IPFS
+    const metadata = formatOrganizationMetadata(organization)
+    const ipfsHash = await uploadToPinata(organizationId, metadata)
+
+    // Create attestation
+    const attestationId = await createOrganizationMetadataAttestation({
+      farcasterId: parseInt(session.user.farcasterId),
+      organizationId: organization.id,
+      name: organization.name,
+      projectIds: organization.projects.map((p) => p.projectId),
+      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    })
+
+    const snapshot = await addOrganizationSnapshot({
+      organizationId,
+      ipfsHash,
+      attestationId,
+    })
+
+    revalidatePath("/dashboard")
+    revalidatePath("/organizations", "layout")
+
+    return {
+      snapshot,
+      error: null,
+    }
+  } catch (error) {
+    console.error("Error creating snapshot", error)
+    return {
+      error,
+    }
+  }
 }

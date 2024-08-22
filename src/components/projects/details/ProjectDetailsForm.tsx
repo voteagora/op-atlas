@@ -1,18 +1,32 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Project } from "@prisma/client"
+import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { createNewProject, updateProjectDetails } from "@/lib/actions/projects"
+import {
+  createNewProject,
+  setProjectOrganization,
+  updateProjectDetails,
+} from "@/lib/actions/projects"
+import { ProjectWithDetails } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -52,6 +66,13 @@ const StringValue = z.object({ value: z.string() }) // use a intermediate object
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string(),
+  organization: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      avatarUrl: z.string().optional(),
+    })
+    .nullable(),
   category: CategoryEnum,
   website: z.array(StringValue),
   farcaster: z.array(StringValue),
@@ -68,7 +89,13 @@ function fromStringObjectArr(objs: { value: string }[]) {
   return objs.map(({ value }) => value).filter(Boolean) // remove empty strings
 }
 
-export default function ProjectDetailsForm({ project }: { project?: Project }) {
+export default function ProjectDetailsForm({
+  project,
+  organizations,
+}: {
+  project?: ProjectWithDetails
+  organizations: Organization[]
+}) {
   const router = useRouter()
   const { track } = useAnalytics()
 
@@ -80,6 +107,13 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
     defaultValues: {
       name: project?.name ?? "",
       description: project?.description ?? "",
+      organization: project?.organization?.organization
+        ? {
+            name: project?.organization?.organization.name,
+            id: project?.organization?.organizationId,
+            avatarUrl: project?.organization?.organization.avatarUrl ?? "",
+          }
+        : null,
       category: project?.category
         ? (project.category as z.infer<typeof CategoryEnum>)
         : "CeFi",
@@ -179,7 +213,11 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       })
 
       const newValues = {
-        ...values,
+        name: values.name,
+        description: values.description,
+        category: values.category,
+        twitter: values.twitter,
+        mirror: values.mirror,
         thumbnailUrl,
         bannerUrl,
         website: fromStringObjectArr(values.website),
@@ -190,12 +228,23 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
 
       const promise: Promise<Project> = new Promise(async (resolve, reject) => {
         try {
-          const response = project
-            ? await updateProjectDetails(project.id, newValues)
-            : await createNewProject(newValues)
+          const [response, res] = project
+            ? await Promise.all([
+                updateProjectDetails(project.id, newValues),
+                setProjectOrganization(
+                  project.id,
+                  project.organization?.organizationId,
+                  values.organization?.id,
+                ),
+              ])
+            : await Promise.all([createNewProject(newValues)])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
+          }
+
+          if (res && res?.error !== null) {
+            throw new Error(res.error ?? "Failed to update organization")
           }
 
           if (isCreating) {
@@ -210,13 +259,15 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
       })
 
       toast.promise(promise, {
-        loading: isCreating ? "Creating project..." : "Saving project...",
+        loading: isCreating
+          ? "Creating project onchain..."
+          : "Saving project onchain...",
         success: (project) => {
           isSave
             ? router.replace(`/projects/${project.id}/details`)
-            : router.push(`/projects/${project.id}/team`)
+            : router.push(`/projects/${project.id}/contributors`)
           setIsSaving(false)
-          return isCreating ? "Project created!" : "Project saved"
+          return isCreating ? "Project created onchain!" : "Project saved"
         },
         error: () => {
           isSave ? setIsSaving(false) : setIsLoading(false)
@@ -273,8 +324,83 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                   type=""
                   id="name"
                   placeholder="Add a project name"
+                  className="line-clamp-2"
                   {...field}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="organization"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-1.5">
+                <FormLabel className="text-foreground">
+                  Organization<span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="h-10 py-2.5 px-3 flex text-foreground items-center rounded-lg border border-input mt-2 cursor-pointer">
+                      {field.value?.avatarUrl && (
+                        <Avatar className="w-5 h-5 mr-2">
+                          <AvatarImage
+                            src={field.value?.avatarUrl ?? ""}
+                            alt="avatar"
+                          />
+                          <AvatarFallback>{field.value?.name}</AvatarFallback>
+                        </Avatar>
+                      )}
+                      <p className="text-sm text-foreground">
+                        {field.value?.name ?? "No Organization"}
+                      </p>
+                      <Image
+                        className="ml-auto"
+                        src="/assets/icons/arrowDownIcon.svg"
+                        height={8}
+                        width={10}
+                        alt="Arrow up"
+                      />
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="!w-[750px]">
+                    {organizations?.map((organization) => (
+                      <DropdownMenuCheckboxItem
+                        className="text-sm font-normal text-secondary-foreground w-full"
+                        checked={field.value?.id === organization.id}
+                        key={organization.id}
+                        onCheckedChange={() => {
+                          field.onChange(organization)
+                        }}
+                      >
+                        <Avatar className="w-5 h-5 mr-2">
+                          <AvatarImage
+                            src={organization.avatarUrl || ""}
+                            alt="avatar"
+                          />
+                          <AvatarFallback>{organization.name}</AvatarFallback>
+                        </Avatar>
+                        {organization.name}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+
+                    <DropdownMenuCheckboxItem
+                      className="text-sm font-normal text-secondary-foreground w-full"
+                      checked={field.value === null}
+                      onCheckedChange={() => {
+                        field.onChange(null)
+                      }}
+                    >
+                      No organization
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
+                      <Link href="/profile/organizations/new">
+                        Make an organization
+                      </Link>
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <FormMessage />
               </FormItem>
             )}
@@ -287,7 +413,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                 <FormLabel className="text-foreground">
                   Description<span className="ml-0.5 text-destructive">*</span>
                 </FormLabel>
-                <FormDescription className="!mt-0">
+                <FormDescription className="!mt-0 text-secondary-foreground">
                   Introduce your project to the Optimism Collective. Share who
                   you are and what you do.
                 </FormDescription>
@@ -312,9 +438,9 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                 Images must be no larger than 4.5 MB.
               </div>
             </div>
-            <div className="flex flex-1 gap-x-2 mt-2">
+            <div className="flex flex-1 gap-x-2 mt-2 relative pb-10">
               <FileUploadInput
-                className="flex-1"
+                className="absolute bottom-0 left-6"
                 onChange={(e) => {
                   if (!e.target.files || e.target.files.length < 1) return
 
@@ -322,7 +448,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                   setAvatarSrc(URL.createObjectURL(file))
                 }}
               >
-                <div className="border border-solid rounded-xl overflow-hidden h-40 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
+                <div className="border border-solid rounded-md overflow-hidden h-32 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -338,17 +464,13 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                         height={20}
                         alt="img"
                       />
-                      <p className="text-muted-foreground text-xs">
-                        Add project
-                        <br />
-                        avatar
-                      </p>
+                      <p className="text-muted-foreground text-xs">Avatar</p>
                     </>
                   )}
                 </div>
               </FileUploadInput>
               <FileUploadInput
-                className="flex-[4]"
+                className="w-full"
                 onChange={(e) => {
                   if (!e.target.files || e.target.files.length < 1) return
 
@@ -356,7 +478,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                   setBannerSrc(URL.createObjectURL(file))
                 }}
               >
-                <div className="border border-solid h-40 overflow-hidden bg-secondary rounded-xl flex flex-col justify-center items-center gap-2 select-none">
+                <div className="border border-solid h-40 overflow-hidden bg-secondary rounded-md flex flex-col justify-center items-center gap-2 select-none">
                   {bannerUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -373,9 +495,7 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
                         alt="img"
                       />
                       <p className="text-muted-foreground text-xs">
-                        Add project cover
-                        <br />
-                        image
+                        Cover image
                       </p>
                     </>
                   )}
@@ -440,7 +560,8 @@ export default function ProjectDetailsForm({ project }: { project?: Project }) {
             <div>
               <FormLabel className="text-sm font-medium">Website</FormLabel>
               <div className="text-sm text-muted-foreground">
-                If your project has more than one website, you can add rows.
+                If your organization has more than one website, you can add
+                rows.
               </div>
             </div>
             {websiteFields.map((field, index) => (

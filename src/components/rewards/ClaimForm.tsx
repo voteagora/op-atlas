@@ -126,7 +126,6 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
             )}
             <div className="flex gap-2 items-center">
               <Checkbox
-                className="border-2 rounded-[2px]"
                 checked={confirmedOnOpMainnet}
                 onCheckedChange={() =>
                   setConfirmedOnOpMainnet(!confirmedOnOpMainnet)
@@ -138,7 +137,6 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
             </div>
             <div className="flex gap-2 items-center">
               <Checkbox
-                className="border-2 rounded-[2px]"
                 checked={confirmedCanMakeContractCalls}
                 onCheckedChange={() =>
                   setConfirmedCanMakeContractCalls(

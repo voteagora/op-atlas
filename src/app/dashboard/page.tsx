@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
+import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
 import { getUserById } from "@/db/users"
+import { getUserOrganizations } from "@/lib/actions/organizations"
 import { getApplications, getProjects } from "@/lib/actions/projects"
 
 export default async function Page() {
@@ -12,10 +14,11 @@ export default async function Page() {
     redirect("/")
   }
 
-  const [user, projects, applications] = await Promise.all([
+  const [user, projects, applications, organizations] = await Promise.all([
     getUserById(session.user.id),
     getProjects(session.user.id),
     getApplications(session.user.id),
+    getUserOrganizations(session.user.id),
   ])
 
   if (!user) {
@@ -28,8 +31,12 @@ export default async function Page() {
         user={user}
         projects={projects}
         applications={applications}
+        organizations={organizations}
         className="w-full max-w-4xl"
       />
+      <div className="fixed bottom-4 left-4">
+        <FeedbackButton />
+      </div>
     </main>
   )
 }

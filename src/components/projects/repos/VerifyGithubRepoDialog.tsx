@@ -422,7 +422,6 @@ const ContractCodeStep = ({
           <Checkbox
             checked={containsContracts}
             onCheckedChange={toggleContainsContracts}
-            className="border-2 rounded-[2px]"
           />
           <p className="text-sm font-medium">
             This repo contains contract code
