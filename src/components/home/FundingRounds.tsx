@@ -193,7 +193,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
               <div className="items-center flex gap-2 pr-4 ">
                 <ChainLogo chainId={optimism.id.toString()} />
                 <div className="text-sm font-medium text-secondary-foreground">
-                  10M OP
+                  8M OP
                 </div>
               </div>
               <Link href="/application/5">
