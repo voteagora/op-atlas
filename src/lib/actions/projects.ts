@@ -79,6 +79,8 @@ export const createNewProject = async (
     organizationId,
   })
 
+  await setProjectOrganization(project.id, undefined, organizationId)
+
   revalidatePath("/dashboard")
   return {
     error: null,
