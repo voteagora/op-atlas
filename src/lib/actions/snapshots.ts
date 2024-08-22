@@ -165,7 +165,7 @@ export const createOrganizationSnapshot = async (organizationId: string) => {
       farcasterId: parseInt(session.user.farcasterId),
       organizationId: organization.id,
       name: organization.name,
-      projectIds: organization.projects.map((p) => p.id),
+      projectIds: organization.projects.map((p) => p.projectId),
       ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
     })
 

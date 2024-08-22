@@ -173,6 +173,11 @@ export const setProjectOrganization = async (
 
   if (!organizationId) {
     await removeProjectOrganization({ projectId })
+
+    if (oldOrganizationId) {
+      // Create organization snapshot
+      await createOrganizationSnapshot(oldOrganizationId)
+    }
   } else {
     // Only organization admins can set the organization
     const isOrganizationAdmin = await verifyOrganizationMembership(
@@ -187,7 +192,10 @@ export const setProjectOrganization = async (
     await updateProjectOrganization({ projectId, organizationId })
 
     // Create organization snapshot
-    await createOrganizationSnapshot(organizationId)
+    await Promise.all([
+      createOrganizationSnapshot(organizationId),
+      oldOrganizationId && createOrganizationSnapshot(oldOrganizationId),
+    ])
   }
 
   revalidatePath("/dashboard")
