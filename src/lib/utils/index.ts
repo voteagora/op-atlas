@@ -120,8 +120,8 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
     completedSections.push(ProjectSection.Grants)
   }
 
-  const hasSnapshots = project.snapshots.length > 0
-  if (hasSnapshots) {
+  const hasUnpublishedChanges = projectHasUnpublishedChanges(project)
+  if (!hasUnpublishedChanges) {
     completedSections.push(ProjectSection.Publish)
   }
 
@@ -130,7 +130,7 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   progress += hasRepos ? 16.67 : 0
   progress += hasContracts ? 16.67 : 0
   progress += hasFunding ? 16.67 : 0
-  progress += hasSnapshots ? 16.67 : 0
+  progress += hasUnpublishedChanges ? 16.67 : 0
 
   return { completedSections, progressPercent: Math.round(progress) }
 }
