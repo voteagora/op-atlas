@@ -76,16 +76,21 @@ export const POST = async (
     return new Response(authResponse.failReason, { status: 401 })
   }
 
-  const { projectId } = route.params
-  const { farcasterId, metadata } = await req.json()
+  try {
+    const { projectId } = route.params
+    const { farcasterId, metadata } = await req.json()
 
-  const { ipfsHash, attestationId } = await createProjectSnapshotOnBehalf(
-    ProjectMetadataValidator.parse(metadata),
-    projectId,
-    z.string().parse(farcasterId),
-  )
+    const { ipfsHash, attestationId } = await createProjectSnapshotOnBehalf(
+      ProjectMetadataValidator.parse(metadata),
+      projectId,
+      z.string().parse(farcasterId),
+    )
 
-  return NextResponse.json({ ipfsHash, attestationId, projectId })
+    return NextResponse.json({ ipfsHash, attestationId, projectId })
+  } catch (e) {
+    console.error(e)
+    return new Response(JSON.stringify(e), { status: 500 })
+  }
 }
 
 export const GET = async (
@@ -98,20 +103,25 @@ export const GET = async (
     return new Response(authResponse.failReason, { status: 401 })
   }
 
-  const { projectId } = route.params
+  try {
+    const { projectId } = route.params
 
-  const project = await getProject({ id: projectId })
+    const project = await getProject({ id: projectId })
 
-  if (!project) {
-    return new Response("Project not found", { status: 404 })
+    if (!project) {
+      return new Response("Project not found", { status: 404 })
+    }
+
+    const metadata = formatProjectMetadata(project)
+
+    return NextResponse.json({
+      metadata,
+      projectId,
+      projectMetadataId:
+        project.snapshots[project.snapshots.length - 1].attestationId,
+    })
+  } catch (e) {
+    console.error(e)
+    return new Response(JSON.stringify(e), { status: 500 })
   }
-
-  const metadata = formatProjectMetadata(project)
-
-  return NextResponse.json({
-    metadata,
-    projectId,
-    projectMetadataId:
-      project.snapshots[project.snapshots.length - 1].attestationId,
-  })
 }

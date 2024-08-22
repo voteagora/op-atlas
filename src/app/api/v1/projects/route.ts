@@ -17,10 +17,15 @@ export const POST = async (req: NextRequest) => {
     return new Response(authResponse.failReason, { status: 401 })
   }
 
-  const { name, farcasterId } = payloadValidator.parse(await req.json())
+  try {
+    const { name, farcasterId } = payloadValidator.parse(await req.json())
 
-  const { id } = await upsertUser({ farcasterId })
-  const project = await createNewProjectOnBehalf({ name }, id, farcasterId)
+    const { id } = await upsertUser({ farcasterId })
+    const project = await createNewProjectOnBehalf({ name }, id, farcasterId)
 
-  return NextResponse.json({ attestationId: project.id })
+    return NextResponse.json({ attestationId: project.id })
+  } catch (e) {
+    console.error(e)
+    return new Response(JSON.stringify(e), { status: 500 })
+  }
 }
