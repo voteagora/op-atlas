@@ -1,12 +1,6 @@
-/*
-  Warnings:
-
-  - Added the required column `categoryId` to the `Application` table without a default value. This is not possible if the table is not empty.
-
-*/
-
 -- AlterTable
-ALTER TABLE "Application" ADD COLUMN     "categoryId" TEXT NOT NULL;
+ALTER TABLE "Application" ADD COLUMN     "categoryId" TEXT,
+ADD COLUMN     "projectDescriptionOptions" TEXT[];
 
 -- AlterTable
 ALTER TABLE "Project" ADD COLUMN     "hasCodeRepositories" BOOLEAN NOT NULL DEFAULT true,
@@ -37,6 +31,17 @@ CREATE TABLE "UserInteraction" (
     "lastInteracted" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "UserInteraction_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "OrganizationSnapshot" (
+    "id" TEXT NOT NULL,
+    "ipfsHash" TEXT NOT NULL,
+    "attestationId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "organizationId" TEXT NOT NULL,
+
+    CONSTRAINT "OrganizationSnapshot_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -90,6 +95,9 @@ CREATE TABLE "ProjectLinks" (
 CREATE UNIQUE INDEX "UserInteraction_userId_key" ON "UserInteraction"("userId");
 
 -- CreateIndex
+CREATE INDEX "OrganizationSnapshot_organizationId_idx" ON "OrganizationSnapshot"("organizationId");
+
+-- CreateIndex
 CREATE INDEX "ImpactStatement_categoryId_idx" ON "ImpactStatement"("categoryId");
 
 -- CreateIndex
@@ -102,7 +110,10 @@ CREATE INDEX "ProjectLinks_projectId_idx" ON "ProjectLinks"("projectId");
 ALTER TABLE "UserInteraction" ADD CONSTRAINT "UserInteraction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Application" ADD CONSTRAINT "Application_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrganizationSnapshot" ADD CONSTRAINT "OrganizationSnapshot_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Application" ADD CONSTRAINT "Application_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ImpactStatement" ADD CONSTRAINT "ImpactStatement_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
