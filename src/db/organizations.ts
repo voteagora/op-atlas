@@ -1,10 +1,11 @@
 "use server"
 
 import { Organization } from "@prisma/client"
+import { cache } from "react"
 
 import { prisma } from "./client"
 
-export async function getOrganizations(userId: string) {
+async function getOrganizationsFn(userId: string) {
   return prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -18,7 +19,9 @@ export async function getOrganizations(userId: string) {
   })
 }
 
-export async function getAdminOrganizations(userId: string) {
+export const getOrganizations = cache(getOrganizationsFn)
+
+async function getAdminOrganizationsFn(userId: string) {
   return prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -32,7 +35,9 @@ export async function getAdminOrganizations(userId: string) {
   })
 }
 
-export async function getUserProjectOrganizations(
+export const getAdminOrganizations = cache(getAdminOrganizationsFn)
+
+async function getUserProjectOrganizationsFn(
   farcasterId: string,
   projectId: string,
 ) {
@@ -66,8 +71,10 @@ export async function getUserProjectOrganizations(
   })
 }
 
+export const getUserProjectOrganizations = cache(getUserProjectOrganizationsFn)
+
 // Get all organizations with detail a user is part of
-export async function getUserOrganizationsWithDetails(farcasterId: string) {
+async function getUserOrganizationsWithDetailsFn(farcasterId: string) {
   return prisma.user.findUnique({
     where: { id: farcasterId },
     select: {
@@ -109,6 +116,10 @@ export async function getUserOrganizationsWithDetails(farcasterId: string) {
     },
   })
 }
+
+export const getUserOrganizationsWithDetails = cache(
+  getUserOrganizationsWithDetailsFn,
+)
 
 export type CreateOrganizationParams = Partial<
   Omit<Organization, "id" | "createdAt" | "updatedAt" | "deletedAt">
@@ -185,7 +196,7 @@ export async function deleteOrganization({
 }
 
 // Get detailed information about an organization
-export async function getOrganization({ id }: { id: string }) {
+async function getOrganizationFn({ id }: { id: string }) {
   return prisma.organization.findUnique({
     where: { id },
     include: {
@@ -194,6 +205,8 @@ export async function getOrganization({ id }: { id: string }) {
     },
   })
 }
+
+export const getOrganization = cache(getOrganizationFn)
 
 export async function addOrganizationSnapshot({
   organizationId,
@@ -276,7 +289,7 @@ export async function removeOrganizationMember({
 }
 
 // Get organization contributors
-export async function getOrganizationTeam({ id }: { id: string }) {
+async function getOrganizationTeamFn({ id }: { id: string }) {
   return prisma.organization.findUnique({
     where: {
       id,
@@ -290,6 +303,8 @@ export async function getOrganizationTeam({ id }: { id: string }) {
     },
   })
 }
+
+export const getOrganizationTeam = cache(getOrganizationTeamFn)
 
 //  Checks if a user is an admin of an organization
 export async function isUserAdminOfOrganization(
