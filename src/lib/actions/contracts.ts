@@ -8,6 +8,7 @@ import {
   addProjectContract,
   getProjectContracts,
   removeProjectContract,
+  updateProjectContract,
 } from "@/db/projects"
 
 import { getTransaction, getTransactionTrace, TraceCall } from "../eth"
@@ -160,6 +161,52 @@ export const verifyContract = async ({
     return {
       error: "Error creating contract",
     }
+  }
+}
+
+export const updateContractDetails = async ({
+  projectId,
+  contractAddress: contractAddressRaw,
+  chainId,
+  name,
+  description,
+}: {
+  projectId: string
+  contractAddress: Address
+  chainId: number
+  name?: string
+  description?: string
+}) => {
+  const session = await auth()
+  if (!session) {
+    return {
+      error: "Not authenticated",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  const contractAddress = getAddress(contractAddressRaw)
+
+  const contract = await updateProjectContract({
+    projectId,
+    contractAddress,
+    chainId,
+    updates: {
+      name,
+      description,
+    },
+  })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+    contract,
   }
 }
 

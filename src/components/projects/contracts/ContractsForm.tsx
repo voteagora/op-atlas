@@ -27,7 +27,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { removeContract, updateProjectOSOStatus } from "@/lib/actions/contracts"
+import {
+  removeContract,
+  updateContractDetails,
+  updateProjectOSOStatus,
+} from "@/lib/actions/contracts"
 import { updateProjectDetails } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 
@@ -148,6 +152,13 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
           }),
           updateProjectDetails(project.id, {
             isOnChainContract: !values.isOffChain,
+          }),
+          updateContractDetails({
+            projectId: project.id,
+            contractAddress: values.contracts[0].contractAddress,
+            chainId: parseInt(values.contracts[0].chain),
+            name: values.contracts[0].name,
+            description: values.contracts[0].description,
           }),
         ])
 

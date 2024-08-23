@@ -496,6 +496,40 @@ export async function addProjectContract({
   return prisma.$transaction([contractCreate, projectUpdate])
 }
 
+export async function updateProjectContract({
+  projectId,
+  contractAddress,
+  chainId,
+  updates,
+}: {
+  projectId: string
+  contractAddress: string
+  chainId: number
+  updates: Prisma.ProjectContractUpdateInput
+}) {
+  const contractUpdate = prisma.projectContract.update({
+    where: {
+      projectId,
+      contractAddress_chainId: {
+        contractAddress,
+        chainId,
+      },
+    },
+    data: updates,
+  })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([contractUpdate, projectUpdate])
+}
+
 export async function removeProjectContract({
   projectId,
   address,
