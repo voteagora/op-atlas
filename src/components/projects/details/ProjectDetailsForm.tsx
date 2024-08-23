@@ -70,7 +70,7 @@ const formSchema = z.object({
     .object({
       id: z.string(),
       name: z.string(),
-      avatarUrl: z.string().optional(),
+      avatarUrl: z.string().optional().nullable(),
     })
     .nullable(),
   category: CategoryEnum,
@@ -111,7 +111,7 @@ export default function ProjectDetailsForm({
         ? {
             name: project?.organization?.organization.name,
             id: project?.organization?.organizationId,
-            avatarUrl: project?.organization?.organization.avatarUrl ?? "",
+            avatarUrl: project?.organization?.organization.avatarUrl,
           }
         : null,
       category: project?.category
@@ -237,7 +237,9 @@ export default function ProjectDetailsForm({
                   values.organization?.id,
                 ),
               ])
-            : await Promise.all([createNewProject(newValues)])
+            : await Promise.all([
+                createNewProject(newValues, values.organization?.id),
+              ])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
