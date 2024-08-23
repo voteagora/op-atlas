@@ -1000,12 +1000,12 @@ export async function updateAllForProject(
   const createRepositories = prisma.projectRepository.createMany({
     data: [
       ...project.github.map((repo) => ({
-        url: repo,
+        url: repo.url,
         type: "github",
         projectId,
       })),
       ...project.packages.map((repo) => ({
-        url: repo,
+        url: repo.url,
         type: "package",
         projectId,
       })),
