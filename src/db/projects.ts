@@ -554,8 +554,20 @@ export async function addProjectRepository({
   projectId: string
   repo: Omit<Prisma.ProjectRepositoryCreateInput, "project">
 }) {
-  const repoCreate = prisma.projectRepository.create({
-    data: {
+  const repoCreate = prisma.projectRepository.upsert({
+    where: {
+      url: repo.url,
+      projectId,
+    },
+    update: {
+      ...repo,
+      project: {
+        connect: {
+          id: projectId,
+        },
+      },
+    },
+    create: {
       ...repo,
       project: {
         connect: {
