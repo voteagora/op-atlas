@@ -153,13 +153,14 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
           updateProjectDetails(project.id, {
             isOnChainContract: !values.isOffChain,
           }),
-          updateContractDetails({
-            projectId: project.id,
-            contractAddress: values.contracts[0].contractAddress,
-            chainId: parseInt(values.contracts[0].chain),
-            name: values.contracts[0].name,
-            description: values.contracts[0].description,
-          }),
+          !values.isOffChain &&
+            updateContractDetails({
+              projectId: project.id,
+              contractAddress: values.contracts[0].contractAddress,
+              chainId: parseInt(values.contracts[0].chain),
+              name: values.contracts[0].name,
+              description: values.contracts[0].description,
+            }),
         ])
 
         if (result.error) {
