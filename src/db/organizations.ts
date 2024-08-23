@@ -42,7 +42,7 @@ async function getUserProjectOrganizationsFn(
   projectId: string,
 ) {
   return prisma.user.findUnique({
-    where: { id: farcasterId },
+    where: { farcasterId },
     select: {
       organizations: {
         where: { deletedAt: null },
@@ -60,7 +60,7 @@ async function getUserProjectOrganizationsFn(
               projects: {
                 where: {
                   deletedAt: null,
-                  id: projectId,
+                  projectId,
                 },
               },
             },
