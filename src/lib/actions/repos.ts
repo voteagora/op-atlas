@@ -219,21 +219,19 @@ export const updateGithubRepos = async (
       },
     })
 
-    const repoUpdates = updateProjectRepositories({
-      projectId,
-      type: "github",
-      repositories: repos.map((repo) => {
-        return {
-          url: repo.url,
-          type: "github",
-          verified: false,
+    const repoUpdates = Promise.all(
+      repos.map((repo) =>
+        updateProjectRepository({
           projectId,
-          containsContracts: repo.updates.containsContracts,
-          name: repo.updates.name,
-          description: repo.updates.description,
-        }
-      }),
-    })
+          url: repo.url,
+          updates: {
+            containsContracts: repo.updates.containsContracts,
+            name: repo.updates.name,
+            description: repo.updates.description,
+          },
+        }),
+      ),
+    )
 
     const [_, updatedRepos] = await Promise.all([projectUpdate, repoUpdates])
 

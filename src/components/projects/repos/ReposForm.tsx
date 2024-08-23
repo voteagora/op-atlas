@@ -220,7 +220,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         console.error("Error saving packages", error)
       }
     },
-    [project.id, project.organization?.organizationId, router],
+    [project.id, router],
   )
 
   const links = form.watch("links")
