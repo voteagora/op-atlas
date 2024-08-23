@@ -82,6 +82,56 @@ async function getUserAdminProjectsWithDetailFn({
           },
         },
       },
+      organizations: {
+        where: {
+          deletedAt: null,
+          role: "admin" satisfies TeamRole,
+        },
+        select: {
+          organization: {
+            include: {
+              projects: {
+                where: { deletedAt: null },
+                include: {
+                  project: {
+                    include: {
+                      team: {
+                        where: { deletedAt: null },
+                        include: { user: true },
+                      },
+                      repos: true,
+                      contracts: true,
+                      funding: true,
+                      snapshots: true,
+                      organization: {
+                        where: { deletedAt: null },
+                        include: {
+                          organization: {
+                            include: {
+                              team: {
+                                where: { deletedAt: null },
+                                include: { user: true },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      applications: true,
+                      links: true,
+                      rewards: { include: { claim: true } },
+                    },
+                  },
+                },
+                orderBy: {
+                  project: {
+                    createdAt: "asc",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   })
 }

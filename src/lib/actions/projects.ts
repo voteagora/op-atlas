@@ -38,7 +38,13 @@ export const getProjects = async (userId: string) => {
 
 export const getAdminProjects = async (userId: string) => {
   const teams = await getUserAdminProjectsWithDetail({ userId })
-  return (teams?.projects ?? []).map(({ project }) => project)
+  const teamProjects = teams?.projects.map(({ project }) => project) ?? []
+  const organizationProjects =
+    teams?.organizations
+      .map(({ organization }) => organization.projects)
+      .flat()
+      .map(({ project }) => project) ?? []
+  return [...teamProjects, ...organizationProjects]
 }
 
 export const getApplications = async (userId: string) => {
