@@ -5,11 +5,17 @@ export type TeamRole = "member" | "admin"
 export type ProjectWithDetails = Prisma.ProjectGetPayload<{
   include: {
     team: { include: { user: true } }
+    organization: {
+      include: {
+        organization: { include: { team: { include: { user: true } } } }
+      }
+    }
     repos: true
     contracts: true
     funding: true
     snapshots: true
     applications: true
+    links: true
     rewards: { include: { claim: true } }
   }
 }>
@@ -17,6 +23,7 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
 export type UserWithAddresses = Prisma.UserGetPayload<{
   include: {
     addresses: true
+    interaction: true
   }
 }>
 
@@ -62,5 +69,61 @@ export type FundingRewardDetails = Prisma.FundingRewardGetPayload<{
         address: true
       }
     }
+  }
+}>
+
+export type OrganizationWithDetails = Prisma.OrganizationGetPayload<{
+  include: {
+    team: { include: { user: true } }
+    projects: true
+  }
+}>
+
+export type UserOrganizationsWithDetails = Prisma.UserOrganizationGetPayload<{
+  include: {
+    organization: {
+      include: {
+        team: {
+          include: {
+            user: true
+          }
+          where: {
+            deletedAt: null
+          }
+        }
+        projects: {
+          include: {
+            project: {
+              include: {
+                team: { include: { user: true } }
+                repos: true
+                contracts: true
+                funding: true
+                snapshots: true
+                applications: true
+                rewards: { include: { claim: true } }
+              }
+            }
+          }
+          where: {
+            deletedAt: null
+          }
+        }
+      }
+    }
+  }
+}>
+
+export type ApplicationWithDetails = Prisma.ApplicationGetPayload<{
+  include: {
+    impactStatementAnswer: true
+    project: true
+    projectDescriptionOptions: true
+  }
+}>
+
+export type CategoryWithImpact = Prisma.CategoryGetPayload<{
+  include: {
+    impactStatements: true
   }
 }>

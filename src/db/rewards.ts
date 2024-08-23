@@ -1,10 +1,11 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
+import { cache } from "react"
 
 import { prisma } from "./client"
 
-export async function getFundingRewardsByRoundIdAndSearch({
+async function getFundingRewardsByRoundIdAndSearchFn({
   roundId,
   search,
   sortBy,
@@ -95,7 +96,11 @@ export async function getFundingRewardsByRoundIdAndSearch({
   return { rewards, totalCount }
 }
 
-export async function getReward({ id }: { id: string }) {
+export const getFundingRewardsByRoundIdAndSearch = cache(
+  getFundingRewardsByRoundIdAndSearchFn,
+)
+
+async function getRewardFn({ id }: { id: string }) {
   return prisma.fundingReward.findUnique({
     where: {
       id,
@@ -122,6 +127,8 @@ export async function getReward({ id }: { id: string }) {
   })
 }
 
+export const getReward = cache(getRewardFn)
+
 export async function insertRewards(
   rewards: {
     id: string
@@ -138,13 +145,15 @@ export async function insertRewards(
   })
 }
 
-export async function getClaimByAddress({ address }: { address: string }) {
+async function getClaimByAddressFn({ address }: { address: string }) {
   return prisma.rewardClaim.findFirst({
     where: {
       address: address.toLowerCase(),
     },
   })
 }
+
+export const getClaimByAddress = cache(getClaimByAddressFn)
 
 export async function startClaim({
   rewardId,

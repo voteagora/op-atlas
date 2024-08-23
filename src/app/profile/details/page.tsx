@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getUserById } from "@/db/users"
+import { updateInteractions } from "@/lib/actions/users"
 
 export default async function Page() {
   const session = await auth()
@@ -16,7 +17,10 @@ export default async function Page() {
     redirect("/")
   }
 
-  const user = await getUserById(session.user.id)
+  const [user] = await Promise.all([
+    getUserById(session.user.id),
+    updateInteractions({ userId: session.user.id, profileVisitCount: 1 }),
+  ])
 
   if (!user) {
     redirect("/")

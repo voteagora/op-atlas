@@ -1,10 +1,7 @@
 ---
 name: P0 Bug
 about: Describe this issue template's purpose here.
-title: ''
+title: ""
 labels: bug, p0
-assignees: ''
-
+assignees: ""
 ---
-
-

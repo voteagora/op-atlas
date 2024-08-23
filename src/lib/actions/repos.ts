@@ -1,11 +1,14 @@
 "use server"
 
+import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
 import {
   addProjectRepository,
   removeProjectRepository,
+  updateProject,
+  updateProjectLinks,
   updateProjectRepositories,
   updateProjectRepository,
 } from "@/db/projects"
@@ -69,6 +72,8 @@ export const verifyGithubRepo = async (
   projectId: string,
   owner: string,
   slug: string,
+  name?: string,
+  description?: string,
 ) => {
   const session = await auth()
 
@@ -109,6 +114,8 @@ export const verifyGithubRepo = async (
         url: `https://github.com/${owner}/${slug}`,
         verified: true,
         openSource: !!isOpenSource,
+        name,
+        description,
       },
     })
 
@@ -141,7 +148,7 @@ export const verifyGithubRepo = async (
 export const updateGithubRepo = async (
   projectId: string,
   url: string,
-  updates: { containsContracts: boolean },
+  updates: { containsContracts: boolean; name?: string; description?: string },
 ) => {
   const session = await auth()
 
@@ -174,6 +181,73 @@ export const updateGithubRepo = async (
     console.error("Error updating repo", error)
     return {
       error: "Error updating repo",
+    }
+  }
+}
+
+// Update multiple repo update
+export const updateGithubRepos = async (
+  projectId: string,
+  noRepos: boolean,
+  repos: {
+    url: string
+    updates: {
+      containsContracts?: boolean
+      name?: string
+      description?: string
+    }
+  }[],
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  try {
+    const projectUpdate = updateProject({
+      id: projectId,
+      project: {
+        hasCodeRepositories: !noRepos,
+      },
+    })
+
+    const repoUpdates = updateProjectRepositories({
+      projectId,
+      type: "github",
+      repositories: repos.map((repo) => {
+        return {
+          url: repo.url,
+          type: "github",
+          verified: false,
+          projectId,
+          containsContracts: repo.updates.containsContracts,
+          name: repo.updates.name,
+          description: repo.updates.description,
+        }
+      }),
+    })
+
+    const [_, updatedRepos] = await Promise.all([projectUpdate, repoUpdates])
+
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
+
+    return {
+      error: null,
+      repos: updatedRepos,
+    }
+  } catch (error) {
+    console.error("Error updating repos", error)
+    return {
+      error: "Error updating repos",
     }
   }
 }
@@ -254,4 +328,27 @@ export const updatePackageRepos = async (projectId: string, urls: string[]) => {
       error: "Error updating packages",
     }
   }
+}
+
+export const setProjectLinks = async (
+  projectId: string,
+  links: Prisma.ProjectLinksCreateManyInput[],
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  await updateProjectLinks({ projectId, links })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
 }

@@ -6,46 +6,66 @@ import { sortBy } from "ramda"
 
 import { auth } from "@/auth"
 import { createApplication, getProject } from "@/db/projects"
+import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
-import { verifyMembership } from "./utils"
+import { verifyAdminStatus } from "./utils"
+
+interface SubmitApplicationRequest {
+  projectId: string
+  categoryId: string
+  impactStatement: Record<string, string>
+  projectDescriptionOptions: string[]
+}
 
 export const publishAndSaveApplication = async ({
-  projectId,
+  project,
   farcasterId,
   metadataSnapshotId,
 }: {
-  projectId: string
+  project: SubmitApplicationRequest
   farcasterId: string
   metadataSnapshotId: string
 }): Promise<Application> => {
   // Publish attestation
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
-    projectId,
-    round: 4,
+    projectId: project.projectId,
+    round: 5,
     snapshotRef: metadataSnapshotId,
   })
 
   // Create application in database
-  return await createApplication({
-    projectId,
+  return createApplication({
+    round: 5,
+    ...project,
     attestationId,
-    round: 4,
   })
 }
 
 const createProjectApplication = async (
-  projectId: string,
+  applicationData: SubmitApplicationRequest,
   farcasterId: string,
 ) => {
-  const isInvalid = await verifyMembership(projectId, farcasterId)
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      applications: [],
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(
+    applicationData.projectId,
+    farcasterId,
+  )
   if (isInvalid?.error) {
     return isInvalid
   }
 
-  const project = await getProject({ id: projectId })
+  const project = await getProject({ id: applicationData.projectId })
 
   if (!project) {
     return {
@@ -69,7 +89,12 @@ const createProjectApplication = async (
   )[0]
 
   const application = await publishAndSaveApplication({
-    projectId,
+    project: {
+      projectId: project.id,
+      categoryId: applicationData.categoryId,
+      impactStatement: applicationData.impactStatement,
+      projectDescriptionOptions: applicationData.projectDescriptionOptions,
+    },
     farcasterId,
     metadataSnapshotId: latestSnapshot.attestationId,
   })
@@ -80,13 +105,29 @@ const createProjectApplication = async (
   }
 }
 
-export const submitApplications = async (projectIds: string[]) => {
+export const submitApplications = async (
+  projects: {
+    projectId: string
+    categoryId: string
+    impactStatement: Record<string, string>
+    projectDescriptionOptions: string[]
+  }[],
+) => {
   const session = await auth()
 
   if (!session?.user?.id) {
     return {
       applications: [],
       error: "Unauthorized",
+    }
+  }
+
+  const user = await getUserById(session.user.id)
+
+  if (!user?.email) {
+    return {
+      applications: [],
+      error: "You must provide an email to apply.",
     }
   }
 
@@ -97,9 +138,9 @@ export const submitApplications = async (projectIds: string[]) => {
   const applications: Application[] = []
   let error: string | null = null
 
-  for (const projectId of projectIds) {
+  for (const project of projects) {
     const result = await createProjectApplication(
-      projectId,
+      project,
       session.user.farcasterId,
     )
     if (result.error === null && result.application) {

@@ -5,7 +5,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { submitApplications } from "@/lib/actions/applications"
-import { ProjectWithDetails } from "@/lib/types"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -32,8 +32,8 @@ export const FundingApplication = ({
 }: {
   className?: string
   projects: ProjectWithDetails[]
-  applications: Application[]
-  onApplied: (application: Application) => void
+  applications: ApplicationWithDetails[]
+  onApplied: (application: ApplicationWithDetails) => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -76,16 +76,16 @@ export const FundingApplication = ({
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
         try {
-          const result = await submitApplications(selectedProjectIds)
+          const result = await submitApplications([])
           if (result.error !== null || result.applications.length === 0) {
             throw new Error(result.error ?? "Error submitting application")
           }
 
           for (const application of result.applications) {
-            track("Apply", {
-              projectIds: application.projectId,
-              attestationId: application.attestationId,
-            })
+            // track("Apply", {
+            //   projectIds: application.projectId,
+            //   attestationId: application.attestationId,
+            // })
           }
 
           resolve(result.applications[0])
@@ -99,7 +99,7 @@ export const FundingApplication = ({
     toast.promise(promise, {
       loading: "Submitting application...",
       success: (application) => {
-        onApplied(application)
+        // onApplied(application)
         return "Application submitted"
       },
       error: (error) => {
@@ -273,7 +273,7 @@ export const FundingApplication = ({
                 disabled
                 checked={agreedTerms[idx]}
                 onCheckedChange={() => toggleAgreedTerm(idx)}
-                className="mt-1 border-2 rounded-[2px]"
+                className="mt-1"
               />
               <p className="">{term}</p>
             </div>
@@ -283,7 +283,7 @@ export const FundingApplication = ({
               disabled
               checked={agreedTerms[TERMS.length]}
               onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
-              className="mt-1 border-2 rounded-[2px]"
+              className="mt-1"
             />
             <p className="">
               I agree to the{" "}

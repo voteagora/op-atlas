@@ -1,5 +1,6 @@
 "use server"
 
+import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth, signIn } from "@/auth"
@@ -9,6 +10,7 @@ import {
   updateUserEmail,
   updateUserGithub,
   updateUserHasGithub,
+  updateUserInteraction,
 } from "@/db/users"
 
 export const connectGithub = async () => {
@@ -118,5 +120,26 @@ export const searchUsers = async (username: string) => {
   return {
     error: null,
     users,
+  }
+}
+
+export const updateInteractions = async (
+  data: Prisma.UserInteractionUncheckedCreateInput,
+) => {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const userInteraction = await updateUserInteraction(session?.user?.id, {
+    ...data,
+    userId: session.user.id,
+  })
+
+  return {
+    error: null,
+    userInteraction,
   }
 }

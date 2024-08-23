@@ -1,5 +1,5 @@
 import { User } from "@prisma/client"
-import { Check, Github, GithubIcon, Mail, Plus, X } from "lucide-react"
+import { Check, Mail, Plus, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -42,8 +42,10 @@ export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
       <AccordionItem value="item-1">
         <AccordionTrigger className="p-8 justify-between">
           <div className="flex items-center gap-1 flex-1">
-            <div className="text-xl">{isComplete ? "👏" : "👋"}</div>
-            <div className="p-3 font-semibold">
+            <div className="text-3xl font-semibold w-12 h-12 flex items-center justify-center">
+              {isComplete ? "👏" : "👋"}
+            </div>
+            <div className="text-base font-semibold">
               {isComplete
                 ? "Profile complete!"
                 : "Complete your Optimist Profile"}
@@ -107,7 +109,7 @@ function ProfileSteps({ user }: { user: UserWithAddresses }) {
 function AddYourEmailStep({ user }: { user: User }) {
   const { setOpenDialog } = useAppDialogs()
   return (
-    <div className="flex justify-between pb-6 gap-6">
+    <div className="flex justify-between pb-4 gap-6">
       <div className="flex gap-4">
         {user.email ? <GreenCheck /> : <StepNumber num={1} />}
         <div className="flex flex-1 flex-col gap-4">
@@ -170,7 +172,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
   }
 
   return (
-    <div className="flex justify-between py-6 gap-6">
+    <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
         {!isDeveloper || user.github ? <GreenCheck /> : <StepNumber num={2} />}
         <div className="flex flex-1 flex-col gap-4">
@@ -229,10 +231,10 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
   }
 
   return (
-    <div className="flex justify-between py-6 gap-6">
+    <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
         {user.addresses.length ? <GreenCheck /> : <StepNumber num={3} />}
-        <div className="flex flex-col gap-6 flex-1">
+        <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-[2px]">
               <div className="font-medium">Add verified addresses</div>

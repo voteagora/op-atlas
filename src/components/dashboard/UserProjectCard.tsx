@@ -1,15 +1,17 @@
 import Image from "next/image"
 import Link from "next/link"
 import { reverse, uniqBy } from "ramda"
-import { memo, useMemo, useState } from "react"
+import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
+import { useIsAdmin } from "@/lib/hooks"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 
 import { ChainLogo } from "../common/ChainLogo"
 import ExternalLink from "../ExternalLink"
 import { Avatar, AvatarImage } from "../ui/avatar"
+import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 
 const UserProjectCard = ({
@@ -19,16 +21,22 @@ const UserProjectCard = ({
   className?: string
   project: ProjectWithDetails
 }) => {
+  const isAdmin = useIsAdmin(project)
+
   const progress = useMemo(() => {
     const { progressPercent } = getProjectStatus(project)
     return progressPercent
   }, [project])
 
-  const [loadingProject, setLoadingProject] = useState(false)
-
   return (
-    <div className={cn("flex gap-x-6 border rounded-2xl p-6", className)}>
-      <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-40 w-40 shrink-0">
+    <Link
+      href={`/projects/${project.id}/details`}
+      className={cn(
+        "flex gap-x-6 border rounded-xl hover:shadow-md p-8",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-32 w-32 shrink-0">
         {project.thumbnailUrl ? (
           <Image
             src={project.thumbnailUrl}
@@ -48,52 +56,22 @@ const UserProjectCard = ({
 
       <div className="flex flex-col flex-1 min-w-0">
         <div className="flex items-start">
-          <h3 className="mr-3 pt-1 truncate">{project.name}</h3>
-
-          <div className="ml-auto flex items-center shrink-0">
-            {progress === 100 ? (
-              <>
-                <Image
-                  alt="Checkmark"
-                  src="/assets/icons/circle-check-green.svg"
-                  height={16}
-                  width={16}
-                  className="w-4 h-4 object-center object-cover"
-                />
-                <p className="ml-2 text-sm text-secondary-foreground">
-                  Onchain
-                </p>
-              </>
-            ) : (
-              <>
-                <Progress value={progress} className="h-2 w-16" />
-                <p className="ml-2 text-sm text-secondary-foreground">
-                  {progress}% setup{" "}
-                </p>
-              </>
-            )}
-
-            <Link
-              href={`/projects/${project.id}/details`}
-              className="ml-6"
-              onClick={() => setLoadingProject(true)}
-            >
-              <Button isLoading={loadingProject} size="sm" variant="secondary">
-                Edit
-              </Button>
-            </Link>
-          </div>
+          <h3 className="mr-3 text-base truncate">{project.name}</h3>
         </div>
 
-        <div className="mt-4 flex flex-col">
-          <p className="text-secondary-foreground line-clamp-3">
-            {project.description}
-          </p>
-        </div>
+        <p className="text-base text-secondary-foreground mt-3 line-clamp-2">
+          {project.description}
+        </p>
 
-        <div className="mt-auto h-6 flex items-center">
+        <div className="mt-auto h-6 flex items-center gap-x-2">
+          {isAdmin && (
+            <Badge variant="outline" className="text-xs font-medium h-full">
+              Admin
+            </Badge>
+          )}
+
           {project.contracts.length > 0 ? (
-            <div className="h-full flex flex-row-reverse items-center w-fit mr-3 ml-1.5">
+            <div className="h-full flex flex-row-reverse items-center w-fit mr-3">
               {reverse(uniqBy((c) => c.chainId, project.contracts)).map(
                 (contract, idx) => (
                   <div
@@ -117,7 +95,7 @@ const UserProjectCard = ({
           </div>
 
           {project?.website?.length > 0 && (
-            <ExternalLink href={project.website[0]} className="ml-2">
+            <ExternalLink href={project.website[0]}>
               <Button
                 variant="link"
                 className="px-3 py-1.5 text-secondary-foreground"
@@ -128,7 +106,25 @@ const UserProjectCard = ({
           )}
         </div>
       </div>
-    </div>
+      <div className="m-auto">
+        {progress === 100 ? (
+          <div className="flex items-center">
+            <Image
+              alt="Checkmark"
+              src="/assets/icons/circle-check-green.svg"
+              height={16}
+              width={16}
+              className="w-4 h-4 object-center object-cover"
+            />
+            <p className="ml-2 text-sm text-secondary-foreground">Onchain</p>
+          </div>
+        ) : (
+          <>
+            <Progress value={progress} className="h-2 w-16" />
+          </>
+        )}
+      </div>
+    </Link>
   )
 }
 
