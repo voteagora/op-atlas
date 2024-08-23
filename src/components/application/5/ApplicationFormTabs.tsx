@@ -303,7 +303,12 @@ const ApplicationFormTabs = ({
                 </div>
               </div>
               <Button
-                disabled={!canSubmitForm || isLoading || !hasSelectedProjects}
+                disabled={
+                  !canSubmitForm ||
+                  isLoading ||
+                  !hasSelectedProjects ||
+                  !form.formState.isValid
+                }
                 onClick={submitApplication}
                 className="w-full mt-2"
                 type="button"
