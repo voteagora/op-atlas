@@ -80,8 +80,22 @@ export const POST = async (
     const { projectId } = route.params
     const { farcasterId, metadata } = await req.json()
 
+    const parsedMetadata = ProjectMetadataValidator.parse(metadata)
+
     const { ipfsHash, attestationId } = await createProjectSnapshotOnBehalf(
-      ProjectMetadataValidator.parse(metadata),
+      {
+        ...parsedMetadata,
+        github: parsedMetadata.github.map((url) => ({
+          url,
+          name: null,
+          description: null,
+        })),
+        packages: parsedMetadata.packages.map((url) => ({
+          url,
+          name: null,
+          description: null,
+        })),
+      },
       projectId,
       z.string().parse(farcasterId),
     )

@@ -14,8 +14,16 @@ export type ProjectMetadata = {
     mirror: string | null
   }
   team: string[]
-  github: string[]
-  packages: string[]
+  github: {
+    url: string
+    name: string | null
+    description: string | null
+  }[]
+  packages: {
+    url: string
+    name: string | null
+    description: string | null
+  }[]
   contracts: {
     address: string
     deploymentTxHash: string
@@ -58,10 +66,22 @@ export function formatProjectMetadata(
   const team = project.team.map(({ user }) => user.farcasterId)
   const github = project.repos
     .filter((repo) => repo.type === "github")
-    .map((repo) => repo.url)
+    .map((repo) => {
+      return {
+        url: repo.url,
+        name: repo.name,
+        description: repo.description,
+      }
+    })
   const packages = project.repos
     .filter((repo) => repo.type === "package")
-    .map((repo) => repo.url)
+    .map((repo) => {
+      return {
+        url: repo.url,
+        name: repo.name,
+        description: repo.description,
+      }
+    })
 
   const contracts = project.contracts.map((contract) => ({
     address: contract.contractAddress,
