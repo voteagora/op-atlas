@@ -60,6 +60,9 @@ async function getUserProjectOrganizationsFn(
               projects: {
                 where: {
                   deletedAt: null,
+                  project: {
+                    deletedAt: null,
+                  },
                   projectId,
                 },
               },
@@ -94,6 +97,9 @@ async function getUserOrganizationsWithDetailsFn(farcasterId: string) {
               projects: {
                 where: {
                   deletedAt: null,
+                  project: {
+                    deletedAt: null,
+                  },
                 },
                 include: {
                   project: {

@@ -97,7 +97,7 @@ async function getUserAdminProjectsWithDetailFn({
           organization: {
             include: {
               projects: {
-                where: { deletedAt: null },
+                where: { deletedAt: null, project: { deletedAt: null } },
                 include: {
                   project: {
                     include: {
