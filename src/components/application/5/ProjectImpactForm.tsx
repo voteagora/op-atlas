@@ -37,8 +37,13 @@ const ProjectImpactForm = ({
     return getProjectStatus(project).progressPercent === 100
   }, [project])
 
-  const hasApplied = project.applications[0]?.status === "submitted"
-  const attestationId = project.applications[0]?.attestationId
+  const hasApplied = project.applications.some(
+    (application) =>
+      application.status === "submitted" && application.roundId === "5",
+  )
+  const attestationId = project.applications.find(
+    (application) => application.roundId === "5",
+  )?.attestationId
 
   const categoryId = useWatch({ name: `projects.${index}.category` })
 

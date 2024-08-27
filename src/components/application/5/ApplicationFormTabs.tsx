@@ -164,6 +164,7 @@ const ApplicationFormTabs = ({
       }),
     },
     shouldFocusError: true,
+    mode: "onChange",
   })
 
   const toggleAgreedTerm = (idx: number) => {
