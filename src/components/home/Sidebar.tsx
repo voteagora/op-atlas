@@ -133,7 +133,7 @@ export const Sidebar = ({
             variant="outline"
             className="text-sm font-medium text-foreground justify-center mt-1 w-full"
           >
-            View Recipients
+            View recipients
           </Button>
         </Link>
       </div>
