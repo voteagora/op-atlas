@@ -92,12 +92,13 @@ async function getUserAdminProjectsWithDetailFn({
         where: {
           deletedAt: null,
           role: "admin" satisfies TeamRole,
+          organization: { deletedAt: null },
         },
         select: {
           organization: {
             include: {
               projects: {
-                where: { deletedAt: null },
+                where: { deletedAt: null, project: { deletedAt: null } },
                 include: {
                   project: {
                     include: {
