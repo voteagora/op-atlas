@@ -92,6 +92,7 @@ async function getUserAdminProjectsWithDetailFn({
         where: {
           deletedAt: null,
           role: "admin" satisfies TeamRole,
+          organization: { deletedAt: null },
         },
         select: {
           organization: {
