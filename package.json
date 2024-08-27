@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "report:applicants": "tsx src/scripts/applicants.ts",
+    "report:applications": "tsx src/scripts/applications.ts",
     "rewards": "tsx src/scripts/rewards.ts",
     "kyc": "tsx src/scripts/kyc.ts",
     "prepare": "husky"
