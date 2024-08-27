@@ -60,7 +60,7 @@ async function getUserAdminProjectsWithDetailFn({
               funding: true,
               snapshots: true,
               organization: {
-                where: { deletedAt: null },
+                where: { deletedAt: null, organization: { deletedAt: null } },
                 include: {
                   organization: {
                     include: {
@@ -348,7 +348,7 @@ async function getProjectFn({ id }: { id: string }) {
     include: {
       team: { where: { deletedAt: null }, include: { user: true } },
       organization: {
-        where: { deletedAt: null },
+        where: { deletedAt: null, organization: { deletedAt: null } },
         include: {
           organization: {
             include: {

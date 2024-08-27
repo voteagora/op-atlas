@@ -10,7 +10,7 @@ async function getOrganizationsFn(userId: string) {
     where: { id: userId },
     select: {
       organizations: {
-        where: { deletedAt: null },
+        where: { deletedAt: null, organization: { deletedAt: null } },
         include: {
           organization: true,
         },
