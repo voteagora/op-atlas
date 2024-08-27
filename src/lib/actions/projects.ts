@@ -1,7 +1,6 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
-import { nanoid } from "nanoid"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -11,30 +10,60 @@ import {
   CreateProjectParams,
   deleteProject,
   getProjectTeam,
+  getUserAdminProjectsWithDetail,
   getUserApplications,
   getUserProjectsWithDetails,
+  removeProjectOrganization,
   removeTeamMember,
   updateMemberRole,
   updateProject,
   updateProjectFunding,
+  updateProjectOrganization,
   UpdateProjectParams,
 } from "@/db/projects"
 
-import { createProjectAttestation } from "../eas"
+import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
-import { verifyAdminStatus, verifyMembership } from "./utils"
+import { createOrganizationSnapshot } from "./snapshots"
+import {
+  verifyAdminStatus,
+  verifyMembership,
+  verifyOrganizationMembership,
+} from "./utils"
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
   return (teams?.projects ?? []).map(({ project }) => project)
 }
 
-export const getApplications = async (userId: string) => {
-  const teams = await getUserApplications({ userId })
-  return (teams?.projects ?? []).flatMap(({ project }) => project.applications)
+export const getAdminProjects = async (userId: string) => {
+  const teams = await getUserAdminProjectsWithDetail({ userId })
+  const teamProjects = teams?.projects.map(({ project }) => project) ?? []
+  const organizationProjects =
+    teams?.organizations
+      .map(({ organization }) => organization.projects)
+      .flat()
+      .map(({ project }) => project) ?? []
+  return [...teamProjects, ...organizationProjects]
 }
 
-export const createNewProject = async (details: CreateProjectParams) => {
+export const getApplications = async (userId: string) => {
+  const userApplications = await getUserApplications({ userId })
+  return userApplications
+}
+
+export const getRoundApplications = async (userId: string, roundId: number) => {
+  const userApplications = await getUserApplications({
+    userId,
+    roundId: roundId.toString(),
+  })
+  return userApplications
+}
+
+export const createNewProject = async (
+  details: CreateProjectParams,
+  organizationId?: string,
+) => {
   const session = await auth()
 
   if (!session?.user?.id || !session.user.farcasterId) {
@@ -43,22 +72,44 @@ export const createNewProject = async (details: CreateProjectParams) => {
     }
   }
 
-  // Create project attestation
-  const attestationId = await createProjectAttestation({
+  // Create entity attestation
+  const attestationId = await createEntityAttestation({
     farcasterId: parseInt(session.user.farcasterId),
+    type: "project",
   })
 
   const project = await createProject({
     userId: session.user.id,
     projectId: attestationId,
     project: details,
+    organizationId,
   })
+
+  await setProjectOrganization(project.id, undefined, organizationId)
 
   revalidatePath("/dashboard")
   return {
     error: null,
     project,
   }
+}
+
+export const createNewProjectOnBehalf = async (
+  details: CreateProjectParams,
+  userId: string,
+  farcasterId: string,
+) => {
+  // Create project attestation
+  const attestationId = await createEntityAttestation({
+    farcasterId: parseInt(farcasterId),
+    type: "project",
+  })
+
+  return createProject({
+    userId: userId,
+    projectId: attestationId,
+    project: details,
+  })
 }
 
 export const updateProjectDetails = async (
@@ -74,17 +125,93 @@ export const updateProjectDetails = async (
   }
 
   const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+
   if (isInvalid?.error) {
     return isInvalid
   }
 
-  const updated = await updateProject({ id: projectId, project: details })
+  const updated = await updateProject({
+    id: projectId,
+    project: details,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
   return {
     error: null,
     project: updated,
+  }
+}
+
+export const setProjectOrganization = async (
+  projectId: string,
+  oldOrganizationId?: string,
+  organizationId?: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  // Skip if the organization hasn't changed
+  if (oldOrganizationId === organizationId) {
+    return {
+      error: null,
+      organizationId,
+    }
+  }
+
+  // Only project admins can set the organization
+  const projectAdmin = verifyAdminStatus(projectId, session.user.farcasterId)
+
+  // Only organization admins can remove the organization
+  const oldOrganizationAdmin = oldOrganizationId
+    ? verifyOrganizationMembership(oldOrganizationId, session.user.id)
+    : null
+
+  const isInvalid = (
+    await Promise.all([projectAdmin, oldOrganizationAdmin])
+  ).reduce((acc, val) => acc || val, null)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  if (!organizationId) {
+    await removeProjectOrganization({ projectId })
+
+    if (oldOrganizationId) {
+      // Create organization snapshot
+      await createOrganizationSnapshot(oldOrganizationId)
+    }
+  } else {
+    // Only organization admins can set the organization
+    const isOrganizationAdmin = await verifyOrganizationMembership(
+      organizationId,
+      session.user.id,
+    )
+
+    if (isOrganizationAdmin?.error) {
+      return isOrganizationAdmin
+    }
+
+    await updateProjectOrganization({ projectId, organizationId })
+
+    // Create organization snapshot
+    await Promise.all([
+      createOrganizationSnapshot(organizationId),
+      oldOrganizationId && createOrganizationSnapshot(oldOrganizationId),
+    ])
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+    organizationId,
   }
 }
 

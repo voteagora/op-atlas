@@ -12,7 +12,7 @@ import {
   useEffect,
 } from "react"
 
-import usePrevious from "@/lib/hooks"
+import { usePrevious } from "@/lib/hooks"
 
 const MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN
 

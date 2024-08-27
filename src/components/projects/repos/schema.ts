@@ -5,16 +5,20 @@ export const GithubRepoSchema = z.object({
   verified: z.boolean().default(false),
   openSource: z.boolean().default(false),
   containsContracts: z.boolean().default(false),
+  name: z.string().optional(),
+  description: z.string().optional(),
 })
 
 export type GithubRepo = z.infer<typeof GithubRepoSchema>
 
-export const PackageSchema = z.object({
+export const LinkSchema = z.object({
   url: z.string(),
+  name: z.string(),
+  description: z.string(),
 })
 
 export const ReposFormSchema = z.object({
   noRepos: z.boolean(),
   githubRepos: z.array(GithubRepoSchema),
-  packages: z.array(PackageSchema),
+  links: z.array(LinkSchema),
 })

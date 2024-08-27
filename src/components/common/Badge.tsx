@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils"
 
 export const Badge = ({
   className,
+  textClassName,
   accent,
   size = "md",
   text,
@@ -10,6 +11,7 @@ export const Badge = ({
   accent?: boolean
   size?: "md" | "lg"
   text: string
+  textClassName?: string
 }) => {
   return (
     <div
@@ -25,6 +27,7 @@ export const Badge = ({
           "font-medium",
           size === "lg" ? "text-sm" : "text-xs",
           accent ? "text-background" : "text-secondary-foreground",
+          textClassName,
         )}
       >
         {text}

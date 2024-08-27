@@ -6,46 +6,66 @@ import { sortBy } from "ramda"
 
 import { auth } from "@/auth"
 import { createApplication, getProject } from "@/db/projects"
+import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
-import { getProjectStatus } from "../utils"
+import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { verifyAdminStatus } from "./utils"
 
+interface SubmitApplicationRequest {
+  projectId: string
+  categoryId: string
+  impactStatement: Record<string, string>
+  projectDescriptionOptions: string[]
+}
+
 export const publishAndSaveApplication = async ({
-  projectId,
+  project,
   farcasterId,
   metadataSnapshotId,
 }: {
-  projectId: string
+  project: SubmitApplicationRequest
   farcasterId: string
   metadataSnapshotId: string
 }): Promise<Application> => {
   // Publish attestation
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
-    projectId,
-    round: 4,
+    projectId: project.projectId,
+    round: 5,
     snapshotRef: metadataSnapshotId,
   })
 
   // Create application in database
-  return await createApplication({
-    projectId,
+  return createApplication({
+    round: 5,
+    ...project,
     attestationId,
-    round: 4,
   })
 }
 
 const createProjectApplication = async (
-  projectId: string,
+  applicationData: SubmitApplicationRequest,
   farcasterId: string,
 ) => {
-  const isInvalid = await verifyAdminStatus(projectId, farcasterId)
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      applications: [],
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(
+    applicationData.projectId,
+    farcasterId,
+  )
   if (isInvalid?.error) {
     return isInvalid
   }
 
-  const project = await getProject({ id: projectId })
+  const project = await getProject({ id: applicationData.projectId })
 
   if (!project) {
     return {
@@ -69,7 +89,12 @@ const createProjectApplication = async (
   )[0]
 
   const application = await publishAndSaveApplication({
-    projectId,
+    project: {
+      projectId: project.id,
+      categoryId: applicationData.categoryId,
+      impactStatement: applicationData.impactStatement,
+      projectDescriptionOptions: applicationData.projectDescriptionOptions,
+    },
     farcasterId,
     metadataSnapshotId: latestSnapshot.attestationId,
   })
@@ -80,31 +105,50 @@ const createProjectApplication = async (
   }
 }
 
-export const submitApplications = async (projectIds: string[]) => {
+export const submitApplications = async (
+  projects: {
+    projectId: string
+    categoryId: string
+    impactStatement: Record<string, string>
+    projectDescriptionOptions: string[]
+  }[],
+) => {
   const session = await auth()
 
   if (!session?.user?.id) {
     return {
+      applications: [],
       error: "Unauthorized",
     }
   }
 
-  const results = await Promise.all(
-    projectIds.map((projectId) =>
-      createProjectApplication(projectId, session.user.farcasterId),
-    ),
-  )
+  const user = await getUserById(session.user.id)
+
+  if (!user?.email) {
+    return {
+      applications: [],
+      error: "You must provide an email to apply.",
+    }
+  }
+
+  if (APPLICATIONS_CLOSED) {
+    throw new Error("Applications are closed")
+  }
 
   const applications: Application[] = []
-  let error: Error | null = null
+  let error: string | null = null
 
-  results.forEach((result) => {
+  for (const project of projects) {
+    const result = await createProjectApplication(
+      project,
+      session.user.farcasterId,
+    )
     if (result.error === null && result.application) {
       applications.push(result.application)
     } else if (result.error) {
-      error = new Error(result.error)
+      error = result.error
     }
-  })
+  }
 
   revalidatePath("/dashboard")
 

@@ -1,11 +1,19 @@
 "use server"
 
+import { Prisma, User } from "@prisma/client"
+
+import { UserAddressSource } from "@/lib/types"
+
 import { prisma } from "./client"
 
 export async function getUserById(userId: string) {
   return prisma.user.findUnique({
     where: {
       id: userId,
+    },
+    include: {
+      addresses: true,
+      interaction: true,
     },
   })
 }
@@ -14,6 +22,9 @@ export async function getUserByFarcasterId(farcasterId: string) {
   return prisma.user.findUnique({
     where: {
       farcasterId,
+    },
+    include: {
+      addresses: true,
     },
   })
 }
@@ -70,5 +81,94 @@ export async function updateUserEmail({
     data: {
       email,
     },
+  })
+}
+
+export async function updateUserHasGithub({
+  id,
+  notDeveloper = false,
+}: {
+  id: string
+  notDeveloper?: boolean
+}) {
+  return prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      notDeveloper,
+    },
+  })
+}
+
+export async function updateUserGithub({
+  id,
+  github,
+}: {
+  id: string
+  github?: string | null
+}) {
+  const updates: Partial<User> = {
+    github,
+  }
+  if (github) {
+    updates.notDeveloper = false
+  }
+
+  return prisma.user.update({
+    where: {
+      id,
+    },
+    data: updates,
+  })
+}
+
+export async function addUserAddresses({
+  id,
+  addresses,
+  source,
+}: {
+  id: string
+  addresses: string[]
+  source: UserAddressSource
+}) {
+  return prisma.userAddress.createMany({
+    data: addresses.map((address) => ({
+      userId: id,
+      address,
+      source,
+    })),
+  })
+}
+
+export async function removeUserAddress({
+  id,
+  address,
+}: {
+  id: string
+  address: string
+}) {
+  return prisma.userAddress.delete({
+    where: {
+      address_userId: {
+        address,
+        userId: id,
+      },
+    },
+  })
+}
+
+export async function updateUserInteraction(
+  userId: string,
+  data: Prisma.UserInteractionUncheckedCreateInput,
+) {
+  return await prisma.userInteraction.upsert({
+    where: { userId },
+    update: {
+      ...data,
+      ...(data.homePageViewCount && { homePageViewCount: { increment: 1 } }),
+      ...(data.profileVisitCount && { profileVisitCount: { increment: 1 } }),
+    },
+    create: { ...data, userId },
   })
 }

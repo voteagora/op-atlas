@@ -1,4 +1,4 @@
-import { Ellipsis, X } from "lucide-react"
+import { ChevronDown, ChevronUp, Ellipsis, X } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { UseFormReturn, useWatch } from "react-hook-form"
@@ -28,6 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { verifyContract } from "@/lib/actions/contracts"
 import { copyToClipboard } from "@/lib/utils"
 
@@ -50,6 +51,7 @@ export function ContractForm({
 }) {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isFormExpanded, setIsRepoFormExpanded] = useState(true)
 
   const { contracts } = useWatch({
     control: form.control,
@@ -127,64 +129,6 @@ export function ContractForm({
     isAddress(deployerAddress) &&
     isHex(deploymentTxHash)
 
-  if (signature) {
-    return (
-      <div className="flex flex-col gap-2">
-        <FormLabel>Contract {index + 1}</FormLabel>
-        <div className="flex items-center gap-1.5">
-          <div className="flex flex-1 px-3 py-2 border items-center rounded-lg">
-            <div className="pr-2 border-r">
-              <Image
-                src="/assets/icons/circle-check-green.svg"
-                height={16.67}
-                width={16.67}
-                alt="Verified"
-              />
-            </div>
-            <div className="px-2 text-secondary-foreground flex items-center gap-1.5">
-              <ChainLogo chainId={chain} size={18} />
-              {contractAddress}
-            </div>
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary">
-                <Ellipsis size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => onCopyValue(contractAddress)}
-              >
-                Copy contract address
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => onCopyValue(deploymentTxHash)}
-              >
-                Copy deployment tx hash
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => onCopyValue(deployerAddress)}
-              >
-                Copy deployer address
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={removeVerified}
-              >
-                Remove
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <>
       {isVerifying && (
@@ -201,13 +145,7 @@ export function ContractForm({
       )}
       <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
         <div className="flex flex-col">
-          <div className="flex justify-between">
-            <div>
-              <h3>Add a contract</h3>
-              <p className="text-secondary-foreground">
-                Sign a message onchain to verify that you own this contract.
-              </p>
-            </div>
+          <div className="flex justify-end">
             {index > 0 && (
               <Button onClick={removeEmpty} className="p-2" variant="ghost">
                 <X className="h-4 w-4" />
@@ -216,59 +154,175 @@ export function ContractForm({
             )}
           </div>
         </div>
-        <FormField
-          control={form.control}
-          name={`contracts.${index}.contractAddress`}
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-1.5">
-              <FormLabel className="text-foreground">Contract</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="0x..." className="" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name={`contracts.${index}.deploymentTxHash`}
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-1.5">
-              <FormLabel className="text-foreground">
-                Deployment tx hash
-              </FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="0x..." className="" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name={`contracts.${index}.deployerAddress`}
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-1.5">
-              <FormLabel className="text-foreground">
-                Deployer address
-              </FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="0x..." className="" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        {signature ? (
+          <div className="flex flex-col gap-2">
+            <FormLabel>Contract</FormLabel>
+            <div className="flex items-center gap-1.5">
+              <div className="flex flex-1 px-3 py-2 border items-center rounded-lg">
+                <Image
+                  src="/assets/icons/circle-check-green.svg"
+                  height={16.67}
+                  width={16.67}
+                  alt="Verified"
+                />
+
+                <div className="px-2 text-sm  text-secondary-foreground flex items-center gap-1.5">
+                  <ChainLogo chainId={chain} size={18} />
+                  {contractAddress}
+                </div>
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary">
+                    <Ellipsis size={16} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => onCopyValue(contractAddress)}
+                  >
+                    Copy contract address
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => onCopyValue(deploymentTxHash)}
+                  >
+                    Copy deployment tx hash
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => onCopyValue(deployerAddress)}
+                  >
+                    Copy deployer address
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={removeVerified}
+                  >
+                    Remove
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ) : (
+          <>
+            <FormField
+              control={form.control}
+              name={`contracts.${index}.contractAddress`}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground !mt-0">
+                    Contract
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="0x…" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`contracts.${index}.deploymentTxHash`}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Deployment tx hash
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="0x..." className="" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`contracts.${index}.deployerAddress`}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Deployer address
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="0x..." className="" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <ChainSelector form={form} index={index} />
+          </>
+        )}
+
+        {(isFormExpanded || !signature) && (
+          <>
+            <FormField
+              control={form.control}
+              name={`contracts.${index}.name`}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Add a name" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`contracts.${index}.description`}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">Description</FormLabel>
+                  <Textarea
+                    id="description"
+                    placeholder="Describe this contribution"
+                    className="resize-y min-h-[100px]"
+                    {...field}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
         <div className="flex justify-between items-end">
-          <ChainSelector form={form} index={index} />
-          <Button
-            disabled={!canVerify || isLoading}
-            variant="destructive"
-            type="button"
-            onClick={onVerify}
-          >
-            Verify
-          </Button>
+          {signature ? (
+            <Button
+              onClick={() => setIsRepoFormExpanded(!isFormExpanded)}
+              variant="ghost"
+              type="button"
+              className="!p-0 text-sm font-medium text-secondary-foreground"
+            >
+              {isFormExpanded
+                ? "Hide additional inputs"
+                : "Show additional inputs"}{" "}
+              {isFormExpanded ? (
+                <ChevronUp size={16} />
+              ) : (
+                <ChevronDown size={16} />
+              )}
+            </Button>
+          ) : (
+            <Button
+              disabled={!canVerify || isLoading}
+              variant="destructive"
+              type="button"
+              onClick={onVerify}
+            >
+              Verify
+            </Button>
+          )}
         </div>
       </div>
     </>

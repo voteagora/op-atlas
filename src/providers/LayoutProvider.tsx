@@ -1,6 +1,7 @@
 "use client"
 
-import React from "react"
+import { usePathname } from "next/navigation"
+import React, { useEffect, useState } from "react"
 import { useWindowSize } from "usehooks-ts"
 
 import { MobileViewportWarning } from "@/components/common/MobileViewportWarning"
@@ -10,11 +11,26 @@ const MOBILE_BREAKPOINT = 640 // Tailwind's `sm` breakpoint
 
 export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   const { width } = useWindowSize()
+  const pathname = usePathname()
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (!isMounted) {
+    // Render nothing until the component is mounted on the client
+    return null
+  }
 
   return (
     <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
       <Navbar />
-      {width < MOBILE_BREAKPOINT ? <MobileViewportWarning /> : children}
+      {width < MOBILE_BREAKPOINT && pathname !== "/round/results" ? (
+        <MobileViewportWarning />
+      ) : (
+        children
+      )}
     </div>
   )
 }

@@ -3,85 +3,26 @@
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
-import { addProjectSnapshot, getProject } from "@/db/projects"
+import { addOrganizationSnapshot, getOrganization } from "@/db/organizations"
+import {
+  addProjectSnapshot,
+  getProject,
+  updateAllForProject,
+} from "@/db/projects"
 
-import { createProjectMetadataAttestation } from "../eas"
+import {
+  createOrganizationMetadataAttestation,
+  createProjectMetadataAttestation,
+} from "../eas"
 import { uploadToPinata } from "../pinata"
-import { ProjectWithDetails } from "../types"
+import { APPLICATIONS_CLOSED } from "../utils"
+import {
+  formatOrganizationMetadata,
+  formatProjectMetadata,
+  ProjectMetadata,
+} from "../utils/metadata"
 import { publishAndSaveApplication } from "./applications"
 import { verifyMembership } from "./utils"
-
-function formatProjectMetadata(
-  project: ProjectWithDetails,
-): Record<string, unknown> {
-  // Eliminate extraneous data from IPFS snapshots
-
-  const team = project.team.map(({ user }) => user.farcasterId)
-  const github = project.repos
-    .filter((repo) => repo.type === "github")
-    .map((repo) => repo.url)
-  const packages = project.repos
-    .filter((repo) => repo.type === "package")
-    .map((repo) => repo.url)
-
-  const contracts = project.contracts.map((contract) => ({
-    address: contract.contractAddress,
-    deploymentTxHash: contract.deploymentHash,
-    deployerAddress: contract.deployerAddress,
-    chainId: contract.chainId,
-  }))
-
-  const venture = project.funding
-    .filter((funding) => funding.type === "venture")
-    .map((funding) => ({
-      amount: funding.amount,
-      year: funding.receivedAt,
-      details: funding.details,
-    }))
-  const revenue = project.funding
-    .filter((funding) => funding.type === "revenue")
-    .map((funding) => ({
-      amount: funding.amount,
-      details: funding.details,
-    }))
-  const grants = project.funding
-    .filter(
-      (funding) => funding.type !== "venture" && funding.type !== "revenue",
-    )
-    .map((funding) => ({
-      grant: funding.grant,
-      link: funding.grantUrl,
-      amount: funding.amount,
-      date: funding.receivedAt,
-      details: funding.details,
-    }))
-
-  const metadata = {
-    name: project.name,
-    description: project.description,
-    projectAvatarUrl: project.thumbnailUrl,
-    proejctCoverImageUrl: project.bannerUrl,
-    category: project.category,
-    osoSlug: project.openSourceObserverSlug,
-    socialLinks: {
-      website: project.website,
-      farcaster: project.farcaster,
-      twitter: project.twitter,
-      mirror: project.mirror,
-    },
-    team,
-    github,
-    packages,
-    contracts,
-    grantsAndFunding: {
-      ventureFunding: venture,
-      grants,
-      revenue,
-    },
-  }
-
-  return metadata
-}
 
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()
@@ -125,9 +66,23 @@ export const createProjectSnapshot = async (projectId: string) => {
     })
 
     // If the project has an application, we need to publish a new one to reference this snapshot.
-    if (project.applications.length > 0) {
+
+    const application = project.applications.find((a) => a.roundId === "5")
+
+    if (application && !APPLICATIONS_CLOSED) {
       await publishAndSaveApplication({
-        projectId,
+        project: {
+          projectId: project.id,
+          categoryId: application.categoryId ?? "",
+          impactStatement: application.impactStatementAnswer.reduce(
+            (acc, { impactStatementId, answer }) => {
+              acc[impactStatementId] = answer
+              return acc
+            },
+            {} as Record<string, string>,
+          ),
+          projectDescriptionOptions: application.projectDescriptionOptions,
+        },
         farcasterId: session.user.farcasterId,
         metadataSnapshotId: snapshot.attestationId,
       })
@@ -135,6 +90,93 @@ export const createProjectSnapshot = async (projectId: string) => {
 
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")
+
+    return {
+      snapshot,
+      error: null,
+    }
+  } catch (error) {
+    console.error("Error creating snapshot", error)
+    return {
+      error,
+    }
+  }
+}
+
+export const createProjectSnapshotOnBehalf = async (
+  project: ProjectMetadata,
+  projectId: string,
+  farcasterId: string,
+) => {
+  // Update project details in the database
+  const updateProjectPromise = updateAllForProject(project, projectId)
+
+  const attestationPromise = (async () => {
+    // Upload metadata to IPFS
+    const ipfsHash = await uploadToPinata(projectId, project)
+
+    // Create attestation
+    const attestationId = await createProjectMetadataAttestation({
+      farcasterId: parseInt(farcasterId),
+      projectId: projectId,
+      name: project.name,
+      category: project.category ?? "",
+      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    })
+
+    return { ipfsHash, attestationId }
+  })()
+
+  const [{ ipfsHash, attestationId }, _] = await Promise.all([
+    attestationPromise,
+    updateProjectPromise,
+  ])
+
+  return addProjectSnapshot({
+    projectId,
+    ipfsHash,
+    attestationId,
+  })
+}
+
+export const createOrganizationSnapshot = async (organizationId: string) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const organization = await getOrganization({ id: organizationId })
+  if (!organization) {
+    return {
+      error: "Organization not found",
+    }
+  }
+
+  try {
+    // Upload metadata to IPFS
+    const metadata = formatOrganizationMetadata(organization)
+    const ipfsHash = await uploadToPinata(organizationId, metadata)
+
+    // Create attestation
+    const attestationId = await createOrganizationMetadataAttestation({
+      farcasterId: parseInt(session.user.farcasterId),
+      organizationId: organization.id,
+      name: organization.name,
+      projectIds: organization.projects.map((p) => p.projectId),
+      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    })
+
+    const snapshot = await addOrganizationSnapshot({
+      organizationId,
+      ipfsHash,
+      attestationId,
+    })
+
+    revalidatePath("/dashboard")
+    revalidatePath("/organizations", "layout")
 
     return {
       snapshot,

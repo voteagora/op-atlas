@@ -2,10 +2,13 @@
 
 import { useAppDialogs } from "@/providers/DialogProvider"
 
+import { VerifyAddressDialog } from "../projects/contracts/VerifyAddressDialog"
+import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import { DialogType } from "./types"
+import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
 export default function AppDialogs() {
   const { openDialog, setOpenDialog } = useAppDialogs()
@@ -22,6 +25,18 @@ export default function AppDialogs() {
       )}
       {openDialog === "get_started" && (
         <GetStartedDialog open onOpenChange={onOpenChange("get_started")} />
+      )}
+      {openDialog === "verify_address" && (
+        <AddVerifiedAddressDialog
+          open
+          onOpenChange={onOpenChange("verify_address")}
+        />
+      )}
+      {openDialog === "welcome_badgeholder" && (
+        <WelcomeBadgeholderDialog
+          open
+          onOpenChange={onOpenChange("welcome_badgeholder")}
+        />
       )}
     </>
   )

@@ -5,8 +5,8 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { submitApplications } from "@/lib/actions/applications"
-import { ProjectWithDetails } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import { cn, EAS_URL_PREFIX } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { Badge } from "../common/Badge"
@@ -32,8 +32,8 @@ export const FundingApplication = ({
 }: {
   className?: string
   projects: ProjectWithDetails[]
-  applications: Application[]
-  onApplied: (application: Application) => void
+  applications: ApplicationWithDetails[]
+  onApplied: (application: ApplicationWithDetails) => void
 }) => {
   const [isLoading, setIsLoading] = useState(false)
 
@@ -76,16 +76,16 @@ export const FundingApplication = ({
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
         try {
-          const result = await submitApplications(selectedProjectIds)
+          const result = await submitApplications([])
           if (result.error !== null || result.applications.length === 0) {
             throw new Error(result.error ?? "Error submitting application")
           }
 
           for (const application of result.applications) {
-            track("Apply", {
-              projectIds: application.projectId,
-              attestationId: application.attestationId,
-            })
+            // track("Apply", {
+            //   projectIds: application.projectId,
+            //   attestationId: application.attestationId,
+            // })
           }
 
           resolve(result.applications[0])
@@ -99,7 +99,7 @@ export const FundingApplication = ({
     toast.promise(promise, {
       loading: "Submitting application...",
       success: (application) => {
-        onApplied(application)
+        // onApplied(application)
         return "Application submitted"
       },
       error: (error) => {
@@ -129,23 +129,27 @@ export const FundingApplication = ({
         />
         <h2 className="text-center">Retro Funding Round 4: Onchain Builders</h2>
         {hasApplied ? (
-          <div className="flex items-center gap-2 p-4 bg-success rounded-xl w-full">
-            <Image
-              src="/assets/icons/circle-check-green.svg"
-              height={16}
-              width={16}
-              alt="Submitted"
-            />
-            <div className="flex flex-col text-success-foreground">
-              <p className="font-medium text-sm">
-                Application submitted on{" "}
-                {format(applications[0].createdAt, "MMMM d, h:mm a")}
-              </p>
-              <p className="text-sm">
-                You can resubmit with additional projects until June 6th at
-                19:00 UTC.
-              </p>
+          <div className="flex justify-between items-center gap-2 p-4 bg-success rounded-xl w-full">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/assets/icons/circle-check-green.svg"
+                height={16}
+                width={16}
+                alt="Submitted"
+              />
+              <div className="flex flex-col text-success-foreground">
+                <p className="font-medium text-sm">
+                  Application submitted on{" "}
+                  {format(applications[0].createdAt, "MMMM d, h:mm a")}
+                </p>
+              </div>
             </div>
+            <ExternalLink
+              className="text-sm text-success-foreground font-medium"
+              href={`${EAS_URL_PREFIX}${applications[0].attestationId}`}
+            >
+              View attestation
+            </ExternalLink>
           </div>
         ) : (
           <Badge
@@ -266,18 +270,20 @@ export const FundingApplication = ({
           {TERMS.map((term, idx) => (
             <div key={idx} className="flex gap-x-4">
               <Checkbox
+                disabled
                 checked={agreedTerms[idx]}
                 onCheckedChange={() => toggleAgreedTerm(idx)}
-                className="mt-1 border-2 rounded-[2px]"
+                className="mt-1"
               />
               <p className="">{term}</p>
             </div>
           ))}
           <div className="flex gap-x-4">
             <Checkbox
+              disabled
               checked={agreedTerms[TERMS.length]}
               onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
-              className="mt-1 border-2 rounded-[2px]"
+              className="mt-1"
             />
             <p className="">
               I agree to the{" "}
@@ -303,15 +309,6 @@ export const FundingApplication = ({
           for information about how Retro Funding signup data is used.
         </p>
       </div>
-
-      <Button
-        size="lg"
-        onClick={submitApplication}
-        disabled={!canSubmit || isLoading}
-        className="font-medium bg-destructive hover:bg-destructive"
-      >
-        Submit application
-      </Button>
     </div>
   )
 }

@@ -7,6 +7,11 @@ const nextConfig = {
         hostname: "storage.googleapis.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.charmverse.io",
+        pathname: "/**",
+      },
     ],
   },
 }
