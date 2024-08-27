@@ -10,7 +10,7 @@ async function getOrganizationsFn(userId: string) {
     where: { id: userId },
     select: {
       organizations: {
-        where: { deletedAt: null },
+        where: { deletedAt: null, organization: { deletedAt: null } },
         include: {
           organization: true,
         },
@@ -26,7 +26,11 @@ async function getAdminOrganizationsFn(userId: string) {
     where: { id: userId },
     select: {
       organizations: {
-        where: { deletedAt: null, role: "admin" },
+        where: {
+          deletedAt: null,
+          role: "admin",
+          organization: { deletedAt: null },
+        },
         include: {
           organization: true,
         },
@@ -45,7 +49,12 @@ async function getUserProjectOrganizationsFn(
     where: { farcasterId },
     select: {
       organizations: {
-        where: { deletedAt: null },
+        where: {
+          deletedAt: null,
+          organization: {
+            deletedAt: null,
+          },
+        },
         include: {
           organization: {
             include: {
@@ -79,7 +88,7 @@ async function getUserOrganizationsWithDetailsFn(farcasterId: string) {
     where: { id: farcasterId },
     select: {
       organizations: {
-        where: { deletedAt: null },
+        where: { deletedAt: null, organization: { deletedAt: null } },
         include: {
           organization: {
             include: {
@@ -94,6 +103,9 @@ async function getUserOrganizationsWithDetailsFn(farcasterId: string) {
               projects: {
                 where: {
                   deletedAt: null,
+                  project: {
+                    deletedAt: null,
+                  },
                 },
                 include: {
                   project: {

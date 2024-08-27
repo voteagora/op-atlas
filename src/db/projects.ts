@@ -58,7 +58,7 @@ async function getUserAdminProjectsWithDetailFn({
               funding: true,
               snapshots: true,
               organization: {
-                where: { deletedAt: null },
+                where: { deletedAt: null, organization: { deletedAt: null } },
                 include: {
                   organization: {
                     include: {
@@ -86,6 +86,9 @@ async function getUserAdminProjectsWithDetailFn({
         where: {
           deletedAt: null,
           role: "admin" satisfies TeamRole,
+          organization: {
+            deletedAt: null,
+          },
         },
         select: {
           organization: {
@@ -164,9 +167,20 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
           deletedAt: null,
           project: {
             deletedAt: null,
-            organization: {
-              is: null,
-            },
+            OR: [
+              {
+                organization: {
+                  is: null,
+                },
+              },
+              {
+                organization: {
+                  organization: {
+                    deletedAt: { not: null },
+                  },
+                },
+              },
+            ],
           },
         },
         include: {
@@ -341,7 +355,7 @@ async function getProjectFn({ id }: { id: string }) {
     include: {
       team: { where: { deletedAt: null }, include: { user: true } },
       organization: {
-        where: { deletedAt: null },
+        where: { deletedAt: null, organization: { deletedAt: null } },
         include: {
           organization: {
             include: {
