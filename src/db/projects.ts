@@ -33,8 +33,10 @@ export const getUserProjects = cache(getUserProjectsFn)
 
 async function getUserAdminProjectsWithDetailFn({
   userId,
+  roundId,
 }: {
   userId: string
+  roundId?: string
 }) {
   return prisma.user.findUnique({
     where: {
@@ -70,7 +72,11 @@ async function getUserAdminProjectsWithDetailFn({
                   },
                 },
               },
-              applications: true,
+              applications: {
+                where: {
+                  roundId,
+                },
+              },
               links: true,
               rewards: { include: { claim: true } },
             },

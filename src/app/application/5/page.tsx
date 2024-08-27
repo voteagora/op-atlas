@@ -10,7 +10,7 @@ export default async function Page() {
 
   const [projects, applications, categories] = session
     ? await Promise.all([
-        getAdminProjects(session.user.id),
+        getAdminProjects(session.user.id, "5"),
         getRoundApplications(session.user.id, 5),
         getCategories(),
       ])
