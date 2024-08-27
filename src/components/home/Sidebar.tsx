@@ -8,7 +8,10 @@ import { useSession } from "next-auth/react"
 
 import { updateInteractions } from "@/lib/actions/users"
 import { UserWithAddresses } from "@/lib/types"
-import { clickSignInWithFarcasterButton } from "@/lib/utils"
+import {
+  APPLICATIONS_CLOSED,
+  clickSignInWithFarcasterButton,
+} from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
@@ -50,7 +53,8 @@ export const Sidebar = ({
   return (
     <div className={cn("flex flex-col gap-y-6", className)}>
       {/* Your project not received card */}
-      {data?.user &&
+      {APPLICATIONS_CLOSED &&
+        data?.user &&
         !user?.interaction?.viewProfileClicked &&
         +(user?.interaction?.homePageViewCount ?? 0) < 3 && (
           <div className="flex flex-col items-center gap-y-3 p-6 border border-[#E0E2EB] bg-[#FBFCFE] rounded-xl">
@@ -79,12 +83,13 @@ export const Sidebar = ({
       {/* Welcome too retro funding app */}
       {status === "unauthenticated" && (
         <div className="flex flex-col items-center gap-y-3 p-6 border border-[#D6E4FF] bg-[#F0F4FF] rounded-xl">
-          <Image
-            alt="empty profile"
-            src="/assets/images/sunnies-group.png"
-            width={207}
-            height={84.2}
-          />
+          <div className="w-52 h-[84px] relative">
+            <Image
+              alt="empty profile"
+              fill
+              src="/assets/images/sunnies-group.png"
+            />
+          </div>
 
           <p className="text-sm font-medium text-foreground text-center">
             Welcome to the new Retro Funding app
