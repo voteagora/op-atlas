@@ -45,7 +45,11 @@ const signer = new Wallet(EAS_SIGNER_PRIVATE_KEY, provider)
 
 eas.connect(signer)
 
-async function createAttestation(schemaId: string, data: string) {
+async function createAttestation(
+  schemaId: string,
+  data: string,
+  refUID?: string,
+) {
   const tx = await eas.attest({
     schema: schemaId,
     data: {
@@ -53,6 +57,7 @@ async function createAttestation(schemaId: string, data: string) {
       expirationTime: BigInt(0),
       revocable: true,
       data,
+      refUID,
     },
   })
 
@@ -103,6 +108,7 @@ export async function createProjectMetadataAttestation({
   const attestationId = await createAttestation(
     PROJECT_METADATA_SCHEMA_ID,
     data,
+    projectId,
   )
   console.info("Created project metadata attestation:", attestationId)
 
@@ -135,6 +141,7 @@ export async function createOrganizationMetadataAttestation({
   const attestationId = await createAttestation(
     ORGANIZATION_METADATA_SCHEMA_ID,
     data,
+    organizationId,
   )
   console.info("Created organization metadata attestation:", attestationId)
 
