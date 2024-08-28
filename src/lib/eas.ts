@@ -166,7 +166,11 @@ export async function createApplicationAttestation({
     { name: "metadataSnapshotRefUID", value: snapshotRef, type: "bytes32" },
   ])
 
-  const attestationId = await createAttestation(APPLICATION_SCHEMA_ID, data)
+  const attestationId = await createAttestation(
+    APPLICATION_SCHEMA_ID,
+    data,
+    projectId,
+  )
   console.info("Created application attestation:", attestationId)
 
   return attestationId
