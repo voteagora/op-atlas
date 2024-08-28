@@ -398,3 +398,10 @@ model ApiUser {
   @@index([api_key])
   @@map("api_users")
 }
+
+model Badgeholder {
+  address     String   
+  roundId     String
+
+  @@unique([address, roundId])
+}
