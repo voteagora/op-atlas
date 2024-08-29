@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Application } from "@prisma/client"
 import { useSearchParams } from "next/navigation"
 import React, { useEffect, useMemo, useState } from "react"
-import { SubmitHandler, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -156,10 +156,8 @@ const ApplicationFormTabs = ({
             },
             {},
           ) ?? { "1": "", "2": "" },
-          isSubmitted:
-            applications.some((o) => o.project.id === project.id) ?? false,
-          selected:
-            applications.some((o) => o.project.id === project.id) || false,
+          isSubmitted: !!application,
+          selected: !!application,
         }
       }),
     },
@@ -177,22 +175,14 @@ const ApplicationFormTabs = ({
 
   const hasSelectedProjects = form
     .watch("projects")
-    .some(
-      (project) =>
-        project.selected &&
-        !applications.some((o) => o.project.id === project.projectId),
-    )
+    .some((project) => project.selected)
 
   const submitApplication = async () => {
     setIsLoading(true)
 
     const filterProjects = form
       .getValues()
-      .projects.filter(
-        (project) =>
-          project.selected &&
-          !applications.some((o) => o.project.id === project.projectId),
-      )
+      .projects.filter((project) => project.selected)
 
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
@@ -308,7 +298,8 @@ const ApplicationFormTabs = ({
                   !canSubmitForm ||
                   isLoading ||
                   !hasSelectedProjects ||
-                  !form.formState.isValid
+                  !form.formState.isValid ||
+                  !form.formState.isDirty
                 }
                 onClick={submitApplication}
                 className="w-full mt-2"

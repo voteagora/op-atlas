@@ -70,7 +70,7 @@ const ProjectImpactForm = ({
     })
   }, [categories, categoryId, form])
 
-  const isIneligible = !isEligible || hasApplied
+  const isIneligible = !isEligible
 
   return (
     <div className="p-8 border border-input rounded-xl">
@@ -88,7 +88,7 @@ const ProjectImpactForm = ({
                 control={form.control}
                 render={({ field }) => (
                   <Checkbox
-                    disabled={isIneligible}
+                    disabled={isIneligible || hasApplied}
                     name={field.name}
                     checked={field.value}
                     onCheckedChange={field.onChange}

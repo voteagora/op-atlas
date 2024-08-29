@@ -34,12 +34,9 @@ const ApplicationProjectImpactForm = ({
   })
   const router = useRouter()
 
-  const hasSelectedProjects = !form
+  const hasSelectedProjects = !!form
     .watch("projects")
-    .filter((project) => project.selected)
-    .every((selectedProject) =>
-      applications.some((o) => o.project.id === selectedProject.projectId),
-    )
+    .filter((project) => project.selected).length
 
   return (
     <div className="flex flex-col gap-y-12">
@@ -83,7 +80,11 @@ const ApplicationProjectImpactForm = ({
       <Button
         variant="destructive"
         type="submit"
-        disabled={!hasSelectedProjects}
+        disabled={
+          !hasSelectedProjects ||
+          !form.formState.isDirty ||
+          !form.formState.isValid
+        }
         className="disabled:bg-destructive disabled:!text-white"
         onClick={() => {
           onNext?.()
