@@ -44,7 +44,13 @@ export const getAdminProjects = async (userId: string, roundId?: string) => {
       .map(({ organization }) => organization.projects)
       .flat()
       .map(({ project }) => project) ?? []
-  return [...teamProjects, ...organizationProjects]
+
+  // Filter out duplicates
+  const organizationProjectIds = organizationProjects.map(({ id }) => id)
+  const filteredTeamProjects = teamProjects.filter(
+    ({ id }) => !organizationProjectIds.includes(id),
+  )
+  return [...filteredTeamProjects, ...organizationProjects]
 }
 
 export const getApplications = async (userId: string) => {
