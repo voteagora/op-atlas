@@ -6,7 +6,8 @@ import { twMerge } from "tailwind-merge"
 
 import { ProjectWithDetails, UserWithAddresses } from "../types"
 
-export const APPLICATIONS_CLOSED = false
+export const APPLICATIONS_CLOSED =
+  process.env.NEXT_PUBLIC_APPLICATIONS_CLOSED === "true"
 
 export const GITHUB_REDIRECT_COOKIE = "github-auth-redirect"
 
