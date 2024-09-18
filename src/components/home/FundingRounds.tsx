@@ -23,10 +23,11 @@ export const FundingRounds = ({
   className?: string
   fundingRounds: FundingRound[]
 }) => {
-  const { open, upcoming, past } = useMemo(() => {
+  const { open, upcoming, past, ongoing } = useMemo(() => {
     const n: FundingRound[] = []
     const u: FundingRound[] = []
     const p: FundingRound[] = []
+    const o: FundingRound[] = []
 
     fundingRounds.forEach((round) => {
       switch (round.status) {
@@ -39,14 +40,17 @@ export const FundingRounds = ({
         case "past":
           p.push(round)
           break
+        case "ongoing":
+          o.push(round)
+          break
       }
     })
 
-    return { open: n, upcoming: u, past: p }
+    return { open: n, upcoming: u, past: p, ongoing: o }
   }, [fundingRounds])
 
   const renderSection = (
-    status: "open" | "upcoming" | "past",
+    status: "open" | "upcoming" | "past" | "ongoing",
     rounds: FundingRound[],
   ) => {
     return (
@@ -67,6 +71,7 @@ export const FundingRounds = ({
     <div className={cn("flex flex-col gap-y-12 w-full", className)}>
       {open.length > 0 && renderSection("open", open)}
       {upcoming.length > 0 && renderSection("upcoming", upcoming)}
+      {ongoing.length > 0 && renderSection("ongoing", ongoing)}
       {past.length > 0 && renderSection("past", past)}
     </div>
   )
