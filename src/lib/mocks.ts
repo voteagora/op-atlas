@@ -2,7 +2,7 @@ export type FundingRound = {
   number: number
   name: string
   details: string
-  status: "open" | "upcoming" | "past" | "onging"
+  status: "open" | "upcoming" | "past" | "ongoing"
   accentColor?: string
   link?: string
   resultsLink?: string
