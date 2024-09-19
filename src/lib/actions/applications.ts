@@ -136,7 +136,7 @@ export const submitApplications = async (
     projects.some(
       (p) =>
         p.projectId !==
-        "0xbb3291f2e0a56c4f8fe8250613c5487e4447fce05bb75854472fe3e01eebaffa",
+        "0x80393c05d524b7a6f7a78b0c141eadf0759642ae8d7e718134318cd2d73d5464",
     )
   ) {
     throw new Error("Applications are closed")
