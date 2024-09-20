@@ -28,7 +28,7 @@ const ApplicationHeader = ({
     <div className="flex flex-col gap-y-6 items-center">
       <Image
         alt="sunny"
-        src="/assets/images/round-6.svg"
+        src="/assets/images/round-6-transparent.svg"
         height={120}
         width={120}
       />
@@ -46,7 +46,7 @@ const ApplicationHeader = ({
               <p className="font-medium text-sm">
                 Your application was submitted on{" "}
                 {format(applications[0].createdAt, "MMMM d, h:mm a")}. You can
-                resubmit with additional projects until Sep 5 at 19:00 UTC
+                resubmit with additional projects until Oct 10 at 19:00 UTC
               </p>
             </div>
           </div>
