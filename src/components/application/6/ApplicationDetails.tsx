@@ -242,6 +242,33 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
         ))}
       </div>
 
+      {/* Round Size */}
+
+      <div className="flex flex-col gap-y-6">
+        <h3>Round Size</h3>
+        <p className="text-secondary-foreground">
+          Citizens will vote on the round&apos;s OP allocation within the voting
+          experience. The Foundation is assigning a minimum OP Amount for the
+          round of 1.1M OP and a maximum OP amount of 3.5m OP. Citizens will be
+          able to vote for an OP amount within the range of minimum and maximum
+          which they believe appropriately rewards the impact within the round.
+          The round allocation will be decided by taking the median of
+          Citizens&apos; votes.
+        </p>
+
+        <p>
+          For additional information on round size, how voting works, and how
+          grant claiming works,{" "}
+          <ExternalLink
+            className="underline"
+            href="https://gov.optimism.io/t/retro-funding-6-governance-round-details/8870"
+          >
+            view the forum
+          </ExternalLink>
+          .
+        </p>
+      </div>
+
       {/* Rules */}
 
       <div className="flex flex-col gap-y-6">
