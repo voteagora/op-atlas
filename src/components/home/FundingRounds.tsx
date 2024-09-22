@@ -198,7 +198,9 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
               <div className="items-center flex gap-2 pr-4 ">
                 <ChainLogo chainId={optimism.id.toString()} />
                 <div className="text-sm font-medium text-secondary-foreground">
-                  8M OP
+                  {fundingRound.funding?.op && (
+                    <span>{fundingRound.funding.op}</span>
+                  )}{" "}
                 </div>
               </div>
               <Link href="/application/6">
@@ -214,8 +216,8 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
         </div>
 
         {fundingRound.status === "past" && (
-          <div className="flex flex-row  items-center gap-4">
-            <div className="flex flex-row  items-center gap-2 text-sm font-medium text-secondary-foreground">
+          <div className="flex flex-row items-center gap-4">
+            <div className="flex flex-row items-center gap-2 text-sm font-medium text-secondary-foreground">
               {fundingRound.funding?.op && (
                 <ChainLogo chainId={optimism.id.toString()} />
               )}
@@ -228,7 +230,11 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                 )}
               </div>
             </div>
-            {fundingRound.resultsLink && (
+            {fundingRound.number === 5 ? (
+              <span className="text-sm font-medium text-secondary-foreground">
+                Currently Voting
+              </span>
+            ) : fundingRound.resultsLink ? (
               <Link href="/round/results">
                 <Button
                   variant="secondary"
@@ -237,7 +243,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                   View results
                 </Button>
               </Link>
-            )}
+            ) : null}
           </div>
         )}
       </div>

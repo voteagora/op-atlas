@@ -88,7 +88,7 @@ const ApplicationProjectImpactForm = ({
         className="disabled:bg-destructive disabled:!text-white"
         onClick={() => {
           onNext?.()
-          router.push("/application/5?tab=application")
+          router.push("/application/6?tab=application")
         }}
       >
         Save and continue

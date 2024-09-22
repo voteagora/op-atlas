@@ -295,7 +295,7 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
             onClickGetStarted()
           } else {
             onNext?.()
-            router.push("/application/5?tab=projects")
+            router.push("/application/6?tab=projects")
           }
         }}
         className="w-full disabled:bg-destructive disabled:!text-white"

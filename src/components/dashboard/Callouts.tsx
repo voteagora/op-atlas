@@ -89,7 +89,7 @@ export function SurveyCallout({ projectId }: { projectId?: string }) {
 export function FundingRoundAnnouncementCallout() {
   return (
     <Link
-      href="/application/5"
+      href="/application/6"
       className={cn(
         "flex items-center rounded-xl px-8 py-6 w-full",
         "bg-accent text-accent-foreground",
@@ -97,15 +97,15 @@ export function FundingRoundAnnouncementCallout() {
     >
       <Image
         alt="Info"
-        src="/assets/icons/sunny-callout.png"
+        src="/assets/images/round-6-transparent.svg"
         width={48}
         height={48}
       />
       <div className="ml-4 mr-5 flex-1">
         <p className="font-medium">
-          Now taking applications for Retro Funding 5: OP Stack
+          Now taking applications for Round 6: Governance
         </p>
-        <div>Learn about the round, then apply by Sep 5.</div>
+        <div>Apply by Oct 10.</div>
       </div>
       <ArrowRight size={20} />
     </Link>
