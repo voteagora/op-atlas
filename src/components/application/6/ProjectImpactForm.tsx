@@ -190,20 +190,20 @@ const ProjectImpactForm = ({
                   Impact statement
                 </h4>
                 <p className="text-sm text-secondary-foreground">
-                  Describe this project’s impact on the OP Stack from Oct 1,
-                  2023 - July 31, 2024. Please only describe the impact that was
-                  delivered during that specific time period.
+                  Describe this project&apos;s impact on the OP Stack from Oct
+                  1, 2023 - July 31, 2024. Please only describe the impact that
+                  was delivered during that specific time period.
                 </p>
                 <p className="text-sm text-secondary-foreground">
-                  You’ve already given your project a description in your{" "}
+                  You&apos; ve already given your project a description in your{" "}
                   <ExternalLink
                     href={`/projects/${project.id}/details`}
                     className="underline"
                   >
                     project setup
                   </ExternalLink>
-                  . There’s no need to repeat that information here. Instead,
-                  focus on communicating your project’s impact.
+                  . There&apos;s no need to repeat that information here.
+                  Instead, focus on communicating your project&apos;s impact.
                 </p>
                 <Callout
                   className="!text-sm"
@@ -211,9 +211,12 @@ const ProjectImpactForm = ({
                   text="Promises of future deliverables or impact are not allowed."
                 />
 
-                {categories
-                  .find((category) => category.id === categoryId)
-                  ?.impactStatements.map((impactStatement) => (
+                {(
+                  categories.find((category) => category.id === categoryId)
+                    ?.impactStatements || []
+                )
+                  .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10))
+                  .map((impactStatement) => (
                     <div key={impactStatement.id}>
                       <h6 className="text-sm font-medium">
                         {impactStatement.question}
@@ -234,9 +237,11 @@ const ProjectImpactForm = ({
                                 className="min-h-60"
                                 placeholder="Add a response"
                               />
-                              <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
-                                {field?.value?.length}/1000
-                              </span>
+                              <div className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground flex gap-2">
+                                <span>{field?.value?.length}/1000</span>
+                                <span>•</span>
+                                <span>Markdown is supported</span>
+                              </div>
                             </div>
                             <FormMessage />
                           </FormItem>
@@ -268,12 +273,12 @@ const CategoryItem = ({
 }) => {
   return (
     <div className="p-6 border border-input rounded-xl">
-      <div className=" flex items-center gap-4 ">
-        <span>
+      <div className="flex items-start gap-4">
+        <span className="mt-1">
           <RadioGroupItem value={value} />
         </span>
 
-        <div>
+        <div className="flex-grow">
           <h6 className="text-sm font-medium">{name}</h6>
           <p className="text-sm text-secondary-foreground">{description}</p>
         </div>
@@ -288,8 +293,8 @@ const CategoryItem = ({
         </div>
       </div>
       {selectedValue === value && (
-        <div className="flex flex-col gap-y-1.5 pl-8 w-full">
-          <h5 className="text-sm font-medium text-foreground mt-4 w-full">
+        <div className="flex flex-col gap-y-1.5 pl-8 w-full mt-4">
+          <h5 className="text-sm font-medium text-foreground w-full">
             Which option describes your project?
             <span className="text-destructive">*</span>
           </h5>
@@ -307,9 +312,9 @@ const CategoryItem = ({
                   return (
                     <div
                       key={option}
-                      className="py-2.5 px-3 flex items-center gap-x-2 border border-input rounded-lg w-full"
+                      className="py-2.5 px-3 flex items-start gap-x-2 border border-input rounded-lg w-full"
                     >
-                      <span>
+                      <span className="mt-1">
                         <Checkbox
                           checked={field.value.includes(option)}
                           onCheckedChange={(checked) => {

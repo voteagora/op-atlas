@@ -16,9 +16,9 @@ export default async function Page() {
       ])
     : [[], [], []]
 
-  const filteredCategories = categories.filter(
-    (category) => category.roundId === "6",
-  )
+  const filteredCategories = categories
+    .filter((category) => category.roundId === "6")
+    .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10))
 
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
