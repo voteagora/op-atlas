@@ -51,6 +51,9 @@ async function getApplications() {
         },
       },
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   })
 
   return applications
