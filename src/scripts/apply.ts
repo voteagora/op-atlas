@@ -1,5 +1,4 @@
 import { prisma } from "@/db/client"
-import { publishAndSaveApplication } from "@/lib/actions/applications"
 import { createApplicationAttestation } from "@/lib/eas"
 
 async function main() {
