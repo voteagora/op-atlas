@@ -123,7 +123,11 @@ async function getUserAdminProjectsWithDetailFn({
                           },
                         },
                       },
-                      applications: true,
+                      applications: {
+                        where: {
+                          roundId,
+                        },
+                      },
                       links: true,
                       rewards: { include: { claim: true } },
                     },
