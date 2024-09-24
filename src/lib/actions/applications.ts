@@ -131,14 +131,7 @@ export const submitApplications = async (
     }
   }
 
-  if (
-    APPLICATIONS_CLOSED &&
-    projects.some(
-      (p) =>
-        p.projectId !==
-        "0xbb3291f2e0a56c4f8fe8250613c5487e4447fce05bb75854472fe3e01eebaffa",
-    )
-  ) {
+  if (APPLICATIONS_CLOSED) {
     throw new Error("Applications are closed")
   }
 
