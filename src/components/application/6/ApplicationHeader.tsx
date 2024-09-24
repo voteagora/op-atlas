@@ -1,11 +1,8 @@
 import { format } from "date-fns"
-import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
 import React from "react"
 
-import ExternalLink from "@/components/ExternalLink"
 import { ApplicationWithDetails } from "@/lib/types"
-import { EAS_URL_PREFIX } from "@/lib/utils"
 
 interface ApplicationHeaderProps {
   hasApplied: boolean
@@ -42,26 +39,14 @@ const ApplicationHeader = ({
               width={16}
               alt="Submitted"
             />
-            <div className="flex flex-col text-success-foreground max-w-[445px]">
+            <div className="flex flex-col text-success-foreground">
               <p className="font-medium text-sm">
-                Your application was submitted on{" "}
+                You submitted this application on{" "}
                 {format(applications[0].createdAt, "MMMM d, h:mm a")}. You can
-                resubmit with additional projects until Oct 10 at 19:00 UTC
+                edit or resubmit with additional projects until Oct 10 at 19:00
+                UTC.
               </p>
             </div>
-          </div>
-          <div className="flex justify-center items-center gap-x-6">
-            <Image
-              alt="sunny"
-              src="/assets/images/submitted-retro-5-funding.png"
-              height={80}
-              width={143}
-            />
-            <ArrowDownToLine
-              onClick={handleDownload}
-              size={11}
-              className="text-success-foreground cursor-pointer"
-            />
           </div>
         </div>
       ) : (
