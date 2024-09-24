@@ -57,9 +57,9 @@ const ProjectImpactForm = ({
         const updatedImpactStatements =
           selectedCategory.impactStatements.reduce(
             (acc: Record<string, string>, statement) => {
-              if (statement.limitToOptions.length > 0) {
+              if (statement.limitToCategoryOptions.length > 0) {
                 if (
-                  statement.limitToOptions.some((option) =>
+                  statement.limitToCategoryOptions.some((option) =>
                     projectDescriptionOptions.includes(
                       selectedCategory.options[option],
                     ),
@@ -231,11 +231,11 @@ const ProjectImpactForm = ({
                   const filteredStatements = categories
                     .find((category) => category.id === categoryId)
                     ?.impactStatements.filter((impactStatement) => {
-                      if (impactStatement.limitToOptions.length > 0) {
+                      if (impactStatement.limitToCategoryOptions.length > 0) {
                         return projectDescriptionOptions.includes(
                           categories.find(
                             (category) => category.id === categoryId,
-                          )?.options[impactStatement.limitToOptions[0]],
+                          )?.options[impactStatement.limitToCategoryOptions[0]],
                         )
                       }
                       return true
