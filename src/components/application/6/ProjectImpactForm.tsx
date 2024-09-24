@@ -227,9 +227,21 @@ const ProjectImpactForm = ({
                   text="Promises of future deliverables or impact are not allowed."
                 />
 
-                {categories
-                  .find((category) => category.id === categoryId)
-                  ?.impactStatements.map((impactStatement) => (
+                {(() => {
+                  const filteredStatements = categories
+                    .find((category) => category.id === categoryId)
+                    ?.impactStatements.filter((impactStatement) => {
+                      if (impactStatement.limitToOptions.length > 0) {
+                        return projectDescriptionOptions.includes(
+                          categories.find(
+                            (category) => category.id === categoryId,
+                          )?.options[impactStatement.limitToOptions[0]],
+                        )
+                      }
+                      return true
+                    })
+
+                  return filteredStatements?.map((impactStatement) => (
                     <div key={impactStatement.id}>
                       <h6 className="text-sm font-medium">
                         {impactStatement.question}
@@ -259,7 +271,8 @@ const ProjectImpactForm = ({
                         )}
                       />
                     </div>
-                  ))}
+                  ))
+                })()}
               </div>
             </div>
           </AccordionContent>
