@@ -244,7 +244,7 @@ model Category {
   options           String[]
   roundId           String?
   isMultipleChoice  Boolean @default(true)
-  
+
   round             FundingRound? @relation(fields: [roundId], references: [id])
 
   impactStatements ImpactStatement[]
@@ -260,7 +260,8 @@ model ImpactStatement {
   isRequired          Boolean       @default(true)
   isMarkdownSupported Boolean       @default(true)
   roundId             String?
-  limitToOptions      Int[]         @default([])         
+  limitToCategoryOptions      Int[]         @default([])
+  selectionOptions    String[]               
 
   round               FundingRound? @relation(fields: [roundId], references: [id])
 
