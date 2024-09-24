@@ -258,6 +258,8 @@ model ImpactStatement {
   isRequired          Boolean       @default(true)
   isMarkdownSupported Boolean       @default(true)
   roundId             String?
+  limitToOptions      Int[]         @default([])         
+
   round               FundingRound? @relation(fields: [roundId], references: [id])
 
   impactStatementAnswer ImpactStatementAnswer[]
