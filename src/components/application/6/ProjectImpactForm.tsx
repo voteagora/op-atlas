@@ -241,66 +241,68 @@ const ProjectImpactForm = ({
                       return true
                     })
 
-                  return filteredStatements?.map((impactStatement) => (
-                    <div key={impactStatement.id}>
-                      <h6 className="text-sm font-medium">
-                        {impactStatement.question}
-                        <span className="text-destructive">*</span>
-                      </h6>
-                      <p className="text-sm text-secondary-foreground mb-2">
-                        {impactStatement.subtext}
-                      </p>
+                  return filteredStatements
+                    ?.sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10))
+                    .map((impactStatement) => (
+                      <div key={impactStatement.id}>
+                        <h6 className="text-sm font-medium">
+                          {impactStatement.question}
+                          <span className="text-destructive">*</span>
+                        </h6>
+                        <p className="text-sm text-secondary-foreground mb-2">
+                          {impactStatement.subtext}
+                        </p>
 
-                      <FormField
-                        control={form.control}
-                        name={`projects.${index}.impactStatement.${impactStatement.id}`}
-                        render={({ field }) => (
-                          <>
-                            {impactStatement.selectionOptions?.length > 0 ? (
-                              <FormItem className="space-y-2">
-                                {impactStatement.selectionOptions.map(
-                                  (option) => (
-                                    <div
-                                      className="flex items-center space-x-2 border rounded-sm p-4"
-                                      key={option}
-                                    >
-                                      <Checkbox
-                                        id={option}
-                                        checked={field.value === option}
-                                        onCheckedChange={() =>
-                                          field.onChange(option)
-                                        }
-                                      />
-                                      <label
-                                        htmlFor={option}
-                                        className="text-sm"
+                        <FormField
+                          control={form.control}
+                          name={`projects.${index}.impactStatement.${impactStatement.id}`}
+                          render={({ field }) => (
+                            <>
+                              {impactStatement.selectionOptions?.length > 0 ? (
+                                <FormItem className="space-y-2">
+                                  {impactStatement.selectionOptions.map(
+                                    (option) => (
+                                      <div
+                                        className="flex items-center space-x-2 border rounded-sm p-4"
+                                        key={option}
                                       >
-                                        {option}
-                                      </label>
-                                    </div>
-                                  ),
-                                )}
-                              </FormItem>
-                            ) : (
-                              <FormItem className="relative">
-                                <div className="relative">
-                                  <Textarea
-                                    {...field}
-                                    className="min-h-60"
-                                    placeholder="Add a response"
-                                  />
-                                  <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
-                                    {field?.value?.length}/1000
-                                  </span>
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          </>
-                        )}
-                      />
-                    </div>
-                  ))
+                                        <Checkbox
+                                          id={option}
+                                          checked={field.value === option}
+                                          onCheckedChange={() =>
+                                            field.onChange(option)
+                                          }
+                                        />
+                                        <label
+                                          htmlFor={option}
+                                          className="text-sm"
+                                        >
+                                          {option}
+                                        </label>
+                                      </div>
+                                    ),
+                                  )}
+                                </FormItem>
+                              ) : (
+                                <FormItem className="relative">
+                                  <div className="relative">
+                                    <Textarea
+                                      {...field}
+                                      className="min-h-60"
+                                      placeholder="Add a response"
+                                    />
+                                    <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
+                                      {field?.value?.length}/1000
+                                    </span>
+                                  </div>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            </>
+                          )}
+                        />
+                      </div>
+                    ))
                 })()}
               </div>
             </div>
