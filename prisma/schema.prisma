@@ -236,14 +236,16 @@ model Application {
 }
 
 model Category {
-  id          String        @id @default(uuid())
-  name        String
-  description String
-  imageUrl    String?
-  question    String
-  options     String[]
-  roundId     String?
-  round       FundingRound? @relation(fields: [roundId], references: [id])
+  id                String        @id @default(uuid())
+  name              String
+  description       String
+  imageUrl          String?
+  question          String
+  options           String[]
+  roundId           String?
+  isMultipleChoice  Boolean @default(true)
+
+  round             FundingRound? @relation(fields: [roundId], references: [id])
 
   impactStatements ImpactStatement[]
   application      Application[]
@@ -258,6 +260,9 @@ model ImpactStatement {
   isRequired          Boolean       @default(true)
   isMarkdownSupported Boolean       @default(true)
   roundId             String?
+  limitToCategoryOptions      Int[]         @default([])
+  selectionOptions    String[]               
+
   round               FundingRound? @relation(fields: [roundId], references: [id])
 
   impactStatementAnswer ImpactStatementAnswer[]
