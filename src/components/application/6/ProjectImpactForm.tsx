@@ -255,19 +255,48 @@ const ProjectImpactForm = ({
                         control={form.control}
                         name={`projects.${index}.impactStatement.${impactStatement.id}`}
                         render={({ field }) => (
-                          <FormItem className="relative">
-                            <div className="relative">
-                              <Textarea
-                                {...field}
-                                className="min-h-60"
-                                placeholder="Add a response"
-                              />
-                              <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
-                                {field?.value?.length}/1000
-                              </span>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
+                          <>
+                            {impactStatement.selectionOptions?.length > 0 ? (
+                              <FormItem className="space-y-2">
+                                {impactStatement.selectionOptions.map(
+                                  (option) => (
+                                    <div
+                                      className="flex items-center space-x-2 border rounded-sm p-4"
+                                      key={option}
+                                    >
+                                      <Checkbox
+                                        id={option}
+                                        checked={field.value === option}
+                                        onCheckedChange={() =>
+                                          field.onChange(option)
+                                        }
+                                      />
+                                      <label
+                                        htmlFor={option}
+                                        className="text-sm"
+                                      >
+                                        {option}
+                                      </label>
+                                    </div>
+                                  ),
+                                )}
+                              </FormItem>
+                            ) : (
+                              <FormItem className="relative">
+                                <div className="relative">
+                                  <Textarea
+                                    {...field}
+                                    className="min-h-60"
+                                    placeholder="Add a response"
+                                  />
+                                  <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
+                                    {field?.value?.length}/1000
+                                  </span>
+                                </div>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          </>
                         )}
                       />
                     </div>

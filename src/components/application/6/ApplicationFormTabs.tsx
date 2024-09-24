@@ -71,8 +71,8 @@ export const ApplicationFormSchema = z.object({
               if (
                 !value ||
                 value.trim() === "" ||
-                value.length < 200 ||
-                value.length > 1000
+                // TODO: This key is hardcoded, should be dynamic
+                ((value.length < 200 || value.length > 1000) && key !== "11")
               ) {
                 ctx.addIssue({
                   path: ["impactStatement", key],
@@ -92,12 +92,13 @@ export const ApplicationFormSchema = z.object({
           if (
             !project.category?.trim() ||
             !project.projectDescriptionOptions.length ||
-            !Object.values(project.impactStatement).every(
-              (answer) =>
+            !Object.entries(project.impactStatement).every(
+              ([id, answer]) =>
                 answer &&
                 answer.trim() !== "" &&
-                answer.length >= 200 &&
-                answer.length <= 1000,
+                ((answer.length >= 200 && answer.length <= 1000) ||
+                  // TODO: This id is hardcoded, should be dynamic
+                  id === "11"),
             )
           ) {
             ctx.addIssue({
