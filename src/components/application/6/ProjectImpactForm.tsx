@@ -41,18 +41,9 @@ const ProjectImpactForm = ({
   const attestationId = project.applications[0]?.attestationId
 
   const categoryId = useWatch({ name: `projects.${index}.category` })
-  const selectedOption = useWatch({
+  const projectDescriptionOptions = useWatch({
     name: `projects.${index}.projectDescriptionOptions`,
   })
-
-  const selectedCategory = categories.find(
-    (category) => category.id === categoryId,
-  )
-
-  const isGovNERDs = selectedOption[0]?.includes("GovNERDs")
-
-  console.log("Selected Category:", selectedCategory)
-  console.log("Selected Option:", selectedOption)
 
   useEffect(() => {
     const watchedProjects = form.getValues("projects")
@@ -66,8 +57,21 @@ const ProjectImpactForm = ({
         const updatedImpactStatements =
           selectedCategory.impactStatements.reduce(
             (acc: Record<string, string>, statement) => {
+              if (statement.limitToOptions.length > 0) {
+                if (
+                  statement.limitToOptions.some((option) =>
+                    projectDescriptionOptions.includes(
+                      selectedCategory.options[option],
+                    ),
+                  )
+                ) {
+                  acc[statement.id] =
+                    project.impactStatement[statement.id] || ""
+                }
+                return acc
+              }
               acc[statement.id] = project.impactStatement[statement.id] || ""
-              return acc ?? { "1": "", "2": "" }
+              return acc
             },
             {},
           )
@@ -80,7 +84,7 @@ const ProjectImpactForm = ({
         form.setValue(`projects.${index}.selected`, true)
       }
     })
-  }, [categories, categoryId, form])
+  }, [categories, categoryId, form, projectDescriptionOptions])
 
   const isIneligible = !isEligible
 
@@ -202,20 +206,20 @@ const ProjectImpactForm = ({
                   Impact statement
                 </h4>
                 <p className="text-sm text-secondary-foreground">
-                  Describe this project&apos;s impact on the OP Stack from Oct
-                  1, 2023 - July 31, 2024. Please only describe the impact that
-                  was delivered during that specific time period.
+                  Describe this project’s impact on the OP Stack from Oct 1,
+                  2023 - July 31, 2024. Please only describe the impact that was
+                  delivered during that specific time period.
                 </p>
                 <p className="text-sm text-secondary-foreground">
-                  You&apos; ve already given your project a description in your{" "}
+                  You’ve already given your project a description in your{" "}
                   <ExternalLink
                     href={`/projects/${project.id}/details`}
                     className="underline"
                   >
                     project setup
                   </ExternalLink>
-                  . There&apos;s no need to repeat that information here.
-                  Instead, focus on communicating your project&apos;s impact.
+                  . There’s no need to repeat that information here. Instead,
+                  focus on communicating your project’s impact.
                 </p>
                 <Callout
                   className="!text-sm"
@@ -223,160 +227,39 @@ const ProjectImpactForm = ({
                   text="Promises of future deliverables or impact are not allowed."
                 />
 
-                {selectedCategory?.name === "Governance Leadership" &&
-                  selectedCategory.roundId === "6" && (
-                    <>
-                      {isGovNERDs && (
-                        <div className="mb-6">
-                          <h6 className="text-sm font-medium mb-2">
-                            In what season did your work take place
-                            <span className="text-destructive">*</span>
-                          </h6>
-                          <p className="text-sm text-secondary-foreground mb-4">
-                            If you represent a council/committee/board or
-                            similar, please submit one project and application
-                            per governance season.
-                          </p>
-                          <FormField
-                            control={form.control}
-                            name="governance_impact"
-                            render={({ field }) => (
-                              <FormItem className="space-y-2">
-                                <div className="flex items-center space-x-2 border rounded-sm p-4">
-                                  <Checkbox
-                                    id="season5"
-                                    checked={field.value === "Season 5"}
-                                    onCheckedChange={() =>
-                                      field.onChange("Season 5")
-                                    }
-                                  />
-                                  <label htmlFor="season5" className="text-sm">
-                                    Season 5: Sept 28th 2023 - May 8th 2024
-                                  </label>
-                                </div>
-                                <div className="flex items-center space-x-2 border rounded-sm p-4">
-                                  <Checkbox
-                                    id="season6"
-                                    checked={field.value === "Season 6"}
-                                    onCheckedChange={() =>
-                                      field.onChange("Season 6")
-                                    }
-                                  />
-                                  <label htmlFor="season6" className="text-sm">
-                                    Season 6: May 9th - September 18th 2024 (up
-                                    until Voting Cycle #28)
-                                  </label>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      )}
+                {categories
+                  .find((category) => category.id === categoryId)
+                  ?.impactStatements.map((impactStatement) => (
+                    <div key={impactStatement.id}>
+                      <h6 className="text-sm font-medium">
+                        {impactStatement.question}
+                        <span className="text-destructive">*</span>
+                      </h6>
+                      <p className="text-sm text-secondary-foreground mb-2">
+                        {impactStatement.subtext}
+                      </p>
 
-                      {/* Existing impact statements rendering */}
-                      {(() => {
-                        console.log(
-                          "Impact Statements before filter:",
-                          selectedCategory.impactStatements,
-                        )
-
-                        const filteredStatements =
-                          selectedCategory.impactStatements.filter(
-                            (statement) => {
-                              if (isGovNERDs) {
-                                return (
-                                  statement.question.includes(
-                                    "What is the mandate",
-                                  ) ||
-                                  statement.question.includes(
-                                    "How did your work achieve",
-                                  )
-                                )
-                              } else {
-                                return statement.question.includes(
-                                  "How has your facilitation work improved",
-                                )
-                              }
-                            },
-                          )
-
-                        console.log(
-                          "Filtered Impact Statements:",
-                          filteredStatements,
-                        )
-                        return filteredStatements.map((impactStatement) => (
-                          <div key={impactStatement.id}>
-                            <h6 className="text-sm font-medium">
-                              {impactStatement.question}
-                              <span className="text-destructive">*</span>
-                            </h6>
-                            <p className="text-sm text-secondary-foreground mb-2">
-                              {impactStatement.subtext}
-                            </p>
-
-                            <FormField
-                              control={form.control}
-                              name={`projects.${index}.impactStatement.${impactStatement.id}`}
-                              render={({ field }) => (
-                                <FormItem className="relative">
-                                  <div className="relative">
-                                    <Textarea
-                                      {...field}
-                                      className="min-h-60"
-                                      placeholder="Add a response"
-                                    />
-                                    <div className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground flex gap-2">
-                                      <span>{field?.value?.length}/1000</span>
-                                      <span>•</span>
-                                      <span>Markdown is supported</span>
-                                    </div>
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        ))
-                      })()}
-                    </>
-                  )}
-
-                {selectedCategory?.name !== "Governance Leadership" &&
-                  selectedCategory?.impactStatements
-                    .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10))
-                    .map((impactStatement) => (
-                      <div key={impactStatement.id}>
-                        <h6 className="text-sm font-medium">
-                          {impactStatement.question}
-                          <span className="text-destructive">*</span>
-                        </h6>
-                        <p className="text-sm text-secondary-foreground mb-2">
-                          {impactStatement.subtext}
-                        </p>
-
-                        <FormField
-                          control={form.control}
-                          name={`projects.${index}.impactStatement.${impactStatement.id}`}
-                          render={({ field }) => (
-                            <FormItem className="relative">
-                              <div className="relative">
-                                <Textarea
-                                  {...field}
-                                  className="min-h-60"
-                                  placeholder="Add a response"
-                                />
-                                <div className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground flex gap-2">
-                                  <span>{field?.value?.length}/1000</span>
-                                  <span>•</span>
-                                  <span>Markdown is supported</span>
-                                </div>
-                              </div>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    ))}
+                      <FormField
+                        control={form.control}
+                        name={`projects.${index}.impactStatement.${impactStatement.id}`}
+                        render={({ field }) => (
+                          <FormItem className="relative">
+                            <div className="relative">
+                              <Textarea
+                                {...field}
+                                className="min-h-60"
+                                placeholder="Add a response"
+                              />
+                              <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
+                                {field?.value?.length}/1000
+                              </span>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))}
               </div>
             </div>
           </AccordionContent>
@@ -387,7 +270,7 @@ const ProjectImpactForm = ({
 }
 
 const CategoryItem = ({
-  category: { description, name, options, imageUrl, roundId },
+  category: { description, name, options, imageUrl },
   value,
   selectedValue,
   form,
@@ -399,17 +282,14 @@ const CategoryItem = ({
   index: number
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
 }) => {
-  const isGovernanceLeadership =
-    name === "Governance Leadership" && roundId === "6"
-
   return (
     <div className="p-6 border border-input rounded-xl">
-      <div className="flex items-start gap-4">
-        <span className="mt-1">
+      <div className=" flex items-center gap-4 ">
+        <span>
           <RadioGroupItem value={value} />
         </span>
 
-        <div className="flex-grow">
+        <div>
           <h6 className="text-sm font-medium">{name}</h6>
           <p className="text-sm text-secondary-foreground">{description}</p>
         </div>
@@ -424,8 +304,8 @@ const CategoryItem = ({
         </div>
       </div>
       {selectedValue === value && (
-        <div className="flex flex-col gap-y-1.5 pl-8 w-full mt-4">
-          <h5 className="text-sm font-medium text-foreground w-full">
+        <div className="flex flex-col gap-y-1.5 pl-8 w-full">
+          <h5 className="text-sm font-medium text-foreground mt-4 w-full">
             Which option describes your project?
             <span className="text-destructive">*</span>
           </h5>
@@ -435,82 +315,27 @@ const CategoryItem = ({
             name={`projects.${index}.projectDescriptionOptions`}
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
-                {/* If Governance Leadership, we are going to put in 
-                radio boxes and then swap out the impact statements, 
-                else, we will show the check boxes with the same impact 
-                statements based o nthe category. This is a Round 6 specific thing, will want to 
-                generalize later for future rounds. */}
-                {isGovernanceLeadership ? (
-                  <RadioGroup
-                    onValueChange={(value) => field.onChange([value])}
-                    value={field.value[0]}
-                    className="space-y-3"
+                {options.map((option) => (
+                  <div
+                    key={option}
+                    className="py-2.5 px-3 flex items-center gap-x-2 border border-input rounded-lg w-full"
                   >
-                    {options.map((option) => {
-                      const [title, description] = option.includes("::")
-                        ? option.split("::")
-                        : [option, ""]
-
-                      return (
-                        <div
-                          key={option}
-                          className="py-3 px-4 flex items-start gap-x-4 border border-input rounded-lg w-full"
-                        >
-                          <RadioGroupItem
-                            value={option}
-                            id={option}
-                            className="w-10 h-5"
-                          />
-                          <div className="flex-grow">
-                            <label
-                              htmlFor={option}
-                              className="text-sm font-medium"
-                            >
-                              {title}
-                            </label>
-                            {description && (
-                              <p className="text-sm text-secondary-foreground mt-1">
-                                {description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </RadioGroup>
-                ) : (
-                  options.map((option) => {
-                    const [title, description] = option.includes("::")
-                      ? option.split("::")
-                      : [option, ""]
-
-                    return (
-                      <div
-                        key={option}
-                        className="py-3 px-4 flex items-start gap-x-4 border border-input rounded-lg w-full"
-                      >
-                        <Checkbox
-                          checked={field.value.includes(option)}
-                          onCheckedChange={(checked) => {
-                            const newValue = checked
-                              ? [...field.value, option]
-                              : field.value.filter((id) => id !== option)
-                            field.onChange(newValue)
-                          }}
-                          className="w-5 h-5 mt-0.5"
-                        />
-                        <div className="flex-grow">
-                          <p className="text-sm font-medium">{title}</p>
-                          {description && (
-                            <p className="text-sm text-secondary-foreground mt-1">
-                              {description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })
-                )}
+                    <span>
+                      <Checkbox
+                        checked={field.value.includes(option)}
+                        onCheckedChange={(checked) => {
+                          const newValue = checked
+                            ? [...field.value, option]
+                            : field.value.filter((id) => id !== option)
+                          field.onChange(newValue)
+                        }}
+                      />
+                    </span>
+                    <div>
+                      <p className="text-sm">{option}</p>
+                    </div>
+                  </div>
+                ))}
 
                 <FormMessage />
               </FormItem>
