@@ -66,8 +66,9 @@ export const createProjectSnapshot = async (projectId: string) => {
     })
 
     // If the project has an application, we need to publish a new one to reference this snapshot.
-
-    const application = project.applications.find((a) => a.roundId === "5")
+    const application = project.applications.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    )[0]
 
     if (application && !APPLICATIONS_CLOSED) {
       await publishAndSaveApplication({
@@ -85,6 +86,7 @@ export const createProjectSnapshot = async (projectId: string) => {
         },
         farcasterId: session.user.farcasterId,
         metadataSnapshotId: snapshot.attestationId,
+        round: Number(application.round.id),
       })
     }
 

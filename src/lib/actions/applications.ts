@@ -23,22 +23,24 @@ export const publishAndSaveApplication = async ({
   project,
   farcasterId,
   metadataSnapshotId,
+  round,
 }: {
   project: SubmitApplicationRequest
   farcasterId: string
   metadataSnapshotId: string
+  round: number
 }): Promise<Application> => {
   // Publish attestation
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId: project.projectId,
-    round: 5,
+    round,
     snapshotRef: metadataSnapshotId,
   })
 
   // Create application in database
   return createApplication({
-    round: 5,
+    round,
     ...project,
     attestationId,
   })
@@ -47,6 +49,7 @@ export const publishAndSaveApplication = async ({
 const createProjectApplication = async (
   applicationData: SubmitApplicationRequest,
   farcasterId: string,
+  round: number,
 ) => {
   const session = await auth()
 
@@ -97,6 +100,7 @@ const createProjectApplication = async (
     },
     farcasterId,
     metadataSnapshotId: latestSnapshot.attestationId,
+    round,
   })
 
   return {
@@ -112,6 +116,7 @@ export const submitApplications = async (
     impactStatement: Record<string, string>
     projectDescriptionOptions: string[]
   }[],
+  round: number,
 ) => {
   const session = await auth()
 
@@ -142,6 +147,7 @@ export const submitApplications = async (
     const result = await createProjectApplication(
       project,
       session.user.farcasterId,
+      round,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)

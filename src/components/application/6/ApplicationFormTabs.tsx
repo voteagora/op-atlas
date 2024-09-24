@@ -117,11 +117,13 @@ const ApplicationFormTabs = ({
   applications,
   onApplied,
   categories,
+  round,
 }: {
   projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   onApplied: (application: ApplicationWithDetails) => void
   categories: CategoryWithImpact[]
+  round: number
 }) => {
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
@@ -195,6 +197,7 @@ const ApplicationFormTabs = ({
               projectDescriptionOptions: project.projectDescriptionOptions,
               impactStatement: project.impactStatement,
             })),
+            round,
           )
 
           if (result.error !== null || result.applications.length === 0) {
