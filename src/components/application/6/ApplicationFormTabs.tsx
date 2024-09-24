@@ -71,7 +71,7 @@ export const ApplicationFormSchema = z.object({
               if (
                 !value ||
                 value.trim() === "" ||
-                // TODO: This key is hardcoded, should be dynamic
+                // TODO: We're hardcoding the id of a multiple choice question here. This should be dynamic
                 ((value.length < 200 || value.length > 1000) && key !== "11")
               ) {
                 ctx.addIssue({
@@ -97,7 +97,7 @@ export const ApplicationFormSchema = z.object({
                 answer &&
                 answer.trim() !== "" &&
                 ((answer.length >= 200 && answer.length <= 1000) ||
-                  // TODO: This id is hardcoded, should be dynamic
+                  // TODO: We're hardcoding the id of a multiple choice question here. This should be dynamic
                   id === "11"),
             )
           ) {
