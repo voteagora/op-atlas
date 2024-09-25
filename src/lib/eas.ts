@@ -12,7 +12,9 @@ const ORGANIZATION_METADATA_SCHEMA_ID =
     ? "0x9c181f1e683fd2d79287d0b4fe1832f571fb4f5815ff9c1d0ed5b7a9bd067a03"
     : "0xc2b376d1a140287b1fa1519747baae1317cf37e0d27289b86f85aa7cebfd649f"
 const APPLICATION_SCHEMA_ID =
-  "0x88b62595c76fbcd261710d0930b5f1cc2e56758e155dea537f82bf0baadd9a32"
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0xb50a1973d1aab9206545cd1da93e0dc1b5314989928bb35f58762020e2027154"
+    : "0x2169b74bfcb5d10a6616bbc8931dc1c56f8d1c305319a9eeca77623a991d4b80"
 
 const entitySchema = new SchemaEncoder("uint256 farcasterID,string type")
 const projectMetadataSchema = new SchemaEncoder(
@@ -22,7 +24,7 @@ const organizationMetadataSchema = new SchemaEncoder(
   "bytes32 refUID, uint256 farcasterID, string name, bytes32 parentOrgUID, bytes32[] projects, uint8 metadataType, string metadataUrl",
 )
 const applicationSchema = new SchemaEncoder(
-  "uint32 round,bytes32 projectRefUID,uint256 farcasterID,bytes32 metadataSnapshotRefUID",
+  "string round, uint256 farcasterID, bytes32 metadataSnapshotRefUID, uint8 metadataType, string metadataUrl",
 )
 
 const EAS_SIGNER_PRIVATE_KEY = process.env.EAS_SIGNER_PRIVATE_KEY
@@ -153,17 +155,20 @@ export async function createApplicationAttestation({
   projectId,
   round,
   snapshotRef,
+  ipfsUrl,
 }: {
   farcasterId: number
   projectId: string
   round: number
   snapshotRef: string
+  ipfsUrl: string
 }) {
   const data = applicationSchema.encodeData([
-    { name: "round", value: round, type: "uint32" },
-    { name: "projectRefUID", value: projectId, type: "bytes32" },
+    { name: "round", value: round.toString(), type: "string" },
     { name: "farcasterID", value: farcasterId, type: "uint256" },
     { name: "metadataSnapshotRefUID", value: snapshotRef, type: "bytes32" },
+    { name: "metadataType", value: "0", type: "uint8" },
+    { name: "metadataUrl", value: ipfsUrl, type: "string" },
   ])
 
   const attestationId = await createAttestation(
@@ -171,7 +176,6 @@ export async function createApplicationAttestation({
     data,
     projectId,
   )
-  console.info("Created application attestation:", attestationId)
 
   return attestationId
 }

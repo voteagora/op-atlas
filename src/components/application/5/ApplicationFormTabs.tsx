@@ -197,6 +197,7 @@ const ApplicationFormTabs = ({
               impactStatement: project.impactStatement,
             })),
             round,
+            categories,
           )
 
           if (result.error !== null || result.applications.length === 0) {

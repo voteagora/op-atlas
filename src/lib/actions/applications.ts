@@ -9,7 +9,10 @@ import { createApplication, getProject } from "@/db/projects"
 import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
+import { uploadToPinata } from "../pinata"
+import { ApplicationWithDetails, CategoryWithImpact } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
+import { formatApplicationMetadata } from "../utils/metadata"
 import { verifyAdminStatus } from "./utils"
 
 interface SubmitApplicationRequest {
@@ -21,21 +24,34 @@ interface SubmitApplicationRequest {
 
 export const publishAndSaveApplication = async ({
   project,
+  category,
   farcasterId,
   metadataSnapshotId,
   round,
 }: {
   project: SubmitApplicationRequest
+  category: CategoryWithImpact
   farcasterId: string
   metadataSnapshotId: string
   round: number
 }): Promise<Application> => {
+  // Upload metadata to IPFS
+  const metadata = formatApplicationMetadata({
+    round,
+    categoryId: project.categoryId,
+    impactStatement: project.impactStatement,
+    category,
+    projectDescriptionOptions: project.projectDescriptionOptions,
+  })
+  const ipfsHash = await uploadToPinata(project.projectId, metadata)
+
   // Publish attestation
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId: project.projectId,
     round,
     snapshotRef: metadataSnapshotId,
+    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
   })
 
   // Create application in database
@@ -50,6 +66,7 @@ const createProjectApplication = async (
   applicationData: SubmitApplicationRequest,
   farcasterId: string,
   round: number,
+  category: CategoryWithImpact,
 ) => {
   const session = await auth()
 
@@ -98,6 +115,7 @@ const createProjectApplication = async (
       impactStatement: applicationData.impactStatement,
       projectDescriptionOptions: applicationData.projectDescriptionOptions,
     },
+    category,
     farcasterId,
     metadataSnapshotId: latestSnapshot.attestationId,
     round,
@@ -117,6 +135,7 @@ export const submitApplications = async (
     projectDescriptionOptions: string[]
   }[],
   round: number,
+  categories: CategoryWithImpact[],
 ) => {
   const session = await auth()
 
@@ -148,6 +167,7 @@ export const submitApplications = async (
       project,
       session.user.farcasterId,
       round,
+      categories.find((category) => category.id === project.categoryId)!,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)

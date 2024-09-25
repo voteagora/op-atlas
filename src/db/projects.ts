@@ -941,8 +941,13 @@ async function getUserApplicationsFn({
             include: {
               applications: {
                 include: {
-                  impactStatementAnswer: true,
+                  impactStatementAnswer: {
+                    include: {
+                      impactStatement: true,
+                    },
+                  },
                   project: true,
+                  round: true,
                 },
                 where: {
                   roundId,
@@ -977,6 +982,7 @@ async function getUserApplicationsFn({
                         include: {
                           impactStatementAnswer: true,
                           project: true,
+                          round: true,
                         },
                         where: {
                           roundId,
