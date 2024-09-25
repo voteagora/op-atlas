@@ -84,6 +84,7 @@ export const createProjectSnapshot = async (projectId: string) => {
           ),
           projectDescriptionOptions: application.projectDescriptionOptions,
         },
+        category: application.category!,
         farcasterId: session.user.farcasterId,
         metadataSnapshotId: snapshot.attestationId,
         round: Number(application.round.id),

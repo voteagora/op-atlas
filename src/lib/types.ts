@@ -119,6 +119,7 @@ export type ApplicationWithDetails = Prisma.ApplicationGetPayload<{
     impactStatementAnswer: true
     project: true
     projectDescriptionOptions: true
+    round: true
   }
 }>
 
