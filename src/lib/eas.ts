@@ -14,7 +14,7 @@ const ORGANIZATION_METADATA_SCHEMA_ID =
 const APPLICATION_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0xb50a1973d1aab9206545cd1da93e0dc1b5314989928bb35f58762020e2027154"
-    : "0x88b62595c76fbcd261710d0930b5f1cc2e56758e155dea537f82bf0baadd9a32"
+    : "0x2169b74bfcb5d10a6616bbc8931dc1c56f8d1c305319a9eeca77623a991d4b80"
 
 const entitySchema = new SchemaEncoder("uint256 farcasterID,string type")
 const projectMetadataSchema = new SchemaEncoder(
