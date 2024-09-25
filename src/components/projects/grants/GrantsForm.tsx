@@ -72,7 +72,7 @@ function toFormValues(
         date: format(toDate(funding.receivedAt), "yyyy-MM-dd"), // date-fns does really stupid timezone conversions by default...
         details: funding.details ?? "",
       })
-    } else if (funding.type === "investment") {
+    } else if (funding.type === "venture") {
       investment.push({
         amount: funding.amount,
         details: funding.details ?? undefined,
@@ -141,7 +141,7 @@ function fromFormValues(
 
   values.investment.forEach((investment) => {
     funding.push({
-      type: "investment",
+      type: "venture",
       amount: investment.amount,
       details: investment.details,
       receivedAt: investment.year,
@@ -169,7 +169,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   )
 
   const {
-    fields: ventureFields,
+    fields: retroFundingFields,
     replace: setRetroFunding,
     append: addRetroFunding,
     remove: removeRetroFunding,
@@ -189,7 +189,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   })
 
   const {
-    fields: revenueFields,
+    fields: investmentFields,
     replace: setRevenueFields,
     append: addRevenueField,
     remove: removeRevenueField,
@@ -201,11 +201,11 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   const hasFundingType = (type: FundingType) => {
     switch (type) {
       case "retroFunding":
-        return ventureFields.length > 0
+        return retroFundingFields.length > 0
       case "grants":
         return grantsFields.length > 0
-      case "investment":
-        return revenueFields.length > 0
+      case "revenue":
+        return investmentFields.length > 0
       case "none":
         return selectedNone
       default:
@@ -215,7 +215,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
 
   const onToggleFundingType = (type: FundingType) => {
     if (type === "retroFunding") {
-      if (ventureFields.length === 0) {
+      if (retroFundingFields.length === 0) {
         setSelectedNone(false)
         addRetroFunding({
           amount: "",
@@ -237,8 +237,8 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
       } else {
         setGrantsFields([])
       }
-    } else if (type === "investment") {
-      if (revenueFields.length === 0) {
+    } else if (type === "venture") {
+      if (investmentFields.length === 0) {
         setSelectedNone(false)
         addRevenueField({
           amount: "",
@@ -276,7 +276,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           details: "",
         })
       }
-    } else if (type === "investment") {
+    } else if (type === "venture") {
       const valid = await form.trigger("investment")
       if (valid) {
         addRevenueField({
@@ -311,12 +311,12 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
 
   const canSubmit =
     (selectedNone ||
-      ventureFields.length > 0 ||
+      retroFundingFields.length > 0 ||
       grantsFields.length > 0 ||
-      revenueFields.length > 0) &&
+      investmentFields.length > 0) &&
     pricingModel
 
-  console.log(ventureFields, grantsFields, revenueFields, "data")
+  console.log(retroFundingFields, grantsFields, investmentFields, "data")
 
   return (
     <Form {...form}>
@@ -436,12 +436,12 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
               </Button>
             </div>
           ) : null}
-          {ventureFields.length > 0 ? (
+          {retroFundingFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
               <h3 className="text-lg font-semibold text-text-default">
                 Optimism Retro Funding
               </h3>
-              {ventureFields.map((field, index) => (
+              {retroFundingFields.map((field, index) => (
                 <VentureFundingForm
                   key={field.id}
                   form={form}
@@ -459,12 +459,12 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
               </Button>
             </div>
           ) : null}
-          {revenueFields.length > 0 ? (
+          {investmentFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
               <h3 className="text-lg font-semibold text-text-default">
                 Investment (since Jan 2020)
               </h3>
-              {revenueFields.map((field, index) => (
+              {investmentFields.map((field, index) => (
                 <RevenueFundingForm
                   key={field.id}
                   form={form}
@@ -475,7 +475,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => onAddFundingType("investment")}
+                onClick={() => onAddFundingType("venture")}
                 className="w-fit text-sm font-medium text-foreground"
               >
                 <Plus size={16} className="mr-2.5" /> Add investment

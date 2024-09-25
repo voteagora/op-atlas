@@ -96,7 +96,7 @@ export function formatProjectMetadata(
     chainId: contract.chainId,
   }))
 
-  const venture = project.funding
+  const investments = project.funding
     .filter((funding) => funding.type === "venture")
     .map((funding) => ({
       amount: funding.amount,
@@ -109,9 +109,21 @@ export function formatProjectMetadata(
       amount: funding.amount,
       details: funding.details,
     }))
+  const retroFunding = project.funding
+    .filter((funding) => funding.type === "retroFunding")
+    .map((funding) => ({
+      grant: "retroFunding",
+      link: funding.grantUrl,
+      amount: funding.amount,
+      date: funding.receivedAt,
+      details: "Round " + funding.fundingRound,
+    }))
   const grants = project.funding
     .filter(
-      (funding) => funding.type !== "venture" && funding.type !== "revenue",
+      (funding) =>
+        funding.type !== "venture" &&
+        funding.type !== "revenue" &&
+        funding.type !== "retroFunding",
     )
     .map((funding) => ({
       grant: funding.grant,
@@ -139,9 +151,10 @@ export function formatProjectMetadata(
     packages,
     contracts,
     grantsAndFunding: {
-      ventureFunding: venture,
+      ventureFunding: investments,
       grants,
       revenue,
+      retroFunding,
     },
     pricingModel: project.pricingModel,
     pricingModelDetails: project.pricingModelDetails,
