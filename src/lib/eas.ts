@@ -163,8 +163,6 @@ export async function createApplicationAttestation({
   snapshotRef: string
   ipfsUrl: string
 }) {
-  console.log("Creating application attestation", snapshotRef)
-
   const data = applicationSchema.encodeData([
     { name: "round", value: round.toString(), type: "string" },
     { name: "farcasterID", value: farcasterId, type: "uint256" },
@@ -173,14 +171,11 @@ export async function createApplicationAttestation({
     { name: "metadataUrl", value: ipfsUrl, type: "string" },
   ])
 
-  console.log("Creating application attestation", data)
-
   const attestationId = await createAttestation(
     APPLICATION_SCHEMA_ID,
     data,
     projectId,
   )
-  console.info("Created application attestation:", attestationId)
 
   return attestationId
 }

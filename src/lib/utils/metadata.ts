@@ -218,7 +218,7 @@ export function formatApplicationMetadata({
 }): ApplicationMetadata {
   const metadata = {
     round: round,
-    category: categoryId,
+    category: category.name,
     subcategory: projectDescriptionOptions,
     impactStatement: Object.entries(impactStatement).map(([id, answer]) => ({
       question:
