@@ -5,7 +5,6 @@ export type FundingType =
   | "revenue"
   | "grants"
   | "retroFunding"
-  | "investment"
   | "none"
 export type PRICINGMODELTYPES = "free" | "freemium" | "pay_to_use"
 
@@ -42,7 +41,7 @@ export const FUNDING_TYPES = [
     description: "",
   },
   {
-    type: "investment",
+    type: "venture",
     label: "Investment (since Jan 2020)",
     description:
       "This project has received funding provided by individuals or investment firms in exchange for equity ownership.",
