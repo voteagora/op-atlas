@@ -1,4 +1,3 @@
-import { CheckedState } from "@radix-ui/react-checkbox"
 import Image from "next/image"
 import React, { memo, useEffect, useMemo } from "react"
 import { UseFormReturn, useWatch } from "react-hook-form"
@@ -40,51 +39,49 @@ const ProjectImpactForm = ({
   const hasApplied = project.applications[0]?.status === "submitted"
   const attestationId = project.applications[0]?.attestationId
 
-  const categoryId = useWatch({ name: `projects.${index}.category` })
-  const projectDescriptionOptions = useWatch({
+  const watchedCategoryId = useWatch({ name: `projects.${index}.category` })
+  const watchedProjectDescriptionOptions = useWatch({
     name: `projects.${index}.projectDescriptionOptions`,
+  })
+  const watchedImpactStetements = useWatch({
+    name: `projects.${index}.impactStatement`,
   })
 
   useEffect(() => {
-    const watchedProjects = form.getValues("projects")
+    const selectedCategory = categories.find(
+      (category) => category.id === watchedCategoryId,
+    )
 
-    watchedProjects.forEach((project, index: number) => {
-      const selectedCategory = categories.find(
-        (category) => category.id === project.category,
+    if (selectedCategory) {
+      // Update the impactStatement object with new fields
+      const updatedImpactStatements = selectedCategory.impactStatements.reduce(
+        (acc: Record<string, string>, statement) => {
+          if (statement.limitToCategoryOptions.length > 0) {
+            if (
+              statement.limitToCategoryOptions.some((option) =>
+                watchedProjectDescriptionOptions.includes(
+                  selectedCategory.options[option],
+                ),
+              )
+            ) {
+              acc[statement.id] = watchedImpactStetements[statement.id] || ""
+            }
+            return acc
+          }
+          acc[statement.id] = watchedImpactStetements[statement.id] || ""
+          return acc
+        },
+        {},
       )
-      if (selectedCategory) {
-        // Update the impactStatement object with new fields
-        const updatedImpactStatements =
-          selectedCategory.impactStatements.reduce(
-            (acc: Record<string, string>, statement) => {
-              if (statement.limitToCategoryOptions.length > 0) {
-                if (
-                  statement.limitToCategoryOptions.some((option) =>
-                    projectDescriptionOptions.includes(
-                      selectedCategory.options[option],
-                    ),
-                  )
-                ) {
-                  acc[statement.id] =
-                    project.impactStatement[statement.id] || ""
-                }
-                return acc
-              }
-              acc[statement.id] = project.impactStatement[statement.id] || ""
-              return acc
-            },
-            {},
-          )
-        // Update the form state with the new impactStatement structure
-        form.setValue(
-          `projects.${index}.impactStatement`,
-          updatedImpactStatements,
-          { shouldValidate: true },
-        )
-        form.setValue(`projects.${index}.selected`, true)
-      }
-    })
-  }, [categories, categoryId, form, projectDescriptionOptions])
+      // Update the form state with the new impactStatement structure
+      form.setValue(
+        `projects.${index}.impactStatement`,
+        updatedImpactStatements,
+        { shouldValidate: true },
+      )
+      form.setValue(`projects.${index}.selected`, true)
+    }
+  }, [categories, watchedCategoryId, form, watchedProjectDescriptionOptions])
 
   const isIneligible = !isEligible
 
@@ -229,12 +226,12 @@ const ProjectImpactForm = ({
 
                 {(() => {
                   const filteredStatements = categories
-                    .find((category) => category.id === categoryId)
+                    .find((category) => category.id === watchedCategoryId)
                     ?.impactStatements.filter((impactStatement) => {
                       if (impactStatement.limitToCategoryOptions.length > 0) {
-                        return projectDescriptionOptions.includes(
+                        return watchedProjectDescriptionOptions.includes(
                           categories.find(
-                            (category) => category.id === categoryId,
+                            (category) => category.id === watchedCategoryId,
                           )?.options[impactStatement.limitToCategoryOptions[0]],
                         )
                       }
