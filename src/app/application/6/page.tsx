@@ -16,6 +16,39 @@ export default async function Page() {
       ])
     : [[], [], []]
 
+  const mockApplication = {
+    id: "1",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    userId: "1",
+    roundId: "6",
+    project: {
+      id: "1",
+      name: "Mock Project",
+      description: null,
+      category: null,
+      thumbnailUrl: null,
+      bannerUrl: null,
+      website: [],
+      farcaster: [],
+      twitter: null,
+      mirror: null,
+      pricingModel: null,
+      pricingModelDetails: null,
+      openSourceObserverSlug: null,
+      addedTeamMembers: [],
+      addedFunding: [],
+      hasCodeRepositories: false,
+      isOnChainContract: false,
+      isLaunched: false,
+      launchedAt: null,
+      deletedAt: null,
+    },
+    impactStatementAnswer: [],
+    projectDescriptionOptions: [],
+    // Add other required properties here
+  }
+
   const filteredCategories = categories
     .filter((category) => category.roundId === "6")
     .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10))
@@ -25,7 +58,8 @@ export default async function Page() {
       <ApplicationFlow
         className="mt-18 max-w-4xl"
         projects={projects}
-        applications={applications}
+        // applications={applications}
+        applications={[mockApplication]}
         categories={filteredCategories}
       />
     </main>

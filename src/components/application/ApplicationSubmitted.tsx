@@ -1,5 +1,8 @@
+"use client"
+
 import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
@@ -10,7 +13,6 @@ import { cn } from "@/lib/utils"
 import ExternalLink from "../ExternalLink"
 import { Discord, DiscussionForum, Optimism, XOptimism } from "../icons/socials"
 import { Button } from "../ui/button"
-import { ApplicationStatus } from "./ApplicationStatus"
 
 const SOCIALS = [
   {
@@ -52,12 +54,15 @@ const confettiConfig = {
 export const ApplicationSubmitted = ({
   className,
   application,
+  onClose,
 }: {
   className?: string
   application: ApplicationWithDetails
+  onClose?: () => void
 }) => {
   const { data: session } = useSession()
   const [showConfetti, setShowConfetti] = useState(false)
+  const router = useRouter()
 
   // Scroll to top on mount
   useLayoutEffect(() => {
@@ -98,7 +103,16 @@ export const ApplicationSubmitted = ({
         </p>
       </div>
 
-      <ApplicationStatus application={application} />
+      {onClose && (
+        <Button
+          onClick={onClose}
+          className="w-fit mx-auto"
+          type="button"
+          variant="destructive"
+        >
+          View or edit your application
+        </Button>
+      )}
 
       {/* Expectations */}
       <div className="flex flex-col gap-y-6">

@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
 import {
@@ -25,6 +26,40 @@ export const ApplicationFlow = ({
   const [submittedApp, setSubmittedApp] =
     useState<ApplicationWithDetails | null>(null)
 
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const successParam = searchParams?.get("success") || "false"
+  const isSuccess = successParam === "true"
+
+  const addSuccessParam = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("success", "true")
+    router.push(`?${params.toString()}`)
+  }
+
+  const removeSuccessParam = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("success")
+    router.push(`?${params.toString()}`)
+  }
+
+  const onApplied = () => {
+    setSubmittedApp(applications[0])
+    addSuccessParam()
+  }
+
+  // a bit worried that changes here will affect other cycles
+  // if this is the case, we can make a new component for the success page
+  if (isSuccess) {
+    return (
+      <ApplicationSubmitted
+        className={className}
+        application={applications[0]}
+        onClose={removeSuccessParam}
+      />
+    )
+  }
+
   return submittedApp ? (
     <ApplicationSubmitted className={className} application={submittedApp} />
   ) : (
@@ -33,7 +68,7 @@ export const ApplicationFlow = ({
       projects={projects}
       applications={applications}
       categories={categories}
-      onApplied={setSubmittedApp}
+      onApplied={onApplied}
     />
   )
 }
