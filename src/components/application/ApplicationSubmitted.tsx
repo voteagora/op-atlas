@@ -4,11 +4,13 @@ import { format } from "date-fns"
 import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
+import { useEffect } from "react"
 import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
 
 import { ApplicationWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Callout } from "../common/Callout"
 import ExternalLink from "../ExternalLink"
@@ -62,15 +64,20 @@ export const ApplicationSubmitted = ({
   onClose?: () => void
 }) => {
   const { data: session } = useSession()
+  const { setOpenDialog } = useAppDialogs()
   const [showConfetti, setShowConfetti] = useState(false)
-
-  console.log(application)
-
+  const isGovernanceTypeApplication = application.categoryId === "6"
   // Scroll to top on mount
   useLayoutEffect(() => {
     setShowConfetti(true)
     window.scrollTo(0, 0)
   }, [])
+
+  useEffect(() => {
+    if (isGovernanceTypeApplication) {
+      setOpenDialog("governance_testimonial_request")
+    }
+  }, [isGovernanceTypeApplication])
 
   const email = session?.user?.email
 
@@ -110,7 +117,7 @@ export const ApplicationSubmitted = ({
         </p>
       </div>
 
-      {application.categoryId === "6" && (
+      {isGovernanceTypeApplication && (
         <div className="flex justify-between items-center gap-2 p-4 bg-accent text-accent-foreground rounded-xl w-full">
           <div className="flex items-center gap-2">
             <Image
@@ -126,7 +133,7 @@ export const ApplicationSubmitted = ({
               <p className="">
                 Governance leadership submissions are encouraged to ask citizens
                 and delegates familiar with their projects for testimonials on
-                Metrics Garden:
+                Metrics Garden.
               </p>
             </div>
           </div>

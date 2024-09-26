@@ -35,7 +35,6 @@ import {
   UnclaimedRecipientCallout,
 } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
-import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
