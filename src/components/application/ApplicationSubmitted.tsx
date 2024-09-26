@@ -12,7 +12,6 @@ import { ApplicationWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { Callout } from "../common/Callout"
 import ExternalLink from "../ExternalLink"
 import { Discord, DiscussionForum, Optimism, XOptimism } from "../icons/socials"
 import { Button } from "../ui/button"

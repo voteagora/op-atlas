@@ -125,7 +125,7 @@ export function UnclaimedRecipientCallout() {
     >
       <Image
         alt="Info"
-        src="/assets/images/big-sunny.png"
+        src="/assets/icons/sunny-white.svg"
         width={48}
         height={48}
       />
