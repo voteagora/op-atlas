@@ -16,6 +16,7 @@ export default async function Page() {
       ])
     : [[], [], []]
 
+  //   categories don't have a roundId??
   const filteredCategories = categories
     .filter((category) => category.roundId === "6")
     .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10))

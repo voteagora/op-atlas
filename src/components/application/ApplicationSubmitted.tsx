@@ -1,8 +1,8 @@
 "use client"
 
+import { format } from "date-fns"
 import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
@@ -10,6 +10,7 @@ import Confetti from "react-dom-confetti"
 import { ApplicationWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
+import { Callout } from "../common/Callout"
 import ExternalLink from "../ExternalLink"
 import { Discord, DiscussionForum, Optimism, XOptimism } from "../icons/socials"
 import { Button } from "../ui/button"
@@ -18,12 +19,12 @@ const SOCIALS = [
   {
     name: "Discord",
     icon: <Discord />,
-    link: "https://discord.com/invite/optimism",
+    link: "https://discord.com/channels/667044843901681675/972069216343715860",
   },
   {
     name: "Gov Forum",
     icon: <DiscussionForum />,
-    link: "https://gov.optimism.io/",
+    link: "https://gov.optimism.io/c/retrofunding/46",
   },
   {
     name: "@optimism",
@@ -33,7 +34,7 @@ const SOCIALS = [
   {
     name: "@optimism",
     icon: <Optimism />,
-    link: "https://www.optimism.io/",
+    link: "https://warpcast.com/optimism",
   },
 ] as const
 
@@ -62,7 +63,8 @@ export const ApplicationSubmitted = ({
 }) => {
   const { data: session } = useSession()
   const [showConfetti, setShowConfetti] = useState(false)
-  const router = useRouter()
+
+  console.log(application)
 
   // Scroll to top on mount
   useLayoutEffect(() => {
@@ -90,7 +92,7 @@ export const ApplicationSubmitted = ({
           width={124}
         />
         <h2 className="text-center">Application Submitted!</h2>
-        <p className="text-center text-lg font-semibold max-w-lg">
+        <p className="text-center text-lg font-semibold">
           You&apos;ll receive an email{" "}
           {email ? (
             <>
@@ -101,7 +103,35 @@ export const ApplicationSubmitted = ({
           )}
           when your application is approved.
         </p>
+        <p className="text-center">
+          Your application to Retro Funding 6: Governance was submitted on{" "}
+          {format(application.createdAt, "MMMM d, h:mm a")}. You can edit or
+          resubmit with additional projects until October 10 at 19:00 UTC.
+        </p>
       </div>
+
+      {application.categoryId === "6" && (
+        <div className="flex justify-between items-center gap-2 p-4 bg-accent text-accent-foreground rounded-xl w-full">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/assets/icons/info-blue.svg"
+              height={16}
+              width={16}
+              alt="Submitted"
+            />
+            <div className="flex flex-col">
+              <h3 className="font-semibold text-base">
+                Don&apos;t forget to request testimonials
+              </h3>
+              <p className="">
+                Governance leadership submissions are encouraged to ask citizens
+                and delegates familiar with their projects for testimonials on
+                Metrics Garden:
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {onClose && (
         <Button
@@ -121,19 +151,18 @@ export const ApplicationSubmitted = ({
         <ul className="list-disc text-secondary-foreground space-y-4 pl-5">
           <li>
             <span className="font-medium">
-              Your application is under review:
+              All applications are reviewed before approval:
             </span>{" "}
-            All applications are reviewed before approval. Check your email for
-            updates regarding your application status.
+            Check your email for updates regarding your application status.
           </li>
           <li>
-            <span className="font-medium"> Voting starts on Sep 5:</span>{" "}
-            Badgeholders will evaluate the impact of your project.
+            <span className="font-medium"> Voting starts on Oct 28:</span>{" "}
+            Badgeholders will evaluate the impact of your project(s).
           </li>
           <li>
-            <span className="font-medium"> Results will be shared Oct 3:</span>{" "}
-            If you receive rewards, you will receive instructions on how to
-            claim your Retro Funding rewards via email.
+            <span className="font-medium"> Results will be shared Nov 19:</span>{" "}
+            If you receive rewards, you will get instructions on how to claim
+            them via email.
           </li>
         </ul>
       </div>
@@ -143,18 +172,41 @@ export const ApplicationSubmitted = ({
         <h3 className="text-xl font-semibold">Share with your community</h3>
         <div className="w-full h-[356px] relative">
           <Image
-            src="/assets/images/submitted-retro-5-funding.png"
+            src="/assets/images/round_6_success.png"
             fill
             alt="Social share"
           />
         </div>
 
-        <a href="/assets/images/submitted-retro-5-funding.png" download>
-          <Button variant="secondary" className="w-fit">
-            Download image
-            <ArrowDownToLine size={16} className="ml-2.5" />
-          </Button>
-        </a>
+        <div className="flex justify-center gap-x-2">
+          <a
+            href="https://warpcast.com/~/compose?text=I%20submitted%20for%20Retro%20Funding%20Round%206%20Governance"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="secondary" className="w-fit">
+              <Optimism className="h-4 w-4 mr-2.5" />
+              Cast to Warpcast
+            </Button>
+          </a>
+          <a
+            href="https://x.com/compose/post?text=I%20submitted%20for%20Retro%20Funding%20Round%206%20Governance"
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+          >
+            <Button variant="secondary" className="w-fit">
+              <XOptimism className="h-4 w-4 mr-2.5" />
+              Post on X
+            </Button>
+          </a>
+          <a href="/assets/images/round_6_success.png" download>
+            <Button variant="secondary" className="w-fit">
+              Download image
+              <ArrowDownToLine size={16} className="ml-2.5" />
+            </Button>
+          </a>
+        </div>
       </div>
 
       {/* Join the conversation */}

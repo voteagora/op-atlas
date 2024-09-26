@@ -13,14 +13,6 @@ const ApplicationHeader = ({
   applications,
   hasApplied,
 }: ApplicationHeaderProps) => {
-  const handleDownload = () => {
-    const link = document.createElement("a")
-    link.href = "/assets/images/submitted-retro-5-funding.png"
-    link.download = "submitted-retro-5-funding.png"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
   return (
     <div className="flex flex-col gap-y-6 items-center">
       <Image
