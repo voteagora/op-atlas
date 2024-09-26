@@ -30,7 +30,10 @@ import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstOrganizationProject from "./AddFirstOrganizationProject"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import { FundingRoundAnnouncementCallout } from "./Callouts"
+import {
+  FundingRoundAnnouncementCallout,
+  UnclaimedRecipientCallout,
+} from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -60,14 +63,12 @@ const Dashboard = ({
 }) => {
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
-  const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
-    useState(false)
 
   const [showOnBoarding, setShowOnBoarding] = useState(false)
   const [showApplicationDialogue, setShowApplicationDialogue] = useState(false)
   const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] =
     useState(false)
-  const [visibleCardsCount, setVisibleCardsCount] = useState(1)
+  const [visibleCardsCount, setVisibleCardsCount] = useState(2)
 
   const { track } = useAnalytics()
 
@@ -90,7 +91,9 @@ const Dashboard = ({
     }
 
     if (projects.find((project) => unclaimedRewards(project).length)) {
-      setShowUnclaimedRewardsDialog(true)
+      cardComponents.push(
+        <UnclaimedRecipientCallout key="unclaimedRecipient" />,
+      )
     }
   }, [projects])
 
@@ -245,16 +248,6 @@ const Dashboard = ({
             {projects.map((project) => (
               <ProjectRewardRow key={project.id} project={project} />
             ))}
-          </div>
-        )}
-
-        {showUnclaimedRewardsDialog && (
-          <div className="flex flex-col">
-            <h3>Your Retro Funding Round 4 rewards</h3>
-            <p className="text-base font-normal text-secondary-foreground mb-6">
-              Claim by Sep 5, 2025
-            </p>
-            <UnclaimedRewardsCard projects={projects} />
           </div>
         )}
 
