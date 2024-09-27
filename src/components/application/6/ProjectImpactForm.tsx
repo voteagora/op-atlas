@@ -356,17 +356,20 @@ const CategoryItem = ({
             name={`projects.${index}.projectDescriptionOptions`}
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
-                {/* If isMultipleChoice flag is set to false, we are going to put in 
-                radio boxes and then swap out the impact statements, 
-                else, we will show the check boxes with the same impact 
+                {/* If isMultipleChoice flag is set to false, we are going to put in
+                radio boxes and then swap out the impact statements,
+                else, we will show the check boxes with the same impact
                 statements based on the category. */}
                 {isMultipleChoice ? (
-                  options.map((option) => (
-                    <div
-                      key={option}
-                      className="py-2.5 px-3 flex items-center gap-x-2 border border-input rounded-lg w-full"
-                    >
-                      <span>
+                  options.map((option) => {
+                    const [title, description] = option.includes("::")
+                      ? option.split("::")
+                      : [option, ""]
+                    return (
+                      <div
+                        key={option}
+                        className="py-2.5 px-3 flex items-center gap-x-3 border border-input rounded-lg w-full"
+                      >
                         <Checkbox
                           checked={field.value.includes(option)}
                           onCheckedChange={(checked) => {
@@ -375,13 +378,25 @@ const CategoryItem = ({
                               : field.value.filter((id) => id !== option)
                             field.onChange(newValue)
                           }}
+                          className=""
                         />
-                      </span>
-                      <div>
-                        <p className="text-sm">{option}</p>
+
+                        <div className="flex-grow">
+                          <label
+                            htmlFor={option}
+                            className="text-sm font-medium"
+                          >
+                            {title}
+                          </label>
+                          {description && (
+                            <p className="text-sm text-secondary-foreground mt-1">
+                              {description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  })
                 ) : (
                   <RadioGroup
                     onValueChange={(value) => field.onChange([value])}
@@ -396,12 +411,12 @@ const CategoryItem = ({
                       return (
                         <div
                           key={option}
-                          className="py-3 px-4 flex items-start gap-x-4 border border-input rounded-lg w-full"
+                          className="py-3 px-4 flex items-center gap-x-3 border border-input rounded-lg w-full"
                         >
                           <RadioGroupItem
                             value={option}
                             id={option}
-                            className="w-10 h-5"
+                            className="w-8 h-4"
                           />
                           <div className="flex-grow">
                             <label
