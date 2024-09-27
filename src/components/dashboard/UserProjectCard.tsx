@@ -32,7 +32,7 @@ const UserProjectCard = ({
     <Link
       href={`/projects/${project.id}/details`}
       className={cn(
-        "flex gap-x-6 border rounded-xl hover:shadow-md p-8",
+        "flex gap-x-6 border rounded-xl hover:shadow-sm p-8",
         className,
       )}
     >
