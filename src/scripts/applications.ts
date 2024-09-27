@@ -40,7 +40,15 @@ async function getApplications() {
           },
           organization: {
             include: {
-              organization: true,
+              organization: {
+                include: {
+                  team: {
+                    include: {
+                      user: true,
+                    },
+                  },
+                },
+              },
             },
           },
           repos: true,
@@ -76,6 +84,10 @@ type FarcasterUser = {
 }
 
 async function getFarcasterProfiles(farcasterIds: string[]) {
+  if (farcasterIds.length === 0) {
+    return []
+  }
+
   const params = new URLSearchParams({ fids: farcasterIds.join(",") })
   const url = `https://api.neynar.com/v2/farcaster/user/bulk?${params.toString()}`
   const options = {
@@ -84,6 +96,10 @@ async function getFarcasterProfiles(farcasterIds: string[]) {
 
   const results = await fetch(url, options)
   const data = (await results.json()) as { users: FarcasterUser[] }
+
+  if (!data.users) {
+    return getFarcasterProfiles(farcasterIds)
+  }
   return data.users
 }
 
@@ -93,15 +109,26 @@ async function generateApplicationData() {
       await getApplications()
     ).map(async (application) => {
       // get farcasterId for each team member
-      await Promise.all(
-        application.project.team.map(async (member) => {
-          const user = await getFarcasterProfiles([member.user.farcasterId])
-          member.user = {
-            ...member.user,
-            ...user[0],
-          }
-        }),
+      const projectTeam = await getFarcasterProfiles(
+        application.project.team.map((member) => member.user.farcasterId),
       )
+
+      const organizationTeam = await getFarcasterProfiles(
+        application.project.organization?.organization.team.map(
+          (member) => member.user.farcasterId,
+        ) ?? [],
+      )
+
+      // assemeble the team
+      const team = [
+        ...projectTeam,
+        ...organizationTeam.filter(
+          (member) => !projectTeam.some((m) => m.fid === member.fid),
+        ),
+      ]
+
+      // add team to application
+      application.project.team = team as any
 
       return application
     }),
