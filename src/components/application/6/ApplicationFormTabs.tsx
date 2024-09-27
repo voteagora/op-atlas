@@ -266,7 +266,7 @@ const ApplicationFormTabs = ({
               <p className="my-2">
                 Optimism will issue an onchain attestation on your behalf when
                 you submit this application. You can make edits and resubmit
-                this application until the deadline (Sep 5 at 19:00 UTC).{" "}
+                this application until the deadline (Oct 14th at 18:00 UTC).{" "}
               </p>
 
               <div className="flex flex-col gap-y-4 ml-px">
