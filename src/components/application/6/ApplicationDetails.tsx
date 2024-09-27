@@ -194,8 +194,8 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
       <div className="flex flex-col gap-y-6">
         <h3>Timeline</h3>
         <p className="text-secondary-foreground">
-          The deadline for applications is Oct 10 at 19:00 UTC. After you apply,
-          you can still make edits to{" "}
+          The deadline for applications is Oct 14th at 19:00 UTC. After you
+          apply, you can still make edits to{" "}
           <Link href="/dashboard" className="underline">
             your projects
           </Link>{" "}
@@ -204,7 +204,7 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
           republish your metadata onchain.
         </p>
         <ul className="list-disc pl-5">
-          <li className="pl-2">Sign up: Sept 26th - Oct 10th</li>
+          <li className="pl-2">Sign up: Sept 26th - Oct 14th</li>
           <li className="pl-2">
             Application Review Process: Oct 14th - Oct 28th
           </li>

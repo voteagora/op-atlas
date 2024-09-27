@@ -35,15 +35,15 @@ const ApplicationHeader = ({
               <p className="font-medium text-sm">
                 You submitted this application on{" "}
                 {format(applications[0].createdAt, "MMMM d, h:mm a")}. You can
-                edit or resubmit with additional projects until Oct 10 at 19:00
-                UTC.
+                edit or resubmit with additional projects until Oct 14th at
+                19:00 UTC.
               </p>
             </div>
           </div>
         </div>
       ) : (
         <p className="text-secondary-foreground">
-          Submit this application by Oct 10th, 2025 at 19:00 UTC
+          Submit this application by Oct 14th, 2024 at 19:00 UTC
         </p>
       )}
     </div>

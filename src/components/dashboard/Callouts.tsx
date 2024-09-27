@@ -105,7 +105,7 @@ export function FundingRoundAnnouncementCallout() {
         <p className="font-medium">
           Now taking applications for Round 6: Governance
         </p>
-        <div>Apply by Oct 10.</div>
+        <div>Apply by Oct 14th.</div>
       </div>
       <ArrowRight size={20} />
     </Link>
