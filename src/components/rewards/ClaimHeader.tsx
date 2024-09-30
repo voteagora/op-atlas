@@ -102,7 +102,7 @@ const ClaimHeader = ({
       {session?.user && isUserAdmin ? (
         <div className="flex items-center gap-6">
           <p className="text-secondary-foreground text-sm">
-            Claim by <span className="font-medium">Aug 01, 2025</span>
+            Claim by <span className="font-medium">Oct 10th, 2024</span>
           </p>
 
           <div className="w-px h-10 bg-border" />
