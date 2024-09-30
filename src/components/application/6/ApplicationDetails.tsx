@@ -349,7 +349,7 @@ const ContributionsSection = ({
       ))}
     </ul>
     <h4 className="font-semibold text-base text-secondary-foreground">
-      Not eligibile:
+      Not eligible:{" "}
       <span className="font-normal">
         The following types of projects are not eligible.
       </span>
