@@ -112,12 +112,10 @@ export function FundingRoundAnnouncementCallout() {
   )
 }
 
-export function UnclaimedRecipientCallout() {
+export function UnclaimedRecipientCallout({ rewardId }: { rewardId: string }) {
   return (
     <Link
-      // replace with link to KYC
-      // might be `/rewards/${project.rewards[0].id}`?
-      href="/"
+      href={`/rewards/${rewardId}`}
       className={cn(
         "flex items-center rounded-xl px-8 py-6 w-full",
         "bg-destructive text-white",

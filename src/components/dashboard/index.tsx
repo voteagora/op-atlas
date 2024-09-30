@@ -95,8 +95,16 @@ const Dashboard = ({
     }
 
     if (projects.find((project) => unclaimedRewards(project).length)) {
+      const unclaimedReward = projects
+        .map((project) => project.rewards)
+        .flat()
+        .find((reward) => !reward.claim || reward.claim.status !== "claimed")!
+
       cardComponents.push(
-        <UnclaimedRecipientCallout key="unclaimedRecipient" />,
+        <UnclaimedRecipientCallout
+          key="unclaimedRecipient"
+          rewardId={unclaimedReward?.id}
+        />,
       )
     }
   }, [projects])
