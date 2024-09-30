@@ -288,8 +288,14 @@ const ProjectImpactForm = ({
                                       className="min-h-60"
                                       placeholder="Add a response"
                                     />
-                                    <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
-                                      {field?.value?.length}/1000
+                                    <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground space-x-1">
+                                      <span className="font-medium">
+                                        {field?.value?.length}/1000
+                                      </span>
+                                      <span className="text-muted-foreground">
+                                        ·
+                                      </span>
+                                      <span>Markdown supported</span>
                                     </span>
                                   </div>
                                   <FormMessage />
