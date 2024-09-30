@@ -248,7 +248,7 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
         <p className="text-secondary-foreground">
           Citizens will vote on the round&apos;s OP allocation within the voting
           experience. The Foundation is assigning a minimum OP Amount for the
-          round of 1.1M OP and a maximum OP amount of 3.5m OP. Citizens will be
+          round of 1.1M OP and a maximum OP amount of 3.5M OP. Citizens will be
           able to vote for an OP amount within the range of minimum and maximum
           which they believe appropriately rewards the impact within the round.
           The round allocation will be decided by taking the median of
