@@ -199,9 +199,8 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
           <Link href="/dashboard" className="underline">
             your projects
           </Link>{" "}
-          until the deadline. You do until the deadline. You do not need to
-          resubmit your application if you make edits, but you do need to
-          republish your metadata onchain.
+          until the deadline. You do not need to resubmit your application if
+          you make edits, but you do need to republish your metadata onchain.
         </p>
         <ul className="list-disc pl-5">
           <li className="pl-2">Sign up: Sept 26th - Oct 14th</li>

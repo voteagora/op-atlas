@@ -31,6 +31,7 @@ import AddFirstOrganizationProject from "./AddFirstOrganizationProject"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
 import {
+  ApplicationSubmittedCallout,
   FundingRoundAnnouncementCallout,
   UnclaimedRecipientCallout,
 } from "./Callouts"
@@ -43,8 +44,6 @@ import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
 
 const SHOW_APPLICATIONS = false
-
-const cardComponents = [<FundingRoundAnnouncementCallout key="fundingRound" />]
 
 const Dashboard = ({
   className,
@@ -59,6 +58,13 @@ const Dashboard = ({
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
 }) => {
+  const cardComponents = [
+    applications.length > 0 ? (
+      <ApplicationSubmittedCallout key="applicationSubmitted" />
+    ) : (
+      <FundingRoundAnnouncementCallout key="fundingRound" />
+    ),
+  ]
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
 
