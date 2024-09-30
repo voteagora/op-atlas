@@ -4,13 +4,11 @@ import { format } from "date-fns"
 import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
-import { useEffect } from "react"
 import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
 
 import { ApplicationWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
 import ExternalLink from "../ExternalLink"
 import { Discord, DiscussionForum, Optimism, XOptimism } from "../icons/socials"
@@ -63,20 +61,13 @@ export const ApplicationSubmitted = ({
   onClose?: () => void
 }) => {
   const { data: session } = useSession()
-  const { setOpenDialog } = useAppDialogs()
   const [showConfetti, setShowConfetti] = useState(false)
-  const isGovernanceTypeApplication = application.categoryId === "6"
+
   // Scroll to top on mount
   useLayoutEffect(() => {
     setShowConfetti(true)
     window.scrollTo(0, 0)
   }, [])
-
-  useEffect(() => {
-    if (isGovernanceTypeApplication) {
-      setOpenDialog("governance_testimonial_request")
-    }
-  }, [isGovernanceTypeApplication])
 
   const email = session?.user?.email
 
@@ -115,29 +106,6 @@ export const ApplicationSubmitted = ({
           resubmit with additional projects until October 10 at 19:00 UTC.
         </p>
       </div>
-
-      {isGovernanceTypeApplication && (
-        <div className="flex justify-between items-center gap-2 p-4 bg-accent text-accent-foreground rounded-xl w-full">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/assets/icons/info-blue.svg"
-              height={16}
-              width={16}
-              alt="Submitted"
-            />
-            <div className="flex flex-col">
-              <h3 className="font-semibold text-base">
-                Don&apos;t forget to request testimonials
-              </h3>
-              <p className="">
-                Governance leadership submissions are encouraged to ask citizens
-                and delegates familiar with their projects for testimonials on
-                Metrics Garden.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {onClose && (
         <Button
