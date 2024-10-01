@@ -76,6 +76,9 @@ async function getUserAdminProjectsWithDetailFn({
                 where: {
                   roundId,
                 },
+                orderBy: {
+                  createdAt: "desc",
+                },
               },
               links: true,
               rewards: { include: { claim: true } },
@@ -126,6 +129,9 @@ async function getUserAdminProjectsWithDetailFn({
                       applications: {
                         where: {
                           roundId,
+                        },
+                        orderBy: {
+                          createdAt: "desc",
                         },
                       },
                       links: true,
