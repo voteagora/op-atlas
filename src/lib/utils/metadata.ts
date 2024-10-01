@@ -1,4 +1,9 @@
-import { OrganizationWithDetails, ProjectWithDetails } from "../types"
+import {
+  ApplicationWithDetails,
+  CategoryWithImpact,
+  OrganizationWithDetails,
+  ProjectWithDetails,
+} from "../types"
 
 export type ProjectMetadata = {
   name: string
@@ -196,6 +201,43 @@ export function formatOrganizationMetadata(
       mirror: organization.mirror,
     },
     team,
+  }
+
+  return metadata
+}
+
+export type ApplicationMetadata = {
+  round: number
+  category: string
+  subcategory: string[]
+  impactStatement: {
+    question: string
+    answer: string
+  }[]
+}
+
+export function formatApplicationMetadata({
+  round,
+  categoryId,
+  impactStatement,
+  category,
+  projectDescriptionOptions,
+}: {
+  round: number
+  categoryId: string
+  impactStatement: Record<string, string>
+  category: CategoryWithImpact
+  projectDescriptionOptions: string[]
+}): ApplicationMetadata {
+  const metadata = {
+    round: round,
+    category: category.name,
+    subcategory: projectDescriptionOptions,
+    impactStatement: Object.entries(impactStatement).map(([id, answer]) => ({
+      question:
+        category.impactStatements.find((i) => i.id === id)?.question ?? "",
+      answer,
+    })),
   }
 
   return metadata

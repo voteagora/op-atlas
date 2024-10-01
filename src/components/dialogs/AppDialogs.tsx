@@ -7,6 +7,7 @@ import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
+import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
@@ -36,6 +37,12 @@ export default function AppDialogs() {
         <WelcomeBadgeholderDialog
           open
           onOpenChange={onOpenChange("welcome_badgeholder")}
+        />
+      )}
+      {openDialog === "governance_testimonial_request" && (
+        <GovernanceTestimonialRequestDialog
+          open
+          onOpenChange={onOpenChange("governance_testimonial_request")}
         />
       )}
     </>

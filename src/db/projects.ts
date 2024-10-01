@@ -76,6 +76,9 @@ async function getUserAdminProjectsWithDetailFn({
                 where: {
                   roundId,
                 },
+                orderBy: {
+                  createdAt: "desc",
+                },
               },
               links: true,
               rewards: { include: { claim: true } },
@@ -123,7 +126,14 @@ async function getUserAdminProjectsWithDetailFn({
                           },
                         },
                       },
-                      applications: true,
+                      applications: {
+                        where: {
+                          roundId,
+                        },
+                        orderBy: {
+                          createdAt: "desc",
+                        },
+                      },
                       links: true,
                       rewards: { include: { claim: true } },
                     },
@@ -937,8 +947,13 @@ async function getUserApplicationsFn({
             include: {
               applications: {
                 include: {
-                  impactStatementAnswer: true,
+                  impactStatementAnswer: {
+                    include: {
+                      impactStatement: true,
+                    },
+                  },
                   project: true,
+                  round: true,
                 },
                 where: {
                   roundId,
@@ -973,6 +988,7 @@ async function getUserApplicationsFn({
                         include: {
                           impactStatementAnswer: true,
                           project: true,
+                          round: true,
                         },
                         where: {
                           roundId,

@@ -45,7 +45,7 @@ export const FundingApplication = ({
           applications={applications}
           projects={projects}
           categories={categories}
-          round={5}
+          round={6}
         />
       ) : (
         <ApplicationDetails />

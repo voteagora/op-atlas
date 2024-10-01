@@ -23,10 +23,11 @@ export const FundingRounds = ({
   className?: string
   fundingRounds: FundingRound[]
 }) => {
-  const { open, upcoming, past } = useMemo(() => {
+  const { open, upcoming, past, ongoing } = useMemo(() => {
     const n: FundingRound[] = []
     const u: FundingRound[] = []
     const p: FundingRound[] = []
+    const o: FundingRound[] = []
 
     fundingRounds.forEach((round) => {
       switch (round.status) {
@@ -39,14 +40,17 @@ export const FundingRounds = ({
         case "past":
           p.push(round)
           break
+        case "ongoing":
+          o.push(round)
+          break
       }
     })
 
-    return { open: n, upcoming: u, past: p }
+    return { open: n, upcoming: u, past: p, ongoing: o }
   }, [fundingRounds])
 
   const renderSection = (
-    status: "open" | "upcoming" | "past",
+    status: "open" | "upcoming" | "past" | "ongoing",
     rounds: FundingRound[],
   ) => {
     return (
@@ -67,6 +71,7 @@ export const FundingRounds = ({
     <div className={cn("flex flex-col gap-y-12 w-full", className)}>
       {open.length > 0 && renderSection("open", open)}
       {upcoming.length > 0 && renderSection("upcoming", upcoming)}
+      {ongoing.length > 0 && renderSection("ongoing", ongoing)}
       {past.length > 0 && renderSection("past", past)}
     </div>
   )
@@ -193,10 +198,12 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
               <div className="items-center flex gap-2 pr-4 ">
                 <ChainLogo chainId={optimism.id.toString()} />
                 <div className="text-sm font-medium text-secondary-foreground">
-                  8M OP
+                  {fundingRound.funding?.op && (
+                    <span>{fundingRound.funding.op}</span>
+                  )}{" "}
                 </div>
               </div>
-              <Link href="/application/5">
+              <Link href="/application/6">
                 <Button
                   variant="secondary"
                   className="text-sm font-medium text-foreground"
@@ -209,8 +216,8 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
         </div>
 
         {fundingRound.status === "past" && (
-          <div className="flex flex-row  items-center gap-4">
-            <div className="flex flex-row  items-center gap-2 text-sm font-medium text-secondary-foreground">
+          <div className="flex flex-row items-center gap-4">
+            <div className="flex flex-row items-center gap-2 text-sm font-medium text-secondary-foreground">
               {fundingRound.funding?.op && (
                 <ChainLogo chainId={optimism.id.toString()} />
               )}
@@ -223,7 +230,11 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                 )}
               </div>
             </div>
-            {fundingRound.resultsLink && (
+            {fundingRound.number === 5 ? (
+              <span className="text-sm font-medium text-secondary-foreground">
+                Currently Voting
+              </span>
+            ) : fundingRound.resultsLink ? (
               <Link href="/round/results">
                 <Button
                   variant="secondary"
@@ -232,7 +243,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                   View results
                 </Button>
               </Link>
-            )}
+            ) : null}
           </div>
         )}
       </div>

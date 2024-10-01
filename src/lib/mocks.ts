@@ -2,7 +2,7 @@ export type FundingRound = {
   number: number
   name: string
   details: string
-  status: "open" | "upcoming" | "past"
+  status: "open" | "upcoming" | "past" | "ongoing"
   accentColor?: string
   link?: string
   resultsLink?: string
@@ -36,9 +36,12 @@ export const FUNDING_ROUNDS: FundingRound[] = [
   {
     name: "OP Stack",
     number: 5,
+    funding: {
+      op: "Up to 8M",
+    },
     details:
       "Round 5 will reward OP Stack contributions. This includes direct contributions to the OP Stack, as well as its key dependencies. The round will reward impact which has been generated between October 2023 - July 2024. Impact will be rewarded within the following three categories: Ethereum Core Contributions, OP Stack Research & Development, and OP Stack Tooling. ",
-    status: "open",
+    status: "past",
     accentColor: "#FFF0F1",
     iconUrl: "/assets/images/round-5-transparent.svg",
     startsAt: new Date("2024-08-14T21:53:13.300Z"),
@@ -47,13 +50,16 @@ export const FUNDING_ROUNDS: FundingRound[] = [
   {
     name: "Governance",
     number: 6,
+    funding: {
+      op: "Up to 8M",
+    },
     details:
       "Improving the capture resistance and resource allocation of Optimism Governance is the primary objective of this category. By incentivizing contributions that enhance governance tools, mechanisms, and processes, Retro Funding aims to foster a more robust and resilient governance framework within the ecosystem.",
-    status: "upcoming",
+    status: "open",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/round-6.svg",
-    startsAt: `Planned for ${new Date("2024-09-14T21:53:13.300Z")}`,
-    endsAt: new Date("2023-05-31T21:53:13.300Z"),
+    startsAt: `Planned for ${new Date("2024-09-26T21:53:13.300Z")}`,
+    endsAt: new Date("2024-10-10T21:53:13.300Z"),
   },
   {
     name: "Dev Tooling",

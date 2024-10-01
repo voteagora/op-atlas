@@ -71,8 +71,8 @@ export const ApplicationFormSchema = z.object({
               if (
                 !value ||
                 value.trim() === "" ||
-                value.length < 200 ||
-                value.length > 1000
+                // TODO: We're hardcoding the id of a multiple choice question here. This should be dynamic
+                ((value.length < 200 || value.length > 1000) && key !== "11")
               ) {
                 ctx.addIssue({
                   path: ["impactStatement", key],
@@ -92,12 +92,13 @@ export const ApplicationFormSchema = z.object({
           if (
             !project.category?.trim() ||
             !project.projectDescriptionOptions.length ||
-            !Object.values(project.impactStatement).every(
-              (answer) =>
+            !Object.entries(project.impactStatement).every(
+              ([id, answer]) =>
                 answer &&
                 answer.trim() !== "" &&
-                answer.length >= 200 &&
-                answer.length <= 1000,
+                ((answer.length >= 200 && answer.length <= 1000) ||
+                  // TODO: We're hardcoding the id of a multiple choice question here. This should be dynamic
+                  id === "11"),
             )
           ) {
             ctx.addIssue({
@@ -265,7 +266,7 @@ const ApplicationFormTabs = ({
               <p className="my-2">
                 Optimism will issue an onchain attestation on your behalf when
                 you submit this application. You can make edits and resubmit
-                this application until the deadline (Sep 5 at 19:00 UTC).{" "}
+                this application until the deadline (Oct 14th at 18:00 UTC).{" "}
               </p>
 
               <div className="flex flex-col gap-y-4 ml-px">

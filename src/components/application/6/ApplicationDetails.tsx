@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React from "react"
@@ -22,83 +23,82 @@ interface ContributionsSectionProps {
 // CATEGORIES array
 export const CATEGORIES = [
   {
-    id: "Ethereum Core Contributions",
-    title: "Ethereum Core Contributions",
-    icon: "/assets/images/application-category-1.png",
+    id: "Governance Infrastructure & Tooling",
+    title: "Governance Infrastructure & Tooling",
+    icon: "/assets/images/governance-category-1.svg",
     description:
-      "Ethereum Core Contributions are infrastructure which supports, or is a dependency, of the OP Stack.",
+      "Infrastructure and tooling that powered governance or that made the usage of governance infrastructure more accessible.",
     examples:
-      "Smart contract languages, Ethereum consensus & execution clients, EVM, Ethereum testnets, Cryptography research.",
+      "Work on Optimism Governor contracts, Optimism Governance voting clients and interfaces, work on Optimism identity and reputation infrastructure, Retro Funding voting clients and sign up.",
     eligibility: [
-      "Ethereum client implementations",
-      "Infrastructure to test and deploy chains",
-      "Languages that are dedicated to the development of smart contracts",
-      "Research which informs Ethereum core development",
+      "Governance Infrastructure: Technical infrastructure that powers the voting process within Optimism Governance.",
+      "Governance Tooling: Tools that are used by Delegates or Citizens to participate in Optimism Governance.",
+      "Grants Tooling: Tools that support the Token House grants process, including the operation of the Grants Council. Tools which power or support the Retro Funding process.",
     ],
     notEligibility: [
-      "Projects that are used to develop or deploy contracts or apps, including in the development and deployment of Optimism contracts, may be rewarded in Retro Funding 7: Dev Tooling, and are not in scope for this category.",
-      "Extended Ethereum related tooling that is not listed under eligibility, including analytics/data infrastructure, frontend libraries, indexers and more. These may be rewarded in Retro Funding 7: Dev Tooling and are not in scope for this category.",
-      "Generic Ethereum related research that does not inform Ethereum core development",
+      "Non-Optimism related governance tooling: Tools that have not been used in Optimism Governance.",
+      "Resources for Governance Onboarding: Documentation, educational videos or other resources that are dedicated to explaining Optimism Governance.",
     ],
   },
   {
-    id: "OP Stack Research & Development",
-    title: "OP Stack Research & Development",
-    icon: "/assets/images/application-category-2.png",
+    id: "Governance Analytics",
+    title: "Governance Analytics",
+    icon: "/assets/images/governance-category-2.svg",
     examples:
-      "Optimism Protocol upgrades, OP Stack Client Implementations, modules & mods, audits and Fault Proof VM implementations",
+      "Governance performance reports, Finance and Grant related analytics & reports, Delegate/Citizen voting power and activity analytics.",
     description:
-      "Direct research & development contributions to the OP Stack, and contributions that support protocol upgrades.",
+      "Analytics that enabled accountability, provided transparency into Collective operations, promoted improved performance, or aided in the design of the Collective.",
     eligibility: [
-      "Work on core components of the OP Stack, including client implementations, modules, and modifications.",
+      "Optimism Governance related Analytics: Analyses of the performance of Optimism governance, including governance participation, grant allocation and more.",
       "Research or development that introduced features, improvements, or capabilities to the OP Stack.",
       "Security audits specifically on the OP Stack or its components.",
     ],
     notEligibility: [
-      <li key={1}>
-        Optimism Monorepo contributions by non-core devs: Only{" "}
-        <ExternalLink
-          className="underline"
-          href="https://github.com/ethereum-optimism/optimism"
-        >
-          Optimism Monorepo 11
-        </ExternalLink>{" "}
-        contributions by core devs may be rewarded within Retro Funding 5.
-        Commits to the monorepo are currently mainly done by Optimism core devs
-        and the core dev program is not developed enough to support outside
-        contributions to the monorepo yet. As the core dev program evolves, more
-        contributions to the monorepo may become eligible.
-      </li>,
-      <li key={2}>
-        Submissions to the
-        <ExternalLink
-          className="underline"
-          href="https://immunefi.com/bug-bounty/optimism/information/"
-        >
-          {" "}
-          Optimism Bug Bounty Programs{" "}
-        </ExternalLink>
-        are not eligible to participate in this round.
-      </li>,
+      "Analytics infrastructure or reports which are not related to Optimism Governance.",
     ],
   },
   {
-    id: "OP Stack Tooling",
-    title: "OP Stack Tooling",
-    icon: "/assets/images/application-category-3.png",
+    id: "Governance Leadership",
+    title: "Governance Leadership",
+    icon: "/assets/images/governance-category-3.svg",
     description:
-      "Efforts that improve the usability and accessibility of the OP Stack through tooling enhancements.",
+      "Demonstrated leadership in the Collective, including but not limited to, hosting community calls and/or participation in councils, boards and commissions beyond executing on basic responsibilities outlined in Token House Charters.",
     examples:
-      "Integration and load testing infrastructure, scripts for running an Optimism node, RaaS providers, OP Stack tutorials & documentation",
+      "Various Optimism Governance Councils, Commissions and Boards, governance process facilitation.",
     eligibility: [
-      " Tools that facilitate the deployment, operation, or testing of the OP Stack. This includes integration tools, load testing infrastructure, and scripts for node management.",
-      "Services for deploying and hosting an OP Chain",
-      "Documentation and tutorials which aid in understanding of the OP Stack’s components and its development",
+      "Councils, Commissions and Advisory Boards; NERD programs focused exclusively on core governance responsibilities (GovNERDs). This includes Security Council, Grants Council, Developer Advisory Board, Code of Conduct Council, Anticapture Commission, Collective Feedback Commissions and GovNERDs.",
+      "Governance facilitation of critical governance processes and/or experiments such as community calls, proposal creation or review sessions, deliberations or similar",
     ],
     notEligibility: [
-      "Projects that are used to develop or deploy contracts or apps, including in the development and deployment of Optimism contracts, may be rewarded in Retro Funding 7: Dev Tooling, and are not in scope for this category.",
-      " Extended tooling that is not listed under eligibility, including analytics/data infrastructure, frontend libraries, indexers and more. These may be rewarded in Retro Funding 7: Dev Tooling and are not in scope for this category.",
-      " Documentation and tutorials which are not about the OP Stack’s components or development, such as non technical tutorials about Optimism.",
+      <ul key="nel" className="list-disc list-outside">
+        <li key={1}>Governance onboarding and promotion initiatives.</li>
+        <li key={2}>
+          Delegate or Citizen governance participation, including forum
+          engagement, participation in calls & workshops, participation in
+          survey and other activities which are part of the responsibilities of
+          citizens and delegates. These activities are rewarded separately as
+          part of the
+          <ExternalLink
+            className="underline"
+            href="https://gov.optimism.io/t/season-5-retro-governance-participation-rewards/8105"
+          >
+            {" "}
+            Retro Governance Participation Rewards 10{" "}
+          </ExternalLink>
+        </li>
+        <li key={3}>
+          Each of the above mentioned Councils, Commissions, Advisory Boards and
+          NERD programs are required to submit one application as a group,
+          individual participation within one of the groups is not eligible. The
+          allocation of rewards among group members should be proposed by the
+          team Lead and is subject to the consensus mechanism of that group
+          outlined in their internal operating procedures
+        </li>
+        <li key={4}>
+          Governance Leadership within Governance Season 4 is not considered
+          within this round, as it was already rewarded in Retro Funding 3.
+        </li>
+      </ul>,
     ],
   },
 ]
@@ -162,7 +162,7 @@ const RULES = [
   {
     title: "Applications in Languages Other Than English Will Be Discarded",
     description:
-      "This will help simplify the process as English is the working language of the majority of Badgeholders. Please ensure you translate any content that’s part of the application.",
+      "This will help simplify the process as English is the working language of the majority of Badgeholders. Please ensure you translate any content that's part of the application.",
   },
   {
     title: "Duplicate Applications",
@@ -184,36 +184,44 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
     <div className="flex flex-col gap-y-12">
       <div className="flex flex-col gap-y-6 text-secondary-foreground">
         <p>
-          Round 5 will reward OP Stack contributions. This includes direct
-          contributions to the OP Stack, as well as its key dependencies. A
-          single project can only apply to one OP Stack category (listed below).
-          This means that each distinct contribution you have to the OP Stack
-          should be setup as its own project.
+          Retroactive Public Goods Funding (Retro Funding) 6 will reward
+          contributions to Optimism Governance, including governance
+          infrastructure & tooling, governance analytics, and governance
+          leadership.
         </p>
       </div>
       {/* Timeline */}
       <div className="flex flex-col gap-y-6">
         <h3>Timeline</h3>
         <p className="text-secondary-foreground">
-          The deadline for applications is Sep 5 at 19:00 UTC. After you apply,
-          you can still make edits to your projects until the deadline. You do
-          not need to resubmit your application if you make edits, but you do
-          need to republish your metadata onchain.
+          The deadline for applications is Oct 14th at 19:00 UTC. After you
+          apply, you can still make edits to{" "}
+          <Link href="/dashboard" className="underline">
+            your projects
+          </Link>{" "}
+          until the deadline. You do not need to resubmit your application if
+          you make edits, but you do need to republish your metadata onchain.
         </p>
+        <ul className="list-disc pl-5">
+          <li className="pl-2">Sign up: Sept 26th - Oct 14th</li>
+          <li className="pl-2">
+            Application Review Process: Oct 14th - Oct 28th
+          </li>
+          <li className="pl-2">Voting: Oct 28th - Nov 7th</li>
+          <li className="pl-2">Results: Nov 19th</li>
+        </ul>
       </div>
       {/* Eligibility */}
       <div className="flex flex-col gap-y-6">
         <h3>Eligibility</h3>
         <p className="text-secondary-foreground">
-          The round will reward impact which has been generated between October
-          2023 - August 2024. Impact will be rewarded within the following three
-          categories: Ethereum Core Contributions, OP Stack Research &
-          Development, and OP Stack Tooling.
+          Retro Funding 6: Governance will reward impact which has been
+          generated between October 2023 - September 18th 2024. This includes
+          impact relating to Governance Season 5 and Season 6 (up until Voting
+          Cycle #28), as well as impact relating to the design and execution of
+          Retro Funding 3, 4, & 5.
         </p>
-        <p>
-          Each category has it’s own eligibility criteria. Please review the
-          following category descriptions carefully.
-        </p>
+        <p>Impact will be rewarded within the following categories:</p>
         <Separator className="my-6" />
         {CATEGORIES.map((category, index) => (
           <React.Fragment key={index}>
@@ -231,6 +239,33 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
             />
           </React.Fragment>
         ))}
+      </div>
+
+      {/* Round Size */}
+
+      <div className="flex flex-col gap-y-6">
+        <h3>Round Size</h3>
+        <p className="text-secondary-foreground">
+          Citizens will vote on the round&apos;s OP allocation within the voting
+          experience. The Foundation is assigning a minimum OP Amount for the
+          round of 1.1M OP and a maximum OP amount of 3.5M OP. Citizens will be
+          able to vote for an OP amount within the range of minimum and maximum
+          which they believe appropriately rewards the impact within the round.
+          The round allocation will be decided by taking the median of
+          Citizens&apos; votes.
+        </p>
+
+        <p>
+          For additional information on round size, how voting works, and how
+          grant claiming works,{" "}
+          <ExternalLink
+            className="underline"
+            href="https://gov.optimism.io/t/retro-funding-6-governance-round-details/8870"
+          >
+            view the forum
+          </ExternalLink>
+          .
+        </p>
       </div>
 
       {/* Rules */}

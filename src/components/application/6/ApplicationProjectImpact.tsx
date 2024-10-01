@@ -46,11 +46,7 @@ const ApplicationProjectImpactForm = ({
         </h4>
         <p className="text-secondary-foreground">
           This part of your application helps badgeholders understand how your
-          work has benefitted the Optimism Collective. If you need help,{" "}
-          <ExternalLink className="underline" href="#">
-            {" "}
-            view our guidelines.
-          </ExternalLink>
+          work has benefitted the Optimism Collective.
         </p>
       </div>
       <div className="flex flex-col gap-y-4">
@@ -88,7 +84,7 @@ const ApplicationProjectImpactForm = ({
         className="disabled:bg-destructive disabled:!text-white"
         onClick={() => {
           onNext?.()
-          router.push("/application/5?tab=application")
+          router.push("/application/6?tab=application")
         }}
       >
         Save and continue

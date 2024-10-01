@@ -76,7 +76,7 @@ export const FundingApplication = ({
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
         try {
-          const result = await submitApplications([])
+          const result = await submitApplications([], 4, [])
           if (result.error !== null || result.applications.length === 0) {
             throw new Error(result.error ?? "Error submitting application")
           }
