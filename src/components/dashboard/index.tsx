@@ -58,8 +58,12 @@ const Dashboard = ({
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
 }) => {
+  const currentRoundId = "6"
+  const hasSubmittedToCurrentRound = applications.some(
+    (application) => application.roundId === currentRoundId,
+  )
   const cardComponents = [
-    applications.length > 0 ? (
+    hasSubmittedToCurrentRound ? (
       <ApplicationSubmittedCallout key="applicationSubmitted" />
     ) : (
       <FundingRoundAnnouncementCallout key="fundingRound" />
