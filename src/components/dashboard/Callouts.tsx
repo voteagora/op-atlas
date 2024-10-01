@@ -149,7 +149,7 @@ export function ApplicationSubmittedCallout() {
     >
       <Image
         alt="Info"
-        src="/assets/icons/sunny-white.svg"
+        src="/assets/icons/sunny-green.svg"
         width={48}
         height={48}
       />
