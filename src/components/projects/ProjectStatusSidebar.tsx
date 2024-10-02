@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { deleteUserProject } from "@/lib/actions/projects"
 import { useIsAdmin } from "@/lib/hooks"
-import { unclaimedRewards } from "@/lib/rewards"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
 
@@ -55,6 +54,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   }
 
   const currentPage = pathname.split("/").slice(-1)[0]
+  const hasNotBeenPublished = project ? project?.snapshots.length === 0 : true
 
   return (
     <div className="sm:flex flex-col gap-4 items-start hidden">
@@ -77,10 +77,13 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
       <h2 className="max-w-48 line-clamp-2 text-2xl font-semibold text-secondary-foreground pl-2">
         {project?.name ?? "New project"}
       </h2>
-      <div className="flex flex-col gap-2 pl-2">
-        <Progress value={progressPercent} className="w-[228px] h-2" />
-        <p className="text-sm font-normal">{progressPercent}% complete</p>
-      </div>
+
+      {hasNotBeenPublished && (
+        <div className="flex flex-col gap-2 pl-2">
+          <Progress value={progressPercent} className="w-[228px] h-2" />
+          <p className="text-sm font-normal">{progressPercent}% complete</p>
+        </div>
+      )}
 
       <div className="w-full gap-2">
         {Object.values(ProjectSection).map((option, index) => (

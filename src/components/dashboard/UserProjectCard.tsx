@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { useIsAdmin } from "@/lib/hooks"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
+import { projectHasUnpublishedChanges } from "@/lib/utils"
 
 import { ChainLogo } from "../common/ChainLogo"
 import ExternalLink from "../ExternalLink"
@@ -22,6 +23,7 @@ const UserProjectCard = ({
   project: ProjectWithDetails
 }) => {
   const isAdmin = useIsAdmin(project)
+  const projectHasChanges = projectHasUnpublishedChanges(project)
 
   const progress = useMemo(() => {
     const { progressPercent } = getProjectStatus(project)
@@ -94,6 +96,12 @@ const UserProjectCard = ({
             ))}
           </div>
 
+          {projectHasChanges && (
+            <div className="text-xs font-medium text-red-700 bg-red-100 rounded-full px-2 py-1 ml-1.5">
+              Unpublished edits
+            </div>
+          )}
+
           {project?.website?.length > 0 && (
             <ExternalLink href={project.website[0]}>
               <Button
@@ -106,24 +114,26 @@ const UserProjectCard = ({
           )}
         </div>
       </div>
-      <div className="m-auto">
-        {progress === 100 ? (
-          <div className="flex items-center">
-            <Image
-              alt="Checkmark"
-              src="/assets/icons/circle-check-green.svg"
-              height={16}
-              width={16}
-              className="w-4 h-4 object-center object-cover"
-            />
-            <p className="ml-2 text-sm text-secondary-foreground">Onchain</p>
-          </div>
-        ) : (
-          <>
-            <Progress value={progress} className="h-2 w-16" />
-          </>
-        )}
-      </div>
+      {!projectHasChanges && (
+        <div className="m-auto">
+          {progress === 100 ? (
+            <div className="flex items-center">
+              <Image
+                alt="Checkmark"
+                src="/assets/icons/circle-check-green.svg"
+                height={16}
+                width={16}
+                className="w-4 h-4 object-center object-cover"
+              />
+              <p className="ml-2 text-sm text-secondary-foreground">Onchain</p>
+            </div>
+          ) : (
+            <>
+              <Progress value={progress} className="h-2 w-16" />
+            </>
+          )}
+        </div>
+      )}
     </Link>
   )
 }
