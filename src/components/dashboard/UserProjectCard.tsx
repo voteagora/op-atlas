@@ -24,6 +24,7 @@ const UserProjectCard = ({
 }) => {
   const isAdmin = useIsAdmin(project)
   const projectHasChanges = projectHasUnpublishedChanges(project)
+  const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
   const progress = useMemo(() => {
     const { progressPercent } = getProjectStatus(project)
@@ -96,9 +97,22 @@ const UserProjectCard = ({
             ))}
           </div>
 
-          {projectHasChanges && (
+          {projectHasChanges && hasBeenPublished ? (
             <div className="text-xs font-medium text-red-700 bg-red-100 rounded-full px-2 py-1 ml-1.5">
               Unpublished edits
+            </div>
+          ) : (
+            <div className="flex items-center gap-x-1 bg-green-100 rounded-full px-2 py-1 ml-1.5">
+              <Image
+                alt="Checkmark"
+                src="/assets/icons/circle-check-green.svg"
+                height={16}
+                width={16}
+                className="w-4 h-4 object-center object-cover"
+              />
+              <p className="text-xs font-medium text-green-700">
+                Verified onchain
+              </p>
             </div>
           )}
 
@@ -114,7 +128,7 @@ const UserProjectCard = ({
           )}
         </div>
       </div>
-      {!projectHasChanges && (
+      {!hasBeenPublished && (
         <div className="m-auto">
           {progress === 100 ? (
             <div className="flex items-center">

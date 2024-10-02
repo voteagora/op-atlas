@@ -16,11 +16,11 @@ const UnsavedChangesToastClient = ({
   project: ProjectWithDetails
 }) => {
   const { track } = useAnalytics()
-
+  const toastOpenRef = useRef(false)
   const [showMetadataPublishedDialogue, setShowMetadataPublishedDialogue] =
     useState(false)
   const hasUnpublishedChanges = projectHasUnpublishedChanges(project)
-  const toastOpenRef = useRef(false)
+  const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
   const onPublish = async () => {
     toast.promise(createProjectSnapshot(project.id), {
@@ -40,7 +40,7 @@ const UnsavedChangesToastClient = ({
   }
 
   useEffect(() => {
-    if (hasUnpublishedChanges && !toastOpenRef.current) {
+    if (hasUnpublishedChanges && hasBeenPublished && !toastOpenRef.current) {
       toastOpenRef.current = true
       const toastId = toast.custom(
         () => {
