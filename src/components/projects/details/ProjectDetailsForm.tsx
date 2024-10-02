@@ -11,7 +11,6 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import useUnsavedProjectToast from "@/app/projects/[projectId]/hooks/useUnsavedProjectToast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -99,7 +98,6 @@ export default function ProjectDetailsForm({
 }) {
   const router = useRouter()
   const { track } = useAnalytics()
-  useUnsavedProjectToast({ project })
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
