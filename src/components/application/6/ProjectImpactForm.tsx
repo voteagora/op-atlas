@@ -203,20 +203,20 @@ const ProjectImpactForm = ({
                   Impact statement
                 </h4>
                 <p className="text-sm text-secondary-foreground">
-                  Describe this project’s impact on the OP Stack from Oct 1,
-                  2023 - July 31, 2024. Please only describe the impact that was
-                  delivered during that specific time period.
+                  Describe this project&apos;s impact on the OP Governance from
+                  Oct 1, 2023 - September 18th 2024. Please only describe the
+                  impact that was delivered during that specific time period.
                 </p>
                 <p className="text-sm text-secondary-foreground">
-                  You’ve already given your project a description in your{" "}
+                  You&apos;ve already given your project a description in your{" "}
                   <ExternalLink
                     href={`/projects/${project.id}/details`}
                     className="underline"
                   >
                     project setup
                   </ExternalLink>
-                  . There’s no need to repeat that information here. Instead,
-                  focus on communicating your project’s impact.
+                  . There&apos;s no need to repeat that information here.
+                  Instead, focus on communicating your project&apos;s impact.
                 </p>
                 <Callout
                   className="!text-sm"
