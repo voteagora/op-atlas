@@ -48,7 +48,7 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
       <div className="flex-1 min-w-0 text-nowrap overflow-hidden overflow-ellipsis mr-8 flex-col">
         <div className="font-semibold ">{project.name}</div>
         <div className="text-sm text-secondary-foreground">
-          Claim by Oct 10th, 2024
+          Claim by Aug 5, 2025
         </div>
       </div>
       <div className="flex items-center gap-2">
