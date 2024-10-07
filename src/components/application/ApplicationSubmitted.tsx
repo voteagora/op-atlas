@@ -103,7 +103,7 @@ export const ApplicationSubmitted = ({
         <p className="text-center">
           Your application to Retro Funding 6: Governance was submitted on{" "}
           {format(application.createdAt, "MMMM d, h:mm a")}. You can edit or
-          resubmit with additional projects until October 10 at 19:00 UTC.
+          resubmit with additional projects until October 14 at 19:00 UTC.
         </p>
       </div>
 

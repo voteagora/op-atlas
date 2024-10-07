@@ -59,7 +59,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/round-6.svg",
     startsAt: `Planned for ${new Date("2024-09-26T21:53:13.300Z")}`,
-    endsAt: new Date("2024-10-10T21:53:13.300Z"),
+    endsAt: new Date("2024-10-14T21:53:13.300Z"),
   },
   {
     name: "Dev Tooling",
