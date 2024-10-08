@@ -21,7 +21,7 @@ export function Results() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
-  const [round, setRound] = useState(4)
+  const [round, setRound] = useState(5)
 
   const pageSize = 10
   const debouncedSearchText = useDebounce<string>(searchText, 300) // 2-second debounce
