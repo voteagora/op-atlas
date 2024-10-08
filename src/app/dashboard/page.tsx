@@ -5,7 +5,7 @@ import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
 import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
-import { getApplications, getProjects } from "@/lib/actions/projects"
+import { getAdminProjects, getApplications } from "@/lib/actions/projects"
 
 export default async function Page() {
   const session = await auth()
@@ -16,7 +16,7 @@ export default async function Page() {
 
   const [user, projects, applications, organizations] = await Promise.all([
     getUserById(session.user.id),
-    getProjects(session.user.id),
+    getAdminProjects(session.user.id),
     getApplications(session.user.id),
     getUserOrganizations(session.user.id),
   ])
