@@ -51,12 +51,14 @@ const Dashboard = ({
   projects,
   applications,
   organizations,
+  adminProjects,
 }: {
   className?: string
   user: UserWithAddresses
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
+  adminProjects: ProjectWithDetails[]
 }) => {
   const currentRoundId = "6"
   const hasSubmittedToCurrentRound = applications.some(
@@ -90,7 +92,7 @@ const Dashboard = ({
     // User has submitted at least one application but didn't receive any rewards
     if (
       !hasShownNoRewardsDialog() &&
-      projects.find((project) => project.applications.length > 1) &&
+      adminProjects.find((project) => project.applications.length > 1) &&
       noRewards(projects)
     ) {
       saveHasShownNoRewardsDialog()
@@ -98,7 +100,7 @@ const Dashboard = ({
       return
     }
 
-    if (projects.find((project) => unclaimedRewards(project).length)) {
+    if (adminProjects.find((project) => unclaimedRewards(project).length)) {
       const unclaimedReward = projects
         .map((project) => project.rewards)
         .flat()
@@ -111,7 +113,7 @@ const Dashboard = ({
         />,
       )
     }
-  }, [projects])
+  }, [adminProjects])
 
   // TODO: hide rewards section if all rewards are claimed
   const showRewardsSection = Boolean(
@@ -260,8 +262,8 @@ const Dashboard = ({
 
         {showRewardsSection && (
           <div className="flex flex-col gap-6">
-            <h3>Your Retro Funding Round 4 rewards</h3>
-            {projects.map((project) => (
+            <h3>Your Retro Funding rewards</h3>
+            {adminProjects.map((project) => (
               <ProjectRewardRow key={project.id} project={project} />
             ))}
           </div>
