@@ -59,24 +59,27 @@ const RewardClaimFlow = ({
         <StarIcon className="mx-auto" />
 
         {/* Share image */}
-        <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
-          <h4 className="font-semibold text-xl">Share your achievement</h4>
-          <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
-            <ShareImage
-              name={reward.project.name}
-              // @ts-expect-error Next converts Decimal to number bc Server Components suck
-              amount={reward.amount}
-              thumbnailUrl={reward.project.thumbnailUrl}
-            />
-          </div>
+        {reward.roundId === "5" && (
+          <>
+            <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
+              <h4 className="font-semibold text-xl">Share your achievement</h4>
+              <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
+                <ShareImage
+                  name={reward.project.name}
+                  // @ts-expect-error Next converts Decimal to number bc Server Components suck
+                  amount={reward.amount}
+                  thumbnailUrl={reward.project.thumbnailUrl}
+                />
+              </div>
 
-          <Button variant="secondary" onClick={downloadImage}>
-            {isLoading ? "Downloading..." : "Download image"}
-            <ArrowDownToLine size={16} className="ml-2.5" />
-          </Button>
-        </div>
-
-        <StarIcon className="mx-auto" />
+              <Button variant="secondary" onClick={downloadImage}>
+                {isLoading ? "Downloading..." : "Download image"}
+                <ArrowDownToLine size={16} className="ml-2.5" />
+              </Button>
+            </div>
+            <StarIcon className="mx-auto" />
+          </>
+        )}
 
         {/* Survey */}
         <div className="flex flex-col items-center gap-6">

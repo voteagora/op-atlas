@@ -1,4 +1,3 @@
-import { useRive } from "@rive-app/react-canvas-lite"
 import { Copy, Pencil } from "lucide-react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
@@ -11,15 +10,6 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
-
-// TODO: Replace with final animation code
-const AnimatedSunny = () => {
-  const { RiveComponent } = useRive({
-    src: "https://public.rive.app/hosted/86773/146592/QOdj6rChHEWfZuMkcMInNQ.riv",
-    autoplay: true,
-  })
-  return <RiveComponent />
-}
 
 const ClaimHeader = ({
   reward,
@@ -92,7 +82,11 @@ const ClaimHeader = ({
       <p className="text-secondary-foreground text-center">
         You&apos;ve been rewarded in{" "}
         <span className="font-medium">
-          Retro Funding Round 4: Onchain Builders
+          {reward.roundId === "4"
+            ? "Retro Funding Round 4: Onchain Builders"
+            : reward.roundId === "5"
+            ? "Retro Funding Round 5: OP Stack"
+            : "Retro Funding Round 1,2 or 3"}
         </span>
         . Project admins with a verified email address can claim this OP grant.
         Following your KYC approval, your grant will be streamed to you over 100
@@ -102,7 +96,10 @@ const ClaimHeader = ({
       {session?.user && isUserAdmin ? (
         <div className="flex items-center gap-6">
           <p className="text-secondary-foreground text-sm">
-            Claim by <span className="font-medium">Oct 10th, 2024</span>
+            Claim by{" "}
+            <span className="font-medium">
+              {reward.roundId === "4" ? "Aug 5th, 2025" : "Oct 14th, 2025"}
+            </span>
           </p>
 
           <div className="w-px h-10 bg-border" />
