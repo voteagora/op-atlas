@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 async function getApplications() {
   const applications = await prisma.application.findMany({
     where: {
-      roundId: "5",
+      roundId: "6",
     },
     distinct: ["projectId"],
     select: {
