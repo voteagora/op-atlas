@@ -96,10 +96,7 @@ const ClaimHeader = ({
       {session?.user && isUserAdmin ? (
         <div className="flex items-center gap-6">
           <p className="text-secondary-foreground text-sm">
-            Claim by{" "}
-            <span className="font-medium">
-              {reward.roundId === "4" ? "Aug 5th, 2025" : "Oct 14th, 2025"}
-            </span>
+            Claim by <span className="font-medium">Aug 5, 2025</span>
           </p>
 
           <div className="w-px h-10 bg-border" />
