@@ -122,8 +122,19 @@ async function getUserAdminProjectsWithDetail({
   })
 }
 
-async function getAdminProjects(userId: string, roundId: string) {
-  const teams = await getUserAdminProjectsWithDetail({ userId, roundId })
+async function getAdminProjects(userName: string, roundId: string) {
+  const user = await prisma.user.findFirst({
+    where: {
+      username: userName,
+    },
+  })
+  if (!user) {
+    throw new Error("User not found")
+  }
+  const teams = await getUserAdminProjectsWithDetail({
+    userId: user.id,
+    roundId,
+  })
   const teamProjects = teams?.projects.map(({ project }) => project) ?? []
   const organizationProjects =
     teams?.organizations
@@ -165,21 +176,17 @@ async function injestMockreward({
   const userProjects = await getAdminProjects(userName, roundId)
 
   if (!userProjects.length) {
-    return {
-      error: "User has no projects",
-    }
+    throw new Error("User has no projects")
   }
 
-  const projectId = userProjects[0].id
+  const rewards = userProjects.map((project) => ({
+    id: Math.random().toString(36).substring(7), // Random ID
+    projectId: project.id,
+    amount: 1000000,
+    roundId,
+  }))
 
-  return insertRewards([
-    {
-      id: Math.random().toString(36).substring(7), // Random ID
-      projectId,
-      amount: 1000000,
-      roundId,
-    },
-  ])
+  return insertRewards(rewards)
 }
 
 injestMockreward({
