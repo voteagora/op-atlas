@@ -5,8 +5,8 @@ import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -261,9 +261,7 @@ export default function ProjectDetailsForm({
       })
 
       toast.promise(promise, {
-        loading: isCreating
-          ? "Creating project onchain..."
-          : "Saving project onchain...",
+        loading: isCreating ? "Creating project onchain..." : "Saving project",
         success: (project) => {
           isSave
             ? router.replace(`/projects/${project.id}/details`)
