@@ -5,9 +5,11 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
 
 import { updateInteractions } from "@/lib/actions/users"
-import { UserWithAddresses } from "@/lib/types"
+import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
+import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
 import {
   APPLICATIONS_CLOSED,
   clickSignInWithFarcasterButton,
@@ -16,14 +18,18 @@ import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 
+const ROUND_ID = "5"
+
 export const Sidebar = ({
   className,
   projects,
   user,
+  userProjects,
 }: {
   className?: string
   projects: Project[]
   user?: UserWithAddresses | null
+  userProjects?: ProjectWithDetails[] | null
 }) => {
   const { status, data } = useSession()
   const router = useRouter()
@@ -50,35 +56,82 @@ export const Sidebar = ({
     }
   }
 
+  const [showNoRewards, setShowNoRewards] = useState(false)
+  const [unclaimedReward, setUnclaimedReward] = useState<any | null>(null)
+
+  useEffect(() => {
+    if (!userProjects) return
+    // User has submitted at least one application but didn't receive any rewards
+    if (
+      userProjects.find((project) => project.applications.length > 1) &&
+      noRewardsForRound(userProjects, ROUND_ID)
+    ) {
+      setShowNoRewards(true)
+      return
+    }
+
+    if (userProjects.find((project) => unclaimedRewards(project).length)) {
+      const unclaimedReward = userProjects
+        .map((project) => project.rewards)
+        .flat()
+        .find((reward) => !reward.claim || reward.claim.status !== "claimed")!
+      setUnclaimedReward(unclaimedReward)
+    }
+  }, [userProjects])
+
   return (
     <div className={cn("flex flex-col gap-y-6", className)}>
       {/* Your project not received card */}
-      {APPLICATIONS_CLOSED &&
-        data?.user &&
-        !user?.interaction?.viewProfileClicked &&
-        +(user?.interaction?.homePageViewCount ?? 0) < 3 && (
-          <div className="flex flex-col items-center gap-y-3 p-6 border border-[#E0E2EB] bg-[#FBFCFE] rounded-xl">
-            <Image
-              alt="empty profile"
-              src="/assets/images/big-sunny.png"
-              width={76}
-              height={76}
-            />
+      {showNoRewards && (
+        <div className="flex flex-col items-center gap-y-3 p-6 border border-[#E0E2EB] bg-[#FBFCFE] rounded-xl">
+          <Image
+            alt="empty profile"
+            src="/assets/images/big-sunny.png"
+            width={76}
+            height={76}
+          />
 
-            <p className="text-sm font-medium text-foreground text-center">
-              Your project did not receive rewards in Round 5
-            </p>
-            <Link className="w-full" href="/profile/details">
-              <Button
-                onClick={handleViewProfileClicked}
-                variant="outline"
-                className="text-sm font-medium text-foreground justify-center  w-full"
-              >
-                View profile
-              </Button>
-            </Link>
-          </div>
-        )}
+          <p className="text-sm font-medium text-foreground text-center">
+            Your project did not receive rewards in Round 5
+          </p>
+          <Link className="w-full" href="/profile/details">
+            <Button
+              onClick={handleViewProfileClicked}
+              variant="outline"
+              className="text-sm font-medium text-foreground justify-center  w-full"
+            >
+              View profile
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {/* Your project not received card */}
+      {!!unclaimedReward && (
+        <div className="flex flex-col items-center gap-y-3 p-6 border border-red-200 bg-red-100 rounded-xl">
+          <Image
+            alt="empty profile"
+            src="/assets/images/big-sunny.png"
+            width={76}
+            height={76}
+          />
+          <p className="text-sm font-medium text-foreground text-center">
+            Congratulations!
+          </p>
+          <p className="text-sm text-secondary-foreground text-center">
+            Your project received rewards in Round 5: OP Stack
+          </p>
+          <Link className="w-full" href={`/rewards/${unclaimedReward.id}`}>
+            <Button
+              type="button"
+              variant="destructive"
+              className="text-sm font-medium text-white justify-center w-full"
+            >
+              Claim rewards
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Welcome too retro funding app */}
       {status === "unauthenticated" && (

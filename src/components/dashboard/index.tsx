@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { isBadgeholder } from "@/lib/badgeholders"
-import { noRewards, unclaimedRewards } from "@/lib/rewards"
+import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
   ProjectWithDetails,
@@ -36,6 +36,7 @@ import {
   UnclaimedRecipientCallout,
 } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
+import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
@@ -44,6 +45,7 @@ import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
 
 const SHOW_APPLICATIONS = false
+const ROUND_ID = "5"
 
 const Dashboard = ({
   className,
@@ -71,6 +73,8 @@ const Dashboard = ({
   ]
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
+  const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
+    useState(false)
 
   const [showOnBoarding, setShowOnBoarding] = useState(false)
   const [showApplicationDialogue, setShowApplicationDialogue] = useState(false)
@@ -91,14 +95,14 @@ const Dashboard = ({
     if (
       !hasShownNoRewardsDialog() &&
       projects.find((project) => project.applications.length > 1) &&
-      noRewards(projects)
+      noRewardsForRound(projects, ROUND_ID)
     ) {
-      saveHasShownNoRewardsDialog()
       setShowNoRewardsDialog(true)
       return
     }
 
     if (projects.find((project) => unclaimedRewards(project).length)) {
+      setShowUnclaimedRewardsDialog(true)
       const unclaimedReward = projects
         .map((project) => project.rewards)
         .flat()
@@ -148,13 +152,13 @@ const Dashboard = ({
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
 
-      {/* {showUnclaimedRewardsDialog && (
+      {showUnclaimedRewardsDialog && (
         <UnclaimedRewardsDialog
           open
           onOpenChange={setShowUnclaimedRewardsDialog}
           projects={projects}
         />
-      )} */}
+      )}
       {showApplicationDialogue && (
         <ApplicationInterruptiveDialogue
           open

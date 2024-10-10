@@ -1,23 +1,23 @@
 "use server"
 
-import { getFundingRewardsByRoundIdAndSearch } from "@/db/rewards"
+import { getFundingRewardsByRoundIdsAndSearch } from "@/db/rewards"
 
 export const findFundingRewards = async ({
-  roundId,
+  roundIds,
   search,
   sortBy,
   page,
   pageSize,
 }: {
-  roundId: string
+  roundIds: string[]
   search: string
   sortBy: "asc" | "desc"
   page: number
   pageSize: number
 }) => {
   try {
-    const fundingRewardsData = await getFundingRewardsByRoundIdAndSearch({
-      roundId,
+    const fundingRewardsData = await getFundingRewardsByRoundIdsAndSearch({
+      roundIds,
       search,
       sortBy,
       page,

@@ -41,9 +41,6 @@ function UnclaimedRewardsDialog({
             <DialogTitle className="text-center text-lg font-semibold text-text-default">
               You received rewards!
             </DialogTitle>
-            <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">
-              Retro Funding Round 4: Onchain Builders
-            </DialogDescription>
           </div>
         </DialogHeader>
 
