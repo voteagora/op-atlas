@@ -4,7 +4,7 @@ import { Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
 import { FUNDING_ROUNDS } from "@/lib/mocks"
-import { UserWithAddresses } from "@/lib/types"
+import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
 
 import { Account } from "../common/Account"
 import { FeedbackButton } from "../common/FeedbackButton"
@@ -15,9 +15,11 @@ import { Sidebar } from "./Sidebar"
 export function Rounds({
   projects,
   user,
+  userProjects,
 }: {
   projects: Project[]
   user?: UserWithAddresses | null
+  userProjects?: ProjectWithDetails[] | null
 }) {
   const { data } = useSession()
 
@@ -93,6 +95,7 @@ export function Rounds({
             className="ml-auto w-[260px] pt-12"
             projects={projects}
             user={user}
+            userProjects={userProjects}
           />
         </div>
       </div>

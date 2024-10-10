@@ -50,8 +50,6 @@ export const CATEGORIES = [
       "Analytics that enabled accountability, provided transparency into Collective operations, promoted improved performance, or aided in the design of the Collective.",
     eligibility: [
       "Optimism Governance related Analytics: Analyses of the performance of Optimism governance, including governance participation, grant allocation and more.",
-      "Research or development that introduced features, improvements, or capabilities to the OP Stack.",
-      "Security audits specifically on the OP Stack or its components.",
     ],
     notEligibility: [
       "Analytics infrastructure or reports which are not related to Optimism Governance.",

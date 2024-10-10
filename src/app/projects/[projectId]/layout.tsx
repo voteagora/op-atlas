@@ -3,6 +3,8 @@ import { Suspense } from "react"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import { ProjectSidebar } from "@/components/projects/ProjectSidebar"
 
+import UnsavedChangesToastServer from "./components/UnsavedChangesToast.Server"
+
 export default function Layout({
   children,
   params,
@@ -22,6 +24,7 @@ export default function Layout({
           <ProjectSidebar projectId={params.projectId} />
         </Suspense>
         <div className="card flex-1">
+          <UnsavedChangesToastServer projectId={params.projectId} />
           <Suspense fallback={null}>{children}</Suspense>
         </div>
       </div>
