@@ -93,11 +93,10 @@ const Dashboard = ({
   useEffect(() => {
     // User has submitted at least one application but didn't receive any rewards
     if (
-      //   !hasShownNoRewardsDialog() &&
+      !hasShownNoRewardsDialog() &&
       projects.find((project) => project.applications.length > 1) &&
       noRewardsForRound(projects, ROUND_ID)
     ) {
-      //   saveHasShownNoRewardsDialog()
       setShowNoRewardsDialog(true)
       return
     }
