@@ -19,7 +19,7 @@ export function Rounds({
 }: {
   projects: Project[]
   user?: UserWithAddresses | null
-  userProjects: ProjectWithDetails[] | null
+  userProjects?: ProjectWithDetails[] | null
 }) {
   const { data } = useSession()
 

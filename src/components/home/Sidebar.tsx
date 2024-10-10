@@ -29,7 +29,7 @@ export const Sidebar = ({
   className?: string
   projects: Project[]
   user?: UserWithAddresses | null
-  userProjects: ProjectWithDetails[] | null
+  userProjects?: ProjectWithDetails[] | null
 }) => {
   const { status, data } = useSession()
   const router = useRouter()
