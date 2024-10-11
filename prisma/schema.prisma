@@ -99,6 +99,8 @@ model RewardClaim {
   kycStatus          String?
   kycStatusUpdatedAt DateTime?
 
+  grantEligibilityUpdatedAt DateTime?
+
   tokenStreamStatus      String?
   tokenStreamClaimableAt DateTime?
 
@@ -261,7 +263,7 @@ model ImpactStatement {
   isMarkdownSupported Boolean       @default(true)
   roundId             String?
   limitToCategoryOptions      Int[]         @default([])
-  selectionOptions    String[]               
+  selectionOptions    String[]
 
   round               FundingRound? @relation(fields: [roundId], references: [id])
 
