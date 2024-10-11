@@ -63,13 +63,13 @@ const RewardClaimFlow = ({
           <>
             <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
               <h4 className="font-semibold text-xl">Share your achievement</h4>
-              <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
+              {/* <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
                 <ShareImage
                   name={reward.project.name}
                   amount={Number(reward.amount)}
                   thumbnailUrl={reward.project.thumbnailUrl}
                 />
-              </div>
+              </div> */}
 
               <Button variant="secondary" onClick={downloadImage}>
                 {isLoading ? "Downloading..." : "Download image"}
