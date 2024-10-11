@@ -12,10 +12,7 @@ export default async function Page({
   const session = await auth()
   const claim = await getReward({ id: params.rewardId })
 
-  if (
-    !claim ||
-    !claim.project.team.some(({ userId }) => userId === session?.user.id)
-  ) {
+  if (!claim) {
     redirect("/dashboard")
   }
 
