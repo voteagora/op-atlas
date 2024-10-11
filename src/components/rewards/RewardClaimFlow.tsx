@@ -66,8 +66,7 @@ const RewardClaimFlow = ({
               <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
                 <ShareImage
                   name={reward.project.name}
-                  // @ts-expect-error Next converts Decimal to number bc Server Components suck
-                  amount={reward.amount}
+                  amount={Number(reward.amount.toFixed(2))}
                   thumbnailUrl={reward.project.thumbnailUrl}
                 />
               </div>
