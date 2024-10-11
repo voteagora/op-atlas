@@ -32,7 +32,7 @@ export const ShareImage = ({
         width: "100%",
         height: "100%",
         padding: 20,
-        backgroundImage: "url(/assets/images/round-5-reward.svg)",
+        // backgroundImage: "url(/assets/images/round-5-reward.svg)",
         backgroundSize: "cover",
         overflow: "hidden",
       }}
