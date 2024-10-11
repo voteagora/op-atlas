@@ -66,7 +66,7 @@ const RewardClaimFlow = ({
               <div className="border border-border rounded-xl overflow-hidden w-[640px] h-[360px]">
                 <ShareImage
                   name={reward.project.name}
-                  amount={Number(reward.amount.toFixed(2))}
+                  amount={100000}
                   thumbnailUrl={reward.project.thumbnailUrl}
                 />
               </div>
