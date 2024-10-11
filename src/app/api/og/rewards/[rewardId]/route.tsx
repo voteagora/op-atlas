@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og"
 
 import { getReward } from "@/db/rewards"
-import { loadFont, loadImage } from "@/lib/utils/og"
 
 export async function GET(
   request: Request,
@@ -12,10 +11,21 @@ export async function GET(
   const reward = claim?.amount || 0
   const thumbnailUrl = claim?.project.thumbnailUrl
 
-  const soraRegular = await loadFont("Sora-Regular.otf")
-  const soraSemiBold = await loadFont("Sora-SemiBold.otf")
-  const soraBold = await loadFont("Sora-Bold.otf")
-  const bgImage = await loadImage("round-5-reward.png")
+  const soraRegular = await fetch(
+    new URL("../../assets/Sora-Regular.otf", import.meta.url),
+  ).then((res) => res.arrayBuffer())
+
+  const soraSemiBold = await fetch(
+    new URL("../../assets/Sora-SemiBold.otf", import.meta.url),
+  ).then((res) => res.arrayBuffer())
+
+  const soraBold = await fetch(
+    new URL("../../assets/Sora-Bold.otf", import.meta.url),
+  ).then((res) => res.arrayBuffer())
+
+  const bgImage = await fetch(
+    new URL("../../assets/round-5-reward.png", import.meta.url),
+  ).then((res) => res.arrayBuffer())
 
   return new ImageResponse(
     (
@@ -33,6 +43,7 @@ export async function GET(
         }}
       >
         <img
+          // @ts-ignore
           src={bgImage}
           style={{ position: "absolute" }}
           tw="absolute"
