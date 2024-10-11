@@ -102,7 +102,7 @@ export const ShareImage = ({
                 "linear-gradient(90deg, #FE1138 0%, #FE4FE2 100%)",
               backgroundClip: "text",
               // @ts-ignore TS doesn't know about webkit prefixes
-              // "-webkit-background-clip": "text",
+              "-webkit-background-clip": "text",
               color: "transparent",
               margin: 0,
             }}
