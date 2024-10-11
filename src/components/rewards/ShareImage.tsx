@@ -1,8 +1,4 @@
-// import html2canvas from "html2canvas"
 import { Sora } from "next/font/google"
-// import satori from "satori"
-
-// import { downloadImageAsPNG } from "@/lib/utils/images"
 
 const sora = Sora({
   subsets: ["latin"],
@@ -123,76 +119,3 @@ export const ShareImage = ({
     </div>
   )
 }
-
-// export async function generateShareImage() {
-//   try {
-//     const node = document.querySelector("#share-image")
-//     if (!node) {
-//       return
-//     }
-
-//     const canvas = await html2canvas(node as HTMLElement)
-//     const imageUrl = canvas.toDataURL("image/png")
-
-//     const a = document.createElement("a")
-//     a.href = imageUrl
-//     a.download = "Image.png"
-//     document.body.appendChild(a)
-//     a.click()
-//     document.body.removeChild(a)
-//     URL.revokeObjectURL(imageUrl)
-//   } catch (error) {
-//     console.error("Error generating share image", error)
-//   }
-// }
-
-// export async function downloadShareImage(
-//   name: string,
-//   amount: number,
-//   thumbnailUrl?: string | null,
-// ) {
-//   const fonts = await Promise.all([
-//     fetch("/fonts/Sora-Regular.otf"),
-//     fetch("/fonts/Sora-SemiBold.otf"),
-//     fetch("/fonts/Sora-Bold.otf"),
-//   ])
-
-//   const buffers = await Promise.all(
-//     fonts.map((response) => response.arrayBuffer()),
-//   )
-
-//   const svg = await satori(
-//     <ShareImage
-//       name={name}
-//       amount={amount}
-//       thumbnailUrl={thumbnailUrl}
-//       useExternalFont={false}
-//     />,
-//     {
-//       width: 1600,
-//       height: 900,
-//       fonts: [
-//         {
-//           name: "Sora",
-//           data: buffers[0],
-//           weight: 400,
-//           style: "normal",
-//         },
-//         {
-//           name: "Sora",
-//           data: buffers[1],
-//           weight: 600,
-//           style: "normal",
-//         },
-//         {
-//           name: "Sora",
-//           data: buffers[2],
-//           weight: 700,
-//           style: "normal",
-//         },
-//       ],
-//     },
-//   )
-
-//   await downloadImageAsPNG(svg)
-// }
