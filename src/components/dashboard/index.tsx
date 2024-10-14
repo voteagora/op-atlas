@@ -60,17 +60,18 @@ const Dashboard = ({
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
 }) => {
-  const currentRoundId = "6"
   const hasSubmittedToCurrentRound = applications.some(
-    (application) => application.roundId === currentRoundId,
+    (application) => application.roundId === ROUND_ID,
   )
-  const cardComponents = [
-    hasSubmittedToCurrentRound ? (
-      <ApplicationSubmittedCallout key="applicationSubmitted" />
-    ) : (
-      <FundingRoundAnnouncementCallout key="fundingRound" />
-    ),
-  ]
+  const cardComponents = process.env.NEXT_PUBLIC_APPLICATIONS_CLOSED
+    ? []
+    : ([
+        hasSubmittedToCurrentRound ? (
+          <ApplicationSubmittedCallout key="applicationSubmitted" />
+        ) : (
+          <FundingRoundAnnouncementCallout key="fundingRound" />
+        ),
+      ] as React.ReactNode[])
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
   const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =

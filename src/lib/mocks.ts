@@ -55,7 +55,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     },
     details:
       "Improving the capture resistance and resource allocation of Optimism Governance is the primary objective of this category. By incentivizing contributions that enhance governance tools, mechanisms, and processes, Retro Funding aims to foster a more robust and resilient governance framework within the ecosystem.",
-    status: "open",
+    status: "past",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/round-6.svg",
     startsAt: `Planned for ${new Date("2024-09-26T21:53:13.300Z")}`,
