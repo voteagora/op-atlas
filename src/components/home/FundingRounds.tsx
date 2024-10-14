@@ -145,7 +145,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
         <div className="flex flex-col gap-y-4">
           <div className="flex justify-between">
             <div className="w-full flex flex-col justify-between gap-y-1">
-              <div className="w-full flex justify-between">
+              <div className="w-full flex justify-between space-x-2">
                 <h2 className="text-base font-semibold text-text-default text-start">
                   Round {fundingRound.number}
                   {fundingRound.status !== "past" || fundingRound.number === 4
