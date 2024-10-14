@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { z } from "zod"
 
 import { updateEligibilityClaimTimestampToRewardClaim } from "@/lib/actions/rewards"
 import { authenticateApiUser } from "@/serverAuth"
-
-const payloadValidator = z.object({
-  rewardId: z.string(),
-  timestamp: z.string(),
-})
 
 export const POST = async (req: NextRequest) => {
   const authResponse = await authenticateApiUser(req)
@@ -16,10 +10,16 @@ export const POST = async (req: NextRequest) => {
     return new Response(authResponse.failReason, { status: 401 })
   }
 
-  const { rewardId, timestamp } = payloadValidator.parse(await req.json())
+  const formData = await req.formData()
+  const grant_id = formData.get("grant_id")?.toString()
+  const timestamp = new Date().toISOString()
+
+  if (!grant_id) {
+    return new Response("grant_id is required", { status: 400 })
+  }
 
   const { error, claim } = await updateEligibilityClaimTimestampToRewardClaim(
-    rewardId,
+    grant_id,
     timestamp,
   )
 
