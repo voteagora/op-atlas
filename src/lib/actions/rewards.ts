@@ -6,6 +6,7 @@ import { isAddress } from "viem"
 import { auth } from "@/auth"
 import {
   getClaimByAddress,
+  getClaimByRewardId,
   getReward,
   startClaim,
   updateClaim,
@@ -96,6 +97,39 @@ export const addAddressToRewardsClaim = async (
   return {
     error: null,
     reward: updated,
+  }
+}
+
+export const updateEligibilityClaimTimestampToRewardClaim = async (
+  rewardId: string,
+  timestamp: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const claim = await getClaimByRewardId({ rewardId })
+  if (!claim) {
+    return {
+      error: "Claim not found",
+    }
+  }
+
+  const updatedClaim = await updateClaim(claim.rewardId, {
+    grantEligibilityUpdatedAt: timestamp,
+  })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+  revalidatePath("/rewards/[rewardId]/page", "page")
+
+  return {
+    error: null,
+    claim: updatedClaim,
   }
 }
 
