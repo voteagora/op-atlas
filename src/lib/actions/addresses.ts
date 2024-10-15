@@ -1,12 +1,12 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { verifyMessage } from "viem"
 
 import { auth } from "@/auth"
 import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
 
 import { getUserConnectedAddresses } from "../neynar"
+import verifyMessage from "../utils/serverVerifyMessage"
 
 const getMessage = (farcasterId: string) =>
   `I verify that I am ${farcasterId} on Farcaster and I'm an optimist.`
