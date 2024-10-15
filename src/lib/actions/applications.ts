@@ -15,6 +15,15 @@ import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { formatApplicationMetadata } from "../utils/metadata"
 import { verifyAdminStatus } from "./utils"
 
+const whitelist = [
+  "0x61400c6b679bc467d522c7124819332c8a660716c55ea71f76f708d6bc296c22",
+  "0x008875f970469e090a5a843c68e3f8444e110a741990f03938e4ea42df8d11a2",
+  "0xdff778291bf6893ac1c67540cb7b552781721138767dbf59dd1d1ba132a4c377",
+  "0x09b585a065b43e85d9d86c9901b13fa80ac872228c57ffb23ed0063d1f2da28a",
+  "0x850df51e29f2846a5f085d88e6b6fc13fad51ad7161f8a825ed09d470668161a",
+  "0xb11ee90652aca0a437820f205bb545dbdf1ab14b99f8f63a76e50a5d57ef2520",
+]
+
 interface SubmitApplicationRequest {
   projectId: string
   categoryId: string
@@ -155,7 +164,11 @@ export const submitApplications = async (
     }
   }
 
-  if (APPLICATIONS_CLOSED) {
+  const isWhitelisted = projects.some((project) =>
+    whitelist.includes(project.projectId),
+  )
+
+  if (APPLICATIONS_CLOSED && !isWhitelisted) {
     throw new Error("Applications are closed")
   }
 
