@@ -104,14 +104,6 @@ export const updateEligibilityClaimTimestampToRewardClaim = async (
   rewardId: string,
   timestamp: string,
 ) => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
   const claim = await getClaimByRewardId({ rewardId })
   if (!claim) {
     return {

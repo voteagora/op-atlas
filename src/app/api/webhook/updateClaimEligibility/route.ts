@@ -23,6 +23,9 @@ export const POST = async (req: NextRequest) => {
     timestamp,
   )
 
+  console.log(error)
+  console.log(claim)
+
   if (error) {
     return new Response(error, { status: 500 })
   }
