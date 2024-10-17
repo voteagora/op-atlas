@@ -100,31 +100,6 @@ export const addAddressToRewardsClaim = async (
   }
 }
 
-export const updateEligibilityClaimTimestampToRewardClaim = async (
-  rewardId: string,
-  timestamp: string,
-) => {
-  const claim = await getClaimByRewardId({ rewardId })
-  if (!claim) {
-    return {
-      error: "Claim not found",
-    }
-  }
-
-  const updatedClaim = await updateClaim(claim.rewardId, {
-    grantEligibilityUpdatedAt: timestamp,
-  })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/projects", "layout")
-  revalidatePath("/rewards/[rewardId]/page", "page")
-
-  return {
-    error: null,
-    claim: updatedClaim,
-  }
-}
-
 export const completeRewardsClaim = async (rewardId: string) => {
   const session = await auth()
 

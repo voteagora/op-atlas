@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { updateEligibilityClaimTimestampToRewardClaim } from "@/lib/actions/rewards"
+import { getClaimByRewardId, updateClaim } from "@/db/rewards"
 import { authenticateApiUser } from "@/serverAuth"
 
 export const POST = async (req: NextRequest) => {
@@ -18,16 +18,14 @@ export const POST = async (req: NextRequest) => {
     return new Response("grant_id is required", { status: 400 })
   }
 
-  const { error, claim } = await updateEligibilityClaimTimestampToRewardClaim(
-    grant_id,
-    timestamp,
-  )
-
-  console.log(error)
-  console.log(claim)
-
-  if (error) {
-    return new Response(error, { status: 500 })
+  const claim = await getClaimByRewardId({ rewardId: grant_id })
+  if (!claim) {
+    throw new Response("Claim not found", { status: 404 })
   }
-  return NextResponse.json({ claim })
+
+  const updatedClaim = await updateClaim(grant_id, {
+    grantEligibilityUpdatedAt: timestamp,
+  })
+
+  return NextResponse.json({ claim: updatedClaim })
 }
