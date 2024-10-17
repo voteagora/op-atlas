@@ -52,7 +52,7 @@ function MetadataPublishedConfirmationDialog({
             </Link>
           ) : (
             <Link
-              href="/application/5"
+              href="/application/6"
               className={cn(
                 "flex items-center rounded-xl p-6 w-full",
                 "bg-accent text-accent-foreground",
@@ -65,8 +65,8 @@ function MetadataPublishedConfirmationDialog({
                 height={48}
               />
               <div className="ml-4 mr-5 flex-1">
-                <p className="text-base font-semibold">Round 5: OP Stack</p>
-                <div className="text-base font-normal">Apply by Sep 5</div>
+                <p className="text-base font-semibold">Round 6: Governance</p>
+                <div className="text-base font-normal">Apply by Oct 14th</div>
               </div>
               <ArrowRight size={20} />
             </Link>

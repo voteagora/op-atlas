@@ -98,7 +98,7 @@ export function AddVerifiedAddressDialog({
                   Be sure to sign using the desired address, then return here
                   and continue to the next step. You can{" "}
                   <ExternalLink
-                    href="https://etherscan.io/verifiedSignatures"
+                    href="https://optimistic.etherscan.io/verifiedSignatures"
                     className="underline"
                   >
                     use Etherscan

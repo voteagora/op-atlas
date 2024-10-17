@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { isBadgeholder } from "@/lib/badgeholders"
-import { noRewards, unclaimedRewards } from "@/lib/rewards"
+import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
   ProjectWithDetails,
@@ -30,20 +30,22 @@ import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstOrganizationProject from "./AddFirstOrganizationProject"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import { FundingRoundAnnouncementCallout } from "./Callouts"
+import {
+  ApplicationSubmittedCallout,
+  FundingRoundAnnouncementCallout,
+  UnclaimedRecipientCallout,
+} from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
-import UnclaimedRewardsCard from "./UnclaimedRewardsCard"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
 
 const SHOW_APPLICATIONS = false
-
-const cardComponents = [<FundingRoundAnnouncementCallout key="fundingRound" />]
+const ROUND_ID = "5"
 
 const Dashboard = ({
   className,
@@ -58,6 +60,18 @@ const Dashboard = ({
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
 }) => {
+  const hasSubmittedToCurrentRound = applications.some(
+    (application) => application.roundId === ROUND_ID,
+  )
+  const cardComponents = process.env.NEXT_PUBLIC_APPLICATIONS_CLOSED
+    ? []
+    : ([
+        hasSubmittedToCurrentRound ? (
+          <ApplicationSubmittedCallout key="applicationSubmitted" />
+        ) : (
+          <FundingRoundAnnouncementCallout key="fundingRound" />
+        ),
+      ] as React.ReactNode[])
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
   const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
@@ -67,7 +81,7 @@ const Dashboard = ({
   const [showApplicationDialogue, setShowApplicationDialogue] = useState(false)
   const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] =
     useState(false)
-  const [visibleCardsCount, setVisibleCardsCount] = useState(1)
+  const [visibleCardsCount, setVisibleCardsCount] = useState(2)
 
   const { track } = useAnalytics()
 
@@ -82,15 +96,25 @@ const Dashboard = ({
     if (
       !hasShownNoRewardsDialog() &&
       projects.find((project) => project.applications.length > 1) &&
-      noRewards(projects)
+      noRewardsForRound(projects, ROUND_ID)
     ) {
-      saveHasShownNoRewardsDialog()
       setShowNoRewardsDialog(true)
       return
     }
 
     if (projects.find((project) => unclaimedRewards(project).length)) {
       setShowUnclaimedRewardsDialog(true)
+      const unclaimedReward = projects
+        .map((project) => project.rewards)
+        .flat()
+        .find((reward) => !reward.claim || reward.claim.status !== "claimed")!
+
+      cardComponents.push(
+        <UnclaimedRecipientCallout
+          key="unclaimedRecipient"
+          rewardId={unclaimedReward?.id}
+        />,
+      )
     }
   }, [projects])
 
@@ -129,13 +153,13 @@ const Dashboard = ({
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
 
-      {/* {showUnclaimedRewardsDialog && (
+      {showUnclaimedRewardsDialog && (
         <UnclaimedRewardsDialog
           open
           onOpenChange={setShowUnclaimedRewardsDialog}
           projects={projects}
         />
-      )} */}
+      )}
       {showApplicationDialogue && (
         <ApplicationInterruptiveDialogue
           open
@@ -245,16 +269,6 @@ const Dashboard = ({
             {projects.map((project) => (
               <ProjectRewardRow key={project.id} project={project} />
             ))}
-          </div>
-        )}
-
-        {showUnclaimedRewardsDialog && (
-          <div className="flex flex-col">
-            <h3>Your Retro Funding Round 4 rewards</h3>
-            <p className="text-base font-normal text-secondary-foreground mb-6">
-              Claim by Sep 5, 2025
-            </p>
-            <UnclaimedRewardsCard projects={projects} />
           </div>
         )}
 

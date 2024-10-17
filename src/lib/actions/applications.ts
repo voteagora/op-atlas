@@ -9,8 +9,20 @@ import { createApplication, getProject } from "@/db/projects"
 import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
+import { uploadToPinata } from "../pinata"
+import { ApplicationWithDetails, CategoryWithImpact } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
+import { formatApplicationMetadata } from "../utils/metadata"
 import { verifyAdminStatus } from "./utils"
+
+const whitelist = [
+  "0x61400c6b679bc467d522c7124819332c8a660716c55ea71f76f708d6bc296c22",
+  "0x008875f970469e090a5a843c68e3f8444e110a741990f03938e4ea42df8d11a2",
+  "0xdff778291bf6893ac1c67540cb7b552781721138767dbf59dd1d1ba132a4c377",
+  "0x09b585a065b43e85d9d86c9901b13fa80ac872228c57ffb23ed0063d1f2da28a",
+  "0x850df51e29f2846a5f085d88e6b6fc13fad51ad7161f8a825ed09d470668161a",
+  "0x8d7569742539aab697bd8825e7c49883743778b38b6090660fbdf84ec2c3938f",
+]
 
 interface SubmitApplicationRequest {
   projectId: string
@@ -21,24 +33,39 @@ interface SubmitApplicationRequest {
 
 export const publishAndSaveApplication = async ({
   project,
+  category,
   farcasterId,
   metadataSnapshotId,
+  round,
 }: {
   project: SubmitApplicationRequest
+  category: CategoryWithImpact
   farcasterId: string
   metadataSnapshotId: string
+  round: number
 }): Promise<Application> => {
+  // Upload metadata to IPFS
+  const metadata = formatApplicationMetadata({
+    round,
+    categoryId: project.categoryId,
+    impactStatement: project.impactStatement,
+    category,
+    projectDescriptionOptions: project.projectDescriptionOptions,
+  })
+  const ipfsHash = await uploadToPinata(project.projectId, metadata)
+
   // Publish attestation
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId: project.projectId,
-    round: 5,
+    round,
     snapshotRef: metadataSnapshotId,
+    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
   })
 
   // Create application in database
   return createApplication({
-    round: 5,
+    round,
     ...project,
     attestationId,
   })
@@ -47,6 +74,8 @@ export const publishAndSaveApplication = async ({
 const createProjectApplication = async (
   applicationData: SubmitApplicationRequest,
   farcasterId: string,
+  round: number,
+  category: CategoryWithImpact,
 ) => {
   const session = await auth()
 
@@ -95,8 +124,10 @@ const createProjectApplication = async (
       impactStatement: applicationData.impactStatement,
       projectDescriptionOptions: applicationData.projectDescriptionOptions,
     },
+    category,
     farcasterId,
     metadataSnapshotId: latestSnapshot.attestationId,
+    round,
   })
 
   return {
@@ -112,6 +143,8 @@ export const submitApplications = async (
     impactStatement: Record<string, string>
     projectDescriptionOptions: string[]
   }[],
+  round: number,
+  categories: CategoryWithImpact[],
 ) => {
   const session = await auth()
 
@@ -131,14 +164,11 @@ export const submitApplications = async (
     }
   }
 
-  if (
-    APPLICATIONS_CLOSED &&
-    projects.some(
-      (p) =>
-        p.projectId !==
-        "0x80393c05d524b7a6f7a78b0c141eadf0759642ae8d7e718134318cd2d73d5464",
-    )
-  ) {
+  const isWhitelisted = projects.some((project) =>
+    whitelist.includes(project.projectId),
+  )
+
+  if (APPLICATIONS_CLOSED && !isWhitelisted) {
     throw new Error("Applications are closed")
   }
 
@@ -149,6 +179,8 @@ export const submitApplications = async (
     const result = await createProjectApplication(
       project,
       session.user.farcasterId,
+      round,
+      categories.find((category) => category.id === project.categoryId)!,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)

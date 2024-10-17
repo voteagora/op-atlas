@@ -37,7 +37,7 @@ export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
     <Accordion
       type="single"
       collapsible
-      className="w-full border border-default rounded-2xl"
+      className="w-full border border-default rounded-xl hover:shadow-sm"
     >
       <AccordionItem value="item-1">
         <AccordionTrigger className="p-8 justify-between">

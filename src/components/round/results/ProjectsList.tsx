@@ -1,4 +1,5 @@
 "use client"
+
 import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import React from "react"
@@ -12,7 +13,6 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 interface Props {
   projectRewards: FundingRewardDetails[]
   loading: boolean
-  round: string | number
   totalCount: number
   handleLoadMore: () => void
   isFetchingMore: boolean
@@ -21,7 +21,6 @@ interface Props {
 const ProjectsList = ({
   projectRewards,
   loading,
-  round,
   totalCount,
   handleLoadMore,
   isFetchingMore,
@@ -51,13 +50,6 @@ const ProjectsList = ({
 
   return (
     <div>
-      <div className="flex flex-row justify-between w-full mt-6 pb-4">
-        <h1 className="text-xl font-semibold">
-          {totalCount} projects rewarded in Round {round}
-        </h1>
-        <h1 className="text-xl font-semibold">Rewards</h1>
-      </div>
-      <hr />
       {projectRewards?.map((project) => (
         <React.Fragment key={project.id}>
           <div className="flex flex-row justify-between py-8 gap-1">

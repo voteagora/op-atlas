@@ -57,7 +57,7 @@ const ApplicationProjectImpactForm = ({
         {!!!projects?.length && (
           <Callout
             type="error"
-            text="You haven’t added or joined any projects"
+            text="You haven't added or joined any projects"
             linkText="View projects"
             linkHref="/dashboard"
           />

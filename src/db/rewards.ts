@@ -5,14 +5,14 @@ import { cache } from "react"
 
 import { prisma } from "./client"
 
-async function getFundingRewardsByRoundIdAndSearchFn({
-  roundId,
+async function getFundingRewardsByRoundIdsAndSearchFn({
+  roundIds,
   search,
   sortBy,
   page = 1,
   pageSize = 10,
 }: {
-  roundId: string
+  roundIds: string[]
   search: string
   sortBy: "asc" | "desc"
   page?: number
@@ -24,7 +24,7 @@ async function getFundingRewardsByRoundIdAndSearchFn({
   const [rewards, totalCount] = await prisma.$transaction([
     prisma.fundingReward.findMany({
       where: {
-        roundId: roundId,
+        roundId: { in: roundIds },
         project: {
           OR: [
             {
@@ -72,7 +72,7 @@ async function getFundingRewardsByRoundIdAndSearchFn({
     }),
     prisma.fundingReward.count({
       where: {
-        roundId: roundId,
+        roundId: { in: roundIds },
         project: {
           OR: [
             {
@@ -96,8 +96,8 @@ async function getFundingRewardsByRoundIdAndSearchFn({
   return { rewards, totalCount }
 }
 
-export const getFundingRewardsByRoundIdAndSearch = cache(
-  getFundingRewardsByRoundIdAndSearchFn,
+export const getFundingRewardsByRoundIdsAndSearch = cache(
+  getFundingRewardsByRoundIdsAndSearchFn,
 )
 
 async function getRewardFn({ id }: { id: string }) {

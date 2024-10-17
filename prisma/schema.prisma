@@ -65,8 +65,10 @@ model FundingRound {
   startDate   DateTime
   endDate     DateTime
 
-  applications Application[]
-  recipients   FundingReward[]
+  applications    Application[]
+  recipients      FundingReward[]
+  Category        Category[]
+  ImpactStatement ImpactStatement[]
 }
 
 model FundingReward {
@@ -213,10 +215,10 @@ model Project {
 }
 
 model Application {
-  id            String @id @default(uuid())
-  status        String @default("submitted")
-  attestationId String
-  projectDescriptionOptions   String[]
+  id                        String   @id @default(uuid())
+  status                    String   @default("submitted")
+  attestationId             String
+  projectDescriptionOptions String[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -227,19 +229,23 @@ model Application {
 
   round                 FundingRound            @relation(fields: [roundId], references: [id])
   project               Project                 @relation(fields: [projectId], references: [id])
-  category              Category?                @relation(fields: [categoryId], references: [id])
+  category              Category?               @relation(fields: [categoryId], references: [id])
   impactStatementAnswer ImpactStatementAnswer[]
 
   @@index([projectId])
 }
 
 model Category {
-  id          String   @id @default(uuid())
-  name        String
-  description String
-  imageUrl    String?
-  question    String
-  options     String[]
+  id                String        @id @default(uuid())
+  name              String
+  description       String
+  imageUrl          String?
+  question          String
+  options           String[]
+  roundId           String?
+  isMultipleChoice  Boolean @default(true)
+
+  round             FundingRound? @relation(fields: [roundId], references: [id])
 
   impactStatements ImpactStatement[]
   application      Application[]
@@ -251,8 +257,13 @@ model ImpactStatement {
   question   String
   subtext    String?
 
-  isRequired          Boolean @default(true)
-  isMarkdownSupported Boolean @default(true)
+  isRequired          Boolean       @default(true)
+  isMarkdownSupported Boolean       @default(true)
+  roundId             String?
+  limitToCategoryOptions      Int[]         @default([])
+  selectionOptions    String[]               
+
+  round               FundingRound? @relation(fields: [roundId], references: [id])
 
   impactStatementAnswer ImpactStatementAnswer[]
 
@@ -274,8 +285,8 @@ model ImpactStatementAnswer {
 }
 
 model UserProjects {
-  id                   String  @id @default(uuid())
-  role                 String  @default("member")
+  id   String @id @default(uuid())
+  role String @default("member")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -400,8 +411,8 @@ model ApiUser {
 }
 
 model Badgeholder {
-  address     String   
-  roundId     String
+  address String
+  roundId String
 
   @@unique([address, roundId])
 }

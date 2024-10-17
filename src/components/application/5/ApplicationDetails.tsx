@@ -259,7 +259,7 @@ const ApplicationDetails = ({ onNext }: { onNext?: () => void }) => {
             onClickGetStarted()
           } else {
             onNext?.()
-            router.push("/application/5?tab=projects")
+            router.push("/application/6?tab=projects")
           }
         }}
         className="w-full disabled:bg-destructive disabled:!text-white"
@@ -314,7 +314,7 @@ const ContributionsSection = ({
       ))}
     </ul>
     <h4 className="font-semibold text-base text-secondary-foreground">
-      Not eligibile:
+      Not eligible:{" "}
       <span className="font-normal">
         The following types of projects are not eligible.
       </span>

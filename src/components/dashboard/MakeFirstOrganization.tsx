@@ -18,7 +18,7 @@ const MakeFirstOrganization = ({
       onClick={onClick}
       variant="ghost"
       className={cn(
-        "flex gap-x-6 border rounded-xl p-8 items-center justify-start h-fit",
+        "flex gap-x-6 border rounded-xl p-8 items-center justify-start h-fit hover:shadow-sm hover:opacity-100 hover:text-primary",
         className,
       )}
     >

@@ -11,7 +11,10 @@ export const APPLICATIONS_CLOSED =
 
 export const GITHUB_REDIRECT_COOKIE = "github-auth-redirect"
 
-export const EAS_URL_PREFIX = "https://optimism.easscan.org/attestation/view/"
+export const EAS_URL_PREFIX =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "https://sepolia.easscan.org/attestation/view/"
+    : "https://optimism.easscan.org/attestation/view/"
 
 export const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",

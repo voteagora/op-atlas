@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "npx prisma generate && next dev",
     "build": "prisma generate && next build && prisma migrate deploy",
     "start": "next start",
     "format": "prettier --write .",
