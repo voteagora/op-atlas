@@ -29,6 +29,10 @@ export function ClaimForm({ reward }: { reward: RewardWithProject }) {
   return (
     <div className="flex flex-col gap-2">
       <ClaimFormAddress reward={reward} />
+      <ClaimFormEligibility
+        reward={reward}
+        disabled={!Boolean(reward.claim?.address)}
+      />
       <ClaimFormKYC
         reward={reward}
         disabled={
@@ -173,13 +177,14 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
   )
 }
 
-function ClaimFormKYC({
+function ClaimFormEligibility({
   reward,
   disabled,
 }: {
   reward: RewardWithProject
   disabled: boolean
 }) {
+  console.log(reward)
   const formLink = useMemo<string | null>(() => {
     if (disabled) {
       return null
@@ -200,45 +205,98 @@ function ClaimFormKYC({
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-between">
           <div className="flex items-center gap-1 flex-1 text-sm font-medium">
-            Step 2. Complete KYC
+            Step 2. Submit the grant eligibility form
           </div>
-          {(reward.claim?.status === "cleared" ||
-            reward.claim?.status === "claimed") && <Completed />}
+          {!!reward.claim?.grantEligibilityUpdatedAt && <Completed />}
         </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-12">
           <div className="flex flex-col gap-6">
             <div className="text-secondary-foreground text-sm">
-              <span className="text-foreground font-medium">
-                First, submit the grant eligibility form.
-              </span>{" "}
               Only one project admin needs to submit the form.
             </div>
 
-            <MaybeLink url={formLink} className="self-start">
-              <Button
-                disabled={disabled || !formLink}
-                variant="destructive"
-                className="flex gap-[10px] items-center"
-              >
-                <div>Fill out the form</div>
-                <ArrowUpRight size={16} />
-              </Button>
-            </MaybeLink>
+            {!reward.claim?.grantEligibilityUpdatedAt ? (
+              <MaybeLink url={formLink} className="self-start">
+                <Button
+                  disabled={disabled || !formLink}
+                  variant="destructive"
+                  className="flex gap-[10px] items-center"
+                >
+                  <div>Fill out the form</div>
+                  <ArrowUpRight size={16} />
+                </Button>
+              </MaybeLink>
+            ) : (
+              <>
+                <div className="text-secondary-foreground text-sm flex flex-row items-center gap-x-1">
+                  <Completed /> on{" "}
+                  {format(
+                    reward.claim.grantEligibilityUpdatedAt,
+                    "eeee, MMMM d",
+                  )}
+                </div>
+                <p className="text-secondary-foreground text-xs">
+                  Forgot something?{" "}
+                  <ExternalLink
+                    href={formLink!}
+                    className="text-foreground font-medium"
+                  >
+                    Resubmit form
+                  </ExternalLink>
+                </p>
+              </>
+            )}
           </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
+function ClaimFormKYC({
+  reward,
+  disabled,
+}: {
+  reward: RewardWithProject
+  disabled: boolean
+}) {
+  // TODO: need to replace with the real logic, MG to figure out what happens after application
+  const kycPending = false
+
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      className="w-full border border-default rounded-xl p-8"
+    >
+      <AccordionItem value="item-1">
+        <AccordionTrigger className="justify-between">
+          <div className="flex items-center gap-1 flex-1 text-sm font-medium">
+            Step 3. Complete KYC
+          </div>
+          {(reward.claim?.status === "cleared" ||
+            reward.claim?.status === "claimed") && <Completed />}
+        </AccordionTrigger>
+        <AccordionContent className="pt-4 flex flex-col gap-6">
           <div className="flex flex-col gap-6">
-            <div className="text-secondary-foreground text-sm">
-              <span className="text-foreground font-medium">
-                Next, verify your identity.
-              </span>{" "}
-              Each person or business identified in the form must verify their
-              identity. Individuals should verify at kyc.optimism.io while
-              businesses should verify at kyb.optimism.io.
-              <br />
-              <br />
-              Once all team members have completed their own KYC,{" "}
-              <span className="text-foreground font-medium">
-                you will be notified of the outcome within 48 hours.
-              </span>
+            <div className="text-secondary-foreground text-sm space-y-4">
+              <p className="text-sm">
+                <span className="text-foreground font-medium">
+                  Each person or business identified in the grant eligibility
+                  form must verify their identity:
+                </span>
+                <br />
+                individuals at kyc.optimism.io and businesses at
+                kyb.optimism.io.
+              </p>
+              <p className="text-sm">
+                If a person or business has been verified within the last
+                calendar year, they do not need to verify again.
+              </p>
+              <p className="text-sm">
+                Once all parties have completed KYC or KYB, your status will be
+                updated here (within 48 hours).
+              </p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -265,6 +323,13 @@ function ClaimFormKYC({
               </MaybeLink>
             </div>
           </div>
+
+          {kycPending && (
+            <p className="text-secondary-foreground text-sm">
+              We are processing your KYC/KYB status. Please check back later to
+              continue.
+            </p>
+          )}
 
           <p className="text-secondary-foreground text-xs">
             Need help? Contact{" "}

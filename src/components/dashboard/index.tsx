@@ -53,12 +53,14 @@ const Dashboard = ({
   projects,
   applications,
   organizations,
+  adminProjects,
 }: {
   className?: string
   user: UserWithAddresses
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
+  adminProjects: ProjectWithDetails[]
 }) => {
   const hasSubmittedToCurrentRound = applications.some(
     (application) => application.roundId === ROUND_ID,
@@ -116,7 +118,7 @@ const Dashboard = ({
         />,
       )
     }
-  }, [projects])
+  }, [adminProjects])
 
   // TODO: hide rewards section if all rewards are claimed
   const showRewardsSection = Boolean(
@@ -265,8 +267,8 @@ const Dashboard = ({
 
         {showRewardsSection && (
           <div className="flex flex-col gap-6">
-            <h3>Your Retro Funding Round 4 rewards</h3>
-            {projects.map((project) => (
+            <h3>Your Retro Funding rewards</h3>
+            {adminProjects.map((project) => (
               <ProjectRewardRow key={project.id} project={project} />
             ))}
           </div>

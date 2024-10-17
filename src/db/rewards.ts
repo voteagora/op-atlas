@@ -195,3 +195,13 @@ export async function updateClaim(
     data,
   })
 }
+
+async function getClaimByRewardIdFn({ rewardId }: { rewardId: string }) {
+  return prisma.rewardClaim.findFirst({
+    where: {
+      rewardId,
+    },
+  })
+}
+
+export const getClaimByRewardId = cache(getClaimByRewardIdFn)

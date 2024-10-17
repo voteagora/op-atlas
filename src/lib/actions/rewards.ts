@@ -6,6 +6,7 @@ import { isAddress } from "viem"
 import { auth } from "@/auth"
 import {
   getClaimByAddress,
+  getClaimByRewardId,
   getReward,
   startClaim,
   updateClaim,
