@@ -10,10 +10,12 @@ import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
 import { uploadToPinata } from "../pinata"
-import { ApplicationWithDetails, CategoryWithImpact } from "../types"
+import { CategoryWithImpact } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { formatApplicationMetadata } from "../utils/metadata"
 import { verifyAdminStatus } from "./utils"
+
+const whitelist: string[] = []
 
 interface SubmitApplicationRequest {
   projectId: string
@@ -155,7 +157,11 @@ export const submitApplications = async (
     }
   }
 
-  if (APPLICATIONS_CLOSED) {
+  const isWhitelisted = projects.some((project) =>
+    whitelist.includes(project.projectId),
+  )
+
+  if (APPLICATIONS_CLOSED && !isWhitelisted) {
     throw new Error("Applications are closed")
   }
 

@@ -89,7 +89,7 @@ export function VerifyAddressDialog({
                   <br />
                   You can{" "}
                   <ExternalLink
-                    href="https://etherscan.io/verifiedSignatures"
+                    href="https://optimistic.etherscan.io/verifiedSignatures"
                     className="underline"
                   >
                     use Etherscan
