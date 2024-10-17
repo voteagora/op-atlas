@@ -1,5 +1,6 @@
 import { prisma } from "@/db/client"
 import { createApplicationAttestation } from "@/lib/eas"
+import { uploadToPinata } from "@/lib/pinata"
 
 async function main() {
   const roundId = "6"
@@ -56,12 +57,38 @@ async function main() {
 
   const application = project?.applications.find((ap) => ap.roundId === roundId)
 
+  const metadata = {
+    round: parseInt(roundId),
+    category: application!.category!.name,
+    subcategory: application!.projectDescriptionOptions,
+    impactStatement: Object.entries(
+      application!.impactStatementAnswer.reduce(
+        (acc, { impactStatementId, answer }) => {
+          acc[impactStatementId] = answer
+          return acc
+        },
+        {} as Record<string, string>,
+      ),
+    ).map(([impactStatementId, answer]) => {
+      const question = application!.category!.impactStatements.find(
+        (i) => i.id === impactStatementId,
+      )?.question
+      return {
+        question,
+        answer,
+      }
+    }),
+  }
+
+  const ipfsHash = await uploadToPinata(projectId, metadata)
+
   // Attest applicaiton
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId,
     round: parseInt(roundId),
     snapshotRef: metadataSnapshotId,
+    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
   })
 
   // Create application in database
