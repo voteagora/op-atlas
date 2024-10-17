@@ -17,12 +17,12 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const isAdmin = await verifyAdminStatus(
+  const isInvalid = await verifyAdminStatus(
     claim.projectId,
     session.user.farcasterId,
   )
 
-  if (!isAdmin) {
+  if (isInvalid?.error) {
     redirect("/dashboard")
   }
 
