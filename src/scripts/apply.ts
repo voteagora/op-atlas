@@ -2,6 +2,7 @@ import { prisma } from "@/db/client"
 import { createApplicationAttestation } from "@/lib/eas"
 
 async function main() {
+  const roundId = "6"
   const projectId = ""
   // const categoryId = "2"
   const farcasterId = ""
@@ -53,13 +54,13 @@ async function main() {
     },
   })
 
-  const application = project?.applications.find((ap) => ap.roundId === "5")
+  const application = project?.applications.find((ap) => ap.roundId === roundId)
 
   // Attest applicaiton
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId,
-    round: 5,
+    round: parseInt(roundId),
     snapshotRef: metadataSnapshotId,
   })
 
@@ -76,7 +77,7 @@ async function main() {
       },
       round: {
         connect: {
-          id: "5",
+          id: roundId,
         },
       },
       category: {
