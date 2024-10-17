@@ -31,27 +31,19 @@ export const ShareImage = ({
         flexDirection: "column",
         width: "100%",
         height: "100%",
-        padding: 28,
-        backgroundImage: "url(/assets/images/social-share-background.png)",
+        padding: 20,
+        backgroundImage: "url(/assets/images/round-5-reward.svg)",
         backgroundSize: "cover",
         overflow: "hidden",
       }}
     >
-      {/* OP Wordmark */}
-      <img
-        alt=""
-        src="/assets/images/optimism-wordmark.png"
-        width={138}
-        height={19}
-      />
-
       {/* Image, project name, and reward */}
       <div
         style={{
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
-          marginTop: 40,
+          marginTop: 113,
           gap: 20,
         }}
       >
@@ -67,35 +59,20 @@ export const ShareImage = ({
               borderRadius: 19,
               height: 145,
               width: 145,
-              padding: 3.5,
-              background: "linear-gradient(180deg, #FF0420 0%, #8935DE 100%)",
             }}
           >
             <img
               alt=""
               src={thumbnailUrl}
-              height={138}
-              width={138}
+              height={140}
+              width={140}
               style={{
-                height: 138,
-                width: 138,
-                borderRadius: 15.83,
-                // overflow: "hidden",
+                height: 140,
+                width: 140,
+                borderRadius: 15,
                 objectFit: "cover",
               }}
             />
-            {/* <div
-              style={{
-                display: "flex",
-                backgroundImage: `url(${thumbnailUrl})`,
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "cover",
-                borderRadius: 15.83,
-                overflow: "hidden",
-                height: 138,
-                width: 138,
-              }}
-            /> */}
           </div>
         )}
 
@@ -108,7 +85,7 @@ export const ShareImage = ({
         >
           <p
             style={{
-              color: "#8D33DB",
+              color: "#FE1138",
               fontSize: 24,
               lineHeight: "28px",
               letterSpacing: "-0.02em",
@@ -124,7 +101,7 @@ export const ShareImage = ({
               lineHeight: "64px",
               letterSpacing: "-0.02em",
               backgroundImage:
-                "linear-gradient(90deg, #8D33DB 0%, #523EFF 100%)",
+                "linear-gradient(90deg, #FE1138 0%, #FE4FE2 100%)",
               backgroundClip: "text",
               // @ts-ignore TS doesn't know about webkit prefixes
               "-webkit-background-clip": "text",
@@ -144,40 +121,7 @@ export const ShareImage = ({
           display: "flex",
           flexDirection: "column",
         }}
-      >
-        <p
-          style={{
-            fontWeight: 600,
-            fontSize: 24,
-            lineHeight: "28px",
-            letterSpacing: "-0.02em",
-            backgroundImage: "linear-gradient(90deg, #9E3CE9 0%, #523EFF 100%)",
-            backgroundClip: "text",
-            // @ts-ignore TS doesn't know about webkit prefixes
-            "-webkit-background-clip": "text",
-            color: "transparent",
-            margin: 0,
-          }}
-        >
-          Retro Funding Round 4
-        </p>
-        <p
-          style={{
-            fontWeight: 600,
-            fontSize: 32,
-            lineHeight: "36px",
-            letterSpacing: "-0.02em",
-            backgroundImage: "linear-gradient(90deg, #9E3CE9 0%, #523EFF 100%)",
-            backgroundClip: "text",
-            // @ts-ignore TS doesn't know about webkit prefixes
-            "-webkit-background-clip": "text",
-            color: "transparent",
-            margin: 0,
-          }}
-        >
-          Onchain Builders
-        </p>
-      </div>
+      ></div>
     </div>
   )
 }
