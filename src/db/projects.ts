@@ -163,6 +163,7 @@ const getRandomProjectsFn = () => {
     FROM "Project" 
     WHERE "deletedAt" IS NULL 
     AND "thumbnailUrl" IS NOT NULL 
+    AND "thumbnailUrl" != ''
     ORDER BY RANDOM() 
     LIMIT 5;
   `
