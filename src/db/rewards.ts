@@ -204,4 +204,12 @@ async function getClaimByRewardIdFn({ rewardId }: { rewardId: string }) {
   })
 }
 
+export async function deleteClaim(rewardId: string) {
+  return prisma.rewardClaim.delete({
+    where: {
+      rewardId,
+    },
+  })
+}
+
 export const getClaimByRewardId = cache(getClaimByRewardIdFn)

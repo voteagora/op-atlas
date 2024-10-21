@@ -106,7 +106,6 @@ model RewardClaim {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  deletedAt DateTime?
 
   reward       FundingReward @relation(fields: [rewardId], references: [id])
   addressSetBy User?         @relation(fields: [addressSetById], references: [id])
