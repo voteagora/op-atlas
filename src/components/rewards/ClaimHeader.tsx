@@ -89,8 +89,6 @@ const ClaimHeader = ({
             : "Retro Funding Round 1,2 or 3"}
         </span>
         . Project admins with a verified email address can claim this OP grant.
-        Following your KYC approval, your grant will be streamed to you over 100
-        days.
       </p>
 
       {session?.user && isUserAdmin ? (
