@@ -9,6 +9,7 @@ import { isAddress } from "viem"
 import {
   addAddressToRewardsClaim,
   completeRewardsClaim,
+  resetRewardsClaim,
 } from "@/lib/actions/rewards"
 import { RewardWithProject } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -99,6 +100,16 @@ function ClaimFormAddress({
       setAddressError("Something went wrong, please try again")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const onResetClaim = async () => {
+    try {
+      await resetRewardsClaim(reward.id)
+      // Refresh the page to reset the claim form
+      window.location.reload()
+    } catch (error) {
+      console.error("Error resetting claim", error)
     }
   }
 
@@ -203,8 +214,20 @@ function ClaimFormAddress({
                   {reward.claim?.addressSetBy?.username}{" "}
                 </AvatarFallback>
               </Avatar>
-              {reward.claim?.addressSetBy?.name || ""}
+              {reward.claim?.addressSetBy?.name}
             </div>
+          )}
+          {disabled && (
+            <p className="text-secondary-foreground text-xs">
+              Need to change your address?
+              <Button
+                variant="link"
+                className="text-secondary-foreground text-xs p-2"
+                onClick={onResetClaim}
+              >
+                Reset and start over
+              </Button>
+            </p>
           )}
         </AccordionContent>
       </AccordionItem>
