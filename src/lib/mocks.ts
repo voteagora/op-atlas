@@ -27,7 +27,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
       "This category will reward onchain builders who contribute to the success of Optimism. This round seeks to expand the...",
     status: "past",
     link: "/projects/new",
-    resultsLink: "/round/results",
+    resultsLink: "/round/results/4",
     accentColor: "#F0F4FF",
     iconUrl: "/assets/images/round-4.svg",
     startsAt: new Date("2024-05-14T21:53:13.300Z"),
@@ -42,6 +42,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     details:
       "Round 5 will reward OP Stack contributions. This includes direct contributions to the OP Stack, as well as its key dependencies. The round will reward impact which has been generated between October 2023 - July 2024. Impact will be rewarded within the following three categories: Ethereum Core Contributions, OP Stack Research & Development, and OP Stack Tooling. ",
     status: "past",
+    resultsLink: "/round/results/5",
     accentColor: "#FFF0F1",
     iconUrl: "/assets/images/round-5-transparent.svg",
     startsAt: new Date("2024-08-14T21:53:13.300Z"),

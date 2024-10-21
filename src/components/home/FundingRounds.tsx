@@ -230,12 +230,8 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                 )}
               </div>
             </div>
-            {fundingRound.number === 5 ? (
-              <span className="text-sm font-medium text-secondary-foreground">
-                Currently Voting
-              </span>
-            ) : fundingRound.resultsLink ? (
-              <Link href="/round/results">
+            {fundingRound.resultsLink && (
+              <Link href={fundingRound.resultsLink}>
                 <Button
                   variant="secondary"
                   className="text-sm font-medium text-foreground"
@@ -243,7 +239,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                   View results
                 </Button>
               </Link>
-            ) : null}
+            )}
           </div>
         )}
       </div>
