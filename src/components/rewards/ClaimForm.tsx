@@ -184,7 +184,6 @@ function ClaimFormEligibility({
   reward: RewardWithProject
   disabled: boolean
 }) {
-  console.log(reward)
   const formLink = useMemo<string | null>(() => {
     if (disabled) {
       return null
