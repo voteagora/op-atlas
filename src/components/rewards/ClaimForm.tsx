@@ -28,7 +28,10 @@ import { Input } from "../ui/input"
 export function ClaimForm({ reward }: { reward: RewardWithProject }) {
   return (
     <div className="flex flex-col gap-2">
-      <ClaimFormAddress reward={reward} />
+      <ClaimFormAddress
+        reward={reward}
+        disabled={Boolean(reward.claim?.address)}
+      />
       <ClaimFormEligibility
         reward={reward}
         disabled={!Boolean(reward.claim?.address)}
@@ -49,7 +52,13 @@ export function ClaimForm({ reward }: { reward: RewardWithProject }) {
   )
 }
 
-function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
+function ClaimFormAddress({
+  reward,
+  disabled,
+}: {
+  reward: RewardWithProject
+  disabled: boolean
+}) {
   const { data: session } = useSession()
   const [address, setAddress] = useState(reward.claim?.address)
 
@@ -116,6 +125,7 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
               Enter an address that can receive funds on OP Mainnet.
             </div>
             <Input
+              disabled={disabled}
               value={address ?? ""}
               onChange={(e) => {
                 setAddress(e.target.value)
@@ -130,6 +140,7 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
             )}
             <div className="flex gap-2 items-center">
               <Checkbox
+                disabled={disabled}
                 checked={confirmedOnOpMainnet}
                 onCheckedChange={() =>
                   setConfirmedOnOpMainnet(!confirmedOnOpMainnet)
@@ -141,6 +152,7 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
             </div>
             <div className="flex gap-2 items-center">
               <Checkbox
+                disabled={disabled}
                 checked={confirmedCanMakeContractCalls}
                 onCheckedChange={() =>
                   setConfirmedCanMakeContractCalls(
@@ -153,24 +165,27 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
               </div>
             </div>
           </div>
-          <Button
-            disabled={
-              !address ||
-              !confirmedOnOpMainnet ||
-              !confirmedCanMakeContractCalls ||
-              loading ||
-              Boolean(
-                address &&
-                  reward.claim?.address &&
-                  address.toLowerCase() === reward.claim.address.toLowerCase(),
-              )
-            }
-            className="self-start"
-            variant="destructive"
-            onClick={onConfirmAddress}
-          >
-            Confirm
-          </Button>
+          {!disabled && (
+            <Button
+              disabled={
+                !address ||
+                !confirmedOnOpMainnet ||
+                !confirmedCanMakeContractCalls ||
+                loading ||
+                Boolean(
+                  address &&
+                    reward.claim?.address &&
+                    address.toLowerCase() ===
+                      reward.claim.address.toLowerCase(),
+                )
+              }
+              className="self-start"
+              variant="destructive"
+              onClick={onConfirmAddress}
+            >
+              Confirm
+            </Button>
+          )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>
