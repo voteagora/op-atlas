@@ -1,5 +1,5 @@
 import { format, isAfter } from "date-fns"
-import { ArrowUpRight, Check } from "lucide-react"
+import { ArrowUpRight, Check, Loader2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -260,8 +260,7 @@ function ClaimFormKYC({
   reward: RewardWithProject
   disabled: boolean
 }) {
-  // TODO: need to replace with the real logic, MG to figure out what happens after application
-  const kycPending = false
+  const kycPending = !disabled
 
   return (
     <Accordion
@@ -294,30 +293,30 @@ function ClaimFormKYC({
                 calendar year, they do not need to verify again.
               </p>
               <p className="text-sm">
-                Once all parties have completed KYC or KYB, your status will be
-                updated here (within 48 hours).
+                Once all parties have completed KYC or KYB, refresh this page
+                and your status will be updated (within 48 hours).
               </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <MaybeLink url={disabled ? null : "https://kyb.optimism.io"}>
+              <MaybeLink url={disabled ? null : "https://kyc.optimism.io"}>
                 <Button
                   disabled={disabled}
-                  variant="secondary"
+                  variant="destructive"
                   className="flex gap-[10px] items-center"
                 >
-                  <div>Verify my business</div>
+                  <div>Verify my ID</div>
                   <ArrowUpRight size={16} />
                 </Button>
               </MaybeLink>
 
-              <MaybeLink url={disabled ? null : "https://kyc.optimism.io"}>
+              <MaybeLink url={disabled ? null : "https://kyb.optimism.io"}>
                 <Button
                   disabled={disabled}
-                  variant="secondary"
+                  variant="destructive"
                   className="flex gap-[10px] items-center"
                 >
-                  <div>Verify my ID</div>
+                  <div>Verify my business</div>
                   <ArrowUpRight size={16} />
                 </Button>
               </MaybeLink>
@@ -325,10 +324,13 @@ function ClaimFormKYC({
           </div>
 
           {kycPending && (
-            <p className="text-secondary-foreground text-sm">
-              We are processing your KYC/KYB status. Please check back later to
-              continue.
-            </p>
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <p className="text-secondary-foreground text-sm">
+                We are waiting on 1 or more of your teammates. Please ensure all
+                members have taken action before writing in.
+              </p>
+            </div>
           )}
 
           <p className="text-secondary-foreground text-xs">
@@ -378,7 +380,7 @@ function ClaimFormSuperfluid({
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-between">
           <div className="flex items-center gap-1 flex-1 text-sm font-medium">
-            Step 3. Receive your grant
+            Step 4. Receive your grant
           </div>
           {reward.claim?.status === "claimed" && <Completed />}
         </AccordionTrigger>
