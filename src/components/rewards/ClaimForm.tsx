@@ -269,7 +269,8 @@ function ClaimFormEligibility({
         <AccordionContent className="flex flex-col gap-12">
           <div className="flex flex-col gap-6">
             <div className="text-secondary-foreground text-sm">
-              Only one project admin needs to submit the form.
+              Only one project admin needs to submit the form. After submitting,
+              refresh this page and your status will be updated (within 1 hour).
             </div>
 
             {!reward.claim?.grantEligibilityUpdatedAt ? (
