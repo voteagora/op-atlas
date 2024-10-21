@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import { format, isAfter } from "date-fns"
-import { ArrowUpRight, Check, Loader2 } from "lucide-react"
+import { ArrowUpRight, Check, Copy, Loader2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -12,7 +12,7 @@ import {
   resetRewardsClaim,
 } from "@/lib/actions/rewards"
 import { RewardWithProject } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn, copyToClipboard } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Callout } from "../common/Callout"
@@ -136,15 +136,32 @@ function ClaimFormAddress({
             <div className="text-secondary-foreground text-sm">
               Enter an address that can receive funds on OP Mainnet.
             </div>
-            <Input
-              disabled={disabled}
-              value={address ?? ""}
-              onChange={(e) => {
-                setAddress(e.target.value)
-                setAddressError("")
-              }}
-              placeholder="0x..."
-            />
+            <div className="relative w-full">
+              <Input
+                disabled={disabled}
+                value={address ?? ""}
+                onChange={(e) => {
+                  setAddress(e.target.value)
+                  setAddressError("")
+                }}
+                placeholder="0x..."
+              />
+              {reward.claim?.address && (
+                <Button
+                  variant="ghost"
+                  onClick={async () => {
+                    if (reward.claim?.address) {
+                      await copyToClipboard(reward.claim?.address)
+
+                      toast("Copied to clipboard")
+                    }
+                  }}
+                  className="absolute top-1/2 right-0 transform -translate-y-1/2"
+                >
+                  <Copy size={16} />
+                </Button>
+              )}
+            </div>
             {addressError && (
               <div className="text-red-600 text-sm font-medium">
                 {addressError}
