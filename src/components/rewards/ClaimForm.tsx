@@ -409,12 +409,12 @@ function ClaimFormKYC({
           )}
 
           <p className="text-secondary-foreground text-xs">
-            Need help? Contact{" "}
+            Need help?{" "}
             <ExternalLink
-              href="mailto:retrofunding.optimism.io"
+              href="https://share.hsforms.com/1PNoDrBhtR2CHm3HwbB577Aqoshb"
               className="text-foreground font-medium"
             >
-              retrofunding@optimism.io
+              Contact support
             </ExternalLink>
           </p>
         </AccordionContent>

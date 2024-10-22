@@ -108,7 +108,7 @@ const RewardClaimFlow = ({
           </ExternalLink>{" "}
           or{" "}
           <ExternalLink
-            href="mailto:retrofunding@optimism.io"
+            href="https://share.hsforms.com/1PNoDrBhtR2CHm3HwbB577Aqoshb"
             className="font-medium"
           >
             contact support
