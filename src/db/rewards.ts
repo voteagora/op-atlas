@@ -44,6 +44,7 @@ async function getFundingRewardsByRoundIdsAndSearchFn({
       },
       select: {
         id: true,
+        roundId: true,
         amount: true,
         createdAt: true,
         updatedAt: true,

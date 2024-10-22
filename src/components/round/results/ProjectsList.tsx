@@ -25,11 +25,11 @@ const ProjectsList = ({
   handleLoadMore,
   isFetchingMore,
 }: Props) => {
-  const getProjectUrl = (projectName: string) => {
+  const getProjectUrl = (projectName: string, roundId: string) => {
     const formattedName = projectName
       .replace(/ /g, "-")
       .replace(/[^a-zA-Z0-9-]/g, "")
-    return `https://retropgfhub.com/explore/RetroPGF4/${formattedName}`
+    return `https://retropgfhub.com/explore/RetroPGF${roundId}/${formattedName}`
   }
   const { track } = useAnalytics()
 
@@ -64,7 +64,7 @@ const ProjectsList = ({
               <div className="ml-4">
                 <ExternalLink
                   className="hover:underline"
-                  href={getProjectUrl(project.project.name)}
+                  href={getProjectUrl(project.project.name, project.roundId)}
                   onClick={() => {
                     track("Project rewarded", {
                       projectId: project.project.id,

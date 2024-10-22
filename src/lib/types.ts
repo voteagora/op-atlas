@@ -51,6 +51,7 @@ export type RewardWithProject = Prisma.FundingRewardGetPayload<{
 export type FundingRewardDetails = Prisma.FundingRewardGetPayload<{
   select: {
     id: true
+    roundId: true
     amount: true
     createdAt: true
     updatedAt: true
