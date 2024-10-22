@@ -1,5 +1,7 @@
 import { Sora } from "next/font/google"
 
+import { formatNumber } from "@/lib/utils"
+
 const sora = Sora({
   subsets: ["latin"],
   variable: "--inter",
@@ -103,7 +105,7 @@ export const ShareImage = ({
               margin: 0,
             }}
           >
-            {new Intl.NumberFormat("en-US").format(amount)} OP
+            {formatNumber(amount, 0)} OP
           </p>
         </div>
       </div>

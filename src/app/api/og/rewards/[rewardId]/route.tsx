@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og"
 
 import { getReward } from "@/db/rewards"
+import { formatNumber } from "@/lib/utils"
 import { loadFont, loadImage } from "@/lib/utils/og"
 
 export async function GET(
@@ -9,7 +10,7 @@ export async function GET(
 ) {
   const claim = await getReward({ id: params.rewardId })
   const projectName = claim?.project.name
-  const reward = claim?.amount || 0
+  const reward = formatNumber(claim?.amount.toFixed(0) || 0, 0)
   const thumbnailUrl = claim?.project.thumbnailUrl
 
   const soraRegular = await loadFont("Sora-Regular.otf")
@@ -58,7 +59,7 @@ export async function GET(
                 color: "transparent",
               }}
             >
-              {reward.toString()} OP
+              {reward} OP
             </h4>
           </div>
         </div>
