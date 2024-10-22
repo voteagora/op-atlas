@@ -2,7 +2,7 @@ import { Sora } from "next/font/google"
 import Image from "next/image"
 
 import { RewardWithProject } from "@/lib/types"
-import { cn, numberWithCommas } from "@/lib/utils"
+import { cn, formatNumber } from "@/lib/utils"
 
 const sora = Sora({
   subsets: ["latin"],
@@ -60,7 +60,7 @@ export function SocialShareImage({ reward }: { reward: RewardWithProject }) {
             className="text-[45px] font-semibold text-[#8D33DB] tracking-tighter"
           >
             {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-            {numberWithCommas(reward.amount)} OP
+            {formatNumber(reward.amount)} OP
           </div>
         </div>
       </div>

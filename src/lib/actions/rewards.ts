@@ -5,7 +5,9 @@ import { isAddress } from "viem"
 
 import { auth } from "@/auth"
 import {
+  deleteClaim,
   getClaimByAddress,
+  getClaimByRewardId,
   getReward,
   startClaim,
   updateClaim,
@@ -128,6 +130,42 @@ export const completeRewardsClaim = async (rewardId: string) => {
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
   revalidatePath("/rewards/[rewardId]/page", "page")
+
+  return {
+    error: null,
+    claim,
+  }
+}
+
+export const resetRewardsClaim = async (rewardId: string) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const reward = await getReward({ id: rewardId })
+  if (!reward) {
+    return {
+      error: "Reward not found",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(
+    reward.project.id,
+    session.user.farcasterId,
+  )
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  const claim = await deleteClaim(rewardId)
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+  revalidatePath("/rewards/[rewardId]", "page")
 
   return {
     error: null,

@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast, Toaster } from "sonner"
 
 import MetadataPublishedConfirmationDialog from "@/components/projects/publish/MetadataPublishedConfirmationDialog"
@@ -22,7 +22,7 @@ const UnsavedChangesToastClient = ({
   const hasUnpublishedChanges = projectHasUnpublishedChanges(project)
   const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
-  const onPublish = async () => {
+  const onPublish = useCallback(async () => {
     toast.promise(createProjectSnapshot(project.id), {
       loading: "Publishing metadata onchain...",
       success: ({ snapshot }) => {
@@ -37,7 +37,7 @@ const UnsavedChangesToastClient = ({
         return "Error publishing snapshot, please try again."
       },
     })
-  }
+  }, [project.id, track])
 
   useEffect(() => {
     if (hasUnpublishedChanges && hasBeenPublished && !toastOpenRef.current) {
@@ -77,7 +77,7 @@ const UnsavedChangesToastClient = ({
         },
       )
     }
-  }, [hasUnpublishedChanges, project])
+  }, [hasUnpublishedChanges, hasBeenPublished, onPublish, project])
 
   return (
     <>

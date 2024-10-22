@@ -91,7 +91,7 @@ const Navbar = () => {
                   className={`${
                     isProjects ? "mt-1" : "group-hover:mt-1"
                   } focus:outline-none focus:opacity-80`}
-                  href="/round/results"
+                  href="/round/results/5"
                 >
                   Recipients
                 </Link>

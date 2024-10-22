@@ -1,5 +1,6 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
 import { format, isAfter } from "date-fns"
-import { ArrowUpRight, Check } from "lucide-react"
+import { ArrowUpRight, Check, Copy, Loader2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -8,9 +9,10 @@ import { isAddress } from "viem"
 import {
   addAddressToRewardsClaim,
   completeRewardsClaim,
+  resetRewardsClaim,
 } from "@/lib/actions/rewards"
 import { RewardWithProject } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn, copyToClipboard } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Callout } from "../common/Callout"
@@ -28,7 +30,14 @@ import { Input } from "../ui/input"
 export function ClaimForm({ reward }: { reward: RewardWithProject }) {
   return (
     <div className="flex flex-col gap-2">
-      <ClaimFormAddress reward={reward} />
+      <ClaimFormAddress
+        reward={reward}
+        disabled={Boolean(reward.claim?.address)}
+      />
+      <ClaimFormEligibility
+        reward={reward}
+        disabled={!Boolean(reward.claim?.address)}
+      />
       <ClaimFormKYC
         reward={reward}
         disabled={
@@ -45,7 +54,13 @@ export function ClaimForm({ reward }: { reward: RewardWithProject }) {
   )
 }
 
-function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
+function ClaimFormAddress({
+  reward,
+  disabled,
+}: {
+  reward: RewardWithProject
+  disabled: boolean
+}) {
   const { data: session } = useSession()
   const [address, setAddress] = useState(reward.claim?.address)
 
@@ -88,6 +103,16 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
     }
   }
 
+  const onResetClaim = async () => {
+    try {
+      await resetRewardsClaim(reward.id)
+      // Refresh the page to reset the claim form
+      window.location.reload()
+    } catch (error) {
+      console.error("Error resetting claim", error)
+    }
+  }
+
   return (
     <Accordion
       type="single"
@@ -111,14 +136,32 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
             <div className="text-secondary-foreground text-sm">
               Enter an address that can receive funds on OP Mainnet.
             </div>
-            <Input
-              value={address ?? ""}
-              onChange={(e) => {
-                setAddress(e.target.value)
-                setAddressError("")
-              }}
-              placeholder="0x..."
-            />
+            <div className="relative w-full">
+              <Input
+                disabled={disabled}
+                value={address ?? ""}
+                onChange={(e) => {
+                  setAddress(e.target.value)
+                  setAddressError("")
+                }}
+                placeholder="0x..."
+              />
+              {reward.claim?.address && (
+                <Button
+                  variant="ghost"
+                  onClick={async () => {
+                    if (reward.claim?.address) {
+                      await copyToClipboard(reward.claim?.address)
+
+                      toast("Copied to clipboard")
+                    }
+                  }}
+                  className="absolute top-1/2 right-0 transform -translate-y-1/2"
+                >
+                  <Copy size={16} />
+                </Button>
+              )}
+            </div>
             {addressError && (
               <div className="text-red-600 text-sm font-medium">
                 {addressError}
@@ -126,6 +169,7 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
             )}
             <div className="flex gap-2 items-center">
               <Checkbox
+                disabled={disabled}
                 checked={confirmedOnOpMainnet}
                 onCheckedChange={() =>
                   setConfirmedOnOpMainnet(!confirmedOnOpMainnet)
@@ -137,6 +181,7 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
             </div>
             <div className="flex gap-2 items-center">
               <Checkbox
+                disabled={disabled}
                 checked={confirmedCanMakeContractCalls}
                 onCheckedChange={() =>
                   setConfirmedCanMakeContractCalls(
@@ -149,31 +194,65 @@ function ClaimFormAddress({ reward }: { reward: RewardWithProject }) {
               </div>
             </div>
           </div>
-          <Button
-            disabled={
-              !address ||
-              !confirmedOnOpMainnet ||
-              !confirmedCanMakeContractCalls ||
-              loading ||
-              Boolean(
-                address &&
-                  reward.claim?.address &&
-                  address.toLowerCase() === reward.claim.address.toLowerCase(),
-              )
-            }
-            className="self-start"
-            variant="destructive"
-            onClick={onConfirmAddress}
-          >
-            Confirm
-          </Button>
+          {!disabled && (
+            <Button
+              disabled={
+                !address ||
+                !confirmedOnOpMainnet ||
+                !confirmedCanMakeContractCalls ||
+                loading ||
+                Boolean(
+                  address &&
+                    reward.claim?.address &&
+                    address.toLowerCase() ===
+                      reward.claim.address.toLowerCase(),
+                )
+              }
+              className="self-start"
+              variant="destructive"
+              onClick={onConfirmAddress}
+            >
+              Confirm
+            </Button>
+          )}
+          {disabled && (
+            <div className="flex gap-2 items-center text-secondary-foreground text-sm">
+              <Check className="stroke-success-foreground" size={16} />
+              Completed on{" "}
+              {format(reward.claim?.addressSetAt || "", "MMM d, h:mm a")}{" "}
+              {reward.claim?.addressSetBy && "by"}
+              <Avatar className="!w-6 !h-6">
+                <AvatarImage
+                  className="rounded-full"
+                  src={reward.claim?.addressSetBy?.imageUrl || ""}
+                  alt="team avatar"
+                />
+                <AvatarFallback>
+                  {reward.claim?.addressSetBy?.username}{" "}
+                </AvatarFallback>
+              </Avatar>
+              {reward.claim?.addressSetBy?.name}
+            </div>
+          )}
+          {disabled && (
+            <p className="text-secondary-foreground text-xs">
+              Need to change your address?
+              <Button
+                variant="link"
+                className="text-secondary-foreground text-xs p-2"
+                onClick={onResetClaim}
+              >
+                Reset and start over
+              </Button>
+            </p>
+          )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>
   )
 }
 
-function ClaimFormKYC({
+function ClaimFormEligibility({
   reward,
   disabled,
 }: {
@@ -200,79 +279,142 @@ function ClaimFormKYC({
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-between">
           <div className="flex items-center gap-1 flex-1 text-sm font-medium">
-            Step 2. Complete KYC
+            Step 2. Submit the grant eligibility form
           </div>
-          {(reward.claim?.status === "cleared" ||
-            reward.claim?.status === "claimed") && <Completed />}
+          {!!reward.claim?.grantEligibilityUpdatedAt && <Completed />}
         </AccordionTrigger>
         <AccordionContent className="flex flex-col gap-12">
           <div className="flex flex-col gap-6">
             <div className="text-secondary-foreground text-sm">
-              <span className="text-foreground font-medium">
-                First, submit the grant eligibility form.
-              </span>{" "}
-              Only one project admin needs to submit the form.
+              Only one project admin needs to submit the form. After submitting,
+              refresh this page and your status will be updated (within 1 hour).
             </div>
 
-            <MaybeLink url={formLink} className="self-start">
-              <Button
-                disabled={disabled || !formLink}
-                variant="destructive"
-                className="flex gap-[10px] items-center"
-              >
-                <div>Fill out the form</div>
-                <ArrowUpRight size={16} />
-              </Button>
-            </MaybeLink>
-          </div>
-          <div className="flex flex-col gap-6">
-            <div className="text-secondary-foreground text-sm">
-              <span className="text-foreground font-medium">
-                Next, verify your identity.
-              </span>{" "}
-              Each person or business identified in the form must verify their
-              identity. Individuals should verify at kyc.optimism.io while
-              businesses should verify at kyb.optimism.io.
-              <br />
-              <br />
-              Once all team members have completed their own KYC,{" "}
-              <span className="text-foreground font-medium">
-                you will be notified of the outcome within 48 hours.
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <MaybeLink url={disabled ? null : "https://kyb.optimism.io"}>
+            {!reward.claim?.grantEligibilityUpdatedAt ? (
+              <MaybeLink url={formLink} className="self-start">
                 <Button
-                  disabled={disabled}
-                  variant="secondary"
+                  disabled={disabled || !formLink}
+                  variant="destructive"
                   className="flex gap-[10px] items-center"
                 >
-                  <div>Verify my business</div>
+                  <div>Fill out the form</div>
                   <ArrowUpRight size={16} />
                 </Button>
               </MaybeLink>
+            ) : (
+              <>
+                <div className="text-secondary-foreground text-sm flex flex-row items-center gap-x-1">
+                  <Completed /> on{" "}
+                  {format(
+                    reward.claim.grantEligibilityUpdatedAt,
+                    "eeee, MMMM d",
+                  )}
+                </div>
+                <p className="text-secondary-foreground text-xs">
+                  Forgot something?{" "}
+                  <ExternalLink
+                    href={formLink!}
+                    className="text-foreground font-medium"
+                  >
+                    Resubmit form
+                  </ExternalLink>
+                </p>
+              </>
+            )}
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
+}
 
+function ClaimFormKYC({
+  reward,
+  disabled,
+}: {
+  reward: RewardWithProject
+  disabled: boolean
+}) {
+  const kycPending = !disabled
+
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      className="w-full border border-default rounded-xl p-8"
+    >
+      <AccordionItem value="item-1">
+        <AccordionTrigger className="justify-between">
+          <div className="flex items-center gap-1 flex-1 text-sm font-medium">
+            Step 3. Complete KYC
+          </div>
+          {(reward.claim?.status === "cleared" ||
+            reward.claim?.status === "claimed") && <Completed />}
+        </AccordionTrigger>
+        <AccordionContent className="pt-4 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
+            <div className="text-secondary-foreground text-sm space-y-4">
+              <p className="text-sm">
+                <span className="text-foreground font-medium">
+                  Each person or business identified in the grant eligibility
+                  form must verify their identity:
+                </span>
+                <br />
+                individuals at kyc.optimism.io and businesses at
+                kyb.optimism.io.
+              </p>
+              <p className="text-sm">
+                If a person or business has been verified within the last
+                calendar year, they do not need to verify again.
+              </p>
+              <p className="text-sm">
+                Once all parties have completed KYC or KYB, refresh this page
+                and your status will be updated (within 48 hours).
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
               <MaybeLink url={disabled ? null : "https://kyc.optimism.io"}>
                 <Button
                   disabled={disabled}
-                  variant="secondary"
+                  variant="destructive"
                   className="flex gap-[10px] items-center"
                 >
                   <div>Verify my ID</div>
                   <ArrowUpRight size={16} />
                 </Button>
               </MaybeLink>
+
+              <MaybeLink url={disabled ? null : "https://kyb.optimism.io"}>
+                <Button
+                  disabled={disabled}
+                  variant="destructive"
+                  className="flex gap-[10px] items-center"
+                >
+                  <div>Verify my business</div>
+                  <ArrowUpRight size={16} />
+                </Button>
+              </MaybeLink>
             </div>
           </div>
 
+          {kycPending && (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <p className="text-secondary-foreground text-sm">
+                We are waiting on 1 or more of your teammates. Please ensure all
+                members have taken action before writing in.
+              </p>
+            </div>
+          )}
+
           <p className="text-secondary-foreground text-xs">
-            Need help? Contact{" "}
+            Need help?{" "}
             <ExternalLink
-              href="mailto:retrofunding.optimism.io"
+              href="https://share.hsforms.com/1PNoDrBhtR2CHm3HwbB577Aqoshb"
               className="text-foreground font-medium"
             >
-              retrofunding@optimism.io
+              Contact support
             </ExternalLink>
           </p>
         </AccordionContent>
@@ -313,7 +455,7 @@ function ClaimFormSuperfluid({
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-between">
           <div className="flex items-center gap-1 flex-1 text-sm font-medium">
-            Step 3. Receive your grant
+            Step 4. Receive your grant
           </div>
           {reward.claim?.status === "claimed" && <Completed />}
         </AccordionTrigger>

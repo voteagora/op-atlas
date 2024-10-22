@@ -11,7 +11,7 @@ import ResultFilters from "./ResultFilters"
 import ResultsHeader from "./ResultsHeader"
 import RoundSelector from "./RoundSelector"
 
-export function Results() {
+export function Results({ roundId }: { roundId?: string }) {
   const [searchText, setSearchText] = useState("")
   const [sortByAmount, setSortByAmount] = useState<"asc" | "desc">("desc")
   const [projectRewards, setProjectRewards] = useState<FundingRewardDetails[]>(
@@ -22,11 +22,9 @@ export function Results() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
-  const [selectedRounds, setSelectedRounds] = useState<string[]>([
-    "4",
-    "5",
-    "6",
-  ])
+  const [selectedRounds, setSelectedRounds] = useState<string[]>(
+    roundId ? [roundId] : ["4", "5", "6"],
+  )
 
   const pageSize = 10
   const debouncedSearchText = useDebounce<string>(searchText, 300) // 2-second debounce

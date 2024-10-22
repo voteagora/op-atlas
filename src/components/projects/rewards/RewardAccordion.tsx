@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ProjectWithDetails } from "@/lib/types"
-import { copyToClipboard, numberWithCommas } from "@/lib/utils"
+import { copyToClipboard, formatNumber } from "@/lib/utils"
 
 const RewardAccordion = ({
   reward,
@@ -57,7 +57,7 @@ const RewardAccordion = ({
               />
               <div className="text-sm text-secondary-foreground">
                 {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-                {numberWithCommas(reward.amount)}
+                {formatNumber(reward.amount)}
               </div>
             </div>
           )}
@@ -74,7 +74,7 @@ const RewardAccordion = ({
               />
               <div className="text-sm text-secondary-foreground">
                 {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-                {numberWithCommas(reward.amount)}
+                {formatNumber(reward.amount)}
               </div>
             </div>
           </div>

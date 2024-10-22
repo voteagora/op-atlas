@@ -21,8 +21,16 @@ export const nanoid = customAlphabet(
   10,
 )
 
-export function numberWithCommas(x: number) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+export function formatNumber(
+  amount: string | number,
+  maximumSignificantDigits = 2,
+) {
+  const numberFormat = new Intl.NumberFormat("en", {
+    notation: "standard",
+    maximumFractionDigits: maximumSignificantDigits,
+  })
+
+  return numberFormat.format(Number(amount))
 }
 
 export function cn(...inputs: ClassValue[]) {

@@ -27,7 +27,7 @@ export function Rounds({
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       {!data && (
         <div className="z-10 w-full py-3 text-center text-background text-sm font-medium bg-accent-foreground">
-          The results are in! Sign in to see your Retro Funding Round 4 results.
+          The results are in! Sign in to see your Retro Funding 5 rewards.
         </div>
       )}
       {/* Background image */}

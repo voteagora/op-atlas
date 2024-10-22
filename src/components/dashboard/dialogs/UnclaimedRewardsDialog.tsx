@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { unclaimedRewards } from "@/lib/rewards"
 import { ProjectWithDetails } from "@/lib/types"
-import { numberWithCommas } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
 
 function UnclaimedRewardsDialog({
   open,
@@ -90,7 +90,7 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
         />
         <div className="font-semibold">
           {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-          {numberWithCommas(project.rewards[0].amount)}
+          {formatNumber(project.rewards[0].amount)}
         </div>
       </div>
       <Link href={`/rewards/${project.rewards[0].id}`}>
