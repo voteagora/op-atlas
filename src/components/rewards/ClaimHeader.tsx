@@ -5,7 +5,7 @@ import { useMemo } from "react"
 import { toast } from "sonner"
 
 import { RewardWithProject } from "@/lib/types"
-import { cn, copyToClipboard } from "@/lib/utils"
+import { cn, copyToClipboard, formatNumber } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
@@ -74,7 +74,7 @@ const ClaimHeader = ({
           />
           <p className="font-semibold">
             {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-            {new Intl.NumberFormat("en-US").format(reward.amount)}
+            {formatNumber(reward.amount)}
           </p>
         </div>
       </div>
