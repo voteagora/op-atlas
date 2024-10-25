@@ -402,8 +402,9 @@ function ClaimFormKYC({
             <div className="flex items-center gap-2">
               <Loader2 className="h-5 w-5 animate-spin" />
               <p className="text-secondary-foreground text-sm">
-                We are waiting on 1 or more of your teammates. Please ensure all
-                members have taken action before writing in.
+                We are checking your verifications. Please ensure every person
+                and business named in the KYC form has taken action and allow 48
+                hours before writing in.
               </p>
             </div>
           )}
