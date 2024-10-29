@@ -26,9 +26,15 @@ export default async function Page({
     redirect("/dashboard")
   }
 
+  const isUserAdmin = !isInvalid?.error
+
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
-      <RewardClaimFlow className="mt-18 max-w-4xl" reward={claim} />
+      <RewardClaimFlow
+        className="mt-18 max-w-4xl"
+        reward={claim}
+        isUserAdmin={isUserAdmin}
+      />
     </main>
   )
 }

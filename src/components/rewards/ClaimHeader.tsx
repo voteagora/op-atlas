@@ -13,22 +13,15 @@ import { Button } from "../ui/button"
 
 const ClaimHeader = ({
   reward,
+  isUserAdmin,
   className,
 }: {
   reward: RewardWithProject
+  isUserAdmin: boolean
   className?: string
 }) => {
   const { data: session } = useSession()
   const { setOpenDialog } = useAppDialogs()
-
-  const isUserAdmin = useMemo(
-    () =>
-      session?.user &&
-      reward.project.team.some(
-        ({ role, userId }) => userId === session?.user.id && role === "admin",
-      ),
-    [reward, session?.user],
-  )
 
   const copyGrantId = async () => {
     try {

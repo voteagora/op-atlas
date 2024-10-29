@@ -16,9 +16,11 @@ import { ShareImage } from "./ShareImage"
 
 const RewardClaimFlow = ({
   className,
+  isUserAdmin,
   reward,
 }: {
   reward: RewardWithProject
+  isUserAdmin: boolean
   className?: string
 }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -51,7 +53,7 @@ const RewardClaimFlow = ({
     <div className={cn("flex flex-col gap-y-18", className)}>
       <div className="flex flex-col gap-y-12 w-full bg-background border rounded-3xl p-16">
         {/* Header */}
-        <ClaimHeader reward={reward} />
+        <ClaimHeader reward={reward} isUserAdmin={isUserAdmin} />
 
         {/* Claim form */}
         <ClaimForm reward={reward} />
