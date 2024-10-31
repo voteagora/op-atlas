@@ -45,7 +45,7 @@ const RewardAccordion = ({
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-between p-0">
           <div className="flex items-center text-base font-semibold gap-1 flex-1">
-            Retro Funding Round {reward.id}
+            Retro Funding Round {reward.roundId}
           </div>
           {!isExpanded && (
             <div className="flex gap-2">
