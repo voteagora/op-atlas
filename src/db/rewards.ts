@@ -146,15 +146,33 @@ export async function insertRewards(
   })
 }
 
-async function getClaimByAddressFn({ address }: { address: string }) {
-  return prisma.rewardClaim.findFirst({
-    where: {
-      address: address.toLowerCase(),
-    },
-  })
+async function canClaimToAddressFn({
+  address,
+  rewardId,
+}: {
+  address: string
+  rewardId: string
+}) {
+  const [reward, claim] = await Promise.all([
+    prisma.fundingReward.findFirst({
+      where: {
+        id: rewardId,
+      },
+    }),
+    prisma.rewardClaim.findFirst({
+      where: {
+        address: address.toLowerCase(),
+      },
+      include: {
+        reward: true,
+      },
+    }),
+  ])
+
+  return !claim || reward?.projectId === claim.reward.projectId // can only claim to the same project
 }
 
-export const getClaimByAddress = cache(getClaimByAddressFn)
+export const canClaimToAddress = cache(canClaimToAddressFn)
 
 export async function startClaim({
   rewardId,

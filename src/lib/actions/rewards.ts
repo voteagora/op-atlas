@@ -5,9 +5,8 @@ import { isAddress } from "viem"
 
 import { auth } from "@/auth"
 import {
+  canClaimToAddress,
   deleteClaim,
-  getClaimByAddress,
-  getClaimByRewardId,
   getReward,
   startClaim,
   updateClaim,
@@ -79,8 +78,8 @@ export const addAddressToRewardsClaim = async (
   }
 
   // Address can't be used by another claim
-  const claim = await getClaimByAddress({ address })
-  if (claim) {
+  const canClaim = await canClaimToAddress({ address, rewardId })
+  if (!canClaim) {
     return {
       error: "Address already in use by another project",
     }
