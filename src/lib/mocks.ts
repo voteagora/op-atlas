@@ -18,20 +18,18 @@ export type FundingRound = {
 
 export const FUNDING_ROUNDS: FundingRound[] = [
   {
-    name: "Onchain Builders",
-    number: 4,
+    name: "Governance",
+    number: 6,
     funding: {
-      op: "10M",
+      op: "Up to 3.5M",
     },
     details:
-      "This category will reward onchain builders who contribute to the success of Optimism. This round seeks to expand the...",
+      "Improving the capture resistance and resource allocation of Optimism Governance is the primary objective of this category. By incentivizing contributions that enhance governance tools, mechanisms, and processes, Retro Funding aims to foster a more robust and resilient governance framework within the ecosystem.",
     status: "past",
-    link: "/projects/new",
-    resultsLink: "/round/results/4",
-    accentColor: "#F0F4FF",
-    iconUrl: "/assets/images/round-4.svg",
-    startsAt: new Date("2024-05-14T21:53:13.300Z"),
-    endsAt: new Date("2023-06-06T21:53:13.300Z"),
+    accentColor: "#F0FFF1",
+    iconUrl: "/assets/images/round-6.svg",
+    startsAt: `Planned for ${new Date("2024-09-26T21:53:13.300Z")}`,
+    endsAt: new Date("2024-10-14T21:53:13.300Z"),
   },
   {
     name: "OP Stack",
@@ -49,18 +47,20 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     endsAt: new Date("2024-09-07T00:00:00.300Z"),
   },
   {
-    name: "Governance",
-    number: 6,
+    name: "Onchain Builders",
+    number: 4,
     funding: {
-      op: "Up to 3.5M",
+      op: "10M",
     },
     details:
-      "Improving the capture resistance and resource allocation of Optimism Governance is the primary objective of this category. By incentivizing contributions that enhance governance tools, mechanisms, and processes, Retro Funding aims to foster a more robust and resilient governance framework within the ecosystem.",
+      "This category will reward onchain builders who contribute to the success of Optimism. This round seeks to expand the...",
     status: "past",
-    accentColor: "#F0FFF1",
-    iconUrl: "/assets/images/round-6.svg",
-    startsAt: `Planned for ${new Date("2024-09-26T21:53:13.300Z")}`,
-    endsAt: new Date("2024-10-14T21:53:13.300Z"),
+    link: "/projects/new",
+    resultsLink: "/round/results/4",
+    accentColor: "#F0F4FF",
+    iconUrl: "/assets/images/round-4.svg",
+    startsAt: new Date("2024-05-14T21:53:13.300Z"),
+    endsAt: new Date("2023-06-06T21:53:13.300Z"),
   },
   {
     name: "Welcome, Optimists!",
