@@ -63,17 +63,6 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     endsAt: new Date("2024-10-14T21:53:13.300Z"),
   },
   {
-    name: "Dev Tooling",
-    number: 7,
-    details:
-      "Supporting Optimism builders with developer tooling is the focus of this category. From SDKs to testing frameworks, contributions that streamline the development process and empower builders will be rewarded, ensuring a more efficient and productive development environment.",
-    status: "upcoming",
-    accentColor: "#FFF6F0",
-    iconUrl: "/assets/images/round-7.svg",
-    startsAt: new Date("2024-10-14T21:53:13.300Z"),
-    endsAt: new Date("2023-05-31T21:53:13.300Z"),
-  },
-  {
     name: "Welcome, Optimists!",
     number: 3,
     funding: {
