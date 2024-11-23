@@ -148,9 +148,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
               <div className="w-full flex justify-between space-x-2">
                 <h2 className="text-base font-semibold text-text-default text-start">
                   Round {fundingRound.number}
-                  {fundingRound.status !== "past" || fundingRound.number === 4
-                    ? ": " + fundingRound.name
-                    : ""}
+                  {fundingRound.number > 3 ? ": " + fundingRound.name : ""}
                 </h2>
                 {(fundingRound.status === "upcoming" ||
                   !fundingRound.endsAt ||
