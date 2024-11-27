@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { Rounds } from "@/components/home/Rounds"
 import { getRandomProjects } from "@/db/projects"
 import { getUserById } from "@/db/users"
-import { getProjects } from "@/lib/actions/projects"
+import { getAdminProjects } from "@/lib/actions/projects"
 import { updateInteractions } from "@/lib/actions/users"
 
 export default async function Page() {
@@ -10,7 +10,7 @@ export default async function Page() {
   const [projects, user, userProjects] = await Promise.all([
     getRandomProjects(),
     session?.user.id ? getUserById(session.user.id) : null,
-    session?.user.id ? getProjects(session.user.id) : null,
+    session?.user.id ? getAdminProjects(session.user.id) : null,
   ])
 
   if (session?.user) {

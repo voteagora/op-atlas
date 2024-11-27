@@ -122,7 +122,7 @@ const Dashboard = ({
 
   // TODO: hide rewards section if all rewards are claimed
   const showRewardsSection = Boolean(
-    projects?.find((project) => project.applications.length),
+    adminProjects?.find((project) => project.applications.length),
   )
 
   const handleShowMore = () => {
