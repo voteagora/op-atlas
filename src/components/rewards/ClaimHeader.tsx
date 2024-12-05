@@ -79,6 +79,8 @@ const ClaimHeader = ({
             ? "Retro Funding Round 4: Onchain Builders"
             : reward.roundId === "5"
             ? "Retro Funding Round 5: OP Stack"
+            : reward.roundId === "6"
+            ? "Retro Funding Round 6: Governance"
             : "Retro Funding Round 1,2 or 3"}
         </span>
         . Project admins with a verified email address can claim this OP grant.
