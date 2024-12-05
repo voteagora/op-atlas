@@ -12,11 +12,13 @@ export const ShareImage = ({
   amount,
   thumbnailUrl,
   useExternalFont = true,
+  roundId,
 }: {
   name: string
   amount: number
   thumbnailUrl?: string | null
   useExternalFont?: boolean
+  roundId: "5" | "6"
 }) => {
   return (
     <div
@@ -28,7 +30,7 @@ export const ShareImage = ({
         width: "100%",
         height: "100%",
         padding: 20,
-        backgroundImage: "url(/assets/images/round-5-reward.svg)",
+        backgroundImage: `url(/assets/images/round-${roundId}-reward.svg)`,
         backgroundSize: "cover",
         overflow: "hidden",
       }}

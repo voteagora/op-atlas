@@ -61,7 +61,7 @@ const RewardClaimFlow = ({
         <StarIcon className="mx-auto" />
 
         {/* Share image */}
-        {reward.roundId === "5" && (
+        {(reward.roundId === "5" || reward.roundId === "6") && (
           <>
             <div className="flex flex-col items-center border rounded-2xl p-10 gap-6">
               <h4 className="font-semibold text-xl">Share your achievement</h4>
@@ -70,6 +70,7 @@ const RewardClaimFlow = ({
                   name={reward.project.name}
                   amount={Number(reward.amount)}
                   thumbnailUrl={reward.project.thumbnailUrl}
+                  roundId={reward.roundId}
                 />
               </div>
 
