@@ -12,12 +12,19 @@ export const ShareImage = ({
   amount,
   thumbnailUrl,
   useExternalFont = true,
+  roundId,
 }: {
   name: string
   amount: number
   thumbnailUrl?: string | null
   useExternalFont?: boolean
+  roundId: "5" | "6"
 }) => {
+  const gradient =
+    roundId === "6"
+      ? "linear-gradient(90deg, #39D551 0%, #3374DB 100%)"
+      : "linear-gradient(90deg, #FE1138 0%, #FE4FE2 100%)"
+
   return (
     <div
       id="share-image"
@@ -28,7 +35,7 @@ export const ShareImage = ({
         width: "100%",
         height: "100%",
         padding: 20,
-        backgroundImage: "url(/assets/images/round-5-reward.svg)",
+        backgroundImage: `url(/assets/images/round-${roundId}-reward.svg)`,
         backgroundSize: "cover",
         overflow: "hidden",
       }}
@@ -81,7 +88,7 @@ export const ShareImage = ({
         >
           <p
             style={{
-              color: "#FE1138",
+              color: roundId === "6" ? "#3374DB" : "#FE1138",
               fontSize: 24,
               lineHeight: "28px",
               letterSpacing: "-0.02em",
@@ -96,8 +103,7 @@ export const ShareImage = ({
               fontSize: 56,
               lineHeight: "64px",
               letterSpacing: "-0.02em",
-              backgroundImage:
-                "linear-gradient(90deg, #FE1138 0%, #FE4FE2 100%)",
+              backgroundImage: gradient,
               backgroundClip: "text",
               // @ts-ignore TS doesn't know about webkit prefixes
               "-webkit-background-clip": "text",
