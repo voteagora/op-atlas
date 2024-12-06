@@ -16,7 +16,7 @@ async function ingestRewards() {
   const file = await readFile(CSV_PATH)
   const entries = file.toString().split("\n")
 
-  let grantId = 208
+  let grantId = 287
 
   const rewards: {
     id: string
@@ -70,7 +70,7 @@ async function ingestRewards() {
 
     await prisma.fundingReward.createMany({
       data: batch.map((reward) => ({
-        roundId: "5",
+        roundId: "6",
         id: reward.id,
         projectId: reward.projectId,
         amount: reward.amount,
