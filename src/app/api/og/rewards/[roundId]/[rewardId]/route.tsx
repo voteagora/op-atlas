@@ -6,7 +6,7 @@ import { loadFont, loadImage } from "@/lib/utils/og"
 
 export async function GET(
   request: Request,
-  { params }: { params: { rewardId: string } },
+  { params }: { params: { rewardId: string; roundId: string } },
 ) {
   const claim = await getReward({ id: params.rewardId })
   const projectName = claim?.project.name
@@ -16,7 +16,14 @@ export async function GET(
   const soraRegular = await loadFont("Sora-Regular.otf")
   const soraSemiBold = await loadFont("Sora-SemiBold.otf")
   const soraBold = await loadFont("Sora-Bold.otf")
-  const bgImage = await loadImage("round-5-reward.png")
+  const bgImage = await loadImage(`round-${params.roundId}-reward.png`)
+
+  const gradient =
+    params.roundId === "6"
+      ? "linear-gradient(90deg, #39D551 0%, #3374DB 100%)"
+      : "linear-gradient(90deg, #FE1138 0%, #FE4FE2 100%)"
+
+  const textColor = params.roundId === "6" ? "#3374DB" : "#FE1138"
 
   return new ImageResponse(
     (
@@ -47,12 +54,13 @@ export async function GET(
             alt="project thumbnail"
           />
           <div tw="flex flex-col self-end">
-            <h3 tw="text-5xl m-0 text-[#FE1138]">{projectName} received</h3>
+            <h3 tw="text-5xl m-0" style={{ color: textColor }}>
+              {projectName} received
+            </h3>
             <h4
               tw="text-[120px] m-0"
               style={{
-                backgroundImage:
-                  "linear-gradient(90deg, #FE1138 0%, #FE4FE2 100%)",
+                backgroundImage: gradient,
                 backgroundClip: "text",
                 // @ts-ignore TS doesn't know about webkit prefixes
                 "-webkit-background-clip": "text",
