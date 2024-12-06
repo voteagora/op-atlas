@@ -33,7 +33,9 @@ const RewardClaimFlow = ({
   const downloadImage = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/og/rewards/${reward.id}`)
+      const response = await fetch(
+        `/api/og/rewards/${reward.roundId}/${reward.id}`,
+      )
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement("a")
