@@ -1,14 +1,25 @@
 import { ponder } from "@/generated";
 import * as schema from "../ponder.schema";
 
-ponder.on("AstariaRouter:Liquidation", async ({ event, context }) => {
-  await context.db
-    .insert(schema.liquidationEvent)
-    .values({ id: event.log.id, liquidator: event.args.liquidator });
+ponder.on("EASAttested:Attested", async ({ event, context }) => {
+  console.log(event.block.timestamp);
+
+  await context.db.insert(schema.entity).values({
+    id: event.args.uid,
+    type: (
+      await context.client.readContract({
+        abi: context.contracts.EASAttested.abi,
+        address: context.contracts.EASAttested.address,
+        functionName: "getAttestation",
+        args: [event.args.uid],
+      })
+    ).data,
+    revoked: false,
+  });
 });
 
-ponder.on("AstariaRouter:OwnershipTransferred", async ({ event, context }) => {
+ponder.on("EASRevoked:Revoked", async ({ event, context }) => {
   await context.db
-    .insert(schema.ownershipTransferEvent)
-    .values({ id: event.log.id, newOwner: event.args.newOwner });
+    .update(schema.entity, { id: event.args.uid })
+    .set({ revoked: true });
 });

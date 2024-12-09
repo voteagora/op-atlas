@@ -1,22 +1,44 @@
 import { createConfig, mergeAbis } from "@ponder/core";
 import { http } from "viem";
 
-import { RouterImplAbi } from "./abis/RouterImplAbi";
-import { RouterProxyAbi } from "./abis/RouterProxyAbi";
+import { EASImplAbi } from "./abis/EASImplAbi";
+import { EASProxiAbi } from "./abis/EASProxiAbi";
 
 export default createConfig({
   networks: {
-    mainnet: {
-      chainId: 1,
-      transport: http(process.env.PONDER_RPC_URL_1),
+    optimism: {
+      chainId: 10,
+      transport: http(process.env.PONDER_RPC_URL_10),
     },
   },
   contracts: {
-    AstariaRouter: {
-      network: "mainnet",
-      abi: mergeAbis([RouterProxyAbi, RouterImplAbi]),
-      address: "0x42CDc5D4B05E8dACc2FCD181cbe0Cc86Ee14c439",
-      startBlock: 17942156,
+    EASAttested: {
+      network: "optimism",
+      abi: mergeAbis([EASProxiAbi, EASImplAbi]),
+      address: "0x4200000000000000000000000000000000000021",
+      startBlock: 124380685,
+      filter: {
+        event: "Attested",
+        args: {
+          schema: [
+            "0xff0b916851c1c5507406cfcaa60e5d549c91b7f642eb74e33b88143cae4b47d0",
+          ],
+        },
+      },
+    },
+    EASRevoked: {
+      network: "optimism",
+      abi: mergeAbis([EASProxiAbi, EASImplAbi]),
+      address: "0x4200000000000000000000000000000000000021",
+      startBlock: 124380685,
+      filter: {
+        event: "Revoked",
+        args: {
+          schema: [
+            "0xff0b916851c1c5507406cfcaa60e5d549c91b7f642eb74e33b88143cae4b47d0",
+          ],
+        },
+      },
     },
   },
 });
