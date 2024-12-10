@@ -21,7 +21,7 @@ export default createConfig({
         event: "Attested",
         args: {
           schema: [
-            "0xff0b916851c1c5507406cfcaa60e5d549c91b7f642eb74e33b88143cae4b47d0",
+            "0x5ebff8ad62d203585850493a9699d7f32d0de739ff7f7421f1ad64d6ddf7749d",
           ],
         },
       },
@@ -35,7 +35,7 @@ export default createConfig({
         event: "Revoked",
         args: {
           schema: [
-            "0xff0b916851c1c5507406cfcaa60e5d549c91b7f642eb74e33b88143cae4b47d0",
+            "0x5ebff8ad62d203585850493a9699d7f32d0de739ff7f7421f1ad64d6ddf7749d",
           ],
         },
       },
