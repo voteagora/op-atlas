@@ -6,6 +6,7 @@ export const schemaSignatures = {
   badgeholder: parseAbiParameters(
     "string rpgfRound,address referredBy,string referredMethod"
   ),
+  gov_contribution: parseAbiParameters("string govSeason,string govRole"),
 };
 
 export const schemaIds: {

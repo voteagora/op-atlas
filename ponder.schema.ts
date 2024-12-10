@@ -16,3 +16,11 @@ export const badgeholder = onchainTable("badgeholder", (t) => ({
   referred_method: t.text(),
   revoked: t.boolean().notNull(),
 }));
+
+export const gov_contribution = onchainTable("gov_contribution", (t) => ({
+  id: t.text().primaryKey(),
+  address: t.text().notNull(),
+  gov_season: t.text().notNull(),
+  gov_role: t.text().notNull(),
+  revoked: t.boolean().notNull(),
+}));

@@ -42,6 +42,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
         revoked: false,
       });
       break;
+
     case "badgeholder":
       const [rpgfRound, referredBy, referredMethod] = decodeAbiParameters(
         schemaSignatures[schemaName],
@@ -53,6 +54,20 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
         rpgf_round: rpgfRound,
         referred_by: referredBy,
         referred_method: referredMethod,
+        revoked: false,
+      });
+      break;
+
+    case "gov_contribution":
+      const [govSeason, govRole] = decodeAbiParameters(
+        schemaSignatures[schemaName],
+        hexToBytes(data.data)
+      );
+      await context.db.insert(dbSchema.gov_contribution).values({
+        id: uid,
+        address: recipient,
+        gov_season: govSeason,
+        gov_role: govRole,
         revoked: false,
       });
       break;

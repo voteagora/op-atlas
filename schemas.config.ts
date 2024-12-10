@@ -14,6 +14,11 @@ const schemas: {
     name: "badgeholder",
     attester: "0x621477dBA416E12df7FF0d48E14c4D20DC85D7D9",
   },
+  gov_contribution: {
+    id: "0xef874554718a2afc254b064e5ce9c58c9082fb9f770250499bf406fc112bd315" as `0x${string}`,
+    name: "gov_contribution",
+    attester: "0x621477dBA416E12df7FF0d48E14c4D20DC85D7D9",
+  },
 };
 
 export default schemas;
