@@ -3,6 +3,7 @@ import { http } from "viem";
 
 import { EASImplAbi } from "./abis/EASImplAbi";
 import { EASProxiAbi } from "./abis/EASProxiAbi";
+import schemas from "./schemas.config";
 
 export default createConfig({
   networks: {
@@ -20,9 +21,7 @@ export default createConfig({
       filter: {
         event: "Attested",
         args: {
-          schema: [
-            "0x5ebff8ad62d203585850493a9699d7f32d0de739ff7f7421f1ad64d6ddf7749d",
-          ],
+          schema: Object.values(schemas).map((schema) => schema.id),
         },
       },
     },
@@ -34,9 +33,7 @@ export default createConfig({
       filter: {
         event: "Revoked",
         args: {
-          schema: [
-            "0x5ebff8ad62d203585850493a9699d7f32d0de739ff7f7421f1ad64d6ddf7749d",
-          ],
+          schema: Object.values(schemas).map((schema) => schema.id),
         },
       },
     },

@@ -1,10 +1,15 @@
 import { parseAbiParameters } from "viem";
+import schemas from "../schemas.config";
 
 export const schemaSignatures = {
   citizen: parseAbiParameters("uint256 farcasterId,string selectionMethod"),
 };
 
-export const schemaIds = {
-  "0x5ebff8ad62d203585850493a9699d7f32d0de739ff7f7421f1ad64d6ddf7749d":
-    "citizen",
-} as { [key: `0x${string}`]: keyof typeof schemaSignatures };
+export const schemaIds: {
+  [key: `0x${string}`]: keyof typeof schemaSignatures;
+} = Object.fromEntries(
+  Object.entries(schemas).map(([key, value]) => [
+    value.id as `0x${string}`,
+    key as keyof typeof schemaSignatures,
+  ])
+);
