@@ -69,3 +69,4 @@ yarn dev
 2. Define schema parameters in `src/schemas.ts`
 3. Add corresponding table definition in `ponder.schema.ts`
 4. Add schema to `ponder.config.ts`
+5. Update `src/index.ts` to include the new schema
