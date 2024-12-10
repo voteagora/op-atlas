@@ -4,7 +4,7 @@ import { decodeAbiParameters, hexToBytes } from "viem";
 import { schemaIds, schemaSignatures } from "./schemas";
 
 ponder.on("EASAttested:Attested", async ({ event, context }) => {
-  const { recipient, uid, schema } = event.args;
+  const { attester, recipient, uid, schema } = event.args;
 
   const schemaName = schemaIds[schema];
 
@@ -19,21 +19,57 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
     args: [uid],
   });
 
-  const [farcasterId, selectionMethod] = decodeAbiParameters(
-    schemaSignatures[schemaName],
-    hexToBytes(data.data)
-  );
+  switch (schemaName) {
+    case "citizen":
+      const [farcasterId, selectionMethod] = decodeAbiParameters(
+        schemaSignatures[schemaName],
+        hexToBytes(data.data)
+      );
+      await context.db.insert(dbSchema.citizen).values({
+        id: uid,
+        address: recipient,
+        farcaster_id: farcasterId.toString(),
+        selection_method: selectionMethod,
+        revoked: false,
+      });
+      break;
+    case "badgeholder":
+      if (attester !== "0x621477dBA416E12df7FF0d48E14c4D20DC85D7D9") {
+        break;
+      }
 
-  await context.db.insert(dbSchema.citizen).values({
-    id: uid,
-    address: recipient,
-    farcaster_id: farcasterId.toString(),
-    selection_method: selectionMethod,
-    revoked: false,
-  });
+      const [rpgfRound, referredBy, referredMethod] = decodeAbiParameters(
+        schemaSignatures[schemaName],
+        hexToBytes(data.data)
+      );
+      await context.db.insert(dbSchema.badgeholder).values({
+        id: uid,
+        address: recipient,
+        rpgf_round: rpgfRound,
+        referred_by: referredBy,
+        referred_method: referredMethod,
+        revoked: false,
+      });
+      break;
+  }
 });
 
 ponder.on("EASRevoked:Revoked", async ({ event, context }) => {
-  const { uid } = event.args;
-  await context.db.update(dbSchema.citizen, { id: uid }).set({ revoked: true });
+  const { uid, schema } = event.args;
+
+  const schemaName = schemaIds[schema];
+
+  if (!schemaName) {
+    throw new Error(`Unknown schema: ${schema}`);
+  }
+
+  try {
+    await context.db
+      .update(dbSchema[schemaName], { id: uid })
+      .set({ revoked: true });
+  } catch (e) {
+    if (!(e as Error).message.includes("No existing record found")) {
+      throw e;
+    }
+  }
 });

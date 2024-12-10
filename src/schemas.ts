@@ -3,6 +3,9 @@ import schemas from "../schemas.config";
 
 export const schemaSignatures = {
   citizen: parseAbiParameters("uint256 farcasterId,string selectionMethod"),
+  badgeholder: parseAbiParameters(
+    "string rpgfRound,address referredBy,string referredMethod"
+  ),
 };
 
 export const schemaIds: {

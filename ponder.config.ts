@@ -17,7 +17,7 @@ export default createConfig({
       network: "optimism",
       abi: mergeAbis([EASProxiAbi, EASImplAbi]),
       address: "0x4200000000000000000000000000000000000021",
-      startBlock: 124380685,
+      startBlock: 108269604,
       filter: {
         event: "Attested",
         args: {
