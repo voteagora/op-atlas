@@ -30,46 +30,72 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
 
   switch (schemaName) {
     case "citizen":
-      const [farcasterId, selectionMethod] = decodeAbiParameters(
-        schemaSignatures[schemaName],
-        hexToBytes(data.data)
-      );
-      await context.db.insert(dbSchema.citizen).values({
-        id: uid,
-        address: recipient,
-        farcaster_id: farcasterId.toString(),
-        selection_method: selectionMethod,
-        revoked: false,
-      });
+      {
+        const [farcasterId, selectionMethod] = decodeAbiParameters(
+          schemaSignatures[schemaName],
+          hexToBytes(data.data)
+        );
+        await context.db.insert(dbSchema.citizen).values({
+          id: uid,
+          address: recipient,
+          farcaster_id: farcasterId.toString(),
+          selection_method: selectionMethod,
+          revoked: false,
+        });
+      }
       break;
 
     case "badgeholder":
-      const [rpgfRound, referredBy, referredMethod] = decodeAbiParameters(
-        schemaSignatures[schemaName],
-        hexToBytes(data.data)
-      );
-      await context.db.insert(dbSchema.badgeholder).values({
-        id: uid,
-        address: recipient,
-        rpgf_round: rpgfRound,
-        referred_by: referredBy,
-        referred_method: referredMethod,
-        revoked: false,
-      });
+      {
+        const [rpgfRound, referredBy, referredMethod] = decodeAbiParameters(
+          schemaSignatures[schemaName],
+          hexToBytes(data.data)
+        );
+        await context.db.insert(dbSchema.badgeholder).values({
+          id: uid,
+          address: recipient,
+          rpgf_round: rpgfRound,
+          referred_by: referredBy,
+          referred_method: referredMethod,
+          revoked: false,
+        });
+      }
       break;
 
     case "gov_contribution":
-      const [govSeason, govRole] = decodeAbiParameters(
-        schemaSignatures[schemaName],
-        hexToBytes(data.data)
-      );
-      await context.db.insert(dbSchema.gov_contribution).values({
-        id: uid,
-        address: recipient,
-        gov_season: govSeason,
-        gov_role: govRole,
-        revoked: false,
-      });
+      {
+        const [govSeason, govRole] = decodeAbiParameters(
+          schemaSignatures[schemaName],
+          hexToBytes(data.data)
+        );
+        await context.db.insert(dbSchema.gov_contribution).values({
+          id: uid,
+          address: recipient,
+          gov_season: govSeason,
+          gov_role: govRole,
+          revoked: false,
+        });
+      }
+      break;
+
+    case "rf_voter":
+      {
+        const [farcasterId, round, voterType, votingGroup, selectionMethod] =
+          decodeAbiParameters(
+            schemaSignatures[schemaName],
+            hexToBytes(data.data)
+          );
+        await context.db.insert(dbSchema.rf_voter).values({
+          id: uid,
+          address: recipient,
+          farcaster_id: farcasterId.toString(),
+          round,
+          voter_type: voterType,
+          voting_group: votingGroup,
+          selection_method: selectionMethod,
+          revoked: false,
+        });
+      }
       break;
   }
 });

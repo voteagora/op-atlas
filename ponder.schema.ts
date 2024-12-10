@@ -24,3 +24,14 @@ export const gov_contribution = onchainTable("gov_contribution", (t) => ({
   gov_role: t.text().notNull(),
   revoked: t.boolean().notNull(),
 }));
+
+export const rf_voter = onchainTable("rf_voter", (t) => ({
+  id: t.text().primaryKey(),
+  address: t.text().notNull(),
+  farcaster_id: t.text().notNull(),
+  round: t.text().notNull(),
+  voter_type: t.text().notNull(),
+  voting_group: t.text().notNull(),
+  selection_method: t.text().notNull(),
+  revoked: t.boolean().notNull(),
+}));

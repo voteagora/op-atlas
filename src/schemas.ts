@@ -7,6 +7,9 @@ export const schemaSignatures = {
     "string rpgfRound,address referredBy,string referredMethod"
   ),
   gov_contribution: parseAbiParameters("string govSeason,string govRole"),
+  rf_voter: parseAbiParameters(
+    "uint256 farcasterID,string round,string voterType,string votingGroup,string selectionMethod"
+  ),
 };
 
 export const schemaIds: {

@@ -19,6 +19,10 @@ const schemas: {
     name: "gov_contribution",
     attester: "0x621477dBA416E12df7FF0d48E14c4D20DC85D7D9",
   },
+  rf_voter: {
+    id: "0x41513aa7b99bfea09d389c74aacedaeb13c28fb748569e9e2400109cbe284ee5" as `0x${string}`,
+    name: "rf_voter",
+  },
 };
 
 export default schemas;
