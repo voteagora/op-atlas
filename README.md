@@ -4,7 +4,7 @@ A [Ponder](https://ponder.sh) indexer for Ethereum Attestation Service (EAS) att
 
 ## Overview
 
-This indexer tracks EAS attestations and stores them in a SQLite database. It watches for `Attested` and `Revoked` events from the EAS contract on Optimism, decodes the attestation data according to predefined schemas, and stores the results in structured tables.
+This indexer tracks EAS attestations and stores them into Postgres database. It watches for `Attested` and `Revoked` events from the EAS contract on Optimism, decodes the attestation data according to predefined schemas, and stores the results in structured tables.
 
 ## How it Works
 
