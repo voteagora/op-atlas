@@ -1,25 +1,39 @@
 import { ponder } from "@/generated";
-import * as schema from "../ponder.schema";
+import * as dbSchema from "../ponder.schema";
+import { decodeAbiParameters, hexToBytes } from "viem";
+import { schemaIds, schemaSignatures } from "./schemas";
 
 ponder.on("EASAttested:Attested", async ({ event, context }) => {
-  console.log(event.block.timestamp);
+  const { recipient, uid, schema } = event.args;
 
-  await context.db.insert(schema.entity).values({
-    id: event.args.uid,
-    type: (
-      await context.client.readContract({
-        abi: context.contracts.EASAttested.abi,
-        address: context.contracts.EASAttested.address,
-        functionName: "getAttestation",
-        args: [event.args.uid],
-      })
-    ).data,
+  const schemaName = schemaIds[schema];
+
+  if (!schemaName) {
+    throw new Error(`Unknown schema: ${schema}`);
+  }
+
+  const data = await context.client.readContract({
+    abi: context.contracts.EASAttested.abi,
+    address: context.contracts.EASAttested.address,
+    functionName: "getAttestation",
+    args: [uid],
+  });
+
+  const [farcasterId, selectionMethod] = decodeAbiParameters(
+    schemaSignatures[schemaName],
+    hexToBytes(data.data)
+  );
+
+  await context.db.insert(dbSchema.citizen).values({
+    id: uid,
+    address: recipient,
+    farcaster_id: farcasterId.toString(),
+    selection_method: selectionMethod,
     revoked: false,
   });
 });
 
 ponder.on("EASRevoked:Revoked", async ({ event, context }) => {
-  await context.db
-    .update(schema.entity, { id: event.args.uid })
-    .set({ revoked: true });
+  const { uid } = event.args;
+  await context.db.update(dbSchema.citizen, { id: uid }).set({ revoked: true });
 });
