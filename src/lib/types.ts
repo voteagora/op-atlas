@@ -20,6 +20,10 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
   }
 }>
 
+export type RewardWithClaim = Prisma.FundingRewardGetPayload<{
+  include: { claim: true }
+}>
+
 export type UserWithAddresses = Prisma.UserGetPayload<{
   include: {
     addresses: true

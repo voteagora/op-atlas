@@ -1,9 +1,13 @@
-import { ProjectWithDetails } from "./types"
+import { ProjectWithDetails, RewardWithClaim } from "./types"
 
 export function unclaimedRewards(project: ProjectWithDetails) {
   return project.rewards.map(
     (reward) => !reward.claim || reward.claim.status !== "claimed",
   )
+}
+
+export function unclaimedReward(reward: RewardWithClaim) {
+  return !reward.claim || reward.claim.status !== "claimed"
 }
 
 export function noRewards(projects: ProjectWithDetails[]) {
