@@ -220,7 +220,7 @@ const Dashboard = ({
               <Button
                 className="flex items-center gap-2"
                 variant="secondary"
-                onClick={() => setShowApplicationDialogue(true)}
+                onClick={() => (window.location.href = "/projects/new")}
               >
                 <Image
                   src="/assets/icons/plus.svg"
