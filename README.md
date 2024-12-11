@@ -70,3 +70,44 @@ yarn dev
 3. Add corresponding table definition in `ponder.schema.ts`
 4. Add schema to `ponder.config.ts`
 5. Update `src/index.ts` to include the new schema
+
+### Adding New Entities
+
+1. Add entity configuration in `ponder.schema.ts`
+2. Add entity to `ponder.config.ts`
+3. Update `src/index.ts` to include the new entity
+
+## API Endpoints
+
+The indexer exposes REST API endpoints for querying attestation data. Endpoints are automatically generated for each schema defined in `schemas.config.ts`.
+
+### Get Attestations by Address
+
+For each schema (citizen, badgeholder, gov_contribution, etc.), the following endpoint is available:
+
+```
+GET /api/{schema}/address/{address}
+```
+
+Example:
+
+```
+GET /api/citizen/address/0x1234...
+```
+
+Response:
+
+```json
+{
+  "attestations": [
+    {
+      "id": "0xabcd...",
+      "recipient": "0x1234...",
+      "attester": "0x5678...",
+      "time": "2024-03-21T15:30:00Z",
+      "revoked": false
+      // schema-specific fields
+    }
+  ]
+}
+```
