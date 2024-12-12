@@ -4,8 +4,8 @@ import { OrganizationWithTeamAndProjects } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import OrganizationHeader from "./OrganizationHeader"
+import OrganizationProjects from "./OrganizationProjects"
 import OrganizationTeam from "./OrganizationTeam"
-// import OrganizationProjects from "./OrganizationProjects"
 
 const PublicUserProfile = ({
   className,
@@ -22,7 +22,7 @@ const PublicUserProfile = ({
         {/* Team */}
         <OrganizationTeam organization={organization} className="px-8" />
         {/* Projects */}
-        {/* <OrganizationProjects projects={organization.projects} /> */}
+        <OrganizationProjects organization={organization} className="px-8" />
       </div>
     </div>
   )
