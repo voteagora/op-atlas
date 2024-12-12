@@ -18,6 +18,14 @@ export default function ProfileHeaderLinks({ user }: { user: UserWithAddresses }
       {/* X */}
 
       {/* Github */}
+      {user.github && (
+        <ProfileHeaderSocialLink
+          href={`https://github.com/${user.github}`}
+          icon="/assets/icons/github-icon.svg"
+        text={`@${user.github}`}
+          tooltipText="Github"
+        />
+      )}
 
       {/* Agora */}
 
