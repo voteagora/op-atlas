@@ -1,5 +1,5 @@
 import PublicUserProfile from "@/components/profile/public/PublicProfile"
-import { getOrganization } from "@/db/organizations"
+import { getOrganization, getOrganizations } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
 
 export default async function PublicProfile({
@@ -23,5 +23,15 @@ export default async function PublicProfile({
     return <div>User not found</div>
   }
 
-  return <PublicUserProfile user={user} />
+  const organizations = await getOrganizations(user.id)
+
+  return (
+    <PublicUserProfile
+      user={user}
+      organizations={
+        organizations?.organizations.map(({ organization }) => organization) ||
+        []
+      }
+    />
+  )
 }
