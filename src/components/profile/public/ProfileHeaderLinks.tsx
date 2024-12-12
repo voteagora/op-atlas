@@ -1,14 +1,11 @@
-import Image from "next/image"
-
+import BubbleLink from "@/components/common/BubbleLink"
 import { UserWithAddresses } from "@/lib/types"
-
-import ProfileHeaderSocialLink from "./ProfileHeaderSocialLink"
 
 export default function ProfileHeaderLinks({ user }: { user: UserWithAddresses }) {
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-4">
       {/* Farcaster */}
-      <ProfileHeaderSocialLink
+      <BubbleLink
         href={`https://warpcast.com/${user.username}`}
         icon="/assets/icons/farcaster-icon.svg"
         text={`@${user.username}`}
@@ -19,10 +16,10 @@ export default function ProfileHeaderLinks({ user }: { user: UserWithAddresses }
 
       {/* Github */}
       {user.github && (
-        <ProfileHeaderSocialLink
+        <BubbleLink
           href={`https://github.com/${user.github}`}
           icon="/assets/icons/github-icon.svg"
-        text={`@${user.github}`}
+          text={`@${user.github}`}
           tooltipText="Github"
         />
       )}
