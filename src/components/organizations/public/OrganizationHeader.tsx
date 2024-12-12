@@ -19,16 +19,18 @@ const OrganizationHeader = ({
     <div className={cn("flex w-full h-full gap-x-4", className)}>
       <div className="flex flex-col w-full">
         <div className="relative">
-          {organization.coverUrl && (
-            <div className="relative w-full h-48 -mt-16 overflow-hidden translate-y-1/4 rounded-lg">
+          <div className="relative w-full h-48 -mt-16 overflow-hidden translate-y-1/4 rounded-lg border border-gray-100">
+            {organization.coverUrl ? (
               <Image
                 src={organization.coverUrl}
                 alt={`${organization.name} banner`}
                 fill
                 className="object-cover"
               />
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full bg-white" />
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 px-8">
