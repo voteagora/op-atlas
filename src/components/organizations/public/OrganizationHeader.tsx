@@ -5,6 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OrganizationWithTeamAndProjects } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
+import OrganizationHeaderLinks from "./OrganizationHeaderLinks"
+
 const OrganizationHeader = ({
   className,
   organization,
@@ -45,6 +47,8 @@ const OrganizationHeader = ({
               </p>
             )}
           </div>
+
+          <OrganizationHeaderLinks organization={organization} />
         </div>
       </div>
     </div>
