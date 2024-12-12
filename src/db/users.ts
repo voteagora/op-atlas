@@ -29,6 +29,18 @@ export async function getUserByFarcasterId(farcasterId: string) {
   })
 }
 
+export async function getUserByUsername(username: string) {
+  return prisma.user.findFirst({
+    where: {
+      username,
+    },
+    include: {
+      addresses: true,
+      interaction: true,
+    },
+  })
+}
+
 export async function searchUsersByUsername({
   username,
 }: {

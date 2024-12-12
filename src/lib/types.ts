@@ -119,6 +119,37 @@ export type UserOrganizationsWithDetails = Prisma.UserOrganizationGetPayload<{
   }
 }>
 
+export type OrganizationWithTeamAndProjects = Prisma.OrganizationGetPayload<{
+  include: {
+    team: {
+      include: {
+        user: true
+      }
+      where: {
+        deletedAt: null
+      }
+    }
+    projects: {
+      include: {
+        project: {
+          include: {
+            team: { include: { user: true } }
+            repos: true
+            contracts: true
+            funding: true
+            snapshots: true
+            applications: true
+            rewards: { include: { claim: true } }
+          }
+        }
+      }
+      where: {
+        deletedAt: null
+      }
+    }
+  }
+}>
+
 export type ApplicationWithDetails = Prisma.ApplicationGetPayload<{
   include: {
     impactStatementAnswer: true
