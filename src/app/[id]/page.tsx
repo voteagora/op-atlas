@@ -1,5 +1,9 @@
+import PublicOrganizationProfile from "@/components/organizations/public/PublicOrganizationProfile"
 import PublicUserProfile from "@/components/profile/public/PublicProfile"
-import { getOrganization, getOrganizations } from "@/db/organizations"
+import {
+  getOrganizations,
+  getOrganizationWithDetails,
+} from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
 import { getProjects } from "@/lib/actions/projects"
 
@@ -9,13 +13,13 @@ export default async function PublicProfile({
   params: { id: string }
 }) {
   if (params.id.startsWith("0x")) {
-    const organization = await getOrganization({ id: params.id })
+    const organization = await getOrganizationWithDetails({ id: params.id })
 
     if (!organization) {
       return <div>Organization not found</div>
     }
 
-    return <div>{JSON.stringify(organization)}</div>
+    return <PublicOrganizationProfile organization={organization} />
   }
 
   const user = await getUserByUsername(params.id)

@@ -218,6 +218,45 @@ async function getOrganizationFn({ id }: { id: string }) {
 
 export const getOrganization = cache(getOrganizationFn)
 
+function getOrganizationWithDetailsFn({ id }: { id: string }) {
+  return prisma.organization.findUnique({
+    where: { id },
+    include: {
+      team: {
+        include: {
+          user: {},
+        },
+        where: {
+          deletedAt: null,
+        },
+      },
+      projects: {
+        where: {
+          deletedAt: null,
+          project: {
+            deletedAt: null,
+          },
+        },
+        include: {
+          project: {
+            include: {
+              team: { include: { user: true } },
+              repos: true,
+              contracts: true,
+              funding: true,
+              snapshots: true,
+              applications: true,
+              rewards: { include: { claim: true } },
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export const getOrganizationWithDetails = cache(getOrganizationWithDetailsFn)
+
 export async function addOrganizationSnapshot({
   organizationId,
   ipfsHash,
