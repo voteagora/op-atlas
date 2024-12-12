@@ -7,7 +7,7 @@ function ProfileOrganizations({ organizations }: { organizations: Organization[]
       <h2 className="text-xl font-medium">Organizations</h2>
       <div className="flex flex-col gap-y-4">
         {organizations.map((organization) => (
-          <div key={organization.id} className="flex items-center gap-x-3">
+          <a href={`/${organization.id}`} key={organization.id} className="flex items-center gap-x-3 hover:opacity-80 hover:underline">
             {organization.avatarUrl ? (
               <Image
                 src={organization.avatarUrl ?? ""}
@@ -22,7 +22,14 @@ function ProfileOrganizations({ organizations }: { organizations: Organization[]
               </div>
             )}
             <span>{organization.name}</span>
-          </div>
+            <Image 
+              src="/assets/icons/arrow-up-right.svg"
+              width={10}
+              height={10}
+              alt="External link"
+              className="ml-1"
+            />
+          </a>
         ))}
       </div>
     </div>
