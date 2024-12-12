@@ -2,20 +2,23 @@
 
 import { Organization } from "@prisma/client"
 
-import { UserWithAddresses } from "@/lib/types"
+import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ProfileHeader from "./ProfileHeader"
 import ProfileOrganizations from "./ProfileOrganizations"
+import ProfileProjects from "./ProfileProjects"
 
 const PublicUserProfile = ({
   className,
   user,
   organizations,
+  projects,
 }: {
   className?: string
   user: UserWithAddresses
   organizations: Organization[]
+  projects: ProjectWithDetails[]
 }) => {
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
@@ -28,6 +31,7 @@ const PublicUserProfile = ({
         {/* Organizations */}
         <ProfileOrganizations organizations={organizations} />
         {/* Projects */}
+        <ProfileProjects projects={projects} />
       </div>
     </div>
   )

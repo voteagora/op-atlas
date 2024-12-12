@@ -1,6 +1,7 @@
 import PublicUserProfile from "@/components/profile/public/PublicProfile"
 import { getOrganization, getOrganizations } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
+import { getProjects } from "@/lib/actions/projects"
 
 export default async function PublicProfile({
   params,
@@ -23,7 +24,10 @@ export default async function PublicProfile({
     return <div>User not found</div>
   }
 
-  const organizations = await getOrganizations(user.id)
+  const [organizations, projects] = await Promise.all([
+    getOrganizations(user.id),
+    getProjects(user.id),
+  ])
 
   return (
     <PublicUserProfile
@@ -32,6 +36,7 @@ export default async function PublicProfile({
         organizations?.organizations.map(({ organization }) => organization) ||
         []
       }
+      projects={projects}
     />
   )
 }
