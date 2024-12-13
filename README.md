@@ -45,5 +45,3 @@ Each package has its own README with detailed setup and development instructions
    ```
 
 The app will be available at [http://localhost:3000](http://localhost:3000).
-
-For more information on each package, see their respective READMEs.
