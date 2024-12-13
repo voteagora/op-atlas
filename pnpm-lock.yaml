@@ -13,6 +13,9 @@ importers:
       '@ethereum-attestation-service/eas-sdk':
         specifier: ^2.1.4
         version: 2.7.0(typescript@5.7.2)(zod@3.24.1)
+      '@farcaster/auth-client':
+        specifier: ^0.3.0
+        version: 0.3.0(ethers@6.13.4)(viem@2.21.55(typescript@5.7.2)(zod@3.24.1))
       '@farcaster/auth-kit':
         specifier: ^0.3.1
         version: 0.3.1(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.55(typescript@5.7.2)(zod@3.24.1))
@@ -497,6 +500,12 @@ packages:
 
   '@farcaster/auth-client@0.1.1':
     resolution: {integrity: sha512-6ZYsDKzvagsRiNLiJZfrx1P7tRKOHKSZtF9uM3Ihb+AMX0hTxrp5Y3tkSKxufPu9Sgxfc5FyzGUYw21lkqFFCA==}
+    peerDependencies:
+      ethers: 5.x || 6.x
+      viem: 1.x || 2.x
+
+  '@farcaster/auth-client@0.3.0':
+    resolution: {integrity: sha512-tOQ5r40V7sYKOhk7QEzVnU9wAM0FGpQ2Y3jXpNfNPw61lFpYc4kRAxTJOOc2NF1msYdHGFVDvG8xe9Qf36M1RA==}
     peerDependencies:
       ethers: 5.x || 6.x
       viem: 1.x || 2.x
@@ -4800,6 +4809,13 @@ snapshots:
       '@ethersproject/strings': 5.7.0
 
   '@farcaster/auth-client@0.1.1(ethers@6.13.4)(viem@2.21.55(typescript@5.7.2)(zod@3.24.1))':
+    dependencies:
+      ethers: 6.13.4
+      neverthrow: 6.2.2
+      siwe: 2.3.2(ethers@6.13.4)
+      viem: 2.21.55(typescript@5.7.2)(zod@3.24.1)
+
+  '@farcaster/auth-client@0.3.0(ethers@6.13.4)(viem@2.21.55(typescript@5.7.2)(zod@3.24.1))':
     dependencies:
       ethers: 6.13.4
       neverthrow: 6.2.2
