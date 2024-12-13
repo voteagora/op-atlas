@@ -2,7 +2,10 @@
   "name": "atlas",
   "private": true,
   "engines": {
-    "node": ">=20",
+    "node": ">=21",
     "pnpm": ">=9"
+  },
+  "scripts": {
+    "format": "prettier --write ."
   }
 }
