@@ -8,7 +8,7 @@ import {
   ProjectWithDetails,
 } from "@/lib/types"
 
-import { FundingApplication } from "../5/FundingApplication"
+import { FundingApplication } from "./FundingApplication"
 import { ApplicationSubmitted } from "../ApplicationSubmitted"
 
 export const ApplicationFlow = ({
