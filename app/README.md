@@ -1,21 +1,19 @@
 # OP Atlas
 
-Bring your identity to the OP collective and signup to get funded via RetroPGF.
-
-Shepherded by the fine folks of [Agora](https://voteagora.com).
+This is the main OP Atlas Next.js web application.
 
 ## Getting Started
 
 First, install the dependencies:
 
 ```bash
-yarn
+pnpm install
 ```
 
 Then, run the development server:
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -42,6 +40,7 @@ We welcome contributions from the community and are pleased to have you join us 
 ## Prerequisites
 
 Before you begin, ensure you have:
+
 - A GitHub account
 - Git installed on your machine
 - Basic understanding of Git and GitHub workflows
@@ -51,33 +50,44 @@ Before you begin, ensure you have:
 To make a contribution, please follow the git-flow workflow:
 
 1. **Fork the Repository**
+
    - Navigate to the repository on GitHub.
    - Click the "Fork" button on the upper right-hand side of the repository's page.
 
 2. **Clone the Forked Repository**
+
    - Clone the repository to your local machine by running:
+
      ```bash
      git clone https://github.com/<your-username>/<repository-name>.git
      ```
+
    - Replace `<your-username>` with your GitHub username and `<repository-name>` with the name of the repository you're contributing to.
 
 3. **Create a New Branch**
+
    - Before making any changes, switch to a new branch using the git-flow naming convention: `<your-name>/<feature-or-fix-description>`
+
      ```bash
      git checkout -b <your-name>/<feature-or-fix-description>
      ```
+
    - Example: `git checkout -b john-doe/add-login-feature`
 
 4. **Make Your Changes**
+
    - Implement your feature or fix.
    - Add and commit your changes with a clear and descriptive commit message:
+
      ```bash
      git add .
      git commit -m "A brief description of the changes"
      ```
 
 5. **Push Changes to GitHub**
+
    - Push your changes to your fork on GitHub:
+
      ```bash
      git push origin <your-name>/<feature-or-fix-description>
      ```
@@ -98,3 +108,4 @@ To ensure your fork stays current with the main repository, set up the original 
 
 ```bash
 git remote add upstream https://github.com/original-owner-username/original-repository.git
+```
