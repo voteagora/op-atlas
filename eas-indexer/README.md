@@ -85,13 +85,13 @@ The indexer exposes REST API endpoints for querying attestation data. Endpoints 
 
 For each schema (citizen, badgeholder, gov_contribution, etc.), the following endpoint is available:
 
-```
+```http
 GET /api/{schema}/address/{address}
 ```
 
 Example:
 
-```
+```http
 GET /api/citizen/address/0x1234...
 ```
 
