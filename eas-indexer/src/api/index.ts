@@ -11,7 +11,7 @@ type Entity = keyof typeof dbSchema;
 
 entities.forEach((entity: Entity) => {
   ponder.get(`/${entity}/:address`, async (c) => {
-    const address = c.req.param("address");
+    const address = c.req.param("address").toLowerCase();
     const table = dbSchema[entity];
     const data = await (c.db.query[entity] as any).findMany({
       where: and(eq(table.address, address), eq(table.revoked, false)),
@@ -33,7 +33,7 @@ entities.forEach((entity: Entity) => {
 });
 
 ponder.get("/attestations/:address", async (c) => {
-  const address = c.req.param("address");
+  const address = c.req.param("address").toLowerCase();
   const attestations: Attestation[] = [];
 
   for (const entity of entities) {
