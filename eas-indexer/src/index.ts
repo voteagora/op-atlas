@@ -37,7 +37,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
         );
         await context.db.insert(dbSchema.citizen).values({
           id: uid,
-          address: recipient,
+          address: recipient.toLowerCase(),
           farcaster_id: farcasterId.toString(),
           selection_method: selectionMethod,
           revoked: false,
@@ -53,9 +53,9 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
         );
         await context.db.insert(dbSchema.badgeholder).values({
           id: uid,
-          address: recipient,
+          address: recipient.toLowerCase(),
           rpgf_round: rpgfRound,
-          referred_by: referredBy,
+          referred_by: referredBy.toLowerCase(),
           referred_method: referredMethod,
           revoked: false,
         });
@@ -70,7 +70,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
         );
         await context.db.insert(dbSchema.gov_contribution).values({
           id: uid,
-          address: recipient,
+          address: recipient.toLowerCase(),
           gov_season: govSeason,
           gov_role: govRole,
           revoked: false,
@@ -87,7 +87,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           );
         await context.db.insert(dbSchema.rf_voter).values({
           id: uid,
-          address: recipient,
+          address: recipient.toLowerCase(),
           farcaster_id: farcasterId.toString(),
           round,
           voter_type: voterType,
