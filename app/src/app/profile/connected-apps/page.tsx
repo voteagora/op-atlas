@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import { GithubConnection } from "@/components/profile/GithubConnection"
+import { GovForumConnection } from "@/components/profile/GovForumConnection"
 import { getUserById } from "@/db/users"
 
 export default async function Page() {
@@ -21,6 +22,7 @@ export default async function Page() {
     <div className="flex flex-col gap-12 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
       <GithubConnection user={user} />
+      <GovForumConnection user={user} />
     </div>
   )
 }

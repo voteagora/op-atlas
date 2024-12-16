@@ -135,6 +135,19 @@ export async function updateUserGithub({
   })
 }
 
+export async function updateUserGovForumProfileUrl({
+  id,
+  govForumProfileUrl,
+}: {
+  id: string
+  govForumProfileUrl?: string | null
+}) {
+  return prisma.user.update({
+    where: { id },
+    data: { govForumProfileUrl },
+  })
+}
+
 export async function addUserAddresses({
   id,
   addresses,
