@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import ProfileHeader from "./ProfileHeader"
 import ProfileOrganizations from "./ProfileOrganizations"
 import ProfileProjects from "./ProfileProjects"
+import ProfileRoles from "./ProfileRoles"
 
 const PublicUserProfile = ({
   className,
@@ -25,6 +26,7 @@ const PublicUserProfile = ({
       <div className="flex flex-col w-full items-start max-w-4xl mx-auto my-18">
         <ProfileHeader user={user} />
         {/* Roles */}
+        <ProfileRoles user={user} />
 
         {/* OP Stack proximity */}
 
