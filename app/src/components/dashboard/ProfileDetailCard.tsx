@@ -1,5 +1,5 @@
 import { User } from "@prisma/client"
-import { Ellipsis } from "lucide-react"
+import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import React, { memo } from "react"
@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 
@@ -98,6 +99,13 @@ const ProfileDetailCard = ({
           <Link href="profile/organizations/new">
             <DropdownMenuItem className="cursor-pointer">
               Make an organization
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuSeparator className="mx-1 opacity-50" />
+          <Link href={`/${user.username}`}>
+            <DropdownMenuItem className="cursor-pointer flex items-center justify-between">
+              View public profile
+              <ArrowUpRight size={16} />
             </DropdownMenuItem>
           </Link>
         </DropdownMenuContent>
