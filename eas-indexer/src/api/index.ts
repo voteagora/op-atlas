@@ -33,7 +33,7 @@ entities.forEach((entity: Entity) => {
 });
 
 ponder.get("/attestations/:address", async (c) => {
-  const address = c.req.param("address");
+  const address = c.req.param("address").toLowerCase();
   const attestations: Attestation[] = [];
 
   for (const entity of entities) {
