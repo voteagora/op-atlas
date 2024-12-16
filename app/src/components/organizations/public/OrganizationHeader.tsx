@@ -14,7 +14,6 @@ const OrganizationHeader = ({
   className?: string
   organization: OrganizationWithTeamAndProjects
 }) => {
-
   return (
     <div className={cn("flex w-full h-full gap-x-4", className)}>
       <div className="flex flex-col w-full">
@@ -42,6 +41,9 @@ const OrganizationHeader = ({
           <div className="flex flex-col w-full">
             <h2 className="flex items-center gap-x-2">
               {organization.name ?? ""}{" "}
+              <span className="text-xs font-medium text-gray-700 border border-gray-200 px-2 py-0.5 rounded-full">
+                Organization
+              </span>
             </h2>
             {organization.description && (
               <p className="text-md text-muted-foreground mt-2">
