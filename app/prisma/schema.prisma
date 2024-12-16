@@ -418,3 +418,10 @@ model Badgeholder {
 
   @@unique([address, roundId])
 }
+
+model GithubProximity {
+  peer String
+  percentile Float
+
+  @@unique([peer])
+}
