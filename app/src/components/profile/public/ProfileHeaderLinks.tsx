@@ -31,6 +31,18 @@ export default function ProfileHeaderLinks({
       {/* Agora */}
 
       {/* Discord */}
+
+      {/* Gov Forum */}
+      {user.govForumProfileUrl && (
+        <BubbleLink
+          href={user.govForumProfileUrl}
+          icon="/assets/icons/op-icon-black.svg"
+          text={`@${
+            user.govForumProfileUrl.split("/u/")[1].split("/summary")[0]
+          }`}
+          tooltipText="Optimism Collective Governance Forum"
+        />
+      )}
     </div>
   )
 }
