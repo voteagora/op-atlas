@@ -3,6 +3,7 @@
 import "@farcaster/auth-kit/styles.css"
 
 import { AuthKitProvider } from "@farcaster/auth-kit"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { SessionProvider } from "next-auth/react"
 
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -30,17 +31,21 @@ const farcasterConfig = {
   domain: farcasterDomain,
 }
 
+const queryClient = new QueryClient()
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <AuthKitProvider config={farcasterConfig}>
-        <AnalyticsProvider>
-          <DialogProvider>
-            <TooltipProvider>
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </TooltipProvider>
-          </DialogProvider>
-        </AnalyticsProvider>
+        <QueryClientProvider client={queryClient}>
+          <AnalyticsProvider>
+            <DialogProvider>
+              <TooltipProvider>
+                <LayoutWrapper>{children}</LayoutWrapper>
+              </TooltipProvider>
+            </DialogProvider>
+          </AnalyticsProvider>
+        </QueryClientProvider>
       </AuthKitProvider>
     </SessionProvider>
   )

@@ -6,7 +6,7 @@ export const getAttestations = async (
   address: string,
 ): Promise<Attestation[]> => {
   try {
-    const response = await easClient(`/attestations/${address}`)
+    const response = await easClient(`attestations/${address}`)
     return response
   } catch (error) {
     return []
