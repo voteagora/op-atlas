@@ -1,5 +1,4 @@
-import Image from "next/image"
-
+import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import CheckIconRed from "@/components/icons/checkIconRed"
 import useAttestations from "@/hooks/api/useAttestations"
 import { UserWithAddresses } from "@/lib/types"
@@ -24,21 +23,11 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
               {attestation.name} <CheckIconRed />
             </div>
             <div className="text-md text-gray-500">{attestation.subtext}</div>
-            <a
-              href={`https://optimism.easscan.org/attestation/view/${attestation.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <OutboundArrowLink
+              text="Attestation"
+              target={`https://optimism.easscan.org/attestation/view/${attestation.id}`}
               className="text-sm text-gray-500 hover:text-gray-600 mt-2 inline-flex items-center"
-            >
-              <span>Attestation</span>
-              <Image
-                src="/assets/icons/arrow-up-right.svg"
-                width={10}
-                height={10}
-                alt="External link"
-                className="ml-1"
-              />
-            </a>
+            />
           </div>
         ))}
       </div>

@@ -1,6 +1,4 @@
-/// <reference types="react" />
-import Image from "next/image"
-
+import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import useGithubProximity from "@/hooks/useGithubProximity"
 import { UserWithAddresses } from "@/lib/types"
 
@@ -29,21 +27,11 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
             for proximity to the OP Stack
           </div>
           <div className="mt-2">
-            <a
-              href={`https://github.com/${user.github}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:underline inline-flex items-center"
-            >
-              @{user.github}{" "}
-              <Image
-                src="/assets/icons/arrow-up-right.svg"
-                width={8}
-                height={8}
-                alt="External link"
-                className="ml-1"
-              />
-            </a>
+            <OutboundArrowLink
+              text={`@${user.github}`}
+              target={`https://github.com/${user.github}`}
+              className="text-sm text-gray-500"
+            />
           </div>
         </div>
 

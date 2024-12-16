@@ -30,13 +30,6 @@ function ProfileOrganizations({
               </div>
             )}
             <span>{organization.name}</span>
-            <Image
-              src="/assets/icons/arrow-up-right.svg"
-              width={10}
-              height={10}
-              alt="External link"
-              className="ml-1"
-            />
           </a>
         ))}
       </div>

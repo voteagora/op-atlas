@@ -1,25 +1,29 @@
 import Image from "next/image"
 
+import { cn } from "@/lib/utils"
+
 function OutboundArrowLink({
   text,
   target,
   subtext,
   icon,
+  className,
 }: {
   text: string
   target: string
   subtext?: string
   icon?: React.ReactNode
+  className?: string
 }) {
   return (
     <a
       href={target}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-center gap-x-3"
+      className={cn("group flex items-center gap-x-3", className)}
     >
       {icon}
-      <span>{text}</span>
+      <span className="group-hover:underline">{text}</span>
       <Image
         src="/assets/icons/arrow-up-right.svg"
         width={10}
