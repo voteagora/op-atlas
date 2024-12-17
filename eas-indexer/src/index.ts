@@ -17,7 +17,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
   // If the attester is not the expected attester, skip the event
   if (
     schemas[schemaName]?.attester &&
-    attester !== schemas[schemaName].attester
+    !schemas[schemaName].attester.includes(attester)
   ) {
     return;
   }
