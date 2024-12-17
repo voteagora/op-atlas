@@ -11,13 +11,13 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
   if (!attestations || attestations.length === 0) return null
 
   return (
-    <div className="flex flex-col gap-y-4 mt-12">
+    <div className="flex flex-col gap-y-4 mt-12 w-full">
       <h2 className="text-xl font-medium">Roles</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-between">
         {attestations.map((attestation) => (
           <div
             key={attestation.id}
-            className="rounded-lg border border-gray-200 p-6 w-[400px]"
+            className="rounded-lg border border-gray-200 p-6 w-[400px] bg-white"
           >
             <div className="text-lg font-medium flex items-center gap-2">
               {attestation.name} <CheckIconRed />
