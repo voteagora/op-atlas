@@ -4,7 +4,7 @@ import useAttestations from "@/hooks/api/useAttestations"
 import { UserWithAddresses } from "@/lib/types"
 
 function ProfileRoles({ user }: { user: UserWithAddresses }) {
-  const { merged: attestations } = useAttestations(
+  const { raw: attestations } = useAttestations(
     user.addresses.map((a) => a.address),
   )
 
