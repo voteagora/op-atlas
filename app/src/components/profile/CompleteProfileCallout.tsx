@@ -1,5 +1,5 @@
 import { User } from "@prisma/client"
-import { Check, Mail, Plus, X } from "lucide-react"
+import { ArrowUpRight, Check, Mail, Plus, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -45,10 +45,22 @@ export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
             <div className="text-3xl font-semibold w-12 h-12 flex items-center justify-center">
               {isComplete ? "👏" : "👋"}
             </div>
-            <div className="text-base font-semibold">
-              {isComplete
-                ? "Profile complete!"
-                : "Complete your Optimist Profile"}
+            <div className="flex flex-col items-start">
+              <div className="text-base font-semibold">
+                {isComplete
+                  ? "Profile complete!"
+                  : "Complete your Optimist Profile"}
+              </div>
+              {isComplete && (
+                <Link
+                  href={`/${user.username}`}
+                  target="_blank"
+                  className="text-sm text-muted-foreground hover:underline flex items-center gap-1 font-medeum"
+                >
+                  Checkout your public profile
+                  <ArrowUpRight size={16} />
+                </Link>
+              )}
             </div>
           </div>
           <ProgressIndicator progress={progress} />
