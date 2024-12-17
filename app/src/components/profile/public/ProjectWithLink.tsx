@@ -60,12 +60,6 @@ function ProjectWithLink({
             alt="External link"
             className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
           />
-          {project.rewards.length && (
-            <span className="text-md text-gray-500">
-              Rewarded in Retro Funding{" "}
-              {project.rewards.map((reward) => reward.roundId).join(", ")}
-            </span>
-          )}
         </>
       )}
     </div>
