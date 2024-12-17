@@ -6,6 +6,7 @@ import schemas from "../schemas.config";
 
 ponder.on("EASAttested:Attested", async ({ event, context }) => {
   const { attester, recipient, uid, schema } = event.args;
+  const createdAt = event.block.timestamp;
 
   const schemaName = schemaIds[schema];
 
@@ -40,7 +41,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           address: recipient.toLowerCase(),
           farcaster_id: farcasterId.toString(),
           selection_method: selectionMethod,
-          revoked: false,
+          created_at: createdAt,
         });
       }
       break;
@@ -57,7 +58,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           rpgf_round: rpgfRound,
           referred_by: referredBy.toLowerCase(),
           referred_method: referredMethod,
-          revoked: false,
+          created_at: createdAt,
         });
       }
       break;
@@ -73,7 +74,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           address: recipient.toLowerCase(),
           gov_season: govSeason,
           gov_role: govRole,
-          revoked: false,
+          created_at: createdAt,
         });
       }
       break;
@@ -93,7 +94,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           voter_type: voterType,
           voting_group: votingGroup,
           selection_method: selectionMethod,
-          revoked: false,
+          created_at: createdAt,
         });
       }
       break;
@@ -112,7 +113,7 @@ ponder.on("EASRevoked:Revoked", async ({ event, context }) => {
   try {
     await context.db
       .update(dbSchema[schemaName], { id: uid })
-      .set({ revoked: true });
+      .set({ revoked_at: event.block.timestamp });
   } catch (e) {
     if (!(e as Error).message.includes("No existing record found")) {
       throw e;

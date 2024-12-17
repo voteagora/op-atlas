@@ -9,5 +9,8 @@ export type Attestation = {
   id: string;
   entity: string;
   address: string;
+  name: string;
   subtext: string;
 };
+
+export type Entity = keyof typeof dbSchema;
