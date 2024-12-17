@@ -2,8 +2,7 @@
 
 import { User } from "@prisma/client"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { updateGovForumProfileUrl } from "@/lib/actions/users"
@@ -46,6 +45,27 @@ export function GovForumConnection({ user }: { user: User }) {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    const isProfileComplete = () => {
+      return (
+        user.govForumProfileUrl &&
+        user.github &&
+        user.email &&
+        user.name &&
+        user.imageUrl
+      )
+    }
+
+    if (isProfileComplete()) {
+      toast.success("Profile complete! 🎉", {
+        action: {
+          label: "View Profile",
+          onClick: () => window.open(`/${user.username}`, "_blank"),
+        },
+      })
+    }
+  }, [user])
 
   return (
     <div className="flex flex-col gap-6">

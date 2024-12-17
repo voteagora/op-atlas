@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { isBadgeholder } from "@/lib/badgeholders"
@@ -14,12 +15,7 @@ import {
   UserOrganizationsWithDetails,
   UserWithAddresses,
 } from "@/lib/types"
-import {
-  cn,
-  hasShownNoRewardsDialog,
-  profileProgress,
-  saveHasShownNoRewardsDialog,
-} from "@/lib/utils"
+import { cn, hasShownNoRewardsDialog, profileProgress } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import ApplicationInterruptiveDialogue from "../application/ApplicationInterruptiveDialogue"
@@ -104,7 +100,7 @@ const Dashboard = ({
       return
     }
 
-    if (projects.find((project) => unclaimedRewards(project).length)) {
+    if (adminProjects.find((project) => unclaimedRewards(project).length)) {
       setShowUnclaimedRewardsDialog(true)
       const unclaimedReward = projects
         .map((project) => project.rewards)
@@ -119,6 +115,19 @@ const Dashboard = ({
       )
     }
   }, [adminProjects])
+
+  useEffect(() => {
+    if (profileInitiallyComplete.current) {
+      toast.success("Profile complete! 🎉", {
+        action: {
+          label: "View Profile",
+          onClick: () => window.open(`/${user.username}`, "_blank"),
+        },
+      })
+      // Set to false after showing toast so it doesn't show again
+      profileInitiallyComplete.current = false
+    }
+  }, [user])
 
   // TODO: hide rewards section if all rewards are claimed
   const showRewardsSection = Boolean(
