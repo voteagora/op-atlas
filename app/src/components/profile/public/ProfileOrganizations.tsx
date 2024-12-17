@@ -6,6 +6,10 @@ function ProfileOrganizations({
 }: {
   organizations: Organization[]
 }) {
+  if (organizations.length === 0) {
+    return null
+  }
+
   return (
     <div className="flex flex-col gap-y-4 mt-12">
       <h2 className="text-xl font-medium">Organizations</h2>
