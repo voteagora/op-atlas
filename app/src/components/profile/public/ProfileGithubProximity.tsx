@@ -34,6 +34,8 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
 
   const label = labels.find((l) => data.percentile >= l.threshold)
 
+  if (data.percentile < 0.8) return null
+
   return (
     <div className="flex flex-col gap-y-4 mt-12">
       <h2 className="text-xl font-medium flex items-center gap-x-2">
