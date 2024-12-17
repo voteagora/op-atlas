@@ -133,41 +133,6 @@ export const Sidebar = ({
         </div>
       )}
 
-      {/* Welcome too retro funding app */}
-      {status === "unauthenticated" && (
-        <div className="flex flex-col items-center gap-y-3 p-6 border border-[#D6E4FF] bg-[#F0F4FF] rounded-xl">
-          <div className="w-52 h-[84px] relative">
-            <Image
-              alt="empty profile"
-              fill
-              src="/assets/images/sunnies-group.png"
-            />
-          </div>
-
-          <p className="text-sm font-medium text-foreground text-center">
-            Welcome to the new Retro Funding app
-          </p>
-          <p className="text-sm font-normal text-secondary-foreground text-center">
-            Whether you’re a builder or a badgeholder, sign up.
-          </p>
-
-          <Button
-            onClick={onClickGetStarted}
-            variant="outline"
-            className="text-sm font-medium text-foreground justify-center mt-1 w-full"
-          >
-            <Image
-              src="/assets/icons/farcaster-icon.svg"
-              height={12.23}
-              width={13.33}
-              alt="farcaster"
-              className="mr-[10px]"
-            />
-            Sign up
-          </Button>
-        </div>
-      )}
-
       {/* Explore projects */}
       <div className="flex flex-col items-center justify-center gap-y-3 p-6 border border-secondary bg-secondary rounded-xl">
         <div className="relative flex justify-center items-center py-4 w-full h-20">
@@ -197,7 +162,14 @@ export const Sidebar = ({
       </div>
 
       {/* Retro funding rewarded to optimism coolective */}
-      <div className="flex flex-col items-center gap-y-3 p-6 border border-secondary bg-secondary rounded-xl">
+      <div className="flex flex-col items-center gap-y-3 p-6">
+        <div className="w-52 h-[84px] relative">
+          <Image
+            alt="empty profile"
+            fill
+            src="/assets/images/sunnies-group.png"
+          />
+        </div>
         <p className="text-sm font-medium text-text-default text-center">
           60,815,042 OP
         </p>
