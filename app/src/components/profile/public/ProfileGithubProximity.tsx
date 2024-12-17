@@ -1,14 +1,17 @@
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { useState } from "react"
+
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import useGithubProximity from "@/hooks/useGithubProximity"
 import { UserWithAddresses } from "@/lib/types"
 
 function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
   const { data, isLoading, error } = useGithubProximity(user.github)
+  const [isContentVisible, setIsContentVisible] = useState(false)
 
   if (isLoading) return null
   if (error) return null
   if (!data) return null
-  if (data.percentile < 0.9) return null
 
   return (
     <div className="flex flex-col gap-y-4 mt-12">
@@ -19,10 +22,10 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
         </span>
       </h2>
 
-      <div className="grid grid-cols-3 gap-x-8 bg-white rounded-lg border border-gray-200 p-6">
-        <div className="col-span-2 mt-4">
+      <div className="grid grid-cols-3 gap-x-8 bg-white rounded-lg border border-gray-200 p-8">
+        <div className="col-span-2 mt-4 font-semibold">
           <div>
-            {user.github} ranks in the top{" "}
+            {user.name} ranks in the top{" "}
             {Math.round((1 - data.percentile) * 100)}% of developers on Github
             for proximity to the OP Stack
           </div>
@@ -50,26 +53,99 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
               </linearGradient>
             </defs>
             <path
-              d="M 24 96 A 72 72 0 0 1 168 96"
+              d="M 12 96 A 84 84 0 0 1 180 96"
               stroke="#e5e7eb"
-              strokeWidth="12"
+              strokeWidth="8"
               fill="none"
             />
             <path
-              d="M 24 96 A 72 72 0 0 1 168 96"
+              d="M 12 96 A 84 84 0 0 1 180 96"
               stroke="url(#redGradient)"
-              strokeWidth="12"
+              strokeWidth="8"
               fill="none"
-              strokeDasharray={`${Math.PI * 72}`}
-              strokeDashoffset={`${Math.PI * 72 * (1 - data.percentile)}`}
+              strokeDasharray={`${Math.PI * 84}`}
+              strokeDashoffset={`${Math.PI * 84 * (1 - data.percentile)}`}
               className="transition-all duration-1000 ease-out"
             />
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center mt-8">
-            <span className="text-2xl font-medium">
-              {Math.round(data.percentile * 100)}th
+          <div className="absolute inset-0 flex flex-col items-center justify-center mt-5">
+            <span className="text-4xl font-extrabold">
+              {Math.round(data.percentile * 100)}
+              <span className="text-lg font-normal">th</span>
             </span>
-            <span className="text-sm text-gray-500">percentile</span>
+            <span className="text-sm text-gray-500">PERCENTILE</span>
+          </div>
+        </div>
+
+        <div className="col-span-3 ">
+          <div className="flex flex-col">
+            <div
+              className={`content mt-4 text-sm text-gray-600 space-y-4 ${
+                !isContentVisible ? "hidden" : ""
+              }`}
+            >
+              <p className="text-sm">
+                This experimental ranking evaluates GitHub developers and repos
+                based on their proximity to OP Stack repos. Using GitHub event
+                data and bipartite trust graph, it applies variations of
+                EigenTrust and Hubs & Authorities algorythms. Trust is built
+                from user actions (e.g. stars, forks) and contributions (e.g.
+                PRs merged). The ranking is logarythmic, and scores in the 90th
+                percentile are considered high.
+              </p>
+              <p className="text-sm">
+                The ranking was developed in collaboration with{" "}
+                <a
+                  href="https://openrank.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-500 underline hover:text-gray-700"
+                >
+                  OpenRank
+                </a>{" "}
+                and{" "}
+                <a
+                  href="https://opensourceobserver.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-500 underline hover:text-gray-700"
+                >
+                  OpenSourceObserver
+                </a>
+                . Want to go deeper?{" "}
+                <a
+                  href="https://gov.optimism.io/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-500 underline hover:text-gray-700"
+                >
+                  Learn more in our forum post
+                </a>
+                .
+              </p>
+            </div>
+            <div className="flex items-center gap-x-4 mt-6">
+              <button
+                onClick={() => setIsContentVisible(!isContentVisible)}
+                className="text-left text-sm text-gray-500 hover:text-gray-700 cursor-pointer mt-1"
+              >
+                <div className="flex items-center gap-x-1">
+                  About the ranking{" "}
+                  {isContentVisible ? (
+                    <ChevronUp size={12} />
+                  ) : (
+                    <ChevronDown size={12} />
+                  )}
+                </div>
+              </button>
+              <OutboundArrowLink
+                text="OpenRank docs"
+                target="https://docs.openrank.com/integrations/github-developers-and-repo-ranking"
+                className={`text-sm text-gray-500 hover:text-gray-700 link ${
+                  isContentVisible ? "" : "hidden"
+                } mt-2`}
+              />
+            </div>
           </div>
         </div>
       </div>
