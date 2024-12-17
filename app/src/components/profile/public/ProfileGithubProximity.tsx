@@ -4,6 +4,25 @@ import { useState } from "react"
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import useGithubProximity from "@/hooks/useGithubProximity"
 import { UserWithAddresses } from "@/lib/types"
+import { Badge } from "@/components/ui/badge"
+
+const labels = [
+  {
+    threshold: 1,
+    emoji: "🌟",
+    text: "Highest",
+  },
+  {
+    threshold: 0.95,
+    emoji: "🎉",
+    text: "Very High",
+  },
+  {
+    threshold: 0.9,
+    emoji: "👏",
+    text: "High",
+  },
+] as const
 
 function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
   const { data, isLoading, error } = useGithubProximity(user.github)
@@ -12,6 +31,8 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
   if (isLoading) return null
   if (error) return null
   if (!data) return null
+
+  const label = labels.find((l) => data.percentile >= l.threshold)
 
   return (
     <div className="flex flex-col gap-y-4 mt-12">
@@ -38,43 +59,56 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
           </div>
         </div>
 
-        <div className="col-span-1 relative w-48 h-32 ml-auto">
-          <svg className="w-full h-full">
-            <defs>
-              <linearGradient
-                id="redGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" style={{ stopColor: "#fee2e2" }} />
-                <stop offset="100%" style={{ stopColor: "#ef4444" }} />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 12 96 A 84 84 0 0 1 180 96"
-              stroke="#e5e7eb"
-              strokeWidth="8"
-              fill="none"
-            />
-            <path
-              d="M 12 96 A 84 84 0 0 1 180 96"
-              stroke="url(#redGradient)"
-              strokeWidth="8"
-              fill="none"
-              strokeDasharray={`${Math.PI * 84}`}
-              strokeDashoffset={`${Math.PI * 84 * (1 - data.percentile)}`}
-              className="transition-all duration-1000 ease-out"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center mt-5">
-            <span className="text-4xl font-extrabold">
-              {Math.round(data.percentile * 100)}
-              <span className="text-lg font-normal">th</span>
-            </span>
-            <span className="text-sm text-gray-500">PERCENTILE</span>
+        <div className="col-span-1 flex items-start">
+          <div className="relative w-48 h-32">
+            <svg className="w-[192px] h-[128px]">
+              <defs>
+                <linearGradient
+                  id="redGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" style={{ stopColor: "#fee2e2" }} />
+                  <stop offset="100%" style={{ stopColor: "#ef4444" }} />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 12 96 A 84 84 0 0 1 180 96"
+                stroke="#e5e7eb"
+                strokeWidth="8"
+                fill="none"
+              />
+              <path
+                d="M 12 96 A 84 84 0 0 1 180 96"
+                stroke="url(#redGradient)"
+                strokeWidth="8"
+                fill="none"
+                strokeDasharray={`${Math.PI * 84}`}
+                strokeDashoffset={`${Math.PI * 84 * (1 - data.percentile)}`}
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center mt-5">
+              <span className="text-4xl font-extrabold">
+                {Math.round(data.percentile * 100)}
+                <span className="text-lg font-normal">th</span>
+              </span>
+              <span className="text-sm text-gray-500">PERCENTILE</span>
+            </div>
           </div>
+          {label && (
+            <Badge
+              variant="destructive"
+              className="text-xs font-medium px-2 py-0.5 rounded-full text-white gap-x-1"
+            >
+              <span className="text-white">{label.emoji}</span>{" "}
+              <span className="text-white font-normal whitespace-nowrap">
+                {label.text}
+              </span>
+            </Badge>
+          )}
         </div>
 
         <div className="col-span-3 ">
