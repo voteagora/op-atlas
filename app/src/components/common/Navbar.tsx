@@ -116,7 +116,7 @@ const Navbar = () => {
                   } focus:outline-none focus:opacity-80`}
                   href="/rounds"
                 >
-                  Rounds
+                  Retro Rounds
                 </Link>
               </div>
             </div>
