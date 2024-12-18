@@ -21,10 +21,6 @@ const ProfileHeader = ({
     .join("")
     .toUpperCase()
 
-  const isBadgeholder = user.addresses?.find(({ address }) =>
-    isBadgeholderAddress(address),
-  )
-
   return (
     <div className={cn("flex gap-x-4", className)}>
       <div className="flex flex-col">
@@ -34,17 +30,7 @@ const ProfileHeader = ({
         </Avatar>
 
         <div className="flex flex-col">
-          <h2 className="flex items-center gap-x-2">
-            {user.name ?? ""}{" "}
-            {isBadgeholder && (
-              <Image
-                src="/assets/icons/badgeholder-sunny.png"
-                width={14}
-                height={14}
-                alt="Badgeholder checkmark"
-              />
-            )}
-          </h2>
+          <h2 className="flex items-center gap-x-2">{user.name ?? ""} </h2>
           {user.bio && <p>{user.bio}</p>}
         </div>
 
