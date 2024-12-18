@@ -1,8 +1,6 @@
-import Image from "next/image"
 import React, { memo } from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { isBadgeholderAddress } from "@/lib/badgeholders"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -29,9 +27,9 @@ const ProfileHeader = ({
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col pt-4">
           <h2 className="flex items-center gap-x-2">{user.name ?? ""} </h2>
-          {user.bio && <p>{user.bio}</p>}
+          <span className="pt-4">{user.bio}</span>
         </div>
 
         <ProfileHeaderLinks user={user} />

@@ -14,7 +14,7 @@ export default function ProfileHeaderLinks({
   }
 
   return (
-    <div className="mt-2 mr-4 flex items-center gap-x-4">
+    <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
       {/* Farcaster */}
       <BubbleLink
         href={`https://warpcast.com/${user.username}`}
