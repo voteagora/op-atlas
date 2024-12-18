@@ -141,7 +141,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
                 </a>{" "}
                 and{" "}
                 <a
-                  href="https://opensourceobserver.com/"
+                  href="https://www.opensource.observer/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-500 underline hover:text-gray-700"
@@ -150,7 +150,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
                 </a>
                 . Want to go deeper?{" "}
                 <a
-                  href="https://gov.optimism.io/"
+                  href="https://gov.optimism.io/t/retro-funding-5-guest-voter-selection-algorithm-explanation/8719"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-500 underline hover:text-gray-700"
