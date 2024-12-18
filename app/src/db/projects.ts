@@ -262,7 +262,6 @@ async function getAllPublishedUserProjectsFn({ userId }: { userId: string }) {
       organizations: {
         where: {
           deletedAt: null,
-          role: "admin" satisfies TeamRole,
           organization: { deletedAt: null },
         },
         select: {
@@ -273,7 +272,6 @@ async function getAllPublishedUserProjectsFn({ userId }: { userId: string }) {
                   deletedAt: null,
                   project: {
                     deletedAt: null,
-                    organization: { deletedAt: null },
                   },
                 },
                 include: {
