@@ -13,20 +13,22 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
   return (
     <div className="flex flex-col gap-y-4 mt-12 w-full">
       <h2 className="text-xl font-medium">Roles</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-between">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-x-4 justify-between">
         {attestations.map((attestation) => (
           <div
             key={attestation.id}
-            className="rounded-lg border border-gray-200 p-6 w-[400px] bg-white"
+            className="rounded-xl border border-gray-200 p-6 bg-background"
           >
-            <div className="text-lg font-medium flex items-center gap-2">
+            <div className="text-md font-medium flex items-center gap-2">
               {attestation.name} <CheckIconRed />
             </div>
-            <div className="text-md text-gray-500">{attestation.subtext}</div>
+            <div className="text-md text-secondary-foreground">
+              {attestation.subtext}
+            </div>
             <OutboundArrowLink
               text="Attestation"
               target={`https://optimism.easscan.org/attestation/view/${attestation.id}`}
-              className="text-sm text-gray-500 hover:text-gray-600 mt-2 inline-flex items-center"
+              className="text-sm text-secondary-foreground hover:text-gray-600 mt-2 inline-flex items-center"
             />
           </div>
         ))}
