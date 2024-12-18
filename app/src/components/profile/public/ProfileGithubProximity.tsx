@@ -113,7 +113,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
           )}
         </div>
 
-        <div className="col-span-3 ">
+        <div className="col-span-5 ">
           <div className="flex flex-col">
             <div
               className={`content mt-4 text-sm text-gray-600 space-y-4 ${
