@@ -45,8 +45,8 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
         </span>
       </h2>
 
-      <div className="grid grid-cols-3 gap-x-8 bg-white rounded-lg border border-gray-200 p-8">
-        <div className="col-span-2 mt-4 font-semibold">
+      <div className="grid grid-cols-5 gap-x-8 bg-white rounded-lg border border-gray-200 p-8">
+        <div className="col-span-3 mt-4 font-semibold">
           <div>
             {user.name} ranks in the top{" "}
             {Math.round((1 - data.percentile) * 100)}% of developers on Github
@@ -61,7 +61,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
           </div>
         </div>
 
-        <div className="col-span-1 flex items-start">
+        <div className="col-span-2 flex items-start">
           <div className="relative w-48 h-32">
             <svg className="w-[192px] h-[128px]">
               <defs>
