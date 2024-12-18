@@ -84,7 +84,7 @@ export function Account() {
 
     track("Successful Sign In", { userId: session.user.farcasterId })
     if (isFirstTimeUser()) {
-      router.push("/welcome")
+      router.push("/dashboard")
       saveLogInDate()
     } else {
       saveLogInDate()

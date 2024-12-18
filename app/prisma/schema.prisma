@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id            String  @id @default(uuid())
-  name          String?
-  username      String?
-  farcasterId   String  @unique
-  imageUrl      String?
-  bio           String?
-  email         String?
-  emailVerified Boolean @default(false)
-  github        String?
-  notDeveloper  Boolean @default(false)
+  id                  String  @id @default(uuid())
+  name                String?
+  username            String?
+  farcasterId         String  @unique
+  imageUrl            String?
+  bio                 String?
+  email               String?
+  emailVerified       Boolean @default(false)
+  github              String?
+  notDeveloper        Boolean @default(false)
+  govForumProfileUrl  String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -417,4 +418,11 @@ model Badgeholder {
   roundId String
 
   @@unique([address, roundId])
+}
+
+model GithubProximity {
+  peer String
+  percentile Float
+
+  @@unique([peer])
 }

@@ -1,5 +1,5 @@
 import { User } from "@prisma/client"
-import { Check, Mail, Plus, X } from "lucide-react"
+import { ArrowUpRight, Check, Mail, Plus, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -45,10 +45,22 @@ export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
             <div className="text-3xl font-semibold w-12 h-12 flex items-center justify-center">
               {isComplete ? "👏" : "👋"}
             </div>
-            <div className="text-base font-semibold">
-              {isComplete
-                ? "Profile complete!"
-                : "Complete your Optimist Profile"}
+            <div className="flex flex-col items-start">
+              <div className="text-base font-semibold">
+                {isComplete
+                  ? "Profile complete!"
+                  : "Complete your Optimist Profile"}
+              </div>
+              {isComplete && (
+                <Link
+                  href={`/${user.username}`}
+                  target="_blank"
+                  className="text-sm text-muted-foreground hover:underline flex items-center gap-1 font-medeum"
+                >
+                  Checkout your public profile
+                  <ArrowUpRight size={16} />
+                </Link>
+              )}
             </div>
           </div>
           <ProgressIndicator progress={progress} />
@@ -121,10 +133,10 @@ function AddYourEmailStep({ user }: { user: User }) {
                 textClassName="text-red-600"
                 className="bg-red-100"
               />
+              <Badge text="Private" />
             </div>
             <div className="text-secondary-foreground">
-              Please add email for important messages. Don&apos;t worry,
-              we&apos;ll keep it private.
+              Please add email for important messages.
             </div>
           </div>
           {user.email && (
@@ -177,10 +189,11 @@ function ConnectYourGithubStep({ user }: { user: User }) {
         {!isDeveloper || user.github ? <GreenCheck /> : <StepNumber num={2} />}
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col gap-[2px]">
-            <div className="font-medium">Connect your GitHub</div>
+            <div className="font-medium flex items-center gap-2">
+              Connect your GitHub <Badge text="Public" />
+            </div>
             <div className="text-secondary-foreground">
-              Show your code contributions to the Optimism Collective. This step
-              is required for developers wanting to vote in Round 5.
+              Show your code contributions to the Optimism Collective.
             </div>
           </div>
           {user.github && (
@@ -239,12 +252,24 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
             <div className="flex flex-col gap-[2px]">
               <div className="font-medium">Add verified addresses</div>
               <div className="text-secondary-foreground">
-                Add a proof of ownership of an Ethereum account to your public
-                profile, so ENS and attestations can be displayed. Required for
-                Badgeholders.
+                Display your attestations, ENS, and more.
+                <ul className="list-disc pl-4 mt-2 text-sm text-secondary-foreground">
+                  <li>
+                    If you&apos;re a Citizen or guest voter, please verify your
+                    badgeholder address
+                  </li>
+                  <li>
+                    If you&apos;re a Token House delegate, please verify your
+                    delegate address
+                  </li>
+                  <li>
+                    If you&apos;ve received foundation attestations, please
+                    verify the relevant addresses
+                  </li>
+                </ul>
               </div>
             </div>
-            <div className="text-sm text-secondary-foreground">
+            <div className="text-xs text-secondary-foreground">
               You can also verify addresses directly to your Farcaster account,
               and{" "}
               <Link href="/profile/verified-addresses" className="underline">

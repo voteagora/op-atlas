@@ -1,6 +1,12 @@
 "use client"
 
-import { AlignJustify, ChevronUp, MoveUpRight, X } from "lucide-react"
+import {
+  AlignJustify,
+  ArrowUpRight,
+  ChevronUp,
+  MoveUpRight,
+  X,
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -30,6 +36,25 @@ export const menuList = [
   },
 ]
 
+const dropdownList = [
+  {
+    title: "Optimism",
+    href: "https://optimism.io/",
+  },
+  {
+    title: "Retro Funding",
+    href: "https://atlas.optimism.io/",
+  },
+  {
+    title: "Forum",
+    href: "https://gov.optimism.io/",
+  },
+  {
+    title: "Delegates",
+    href: "https://vote.optimism.io/",
+  },
+]
+
 const Navbar = () => {
   const pathname = usePathname()
   const isRounds = pathname === "/" || pathname === "/rounds"
@@ -52,15 +77,32 @@ const Navbar = () => {
                 <AlignJustify className="block sm:hidden" />
               )}
             </button>
-            <Link href="/rounds">
-              <Image
-                src="/assets/images/logo.svg"
-                height={24}
-                width={167}
-                priority
-                alt=""
-              />
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
+                <Image
+                  src="/assets/images/logo.svg"
+                  height={24}
+                  width={167}
+                  priority
+                  alt=""
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-56 flex flex-col gap-1"
+                sideOffset={0}
+                side="bottom"
+                align="start"
+              >
+                {dropdownList.map((item, index) => (
+                  <DropdownMenuItem key={index} asChild>
+                    <ExternalLink href={item.href}>
+                      <div>{item.title}</div>
+                      <ArrowUpRight size={14} />
+                    </ExternalLink>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div
               className={cn(
                 "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
@@ -74,7 +116,7 @@ const Navbar = () => {
                   } focus:outline-none focus:opacity-80`}
                   href="/rounds"
                 >
-                  Rounds
+                  Retro Rounds
                 </Link>
               </div>
             </div>
@@ -107,7 +149,7 @@ const Navbar = () => {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-64 py-3 px-4 flex flex-col gap-4 text-text-secondary rounded-2xl"
+                className="w-56 flex flex-col gap-1"
                 sideOffset={0}
                 side="bottom"
                 align="start"
@@ -115,14 +157,14 @@ const Navbar = () => {
                 {menuList.map((item, index) => (
                   <DropdownMenuItem
                     key={index}
-                    className="focus:bg-none! focus:opacity-80 text-base"
+                    className="focus:bg-none! focus:opacity-80"
                   >
                     <ExternalLink
                       className="flex items-center gap-1"
                       href={item.href}
                     >
                       <div>{item.title}</div>
-                      <MoveUpRight size={12} />
+                      <ArrowUpRight size={14} />
                     </ExternalLink>
                   </DropdownMenuItem>
                 ))}

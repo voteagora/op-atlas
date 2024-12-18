@@ -13,5 +13,7 @@ function useAttestations(addresses: string[]) {
     },
   })
 
-  return { data, isLoading, error }
+  return { raw: data, isLoading, error }
 }
+
+export default useAttestations

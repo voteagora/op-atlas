@@ -29,6 +29,18 @@ export async function getUserByFarcasterId(farcasterId: string) {
   })
 }
 
+export async function getUserByUsername(username: string) {
+  return prisma.user.findFirst({
+    where: {
+      username,
+    },
+    include: {
+      addresses: true,
+      interaction: true,
+    },
+  })
+}
+
 export async function searchUsersByUsername({
   username,
 }: {
@@ -120,6 +132,19 @@ export async function updateUserGithub({
       id,
     },
     data: updates,
+  })
+}
+
+export async function updateUserGovForumProfileUrl({
+  id,
+  govForumProfileUrl,
+}: {
+  id: string
+  govForumProfileUrl?: string | null
+}) {
+  return prisma.user.update({
+    where: { id },
+    data: { govForumProfileUrl },
   })
 }
 

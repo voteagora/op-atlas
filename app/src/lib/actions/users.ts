@@ -9,6 +9,7 @@ import {
   searchUsersByUsername,
   updateUserEmail,
   updateUserGithub,
+  updateUserGovForumProfileUrl,
   updateUserHasGithub,
   updateUserInteraction,
 } from "@/db/users"
@@ -89,6 +90,39 @@ export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/connected-apps")
+
+  return {
+    error: null,
+    user: updated,
+  }
+}
+
+export const updateGovForumProfileUrl = async (govForumProfileUrl: string) => {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  // Validate gov forum profile URL format
+  if (
+    !govForumProfileUrl.match(
+      /^https:\/\/gov\.optimism\.io\/u\/[^\/]+\/summary$/,
+    )
+  ) {
+    return {
+      error:
+        "Invalid URL format. Must be https://gov.optimism.io/u/yourname/summary",
+    }
+  }
+
+  const updated = await updateUserGovForumProfileUrl({
+    id: session.user.id,
+    govForumProfileUrl,
+  })
+
+  revalidatePath("/profile/details")
 
   return {
     error: null,
