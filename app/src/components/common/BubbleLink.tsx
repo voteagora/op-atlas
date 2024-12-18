@@ -1,9 +1,10 @@
 import Image from "next/image"
+import { ReactNode } from "react"
 
 interface BubbleLinkProps {
   href: string
   icon: string
-  text: string
+  text: ReactNode
   tooltipText: string
 }
 
@@ -13,7 +14,7 @@ function BubbleLink({ href, icon, text, tooltipText }: BubbleLinkProps) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex items-center gap-x-2 rounded-full bg-gray-300 px-3 py-1 hover:bg-gray-200 transition-colors"
+      className="group relative flex items-center gap-x-2 rounded-full bg-gray-100 px-3 py-1 hover:bg-gray-200 transition-colors"
     >
       <Image src={icon} width={14} height={13} alt={tooltipText} />
       <span className="text-sm text-secondary-foreground">{text}</span>
