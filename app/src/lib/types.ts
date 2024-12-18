@@ -155,12 +155,10 @@ export type OrganizationWithTeamAndProjects = Prisma.OrganizationGetPayload<{
       include: {
         project: {
           include: {
-            team: { include: { user: true } }
-            repos: true
-            contracts: true
             funding: true
             snapshots: true
             applications: true
+            links: true
             rewards: { include: { claim: true } }
           }
         }
