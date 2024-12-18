@@ -161,6 +161,7 @@ model UserOrganization {
 
   @@unique([userId, organizationId])
   @@index([organizationId])
+  @@index([userId, deletedAt, role])
 }
 
 model ProjectOrganization {
@@ -177,6 +178,7 @@ model ProjectOrganization {
 
   @@unique([projectId, organizationId])
   @@index([organizationId])
+  @@index([projectId, deletedAt])
 }
 
 model Project {
@@ -215,6 +217,8 @@ model Project {
   applications Application[]
   rewards      FundingReward[]
   links        ProjectLinks[]
+
+  @@index([deletedAt, createdAt])
 }
 
 model Application {

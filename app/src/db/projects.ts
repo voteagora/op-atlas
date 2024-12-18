@@ -245,8 +245,6 @@ async function getAllPublishedUserProjectsFn({ userId }: { userId: string }) {
         include: {
           project: {
             include: {
-              repos: true,
-              contracts: true,
               funding: true,
               snapshots: true,
               applications: true,
@@ -281,8 +279,6 @@ async function getAllPublishedUserProjectsFn({ userId }: { userId: string }) {
                 include: {
                   project: {
                     include: {
-                      repos: true,
-                      contracts: true,
                       funding: true,
                       snapshots: true,
                       applications: true,

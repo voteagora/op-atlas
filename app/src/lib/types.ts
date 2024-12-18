@@ -22,8 +22,6 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
 
 export type ProjectWithDetailsLite = Prisma.ProjectGetPayload<{
   include: {
-    repos: true
-    contracts: true
     funding: true
     snapshots: true
     applications: true
