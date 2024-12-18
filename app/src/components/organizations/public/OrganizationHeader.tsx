@@ -41,7 +41,7 @@ const OrganizationHeader = ({
           <div className="flex flex-col w-full">
             <h2 className="flex items-center gap-x-2">
               {organization.name ?? ""}{" "}
-              <span className="text-xs font-medium text-gray-700 border border-gray-200 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-medium text-gray-700 border border-gray-200 px-2 py-1 rounded-full">
                 Organization
               </span>
             </h2>
