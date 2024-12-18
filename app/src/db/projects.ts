@@ -226,6 +226,82 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
 
 export const getUserProjectsWithDetails = cache(getUserProjectsWithDetailsFn)
 
+async function getAllPublishedUserProjectsFn({ userId }: { userId: string }) {
+  return prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      projects: {
+        where: {
+          deletedAt: null,
+          project: {
+            deletedAt: null,
+            organization: {
+              is: null,
+            },
+          },
+        },
+        include: {
+          project: {
+            include: {
+              repos: true,
+              contracts: true,
+              funding: true,
+              snapshots: true,
+              applications: true,
+              links: true,
+              rewards: { include: { claim: true } },
+            },
+          },
+        },
+        orderBy: {
+          project: {
+            createdAt: "asc",
+          },
+        },
+      },
+      organizations: {
+        where: {
+          deletedAt: null,
+          role: "admin" satisfies TeamRole,
+          organization: { deletedAt: null },
+        },
+        select: {
+          organization: {
+            include: {
+              projects: {
+                where: {
+                  deletedAt: null,
+                  project: {
+                    deletedAt: null,
+                    organization: { deletedAt: null },
+                  },
+                },
+                include: {
+                  project: {
+                    include: {
+                      repos: true,
+                      contracts: true,
+                      funding: true,
+                      snapshots: true,
+                      applications: true,
+                      links: true,
+                      rewards: { include: { claim: true } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export const getAllPublishedUserProjects = cache(getAllPublishedUserProjectsFn)
+
 export type CreateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
 > & {

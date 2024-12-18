@@ -1,8 +1,8 @@
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectWithDetailsLite } from "@/lib/types"
 
 import ProjectWithLink from "./ProjectWithLink"
 
-function ProfileProjects({ projects }: { projects: ProjectWithDetails[] }) {
+function ProfileProjects({ projects }: { projects: ProjectWithDetailsLite[] }) {
   if (projects.length === 0) {
     return null
   }

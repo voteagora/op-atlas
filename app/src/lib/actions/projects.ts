@@ -9,6 +9,7 @@ import {
   createProject,
   CreateProjectParams,
   deleteProject,
+  getAllPublishedUserProjects,
   getProjectTeam,
   getUserAdminProjectsWithDetail,
   getUserApplications,
@@ -34,6 +35,20 @@ import {
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
   return (teams?.projects ?? []).map(({ project }) => project)
+}
+
+export const getAllPublishedProjects = async (userId: string) => {
+  const projects = await getAllPublishedUserProjects({ userId })
+  return [
+    ...(projects?.projects
+      .map(({ project }) => project)
+      .filter((project) => project.snapshots.length > 0) ?? []),
+    ...(projects?.organizations
+      .map((o) => o.organization.projects)
+      .flat()
+      .map(({ project }) => project)
+      .filter((project) => project.snapshots.length > 0) ?? []),
+  ]
 }
 
 export const getAdminProjects = async (userId: string, roundId?: string) => {

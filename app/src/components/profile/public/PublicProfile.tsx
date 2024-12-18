@@ -2,7 +2,7 @@
 
 import { Organization } from "@prisma/client"
 
-import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
+import { ProjectWithDetailsLite, UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ProfileGithubProximity from "./ProfileGithubProximity"
@@ -20,7 +20,7 @@ const PublicUserProfile = ({
   className?: string
   user: UserWithAddresses
   organizations: Organization[]
-  projects: ProjectWithDetails[]
+  projects: ProjectWithDetailsLite[]
 }) => {
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>

@@ -20,6 +20,18 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
   }
 }>
 
+export type ProjectWithDetailsLite = Prisma.ProjectGetPayload<{
+  include: {
+    repos: true
+    contracts: true
+    funding: true
+    snapshots: true
+    applications: true
+    links: true
+    rewards: { include: { claim: true } }
+  }
+}>
+
 export type ProjectWithDetailsWithoutOrganization = Prisma.ProjectGetPayload<{
   include: {
     team: { include: { user: true } }

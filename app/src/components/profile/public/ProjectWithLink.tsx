@@ -1,13 +1,9 @@
 import Image from "next/image"
 
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
-import { ProjectWithDetailsWithoutOrganization } from "@/lib/types"
+import { ProjectWithDetailsLite } from "@/lib/types"
 
-function ProjectWithLink({
-  project,
-}: {
-  project: ProjectWithDetailsWithoutOrganization
-}) {
+function ProjectWithLink({ project }: { project: ProjectWithDetailsLite }) {
   return (
     <div className="flex items-center gap-x-3">
       {project.applications.length > 0 ? (
