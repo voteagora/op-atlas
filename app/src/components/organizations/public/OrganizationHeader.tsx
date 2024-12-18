@@ -1,11 +1,14 @@
 import Image from "next/image"
-import React, { memo } from "react"
+import React, { memo, useState } from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OrganizationWithTeamAndProjects } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import OrganizationHeaderLinks from "./OrganizationHeaderLinks"
+import { or } from "ramda"
+import { ChevronUp } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 
 const OrganizationHeader = ({
   className,
@@ -14,6 +17,8 @@ const OrganizationHeader = ({
   className?: string
   organization: OrganizationWithTeamAndProjects
 }) => {
+  const [showMore, setShowMore] = useState(false)
+
   return (
     <div className={cn("flex w-full h-full gap-x-4", className)}>
       <div className="flex flex-col w-full">
@@ -46,9 +51,40 @@ const OrganizationHeader = ({
               </span>
             </h2>
             {organization.description && (
-              <p className="text-md text-muted-foreground mt-2">
-                {organization.description}
-              </p>
+              <div>
+                <p
+                  className={cn(
+                    "text-md text-secondary-foreground mt-2",
+                    !showMore && "overflow-hidden max-h-[4.5em] relative", // 3 lines
+                  )}
+                >
+                  {organization.description}
+                  {!showMore && (
+                    <span className="absolute bottom-0 right-0 bg-gradient-to-l from-white dark:from-background pl-2">
+                      ...
+                    </span>
+                  )}
+                </p>
+                {organization.description &&
+                  organization.description.length > 150 && (
+                    <button
+                      onClick={() => setShowMore(!showMore)}
+                      className="text-sm text-gray-500 hover:text-gray-700 mt-2"
+                    >
+                      <div className="flex items-center gap-x-1">
+                        {showMore ? (
+                          <>
+                            Read less <ChevronUp size={12} />
+                          </>
+                        ) : (
+                          <>
+                            Read more <ChevronDown size={12} />
+                          </>
+                        )}
+                      </div>
+                    </button>
+                  )}
+              </div>
             )}
           </div>
 
