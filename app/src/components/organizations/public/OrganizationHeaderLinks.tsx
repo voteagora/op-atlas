@@ -14,7 +14,7 @@ export default function OrganizationHeaderLinks({
           key={website}
           href={website}
           icon="/assets/icons/link-icon.svg"
-          text={website}
+          text={website.replace(/^https?:\/\//, "").slice(0, 30)}
           tooltipText="Website"
         />
       ))}
@@ -33,13 +33,20 @@ export default function OrganizationHeaderLinks({
       {/* X */}
       {organization.twitter && (
         <BubbleLink
-          href={`https://x.com/${organization.twitter}`}
+          href={
+            organization.twitter.startsWith("http")
+              ? organization.twitter
+              : `https://x.com/${organization.twitter}`
+          }
           icon="/assets/icons/x-icon.svg"
-          text={organization.twitter}
+          text={
+            organization.twitter.startsWith("http")
+              ? organization.twitter.split("/").pop()
+              : organization.twitter
+          }
           tooltipText="X (Twitter)"
         />
       )}
     </div>
   )
 }
-
