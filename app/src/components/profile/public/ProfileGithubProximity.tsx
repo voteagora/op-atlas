@@ -45,7 +45,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
         </span>
       </h2>
 
-      <div className="grid grid-cols-5 gap-x-8 bg-white rounded-xl border border-gray-200 p-8">
+      <div className="grid grid-cols-5 gap-x-8 bg-background rounded-xl border border-gray-200 p-8">
         <div className="col-span-3 font-semibold">
           <div>
             {user.name} ranks in the top{" "}
