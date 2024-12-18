@@ -23,7 +23,7 @@ const OrganizationHeader = ({
     <div className={cn("flex w-full h-full gap-x-4", className)}>
       <div className="flex flex-col w-full">
         <div className="relative">
-          <div className="relative w-full h-48 -mt-16 overflow-hidden translate-y-1/4 rounded-lg border border-gray-100">
+          <div className="relative w-full h-56 -mt-16 overflow-hidden translate-y-1/4 rounded-xl border border-gray-100">
             {organization.coverUrl ? (
               <Image
                 src={organization.coverUrl}
@@ -38,7 +38,7 @@ const OrganizationHeader = ({
         </div>
 
         <div className="flex flex-col gap-4 px-8">
-          <Avatar className="w-20 h-20">
+          <Avatar className="w-28 h-28">
             <AvatarImage src={organization.avatarUrl ?? ""} />
             <AvatarFallback>{organization.name.charAt(0)}</AvatarFallback>
           </Avatar>

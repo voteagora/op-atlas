@@ -19,10 +19,12 @@ const PublicUserProfile = ({
       <div className="flex flex-col w-full items-start max-w-4xl mx-auto my-18">
         <OrganizationHeader organization={organization} />
 
-        {/* Team */}
-        <OrganizationTeam organization={organization} className="px-8" />
-        {/* Projects */}
-        <OrganizationProjects organization={organization} className="px-8" />
+        <div className="max-w-3xl">
+          {/* Team */}
+          <OrganizationTeam organization={organization} className="px-8" />
+          {/* Projects */}
+          <OrganizationProjects organization={organization} className="px-8" />
+        </div>
       </div>
     </div>
   )

@@ -22,7 +22,7 @@ const ProfileHeader = ({
   return (
     <div className={cn("flex gap-x-4", className)}>
       <div className="flex flex-col">
-        <Avatar className="w-20 h-20 mb-4">
+        <Avatar className="w-28 h-28 mb-4">
           <AvatarImage src={user?.imageUrl ?? ""} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
