@@ -36,7 +36,7 @@ export default function ProfileHeaderLinks({
       )}
 
       {/* Agora */}
-      {delegate && (
+      {delegate && Number(delegate.votingPower.total) > 0 && (
         <BubbleLink
           href={`https://vote.optimism.io/delegates/${delegate.address}`}
           icon="/assets/icons/agora-icon.svg"
