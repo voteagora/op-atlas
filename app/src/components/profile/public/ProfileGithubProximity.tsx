@@ -40,25 +40,25 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
     <div className="flex flex-col gap-y-4 mt-12">
       <h2 className="text-xl font-medium flex items-center gap-x-2">
         OP Stack Proximity
-        <span className="text-xs text-secondary-foreground bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-0.5">
+        <span className="text-xs text-secondary-foreground bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-1">
           Experimental
         </span>
       </h2>
 
-      <div className="grid grid-cols-5 gap-x-8 bg-white rounded-lg border border-gray-200 p-8">
-        <div className="col-span-3 mt-4 font-semibold">
+      <div className="grid grid-cols-5 gap-x-8 bg-white rounded-xl border border-gray-200 p-8">
+        <div className="col-span-3 font-semibold">
           <div>
             {user.name} ranks in the top{" "}
-            {Math.round((1 - data.percentile) * 100)}% of developers on Github
-            for proximity to the OP Stack
+            {Math.max(Math.round((1 - data.percentile) * 100), 1)}% of
+            developers on Github for proximity to the OP Stack
           </div>
-          <div className="mt-2">
+          <p className="mt-2 text-secondary-foreground">
             <OutboundArrowLink
               text={`@${user.github}`}
               target={`https://github.com/${user.github}`}
               className="text-sm text-gray-500"
             />
-          </div>
+          </p>
         </div>
 
         <div className="col-span-2 flex items-start">
@@ -103,7 +103,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
           {label && (
             <Badge
               variant="destructive"
-              className="text-xs font-medium px-2 py-0.5 rounded-full text-white gap-x-1"
+              className="text-xs font-medium px-2 py-1 rounded-full text-white gap-x-1"
             >
               <span className="text-white">{label.emoji}</span>{" "}
               <span className="text-white font-normal whitespace-nowrap">
@@ -120,7 +120,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
                 !isContentVisible ? "hidden" : ""
               }`}
             >
-              <p className="text-sm">
+              <p className="text-sm text-secondary-foreground">
                 This experimental ranking evaluates GitHub developers and repos
                 based on their proximity to OP Stack repos. Using GitHub event
                 data and bipartite trust graph, it applies variations of
