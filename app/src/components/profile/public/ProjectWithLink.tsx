@@ -48,7 +48,11 @@ function ProjectWithLink({ project }: { project: ProjectWithDetailsLite }) {
               <span>{project.name.charAt(0)}</span>
             </div>
           )}
-          <span>{project.name}</span>
+          <span>
+            {project.name.length > 20
+              ? `${project.name.slice(0, 20)}...`
+              : project.name}
+          </span>
           <Image
             src="/assets/icons/arrow-up-right.svg"
             width={10}
