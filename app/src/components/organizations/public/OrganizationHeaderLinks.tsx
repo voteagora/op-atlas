@@ -7,7 +7,7 @@ export default function OrganizationHeaderLinks({
   organization: OrganizationWithTeamAndProjects
 }) {
   return (
-    <div className="mt-2 mr-4 flex items-center gap-x-4">
+    <div className="mt-2 mr-4 flex items-center gap-x-4 gap-y-2 flex-wrap">
       {/* Website */}
       {organization.website.map((website) => (
         <BubbleLink
