@@ -41,6 +41,7 @@ export function parseEntity<T extends Entity>(
 
   return {
     id: item.id,
+    attester: item.attester,
     entity,
     address: item.address,
     name: config.getName(item),

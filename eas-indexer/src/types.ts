@@ -7,6 +7,7 @@ export type RfVoter = typeof dbSchema.rf_voter.$inferSelect;
 
 export type Attestation = {
   id: string;
+  attester: string;
   entity: string;
   address: string;
   name: string;
