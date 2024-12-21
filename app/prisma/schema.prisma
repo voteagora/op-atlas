@@ -14,8 +14,6 @@ model User {
   farcasterId         String  @unique
   imageUrl            String?
   bio                 String?
-  email               String?
-  emailVerified       Boolean @default(false)
   github              String?
   notDeveloper        Boolean @default(false)
   govForumProfileUrl  String?
@@ -24,11 +22,23 @@ model User {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  projects      UserProjects[]
-  organizations UserOrganization[]
-  addresses     UserAddress[]
-  RewardClaim   RewardClaim[]
-  interaction   UserInteraction?
+  emails            UserEmail[]
+  projects          UserProjects[]
+  organizations     UserOrganization[]
+  addresses         UserAddress[]
+  RewardClaim       RewardClaim[]
+  interaction       UserInteraction?
+}
+
+model UserEmail {
+  id        String @id @default(uuid())
+  email     String
+  userId    String
+  verified  Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model UserInteraction {
