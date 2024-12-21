@@ -170,7 +170,7 @@ export function clickSignInWithFarcasterButton() {
 export function profileProgress(user: UserWithAddresses): number {
   // check email, github (or not developer), and addresses
   if (
-    user.email &&
+    user.emails.length > 0 &&
     (user.github || user.notDeveloper) &&
     user.addresses.length
   ) {
@@ -178,7 +178,7 @@ export function profileProgress(user: UserWithAddresses): number {
   }
 
   let progress = 0
-  if (user.email) {
+  if (user.emails.length > 0) {
     progress += 33.33
   }
 

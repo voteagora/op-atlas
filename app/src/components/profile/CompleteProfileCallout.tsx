@@ -9,7 +9,11 @@ import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-addre
 import { syncFarcasterAddresses } from "@/lib/actions/addresses"
 import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
 import { isBadgeholderAddress } from "@/lib/badgeholders"
-import { UserAddressSource, UserWithAddresses } from "@/lib/types"
+import {
+  UserAddressSource,
+  UserWithAddresses,
+  UserWithEmails,
+} from "@/lib/types"
 import { cn, profileProgress, shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -118,12 +122,12 @@ function ProfileSteps({ user }: { user: UserWithAddresses }) {
   )
 }
 
-function AddYourEmailStep({ user }: { user: User }) {
+function AddYourEmailStep({ user }: { user: UserWithEmails }) {
   const { setOpenDialog } = useAppDialogs()
   return (
     <div className="flex justify-between pb-4 gap-6">
       <div className="flex gap-4">
-        {user.email ? <GreenCheck /> : <StepNumber num={1} />}
+        {user.emails.length > 0 ? <GreenCheck /> : <StepNumber num={1} />}
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col gap-[2px]">
             <div className="flex gap-2 items-center">
@@ -139,19 +143,21 @@ function AddYourEmailStep({ user }: { user: User }) {
               Please add email for important messages.
             </div>
           </div>
-          {user.email && (
+          {user.emails.length > 0 && (
             <div className="flex items-center self-start p-3 border border-border rounded-md gap-1">
               <Mail size={14} />
-              <div className="text-secondary-foreground">{user.email}</div>
+              <div className="text-secondary-foreground">
+                {user.emails[0].email}
+              </div>
             </div>
           )}
         </div>
       </div>
       <Button
         onClick={() => setOpenDialog("email")}
-        variant={user.email ? "secondary" : "destructive"}
+        variant={user.emails.length > 0 ? "secondary" : "destructive"}
       >
-        {user.email ? "Edit" : "Add email"}
+        {user.emails.length > 0 ? "Edit" : "Add email"}
       </Button>
     </div>
   )

@@ -50,10 +50,17 @@ export type UserWithAddresses = Prisma.UserGetPayload<{
   include: {
     addresses: true
     interaction: true
+    emails: true
   }
 }>
 
 export type UserAddressSource = "farcaster" | "atlas"
+
+export type UserWithEmails = Prisma.UserGetPayload<{
+  include: {
+    emails: true
+  }
+}>
 
 export type RewardWithProject = Prisma.FundingRewardGetPayload<{
   include: {

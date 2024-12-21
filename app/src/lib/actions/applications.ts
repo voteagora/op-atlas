@@ -150,7 +150,7 @@ export const submitApplications = async (
 
   const user = await getUserById(session.user.id)
 
-  if (!user?.email) {
+  if (user?.emails.length === 0) {
     return {
       applications: [],
       error: "You must provide an email to apply.",
