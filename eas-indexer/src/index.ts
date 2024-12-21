@@ -41,6 +41,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           address: recipient.toLowerCase(),
           farcaster_id: farcasterId.toString(),
           selection_method: selectionMethod,
+          attester: attester.toLowerCase(),
           created_at: createdAt,
         });
       }
@@ -58,6 +59,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           rpgf_round: rpgfRound,
           referred_by: referredBy.toLowerCase(),
           referred_method: referredMethod,
+          attester: attester.toLowerCase(),
           created_at: createdAt,
         });
       }
@@ -74,6 +76,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           address: recipient.toLowerCase(),
           gov_season: govSeason,
           gov_role: govRole,
+          attester: attester.toLowerCase(),
           created_at: createdAt,
         });
       }
@@ -94,6 +97,7 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
           voter_type: voterType,
           voting_group: votingGroup,
           selection_method: selectionMethod,
+          attester: attester.toLowerCase(),
           created_at: createdAt,
         });
       }
