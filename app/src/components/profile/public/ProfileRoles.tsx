@@ -20,7 +20,15 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
             className="rounded-xl border border-gray-200 p-6 bg-background"
           >
             <div className="text-md font-medium flex items-center gap-2">
-              {attestation.name} <CheckIconRed />
+              {attestation.name}{" "}
+              <span className="relative group">
+                <CheckIconRed />
+                {attestation.isFoundationAttestation && (
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-background px-2 py-1 text-xs text-secondary-foreground font-light shadow-md opacity-0 transition-opacity group-hover:opacity-100">
+                    Attested by Optimism Foundation
+                  </span>
+                )}
+              </span>
             </div>
             <div className="text-md text-secondary-foreground">
               {attestation.subtext}
