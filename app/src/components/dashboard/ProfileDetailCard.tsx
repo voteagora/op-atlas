@@ -73,7 +73,9 @@ const ProfileDetailCard = ({
               onClick={() => setOpenDialog("email")}
               className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
             >
-              {user.email ? user.email : "Add your email"}
+              {user.emails.length > 0
+                ? user.emails[0]?.email
+                : "Add your email"}
             </Button>
           </p>
         </div>

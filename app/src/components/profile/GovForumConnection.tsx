@@ -1,17 +1,17 @@
 "use client"
 
-import { User } from "@prisma/client"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { updateGovForumProfileUrl } from "@/lib/actions/users"
+import { UserWithEmails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 
-export function GovForumConnection({ user }: { user: User }) {
+export function GovForumConnection({ user }: { user: UserWithEmails }) {
   const [govForumProfileUrl, setGovForumProfileUrl] = useState(
     user.govForumProfileUrl || "",
   )
@@ -51,7 +51,7 @@ export function GovForumConnection({ user }: { user: User }) {
       return (
         user.govForumProfileUrl &&
         user.github &&
-        user.email &&
+        user.emails.length > 0 &&
         user.name &&
         user.imageUrl
       )

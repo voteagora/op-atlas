@@ -14,6 +14,7 @@ export async function getUserById(userId: string) {
     include: {
       addresses: true,
       interaction: true,
+      emails: true,
     },
   })
 }
@@ -25,6 +26,7 @@ export async function getUserByFarcasterId(farcasterId: string) {
     },
     include: {
       addresses: true,
+      emails: true,
     },
   })
 }
@@ -37,6 +39,7 @@ export async function getUserByUsername(username: string) {
     include: {
       addresses: true,
       interaction: true,
+      emails: true,
     },
   })
 }
@@ -76,6 +79,9 @@ export async function upsertUser({
       farcasterId,
       ...user,
     },
+    include: {
+      emails: true,
+    },
   })
 }
 
@@ -86,14 +92,24 @@ export async function updateUserEmail({
   id: string
   email?: string | null
 }) {
-  return prisma.user.update({
+  const deleteEmails = prisma.userEmail.deleteMany({
     where: {
-      id,
-    },
-    data: {
-      email,
+      userId: id,
     },
   })
+
+  const createEmail = email
+    ? [
+        prisma.userEmail.create({
+          data: {
+            email,
+            userId: id,
+          },
+        }),
+      ]
+    : []
+
+  return prisma.$transaction([deleteEmails, ...createEmail])
 }
 
 export async function updateUserHasGithub({

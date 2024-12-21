@@ -90,7 +90,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
 
         // Create or update the user in our database
-        const { id, email, farcasterId } = await upsertUser({
+        const { id, emails, farcasterId } = await upsertUser({
           farcasterId: fid.toString(),
           name: credentials?.name as string | undefined,
           username: credentials?.username as string | undefined,
@@ -100,8 +100,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
         return {
           id,
-          email,
           farcasterId,
+          email: emails[0]?.email,
           name: credentials?.name as string | undefined,
           image: credentials?.pfp as string | undefined,
         }

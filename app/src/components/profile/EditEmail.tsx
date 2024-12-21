@@ -1,18 +1,18 @@
 "use client"
 
-import { User } from "@prisma/client"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { useUpdateEmail } from "@/lib/hooks"
+import { UserWithEmails } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Badge } from "../common/Badge"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 
-export function EditEmail({ user }: { user: User }) {
-  const [email, setEmail] = useState(user.email)
+export function EditEmail({ user }: { user: UserWithEmails }) {
+  const [email, setEmail] = useState(user.emails[0]?.email)
   const updateEmail = useUpdateEmail()
   const { setOpenDialog } = useAppDialogs()
 
@@ -24,8 +24,8 @@ export function EditEmail({ user }: { user: User }) {
   }
 
   useEffect(() => {
-    setEmail(user.email)
-  }, [user.email])
+    setEmail(user.emails[0]?.email)
+  }, [user.emails])
 
   return (
     <div className="flex flex-col gap-6">
@@ -36,7 +36,7 @@ export function EditEmail({ user }: { user: User }) {
         can reliably reach you. Don&apos;t worry, we&apos;ll keep it private.
       </div>
 
-      {user.email ? (
+      {user.emails.length > 0 ? (
         <>
           <div className="flex flex-col gap-2">
             <div className="flex gap-[6px] items-center">
@@ -51,7 +51,7 @@ export function EditEmail({ user }: { user: User }) {
           </div>
           <Button
             onClick={onEditEmail}
-            disabled={!email || email === user.email}
+            disabled={!email || email === user.emails[0]?.email}
             className="self-start"
             variant="secondary"
           >
