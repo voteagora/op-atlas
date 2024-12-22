@@ -1,7 +1,9 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
+import { getUser } from "@/lib/github"
 import { UserWithAddresses } from "@/lib/types"
+import { useEffect, useState } from "react"
 
 function formatNumber(num: number): string {
   if (num >= 1000) {
@@ -21,7 +23,17 @@ export default function ProfileHeaderLinks({
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
-  const { user: githubUserData } = useGithubUserData(user.github || "")
+  const [githubUserData, setGithubUserData] = useState<any>()
+
+  useEffect(() => {
+    async function get() {
+      const userData = await getUser(user.github || "")
+      setGithubUserData(userData)
+    }
+    get()
+  }, [user.github])
+
+  // const { user: githubUserData } = useGithubUserData(user.github || "")
 
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
