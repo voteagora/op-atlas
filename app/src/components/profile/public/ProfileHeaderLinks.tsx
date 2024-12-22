@@ -1,6 +1,6 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
-import { getUser } from "@/lib/github"
+import { getGithubUser } from "@/lib/actions/github"
 import { UserWithAddresses } from "@/lib/types"
 import { useEffect, useState } from "react"
 
@@ -26,8 +26,8 @@ export default function ProfileHeaderLinks({
 
   useEffect(() => {
     async function get() {
-      const userData = await getUser(user.github || "")
-      setGithubUserData(userData)
+      const result = await getGithubUser(user.github || "")
+      setGithubUserData(result?.user)
     }
     get()
   }, [user.github])
