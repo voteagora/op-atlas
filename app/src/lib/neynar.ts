@@ -1,11 +1,9 @@
 const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY
-console.log(process.env)
-console.log(NEYNAR_API_KEY)
 if (!NEYNAR_API_KEY) {
   throw new Error("NEYNAR_API_KEY is missing from env")
 }
 
-type FarcasterUser = {
+export type FarcasterUser = {
   fid: number
   username: string
   display_name: string
@@ -14,6 +12,7 @@ type FarcasterUser = {
     eth_addresses: string[]
     sol_addresses: string[]
   }
+  follower_count: number
 }
 
 export async function getFarcasterUser(

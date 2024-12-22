@@ -1,8 +1,6 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
-import { getFarcasterUserData } from "@/lib/actions/neynar"
 import { UserWithAddresses } from "@/lib/types"
-import { useEffect, useState } from "react"
 
 function formatNumber(num: number): string {
   if (num >= 1000) {
@@ -13,27 +11,16 @@ function formatNumber(num: number): string {
 
 export default function ProfileHeaderLinks({
   user,
+  farcasterFollowerCount,
 }: {
   user: UserWithAddresses
+  farcasterFollowerCount?: number
 }) {
   const { delegate } = useDelegateData(user.addresses.map((a) => a.address))
 
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
-
-  const [farcasterUserData, setFarcasterUserData] = useState<any>()
-
-  useEffect(() => {
-    async function get() {
-      const result = await getFarcasterUserData(user.farcasterId)
-      setFarcasterUserData(result?.user)
-    }
-    get()
-  }, [user.farcasterId])
-
-  console.log(farcasterUserData)
-  // const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
 
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
@@ -45,12 +32,7 @@ export default function ProfileHeaderLinks({
           <>
             <span className="text-sm text-black">@{user.username}</span>
             <span className="text-sm text-[#404454]">
-              {" " +
-                formatNumber(
-                  0,
-                  // farcasterUsers?.users[0]?.follower_count || 0,
-                )}{" "}
-              Followers
+              {" " + formatNumber(farcasterFollowerCount || 0)} Followers
             </span>
           </>
         }
