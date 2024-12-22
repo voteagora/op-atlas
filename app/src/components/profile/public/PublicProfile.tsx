@@ -2,7 +2,11 @@
 
 import { Organization } from "@prisma/client"
 
-import { ProjectWithDetailsLite, UserWithAddresses } from "@/lib/types"
+import {
+  GithubUserData,
+  ProjectWithDetailsLite,
+  UserWithAddresses,
+} from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ProfileGithubProximity from "./ProfileGithubProximity"
@@ -20,7 +24,7 @@ const PublicUserProfile = ({
 }: {
   className?: string
   user: UserWithAddresses
-  githubUserData?: any
+  githubUserData?: GithubUserData
   organizations: Organization[]
   projects: ProjectWithDetailsLite[]
 }) => {

@@ -191,3 +191,7 @@ export type CategoryWithImpact = Prisma.CategoryGetPayload<{
     impactStatements: true
   }
 }>
+
+export type GithubUserData = {
+  followers: number
+}
