@@ -1,9 +1,6 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
-// import { getGithubUser } from "@/lib/actions/github"
-// import { getUser } from "@/lib/github"
 import { UserWithAddresses } from "@/lib/types"
-// import { useEffect, useState } from "react"
 
 function formatNumber(num: number): string {
   if (num >= 1000) {
