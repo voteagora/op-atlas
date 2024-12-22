@@ -6,6 +6,45 @@ import { cn } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
 
+export function GovCandidateCallout() {
+  return (
+    <ExternalLink
+      href="https://gov.optimism.io/t/season-7-elections-information/9392#p-42386-for-candidates-1"
+      className={cn(
+        "bg-[#D6E4FF] flex flex-col gap-y-6 mt-6 w-full max-w-4xl rounded-lg p-6",
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex gap-4">
+          <Image
+            src={"/assets/icons/vial-icon.svg"}
+            width={56}
+            height={56}
+            alt="Vial"
+          />
+          <div className="flex flex-col mt-1">
+            <p className="text-[#0E4CAF] font-bold">
+              Are you a governance candidate?
+            </p>
+            <p className="text-[#0E4CAF]">
+              Check out Season 7 elections information
+            </p>
+          </div>
+        </div>
+
+        <div className="w-6 h-6 flex items-center justify-center">
+          <Image
+            src="/assets/icons/arrow-up-right-0E4CAF.svg"
+            width={12}
+            height={12}
+            alt="External link"
+          />
+        </div>
+      </div>
+    </ExternalLink>
+  )
+}
+
 export function BadgeholderCallout() {
   return (
     <ExternalLink
