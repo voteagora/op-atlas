@@ -7,7 +7,6 @@ import {
 import { getUserByUsername } from "@/db/users"
 import { getUser as getGithubUser } from "@/lib/actions/github"
 import { getAllPublishedProjects } from "@/lib/actions/projects"
-// import { getUser } from "@/lib/github"
 
 export default async function PublicProfile({
   params,
