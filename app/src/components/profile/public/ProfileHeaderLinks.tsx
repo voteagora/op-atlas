@@ -32,8 +32,6 @@ export default function ProfileHeaderLinks({
     get()
   }, [user.github])
 
-  // const { user: githubUserData } = useGithubUserData(user.github || "")
-
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
       {/* Farcaster */}
