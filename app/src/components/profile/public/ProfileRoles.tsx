@@ -3,6 +3,16 @@ import CheckIconRed from "@/components/icons/checkIconRed"
 import useAttestations from "@/hooks/api/useAttestations"
 import { UserWithAddresses } from "@/lib/types"
 
+const validAttestations = [
+  "Anticapture Commission",
+  "Citizen",
+  "Collective Feedback Commission",
+  "Developer Advisory Board",
+  "Grants Council",
+  "Security Council",
+  "Top 100 Delegate",
+]
+
 function ProfileRoles({ user }: { user: UserWithAddresses }) {
   const { raw: attestations } = useAttestations(
     user.addresses.map((a) => a.address),
@@ -33,6 +43,16 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
             <div className="text-md text-secondary-foreground">
               {attestation.subtext}
             </div>
+            {validAttestations.includes(attestation.name) ? (
+              <OutboundArrowLink
+                text="About"
+                target={`https://gov.optimism.io/t/optimism-governance-glossary/9407`}
+                className="text-sm text-secondary-foreground hover:text-gray-600 mt-2 inline-flex items-center"
+              />
+            ) : (
+              <></>
+            )}
+
             <OutboundArrowLink
               text="Attestation"
               target={`https://optimism.easscan.org/attestation/view/${attestation.id}`}
