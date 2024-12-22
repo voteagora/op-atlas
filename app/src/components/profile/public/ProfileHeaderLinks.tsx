@@ -1,5 +1,6 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
+import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 
 export default function ProfileHeaderLinks({
@@ -12,6 +13,8 @@ export default function ProfileHeaderLinks({
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
+
+  const { user: githubUserData } = useGithubUserData(user.github || "")
 
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
@@ -30,7 +33,14 @@ export default function ProfileHeaderLinks({
         <BubbleLink
           href={`https://github.com/${user.github}`}
           icon="/assets/icons/github-icon.svg"
-          text={<span className="text-sm text-black">@{user.github}</span>}
+          text={
+            <>
+              <span className="text-sm text-black">@{user.github}</span>
+              <span className="text-sm text-[#404454]">
+                {" " + githubUserData?.followers} Followers
+              </span>
+            </>
+          }
           tooltipText="Github"
         />
       )}
