@@ -3,6 +3,13 @@ import useDelegateData from "@/hooks/api/useDelegateData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 
+function formatNumber(num: number): string {
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k"
+  }
+  return num.toString()
+}
+
 export default function ProfileHeaderLinks({
   user,
 }: {
@@ -37,7 +44,7 @@ export default function ProfileHeaderLinks({
             <>
               <span className="text-sm text-black">@{user.github}</span>
               <span className="text-sm text-[#404454]">
-                {" " + githubUserData?.followers} Followers
+                {" " + formatNumber(githubUserData?.followers || 0)} Followers
               </span>
             </>
           }
