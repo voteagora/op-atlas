@@ -1,7 +1,9 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
+import { getFarcasterUser } from "@/lib/neynar"
 import { UserWithAddresses } from "@/lib/types"
+import { useEffect } from "react"
 
 function formatNumber(num: number): string {
   if (num >= 1000) {
@@ -21,7 +23,15 @@ export default function ProfileHeaderLinks({
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
-  const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
+  useEffect(() => {
+    async function get() {
+      const result = await getFarcasterUser(user.farcasterId)
+      console.log(result)
+    }
+    get()
+  }, [])
+
+  // const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
 
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
@@ -34,7 +44,10 @@ export default function ProfileHeaderLinks({
             <span className="text-sm text-black">@{user.username}</span>
             <span className="text-sm text-[#404454]">
               {" " +
-                formatNumber(farcasterUsers?.users[0]?.follower_count || 0)}
+                formatNumber(
+                  0,
+                  // farcasterUsers?.users[0]?.follower_count || 0,
+                )}{" "}
               Followers
             </span>
           </>

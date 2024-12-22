@@ -1,4 +1,6 @@
 const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY
+console.log(process.env)
+console.log(NEYNAR_API_KEY)
 if (!NEYNAR_API_KEY) {
   throw new Error("NEYNAR_API_KEY is missing from env")
 }
@@ -14,7 +16,9 @@ type FarcasterUser = {
   }
 }
 
-async function getFarcasterUser(fid: string): Promise<FarcasterUser | null> {
+export async function getFarcasterUser(
+  fid: string,
+): Promise<FarcasterUser | null> {
   const params = new URLSearchParams({ fids: fid })
   const url = `https://api.neynar.com/v2/farcaster/user/bulk?${params.toString()}`
   const options = {
