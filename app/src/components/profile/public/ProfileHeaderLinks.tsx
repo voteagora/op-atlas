@@ -1,9 +1,8 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
-import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
-import { getFarcasterUser } from "@/lib/neynar"
+import { getFarcasterUserData } from "@/lib/actions/neynar"
 import { UserWithAddresses } from "@/lib/types"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 function formatNumber(num: number): string {
   if (num >= 1000) {
@@ -23,14 +22,17 @@ export default function ProfileHeaderLinks({
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
+  const [farcasterUserData, setFarcasterUserData] = useState<any>()
+
   useEffect(() => {
     async function get() {
-      const result = await getFarcasterUser(user.farcasterId)
-      console.log(result)
+      const result = await getFarcasterUserData(user.farcasterId)
+      setFarcasterUserData(result?.user)
     }
     get()
-  }, [])
+  }, [user.farcasterId])
 
+  console.log(farcasterUserData)
   // const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
 
   return (
