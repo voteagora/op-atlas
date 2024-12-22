@@ -35,17 +35,12 @@ export default async function PublicProfile({
     getAllPublishedProjects(user.id),
   ])
 
-  user.github = "jacobhomanics"
-  const githubUserDataResult = await getGithubUser(user.github)
+  const githubUserDataResult = await getGithubUser(user.github || "")
 
-  // console.log(githubUserData.name)
-
-  console.log(githubUserDataResult?.user)
   return (
     <PublicUserProfile
       user={user}
       githubUserData={githubUserDataResult?.user}
-      // userGithubData={githubUserData}
       organizations={
         organizations?.organizations.map(({ organization }) => organization) ||
         []
