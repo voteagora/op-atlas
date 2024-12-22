@@ -3,6 +3,13 @@ import useDelegateData from "@/hooks/api/useDelegateData"
 import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { UserWithAddresses } from "@/lib/types"
 
+function formatNumber(num: number): string {
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k"
+  }
+  return num.toString()
+}
+
 export default function ProfileHeaderLinks({
   user,
 }: {
@@ -26,7 +33,9 @@ export default function ProfileHeaderLinks({
           <>
             <span className="text-sm text-black">@{user.username}</span>
             <span className="text-sm text-[#404454]">
-              {" " + farcasterUsers?.users[0]?.follower_count} Followers
+              {" " +
+                formatNumber(farcasterUsers?.users[0]?.follower_count || 0)}
+              Followers
             </span>
           </>
         }
