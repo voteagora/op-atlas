@@ -1,6 +1,5 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
-import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { getUser } from "@/lib/github"
 import { UserWithAddresses } from "@/lib/types"
 import { useEffect, useState } from "react"
