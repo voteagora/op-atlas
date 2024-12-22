@@ -15,17 +15,19 @@ const PublicUserProfile = ({
   className,
   user,
   organizations,
+  githubUserData,
   projects,
 }: {
   className?: string
   user: UserWithAddresses
+  githubUserData?: any
   organizations: Organization[]
   projects: ProjectWithDetailsLite[]
 }) => {
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
       <div className="flex flex-col w-full items-start max-w-3xl mx-auto my-18">
-        <ProfileHeader user={user} />
+        <ProfileHeader user={user} githubUserData={githubUserData} />
         {/* Roles */}
         <ProfileRoles user={user} />
 

@@ -1,8 +1,9 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
-import { getGithubUser } from "@/lib/actions/github"
+// import { getGithubUser } from "@/lib/actions/github"
+// import { getUser } from "@/lib/github"
 import { UserWithAddresses } from "@/lib/types"
-import { useEffect, useState } from "react"
+// import { useEffect, useState } from "react"
 
 function formatNumber(num: number): string {
   if (num >= 1000) {
@@ -13,24 +14,16 @@ function formatNumber(num: number): string {
 
 export default function ProfileHeaderLinks({
   user,
+  githubFollowerCount,
 }: {
   user: UserWithAddresses
+  githubFollowerCount?: number
 }) {
   const { delegate } = useDelegateData(user.addresses.map((a) => a.address))
 
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
-
-  const [githubUserData, setGithubUserData] = useState<any>()
-
-  useEffect(() => {
-    async function get() {
-      const result = await getGithubUser(user.github || "")
-      setGithubUserData(result?.user)
-    }
-    get()
-  }, [user.github])
 
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
@@ -53,7 +46,7 @@ export default function ProfileHeaderLinks({
             <>
               <span className="text-sm text-black">@{user.github}</span>
               <span className="text-sm text-[#404454]">
-                {" " + formatNumber(githubUserData?.followers || 0)} Followers
+                {" " + formatNumber(githubFollowerCount || 0)} Followers
               </span>
             </>
           }

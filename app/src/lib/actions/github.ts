@@ -1,12 +1,12 @@
-import { getUser } from "../github"
+import { getUser as getGithubUser } from "../github"
 
-export const getGithubUser = async (username: string) => {
+export const getUser = async (username: string) => {
   try {
-    const user = await getUser(username)
+    const user = await getGithubUser(username)
     if (user) {
       return {
         error: null,
-        user: user ?? null,
+        user: user.data ?? null,
       }
     }
   } catch (error: unknown) {

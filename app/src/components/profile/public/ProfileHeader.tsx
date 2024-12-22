@@ -9,9 +9,11 @@ import ProfileHeaderLinks from "./ProfileHeaderLinks"
 const ProfileHeader = ({
   className,
   user,
+  githubUserData,
 }: {
   className?: string
   user: UserWithAddresses
+  githubUserData?: any
 }) => {
   const initials = (user?.name ?? "")
     .split(" ")
@@ -32,7 +34,10 @@ const ProfileHeader = ({
           <span className="pt-4">{user.bio}</span>
         </div>
 
-        <ProfileHeaderLinks user={user} />
+        <ProfileHeaderLinks
+          user={user}
+          githubFollowerCount={githubUserData.followers}
+        />
       </div>
     </div>
   )
