@@ -36,7 +36,7 @@ export default function ProfileHeaderLinks({
           text={
             <>
               <span className="text-sm text-black">@{user.github}</span>
-              <span className="text-sm text-[#404454]">
+              <span className="text-sm text-gray-500">
                 {" " + formatNumber(githubFollowerCount || 0)} Followers
               </span>
             </>
