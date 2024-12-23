@@ -10,7 +10,7 @@ import { FarcasterUser } from "@/lib/neynar"
 const ProfileHeader = ({
   className,
   user,
-  farcasterUser: farcasterUserData,
+  farcasterUser,
 }: {
   className?: string
   user: UserWithAddresses
@@ -37,7 +37,7 @@ const ProfileHeader = ({
 
         <ProfileHeaderLinks
           user={user}
-          farcasterFollowerCount={farcasterUserData?.follower_count}
+          farcasterFollowerCount={farcasterUser?.follower_count}
         />
       </div>
     </div>
