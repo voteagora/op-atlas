@@ -1,11 +1,14 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { UserWithAddresses } from "@/lib/types"
+import { formatNumber } from "@/lib/utils"
 
 export default function ProfileHeaderLinks({
   user,
+  githubFollowerCount,
 }: {
   user: UserWithAddresses
+  githubFollowerCount?: number
 }) {
   const { delegate } = useDelegateData(user.addresses.map((a) => a.address))
 
@@ -30,7 +33,14 @@ export default function ProfileHeaderLinks({
         <BubbleLink
           href={`https://github.com/${user.github}`}
           icon="/assets/icons/github-icon.svg"
-          text={<span className="text-sm text-black">@{user.github}</span>}
+          text={
+            <>
+              <span className="text-sm text-black">@{user.github}</span>
+              <span className="text-sm text-gray-500">
+                {" " + formatNumber(githubFollowerCount || 0)} Followers
+              </span>
+            </>
+          }
           tooltipText="Github"
         />
       )}
