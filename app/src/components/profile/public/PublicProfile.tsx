@@ -15,7 +15,7 @@ import { FarcasterUser } from "@/lib/neynar"
 const PublicUserProfile = ({
   className,
   user,
-  farcasterUser: farcasterUserData,
+  farcasterUser,
   organizations,
   projects,
 }: {
@@ -28,7 +28,7 @@ const PublicUserProfile = ({
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
       <div className="flex flex-col w-full items-start max-w-3xl mx-auto my-18">
-        <ProfileHeader user={user} farcasterUser={farcasterUserData} />
+        <ProfileHeader user={user} farcasterUser={farcasterUser} />
         {/* Roles */}
         <ProfileRoles user={user} />
 
