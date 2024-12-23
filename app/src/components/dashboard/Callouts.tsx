@@ -34,7 +34,7 @@ export function GovCandidateCallout() {
 
         <div className="w-6 h-6 flex items-center justify-center">
           <Image
-            src="/assets/icons/arrow-up-right-0E4CAF.svg"
+            src="/assets/icons/arrow-up-right.svg"
             width={12}
             height={12}
             alt="External link"
