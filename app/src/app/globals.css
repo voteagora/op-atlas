@@ -126,6 +126,9 @@
       #f2f3f8 100%
     );
   }
+  .bgAlternativeCallout {
+    background: #D6E4FF
+  }
 }
 
 .fc-authkit-signin-button > button {
