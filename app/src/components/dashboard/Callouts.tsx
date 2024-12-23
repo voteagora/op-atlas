@@ -23,10 +23,10 @@ export function GovCandidateCallout() {
             alt="Vial"
           />
           <div className="flex flex-col mt-1">
-            <p className="text-[#0E4CAF] font-bold">
+            <p className="text-blue-800 font-bold">
               Are you a governance candidate?
             </p>
-            <p className="text-[#0E4CAF]">
+            <p className="text-blue-700">
               Check out Season 7 elections information
             </p>
           </div>
