@@ -5,7 +5,7 @@ import {
   getOrganizationWithDetails,
 } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
-import { getUser as getGithubUser } from "@/lib/actions/github"
+import { getUser as getGithubUser } from "@/lib/github"
 import { getAllPublishedProjects } from "@/lib/actions/projects"
 
 export default async function PublicProfile({
@@ -34,12 +34,15 @@ export default async function PublicProfile({
     getAllPublishedProjects(user.id),
   ])
 
-  const githubUserDataResult = await getGithubUser(user.github || "")
+  user.github = "jacobhomanics"
+  const githubUser = await getGithubUser(user.github || "")
+
+  console.log(githubUser)
 
   return (
     <PublicUserProfile
       user={user}
-      githubUserData={githubUserDataResult?.user}
+      githubUser={githubUser.data}
       organizations={
         organizations?.organizations.map(({ organization }) => organization) ||
         []

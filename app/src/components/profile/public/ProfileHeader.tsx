@@ -1,7 +1,7 @@
 import React, { memo } from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { GithubUserData, UserWithAddresses } from "@/lib/types"
+import { GithubUser, UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ProfileHeaderLinks from "./ProfileHeaderLinks"
@@ -9,11 +9,11 @@ import ProfileHeaderLinks from "./ProfileHeaderLinks"
 const ProfileHeader = ({
   className,
   user,
-  githubUserData,
+  githubUser,
 }: {
   className?: string
   user: UserWithAddresses
-  githubUserData?: GithubUserData
+  githubUser?: GithubUser
 }) => {
   const initials = (user?.name ?? "")
     .split(" ")
@@ -36,7 +36,7 @@ const ProfileHeader = ({
 
         <ProfileHeaderLinks
           user={user}
-          githubFollowerCount={githubUserData?.followers}
+          githubFollowerCount={githubUser?.followers}
         />
       </div>
     </div>
