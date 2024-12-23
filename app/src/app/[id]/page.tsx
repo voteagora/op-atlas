@@ -27,8 +27,6 @@ export default async function PublicProfile({
 
   if (!user) {
     notFound()
-
-    // return <div>User not found</div>
   }
 
   const [organizations, projects] = await Promise.all([
