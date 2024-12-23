@@ -1,13 +1,7 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { UserWithAddresses } from "@/lib/types"
-
-function formatNumber(num: number): string {
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k"
-  }
-  return num.toString()
-}
+import { formatNumber } from "@/lib/utils"
 
 export default function ProfileHeaderLinks({
   user,
