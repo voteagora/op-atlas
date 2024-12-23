@@ -10,11 +10,11 @@ import { FarcasterUser } from "@/lib/neynar"
 const ProfileHeader = ({
   className,
   user,
-  farcasterUserData,
+  farcasterUser: farcasterUserData,
 }: {
   className?: string
   user: UserWithAddresses
-  farcasterUserData?: FarcasterUser
+  farcasterUser?: FarcasterUser
 }) => {
   const initials = (user?.name ?? "")
     .split(" ")
