@@ -11,8 +11,9 @@ export default function NotFound() {
         width={160}
         height={160}
       />
+
       <h4 className="text-black font-semibold">
-        The page you're looking for doesn't exist.
+        The page you&apos;re looking for doesn&apos;t exist.
       </h4>
 
       <div className="flex gap-3">
