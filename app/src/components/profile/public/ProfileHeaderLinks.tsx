@@ -1,11 +1,14 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { UserWithAddresses } from "@/lib/types"
+import { formatNumber } from "@/lib/utils"
 
 export default function ProfileHeaderLinks({
   user,
+  farcasterFollowerCount,
 }: {
   user: UserWithAddresses
+  farcasterFollowerCount?: number
 }) {
   const { delegate } = useDelegateData(user.addresses.map((a) => a.address))
 
@@ -19,7 +22,14 @@ export default function ProfileHeaderLinks({
       <BubbleLink
         href={`https://warpcast.com/${user.username}`}
         icon="/assets/icons/farcaster-icon.svg"
-        text={<span className="text-sm text-black">@{user.username}</span>}
+        text={
+          <>
+            <span className="text-sm text-black">@{user.username}</span>
+            <span className="text-sm text-gray-500">
+              {" " + formatNumber(farcasterFollowerCount || 0)} Followers
+            </span>
+          </>
+        }
         tooltipText="Farcaster"
       />
 

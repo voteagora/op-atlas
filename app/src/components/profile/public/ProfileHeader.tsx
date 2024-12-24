@@ -5,13 +5,16 @@ import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ProfileHeaderLinks from "./ProfileHeaderLinks"
+import { FarcasterUser } from "@/lib/neynar"
 
 const ProfileHeader = ({
   className,
   user,
+  farcasterUser,
 }: {
   className?: string
   user: UserWithAddresses
+  farcasterUser?: FarcasterUser
 }) => {
   const initials = (user?.name ?? "")
     .split(" ")
@@ -32,7 +35,10 @@ const ProfileHeader = ({
           <span className="pt-4">{user.bio}</span>
         </div>
 
-        <ProfileHeaderLinks user={user} />
+        <ProfileHeaderLinks
+          user={user}
+          farcasterFollowerCount={farcasterUser?.follower_count}
+        />
       </div>
     </div>
   )

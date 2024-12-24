@@ -10,22 +10,25 @@ import ProfileHeader from "./ProfileHeader"
 import ProfileOrganizations from "./ProfileOrganizations"
 import ProfileProjects from "./ProfileProjects"
 import ProfileRoles from "./ProfileRoles"
+import { FarcasterUser } from "@/lib/neynar"
 
 const PublicUserProfile = ({
   className,
   user,
+  farcasterUser,
   organizations,
   projects,
 }: {
   className?: string
   user: UserWithAddresses
   organizations: Organization[]
+  farcasterUser?: FarcasterUser
   projects: ProjectWithDetailsLite[]
 }) => {
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
       <div className="flex flex-col w-full items-start max-w-3xl mx-auto my-18">
-        <ProfileHeader user={user} />
+        <ProfileHeader user={user} farcasterUser={farcasterUser} />
         {/* Roles */}
         <ProfileRoles user={user} />
 
