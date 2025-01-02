@@ -2,11 +2,7 @@
 
 import { Organization } from "@prisma/client"
 
-import {
-  GithubUser,
-  ProjectWithDetailsLite,
-  UserWithAddresses,
-} from "@/lib/types"
+import { ProjectWithDetailsLite, UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ProfileGithubProximity from "./ProfileGithubProximity"
@@ -19,19 +15,17 @@ const PublicUserProfile = ({
   className,
   user,
   organizations,
-  githubUser,
   projects,
 }: {
   className?: string
   user: UserWithAddresses
-  githubUser?: GithubUser
   organizations: Organization[]
   projects: ProjectWithDetailsLite[]
 }) => {
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
       <div className="flex flex-col w-full items-start max-w-3xl mx-auto my-18">
-        <ProfileHeader user={user} githubUser={githubUser} />
+        <ProfileHeader user={user} />
         {/* Roles */}
         <ProfileRoles user={user} />
 

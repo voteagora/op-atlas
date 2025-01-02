@@ -1,20 +1,21 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
+import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
 
 export default function ProfileHeaderLinks({
   user,
-  githubFollowerCount,
 }: {
   user: UserWithAddresses
-  githubFollowerCount?: number
 }) {
   const { delegate } = useDelegateData(user.addresses.map((a) => a.address))
 
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
+
+  const { user: githubUserData } = useGithubUserData(user.github || "")
 
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
@@ -36,8 +37,8 @@ export default function ProfileHeaderLinks({
           text={
             <>
               <span className="text-sm text-black">@{user.github}</span>
-              <span className="text-sm text-gray-500">
-                {" " + formatNumber(githubFollowerCount || 0)} Followers
+              <span className="text-sm text-[#404454]">
+                {" " + formatNumber(githubUserData?.followers || 0)} Followers
               </span>
             </>
           }

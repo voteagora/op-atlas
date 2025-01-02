@@ -4,10 +4,6 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_AUTH_TOKEN,
 })
 
-export async function getUser(username: string) {
-  return await octokit.rest.users.getByUsername({ username })
-}
-
 export async function getRepository(owner: string, slug: string) {
   return await octokit.rest.repos.get({ owner, repo: slug })
 }
