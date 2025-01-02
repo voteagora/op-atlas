@@ -1,20 +1,21 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
+import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { UserWithAddresses } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
 
 export default function ProfileHeaderLinks({
   user,
-  farcasterFollowerCount,
 }: {
   user: UserWithAddresses
-  farcasterFollowerCount?: number
 }) {
   const { delegate } = useDelegateData(user.addresses.map((a) => a.address))
 
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
+
+  const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
 
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
@@ -25,8 +26,10 @@ export default function ProfileHeaderLinks({
         text={
           <>
             <span className="text-sm text-black">@{user.username}</span>
-            <span className="text-sm text-gray-500">
-              {" " + formatNumber(farcasterFollowerCount || 0)} Followers
+            <span className="text-sm text-[#404454]">
+              {" " +
+                formatNumber(farcasterUsers?.users[0]?.follower_count || 0)}
+              Followers
             </span>
           </>
         }

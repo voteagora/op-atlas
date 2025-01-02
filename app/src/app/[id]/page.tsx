@@ -6,7 +6,6 @@ import {
 } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
 import { getAllPublishedProjects } from "@/lib/actions/projects"
-import { getFarcasterUser } from "@/lib/neynar"
 
 export default async function PublicProfile({
   params,
@@ -34,8 +33,6 @@ export default async function PublicProfile({
     getAllPublishedProjects(user.id),
   ])
 
-  const farcasterUser = await getFarcasterUser(user.farcasterId)
-
   return (
     <PublicUserProfile
       user={user}
@@ -43,7 +40,6 @@ export default async function PublicProfile({
         organizations?.organizations.map(({ organization }) => organization) ||
         []
       }
-      farcasterUser={farcasterUser || undefined}
       projects={projects}
     />
   )
