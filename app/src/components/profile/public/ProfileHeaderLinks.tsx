@@ -24,14 +24,13 @@ export default function ProfileHeaderLinks({
         href={`https://warpcast.com/${user.username}`}
         icon="/assets/icons/farcaster-icon.svg"
         text={
-          <>
+          <div className="flex gap-1">
             <span className="text-sm text-black">@{user.username}</span>
             <span className="text-sm text-[#404454]">
-              {" " +
-                formatNumber(farcasterUsers?.users[0]?.follower_count || 0)}
-              Followers
+              {formatNumber(farcasterUsers?.users[0]?.follower_count || 0)}
             </span>
-          </>
+            <span className="text-sm text-[#404454]">Followers</span>
+          </div>
         }
         tooltipText="Farcaster"
       />
