@@ -18,25 +18,25 @@ export default function NotFound() {
 
       <div className="flex gap-3">
         <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg font-medium"
+          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
           text={"Optimism"}
           target={"https://optimism.io"}
         />
 
         <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg font-medium"
+          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
           text={"Retro Funding"}
           target={"/"}
         />
 
         <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg font-medium"
+          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
           text={"Forum"}
           target={"https://gov.optimism.io"}
         />
 
         <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg font-medium"
+          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
           text={"Delegates"}
           target={"https://vote.optimism.io/delegates"}
         />
