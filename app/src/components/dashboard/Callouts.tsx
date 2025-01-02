@@ -26,7 +26,7 @@ export function GovCandidateCallout() {
             <p className="text-blue-800 font-bold">
               Are you a governance candidate?
             </p>
-            <p className="text-blue-700">
+            <p className="text-blue-800">
               Check out Season 7 elections information
             </p>
           </div>
