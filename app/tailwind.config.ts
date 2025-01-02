@@ -72,6 +72,9 @@ const config = {
         callout: {
           foreground: "#3374DB",
         },
+        calloutAlternative: {
+          foreground: "#D6E4FF",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
