@@ -1,12 +1,16 @@
-import sdk from "@pinata/sdk"
+import { PinataSDK } from "pinata-web3"
 
-if (!process.env.PINATA_API_KEY || !process.env.PINATA_SECRET_API_KEY) {
-  throw new Error("PINATA_API_KEY or PINATA_SECRET_API_KEY missing from env")
+if (!process.env.PINATA_JWT) {
+  throw new Error("PINATA_JWT is missing from env")
 }
 
-const pinata = new sdk({
-  pinataApiKey: process.env.PINATA_API_KEY,
-  pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY,
+if (!process.env.NEXT_PUBLIC_GATEWAY_URL) {
+  throw new Error("NEXT_PUBLIC_GATEWAY_URL is missing from env")
+}
+
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT,
+  pinataGateway: process.env.NEXT_PUBLIC_GATEWAY_URL,
 })
 
 export async function testConnection() {
@@ -18,13 +22,12 @@ export async function uploadToPinata(
   projectId: string,
   json: Record<string, unknown>,
 ) {
-  const res = await pinata.pinJSONToIPFS(json, {
-    pinataMetadata: {
-      name: "OPRetroFunding",
-      projectID: projectId,
+  const res = await pinata.upload.json(json).addMetadata({
+    name: "OPRetroFunding",
+    keyValues: {
+      projectId: projectId,
     },
   })
 
-  console.info("Uploaded metadata to Pinata:", res)
   return res.IpfsHash
 }
