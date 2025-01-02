@@ -33,11 +33,18 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
             <div className="text-md text-secondary-foreground">
               {attestation.subtext}
             </div>
-            <OutboundArrowLink
-              text="Attestation"
-              target={`https://optimism.easscan.org/attestation/view/${attestation.id}`}
-              className="text-sm text-secondary-foreground hover:text-gray-600 mt-2 inline-flex items-center"
-            />
+            <div className="inline-flex gap-x-2">
+              <OutboundArrowLink
+                text="About"
+                target={`https://gov.optimism.io/t/optimism-governance-glossary/9407`}
+                className="text-sm text-secondary-foreground hover:text-gray-600 mt-2 inline-flex items-center"
+              />
+              <OutboundArrowLink
+                text="Attestation"
+                target={`https://optimism.easscan.org/attestation/view/${attestation.id}`}
+                className="text-sm text-secondary-foreground hover:text-gray-600 mt-2 inline-flex items-center"
+              />
+            </div>
           </div>
         ))}
       </div>
