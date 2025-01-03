@@ -9,7 +9,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useParams } from "next/navigation"
 import React, { useState } from "react"
 
 import { cn } from "@/lib/utils"
@@ -57,6 +57,7 @@ const dropdownList = [
 
 const Navbar = () => {
   const pathname = usePathname()
+  const params = useParams()
   const isRounds = pathname === "/" || pathname === "/rounds"
   const isProjects = pathname.includes("/round/")
 
@@ -64,7 +65,11 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="sticky inset-x-0 top-0 h-18 bg-white flex px-6 shadow-sm z-20">
+      <nav
+        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-20 ${
+          params.id ? "" : "shadow-sm"
+        }`}
+      >
         <div className="flex items-center justify-between h-full w-full max-w-7xl mx-auto">
           <div className="flex gap-12 items-center h-full">
             <button
