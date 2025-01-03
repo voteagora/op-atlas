@@ -30,10 +30,12 @@ export default function ProfileHeaderLinks({
             <span className="text-sm text-black">@{user.username}</span>
             {farcasterUsers?.users[0]?.follower_count ? (
               <>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-500 font-light">
                   {formatNumber(farcasterUsers?.users[0]?.follower_count)}
                 </span>
-                <span className="text-sm text-gray-600">Followers</span>
+                <span className="text-sm text-gray-500 font-light">
+                  Followers
+                </span>
               </>
             ) : (
               <></>
@@ -55,10 +57,12 @@ export default function ProfileHeaderLinks({
               <span className="text-sm text-black">@{user.github}</span>
               {githubUserData?.followers ? (
                 <>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-500 font-light">
                     {formatNumber(githubUserData?.followers)}
                   </span>
-                  <span className="text-sm text-gray-600">Followers</span>
+                  <span className="text-sm text-gray-500 font-light">
+                    Followers
+                  </span>
                 </>
               ) : (
                 <></>
