@@ -1,5 +1,6 @@
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
+import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
@@ -15,6 +16,7 @@ export default function ProfileHeaderLinks({
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
+  const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
   const { user: githubUserData } = useGithubUserData(user.github || "")
 
   return (
@@ -23,7 +25,15 @@ export default function ProfileHeaderLinks({
       <BubbleLink
         href={`https://warpcast.com/${user.username}`}
         icon="/assets/icons/farcaster-icon.svg"
-        text={<span className="text-sm text-black">@{user.username}</span>}
+        text={
+          <div className="flex gap-1">
+            <span className="text-sm text-black">@{user.username}</span>
+            <span className="text-sm text-[#404454]">
+              {formatNumber(farcasterUsers?.users[0]?.follower_count || 0)}
+            </span>
+            <span className="text-sm text-[#404454]">Followers</span>
+          </div>
+        }
         tooltipText="Farcaster"
       />
 
