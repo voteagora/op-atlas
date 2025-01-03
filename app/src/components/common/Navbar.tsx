@@ -70,7 +70,11 @@ const Navbar = () => {
           params.id ? "" : "shadow-sm"
         }`}
       >
-        <div className="flex items-center justify-between h-full w-full mx-auto">
+        <div
+          className={`flex items-center justify-between h-full w-full mx-auto ${
+            params.id ? "bg-background" : ""
+          }`}
+        >
           <div className="flex h-full">
             <button
               className={showMobileNav ? "block" : "sm:hidden"}
