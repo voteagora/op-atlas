@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation"
+
 import PublicOrganizationProfile from "@/components/organizations/public/PublicOrganizationProfile"
 import PublicUserProfile from "@/components/profile/public/PublicProfile"
 import {
@@ -6,18 +8,17 @@ import {
 } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
 import { getAllPublishedProjects } from "@/lib/actions/projects"
-import { notFound } from "next/navigation"
 
 export default async function PublicProfile({
   params,
 }: {
   params: { id: string }
 }) {
-  if (params.id.startsWith("0x")) {
+  if (params.id.startsWith("0x") && params.id.length === 66) {
     const organization = await getOrganizationWithDetails({ id: params.id })
 
     if (!organization) {
-      return <div>Organization not found</div>
+      notFound()
     }
 
     return <PublicOrganizationProfile organization={organization} />
