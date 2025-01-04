@@ -20,10 +20,10 @@ function OutboundArrowLink({
       href={target}
       target="_blank"
       rel="noopener noreferrer"
-      className={cn("flex items-center gap-x-1.5", className)}
+      className={cn("group flex items-center gap-x-1.5", className)}
     >
       {icon}
-      <span className="hover:underline inline-flex items-center">
+      <span className="group-hover:underline inline-flex items-center">
         {text}
         <Image
           src="/assets/icons/arrow-up-right.svg"
