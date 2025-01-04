@@ -17,7 +17,7 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
         {attestations.map((attestation) => (
           <div
             key={attestation.id}
-            className="rounded-xl border border-gray-200 p-6 bg-background"
+            className="rounded-xl border border-gray-200 p-6 bg-background group/card"
           >
             <div className="text-md font-medium flex items-center gap-2">
               {attestation.name}{" "}
@@ -33,7 +33,7 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
             <div className="text-md text-secondary-foreground">
               {attestation.subtext}
             </div>
-            <div className="inline-flex gap-x-2">
+            <div className="inline-flex gap-x-2 opacity-0 transition-opacity duration-300 group-hover/card:opacity-100">
               <OutboundArrowLink
                 text="About"
                 target={`https://gov.optimism.io/t/optimism-governance-glossary/9407`}
