@@ -55,7 +55,7 @@ export default function ProfileHeaderLinks({
           text={
             <div className="flex gap-1">
               <span className="text-sm text-black">@{user.github}</span>
-              {githubUserData?.followers ? (
+              {githubUserData?.followers && (
                 <>
                   <span className="text-sm text-gray-500 font-light">
                     {formatNumber(githubUserData?.followers)}
@@ -64,8 +64,6 @@ export default function ProfileHeaderLinks({
                     Followers
                   </span>
                 </>
-              ) : (
-                <></>
               )}
             </div>
           }
