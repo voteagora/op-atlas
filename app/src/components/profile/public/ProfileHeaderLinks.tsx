@@ -28,10 +28,16 @@ export default function ProfileHeaderLinks({
         text={
           <div className="flex gap-1">
             <span className="text-sm text-black">@{user.username}</span>
-            <span className="text-sm text-[#404454]">
-              {formatNumber(farcasterUsers?.users[0]?.follower_count || 0)}
-            </span>
-            <span className="text-sm text-[#404454]">Followers</span>
+            {farcasterUsers?.users[0]?.follower_count && (
+              <>
+                <span className="text-sm text-gray-500 font-light">
+                  {formatNumber(farcasterUsers?.users[0]?.follower_count)}
+                </span>
+                <span className="text-sm text-gray-500 font-light">
+                  Followers
+                </span>
+              </>
+            )}
           </div>
         }
         tooltipText="Farcaster"
@@ -45,12 +51,19 @@ export default function ProfileHeaderLinks({
           href={`https://github.com/${user.github}`}
           icon="/assets/icons/github-icon.svg"
           text={
-            <>
+            <div className="flex gap-1">
               <span className="text-sm text-black">@{user.github}</span>
-              <span className="text-sm text-[#404454]">
-                {" " + formatNumber(githubUserData?.followers || 0)} Followers
-              </span>
-            </>
+              {githubUserData?.followers && (
+                <>
+                  <span className="text-sm text-gray-500 font-light">
+                    {formatNumber(githubUserData?.followers)}
+                  </span>
+                  <span className="text-sm text-gray-500 font-light">
+                    Followers
+                  </span>
+                </>
+              )}
+            </div>
           }
           tooltipText="Github"
         />
