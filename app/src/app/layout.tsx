@@ -16,20 +16,20 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://retrofunding.optimism.io"),
+  metadataBase: new URL("https://atlas.optimism.io"),
   title: "Atlas",
   description: "Results are in for Round 6: Governance",
   icons: "/favicon.ico",
   openGraph: {
     title: "Atlas",
     description: "Results are in for Round 6: Governance",
-    url: "https://retrofunding.optimism.io",
+    url: "https://atlas.optimism.io",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Retro Funding",
+        alt: "Atlas",
       },
     ],
   },
