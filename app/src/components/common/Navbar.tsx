@@ -1,15 +1,9 @@
 "use client"
 
-import {
-  AlignJustify,
-  ArrowUpRight,
-  ChevronUp,
-  MoveUpRight,
-  X,
-} from "lucide-react"
+import { AlignJustify, ArrowUpRight, ChevronUp, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname, useParams } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import React, { useState } from "react"
 
 import { cn } from "@/lib/utils"
@@ -21,7 +15,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card"
 import { Account } from "./Account"
 import { MobileNav } from "./MobileNav"
 
@@ -43,7 +36,7 @@ const dropdownList = [
   },
   {
     title: "Retro Funding",
-    href: "https://atlas.optimism.io/",
+    href: "/",
   },
   {
     title: "Forum",
@@ -51,7 +44,7 @@ const dropdownList = [
   },
   {
     title: "Delegates",
-    href: "https://vote.optimism.io/",
+    href: "https://vote.optimism.io/delegates",
   },
 ]
 
