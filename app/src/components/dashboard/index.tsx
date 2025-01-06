@@ -91,11 +91,7 @@ const Dashboard = ({
 
   useEffect(() => {
     // User has submitted at least one application but didn't receive any rewards
-    if (
-      !hasShownNoRewardsDialog() &&
-      projects.find((project) => project.applications.length > 1) &&
-      noRewardsForRound(projects, ROUND_ID)
-    ) {
+    if (false) {
       setShowNoRewardsDialog(true)
       return
     }
@@ -114,7 +110,7 @@ const Dashboard = ({
         />,
       )
     }
-  }, [adminProjects])
+  }, [adminProjects, projects])
 
   useEffect(() => {
     if (profileInitiallyComplete.current) {
