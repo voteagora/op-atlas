@@ -119,8 +119,8 @@ export const verifyGithubRepo = async (
     const license = await getLicense(owner, slug)
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
-    // const { npmPackage } = await verifyNpm(owner, slug)
-    // const isNpmPackage = npmPackage && npmPackage.error == "Not found"
+    const { npmPackage } = await verifyNpm(owner, slug)
+    const isNpmPackage = npmPackage && npmPackage.error == "Not found"
 
     const repo = await addProjectRepository({
       projectId,
@@ -129,7 +129,7 @@ export const verifyGithubRepo = async (
         url: `https://github.com/${owner}/${slug}`,
         verified: true,
         openSource: !!isOpenSource,
-        //isNpmPackage: !!isNpmPackage
+        npmPackage: !!isNpmPackage,
         name,
         description,
       },

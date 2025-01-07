@@ -138,6 +138,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         verified: false,
         openSource: false,
         containsContracts: false,
+        npmPackage: false,
         name: "",
         description: "",
       })
@@ -158,6 +159,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
           verified: false,
           openSource: false,
           containsContracts: false,
+          npmPackage: false,
           name: "",
           description: "",
         })

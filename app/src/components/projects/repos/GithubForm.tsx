@@ -42,9 +42,8 @@ export const GithubForm = ({
   const url = form.watch(`githubRepos.${index}.url`)
   const isVerified = form.watch(`githubRepos.${index}.verified`)
   const isOpenSource = form.watch(`githubRepos.${index}.openSource`)
-  const isNpmPackage = true
   const isCratePackage = true
-  // const isNpmPackage = form.watch(`githubRepos.${index}.npmPackage`)
+  const isNpmPackage = form.watch(`githubRepos.${index}.npmPackage`)
   // const isCratePackage = form.watch(`githubRepos.${index}.cratePackage`)
 
   const containsContracts = form.watch(`githubRepos.${index}.containsContracts`)

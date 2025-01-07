@@ -343,6 +343,7 @@ model ProjectRepository {
   verified          Boolean @default(false)
   openSource        Boolean @default(false)
   containsContracts Boolean @default(false)
+  npmPackage        Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
