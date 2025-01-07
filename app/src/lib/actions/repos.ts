@@ -131,7 +131,7 @@ export const verifyGithubRepo = async (
     const isNpmPackage = npmPackage && npmPackage.error !== "Not found"
 
     const crate = await verifyCrate(owner, slug)
-    const isCrate = crate && crate.errors?.length === 0
+    const isCrate = crate && !crate.errors
 
     const repo = await addProjectRepository({
       projectId,
