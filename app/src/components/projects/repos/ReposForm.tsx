@@ -29,7 +29,6 @@ import {
   removeGithubRepo,
   setProjectLinks,
   updateGithubRepos,
-  verifyCrate,
 } from "@/lib/actions/repos"
 import { ProjectWithDetails } from "@/lib/types"
 
