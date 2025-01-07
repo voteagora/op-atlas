@@ -74,11 +74,9 @@ const isValidFundingFile = (contents: string, projectId: string) => {
   }
 }
 
-export const verifyNpmAndCrate = async (owner: string, slug: string) => {
+export const verifyNpm = async (owner: string, slug: string) => {
   const packageJson = await getPackageJson(owner, slug)
-
   const npmPackage = await getNpmPackage(packageJson.name)
-
   return { packageJson, npmPackage }
 }
 
@@ -121,8 +119,8 @@ export const verifyGithubRepo = async (
     const license = await getLicense(owner, slug)
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
-    //Add NPM/Create functions here
-    // const isNpmPackage = await getPackage(owner, slug);
+    // const { npmPackage } = await verifyNpm(owner, slug)
+    // const isNpmPackage = npmPackage && npmPackage.error == "Not found"
 
     const repo = await addProjectRepository({
       projectId,
@@ -131,6 +129,7 @@ export const verifyGithubRepo = async (
         url: `https://github.com/${owner}/${slug}`,
         verified: true,
         openSource: !!isOpenSource,
+        //isNpmPackage: !!isNpmPackage
         name,
         description,
       },

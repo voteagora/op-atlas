@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { partition } from "ramda"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -29,6 +29,7 @@ import {
   removeGithubRepo,
   setProjectLinks,
   updateGithubRepos,
+  verifyNpm,
 } from "@/lib/actions/repos"
 import { ProjectWithDetails } from "@/lib/types"
 
@@ -222,6 +223,19 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     },
     [project.id, router],
   )
+
+  useEffect(() => {
+    async function get() {
+      const urlParts =
+        githubFields[0].url?.replace(/.*github.com\//, "").split("/") ?? []
+      const owner = urlParts[0]
+      const slug = urlParts[1]
+      const { packageJson, npmPackage } = await verifyNpm(owner, slug)
+      console.log(packageJson)
+      console.log(npmPackage)
+    }
+    get()
+  }, [githubFields?.length])
 
   const links = form.watch("links")
   const isValidToAddLink = useMemo(() => {

@@ -42,6 +42,11 @@ export const GithubForm = ({
   const url = form.watch(`githubRepos.${index}.url`)
   const isVerified = form.watch(`githubRepos.${index}.verified`)
   const isOpenSource = form.watch(`githubRepos.${index}.openSource`)
+  const isNpmPackage = true
+  const isCratePackage = true
+  // const isNpmPackage = form.watch(`githubRepos.${index}.npmPackage`)
+  // const isCratePackage = form.watch(`githubRepos.${index}.cratePackage`)
+
   const containsContracts = form.watch(`githubRepos.${index}.containsContracts`)
 
   const onCopy = async () => {
@@ -139,8 +144,21 @@ export const GithubForm = ({
             )}
           </div>
 
-          {isVerified && (isOpenSource || containsContracts) ? (
+          {isVerified ? (
             <div className="flex items-center gap-2">
+              {isNpmPackage && (
+                <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
+                  <Check size={12} />
+                  <p className="text-xs font-medium">NPM</p>
+                </div>
+              )}
+              {isCratePackage && (
+                <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
+                  <Check size={12} />
+                  <p className="text-xs font-medium">Crate</p>
+                </div>
+              )}
+
               {isOpenSource && (
                 <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
                   <Check size={12} />
