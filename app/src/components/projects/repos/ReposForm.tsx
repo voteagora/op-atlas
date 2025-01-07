@@ -29,7 +29,7 @@ import {
   removeGithubRepo,
   setProjectLinks,
   updateGithubRepos,
-  verifyNpm,
+  verifyCrate,
 } from "@/lib/actions/repos"
 import { ProjectWithDetails } from "@/lib/types"
 
@@ -238,9 +238,13 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         githubFields[0].url?.replace(/.*github.com\//, "").split("/") ?? []
       const owner = urlParts[0]
       const slug = urlParts[1]
-      const { packageJson, npmPackage } = await verifyNpm(owner, slug)
-      console.log(packageJson)
-      console.log(npmPackage)
+      // const { packageJson, npmPackage } = await verifyNpm(owner, slug)
+      // console.log(packageJson)
+      // console.log(npmPackage)
+
+      const { cargoToml, crate } = await verifyCrate(owner, slug)
+      console.log(cargoToml)
+      console.log(crate)
     }
     get()
   }, [githubFields?.length])

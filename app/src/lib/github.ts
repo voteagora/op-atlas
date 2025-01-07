@@ -1,4 +1,5 @@
 import { Octokit } from "octokit"
+import toml from "toml"
 
 const octokit = new Octokit({
   auth: process.env.GITHUB_AUTH_TOKEN,
@@ -40,6 +41,13 @@ export async function getNpmPackage(name: string) {
   return npmPackage
 }
 
+export async function getCrate(name: string) {
+  const url = `https://crates.io/api/v1/crates/${encodeURIComponent(name)}1`
+  const response = await fetch(url)
+  const npmPackage = await response.json()
+  return npmPackage
+}
+
 export async function getPackageJson(owner: string, slug: string) {
   try {
     const result = await octokit.request(
@@ -53,14 +61,34 @@ export async function getPackageJson(owner: string, slug: string) {
       },
     )
 
-    const packageJsonContent = Buffer.from(
-      result.data.content,
-      "base64",
-    ).toString("utf-8")
-    const packageJson = JSON.parse(packageJsonContent) // Parse the JSON
+    const content = Buffer.from(result.data.content, "base64").toString("utf-8")
+    const json = JSON.parse(content)
 
-    return packageJson
+    return json
   } catch (error: unknown) {
+    return null
+  }
+}
+
+export async function getCargoToml(owner: string, slug: string) {
+  try {
+    const result = await octokit.request(
+      "GET /repos/{owner}/{repo}/contents/cargo.toml",
+      {
+        owner,
+        repo: slug,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    )
+
+    const content = Buffer.from(result.data.content, "base64").toString("utf-8")
+    const json = JSON.parse(JSON.stringify(toml.parse(content)))
+
+    return json
+  } catch (error: unknown) {
+    console.log(error)
     return null
   }
 }
