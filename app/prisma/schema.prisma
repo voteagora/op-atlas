@@ -1,3 +1,5 @@
+
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,33 +10,33 @@ datasource db {
 }
 
 model User {
-  id                 String  @id @default(uuid())
-  name               String?
-  username           String?
-  farcasterId        String  @unique
-  imageUrl           String?
-  bio                String?
-  github             String?
-  notDeveloper       Boolean @default(false)
-  govForumProfileUrl String?
+  id                  String  @id @default(uuid())
+  name                String?
+  username            String?
+  farcasterId         String  @unique
+  imageUrl            String?
+  bio                 String?
+  github              String?
+  notDeveloper        Boolean @default(false)
+  govForumProfileUrl  String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  emails        UserEmail[]
-  projects      UserProjects[]
-  organizations UserOrganization[]
-  addresses     UserAddress[]
-  RewardClaim   RewardClaim[]
-  interaction   UserInteraction?
+  emails            UserEmail[]
+  projects          UserProjects[]
+  organizations     UserOrganization[]
+  addresses         UserAddress[]
+  RewardClaim       RewardClaim[]
+  interaction       UserInteraction?
 }
 
 model UserEmail {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   email     String
   userId    String
-  verified  Boolean  @default(false)
+  verified  Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -253,16 +255,16 @@ model Application {
 }
 
 model Category {
-  id               String   @id @default(uuid())
-  name             String
-  description      String
-  imageUrl         String?
-  question         String
-  options          String[]
-  roundId          String?
-  isMultipleChoice Boolean  @default(true)
+  id                String        @id @default(uuid())
+  name              String
+  description       String
+  imageUrl          String?
+  question          String
+  options           String[]
+  roundId           String?
+  isMultipleChoice  Boolean @default(true)
 
-  round FundingRound? @relation(fields: [roundId], references: [id])
+  round             FundingRound? @relation(fields: [roundId], references: [id])
 
   impactStatements ImpactStatement[]
   application      Application[]
@@ -274,13 +276,13 @@ model ImpactStatement {
   question   String
   subtext    String?
 
-  isRequired             Boolean  @default(true)
-  isMarkdownSupported    Boolean  @default(true)
-  roundId                String?
-  limitToCategoryOptions Int[]    @default([])
-  selectionOptions       String[]
+  isRequired          Boolean       @default(true)
+  isMarkdownSupported Boolean       @default(true)
+  roundId             String?
+  limitToCategoryOptions      Int[]         @default([])
+  selectionOptions    String[]
 
-  round FundingRound? @relation(fields: [roundId], references: [id])
+  round               FundingRound? @relation(fields: [roundId], references: [id])
 
   impactStatementAnswer ImpactStatementAnswer[]
 
@@ -345,7 +347,7 @@ model ProjectRepository {
   containsContracts Boolean @default(false)
   npmPackage        Boolean @default(false)
   cratePackage      Boolean @default(false)
-
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -437,7 +439,7 @@ model Badgeholder {
 }
 
 model GithubProximity {
-  peer       String
+  peer String
   percentile Float
 
   @@unique([peer])
