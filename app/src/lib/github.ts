@@ -34,7 +34,7 @@ export async function getLicense(owner: string, slug: string) {
 }
 
 export async function getNpmPackage(name: string) {
-  const url = `https://registry.npmjs.org/${encodeURIComponent("eth-crypto")}`
+  const url = `https://registry.npmjs.org/${encodeURIComponent(name)}`
   const response = await fetch(url)
   const npmPackage = await response.json()
   return npmPackage
