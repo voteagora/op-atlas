@@ -1,7 +1,7 @@
 "use client"
 
 import { User } from "@prisma/client"
-import { setCookie } from "cookies-next"
+import { deleteCookie, setCookie } from "cookies-next"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
@@ -67,6 +67,9 @@ export function GithubConnection({ user }: { user: User }) {
       console.error("Error disconnecting GitHub", error)
       toast.error("Error disconnecting GitHub")
     } finally {
+      // remove the cookie
+      deleteCookie(GITHUB_REDIRECT_COOKIE)
+
       setLoading(false)
     }
   }
