@@ -78,7 +78,7 @@ const isValidFundingFile = (contents: string, projectId: string) => {
 
 export const verifyCrate = async (owner: string, slug: string) => {
   const cargoToml = await getCargoToml(owner, slug)
-  const crate = await getCrate(cargoToml.name)
+  const crate = await getCrate(cargoToml.package.name)
   return { cargoToml, crate }
 }
 
