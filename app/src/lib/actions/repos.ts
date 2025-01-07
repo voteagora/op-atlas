@@ -120,7 +120,12 @@ export const verifyGithubRepo = async (
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
     const { npmPackage } = await verifyNpm(owner, slug)
-    const isNpmPackage = npmPackage && npmPackage.error == "Not found"
+
+    console.log(npmPackage)
+
+    const isNpmPackage = npmPackage && npmPackage.error !== "Not found"
+
+    console.log(isNpmPackage)
 
     const repo = await addProjectRepository({
       projectId,

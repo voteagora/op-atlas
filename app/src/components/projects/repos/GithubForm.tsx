@@ -45,7 +45,6 @@ export const GithubForm = ({
   const isCratePackage = true
   const isNpmPackage = form.watch(`githubRepos.${index}.npmPackage`)
   // const isCratePackage = form.watch(`githubRepos.${index}.cratePackage`)
-
   const containsContracts = form.watch(`githubRepos.${index}.containsContracts`)
 
   const onCopy = async () => {

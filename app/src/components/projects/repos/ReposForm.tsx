@@ -60,6 +60,7 @@ function toFormValues(project: ProjectWithDetails) {
               verified,
               openSource,
               containsContracts,
+              npmPackage,
               name,
               description,
             }) => ({
@@ -67,6 +68,7 @@ function toFormValues(project: ProjectWithDetails) {
               verified,
               openSource,
               containsContracts,
+              npmPackage,
               name: name ?? "",
               description: description ?? "",
             }),
