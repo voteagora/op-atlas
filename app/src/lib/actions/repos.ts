@@ -15,13 +15,13 @@ import {
 
 import {
   getCargoToml,
-  getCrate,
   getFile,
   getLicense,
-  getNpmPackage,
   getPackageJson,
   getRepository,
 } from "../github"
+import { getCrate } from "../crates"
+import { getNpmPackage } from "../npm"
 import { OPEN_SOURCE_LICENSES } from "../licenses"
 import { verifyMembership } from "./utils"
 
@@ -76,16 +76,16 @@ const isValidFundingFile = (contents: string, projectId: string) => {
   }
 }
 
-export const verifyCrate = async (owner: string, slug: string) => {
+const verifyCrate = async (owner: string, slug: string) => {
   const cargoToml = await getCargoToml(owner, slug)
   const crate = await getCrate(cargoToml.package.name)
-  return { cargoToml, crate }
+  return crate
 }
 
 const verifyNpm = async (owner: string, slug: string) => {
   const packageJson = await getPackageJson(owner, slug)
   const npmPackage = await getNpmPackage(packageJson.name)
-  return { packageJson, npmPackage }
+  return npmPackage
 }
 
 export const verifyGithubRepo = async (
@@ -127,10 +127,10 @@ export const verifyGithubRepo = async (
     const license = await getLicense(owner, slug)
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
-    const { npmPackage } = await verifyNpm(owner, slug)
+    const npmPackage = await verifyNpm(owner, slug)
     const isNpmPackage = npmPackage && npmPackage.error !== "Not found"
 
-    const { crate } = await verifyCrate(owner, slug)
+    const crate = await verifyCrate(owner, slug)
     const isCratePackage = crate && crate.errors.length === 0
 
     const repo = await addProjectRepository({
