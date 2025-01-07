@@ -42,9 +42,9 @@ export const GithubForm = ({
   const url = form.watch(`githubRepos.${index}.url`)
   const isVerified = form.watch(`githubRepos.${index}.verified`)
   const isOpenSource = form.watch(`githubRepos.${index}.openSource`)
+  const containsContracts = form.watch(`githubRepos.${index}.containsContracts`)
   const isNpmPackage = form.watch(`githubRepos.${index}.npmPackage`)
   const isCrate = form.watch(`githubRepos.${index}.crate`)
-  const containsContracts = form.watch(`githubRepos.${index}.containsContracts`)
 
   const onCopy = async () => {
     try {
