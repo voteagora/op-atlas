@@ -13,7 +13,13 @@ import {
   updateProjectRepository,
 } from "@/db/projects"
 
-import { getFile, getLicense, getRepository } from "../github"
+import {
+  getFile,
+  getLicense,
+  getNpmPackage,
+  getPackageJson,
+  getRepository,
+} from "../github"
 import { OPEN_SOURCE_LICENSES } from "../licenses"
 import { verifyMembership } from "./utils"
 
@@ -68,6 +74,14 @@ const isValidFundingFile = (contents: string, projectId: string) => {
   }
 }
 
+export const verifyNpmAndCrate = async (owner: string, slug: string) => {
+  const packageJson = await getPackageJson(owner, slug)
+
+  const npmPackage = await getNpmPackage(packageJson.name)
+
+  return { packageJson, npmPackage }
+}
+
 export const verifyGithubRepo = async (
   projectId: string,
   owner: string,
@@ -106,6 +120,9 @@ export const verifyGithubRepo = async (
     // Fetch license to determine open source status
     const license = await getLicense(owner, slug)
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
+
+    //Add NPM/Create functions here
+    // const isNpmPackage = await getPackage(owner, slug);
 
     const repo = await addProjectRepository({
       projectId,
