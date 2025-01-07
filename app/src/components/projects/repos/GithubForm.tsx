@@ -43,7 +43,7 @@ export const GithubForm = ({
   const isVerified = form.watch(`githubRepos.${index}.verified`)
   const isOpenSource = form.watch(`githubRepos.${index}.openSource`)
   const isNpmPackage = form.watch(`githubRepos.${index}.npmPackage`)
-  const isCratePackage = form.watch(`githubRepos.${index}.cratePackage`)
+  const isCrate = form.watch(`githubRepos.${index}.crate`)
   const containsContracts = form.watch(`githubRepos.${index}.containsContracts`)
 
   const onCopy = async () => {
@@ -149,7 +149,7 @@ export const GithubForm = ({
                   <p className="text-xs font-medium">NPM</p>
                 </div>
               )}
-              {isCratePackage && (
+              {isCrate && (
                 <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
                   <Check size={12} />
                   <p className="text-xs font-medium">Crate</p>

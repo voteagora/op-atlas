@@ -60,7 +60,7 @@ function toFormValues(project: ProjectWithDetails) {
               openSource,
               containsContracts,
               npmPackage,
-              cratePackage,
+              crate,
               name,
               description,
             }) => ({
@@ -69,7 +69,7 @@ function toFormValues(project: ProjectWithDetails) {
               openSource,
               containsContracts,
               npmPackage,
-              cratePackage,
+              crate,
               name: name ?? "",
               description: description ?? "",
             }),
@@ -142,7 +142,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         openSource: false,
         containsContracts: false,
         npmPackage: false,
-        cratePackage: false,
+        crate: false,
         name: "",
         description: "",
       })
@@ -164,7 +164,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
           openSource: false,
           containsContracts: false,
           npmPackage: false,
-          cratePackage: false,
+          crate: false,
           name: "",
           description: "",
         })
