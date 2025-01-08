@@ -59,9 +59,8 @@ export const getFilesContentsToml = async (
   repo: string,
   paths: string[],
 ) => {
-  const contents = await getFilesContentsBase64Decoded(owner, repo, paths)
-  return contents.map((element) =>
-    JSON.parse(JSON.stringify(toml.parse(element))),
+  return await Promise.all(
+    paths.map((path) => getFileContentToml(owner, repo, path)),
   )
 }
 
@@ -70,25 +69,30 @@ export const getFilesContentsJson = async (
   repo: string,
   paths: string[],
 ) => {
-  const contents = await getFilesContentsBase64Decoded(owner, repo, paths)
-  return contents.map((element) => JSON.parse(element))
+  return await Promise.all(
+    paths.map((path) => getFileContentJson(owner, repo, path)),
+  )
 }
 
-const getFilesContentsBase64Decoded = async (
+const getFileContentToml = async (
   owner: string,
   repo: string,
-  paths: string[],
+  path: string = "",
 ) => {
-  const contents = []
-
-  for (let i = 0; i < paths.length; i++) {
-    contents.push(await getFileContentBase64Decoded(owner, repo, paths[i]))
-  }
-
-  return contents
+  const base64Decoded = await getFileContentBase64Decoded(owner, repo, path)
+  return JSON.parse(JSON.stringify(toml.parse(base64Decoded)))
 }
 
-export const getFileContentBase64Decoded = async (
+const getFileContentJson = async (
+  owner: string,
+  repo: string,
+  path: string = "",
+) => {
+  const base64Decoded = await getFileContentBase64Decoded(owner, repo, path)
+  return JSON.parse(base64Decoded)
+}
+
+const getFileContentBase64Decoded = async (
   owner: string,
   repo: string,
   path: string = "",
