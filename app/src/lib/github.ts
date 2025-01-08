@@ -106,6 +106,6 @@ const getFileContentBase64Decoded = async (
     }
   } catch (error: unknown) {
     console.error("Error getting file contents:", error)
-    return []
+    return null
   }
 }
