@@ -14,12 +14,12 @@ import {
 } from "@/db/projects"
 
 import {
+  findAllFilesRecursively,
   getCargoToml,
-  getFile,
+  getFileOrFolder,
+  getFilesContents,
   getLicense,
-  getPackageJson,
   getRepository,
-  searchAllPackageJson,
 } from "../github"
 import { getCrate } from "../crates"
 import { getNpmPackage } from "../npm"
@@ -52,12 +52,12 @@ export const findRepo = async (owner: string, slug: string) => {
 
 const fetchFundingFile = async (owner: string, slug: string) => {
   try {
-    const { data } = await getFile(owner, slug, "funding.json")
+    const { data } = await getFileOrFolder(owner, slug, "funding.json")
     return Buffer.from((data as any).content ?? "", "base64").toString("utf-8")
   } catch (error: unknown) {
     // This will also happen if the file doesn't exist - try the all-caps name
     try {
-      const { data } = await getFile(owner, slug, "FUNDING.json")
+      const { data } = await getFileOrFolder(owner, slug, "FUNDING.json")
       return Buffer.from((data as any).content ?? "", "base64").toString(
         "utf-8",
       )
@@ -83,11 +83,15 @@ const verifyCrate = async (owner: string, slug: string) => {
   return crate
 }
 
-const verifyNpm = async (owner: string, slug: string) => {
-  const packageJsons = await searchAllPackageJson(owner, slug)
+const getFilesByName = (files: any[], name: string) => {
+  return files.filter((element: any) => {
+    return element.name === name
+  })
+}
 
-  for (let x = 0; x < packageJsons.length; x++) {
-    const result = await getNpmPackage(packageJsons[x].content.name)
+const verifyNpm = async (contents: any[]) => {
+  for (let x = 0; x < contents.length; x++) {
+    const result = await getNpmPackage(contents[x].name)
 
     if (result && result.error !== "Not found") {
       return true
@@ -136,7 +140,17 @@ export const verifyGithubRepo = async (
     const license = await getLicense(owner, slug)
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
-    const isNpmPackage = await verifyNpm(owner, slug)
+    const repoFiles = await findAllFilesRecursively(owner, slug)
+
+    const packageJsons = getFilesByName(repoFiles, "package.json")
+    const packageJsonContents = await getFilesContents(
+      owner,
+      slug,
+      packageJsons.map((item) => item.path),
+    )
+
+    const isNpmPackage = await verifyNpm(packageJsonContents)
+
     // const isNpmPackage = npmPackage && npmPackage.error !== "Not found"
 
     const crate = await verifyCrate(owner, slug)

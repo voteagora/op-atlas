@@ -9,7 +9,11 @@ export async function getRepository(owner: string, slug: string) {
   return await octokit.rest.repos.get({ owner, repo: slug })
 }
 
-export async function getFile(owner: string, slug: string, path: string) {
+export async function getFileOrFolder(
+  owner: string,
+  slug: string,
+  path: string,
+) {
   return await octokit.rest.repos.getContent({
     owner,
     repo: slug,
@@ -79,62 +83,66 @@ export async function getCargoToml(owner: string, slug: string) {
   }
 }
 
-const findFilesWithContentRecursively = async (
+export const findAllFilesRecursively = async (
   owner: string,
   repo: string,
   path: string = "",
-  results: any[] = [],
 ) => {
   try {
-    const response = await octokit.request(
-      "GET /repos/{owner}/{repo}/contents/{path}",
-      {
-        owner,
-        repo,
-        path,
-      },
-    )
+    const response = await getFileOrFolder(owner, repo, path)
+
+    const files = []
 
     for (const item of response.data as any) {
-      if (item.type === "file" && item.name === "package.json") {
-        console.log(`Found package.json at: ${item.path}`)
-        // Fetch file content
-        const fileResponse = await octokit.request(
-          "GET /repos/{owner}/{repo}/contents/{path}",
-          {
-            owner,
-            repo,
-            path: item.path,
-          },
-        )
-
-        if ((fileResponse.data as any).encoding === "base64") {
-          const content = JSON.parse(
-            Buffer.from((fileResponse.data as any).content, "base64").toString(
-              "utf-8",
-            ),
-          )
-          results.push({ path: item.path, content }) // Store path and decoded content
-        }
+      if (item.type === "file") {
+        files.push(item)
       }
 
       if (item.type === "dir") {
-        await findFilesWithContentRecursively(owner, repo, item.path, results) // Recurse into directories
+        const nestedFiles: any = await findAllFilesRecursively(
+          owner,
+          repo,
+          item.path,
+        )
+        files.push(...nestedFiles)
       }
     }
+    return files
   } catch (error: unknown) {
     console.error("Error during recursive search:", error)
+    return []
   }
-  return results // Return the accumulated results
 }
 
-export const searchAllPackageJson = async (owner: string, repo: string) => {
-  const results = await findFilesWithContentRecursively(owner, repo)
-  if (results.length === 0) {
-    console.log("No package.json files found in the repository.")
-  } else {
-    console.log("Found package.json files at the following locations:")
-    console.log(results)
+export const getFilesContents = async (
+  owner: string,
+  repo: string,
+  paths: string[],
+) => {
+  const contents = []
+
+  for (let i = 0; i < paths.length; i++) {
+    contents.push(await getFileContents(owner, repo, paths[i]))
   }
-  return results
+
+  return contents
+}
+
+export const getFileContents = async (
+  owner: string,
+  repo: string,
+  path: string = "",
+) => {
+  try {
+    const response = await getFileOrFolder(owner, repo, path)
+    if ((response.data as any).encoding === "base64") {
+      const content = JSON.parse(
+        Buffer.from((response.data as any).content, "base64").toString("utf-8"),
+      )
+      return content
+    }
+  } catch (error: unknown) {
+    console.error("Error getting file contents:", error)
+    return []
+  }
 }
