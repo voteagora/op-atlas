@@ -91,15 +91,11 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
     cargoTomls.map((item) => item.path),
   )
 
-  for (let x = 0; x < contents.length; x++) {
-    const result = await getCrate(contents[x].package.name)
+  const crates = await Promise.all(
+    contents.map((content) => getCrate(content.package.name)),
+  )
 
-    if (result && !result.errors) {
-      return true
-    }
-  }
-
-  return false
+  return crates.some((crate) => crate && !crate.errors)
 }
 
 const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
@@ -110,15 +106,11 @@ const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
     packageJsons.map((item) => item.path),
   )
 
-  for (let x = 0; x < contents.length; x++) {
-    const result = await getNpmPackage(contents[x].name)
+  const packages = await Promise.all(
+    contents.map((content) => getNpmPackage(content.name)),
+  )
 
-    if (result && result.error !== "Not found") {
-      return true
-    }
-  }
-
-  return false
+  return packages.some((pkg) => pkg && pkg.error !== "Not found")
 }
 
 export const verifyGithubRepo = async (
@@ -161,8 +153,11 @@ export const verifyGithubRepo = async (
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
     const repoFiles = await getContents(owner, slug)
-    const isCrate = await verifyCrate(owner, slug, repoFiles)
-    const isNpmPackage = await verifyNpm(owner, slug, repoFiles)
+
+    const [isCrate, isNpmPackage] = await Promise.all([
+      verifyCrate(owner, slug, repoFiles),
+      verifyNpm(owner, slug, repoFiles),
+    ])
 
     const repo = await addProjectRepository({
       projectId,
