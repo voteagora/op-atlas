@@ -80,7 +80,11 @@ const getFileContentToml = async (
   path: string = "",
 ) => {
   const base64Decoded = await getFileContentBase64Decoded(owner, repo, path)
-  return JSON.parse(JSON.stringify(toml.parse(base64Decoded)))
+  try {
+    return JSON.parse(JSON.stringify(toml.parse(base64Decoded)))
+  } catch (error: unknown) {
+    return null
+  }
 }
 
 const getFileContentJson = async (
@@ -89,7 +93,11 @@ const getFileContentJson = async (
   path: string = "",
 ) => {
   const base64Decoded = await getFileContentBase64Decoded(owner, repo, path)
-  return JSON.parse(base64Decoded)
+  try {
+    return JSON.parse(base64Decoded)
+  } catch (error: unknown) {
+    return null
+  }
 }
 
 const getFileContentBase64Decoded = async (
