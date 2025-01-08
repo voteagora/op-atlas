@@ -101,6 +101,7 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
 
   return false
 }
+
 const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
   const packageJsons = getFilesByName(repoFiles, "package.json")
   const contents = await getFilesContentsJson(
