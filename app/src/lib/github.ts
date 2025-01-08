@@ -39,15 +39,19 @@ export async function getLicense(owner: string, slug: string) {
 }
 
 export const getContents = async (owner: string, slug: string) => {
-  const result = await octokit.request("GET /repos/{owner}/{repo}/contents", {
-    owner,
-    repo: slug,
-    headers: {
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-  })
+  try {
+    const result = await octokit.request("GET /repos/{owner}/{repo}/contents", {
+      owner,
+      repo: slug,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    })
 
-  return result.data
+    return result.data
+  } catch (error: unknown) {
+    return null
+  }
 }
 
 export const getFilesContentsToml = async (
