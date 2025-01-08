@@ -13,7 +13,7 @@ export async function getCrate(name: string) {
     const url = getCrateUrl(name)
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "OP Atlas (jake@voteagora.com)",
+        "User-Agent": `OP Atlas (${process.env.CRATE_USER_AGENT_CONTACT})`,
       },
     })
 
