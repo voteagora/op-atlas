@@ -78,3 +78,63 @@ export async function getCargoToml(owner: string, slug: string) {
     return null
   }
 }
+
+const findFilesWithContentRecursively = async (
+  owner: string,
+  repo: string,
+  path: string = "",
+  results: any[] = [],
+) => {
+  try {
+    const response = await octokit.request(
+      "GET /repos/{owner}/{repo}/contents/{path}",
+      {
+        owner,
+        repo,
+        path,
+      },
+    )
+
+    for (const item of response.data as any) {
+      if (item.type === "file" && item.name === "package.json") {
+        console.log(`Found package.json at: ${item.path}`)
+        // Fetch file content
+        const fileResponse = await octokit.request(
+          "GET /repos/{owner}/{repo}/contents/{path}",
+          {
+            owner,
+            repo,
+            path: item.path,
+          },
+        )
+
+        if ((fileResponse.data as any).encoding === "base64") {
+          const content = JSON.parse(
+            Buffer.from((fileResponse.data as any).content, "base64").toString(
+              "utf-8",
+            ),
+          )
+          results.push({ path: item.path, content }) // Store path and decoded content
+        }
+      }
+
+      if (item.type === "dir") {
+        await findFilesWithContentRecursively(owner, repo, item.path, results) // Recurse into directories
+      }
+    }
+  } catch (error: unknown) {
+    console.error("Error during recursive search:", error)
+  }
+  return results // Return the accumulated results
+}
+
+export const searchAllPackageJson = async (owner: string, repo: string) => {
+  const results = await findFilesWithContentRecursively(owner, repo)
+  if (results.length === 0) {
+    console.log("No package.json files found in the repository.")
+  } else {
+    console.log("Found package.json files at the following locations:")
+    console.log(results)
+  }
+  return results
+}

@@ -19,6 +19,7 @@ import {
   getLicense,
   getPackageJson,
   getRepository,
+  searchAllPackageJson,
 } from "../github"
 import { getCrate } from "../crates"
 import { getNpmPackage } from "../npm"
@@ -83,9 +84,17 @@ const verifyCrate = async (owner: string, slug: string) => {
 }
 
 const verifyNpm = async (owner: string, slug: string) => {
-  const packageJson = await getPackageJson(owner, slug)
-  const npmPackage = await getNpmPackage(packageJson.name)
-  return npmPackage
+  const packageJsons = await searchAllPackageJson(owner, slug)
+
+  for (let x = 0; x < packageJsons.length; x++) {
+    const result = await getNpmPackage(packageJsons[x].content.name)
+
+    if (result && result.error !== "Not found") {
+      return true
+    }
+  }
+
+  return false
 }
 
 export const verifyGithubRepo = async (
@@ -127,8 +136,8 @@ export const verifyGithubRepo = async (
     const license = await getLicense(owner, slug)
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
-    const npmPackage = await verifyNpm(owner, slug)
-    const isNpmPackage = npmPackage && npmPackage.error !== "Not found"
+    const isNpmPackage = await verifyNpm(owner, slug)
+    // const isNpmPackage = npmPackage && npmPackage.error !== "Not found"
 
     const crate = await verifyCrate(owner, slug)
     const isCrate = crate && !crate.errors
