@@ -69,26 +69,12 @@ export const findAllFilesRecursively = async (
   }
 }
 
-const getFilesContents = async (
-  owner: string,
-  repo: string,
-  paths: string[],
-) => {
-  const contents = []
-
-  for (let i = 0; i < paths.length; i++) {
-    contents.push(await getFileContents(owner, repo, paths[i]))
-  }
-
-  return contents
-}
-
 export const getFilesContentsToml = async (
   owner: string,
   repo: string,
   paths: string[],
 ) => {
-  const contents = await getFilesContents(owner, repo, paths)
+  const contents = await getFilesContentsBase64Decoded(owner, repo, paths)
   return contents.map((element) =>
     JSON.parse(JSON.stringify(toml.parse(element))),
   )
@@ -99,11 +85,25 @@ export const getFilesContentsJson = async (
   repo: string,
   paths: string[],
 ) => {
-  const contents = await getFilesContents(owner, repo, paths)
+  const contents = await getFilesContentsBase64Decoded(owner, repo, paths)
   return contents.map((element) => JSON.parse(element))
 }
 
-export const getFileContents = async (
+const getFilesContentsBase64Decoded = async (
+  owner: string,
+  repo: string,
+  paths: string[],
+) => {
+  const contents = []
+
+  for (let i = 0; i < paths.length; i++) {
+    contents.push(await getFileContentBase64Decoded(owner, repo, paths[i]))
+  }
+
+  return contents
+}
+
+export const getFileContentBase64Decoded = async (
   owner: string,
   repo: string,
   path: string = "",
