@@ -79,7 +79,7 @@ const isValidFundingFile = (contents: string, projectId: string) => {
 
 const getFilesByName = (files: any[], name: string) => {
   return files.filter((element: any) => {
-    return element.name === name
+    return element.name.toLowerCase() === name
   })
 }
 
