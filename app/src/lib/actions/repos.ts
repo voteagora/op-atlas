@@ -15,6 +15,7 @@ import {
 
 import {
   findAllFilesRecursively,
+  getContents,
   getFileOrFolder,
   getFilesContentsJson,
   getFilesContentsToml,
@@ -159,7 +160,9 @@ export const verifyGithubRepo = async (
     const license = await getLicense(owner, slug)
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
-    const repoFiles = await findAllFilesRecursively(owner, slug)
+    const repoFiles = await getContents(owner, slug)
+
+    // const repoFiles = await findAllFilesRecursively(owner, slug)
     const isCrate = await verifyCrate(owner, slug, repoFiles)
     const isNpmPackage = await verifyNpm(owner, slug, repoFiles)
 

@@ -38,6 +38,18 @@ export async function getLicense(owner: string, slug: string) {
   }
 }
 
+export const getContents = async (owner: string, slug: string) => {
+  const result = await octokit.request("GET /repos/{owner}/{repo}/contents", {
+    owner,
+    repo: slug,
+    headers: {
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  })
+
+  return result.data
+}
+
 export const findAllFilesRecursively = async (
   owner: string,
   repo: string,
