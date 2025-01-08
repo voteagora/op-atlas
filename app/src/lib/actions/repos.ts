@@ -14,7 +14,6 @@ import {
 } from "@/db/projects"
 
 import {
-  findAllFilesRecursively,
   getContents,
   getFileOrFolder,
   getFilesContentsJson,
@@ -161,8 +160,6 @@ export const verifyGithubRepo = async (
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
     const repoFiles = await getContents(owner, slug)
-
-    // const repoFiles = await findAllFilesRecursively(owner, slug)
     const isCrate = await verifyCrate(owner, slug, repoFiles)
     const isNpmPackage = await verifyNpm(owner, slug, repoFiles)
 
