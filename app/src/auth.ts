@@ -3,7 +3,7 @@ import { deleteCookie, getCookie } from "cookies-next"
 import { cookies } from "next/headers"
 import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import GitHubProvider from "next-auth/providers/github"
+import GitHub from "next-auth/providers/github"
 
 import { updateUserGithub, upsertUser } from "./db/users"
 import { GITHUB_REDIRECT_COOKIE } from "./lib/utils"
@@ -23,10 +23,7 @@ declare module "next-auth" {
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    }),
+    GitHub,
     CredentialsProvider({
       name: "Sign in with Farcaster",
       credentials: {
