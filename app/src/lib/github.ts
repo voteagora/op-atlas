@@ -128,6 +128,26 @@ export const getFilesContents = async (
   return contents
 }
 
+export const getFilesContentsToml = async (
+  owner: string,
+  repo: string,
+  paths: string[],
+) => {
+  const contents = await getFilesContents(owner, repo, paths)
+  return contents.map((element) =>
+    JSON.parse(JSON.stringify(toml.parse(element))),
+  )
+}
+
+export const getFilesContentsJson = async (
+  owner: string,
+  repo: string,
+  paths: string[],
+) => {
+  const contents = await getFilesContents(owner, repo, paths)
+  return contents.map((element) => JSON.parse(element))
+}
+
 export const getFileContents = async (
   owner: string,
   repo: string,
@@ -136,10 +156,9 @@ export const getFileContents = async (
   try {
     const response = await getFileOrFolder(owner, repo, path)
     if ((response.data as any).encoding === "base64") {
-      const content = JSON.parse(
-        Buffer.from((response.data as any).content, "base64").toString("utf-8"),
-      )
-      return content
+      return Buffer.from((response.data as any).content, "base64").toString(
+        "utf-8",
+      ) as any
     }
   } catch (error: unknown) {
     console.error("Error getting file contents:", error)

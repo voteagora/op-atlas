@@ -18,6 +18,8 @@ import {
   getCargoToml,
   getFileOrFolder,
   getFilesContents,
+  getFilesContentsJson,
+  getFilesContentsToml,
   getLicense,
   getRepository,
 } from "../github"
@@ -77,19 +79,39 @@ const isValidFundingFile = (contents: string, projectId: string) => {
   }
 }
 
-const verifyCrate = async (owner: string, slug: string) => {
-  const cargoToml = await getCargoToml(owner, slug)
-  const crate = await getCrate(cargoToml.package.name)
-  return crate
-}
-
 const getFilesByName = (files: any[], name: string) => {
   return files.filter((element: any) => {
     return element.name === name
   })
 }
 
-const verifyNpm = async (contents: any[]) => {
+const verifyCrate = async (owner: string, slug: string, files: any[]) => {
+  const cargoTomls = getFilesByName(files, "cargo.toml")
+  const contents = await getFilesContentsToml(
+    owner,
+    slug,
+    cargoTomls.map((item) => item.path),
+  )
+
+  for (let x = 0; x < contents.length; x++) {
+    const result = await getCrate(contents[x].package.name)
+
+    if (result && !result.errors) {
+      return true
+    }
+  }
+
+  return false
+}
+
+const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
+  const packageJsons = getFilesByName(repoFiles, "package.json")
+  const contents = await getFilesContentsJson(
+    owner,
+    slug,
+    packageJsons.map((item) => item.path),
+  )
+
   for (let x = 0; x < contents.length; x++) {
     const result = await getNpmPackage(contents[x].name)
 
@@ -142,19 +164,14 @@ export const verifyGithubRepo = async (
 
     const repoFiles = await findAllFilesRecursively(owner, slug)
 
-    const packageJsons = getFilesByName(repoFiles, "package.json")
-    const packageJsonContents = await getFilesContents(
-      owner,
-      slug,
-      packageJsons.map((item) => item.path),
-    )
+    const isCrate = await verifyCrate(owner, slug, repoFiles)
 
-    const isNpmPackage = await verifyNpm(packageJsonContents)
+    const isNpmPackage = await verifyNpm(owner, slug, repoFiles)
 
     // const isNpmPackage = npmPackage && npmPackage.error !== "Not found"
 
-    const crate = await verifyCrate(owner, slug)
-    const isCrate = crate && !crate.errors
+    // const crate = await verifyCrate(owner, slug)
+    // const isCrate = crate && !crate.errors
 
     const repo = await addProjectRepository({
       projectId,
