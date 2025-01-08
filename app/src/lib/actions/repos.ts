@@ -15,9 +15,7 @@ import {
 
 import {
   findAllFilesRecursively,
-  getCargoToml,
   getFileOrFolder,
-  getFilesContents,
   getFilesContentsJson,
   getFilesContentsToml,
   getLicense,

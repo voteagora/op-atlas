@@ -38,51 +38,6 @@ export async function getLicense(owner: string, slug: string) {
   }
 }
 
-export async function getPackageJson(owner: string, slug: string) {
-  try {
-    const result = await octokit.request(
-      "GET /repos/{owner}/{repo}/contents/package.json",
-      {
-        owner,
-        repo: slug,
-        headers: {
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      },
-    )
-
-    const content = Buffer.from(result.data.content, "base64").toString("utf-8")
-    const json = JSON.parse(content)
-
-    return json
-  } catch (error: unknown) {
-    return null
-  }
-}
-
-export async function getCargoToml(owner: string, slug: string) {
-  try {
-    const result = await octokit.request(
-      "GET /repos/{owner}/{repo}/contents/cargo.toml",
-      {
-        owner,
-        repo: slug,
-        headers: {
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      },
-    )
-
-    const content = Buffer.from(result.data.content, "base64").toString("utf-8")
-    const json = JSON.parse(JSON.stringify(toml.parse(content)))
-
-    return json
-  } catch (error: unknown) {
-    console.log(error)
-    return null
-  }
-}
-
 export const findAllFilesRecursively = async (
   owner: string,
   repo: string,
@@ -114,7 +69,7 @@ export const findAllFilesRecursively = async (
   }
 }
 
-export const getFilesContents = async (
+const getFilesContents = async (
   owner: string,
   repo: string,
   paths: string[],
