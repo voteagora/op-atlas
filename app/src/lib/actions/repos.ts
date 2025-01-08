@@ -101,7 +101,6 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
 
   return false
 }
-
 const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
   const packageJsons = getFilesByName(repoFiles, "package.json")
   const contents = await getFilesContentsJson(
@@ -161,15 +160,8 @@ export const verifyGithubRepo = async (
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
     const repoFiles = await findAllFilesRecursively(owner, slug)
-
     const isCrate = await verifyCrate(owner, slug, repoFiles)
-
     const isNpmPackage = await verifyNpm(owner, slug, repoFiles)
-
-    // const isNpmPackage = npmPackage && npmPackage.error !== "Not found"
-
-    // const crate = await verifyCrate(owner, slug)
-    // const isCrate = crate && !crate.errors
 
     const repo = await addProjectRepository({
       projectId,
