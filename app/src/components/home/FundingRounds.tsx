@@ -63,9 +63,17 @@ export const FundingRounds = ({
           </h3>
         </div>
 
-        {rounds.map((fundingRound) => (
-          <Round key={fundingRound.number} fundingRound={fundingRound} />
-        ))}
+        <div
+          className={`flex gap-4 ${
+            status === "ongoing" ? "flex flex-wrap" : "flex-col"
+          }`}
+        >
+          {rounds.map((fundingRound) => (
+            <Round key={fundingRound.number} fundingRound={fundingRound} />
+          ))}
+        </div>
+
+        {/* </div> */}
 
         {/* {status === "past"
           ? rounds.map((fundingRound) => (
@@ -116,7 +124,9 @@ const Round = ({
   // }
 
   const content = (
-    <div className={cn("flex gap-x-6 border rounded-xl p-10", className)}>
+    <div
+      className={cn(`flex flex-1 gap-x-6 border rounded-xl p-10`, className)}
+    >
       <SelectedContent fundingRound={fundingRound} />
       {/* <FundingRoundContent fundingRound={fundingRound} /> */}
     </div>

@@ -66,7 +66,7 @@ export function FundingRoundOngoing({
                   src={fundingRound.iconUrl}
                   width={124}
                   height={124}
-                  className="rounded-md"
+                  className="rounded-md w-full"
                   alt="Sunny blobs"
                 />
               )}
