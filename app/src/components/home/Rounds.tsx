@@ -30,27 +30,10 @@ export function Rounds({
           The results are in! Sign in to see your Retro Funding 6 rewards.
         </div>
       )}
-      {/* Background image */}
-      <div
-        className="absolute h-[500px] w-full"
-        style={{
-          backgroundImage: 'url("/assets/images/gradient-background.svg")',
-          backgroundSize: "cover",
-        }}
-      />
-
       {/* Main content */}
-      <div className="mt-36 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
+      <div className="mt-8 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
         <div className="flex flex-col w-full">
-          <h1 className="text-4xl font-semibold">Rounds</h1>
-          <p className="mt-2 text-muted-foreground">
-            Build together, benefit together.
-          </p>
-          {!data?.user && (
-            <div className="mt-6">
-              <Account />
-            </div>
-          )}
+          <h1 className="text-4xl font-semibold">Retro Funding Missions</h1>
         </div>
 
         <div className="mt-10 flex flex-1 gap-x-6">

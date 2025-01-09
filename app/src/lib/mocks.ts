@@ -18,7 +18,37 @@ export type FundingRound = {
 
 export const FUNDING_ROUNDS: FundingRound[] = [
   {
-    name: "Governance",
+    name: "Onchain Builders",
+    number: 7,
+    funding: {
+      op: "Up to 3.5M",
+    },
+    details:
+      "Rewards projects that drive cross-chain asset transfers, enabled through interop, by growing the Superchain across",
+    status: "open",
+    resultsLink: "/round/results/6",
+    accentColor: "#F0FFF1",
+    iconUrl: "/assets/images/Frame 2486.png",
+    startsAt: `Planned for ${new Date("2025-02-01T21:53:13.300Z")}`,
+    endsAt: new Date("2025-06-30T21:53:13.300Z"),
+  },
+  {
+    name: "Dev Tooling",
+    number: 7,
+    funding: {
+      op: "Up to 3.5M",
+    },
+    details:
+      "Rewards toolchain software, such as compilers, libraries, and debuggers, that support builders in developing onchain",
+    status: "open",
+    resultsLink: "/round/results/6",
+    accentColor: "#F0FFF1",
+    iconUrl: "/assets/images/Frame 2485.png",
+    startsAt: `Planned for ${new Date("2025-02-01T21:53:13.300Z")}`,
+    endsAt: new Date("2025-06-30T21:53:13.300Z"),
+  },
+  {
+    name: "Round 6: Governance",
     number: 6,
     funding: {
       op: "Up to 3.5M",
@@ -33,7 +63,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     endsAt: new Date("2024-10-14T21:53:13.300Z"),
   },
   {
-    name: "OP Stack",
+    name: "Round 5: OP Stack",
     number: 5,
     funding: {
       op: "Up to 8M",
@@ -48,7 +78,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     endsAt: new Date("2024-09-07T00:00:00.300Z"),
   },
   {
-    name: "Onchain Builders",
+    name: "Round 4: Onchain Builders",
     number: 4,
     funding: {
       op: "10M",
@@ -64,7 +94,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     endsAt: new Date("2023-06-06T21:53:13.300Z"),
   },
   {
-    name: "Welcome, Optimists!",
+    name: "Round 3",
     number: 3,
     funding: {
       op: "30M",
@@ -78,7 +108,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     endsAt: new Date("2023-11-01T21:53:13.300Z"),
   },
   {
-    name: "Welcome, Optimists!",
+    name: "Round 2",
     number: 2,
     funding: {
       op: "10M",
@@ -92,7 +122,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     endsAt: new Date("2023-06-30T21:53:13.300Z"),
   },
   {
-    name: "Welcome, Optimists!",
+    name: "Round 1",
     number: 1,
     funding: {
       dollar: "$1M",
