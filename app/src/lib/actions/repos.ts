@@ -95,7 +95,17 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
     contents.map((content) => getCrate(content.package.name)),
   )
 
-  return crates.some((crate) => crate && !crate.errors)
+  return crates.some((crate) => {
+    return (
+      crate &&
+      !crate.errors &&
+      verifyOwnerAndSlug(
+        owner,
+        slug,
+        crate.crate.repository?.split("/").filter(Boolean),
+      )
+    )
+  })
 }
 
 const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
@@ -110,7 +120,29 @@ const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
     contents.map((content) => getNpmPackage(content.name)),
   )
 
-  return packages.some((pkg) => pkg && pkg.error !== "Not found")
+  return packages.some(
+    (pkg) =>
+      pkg &&
+      pkg.error !== "Not found" &&
+      verifyOwnerAndSlug(
+        owner,
+        slug,
+        pkg.repository?.url.split("/").filter(Boolean),
+      ),
+  )
+}
+
+const verifyOwnerAndSlug = (
+  owner: string,
+  slug: string,
+  pathParts: string[],
+) => {
+  const ownerResult = pathParts?.some((part) => owner === part)
+  const slugResult = pathParts?.some(
+    (part) => slug === part.replace(".git", ""),
+  )
+
+  return ownerResult && slugResult
 }
 
 export const verifyGithubRepo = async (
