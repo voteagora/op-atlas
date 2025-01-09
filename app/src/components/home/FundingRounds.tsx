@@ -15,6 +15,7 @@ import { ChainLogo } from "../common/ChainLogo"
 import ExternalLink from "../ExternalLink"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
+import { FundingRoundPast } from "./FundingRoundPast"
 
 export const FundingRounds = ({
   className,
@@ -60,9 +61,21 @@ export const FundingRounds = ({
             {status === "open" ? "Open for applications" : titlecase(status)}
           </h3>
         </div>
+
         {rounds.map((fundingRound) => (
           <Round key={fundingRound.number} fundingRound={fundingRound} />
         ))}
+
+        {/* {status === "past"
+          ? rounds.map((fundingRound) => (
+              <FundingRoundPast
+                key={fundingRound.number}
+                fundingRound={fundingRound}
+              />
+            ))
+          : rounds.map((fundingRound) => (
+              <Round key={fundingRound.number} fundingRound={fundingRound} />
+            ))} */}
       </div>
     )
   }
@@ -84,47 +97,33 @@ const Round = ({
   className?: string
   fundingRound: FundingRound
 }) => {
-  const router = useRouter()
-  const { status } = useSession()
-  const { setOpenDialog } = useAppDialogs()
+  let SelectedContent: React.ComponentType<{
+    fundingRound: typeof fundingRound
+  }>
 
-  const onClick = () => {
-    if (fundingRound.status === "open") {
-      if (status === "authenticated") {
-        router.push("/dashboard")
-      } else {
-        setOpenDialog("get_started")
-      }
-      return
-    }
-
-    fundingRound.link && router.push(fundingRound.link)
+  // fundingRound.status === ""
+  if (fundingRound.status === "past") {
+    SelectedContent = FundingRoundPast
+  } else {
+    SelectedContent = FundingRoundContent
   }
 
-  if (fundingRound.status === "open") {
-    return (
-      <div className={cn("flex gap-x-6 border rounded-xl p-10", className)}>
-        <FundingRoundContent fundingRound={fundingRound} />
-      </div>
-    )
-  }
+  // else if (fundingRound.status === "open") {
+  //   SelectedContent = FundingRoundContent
+  // }
 
-  if (!fundingRound.link) {
-    return (
-      <div className={cn("flex gap-x-6 border rounded-xl p-10", className)}>
-        <FundingRoundContent fundingRound={fundingRound} />
-      </div>
-    )
-  }
-
-  return (
-    <ExternalLink
-      href={fundingRound.link}
-      className={cn("flex gap-x-6 border rounded-xl p-10", className)}
-    >
-      <FundingRoundContent fundingRound={fundingRound} />
-    </ExternalLink>
+  const content = (
+    <div className={cn("flex gap-x-6 border rounded-xl p-10", className)}>
+      <SelectedContent fundingRound={fundingRound} />
+      {/* <FundingRoundContent fundingRound={fundingRound} /> */}
+    </div>
   )
+
+  if (fundingRound.status !== "open" && fundingRound.link) {
+    return <ExternalLink href={fundingRound.link}>{content}</ExternalLink>
+  }
+
+  return content
 }
 
 function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {

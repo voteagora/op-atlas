@@ -18,6 +18,38 @@ export type FundingRound = {
 
 export const FUNDING_ROUNDS: FundingRound[] = [
   {
+    name: "Ongoing Test",
+    number: 7,
+    funding: {
+      op: "Up to 3.5M",
+    },
+    details:
+      "Rewards projects that drive cross-chain asset transfers, enabled through interop, by growing the Superchain across",
+    status: "ongoing",
+    link: "https://optimism.mirror.xyz/Bbu5M1mTNV2Z637QxOiF7Qt7R9hy6nxghbZiFbtZOBA",
+    resultsLink: "/round/results/6",
+    accentColor: "#F0FFF1",
+    iconUrl: "/assets/images/Frame 2486.png",
+    startsAt: `Planned for ${new Date("2025-02-01T21:53:13.300Z")}`,
+    endsAt: new Date("2025-06-30T21:53:13.300Z"),
+  },
+  {
+    name: "Upcoming Test",
+    number: 7,
+    funding: {
+      op: "Up to 3.5M",
+    },
+    details:
+      "Rewards projects that drive cross-chain asset transfers, enabled through interop, by growing the Superchain across",
+    status: "upcoming",
+    link: "https://optimism.mirror.xyz/Bbu5M1mTNV2Z637QxOiF7Qt7R9hy6nxghbZiFbtZOBA",
+    resultsLink: "/round/results/6",
+    accentColor: "#F0FFF1",
+    iconUrl: "/assets/images/Frame 2486.png",
+    startsAt: `Planned for ${new Date("2025-02-01T21:53:13.300Z")}`,
+    endsAt: new Date("2025-06-30T21:53:13.300Z"),
+  },
+  {
     name: "Onchain Builders",
     number: 7,
     funding: {
