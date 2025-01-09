@@ -1,5 +1,6 @@
 import "./globals.css"
 
+import { GoogleAnalytics } from "@next/third-parties/google"
 import { Loader2 } from "lucide-react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
@@ -9,6 +10,8 @@ import { CheckIconFilled } from "@/components/icons/checkIconFilled"
 import { InfoIconFilled } from "@/components/icons/infoIconFilled"
 import { Toaster } from "@/components/ui/sonner"
 import Providers from "@/providers/Providers"
+
+const GOOGLE_ANALYTICS_ID = process.env.GOOGLE_ANALYTICS_ID || ""
 
 const inter = Inter({
   subsets: ["latin"],
@@ -55,6 +58,7 @@ export default function RootLayout({
           />
         </Providers>
       </body>
+      <GoogleAnalytics gaId={GOOGLE_ANALYTICS_ID} />
     </html>
   )
 }
