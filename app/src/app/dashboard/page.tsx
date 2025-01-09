@@ -10,7 +10,6 @@ import {
   getApplications,
   getProjects,
 } from "@/lib/actions/projects"
-import { GovCandidateCallout } from "@/components/dashboard/Callouts"
 
 export default async function Page() {
   const session = await auth()
@@ -34,7 +33,6 @@ export default async function Page() {
 
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
-      <GovCandidateCallout />
       <Dashboard
         user={user}
         projects={projects}
