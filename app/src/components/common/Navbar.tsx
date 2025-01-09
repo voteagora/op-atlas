@@ -1,6 +1,12 @@
 "use client"
 
-import { AlignJustify, ArrowUpRight, ChevronUp, X } from "lucide-react"
+import {
+  AlignJustify,
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp,
+  X,
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams, usePathname } from "next/navigation"
@@ -122,7 +128,7 @@ const Navbar = () => {
                       } focus:outline-none focus:opacity-80`}
                       href="/rounds"
                     >
-                      Retro Rounds
+                      Retro Missisons
                     </Link>
                   </div>
                 </div>
@@ -150,7 +156,7 @@ const Navbar = () => {
                     <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
                       <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
                         <div>More</div>
-                        <ChevronUp size={12} />
+                        <ChevronDown size={12} />
                       </div>
                     </div>
                   </DropdownMenuTrigger>
