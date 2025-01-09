@@ -36,7 +36,7 @@ export function Rounds({
           <h1 className="text-4xl font-semibold">Retro Funding Missions</h1>
         </div>
 
-        <div className="mt-10 flex flex-1 gap-x-6">
+        <div className="mt-10 flex flex-1 gap-x-10">
           <div className="flex flex-col flex-1 gap-y-12">
             <FundingRounds fundingRounds={FUNDING_ROUNDS} />
             <div className="flex flex-col">

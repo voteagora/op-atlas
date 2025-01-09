@@ -72,7 +72,7 @@ export function FundingRoundOngoing({
               )}
             </div>
           </div>
-          <p className="text-secondary-foreground text-start line-clamp-3">
+          <p className="text-secondary-foreground text-start line-clamp-3 text-sm">
             {fundingRound.details}
           </p>
         </div>

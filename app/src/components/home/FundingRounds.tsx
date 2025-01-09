@@ -125,7 +125,7 @@ const Round = ({
 
   const content = (
     <div
-      className={cn(`flex flex-1 gap-x-6 border rounded-xl p-10`, className)}
+      className={cn(`flex flex-1 gap-x-1 border rounded-xl p-10`, className)}
     >
       <SelectedContent fundingRound={fundingRound} />
       {/* <FundingRoundContent fundingRound={fundingRound} /> */}
