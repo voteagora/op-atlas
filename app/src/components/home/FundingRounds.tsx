@@ -16,6 +16,7 @@ import ExternalLink from "../ExternalLink"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { FundingRoundPast } from "./FundingRoundPast"
+import { FundingRoundOngoing } from "./FundingRoundOngoing"
 
 export const FundingRounds = ({
   className,
@@ -82,10 +83,10 @@ export const FundingRounds = ({
 
   return (
     <div className={cn("flex flex-col gap-y-12 w-full", className)}>
-      {open.length > 0 && renderSection("open", open)}
-      {upcoming.length > 0 && renderSection("upcoming", upcoming)}
       {ongoing.length > 0 && renderSection("ongoing", ongoing)}
       {past.length > 0 && renderSection("past", past)}
+      {open.length > 0 && renderSection("open", open)}
+      {upcoming.length > 0 && renderSection("upcoming", upcoming)}
     </div>
   )
 }
@@ -104,6 +105,8 @@ const Round = ({
   // fundingRound.status === ""
   if (fundingRound.status === "past") {
     SelectedContent = FundingRoundPast
+  } else if (fundingRound.status === "ongoing") {
+    SelectedContent = FundingRoundOngoing
   } else {
     SelectedContent = FundingRoundContent
   }
