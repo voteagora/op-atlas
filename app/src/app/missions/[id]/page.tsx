@@ -232,6 +232,7 @@ export default function Mission({ params }: { params: { id: string } }) {
             className="ml-auto w-[290px]"
             applyByDate={applyByDate}
             startDate={startDate}
+            projectsEnrolled={18}
           />
         </div>
       </div>

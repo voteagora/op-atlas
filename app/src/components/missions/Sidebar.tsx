@@ -6,14 +6,15 @@ export const Sidebar = ({
   className,
   applyByDate,
   startDate,
+  projectsEnrolled,
 }: {
   className?: string
   applyByDate: string
   startDate: string
+  projectsEnrolled: number
 }) => {
   const units = "0"
 
-  const projectsEnrolled = 42
   const opRewarded = "25,400"
   const avgOpRewardPerProject = "450"
 
@@ -28,25 +29,27 @@ export const Sidebar = ({
         </p>
       </div>
 
-      <div className="flex flex-col gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
-        <p className="font-bold">{projectsEnrolled} projects enrolled</p>
-        <div className="w-full bg-black rounded-lg h-[126px]"></div>
+      {projectsEnrolled > 0 && (
+        <div className="flex flex-col gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
+          <p className="font-bold">{projectsEnrolled} projects enrolled</p>
+          <div className="w-full bg-black rounded-lg h-[126px]"></div>
 
-        <LittleSection
-          title={`${units} Units`}
-          description="High quality onchain value"
-        />
+          <LittleSection
+            title={`${units} Units`}
+            description="High quality onchain value"
+          />
 
-        <LittleSection
-          title={`${opRewarded} OP`}
-          description="Rewarded across projects so far"
-        />
+          <LittleSection
+            title={`${opRewarded} OP`}
+            description="Rewarded across projects so far"
+          />
 
-        <LittleSection
-          title={`${avgOpRewardPerProject} OP`}
-          description="Average rewards per project"
-        />
-      </div>
+          <LittleSection
+            title={`${avgOpRewardPerProject} OP`}
+            description="Average rewards per project"
+          />
+        </div>
+      )}
     </div>
   )
 }
