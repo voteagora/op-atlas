@@ -82,17 +82,7 @@ export function Results({ roundId }: { roundId?: string }) {
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      {/* Background image */}
-      <div
-        className="absolute h-[500px] w-full"
-        style={{
-          backgroundImage: 'url("/assets/images/gradient-background.svg")',
-          backgroundSize: "cover",
-        }}
-      />
-
-      {/* Main content */}
-      <div className="mt-20 p-6 sm:mt-36 sm:p-16 bg-background flex flex-col w-full max-w-6xl rounded-3xl z-10">
+      <div className="mt-8 p-6 sm:mt-8 sm:p-16 bg-background flex flex-col w-full max-w-6xl rounded-3xl z-10">
         <ResultsHeader />
         <RoundSelector
           selectedRounds={selectedRounds}
