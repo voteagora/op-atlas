@@ -23,6 +23,8 @@ export function Rounds({
 }) {
   const { data } = useSession()
 
+  console.log(data)
+
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       {!data && (

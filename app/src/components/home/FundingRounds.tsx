@@ -106,35 +106,30 @@ const Round = ({
   className?: string
   fundingRound: FundingRound
 }) => {
-  let SelectedContent: React.ComponentType<{
-    fundingRound: typeof fundingRound
-  }>
+  const { data } = useSession()
 
-  // fundingRound.status === ""
+  let SelectedContent: any
+
   if (fundingRound.status === "past") {
-    SelectedContent = FundingRoundPast
+    SelectedContent = <FundingRoundPast fundingRound={fundingRound} />
   } else if (fundingRound.status === "ongoing") {
-    SelectedContent = FundingRoundOngoing
+    SelectedContent = (
+      <FundingRoundOngoing
+        fundingRound={fundingRound}
+        userApplicationState={data ? "Active" : "Open"}
+      />
+    )
   } else {
-    SelectedContent = FundingRoundContent
+    SelectedContent = <FundingRoundContent fundingRound={fundingRound} />
   }
-
-  // else if (fundingRound.status === "open") {
-  //   SelectedContent = FundingRoundContent
-  // }
 
   const content = (
     <div
       className={cn(`flex flex-1 gap-x-1 border rounded-xl p-10`, className)}
     >
-      <SelectedContent fundingRound={fundingRound} />
-      {/* <FundingRoundContent fundingRound={fundingRound} /> */}
+      {SelectedContent}
     </div>
   )
-
-  if (fundingRound.status !== "open" && fundingRound.link) {
-    return <ExternalLink href={fundingRound.link}>{content}</ExternalLink>
-  }
 
   return content
 }
