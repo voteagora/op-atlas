@@ -1,21 +1,13 @@
 "use client"
 
-import { Project } from "@prisma/client"
-import { useSession } from "next-auth/react"
-
-import { FUNDING_ROUNDS } from "@/lib/mocks"
-import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
-// import Account
-// import { Account } from "../common/Account"
-// import { FeedbackButton } from "../common/FeedbackButton"
 import ExternalLink from "../../../components/ExternalLink"
 import { Sidebar } from "../../../components/missions/Sidebar"
 
-import { AxeIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { VideoCallout } from "@/components/missions/VideoCallouts"
+import { NewIn2025Callout } from "@/components/missions/NewIn2025Callout"
 
 export default function Mission({ params }: { params: { id: string } }) {
   const applyByDate = "Jan 25"
@@ -28,7 +20,6 @@ export default function Mission({ params }: { params: { id: string } }) {
     router.push("/")
   }
 
-  // const timeline = "Feb 1 - Jun 30, 2025"
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       {/* Main content */}
@@ -237,89 +228,5 @@ export default function Mission({ params }: { params: { id: string } }) {
         </div>
       </div>
     </main>
-  )
-}
-
-function VideoCallout({ text }: { text: string }) {
-  return (
-    <div
-      className={cn(
-        "bg-calloutAlternative-foreground flex flex-col gap-y-6 w-full max-w-4xl rounded-lg py-2 px-4",
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex gap-3 items-center">
-          <Image
-            src={"/assets/icons/video-icon.png"}
-            width={1}
-            height={1}
-            alt="Sunny"
-            className="h-4 w-4"
-          />
-          <div>
-            <span className="text-blue-800">{text}</span>{" "}
-          </div>
-        </div>
-
-        <div className="flex items-center">
-          <p className="text-blue-800">Watch video</p>
-          <div className="w-6 h-6 flex items-center justify-center">
-            <Image
-              src="/assets/icons/arrow-up-right.svg"
-              width={12}
-              height={12}
-              alt="External link"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function NewIn2025Callout() {
-  return (
-    <div
-      className={cn(
-        "bg-rose-100 flex flex-col gap-y-6 mt-6 w-full max-w-4xl rounded-lg p-6",
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex gap-4">
-          <Image
-            src={"/assets/icons/sunny-red.svg"}
-            width={56}
-            height={56}
-            alt="Sunny"
-          />
-          <div>
-            <span className="text-rose-800 font-bold ">New in 2025:</span>{" "}
-            <span className="text-rose-800  font-light">
-              The Retro Funding program is transitioning from annual rounds to
-              ongoing impact evaluation and regular rewards, offering builders
-              greater consistency and predictability.
-            </span>{" "}
-            <ExternalLink
-              href={
-                "https://gov.optimism.io/t/season-7-retro-funding-missions/9295/1"
-              }
-            >
-              <span className="text-rose-800 underline  font-light">
-                Learn more
-              </span>
-            </ExternalLink>
-          </div>
-        </div>
-
-        <div className="w-6 h-6 flex items-center justify-center">
-          <Image
-            src="/assets/icons/arrow-up-right.svg"
-            width={12}
-            height={12}
-            alt="External link"
-          />
-        </div>
-      </div>
-    </div>
   )
 }
