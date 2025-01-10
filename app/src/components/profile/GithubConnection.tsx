@@ -83,12 +83,8 @@ export function GithubConnection({ user }: { user: User }) {
         <h3 className="text-xl font-semibold text-foreground">Github</h3>
       </div>
       <p className="text-secondary-foreground">
-        Connecting your GitHub account to your profile allows you to show your
-        code contributions to the Optimism Collective.
-        <br />
-        <br />
-        Doing so opens up new opportunities, such as applying to participate in
-        Retro Funding 5 as a guest voter.
+        Connect your GitHub account to show your code contributions to the
+        Optimism Collective.
       </p>
 
       {user.github && (
