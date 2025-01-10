@@ -37,12 +37,12 @@ export default function Mission({ params }: { params: { id: string } }) {
           <div className="flex flex-col flex-1 gap-y-12">
             <div className="flex flex-col">
               <div className="flex gap-3 mb-10">
-                <p
+                <button
                   className="text-gray-500  font-light hover:underline hover:cursor-pointer"
                   onClick={handleClick}
                 >
                   Retro Funding Missions{" "}
-                </p>
+                </button>
                 <p className=" font-light">{">"}</p>
                 <p className=" font-light">Dev Tooling</p>
               </div>
