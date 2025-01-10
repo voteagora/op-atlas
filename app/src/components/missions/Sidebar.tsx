@@ -1,9 +1,6 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { Account } from "../common/Account"
-import { useSession } from "next-auth/react"
-import { QRCode, useSignIn } from "@farcaster/auth-kit"
 
 export const Sidebar = ({
   className,
@@ -14,22 +11,11 @@ export const Sidebar = ({
   applyByDate: string
   startDate: string
 }) => {
-  const { data: session } = useSession()
+  const units = "0"
 
-  console.log(session)
-
-  const { signIn, url } = useSignIn({})
-
-  console.log(url)
-
-  //   const {
-  //     signIn,
-  //     url
-  //     data: { username },
-  //     onSuccess: ({ fid }) => console.log("Your fid:", fid);
-  //   } = useSignIn();
-
-  async function handleWarpcastSignin() {}
+  const projectsEnrolled = 42
+  const opRewarded = "25,400"
+  const avgOpRewardPerProject = "450"
 
   return (
     <div className={cn("flex flex-col gap-y-6", className)}>
@@ -40,21 +26,42 @@ export const Sidebar = ({
           Apply by {applyByDate} to be evaluated for rewards starting{" "}
           {startDate}.
         </p>
-
-        {session ? (
-          <p>Logged in!</p>
-        ) : (
-          <>
-            <button onClick={signIn}>Sign In</button>
-
-            {url && (
-              <span>
-                Scan this: <QRCode uri={url} />
-              </span>
-            )}
-          </>
-        )}
       </div>
+
+      <div className="flex flex-col gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
+        <p className="font-bold">{projectsEnrolled} projects enrolled</p>
+        <div className="w-full bg-black rounded-lg h-[126px]"></div>
+
+        <LittleSection
+          title={`${units} Units`}
+          description="High quality onchain value"
+        />
+
+        <LittleSection
+          title={`${opRewarded} OP`}
+          description="Rewarded across projects so far"
+        />
+
+        <LittleSection
+          title={`${avgOpRewardPerProject} OP`}
+          description="Average rewards per project"
+        />
+      </div>
+    </div>
+  )
+}
+
+function LittleSection({
+  title,
+  description,
+}: {
+  title?: string
+  description?: string
+}) {
+  return (
+    <div className="flex flex-col">
+      <p className="font-bold">{title}</p>
+      <p className="font-light text-sm">{description}</p>
     </div>
   )
 }
