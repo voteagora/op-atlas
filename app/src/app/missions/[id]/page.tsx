@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+
 // import Account
 // import { Account } from "../common/Account"
 // import { FeedbackButton } from "../common/FeedbackButton"
@@ -20,6 +22,12 @@ export default function Mission({ params }: { params: { id: string } }) {
   const startDate = "Feb 1"
   const endDate = "Jun 30, 2025"
 
+  const router = useRouter()
+
+  const handleClick = () => {
+    router.push("/")
+  }
+
   // const timeline = "Feb 1 - Jun 30, 2025"
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -29,7 +37,10 @@ export default function Mission({ params }: { params: { id: string } }) {
           <div className="flex flex-col flex-1 gap-y-12">
             <div className="flex flex-col">
               <div className="flex gap-3 mb-10">
-                <p className="text-gray-500  font-light">
+                <p
+                  className="text-gray-500  font-light hover:underline hover:cursor-pointer"
+                  onClick={handleClick}
+                >
                   Retro Funding Missions{" "}
                 </p>
                 <p className=" font-light">{">"}</p>
