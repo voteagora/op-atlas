@@ -9,6 +9,15 @@ import { Sidebar } from "../../../components/missions/Sidebar"
 import { VideoCallout } from "@/components/missions/VideoCallouts"
 import { NewIn2025Callout } from "@/components/missions/NewIn2025Callout"
 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+
 export default function Mission({ params }: { params: { id: string } }) {
   const applyByDate = "Jan 25"
   const startDate = "Feb 1"
@@ -26,18 +35,21 @@ export default function Mission({ params }: { params: { id: string } }) {
       <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
         <div className="mt-1 flex flex-1 gap-x-10">
           <div className="flex flex-col flex-1 gap-y-12">
-            <div className="flex flex-col">
-              <div className="flex gap-3 mb-10">
-                <button
-                  className="text-gray-500  font-light hover:underline hover:cursor-pointer"
-                  onClick={handleClick}
-                >
-                  Retro Funding Missions{" "}
-                </button>
-                <p className=" font-light">{">"}</p>
-                <p className=" font-light">Dev Tooling</p>
-              </div>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">
+                    Retro Funding Missions
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Dev Tooling</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
 
+            <div className="flex flex-col">
               <h2 className="text-4xl mb-2">Dev Tooling</h2>
               <div className="flex gap-2 mb-6 items-center">
                 <p className="font-light text-gray-700">
