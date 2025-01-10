@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils"
 import { Account } from "../common/Account"
 import { useSession } from "next-auth/react"
+import { QRCode, useSignIn } from "@farcaster/auth-kit"
 
 export const Sidebar = ({
   className,
@@ -17,6 +18,17 @@ export const Sidebar = ({
 
   console.log(session)
 
+  const { signIn, url } = useSignIn({})
+
+  console.log(url)
+
+  //   const {
+  //     signIn,
+  //     url
+  //     data: { username },
+  //     onSuccess: ({ fid }) => console.log("Your fid:", fid);
+  //   } = useSignIn();
+
   async function handleWarpcastSignin() {}
 
   return (
@@ -29,7 +41,19 @@ export const Sidebar = ({
           {startDate}.
         </p>
 
-        {session ? <p>Logged in!</p> : <Account />}
+        {session ? (
+          <p>Logged in!</p>
+        ) : (
+          <>
+            <button onClick={signIn}>Sign In</button>
+
+            {url && (
+              <span>
+                Scan this: <QRCode uri={url} />
+              </span>
+            )}
+          </>
+        )}
       </div>
     </div>
   )
