@@ -16,7 +16,11 @@ import { AxeIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function Mission({ params }: { params: { id: string } }) {
-  const timeline = "Feb 1 - Jun 30, 2025"
+  const applyByDate = "Jan 25"
+  const startDate = "Feb 1"
+  const endDate = "Jun 30, 2025"
+
+  // const timeline = "Feb 1 - Jun 30, 2025"
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       {/* Main content */}
@@ -34,7 +38,9 @@ export default function Mission({ params }: { params: { id: string } }) {
 
               <h2 className="text-4xl mb-2">Dev Tooling</h2>
               <div className="flex gap-2 mb-6 items-center">
-                <p className="font-light text-gray-700">{timeline}</p>
+                <p className="font-light text-gray-700">
+                  {startDate + " - " + endDate}
+                </p>
                 <div className="w-[1px] bg-gray-300 h-full"></div>
                 <Image
                   src={"/assets/icons/triangular-flag-full.png"}
@@ -71,7 +77,9 @@ export default function Mission({ params }: { params: { id: string } }) {
                 <li>
                   <span className="font-bold ">{"Timeline:"}</span>
                   <span className="">
-                    {` The program will take place from ${timeline}`}
+                    {` The program will take place from ${
+                      startDate + " - " + endDate
+                    }`}
                   </span>
                 </li>
                 <li>
@@ -209,7 +217,11 @@ export default function Mission({ params }: { params: { id: string } }) {
               </div>
             </div>
           </div>
-          <Sidebar className="ml-auto w-[260px]" />
+          <Sidebar
+            className="ml-auto w-[290px]"
+            applyByDate={applyByDate}
+            startDate={startDate}
+          />
         </div>
       </div>
     </main>
