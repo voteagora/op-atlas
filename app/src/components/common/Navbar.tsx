@@ -60,18 +60,20 @@ const Navbar = () => {
   const isRounds = pathname === "/" || pathname === "/rounds"
   const isProjects = pathname.includes("/round/")
 
+  const isMissions = pathname.includes("/missions")
+
   const [showMobileNav, setShowMobileNav] = useState(false)
 
   return (
     <>
       <nav
         className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-20 ${
-          params.id ? "" : "shadow-sm"
+          params.id || isMissions ? "" : "shadow-sm"
         }`}
       >
         <div
           className={`flex items-center justify-between h-full w-full mx-auto ${
-            params.id ? "bg-background" : ""
+            params.id || isMissions ? "bg-background" : ""
           }`}
         >
           <div className="flex h-full">
@@ -111,7 +113,7 @@ const Navbar = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            {params.id === undefined ? (
+            {params.id === undefined || isMissions ? (
               <div className="flex gap-12">
                 <div
                   className={cn(
