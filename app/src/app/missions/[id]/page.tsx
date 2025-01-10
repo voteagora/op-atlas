@@ -18,16 +18,38 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
+const projects = {
+  "retro-funding-onchain-builders": {
+    name: "Dev Tooling",
+    description:
+      "rewards toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain.",
+    applyByDate: "Jan 25",
+    startDate: "Feb 1",
+    endDate: "Jun 30, 2025",
+    eligibility: [
+      {
+        name: "Open Source",
+        description:
+          "Projects must have a public GitHub repository with a history of public commits.",
+      },
+      {
+        name: "Ownership of GitHub repo",
+        description:
+          "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas.",
+        videoCallout: {
+          name: "How to verify a GitHub repo in OP Atlas",
+          link: "https://youtube.com",
+        },
+      },
+    ],
+
+    mainContent: <></>,
+  },
+} as any
+
 export default function Mission({ params }: { params: { id: string } }) {
-  const applyByDate = "Jan 25"
-  const startDate = "Feb 1"
-  const endDate = "Jun 30, 2025"
-
-  const router = useRouter()
-
-  const handleClick = () => {
-    router.push("/")
-  }
+  const { name, description, applyByDate, startDate, endDate, eligibility } =
+    projects[params.id]
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -44,13 +66,13 @@ export default function Mission({ params }: { params: { id: string } }) {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Dev Tooling</BreadcrumbPage>
+                  <BreadcrumbPage>{name}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
 
             <div className="flex flex-col">
-              <h2 className="text-4xl mb-2">Dev Tooling</h2>
+              <h2 className="text-4xl mb-2">{name}</h2>
               <div className="flex gap-2 mb-6 items-center">
                 <p className="font-light text-gray-700">
                   {startDate + " - " + endDate}
@@ -78,13 +100,9 @@ export default function Mission({ params }: { params: { id: string } }) {
 
               <div className="mb-5">
                 <span className="font-semibold ">
-                  {"Retro Funding: Dev Tooling"}
+                  {`Retro Funding: ${name}`}
                 </span>{" "}
-                <span className="">
-                  {
-                    "rewards toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain."
-                  }
-                </span>
+                <span className="">{description}</span>
               </div>
 
               <ul className="list-disc pl-6">
@@ -134,26 +152,30 @@ export default function Mission({ params }: { params: { id: string } }) {
                   Applications must meet these criteria:
                 </p>
 
-                <ol className="list-decimal pl-6">
-                  <li>
-                    <span className="font-bold ">{"Open Source:"}</span>
-                    <span className="">
-                      {` Projects must have a public GitHub repository with a history of public commits.`}
-                    </span>
-                  </li>
-                  <li>
-                    <span className="font-bold ">
-                      {"Ownership of GitHub repo:"}
-                    </span>
-                    <span className="">
-                      {` A funding.json file linked to the GitHub repository must verify ownership in OP Atlas.`}
-                    </span>
-                  </li>
+                <ol>
+                  {eligibility.map((element: any, index: number) => {
+                    return (
+                      <>
+                        <li>
+                          <span className="font-bold pr-2">{index + "."}</span>
+                          <span className="font-bold pr-1">
+                            {element.name + ":"}
+                          </span>
+                          <span>{element.description}</span>
+                        </li>
+                        {element.videoCallout ? (
+                          <ExternalLink href={element.videoCallout.link}>
+                            <div className="mt-5">
+                              <VideoCallout text={element.videoCallout.name} />
+                            </div>
+                          </ExternalLink>
+                        ) : (
+                          <></>
+                        )}
+                      </>
+                    )
+                  })}
                 </ol>
-
-                <ExternalLink href={"https://youtube.com"}>
-                  <VideoCallout text="How to verify a GitHub repo in OP Atlas" />
-                </ExternalLink>
 
                 <p className="font-bold">For JavaScript and Rust Packages:</p>
 
