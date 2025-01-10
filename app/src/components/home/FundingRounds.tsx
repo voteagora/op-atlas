@@ -9,10 +9,8 @@ import { optimism } from "viem/chains"
 
 import { FundingRound } from "@/lib/mocks"
 import { cn, titlecase } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { ChainLogo } from "../common/ChainLogo"
-import ExternalLink from "../ExternalLink"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { FundingRoundPast } from "./FundingRoundPast"
@@ -72,19 +70,6 @@ export const FundingRounds = ({
             <Round key={fundingRound.number} fundingRound={fundingRound} />
           ))}
         </div>
-
-        {/* </div> */}
-
-        {/* {status === "past"
-          ? rounds.map((fundingRound) => (
-              <FundingRoundPast
-                key={fundingRound.number}
-                fundingRound={fundingRound}
-              />
-            ))
-          : rounds.map((fundingRound) => (
-              <Round key={fundingRound.number} fundingRound={fundingRound} />
-            ))} */}
       </div>
     )
   }
