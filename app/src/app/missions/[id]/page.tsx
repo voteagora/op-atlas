@@ -26,23 +26,6 @@ const projects = {
     applyByDate: "Jan 25",
     startDate: "Feb 1",
     endDate: "Jun 30, 2025",
-    eligibility: [
-      {
-        name: "Open Source",
-        description:
-          "Projects must have a public GitHub repository with a history of public commits.",
-      },
-      {
-        name: "Ownership of GitHub repo",
-        description:
-          "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas.",
-        videoCallout: {
-          name: "How to verify a GitHub repo in OP Atlas",
-          link: "https://youtube.com",
-        },
-      },
-    ],
-
     mainContent: <></>,
   },
 } as any
@@ -152,30 +135,32 @@ export default function Mission({ params }: { params: { id: string } }) {
                   Applications must meet these criteria:
                 </p>
 
-                <ol>
-                  {eligibility.map((element: any, index: number) => {
-                    return (
-                      <>
-                        <li>
-                          <span className="font-bold pr-2">{index + "."}</span>
-                          <span className="font-bold pr-1">
-                            {element.name + ":"}
-                          </span>
-                          <span>{element.description}</span>
-                        </li>
-                        {element.videoCallout ? (
-                          <ExternalLink href={element.videoCallout.link}>
-                            <div className="mt-5">
-                              <VideoCallout text={element.videoCallout.name} />
-                            </div>
-                          </ExternalLink>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    )
-                  })}
+                <ol className="list-decimal pl-6">
+                  <li>
+                    <span className="font-bold pr-1">{"Open Source:"}</span>
+                    <span>
+                      {
+                        "Projects must have a public GitHub repository with a history of public commits."
+                      }
+                    </span>
+                  </li>
+                  <li>
+                    <span className="font-bold pr-1">
+                      {"Ownership of GitHub repo:"}
+                    </span>
+                    <span>
+                      {
+                        "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas."
+                      }
+                    </span>
+                  </li>
                 </ol>
+
+                <ExternalLink href="https://youtube.com">
+                  <div className="mt-2">
+                    <VideoCallout text="How to verify a GitHub repo in OP Atlas" />
+                  </div>
+                </ExternalLink>
 
                 <p className="font-bold">For JavaScript and Rust Packages:</p>
 
