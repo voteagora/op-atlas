@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation"
 import ExternalLink from "../../../components/ExternalLink"
 import { Sidebar } from "../../../components/missions/Sidebar"
 
-import { VideoCallout } from "@/components/missions/VideoCallouts"
+import {
+  DocumentCallout,
+  VideoCallout,
+} from "@/components/missions/VideoCallouts"
 import { NewIn2025Callout } from "@/components/missions/NewIn2025Callout"
 import { notFound } from "next/navigation"
 
@@ -28,7 +31,6 @@ const projects = {
     applyByDate: "Jan 25",
     startDate: "Feb 1",
     endDate: "Jun 30, 2025",
-    mainContent: <></>,
     eligibility: (
       <>
         <ol className="list-decimal pl-6">
@@ -134,35 +136,84 @@ const projects = {
     applyByDate: "Jan 25",
     startDate: "Feb 1",
     endDate: "Jun 30, 2025",
-    mainContent: <></>,
     eligibility: (
       <>
-        <ol className="list-decimal pl-6">
+        <ol>
           <li>
-            <span className="font-bold pr-1">{"Open Source:"}</span>
+            <span className="pr-1">1.</span>
+            <span className="font-bold pr-1">{"Onchain deployment:"}</span>
             <span>
               {
-                "Projects must have a public GitHub repository with a history of public commits."
+                "Your project must have a verified contract on one of the following OP Chains: Base, Ink, Lisk, Mode, OP Mainnet, Sonium, Unichain, Worldchain, Zora."
               }
             </span>
           </li>
           <li>
+            <span className="pr-1">2.</span>
+            <span className="font-bold pr-1">{"Contract verification:"}</span>
+            <span>
+              {
+                "To verify ownership of a contract, the deployer address of the contract must sign a message in the “Contracts” step of project setup in OP Atlas."
+              }
+            </span>
+
+            <ExternalLink href="https://youtube.com">
+              <div className="mt-6 mb-6">
+                <VideoCallout text="How to verify onchain contracts in OP Atlas" />
+              </div>
+            </ExternalLink>
+          </li>
+
+          <li>
+            <span className="pr-1">3.</span>
+            <span className="font-bold pr-1">{"Contract attribution:"}</span>
+            <span>
+              {
+                "Contracts deployed by factories are attributed to the factory deployer. Contracts must have a single project owner applying for Retro Funding; overlapping claims are not allowed."
+              }
+            </span>
+          </li>
+
+          <li>
+            <span className="pr-1">4.</span>
+            <span className="font-bold pr-1">{"Transaction thresholds:"}</span>
+            <span>
+              {
+                "Projects must meet the following minimum activity requirements over the Retro Funding eligibility period:"
+              }
+            </span>
+            <ul className="list-disc pl-10">
+              <li>At least 1000 transactions</li>
+              <li>At least 420 qualified addresses</li>
+              <li>10 distinct days of onchain activity</li>
+            </ul>
+
+            <div className="mt-6 mb-6">
+              <p>
+                Additional criteria for{" "}
+                <span className="font-bold">DeFi projects:</span>
+              </p>
+            </div>
+          </li>
+
+          <li>
+            <span className="pr-1">5.</span>
             <span className="font-bold pr-1">
-              {"Ownership of GitHub repo:"}
+              {"TVL and Adaptor Requirement:"}
             </span>
             <span>
               {
-                "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas."
+                "DeFi projects must have a DefiLlama adaptor and an average Total Value Locked (TVL) of at least $1M during the eligibility period. A link to the adaptor must be provided in in the “Repos & Links” step of project setup in OP Atlas."
               }
             </span>
+
+            <ExternalLink href="https://youtube.com">
+              <div className="mt-6 mb-6">
+                <DocumentCallout text="How to build an adapter" />
+              </div>
+            </ExternalLink>
           </li>
         </ol>
-
-        <ExternalLink href="https://youtube.com">
-          <div className="mt-2">
-            <VideoCallout text="How to verify a GitHub repo in OP Atlas" />
-          </div>
-        </ExternalLink>
 
         <p className="font-bold">For JavaScript and Rust Packages:</p>
 
