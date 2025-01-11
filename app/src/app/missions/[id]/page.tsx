@@ -398,8 +398,8 @@ export default function Mission({ params }: { params: { id: string } }) {
                   </p>
 
                   <ol className="list-decimal pl-6">
-                    {rewards.criteria.map((element: any) => {
-                      return <li>{element}</li>
+                    {rewards.criteria.map((element: any, index: number) => {
+                      return <li key={"rewards" + index}>{element}</li>
                     })}
                   </ol>
                   {rewards.measurement}
