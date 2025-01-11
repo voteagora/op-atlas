@@ -8,6 +8,7 @@ import { Sidebar } from "../../../components/missions/Sidebar"
 
 import { VideoCallout } from "@/components/missions/VideoCallouts"
 import { NewIn2025Callout } from "@/components/missions/NewIn2025Callout"
+import { notFound } from "next/navigation"
 
 import {
   Breadcrumb,
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/breadcrumb"
 
 const projects = {
-  "retro-funding-onchain-builders": {
+  "retro-funding-dev-tooling": {
     name: "Dev Tooling",
     description:
       "rewards toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain.",
@@ -127,6 +128,8 @@ const projects = {
 } as any
 
 export default function Mission({ params }: { params: { id: string } }) {
+  if (projects[params.id] === undefined) notFound()
+
   const {
     name,
     description,
