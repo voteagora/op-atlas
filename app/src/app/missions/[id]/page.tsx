@@ -110,23 +110,14 @@ const projects = {
         </ExternalLink>
       </>
     ),
-    rewards: (
-      <>
-        <ol className="list-decimal pl-6">
-          <li>
-            <span>{`Importance of the tool in onchain application development`}</span>
-          </li>
-          <li>
-            <span>{`Features that support superchain interop adoption among builders`}</span>
-          </li>
-        </ol>
-        <p>
-          {
-            "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens."
-          }
-        </p>
-      </>
-    ),
+    rewards: {
+      measurement:
+        "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
+      criteria: [
+        "Importance of the tool in onchain application development",
+        `Features that support superchain interop adoption among builders`,
+      ],
+    },
   },
   "retro-funding-onchain-builders": {
     name: "Onchain Builders",
@@ -260,26 +251,16 @@ const projects = {
         </ol>
       </>
     ),
-    rewards: (
-      <>
-        <ol className="list-decimal pl-6">
-          <li>
-            <span>{`Growth in Superchain adoption`}</span>
-          </li>
-          <li>
-            <span>{`High-quality onchain value (e.g., TVL)`}</span>
-          </li>
-          <li>
-            <span>{`Interoperability support and adoption`}</span>
-          </li>
-        </ol>
-        <p>
-          {
-            "Your impact will be measured via an evaluation algorithm powered by onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens."
-          }
-        </p>
-      </>
-    ),
+
+    rewards: {
+      measurement:
+        "Your impact will be measured via an evaluation algorithm powered by onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
+      criteria: [
+        "Growth in Superchain adoption",
+        `High-quality onchain value (e.g., TVL)`,
+        "Interoperability support and adoption",
+      ],
+    },
   },
 } as any
 
@@ -411,7 +392,12 @@ export default function Mission({ params }: { params: { id: string } }) {
                     criteria:
                   </p>
 
-                  {rewards}
+                  <ol className="list-decimal pl-6">
+                    {rewards.criteria.map((element: any) => {
+                      return <li>{element}</li>
+                    })}
+                  </ol>
+                  {rewards.measurement}
                 </div>
               </div>
             </div>
