@@ -10,21 +10,23 @@ export const Sidebar = ({
   applyByDate,
   startDate,
   projectsEnrolled,
+  units,
+  opRewarded,
+  avgOpRewardPerProject,
+  userProjectCount,
 }: {
   className?: string
   applyByDate: string
   startDate: string
   projectsEnrolled: number
+  units: string
+  opRewarded: string
+  avgOpRewardPerProject: string
+  userProjectCount: number
 }) => {
   const router = useRouter()
 
   const { data } = useSession()
-
-  const units = "0"
-
-  const opRewarded = "25,400"
-  const avgOpRewardPerProject = "450"
-  const userProjectCount = 1
 
   return (
     <div className={cn("flex flex-col gap-y-6", className)}>

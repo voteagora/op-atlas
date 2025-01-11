@@ -283,6 +283,12 @@ export default function Mission({ params }: { params: { id: string } }) {
     rewards,
   } = projects[params.id]
 
+  //get live project data from somewhere
+  //const { units, opRewarded, projectsEnrolled} = db.getProjectData(params.id);
+
+  //get user data from somewhere
+  //const userProjectsCount = db.getUserProjectCount(session.id);
+
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       {/* Main content */}
@@ -428,11 +434,16 @@ export default function Mission({ params }: { params: { id: string } }) {
               <></>
             )}
           </div>
+
           <Sidebar
             className="ml-auto w-[290px]"
             applyByDate={applyByDate}
             startDate={startDate}
             projectsEnrolled={18}
+            units="5"
+            opRewarded="25,400"
+            avgOpRewardPerProject="450"
+            userProjectCount={1}
           />
         </div>
       </div>
