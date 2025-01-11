@@ -114,8 +114,9 @@ const projects = {
       measurement:
         "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
       criteria: [
-        "Importance of the tool in onchain application development",
-        `Features that support superchain interop adoption among builders`,
+        "Adoption of Dev Tool by onchain builders",
+        `Importance of the tool in onchain application development`,
+        "Features that support superchain interop adoption among builders",
       ],
     },
   },
@@ -192,9 +193,13 @@ const projects = {
             <span className="font-bold pr-1">
               {"TVL and Adaptor Requirement:"}
             </span>
+            <span>{"DeFi projects must have a "}</span>
+            <ExternalLink className="underline" href={"https://defillama.com/"}>
+              <span>DefiLlama</span>
+            </ExternalLink>
             <span>
               {
-                "DeFi projects must have a DefiLlama adaptor and an average Total Value Locked (TVL) of at least $1M during the eligibility period. A link to the adaptor must be provided in in the “Repos & Links” step of project setup in OP Atlas."
+                " adaptor and an average Total Value Locked (TVL) of at least $1M during the eligibility period. A link to the adaptor must be provided in in the “Repos & Links” step of project setup in OP Atlas."
               }
             </span>
 
