@@ -27,12 +27,115 @@ const projects = {
     startDate: "Feb 1",
     endDate: "Jun 30, 2025",
     mainContent: <></>,
+    eligibility: (
+      <>
+        <ol className="list-decimal pl-6">
+          <li>
+            <span className="font-bold pr-1">{"Open Source:"}</span>
+            <span>
+              {
+                "Projects must have a public GitHub repository with a history of public commits."
+              }
+            </span>
+          </li>
+          <li>
+            <span className="font-bold pr-1">
+              {"Ownership of GitHub repo:"}
+            </span>
+            <span>
+              {
+                "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas."
+              }
+            </span>
+          </li>
+        </ol>
+
+        <ExternalLink href="https://youtube.com">
+          <div className="mt-2">
+            <VideoCallout text="How to verify a GitHub repo in OP Atlas" />
+          </div>
+        </ExternalLink>
+
+        <p className="font-bold">For JavaScript and Rust Packages:</p>
+
+        <ul className="list-disc pl-6">
+          <li>
+            <span>{"Must be published on respective registries (e.g., "}</span>
+
+            <ExternalLink href={"https://npmjs.org"}>
+              <span className="underline">npm</span>
+            </ExternalLink>
+            <span>{" or "}</span>
+            <ExternalLink href={"https://crates.io"}>
+              <span className="underline">crates.io</span>
+            </ExternalLink>
+            <span>
+              {") with the associated Github repo verified in OP Atlas."}
+            </span>
+          </li>
+          <li>
+            {
+              "Must be imported by at least three verified Superchain builder projects contributing 0.01 ETH in L2 gas fees within the past 6 months."
+            }
+          </li>
+        </ul>
+
+        <p className="font-bold">For Other Open Source Toolchains:</p>
+
+        <ul className="list-disc pl-6">
+          <li>
+            {
+              "Must have at least one release on GitHub within the past 6 months."
+            }
+          </li>
+          <li>
+            {
+              "Must show engagement from 10+ trusted developers (e.g., stars, forks, issues, or pull requests), verified using reputation algorithms like OpenRank."
+            }
+          </li>
+        </ul>
+
+        <p>
+          {
+            "To add your project to OP Atlas, first sign in or sign up using Farcaster. From your signed in dashboard, choose “Add project” and proceed with project setup. A project can’t be considered eligible until it’s setup is complete."
+          }
+        </p>
+
+        <ExternalLink href={"https://youtube.com"}>
+          <VideoCallout text="How to add a project in OP Atlas" />
+        </ExternalLink>
+      </>
+    ),
+    rewards: (
+      <>
+        <ol className="list-decimal pl-6">
+          <li>
+            <span>{`Importance of the tool in onchain application development`}</span>
+          </li>
+          <li>
+            <span>{`Features that support superchain interop adoption among builders`}</span>
+          </li>
+        </ol>
+        <p>
+          {
+            "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens."
+          }
+        </p>
+      </>
+    ),
   },
 } as any
 
 export default function Mission({ params }: { params: { id: string } }) {
-  const { name, description, applyByDate, startDate, endDate, eligibility } =
-    projects[params.id]
+  const {
+    name,
+    description,
+    applyByDate,
+    startDate,
+    endDate,
+    eligibility,
+    rewards,
+  } = projects[params.id]
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -135,85 +238,7 @@ export default function Mission({ params }: { params: { id: string } }) {
                   Applications must meet these criteria:
                 </p>
 
-                <ol className="list-decimal pl-6">
-                  <li>
-                    <span className="font-bold pr-1">{"Open Source:"}</span>
-                    <span>
-                      {
-                        "Projects must have a public GitHub repository with a history of public commits."
-                      }
-                    </span>
-                  </li>
-                  <li>
-                    <span className="font-bold pr-1">
-                      {"Ownership of GitHub repo:"}
-                    </span>
-                    <span>
-                      {
-                        "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas."
-                      }
-                    </span>
-                  </li>
-                </ol>
-
-                <ExternalLink href="https://youtube.com">
-                  <div className="mt-2">
-                    <VideoCallout text="How to verify a GitHub repo in OP Atlas" />
-                  </div>
-                </ExternalLink>
-
-                <p className="font-bold">For JavaScript and Rust Packages:</p>
-
-                <ul className="list-disc pl-6">
-                  <li>
-                    <span>
-                      {"Must be published on respective registries (e.g., "}
-                    </span>
-
-                    <ExternalLink href={"https://npmjs.org"}>
-                      <span className="underline">npm</span>
-                    </ExternalLink>
-                    <span>{" or "}</span>
-                    <ExternalLink href={"https://crates.io"}>
-                      <span className="underline">crates.io</span>
-                    </ExternalLink>
-                    <span>
-                      {
-                        ") with the associated Github repo verified in OP Atlas."
-                      }
-                    </span>
-                  </li>
-                  <li>
-                    {
-                      "Must be imported by at least three verified Superchain builder projects contributing 0.01 ETH in L2 gas fees within the past 6 months."
-                    }
-                  </li>
-                </ul>
-
-                <p className="font-bold">For Other Open Source Toolchains:</p>
-
-                <ul className="list-disc pl-6">
-                  <li>
-                    {
-                      "Must have at least one release on GitHub within the past 6 months."
-                    }
-                  </li>
-                  <li>
-                    {
-                      "Must show engagement from 10+ trusted developers (e.g., stars, forks, issues, or pull requests), verified using reputation algorithms like OpenRank."
-                    }
-                  </li>
-                </ul>
-
-                <p>
-                  {
-                    "To add your project to OP Atlas, first sign in or sign up using Farcaster. From your signed in dashboard, choose “Add project” and proceed with project setup. A project can’t be considered eligible until it’s setup is complete."
-                  }
-                </p>
-
-                <ExternalLink href={"https://youtube.com"}>
-                  <VideoCallout text="How to add a project in OP Atlas" />
-                </ExternalLink>
+                {eligibility}
               </div>
 
               <div className="flex flex-col gap-6">
@@ -222,19 +247,7 @@ export default function Mission({ params }: { params: { id: string } }) {
                   Your impact will be rewarded based on the following criteria:
                 </p>
 
-                <ol className="list-decimal pl-6">
-                  <li>
-                    <span>{`Importance of the tool in onchain application development`}</span>
-                  </li>
-                  <li>
-                    <span>{`Features that support superchain interop adoption among builders`}</span>
-                  </li>
-                </ol>
-                <p>
-                  {
-                    "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens."
-                  }
-                </p>
+                {rewards}
               </div>
             </div>
           </div>
