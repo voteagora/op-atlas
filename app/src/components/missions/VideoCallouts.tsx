@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 export function VideoCallout({
   text,
   imageSrc = "/assets/icons/video-icon.png",
-  rightHandComponents = <p className="text-blue-800">Watch video</p>,
+  rightHandComponents, //= <p className="text-blue-800">Watch video</p>,
 }: {
   text: string
   imageSrc?: string
