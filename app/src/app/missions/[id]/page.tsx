@@ -212,72 +212,70 @@ const projects = {
                 <DocumentCallout text="How to build an adapter" />
               </div>
             </ExternalLink>
+
+            <div className="mt-6 mb-6">
+              <p>
+                Additional criteria for{" "}
+                <span className="font-bold">Account abstraction:</span>
+              </p>
+            </div>
           </li>
-        </ol>
 
-        <p className="font-bold">For JavaScript and Rust Packages:</p>
-
-        <ul className="list-disc pl-6">
           <li>
-            <span>{"Must be published on respective registries (e.g., "}</span>
-
-            <ExternalLink href={"https://npmjs.org"}>
-              <span className="underline">npm</span>
-            </ExternalLink>
-            <span>{" or "}</span>
-            <ExternalLink href={"https://crates.io"}>
-              <span className="underline">crates.io</span>
+            <span className="pr-1">6.</span>
+            <span className="font-bold pr-1">
+              {"Operator Registry Requirement:"}
+            </span>
+            <span>
+              {
+                "The project must be included in the operator registry maintained by "
+              }
+            </span>
+            <ExternalLink
+              className="underline"
+              href="https://www.bundlebear.com/"
+            >
+              <span className="">BundleBear</span>
             </ExternalLink>
             <span>
-              {") with the associated Github repo verified in OP Atlas."}
+              {
+                " .The address(es) verified in the application must also be present in the registry."
+              }
             </span>
-          </li>
-          <li>
-            {
-              "Must be imported by at least three verified Superchain builder projects contributing 0.01 ETH in L2 gas fees within the past 6 months."
-            }
-          </li>
-        </ul>
 
-        <p className="font-bold">For Other Open Source Toolchains:</p>
+            <div className="mt-6 mb-6">
+              <p>
+                {
+                  "To add your project to OP Atlas, first sign in or sign up using Farcaster. From your signed in dashboard, choose “Add project” and proceed with project setup. A project can’t be considered eligible until it’s setup is complete."
+                }
+              </p>
+            </div>
 
-        <ul className="list-disc pl-6">
-          <li>
-            {
-              "Must have at least one release on GitHub within the past 6 months."
-            }
+            <ExternalLink href="https://youtube.com">
+              <div className="mt-6 mb-6">
+                <VideoCallout text="How to add a project in OP Atlas" />
+              </div>
+            </ExternalLink>
           </li>
-          <li>
-            {
-              "Must show engagement from 10+ trusted developers (e.g., stars, forks, issues, or pull requests), verified using reputation algorithms like OpenRank."
-            }
-          </li>
-        </ul>
-
-        <p>
-          {
-            "To add your project to OP Atlas, first sign in or sign up using Farcaster. From your signed in dashboard, choose “Add project” and proceed with project setup. A project can’t be considered eligible until it’s setup is complete."
-          }
-        </p>
-
-        <ExternalLink href={"https://youtube.com"}>
-          <VideoCallout text="How to add a project in OP Atlas" />
-        </ExternalLink>
+        </ol>
       </>
     ),
     rewards: (
       <>
         <ol className="list-decimal pl-6">
           <li>
-            <span>{`Importance of the tool in onchain application development`}</span>
+            <span>{`Growth in Superchain adoption`}</span>
           </li>
           <li>
-            <span>{`Features that support superchain interop adoption among builders`}</span>
+            <span>{`High-quality onchain value (e.g., TVL)`}</span>
+          </li>
+          <li>
+            <span>{`Interoperability support and adoption`}</span>
           </li>
         </ol>
         <p>
           {
-            "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens."
+            "Your impact will be measured via an evaluation algorithm powered by onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens."
           }
         </p>
       </>
