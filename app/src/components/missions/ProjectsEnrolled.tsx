@@ -1,65 +1,26 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import { cn, formatNumber } from "@/lib/utils"
 import Image from "next/image"
 
 export const ProjectsEnrolled = ({
   className,
-  projectsEnrolled,
   units,
   opRewarded,
   avgOpRewardPerProject,
+  projects,
 }: {
   className?: string
-  projectsEnrolled: number
+  projects: any[]
   units: string
-  opRewarded: string
-  avgOpRewardPerProject: string
+  opRewarded: number
+  avgOpRewardPerProject: number
 }) => {
-  const projects = [
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-    },
-  ]
-
   return (
     <div>
-      {projectsEnrolled > 0 && (
+      {projects.length > 0 && (
         <div className="flex flex-col gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
-          <p className="font-bold">{projectsEnrolled} projects enrolled</p>
+          <p className="font-bold">{projects.length} projects enrolled</p>
 
           <div>
             <div
@@ -85,17 +46,17 @@ export const ProjectsEnrolled = ({
           </div>
 
           <LittleSection
-            title={`${units} Units`}
+            title={`${formatNumber(units)} Units`}
             description="High quality onchain value"
           />
 
           <LittleSection
-            title={`${opRewarded} OP`}
+            title={`${formatNumber(opRewarded)} OP`}
             description="Rewarded across projects so far"
           />
 
           <LittleSection
-            title={`${avgOpRewardPerProject} OP`}
+            title={`${formatNumber(avgOpRewardPerProject)} OP`}
             description="Average rewards per project"
           />
         </div>

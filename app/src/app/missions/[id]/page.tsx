@@ -300,11 +300,25 @@ export default function Mission({ params }: { params: { id: string } }) {
       status: "Active",
     },
   ]
+
+  const enrolledProjects = [
+    {
+      opReward: 500,
+      icon: "/assets/icons/uniswap.png",
+    },
+    {
+      opReward: 3000,
+      icon: "/assets/icons/uniswap.png",
+    },
+  ]
+
   const userProjectCount = 1
   const units = "240"
-  const opRewarded = "76,000"
-  const projectsEnrolled = 77
-  const avgOpRewardPerProject = "1,250"
+  const totalOpReward = enrolledProjects.reduce(
+    (total, item) => total + item.opReward,
+    0,
+  )
+  const avgOpRewardPerProject = totalOpReward / enrolledProjects.length
   //get user data from somewhere
   //const userProjectsCount = db.getUserProjectCount(session.id);
 
@@ -461,12 +475,16 @@ export default function Mission({ params }: { params: { id: string } }) {
               userProjectCount={userProjectCount}
               userAppliedProjects={userAppliedProjects}
             />
-            <ProjectsEnrolled
-              projectsEnrolled={projectsEnrolled}
-              units={units}
-              opRewarded={opRewarded}
-              avgOpRewardPerProject={avgOpRewardPerProject}
-            />
+            {enrolledProjects.length > 0 ? (
+              <ProjectsEnrolled
+                units={units}
+                opRewarded={totalOpReward}
+                avgOpRewardPerProject={avgOpRewardPerProject}
+                projects={enrolledProjects}
+              />
+            ) : (
+              <></>
+            )}
           </Sidebar>
         </div>
       </div>
