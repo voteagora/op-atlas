@@ -225,6 +225,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
         !isSave && router.push(`/projects/${project.id}/contracts`)
         setIsSaving(false)
+        form.reset({ links, githubRepos: projectRepos })
         toast.success("Project saved")
       } catch (error) {
         toast.error("There was an error updating your Repos and Links")
@@ -232,6 +233,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         console.error("Error saving packages", error)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [project.id, router],
   )
 
