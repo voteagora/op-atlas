@@ -47,16 +47,16 @@ export default function Mission({ params }: { params: { id: string } }) {
   //const { units, opRewarded, projectsEnrolled} = db.getProjectData(params.id);
 
   const userAppliedProjects: any[] = [
-    {
-      icon: "/assets/icons/uniswap.png",
-      name: "Purrmissionless Staking",
-      status: "Pending",
-    },
-    {
-      icon: "/assets/icons/uniswap.png",
-      name: "Purrmissionless Staking",
-      status: "Active",
-    },
+    // {
+    //   icon: "/assets/icons/uniswap.png",
+    //   name: "Purrmissionless Staking",
+    //   status: "Pending",
+    // },
+    // {
+    //   icon: "/assets/icons/uniswap.png",
+    //   name: "Purrmissionless Staking",
+    //   status: "Active",
+    // },
   ]
 
   const enrolledProjects = [
@@ -246,8 +246,8 @@ export default function Mission({ params }: { params: { id: string } }) {
 
           <Sidebar className="ml-auto w-[290px]">
             <Apply
-              applyByDate={applyBy?.toString()}
-              startDate={startsAt.toString()}
+              applyByDate={applyBy && format(applyBy, "MMM d")}
+              startDate={format(startsAt, "MMM d")}
               userProjectCount={userProjectCount}
               userAppliedProjects={userAppliedProjects}
             />
