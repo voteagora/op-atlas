@@ -6,7 +6,7 @@ export default function NotFound() {
   return (
     <div className="flex flex-col items-center gap-6 mt-64">
       <Image
-        src={"/assets/icons/sunny-stars-custom-gimp-edit.png"}
+        src={"/assets/icons/sunny-stars-custom-gimp-edit.svg"}
         alt="Sunny Logo"
         width={160}
         height={160}
