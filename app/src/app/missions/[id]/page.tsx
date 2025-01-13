@@ -288,6 +288,18 @@ export default function Mission({ params }: { params: { id: string } }) {
   //get live project data from somewhere
   //const { units, opRewarded, projectsEnrolled} = db.getProjectData(params.id);
 
+  const userAppliedProjects: any[] = [
+    {
+      icon: "/assets/icons/uniswap.png",
+      name: "Purrmissionless Staking",
+      status: "Pending",
+    },
+    {
+      icon: "/assets/icons/uniswap.png",
+      name: "Purrmissionless Staking",
+      status: "Active",
+    },
+  ]
   const userProjectCount = 1
   const units = "240"
   const opRewarded = "76,000"
@@ -442,20 +454,12 @@ export default function Mission({ params }: { params: { id: string } }) {
             )}
           </div>
 
-          <Sidebar
-            className="ml-auto w-[290px]"
-            applyByDate={applyByDate}
-            startDate={startDate}
-            projectsEnrolled={18}
-            units="5"
-            opRewarded="25,400"
-            avgOpRewardPerProject="450"
-            userProjectCount={1}
-          >
+          <Sidebar className="ml-auto w-[290px]">
             <Apply
               applyByDate={applyByDate}
               startDate={startDate}
               userProjectCount={userProjectCount}
+              userAppliedProjects={userAppliedProjects}
             />
             <ProjectsEnrolled
               projectsEnrolled={projectsEnrolled}

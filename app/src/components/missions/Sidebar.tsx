@@ -7,13 +7,6 @@ export const Sidebar = ({
   children,
 }: {
   className?: string
-  applyByDate: string
-  startDate: string
-  projectsEnrolled: number
-  units: string
-  opRewarded: string
-  avgOpRewardPerProject: string
-  userProjectCount: number
   children?: any
 }) => {
   return (
