@@ -59,6 +59,8 @@ function toFormValues(project: ProjectWithDetails) {
               verified,
               openSource,
               containsContracts,
+              npmPackage,
+              crate,
               name,
               description,
             }) => ({
@@ -66,6 +68,8 @@ function toFormValues(project: ProjectWithDetails) {
               verified,
               openSource,
               containsContracts,
+              npmPackage,
+              crate,
               name: name ?? "",
               description: description ?? "",
             }),
@@ -114,6 +118,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     url: string,
     openSource: boolean,
     containsContracts: boolean,
+    npmPackage: boolean,
+    crate: boolean,
   ) => {
     const repo = form
       .getValues("githubRepos")
@@ -126,6 +132,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     form.setValue(`githubRepos.${repo}.verified`, true)
     form.setValue(`githubRepos.${repo}.openSource`, openSource)
     form.setValue(`githubRepos.${repo}.containsContracts`, containsContracts)
+    form.setValue(`githubRepos.${repo}.npmPackage`, npmPackage)
+    form.setValue(`githubRepos.${repo}.crate`, crate)
     setVerifyingUrl("")
   }
 
@@ -137,6 +145,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         verified: false,
         openSource: false,
         containsContracts: false,
+        npmPackage: false,
+        crate: false,
         name: "",
         description: "",
       })
@@ -157,6 +167,8 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
           verified: false,
           openSource: false,
           containsContracts: false,
+          npmPackage: false,
+          crate: false,
           name: "",
           description: "",
         })

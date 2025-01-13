@@ -5,6 +5,8 @@ export const GithubRepoSchema = z.object({
   verified: z.boolean().default(false),
   openSource: z.boolean().default(false),
   containsContracts: z.boolean().default(false),
+  npmPackage: z.boolean().default(false),
+  crate: z.boolean().default(false),
   name: z.string().optional(),
   description: z.string().optional(),
 })

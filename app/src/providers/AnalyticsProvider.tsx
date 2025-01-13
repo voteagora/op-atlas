@@ -27,6 +27,7 @@ if (!isServer) {
     debug: true,
     track_pageview: true,
     persistence: "localStorage",
+    ignore_dnt: true,
   })
 }
 

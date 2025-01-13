@@ -13,7 +13,16 @@ import {
   updateProjectRepository,
 } from "@/db/projects"
 
-import { getFile, getLicense, getRepository } from "../github"
+import {
+  getContents,
+  getFileOrFolder,
+  getFilesContentsJson,
+  getFilesContentsToml,
+  getLicense,
+  getRepository,
+} from "../github"
+import { getCrate } from "../crates"
+import { getNpmPackage } from "../npm"
 import { OPEN_SOURCE_LICENSES } from "../licenses"
 import { verifyMembership } from "./utils"
 
@@ -43,12 +52,12 @@ export const findRepo = async (owner: string, slug: string) => {
 
 const fetchFundingFile = async (owner: string, slug: string) => {
   try {
-    const { data } = await getFile(owner, slug, "funding.json")
+    const { data } = await getFileOrFolder(owner, slug, "funding.json")
     return Buffer.from((data as any).content ?? "", "base64").toString("utf-8")
   } catch (error: unknown) {
     // This will also happen if the file doesn't exist - try the all-caps name
     try {
-      const { data } = await getFile(owner, slug, "FUNDING.json")
+      const { data } = await getFileOrFolder(owner, slug, "FUNDING.json")
       return Buffer.from((data as any).content ?? "", "base64").toString(
         "utf-8",
       )
@@ -66,6 +75,74 @@ const isValidFundingFile = (contents: string, projectId: string) => {
   } catch (error) {
     return false
   }
+}
+
+const getFilesByName = (files: any[], name: string) => {
+  return files.filter((element: any) => {
+    return element.name.toLowerCase() === name
+  })
+}
+
+const verifyCrate = async (owner: string, slug: string, files: any[]) => {
+  const cargoTomls = getFilesByName(files, "cargo.toml")
+  const contents = await getFilesContentsToml(
+    owner,
+    slug,
+    cargoTomls.map((item) => item.path),
+  )
+
+  const crates = await Promise.all(
+    contents.map((content) => getCrate(content.package.name)),
+  )
+
+  return crates.some((crate) => {
+    return (
+      crate &&
+      !crate.errors &&
+      verifyOwnerAndSlug(
+        owner,
+        slug,
+        crate.crate.repository?.split("/").filter(Boolean),
+      )
+    )
+  })
+}
+
+const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
+  const packageJsons = getFilesByName(repoFiles, "package.json")
+  const contents = await getFilesContentsJson(
+    owner,
+    slug,
+    packageJsons.map((item) => item.path),
+  )
+
+  const packages = await Promise.all(
+    contents.map((content) => getNpmPackage(content.name)),
+  )
+
+  return packages.some(
+    (pkg) =>
+      pkg &&
+      pkg.error !== "Not found" &&
+      verifyOwnerAndSlug(
+        owner,
+        slug,
+        pkg.repository?.url.split("/").filter(Boolean),
+      ),
+  )
+}
+
+const verifyOwnerAndSlug = (
+  owner: string,
+  slug: string,
+  pathParts: string[],
+) => {
+  const ownerResult = pathParts?.some((part) => owner === part)
+  const slugResult = pathParts?.some(
+    (part) => slug === part.replace(".git", ""),
+  )
+
+  return ownerResult && slugResult
 }
 
 export const verifyGithubRepo = async (
@@ -107,6 +184,13 @@ export const verifyGithubRepo = async (
     const license = await getLicense(owner, slug)
     const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
 
+    const repoFiles = await getContents(owner, slug)
+
+    const [isCrate, isNpmPackage] = await Promise.all([
+      verifyCrate(owner, slug, repoFiles),
+      verifyNpm(owner, slug, repoFiles),
+    ])
+
     const repo = await addProjectRepository({
       projectId,
       repo: {
@@ -114,6 +198,8 @@ export const verifyGithubRepo = async (
         url: `https://github.com/${owner}/${slug}`,
         verified: true,
         openSource: !!isOpenSource,
+        npmPackage: !!isNpmPackage,
+        crate: !!isCrate,
         name,
         description,
       },
