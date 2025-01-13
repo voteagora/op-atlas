@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Apply } from "@/components/missions/Apply"
 import { ProjectsEnrolled } from "@/components/missions/ProjectsEnrolled"
+import React from "react"
 
 const projects = {
   "retro-funding-dev-tooling": {
@@ -33,6 +34,52 @@ const projects = {
     applyByDate: "Jan 25",
     startDate: "Feb 1",
     endDate: "Jun 30, 2025",
+    eligibilityRaw: {
+      criteria: [
+        {
+          name: "Open Source",
+          description:
+            "Projects must have a public GitHub repository with a history of public commits.",
+        },
+        {
+          name: "Ownership of GitHub repo",
+          description:
+            "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas.",
+          videoLink: {
+            text: "How to verify a GitHub repo in OP Atlas",
+            link: "https://youtube.com",
+          },
+        },
+      ],
+      contextSpecificCriteria: [
+        {
+          name: "For JavaScript and Rust Packages",
+          criteria: [
+            {
+              text: "Must be published on respective registries (e.g., npm or crates.io) with the associated Github repo verified in OP Atlas.",
+              links: {
+                npm: "https://www.npmjs.com",
+                "crates.io": "https://crates.io",
+              },
+            },
+            {
+              text: "Must be imported by at least three verified Superchain builder projects contributing 0.01 ETH in L2 gas fees within the past 6 months.",
+            },
+          ],
+        },
+        {
+          name: "For Other Open Source Toolchains",
+          criteria: [
+            {
+              text: "Must have at least one release on GitHub within the past 6 months.",
+            },
+            {
+              text: "Must show engagement from 10+ trusted developers (e.g., stars, forks, issues, or pull requests), verified using reputation algorithms like OpenRank.",
+            },
+          ],
+        },
+      ],
+    },
     eligibility: (
       <>
         <ol className="list-decimal pl-6">
@@ -130,6 +177,61 @@ const projects = {
     applyByDate: "Jan 25",
     startDate: "Feb 1",
     endDate: "Jun 30, 2025",
+    eligibilityRaw: {
+      criteria: [
+        {
+          name: "Onchain deployment",
+          description:
+            "Your project must have a verified contract on one of the following OP Chains: Base, Ink, Lisk, Mode, OP Mainnet, Sonium, Unichain, Worldchain, Zora.",
+        },
+        {
+          name: "Contract verification",
+          description:
+            "To verify ownership of a contract, the deployer address of the contract must sign a message in the “Contracts” step of project setup in OP Atlas.",
+          videoLink: {
+            text: "How to verify onchain contracts in OP Atlas",
+            link: "https://youtube.com",
+          },
+        },
+        {
+          name: "Contract attribution",
+          description:
+            "Contracts deployed by factories are attributed to the factory deployer. Contracts must have a single project owner applying for Retro Funding; overlapping claims are not allowed.",
+        },
+        {
+          name: "Transaction thresholds",
+          description:
+            "Projects must meet the following minimum activity requirements over the Retro Funding eligibility period:",
+          criteria: [
+            "At least 1000 transactions",
+            "At least 420 qualified addresses",
+            "10 distinct days of onchain activity",
+          ],
+        },
+        {
+          category: "DeFi projects",
+          name: "TVL and Adaptor Requirement",
+          description:
+            "DeFi projects must have a DeFiLlama adaptor and an average Total Value Locked (TVL) of at least $1M during the eligibility period. A link to the adaptor must be provided in in the “Repos & Links” step of project setup in OP Atlas.",
+          videoLink: {
+            text: "How to build an adapter",
+            link: "https://youtube.com",
+          },
+          links: {
+            "DeFiLlama adaptor": "https://defillama.com/",
+          },
+        },
+        {
+          category: "Account abstraction",
+          name: "Operator Registry Requirement",
+          description:
+            "The project must be included in the operator registry maintained by BundleBear. The address(es) verified in the application must also be present in the registry.",
+          links: {
+            BundleBear: "https://bundlebear.com/",
+          },
+        },
+      ],
+    },
     eligibility: (
       <>
         <ol>
@@ -283,6 +385,7 @@ export default function Mission({ params }: { params: { id: string } }) {
     endDate,
     eligibility,
     rewards,
+    eligibilityRaw,
   } = projects[params.id]
 
   //get live project data from somewhere
@@ -321,6 +424,35 @@ export default function Mission({ params }: { params: { id: string } }) {
   const avgOpRewardPerProject = totalOpReward / enrolledProjects.length
   //get user data from somewhere
   //const userProjectsCount = db.getUserProjectCount(session.id);
+
+  const createLinkedText = (text: string, links: any) => {
+    if (links == undefined) return text
+
+    const regex = new RegExp(
+      `\\b(${Object.keys(links)
+        .map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) // Escape special characters
+        .join("|")})\\b`,
+      "g",
+    )
+
+    // Replace words in the text with links
+    const parts = text.split(regex)
+    return parts.map((part, index) => {
+      const trimmedPart = part.trim()
+      if (links[trimmedPart]) {
+        return (
+          <ExternalLink
+            key={index}
+            href={links[trimmedPart]}
+            className="underline"
+          >
+            {part}
+          </ExternalLink>
+        )
+      }
+      return part
+    })
+  }
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -426,7 +558,104 @@ export default function Mission({ params }: { params: { id: string } }) {
                     Applications must meet these criteria:
                   </p>
 
-                  {eligibility}
+                  <ol>
+                    {eligibilityRaw.criteria.map(
+                      (criteria: any, index: number) => {
+                        return (
+                          <>
+                            {criteria.category && (
+                              <p className="mt-7 mb-7">
+                                Additional criteria for{" "}
+                                <span className="font-bold">
+                                  {criteria.category + ":"}
+                                </span>
+                              </p>
+                            )}
+
+                            <li key={"Eligibility-" + index}>
+                              <span className="pr-1">{index + 1}.</span>
+                              <span className="font-bold pr-1">
+                                {criteria.name + ":"}
+                              </span>
+                              <span>
+                                {createLinkedText(
+                                  criteria.description,
+                                  criteria.links,
+                                )}
+                              </span>
+                              {
+                                <ul className="list-disc pl-10">
+                                  {criteria.criteria?.map(
+                                    (subCriteria: any, subIndex: number) => {
+                                      return (
+                                        <li
+                                          key={
+                                            "SubEligibility-" +
+                                            index +
+                                            "-" +
+                                            subIndex
+                                          }
+                                        >
+                                          {subCriteria}
+                                        </li>
+                                      )
+                                    },
+                                  )}
+                                </ul>
+                              }
+                              {criteria.videoLink && (
+                                <ExternalLink href={criteria.videoLink.link}>
+                                  <div className="mt-6 mb-6">
+                                    <VideoCallout
+                                      text={criteria.videoLink.text}
+                                    />
+                                  </div>
+                                </ExternalLink>
+                              )}
+                            </li>
+                          </>
+                        )
+                      },
+                    )}
+
+                    {eligibilityRaw.contextSpecificCriteria?.map(
+                      (criteria: any, index: number) => {
+                        return (
+                          <div className="mb-7">
+                            <p className="font-bold mb-7">
+                              {criteria.name + ":"}
+                            </p>
+
+                            <ul className="list-disc pl-6">
+                              {criteria.criteria.map(
+                                (criterion: any, index: number) => {
+                                  return (
+                                    <li>
+                                      {createLinkedText(
+                                        criterion.text,
+                                        criterion.links,
+                                      )}
+                                    </li>
+                                  )
+                                },
+                              )}
+                            </ul>
+                          </div>
+                        )
+                      },
+                    )}
+                  </ol>
+
+                  <p>
+                    {
+                      "To add your project to OP Atlas, first sign in or sign up using Farcaster. From your signed in dashboard, choose “Add project” and proceed with project setup. A project can’t be considered eligible until it’s setup is complete."
+                    }
+                  </p>
+
+                  <ExternalLink href={"https://youtube.com"}>
+                    <VideoCallout text="How to add a project in OP Atlas" />
+                  </ExternalLink>
+                  {/* {eligibility} */}
                 </div>
 
                 <div className="flex flex-col gap-6">
