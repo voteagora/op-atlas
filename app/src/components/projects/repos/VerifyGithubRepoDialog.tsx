@@ -49,6 +49,8 @@ type Props = DialogProps<{ projectId: string; url?: string }> & {
     url: string,
     openSource: boolean,
     containsContracts: boolean,
+    npmPackage: boolean,
+    crate: boolean,
   ) => void
 }
 
@@ -65,6 +67,8 @@ const VerifyGithubRepoDialog = ({
   const [hasFundingFile, setHasFundingFile] = useState(false)
   const [openSource, setOpenSource] = useState(false)
   const [containsContracts, setContainsContracts] = useState(false)
+  const [npmPackage, setNpmPackage] = useState(false)
+  const [crate, setCrate] = useState(false)
 
   const urlParts = url?.replace(/.*github.com\//, "").split("/") ?? []
   const owner = urlParts[0]
@@ -72,13 +76,21 @@ const VerifyGithubRepoDialog = ({
 
   const onAdded = () => {
     if (url) {
-      onVerificationComplete(url, openSource, containsContracts)
+      onVerificationComplete(
+        url,
+        openSource,
+        containsContracts,
+        npmPackage,
+        crate,
+      )
       onOpenChange(false)
     }
   }
 
   const onVerified = (repo: ProjectRepository) => {
     setOpenSource(repo.openSource)
+    setNpmPackage(repo.npmPackage)
+    setCrate(repo.crate)
     setStep("contracts")
   }
 
