@@ -40,9 +40,6 @@ export const Project = ({
 
   const isDisabled = false
 
-  console.log(completedSections)
-  console.log(project)
-
   const router = useRouter()
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
@@ -53,8 +50,6 @@ export const Project = ({
     mode: "onChange",
   })
 
-  console.log(round)
-
   const projectRequirements: ProjectSection[] = [
     ProjectSection.Details,
     ProjectSection.Contributors,
@@ -63,14 +58,10 @@ export const Project = ({
     ProjectSection.Publish,
   ]
 
-  const userData = ["Details", "Contributors", "Repos"]
-
   const requirementStatus = projectRequirements.reduce((acc, requirement) => {
     acc[requirement] = completedSections.includes(requirement)
     return acc
   }, {} as Record<string, boolean>)
-
-  console.log(requirementStatus)
 
   const setupTitles = {
     Details: "Project details",
@@ -79,21 +70,6 @@ export const Project = ({
     Contracts: "Contracts",
     Publish: "Publish metadata onchain",
   }
-
-  const projectRequirementsCompletedTitles = projectRequirements.map(
-    (requirement: any) => {
-      type KeyType = keyof typeof setupTitles // "Details" | "Contributors" | "Repos" | "Contracts" | "Publish"
-      const isCompleted = completedSections.find((section) => {
-        return requirement === section
-      })
-
-      return isCompleted ? (
-        <div>{setupTitles[requirement as KeyType]}</div>
-      ) : (
-        <div>{setupTitles[requirement as KeyType]}</div>
-      )
-    },
-  )
 
   return (
     <div className="p-8 border border-input rounded-xl">
@@ -130,27 +106,6 @@ export const Project = ({
                 </h5>
                 <p>Admin</p>
               </div>
-
-              {/* {hasApplied && (
-                <ExternalLink
-                  href={`${EAS_URL_PREFIX}${attestationId}`}
-                  className="ml-auto flex items-center gap-1 mr-2"
-                >
-                  <Image
-                    alt="Checkmark"
-                    src="/assets/icons/circle-check-green.svg"
-                    height={11.6}
-                    width={11.6}
-                  />
-                  <p className="font-medium text-sm text-success-foreground">
-                    View attestation
-                  </p>
-                </ExternalLink>
-              )}
-
-              {isIneligible && !hasApplied && (
-                <Badge size="lg" text="Not eligible" className="ml-auto" />
-              )} */}
             </div>
           </AccordionTrigger>
 
@@ -185,50 +140,11 @@ export const Project = ({
                     {icon}
                   </div>
                   <p>
-                    <span>{key}</span>
+                    <span>{setupTitles[key as keyof typeof setupTitles]}</span>
                   </p>
                 </div>
               )
             })}
-
-            {
-              //  Object.entries(requirementStatus).map(([key:, value]:) => (
-              //     <div key={key}>
-              //       {key}: {value ? "Enabled" : "Disabled"}
-              //     </div>
-              //   ))
-              //   <div className="flex items-center">
-              //     <div className="relative w-5 h-5 flex items-center justify-center">
-              //       {icon}
-              //     </div>
-              //     <p>
-              //       <span>{criterion.name}</span>
-              //       {criterion.category && (
-              //         <span>
-              //           {": " +
-              //             criterion.category +
-              //             " - Checked after application is submitted"}
-              //         </span>
-              //       )}
-              //     </p>
-              //   </div>
-            }
-            <div className="flex">
-              <div className="relative w-5 h-5 flex items-center justify-center">
-                <CircleCheck
-                  className="absolute w-full h-full"
-                  color="green"
-                  fill="green"
-                />
-                <Check
-                  className="absolute w-3 h-3"
-                  color="white"
-                  strokeWidth={3}
-                />
-              </div>
-
-              <p>Project Details</p>
-            </div>
 
             <Button
               variant={"ghost"}
