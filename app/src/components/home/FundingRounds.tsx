@@ -92,6 +92,7 @@ const Round = ({
   fundingRound: FundingRound
 }) => {
   const { data } = useSession()
+  const router = useRouter()
 
   let SelectedContent: any
 
@@ -99,19 +100,23 @@ const Round = ({
     SelectedContent = <FundingRoundPast fundingRound={fundingRound} />
   } else if (fundingRound.status === "ongoing") {
     SelectedContent = (
-      <FundingRoundOngoing
-        fundingRound={fundingRound}
-        userApplicationState={data ? "Active" : "Open"}
-      />
+      <button
+        onClick={() => {
+          router.push(`/missions/${fundingRound.pageName}`)
+        }}
+      >
+        <FundingRoundOngoing
+          fundingRound={fundingRound}
+          userApplicationState={data ? "Active" : "Open"}
+        />
+      </button>
     )
   } else {
     SelectedContent = <FundingRoundContent fundingRound={fundingRound} />
   }
 
   const content = (
-    <div
-      className={cn(`flex flex-1 gap-x-1 border rounded-xl p-10`, className)}
-    >
+    <div className={cn(`flex flex-1 gap-x-1 border rounded-xl`, className)}>
       {SelectedContent}
     </div>
   )
@@ -123,7 +128,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
   const router = useRouter()
   const { status } = useSession()
   return (
-    <>
+    <div className="p-10">
       {fundingRound.status !== "past" && fundingRound.iconUrl && (
         <Image
           src={fundingRound.iconUrl}
@@ -233,6 +238,6 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
           </div>
         )}
       </div>
-    </>
+    </div>
   )
 }

@@ -25,161 +25,166 @@ import { Apply } from "@/components/missions/Apply"
 import { ProjectsEnrolled } from "@/components/missions/ProjectsEnrolled"
 import React from "react"
 import { Eligibility } from "@/components/missions/Eligibility"
+import { FUNDING_ROUNDS } from "@/lib/mocks"
+import { format } from "date-fns"
 
-const projects = {
-  "retro-funding-dev-tooling": {
-    name: "Dev Tooling",
-    description:
-      "rewards toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain.",
-    imageUrl: "/assets/images/Frame 2485.png",
-    applyByDate: "Jan 25",
-    startDate: "Feb 1",
-    endDate: "Jun 30, 2025",
-    eligibility: {
-      criteria: [
-        {
-          name: "Open Source",
-          description:
-            "Projects must have a public GitHub repository with a history of public commits.",
-        },
-        {
-          name: "Ownership of GitHub repo",
-          description:
-            "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas.",
-          videoLink: {
-            text: "How to verify a GitHub repo in OP Atlas",
-            link: "https://youtube.com",
-          },
-        },
-      ],
-      contextSpecificCriteria: [
-        {
-          name: "For JavaScript and Rust Packages",
-          criteria: [
-            {
-              text: "Must be published on respective registries (e.g., npm or crates.io) with the associated Github repo verified in OP Atlas.",
-              links: {
-                npm: "https://www.npmjs.com",
-                "crates.io": "https://crates.io",
-              },
-            },
-            {
-              text: "Must be imported by at least three verified Superchain builder projects contributing 0.01 ETH in L2 gas fees within the past 6 months.",
-            },
-          ],
-        },
-        {
-          name: "For Other Open Source Toolchains",
-          criteria: [
-            {
-              text: "Must have at least one release on GitHub within the past 6 months.",
-            },
-            {
-              text: "Must show engagement from 10+ trusted developers (e.g., stars, forks, issues, or pull requests), verified using reputation algorithms like OpenRank.",
-            },
-          ],
-        },
-      ],
-    },
+// const rounds = {
+//   "retro-funding-dev-tooling": {
+//     name: "Dev Tooling",
+//     description:
+//       "rewards toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain.",
+//     imageUrl: "/assets/images/Frame 2485.png",
+//     applyByDate: "Jan 25",
+//     startDate: "Feb 1",
+//     endDate: "Jun 30, 2025",
+//     eligibility: {
+//       criteria: [
+//         {
+//           name: "Open Source",
+//           description:
+//             "Projects must have a public GitHub repository with a history of public commits.",
+//         },
+//         {
+//           name: "Ownership of GitHub repo",
+//           description:
+//             "A funding.json file linked to the GitHub repository must verify ownership in OP Atlas.",
+//           videoLink: {
+//             text: "How to verify a GitHub repo in OP Atlas",
+//             link: "https://youtube.com",
+//           },
+//         },
+//       ],
+//       contextSpecificCriteria: [
+//         {
+//           name: "For JavaScript and Rust Packages",
+//           criteria: [
+//             {
+//               text: "Must be published on respective registries (e.g., npm or crates.io) with the associated Github repo verified in OP Atlas.",
+//               links: {
+//                 npm: "https://www.npmjs.com",
+//                 "crates.io": "https://crates.io",
+//               },
+//             },
+//             {
+//               text: "Must be imported by at least three verified Superchain builder projects contributing 0.01 ETH in L2 gas fees within the past 6 months.",
+//             },
+//           ],
+//         },
+//         {
+//           name: "For Other Open Source Toolchains",
+//           criteria: [
+//             {
+//               text: "Must have at least one release on GitHub within the past 6 months.",
+//             },
+//             {
+//               text: "Must show engagement from 10+ trusted developers (e.g., stars, forks, issues, or pull requests), verified using reputation algorithms like OpenRank.",
+//             },
+//           ],
+//         },
+//       ],
+//     },
 
-    rewards: {
-      measurement:
-        "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
-      criteria: [
-        "Adoption of Dev Tool by onchain builders",
-        `Importance of the tool in onchain application development`,
-        "Features that support superchain interop adoption among builders",
-      ],
-    },
-  },
-  "retro-funding-onchain-builders": {
-    name: "Onchain Builders",
-    description:
-      "rewards projects that drive cross-chain asset transfers, enabled through interop, by growing the Superchain across eligible OP Chains.",
-    imageUrl: "/assets/images/Frame 2486.png",
-    applyByDate: "Jan 25",
-    startDate: "Feb 1",
-    endDate: "Jun 30, 2025",
-    eligibility: {
-      criteria: [
-        {
-          name: "Onchain deployment",
-          description:
-            "Your project must have a verified contract on one of the following OP Chains: Base, Ink, Lisk, Mode, OP Mainnet, Sonium, Unichain, Worldchain, Zora.",
-        },
-        {
-          name: "Contract verification",
-          description:
-            "To verify ownership of a contract, the deployer address of the contract must sign a message in the “Contracts” step of project setup in OP Atlas.",
-          videoLink: {
-            text: "How to verify onchain contracts in OP Atlas",
-            link: "https://youtube.com",
-          },
-        },
-        {
-          name: "Contract attribution",
-          description:
-            "Contracts deployed by factories are attributed to the factory deployer. Contracts must have a single project owner applying for Retro Funding; overlapping claims are not allowed.",
-        },
-        {
-          name: "Transaction thresholds",
-          description:
-            "Projects must meet the following minimum activity requirements over the Retro Funding eligibility period:",
-          criteria: [
-            "At least 1000 transactions",
-            "At least 420 qualified addresses",
-            "10 distinct days of onchain activity",
-          ],
-        },
-        {
-          category: "DeFi projects",
-          name: "TVL and Adaptor Requirement",
-          description:
-            "DeFi projects must have a DeFiLlama adaptor and an average Total Value Locked (TVL) of at least $1M during the eligibility period. A link to the adaptor must be provided in in the “Repos & Links” step of project setup in OP Atlas.",
-          videoLink: {
-            text: "How to build an adapter",
-            link: "https://youtube.com",
-          },
-          links: {
-            "DeFiLlama adaptor": "https://defillama.com/",
-          },
-        },
-        {
-          category: "Account abstraction",
-          name: "Operator Registry Requirement",
-          description:
-            "The project must be included in the operator registry maintained by BundleBear. The address(es) verified in the application must also be present in the registry.",
-          links: {
-            BundleBear: "https://bundlebear.com/",
-          },
-        },
-      ],
-    },
-    rewards: {
-      measurement:
-        "Your impact will be measured via an evaluation algorithm powered by onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
-      criteria: [
-        "Growth in Superchain adoption",
-        `High-quality onchain value (e.g., TVL)`,
-        "Interoperability support and adoption",
-      ],
-    },
-  },
-} as any
+//     rewards: {
+//       measurement:
+//         "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
+//       criteria: [
+//         "Adoption of Dev Tool by onchain builders",
+//         `Importance of the tool in onchain application development`,
+//         "Features that support superchain interop adoption among builders",
+//       ],
+//     },
+//   },
+//   "retro-funding-onchain-builders": {
+//     name: "Onchain Builders",
+//     description:
+//       "rewards projects that drive cross-chain asset transfers, enabled through interop, by growing the Superchain across eligible OP Chains.",
+//     imageUrl: "/assets/images/Frame 2486.png",
+//     applyByDate: "Jan 25",
+//     startDate: "Feb 1",
+//     endDate: "Jun 30, 2025",
+//     eligibility: {
+//       criteria: [
+//         {
+//           name: "Onchain deployment",
+//           description:
+//             "Your project must have a verified contract on one of the following OP Chains: Base, Ink, Lisk, Mode, OP Mainnet, Sonium, Unichain, Worldchain, Zora.",
+//         },
+//         {
+//           name: "Contract verification",
+//           description:
+//             "To verify ownership of a contract, the deployer address of the contract must sign a message in the “Contracts” step of project setup in OP Atlas.",
+//           videoLink: {
+//             text: "How to verify onchain contracts in OP Atlas",
+//             link: "https://youtube.com",
+//           },
+//         },
+//         {
+//           name: "Contract attribution",
+//           description:
+//             "Contracts deployed by factories are attributed to the factory deployer. Contracts must have a single project owner applying for Retro Funding; overlapping claims are not allowed.",
+//         },
+//         {
+//           name: "Transaction thresholds",
+//           description:
+//             "Projects must meet the following minimum activity requirements over the Retro Funding eligibility period:",
+//           criteria: [
+//             "At least 1000 transactions",
+//             "At least 420 qualified addresses",
+//             "10 distinct days of onchain activity",
+//           ],
+//         },
+//         {
+//           category: "DeFi projects",
+//           name: "TVL and Adaptor Requirement",
+//           description:
+//             "DeFi projects must have a DeFiLlama adaptor and an average Total Value Locked (TVL) of at least $1M during the eligibility period. A link to the adaptor must be provided in in the “Repos & Links” step of project setup in OP Atlas.",
+//           videoLink: {
+//             text: "How to build an adapter",
+//             link: "https://youtube.com",
+//           },
+//           links: {
+//             "DeFiLlama adaptor": "https://defillama.com/",
+//           },
+//         },
+//         {
+//           category: "Account abstraction",
+//           name: "Operator Registry Requirement",
+//           description:
+//             "The project must be included in the operator registry maintained by BundleBear. The address(es) verified in the application must also be present in the registry.",
+//           links: {
+//             BundleBear: "https://bundlebear.com/",
+//           },
+//         },
+//       ],
+//     },
+//     rewards: {
+//       measurement:
+//         "Your impact will be measured via an evaluation algorithm powered by onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
+//       criteria: [
+//         "Growth in Superchain adoption",
+//         `High-quality onchain value (e.g., TVL)`,
+//         "Interoperability support and adoption",
+//       ],
+//     },
+//   },
+// } as any
 
 export default function Mission({ params }: { params: { id: string } }) {
-  if (projects[params.id] === undefined) notFound()
+  const foundRound = FUNDING_ROUNDS.find((page) => page.pageName === params.id)
+  if (foundRound === undefined) notFound()
+
+  // if (rounds[params.id] === undefined) notFound()
 
   const {
     name,
-    description,
-    imageUrl,
-    applyByDate,
-    startDate,
-    endDate,
+    details,
+    iconUrl,
+    applyBy,
+    startsAt,
+    endsAt,
     eligibility,
     rewards,
-  } = projects[params.id]
+  } = foundRound
 
   //get live project data from somewhere
   //const { units, opRewarded, projectsEnrolled} = db.getProjectData(params.id);
@@ -243,7 +248,10 @@ export default function Mission({ params }: { params: { id: string } }) {
                 <h2 className="text-4xl mb-2">{name}</h2>
                 <div className="flex gap-2 mb-6 items-center">
                   <p className="font-light text-gray-700">
-                    {startDate + " - " + endDate}
+                    <span>{format(startsAt, "MMM d")}</span>
+                    {endsAt && (
+                      <span>{" - " + format(endsAt, "MMM d, yyyy")}</span>
+                    )}
                   </p>
                   <div className="w-[1px] bg-gray-300 h-full"></div>
                   <Image
@@ -258,9 +266,9 @@ export default function Mission({ params }: { params: { id: string } }) {
                     Open for applications
                   </p>
                 </div>
-                {imageUrl && (
+                {iconUrl && (
                   <Image
-                    src={imageUrl}
+                    src={iconUrl}
                     width={124}
                     height={124}
                     className="rounded-md w-full mb-5"
@@ -272,17 +280,20 @@ export default function Mission({ params }: { params: { id: string } }) {
                   <span className="font-semibold ">
                     {`Retro Funding: ${name}`}
                   </span>{" "}
-                  <span className="">{description}</span>
+                  <span className="">{details}</span>
                 </div>
 
                 <ul className="list-disc pl-6">
                   <li>
                     <span className="font-bold ">{"Timeline:"}</span>
                     <span className="">
-                      {` The program will take place from ${
-                        startDate + " - " + endDate
-                      }`}
+                      {` The program will take place from `}
                     </span>
+                    <span>{format(startsAt, "MMM d")}</span>
+                    {endsAt && (
+                      <span>{" - " + format(endsAt, "MMM d, yyyy")}</span>
+                    )}
+                    .
                   </li>
                   <li>
                     <span className="font-semibold ">
@@ -378,8 +389,8 @@ export default function Mission({ params }: { params: { id: string } }) {
 
           <Sidebar className="ml-auto w-[290px]">
             <Apply
-              applyByDate={applyByDate}
-              startDate={startDate}
+              applyByDate={applyBy?.toString()}
+              startDate={startsAt.toString()}
               userProjectCount={userProjectCount}
               userAppliedProjects={userAppliedProjects}
             />

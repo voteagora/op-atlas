@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { Check, Loader, Loader2 } from "lucide-react"
 import { Badge } from "../ui/badge"
+import { format } from "date-fns"
 
 export const Apply = ({
   className,
@@ -16,7 +17,7 @@ export const Apply = ({
   userAppliedProjects,
 }: {
   className?: string
-  applyByDate: string
+  applyByDate: string | undefined
   startDate: string
   userProjectCount: number
   userAppliedProjects: any
@@ -51,10 +52,15 @@ export const Apply = ({
       <>
         <p className="font-bold">{"Apply"}</p>
 
-        <p className="text-sm text-secondary-foreground text-center">
-          {`Apply by ${applyByDate} to be evaluated for rewards starting 
-            ${startDate}.`}
-        </p>
+        {applyByDate && (
+          <p className="text-sm text-secondary-foreground text-center">
+            {`Apply by ${format(
+              applyByDate,
+              "MMM d",
+            )} to be evaluated for rewards starting 
+          ${format(startDate, "MMM d")}.`}
+          </p>
+        )}
 
         <Button className="bg-optimismRed text-white" variant={"outline"}>
           Sign up or sign in
