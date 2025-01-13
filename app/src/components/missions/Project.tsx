@@ -242,7 +242,7 @@ export const Project = ({
 
             <p>Eligibility Criteria</p>
 
-            {round.eligibility.criteria.map((criterion: any) => {
+            {round.eligibility.criteria.map((criterion: any, index: number) => {
               const criteriaCompletion = false
               let icon
 
@@ -270,7 +270,7 @@ export const Project = ({
               }
 
               return (
-                <div className="flex items-center">
+                <div className="flex items-center" key={"criterion-" + index}>
                   <div className="relative w-5 h-5 flex items-center justify-center">
                     {icon}
                   </div>
