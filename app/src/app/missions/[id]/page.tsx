@@ -24,6 +24,7 @@ import {
 import { Apply } from "@/components/missions/Apply"
 import { ProjectsEnrolled } from "@/components/missions/ProjectsEnrolled"
 import React from "react"
+import { Eligibility } from "@/components/missions/Eligibility"
 
 const projects = {
   "retro-funding-dev-tooling": {
@@ -34,7 +35,7 @@ const projects = {
     applyByDate: "Jan 25",
     startDate: "Feb 1",
     endDate: "Jun 30, 2025",
-    eligibilityRaw: {
+    eligibility: {
       criteria: [
         {
           name: "Open Source",
@@ -99,7 +100,7 @@ const projects = {
     applyByDate: "Jan 25",
     startDate: "Feb 1",
     endDate: "Jun 30, 2025",
-    eligibilityRaw: {
+    eligibility: {
       criteria: [
         {
           name: "Onchain deployment",
@@ -178,7 +179,6 @@ export default function Mission({ params }: { params: { id: string } }) {
     endDate,
     eligibility,
     rewards,
-    eligibilityRaw,
   } = projects[params.id]
 
   //get live project data from somewhere
@@ -217,35 +217,6 @@ export default function Mission({ params }: { params: { id: string } }) {
   const avgOpRewardPerProject = totalOpReward / enrolledProjects.length
   //get user data from somewhere
   //const userProjectsCount = db.getUserProjectCount(session.id);
-
-  const createLinkedText = (text: string, links: any) => {
-    if (links == undefined) return text
-
-    const regex = new RegExp(
-      `\\b(${Object.keys(links)
-        .map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) // Escape special characters
-        .join("|")})\\b`,
-      "g",
-    )
-
-    // Replace words in the text with links
-    const parts = text.split(regex)
-    return parts.map((part, index) => {
-      const trimmedPart = part.trim()
-      if (links[trimmedPart]) {
-        return (
-          <ExternalLink
-            key={index}
-            href={links[trimmedPart]}
-            className="underline"
-          >
-            {part}
-          </ExternalLink>
-        )
-      }
-      return part
-    })
-  }
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -351,106 +322,8 @@ export default function Mission({ params }: { params: { id: string } }) {
                     Applications must meet these criteria:
                   </p>
 
-                  <ol>
-                    {eligibilityRaw.criteria.map(
-                      (criteria: any, index: number) => {
-                        return (
-                          <div key={"Eligibility-" + index}>
-                            {criteria.category && (
-                              <p className="mt-7 mb-7">
-                                Additional criteria for{" "}
-                                <span className="font-bold">
-                                  {criteria.category + ":"}
-                                </span>
-                              </p>
-                            )}
-
-                            <li>
-                              <span className="pr-1">{index + 1}.</span>
-                              <span className="font-bold pr-1">
-                                {criteria.name + ":"}
-                              </span>
-                              <span>
-                                {createLinkedText(
-                                  criteria.description,
-                                  criteria.links,
-                                )}
-                              </span>
-                              {
-                                <ul className="list-disc pl-10">
-                                  {criteria.criteria?.map(
-                                    (subCriteria: any, subIndex: number) => {
-                                      return (
-                                        <li
-                                          key={
-                                            "SubEligibility-" +
-                                            index +
-                                            "-" +
-                                            subIndex
-                                          }
-                                        >
-                                          {subCriteria}
-                                        </li>
-                                      )
-                                    },
-                                  )}
-                                </ul>
-                              }
-                              {criteria.videoLink && (
-                                <ExternalLink href={criteria.videoLink.link}>
-                                  <div className="mt-6 mb-6">
-                                    <VideoCallout
-                                      text={criteria.videoLink.text}
-                                    />
-                                  </div>
-                                </ExternalLink>
-                              )}
-                            </li>
-                          </div>
-                        )
-                      },
-                    )}
-
-                    {eligibilityRaw.contextSpecificCriteria?.map(
-                      (criteria: any, contextSpecificIndex: number) => {
-                        return (
-                          <div
-                            className="mb-7"
-                            key={
-                              "ContextSpecificEligibility" +
-                              contextSpecificIndex
-                            }
-                          >
-                            <p className="font-bold mb-7">
-                              {criteria.name + ":"}
-                            </p>
-
-                            <ul className="list-disc pl-6">
-                              {criteria.criteria.map(
-                                (criterion: any, index: number) => {
-                                  return (
-                                    <li
-                                      key={
-                                        "LinkedText" +
-                                        index +
-                                        " " +
-                                        contextSpecificIndex
-                                      }
-                                    >
-                                      {createLinkedText(
-                                        criterion.text,
-                                        criterion.links,
-                                      )}
-                                    </li>
-                                  )
-                                },
-                              )}
-                            </ul>
-                          </div>
-                        )
-                      },
-                    )}
-                  </ol>
+                  <Eligibility eligibility={eligibility} />
+                  {/* {renderEligibilityCriteria(eligibility)} */}
 
                   <p>
                     {
