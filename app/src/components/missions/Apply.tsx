@@ -21,51 +21,49 @@ export const Apply = ({
   const { data } = useSession()
 
   return (
-    <div className={cn("flex flex-col gap-y-6", className)}>
-      <div className="flex flex-col items-center justify-center gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
-        <p className="font-bold">
-          {!data || userProjectCount > 0 ? "Apply" : "Add project to apply"}{" "}
-        </p>
+    <div className="flex flex-col items-center justify-center gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
+      <p className="font-bold">
+        {!data || userProjectCount > 0 ? "Apply" : "Add project to apply"}{" "}
+      </p>
 
-        <p className="text-sm text-secondary-foreground text-center">
-          {!data || userProjectCount > 0 ? (
-            <p>
-              {`Apply by ${applyByDate} to be evaluated for rewards starting 
+      <p className="text-sm text-secondary-foreground text-center">
+        {!data || userProjectCount > 0 ? (
+          <p>
+            {`Apply by ${applyByDate} to be evaluated for rewards starting 
               ${startDate}`}
-              .
-            </p>
-          ) : (
-            <p>
-              {
-                "You can’t apply for this Retro Funding Mission until you’ve added your project to OP Atlas."
-              }
-            </p>
-          )}
-        </p>
-        {!data ? (
-          <Button className="bg-optimismRed text-white" variant={"outline"}>
-            Sign up or sign in
-          </Button>
-        ) : userProjectCount > 0 ? (
-          <Button className="bg-optimismRed text-white" variant={"outline"}>
-            Apply
-          </Button>
+            .
+          </p>
         ) : (
-          <div className="flex flex-col w-full gap-2">
-            <Button className="bg-optimismRed text-white" variant={"outline"}>
-              Add Project
-            </Button>
-            <Button
-              variant={"ghost"}
-              onClick={() => {
-                router.push("/dashboard")
-              }}
-            >
-              View Dashboard
-            </Button>
-          </div>
+          <p>
+            {
+              "You can’t apply for this Retro Funding Mission until you’ve added your project to OP Atlas."
+            }
+          </p>
         )}
-      </div>
+      </p>
+      {!data ? (
+        <Button className="bg-optimismRed text-white" variant={"outline"}>
+          Sign up or sign in
+        </Button>
+      ) : userProjectCount > 0 ? (
+        <Button className="bg-optimismRed text-white" variant={"outline"}>
+          Apply
+        </Button>
+      ) : (
+        <div className="flex flex-col w-full gap-2">
+          <Button className="bg-optimismRed text-white" variant={"outline"}>
+            Add Project
+          </Button>
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              router.push("/dashboard")
+            }}
+          >
+            View Dashboard
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

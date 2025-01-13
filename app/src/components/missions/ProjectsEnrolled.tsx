@@ -56,7 +56,7 @@ export const ProjectsEnrolled = ({
   ]
 
   return (
-    <div className={cn("flex flex-col gap-y-6", className)}>
+    <div>
       {projectsEnrolled > 0 && (
         <div className="flex flex-col gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
           <p className="font-bold">{projectsEnrolled} projects enrolled</p>
@@ -72,6 +72,7 @@ export const ProjectsEnrolled = ({
                     width={44}
                     height={44}
                     alt="Project"
+                    key={"projectsEnrolled-" + index}
                   />
                 )
               })}
