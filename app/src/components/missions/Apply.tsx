@@ -31,7 +31,7 @@ export const Apply = ({
       variant={"outline"}
     >
       <Loader2 width={12} height={12} />
-      <p className="text-xs">{"Pending"}</p>
+      Pending
     </Badge>
   )
 
@@ -41,7 +41,7 @@ export const Apply = ({
       variant={"outline"}
     >
       <Check width={12} height={12}></Check>
-      <p className="text-xs">{"Active"}</p>
+      Active
     </Badge>
   )
 
@@ -68,7 +68,7 @@ export const Apply = ({
           <>
             <p className="font-bold">{"Your status"}</p>
 
-            <p className="text-sm text-secondary-foreground text-center">
+            <div className="text-sm text-secondary-foreground text-center">
               <div className="flex flex-col gap-2">
                 {userAppliedProjects.map((element: any, index: number) => {
                   return (
@@ -92,7 +92,7 @@ export const Apply = ({
                   Apply with more projects
                 </Button>
               </div>
-            </p>
+            </div>
           </>
         )
       } else {
