@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { Button } from "../ui/button"
 import { useSession } from "next-auth/react"
-import Image from "next/Image"
+import Image from "next/image"
 import { Check, Loader, Loader2 } from "lucide-react"
 import { Badge } from "../ui/badge"
 
