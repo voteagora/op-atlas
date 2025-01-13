@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { partition } from "ramda"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -224,15 +224,20 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   )
 
   const links = form.watch("links")
-  const isValidToAddLink = useMemo(() => {
-    return (
-      links[links.length - 1].url !== "" &&
-      z
-        .string()
-        .url()
-        .safeParse(links[links.length - 1].url).success
-    )
-  }, [links])
+  const [isValidToAddLink, setIsValidToAddLink] = useState(false)
+
+  useEffect(() => {
+    // Run code whenever 'firstName' changes
+    if (links) {
+      setIsValidToAddLink(
+        links[links.length - 1]?.url !== "" &&
+          z
+            .string()
+            .url()
+            .safeParse(links[links.length - 1]?.url).success,
+      )
+    }
+  }, [JSON.stringify(links)])
 
   return (
     <>
