@@ -149,6 +149,7 @@ export const ROUNDS: FundingRound[] = [
             text: "How to build an adapter",
             link: "https://youtube.com",
           },
+          situational: true,
           links: {
             "DeFiLlama adaptor": "https://defillama.com/",
           },
@@ -161,6 +162,7 @@ export const ROUNDS: FundingRound[] = [
           links: {
             BundleBear: "https://bundlebear.com/",
           },
+          situational: true,
         },
       ],
     },
