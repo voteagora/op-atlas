@@ -21,6 +21,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Apply } from "@/components/missions/Apply"
+import { ProjectsEnrolled } from "@/components/missions/ProjectsEnrolled"
 
 const projects = {
   "retro-funding-dev-tooling": {
@@ -286,6 +288,11 @@ export default function Mission({ params }: { params: { id: string } }) {
   //get live project data from somewhere
   //const { units, opRewarded, projectsEnrolled} = db.getProjectData(params.id);
 
+  const userProjectCount = 1
+  const units = "240"
+  const opRewarded = "76,000"
+  const projectsEnrolled = 77
+  const avgOpRewardPerProject = "1,250"
   //get user data from somewhere
   //const userProjectsCount = db.getUserProjectCount(session.id);
 
@@ -444,7 +451,19 @@ export default function Mission({ params }: { params: { id: string } }) {
             opRewarded="25,400"
             avgOpRewardPerProject="450"
             userProjectCount={1}
-          />
+          >
+            <Apply
+              applyByDate={applyByDate}
+              startDate={startDate}
+              userProjectCount={userProjectCount}
+            />
+            <ProjectsEnrolled
+              projectsEnrolled={projectsEnrolled}
+              units={units}
+              opRewarded={opRewarded}
+              avgOpRewardPerProject={avgOpRewardPerProject}
+            />
+          </Sidebar>
         </div>
       </div>
     </main>
