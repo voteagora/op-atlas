@@ -1,6 +1,6 @@
-import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import Image from "next/image"
-import Link from "next/link"
+
+import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 
 export default function NotFound() {
   return (
@@ -17,26 +17,13 @@ export default function NotFound() {
       </h4>
 
       <div className="flex gap-3">
-        <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
-          text={"Optimism"}
-          target={"https://optimism.io"}
-        />
+        <OutboundArrowLink text={"Optimism"} target={"https://optimism.io"} />
+
+        <OutboundArrowLink text={"Retro Funding"} target={"/"} />
+
+        <OutboundArrowLink text={"Forum"} target={"https://gov.optimism.io"} />
 
         <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
-          text={"Retro Funding"}
-          target={"/"}
-        />
-
-        <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
-          text={"Forum"}
-          target={"https://gov.optimism.io"}
-        />
-
-        <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
           text={"Delegates"}
           target={"https://vote.optimism.io/delegates"}
         />
