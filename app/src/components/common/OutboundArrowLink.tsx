@@ -25,7 +25,10 @@ function OutboundArrowLink({
       rel="noopener noreferrer"
       className={cn("group", className)}
     >
-      <Button variant="secondary">
+      <Button
+        variant="secondary"
+        className={cn("flex items-center gap-x-1.5", className)}
+      >
         {icon}
         <span className="group-hover:underline inline-flex items-center">
           {text}
