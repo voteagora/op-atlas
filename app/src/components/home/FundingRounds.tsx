@@ -99,6 +99,18 @@ const Round = ({
   if (fundingRound.status === "past") {
     SelectedContent = <FundingRoundPast fundingRound={fundingRound} />
   } else if (fundingRound.status === "ongoing") {
+    let userApplicationState: "Open" | "Pending" | "Active" = "Open"
+
+    if (data) {
+      const applicationStates = ["Active", "Pending", "Active"]
+
+      if (applicationStates.length > 0) {
+        const areAnyPending = applicationStates.some((state) => {
+          return state === "Pending"
+        })
+        userApplicationState = areAnyPending ? "Pending" : "Active"
+      }
+    }
     SelectedContent = (
       <button
         onClick={() => {
@@ -107,7 +119,7 @@ const Round = ({
       >
         <FundingRoundOngoing
           fundingRound={fundingRound}
-          userApplicationState={data ? "Active" : "Open"}
+          userApplicationState={userApplicationState}
         />
       </button>
     )
