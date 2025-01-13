@@ -110,6 +110,7 @@ const Dashboard = ({
         />,
       )
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminProjects, projects])
 
   useEffect(() => {
