@@ -355,7 +355,7 @@ export default function Mission({ params }: { params: { id: string } }) {
                     {eligibilityRaw.criteria.map(
                       (criteria: any, index: number) => {
                         return (
-                          <>
+                          <div key={"Eligibility-" + index}>
                             {criteria.category && (
                               <p className="mt-7 mb-7">
                                 Additional criteria for{" "}
@@ -365,7 +365,7 @@ export default function Mission({ params }: { params: { id: string } }) {
                               </p>
                             )}
 
-                            <li key={"Eligibility-" + index}>
+                            <li>
                               <span className="pr-1">{index + 1}.</span>
                               <span className="font-bold pr-1">
                                 {criteria.name + ":"}
@@ -406,15 +406,21 @@ export default function Mission({ params }: { params: { id: string } }) {
                                 </ExternalLink>
                               )}
                             </li>
-                          </>
+                          </div>
                         )
                       },
                     )}
 
                     {eligibilityRaw.contextSpecificCriteria?.map(
-                      (criteria: any, index: number) => {
+                      (criteria: any, contextSpecificIndex: number) => {
                         return (
-                          <div className="mb-7">
+                          <div
+                            className="mb-7"
+                            key={
+                              "ContextSpecificEligibility" +
+                              contextSpecificIndex
+                            }
+                          >
                             <p className="font-bold mb-7">
                               {criteria.name + ":"}
                             </p>
@@ -423,7 +429,14 @@ export default function Mission({ params }: { params: { id: string } }) {
                               {criteria.criteria.map(
                                 (criterion: any, index: number) => {
                                   return (
-                                    <li>
+                                    <li
+                                      key={
+                                        "LinkedText" +
+                                        index +
+                                        " " +
+                                        contextSpecificIndex
+                                      }
+                                    >
                                       {createLinkedText(
                                         criterion.text,
                                         criterion.links,
