@@ -48,7 +48,7 @@ export function ApplyDetails({
         <div className="mt-12">
           {/* application details content */}
           <TabsContent value="details">
-            <p className="text-2xl font-bold">Choose projects</p>
+            <p className="text-2xl font-bold mb-5">Choose projects</p>
 
             {projects.length > 0 ? (
               projects.map((field, index) => (
@@ -90,6 +90,9 @@ export function ApplyDetails({
                 </div>
               </div>
             )}
+          </TabsContent>
+          <TabsContent value="terms">
+            <p className="text-2xl font-bold mb-5">Agree and apply</p>
           </TabsContent>
         </div>
       </Tabs>
