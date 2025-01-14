@@ -9,7 +9,8 @@ import {
 import Image from "next/image"
 import ExternalLink from "../ExternalLink"
 import { Callout } from "../common/Callout"
-import { Badge } from "../common/Badge"
+import { Badge } from "../ui/badge"
+
 import { FormField } from "../ui/form"
 import { Checkbox } from "../ui/checkbox"
 import { useForm } from "react-hook-form"
@@ -18,11 +19,19 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 import { useMemo } from "react"
-import { Check, ChevronRight, Circle, CircleCheck, X } from "lucide-react"
+import {
+  Check,
+  ChevronRight,
+  Circle,
+  CircleCheck,
+  Loader2,
+  X,
+} from "lucide-react"
 import { Button } from "../ui/button"
 import { notFound, useRouter } from "next/navigation"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 import { FundingRound } from "@/lib/roundsData"
+
 export const Project = ({
   round,
   project,
@@ -37,8 +46,6 @@ export const Project = ({
       ? getProjectStatus(project)
       : { progressPercent: 0, completedSections: [] }
   }, [project])
-
-  const isDisabled = false
 
   const router = useRouter()
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
@@ -71,41 +78,115 @@ export const Project = ({
     Publish: "Publish metadata onchain",
   }
 
+  let projectState: "" | "Active" | "Pending" | "Incomplete" | "Not Eligible" =
+    ""
+
+  const incompleteBadge = (
+    <Badge
+      className={`text-xs font-medium text-rose-800 border-0 ${"bg-rose-200"}`}
+      variant={"outline"}
+    >
+      {"Incomplete"}
+    </Badge>
+  )
+
+  const notEligibleBadge = (
+    <Badge
+      className={`text-xs font-medium text-rose-800 border-0 ${"bg-rose-200"}`}
+      variant={"outline"}
+    >
+      {"Not eligible"}
+    </Badge>
+  )
+
+  const pendingBadge = (
+    <Badge
+      className={`text-xs font-medium text-blue-800 border-0 gap-1 ${"bg-calloutAlternative-foreground"}`}
+      variant={"outline"}
+    >
+      <Loader2 width={16} height={15} />
+      {"Pending approval"}
+    </Badge>
+  )
+
+  const activeBadge = (
+    <Badge
+      className={`text-xs font-medium text-green-800 border-0 bg-green-100`}
+      variant={"outline"}
+    >
+      <Check width={12} height={12}></Check>
+      {"Active"}
+    </Badge>
+  )
+
+  let selectedBadge
+
+  switch (
+    projectState as "" | "Active" | "Pending" | "Incomplete" | "Not Eligible"
+  ) {
+    case "Active":
+      selectedBadge = activeBadge
+      break
+    case "Pending":
+      selectedBadge = pendingBadge
+      break
+    case "Incomplete":
+      selectedBadge = incompleteBadge
+      break
+    case "Not Eligible":
+      selectedBadge = notEligibleBadge
+      break
+    default:
+      ""
+  }
+
+  const isValid =
+    (projectState as
+      | ""
+      | "Active"
+      | "Pending"
+      | "Incomplete"
+      | "Not Eligible") === ""
+
   return (
     <div className="p-8 border border-input rounded-xl">
-      <Accordion type="single" collapsible disabled={false} className="w-full">
+      <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="item-1">
           <AccordionTrigger className="!p-0">
-            <div className="flex gap-6 items-center w-full">
-              <FormField
-                name={`projects.${index}.selected`}
-                control={form.control}
-                render={({ field }) => (
-                  <Checkbox
-                    disabled={isDisabled}
-                    name={field.name}
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
+            <div className="flex gap-6 items-center w-full justify-between">
+              <div className="flex gap-6 items-center">
+                <FormField
+                  name={`projects.${index}.selected`}
+                  control={form.control}
+                  render={({ field }) => (
+                    <Checkbox
+                      disabled={!isValid}
+                      name={field.name}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
 
-              <Image
-                width={48}
-                height={48}
-                className="h-12 w-12 rounded-sm"
-                src={
-                  project?.thumbnailUrl ??
-                  "/assets/images/social-share-background.png"
-                }
-                alt=""
-              />
-              <div className="flex flex-col text-start">
-                <h5 className="text-base font-semibold text-secondary-foreground truncate w-96 ">
-                  {project.name}
-                </h5>
-                <p>Admin</p>
+                <Image
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 rounded-sm"
+                  src={
+                    project?.thumbnailUrl ??
+                    "/assets/images/social-share-background.png"
+                  }
+                  alt=""
+                />
+                <div className="flex flex-col text-start">
+                  <h5 className="text-base font-semibold text-secondary-foreground truncate w-96 ">
+                    {project.name}
+                  </h5>
+                  <p>Admin</p>
+                </div>
               </div>
+
+              {selectedBadge}
             </div>
           </AccordionTrigger>
 
