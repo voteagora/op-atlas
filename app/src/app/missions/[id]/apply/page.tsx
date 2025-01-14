@@ -13,7 +13,7 @@ import { format } from "date-fns"
 import { getAdminProjects, getRoundApplications } from "@/lib/actions/projects"
 import { getCategories } from "@/db/category"
 import { auth } from "@/auth"
-import { Project } from "@/components/missions/Project"
+import { ApplyDetails } from "@/components/missions/ApplyDetails"
 
 export default async function Apply({ params }: { params: { id: string } }) {
   const session = await auth()
@@ -33,6 +33,8 @@ export default async function Apply({ params }: { params: { id: string } }) {
 
   console.log(projects)
   console.log(applications)
+
+  let currentTab = "details"
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -56,21 +58,18 @@ export default async function Apply({ params }: { params: { id: string } }) {
           </BreadcrumbList>
         </Breadcrumb>
         <div className="flex flex-col mt-10">
-          <h2 className="text-4xl mb-2">{name}</h2>
+          <h2 className="text-4xl mb-2">
+            {"Apply for Retro Funding: " + name}
+          </h2>
           {applyBy &&
             `Submit this application by ${format(
               applyBy,
               "MMM d",
             )} to be evaluated for rewards starting 
                     ${format(startsAt, "MMM d")}.`}
-          {projects.map((field, index) => (
-            <Project
-              key={field.id}
-              index={index}
-              project={field}
-              round={foundRound}
-            />
-          ))}{" "}
+          <div className="h-[2px] bg-secondary" />
+
+          <ApplyDetails projects={projects} round={foundRound} />
         </div>
       </div>
     </main>
