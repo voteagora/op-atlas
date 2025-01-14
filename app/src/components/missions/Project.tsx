@@ -37,10 +37,12 @@ export const Project = ({
   round,
   project,
   index,
+  form,
 }: {
   round: FundingRound
   project: ProjectWithDetails
   index: number
+  form: any
 }) => {
   const { progressPercent, completedSections } = useMemo(() => {
     return project
@@ -49,14 +51,6 @@ export const Project = ({
   }, [project])
 
   const router = useRouter()
-  const form = useForm<z.infer<typeof ApplicationFormSchema>>({
-    resolver: zodResolver(ApplicationFormSchema),
-    defaultValues: {
-      projects: [],
-    },
-    shouldFocusError: true,
-    mode: "onChange",
-  })
 
   const projectRequirements: ProjectSection[] = [
     ProjectSection.Details,
