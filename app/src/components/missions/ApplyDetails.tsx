@@ -22,13 +22,13 @@ export function ApplyDetails({
             className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
             value="details"
           >
-            1 Choose projects
+            <span className="pr-2">1</span> Choose projects
           </TabsTrigger>
           <TabsTrigger
             className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
             value="terms"
           >
-            2 Agree to terms
+            <span className="pr-2">2</span> Agree to terms
           </TabsTrigger>
         </TabsList>
         <div className="mt-12">
