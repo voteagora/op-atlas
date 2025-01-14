@@ -29,6 +29,7 @@ import ApplicationBanner from "./ApplicationBanner"
 import {
   ApplicationSubmittedCallout,
   FundingRoundAnnouncementCallout,
+  RewardsCallout,
   UnclaimedRecipientCallout,
 } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
@@ -138,6 +139,8 @@ const Dashboard = ({
   }
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
+      {/* <RewardsCallout text="Congratulations! You received rewards in Retro Funding: Onchain Builders Rewards for Feb 1 – Feb 29" /> */}
+
       {cardComponents.slice(0, visibleCardsCount)}
 
       {visibleCardsCount < cardComponents.length && (
@@ -191,6 +194,7 @@ const Dashboard = ({
           onOpenChange={setShowCreateOrganizationDialog}
         />
       )}
+
       <div className="card flex flex-col w-full gap-y-12">
         {joinProjectDialogOpen && (
           <JoinProjectDialog
@@ -223,6 +227,7 @@ const Dashboard = ({
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h3>Your projects</h3>
+
               <Button
                 className="flex items-center gap-2"
                 variant="secondary"

@@ -1,10 +1,39 @@
-import { ArrowRight, ArrowUpRight } from "lucide-react"
+import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
+import { Callout } from "../common/Callout"
+
+export function RewardsCallout({ text }: { text: string }) {
+  return (
+    <Callout
+      type="optimism"
+      showIcon={false}
+      className="mt-10 py-2"
+      leftAlignedContent={
+        <div className="flex gap-4 items-center">
+          <Image
+            alt="Info"
+            src={"/assets/icons/sunny-white.svg"}
+            width={10}
+            height={10}
+            className="w-12 h-12"
+          />
+
+          <p>{text}</p>
+        </div>
+      }
+      rightAlignedContent={
+        <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
+          <ChevronRight width={16} height={16} />
+        </div>
+      }
+    />
+  )
+}
 
 export function GovCandidateCallout() {
   return (

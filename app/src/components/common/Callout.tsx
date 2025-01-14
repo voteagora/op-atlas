@@ -16,7 +16,7 @@ export const Callout = memo(function Callout({
   rightAlignedContent,
 }: {
   className?: string
-  type: "info" | "error" | "success" | "optimism"
+  type: "info" | "error" | "success" | "optimismBright" | "optimism"
   text?: string
   linkText?: string
   linkHref?: string
@@ -34,7 +34,9 @@ export const Callout = memo(function Callout({
           ? "bg-accent text-accent-foreground"
           : type === "success"
           ? "bg-green-100 text-green-800"
-          : "text-red-600 bg-red-100",
+          : type === "optimismBright"
+          ? "text-red-600 bg-red-100"
+          : "text-white bg-optimismRed",
         className,
       )}
     >

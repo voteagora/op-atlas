@@ -31,7 +31,7 @@ import { FUNDING_ROUNDS } from "@/lib/mocks"
 import { format } from "date-fns"
 import { Callout } from "@/components/common/Callout"
 import { ArrowUpRightIcon } from "lucide-react"
-import { OptimismCallout } from "@/components/missions/Callouts"
+import { NewIn2025Callout } from "@/components/missions/Callouts"
 
 export default function Mission({ params }: { params: { id: string } }) {
   const foundRound = FUNDING_ROUNDS.find((page) => page.pageName === params.id)
@@ -186,7 +186,7 @@ export default function Mission({ params }: { params: { id: string } }) {
                 </ul>
 
                 <div className="mb-10">
-                  <OptimismCallout />
+                  <NewIn2025Callout />
                 </div>
 
                 <div className="flex flex-col gap-6 mb-10">

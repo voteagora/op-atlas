@@ -10,7 +10,10 @@ import {
   getApplications,
   getProjects,
 } from "@/lib/actions/projects"
-import { GovCandidateCallout } from "@/components/dashboard/Callouts"
+import {
+  GovCandidateCallout,
+  RewardsCallout,
+} from "@/components/dashboard/Callouts"
 
 export default async function Page() {
   const session = await auth()

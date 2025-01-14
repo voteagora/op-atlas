@@ -3,10 +3,10 @@ import { Callout } from "../common/Callout"
 import Image from "next/image"
 import ExternalLink from "../ExternalLink"
 
-export function OptimismCallout() {
+export function NewIn2025Callout() {
   return (
     <Callout
-      type="optimism"
+      type="optimismBright"
       showIcon={false}
       className="mt-10"
       leftAlignedContent={
