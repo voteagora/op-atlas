@@ -6,10 +6,13 @@ import { useRouter } from "next/navigation"
 import ExternalLink from "../../../components/ExternalLink"
 import { Sidebar } from "../../../components/missions/Sidebar"
 
-import {
-  DocumentCallout,
-  VideoCallout,
-} from "@/components/missions/VideoCallouts"
+// import {
+//   DocumentCallout,
+//   VideoCallout,
+// } from "@/components/missions/VideoCallouts"
+
+import { VideoCallout } from "@/components/missions/Callouts"
+
 import { NewIn2025Callout } from "@/components/missions/NewIn2025Callout"
 import { notFound } from "next/navigation"
 
@@ -27,6 +30,9 @@ import React from "react"
 import { Eligibility } from "@/components/missions/Eligibility"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 import { format } from "date-fns"
+import { Callout } from "@/components/common/Callout"
+import { ArrowUpRightIcon } from "lucide-react"
+import { OptimismCallout } from "@/components/missions/Callouts"
 
 export default function Mission({ params }: { params: { id: string } }) {
   const foundRound = FUNDING_ROUNDS.find((page) => page.pageName === params.id)
@@ -181,7 +187,7 @@ export default function Mission({ params }: { params: { id: string } }) {
                 </ul>
 
                 <div className="mb-10">
-                  <NewIn2025Callout />
+                  <OptimismCallout />
                 </div>
 
                 <div className="flex flex-col gap-6 mb-10">
@@ -191,7 +197,6 @@ export default function Mission({ params }: { params: { id: string } }) {
                   </p>
 
                   <Eligibility eligibility={eligibility} />
-                  {/* {renderEligibilityCriteria(eligibility)} */}
 
                   <p>
                     {
@@ -199,10 +204,10 @@ export default function Mission({ params }: { params: { id: string } }) {
                     }
                   </p>
 
-                  <ExternalLink href={"https://youtube.com"}>
-                    <VideoCallout text="How to add a project in OP Atlas" />
-                  </ExternalLink>
-                  {/* {eligibility} */}
+                  <VideoCallout
+                    text="How to add a project in OP Atlas"
+                    href="https://youtube.com"
+                  />
                 </div>
 
                 <div className="flex flex-col gap-6">
