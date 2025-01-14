@@ -38,14 +38,17 @@ const UserProjectCard = ({
   const approvedDate = new Date("2025-02-01T21:53:13.300Z")
 
   return (
-    <Link
-      href={`/projects/${project.id}/details`}
+    <div
+      // href={`/projects/${project.id}/details`}
       className={cn(
-        "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm p-8",
+        "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm",
         className,
       )}
     >
-      <div className="flex gap-x-6">
+      <Link
+        href={`/projects/${project.id}/details`}
+        className="flex gap-x-6 pt-8 px-8"
+      >
         <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-32 w-32 shrink-0">
           {project.thumbnailUrl ? (
             <Image
@@ -144,69 +147,71 @@ const UserProjectCard = ({
             )}
           </div>
         )}
-      </div>
+      </Link>
 
-      <div className="mt-4">
-        <Callout
-          type="success"
-          showIcon={false}
-          leftAlignedContent={
-            <div className="flex">
-              <Image
-                alt="Info"
-                src={"/assets/icons/sunny-smiling.png"}
-                width={20}
-                height={20}
-              />
-              <p className="text-sm font-medium mr-5 ml-2">
-                {`Retro Funding: ` + roundName}
-              </p>
-            </div>
-          }
-          rightAlignedContent={
-            <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
-              <Check width={16} height={16} />
-              <span>Active since {format(approvedDate, "MMM d")}</span>{" "}
-              <span>|</span>
-              <Button variant={"ghost"} size={"xs"} className={"gap-2"}>
-                Rewards Monthly
-                <CircleHelp width={16} height={16} />
-              </Button>
-            </div>
-          }
-        />
-      </div>
+      <div className="px-8 pb-8">
+        <div className="mt-4">
+          <Callout
+            type="success"
+            showIcon={false}
+            leftAlignedContent={
+              <div className="flex">
+                <Image
+                  alt="Info"
+                  src={"/assets/icons/sunny-smiling.png"}
+                  width={20}
+                  height={20}
+                />
+                <p className="text-sm font-medium mr-5 ml-2">
+                  {`Retro Funding: ` + roundName}
+                </p>
+              </div>
+            }
+            rightAlignedContent={
+              <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
+                <Check width={16} height={16} />
+                <span>Active since {format(approvedDate, "MMM d")}</span>{" "}
+                <span>|</span>
+                <Button variant={"ghost"} size={"xs"} className={"gap-2"}>
+                  Rewards Monthly
+                  <CircleHelp width={16} height={16} />
+                </Button>
+              </div>
+            }
+          />
+        </div>
 
-      <div className="mt-4">
-        <Callout
-          type="info"
-          showIcon={false}
-          leftAlignedContent={
-            <div className="flex">
-              <Image
-                alt="Info"
-                src={"/assets/icons/sunny-smiling.png"}
-                width={20}
-                height={20}
-              />
-              <p className="text-sm font-medium mr-5 ml-2">
-                {`Retro Funding: ` + roundName}
-              </p>
-            </div>
-          }
-          rightAlignedContent={
-            <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
-              <Loader2 width={16} height={16} />
-              <span>Pending approval</span> <span>|</span>
-              <Button variant={"ghost"} size={"xs"}>
-                View confirmation
-                <ChevronRight width={16} height={16} />
-              </Button>
-            </div>
-          }
-        />
+        <div className="mt-4">
+          <Callout
+            type="info"
+            showIcon={false}
+            leftAlignedContent={
+              <div className="flex">
+                <Image
+                  alt="Info"
+                  src={"/assets/icons/sunny-smiling.png"}
+                  width={20}
+                  height={20}
+                />
+                <p className="text-sm font-medium mr-5 ml-2">
+                  {`Retro Funding: ` + roundName}
+                </p>
+              </div>
+            }
+            rightAlignedContent={
+              <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
+                <Loader2 width={16} height={16} />
+                <span>Pending approval</span> <span>|</span>
+                <Button variant={"ghost"} size={"xs"}>
+                  View confirmation
+                  <ChevronRight width={16} height={16} />
+                </Button>
+              </div>
+            }
+          />
+        </div>
       </div>
-    </Link>
+    </div>
   )
 }
 
