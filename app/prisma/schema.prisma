@@ -28,6 +28,8 @@ model User {
   addresses         UserAddress[]
   RewardClaim       RewardClaim[]
   interaction       UserInteraction?
+
+  @@index([username])
 }
 
 model UserEmail {
@@ -39,6 +41,8 @@ model UserEmail {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model UserInteraction {
@@ -140,6 +144,8 @@ model Organization {
   team      UserOrganization[]
   projects  ProjectOrganization[]
   snapshots OrganizationSnapshot[]
+
+  @@index([deletedAt])
 }
 
 model OrganizationSnapshot {
@@ -172,6 +178,8 @@ model UserOrganization {
   @@unique([userId, organizationId])
   @@index([organizationId])
   @@index([userId, deletedAt, role])
+  @@index([deletedAt])
+  @@index([userId])
 }
 
 model ProjectOrganization {
@@ -229,6 +237,7 @@ model Project {
   links        ProjectLinks[]
 
   @@index([deletedAt, createdAt])
+  @@index([deletedAt])
 }
 
 model Application {
