@@ -1,10 +1,10 @@
 import Image from "next/image"
 
-import OutboundArrowLink from "@/components/common/OutboundArrowLink"
+import Link from "@/components/common/Link"
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center gap-6 mt-64">
+    <div className="flex flex-col items-center gap-6 h-app w-full justify-center lg:px-0 px-2">
       <Image
         src={"/assets/icons/sunny-stars-custom-gimp-edit.svg"}
         alt="Sunny Logo"
@@ -16,16 +16,17 @@ export default function NotFound() {
         The page you&apos;re looking for doesn&apos;t exist.
       </h4>
 
-      <div className="flex gap-3">
-        <OutboundArrowLink text={"Optimism"} target={"https://optimism.io"} />
+      <div className="flex flex-wrap gap-3">
+        <Link as="button" text={"Optimism"} href={"https://optimism.io"} />
 
-        <OutboundArrowLink text={"Retro Funding"} target={"/"} />
+        <Link as="button" text={"Retro Funding"} href={"/"} />
 
-        <OutboundArrowLink text={"Forum"} target={"https://gov.optimism.io"} />
+        <Link as="button" text={"Forum"} href={"https://gov.optimism.io"} />
 
-        <OutboundArrowLink
+        <Link
+          as="button"
           text={"Delegates"}
-          target={"https://vote.optimism.io/delegates"}
+          href={"https://vote.optimism.io/delegates"}
         />
       </div>
     </div>

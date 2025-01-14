@@ -1,5 +1,9 @@
 import type { Config } from "tailwindcss"
 
+const sizes = {
+  app: "calc(100vh - 72px)",
+}
+
 const config = {
   darkMode: ["class"],
   content: [
@@ -18,6 +22,8 @@ const config = {
       },
     },
     extend: {
+      height: sizes,
+      maxHeight: sizes,
       spacing: {
         "18": "4.5rem",
       },
