@@ -1,6 +1,9 @@
 import Image from "next/image"
+import Link from "next/link"
 
 import { cn } from "@/lib/utils"
+
+import { Button } from "../ui/button"
 
 function OutboundArrowLink({
   text,
@@ -16,7 +19,7 @@ function OutboundArrowLink({
   className?: string
 }) {
   return (
-    <a
+    <Link
       href={target}
       target="_blank"
       rel="noopener noreferrer"
@@ -34,7 +37,7 @@ function OutboundArrowLink({
         />
       </span>
       {subtext && <span className="text-md text-gray-500">{subtext}</span>}
-    </a>
+    </Link>
   )
 }
 
