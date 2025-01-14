@@ -1,6 +1,6 @@
 import ExternalLink from "../ExternalLink"
 // import { VideoCallout } from "./VideoCallouts"
-import { VideoCallout } from "./Callouts"
+import { DocumentCallout, VideoCallout } from "./Callouts"
 
 export const Eligibility = ({ eligibility }: any) => {
   const createLinkedText = (text: string, links: any) => {
@@ -65,10 +65,19 @@ export const Eligibility = ({ eligibility }: any) => {
               }
               {criteria.videoLink && (
                 <div className="mt-6 mb-6">
-                  <VideoCallout
-                    text={criteria.videoLink.text}
-                    href={criteria.videoLink.link}
-                  />
+                  {criteria.videoLink.type === "video" ? (
+                    <VideoCallout
+                      text={criteria.videoLink.text}
+                      href={criteria.videoLink.link}
+                    />
+                  ) : criteria.videoLink.type === "document" ? (
+                    <DocumentCallout
+                      text={criteria.videoLink.text}
+                      href={criteria.videoLink.link}
+                    />
+                  ) : (
+                    <></>
+                  )}
                 </div>
               )}
             </li>

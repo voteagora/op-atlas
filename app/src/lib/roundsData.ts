@@ -51,6 +51,7 @@ export const ROUNDS: FundingRound[] = [
           videoLink: {
             text: "How to verify a GitHub repo in OP Atlas",
             link: "https://youtube.com",
+            type: "video",
           },
         },
       ],
@@ -123,6 +124,7 @@ export const ROUNDS: FundingRound[] = [
           videoLink: {
             text: "How to verify onchain contracts in OP Atlas",
             link: "https://youtube.com",
+            type: "video",
           },
         },
         {
@@ -148,6 +150,7 @@ export const ROUNDS: FundingRound[] = [
           videoLink: {
             text: "How to build an adapter",
             link: "https://youtube.com",
+            type: "document",
           },
           situational: true,
           links: {
