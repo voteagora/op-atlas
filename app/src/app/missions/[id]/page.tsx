@@ -13,7 +13,6 @@ import { Sidebar } from "../../../components/missions/Sidebar"
 
 import { VideoCallout } from "@/components/missions/Callouts"
 
-import { NewIn2025Callout } from "@/components/missions/NewIn2025Callout"
 import { notFound } from "next/navigation"
 
 import {
