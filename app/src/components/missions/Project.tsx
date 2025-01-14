@@ -76,7 +76,7 @@ export const Project = ({
       <Accordion type="single" collapsible disabled={false} className="w-full">
         <AccordionItem value="item-1">
           <AccordionTrigger className="!p-0">
-            <div className="flex gap-4 items-center w-full">
+            <div className="flex gap-6 items-center w-full">
               <FormField
                 name={`projects.${index}.selected`}
                 control={form.control}
@@ -109,37 +109,38 @@ export const Project = ({
             </div>
           </AccordionTrigger>
 
-          <AccordionContent className="pb-0">
-            <p>Project Setup</p>
+          <AccordionContent className="pl-10 pt-5">
+            <p className="font-bold pb-2">Project Setup</p>
 
             {Object.entries(requirementStatus).map(([key, value]) => {
               let icon
 
               if (!value) {
+                console.log("aye")
                 icon = <X className="w-5 h-5" color="gray" />
               } else {
                 icon = (
-                  <>
-                    <CircleCheck
-                      className="absolute w-full h-full"
+                  <div className="relative w-32 h-32">
+                    <Circle
+                      className="absolute top-0 left-0 w-full h-full"
                       color="green"
                       fill="green"
                     />
                     <Check
-                      className="absolute w-3 h-3"
+                      className="absolute top-0 left-0 w-full h-full p-1"
                       color="white"
-                      strokeWidth={3}
+                      strokeWidth={4}
                     />
-                  </>
+                  </div>
                 )
               }
 
               return (
-                <div className="flex items-center" key={key}>
+                <div className="flex items-center py-1" key={key}>
                   <div className="relative w-5 h-5 flex items-center justify-center">
                     {icon}
                   </div>
-                  <p>
+                  <p className="pl-4">
                     <span>{setupTitles[key as keyof typeof setupTitles]}</span>
                   </p>
                 </div>
@@ -147,6 +148,7 @@ export const Project = ({
             })}
 
             <Button
+              className="p-0"
               variant={"ghost"}
               onClick={() => {
                 router.push(`/projects/${project.id}/details`)
@@ -156,7 +158,7 @@ export const Project = ({
               <ChevronRight />
             </Button>
 
-            <p>Eligibility Criteria</p>
+            <p className="font-bold pt-5 pb-2">Eligibility Criteria</p>
 
             {round.eligibility.criteria.map((criterion: any, index: number) => {
               const criteriaCompletion = false
@@ -169,28 +171,31 @@ export const Project = ({
                   icon = <X className="w-5 h-5" color="gray" />
                 }
               } else {
-                icon = (
-                  <>
-                    <CircleCheck
-                      className="absolute w-full h-full"
+                icon = icon = (
+                  <div className="relative w-32 h-32">
+                    <Circle
+                      className="absolute top-0 left-0 w-full h-full"
                       color="green"
                       fill="green"
                     />
                     <Check
-                      className="absolute w-3 h-3"
+                      className="absolute top-0 left-0 w-full h-full p-1"
                       color="white"
-                      strokeWidth={3}
+                      strokeWidth={4}
                     />
-                  </>
+                  </div>
                 )
               }
 
               return (
-                <div className="flex items-center" key={"criterion-" + index}>
+                <div
+                  className="flex items-center py-1"
+                  key={"criterion-" + index}
+                >
                   <div className="relative w-5 h-5 flex items-center justify-center">
                     {icon}
                   </div>
-                  <p>
+                  <p className="pl-4">
                     <span>{criterion.name}</span>
                     {criterion.category && (
                       <span>
@@ -205,6 +210,7 @@ export const Project = ({
             })}
 
             <Button
+              className="p-0"
               variant={"ghost"}
               onClick={() => {
                 router.push(`/projects/${project.id}/details`)
