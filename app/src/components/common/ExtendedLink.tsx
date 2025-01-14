@@ -14,8 +14,6 @@ interface BaseProps {
   subtext?: string
 }
 
-import { Url } from "url"
-
 interface ButtonProps extends BaseProps {
   as?: "button"
   href: string | UrlObject
