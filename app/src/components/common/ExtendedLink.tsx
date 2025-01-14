@@ -22,7 +22,7 @@ interface ButtonProps extends BaseProps {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ icon, text, subtext, href, className, ...props }, ref) => {
     return (
-      <NextLink href={href} passHref>
+      <NextLink href={href} passHref target="_blank">
         <ShadcnButton
           ref={ref}
           variant="secondary"
