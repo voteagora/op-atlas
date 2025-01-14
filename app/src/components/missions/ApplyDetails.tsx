@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProjectWithDetails } from "@/lib/types"
 import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
+import CircleWithCheckmark from "../common/CircleWithGreenCheckmark"
 
 export function ApplyDetails({
   projects,
@@ -26,7 +27,16 @@ export function ApplyDetails({
             className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
             value="details"
           >
-            <span className="pr-2">1</span> Choose projects
+            <span className="pr-2">
+              {currentTab === "terms" ? (
+                <div className="w-5 h-5">
+                  <CircleWithCheckmark />
+                </div>
+              ) : (
+                "1"
+              )}
+            </span>{" "}
+            Choose projects
           </TabsTrigger>
           <TabsTrigger
             className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}

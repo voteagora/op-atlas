@@ -31,6 +31,7 @@ import { Button } from "../ui/button"
 import { notFound, useRouter } from "next/navigation"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 import { FundingRound } from "@/lib/roundsData"
+import CircleWithCheckmark from "../common/CircleWithGreenCheckmark"
 
 export const Project = ({
   round,
@@ -82,9 +83,6 @@ export const Project = ({
   const isPending = false
   const isIncomplete = false
   const isNotEligible = false
-
-  //   let projectState: "" | "Active" | "Pending" | "Incomplete" | "Not Eligible" =
-  //     ""
 
   const incompleteBadge = (
     <Badge
@@ -190,20 +188,7 @@ export const Project = ({
                 console.log("aye")
                 icon = <X className="w-5 h-5" color="gray" />
               } else {
-                icon = (
-                  <div className="relative w-32 h-32">
-                    <Circle
-                      className="absolute top-0 left-0 w-full h-full"
-                      color="green"
-                      fill="green"
-                    />
-                    <Check
-                      className="absolute top-0 left-0 w-full h-full p-1"
-                      color="white"
-                      strokeWidth={4}
-                    />
-                  </div>
-                )
+                icon = icon = <CircleWithCheckmark />
               }
 
               return (
@@ -242,20 +227,7 @@ export const Project = ({
                   icon = <X className="w-5 h-5" color="gray" />
                 }
               } else {
-                icon = icon = (
-                  <div className="relative w-32 h-32">
-                    <Circle
-                      className="absolute top-0 left-0 w-full h-full"
-                      color="green"
-                      fill="green"
-                    />
-                    <Check
-                      className="absolute top-0 left-0 w-full h-full p-1"
-                      color="white"
-                      strokeWidth={4}
-                    />
-                  </div>
-                )
+                icon = <CircleWithCheckmark />
               }
 
               return (
