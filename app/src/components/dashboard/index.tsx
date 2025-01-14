@@ -139,7 +139,8 @@ const Dashboard = ({
   }
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
-      {/* <RewardsCallout text="Congratulations! You received rewards in Retro Funding: Onchain Builders Rewards for Feb 1 – Feb 29" /> */}
+      {/* <RewardsCallout text="Congratulations! You received rewards in Retro Funding: Onchain Builders Rewards for Feb 1 – Feb 29" />
+      <RewardsCallout text="Congratulations! You received rewards in Retro Funding: Dev Tooling Rewards for Feb 1 – Feb 29" /> */}
 
       {cardComponents.slice(0, visibleCardsCount)}
 
@@ -310,19 +311,22 @@ const Dashboard = ({
             className="flex items-center justify-center gap-x-2 no-underline text-secondary-foreground"
           >
             <p className="text-sm font-medium">
-              To join an existing project or organization, please have their
-              admin add you.
+              Join an existing project or organization
             </p>
-            <Image
-              src="/assets/icons/arrow-left.svg"
-              className="h-3"
-              height={12}
-              width={12}
-              alt="left"
-            />
           </Button>
         )}
       </div>
+
+      <p className="text-sm text-secondary-foreground text-center">
+        Need support?
+        <ExternalLink
+          className="font-bold"
+          href="https://discord.com/invite/optimism"
+        >
+          {" "}
+          Get help in Discord.
+        </ExternalLink>
+      </p>
     </div>
   )
 }
