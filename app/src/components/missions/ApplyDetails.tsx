@@ -19,13 +19,13 @@ export function ApplyDetails({
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
         <TabsList className="grid w-96 grid-cols-2 bg-background">
           <TabsTrigger
-            className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none`}
+            className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
             value="details"
           >
             1 Choose projects
           </TabsTrigger>
           <TabsTrigger
-            className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none`}
+            className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
             value="terms"
           >
             2 Agree to terms
