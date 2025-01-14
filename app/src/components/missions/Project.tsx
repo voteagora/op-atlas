@@ -78,8 +78,13 @@ export const Project = ({
     Publish: "Publish metadata onchain",
   }
 
-  let projectState: "" | "Active" | "Pending" | "Incomplete" | "Not Eligible" =
-    ""
+  const isActive = false
+  const isPending = false
+  const isIncomplete = false
+  const isNotEligible = false
+
+  //   let projectState: "" | "Active" | "Pending" | "Incomplete" | "Not Eligible" =
+  //     ""
 
   const incompleteBadge = (
     <Badge
@@ -121,32 +126,17 @@ export const Project = ({
 
   let selectedBadge
 
-  switch (
-    projectState as "" | "Active" | "Pending" | "Incomplete" | "Not Eligible"
-  ) {
-    case "Active":
-      selectedBadge = activeBadge
-      break
-    case "Pending":
-      selectedBadge = pendingBadge
-      break
-    case "Incomplete":
-      selectedBadge = incompleteBadge
-      break
-    case "Not Eligible":
-      selectedBadge = notEligibleBadge
-      break
-    default:
-      ""
+  if (isActive) {
+    selectedBadge = activeBadge
+  } else if (isPending) {
+    selectedBadge = pendingBadge
+  } else if (isNotEligible) {
+    selectedBadge = notEligibleBadge
+  } else if (isIncomplete) {
+    selectedBadge = incompleteBadge
   }
 
-  const isValid =
-    (projectState as
-      | ""
-      | "Active"
-      | "Pending"
-      | "Incomplete"
-      | "Not Eligible") === ""
+  const isValid = !isActive && !isPending && !isNotEligible && !isIncomplete
 
   return (
     <div className="p-8 border border-input rounded-xl">
