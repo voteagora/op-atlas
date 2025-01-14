@@ -29,6 +29,7 @@ import ApplicationBanner from "./ApplicationBanner"
 import {
   ApplicationSubmittedCallout,
   FundingRoundAnnouncementCallout,
+  NoRewardsCallout,
   RewardsCallout,
   UnclaimedRecipientCallout,
 } from "./Callouts"
@@ -142,9 +143,16 @@ const Dashboard = ({
   }
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
-      {/* <RewardsCallout text="Congratulations! You received rewards in Retro Funding: Onchain Builders Rewards for Feb 1 – Feb 29" />
-      <RewardsCallout text="Congratulations! You received rewards in Retro Funding: Dev Tooling Rewards for Feb 1 – Feb 29" /> */}
-
+      {/* <RewardsCallout
+        roundName="Onchain Builders"
+        rewardPeriodStart={new Date("2025-02-01T21:53:13.300Z")}
+        rewardPeriodEnd={new Date("2025-02-15T21:53:13.300Z")}
+      />
+      <NoRewardsCallout
+        roundName="Dev Tooling"
+        rewardPeriodStart={new Date("2025-02-01T21:53:13.300Z")}
+        rewardPeriodEnd={new Date("2025-02-15T21:53:13.300Z")}
+      /> */}
       {cardComponents.slice(0, visibleCardsCount)}
 
       {visibleCardsCount < cardComponents.length && (

@@ -6,8 +6,58 @@ import { cn } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
 import { Callout } from "../common/Callout"
+import { format } from "date-fns"
 
-export function RewardsCallout({ text }: { text: string }) {
+export function NoRewardsCallout({
+  roundName,
+  rewardPeriodStart,
+  rewardPeriodEnd,
+}: {
+  roundName: string
+  rewardPeriodStart: Date
+  rewardPeriodEnd: Date
+}) {
+  return (
+    <Callout
+      type="plain"
+      showIcon={false}
+      className="mt-10 py-2 bg-white border border-outline"
+      leftAlignedContent={
+        <div className="flex gap-4 items-center">
+          <Image
+            alt="Info"
+            src={"/assets/icons/sunny-red.svg"}
+            width={10}
+            height={10}
+            className="w-12 h-12"
+          />
+
+          <div>
+            <p className="font-bold">
+              {"You didn't receive rewards in Retro Funding: " + roundName}
+            </p>
+            <p>
+              {"Rewards for " +
+                format(rewardPeriodStart, "MMM d") +
+                " - " +
+                format(rewardPeriodEnd, "MMM d")}
+            </p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
+export function RewardsCallout({
+  roundName,
+  rewardPeriodStart,
+  rewardPeriodEnd,
+}: {
+  roundName: string
+  rewardPeriodStart: Date
+  rewardPeriodEnd: Date
+}) {
   return (
     <Callout
       type="optimism"
@@ -23,7 +73,18 @@ export function RewardsCallout({ text }: { text: string }) {
             className="w-12 h-12"
           />
 
-          <p>{text}</p>
+          <div>
+            <p className="font-bold">
+              {"Congratulations! You received rewards in Retro Funding: " +
+                roundName}
+            </p>
+            <p>
+              {"Rewards for " +
+                format(rewardPeriodStart, "MMM d") +
+                " - " +
+                format(rewardPeriodEnd, "MMM d")}
+            </p>
+          </div>
         </div>
       }
       rightAlignedContent={
