@@ -21,9 +21,11 @@ import { format } from "date-fns"
 const UserProjectCard = ({
   className,
   project,
+  handleActiveRoundHelpClick,
 }: {
   className?: string
   project: ProjectWithDetails
+  handleActiveRoundHelpClick: () => void
 }) => {
   const isAdmin = useIsAdmin(project)
   const projectHasChanges = projectHasUnpublishedChanges(project)
@@ -172,7 +174,12 @@ const UserProjectCard = ({
                 <Check width={16} height={16} />
                 <span>Active since {format(approvedDate, "MMM d")}</span>{" "}
                 <span>|</span>
-                <Button variant={"ghost"} size={"xs"} className={"gap-2"}>
+                <Button
+                  variant={"ghost"}
+                  size={"xs"}
+                  className={"gap-2"}
+                  onClick={handleActiveRoundHelpClick}
+                >
                   Rewards Monthly
                   <CircleHelp width={16} height={16} />
                 </Button>

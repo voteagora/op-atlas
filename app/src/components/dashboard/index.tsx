@@ -40,6 +40,7 @@ import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
+import RewardsMonthlyDialog from "./dialogs/RewardsMonthlyDialog"
 
 const SHOW_APPLICATIONS = false
 const ROUND_ID = "5"
@@ -74,6 +75,8 @@ const Dashboard = ({
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
   const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
+    useState(false)
+  const [showRewardsMonthlyDialog, setShowRewardsMonthlyDialog] =
     useState(false)
 
   const [showOnBoarding, setShowOnBoarding] = useState(false)
@@ -161,6 +164,9 @@ const Dashboard = ({
         </Button>
       )}
 
+      {showRewardsMonthlyDialog && (
+        <RewardsMonthlyDialog open onOpenChange={setShowRewardsMonthlyDialog} />
+      )}
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
@@ -245,7 +251,13 @@ const Dashboard = ({
             </div>
 
             {projects.map((project) => (
-              <UserProjectCard key={project.id} project={project} />
+              <UserProjectCard
+                key={project.id}
+                project={project}
+                handleActiveRoundHelpClick={() => {
+                  setShowRewardsMonthlyDialog(true)
+                }}
+              />
             ))}
           </div>
         )}
@@ -263,6 +275,9 @@ const Dashboard = ({
                     <UserProjectCard
                       key={project.id}
                       project={project.project as ProjectWithDetails}
+                      handleActiveRoundHelpClick={() => {
+                        setShowRewardsMonthlyDialog(true)
+                      }}
                     />
                   ))}
                 </>
