@@ -1,6 +1,7 @@
 import Image from "next/image"
 
 import { cn } from "@/lib/utils"
+import { ArrowUpRight } from "lucide-react"
 
 export function VideoCallout({
   text,
@@ -45,10 +46,10 @@ export function Callout({
         <div className="flex gap-3 items-center">
           <Image
             src={imageSrc}
-            width={1}
-            height={1}
+            width={128}
+            height={128}
             alt="Sunny"
-            className="h-4 w-4"
+            className="h-6 w-6"
           />
           <div>
             <span className="text-blue-800">{text}</span>{" "}
@@ -56,15 +57,10 @@ export function Callout({
         </div>
 
         <div className="flex items-center">
-          {rightHandComponents}
+          <div className="flex text-blue-800">{rightHandComponents}</div>
 
           <div className="w-6 h-6 flex items-center justify-center">
-            <Image
-              src="/assets/icons/arrow-up-right.svg"
-              width={12}
-              height={12}
-              alt="External link"
-            />
+            <ArrowUpRight width={18} height={18} color="blue" />
           </div>
         </div>
       </div>
