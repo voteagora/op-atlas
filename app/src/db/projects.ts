@@ -3,7 +3,11 @@
 import { Prisma, Project } from "@prisma/client"
 import { cache } from "react"
 
-import { ApplicationWithDetails, TeamRole } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  ProjectWithDetailsLite,
+  TeamRole,
+} from "@/lib/types"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
@@ -226,72 +230,169 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
 
 export const getUserProjectsWithDetails = cache(getUserProjectsWithDetailsFn)
 
-async function getAllPublishedUserProjectsFn({ userId }: { userId: string }) {
-  return prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      projects: {
-        where: {
-          deletedAt: null,
-          project: {
-            deletedAt: null,
-            organization: {
-              is: null,
-            },
-          },
-        },
-        include: {
-          project: {
-            include: {
-              funding: true,
-              snapshots: true,
-              applications: true,
-              links: true,
-              rewards: { include: { claim: true } },
-            },
-          },
-        },
-        orderBy: {
-          project: {
-            createdAt: "asc",
-          },
-        },
-      },
-      organizations: {
-        where: {
-          deletedAt: null,
-          organization: { deletedAt: null },
-        },
-        select: {
-          organization: {
-            include: {
-              projects: {
-                where: {
-                  deletedAt: null,
-                  project: {
-                    deletedAt: null,
-                  },
-                },
-                include: {
-                  project: {
-                    include: {
-                      funding: true,
-                      snapshots: true,
-                      applications: true,
-                      links: true,
-                      rewards: { include: { claim: true } },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
+type PublishedUserProjectsResult = {
+  projects: Array<{
+    project: ProjectWithDetailsLite
+  }>
+  organizations: Array<{
+    organization: {
+      projects: Array<{
+        project: ProjectWithDetailsLite
+      }>
+    }
+  }>
+}
+
+async function getAllPublishedUserProjectsFn({
+  userId,
+}: {
+  userId: string
+}): Promise<PublishedUserProjectsResult> {
+  const result = await prisma.$queryRaw<
+    [{ result: PublishedUserProjectsResult }]
+  >`
+    WITH "user_projects" AS (
+      SELECT 
+        p.*,
+        json_agg(DISTINCT pf.*) FILTER (WHERE pf."id" IS NOT NULL) as "funding",
+        json_agg(DISTINCT ps.*) FILTER (WHERE ps."id" IS NOT NULL) as "snapshots",
+        json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL) as "applications",
+        json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL) as "links",
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', fr."id",
+            'roundId', fr."roundId",
+            'projectId', fr."projectId",
+            'amount', fr."amount",
+            'createdAt', fr."createdAt",
+            'updatedAt', fr."updatedAt",
+            'claim', rc
+          )
+        ) FILTER (WHERE fr."id" IS NOT NULL) as "rewards"
+      FROM "Project" p
+      LEFT JOIN "UserProjects" up ON p."id" = up."projectId" 
+        AND up."deletedAt" IS NULL
+      LEFT JOIN "ProjectFunding" pf ON p."id" = pf."projectId"
+      LEFT JOIN "ProjectSnapshot" ps ON p."id" = ps."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId"
+      LEFT JOIN "ProjectLinks" pl ON p."id" = pl."projectId"
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      WHERE up."userId" = ${userId}
+        AND p."deletedAt" IS NULL
+        AND p."id" NOT IN (SELECT "projectId" FROM "ProjectOrganization")
+      GROUP BY p."id"
+    ),
+    "org_projects" AS (
+      SELECT 
+        p.*,
+        json_agg(DISTINCT pf.*) FILTER (WHERE pf."id" IS NOT NULL) as "funding",
+        json_agg(DISTINCT ps.*) FILTER (WHERE ps."id" IS NOT NULL) as "snapshots",
+        json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL) as "applications",
+        json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL) as "links",
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', fr."id",
+            'roundId', fr."roundId",
+            'projectId', fr."projectId",
+            'amount', fr."amount",
+            'createdAt', fr."createdAt",
+            'updatedAt', fr."updatedAt",
+            'claim', rc
+          )
+        ) FILTER (WHERE fr."id" IS NOT NULL) as "rewards",
+        o."id" as "organization_id",
+        o."name" as "organization_name"
+      FROM "Project" p
+      JOIN "ProjectOrganization" po ON p."id" = po."projectId" 
+        AND po."deletedAt" IS NULL
+      JOIN "Organization" o ON po."organizationId" = o."id" 
+        AND o."deletedAt" IS NULL
+      JOIN "UserOrganization" uo ON o."id" = uo."organizationId" 
+        AND uo."userId" = ${userId}
+        AND uo."deletedAt" IS NULL
+      LEFT JOIN "ProjectFunding" pf ON p."id" = pf."projectId"
+      LEFT JOIN "ProjectSnapshot" ps ON p."id" = ps."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId"
+      LEFT JOIN "ProjectLinks" pl ON p."id" = pl."projectId"
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      WHERE p."deletedAt" IS NULL
+      GROUP BY p."id", o."id", o."name"
+    ),
+    "org_projects_grouped" AS (
+      SELECT 
+        "organization_id",
+        "organization_name",
+        jsonb_agg(
+          jsonb_build_object(
+            'project', jsonb_build_object(
+              'id', "id",
+              'name', "name",
+              'description', "description",
+              'category', "category",
+              'thumbnailUrl', "thumbnailUrl",
+              'bannerUrl', "bannerUrl",
+              'website', "website",
+              'farcaster', "farcaster",
+              'twitter', "twitter",
+              'mirror', "mirror",
+              'pricingModel', "pricingModel",
+              'pricingModelDetails', "pricingModelDetails",
+              'openSourceObserverSlug', "openSourceObserverSlug",
+              'addedTeamMembers', "addedTeamMembers",
+              'addedFunding', "addedFunding",
+              'hasCodeRepositories', "hasCodeRepositories",
+              'isOnChainContract', "isOnChainContract",
+              'lastMetadataUpdate', "lastMetadataUpdate",
+              'createdAt', "createdAt",
+              'updatedAt', "updatedAt",
+              'deletedAt', "deletedAt",
+              'funding', "funding",
+              'snapshots', "snapshots",
+              'applications', "applications",
+              'links', "links",
+              'rewards', "rewards"
+            )
+          )
+        ) as projects
+      FROM "org_projects"
+      GROUP BY "organization_id", "organization_name"
+    )
+    SELECT jsonb_build_object(
+      'projects', COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'project', to_jsonb(up.*) - 'organization_id' - 'organization_name'
+          )
+        )
+        FROM "user_projects" up),
+        '[]'::jsonb
+      ),
+      'organizations', COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'organization', jsonb_build_object(
+              'id', og."organization_id",
+              'name', og."organization_name",
+              'projects', og.projects
+            )
+          )
+        )
+        FROM "org_projects_grouped" og),
+        '[]'::jsonb
+      )
+    ) as result;
+  `
+
+  // Transform the raw result to match the expected structure
+  const transformed = result[0]?.result || { projects: [], organizations: [] }
+
+  // Ensure null arrays are converted to empty arrays
+  transformed.projects = transformed.projects || []
+  transformed.organizations = transformed.organizations || []
+
+  return transformed
 }
 
 export const getAllPublishedUserProjects = cache(getAllPublishedUserProjectsFn)
