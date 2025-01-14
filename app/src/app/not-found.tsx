@@ -1,6 +1,6 @@
 import Image from "next/image"
 
-import Link from "@/components/common/Link"
+import ExtendedLink from "@/components/common/ExtendedLink"
 
 export default function NotFound() {
   return (
@@ -17,13 +17,21 @@ export default function NotFound() {
       </h4>
 
       <div className="flex flex-wrap gap-3">
-        <Link as="button" text={"Optimism"} href={"https://optimism.io"} />
+        <ExtendedLink
+          as="button"
+          text={"Optimism"}
+          href={"https://optimism.io"}
+        />
 
-        <Link as="button" text={"Retro Funding"} href={"/"} />
+        <ExtendedLink as="button" text={"Retro Funding"} href={"/"} />
 
-        <Link as="button" text={"Forum"} href={"https://gov.optimism.io"} />
+        <ExtendedLink
+          as="button"
+          text={"Forum"}
+          href={"https://gov.optimism.io"}
+        />
 
-        <Link
+        <ExtendedLink
           as="button"
           text={"Delegates"}
           href={"https://vote.optimism.io/delegates"}
