@@ -36,7 +36,7 @@ export function FundingRoundOngoing({
       variant={"outline"}
     >
       <Check width={12} height={12}></Check>
-      {"Active"}
+      Enrolled
     </Badge>
   )
 

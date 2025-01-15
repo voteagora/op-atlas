@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { optimism } from "viem/chains"
 
 import { FundingRound } from "@/lib/mocks"
@@ -15,13 +15,18 @@ import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { FundingRoundPast } from "./FundingRoundPast"
 import { FundingRoundOngoing } from "./FundingRoundOngoing"
+import { getApplications } from "@/lib/actions/projects"
+import { ApplicationWithDetails } from "@/lib/types"
+import { Session } from "next-auth"
 
 export const FundingRounds = ({
   className,
   fundingRounds,
+  applications,
 }: {
   className?: string
   fundingRounds: FundingRound[]
+  applications: ApplicationWithDetails[] | null
 }) => {
   const { open, upcoming, past, ongoing } = useMemo(() => {
     const n: FundingRound[] = []
@@ -67,7 +72,11 @@ export const FundingRounds = ({
           }`}
         >
           {rounds.map((fundingRound) => (
-            <Round key={fundingRound.number} fundingRound={fundingRound} />
+            <Round
+              key={fundingRound.number}
+              fundingRound={fundingRound}
+              applications={applications}
+            />
           ))}
         </div>
       </div>
@@ -87,11 +96,12 @@ export const FundingRounds = ({
 const Round = ({
   className,
   fundingRound,
+  applications,
 }: {
   className?: string
   fundingRound: FundingRound
+  applications: ApplicationWithDetails[] | null
 }) => {
-  const { data } = useSession()
   const router = useRouter()
 
   let SelectedContent: any
@@ -99,17 +109,35 @@ const Round = ({
   if (fundingRound.status === "past") {
     SelectedContent = <FundingRoundPast fundingRound={fundingRound} />
   } else if (fundingRound.status === "ongoing") {
+    // console.log(
+    //   applications?.find(
+    //     (app) => app.roundId === fundingRound.number.toString(),
+    //   ),
+    // )
+
+    // applications
+    //   ? applications.find(
+    //       (app) => app.roundId === fundingRound.number.toString(),
+    //     )
+    //   : "Open"
+
     let userApplicationState: "Open" | "Pending" | "Active" = "Open"
 
-    if (data) {
-      const applicationStates = ["Active", "Pending", "Active"]
+    if (applications) {
+      userApplicationState =
+        applications.filter(
+          (app) => app.roundId === fundingRound.number.toString(),
+        ).length > 0
+          ? "Active"
+          : "Open"
+      // const applicationStates = ["Active", "Pending", "Active"]
 
-      if (applicationStates.length > 0) {
-        const areAnyPending = applicationStates.some((state) => {
-          return state === "Pending"
-        })
-        userApplicationState = areAnyPending ? "Pending" : "Active"
-      }
+      // if (applicationStates.length > 0) {
+      //   const areAnyPending = applicationStates.some((state) => {
+      //     return state === "Pending"
+      //   })
+      //   userApplicationState = areAnyPending ? "Pending" : "Active"
+      // }
     }
     SelectedContent = (
       <button

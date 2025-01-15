@@ -4,7 +4,11 @@ import { Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
 import { FUNDING_ROUNDS } from "@/lib/mocks"
-import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  ProjectWithDetails,
+  UserWithAddresses,
+} from "@/lib/types"
 
 import { Account } from "../common/Account"
 import { FeedbackButton } from "../common/FeedbackButton"
@@ -16,14 +20,14 @@ export function Rounds({
   projects,
   user,
   userProjects,
+  applications,
 }: {
   projects: Project[]
   user?: UserWithAddresses | null
   userProjects?: ProjectWithDetails[] | null
+  applications: ApplicationWithDetails[] | null
 }) {
   const { data } = useSession()
-
-  console.log(data)
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -40,7 +44,10 @@ export function Rounds({
 
         <div className="mt-10 flex flex-1 gap-x-10">
           <div className="flex flex-col flex-1 gap-y-12">
-            <FundingRounds fundingRounds={FUNDING_ROUNDS} />
+            <FundingRounds
+              fundingRounds={FUNDING_ROUNDS}
+              applications={applications}
+            />
             <div className="flex flex-col">
               <h2 className="text-xl font-semibold text-text-default">
                 About Retro Funding
