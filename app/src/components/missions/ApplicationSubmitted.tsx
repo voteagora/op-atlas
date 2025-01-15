@@ -86,7 +86,7 @@ export const ApplicationSubmitted = ({
   return (
     <div
       className={cn(
-        "flex flex-col gap-y-12 w-full bg-background border rounded-3xl p-16",
+        "flex flex-col gap-y-12 w-full rounded-3xl p-16",
         className,
       )}
     >
