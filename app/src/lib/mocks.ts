@@ -24,7 +24,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
   {
     pageName: "retro-funding-dev-tooling",
     name: "Dev Tooling",
-    number: 8,
+    number: 7,
     funding: {
       op: "Up to 3.5M",
     },
@@ -99,7 +99,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
   {
     pageName: "retro-funding-onchain-builders",
     name: "Onchain Builders",
-    number: 7,
+    number: 8,
     funding: {
       op: "Up to 3.5M",
     },

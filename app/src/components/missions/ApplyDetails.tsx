@@ -3,7 +3,11 @@ import React, { useState } from "react"
 import { FundingRound } from "@/lib/mocks"
 import { Project } from "@/components/missions/Project"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ProjectWithDetails } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  CategoryWithImpact,
+  ProjectWithDetails,
+} from "@/lib/types"
 import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
 import CircleWithCheckmark from "../common/CircleWithGreenCheckmark"
@@ -13,6 +17,9 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import ExternalLink from "../ExternalLink"
+import { toast } from "sonner"
+import { Application } from "@prisma/client"
+import { submitApplications } from "@/lib/actions/applications"
 
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
@@ -25,18 +32,28 @@ const TERMS = [
 export const ApplicationFormSchema = z.object({
   projects: z.array(
     z.object({
+      projectId: z.string(),
+      category: z.string(),
       selected: z.boolean(),
+      projectDescriptionOptions: z.array(z.string()),
+      impactStatement: z.record(z.string(), z.string()),
     }),
   ),
 })
 
 export function ApplyDetails({
   projects,
+  applications,
   round,
+  categories,
 }: {
   projects: ProjectWithDetails[]
+  applications: ApplicationWithDetails[]
   round: FundingRound
+  categories: CategoryWithImpact[]
 }) {
+  console.log(applications)
+
   const [currentTab, setCurrentTab] = useState("details")
 
   const router = useRouter()
@@ -50,11 +67,20 @@ export function ApplyDetails({
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
-      projects: [
-        {
+      projects: projects.map((project) => {
+        return {
           selected: false,
-        },
-      ],
+          projectId: project.id,
+          category: "1",
+          impactStatement: { "1": "" },
+        }
+      }),
+      // [
+      //   {
+      //     selected: false,
+      //     projectId:
+      //   },
+      // ],
     },
     shouldFocusError: true,
     mode: "onChange",
@@ -71,6 +97,58 @@ export function ApplyDetails({
       const updated = [...prev]
       updated[idx] = !updated[idx]
       return updated
+    })
+  }
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  console.log(categories)
+
+  const submitApplication = async () => {
+    setIsLoading(true)
+
+    const filterProjects = form
+      .getValues()
+      .projects.filter((project) => project.selected)
+
+    console.log(filterProjects)
+
+    const promise: Promise<Application> = new Promise(
+      async (resolve, reject) => {
+        try {
+          const result = await submitApplications(
+            filterProjects.map((project) => ({
+              categoryId: project.category,
+              projectId: project.projectId,
+              projectDescriptionOptions: project.projectDescriptionOptions,
+              impactStatement: project.impactStatement,
+            })),
+            round.number,
+            categories,
+          )
+
+          if (result.error !== null || result.applications.length === 0) {
+            throw new Error(result.error ?? "Error submitting application")
+          }
+
+          resolve(result.applications[0])
+        } catch (error) {
+          console.error("Error submitting application", error)
+          reject(error)
+        }
+      },
+    )
+
+    toast.promise(promise, {
+      loading: "Submitting application...",
+      success: (application) => {
+        // onApplied(application as ApplicationWithDetails)
+        return "Application submitted"
+      },
+      error: (error) => {
+        setIsLoading(false)
+        return error.message
+      },
     })
   }
 
@@ -194,6 +272,7 @@ export function ApplyDetails({
               className="mt-10"
               variant={"destructive"}
               disabled={!canSubmitForm}
+              onClick={submitApplication}
             >
               Submit
             </Button>

@@ -10,7 +10,12 @@ import {
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 import { notFound } from "next/navigation"
 import { format } from "date-fns"
-import { getAdminProjects, getRoundApplications } from "@/lib/actions/projects"
+import {
+  getAdminProjects,
+  getApplications,
+  getProjects,
+  getRoundApplications,
+} from "@/lib/actions/projects"
 import { getCategories } from "@/db/category"
 import { auth } from "@/auth"
 import { ApplyDetails } from "@/components/missions/ApplyDetails"
@@ -25,16 +30,11 @@ export default async function Apply({ params }: { params: { id: string } }) {
 
   const [projects, applications, categories] = session
     ? await Promise.all([
-        getAdminProjects(session.user.id, "5"),
-        getRoundApplications(session.user.id, 5),
+        getProjects(session.user.id),
+        getApplications(session.user.id),
         getCategories(),
       ])
     : [[], [], []]
-
-  console.log(projects)
-  console.log(applications)
-
-  let currentTab = "details"
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -69,7 +69,12 @@ export default async function Apply({ params }: { params: { id: string } }) {
                     ${format(startsAt, "MMM d")}.`}
           <div className="h-[2px] bg-secondary" />
 
-          <ApplyDetails projects={projects} round={foundRound} />
+          <ApplyDetails
+            projects={projects}
+            round={foundRound}
+            applications={applications}
+            categories={categories}
+          />
         </div>
       </div>
     </main>
