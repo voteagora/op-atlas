@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { partition } from "ramda"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -225,6 +225,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
         !isSave && router.push(`/projects/${project.id}/contracts`)
         setIsSaving(false)
+        form.reset({ links, githubRepos: projectRepos })
         toast.success("Project saved")
       } catch (error) {
         toast.error("There was an error updating your Repos and Links")
@@ -232,24 +233,20 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         console.error("Error saving packages", error)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [project.id, router],
   )
 
   const links = form.watch("links")
-  const [isValidToAddLink, setIsValidToAddLink] = useState(false)
-
-  useEffect(() => {
-    // Run code whenever 'firstName' changes
-    if (links) {
-      setIsValidToAddLink(
-        links[links.length - 1]?.url !== "" &&
-          z
-            .string()
-            .url()
-            .safeParse(links[links.length - 1]?.url).success,
-      )
-    }
-  }, [JSON.stringify(links)])
+  const isValidToAddLink = useMemo(() => {
+    return (
+      links[links.length - 1].url !== "" &&
+      z
+        .string()
+        .url()
+        .safeParse(links[links.length - 1].url).success
+    )
+  }, [links])
 
   return (
     <>
