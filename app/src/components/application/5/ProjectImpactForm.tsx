@@ -82,7 +82,7 @@ const ProjectImpactForm = ({
       >
         <AccordionItem value="item-1">
           <AccordionTrigger className="!p-0">
-            {/* <div className="flex gap-4 items-center w-full">
+            <div className="flex gap-4 items-center w-full">
               <FormField
                 name={`projects.${index}.selected`}
                 control={form.control}
@@ -133,7 +133,7 @@ const ProjectImpactForm = ({
               {isIneligible && !hasApplied && (
                 <Badge size="lg" text="Not eligible" className="ml-auto" />
               )}
-            </div> */}
+            </div>
           </AccordionTrigger>
 
           <AccordionContent className="pb-0">
@@ -211,7 +211,7 @@ const ProjectImpactForm = ({
                   text="Promises of future deliverables or impact are not allowed."
                 />
 
-                {/* {categories
+                {categories
                   .find((category) => category.id === categoryId)
                   ?.impactStatements.map((impactStatement) => (
                     <div key={impactStatement.id}>
@@ -243,7 +243,7 @@ const ProjectImpactForm = ({
                         )}
                       />
                     </div>
-                  ))} */}
+                  ))}
               </div>
             </div>
           </AccordionContent>
