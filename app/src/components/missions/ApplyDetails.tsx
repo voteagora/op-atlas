@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { format } from "date-fns"
 import Image from "next/image"
+import { ApplicationSubmitted } from "./ApplicationSubmitted"
 
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
@@ -123,7 +124,6 @@ export function ApplyDetails({
 
     console.log(filterProjects)
 
-    // const [application, setApplication] = useState()
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
         try {
@@ -154,6 +154,7 @@ export function ApplyDetails({
       loading: "Submitting application...",
       success: (application) => {
         setIsSubmitted(true)
+
         // onApplied(application as ApplicationWithDetails)
         return "Application submitted"
       },
@@ -164,28 +165,12 @@ export function ApplyDetails({
     })
   }
 
-  if (isSubmitted)
-    return (
-      <div className="flex flex-col items-center justify-center">
-        <Image
-          alt="Info"
-          src={"/assets/icons/sunny-red.svg"}
-          width={56}
-          height={56}
-          className="w-28 h-28"
-        />
+  const [application, setApplication] = useState()
 
-        <p className="text-2xl font-bold">Application Submitted</p>
-
-        <p>
-          Your Application to{" "}
-          <span className="font-bold">{round.pageName}</span> was submitted on{" "}
-          {"{date}"} at time {"{time}"}. You'll receive a confirmation email at{" "}
-          <span className="text-blue-900">shaun@optimism.io</span>{" "}
-        </p>
-      </div>
-    )
-  // async
+  // if (isSubmitted)
+  //   return (
+  //     <ApplicationSubmitted
+  //   )
 
   return (
     <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
