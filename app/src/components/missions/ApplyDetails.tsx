@@ -113,7 +113,7 @@ export function ApplyDetails({
 
   const [isLoading, setIsLoading] = useState(false)
 
-  const [isSubmitted, setIsSubmitted] = useState(true)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
   const submitApplication = async () => {
     setIsLoading(true)
@@ -186,7 +186,7 @@ export function ApplyDetails({
       <ApplicationSubmitted
         className="mt-18 max-w-4xl"
         applications={[application]}
-        roundName="Dev Tooling"
+        roundName={round.name}
       />
     )
   }
@@ -262,6 +262,11 @@ export function ApplyDetails({
                       index={index}
                       project={field}
                       round={round}
+                      isApplicationPresent={
+                        applications.find((app) => app.project.id === field.id)
+                          ? true
+                          : false
+                      }
                       form={form}
                     />
                   ))}

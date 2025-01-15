@@ -40,11 +40,13 @@ export const Project = ({
   project,
   index,
   form,
+  isApplicationPresent,
 }: {
   round: FundingRound
   project: ProjectWithDetails
   index: number
   form: any
+  isApplicationPresent: boolean
 }) => {
   const { data } = useSession()
   // getUserApplications({})
@@ -97,8 +99,8 @@ export const Project = ({
     Publish: "Publish metadata onchain",
   }
 
-  const isActive = false
-  const isPending = false
+  const isActive = isApplicationPresent
+  // const isPending = false
   const isIncomplete = !allRequirementsMet
   const isNotEligible = !allEligibilityMet
 
@@ -136,7 +138,7 @@ export const Project = ({
       variant={"outline"}
     >
       <Check width={12} height={12}></Check>
-      {"Active"}
+      Enrolled
     </Badge>
   )
 
@@ -144,15 +146,17 @@ export const Project = ({
 
   if (isActive) {
     selectedBadge = activeBadge
-  } else if (isPending) {
-    selectedBadge = pendingBadge
-  } else if (isNotEligible) {
+  }
+  // else if (isPending) {
+  //   selectedBadge = pendingBadge
+  // }
+  else if (isNotEligible) {
     selectedBadge = notEligibleBadge
   } else if (isIncomplete) {
     selectedBadge = incompleteBadge
   }
 
-  const isValid = !isActive && !isPending && !isNotEligible && !isIncomplete
+  const isValid = !isActive && !isNotEligible && !isIncomplete //&& !isPending
 
   return (
     <div className="p-8 border border-input rounded-xl">
