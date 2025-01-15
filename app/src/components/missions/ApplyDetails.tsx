@@ -11,7 +11,6 @@ import { FormField } from "../ui/form"
 import { Checkbox } from "../ui/checkbox"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { ApplicationFormSchema } from "../application/5/ApplicationFormTabs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import ExternalLink from "../ExternalLink"
 
@@ -22,6 +21,14 @@ const TERMS = [
   "I certify that no member of the team receiving the grant is barred from participating in Optimism’s grant program under applicable law.",
   "I understand that access to my Optimist Profile is required to claim Retro Funding rewards.",
 ]
+
+export const ApplicationFormSchema = z.object({
+  projects: z.array(
+    z.object({
+      selected: z.boolean(),
+    }),
+  ),
+})
 
 export function ApplyDetails({
   projects,
@@ -38,19 +45,25 @@ export function ApplyDetails({
     Array.from({ length: TERMS.length + 1 }, () => false),
   )
 
-  console.log(agreedTerms)
-
   const canSubmitForm = agreedTerms.every((term) => term)
-
-  console.log(canSubmitForm)
 
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
-      projects: [],
+      projects: [
+        {
+          selected: false,
+        },
+      ],
     },
     shouldFocusError: true,
     mode: "onChange",
+  })
+
+  const projectsForm = form.watch("projects")
+
+  const isNextButtonDisabled = !projectsForm.some((project) => {
+    return project.selected
   })
 
   const toggleAgreedTerm = (idx: number) => {
@@ -104,8 +117,12 @@ export function ApplyDetails({
                   />
                 ))}
                 <Button
-                  className="bg-optimismRed text-white mt-10"
-                  variant={"ghost"}
+                  className="mt-10"
+                  variant={"destructive"}
+                  disabled={isNextButtonDisabled}
+                  onClick={() => {
+                    setCurrentTab("terms")
+                  }}
                 >
                   Next
                 </Button>
@@ -123,10 +140,7 @@ export function ApplyDetails({
                 </p>
 
                 <div className="flex gap-4">
-                  <Button
-                    className="bg-optimismRed text-white w-44"
-                    variant={"outline"}
-                  >
+                  <Button className="w-44" variant={"destructive"}>
                     Add Project
                   </Button>
                   <Button
@@ -177,8 +191,8 @@ export function ApplyDetails({
             </div>
 
             <Button
-              className="bg-optimismRed text-white mt-10"
-              variant={"ghost"}
+              className="mt-10"
+              variant={"destructive"}
               disabled={!canSubmitForm}
             >
               Submit

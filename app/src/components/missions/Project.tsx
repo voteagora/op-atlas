@@ -29,9 +29,11 @@ import {
 } from "lucide-react"
 import { Button } from "../ui/button"
 import { notFound, useRouter } from "next/navigation"
-import { FUNDING_ROUNDS } from "@/lib/mocks"
-import { FundingRound } from "@/lib/roundsData"
+import { FUNDING_ROUNDS, FundingRound } from "@/lib/mocks"
 import CircleWithCheckmark from "../common/CircleWithGreenCheckmark"
+import { getUserApplications } from "@/db/projects"
+import { useSession } from "next-auth/react"
+import { ProjectsEnrolled } from "./ProjectsEnrolled"
 
 export const Project = ({
   round,
@@ -44,6 +46,11 @@ export const Project = ({
   index: number
   form: any
 }) => {
+  const { data } = useSession()
+  // getUserApplications({})
+
+  console.log(data)
+
   const { progressPercent, completedSections } = useMemo(() => {
     return project
       ? getProjectStatus(project)
@@ -60,6 +67,23 @@ export const Project = ({
     ProjectSection.Publish,
   ]
 
+  const allRequirementsMet = projectRequirements.every((section) =>
+    completedSections.includes(section),
+  )
+
+  console.log(allRequirementsMet)
+
+  const allEligibilityMet =
+    project.hasCodeRepositories &&
+    project.repos.length > 0 &&
+    round.eligibility.criteria.every((criterion: any) => {
+      return project.repos.every((repo: any) => {
+        return repo[criterion.dbValue]
+      })
+    })
+
+  console.log(allEligibilityMet)
+
   const requirementStatus = projectRequirements.reduce((acc, requirement) => {
     acc[requirement] = completedSections.includes(requirement)
     return acc
@@ -75,8 +99,8 @@ export const Project = ({
 
   const isActive = false
   const isPending = false
-  const isIncomplete = false
-  const isNotEligible = false
+  const isIncomplete = !allRequirementsMet
+  const isNotEligible = !allEligibilityMet
 
   const incompleteBadge = (
     <Badge
@@ -211,7 +235,13 @@ export const Project = ({
             <p className="font-bold pt-5 pb-2">Eligibility Criteria</p>
 
             {round.eligibility.criteria.map((criterion: any, index: number) => {
-              const criteriaCompletion = false
+              const criteriaCompletion =
+                project.hasCodeRepositories &&
+                project.repos.length > 0 &&
+                project.repos.every((repo: any) => {
+                  return repo[criterion.dbValue]
+                })
+
               let icon
 
               if (!criteriaCompletion) {
@@ -256,116 +286,6 @@ export const Project = ({
               Edit project
               <ChevronRight />
             </Button>
-
-            {/* <div className="mt-12 flex flex-col gap-y-12">
-              <div className="flex flex-col gap-2">
-                <h3 className="text-xl font-semibold text-text-default">
-                  Category
-                </h3>
-                <h5 className="text-sm font-medium text-foreground mt-4">
-                  Choose a category of impact for this project
-                  <span className="text-destructive">*</span>
-                </h5>
-                <FormField
-                    control={form.control}
-                    name={`projects.${index}.category`}
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col gap-2">
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          {categories.map((category) => {
-                            return (
-                              <CategoryItem
-                                key={category.id}
-                                value={category.id}
-                                selectedValue={field.value}
-                                category={category}
-                                index={index}
-                                form={form}
-                              />
-                            )
-                          })}
-                        </RadioGroup>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                <p className="text-sm text-secondary-foreground ">
-                  Unsure which category to choose?
-                  <ExternalLink
-                    className="underline"
-                    href="https://discord.com/invite/optimism"
-                  >
-                    {" "}
-                    Get help in Discord.
-                  </ExternalLink>
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-6">
-                <h4 className="text-xl font-semibold text-text-default">
-                  Impact statement
-                </h4>
-                <p className="text-sm text-secondary-foreground">
-                  Describe this project’s impact on the OP Stack from Oct 1,
-                  2023 - July 31, 2024. Please only describe the impact that was
-                  delivered during that specific time period.
-                </p>
-                <p className="text-sm text-secondary-foreground">
-                  You’ve already given your project a description in your{" "}
-                  <ExternalLink
-                    href={`/projects/${project.id}/details`}
-                    className="underline"
-                  >
-                    project setup
-                  </ExternalLink>
-                  . There’s no need to repeat that information here. Instead,
-                  focus on communicating your project’s impact.
-                </p>
-                <Callout
-                  className="!text-sm"
-                  type="info"
-                  text="Promises of future deliverables or impact are not allowed."
-                />
-
-                {categories
-                    .find((category) => category.id === categoryId)
-                    ?.impactStatements.map((impactStatement) => (
-                      <div key={impactStatement.id}>
-                        <h6 className="text-sm font-medium">
-                          {impactStatement.question}
-                          <span className="text-destructive">*</span>
-                        </h6>
-                        <p className="text-sm text-secondary-foreground mb-2">
-                          {impactStatement.subtext}
-                        </p>
-  
-                        <FormField
-                          control={form.control}
-                          name={`projects.${index}.impactStatement.${impactStatement.id}`}
-                          render={({ field }) => (
-                            <FormItem className="relative">
-                              <div className="relative">
-                                <Textarea
-                                  {...field}
-                                  className="min-h-60"
-                                  placeholder="Add a response"
-                                />
-                                <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground">
-                                  {field?.value?.length}/1000
-                                </span>
-                              </div>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    ))}
-              </div>
-            </div> */}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
