@@ -3,7 +3,7 @@
 import { SignInButton, StatusAPIResponse } from "@farcaster/auth-kit"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -75,6 +75,9 @@ export function Account() {
     }
   }
 
+  const pathName = usePathname()
+  const isMissions = pathName.includes("/missions")
+
   useEffect(() => {
     // only run this useEffect when the user logs in
     if (
@@ -83,12 +86,17 @@ export function Account() {
       return
 
     track("Successful Sign In", { userId: session.user.farcasterId })
+
     if (isFirstTimeUser()) {
-      router.push("/dashboard")
+      if (!isMissions) {
+        router.push("/dashboard")
+      }
       saveLogInDate()
     } else {
       saveLogInDate()
-      router.push("/dashboard")
+      if (!isMissions) {
+        router.push("/dashboard")
+      }
 
       if (!session.user.email) {
         setOpenDialog("email")

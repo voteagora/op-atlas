@@ -4,24 +4,29 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { optimism } from "viem/chains"
 
 import { FundingRound } from "@/lib/mocks"
 import { cn, titlecase } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { ChainLogo } from "../common/ChainLogo"
-import ExternalLink from "../ExternalLink"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
+import { FundingRoundPast } from "./FundingRoundPast"
+import { FundingRoundOngoing } from "./FundingRoundOngoing"
+import { getApplications } from "@/lib/actions/projects"
+import { ApplicationWithDetails } from "@/lib/types"
+import { Session } from "next-auth"
 
 export const FundingRounds = ({
   className,
   fundingRounds,
+  applications,
 }: {
   className?: string
   fundingRounds: FundingRound[]
+  applications: ApplicationWithDetails[] | null
 }) => {
   const { open, upcoming, past, ongoing } = useMemo(() => {
     const n: FundingRound[] = []
@@ -60,19 +65,30 @@ export const FundingRounds = ({
             {status === "open" ? "Open for applications" : titlecase(status)}
           </h3>
         </div>
-        {rounds.map((fundingRound) => (
-          <Round key={fundingRound.number} fundingRound={fundingRound} />
-        ))}
+
+        <div
+          className={`flex gap-4 ${
+            status === "ongoing" ? "flex flex-wrap" : "flex-col"
+          }`}
+        >
+          {rounds.map((fundingRound) => (
+            <Round
+              key={fundingRound.number}
+              fundingRound={fundingRound}
+              applications={applications}
+            />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
     <div className={cn("flex flex-col gap-y-12 w-full", className)}>
-      {open.length > 0 && renderSection("open", open)}
-      {upcoming.length > 0 && renderSection("upcoming", upcoming)}
       {ongoing.length > 0 && renderSection("ongoing", ongoing)}
       {past.length > 0 && renderSection("past", past)}
+      {open.length > 0 && renderSection("open", open)}
+      {upcoming.length > 0 && renderSection("upcoming", upcoming)}
     </div>
   )
 }
@@ -80,58 +96,79 @@ export const FundingRounds = ({
 const Round = ({
   className,
   fundingRound,
+  applications,
 }: {
   className?: string
   fundingRound: FundingRound
+  applications: ApplicationWithDetails[] | null
 }) => {
   const router = useRouter()
-  const { status } = useSession()
-  const { setOpenDialog } = useAppDialogs()
 
-  const onClick = () => {
-    if (fundingRound.status === "open") {
-      if (status === "authenticated") {
-        router.push("/dashboard")
-      } else {
-        setOpenDialog("get_started")
-      }
-      return
+  let SelectedContent: any
+
+  if (fundingRound.status === "past") {
+    SelectedContent = <FundingRoundPast fundingRound={fundingRound} />
+  } else if (fundingRound.status === "ongoing") {
+    // console.log(
+    //   applications?.find(
+    //     (app) => app.roundId === fundingRound.number.toString(),
+    //   ),
+    // )
+
+    // applications
+    //   ? applications.find(
+    //       (app) => app.roundId === fundingRound.number.toString(),
+    //     )
+    //   : "Open"
+
+    let userApplicationState: "Open" | "Pending" | "Active" = "Open"
+
+    if (applications) {
+      userApplicationState =
+        applications.filter(
+          (app) => app.roundId === fundingRound.number.toString(),
+        ).length > 0
+          ? "Active"
+          : "Open"
+      // const applicationStates = ["Active", "Pending", "Active"]
+
+      // if (applicationStates.length > 0) {
+      //   const areAnyPending = applicationStates.some((state) => {
+      //     return state === "Pending"
+      //   })
+      //   userApplicationState = areAnyPending ? "Pending" : "Active"
+      // }
     }
-
-    fundingRound.link && router.push(fundingRound.link)
-  }
-
-  if (fundingRound.status === "open") {
-    return (
-      <div className={cn("flex gap-x-6 border rounded-xl p-10", className)}>
-        <FundingRoundContent fundingRound={fundingRound} />
-      </div>
+    SelectedContent = (
+      <button
+        onClick={() => {
+          router.push(`/missions/${fundingRound.pageName}`)
+        }}
+      >
+        <FundingRoundOngoing
+          fundingRound={fundingRound}
+          userApplicationState={userApplicationState}
+        />
+      </button>
     )
+  } else {
+    SelectedContent = <FundingRoundContent fundingRound={fundingRound} />
   }
 
-  if (!fundingRound.link) {
-    return (
-      <div className={cn("flex gap-x-6 border rounded-xl p-10", className)}>
-        <FundingRoundContent fundingRound={fundingRound} />
-      </div>
-    )
-  }
-
-  return (
-    <ExternalLink
-      href={fundingRound.link}
-      className={cn("flex gap-x-6 border rounded-xl p-10", className)}
-    >
-      <FundingRoundContent fundingRound={fundingRound} />
-    </ExternalLink>
+  const content = (
+    <div className={cn(`flex flex-1 gap-x-1 border rounded-xl`, className)}>
+      {SelectedContent}
+    </div>
   )
+
+  return content
 }
 
 function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
   const router = useRouter()
   const { status } = useSession()
   return (
-    <>
+    <div className="p-10">
       {fundingRound.status !== "past" && fundingRound.iconUrl && (
         <Image
           src={fundingRound.iconUrl}
@@ -241,6 +278,6 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
           </div>
         )}
       </div>
-    </>
+    </div>
   )
 }

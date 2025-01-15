@@ -4,7 +4,11 @@ import { Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
 import { FUNDING_ROUNDS } from "@/lib/mocks"
-import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  ProjectWithDetails,
+  UserWithAddresses,
+} from "@/lib/types"
 
 import { Account } from "../common/Account"
 import { FeedbackButton } from "../common/FeedbackButton"
@@ -16,10 +20,12 @@ export function Rounds({
   projects,
   user,
   userProjects,
+  applications,
 }: {
   projects: Project[]
   user?: UserWithAddresses | null
   userProjects?: ProjectWithDetails[] | null
+  applications: ApplicationWithDetails[] | null
 }) {
   const { data } = useSession()
 
@@ -30,32 +36,18 @@ export function Rounds({
           The results are in! Sign in to see your Retro Funding 6 rewards.
         </div>
       )}
-      {/* Background image */}
-      <div
-        className="absolute h-[500px] w-full"
-        style={{
-          backgroundImage: 'url("/assets/images/gradient-background.svg")',
-          backgroundSize: "cover",
-        }}
-      />
-
       {/* Main content */}
-      <div className="mt-36 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
+      <div className="mt-8 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
         <div className="flex flex-col w-full">
-          <h1 className="text-4xl font-semibold">Rounds</h1>
-          <p className="mt-2 text-muted-foreground">
-            Build together, benefit together.
-          </p>
-          {!data?.user && (
-            <div className="mt-6">
-              <Account />
-            </div>
-          )}
+          <h1 className="text-4xl font-semibold">Retro Funding Missions</h1>
         </div>
 
-        <div className="mt-10 flex flex-1 gap-x-6">
+        <div className="mt-10 flex flex-1 gap-x-10">
           <div className="flex flex-col flex-1 gap-y-12">
-            <FundingRounds fundingRounds={FUNDING_ROUNDS} />
+            <FundingRounds
+              fundingRounds={FUNDING_ROUNDS}
+              applications={applications}
+            />
             <div className="flex flex-col">
               <h2 className="text-xl font-semibold text-text-default">
                 About Retro Funding
