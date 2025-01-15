@@ -6,17 +6,39 @@ import { cache } from "react"
 import { prisma } from "./client"
 
 async function getOrganizationsFn(userId: string) {
-  return prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      organizations: {
-        where: { deletedAt: null, organization: { deletedAt: null } },
-        include: {
-          organization: true,
-        },
-      },
-    },
-  })
+  const result = await prisma.$queryRaw<
+    Array<{
+      organizations: Array<{
+        organization: Organization
+      }>
+    }>
+  >`
+    SELECT jsonb_build_object(
+      'organizations', COALESCE(
+        (
+          SELECT jsonb_agg(
+            jsonb_build_object(
+              'organization', to_jsonb(o.*)
+            )
+          )
+          FROM "Organization" o
+          JOIN "UserOrganization" uo ON o."id" = uo."organizationId"
+          WHERE uo."userId" = ${userId}
+            AND uo."deletedAt" IS NULL
+            AND o."deletedAt" IS NULL
+        ),
+        '[]'::jsonb
+      )
+    ) as result
+  `
+
+  // Transform the raw result to match the expected structure
+  const transformed = result[0] || { organizations: [] }
+
+  // Ensure null arrays are converted to empty arrays
+  transformed.organizations = transformed.organizations || []
+
+  return transformed
 }
 
 export const getOrganizations = cache(getOrganizationsFn)
