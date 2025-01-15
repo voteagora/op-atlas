@@ -38,7 +38,7 @@ export default async function Apply({ params }: { params: { id: string } }) {
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
+      {/* <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
         {" "}
         <Breadcrumb>
           <BreadcrumbList>
@@ -67,16 +67,16 @@ export default async function Apply({ params }: { params: { id: string } }) {
               "MMM d",
             )} to be evaluated for rewards starting 
                     ${format(startsAt, "MMM d")}.`}
-          <div className="h-[2px] bg-secondary" />
+          <div className="h-[2px] bg-secondary" /> */}
 
-          <ApplyDetails
-            projects={projects}
-            round={foundRound}
-            applications={applications}
-            categories={categories}
-          />
-        </div>
-      </div>
+      <ApplyDetails
+        projects={projects}
+        round={foundRound}
+        applications={applications}
+        categories={categories}
+      />
+      {/* </div> */}
+      {/* </div> */}
     </main>
   )
 }

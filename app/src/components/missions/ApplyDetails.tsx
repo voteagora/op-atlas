@@ -20,6 +20,16 @@ import ExternalLink from "../ExternalLink"
 import { toast } from "sonner"
 import { Application } from "@prisma/client"
 import { submitApplications } from "@/lib/actions/applications"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { format } from "date-fns"
+import Image from "next/image"
 
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
@@ -102,7 +112,7 @@ export function ApplyDetails({
 
   const [isLoading, setIsLoading] = useState(false)
 
-  console.log(categories)
+  const [isSubmitted, setIsSubmitted] = useState(true)
 
   const submitApplication = async () => {
     setIsLoading(true)
@@ -113,6 +123,7 @@ export function ApplyDetails({
 
     console.log(filterProjects)
 
+    // const [application, setApplication] = useState()
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
         try {
@@ -142,6 +153,7 @@ export function ApplyDetails({
     toast.promise(promise, {
       loading: "Submitting application...",
       success: (application) => {
+        setIsSubmitted(true)
         // onApplied(application as ApplicationWithDetails)
         return "Application submitted"
       },
@@ -152,133 +164,191 @@ export function ApplyDetails({
     })
   }
 
+  if (isSubmitted)
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <Image
+          alt="Info"
+          src={"/assets/icons/sunny-red.svg"}
+          width={56}
+          height={56}
+          className="w-28 h-28"
+        />
+
+        <p className="text-2xl font-bold">Application Submitted</p>
+
+        <p>
+          Your Application to{" "}
+          <span className="font-bold">{round.pageName}</span> was submitted on{" "}
+          {"{date}"} at time {"{time}"}. You'll receive a confirmation email at{" "}
+          <span className="text-blue-900">shaun@optimism.io</span>{" "}
+        </p>
+      </div>
+    )
+  // async
+
   return (
-    <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
-      <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-        <TabsList className="grid w-96 grid-cols-2 bg-background">
-          <TabsTrigger
-            className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
-            value="details"
-          >
-            <span className="pr-2">
-              {currentTab === "terms" ? (
-                <div className="w-5 h-5">
-                  <CircleWithCheckmark />
-                </div>
-              ) : (
-                "1"
-              )}
-            </span>{" "}
-            Choose projects
-          </TabsTrigger>
-          <TabsTrigger
-            className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
-            value="terms"
-          >
-            <span className="pr-2">2</span> Agree to terms
-          </TabsTrigger>
-        </TabsList>
-        <div className="mt-12">
-          {/* application details content */}
-          <TabsContent value="details">
-            <p className="text-2xl font-bold mb-5">Choose projects</p>
+    <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
+      {" "}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Retro Funding Missions</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href={`/missions/${round.pageName}`}>
+              {round.name}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Apply</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <div className="flex flex-col mt-10">
+        <h2 className="text-4xl mb-2">{"Apply for Retro Funding: " + name}</h2>
+        {round.applyBy &&
+          `Submit this application by ${format(
+            round.applyBy,
+            "MMM d",
+          )} to be evaluated for rewards starting 
+                    ${format(round.startsAt, "MMM d")}.`}
+        <div className="h-[2px] bg-secondary" />
+      </div>
+      <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
+        <Tabs
+          value={currentTab}
+          onValueChange={setCurrentTab}
+          className="w-full"
+        >
+          <TabsList className="grid w-96 grid-cols-2 bg-background">
+            <TabsTrigger
+              className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
+              value="details"
+            >
+              <span className="pr-2">
+                {currentTab === "terms" ? (
+                  <div className="w-5 h-5">
+                    <CircleWithCheckmark />
+                  </div>
+                ) : (
+                  "1"
+                )}
+              </span>{" "}
+              Choose projects
+            </TabsTrigger>
+            <TabsTrigger
+              className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
+              value="terms"
+            >
+              <span className="pr-2">2</span> Agree to terms
+            </TabsTrigger>
+          </TabsList>
+          <div className="mt-12">
+            {/* application details content */}
+            <TabsContent value="details">
+              <p className="text-2xl font-bold mb-5">Choose projects</p>
 
-            {projects.length > 0 ? (
-              <>
-                {projects.map((field, index) => (
-                  <Project
-                    key={field.id}
-                    index={index}
-                    project={field}
-                    round={round}
-                    form={form}
-                  />
-                ))}
-                <Button
-                  className="mt-10"
-                  variant={"destructive"}
-                  disabled={isNextButtonDisabled}
-                  onClick={() => {
-                    setCurrentTab("terms")
-                  }}
-                >
-                  Next
-                </Button>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
-                <p className="font-bold">
-                  {"You haven't added or joined any projects"}
-                </p>
-
-                <p className="text-sm text-secondary-foreground text-center">
-                  {
-                    "To apply for this Retro Funding Mission, first add your project to OP Atlas."
-                  }
-                </p>
-
-                <div className="flex gap-4">
-                  <Button className="w-44" variant={"destructive"}>
-                    Add Project
-                  </Button>
+              {projects.length > 0 ? (
+                <>
+                  {projects.map((field, index) => (
+                    <Project
+                      key={field.id}
+                      index={index}
+                      project={field}
+                      round={round}
+                      form={form}
+                    />
+                  ))}
                   <Button
-                    className="w-44"
-                    variant={"outline"}
+                    className="mt-10"
+                    variant={"destructive"}
+                    disabled={isNextButtonDisabled}
                     onClick={() => {
-                      router.push(`/missions/${round.pageName}`)
+                      setCurrentTab("terms")
                     }}
                   >
-                    View Mission Details
+                    Next
                   </Button>
-                </div>
-              </div>
-            )}
-          </TabsContent>
-          <TabsContent value="terms">
-            <p className="text-2xl font-bold mb-5">Agree and apply</p>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
+                  <p className="font-bold">
+                    {"You haven't added or joined any projects"}
+                  </p>
 
-            <div className="flex flex-col gap-y-4 ml-px">
-              {TERMS.map((term, idx) => (
-                <div key={idx} className="flex gap-x-4">
+                  <p className="text-sm text-secondary-foreground text-center">
+                    {
+                      "To apply for this Retro Funding Mission, first add your project to OP Atlas."
+                    }
+                  </p>
+
+                  <div className="flex gap-4">
+                    <Button className="w-44" variant={"destructive"}>
+                      Add Project
+                    </Button>
+                    <Button
+                      className="w-44"
+                      variant={"outline"}
+                      onClick={() => {
+                        router.push(`/missions/${round.pageName}`)
+                      }}
+                    >
+                      View Mission Details
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            <TabsContent value="terms">
+              <p className="text-2xl font-bold mb-5">Agree and apply</p>
+
+              <div className="flex flex-col gap-y-4 ml-px">
+                {TERMS.map((term, idx) => (
+                  <div key={idx} className="flex gap-x-4">
+                    <Checkbox
+                      className="mt-1"
+                      checked={agreedTerms[idx]}
+                      onCheckedChange={() => toggleAgreedTerm(idx)}
+                    />
+                    <p className="text-secondary-foreground">{term}</p>
+                  </div>
+                ))}
+
+                <div className="flex gap-x-4">
                   <Checkbox
                     className="mt-1"
-                    checked={agreedTerms[idx]}
-                    onCheckedChange={() => toggleAgreedTerm(idx)}
+                    checked={agreedTerms[TERMS.length]}
+                    onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
                   />
-                  <p className="text-secondary-foreground">{term}</p>
+                  <p className="">
+                    I agree to the{" "}
+                    <ExternalLink
+                      href="https://www.optimism.io/data-privacy-policy"
+                      className="font-medium"
+                    >
+                      Optimism Foundation&apos;s Privacy Policy
+                    </ExternalLink>
+                    .
+                  </p>
                 </div>
-              ))}
-
-              <div className="flex gap-x-4">
-                <Checkbox
-                  className="mt-1"
-                  checked={agreedTerms[TERMS.length]}
-                  onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
-                />
-                <p className="">
-                  I agree to the{" "}
-                  <ExternalLink
-                    href="https://www.optimism.io/data-privacy-policy"
-                    className="font-medium"
-                  >
-                    Optimism Foundation&apos;s Privacy Policy
-                  </ExternalLink>
-                  .
-                </p>
               </div>
-            </div>
 
-            <Button
-              className="mt-10"
-              variant={"destructive"}
-              disabled={!canSubmitForm}
-              onClick={submitApplication}
-            >
-              Submit
-            </Button>
-          </TabsContent>
-        </div>
-      </Tabs>
+              <Button
+                className="mt-10"
+                variant={"destructive"}
+                disabled={!canSubmitForm}
+                onClick={submitApplication}
+              >
+                Submit
+              </Button>
+            </TabsContent>
+            <TabsContent value="submitted">Hello</TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   )
 }
