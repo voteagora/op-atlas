@@ -254,11 +254,11 @@ async function getAllPublishedUserProjectsFn({
     WITH "user_projects" AS (
       SELECT 
         p.*,
-        json_agg(DISTINCT pf.*) FILTER (WHERE pf."id" IS NOT NULL) as "funding",
-        json_agg(DISTINCT ps.*) FILTER (WHERE ps."id" IS NOT NULL) as "snapshots",
-        json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL) as "applications",
-        json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL) as "links",
-        json_agg(
+        COALESCE(json_agg(DISTINCT pf.*) FILTER (WHERE pf."id" IS NOT NULL), '[]') as "funding",
+        COALESCE(json_agg(DISTINCT ps.*) FILTER (WHERE ps."id" IS NOT NULL), '[]') as "snapshots",
+        COALESCE(json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL), '[]') as "applications",
+        COALESCE(json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL), '[]') as "links",
+        COALESCE(json_agg(
           DISTINCT jsonb_build_object(
             'id', fr."id",
             'roundId', fr."roundId",
@@ -268,7 +268,7 @@ async function getAllPublishedUserProjectsFn({
             'updatedAt', fr."updatedAt",
             'claim', rc
           )
-        ) FILTER (WHERE fr."id" IS NOT NULL) as "rewards"
+        ) FILTER (WHERE fr."id" IS NOT NULL), '[]') as "rewards"
       FROM "Project" p
       LEFT JOIN "UserProjects" up ON p."id" = up."projectId" 
         AND up."deletedAt" IS NULL
@@ -286,11 +286,11 @@ async function getAllPublishedUserProjectsFn({
     "org_projects" AS (
       SELECT 
         p.*,
-        json_agg(DISTINCT pf.*) FILTER (WHERE pf."id" IS NOT NULL) as "funding",
-        json_agg(DISTINCT ps.*) FILTER (WHERE ps."id" IS NOT NULL) as "snapshots",
-        json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL) as "applications",
-        json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL) as "links",
-        json_agg(
+        COALESCE(json_agg(DISTINCT pf.*) FILTER (WHERE pf."id" IS NOT NULL), '[]') as "funding",
+        COALESCE(json_agg(DISTINCT ps.*) FILTER (WHERE ps."id" IS NOT NULL), '[]') as "snapshots",
+        COALESCE(json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL), '[]') as "applications",
+        COALESCE(json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL), '[]') as "links",
+        COALESCE(json_agg(
           DISTINCT jsonb_build_object(
             'id', fr."id",
             'roundId', fr."roundId",
@@ -300,7 +300,7 @@ async function getAllPublishedUserProjectsFn({
             'updatedAt', fr."updatedAt",
             'claim', rc
           )
-        ) FILTER (WHERE fr."id" IS NOT NULL) as "rewards",
+        ) FILTER (WHERE fr."id" IS NOT NULL), '[]') as "rewards",
         o."id" as "organization_id",
         o."name" as "organization_name"
       FROM "Project" p
