@@ -165,13 +165,31 @@ export function ApplyDetails({
     })
   }
 
-  const [application, setApplication] = useState()
+  // const [application, setApplication] = useState()
 
   // if (isSubmitted)
   //   return (
   //     <ApplicationSubmitted
   //   )
 
+  const application = {
+    project: {
+      name: "Test Name",
+      id: "",
+      thumbnailUrl: "/assets/icons/sunny-smiling.png",
+    },
+    createdAt: new Date(),
+  }
+
+  if (isSubmitted) {
+    return (
+      <ApplicationSubmitted
+        className="mt-18 max-w-4xl"
+        applications={[application]}
+        roundName="Dev Tooling"
+      />
+    )
+  }
   return (
     <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
       {" "}
