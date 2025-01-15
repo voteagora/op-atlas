@@ -263,7 +263,11 @@ export function ApplyDetails({
                       project={field}
                       round={round}
                       isApplicationPresent={
-                        applications.find((app) => app.project.id === field.id)
+                        applications.find(
+                          (app) =>
+                            app.project.id === field.id &&
+                            app.roundId === round.number.toString(),
+                        )
                           ? true
                           : false
                       }
