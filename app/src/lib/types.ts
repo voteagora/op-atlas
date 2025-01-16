@@ -46,6 +46,22 @@ export type RewardWithClaim = Prisma.FundingRewardGetPayload<{
   include: { claim: true }
 }>
 
+export type UserWithProjects = Prisma.UserGetPayload<{
+  select: {
+    projects: {
+      where: {
+        deletedAt: null
+        project: {
+          deletedAt: null
+        }
+      }
+      include: {
+        project: true
+      }
+    }
+  }
+}>
+
 export type UserWithAddresses = Prisma.UserGetPayload<{
   include: {
     addresses: true

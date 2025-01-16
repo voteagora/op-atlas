@@ -7,30 +7,41 @@ import {
   ApplicationWithDetails,
   ProjectWithDetailsLite,
   TeamRole,
+  UserWithProjects,
 } from "@/lib/types"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
-  return prisma.user.findUnique({
-    where: {
-      farcasterId,
-    },
-    select: {
-      projects: {
-        where: {
-          deletedAt: null,
-          project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: true,
-        },
-      },
-    },
-  })
+  const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
+    SELECT jsonb_build_object(
+      'id', u.id,
+      'projects', COALESCE(
+        (
+          SELECT jsonb_agg(
+            jsonb_build_object(
+              'projectId', up."projectId",
+              'userId', up."userId",
+              'deletedAt', up."deletedAt",
+              'project', to_jsonb(p.*)
+            )
+          )
+          FROM "Project" p
+          JOIN "UserProjects" up ON p."id" = up."projectId"
+          WHERE up."userId" = u.id
+            AND up."deletedAt" IS NULL
+            AND p."deletedAt" IS NULL
+        ),
+        '[]'::jsonb
+      )
+    ) as result
+    FROM "User" u
+    WHERE u."farcasterId" = ${farcasterId}
+    LIMIT 1;
+  `
+
+  return result[0]?.result
 }
 
 export const getUserProjects = cache(getUserProjectsFn)
