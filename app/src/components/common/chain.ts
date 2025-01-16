@@ -10,8 +10,8 @@ import {
   swan,
   worldchain,
   zora,
+  ink,
 } from "viem/chains"
-import { ink } from "@/lib/utils/contracts"
 
 export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
   {

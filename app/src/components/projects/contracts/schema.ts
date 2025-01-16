@@ -12,9 +12,9 @@ import {
   swan,
   worldchain,
   zora,
+  ink,
 } from "viem/chains"
 import { z } from "zod"
-import { ink } from "@/lib/utils/contracts"
 
 export const Chain = z.enum([
   base.id.toString(),
