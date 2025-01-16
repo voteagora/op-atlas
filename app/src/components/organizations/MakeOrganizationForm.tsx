@@ -252,6 +252,15 @@ export default function MakeOrganizationForm({
       },
     )
 
+    const newDefaultValues = {
+      ...values,
+      avatarUrl,
+      coverUrl,
+      website: toStringObjectArr(fromStringObjectArr(values.website)),
+      farcaster: toStringObjectArr(fromStringObjectArr(values.farcaster)),
+    }
+    form.reset(newDefaultValues)
+
     toast.promise(promise, {
       loading: isCreating
         ? "Creating organization onchain..."
@@ -546,7 +555,7 @@ export default function MakeOrganizationForm({
 
         <div className="flex gap-2">
           <Button
-            disabled={!canSubmit || isSaving}
+            disabled={!canSubmit || isSaving || !form.formState.isDirty}
             onClick={form.handleSubmit(onSubmit())}
             type="button"
             className="self-start"
