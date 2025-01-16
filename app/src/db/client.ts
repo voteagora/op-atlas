@@ -3,7 +3,9 @@ import { PrismaClient } from "@prisma/client"
 import { timeThis } from "@/logging"
 
 const prismaClientSingleton = () => {
-  return makePrismaClient() as PrismaClient
+  // Check if running in edge runtime
+  const isEdge = process.env.NEXT_RUNTIME === "edge"
+  return isEdge ? new PrismaClient() : (makePrismaClient() as PrismaClient)
 }
 
 // Logging middleware
