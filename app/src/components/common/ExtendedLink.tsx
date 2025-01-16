@@ -22,14 +22,16 @@ interface ButtonProps extends BaseProps {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ icon, text, subtext, href, className, ...props }, ref) => {
     return (
-      <NextLink href={href} passHref target="_blank">
+      <NextLink href={href} passHref target="_blank" className="w-fit">
         <ShadcnButton
           ref={ref}
-          variant="secondary"
-          className={cn("group flex items-center gap-x-1.5", className)}
+          className={cn(
+            "group flex items-center gap-x-1.5 button-secondary",
+            className,
+          )}
         >
           {icon}
-          <span className="group-hover:underline">{text}</span>
+          <span>{text}</span>
           <Image
             src="/assets/icons/arrow-up-right.svg"
             width={10}
@@ -84,3 +86,5 @@ export default function Base({ as = "a", ...props }: Props) {
   }
   return <Link {...props} />
 }
+
+// No underline if button variant

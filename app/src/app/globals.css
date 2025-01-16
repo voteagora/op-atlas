@@ -141,6 +141,10 @@
   .input-container {
     @apply flex items-center self-start px-3 py-2 border border-border rounded-md gap-1 text-secondary-foreground h-10;
   }
+
+  .text-h4 {
+    @apply font-semibold text-xl;
+  }
 }
 
 .fc-authkit-signin-button > button {
