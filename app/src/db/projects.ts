@@ -976,19 +976,23 @@ export async function createApplication({
           id: round.toString(),
         },
       },
-      category: {
-        connect: {
-          id: categoryId,
-        },
-      },
+      category: categoryId
+        ? {
+            connect: {
+              id: categoryId,
+            },
+          }
+        : undefined,
       impactStatementAnswer: {
         createMany: {
-          data: Object.entries(impactStatement).map(
-            ([impactStatementId, answer]) => ({
-              impactStatementId,
-              answer,
-            }),
-          ),
+          data: impactStatement
+            ? Object.entries(impactStatement).map(
+                ([impactStatementId, answer]) => ({
+                  impactStatementId,
+                  answer,
+                }),
+              )
+            : [],
         },
       },
     },

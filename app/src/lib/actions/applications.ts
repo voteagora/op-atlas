@@ -137,7 +137,7 @@ export const submitApplications = async (
     projectDescriptionOptions: string[]
   }[],
   round: number,
-  categories: CategoryWithImpact[],
+  categories?: CategoryWithImpact[],
 ) => {
   const session = await auth()
 
@@ -173,7 +173,7 @@ export const submitApplications = async (
       project,
       session.user.farcasterId,
       round,
-      categories.find((category) => category.id === project.categoryId)!,
+      categories?.find((category) => category.id === project.categoryId)!,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)

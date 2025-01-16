@@ -56,12 +56,10 @@ export function ApplyDetails({
   projects,
   applications,
   round,
-  categories,
 }: {
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   round: FundingRound
-  categories: CategoryWithImpact[]
 }) {
   console.log(applications)
 
@@ -82,8 +80,8 @@ export function ApplyDetails({
         return {
           selected: false,
           projectId: project.id,
-          category: "1",
-          impactStatement: { "1": "" },
+          // category: "1",
+          // impactStatement: { "1": "" },
         }
       }),
       // [
@@ -135,7 +133,6 @@ export function ApplyDetails({
               impactStatement: project.impactStatement,
             })),
             round.number,
-            categories,
           )
 
           if (result.error !== null || result.applications.length === 0) {

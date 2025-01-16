@@ -28,11 +28,10 @@ export default async function Apply({ params }: { params: { id: string } }) {
 
   const { pageName, name, applyBy, startsAt } = foundRound
 
-  const [projects, applications, categories] = session
+  const [projects, applications] = session
     ? await Promise.all([
         getProjects(session.user.id),
         getApplications(session.user.id),
-        getCategories(),
       ])
     : [[], [], []]
 
@@ -73,7 +72,6 @@ export default async function Apply({ params }: { params: { id: string } }) {
         projects={projects}
         round={foundRound}
         applications={applications}
-        categories={categories}
       />
       {/* </div> */}
       {/* </div> */}
