@@ -5,7 +5,7 @@ import { cache } from "react"
 
 import {
   ApplicationWithDetails,
-  ProjectWithDetailsLite,
+  ProjectWithFullDetails,
   PublishedUserProjectsResult,
   TeamRole,
   UserProjectsWithDetails,
@@ -484,49 +484,110 @@ async function getAllPublishedUserProjectsFn({
 
 export const getAllPublishedUserProjects = cache(getAllPublishedUserProjectsFn)
 
-async function getProjectFn({ id }: { id: string }) {
-  return prisma.project.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      team: { where: { deletedAt: null }, include: { user: true } },
-      organization: {
-        where: { deletedAt: null, organization: { deletedAt: null } },
-        include: {
-          organization: {
-            include: {
-              team: {
-                where: { deletedAt: null },
-                include: { user: true },
-              },
-            },
-          },
-        },
-      },
-      repos: true,
-      contracts: true,
-      links: true,
-      funding: true,
-      snapshots: {
-        orderBy: {
-          createdAt: "asc",
-        },
-      },
-      applications: {
-        include: {
-          category: {
-            include: {
-              impactStatements: true,
-            },
-          },
-          impactStatementAnswer: true,
-          round: true,
-        },
-      },
-      rewards: { include: { claim: true } },
-    },
-  })
+async function getProjectFn({
+  id,
+}: {
+  id: string
+}): Promise<ProjectWithFullDetails | null> {
+  const result = await prisma.$queryRaw<{ result: ProjectWithFullDetails }[]>`
+    WITH impact_statements AS (
+      SELECT 
+        cat."id" as category_id,
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(imp.*)), '[]'::jsonb) as statements
+      FROM "Category" cat
+      LEFT JOIN "ImpactStatement" imp ON cat."id" = imp."categoryId"
+      GROUP BY cat."id"
+    ),
+    project_data AS (
+      SELECT 
+        p.*,
+        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
+          'id', t."id",
+          'role', t."role",
+          'userId', t."userId",
+          'projectId', t."projectId",
+          'deletedAt', t."deletedAt",
+          'user', to_jsonb(u.*)
+        )) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
+        COALESCE(jsonb_agg(to_jsonb(s.*) ORDER BY s."createdAt" ASC) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
+        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
+          'id', a."id",
+          'projectId', a."projectId",
+          'roundId', a."roundId",
+          'attestationId', a."attestationId",
+          'projectDescriptionOptions', a."projectDescriptionOptions",
+          'createdAt', a."createdAt",
+          'updatedAt', a."updatedAt",
+          'category', jsonb_build_object(
+            'id', cat."id",
+            'name', cat."name",
+            'description', cat."description",
+            'impactStatements', ist.statements
+          ),
+          'impactStatementAnswer', to_jsonb(isa.*),
+          'round', to_jsonb(rnd.*)
+        )) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
+        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
+          'id', fr."id",
+          'roundId', fr."roundId",
+          'projectId', fr."projectId",
+          'amount', fr."amount",
+          'createdAt', fr."createdAt",
+          'updatedAt', fr."updatedAt",
+          'claim', to_jsonb(rc.*)
+        )) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
+        CASE 
+          WHEN po."id" IS NOT NULL THEN jsonb_build_object(
+            'id', po."id",
+            'projectId', po."projectId",
+            'organizationId', po."organizationId",
+            'deletedAt', po."deletedAt",
+            'organization', jsonb_build_object(
+              'id', o."id",
+              'name', o."name",
+              'team', COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
+                'id', ot."id",
+                'role', ot."role",
+                'userId', ot."userId",
+                'organizationId', ot."organizationId",
+                'deletedAt', ot."deletedAt",
+                'user', to_jsonb(ou.*)
+              )) FILTER (WHERE ot."id" IS NOT NULL AND ot."deletedAt" IS NULL), '[]'::jsonb)
+            )
+          )
+          ELSE NULL
+        END as "organization"
+      FROM "Project" p
+      LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
+      LEFT JOIN "User" u ON t."userId" = u."id"
+      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
+      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
+      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
+      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
+      LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId"
+      LEFT JOIN "Category" cat ON a."categoryId" = cat."id"
+      LEFT JOIN impact_statements ist ON cat."id" = ist.category_id
+      LEFT JOIN "ImpactStatementAnswer" isa ON a."id" = isa."applicationId"
+      LEFT JOIN "FundingRound" rnd ON a."roundId" = rnd."id"
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      LEFT JOIN "ProjectOrganization" po ON p."id" = po."projectId" AND po."deletedAt" IS NULL
+      LEFT JOIN "Organization" o ON po."organizationId" = o."id" AND o."deletedAt" IS NULL
+      LEFT JOIN "UserOrganization" ot ON o."id" = ot."organizationId"
+      LEFT JOIN "User" ou ON ot."userId" = ou."id"
+      WHERE p."id" = ${id}
+      GROUP BY p."id", po."id", o."id", o."name"
+    )
+    SELECT to_jsonb(pd.*) as result
+    FROM project_data pd;
+  `
+
+  return result[0]?.result
 }
 
 export const getProject = cache(getProjectFn)
