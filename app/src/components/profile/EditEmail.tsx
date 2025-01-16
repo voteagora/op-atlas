@@ -53,7 +53,13 @@ export function EditEmail({ user }: { user: UserWithEmails }) {
               readOnly={!isEditing}
             />
             {isEditing ? (
-              <Button disabled={email === ""} onClick={onEditEmail}>
+              <Button
+                disabled={email === ""}
+                onClick={onEditEmail}
+                variant={
+                  user.emails[0]?.email === email ? "secondary" : "primary"
+                }
+              >
                 {user.emails[0]?.email === email ? "Cancel" : "Save"}
               </Button>
             ) : (
