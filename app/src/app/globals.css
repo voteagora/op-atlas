@@ -4,6 +4,12 @@
 
 @layer base {
   :root {
+    --button-primary: 348, 100%, 50%;
+    --button-secondary: 228, 22%, 96%;
+
+    --button-primary-text: 210 40% 98%;
+    --button-secondary-text: 228 14% 29%;
+
     --text-primary: 230 30% 96%;
     --text-default: 229 27% 8%;
     --text-secondary: 228 14% 29%;

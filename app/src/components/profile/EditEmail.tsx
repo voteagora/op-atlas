@@ -13,13 +13,19 @@ import { Input } from "../ui/input"
 
 export function EditEmail({ user }: { user: UserWithEmails }) {
   const [email, setEmail] = useState(user.emails[0]?.email)
+  const [isEditing, setIsEditing] = useState(false)
   const updateEmail = useUpdateEmail()
   const { setOpenDialog } = useAppDialogs()
 
   const onEditEmail = async () => {
     if (!email) return
+    if (user.emails[0]?.email === email) {
+      setIsEditing(false)
+      return
+    }
 
     await updateEmail(email)
+    setIsEditing(false)
     toast.success("Email updated")
   }
 
@@ -44,14 +50,17 @@ export function EditEmail({ user }: { user: UserWithEmails }) {
               value={email ?? ""}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter email address"
+              readOnly={!isEditing}
             />
-            <Button
-              onClick={onEditEmail}
-              disabled={!email || email === user.emails[0]?.email}
-              className="self-start"
-            >
-              Save
-            </Button>
+            {isEditing ? (
+              <Button disabled={email === ""} onClick={onEditEmail}>
+                {user.emails[0]?.email === email ? "Cancel" : "Save"}
+              </Button>
+            ) : (
+              <Button onClick={() => setIsEditing(true)} variant="secondary">
+                Edit
+              </Button>
+            )}
           </div>
         </div>
       ) : (
