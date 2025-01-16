@@ -12,9 +12,10 @@ import {
   superseed,
   shape,
   swan,
+  ink,
 } from "viem/chains"
 
-import { Chain, ink } from "./utils/contracts"
+import { Chain } from "./utils/contracts"
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
 if (!ALCHEMY_API_KEY) {
