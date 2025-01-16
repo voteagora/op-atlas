@@ -6,6 +6,7 @@ import { cache } from "react"
 import {
   ApplicationWithDetails,
   ProjectWithFullDetails,
+  ProjectWithTeam,
   PublishedUserProjectsResult,
   TeamRole,
   UserProjectsWithDetails,
@@ -592,19 +593,26 @@ async function getProjectFn({
 
 export const getProject = cache(getProjectFn)
 
-async function getProjectTeamFn({ id }: { id: string }) {
-  return prisma.project.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      team: {
-        where: {
-          deletedAt: null,
-        },
-      },
-    },
-  })
+async function getProjectTeamFn({
+  id,
+}: {
+  id: string
+}): Promise<ProjectWithTeam | null> {
+  const result = await prisma.$queryRaw<{ result: ProjectWithTeam }[]>`
+    WITH project_data AS (
+      SELECT 
+        p.*,
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*)) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team"
+      FROM "Project" p
+      LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
+      WHERE p."id" = ${id}
+      GROUP BY p."id"
+    )
+    SELECT to_jsonb(pd.*) as result
+    FROM project_data pd;
+  `
+
+  return result[0]?.result
 }
 
 export const getProjectTeam = cache(getProjectTeamFn)

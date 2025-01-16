@@ -146,6 +146,12 @@ export type ProjectWithDetailsWithoutOrganization = Prisma.ProjectGetPayload<{
   }
 }>
 
+export type ProjectWithTeam = Prisma.ProjectGetPayload<{
+  include: {
+    team: true
+  }
+}>
+
 export type RewardWithClaim = Prisma.FundingRewardGetPayload<{
   include: { claim: true }
 }>
