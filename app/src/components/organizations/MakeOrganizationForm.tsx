@@ -11,6 +11,7 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import { Button } from "@/components/common/Button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
@@ -28,7 +29,6 @@ import FileUploadInput from "../common/FileUploadInput"
 import { PhotoCropModal } from "../projects/details/PhotoCropModal"
 import AddTeamMemberDialog from "../projects/teams/AddTeamMemberDialog"
 import DeleteTeamMemberDialog from "../projects/teams/DeleteTeamMemberDialog"
-import { Button } from "../ui/button"
 import {
   Form,
   FormControl,
@@ -354,10 +354,10 @@ export default function MakeOrganizationForm({
               onClick={() => setIsShowingAdd(true)}
               type="button"
               variant="secondary"
-              className="w-fit"
               disabled={!organization ? false : !!!isAdmin}
+              leftIcon={<Plus size={16} />}
             >
-              <Plus size={16} className="mr-2.5" /> Add contributors
+              Add contributors
             </Button>
           </div>
           <FormField
@@ -480,9 +480,9 @@ export default function MakeOrganizationForm({
               type="button"
               variant="secondary"
               onClick={() => addWebsiteField({ value: "" })}
-              className="w-fit"
+              leftIcon={<Plus size={16} />}
             >
-              <Plus size={16} className="mr-2.5" /> Add
+              Add
             </Button>
           </div>
 
@@ -509,9 +509,9 @@ export default function MakeOrganizationForm({
               type="button"
               variant="secondary"
               onClick={() => addFarcasterField({ value: "" })}
-              className="w-fit"
+              leftIcon={<Plus size={16} />}
             >
-              <Plus size={16} className="mr-2.5" /> Add
+              Add
             </Button>
           </div>
 
@@ -546,11 +546,9 @@ export default function MakeOrganizationForm({
 
         <div className="flex gap-2">
           <Button
-            isLoading={isSaving}
             disabled={!canSubmit || isSaving}
             onClick={form.handleSubmit(onSubmit())}
             type="button"
-            variant="destructive"
             className="self-start"
           >
             Save
