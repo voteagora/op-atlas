@@ -4,11 +4,11 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { Button } from "@/components/common/Button"
 import { updateGovForumProfileUrl } from "@/lib/actions/users"
 import { UserWithEmails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 
 export function GovForumConnection({ user }: { user: UserWithEmails }) {
@@ -115,7 +115,7 @@ export function GovForumConnection({ user }: { user: UserWithEmails }) {
         <Button
           onClick={handleSave}
           disabled={loading}
-          variant={user.govForumProfileUrl ? "secondary" : "destructive"}
+          variant={user.govForumProfileUrl ? "secondary" : "primary"}
         >
           {user.govForumProfileUrl ? "Edit" : "Save"}
         </Button>
