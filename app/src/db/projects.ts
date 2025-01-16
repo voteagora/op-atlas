@@ -5,6 +5,7 @@ import { cache } from "react"
 
 import {
   ApplicationWithDetails,
+  ProjectContractWithProject,
   ProjectWithFullDetails,
   ProjectWithTeam,
   PublishedUserProjectsResult,
@@ -623,16 +624,26 @@ async function getProjectContractsFn({
 }: {
   projectId: string
   deployerAddress: string
-}) {
-  return prisma.projectContract.findMany({
-    where: {
-      projectId,
-      deployerAddress,
-    },
-    include: {
-      project: true,
-    },
-  })
+}): Promise<ProjectContractWithProject[]> {
+  const result = await prisma.$queryRaw<
+    { result: ProjectContractWithProject[] }[]
+  >`
+    WITH contract_data AS (
+      SELECT 
+        c.*,
+        to_jsonb(p.*) as "project"
+      FROM "ProjectContract" c
+      LEFT JOIN "Project" p ON c."projectId" = p."id"
+      WHERE c."projectId" = ${projectId}
+        AND c."deployerAddress" = ${deployerAddress}
+    )
+    SELECT jsonb_build_object(
+      'result', COALESCE(jsonb_agg(to_jsonb(cd.*)), '[]'::jsonb)
+    ) as result
+    FROM contract_data cd;
+  `
+
+  return result[0]?.result || []
 }
 
 export const getProjectContracts = cache(getProjectContractsFn)
