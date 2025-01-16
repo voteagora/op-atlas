@@ -190,7 +190,7 @@ export const ApplicationSubmitted = ({
 
         <div className="flex justify-center gap-x-2">
           <a
-            href="https://warpcast.com/~/compose?text=I%20submitted%20for%20Retro%20Funding%20Round%206%20Governance"
+            href="https://warpcast.com/~/compose?text=I%20submitted%20for%20Retro%20Funding:%20Dev%20Tooling!"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -200,7 +200,7 @@ export const ApplicationSubmitted = ({
             </Button>
           </a>
           <a
-            href="https://x.com/compose/post?text=I%20submitted%20for%20Retro%20Funding%20Round%206%20Governance"
+            href="https://x.com/compose/post?text=I%20submitted%20for%20Retro%20Funding:%20Dev%20Tooling!"
             target="_blank"
             rel="noopener noreferrer"
             download

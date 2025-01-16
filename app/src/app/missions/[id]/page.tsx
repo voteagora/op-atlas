@@ -1,5 +1,3 @@
-"use client"
-
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
@@ -32,21 +30,24 @@ import { format } from "date-fns"
 import { Callout } from "@/components/common/Callout"
 import { ArrowUpRightIcon } from "lucide-react"
 import { NewIn2025Callout } from "@/components/missions/Callouts"
+import Mission from "@/components/missions/Mission"
+import { auth } from "@/auth"
+import { getApplications } from "@/lib/actions/projects"
 
-export default function Mission({ params }: { params: { id: string } }) {
+export default async function MissionPage({
+  params,
+}: {
+  params: { id: string }
+}) {
+  const session = await auth()
+
+  let applications = null
+  if (session?.user) {
+    applications = await getApplications(session?.user?.id)
+  }
+
   const foundRound = FUNDING_ROUNDS.find((page) => page.pageName === params.id)
   if (foundRound === undefined) notFound()
-
-  const {
-    name,
-    details,
-    iconUrl,
-    applyBy,
-    startsAt,
-    endsAt,
-    eligibility,
-    rewards,
-  } = foundRound
 
   //get live project data from somewhere
   //const { units, opRewarded, projectsEnrolled} = db.getProjectData(params.id);
@@ -88,6 +89,8 @@ export default function Mission({ params }: { params: { id: string } }) {
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       {/* Main content */}
+      <Mission round={foundRound} applications={applications} />
+      {/*       
       <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
         <div className="mt-1 flex flex-1 gap-x-10">
           <div className="flex flex-1 flex-col">
@@ -267,7 +270,7 @@ export default function Mission({ params }: { params: { id: string } }) {
             )}
           </Sidebar>
         </div>
-      </div>
+      </div> */}
     </main>
   )
 }
