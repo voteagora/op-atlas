@@ -6,6 +6,7 @@ import { cache } from "react"
 import {
   ApplicationWithDetails,
   ProjectWithDetailsLite,
+  PublishedUserProjectsResult,
   TeamRole,
   UserProjectsWithDetails,
   UserProjectWithDetails,
@@ -329,19 +330,6 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
 
 export const getUserProjectsWithDetails = cache(getUserProjectsWithDetailsFn)
 
-type PublishedUserProjectsResult = {
-  projects: Array<{
-    project: ProjectWithDetailsLite
-  }>
-  organizations: Array<{
-    organization: {
-      projects: Array<{
-        project: ProjectWithDetailsLite
-      }>
-    }
-  }>
-}
-
 async function getAllPublishedUserProjectsFn({
   userId,
 }: {
@@ -496,6 +484,189 @@ async function getAllPublishedUserProjectsFn({
 
 export const getAllPublishedUserProjects = cache(getAllPublishedUserProjectsFn)
 
+async function getProjectFn({ id }: { id: string }) {
+  return prisma.project.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      team: { where: { deletedAt: null }, include: { user: true } },
+      organization: {
+        where: { deletedAt: null, organization: { deletedAt: null } },
+        include: {
+          organization: {
+            include: {
+              team: {
+                where: { deletedAt: null },
+                include: { user: true },
+              },
+            },
+          },
+        },
+      },
+      repos: true,
+      contracts: true,
+      links: true,
+      funding: true,
+      snapshots: {
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
+      applications: {
+        include: {
+          category: {
+            include: {
+              impactStatements: true,
+            },
+          },
+          impactStatementAnswer: true,
+          round: true,
+        },
+      },
+      rewards: { include: { claim: true } },
+    },
+  })
+}
+
+export const getProject = cache(getProjectFn)
+
+async function getProjectTeamFn({ id }: { id: string }) {
+  return prisma.project.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      team: {
+        where: {
+          deletedAt: null,
+        },
+      },
+    },
+  })
+}
+
+export const getProjectTeam = cache(getProjectTeamFn)
+
+async function getProjectContractsFn({
+  projectId,
+  deployerAddress,
+}: {
+  projectId: string
+  deployerAddress: string
+}) {
+  return prisma.projectContract.findMany({
+    where: {
+      projectId,
+      deployerAddress,
+    },
+    include: {
+      project: true,
+    },
+  })
+}
+
+export const getProjectContracts = cache(getProjectContractsFn)
+
+async function getUserApplicationsFn({
+  userId,
+  roundId,
+}: {
+  userId: string
+  roundId?: string
+}): Promise<ApplicationWithDetails[]> {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      projects: {
+        where: {
+          project: {
+            deletedAt: null,
+          },
+        },
+        include: {
+          project: {
+            include: {
+              applications: {
+                include: {
+                  impactStatementAnswer: {
+                    include: {
+                      impactStatement: true,
+                    },
+                  },
+                  project: true,
+                  round: true,
+                },
+                where: {
+                  roundId,
+                },
+                orderBy: {
+                  createdAt: "desc",
+                },
+              },
+            },
+          },
+        },
+      },
+      organizations: {
+        where: {
+          organization: {
+            deletedAt: null,
+          },
+        },
+        include: {
+          organization: {
+            include: {
+              projects: {
+                where: {
+                  project: {
+                    deletedAt: null,
+                  },
+                },
+                include: {
+                  project: {
+                    include: {
+                      applications: {
+                        include: {
+                          impactStatementAnswer: true,
+                          project: true,
+                          round: true,
+                        },
+                        where: {
+                          roundId,
+                        },
+                        orderBy: {
+                          createdAt: "desc",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // merge organization applications with user applications
+  if (!user) return []
+
+  const applications = [
+    ...user.projects.flatMap((p) => p.project.applications),
+    ...user.organizations.flatMap((o) =>
+      o.organization.projects.flatMap((p) => p.project.applications),
+    ),
+  ]
+
+  return applications
+}
+
+export const getUserApplications = cache(getUserApplicationsFn)
+
 export type CreateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
 > & {
@@ -620,70 +791,6 @@ export async function deleteProject({ id }: { id: string }) {
     },
   })
 }
-
-async function getProjectFn({ id }: { id: string }) {
-  return prisma.project.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      team: { where: { deletedAt: null }, include: { user: true } },
-      organization: {
-        where: { deletedAt: null, organization: { deletedAt: null } },
-        include: {
-          organization: {
-            include: {
-              team: {
-                where: { deletedAt: null },
-                include: { user: true },
-              },
-            },
-          },
-        },
-      },
-      repos: true,
-      contracts: true,
-      links: true,
-      funding: true,
-      snapshots: {
-        orderBy: {
-          createdAt: "asc",
-        },
-      },
-      applications: {
-        include: {
-          category: {
-            include: {
-              impactStatements: true,
-            },
-          },
-          impactStatementAnswer: true,
-          round: true,
-        },
-      },
-      rewards: { include: { claim: true } },
-    },
-  })
-}
-
-export const getProject = cache(getProjectFn)
-
-async function getProjectTeamFn({ id }: { id: string }) {
-  return prisma.project.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      team: {
-        where: {
-          deletedAt: null,
-        },
-      },
-    },
-  })
-}
-
-export const getProjectTeam = cache(getProjectTeamFn)
 
 export async function addTeamMembers({
   projectId,
@@ -898,26 +1005,6 @@ export async function removeProjectContract({
 
   return prisma.$transaction([contractDelete, projectUpdate])
 }
-
-async function getProjectContractsFn({
-  projectId,
-  deployerAddress,
-}: {
-  projectId: string
-  deployerAddress: string
-}) {
-  return prisma.projectContract.findMany({
-    where: {
-      projectId,
-      deployerAddress,
-    },
-    include: {
-      project: true,
-    },
-  })
-}
-
-export const getProjectContracts = cache(getProjectContractsFn)
 
 export async function addProjectRepository({
   projectId,
@@ -1194,105 +1281,6 @@ export async function createApplication({
     },
   })
 }
-
-async function getUserApplicationsFn({
-  userId,
-  roundId,
-}: {
-  userId: string
-  roundId?: string
-}): Promise<ApplicationWithDetails[]> {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      projects: {
-        where: {
-          project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: {
-            include: {
-              applications: {
-                include: {
-                  impactStatementAnswer: {
-                    include: {
-                      impactStatement: true,
-                    },
-                  },
-                  project: true,
-                  round: true,
-                },
-                where: {
-                  roundId,
-                },
-                orderBy: {
-                  createdAt: "desc",
-                },
-              },
-            },
-          },
-        },
-      },
-      organizations: {
-        where: {
-          organization: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          organization: {
-            include: {
-              projects: {
-                where: {
-                  project: {
-                    deletedAt: null,
-                  },
-                },
-                include: {
-                  project: {
-                    include: {
-                      applications: {
-                        include: {
-                          impactStatementAnswer: true,
-                          project: true,
-                          round: true,
-                        },
-                        where: {
-                          roundId,
-                        },
-                        orderBy: {
-                          createdAt: "desc",
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
-
-  // merge organization applications with user applications
-  if (!user) return []
-
-  const applications = [
-    ...user.projects.flatMap((p) => p.project.applications),
-    ...user.organizations.flatMap((o) =>
-      o.organization.projects.flatMap((p) => p.project.applications),
-    ),
-  ]
-
-  return applications
-}
-
-export const getUserApplications = cache(getUserApplicationsFn)
 
 export async function updateAllForProject(
   project: ProjectMetadata,

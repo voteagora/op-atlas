@@ -67,6 +67,19 @@ export type UserProjectsWithDetails = {
   }[]
 }
 
+export type PublishedUserProjectsResult = {
+  projects: Array<{
+    project: ProjectWithDetailsLite
+  }>
+  organizations: Array<{
+    organization: {
+      projects: Array<{
+        project: ProjectWithDetailsLite
+      }>
+    }
+  }>
+}
+
 export type ProjectWithDetailsLite = Prisma.ProjectGetPayload<{
   include: {
     funding: true
