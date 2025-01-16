@@ -127,7 +127,19 @@
     );
   }
   .bgAlternativeCallout {
-    background: #D6E4FF
+    background: #d6e4ff;
+  }
+
+  .button-primary {
+    @apply bg-button-primary text-button-primary-foreground hover:!bg-button-primary-hover;
+  }
+
+  .button-secondary {
+    @apply bg-button-secondary text-button-secondary-foreground hover:!bg-button-secondary-hover;
+  }
+
+  .input-container {
+    @apply flex items-center self-start px-3 py-2 border border-border rounded-md gap-1 text-secondary-foreground h-10;
   }
 }
 
