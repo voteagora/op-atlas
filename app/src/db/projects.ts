@@ -655,94 +655,55 @@ async function getUserApplicationsFn({
   userId: string
   roundId?: string
 }): Promise<ApplicationWithDetails[]> {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      projects: {
-        where: {
-          project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: {
-            include: {
-              applications: {
-                include: {
-                  impactStatementAnswer: {
-                    include: {
-                      impactStatement: true,
-                    },
-                  },
-                  project: true,
-                  round: true,
-                },
-                where: {
-                  roundId,
-                },
-                orderBy: {
-                  createdAt: "desc",
-                },
-              },
-            },
-          },
-        },
-      },
-      organizations: {
-        where: {
-          organization: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          organization: {
-            include: {
-              projects: {
-                where: {
-                  project: {
-                    deletedAt: null,
-                  },
-                },
-                include: {
-                  project: {
-                    include: {
-                      applications: {
-                        include: {
-                          impactStatementAnswer: true,
-                          project: true,
-                          round: true,
-                        },
-                        where: {
-                          roundId,
-                        },
-                        orderBy: {
-                          createdAt: "desc",
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
+  const result = await prisma.$queryRaw<{ result: ApplicationWithDetails[] }[]>`
+    WITH user_applications AS (
+      SELECT DISTINCT
+        a.*,
+        to_jsonb(p.*) as "project",
+        to_jsonb(fr.*) as "round",
+        COALESCE(
+          jsonb_agg(
+            DISTINCT jsonb_build_object(
+              'id', isa."id",
+              'applicationId', isa."applicationId",
+              'impactStatementId', isa."impactStatementId",
+              'answer', isa."answer",
+              'impactStatement', to_jsonb(ist.*)
+            )
+          ) FILTER (WHERE isa."id" IS NOT NULL),
+          '[]'::jsonb
+        ) as "impactStatementAnswer",
+        a."projectDescriptionOptions"
+      FROM "User" u
+      LEFT JOIN "UserProjects" up ON u."id" = up."userId" AND up."deletedAt" IS NULL
+      LEFT JOIN "Project" p1 ON up."projectId" = p1."id" AND p1."deletedAt" IS NULL
+      LEFT JOIN "Application" a1 ON p1."id" = a1."projectId"
+      LEFT JOIN "UserOrganization" uo ON u."id" = uo."userId" AND uo."deletedAt" IS NULL
+      LEFT JOIN "Organization" o ON uo."organizationId" = o."id" AND o."deletedAt" IS NULL
+      LEFT JOIN "ProjectOrganization" po ON o."id" = po."organizationId" AND po."deletedAt" IS NULL
+      LEFT JOIN "Project" p2 ON po."projectId" = p2."id" AND p2."deletedAt" IS NULL
+      LEFT JOIN "Application" a2 ON p2."id" = a2."projectId"
+      LEFT JOIN "Project" p ON COALESCE(a1."projectId", a2."projectId") = p."id"
+      LEFT JOIN "Application" a ON COALESCE(a1."id", a2."id") = a."id"
+      LEFT JOIN "FundingRound" fr ON a."roundId" = fr."id"
+      LEFT JOIN "ImpactStatementAnswer" isa ON a."id" = isa."applicationId"
+      LEFT JOIN "ImpactStatement" ist ON isa."impactStatementId" = ist."id"
+      WHERE u."id" = ${userId}
+        AND a."id" IS NOT NULL
+      ${roundId ? Prisma.sql`AND a."roundId" = ${roundId}` : Prisma.empty}
+      GROUP BY a.id, p.id, fr.id
+    )
+    SELECT COALESCE(
+      jsonb_agg(
+        to_jsonb(ua.*)
+        ORDER BY ua."createdAt" DESC
+      ),
+      '[]'::jsonb
+    ) as result
+    FROM user_applications ua;
+  `
 
-  // merge organization applications with user applications
-  if (!user) return []
-
-  const applications = [
-    ...user.projects.flatMap((p) => p.project.applications),
-    ...user.organizations.flatMap((o) =>
-      o.organization.projects.flatMap((p) => p.project.applications),
-    ),
-  ]
-
-  return applications
+  return result[0]?.result || []
 }
 
 export const getUserApplications = cache(getUserApplicationsFn)
