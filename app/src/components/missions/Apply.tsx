@@ -15,12 +15,14 @@ export const Apply = ({
   startDate,
   userProjectCount,
   userAppliedProjects,
+  pageName,
 }: {
   className?: string
   applyByDate: string | undefined
   startDate: string
   userProjectCount: number
   userAppliedProjects: any
+  pageName?: string
 }) => {
   const router = useRouter()
 
@@ -110,7 +112,13 @@ export const Apply = ({
               {`Apply by ${applyByDate} to be evaluated for rewards starting 
             ${startDate}.`}
             </p>
-            <Button className="bg-optimismRed text-white" variant={"outline"}>
+            <Button
+              className="bg-optimismRed text-white"
+              variant={"outline"}
+              onClick={() => {
+                router.push(`/missions/${pageName}/application`)
+              }}
+            >
               Apply
             </Button>
           </>

@@ -44,7 +44,7 @@ export const ProjectsEnrolled = ({
               <></>
             )}
           </div>
-
+          {/* 
           <LittleSection
             title={`${formatNumber(units)} Units`}
             description="High quality onchain value"
@@ -58,7 +58,7 @@ export const ProjectsEnrolled = ({
           <LittleSection
             title={`${formatNumber(avgOpRewardPerProject)} OP`}
             description="Average rewards per project"
-          />
+          /> */}
         </div>
       )}
     </div>

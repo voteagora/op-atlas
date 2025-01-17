@@ -251,6 +251,7 @@ export default function Mission({
             startDate={format(startsAt, "MMM d")}
             userProjectCount={userProjectCount}
             userAppliedProjects={userAppliedProjects}
+            pageName={round.pageName}
           />
           {enrolledProjects.length > 0 ? (
             <ProjectsEnrolled
