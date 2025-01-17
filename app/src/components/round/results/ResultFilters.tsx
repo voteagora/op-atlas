@@ -50,7 +50,7 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
 
   return (
     <div className="flex flex-row gap-2 mt-4">
-      <div className="max-w[576px] w-full flex items-center border px-3 rounded-md">
+      <div className="input-container text-inherit">
         <Search className="mr-2 h-4 w-4" />
         <Input
           value={searchText}
