@@ -129,9 +129,12 @@ export const ApplicationSubmitted = ({
       )}
 
       <div className="flex flex-col">
-        {submittedProjects.map((application) => {
+        {submittedProjects.map((application, index) => {
           return (
-            <div className="flex justify-between items-center gap-y-6 p-5 bg-background border rounded-2xl">
+            <div
+              key={"Application" + index}
+              className="flex justify-between items-center gap-y-6 p-5 bg-background border rounded-2xl"
+            >
               <div className="flex items-center gap-4">
                 {application.thumbnailUrl && (
                   <Image
