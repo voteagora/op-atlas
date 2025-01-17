@@ -208,7 +208,9 @@ export function ApplyDetails({
         </BreadcrumbList>
       </Breadcrumb>
       <div className="flex flex-col mt-10">
-        <h2 className="text-4xl mb-2">{"Apply for Retro Funding: " + name}</h2>
+        <h2 className="text-4xl mb-2">
+          {"Apply for Retro Funding: " + round.name}
+        </h2>
         {round.applyBy &&
           `Submit this application by ${format(
             round.applyBy,
