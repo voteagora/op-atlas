@@ -14,7 +14,7 @@ import {
   getAdminProjects,
   getApplications,
   getProjects,
-  getRoundApplications,
+  getUserApplicationsForRound,
 } from "@/lib/actions/projects"
 import { getCategories } from "@/db/category"
 import { auth } from "@/auth"

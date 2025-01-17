@@ -51,7 +51,7 @@ export const Project = ({
   const { data } = useSession()
   // getUserApplications({})
 
-  console.log(data)
+  // console.log(data)
 
   const { progressPercent, completedSections } = useMemo(() => {
     return project
@@ -73,7 +73,7 @@ export const Project = ({
     completedSections.includes(section),
   )
 
-  console.log(allRequirementsMet)
+  // console.log(allRequirementsMet)
 
   const allEligibilityMet =
     project.hasCodeRepositories &&
@@ -84,7 +84,7 @@ export const Project = ({
       })
     })
 
-  console.log(allEligibilityMet)
+  // console.log(allEligibilityMet)
 
   const requirementStatus = projectRequirements.reduce((acc, requirement) => {
     acc[requirement] = completedSections.includes(requirement)
@@ -207,7 +207,7 @@ export const Project = ({
               let icon
 
               if (!value) {
-                console.log("aye")
+                // console.log("aye")
                 icon = <X className="w-5 h-5" color="gray" />
               } else {
                 icon = icon = <CircleWithCheckmark />

@@ -999,6 +999,19 @@ export async function createApplication({
   })
 }
 
+async function getAllApplicationsForRoundFn({ roundId }: { roundId: string }) {
+  return prisma.application.findMany({
+    where: {
+      roundId,
+    },
+    include: {
+      project: true,
+    },
+  })
+}
+
+export const getAllApplicationsForRound = cache(getAllApplicationsForRoundFn)
+
 async function getUserApplicationsFn({
   userId,
   roundId,

@@ -32,9 +32,11 @@ import { ApplicationWithDetails } from "@/lib/types"
 export default function Mission({
   round,
   applications,
+  missionApplications,
 }: {
   round: FundingRound
   applications: ApplicationWithDetails[] | null
+  missionApplications: { icon: string | null; opReward: number }[]
 }) {
   const {
     name,
@@ -64,24 +66,24 @@ export default function Mission({
     // },
   ]
 
-  const enrolledProjects = [
-    {
-      opReward: 500,
-      icon: "/assets/icons/uniswap.png",
-    },
-    {
-      opReward: 3000,
-      icon: "/assets/icons/uniswap.png",
-    },
-  ]
+  // const missionApplications = [
+  //   {
+  //     opReward: 500,
+  //     icon: "/assets/icons/uniswap.png",
+  //   },
+  //   {
+  //     opReward: 3000,
+  //     icon: "/assets/icons/uniswap.png",
+  //   },
+  // ]
 
   const userProjectCount = 1
   const units = "240"
-  const totalOpReward = enrolledProjects.reduce(
+  const totalOpReward = missionApplications.reduce(
     (total, item) => total + item.opReward,
     0,
   )
-  const avgOpRewardPerProject = totalOpReward / enrolledProjects.length
+  const avgOpRewardPerProject = totalOpReward / missionApplications.length
   //get user data from somewhere
   //const userProjectsCount = db.getUserProjectCount(session.id);
 
@@ -253,12 +255,12 @@ export default function Mission({
             userAppliedProjects={userAppliedProjects}
             pageName={round.pageName}
           />
-          {enrolledProjects.length > 0 ? (
+          {missionApplications.length > 0 ? (
             <ProjectsEnrolled
               units={units}
               opRewarded={totalOpReward}
               avgOpRewardPerProject={avgOpRewardPerProject}
-              projects={enrolledProjects}
+              projects={missionApplications}
             />
           ) : (
             <></>

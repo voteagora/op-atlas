@@ -61,8 +61,6 @@ export function ApplyDetails({
   applications: ApplicationWithDetails[]
   round: FundingRound
 }) {
-  console.log(applications)
-
   const [currentTab, setCurrentTab] = useState("details")
 
   const router = useRouter()
@@ -119,8 +117,6 @@ export function ApplyDetails({
     const filterProjects = form
       .getValues()
       .projects.filter((project) => project.selected)
-
-    console.log(filterProjects)
 
     const promise: Promise<Application> = new Promise(
       async (resolve, reject) => {
