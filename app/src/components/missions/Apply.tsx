@@ -21,7 +21,7 @@ export const Apply = ({
   applyByDate: string | undefined
   startDate: string
   userProjectCount: number
-  userAppliedProjects: any
+  userAppliedProjects: { icon: string | null; name: string }[]
   pageName?: string
 }) => {
   const router = useRouter()
@@ -44,9 +44,11 @@ export const Apply = ({
       variant={"outline"}
     >
       <Check width={12} height={12}></Check>
-      Active
+      Enrolled
     </Badge>
   )
+
+  console.log(userAppliedProjects)
 
   let result
   if (!data) {
@@ -71,30 +73,42 @@ export const Apply = ({
     )
   } else {
     if (userProjectCount > 0) {
-      if (userAppliedProjects?.length > 0) {
+      if (userAppliedProjects && userAppliedProjects?.length > 0) {
         result = (
           <>
             <p className="font-bold">{"Your status"}</p>
 
             <div className="text-sm text-secondary-foreground text-center">
               <div className="flex flex-col gap-2">
-                {userAppliedProjects.map((element: any, index: number) => {
-                  return (
-                    <div
-                      key={"userAppliedProject-" + index}
-                      className="flex items-center gap-1"
-                    >
-                      <Image
-                        src={element.icon}
-                        width={32}
-                        height={32}
-                        alt="Project"
-                      />
-                      <p className="overflow-hidden truncate">{element.name}</p>
-                      {element.status == "Pending" ? pendingBadge : activeBadge}
-                    </div>
-                  )
-                })}
+                {userAppliedProjects.map(
+                  (
+                    element: { icon: string | null; name: string },
+                    index: number,
+                  ) => {
+                    return (
+                      <div
+                        key={"userAppliedProject-" + index}
+                        className="flex items-center gap-1"
+                      >
+                        {element.icon ? (
+                          <Image
+                            src={element.icon}
+                            width={32}
+                            height={32}
+                            alt="Project"
+                          />
+                        ) : (
+                          <></>
+                        )}
+                        <p className="overflow-hidden truncate">
+                          {element.name}
+                        </p>
+                        {/* {element.status == "Pending" ? pendingBadge : activeBadge} */}
+                        {activeBadge}
+                      </div>
+                    )
+                  },
+                )}
 
                 <Button variant={"ghost"} className="bg-secondary mt-5">
                   Apply with more projects

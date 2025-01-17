@@ -35,7 +35,7 @@ export default function Mission({
   missionApplications,
 }: {
   round: FundingRound
-  applications: ApplicationWithDetails[] | null
+  applications: { icon: string | null; name: string }[]
   missionApplications: { icon: string | null; opReward: number }[]
 }) {
   const {
@@ -252,7 +252,7 @@ export default function Mission({
             applyByDate={applyBy && format(applyBy, "MMM d")}
             startDate={format(startsAt, "MMM d")}
             userProjectCount={userProjectCount}
-            userAppliedProjects={userAppliedProjects}
+            userAppliedProjects={applications}
             pageName={round.pageName}
           />
           {missionApplications.length > 0 ? (

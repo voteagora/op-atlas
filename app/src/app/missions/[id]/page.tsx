@@ -33,7 +33,15 @@ export default async function MissionPage({
     }
   })
 
-  console.log(roundApplications)
+  const userProjectsForSidebar =
+    applications?.map((element) => {
+      return {
+        icon: element.project.thumbnailUrl,
+        name: element.project.name,
+      }
+    }) || []
+
+  console.log(applications)
   //get live project data from somewhere
   //const { units, opRewarded, projectsEnrolled} = db.getProjectData(params.id);
 
@@ -42,7 +50,7 @@ export default async function MissionPage({
       {/* Main content */}
       <Mission
         round={foundRound}
-        applications={applications}
+        applications={userProjectsForSidebar}
         missionApplications={roundApplicationsForMission}
       />
     </main>
