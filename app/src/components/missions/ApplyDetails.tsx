@@ -31,6 +31,7 @@ import {
 import { format } from "date-fns"
 import Image from "next/image"
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
+import { getUserApplications } from "@/db/projects"
 
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
@@ -68,6 +69,8 @@ export function ApplyDetails({
   const [agreedTerms, setAgreedTerms] = useState(
     Array.from({ length: TERMS.length + 1 }, () => false),
   )
+
+  console.log(projects)
 
   const canSubmitForm = agreedTerms.every((term) => term)
 
@@ -111,14 +114,17 @@ export function ApplyDetails({
 
   const [isSubmitted, setIsSubmitted] = useState(false)
 
+  const [submittedApplications, setSubmittedApplications] =
+    useState<Application[]>()
+
+  const filterProjects = form
+    .getValues()
+    .projects.filter((project) => project.selected)
+
   const submitApplication = async () => {
     setIsLoading(true)
 
-    const filterProjects = form
-      .getValues()
-      .projects.filter((project) => project.selected)
-
-    const promise: Promise<Application> = new Promise(
+    const promise: Promise<Application[]> = new Promise(
       async (resolve, reject) => {
         try {
           const result = await submitApplications(
@@ -135,7 +141,7 @@ export function ApplyDetails({
             throw new Error(result.error ?? "Error submitting application")
           }
 
-          resolve(result.applications[0])
+          resolve(result.applications)
         } catch (error) {
           console.error("Error submitting application", error)
           reject(error)
@@ -145,8 +151,26 @@ export function ApplyDetails({
 
     toast.promise(promise, {
       loading: "Submitting application...",
-      success: (application) => {
+      success: (applications) => {
+        // const latestApplications = applications.map((element) => {
+        //   const foundProject = projects.find((project) => {
+        //     return project.id === element.projectId
+        //   })
+
+        //   return {
+        //     project: foundProject && {
+        //       name: foundProject.name,
+        //       id: foundProject.id,
+        //       thumbnailUrl: foundProject.thumbnailUrl,
+        //     },
+        //     createdAt: element.createdAt,
+        //   }
+        // })
+
+        // setSubmittedApplications(latestApplications)
         setIsSubmitted(true)
+
+        setSubmittedApplications(applications)
 
         // onApplied(application as ApplicationWithDetails)
         return "Application submitted"
@@ -165,20 +189,31 @@ export function ApplyDetails({
   //     <ApplicationSubmitted
   //   )
 
-  const application = {
-    project: {
-      name: "Test Name",
-      id: "",
-      thumbnailUrl: "/assets/icons/sunny-smiling.png",
-    },
-    createdAt: new Date(),
-  }
+  // const application = {
+  //   project: {
+  //     name: "Test Name",
+  //     id: "",
+  //     thumbnailUrl: "/assets/icons/sunny-smiling.png",
+  //   },
+  //   createdAt: new Date(),
+  // }
+
+  const submittedProjects: ProjectWithDetails[] = []
+
+  submittedApplications?.map((application) => {
+    const selectedProject = projects.find((project: ProjectWithDetails) => {
+      return project.id === application.projectId
+    })
+
+    if (selectedProject) submittedProjects.push(selectedProject)
+  })
 
   if (isSubmitted) {
     return (
       <ApplicationSubmitted
         className="mt-18 max-w-4xl"
-        applications={[application]}
+        application={applications[0]}
+        submittedProjects={submittedProjects}
         roundName={round.name}
       />
     )

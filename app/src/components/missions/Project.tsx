@@ -75,14 +75,18 @@ export const Project = ({
 
   // console.log(allRequirementsMet)
 
-  const allEligibilityMet =
-    project.hasCodeRepositories &&
-    project.repos.length > 0 &&
-    round.eligibility.criteria.every((criterion: any) => {
-      return project.repos.every((repo: any) => {
-        return repo[criterion.dbValue]
-      })
+  let eligibility = false
+
+  if (round.number === 7) {
+    eligibility = project.repos.every((repo: any) => {
+      return repo.verified
     })
+  } else if (round.number === 8) {
+    eligibility = project.contracts.length > 0
+  }
+
+  const allEligibilityMet =
+    project.hasCodeRepositories && project.repos.length > 0 && eligibility
 
   // console.log(allEligibilityMet)
 
@@ -239,12 +243,7 @@ export const Project = ({
             <p className="font-bold pt-5 pb-2">Eligibility Criteria</p>
 
             {round.eligibility.criteria.map((criterion: any, index: number) => {
-              const criteriaCompletion =
-                project.hasCodeRepositories &&
-                project.repos.length > 0 &&
-                project.repos.every((repo: any) => {
-                  return repo[criterion.dbValue]
-                })
+              const criteriaCompletion = allEligibilityMet
 
               let icon
 

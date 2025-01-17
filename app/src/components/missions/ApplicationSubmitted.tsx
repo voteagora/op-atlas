@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react"
 import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
 
-import { ApplicationWithDetails } from "@/lib/types"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
@@ -15,6 +15,7 @@ import { Discord, DiscussionForum, Optimism, XOptimism } from "../icons/socials"
 import { Button } from "../ui/button"
 import { Badge } from "../ui/badge"
 import { useRouter } from "next/navigation"
+import { Application } from "@prisma/client"
 
 const SOCIALS = [
   {
@@ -55,15 +56,14 @@ const confettiConfig = {
 
 export const ApplicationSubmitted = ({
   className,
-  applications,
+  application,
+  submittedProjects,
   roundName,
   onClose,
 }: {
   className?: string
-  applications: {
-    project: { name: string; id: string; thumbnailUrl: string }
-    createdAt: Date
-  }[]
+  application: Application
+  submittedProjects: ProjectWithDetails[]
   roundName: string
   onClose?: () => void
 }) => {
@@ -103,11 +103,17 @@ export const ApplicationSubmitted = ({
         <h2 className="text-center">Application Submitted!</h2>
         <p className="text-center">
           Your application to{" "}
-          <span className="font-bold"> Retro Funding: {roundName}</span> was
-          submitted on {format(applications[0].createdAt, "MMMM d")} at{" "}
-          {format(applications[0].createdAt, "h:mm a")}. You&apos;ll receive a
-          confirmation email at{" "}
-          <span className="text-accent-foreground">{email}</span>.
+          {application ? (
+            <>
+              <span className="font-bold"> Retro Funding: {roundName}</span> was
+              submitted on {format(application?.createdAt, "MMMM d")} at{" "}
+              {format(application?.createdAt, "h:mm a")}. You&apos;ll receive a
+              confirmation email at{" "}
+              <span className="text-accent-foreground">{email}</span>.
+            </>
+          ) : (
+            <></>
+          )}
         </p>
       </div>
 
@@ -122,24 +128,34 @@ export const ApplicationSubmitted = ({
         </Button>
       )}
 
-      <div className="flex justify-between items-center gap-y-6 p-5 bg-background border rounded-2xl">
-        <div className="flex items-center gap-4">
-          <Image
-            alt="sunny"
-            src={applications[0].project.thumbnailUrl}
-            height={48}
-            width={48}
-          />
-          <p className="font-bold">{applications[0].project.name}</p>
-        </div>
+      <div className="flex flex-col">
+        {submittedProjects.map((application) => {
+          return (
+            <div className="flex justify-between items-center gap-y-6 p-5 bg-background border rounded-2xl">
+              <div className="flex items-center gap-4">
+                {application.thumbnailUrl && (
+                  <Image
+                    alt="sunny"
+                    src={application.thumbnailUrl}
+                    height={48}
+                    width={48}
+                  />
+                )}
 
-        <Badge
-          className={`text-xs font-medium text-green-800 border-0 bg-green-100`}
-          variant={"outline"}
-        >
-          Enrolled
-        </Badge>
+                <p className="font-bold">{application.name}</p>
+              </div>
+
+              <Badge
+                className={`text-xs font-medium text-green-800 border-0 bg-green-100`}
+                variant={"outline"}
+              >
+                Enrolled
+              </Badge>
+            </div>
+          )
+        })}
       </div>
+
       {/* Expectations */}
       <div className="flex flex-col gap-y-6 text-center">
         <div>

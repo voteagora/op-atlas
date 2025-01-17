@@ -118,7 +118,6 @@ export const FUNDING_ROUNDS: FundingRound[] = [
           name: "Onchain deployment",
           description:
             "Your project must have a verified contract on one of the following OP Chains: Base, Ink, Lisk, Mode, OP Mainnet, Sonium, Unichain, Worldchain, Zora.",
-          dbValue: "contractVerified",
         },
         {
           name: "Contract verification",
