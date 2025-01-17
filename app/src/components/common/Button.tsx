@@ -8,18 +8,22 @@ import {
 } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-type ButtonProps = {
-  as?: "button"
+type BaseProps = {
   variant?: "primary" | "secondary"
+  outline?: boolean
   leftIcon?: React.ReactNode
-  rightIcon?: React.ReactNode
-} & React.ComponentProps<typeof _>
+  className?: string
+  children?: React.ReactNode
+}
 
-type DropdownProps = {
+type ButtonProps = BaseProps & {
+  as?: "button"
+  rightIcon?: React.ReactNode
+} & Omit<ShadcnButtonProps, "variant">
+
+type DropdownProps = BaseProps & {
   as?: "dropdown"
-  variant?: "primary" | "secondary"
-  leftIcon?: React.ReactNode
-} & React.ComponentProps<typeof _>
+} & Omit<ShadcnButtonProps, "variant">
 
 type Props = ButtonProps | DropdownProps
 
@@ -33,7 +37,10 @@ const Button = React.forwardRef<HTMLButtonElement, Props>(
     }
 
     if (as === "dropdown") {
-      const { leftIcon, ...dropdownProps } = props as DropdownProps
+      const { leftIcon, ...restDropdown } = props as Omit<
+        DropdownProps,
+        "variant"
+      >
       return (
         <_
           ref={ref}
@@ -42,7 +49,7 @@ const Button = React.forwardRef<HTMLButtonElement, Props>(
             "w-fit gap-x-2 font-normal",
             className,
           )}
-          {...dropdownProps}
+          {...restDropdown}
         >
           {leftIcon}
           {props.children}
@@ -50,19 +57,22 @@ const Button = React.forwardRef<HTMLButtonElement, Props>(
             src="/assets/icons/arrowDownIcon.svg"
             height={8}
             width={10}
-            alt="Arrow up"
+            alt="Arrow down"
           />
         </_>
       )
     }
 
-    const { leftIcon, rightIcon, ...buttonProps } = props as ButtonProps
+    const { leftIcon, rightIcon, ...restButton } = props as Omit<
+      ButtonProps,
+      "variant"
+    >
 
     return (
       <_
         ref={ref}
         className={cn(variants[variant], "w-fit gap-x-2", className)}
-        {...buttonProps}
+        {...restButton}
       >
         {leftIcon}
         {props.children}

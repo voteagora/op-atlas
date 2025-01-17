@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
+import { Button } from "@/components/common/Button"
 import { syncFarcasterAddresses } from "@/lib/actions/addresses"
 import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
 import { isBadgeholderAddress } from "@/lib/badgeholders"
@@ -18,7 +19,6 @@ import { cn, profileProgress, shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Badge } from "../common/Badge"
-import { Button } from "../common/Button"
 import {
   Accordion,
   AccordionContent,
