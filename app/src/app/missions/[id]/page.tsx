@@ -7,6 +7,7 @@ import { auth } from "@/auth"
 import {
   getApplications,
   getApplicationsForRound,
+  getUserApplicationsForRound,
 } from "@/lib/actions/projects"
 
 export default async function MissionPage({
@@ -21,7 +22,10 @@ export default async function MissionPage({
 
   let applications = null
   if (session?.user) {
-    applications = await getApplications(session?.user?.id)
+    applications = await getUserApplicationsForRound(
+      session?.user?.id,
+      foundRound.number,
+    )
   }
 
   const roundApplications = await getApplicationsForRound(foundRound.number)

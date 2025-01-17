@@ -110,7 +110,13 @@ export const Apply = ({
                   },
                 )}
 
-                <Button variant={"ghost"} className="bg-secondary mt-5">
+                <Button
+                  variant={"ghost"}
+                  className="bg-secondary mt-5"
+                  onClick={() => {
+                    router.push(`/missions/${pageName}/application`)
+                  }}
+                >
                   Apply with more projects
                 </Button>
               </div>
