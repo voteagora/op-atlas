@@ -4,7 +4,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Dispatch, SetStateAction } from "react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/common/Button"
+import DropdownItem from "@/components/common/DropdownItem"
+import ExtendedLink from "@/components/common/ExtendedLink"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -59,17 +61,8 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="secondary"
-            className="text-sm font-normal gap-2 text-muted-foreground focus-visible:ring-0"
-          >
+          <Button variant="secondary" as="dropdown">
             {options.find((option) => option.state === sortByAmount)?.label}
-            <Image
-              src="/assets/icons/arrowDownIcon.svg"
-              height={8}
-              width={10}
-              alt="Arrow up"
-            />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40" align="end" side="bottom">
@@ -89,35 +82,19 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
       </DropdownMenu>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="secondary"
-            className="text-sm font-normal gap-2 text-muted-foreground focus-visible:ring-0"
-          >
+          <Button variant="secondary" as="dropdown">
             View results calculation
-            <Image
-              src="/assets/icons/arrowDownIcon.svg"
-              height={8}
-              width={10}
-              alt="Arrow up"
-            />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="bottom" className="w-40">
           {resultsCalculationOptions.map((option) => (
-            <Link
-              href={option.link}
-              key={option.label}
-              target="_blank"
-              className="flex items-center gap-2 px-2 py-1 text-sm font-normal hover:bg-secondary rounded"
-            >
-              <span className="text-foreground">{option.label}</span>
-              <Image
-                src="/assets/icons/arrow-up-right.svg"
-                height={8}
-                width={8}
-                alt="Arrow up right"
+            <DropdownItem key={option.label}>
+              <ExtendedLink
+                href={option.link}
+                text={option.label}
+                showUnderline={false}
               />
-            </Link>
+            </DropdownItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
