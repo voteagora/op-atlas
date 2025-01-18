@@ -24,7 +24,7 @@ const PublicUserProfile = ({
 }) => {
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6 w-full", className)}>
-      <div className="flex flex-col w-full items-start lg:max-w-3xl lg:mx-auto my-18 lg:px-0 px-6">
+      <div className="flex flex-col w-full items-start lg:max-w-3xl lg:mx-auto my-18 lg:px-0 px-6 space-y-12">
         <ProfileHeader user={user} />
         {/* Roles */}
         <ProfileRoles user={user} />
