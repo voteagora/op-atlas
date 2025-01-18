@@ -26,11 +26,11 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
       <Navbar />
-      {width < MOBILE_BREAKPOINT && !pathname.startsWith("/round/results") ? (
+      {/* {width < MOBILE_BREAKPOINT && !pathname.startsWith("/round/results") ? (
         <MobileViewportWarning />
-      ) : (
-        children
-      )}
+      ) : ( */}
+      {children}
+      {/* )} */}
     </div>
   )
 }

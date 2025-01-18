@@ -20,7 +20,7 @@ export default function ProfileHeaderLinks({
   const { user: githubUserData } = useGithubUserData(user.github || "")
 
   return (
-    <div className="mt-2 mr-4 flex items-center gap-x-2 pt-4">
+    <div className="flex flex-wrap gap-2">
       {/* Farcaster */}
       <BubbleLink
         href={`https://warpcast.com/${user.username}`}
