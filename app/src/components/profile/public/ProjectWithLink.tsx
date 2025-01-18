@@ -1,15 +1,16 @@
 import Image from "next/image"
 
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
+import ExtendedLink from "@/components/common/ExtendedLink"
 import { ProjectWithDetailsLite } from "@/lib/types"
 
 function ProjectWithLink({ project }: { project: ProjectWithDetailsLite }) {
   return (
-    <div className="flex items-center gap-x-3">
+    <div className="flex items-center space-x-2">
       {project.applications.length > 0 ? (
-        <OutboundArrowLink
+        <ExtendedLink
           text={project.name}
-          target={`https://round${project.applications[0].roundId}.retrolist.app/project/${project.id}`}
+          href={`https://round${project.applications[0].roundId}.retrolist.app/project/${project.id}`}
           subtext={
             project.rewards.length
               ? `Rewarded in Retro Funding ${project.rewards

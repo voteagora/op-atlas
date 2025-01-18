@@ -26,7 +26,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             className,
           )}
         >
-          {icon}
+          <div>{icon}</div>
           <span>{text}</span>
           {href.toString().startsWith("http") && (
             <Image
@@ -66,24 +66,40 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         ref={ref}
         passHref
         className={cn(
-          "group flex items-center gap-x-1.5 text-inherit",
+          "group flex sm:items-center space-x-1.5 text-inherit",
+          {
+            "items-start": Boolean(subtext),
+            "items-center": !Boolean(subtext),
+          },
           className,
         )}
       >
-        {icon}
-        <span className={cn([{ "group-hover:underline": showUnderline }])}>
-          {text}
-        </span>
-        {href.toString().startsWith("http") && (
-          <Image
-            src="/assets/icons/arrow-up-right.svg"
-            width={10}
-            height={10}
-            alt="External link"
-            className="ml-0.5"
-          />
-        )}
-        {subtext && <span className="text-md text-gray-500">{subtext}</span>}
+        <div
+          className={cn([
+            "sm:mt-0 shrink-0 w-fit h-fit",
+            { "mt-2": Boolean(subtext), "mt-0": !Boolean(subtext) },
+          ])}
+        >
+          {icon}
+        </div>
+        <div className="flex flex-col sm:flex-row sm:space-x-2">
+          <div className="flex items-start space-x-1.5">
+            <span className={cn([{ "group-hover:underline": showUnderline }])}>
+              {text}
+            </span>
+            {href.toString().startsWith("http") && (
+              <div className="mt-2">
+                <Image
+                  src="/assets/icons/arrow-up-right.svg"
+                  width={10}
+                  height={10}
+                  alt="External link"
+                />
+              </div>
+            )}
+          </div>
+          {subtext && <span className="text-md text-gray-500">{subtext}</span>}
+        </div>
       </NextLink>
     )
   },
