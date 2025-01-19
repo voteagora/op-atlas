@@ -4,6 +4,8 @@ import Image from "next/image"
 import { FundingRound } from "@/lib/mocks"
 import { Badge } from "../ui/badge"
 import { Check } from "lucide-react"
+import { BlueBadge } from "../missions/badges/BlueBadge"
+import { GreenBadge } from "../missions/badges/GreenBadge"
 
 export function FundingRoundOngoing({
   fundingRound,
@@ -12,33 +14,9 @@ export function FundingRoundOngoing({
   fundingRound: FundingRound
   userApplicationState: "Open" | "Pending" | "Active"
 }) {
-  const openBadge = (
-    <Badge
-      className={`text-xs font-medium text-blue-800 border-0 ${"bg-calloutAlternative-foreground"}`}
-      variant={"outline"}
-    >
-      {"Open"}
-    </Badge>
-  )
-
-  const pendingBadge = (
-    <Badge
-      className={`text-xs font-medium text-blue-800 border-0 ${"bg-calloutAlternative-foreground"}`}
-      variant={"outline"}
-    >
-      {"Pending"}
-    </Badge>
-  )
-
-  const activeBadge = (
-    <Badge
-      className={`text-xs font-medium text-green-800 border-0 bg-green-100`}
-      variant={"outline"}
-    >
-      <Check width={12} height={12}></Check>
-      Enrolled
-    </Badge>
-  )
+  const openBadge = <BlueBadge text="Open" />
+  const pendingBadge = <BlueBadge text="Pending" />
+  const activeBadge = <GreenBadge />
 
   let selectedBadge
 

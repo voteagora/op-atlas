@@ -8,6 +8,7 @@ import Image from "next/image"
 import { Check, Loader, Loader2 } from "lucide-react"
 import { Badge } from "../ui/badge"
 import { format } from "date-fns"
+import { GreenBadge } from "./badges/GreenBadge"
 
 export const Apply = ({
   className,
@@ -28,25 +29,7 @@ export const Apply = ({
 
   const { data } = useSession()
 
-  const pendingBadge = (
-    <Badge
-      className={`text-xs font-medium text-blue-800 border-0 ${"bg-calloutAlternative-foreground"} flex gap-1`}
-      variant={"outline"}
-    >
-      <Loader2 width={12} height={12} />
-      Pending
-    </Badge>
-  )
-
-  const activeBadge = (
-    <Badge
-      className={`text-xs font-medium text-green-800 border-0 bg-green-100 flex gap-1`}
-      variant={"outline"}
-    >
-      <Check width={12} height={12}></Check>
-      Enrolled
-    </Badge>
-  )
+  const activeBadge = <GreenBadge />
 
   console.log(userAppliedProjects)
 

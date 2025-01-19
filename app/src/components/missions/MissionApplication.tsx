@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from "react"
 import { FundingRound } from "@/lib/mocks"
-import { Project } from "@/components/missions/Project"
+import { ProjectApplication } from "@/components/missions/ProjectApplication"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   ApplicationWithDetails,
@@ -53,7 +53,7 @@ export const ApplicationFormSchema = z.object({
   ),
 })
 
-export function ApplyDetails({
+export function MissionApplication({
   projects,
   applications,
   round,
@@ -81,16 +81,8 @@ export function ApplyDetails({
         return {
           selected: false,
           projectId: project.id,
-          // category: "1",
-          // impactStatement: { "1": "" },
         }
       }),
-      // [
-      //   {
-      //     selected: false,
-      //     projectId:
-      //   },
-      // ],
     },
     shouldFocusError: true,
     mode: "onChange",
@@ -152,27 +144,8 @@ export function ApplyDetails({
     toast.promise(promise, {
       loading: "Submitting application...",
       success: (applications) => {
-        // const latestApplications = applications.map((element) => {
-        //   const foundProject = projects.find((project) => {
-        //     return project.id === element.projectId
-        //   })
-
-        //   return {
-        //     project: foundProject && {
-        //       name: foundProject.name,
-        //       id: foundProject.id,
-        //       thumbnailUrl: foundProject.thumbnailUrl,
-        //     },
-        //     createdAt: element.createdAt,
-        //   }
-        // })
-
-        // setSubmittedApplications(latestApplications)
         setIsSubmitted(true)
-
         setSubmittedApplications(applications)
-
-        // onApplied(application as ApplicationWithDetails)
         return "Application submitted"
       },
       error: (error) => {
@@ -181,22 +154,6 @@ export function ApplyDetails({
       },
     })
   }
-
-  // const [application, setApplication] = useState()
-
-  // if (isSubmitted)
-  //   return (
-  //     <ApplicationSubmitted
-  //   )
-
-  // const application = {
-  //   project: {
-  //     name: "Test Name",
-  //     id: "",
-  //     thumbnailUrl: "/assets/icons/sunny-smiling.png",
-  //   },
-  //   createdAt: new Date(),
-  // }
 
   const submittedProjects: ProjectWithDetails[] = []
 
@@ -287,7 +244,7 @@ export function ApplyDetails({
               {projects.length > 0 ? (
                 <>
                   {projects.map((field, index) => (
-                    <Project
+                    <ProjectApplication
                       key={field.id}
                       index={index}
                       project={field}

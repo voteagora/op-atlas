@@ -1,11 +1,9 @@
 import { notFound } from "next/navigation"
-
 import React from "react"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 import Mission from "@/components/missions/Mission"
 import { auth } from "@/auth"
 import {
-  getApplications,
   getApplicationsForRound,
   getUserApplicationsForRound,
 } from "@/lib/actions/projects"
@@ -45,13 +43,8 @@ export default async function MissionPage({
       }
     }) || []
 
-  console.log(applications)
-  //get live project data from somewhere
-  //const { units, opRewarded, projectsEnrolled} = db.getProjectData(params.id);
-
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      {/* Main content */}
       <Mission
         round={foundRound}
         applications={userProjectsForSidebar}

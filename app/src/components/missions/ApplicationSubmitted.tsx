@@ -16,6 +16,7 @@ import { Button } from "../ui/button"
 import { Badge } from "../ui/badge"
 import { useRouter } from "next/navigation"
 import { Application } from "@prisma/client"
+import { GreenBadge } from "./badges/GreenBadge"
 
 const SOCIALS = [
   {
@@ -148,12 +149,7 @@ export const ApplicationSubmitted = ({
                 <p className="font-bold">{application.name}</p>
               </div>
 
-              <Badge
-                className={`text-xs font-medium text-green-800 border-0 bg-green-100`}
-                variant={"outline"}
-              >
-                Enrolled
-              </Badge>
+              <GreenBadge />
             </div>
           )
         })}

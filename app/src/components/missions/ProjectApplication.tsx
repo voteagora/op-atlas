@@ -34,8 +34,11 @@ import CircleWithCheckmark from "../common/CircleWithGreenCheckmark"
 import { getUserApplications } from "@/db/projects"
 import { useSession } from "next-auth/react"
 import { ProjectsEnrolled } from "./ProjectsEnrolled"
+import { BlueBadge } from "./badges/BlueBadge"
+import { GreenBadge } from "./badges/GreenBadge"
+import { RedBadge } from "./badges/RedBadge"
 
-export const Project = ({
+export const ProjectApplication = ({
   round,
   project,
   index,
@@ -48,11 +51,6 @@ export const Project = ({
   form: any
   isApplicationPresent: boolean
 }) => {
-  const { data } = useSession()
-  // getUserApplications({})
-
-  // console.log(data)
-
   const { progressPercent, completedSections } = useMemo(() => {
     return project
       ? getProjectStatus(project)
@@ -108,43 +106,9 @@ export const Project = ({
   const isIncomplete = !allRequirementsMet
   const isNotEligible = !allEligibilityMet
 
-  const incompleteBadge = (
-    <Badge
-      className={`text-xs font-medium text-rose-800 border-0 ${"bg-rose-200"}`}
-      variant={"outline"}
-    >
-      {"Incomplete"}
-    </Badge>
-  )
-
-  const notEligibleBadge = (
-    <Badge
-      className={`text-xs font-medium text-rose-800 border-0 ${"bg-rose-200"}`}
-      variant={"outline"}
-    >
-      {"Not eligible"}
-    </Badge>
-  )
-
-  const pendingBadge = (
-    <Badge
-      className={`text-xs font-medium text-blue-800 border-0 gap-1 ${"bg-calloutAlternative-foreground"}`}
-      variant={"outline"}
-    >
-      <Loader2 width={16} height={15} />
-      {"Pending approval"}
-    </Badge>
-  )
-
-  const activeBadge = (
-    <Badge
-      className={`text-xs font-medium text-green-800 border-0 bg-green-100`}
-      variant={"outline"}
-    >
-      <Check width={12} height={12}></Check>
-      Enrolled
-    </Badge>
-  )
+  const incompleteBadge = <RedBadge text="Incomplete" />
+  const notEligibleBadge = <RedBadge text="Not eligible" />
+  const activeBadge = <GreenBadge showIcon={true} />
 
   let selectedBadge
 
