@@ -65,6 +65,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         {...props}
         ref={ref}
         passHref
+        target="_blank"
         className={cn(
           "group flex sm:items-center space-x-1.5 text-inherit",
           {
