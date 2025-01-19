@@ -76,11 +76,13 @@ export const ProjectApplication = ({
   let eligibility = false
 
   if (round.number === 7) {
-    eligibility = project.repos.every((repo: any) => {
-      return repo.verified
-    })
+    eligibility =
+      project.hasCodeRepositories &&
+      project.repos.every((repo: any) => {
+        return repo.verified
+      })
   } else if (round.number === 8) {
-    eligibility = project.contracts.length > 0
+    eligibility = project.isOnChainContract && project.contracts.length > 0
   }
 
   const allEligibilityMet =
