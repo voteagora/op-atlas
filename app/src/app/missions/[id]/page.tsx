@@ -5,6 +5,7 @@ import Mission from "@/components/missions/Mission"
 import { auth } from "@/auth"
 import {
   getApplicationsForRound,
+  getProjects,
   getUserApplicationsForRound,
 } from "@/lib/actions/projects"
 
@@ -19,11 +20,15 @@ export default async function MissionPage({
   if (foundRound === undefined) notFound()
 
   let applications = null
+  let projects: any[] = []
+
   if (session?.user) {
     applications = await getUserApplicationsForRound(
       session?.user?.id,
       foundRound.number,
     )
+
+    projects = await getProjects(session?.user.id)
   }
 
   const roundApplications = await getApplicationsForRound(foundRound.number)
@@ -49,6 +54,7 @@ export default async function MissionPage({
         round={foundRound}
         applications={userProjectsForSidebar}
         missionApplications={roundApplicationsForMission}
+        projects={projects}
       />
     </main>
   )

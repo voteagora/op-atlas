@@ -1,10 +1,9 @@
 "use client"
 
-import { cn, formatNumber } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
 import Image from "next/image"
 
-export const ProjectsEnrolled = ({
-  className,
+export const EnrolledProjectsCard = ({
   units,
   opRewarded,
   avgOpRewardPerProject,
@@ -12,9 +11,9 @@ export const ProjectsEnrolled = ({
 }: {
   className?: string
   projects: any[]
-  units: string
-  opRewarded: number
-  avgOpRewardPerProject: number
+  units?: string
+  opRewarded?: number
+  avgOpRewardPerProject?: number
 }) => {
   return (
     <div>
@@ -44,21 +43,25 @@ export const ProjectsEnrolled = ({
               <></>
             )}
           </div>
-          {/* 
-          <LittleSection
-            title={`${formatNumber(units)} Units`}
-            description="High quality onchain value"
-          />
 
-          <LittleSection
-            title={`${formatNumber(opRewarded)} OP`}
-            description="Rewarded across projects so far"
-          />
-
-          <LittleSection
-            title={`${formatNumber(avgOpRewardPerProject)} OP`}
-            description="Average rewards per project"
-          /> */}
+          {units && (
+            <LittleSection
+              title={`${formatNumber(units)} Units`}
+              description="High quality onchain value"
+            />
+          )}
+          {opRewarded && (
+            <LittleSection
+              title={`${formatNumber(opRewarded)} OP`}
+              description="Rewarded across projects so far"
+            />
+          )}
+          {avgOpRewardPerProject && (
+            <LittleSection
+              title={`${formatNumber(avgOpRewardPerProject)} OP`}
+              description="Average rewards per project"
+            />
+          )}
         </div>
       )}
     </div>

@@ -1,17 +1,13 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { Button } from "../ui/button"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
-import { Check, Loader, Loader2 } from "lucide-react"
-import { Badge } from "../ui/badge"
 import { format } from "date-fns"
 import { GreenBadge } from "./badges/GreenBadge"
 
-export const Apply = ({
-  className,
+export const ApplicationStatusCard = ({
   applyByDate,
   startDate,
   userProjectCount,

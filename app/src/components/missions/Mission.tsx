@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import ExternalLink from "../ExternalLink"
-import { Sidebar } from "./Sidebar"
 import { VideoCallout } from "@/components/missions/Callouts"
 import {
   Breadcrumb,
@@ -12,8 +11,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Apply } from "@/components/missions/Apply"
-import { ProjectsEnrolled } from "@/components/missions/ProjectsEnrolled"
+import { ApplicationStatusCard } from "@/components/missions/ApplicationStatusCard"
+import { EnrolledProjectsCard } from "@/components/missions/EnrolledProjectsCard"
 import React from "react"
 import { Eligibility } from "@/components/missions/details/Eligibility"
 import { FundingRound } from "@/lib/mocks"
@@ -25,10 +24,12 @@ export default function Mission({
   round,
   applications,
   missionApplications,
+  projects,
 }: {
   round: FundingRound
   applications: { icon: string | null; name: string }[]
   missionApplications: { icon: string | null; opReward: number }[]
+  projects: any[]
 }) {
   const {
     name,
@@ -40,14 +41,6 @@ export default function Mission({
     eligibility,
     rewards,
   } = round
-
-  const userProjectCount = 1
-  const units = "240"
-  const totalOpReward = missionApplications.reduce(
-    (total, item) => total + item.opReward,
-    0,
-  )
-  const avgOpRewardPerProject = totalOpReward / missionApplications.length
 
   return (
     <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
@@ -102,25 +95,20 @@ export default function Mission({
           </div>
         </div>
 
-        <Sidebar className="ml-auto w-[290px]">
-          <Apply
+        <div className="flex flex-col gap-y-6 ml-auto w-[290px]">
+          <ApplicationStatusCard
             applyByDate={applyBy && format(applyBy, "MMM d")}
             startDate={format(startsAt, "MMM d")}
-            userProjectCount={userProjectCount}
+            userProjectCount={projects.length}
             userAppliedProjects={applications}
             pageName={round.pageName}
           />
           {missionApplications.length > 0 ? (
-            <ProjectsEnrolled
-              units={units}
-              opRewarded={totalOpReward}
-              avgOpRewardPerProject={avgOpRewardPerProject}
-              projects={missionApplications}
-            />
+            <EnrolledProjectsCard projects={missionApplications} />
           ) : (
             <></>
           )}
-        </Sidebar>
+        </div>
       </div>
     </div>
   )
