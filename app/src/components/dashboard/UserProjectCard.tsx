@@ -5,7 +5,7 @@ import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
 import { useIsAdmin } from "@/lib/hooks"
-import { ProjectWithDetails } from "@/lib/types"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 import { projectHasUnpublishedChanges } from "@/lib/utils"
 
@@ -17,14 +17,17 @@ import { Button } from "../ui/button"
 import { Check, ChevronRight, CircleHelp, Loader2 } from "lucide-react"
 import { Callout } from "../common/Callout"
 import { format } from "date-fns"
+import { EnrolledCallout } from "../missions/Callouts"
 
 const UserProjectCard = ({
   className,
   project,
+  applications,
   handleActiveRoundHelpClick,
 }: {
   className?: string
   project: ProjectWithDetails
+  applications: ApplicationWithDetails[]
   handleActiveRoundHelpClick: () => void
 }) => {
   const isAdmin = useIsAdmin(project)
@@ -152,8 +155,18 @@ const UserProjectCard = ({
       </Link>
 
       <div className="px-8 pb-8">
-        <div className="mt-4">
-          <Callout
+        {applications?.map((application) => {
+          return application.projectId === project.id ? (
+            <div className="mt-4">
+              <EnrolledCallout name={application.round.name} />
+            </div>
+          ) : (
+            <></>
+          )
+        })}
+        {/* <div className="mt-4">
+          <EnrolledCallout name={roundName} /> */}
+        {/* <Callout
             type="success"
             showIcon={false}
             leftAlignedContent={
@@ -185,10 +198,10 @@ const UserProjectCard = ({
                 </Button>
               </div>
             }
-          />
-        </div>
+          /> */}
+        {/* </div> */}
 
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <Callout
             type="info"
             showIcon={false}
@@ -216,7 +229,7 @@ const UserProjectCard = ({
               </div>
             }
           />
-        </div>
+        </div> */}
       </div>
     </div>
   )

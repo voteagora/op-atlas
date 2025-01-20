@@ -265,6 +265,7 @@ const Dashboard = ({
                 handleActiveRoundHelpClick={() => {
                   setShowRewardsMonthlyDialog(true)
                 }}
+                applications={applications}
               />
             ))}
           </div>
@@ -286,6 +287,7 @@ const Dashboard = ({
                       handleActiveRoundHelpClick={() => {
                         setShowRewardsMonthlyDialog(true)
                       }}
+                      applications={applications}
                     />
                   ))}
                 </>
