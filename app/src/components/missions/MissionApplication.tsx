@@ -32,6 +32,7 @@ import { format } from "date-fns"
 import Image from "next/image"
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { getUserApplications } from "@/db/projects"
+import { MissionTerms } from "./MissionTerms"
 
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
@@ -102,25 +103,20 @@ export function MissionApplication({
     })
   }
 
-  const [isLoading, setIsLoading] = useState(false)
-
-  const [isSubmitted, setIsSubmitted] = useState(false)
-
-  const [submittedApplications, setSubmittedApplications] =
-    useState<Application[]>()
-
-  const filterProjects = form
-    .getValues()
-    .projects.filter((project) => project.selected)
+  const [submittedApplications, setSubmittedApplications] = useState<
+    Application[]
+  >([])
 
   const submitApplication = async () => {
-    setIsLoading(true)
+    const selectedProjects = form
+      .getValues()
+      .projects.filter((project) => project.selected)
 
     const promise: Promise<Application[]> = new Promise(
       async (resolve, reject) => {
         try {
           const result = await submitApplications(
-            filterProjects.map((project) => ({
+            selectedProjects.map((project) => ({
               categoryId: project.category,
               projectId: project.projectId,
               projectDescriptionOptions: project.projectDescriptionOptions,
@@ -144,12 +140,10 @@ export function MissionApplication({
     toast.promise(promise, {
       loading: "Submitting application...",
       success: (applications) => {
-        setIsSubmitted(true)
         setSubmittedApplications(applications)
         return "Application submitted"
       },
       error: (error) => {
-        setIsLoading(false)
         return error.message
       },
     })
@@ -158,14 +152,14 @@ export function MissionApplication({
   const submittedProjects: ProjectWithDetails[] = []
 
   submittedApplications?.map((application) => {
-    const selectedProject = projects.find((project: ProjectWithDetails) => {
+    const isProjectSubmitted = projects.find((project: ProjectWithDetails) => {
       return project.id === application.projectId
     })
 
-    if (selectedProject) submittedProjects.push(selectedProject)
+    if (isProjectSubmitted) submittedProjects.push(isProjectSubmitted)
   })
 
-  if (isSubmitted) {
+  if (submittedProjects?.length > 0) {
     return (
       <ApplicationSubmitted
         className="mt-18 max-w-4xl"
@@ -232,6 +226,7 @@ export function MissionApplication({
             <TabsTrigger
               className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
               value="terms"
+              disabled={isNextButtonDisabled}
             >
               <span className="pr-2">2</span> Agree to terms
             </TabsTrigger>
@@ -302,47 +297,7 @@ export function MissionApplication({
               )}
             </TabsContent>
             <TabsContent value="terms">
-              <p className="text-2xl font-bold mb-5">Agree and apply</p>
-
-              <div className="flex flex-col gap-y-4 ml-px">
-                {TERMS.map((term, idx) => (
-                  <div key={idx} className="flex gap-x-4">
-                    <Checkbox
-                      className="mt-1"
-                      checked={agreedTerms[idx]}
-                      onCheckedChange={() => toggleAgreedTerm(idx)}
-                    />
-                    <p className="text-secondary-foreground">{term}</p>
-                  </div>
-                ))}
-
-                <div className="flex gap-x-4">
-                  <Checkbox
-                    className="mt-1"
-                    checked={agreedTerms[TERMS.length]}
-                    onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
-                  />
-                  <p className="">
-                    I agree to the{" "}
-                    <ExternalLink
-                      href="https://www.optimism.io/data-privacy-policy"
-                      className="font-medium"
-                    >
-                      Optimism Foundation&apos;s Privacy Policy
-                    </ExternalLink>
-                    .
-                  </p>
-                </div>
-              </div>
-
-              <Button
-                className="mt-10"
-                variant={"destructive"}
-                disabled={!canSubmitForm}
-                onClick={submitApplication}
-              >
-                Submit
-              </Button>
+              <MissionTerms onSubmit={submitApplication} />
             </TabsContent>
             <TabsContent value="submitted">Hello</TabsContent>
           </div>
