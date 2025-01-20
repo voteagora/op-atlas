@@ -23,8 +23,13 @@ const PublicUserProfile = ({
   projects: ProjectWithDetailsLite[]
 }) => {
   return (
-    <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
-      <div className="flex flex-col w-full items-start max-w-3xl mx-auto my-18">
+    <div
+      className={cn(
+        "flex flex-col gap-y-6 mt-6 w-full overflow-x-hidden",
+        className,
+      )}
+    >
+      <div className="flex flex-col w-full items-start lg:max-w-3xl lg:mx-auto my-18 lg:px-0 px-6 space-y-12">
         <ProfileHeader user={user} />
         {/* Roles */}
         <ProfileRoles user={user} />

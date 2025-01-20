@@ -6,7 +6,7 @@ import { memo, useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/common/Button"
 import {
   Dialog,
   DialogContent,
@@ -96,7 +96,6 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
             onClick={saveEmail}
             className="w-full"
             type="button"
-            variant="destructive"
           >
             {loading ? "Saving..." : "Continue"}
           </Button>

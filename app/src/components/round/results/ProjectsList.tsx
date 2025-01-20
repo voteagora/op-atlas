@@ -4,9 +4,9 @@ import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import React from "react"
 
+import { Button } from "@/components/common/Button"
 import ExternalLink from "@/components/ExternalLink"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
-import { Button } from "@/components/ui/button"
 import { FundingRewardDetails } from "@/lib/types"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -97,15 +97,16 @@ const ProjectsList = ({
         </React.Fragment>
       ))}
       {totalCount > projectRewards?.length && (
-        <Button
-          variant="outline"
-          className="mt-6 text-base font-medium flex justify-center items-center gap-2 mx-auto"
-          onClick={handleLoadMore}
-          isLoading={isFetchingMore}
-        >
-          Show more
-          <ArrowLeftIcon fill="#0F111A" className=" -rotate-90" />
-        </Button>
+        <div className="w-full flex justify-center items-center mt-6">
+          <Button
+            variant="secondary"
+            onClick={handleLoadMore}
+            isLoading={isFetchingMore}
+            rightIcon={<ArrowLeftIcon fill="#0F111A" className=" -rotate-90" />}
+          >
+            Show more
+          </Button>
+        </div>
       )}
     </div>
   )
