@@ -135,7 +135,16 @@ export const ProjectApplication = ({
           <AccordionTrigger className="!p-0">
             <div className="flex gap-6 items-center w-full justify-between">
               <div className="flex gap-6 items-center">
-                <div onClick={(e) => e.stopPropagation()}>
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation()
+                    }
+                  }}
+                >
                   <FormField
                     name={`projects.${index}.selected`}
                     control={form.control}

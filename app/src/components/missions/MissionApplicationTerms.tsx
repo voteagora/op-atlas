@@ -12,7 +12,11 @@ const TERMS = [
   "I understand that access to my Optimist Profile is required to claim Retro Funding rewards.",
 ]
 
-export function MissionTerms({ onSubmit }: { onSubmit: () => void }) {
+export function MissionApplicationTerms({
+  onSubmit,
+}: {
+  onSubmit: () => void
+}) {
   const [agreedTerms, setAgreedTerms] = useState(
     Array.from({ length: TERMS.length + 1 }, () => false),
   )

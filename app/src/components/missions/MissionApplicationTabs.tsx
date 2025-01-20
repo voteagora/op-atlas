@@ -1,0 +1,177 @@
+"use client"
+import React, { useState } from "react"
+import { FundingRound } from "@/lib/mocks"
+import { ProjectApplication } from "@/components/missions/ProjectApplication"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import { Button } from "../ui/button"
+import { useRouter } from "next/navigation"
+import CircleWithCheckmark from "../common/CircleWithGreenCheckmark"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
+import { Application } from "@prisma/client"
+import { submitApplications } from "@/lib/actions/applications"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { format } from "date-fns"
+import { ApplicationSubmitted } from "./ApplicationSubmitted"
+import { MissionApplicationTerms } from "./MissionApplicationTerms"
+import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
+
+export const ApplicationFormSchema = z.object({
+  projects: z.array(
+    z.object({
+      projectId: z.string(),
+      category: z.string(),
+      selected: z.boolean(),
+      projectDescriptionOptions: z.array(z.string()),
+      impactStatement: z.record(z.string(), z.string()),
+    }),
+  ),
+})
+
+export function MissionApplicationTabs({
+  projects,
+  applications,
+  round,
+  onSubmit,
+}: {
+  projects: ProjectWithDetails[]
+  applications: ApplicationWithDetails[]
+  round: FundingRound
+  onSubmit: (projects: any) => void
+}) {
+  const [currentTab, setCurrentTab] = useState("details")
+  const router = useRouter()
+
+  const form = useForm<z.infer<typeof ApplicationFormSchema>>({
+    resolver: zodResolver(ApplicationFormSchema),
+    defaultValues: {
+      projects: projects.map((project) => {
+        return {
+          selected: false,
+          projectId: project.id,
+        }
+      }),
+    },
+    shouldFocusError: true,
+    mode: "onChange",
+  })
+
+  const projectsForm = form.watch("projects")
+
+  const isFormValid = projectsForm.some((project) => {
+    return project.selected
+  })
+
+  return (
+    <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+      <TabsList className="grid w-96 grid-cols-2 bg-background">
+        <TabsTrigger
+          className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
+          value="details"
+        >
+          <span className="pr-2">
+            {currentTab === "terms" ? (
+              <div className="w-5 h-5">
+                <CircleWithCheckmark />
+              </div>
+            ) : (
+              "1"
+            )}
+          </span>{" "}
+          Choose projects
+        </TabsTrigger>
+        <TabsTrigger
+          className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
+          value="terms"
+          disabled={!isFormValid}
+        >
+          <span className="pr-2">2</span> Agree to terms
+        </TabsTrigger>
+      </TabsList>
+      <div className="mt-12">
+        <TabsContent value="details">
+          <p className="text-2xl font-bold mb-5">Choose projects</p>
+
+          {projects.length > 0 ? (
+            <>
+              {projects.map((field, index) => (
+                <ProjectApplication
+                  key={field.id}
+                  index={index}
+                  project={field}
+                  round={round}
+                  isApplicationPresent={
+                    applications.find(
+                      (app) =>
+                        app.project.id === field.id &&
+                        app.roundId === round.number.toString(),
+                    )
+                      ? true
+                      : false
+                  }
+                  form={form}
+                />
+              ))}
+              <Button
+                className="mt-10"
+                variant={"destructive"}
+                disabled={!isFormValid}
+                onClick={() => {
+                  setCurrentTab("terms")
+                }}
+              >
+                Next
+              </Button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
+              <p className="font-bold">
+                {"You haven't added or joined any projects"}
+              </p>
+
+              <p className="text-sm text-secondary-foreground text-center">
+                {
+                  "To apply for this Retro Funding Mission, first add your project to OP Atlas."
+                }
+              </p>
+
+              <div className="flex gap-4">
+                <Button className="w-44" variant={"destructive"}>
+                  Add Project
+                </Button>
+                <Button
+                  className="w-44"
+                  variant={"outline"}
+                  onClick={() => {
+                    router.push(`/missions/${round.pageName}`)
+                  }}
+                >
+                  View Mission Details
+                </Button>
+              </div>
+            </div>
+          )}
+        </TabsContent>
+        <TabsContent value="terms">
+          <MissionApplicationTerms
+            onSubmit={() => {
+              onSubmit(
+                form.getValues().projects.filter((project) => project.selected),
+              )
+            }}
+          />
+        </TabsContent>
+      </div>
+    </Tabs>
+  )
+}
