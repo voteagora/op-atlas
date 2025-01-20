@@ -129,6 +129,23 @@ export async function updateUserHasGithub({
   })
 }
 
+export async function updateUserDiscord({
+  id,
+  discord,
+}: {
+  id: string
+  discord?: string | null
+}) {
+  return prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      discord,
+    },
+  })
+}
+
 export async function updateUserGithub({
   id,
   github,
