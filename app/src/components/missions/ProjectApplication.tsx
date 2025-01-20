@@ -135,18 +135,20 @@ export const ProjectApplication = ({
           <AccordionTrigger className="!p-0">
             <div className="flex gap-6 items-center w-full justify-between">
               <div className="flex gap-6 items-center">
-                <FormField
-                  name={`projects.${index}.selected`}
-                  control={form.control}
-                  render={({ field }) => (
-                    <Checkbox
-                      disabled={!isValid}
-                      name={field.name}
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
+                <div onClick={(e) => e.stopPropagation()}>
+                  <FormField
+                    name={`projects.${index}.selected`}
+                    control={form.control}
+                    render={({ field }) => (
+                      <Checkbox
+                        disabled={!isValid}
+                        name={field.name}
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
 
                 <Image
                   width={48}
