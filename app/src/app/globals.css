@@ -4,6 +4,12 @@
 
 @layer base {
   :root {
+    --button-primary: 348, 100%, 50%;
+    --button-secondary: 228, 22%, 96%;
+
+    --button-primary-text: 210 40% 98%;
+    --button-secondary-text: 228 14% 29%;
+
     --text-primary: 230 30% 96%;
     --text-default: 229 27% 8%;
     --text-secondary: 228 14% 29%;
@@ -127,7 +133,23 @@
     );
   }
   .bgAlternativeCallout {
-    background: #D6E4FF
+    background: #d6e4ff;
+  }
+
+  .button-primary {
+    @apply bg-button-primary text-button-primary-foreground hover:!bg-button-primary-hover;
+  }
+
+  .button-secondary {
+    @apply bg-button-secondary text-button-secondary-foreground hover:!bg-button-secondary-hover;
+  }
+
+  .input-container {
+    @apply flex items-center self-start w-full px-3 py-2 border border-border rounded-md gap-1 text-secondary-foreground h-10;
+  }
+
+  .text-h4 {
+    @apply font-semibold text-xl;
   }
 }
 

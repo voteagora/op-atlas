@@ -17,7 +17,8 @@
     "dump:badgeholders": "tsx src/scripts/badgeholders.ts",
     "rewards": "tsx src/scripts/rewards.ts",
     "kyc": "tsx src/scripts/kyc.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "studio": "prisma studio"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

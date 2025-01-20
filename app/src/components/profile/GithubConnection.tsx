@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { Button } from "@/components/common/Button"
 import {
   connectGithub,
   removeGithub,
@@ -14,7 +15,6 @@ import {
 } from "@/lib/actions/users"
 import { cn, GITHUB_REDIRECT_COOKIE } from "@/lib/utils"
 
-import { Button } from "../ui/button"
 import { Checkbox } from "../ui/checkbox"
 
 export function GithubConnection({ user }: { user: User }) {
@@ -114,7 +114,6 @@ export function GithubConnection({ user }: { user: User }) {
       <div className="flex gap-2">
         <Button
           disabled={userNotDeveloper || !!user.github}
-          variant="destructive"
           onClick={authorizeGithub}
         >
           Connect Github
@@ -122,7 +121,7 @@ export function GithubConnection({ user }: { user: User }) {
 
         <div
           className={cn(
-            "text-sm h-10 px-3 flex gap-1.5 items-center border border-border rounded-md",
+            "input-container text-sm",
             userNotDeveloper && "bg-secondary",
           )}
         >

@@ -4,17 +4,18 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { Button } from "@/components/common/Button"
 import { updateGovForumProfileUrl } from "@/lib/actions/users"
 import { UserWithEmails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 
 export function GovForumConnection({ user }: { user: UserWithEmails }) {
   const [govForumProfileUrl, setGovForumProfileUrl] = useState(
     user.govForumProfileUrl || "",
   )
+  const [isEditing, setIsEditing] = useState(false)
 
   const [loading, setLoading] = useState(false)
 
@@ -44,6 +45,7 @@ export function GovForumConnection({ user }: { user: UserWithEmails }) {
       toast.success("Profile URL updated")
     }
     setLoading(false)
+    setIsEditing(false)
   }
 
   useEffect(() => {
@@ -110,15 +112,25 @@ export function GovForumConnection({ user }: { user: UserWithEmails }) {
             value={govForumProfileUrl}
             onChange={(e) => setGovForumProfileUrl(e.target.value)}
             className={cn(user.govForumProfileUrl && "pl-10")}
+            readOnly={!isEditing}
           />
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={loading}
-          variant={user.govForumProfileUrl ? "secondary" : "destructive"}
-        >
-          {user.govForumProfileUrl ? "Edit" : "Save"}
-        </Button>
+        {isEditing ? (
+          <Button
+            onClick={handleSave}
+            disabled={
+              loading ||
+              user.govForumProfileUrl === govForumProfileUrl ||
+              !govForumProfileUrl
+            }
+          >
+            Save
+          </Button>
+        ) : (
+          <Button onClick={() => setIsEditing(true)} variant="secondary">
+            Edit
+          </Button>
+        )}
       </div>
     </div>
   )

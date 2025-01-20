@@ -1,12 +1,12 @@
-import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import Image from "next/image"
-import Link from "next/link"
+
+import ExtendedLink from "@/components/common/ExtendedLink"
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center gap-6 mt-64">
+    <div className="flex flex-col items-center gap-6 h-app w-full justify-center lg:px-0 px-2">
       <Image
-        src={"/assets/icons/sunny-stars-custom-gimp-edit.png"}
+        src={"/assets/icons/sunny-stars-custom-gimp-edit.svg"}
         alt="Sunny Logo"
         width={160}
         height={160}
@@ -16,29 +16,25 @@ export default function NotFound() {
         The page you&apos;re looking for doesn&apos;t exist.
       </h4>
 
-      <div className="flex gap-3">
-        <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
+      <div className="flex flex-wrap gap-3">
+        <ExtendedLink
+          as="button"
           text={"Optimism"}
-          target={"https://optimism.io"}
+          href={"https://optimism.io"}
         />
 
-        <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
-          text={"Retro Funding"}
-          target={"/"}
-        />
+        <ExtendedLink as="button" text={"Retro Funding"} href={"/"} />
 
-        <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
+        <ExtendedLink
+          as="button"
           text={"Forum"}
-          target={"https://gov.optimism.io"}
+          href={"https://gov.optimism.io"}
         />
 
-        <OutboundArrowLink
-          className="bg-gray-200 pt-[10px] pb-[10px] pl-4 pr-4 rounded-lg text-sm"
+        <ExtendedLink
+          as="button"
           text={"Delegates"}
-          target={"https://vote.optimism.io/delegates"}
+          href={"https://vote.optimism.io/delegates"}
         />
       </div>
     </div>

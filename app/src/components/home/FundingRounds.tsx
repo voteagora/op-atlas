@@ -1,23 +1,20 @@
 "use client"
 import { format } from "date-fns"
 import Image from "next/image"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useMemo, useState } from "react"
 import { optimism } from "viem/chains"
 
+import ExtendedLink from "@/components/common/ExtendedLink"
 import { FundingRound } from "@/lib/mocks"
 import { cn, titlecase } from "@/lib/utils"
 
 import { ChainLogo } from "../common/ChainLogo"
 import { Badge } from "../ui/badge"
-import { Button } from "../ui/button"
 import { FundingRoundPast } from "./FundingRoundPast"
 import { FundingRoundOngoing } from "./FundingRoundOngoing"
-import { getApplications } from "@/lib/actions/projects"
 import { ApplicationWithDetails } from "@/lib/types"
-import { Session } from "next-auth"
 
 export const FundingRounds = ({
   className,
@@ -238,14 +235,7 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                   )}{" "}
                 </div>
               </div>
-              <Link href="/application/6">
-                <Button
-                  variant="secondary"
-                  className="text-sm font-medium text-foreground"
-                >
-                  View application
-                </Button>
-              </Link>
+              <ExtendedLink href="/application/6" text="View application" />
             </div>
           )}
         </div>
@@ -266,14 +256,11 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
               </div>
             </div>
             {fundingRound.resultsLink && (
-              <Link href={fundingRound.resultsLink}>
-                <Button
-                  variant="secondary"
-                  className="text-sm font-medium text-foreground"
-                >
-                  View results
-                </Button>
-              </Link>
+              <ExtendedLink
+                href={fundingRound.resultsLink}
+                as="button"
+                text="View results"
+              />
             )}
           </div>
         )}

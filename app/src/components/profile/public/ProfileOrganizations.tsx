@@ -1,5 +1,6 @@
 import { Organization } from "@prisma/client"
 import Image from "next/image"
+import ExtendedLink from "@/components/common/ExtendedLink"
 
 function ProfileOrganizations({
   organizations,
@@ -11,30 +12,30 @@ function ProfileOrganizations({
   }
 
   return (
-    <div className="flex flex-col gap-y-4 mt-12">
+    <div className="flex flex-col space-y-4">
       <h2 className="text-xl font-medium">Organizations</h2>
-      <div className="flex flex-col gap-y-4">
+      <div className="flex flex-col space-y-4">
         {organizations.map((organization) => (
-          <a
+          <ExtendedLink
             href={`/${organization.id}`}
             key={organization.id}
-            className="flex items-center gap-x-3 hover:opacity-80 hover:underline"
-          >
-            {organization.avatarUrl ? (
-              <Image
-                src={organization.avatarUrl ?? ""}
-                alt={organization.name}
-                width={32}
-                height={32}
-                className="rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                <span>{organization.name.charAt(0)}</span>
-              </div>
-            )}
-            <span>{organization.name}</span>
-          </a>
+            text={organization.name}
+            icon={
+              organization.avatarUrl ? (
+                <Image
+                  src={organization.avatarUrl ?? ""}
+                  alt={organization.name}
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span>{organization.name.charAt(0)}</span>
+                </div>
+              )
+            }
+          />
         ))}
       </div>
     </div>
