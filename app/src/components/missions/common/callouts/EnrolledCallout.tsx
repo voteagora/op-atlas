@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react"
-import { Callout } from "../../common/Callout"
+import { Callout } from "../../../common/Callout"
 import Image from "next/image"
 
 export function EnrolledCallout({ name }: { name: string }) {

@@ -4,8 +4,8 @@ import Image from "next/image"
 import { FundingRound } from "@/lib/mocks"
 import { Badge } from "../ui/badge"
 import { Check } from "lucide-react"
-import { BlueBadge } from "../missions/badges/BlueBadge"
-import { GreenBadge } from "../missions/badges/GreenBadge"
+import { BlueBadge } from "../missions/common/badges/BlueBadge"
+import { GreenBadge } from "../missions/common/badges/GreenBadge"
 
 export function FundingRoundOngoing({
   fundingRound,

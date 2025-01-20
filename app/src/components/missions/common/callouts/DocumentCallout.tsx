@@ -1,9 +1,15 @@
 import { ArrowUpRightIcon } from "lucide-react"
-import { Callout } from "../../common/Callout"
+import { Callout } from "../../../common/Callout"
 import Image from "next/image"
-import ExternalLink from "../../ExternalLink"
+import ExternalLink from "../../../ExternalLink"
 
-export function VideoCallout({ text, href }: { text: string; href: string }) {
+export function DocumentCallout({
+  text,
+  href,
+}: {
+  text: string
+  href: string
+}) {
   return (
     <ExternalLink href={href}>
       <Callout
@@ -14,7 +20,7 @@ export function VideoCallout({ text, href }: { text: string; href: string }) {
           <div className="flex gap-4 items-center">
             <Image
               alt="Info"
-              src={"/assets/icons/video-icon.svg"}
+              src={"/assets/icons/doc-icon.svg"}
               width={10}
               height={10}
               className="w-5 h-5"

@@ -16,7 +16,7 @@ import { Button } from "../ui/button"
 import { Badge } from "../ui/badge"
 import { useRouter } from "next/navigation"
 import { Application } from "@prisma/client"
-import { GreenBadge } from "./badges/GreenBadge"
+import { GreenBadge } from "./common/badges/GreenBadge"
 
 const SOCIALS = [
   {

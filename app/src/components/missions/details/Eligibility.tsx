@@ -1,6 +1,6 @@
 import ExternalLink from "../../ExternalLink"
-import { VideoCallout } from "../callouts/VideoCallout"
-import { DocumentCallout } from "../callouts/DocumentCallout"
+import { VideoCallout } from "../common/callouts/VideoCallout"
+import { DocumentCallout } from "../common/callouts/DocumentCallout"
 export const Eligibility = ({ eligibility }: any) => {
   const createLinkedText = (text: string, links: any) => {
     if (links == undefined) return text

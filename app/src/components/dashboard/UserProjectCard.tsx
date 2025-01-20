@@ -17,7 +17,7 @@ import { Button } from "../ui/button"
 import { Check, ChevronRight, CircleHelp, Loader2 } from "lucide-react"
 import { Callout } from "../common/Callout"
 import { format } from "date-fns"
-import { EnrolledCallout } from "../missions/callouts/EnrolledCallout"
+import { EnrolledCallout } from "../missions/common/callouts/EnrolledCallout"
 const UserProjectCard = ({
   className,
   project,

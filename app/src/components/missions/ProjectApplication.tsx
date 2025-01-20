@@ -34,9 +34,9 @@ import CircleWithCheckmark from "../common/CircleWithGreenCheckmark"
 import { getUserApplications } from "@/db/projects"
 import { useSession } from "next-auth/react"
 import { EnrolledProjectsCard } from "./EnrolledProjectsCard"
-import { BlueBadge } from "./badges/BlueBadge"
-import { GreenBadge } from "./badges/GreenBadge"
-import { RedBadge } from "./badges/RedBadge"
+import { BlueBadge } from "./common/badges/BlueBadge"
+import { GreenBadge } from "./common/badges/GreenBadge"
+import { RedBadge } from "./common/badges/RedBadge"
 
 export const ProjectApplication = ({
   round,

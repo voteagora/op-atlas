@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import ExternalLink from "../ExternalLink"
-import { VideoCallout } from "@/components/missions/callouts/VideoCallout"
+import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
 import {
   Breadcrumb,
   BreadcrumbItem,
