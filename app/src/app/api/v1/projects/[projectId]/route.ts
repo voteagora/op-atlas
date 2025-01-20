@@ -16,7 +16,7 @@ export const DELETE = async (
   try {
     const res = await deleteProject({ id: route.params.projectId })
 
-    return NextResponse.json({ deleted: !!res, id: res.id })
+    return NextResponse.json({ deleted: !!res, id: res[0].id })
   } catch (e) {
     console.error(e)
     return new Response(JSON.stringify(e), { status: 500 })
