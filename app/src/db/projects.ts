@@ -411,14 +411,19 @@ export async function removeProjectOrganization({
 }
 
 export async function deleteProject({ id }: { id: string }) {
-  return prisma.project.update({
-    where: {
-      id,
-    },
-    data: {
-      deletedAt: new Date(),
-    },
-  })
+  return Promise.all([
+    prisma.project.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    }),
+    prisma.projectRepository.deleteMany({
+      where: { projectId: id },
+    }),
+  ])
 }
 
 async function getProjectFn({ id }: { id: string }) {
