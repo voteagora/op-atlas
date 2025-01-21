@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import React from "react"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
-import Mission from "@/components/missions/Mission"
+import Mission from "@/components/missions/details/Mission"
 import { auth } from "@/auth"
 import {
   getApplicationsForRound,

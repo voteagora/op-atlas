@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import ExternalLink from "../ExternalLink"
+import ExternalLink from "../../ExternalLink"
 import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
 import {
   Breadcrumb,
@@ -11,14 +11,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { ApplicationStatusCard } from "@/components/missions/ApplicationStatusCard"
-import { EnrolledProjectsCard } from "@/components/missions/EnrolledProjectsCard"
+import { ApplicationStatusCard } from "@/components/missions/details/ApplicationStatusCard"
+import { EnrolledProjectsCard } from "@/components/missions/details/EnrolledProjectsCard"
 import React from "react"
 import { Eligibility } from "@/components/missions/details/Eligibility"
 import { FundingRound } from "@/lib/mocks"
 import { format } from "date-fns"
-import Header from "./details/Header"
-import Rewards from "./details/Rewards"
+import Header from "@/components/missions/details/Header"
+import Rewards from "@/components/missions/details/Rewards"
 
 export default function Mission({
   round,

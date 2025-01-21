@@ -10,13 +10,18 @@ import Confetti from "react-dom-confetti"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import ExternalLink from "../ExternalLink"
-import { Discord, DiscussionForum, Optimism, XOptimism } from "../icons/socials"
-import { Button } from "../ui/button"
-import { Badge } from "../ui/badge"
+import ExternalLink from "../../ExternalLink"
+import {
+  Discord,
+  DiscussionForum,
+  Optimism,
+  XOptimism,
+} from "../../icons/socials"
+import { Button } from "../../ui/button"
+import { Badge } from "../../ui/badge"
 import { useRouter } from "next/navigation"
 import { Application } from "@prisma/client"
-import { GreenBadge } from "./common/badges/GreenBadge"
+import { GreenBadge } from "../common/badges/GreenBadge"
 
 const SOCIALS = [
   {

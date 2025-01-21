@@ -1,11 +1,11 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Button } from "../ui/button"
+import { Button } from "../../ui/button"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { format } from "date-fns"
-import { GreenBadge } from "./common/badges/GreenBadge"
+import { GreenBadge } from "../common/badges/GreenBadge"
 
 export const ApplicationStatusCard = ({
   applyByDate,

@@ -3,7 +3,7 @@ import { FUNDING_ROUNDS } from "@/lib/mocks"
 import { notFound } from "next/navigation"
 import { getApplications, getProjects } from "@/lib/actions/projects"
 import { auth } from "@/auth"
-import { MissionApplication } from "@/components/missions/MissionApplication"
+import { MissionApplication } from "@/components/missions/application/MissionApplication"
 
 export default async function MissionApplicationPage({
   params,

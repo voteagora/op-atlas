@@ -7,14 +7,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import Image from "next/image"
-import ExternalLink from "../ExternalLink"
-import { Callout } from "../common/Callout"
-import { Badge } from "../ui/badge"
+import ExternalLink from "../../ExternalLink"
+import { Callout } from "../../common/Callout"
+import { Badge } from "../../ui/badge"
 
-import { FormField } from "../ui/form"
-import { Checkbox } from "../ui/checkbox"
+import { FormField } from "../../ui/form"
+import { Checkbox } from "../../ui/checkbox"
 import { useForm } from "react-hook-form"
-import { ApplicationFormSchema } from "../application/5/ApplicationFormTabs"
+import { ApplicationFormSchema } from "../../application/5/ApplicationFormTabs"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
@@ -27,16 +27,16 @@ import {
   Loader2,
   X,
 } from "lucide-react"
-import { Button } from "../ui/button"
+import { Button } from "../../ui/button"
 import { notFound, useRouter } from "next/navigation"
 import { FUNDING_ROUNDS, FundingRound } from "@/lib/mocks"
-import CircleWithCheckmark from "../common/CircleWithGreenCheckmark"
+import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
 import { getUserApplications } from "@/db/projects"
 import { useSession } from "next-auth/react"
-import { EnrolledProjectsCard } from "./EnrolledProjectsCard"
-import { BlueBadge } from "./common/badges/BlueBadge"
-import { GreenBadge } from "./common/badges/GreenBadge"
-import { RedBadge } from "./common/badges/RedBadge"
+import { EnrolledProjectsCard } from "./../details/EnrolledProjectsCard"
+import { BlueBadge } from "../common/badges/BlueBadge"
+import { GreenBadge } from "../common/badges/GreenBadge"
+import { RedBadge } from "../common/badges/RedBadge"
 
 export const ProjectApplication = ({
   round,
