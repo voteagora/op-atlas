@@ -110,7 +110,7 @@ export function MissionApplicationTabs({
                   index={index}
                   project={field}
                   round={round}
-                  isApplicationPresent={
+                  isAppliedToRound={
                     applications.find(
                       (app) =>
                         app.project.id === field.id &&

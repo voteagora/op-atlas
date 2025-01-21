@@ -43,7 +43,6 @@ export const FUNDING_ROUNDS: FundingRound[] = [
           name: "Open Source",
           description:
             "Projects must have a public GitHub repository with a history of public commits.",
-          dbValue: "openSource",
         },
         {
           name: "Ownership of GitHub repo",
@@ -54,7 +53,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
             link: "https://youtube.com",
             type: "video",
           },
-          dbValue: "verified",
+          type: "hasCodeRepositories",
         },
       ],
       contextSpecificCriteria: [

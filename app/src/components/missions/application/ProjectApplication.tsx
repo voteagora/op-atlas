@@ -7,110 +7,96 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import Image from "next/image"
-import ExternalLink from "../../ExternalLink"
-import { Callout } from "../../common/Callout"
-import { Badge } from "../../ui/badge"
-
 import { FormField } from "../../ui/form"
 import { Checkbox } from "../../ui/checkbox"
-import { useForm } from "react-hook-form"
-import { ApplicationFormSchema } from "../../application/5/ApplicationFormTabs"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 import { useMemo } from "react"
-import {
-  Check,
-  ChevronRight,
-  Circle,
-  CircleCheck,
-  Loader2,
-  X,
-} from "lucide-react"
+import { ChevronRight, X } from "lucide-react"
 import { Button } from "../../ui/button"
-import { notFound, useRouter } from "next/navigation"
-import { FUNDING_ROUNDS, FundingRound } from "@/lib/mocks"
+import { useRouter } from "next/navigation"
+import { FundingRound } from "@/lib/mocks"
 import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
-import { getUserApplications } from "@/db/projects"
-import { useSession } from "next-auth/react"
-import { EnrolledProjectsCard } from "./../details/EnrolledProjectsCard"
-import { BlueBadge } from "../common/badges/BlueBadge"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
+
+const incompleteBadge = <RedBadge text="Incomplete" />
+const notEligibleBadge = <RedBadge text="Not eligible" />
+const activeBadge = <GreenBadge showIcon={true} />
+
+const sectionsTitles = {
+  Details: "Project details",
+  Contributors: "Contributors",
+  Repos: "Repos & Links",
+  Contracts: "Contracts",
+  Publish: "Publish metadata onchain",
+}
+
+const sectionsCriteria: ProjectSection[] = [
+  ProjectSection.Details,
+  ProjectSection.Contributors,
+  ProjectSection.Repos,
+  ProjectSection.Contracts,
+  ProjectSection.Publish,
+]
 
 export const ProjectApplication = ({
   round,
   project,
   index,
   form,
-  isApplicationPresent,
+  isAppliedToRound,
 }: {
   round: FundingRound
   project: ProjectWithDetails
   index: number
   form: any
-  isApplicationPresent: boolean
+  isAppliedToRound: boolean
 }) => {
-  const { progressPercent, completedSections } = useMemo(() => {
-    return project
-      ? getProjectStatus(project)
-      : { progressPercent: 0, completedSections: [] }
-  }, [project])
-
   const router = useRouter()
 
-  const projectRequirements: ProjectSection[] = [
-    ProjectSection.Details,
-    ProjectSection.Contributors,
-    ProjectSection.Repos,
-    ProjectSection.Contracts,
-    ProjectSection.Publish,
-  ]
+  const { progressPercent, completedSections: completedSectionsCriteria } =
+    useMemo(() => {
+      return project
+        ? getProjectStatus(project)
+        : { progressPercent: 0, completedSections: [] }
+    }, [project])
 
-  const allRequirementsMet = projectRequirements.every((section) =>
-    completedSections.includes(section),
+  const roundEligibilityCriteriaChecks = round.eligibility.criteria.map(() => {
+    return true
+  })
+
+  for (let i = 0; i < round.eligibility.criteria.length; i++) {
+    var criterion = round.eligibility.criteria[i]
+
+    if (criterion.type === "hasCodeRepositories") {
+      roundEligibilityCriteriaChecks[i] =
+        project.hasCodeRepositories &&
+        project.repos.every((repo: any) => {
+          return repo.verified
+        })
+    }
+
+    if (criterion.type === "isOnChainContract") {
+      roundEligibilityCriteriaChecks[i] =
+        project.isOnChainContract && project.contracts.length > 0
+    }
+  }
+
+  const isSectionsCriteriaMet = sectionsCriteria.reduce(
+    (sections, criterion) => {
+      sections[criterion] = completedSectionsCriteria.includes(criterion)
+      return sections
+    },
+    {} as Record<string, boolean>,
   )
 
-  // console.log(allRequirementsMet)
-
-  let eligibility = false
-
-  if (round.number === 7) {
-    eligibility =
-      project.hasCodeRepositories &&
-      project.repos.every((repo: any) => {
-        return repo.verified
-      })
-  } else if (round.number === 8) {
-    eligibility = project.isOnChainContract && project.contracts.length > 0
-  }
-
-  const allEligibilityMet =
-    project.hasCodeRepositories && project.repos.length > 0 && eligibility
-
-  // console.log(allEligibilityMet)
-
-  const requirementStatus = projectRequirements.reduce((acc, requirement) => {
-    acc[requirement] = completedSections.includes(requirement)
-    return acc
-  }, {} as Record<string, boolean>)
-
-  const setupTitles = {
-    Details: "Project details",
-    Contributors: "Contributors",
-    Repos: "Repos & Links",
-    Contracts: "Contracts",
-    Publish: "Publish metadata onchain",
-  }
-
-  const isActive = isApplicationPresent
-  // const isPending = false
-  const isIncomplete = !allRequirementsMet
-  const isNotEligible = !allEligibilityMet
-
-  const incompleteBadge = <RedBadge text="Incomplete" />
-  const notEligibleBadge = <RedBadge text="Not eligible" />
-  const activeBadge = <GreenBadge showIcon={true} />
+  const isActive = isAppliedToRound
+  const isIncomplete = !sectionsCriteria.every((section) =>
+    completedSectionsCriteria.includes(section),
+  )
+  const isNotEligible = !roundEligibilityCriteriaChecks.every(
+    (check: boolean) => check,
+  )
 
   let selectedBadge
 
@@ -184,7 +170,7 @@ export const ProjectApplication = ({
           <AccordionContent className="pl-10 pt-5">
             <p className="font-bold pb-2">Project Setup</p>
 
-            {Object.entries(requirementStatus).map(([key, value]) => {
+            {Object.entries(isSectionsCriteriaMet).map(([key, value]) => {
               let icon
 
               if (!value) {
@@ -200,7 +186,9 @@ export const ProjectApplication = ({
                     {icon}
                   </div>
                   <p className="pl-4">
-                    <span>{setupTitles[key as keyof typeof setupTitles]}</span>
+                    <span>
+                      {sectionsTitles[key as keyof typeof sectionsTitles]}
+                    </span>
                   </p>
                 </div>
               )
@@ -220,7 +208,7 @@ export const ProjectApplication = ({
             <p className="font-bold pt-5 pb-2">Eligibility Criteria</p>
 
             {round.eligibility.criteria.map((criterion: any, index: number) => {
-              const criteriaCompletion = allEligibilityMet
+              const criteriaCompletion = roundEligibilityCriteriaChecks[index]
 
               let icon
 
