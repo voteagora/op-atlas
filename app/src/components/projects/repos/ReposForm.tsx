@@ -42,7 +42,7 @@ function toFormValues(project: ProjectWithDetails) {
 
   return {
     noRepos: project.hasCodeRepositories === false,
-    links: !!!project?.links?.length
+    links: !project?.links?.length
       ? [{ url: "", name: "", description: "" }]
       : //this name and description with be replace with live data
         project.links?.map(({ url, name, description }) => ({
@@ -240,11 +240,11 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
   const links = form.watch("links")
   const isValidToAddLink = useMemo(() => {
     return (
-      links[links.length - 1].url !== "" &&
+      links[links.length - 1]?.url !== "" &&
       z
         .string()
         .url()
-        .safeParse(links[links.length - 1].url).success
+        .safeParse(links[links.length - 1]?.url).success
     )
   }, [links])
 
