@@ -127,6 +127,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
             link: "https://youtube.com",
             type: "video",
           },
+          type: "isOnChainContract",
         },
         {
           name: "Contract attribution",
