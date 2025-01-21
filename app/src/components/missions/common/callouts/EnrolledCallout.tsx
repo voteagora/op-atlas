@@ -1,8 +1,16 @@
 import { ChevronRight } from "lucide-react"
 import { Callout } from "../../../common/Callout"
 import Image from "next/image"
+import ExternalLink from "@/components/ExternalLink"
+import { EAS_URL_PREFIX } from "@/lib/utils"
 
-export function EnrolledCallout({ name }: { name: string }) {
+export function EnrolledCallout({
+  name,
+  attestationId,
+}: {
+  name: string
+  attestationId: string
+}) {
   return (
     <Callout
       type="success"
@@ -22,10 +30,15 @@ export function EnrolledCallout({ name }: { name: string }) {
       }
       rightAlignedContent={
         <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
-          <span>Confirmation</span>
+          <ExternalLink
+            className="text-sm text-success-foreground font-medium"
+            href={`${EAS_URL_PREFIX}${attestationId}`}
+          >
+            Confirmation
+          </ExternalLink>
           <ChevronRight width={16} height={16} />
-          <span>Rewards</span>
-          <ChevronRight width={16} height={16} />
+          {/* <span>Rewards</span>
+          <ChevronRight width={16} height={16} /> */}
         </div>
       }
     />

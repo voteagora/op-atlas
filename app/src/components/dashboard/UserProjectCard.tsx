@@ -157,7 +157,10 @@ const UserProjectCard = ({
         {applications?.map((application) => {
           return application.projectId === project.id ? (
             <div className="mt-4">
-              <EnrolledCallout name={application.round.name} />
+              <EnrolledCallout
+                name={application.round.name}
+                attestationId={application.attestationId}
+              />
             </div>
           ) : (
             <></>
