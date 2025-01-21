@@ -1,3 +1,6 @@
+import { toast } from "sonner"
+
+import { Badge } from "@/components/common/Badge"
 import BubbleLink from "@/components/common/BubbleLink"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
@@ -18,6 +21,13 @@ export default function ProfileHeaderLinks({
 
   const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
   const { user: githubUserData } = useGithubUserData(user.github || "")
+
+  const onDiscordBadgeClick = () => {
+    if (!user.discord) return
+
+    navigator.clipboard.writeText(user.discord)
+    toast.success("Discord username copied")
+  }
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -66,6 +76,21 @@ export default function ProfileHeaderLinks({
             </div>
           }
           tooltipText="Github"
+        />
+      )}
+
+      {/* Discord */}
+      {user.discord && (
+        <Badge
+          as="button"
+          leftIcon="/assets/icons/discordIcon.svg"
+          text={
+            <div className="flex gap-1">
+              <span className="text-sm text-black">@{user.discord}</span>
+            </div>
+          }
+          tooltipText="Click to copy Discord Username"
+          onClick={onDiscordBadgeClick}
         />
       )}
 
