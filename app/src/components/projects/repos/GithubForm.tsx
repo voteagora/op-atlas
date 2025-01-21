@@ -25,6 +25,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { copyToClipboard } from "@/lib/utils"
 
 import { ReposFormSchema } from "./schema"
+import CircleWithCheckmark from "@/components/common/CircleWithGreenCheckmark"
+import ExternalLink from "@/components/ExternalLink"
 
 export const GithubForm = ({
   form,
@@ -67,16 +69,14 @@ export const GithubForm = ({
     }
   }, [url])
 
+  function split() {
+    let splits = url.split("/").filter(Boolean)
+    return "/" + splits[3] + "/main"
+  }
+
   return (
     <div className="p-6 border border-input rounded-lg">
-      <FormLabel className="text-foreground">
-        Verify your Github repo
-        <span className="ml-0.5 text-destructive">*</span>
-      </FormLabel>
-      <FormDescription className="mb-2">
-        Your project repo must be public. If you have multiple repos, first
-        verify one then you can add more.
-      </FormDescription>
+      <FormLabel className="text-foreground">Github repo</FormLabel>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
@@ -88,19 +88,83 @@ export const GithubForm = ({
                 <FormItem className="flex flex-col gap-1.5 w-full">
                   <FormControl>
                     <div className="relative">
-                      <Input
-                        {...field}
-                        readOnly={isVerified}
-                        placeholder="Repository URL"
-                        className={isVerified ? "pl-10" : ""}
-                      />
-                      {isVerified && (
-                        <Image
-                          alt="Verified"
-                          src="/assets/icons/circle-check-green.svg"
-                          height={20}
-                          width={20}
-                          className="absolute left-3 top-2.5"
+                      {isVerified ? (
+                        <>
+                          <div className="flex gap-2 h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 items-center">
+                            <div className="flex items-center justify-center w-6 h-6">
+                              <Check width={20} height={20} />
+                            </div>
+                            <ExternalLink href={url}>
+                              <Image
+                                src="/assets/icons/github-icon.svg"
+                                width={20}
+                                height={20}
+                                alt="Tes"
+                              />
+                            </ExternalLink>
+
+                            <div>{split()}</div>
+
+                            <button onClick={onCopy}>
+                              <Image
+                                src="/assets/icons/file-copy-line.svg"
+                                width={20}
+                                height={20}
+                                alt="Tes"
+                              />
+                            </button>
+
+                            {isNpmPackage && (
+                              <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
+                                <img
+                                  src="/assets/icons/npm.svg"
+                                  alt="npm"
+                                  className="w-3 h-3"
+                                />
+
+                                <p className="text-xs font-medium">NPM</p>
+                              </div>
+                            )}
+                            {isCrate && (
+                              <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
+                                <img
+                                  src="/assets/icons/rust.svg"
+                                  alt="rust"
+                                  className="w-3 h-3"
+                                />
+                                <p className="text-xs font-medium">Crate</p>
+                              </div>
+                            )}
+
+                            {isOpenSource && (
+                              <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
+                                <img
+                                  src="/assets/icons/oss.svg"
+                                  alt="oss"
+                                  className="w-3 h-3"
+                                />
+                                <p className="text-xs font-medium">
+                                  Open source
+                                </p>
+                              </div>
+                            )}
+
+                            {containsContracts && (
+                              <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
+                                <Check size={12} />
+                                <p className="text-xs font-medium">
+                                  Contains contracts
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <Input
+                          {...field}
+                          readOnly={isVerified}
+                          placeholder="Repository URL"
+                          className={isVerified ? "pl-10" : ""}
                         />
                       )}
                     </div>
@@ -140,50 +204,6 @@ export const GithubForm = ({
               </Button>
             )}
           </div>
-
-          {isVerified ? (
-            <div className="flex items-center gap-2">
-              {isNpmPackage && (
-                <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
-                  <img
-                    src="/assets/icons/npm.svg"
-                    alt="npm"
-                    className="w-3 h-3"
-                  />
-
-                  <p className="text-xs font-medium">NPM</p>
-                </div>
-              )}
-              {isCrate && (
-                <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
-                  <img
-                    src="/assets/icons/rust.svg"
-                    alt="rust"
-                    className="w-3 h-3"
-                  />
-                  <p className="text-xs font-medium">Crate</p>
-                </div>
-              )}
-
-              {isOpenSource && (
-                <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
-                  <img
-                    src="/assets/icons/oss.svg"
-                    alt="oss"
-                    className="w-3 h-3"
-                  />
-                  <p className="text-xs font-medium">Open source</p>
-                </div>
-              )}
-
-              {containsContracts && (
-                <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
-                  <Check size={12} />
-                  <p className="text-xs font-medium">Contains contracts</p>
-                </div>
-              )}
-            </div>
-          ) : null}
         </div>
 
         {isFormExpanded && (
