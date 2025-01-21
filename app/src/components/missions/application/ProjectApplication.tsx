@@ -98,21 +98,17 @@ export const ProjectApplication = ({
     (check: boolean) => check,
   )
 
-  let selectedBadge
+  let enrollmentStatusBadge
 
   if (isActive) {
-    selectedBadge = activeBadge
-  }
-  // else if (isPending) {
-  //   selectedBadge = pendingBadge
-  // }
-  else if (isNotEligible) {
-    selectedBadge = notEligibleBadge
+    enrollmentStatusBadge = activeBadge
+  } else if (isNotEligible) {
+    enrollmentStatusBadge = notEligibleBadge
   } else if (isIncomplete) {
-    selectedBadge = incompleteBadge
+    enrollmentStatusBadge = incompleteBadge
   }
 
-  const isValid = !isActive && !isNotEligible && !isIncomplete //&& !isPending
+  const isValidForEnrollment = !isActive && !isNotEligible && !isIncomplete //&& !isPending
 
   return (
     <div className="p-8 border border-input rounded-xl">
@@ -136,7 +132,7 @@ export const ProjectApplication = ({
                     control={form.control}
                     render={({ field }) => (
                       <Checkbox
-                        disabled={!isValid}
+                        disabled={!isValidForEnrollment}
                         name={field.name}
                         checked={field.value}
                         onCheckedChange={field.onChange}
@@ -163,7 +159,7 @@ export const ProjectApplication = ({
                 </div>
               </div>
 
-              {selectedBadge}
+              {enrollmentStatusBadge}
             </div>
           </AccordionTrigger>
 
