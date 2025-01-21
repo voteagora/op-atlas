@@ -246,11 +246,11 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
   const isValidToAddLink = useMemo(() => {
     return (
-      links[links.length - 1].url !== "" &&
+      links[links.length - 1]?.url !== "" &&
       z
         .string()
         .url()
-        .safeParse(links[links.length - 1].url).success
+        .safeParse(links[links.length - 1]?.url).success
     )
   }, [links])
 
