@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { format } from "date-fns"
 import { GreenBadge } from "../common/badges/GreenBadge"
+import { Account } from "@/components/common/Account"
 
 export const ApplicationStatusCard = ({
   applyByDate,
@@ -45,9 +46,7 @@ export const ApplicationStatusCard = ({
           </p>
         )}
 
-        <Button className="bg-optimismRed text-white" variant={"outline"}>
-          Sign up or sign in
-        </Button>
+        <Account />
       </>
     )
   } else {
