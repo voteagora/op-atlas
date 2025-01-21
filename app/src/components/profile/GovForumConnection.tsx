@@ -70,30 +70,32 @@ export function GovForumConnection({ user }: { user: UserWithEmails }) {
   }, [user])
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-[6px]">
-        <Image
-          src="/assets/icons/op-icon.svg"
-          alt="Gov Forum"
-          height={20}
-          width={20}
-        />
-        <h3 className="text-xl font-semibold text-foreground">
-          Collective Governance Forum
-        </h3>
+    <div className="flex flex-col space-y-4">
+      <div>
+        <div className="flex items-center space-x-1.5">
+          <Image
+            src="/assets/icons/op-icon.svg"
+            alt="Gov Forum"
+            height={20}
+            width={20}
+          />
+          <h3 className="text-xl font-semibold text-foreground">
+            Collective Governance Forum
+          </h3>
+        </div>
+        <p className="text-secondary-foreground">
+          Link your profile so anyone can find you on{" "}
+          <a
+            href="https://gov.optimism.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            gov.optimism.io
+          </a>
+          .
+        </p>
       </div>
-      <p className="text-secondary-foreground">
-        Link your profile so anyone can find you on{" "}
-        <a
-          href="https://gov.optimism.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline"
-        >
-          gov.optimism.io
-        </a>
-        .
-      </p>
 
       <div className="flex gap-x-2">
         <div className="relative flex-1">
