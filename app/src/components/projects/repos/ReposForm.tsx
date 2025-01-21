@@ -36,6 +36,7 @@ import { GithubForm } from "./GithubForm"
 import { LinkForm } from "./LinkForm"
 import { ReposFormSchema } from "./schema"
 import VerifyGithubRepoDialog from "./VerifyGithubRepoDialog"
+import { useWatch } from "react-hook-form"
 
 function toFormValues(project: ProjectWithDetails) {
   const [githubs] = partition((repo) => repo.type === "github", project.repos)
@@ -237,7 +238,12 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
     [project.id, router],
   )
 
-  const links = form.watch("links")
+  const links = useWatch({
+    control: form.control,
+    name: "links", // Watch the "links" field
+    defaultValue: [], // Provide a default value
+  })
+
   const isValidToAddLink = useMemo(() => {
     return (
       links[links.length - 1].url !== "" &&
