@@ -1,6 +1,7 @@
-import { agoraClient } from "@/app/api/agora/common"
 import { useQuery } from "@tanstack/react-query"
 import { formatUnits } from "viem"
+
+import { agoraClient } from "@/app/api/agora/common"
 
 // TODO: Import from Agora swagger
 type DelegateData = {

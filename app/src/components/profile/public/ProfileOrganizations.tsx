@@ -1,5 +1,6 @@
 import { Organization } from "@prisma/client"
 import Image from "next/image"
+
 import ExtendedLink from "@/components/common/ExtendedLink"
 
 function ProfileOrganizations({

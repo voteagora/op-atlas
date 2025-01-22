@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+
 import { neynarClient } from "../../common"
 
 export async function GET(

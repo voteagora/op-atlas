@@ -13,6 +13,7 @@ import {
   updateProjectRepository,
 } from "@/db/projects"
 
+import { getCrate } from "../crates"
 import {
   getContents,
   getFileOrFolder,
@@ -21,9 +22,8 @@ import {
   getLicense,
   getRepository,
 } from "../github"
-import { getCrate } from "../crates"
-import { getNpmPackage } from "../npm"
 import { OPEN_SOURCE_LICENSES } from "../licenses"
+import { getNpmPackage } from "../npm"
 import { verifyMembership } from "./utils"
 
 export const findRepo = async (owner: string, slug: string) => {

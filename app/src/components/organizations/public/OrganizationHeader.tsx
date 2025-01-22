@@ -1,4 +1,7 @@
+import { ChevronUp } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import Image from "next/image"
+import { or } from "ramda"
 import React, { memo, useState } from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -6,9 +9,6 @@ import { OrganizationWithTeamAndProjects } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import OrganizationHeaderLinks from "./OrganizationHeaderLinks"
-import { or } from "ramda"
-import { ChevronUp } from "lucide-react"
-import { ChevronDown } from "lucide-react"
 
 const OrganizationHeader = ({
   className,
