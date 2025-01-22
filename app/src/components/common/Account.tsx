@@ -1,6 +1,6 @@
 "use client"
 
-import { SignInButton, StatusAPIResponse } from "@farcaster/auth-kit"
+import { useLogin, usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -17,7 +17,6 @@ import {
 import { getUserById } from "@/db/users"
 import { isBadgeholder } from "@/lib/badgeholders"
 import { usePrevious } from "@/lib/hooks"
-import { UserWithAddresses } from "@/lib/types"
 import {
   hasShownWelcomeBadgeholderDialog,
   isFirstTimeUser,
@@ -28,42 +27,54 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { Button } from "./Button"
 
 export function Account() {
   const { data: session, status } = useSession()
+  const { ready, authenticated, logout: logoutPrivy } = usePrivy()
+  const { login } = useLogin({
+    onComplete: async ({ user }) => {
+      const { farcaster } = user
+      if (!farcaster) {
+        console.error("No farcaster ID found")
+        await logoutPrivy()
+        return
+      }
+
+      const signInResponse = await signIn("credentials", {
+        fid: farcaster.fid,
+        username: farcaster.username,
+        name: farcaster.displayName,
+        bio: farcaster.bio,
+        pfp: farcaster.pfp,
+        redirect: false,
+      })
+
+      if (!signInResponse || signInResponse.error) {
+        // Don't let farcaster sign in in this case
+        await logoutPrivy()
+        setError(true)
+        return
+      }
+    },
+    onError: (error) => {
+      console.error("Error logging in:", error)
+    },
+  })
   const previousAuthStatus = usePrevious(status)
   const [error, setError] = useState(false)
   const router = useRouter()
   const { setOpenDialog } = useAppDialogs()
   const { track } = useAnalytics()
 
-  const logOut = useCallback(() => {
-    signOut()
+  const disableLogin = !ready || (ready && authenticated)
+
+  const logOut = useCallback(async () => {
+    await signOut()
+    await logoutPrivy()
     router.push("/")
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
-
-  const handleSuccess = useCallback(
-    async (res: StatusAPIResponse) => {
-      const signInResponse = await signIn("credentials", {
-        message: res.message,
-        signature: res.signature,
-        username: res.username,
-        name: res.displayName,
-        bio: res.bio,
-        pfp: res.pfpUrl,
-        nonce: res.nonce,
-        redirect: false,
-      })
-
-      if (!signInResponse || signInResponse.error) {
-        // Don't let farcaster sign in in this case
-        logOut()
-        setError(true)
-        return
-      }
-    },
-    [logOut],
-  )
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -169,10 +180,8 @@ export function Account() {
     )
 
   return (
-    <SignInButton
-      onSuccess={handleSuccess}
-      onError={() => setError(true)}
-      onSignOut={logOut}
-    />
+    <Button disabled={disableLogin} onClick={login}>
+      Sign In
+    </Button>
   )
 }

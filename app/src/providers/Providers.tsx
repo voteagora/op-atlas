@@ -11,6 +11,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { AnalyticsProvider } from "./AnalyticsProvider"
 import { DialogProvider } from "./DialogProvider"
 import { LayoutWrapper } from "./LayoutProvider"
+import { PrivyProvider } from "./PrivyProvider"
 
 if (
   process.env.NEXT_PUBLIC_VERCEL_ENV === "production" &&
@@ -37,15 +38,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <AuthKitProvider config={farcasterConfig}>
-        <QueryClientProvider client={queryClient}>
-          <AnalyticsProvider>
-            <DialogProvider>
-              <TooltipProvider>
-                <LayoutWrapper>{children}</LayoutWrapper>
-              </TooltipProvider>
-            </DialogProvider>
-          </AnalyticsProvider>
-        </QueryClientProvider>
+        <PrivyProvider>
+          <QueryClientProvider client={queryClient}>
+            <AnalyticsProvider>
+              <DialogProvider>
+                <TooltipProvider>
+                  <LayoutWrapper>{children}</LayoutWrapper>
+                </TooltipProvider>
+              </DialogProvider>
+            </AnalyticsProvider>
+          </QueryClientProvider>
+        </PrivyProvider>
       </AuthKitProvider>
     </SessionProvider>
   )
