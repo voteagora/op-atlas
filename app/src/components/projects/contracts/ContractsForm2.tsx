@@ -47,23 +47,23 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const EMPTY_CONTRACT = {
-  contractAddress: "",
-  chain: Chain.options[0],
-  name: "",
-  description: "",
-} satisfies z.infer<typeof ContractSchema2>
+// const EMPTY_CONTRACT = {
+//   contractAddress: "",
+//   chain: Chain.options[0],
+//   name: "",
+//   description: "",
+// } satisfies z.infer<typeof ContractSchema2>
 
-function toFormValues(
-  contract: ProjectContract,
-): z.infer<typeof ContractSchema2> {
-  return {
-    contractAddress: contract.contractAddress,
-    chain: contract.chainId.toString(),
-    name: contract.name ?? "",
-    description: contract.description ?? "",
-  }
-}
+// function toFormValues(
+//   contract: ProjectContract,
+// ): z.infer<typeof ContractSchema2> {
+//   return {
+//     contractAddress: contract.contractAddress,
+//     chain: contract.chainId.toString(),
+//     name: contract.name ?? "",
+//     description: contract.description ?? "",
+//   }
+// }
 
 function getDefaultValues(
   project?: ProjectWithDetails,
@@ -84,12 +84,9 @@ function getDefaultValues(
 
   const deployers: any[] = []
 
-  // const contracts = project.contracts.map(toFormValues)
-
   return {
     isOffChain: project.isOnChainContract === false,
-    // contracts: contracts.length > 0 ? contracts : [{ ...EMPTY_CONTRACT }],
-    deployers: deployers,
+    deployers: deployers.length > 0 ? deployers : [{ ...EMPTY_DEPLOYER }],
     submittedToOSO: !!project.openSourceObserverSlug,
     osoSlug: project.openSourceObserverSlug ?? "",
   }
@@ -108,12 +105,12 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   })
 
   const {
-    fields: deployerFields,
-    append: addContractsFields,
-    remove: removeContractsFields,
+    fields: deployejkrFields,
+    // append: addContractsFields,
+    // remove: removeContractsFields,
   } = useFieldArray({
     control: form.control,
-    name: "contracts",
+    name: "deployers",
   })
 
   // Locally, this runs twice because of strict mode but dw about it
@@ -196,6 +193,8 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   //   formValues.contracts.length < 1 ||
   //   Boolean(formValues.contracts[formValues.contracts.length - 1].signature)
 
+  // console.log(deployejkrFields)
+
   return (
     <div>
       <Form {...form}>
@@ -218,7 +217,9 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
               verification.
             </div>
 
-            <DeployerForm index={0} form={form} />
+            {deployejkrFields.map((field, index) => (
+              <DeployerForm key={field.id} index={index} form={form} />
+            ))}
 
             {/* <FormField
               control={form.control}

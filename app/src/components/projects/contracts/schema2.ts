@@ -6,6 +6,7 @@ export const ContractSchema2 = z.object({
   chain: Chain,
   name: z.string().optional(),
   description: z.string().optional(),
+  selected: z.boolean(),
 })
 
 export const DeployerSchema = z.object({

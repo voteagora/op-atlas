@@ -194,6 +194,8 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     formValues.contracts.length < 1 ||
     Boolean(formValues.contracts[formValues.contracts.length - 1].signature)
 
+  console.log(contractsFields)
+
   return (
     <div>
       <Form {...form}>
