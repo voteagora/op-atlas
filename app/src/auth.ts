@@ -1,4 +1,3 @@
-import { createAppClient, viemConnector } from "@farcaster/auth-client"
 import { deleteCookie, getCookie } from "cookies-next"
 import { cookies } from "next/headers"
 import NextAuth, { type DefaultSession } from "next-auth"
@@ -36,83 +35,51 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     CredentialsProvider({
       name: "Sign in with Farcaster",
       credentials: {
-        message: {
-          label: "Message",
-          type: "text",
-          placeholder: "0x0",
-        },
-        signature: {
-          label: "Signature",
-          type: "text",
-          placeholder: "0x0",
-        },
         // In a production app with a server, these should be fetched from
         // your Farcaster data indexer rather than have them accepted as part
         // of credentials.
+        fid: {
+          label: "Farcaster ID",
+          type: "text",
+        },
         username: {
           label: "Username",
           type: "text",
-          placeholder: "0x0",
         },
         name: {
           label: "Name",
           type: "text",
-          placeholder: "0x0",
         },
         bio: {
           label: "Bio",
           type: "text",
-          placeholder: "0x0",
         },
         pfp: {
           label: "Pfp",
           type: "text",
-          placeholder: "0x0",
-        },
-        nonce: {
-          label: "Nonce",
-          type: "text",
-          placeholder: "0x0",
         },
       },
       async authorize(credentials) {
-        const appClient = createAppClient({
-          ethereum: viemConnector(),
-        })
+        const { fid, bio, name, pfp, username } = credentials
 
-        const farcasterDomain =
-          process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-            ? process.env.NEXT_PUBLIC_APP_DOMAIN
-            : process.env.NEXT_PUBLIC_VERCEL_URL
-
-        const verifyResponse = await appClient.verifySignInMessage({
-          message: credentials?.message as string,
-          signature: credentials?.signature as `0x${string}`,
-          domain: farcasterDomain!,
-          nonce: (credentials?.nonce as string) ?? "",
-        })
-
-        const { success, fid } = verifyResponse
-
-        if (!success) {
+        if (!fid) {
           return null
         }
-
         // Create or update the user in our database
         const { id, emails, farcasterId } = await upsertUser({
           farcasterId: fid.toString(),
-          name: credentials?.name as string | undefined,
-          username: credentials?.username as string | undefined,
-          imageUrl: credentials?.pfp as string | undefined,
-          bio: credentials?.bio as string | undefined,
+          name: name as string | undefined,
+          username: username as string | undefined,
+          imageUrl: pfp as string | undefined,
+          bio: bio as string | undefined,
         })
 
         return {
           id,
           farcasterId,
           email: emails[0]?.email,
-          name: credentials?.name as string | undefined,
-          image: credentials?.pfp as string | undefined,
+          name: name as string | undefined,
+          image: pfp as string | undefined,
         }
       },
     }),
