@@ -1,12 +1,33 @@
 import { isAddress, isHex } from "viem"
-import { base, fraxtal, liskSepolia, mode, optimism, zora } from "viem/chains"
+import {
+  base,
+  fraxtal,
+  lisk,
+  liskSepolia,
+  metalL2,
+  mode,
+  optimism,
+  shape,
+  superseed,
+  swan,
+  worldchain,
+  zora,
+  ink,
+} from "viem/chains"
 import { z } from "zod"
 
 export const Chain = z.enum([
   base.id.toString(),
   fraxtal.id.toString(),
+  ink.id.toString(),
+  lisk.id.toString(),
+  metalL2.id.toString(),
   mode.id.toString(),
   optimism.id.toString(),
+  shape.id.toString(),
+  superseed.id.toString(),
+  swan.id.toString(),
+  worldchain.id.toString(),
   zora.id.toString(),
 ])
 

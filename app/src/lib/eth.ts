@@ -6,6 +6,13 @@ import {
   mode,
   optimism,
   zora,
+  worldchain,
+  lisk,
+  metalL2,
+  superseed,
+  shape,
+  swan,
+  ink,
 } from "viem/chains"
 
 import { Chain } from "./utils/contracts"
@@ -31,11 +38,25 @@ const clients = {
     base,
     `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
+
   [Chain.Fraxtal]: createClient(fraxtal, "https://rpc.frax.com"),
+  [Chain.Ink]: createClient(ink, "https://rpc-gel.inkonchain.com"),
+  [Chain.Lisk]: createClient(lisk, "https://rpc.api.lisk.com"),
+  [Chain.MetalL2]: createClient(metalL2, "https://rpc.metall2.com"),
   [Chain.Mode]: createClient(mode, "https://mainnet.mode.network"),
   [Chain.Optimism]: createClient(
     optimism,
     `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+  ),
+  [Chain.Shape]: createClient(
+    shape,
+    `https://shape-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+  ),
+  [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
+  [Chain.Swan]: createClient(swan, "https://mainnet-rpc.swanchain.org"),
+  [Chain.Worldchain]: createClient(
+    worldchain,
+    `https://worldchain-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
   [Chain.Zora]: createClient(zora, "https://rpc.zora.energy"),
 }
