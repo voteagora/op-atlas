@@ -23,24 +23,30 @@ import { Check, ChevronDown, Loader2, Plus } from "lucide-react"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Callout } from "@/components/common/Callout"
+import { CalloutDeleteAndReplaceMe } from "./CalloutDeleteAndReplaceMe"
 
-const mockContracts = [
+const mockDeployerContracts = [
   {
-    address: "0x123",
-    chain: 8453,
-  },
-  {
-    address: "0x456",
-    chain: 34443,
-  },
-  {
-    address: "0x789",
-    chain: 10,
-  },
+    deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+    contracts: [
+      {
+        address: "0x123",
+        chain: 8453,
+      },
+      {
+        address: "0x456",
+        chain: 34443,
+      },
+      {
+        address: "0x789",
+        chain: 10,
+      },
 
-  {
-    address: "0x111",
-    chain: 10,
+      {
+        address: "0x111",
+        chain: 10,
+      },
+    ],
   },
 ]
 
@@ -56,6 +62,9 @@ export function DeployerForm({
   const [contractViewCount, setContractViewCount] = useState(
     initialMaxContractViewCount,
   )
+
+  const [userDeployerContractViewCount, setUserDeployerContractViewCount] =
+    useState(initialMaxContractViewCount)
 
   const { deployers } = useWatch({
     control: form.control,
@@ -83,32 +92,54 @@ export function DeployerForm({
 
     setIsVerifying(false)
 
-    const contracts: { address: string; chain: number }[] = mockContracts
+    const deployerContracts: {
+      deployerAddress: string
+      contracts: { address: string; chain: number }[]
+    }[] = mockDeployerContracts
 
-    const contractsWithSelected = contracts.map((contract) => {
+    const formValue = form.getValues(`deployers.${index}.deployerAddress`)
+
+    console.log(formValue)
+
+    const foundMock = deployerContracts.find(
+      (deployerContract) => deployerContract.deployerAddress === formValue,
+    )
+
+    console.log(foundMock)
+
+    const contractsWithSelected = foundMock?.contracts.map((contract) => {
       return { ...contract, selected: false }
     })
 
-    const updatedContracts = [...contractsWithSelected]
-    update(index, {
-      ...fields[index],
-      contracts: updatedContracts,
-    })
+    // const contractsWithSelected = deployerContracts.find((deployerContract)=> deployerContract.deployerAddress === form.getValues(`deployers.${index}.deployerAddress`)).map((contract) => {
+    //   return { ...contract, selected: false }
+    // })
 
-    if (contracts.length <= 0) {
-      setErrorMessage(
-        <p className="text-rose-600">
-          We couldn’t find any contracts deployed by this address. Learn more
-          about <span className="underline">missing contracts</span>
-        </p>,
-      )
-      setIsValidDeployer(false)
-    } else {
-      setIsSelectingContracts(true)
+    if (contractsWithSelected) {
+      const updatedContracts = [...contractsWithSelected]
+
+      console.log(updatedContracts)
+
+      update(index, {
+        ...fields[index],
+        contracts: updatedContracts,
+      })
+
+      if (updatedContracts.length <= 0) {
+        setErrorMessage(
+          <p className="text-rose-600">
+            We couldn’t find any contracts deployed by this address. Learn more
+            about <span className="underline">missing contracts</span>
+          </p>,
+        )
+        setIsValidDeployer(false)
+      } else {
+        setIsSelectingContracts(true)
+      }
     }
   }
 
-  let contracts = form.getValues().deployers[index].contracts
+  const contracts = form.getValues().deployers[index].contracts
 
   const isAllContractsSelected = contracts.every(
     (contract: any) => contract.selected,
@@ -148,7 +179,7 @@ export function DeployerForm({
       {contracts.length > 0 ||
         (userDeployerContracts.length > 0 && <p>Contracts</p>)}
 
-      {contracts.length > 0 && (
+      {isSelectingContracts && (
         <>
           {contracts.length > 0 && (
             <div>
@@ -212,7 +243,6 @@ export function DeployerForm({
                   )
 
                   setIsSelectingContracts(false)
-                  contracts = []
                 }}
               >
                 {contracts.filter((contract: any) => contract.selected).length >
@@ -232,15 +262,27 @@ export function DeployerForm({
         </>
       )}
 
-      {userDeployerContracts.length > 0 && (
+      {!isSelectingContracts && userDeployerContracts.length > 0 && (
         <>
-          <Callout
+          <CalloutDeleteAndReplaceMe
             type="info"
-            text="To see all contracts from this deployer, choose"
-            linkText="view and edit contracts."
+            rightHandSide={
+              <p>
+                To see all contracts from this deployer, choose
+                <button
+                  className="m-1 underline"
+                  onClick={() => {
+                    setIsSelectingContracts(true)
+                  }}
+                >
+                  view and edit contracts
+                </button>
+                .
+              </p>
+            }
           />
           {userDeployerContracts.map((contract: any, contractIndex: number) => {
-            if (contractIndex >= contractViewCount) return
+            if (contractIndex >= userDeployerContractViewCount) return
 
             return (
               <div className="flex">
@@ -252,14 +294,26 @@ export function DeployerForm({
               </div>
             )
           })}
+
+          {userDeployerContracts.length > 0 &&
+            userDeployerContractViewCount !== userDeployerContracts.length && (
+              <button
+                className="flex items-center gap-2"
+                onClick={() => {
+                  setUserDeployerContractViewCount(userDeployerContracts.length)
+                }}
+              >
+                <p>
+                  Show{" "}
+                  {userDeployerContracts.length - initialMaxContractViewCount}{" "}
+                  more contracts
+                </p>
+                <ChevronDown width={16} height={16} />
+              </button>
+            )}
         </>
       )}
-      <div className="flex justify-between items-end">
-        <Button variant={"ghost"} className="gap-2">
-          <Plus width={16} height={16} />
-          Add deployer address
-        </Button>
-      </div>
+
       {isVerifying && (
         <div className="flex items-center">
           <Loader2 width={16} height={16} />

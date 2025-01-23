@@ -106,7 +106,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   const {
     fields: deployejkrFields,
-    // append: addContractsFields,
+    append: addDeployerField,
     // remove: removeContractsFields,
   } = useFieldArray({
     control: form.control,
@@ -223,6 +223,18 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
               <DeployerForm key={field.id} index={index} form={form} />
             ))}
 
+            <div className="flex justify-between items-end">
+              <Button
+                variant={"ghost"}
+                className="gap-2"
+                onClick={() => {
+                  addDeployerField(EMPTY_DEPLOYER)
+                }}
+              >
+                <Plus width={16} height={16} />
+                Add deployer address
+              </Button>
+            </div>
             {/* <FormField
               control={form.control}
               name={`deployers.${0}.deployerAddress`}
