@@ -470,10 +470,11 @@ function ClaimFormSuperfluid({
               <Callout
                 type="info"
                 showIcon={false}
-                text={`You can start your token stream on or after ${format(
+                leftAlignedContent={`You can start your token stream on or after ${format(
                   reward.claim.tokenStreamClaimableAt,
                   "eeee, MMMM d",
                 )}`}
+                leftHandSize="sm"
               />
             ) : (
               <MaybeLink

@@ -41,6 +41,7 @@ import {
   PRICING_MODEL_TYPES,
   PRICINGMODELTYPES,
 } from "./schema"
+import ExternalLink from "@/components/ExternalLink"
 
 function toFormValues(
   project: ProjectWithDetails,
@@ -332,9 +333,11 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
             Describe your pricing model, and list any Optimism Grants, Optimism
             Retro Funding, or investment your project has received.
           </p>
+
           <Callout
             type="info"
-            text="Failure to report will result in disqualification from Retro Funding"
+            leftAlignedContent="Failure to report will result in disqualification from Retro Funding"
+            leftHandSize="sm"
           />
           <div className="flex flex-col gap-y-2">
             <p className="text-sm font-medium text-foreground">
