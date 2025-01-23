@@ -7,11 +7,14 @@ import { updateInteractions } from "@/lib/actions/users"
 
 export default async function Page() {
   const session = await auth()
+
+  const userId = session?.user.id ?? ""
+
   const [projects, user, userProjects, userApplications] = await Promise.all([
     getRandomProjects(),
-    session?.user.id ? getUserById(session.user.id) : null,
-    session?.user.id ? getAdminProjects(session.user.id) : null,
-    session?.user.id ? getApplications(session.user.id) : null,
+    getUserById(userId),
+    getAdminProjects(userId),
+    getApplications(userId),
   ])
 
   if (session?.user) {

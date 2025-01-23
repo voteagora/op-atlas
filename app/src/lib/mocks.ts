@@ -8,7 +8,7 @@ export type FundingRound = {
   link?: string
   resultsLink?: string
   iconUrl?: string
-  startsAt: Date
+  startsAt?: Date
   endsAt?: Date
   applyBy?: Date
   funding?: {

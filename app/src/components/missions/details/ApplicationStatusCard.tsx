@@ -17,9 +17,9 @@ export const ApplicationStatusCard = ({
 }: {
   className?: string
   applyByDate: string | undefined
-  startDate: string
-  userProjectCount: number
-  userAppliedProjects: { icon: string | null; name: string }[]
+  startDate: string | undefined
+  userProjectCount?: number
+  userAppliedProjects: { icon: string | null; name: string }[] | undefined
   pageName?: string
 }) => {
   const router = useRouter()
@@ -28,21 +28,18 @@ export const ApplicationStatusCard = ({
 
   const activeBadge = <GreenBadge />
 
-  console.log(userAppliedProjects)
-
   let result
   if (!data) {
     result = (
       <>
         <p className="font-bold">{"Apply"}</p>
-
         {applyByDate && (
           <p className="text-sm text-secondary-foreground text-center">
-            {`Apply by ${format(
-              applyByDate,
-              "MMM d",
-            )} to be evaluated for rewards starting 
-          ${format(startDate, "MMM d")}.`}
+            {`Apply by ${format(applyByDate, "MMM d")}`}
+            <span>
+              {`to be evaluated for rewards starting 
+          ${startDate}.`}
+            </span>
           </p>
         )}
 
@@ -50,7 +47,7 @@ export const ApplicationStatusCard = ({
       </>
     )
   } else {
-    if (userProjectCount > 0) {
+    if (userProjectCount && userProjectCount > 0) {
       if (userAppliedProjects && userAppliedProjects?.length > 0) {
         result = (
           <>

@@ -19,17 +19,21 @@ import { FundingRound } from "@/lib/mocks"
 import { format } from "date-fns"
 import Header from "@/components/missions/details/Header"
 import Rewards from "@/components/missions/details/Rewards"
+import { ApplicationStatusCardAtlas } from "./ApplicationStatusCardAtlas"
+import { EnrolledProjectsCardAtlas } from "./EnrolledProjectsCardAtlas"
 
 export default function Mission({
   round,
   applications,
   missionApplications,
   projects,
+  pageName,
 }: {
   round: FundingRound
   applications: { icon: string | null; name: string }[]
   missionApplications: { icon: string | null; opReward: number }[]
   projects: any[]
+  pageName: string
 }) {
   const {
     name,
@@ -42,6 +46,7 @@ export default function Mission({
     rewards,
   } = round
 
+  console.log("Hello")
   return (
     <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
       <div className="mt-1 flex flex-1 gap-x-10">
@@ -96,18 +101,18 @@ export default function Mission({
         </div>
 
         <div className="flex flex-col gap-y-6 ml-auto w-[290px]">
+          <ApplicationStatusCardAtlas pageName={pageName} />
+          <EnrolledProjectsCardAtlas pageName={pageName} />
+
           <ApplicationStatusCard
             applyByDate={applyBy && format(applyBy, "MMM d")}
-            startDate={format(startsAt, "MMM d")}
+            startDate={startsAt && format(startsAt, "MMM d")}
             userProjectCount={projects.length}
             userAppliedProjects={applications}
             pageName={round.pageName}
           />
-          {missionApplications.length > 0 ? (
-            <EnrolledProjectsCard projects={missionApplications} />
-          ) : (
-            <></>
-          )}
+
+          <EnrolledProjectsCard projects={missionApplications} />
         </div>
       </div>
     </div>

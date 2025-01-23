@@ -51,6 +51,7 @@ export default async function MissionPage({
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       <Mission
+        pageName={params.id}
         round={foundRound}
         applications={userProjectsForSidebar}
         missionApplications={roundApplicationsForMission}

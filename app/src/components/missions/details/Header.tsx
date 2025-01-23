@@ -14,7 +14,7 @@ export default function Header({
   name: string
   description: string
   iconUrl?: string
-  startsAt: Date
+  startsAt: Date | undefined
   endsAt: Date | undefined
 }) {
   return (
@@ -22,8 +22,9 @@ export default function Header({
       <h2 className="text-4xl mb-2">{name}</h2>
       <div className="flex gap-2 mb-6 items-center">
         <p className="font-light text-gray-700">
-          <span>{format(startsAt, "MMM d")}</span>
-          {endsAt && <span>{" - " + format(endsAt, "MMM d, yyyy")}</span>}
+          <span>{startsAt && format(startsAt, "MMM d")}</span>
+          <span>{startsAt && endsAt && " - "}</span>
+          {endsAt && <span>{format(endsAt, "MMM d, yyyy")}</span>}
         </p>
         <div className="w-[1px] bg-gray-300 h-full"></div>
         <Image
@@ -55,8 +56,9 @@ export default function Header({
         <li>
           <span className="font-bold ">{"Timeline:"}</span>
           <span className="">{` The program will take place from `}</span>
-          <span>{format(startsAt, "MMM d")}</span>
-          {endsAt && <span>{" - " + format(endsAt, "MMM d, yyyy")}</span>}.
+          <span>{startsAt && format(startsAt, "MMM d")}</span>
+          <span>{startsAt && endsAt && " - "}</span>
+          {endsAt && <span>{format(endsAt, "MMM d, yyyy")}</span>}.
         </li>
         <li>
           <span className="font-semibold ">{"Application period:"}</span>

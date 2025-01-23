@@ -999,15 +999,27 @@ export async function createApplication({
   })
 }
 
-async function getAllApplicationsForRoundFn({ roundId }: { roundId: string }) {
-  return prisma.application.findMany({
+async function getAllApplicationsForRoundFn({
+  roundId,
+}: {
+  roundId: string
+}): Promise<ApplicationWithDetails[]> {
+  const applications = await prisma.application.findMany({
     where: {
       roundId,
     },
     include: {
       project: true,
+      impactStatementAnswer: {
+        include: {
+          impactStatement: true,
+        },
+      },
+      round: true,
     },
   })
+
+  return applications
 }
 
 export const getAllApplicationsForRound = cache(getAllApplicationsForRoundFn)

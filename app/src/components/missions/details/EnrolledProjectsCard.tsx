@@ -9,15 +9,14 @@ export const EnrolledProjectsCard = ({
   avgOpRewardPerProject,
   projects,
 }: {
-  className?: string
-  projects: any[]
+  projects?: { icon: string | null; opReward: number }[]
   units?: string
   opRewarded?: number
   avgOpRewardPerProject?: number
 }) => {
   return (
     <div>
-      {projects.length > 0 && (
+      {projects && projects.length > 0 && (
         <div className="flex flex-col gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
           <p className="font-bold">{projects.length} projects enrolled</p>
 
