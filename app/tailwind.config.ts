@@ -34,6 +34,7 @@ const config = {
         background: "hsl(var(--background))",
         backgroundaccent: "hsl(var(--background-accent))",
         backgroundSecondary: "hsl(var(--background-secondary))",
+        backgroundSecondaryHover: "hsl(var(--background-secondary-hover))",
         tertiary: "#E0E2EB",
         button: {
           primary: {

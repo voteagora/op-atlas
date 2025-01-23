@@ -43,7 +43,7 @@ function toFormValues(project: ProjectWithDetails) {
 
   return {
     noRepos: project.hasCodeRepositories === false,
-    links: !!!project?.links?.length
+    links: !project?.links?.length
       ? [{ url: "", name: "", description: "" }]
       : //this name and description with be replace with live data
         project.links?.map(({ url, name, description }) => ({

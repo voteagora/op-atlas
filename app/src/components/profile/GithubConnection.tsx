@@ -4,7 +4,7 @@ import { User } from "@prisma/client"
 import { setCookie } from "cookies-next"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
@@ -21,28 +21,22 @@ export function GithubConnection({ user }: { user: User }) {
   const pathname = usePathname()
 
   const [userNotDeveloper, setUserNotDeveloper] = useState(user.notDeveloper)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   const toggleIsDeveloper = async () => {
-    if (loading) {
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const isNotDeveloper = !user.notDeveloper
-      setUserNotDeveloper(isNotDeveloper)
-      const result = await setUserIsNotDeveloper(isNotDeveloper)
-      if (result.error !== null) {
-        throw result.error
+    startTransition(async () => {
+      try {
+        const isNotDeveloper = !user.notDeveloper
+        setUserNotDeveloper(isNotDeveloper)
+        const result = await setUserIsNotDeveloper(isNotDeveloper)
+        if (result.error !== null) {
+          throw result.error
+        }
+      } catch (error) {
+        console.error("Error toggling developer status", error)
+        toast.error("Error updating developer status")
       }
-    } catch (error) {
-      console.error("Error toggling developer status", error)
-      toast.error("Error updating developer status")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   const authorizeGithub = async () => {
@@ -52,40 +46,36 @@ export function GithubConnection({ user }: { user: User }) {
   }
 
   const disconnectGitHub = async () => {
-    if (loading) {
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const result = await removeGithub()
-      if (result.error !== null) {
-        throw result.error
+    startTransition(async () => {
+      try {
+        const result = await removeGithub()
+        if (result.error !== null) {
+          throw result.error
+        }
+      } catch (error) {
+        console.error("Error disconnecting GitHub", error)
+        toast.error("Error disconnecting GitHub")
       }
-    } catch (error) {
-      console.error("Error disconnecting GitHub", error)
-      toast.error("Error disconnecting GitHub")
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-[6px]">
-        <Image
-          src="/assets/icons/githubIcon.svg"
-          alt="Github"
-          height={20}
-          width={20}
-        />
-        <h3 className="text-xl font-semibold text-foreground">Github</h3>
+    <div className="flex flex-col space-y-4">
+      <div>
+        <div className="flex items-center space-x-1.5">
+          <Image
+            src="/assets/icons/githubIcon.svg"
+            alt="Github"
+            height={20}
+            width={20}
+          />
+          <h3 className="font-semibold text-foreground">Github</h3>
+        </div>
+        <p className="text-secondary-foreground">
+          Connect your GitHub account to show your code contributions to the
+          Optimism Collective.
+        </p>
       </div>
-      <p className="text-secondary-foreground">
-        Connect your GitHub account to show your code contributions to the
-        Optimism Collective.
-      </p>
 
       {user.github && (
         <div className="flex flex-col gap-2">
@@ -104,7 +94,11 @@ export function GithubConnection({ user }: { user: User }) {
               <p className="text-sm">{user.github}</p>
             </div>
 
-            <Button variant="secondary" onClick={disconnectGitHub}>
+            <Button
+              variant="secondary"
+              onClick={disconnectGitHub}
+              disabled={isPending}
+            >
               Disconnect
             </Button>
           </div>
@@ -116,7 +110,7 @@ export function GithubConnection({ user }: { user: User }) {
           disabled={userNotDeveloper || !!user.github}
           onClick={authorizeGithub}
         >
-          Connect Github
+          Connect
         </Button>
 
         <div
@@ -129,7 +123,7 @@ export function GithubConnection({ user }: { user: User }) {
             checked={userNotDeveloper}
             onCheckedChange={toggleIsDeveloper}
             className=""
-            disabled={loading}
+            disabled={isPending}
           />
           I&apos;m not a developer
         </div>
