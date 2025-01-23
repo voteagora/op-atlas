@@ -139,6 +139,8 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   //   }
   // }
 
+  const onSubmit =
+    (isSave: boolean) => (values: z.infer<typeof ContractsSchema2>) => {}
   // const onSubmit =
   //   (isSave: boolean) => async (values: z.infer<typeof ContractsSchema>) => {
   //     isSave ? setIsSaving(true) : setIsSubmitting(true)
@@ -199,7 +201,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     <div>
       <Form {...form}>
         <form
-          //onSubmit={form.handleSubmit(onSubmit(false))}
+          onSubmit={form.handleSubmit(onSubmit(false))}
           className="flex flex-col gap-12"
         >
           <div className="flex flex-col gap-6">
