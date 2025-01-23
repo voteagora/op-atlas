@@ -35,6 +35,7 @@ model UserEmail {
   id        String @id @default(uuid())
   email     String
   userId    String
+  mailchimp_subscriber_hash String?
   verified  Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

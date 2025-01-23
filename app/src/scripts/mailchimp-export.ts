@@ -4,6 +4,10 @@ import { prisma } from "@/db/client"
 import mailchimp from "@/lib/mailchimp"
 
 const BATCH_SIZE = 500
+type SUBSCRIBED_MEMBER = {
+  subscriber_hash: string
+  email_address: string
+}
 async function exportEmailsToMailchimp() {
   const userEmails = await prisma.userEmail.findMany({
     // Do we need this?
@@ -11,6 +15,7 @@ async function exportEmailsToMailchimp() {
     //   verified: true,
     // },
     select: {
+      id: true,
       email: true,
       user: {
         select: {
@@ -44,8 +49,35 @@ async function exportEmailsToMailchimp() {
     for (let i = 0; i < batchMembers.length; i += BATCH_SIZE) {
       const batch = batchMembers.slice(i, i + BATCH_SIZE)
 
-      await mailchimp.lists.batchListMembers("ae53f4c952", {
+      const res = await mailchimp.lists.batchListMembers("ae53f4c952", {
         members: batch,
+      })
+
+      const newMembers = (res as any).new_members
+      const subscribedMembers = newMembers.map((member: any) => ({
+        subscriber_hash: member.id,
+        email_address: member.email_address,
+      })) as SUBSCRIBED_MEMBER[]
+
+      const data = await prisma.$transaction(
+        subscribedMembers.map((member) =>
+          prisma.userEmail.update({
+            where: {
+              id: userEmails.find(
+                (userEmail) => userEmail.email === member.email_address,
+              )?.id,
+            },
+            data: {
+              mailchimp_subscriber_hash: member.subscriber_hash,
+            },
+          }),
+        ),
+      )
+
+      data.forEach((userEmail) => {
+        console.log(
+          `Email ${userEmail.email} exported to Mailchimp with subscriber hash ${userEmail.mailchimp_subscriber_hash}`,
+        )
       })
     }
   } catch (error) {
