@@ -11,6 +11,8 @@ import { FeedbackButton } from "../common/FeedbackButton"
 import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
+import { Badge as BaseBadge } from "../common/Badge"
+import { Badge } from "../common/badges/Badge"
 
 export function Rounds({
   projects,
@@ -43,6 +45,12 @@ export function Rounds({
       <div className="mt-36 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
         <div className="flex flex-col w-full">
           <h1 className="text-4xl font-semibold">Rounds</h1>
+          <BaseBadge text="Hello" />
+          <Badge content="Blue badge" icon="loader" />
+          <Badge content="Green badge" colorScheme="green" icon="check" />
+          <Badge content="Red Badge 1" colorScheme="red" icon="X" />
+          <Badge content="Red Badge 2" colorScheme="red" icon="X" />
+
           <p className="mt-2 text-muted-foreground">
             Build together, benefit together.
           </p>
