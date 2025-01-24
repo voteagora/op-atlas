@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { copyToClipboard } from "@/lib/utils"
 
 import { ReposFormSchema } from "./schema"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export const GithubForm = ({
   form,
@@ -203,6 +204,26 @@ export const GithubForm = ({
                 Verify
               </Button>
             )}
+          </div>
+
+          <div className="flex flex-col w-full gap-2">
+            <div className="flex items-center gap-2 px-4 py-3">
+              <FormField
+                control={form.control}
+                name={`githubRepos.${index}.containsContracts`}
+                render={({ field }) => (
+                  <Checkbox
+                    name={field.name}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+
+              <p className="text-sm font-medium">
+                This repo contains contract code
+              </p>
+            </div>
           </div>
         </div>
 

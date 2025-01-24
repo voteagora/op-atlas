@@ -215,6 +215,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         updates: {
           name: field.name,
           description: field.description,
+          containsContracts: field.containsContracts,
         },
       }))
 
@@ -226,7 +227,7 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
 
         !isSave && router.push(`/projects/${project.id}/contracts`)
         setIsSaving(false)
-        form.reset({ links, githubRepos: projectRepos })
+        // form.reset({ links, githubRepos: projectRepos })
         toast.success("Project saved")
       } catch (error) {
         toast.error("There was an error updating your Repos and Links")
