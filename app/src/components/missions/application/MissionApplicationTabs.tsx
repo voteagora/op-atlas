@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Application } from "@prisma/client"
 import { format } from "date-fns"
 import { useRouter } from "next/navigation"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -28,6 +28,8 @@ import { Button } from "../../ui/button"
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTerms } from "./MissionApplicationTerms"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(
@@ -42,12 +44,8 @@ export const ApplicationFormSchema = z.object({
 })
 
 export function MissionApplicationTabs({
-  projects,
-  applications,
   onSubmit,
 }: {
-  projects: ProjectWithDetails[]
-  applications: ApplicationWithDetails[]
   onSubmit: (projects: any) => void
 }) {
   const round = useMissionFromPath()
@@ -55,25 +53,36 @@ export function MissionApplicationTabs({
   const [currentTab, setCurrentTab] = useState("details")
   const router = useRouter()
 
+  const { data: projects = [] } = useUserProjects(round?.number)
+  const { data: applications = [] } = useUserRoundApplications(round?.number)
+
+  // console.log(projects)
+
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
-    defaultValues: {
-      projects: projects.map((project) => {
-        return {
-          selected: false,
-          projectId: project.id,
-        }
-      }),
-    },
     shouldFocusError: true,
     mode: "onChange",
   })
 
+  useEffect(() => {
+    if (projects.length > 0) {
+      form.reset({
+        projects: projects.map((project) => ({
+          selected: false,
+          projectId: project.id,
+        })),
+      })
+    }
+  }, [projects, form])
+
   const projectsForm = form.watch("projects")
 
-  const isFormValid = projectsForm.some((project) => {
+  const isFormValid = projectsForm?.some((project) => {
     return project.selected
   })
+
+  const values = form.getValues()
+  console.log(values)
 
   return (
     <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
@@ -113,7 +122,7 @@ export function MissionApplicationTabs({
                   index={index}
                   project={field}
                   isAppliedToRound={
-                    applications.find(
+                    applications?.find(
                       (app) =>
                         app.project.id === field.id &&
                         app.roundId === round?.number.toString(),

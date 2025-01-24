@@ -18,6 +18,9 @@ import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTabs } from "./MissionApplicationTabs"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
+import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(
@@ -31,14 +34,18 @@ export const ApplicationFormSchema = z.object({
   ),
 })
 
-export function MissionApplication({
-  projects,
-  applications,
-}: {
-  projects: ProjectWithDetails[]
-  applications: ApplicationWithDetails[]
+export function MissionApplication({}: // projects,
+// applications,
+{
+  // projects: ProjectWithDetails[]
+  // applications: ApplicationWithDetails[]
 }) {
   const round = useMissionFromPath()
+
+  const { data: projects } = useUserProjects(round?.number)
+  const { data: applications, refetch } = useUserRoundApplications(
+    round?.number,
+  )
 
   const [submittedApplications, setSubmittedApplications] = useState<
     Application[]
@@ -85,18 +92,18 @@ export function MissionApplication({
   const submittedProjects: ProjectWithDetails[] = []
 
   submittedApplications?.map((application) => {
-    const isProjectSubmitted = projects.find((project: ProjectWithDetails) => {
+    const isProjectSubmitted = projects?.find((project: ProjectWithDetails) => {
       return project.id === application.projectId
     })
 
     if (isProjectSubmitted) submittedProjects.push(isProjectSubmitted)
   })
 
-  if (submittedProjects?.length > 0) {
+  if (submittedProjects?.length > 0 && applications) {
     return (
       <ApplicationSubmitted
         className="mt-18 max-w-4xl"
-        application={applications[0]}
+        application={submittedApplications[0]}
         submittedProjects={submittedProjects}
       />
     )
@@ -117,11 +124,7 @@ export function MissionApplication({
         <div className="h-[2px] bg-secondary" />
       </div>
       <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
-        <MissionApplicationTabs
-          applications={applications}
-          projects={projects}
-          onSubmit={submitApplication}
-        />
+        <MissionApplicationTabs onSubmit={submitApplication} />
       </div>
     </div>
   )

@@ -1,4 +1,8 @@
-import { useQuery } from "@tanstack/react-query"
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  useQuery,
+} from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
 import { getUserApplicationsForRound } from "@/lib/actions/projects"
@@ -8,10 +12,13 @@ export function useUserRoundApplications(roundNumber: number | undefined): {
   data: ApplicationWithDetails[] | undefined
   isLoading: boolean
   error: Error | null
+  refetch: (
+    options?: RefetchOptions | undefined,
+  ) => Promise<QueryObserverResult<ApplicationWithDetails[]>>
 } {
   const session = useSession()
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["userApplicationsForRound", roundNumber],
     queryFn: () =>
       getUserApplicationsForRound(
@@ -21,5 +28,5 @@ export function useUserRoundApplications(roundNumber: number | undefined): {
     enabled: session?.data?.user.id !== undefined && roundNumber !== undefined,
   })
 
-  return { data, isLoading, error }
+  return { data, isLoading, error, refetch }
 }

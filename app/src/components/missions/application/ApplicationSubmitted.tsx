@@ -89,6 +89,8 @@ export const ApplicationSubmitted = ({
 
   const email = session?.user?.email
 
+  console.log(application)
+
   return (
     <div
       className={cn(
@@ -109,17 +111,15 @@ export const ApplicationSubmitted = ({
         <h2 className="text-center">Application Submitted!</h2>
         <p className="text-center">
           Your application to{" "}
-          {application ? (
+          {
             <>
               <span className="font-bold"> Retro Funding: {mission?.name}</span>{" "}
-              was submitted on {format(application?.createdAt, "MMMM d")} at{" "}
+              was submitted on {format(application.createdAt, "MMMM d")} at{" "}
               {format(application?.createdAt, "h:mm a")}. You&apos;ll receive a
               confirmation email at{" "}
               <span className="text-accent-foreground">{email}</span>.
             </>
-          ) : (
-            <></>
-          )}
+          }
         </p>
       </div>
 
