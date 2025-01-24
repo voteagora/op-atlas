@@ -1,7 +1,13 @@
 import ExternalLink from "../../ExternalLink"
 import { VideoCallout } from "../common/callouts/VideoCallout"
 import { DocumentCallout } from "../common/callouts/DocumentCallout"
-export const Eligibility = ({ eligibility }: any) => {
+export const Eligibility = ({
+  missionPageEligibility,
+  eligibility,
+}: {
+  missionPageEligibility: React.ReactNode
+  eligibility: any
+}) => {
   const createLinkedText = (text: string, links: any) => {
     if (links == undefined) return text
 
@@ -32,11 +38,21 @@ export const Eligibility = ({ eligibility }: any) => {
   }
 
   return (
-    <div className="flex flex-col gap-6 mb-10">
+    <div className="flex flex-col gap-6">
       <p className="text-xl font-semibold">Eligibility</p>
-      <p className="font-light">Applications must meet these criteria:</p>
+      <p>
+        {
+          "In order to apply, your Dev Tooling project must first be added to OP Atlas. A project can't be considered for enrollment until its setup is complete."
+        }
+      </p>
+      <VideoCallout
+        text="How to add a project in OP Atlas"
+        href="https://youtube.com"
+      />
 
-      <ol>
+      {missionPageEligibility}
+
+      {/* <ol>
         {eligibility.criteria.map((criteria: any, index: number) => {
           return (
             <div key={"Eligibility-" + index}>
@@ -112,18 +128,7 @@ export const Eligibility = ({ eligibility }: any) => {
             )
           },
         )}
-      </ol>
-
-      <p>
-        {
-          "To add your project to OP Atlas, first sign in or sign up using Farcaster. From your signed in dashboard, choose “Add project” and proceed with project setup. A project can’t be considered eligible until it’s setup is complete."
-        }
-      </p>
-
-      <VideoCallout
-        text="How to add a project in OP Atlas"
-        href="https://youtube.com"
-      />
+      </ol> */}
     </div>
   )
 }

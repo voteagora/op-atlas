@@ -1,3 +1,6 @@
+import ExternalLink from "@/components/ExternalLink"
+import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
+
 export type FundingRound = {
   number: number
   pageName?: string
@@ -16,6 +19,8 @@ export type FundingRound = {
     op?: string
     projects?: number
   }
+  missionPageRequirements?: React.ReactNode
+  missionPageEligibility?: React.ReactNode
   eligibility?: any
   rewards?: any
 }
@@ -37,10 +42,75 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     startsAt: new Date("2025-01-01T21:53:13.300Z"),
     endsAt: new Date("2025-06-30T21:53:13.300Z"),
     applyBy: new Date("2025-01-25T21:53:13.300Z"),
+    missionPageEligibility: (
+      <div>
+        <ul className="list-disc pl-5">
+          <li>
+            <span className="font-bold">All applications</span> must verify
+            ownership of GitHub repo(s) in OP Atlas.
+          </li>
+          <li>
+            <span className="font-bold">JavaScript</span> and{" "}
+            <span className="font-bold">Rust packages</span> must be published
+            on <span className="font-bold">package registries</span> (e.g,{" "}
+            <ExternalLink className="underline" href={"https://npmjs.org"}>
+              npm
+            </ExternalLink>{" "}
+            or{" "}
+            <ExternalLink className="underline" href={"https://crates.io"}>
+              crates.io
+            </ExternalLink>
+            ) with their associated Github repo verified in OP Atlas.
+          </li>
+        </ul>
+        <div className="mt-6">
+          <VideoCallout
+            href="https://youtube.com"
+            text="How to verify a Github repo in OP Atlas"
+          />
+        </div>
+      </div>
+    ),
+    missionPageRequirements: (
+      <div className="flex flex-col gap-4 my-6">
+        <p>
+          <span className="font-bold">All projects must be Open Source.</span>{" "}
+          They must have a public GitHub repository with a history of public
+          commits.
+        </p>
+
+        <p>
+          <span className="font-bold">JavaScript</span> and{" "}
+          <span className="font-bold">Rust Packages</span> must be imported by
+          at least three verified Superchain builder projects contributing 0.01
+          ETH in L2 gas fees within the past 6 months.
+        </p>
+
+        <p>
+          <span className="font-bold">Other Open Source Toolchains</span> must
+          meet these requirements to earn rewards:
+        </p>
+
+        <ol className="list-decimal pl-5">
+          <li>
+            Must have at least one release on GitHub within the past 6 months.
+          </li>
+          <li>
+            Must show engagement from 10+ trusted developers (e.g., stars,
+            forks, issues, or pull requests) verified using reputation
+            algorithms like{" "}
+            <ExternalLink href={"https://openrank.com/"} className="underline">
+              OpenRank
+            </ExternalLink>
+            .
+          </li>
+        </ol>
+      </div>
+    ),
     eligibility: {
       criteria: [
         {
-          name: "Open Source",
+          name: "All applications must verify ownership of GitHub repo(s) in OP Atlas.",
           description:
             "Projects must have a public GitHub repository with a history of public commits.",
         },
@@ -87,7 +157,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     },
     rewards: {
       measurement:
-        "Your impact will be measured via an evaluation algorithm powered by Github, NPM, Crate, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
+        "Your impact will be measured via an evaluation algorithm powered by GitHub, npm, Crates, and Onchain data. The evaluation algorithm will evolve throughout this Retro Funding Mission based on feedback from Optimism Citizens.",
       criteria: [
         "Adoption of Dev Tool by onchain builders",
         `Importance of the tool in onchain application development`,

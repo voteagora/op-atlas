@@ -29,6 +29,8 @@ export default function Mission({ round }: { round: FundingRound }) {
     startsAt,
     endsAt,
     eligibility,
+    missionPageEligibility,
+    missionPageRequirements,
     rewards,
   } = round
 
@@ -60,9 +62,20 @@ export default function Mission({ round }: { round: FundingRound }) {
                 startsAt={startsAt}
                 endsAt={endsAt}
               />
-              <Eligibility eligibility={eligibility} />
-              <Rewards rewards={rewards} />
-              {name === "Dev Tooling" ? (
+              <Eligibility
+                missionPageEligibility={missionPageEligibility}
+                eligibility={eligibility}
+              />
+              <div className="mt-10">
+                <Rewards rewards={rewards} />
+              </div>
+
+              <div className="mt-10">
+                <p className="text-xl font-semibold">Requirements</p>
+                {missionPageRequirements}
+              </div>
+
+              {name === "Dev Tooling" && (
                 <div className="">
                   <div className="bg-secondary h-[2px] mt-5 mb-5" />
                   <div>
@@ -79,8 +92,6 @@ export default function Mission({ round }: { round: FundingRound }) {
                     </span>
                   </div>
                 </div>
-              ) : (
-                <></>
               )}
             </div>
           </div>

@@ -5,7 +5,7 @@ import ExternalLink from "../../../ExternalLink"
 export function NewIn2025Callout() {
   return (
     <Callout
-      type="optimismBright"
+      type="gray"
       showIcon={false}
       className="mt-10"
       leftAlignedContent={

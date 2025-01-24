@@ -61,16 +61,12 @@ export default function Header({
           {endsAt && <span>{format(endsAt, "MMM d, yyyy")}</span>}.
         </li>
         <li>
-          <span className="font-semibold ">{"Application period:"}</span>
+          <span className="font-semibold ">{"Application periods:"}</span>
           <span className="">
             {
-              " Applications are rolling, with new applications being reviewed at the end of each month. Apply by the monthly application deadline, and your project will be evaluated for rewards starting the following month."
+              " Apply by the monthly application deadline, and your project will be evaluated for rewards starting the following month."
             }
           </span>
-        </li>
-        <li>
-          <span className="font-semibold ">{"Eligibility and rewards:"}</span>
-          <span className="">{" See details below."}</span>
         </li>
         <li>
           <span className="font-semibold ">{"Grant delivery:"}</span>
@@ -80,7 +76,7 @@ export default function Header({
         </li>
         <li>
           <span className="font-semibold ">{"Budget:"}</span>
-          <span className="">{" Budget: Up to 8M OP"}</span>
+          <span className="">{" Up to 8M OP"}</span>
         </li>
       </ul>
 

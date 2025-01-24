@@ -16,7 +16,8 @@ export function FundingRoundPast({
           {fundingRound.name}
         </h2>
         <span className="font-normal text-secondary-foreground">
-          {format(fundingRound.startsAt, "MMM d, yyyy")}
+          {fundingRound.startsAt &&
+            format(fundingRound.startsAt, "MMM d, yyyy")}
         </span>
       </div>
 

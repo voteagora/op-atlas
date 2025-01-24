@@ -9,7 +9,7 @@ export function VideoCallout({ text, href }: { text: string; href: string }) {
       <Callout
         type="info"
         showIcon={false}
-        className="mt-10 py-2"
+        className="py-2"
         leftAlignedContent={
           <div className="flex gap-4 items-center">
             <Image
