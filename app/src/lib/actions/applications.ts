@@ -14,6 +14,10 @@ import { CategoryWithImpact } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { formatApplicationMetadata } from "../utils/metadata"
 import { verifyAdminStatus } from "./utils"
+import {
+  getApplicationsForRound,
+  getUserApplicationsForRound,
+} from "./projects"
 
 const whitelist: string[] = []
 
@@ -102,6 +106,21 @@ const createProjectApplication = async (
     return {
       error: "Project is not complete",
     }
+  }
+
+  const applications = await getUserApplicationsForRound(
+    session?.user?.id,
+    round,
+  )
+
+  const result = applications.find(
+    (application) => application.projectId === project.id,
+  )
+
+  console.log(result)
+
+  if (result) {
+    return { error: "Project has already been submitted to this round!" }
   }
 
   // Issue attestation

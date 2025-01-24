@@ -4,7 +4,7 @@ import { Application } from "@prisma/client"
 import { format } from "date-fns"
 import { useRouter } from "next/navigation"
 import React, { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -30,39 +30,27 @@ import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTerms } from "./MissionApplicationTerms"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
 import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
-
-export const ApplicationFormSchema = z.object({
-  projects: z.array(
-    z.object({
-      projectId: z.string(),
-      category: z.string(),
-      selected: z.boolean(),
-      projectDescriptionOptions: z.array(z.string()),
-      impactStatement: z.record(z.string(), z.string()),
-    }),
-  ),
-})
+import { ApplicationFormSchema } from "./MissionApplication"
+import { useSession } from "next-auth/react"
 
 export function MissionApplicationTabs({
+  form,
   onSubmit,
 }: {
+  form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   onSubmit: (
+    email: string | null | undefined,
     projects: z.infer<typeof ApplicationFormSchema>["projects"],
   ) => void
 }) {
   const round = useMissionFromPath()
+  const session = useSession()
 
   const [currentTab, setCurrentTab] = useState("details")
   const router = useRouter()
 
   const { data: projects = [], isLoading } = useUserProjects(round?.number)
   const { data: applications = [] } = useUserRoundApplications(round?.number)
-
-  const form = useForm<z.infer<typeof ApplicationFormSchema>>({
-    resolver: zodResolver(ApplicationFormSchema),
-    shouldFocusError: true,
-    mode: "onChange",
-  })
 
   useEffect(() => {
     if (projects.length > 0) {
@@ -176,6 +164,7 @@ export function MissionApplicationTabs({
           <MissionApplicationTerms
             onSubmit={() => {
               onSubmit(
+                session?.data?.user.email,
                 form.getValues().projects.filter((project) => project.selected),
               )
             }}

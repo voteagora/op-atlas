@@ -11,15 +11,35 @@ import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
-import {
-  ApplicationFormSchema,
-  MissionApplicationTabs,
-} from "./MissionApplicationTabs"
+import { MissionApplicationTabs } from "./MissionApplicationTabs"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
 import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
+import { useSession } from "next-auth/react"
+import EmailSignupDialog from "./dialogs/EmailSignupDialog"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+export const ApplicationFormSchema = z.object({
+  projects: z.array(
+    z.object({
+      projectId: z.string(),
+      category: z.string(),
+      selected: z.boolean(),
+      projectDescriptionOptions: z.array(z.string()),
+      impactStatement: z.record(z.string(), z.string()),
+    }),
+  ),
+})
 
 export function MissionApplication() {
   const round = useMissionFromPath()
+  const session = useSession()
+
+  const form = useForm<z.infer<typeof ApplicationFormSchema>>({
+    resolver: zodResolver(ApplicationFormSchema),
+    shouldFocusError: true,
+    mode: "onChange",
+  })
 
   const { data: projects, isLoading } = useUserProjects(round?.number)
   const { data: applications } = useUserRoundApplications(round?.number)
@@ -29,8 +49,14 @@ export function MissionApplication() {
   >([])
 
   const submitApplication = async (
+    email: string | null | undefined,
     selectedProjects: z.infer<typeof ApplicationFormSchema>["projects"],
   ) => {
+    if (email === null || email === undefined) {
+      setShowDialog(true)
+      return
+    }
+
     const promise: Promise<Application[]> = new Promise(
       async (resolve, reject) => {
         try {
@@ -68,6 +94,8 @@ export function MissionApplication() {
     })
   }
 
+  const [showDialog, setShowDialog] = useState(false)
+
   const submittedProjects: ProjectWithDetails[] = []
 
   submittedApplications?.map((application) => {
@@ -88,22 +116,32 @@ export function MissionApplication() {
     )
   }
   return (
-    <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
-      {" "}
-      <MissionApplicationBreadcrumbs />
-      <div className="flex flex-col mt-10">
-        <h2 className="text-4xl mb-2">
-          {"Apply for Retro Funding: " + round?.name}
-        </h2>
-        {`Submit this application by ${format(
-          round!.applyBy,
-          "MMM d",
-        )} to be evaluated for rewards starting 
+    <div>
+      {showDialog && (
+        <EmailSignupDialog
+          open
+          onOpenChange={setShowDialog}
+          form={form}
+          onSubmit={submitApplication}
+        />
+      )}
+      <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
+        {" "}
+        <MissionApplicationBreadcrumbs />
+        <div className="flex flex-col mt-10">
+          <h2 className="text-4xl mb-2">
+            {"Apply for Retro Funding: " + round?.name}
+          </h2>
+          {`Submit this application by ${format(
+            round!.applyBy,
+            "MMM d",
+          )} to be evaluated for rewards starting 
                     ${format(round!.startsAt, "MMM d")}.`}
-        <div className="h-[2px] bg-secondary" />
-      </div>
-      <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
-        <MissionApplicationTabs onSubmit={submitApplication} />
+          <div className="h-[2px] bg-secondary" />
+        </div>
+        <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
+          <MissionApplicationTabs form={form} onSubmit={submitApplication} />
+        </div>
       </div>
     </div>
   )
