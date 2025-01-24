@@ -18,6 +18,7 @@ import { FundingRound, ModernFundingRound } from "@/lib/mocks"
 import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
 const incompleteBadge = <RedBadge text="Incomplete" />
 const notEligibleBadge = <RedBadge text="Not eligible" />
@@ -40,19 +41,20 @@ const sectionsCriteria: ProjectSection[] = [
 ]
 
 export const ProjectApplication = ({
-  round,
+  // round,
   project,
   index,
   form,
   isAppliedToRound,
 }: {
-  round: ModernFundingRound
+  // round: ModernFundingRound
   project: ProjectWithDetails
   index: number
   form: any
   isAppliedToRound: boolean
 }) => {
   const router = useRouter()
+  const round = useMissionFromPath()
 
   const { progressPercent, completedSections: completedSectionsCriteria } =
     useMemo(() => {
@@ -61,14 +63,14 @@ export const ProjectApplication = ({
         : { progressPercent: 0, completedSections: [] }
     }, [project])
 
-  const roundEligibilityCriteriaChecks = round.applicationPageEligibility.map(
+  const roundEligibilityCriteriaChecks = round!.applicationPageEligibility.map(
     () => {
       return true
     },
   )
 
-  for (let i = 0; i < round.applicationPageEligibility.length; i++) {
-    var criterion = round.applicationPageEligibility[i]
+  for (let i = 0; i < round!.applicationPageEligibility.length; i++) {
+    var criterion = round!.applicationPageEligibility[i]
 
     if (criterion.type && criterion.type === "hasCodeRepositories") {
       roundEligibilityCriteriaChecks[i] =
@@ -190,7 +192,7 @@ export const ProjectApplication = ({
 
             <p className="font-bold pt-5 pb-2">Eligibility Criteria</p>
 
-            {round.applicationPageEligibility.map(
+            {round!.applicationPageEligibility.map(
               (
                 criterion: { reactNode: React.ReactNode; type?: string },
                 index: number,

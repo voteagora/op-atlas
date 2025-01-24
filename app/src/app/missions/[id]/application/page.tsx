@@ -10,12 +10,12 @@ export default async function MissionApplicationPage({
 }: {
   params: { id: string }
 }) {
-  const session = await auth()
-
-  const foundRound = MODERN_FUNDING_ROUNDS.find(
+  const round = MODERN_FUNDING_ROUNDS.find(
     (page) => page.pageName === params.id,
   )
-  if (foundRound === undefined) notFound()
+  if (round === undefined) notFound()
+
+  const session = await auth()
 
   const [projects, applications] = session
     ? await Promise.all([
@@ -28,7 +28,7 @@ export default async function MissionApplicationPage({
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       <MissionApplication
         projects={projects}
-        round={foundRound}
+        // round={round}
         applications={applications}
       />
     </main>

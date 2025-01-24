@@ -15,6 +15,8 @@ import { format } from "date-fns"
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTabs } from "./MissionApplicationTabs"
+import { usePathname } from "next/navigation"
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(
@@ -31,12 +33,12 @@ export const ApplicationFormSchema = z.object({
 export function MissionApplication({
   projects,
   applications,
-  round,
 }: {
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
-  round: ModernFundingRound
 }) {
+  const round = useMissionFromPath()
+
   const [submittedApplications, setSubmittedApplications] = useState<
     Application[]
   >([])
@@ -52,7 +54,7 @@ export function MissionApplication({
               projectDescriptionOptions: project.projectDescriptionOptions,
               impactStatement: project.impactStatement,
             })),
-            round.number,
+            round!.number,
           )
 
           if (result.error !== null || result.applications.length === 0) {
@@ -95,32 +97,26 @@ export function MissionApplication({
         className="mt-18 max-w-4xl"
         application={applications[0]}
         submittedProjects={submittedProjects}
-        roundName={round.name}
       />
     )
   }
   return (
     <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
       {" "}
-      <MissionApplicationBreadcrumbs
-        pageName={round.pageName}
-        name={round.name}
-      />
+      <MissionApplicationBreadcrumbs />
       <div className="flex flex-col mt-10">
         <h2 className="text-4xl mb-2">
-          {"Apply for Retro Funding: " + round.name}
+          {"Apply for Retro Funding: " + round?.name}
         </h2>
-        {round.applyBy &&
-          `Submit this application by ${format(
-            round.applyBy,
-            "MMM d",
-          )} to be evaluated for rewards starting 
-                    ${round.startsAt && format(round.startsAt, "MMM d")}.`}
+        {`Submit this application by ${format(
+          round!.applyBy,
+          "MMM d",
+        )} to be evaluated for rewards starting 
+                    ${format(round!.startsAt, "MMM d")}.`}
         <div className="h-[2px] bg-secondary" />
       </div>
       <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
         <MissionApplicationTabs
-          round={round}
           applications={applications}
           projects={projects}
           onSubmit={submitApplication}

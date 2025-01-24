@@ -1,11 +1,10 @@
 import ExternalLink from "../../ExternalLink"
 import { VideoCallout } from "../common/callouts/VideoCallout"
 import { DocumentCallout } from "../common/callouts/DocumentCallout"
-export const Eligibility = ({
-  missionPageEligibility,
-}: {
-  missionPageEligibility: React.ReactNode
-}) => {
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+export const Eligibility = () => {
+  const mission = useMissionFromPath()
+
   return (
     <div className="flex flex-col gap-6">
       <p className="text-xl font-semibold">Eligibility</p>
@@ -19,7 +18,7 @@ export const Eligibility = ({
         href="https://youtube.com"
       />
 
-      {missionPageEligibility}
+      {mission?.missionPageEligibility}
     </div>
   )
 }

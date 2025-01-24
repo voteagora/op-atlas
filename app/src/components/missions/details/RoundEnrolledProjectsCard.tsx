@@ -3,14 +3,13 @@
 import { IconList } from "./EnrolledProjectsCard"
 import { FundingRound } from "@/lib/mocks"
 import { useRoundApplications } from "@/hooks/useRoundApplications"
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
-export const RoundEnrolledProjectsCard = ({
-  round,
-}: {
-  round: FundingRound
-}) => {
+export const RoundEnrolledProjectsCard = () => {
+  const round = useMissionFromPath()
+
   const { data: roundApplicationsForMission, isLoading } = useRoundApplications(
-    round.number,
+    round?.number,
   )
 
   const icons: (string | null)[] =

@@ -25,6 +25,7 @@ import { format } from "date-fns"
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationTerms } from "./MissionApplicationTerms"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(
@@ -41,14 +42,14 @@ export const ApplicationFormSchema = z.object({
 export function MissionApplicationTabs({
   projects,
   applications,
-  round,
   onSubmit,
 }: {
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
-  round: ModernFundingRound
   onSubmit: (projects: any) => void
 }) {
+  const round = useMissionFromPath()
+
   const [currentTab, setCurrentTab] = useState("details")
   const router = useRouter()
 
@@ -109,12 +110,11 @@ export function MissionApplicationTabs({
                   key={field.id}
                   index={index}
                   project={field}
-                  round={round}
                   isAppliedToRound={
                     applications.find(
                       (app) =>
                         app.project.id === field.id &&
-                        app.roundId === round.number.toString(),
+                        app.roundId === round?.number.toString(),
                     )
                       ? true
                       : false
@@ -153,7 +153,7 @@ export function MissionApplicationTabs({
                   className="w-44"
                   variant={"outline"}
                   onClick={() => {
-                    router.push(`/missions/${round.pageName}`)
+                    router.push(`/missions/${round?.pageName}`)
                   }}
                 >
                   View Mission Details

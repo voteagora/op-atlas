@@ -9,14 +9,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
-export function MissionApplicationBreadcrumbs({
-  name,
-  pageName,
-}: {
-  name: string
-  pageName: string | undefined
-}) {
+export function MissionApplicationBreadcrumbs() {
+  const mission = useMissionFromPath()
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -25,7 +22,9 @@ export function MissionApplicationBreadcrumbs({
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href={`/missions/${pageName}`}>{name}</BreadcrumbLink>
+          <BreadcrumbLink href={`/missions/${mission?.pageName}`}>
+            {mission?.name}
+          </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>

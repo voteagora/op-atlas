@@ -8,14 +8,14 @@ export default async function MissionPage({
 }: {
   params: { id: string }
 }) {
-  const foundRound = MODERN_FUNDING_ROUNDS.find(
+  const round = MODERN_FUNDING_ROUNDS.find(
     (page) => page.pageName === params.id,
   )
-  if (foundRound === undefined) notFound()
+  if (round === undefined) notFound()
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      <Mission round={foundRound} />
+      <Mission />
     </main>
   )
 }

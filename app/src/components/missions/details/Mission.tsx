@@ -19,22 +19,12 @@ import Header from "@/components/missions/details/Header"
 import Rewards from "@/components/missions/details/Rewards"
 import { UserRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
 import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
+import { usePathname } from "next/navigation"
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
-export default function Mission({ round }: { round: ModernFundingRound }) {
-  const {
-    name,
-    details,
-    iconUrl,
-    applyBy,
-    startsAt,
-    endsAt,
-    missionPageEligibility,
-    missionPageRequirements,
-    rewards,
-    footer,
-  } = round
+export default function Mission() {
+  const mission = useMissionFromPath()
 
-  console.log("Hello")
   return (
     <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
       <div className="mt-1 flex flex-1 gap-x-10">
@@ -49,37 +39,31 @@ export default function Mission({ round }: { round: ModernFundingRound }) {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{name}</BreadcrumbPage>
+                  <BreadcrumbPage>{mission?.name}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
 
             <div className="flex flex-col">
-              <Header
-                name={name}
-                description={details}
-                iconUrl={iconUrl}
-                startsAt={startsAt}
-                endsAt={endsAt}
-              />
-              <Eligibility missionPageEligibility={missionPageEligibility} />
+              <Header />
+              <Eligibility />
               <div className="mt-10">
-                <Rewards rewards={rewards} />
+                <Rewards />
               </div>
 
               <div className="mt-10">
                 <p className="text-xl font-semibold">Requirements</p>
-                {missionPageRequirements}
+                {mission?.missionPageRequirements}
               </div>
 
-              {footer}
+              {mission?.footer}
             </div>
           </div>
         </div>
 
         <div className="flex flex-col gap-y-6 ml-auto w-[290px]">
-          <UserRoundApplicationStatusCard round={round} />
-          <RoundEnrolledProjectsCard round={round} />
+          <UserRoundApplicationStatusCard />
+          <RoundEnrolledProjectsCard />
         </div>
       </div>
     </div>

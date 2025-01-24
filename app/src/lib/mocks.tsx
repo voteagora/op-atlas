@@ -9,6 +9,7 @@ export type ModernFundingRound = FundingRound & {
   applicationPageEligibility: { reactNode: React.ReactNode; type?: string }[]
   footer: React.ReactNode
   rewards: { measurement: string; criteria: string[] }
+  applyBy: Date
 }
 
 export type FundingRound = {
@@ -20,9 +21,8 @@ export type FundingRound = {
   link?: string
   resultsLink?: string
   iconUrl?: string
-  startsAt?: Date
-  endsAt?: Date
-  applyBy?: Date
+  startsAt: Date
+  endsAt: Date
   funding?: {
     dollar?: string
     op?: string

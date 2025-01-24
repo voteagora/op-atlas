@@ -4,27 +4,31 @@ import { format } from "date-fns"
 import React from "react"
 import Image from "next/image"
 import { NewIn2025Callout } from "../common/callouts/NewIn2025Callout"
-export default function Header({
-  name,
-  description,
-  iconUrl,
-  startsAt,
-  endsAt,
-}: {
-  name: string
-  description: string
-  iconUrl?: string
-  startsAt: Date | undefined
-  endsAt: Date | undefined
-}) {
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+export default function Header() {
+  //{
+  //   name,
+  //   description,
+  //   iconUrl,
+  //   startsAt,
+  //   endsAt,
+  // }: {
+  //   name: string
+  //   description: string
+  //   iconUrl?: string
+  //   startsAt: Date | undefined
+  //   endsAt: Date | undefined
+  // }
+  const mission = useMissionFromPath()
+
   return (
     <>
-      <h2 className="text-4xl mb-2">{name}</h2>
+      <h2 className="text-4xl mb-2">{mission?.name}</h2>
       <div className="flex gap-2 mb-6 items-center">
         <p className="font-light text-gray-700">
-          <span>{startsAt && format(startsAt, "MMM d")}</span>
-          <span>{startsAt && endsAt && " - "}</span>
-          {endsAt && <span>{format(endsAt, "MMM d, yyyy")}</span>}
+          <span>{format(mission!.startsAt, "MMM d")}</span>
+          <span>{" - "}</span>
+          {<span>{format(mission!.endsAt, "MMM d, yyyy")}</span>}
         </p>
         <div className="w-[1px] bg-gray-300 h-full"></div>
         <Image
@@ -37,9 +41,9 @@ export default function Header({
 
         <p className="font-light text-gray-700">Open for applications</p>
       </div>
-      {iconUrl && (
+      {mission?.iconUrl && (
         <Image
-          src={iconUrl}
+          src={mission.iconUrl}
           width={124}
           height={124}
           className="rounded-md w-full mb-5"
@@ -48,17 +52,17 @@ export default function Header({
       )}
 
       <div className="mb-5">
-        <span className="font-semibold ">{`Retro Funding: ${name}`}</span>{" "}
-        <span className="">{description}</span>
+        <span className="font-semibold ">{`Retro Funding: ${mission?.name}`}</span>{" "}
+        <span className="">{mission?.details}</span>
       </div>
 
       <ul className="list-disc pl-6">
         <li>
           <span className="font-bold ">{"Timeline:"}</span>
           <span className="">{` The program will take place from `}</span>
-          <span>{startsAt && format(startsAt, "MMM d")}</span>
-          <span>{startsAt && endsAt && " - "}</span>
-          {endsAt && <span>{format(endsAt, "MMM d, yyyy")}</span>}.
+          <span>{format(mission!.startsAt, "MMM d")}</span>
+          <span>{" - "}</span>
+          {<span>{format(mission!.endsAt, "MMM d, yyyy")}</span>}.
         </li>
         <li>
           <span className="font-semibold ">{"Application periods:"}</span>

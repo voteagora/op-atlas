@@ -21,6 +21,7 @@ import { Button } from "../../ui/button"
 import { useRouter } from "next/navigation"
 import { Application } from "@prisma/client"
 import { GreenBadge } from "../common/badges/GreenBadge"
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
 const SOCIALS = [
   {
@@ -63,15 +64,15 @@ export const ApplicationSubmitted = ({
   className,
   application,
   submittedProjects,
-  roundName,
   onClose,
 }: {
   className?: string
   application: Application
   submittedProjects: ProjectWithDetails[]
-  roundName: string
   onClose?: () => void
 }) => {
+  const mission = useMissionFromPath()
+
   const payoutTrackingPeriodStartDate = new Date()
   const payoutTrackingPeriodEndDate = new Date()
   const payoutStartDate = new Date()
@@ -110,8 +111,8 @@ export const ApplicationSubmitted = ({
           Your application to{" "}
           {application ? (
             <>
-              <span className="font-bold"> Retro Funding: {roundName}</span> was
-              submitted on {format(application?.createdAt, "MMMM d")} at{" "}
+              <span className="font-bold"> Retro Funding: {mission?.name}</span>{" "}
+              was submitted on {format(application?.createdAt, "MMMM d")} at{" "}
               {format(application?.createdAt, "h:mm a")}. You&apos;ll receive a
               confirmation email at{" "}
               <span className="text-accent-foreground">{email}</span>.
