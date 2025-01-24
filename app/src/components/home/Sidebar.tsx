@@ -17,20 +17,21 @@ import {
 import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
+import { useGetRandomProjects } from "@/hooks/useGetRandomProjects"
 
 const ROUND_ID = "5"
 
 export const Sidebar = ({
   className,
-  projects,
   user,
   userProjects,
 }: {
   className?: string
-  projects: Project[]
   user?: UserWithAddresses | null
   userProjects?: ProjectWithDetails[] | null
 }) => {
+  const { data: projects } = useGetRandomProjects()
+
   const { status, data } = useSession()
   const router = useRouter()
 

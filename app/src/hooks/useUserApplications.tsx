@@ -3,12 +3,13 @@ import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
 import {
+  getApplications,
   getApplicationsForRound,
   getUserApplicationsForRound,
 } from "@/lib/actions/projects"
 import { ApplicationWithDetails } from "@/lib/types"
 
-export function useUserRoundApplications(roundNumber: number | undefined): {
+export function useUserApplications(): {
   data: ApplicationWithDetails[] | undefined
   isLoading: boolean
   error: Error | null
@@ -16,13 +17,9 @@ export function useUserRoundApplications(roundNumber: number | undefined): {
   const session = useSession()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["userApplicationsForRound", roundNumber],
-    queryFn: () =>
-      getUserApplicationsForRound(
-        session?.data?.user.id as string,
-        roundNumber as number,
-      ),
-    enabled: session?.data?.user.id !== undefined && roundNumber !== undefined,
+    queryKey: ["userApplications"],
+    queryFn: () => getApplications(session?.data?.user.id as string),
+    enabled: session?.data?.user.id !== undefined,
   })
 
   return { data, isLoading, error }

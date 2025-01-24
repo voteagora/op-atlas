@@ -15,19 +15,15 @@ import { FeedbackButton } from "../common/FeedbackButton"
 import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
+import { useUserProjects } from "@/hooks/useUserProjects"
+import { useAdminProjects } from "@/hooks/useAdminProjects"
+import { useUserApplications } from "@/hooks/useUserApplications"
 
-export function Rounds({
-  projects,
-  user,
-  userProjects,
-  applications,
-}: {
-  projects: Project[]
-  user?: UserWithAddresses | null
-  userProjects?: ProjectWithDetails[] | null
-  applications: ApplicationWithDetails[] | null
-}) {
+export function Rounds({ user }: { user?: UserWithAddresses | null }) {
   const { data } = useSession()
+
+  const { data: userProjects } = useAdminProjects()
+  const { data: userApplications } = useUserApplications()
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -44,10 +40,7 @@ export function Rounds({
 
         <div className="mt-10 flex flex-1 gap-x-10">
           <div className="flex flex-col flex-1 gap-y-12">
-            <FundingRounds
-              fundingRounds={FUNDING_ROUNDS}
-              applications={applications}
-            />
+            <FundingRounds fundingRounds={FUNDING_ROUNDS} />
             <div className="flex flex-col">
               <h2 className="text-xl font-semibold text-text-default">
                 About Retro Funding
@@ -85,7 +78,6 @@ export function Rounds({
           </div>
           <Sidebar
             className="ml-auto w-[260px] pt-12"
-            projects={projects}
             user={user}
             userProjects={userProjects}
           />

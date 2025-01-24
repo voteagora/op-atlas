@@ -10,23 +10,11 @@ export default async function Page() {
 
   const userId = session?.user.id ?? ""
 
-  const [projects, user, userProjects, userApplications] = await Promise.all([
-    getRandomProjects(),
-    getUserById(userId),
-    getAdminProjects(userId),
-    getApplications(userId),
-  ])
+  const [user] = await Promise.all([getUserById(userId)])
 
   if (session?.user) {
     updateInteractions({ userId: session.user?.id, homePageViewCount: 1 })
   }
 
-  return (
-    <Rounds
-      projects={projects}
-      user={user}
-      userProjects={userProjects}
-      applications={userApplications}
-    />
-  )
+  return <Rounds user={user} />
 }

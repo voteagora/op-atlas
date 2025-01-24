@@ -15,15 +15,14 @@ import { ChainLogo } from "../common/ChainLogo"
 import { Badge } from "../ui/badge"
 import { FundingRoundOngoing } from "./FundingRoundOngoing"
 import { FundingRoundPast } from "./FundingRoundPast"
+import { useUserApplications } from "@/hooks/useUserApplications"
 
 export const FundingRounds = ({
   className,
   fundingRounds,
-  applications,
 }: {
   className?: string
   fundingRounds: FundingRound[]
-  applications: ApplicationWithDetails[] | null
 }) => {
   const { open, upcoming, past, ongoing } = useMemo(() => {
     const n: FundingRound[] = []
@@ -69,11 +68,7 @@ export const FundingRounds = ({
           }`}
         >
           {rounds.map((fundingRound) => (
-            <Round
-              key={fundingRound.number}
-              fundingRound={fundingRound}
-              applications={applications}
-            />
+            <Round key={fundingRound.number} fundingRound={fundingRound} />
           ))}
         </div>
       </div>
@@ -93,13 +88,13 @@ export const FundingRounds = ({
 const Round = ({
   className,
   fundingRound,
-  applications,
 }: {
   className?: string
   fundingRound: FundingRound
-  applications: ApplicationWithDetails[] | null
 }) => {
   const router = useRouter()
+
+  const { data: applications } = useUserApplications()
 
   let SelectedContent: any
 
