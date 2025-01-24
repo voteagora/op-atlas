@@ -13,14 +13,14 @@ import {
 } from "@/components/ui/breadcrumb"
 import React from "react"
 import { Eligibility } from "@/components/missions/details/Eligibility"
-import { FUNDING_ROUNDS, FundingRound } from "@/lib/mocks"
+import { FUNDING_ROUNDS, FundingRound, ModernFundingRound } from "@/lib/mocks"
 import { format } from "date-fns"
 import Header from "@/components/missions/details/Header"
 import Rewards from "@/components/missions/details/Rewards"
 import { UserRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
 import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
 
-export default function Mission({ round }: { round: FundingRound }) {
+export default function Mission({ round }: { round: ModernFundingRound }) {
   const {
     name,
     details,
@@ -28,7 +28,6 @@ export default function Mission({ round }: { round: FundingRound }) {
     applyBy,
     startsAt,
     endsAt,
-    eligibility,
     missionPageEligibility,
     missionPageRequirements,
     rewards,
@@ -63,10 +62,7 @@ export default function Mission({ round }: { round: FundingRound }) {
                 startsAt={startsAt}
                 endsAt={endsAt}
               />
-              <Eligibility
-                missionPageEligibility={missionPageEligibility}
-                eligibility={eligibility}
-              />
+              <Eligibility missionPageEligibility={missionPageEligibility} />
               <div className="mt-10">
                 <Rewards rewards={rewards} />
               </div>
