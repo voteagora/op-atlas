@@ -96,7 +96,7 @@ const Round = ({
 
   const { data: applications } = useUserApplications()
 
-  let SelectedContent: any
+  let SelectedContent: React.ReactNode
 
   if (fundingRound.status === "past") {
     SelectedContent = <FundingRoundPast fundingRound={fundingRound} />

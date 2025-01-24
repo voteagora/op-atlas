@@ -17,16 +17,18 @@ export const IconList = ({
       <div
         className={`flex flex-wrap gap-1 max-h-[120px] overflow-hidden items-start`}
       >
-        {icons.map((icon: any, index: number) => {
+        {icons.map((icon: string | null, index: number) => {
           return (
-            <Image
-              src={icon}
-              width={44}
-              height={44}
-              alt="Project"
-              key={"projectsEnrolled-" + index}
-              className="rounded-lg"
-            />
+            icon && (
+              <Image
+                src={icon}
+                width={44}
+                height={44}
+                alt="Project"
+                key={"projectsEnrolled-" + index}
+                className="rounded-lg"
+              />
+            )
           )
         })}
       </div>

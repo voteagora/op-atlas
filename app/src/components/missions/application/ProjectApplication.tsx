@@ -23,6 +23,9 @@ import { Checkbox } from "../../ui/checkbox"
 import { FormField } from "../../ui/form"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
+import { UseFormReturn } from "react-hook-form"
+import { ApplicationFormSchema } from "./MissionApplication"
+import { z } from "zod"
 
 const incompleteBadge = <RedBadge text="Incomplete" />
 const notEligibleBadge = <RedBadge text="Not eligible" />
@@ -52,7 +55,7 @@ export const ProjectApplication = ({
 }: {
   project: ProjectWithDetails
   index: number
-  form: any
+  form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   isAppliedToRound: boolean
 }) => {
   const round = useMissionFromPath()

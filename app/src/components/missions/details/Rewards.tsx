@@ -13,7 +13,7 @@ export default function Rewards() {
       <p>Your impact will be rewarded based on the following criteria:</p>
 
       <ol className="list-decimal pl-6">
-        {mission?.rewards.criteria.map((element: any, index: number) => {
+        {mission?.rewards.criteria.map((element: string, index: number) => {
           return <li key={"rewards" + index}>{element}</li>
         })}
       </ol>
