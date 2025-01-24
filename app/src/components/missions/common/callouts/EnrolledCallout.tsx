@@ -5,14 +5,24 @@ import ExternalLink from "@/components/ExternalLink"
 import { EAS_URL_PREFIX } from "@/lib/utils"
 
 import { Callout } from "../../../common/Callout"
+import { useRouter } from "next/navigation"
+import { MODERN_FUNDING_ROUNDS } from "@/lib/mocks"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
+import { ApplicationWithDetails } from "@/lib/types"
 
 export function EnrolledCallout({
-  name,
-  attestationId,
+  application,
+  onRewardsClick,
 }: {
-  name: string
-  attestationId: string
+  application: ApplicationWithDetails
+  onRewardsClick: () => void
 }) {
+  const router = useRouter()
+
+  const round = MODERN_FUNDING_ROUNDS.find(
+    (round) => round.number.toString() === application.roundId,
+  )
+
   return (
     <Callout
       type="success"
@@ -25,22 +35,32 @@ export function EnrolledCallout({
             width={20}
             height={20}
           />
-          <p className="text-sm font-medium mr-5 ml-2">
-            {`Enrolled in Retro Funding: ` + name}
-          </p>
+          <button
+            onClick={() => {
+              router.push(`/missions/${round?.pageName}`)
+            }}
+            className="text-sm font-medium mr-5 ml-2"
+          >
+            {`Enrolled in Retro Funding: ` + application?.round.name}
+          </button>
         </div>
       }
       rightAlignedContent={
         <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
           <ExternalLink
-            className="text-sm text-success-foreground font-medium"
-            href={`${EAS_URL_PREFIX}${attestationId}`}
+            className="flex items-center text-sm text-success-foreground font-medium"
+            href={`${EAS_URL_PREFIX}${application.attestationId}`}
           >
             Confirmation
+            <ChevronRight width={16} height={16} />
           </ExternalLink>
-          <ChevronRight width={16} height={16} />
-          {/* <span>Rewards</span>
-          <ChevronRight width={16} height={16} /> */}
+          <button
+            className="flex items-center text-sm text-success-foreground font-medium"
+            onClick={onRewardsClick}
+          >
+            Rewards
+            <ChevronRight width={16} height={16} />
+          </button>
         </div>
       }
     />

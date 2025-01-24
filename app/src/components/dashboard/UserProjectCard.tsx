@@ -38,12 +38,8 @@ const UserProjectCard = ({
     return progressPercent
   }, [project])
 
-  const roundName = "Onchain Builders"
-  const approvedDate = new Date("2025-02-01T21:53:13.300Z")
-
   return (
     <div
-      // href={`/projects/${project.id}/details`}
       className={cn(
         "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm",
         className,
@@ -158,8 +154,8 @@ const UserProjectCard = ({
           return application.projectId === project.id ? (
             <div className="mt-4">
               <EnrolledCallout
-                name={application.round.name}
-                attestationId={application.attestationId}
+                application={application}
+                onRewardsClick={handleActiveRoundHelpClick}
               />
             </div>
           ) : (
