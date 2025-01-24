@@ -1,12 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
 
-import {
-  getApplications,
-  getApplicationsForRound,
-  getUserApplicationsForRound,
-} from "@/lib/actions/projects"
+import { getApplications } from "@/lib/actions/projects"
 import { ApplicationWithDetails } from "@/lib/types"
 
 export function useUserApplications(): {

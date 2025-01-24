@@ -23,7 +23,6 @@ export function Rounds({ user }: { user?: UserWithAddresses | null }) {
   const { data } = useSession()
 
   const { data: userProjects } = useAdminProjects()
-  const { data: userApplications } = useUserApplications()
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">

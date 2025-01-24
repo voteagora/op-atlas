@@ -1,8 +1,6 @@
 import { auth } from "@/auth"
 import { Rounds } from "@/components/home/Rounds"
-import { getRandomProjects } from "@/db/projects"
 import { getUserById } from "@/db/users"
-import { getAdminProjects, getApplications } from "@/lib/actions/projects"
 import { updateInteractions } from "@/lib/actions/users"
 
 export default async function Page() {
