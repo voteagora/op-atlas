@@ -1,6 +1,10 @@
 "use client"
 import React, { useState } from "react"
-import { FundingRound } from "@/lib/mocks"
+import {
+  FundingRound,
+  MODERN_FUNDING_ROUNDS,
+  ModernFundingRound,
+} from "@/lib/mocks"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { z } from "zod"
 import { toast } from "sonner"
@@ -31,7 +35,7 @@ export function MissionApplication({
 }: {
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
-  round: FundingRound
+  round: ModernFundingRound
 }) {
   const [submittedApplications, setSubmittedApplications] = useState<
     Application[]

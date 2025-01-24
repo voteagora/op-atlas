@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from "react"
-import { FundingRound } from "@/lib/mocks"
+import { FundingRound, ModernFundingRound } from "@/lib/mocks"
 import { ProjectApplication } from "@/components/missions/application/ProjectApplication"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
@@ -46,7 +46,7 @@ export function MissionApplicationTabs({
 }: {
   projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
-  round: FundingRound
+  round: ModernFundingRound
   onSubmit: (projects: any) => void
 }) {
   const [currentTab, setCurrentTab] = useState("details")

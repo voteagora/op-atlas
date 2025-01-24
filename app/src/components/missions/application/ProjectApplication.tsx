@@ -14,7 +14,7 @@ import { useMemo } from "react"
 import { ChevronRight, X } from "lucide-react"
 import { Button } from "../../ui/button"
 import { useRouter } from "next/navigation"
-import { FundingRound } from "@/lib/mocks"
+import { FundingRound, ModernFundingRound } from "@/lib/mocks"
 import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
@@ -46,7 +46,7 @@ export const ProjectApplication = ({
   form,
   isAppliedToRound,
 }: {
-  round: FundingRound
+  round: ModernFundingRound
   project: ProjectWithDetails
   index: number
   form: any
@@ -61,22 +61,21 @@ export const ProjectApplication = ({
         : { progressPercent: 0, completedSections: [] }
     }, [project])
 
-  const roundEligibilityCriteriaChecks = round.eligibility.criteria.map(() => {
-    return true
-  })
+  const roundEligibilityCriteriaChecks = round.applicationPageEligibility.map(
+    () => {
+      return true
+    },
+  )
 
-  for (let i = 0; i < round.eligibility.criteria.length; i++) {
-    var criterion = round.eligibility.criteria[i]
+  for (let i = 0; i < round.applicationPageEligibility.length; i++) {
+    var criterion = round.applicationPageEligibility[i]
 
-    if (criterion.type === "hasCodeRepositories") {
+    if (criterion.type && criterion.type === "hasCodeRepositories") {
       roundEligibilityCriteriaChecks[i] =
-        project.hasCodeRepositories &&
-        project.repos.every((repo: any) => {
-          return repo.verified
-        })
+        project.hasCodeRepositories && project.repos.length > 0
     }
 
-    if (criterion.type === "isOnChainContract") {
+    if (criterion.type && criterion.type === "isOnChainContract") {
       roundEligibilityCriteriaChecks[i] =
         project.isOnChainContract && project.contracts.length > 0
     }
@@ -91,12 +90,14 @@ export const ProjectApplication = ({
   )
 
   const isActive = isAppliedToRound
-  const isIncomplete = !sectionsCriteria.every((section) =>
-    completedSectionsCriteria.includes(section),
-  )
-  const isNotEligible = !roundEligibilityCriteriaChecks.every(
-    (check: boolean) => check,
-  )
+  // const isIncomplete = !sectionsCriteria.every((section) =>
+  //   completedSectionsCriteria.includes(section),
+  // )
+  const isNotEligible =
+    !roundEligibilityCriteriaChecks.every((check: boolean) => check) ||
+    !sectionsCriteria.every((section) =>
+      completedSectionsCriteria.includes(section),
+    )
 
   let enrollmentStatusBadge
 
@@ -104,11 +105,9 @@ export const ProjectApplication = ({
     enrollmentStatusBadge = activeBadge
   } else if (isNotEligible) {
     enrollmentStatusBadge = notEligibleBadge
-  } else if (isIncomplete) {
-    enrollmentStatusBadge = incompleteBadge
   }
 
-  const isValidForEnrollment = !isActive && !isNotEligible && !isIncomplete //&& !isPending
+  const isValidForEnrollment = !isActive && !isNotEligible
 
   return (
     <div className="p-8 border border-input rounded-xl">
@@ -170,8 +169,7 @@ export const ProjectApplication = ({
               let icon
 
               if (!value) {
-                // console.log("aye")
-                icon = <X className="w-5 h-5" color="gray" />
+                icon = <X className="w-5 h-5" color="red" />
               } else {
                 icon = icon = <CircleWithCheckmark />
               }
@@ -190,66 +188,41 @@ export const ProjectApplication = ({
               )
             })}
 
-            <Button
-              className="p-0"
-              variant={"ghost"}
-              onClick={() => {
-                router.push(`/projects/${project.id}/details`)
-              }}
-            >
-              Edit project
-              <ChevronRight />
-            </Button>
-
             <p className="font-bold pt-5 pb-2">Eligibility Criteria</p>
 
-            {round.eligibility.criteria.map((criterion: any, index: number) => {
-              const criteriaCompletion = roundEligibilityCriteriaChecks[index]
+            {round.applicationPageEligibility.map(
+              (
+                criterion: { reactNode: React.ReactNode; type?: string },
+                index: number,
+              ) => {
+                const isCriterionComplete =
+                  roundEligibilityCriteriaChecks[index]
 
-              let icon
+                let icon
 
-              if (!criteriaCompletion) {
-                if (criterion.situational) {
-                  icon = <div className="w-full h-[3px] bg-gray-400 m-1" />
+                if (criterion.type) {
+                  if (isCriterionComplete) {
+                    icon = <CircleWithCheckmark />
+                  } else {
+                    icon = <X className="w-5 h-5" color="red" />
+                  }
                 } else {
-                  icon = <X className="w-5 h-5" color="gray" />
+                  icon = <div className="w-[20px] h-[3px] bg-gray-400 m-1" />
                 }
-              } else {
-                icon = <CircleWithCheckmark />
-              }
 
-              return (
-                <div
-                  className="flex items-center py-1"
-                  key={"criterion-" + index}
-                >
-                  <div className="relative w-5 h-5 flex items-center justify-center">
-                    {icon}
+                return (
+                  <div
+                    className="flex items-center py-1 gap-2"
+                    key={"criterion-" + index}
+                  >
+                    <div className="relative w-5 h-5 flex items-center justify-center">
+                      {icon}
+                    </div>
+                    {criterion.reactNode}
                   </div>
-                  <p className="pl-4">
-                    <span>{criterion.name}</span>
-                    {criterion.category && (
-                      <span>
-                        {": " +
-                          criterion.category +
-                          " - Checked after application is submitted"}
-                      </span>
-                    )}
-                  </p>
-                </div>
-              )
-            })}
-
-            <Button
-              className="p-0"
-              variant={"ghost"}
-              onClick={() => {
-                router.push(`/projects/${project.id}/details`)
-              }}
-            >
-              Edit project
-              <ChevronRight />
-            </Button>
+                )
+              },
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
