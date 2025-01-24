@@ -111,7 +111,7 @@ export function MissionApplication({
             round.applyBy,
             "MMM d",
           )} to be evaluated for rewards starting 
-                    ${format(round.startsAt, "MMM d")}.`}
+                    ${round.startsAt && format(round.startsAt, "MMM d")}.`}
         <div className="h-[2px] bg-secondary" />
       </div>
       <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">

@@ -32,6 +32,7 @@ export default function Mission({ round }: { round: FundingRound }) {
     missionPageEligibility,
     missionPageRequirements,
     rewards,
+    footer,
   } = round
 
   console.log("Hello")
@@ -75,24 +76,7 @@ export default function Mission({ round }: { round: FundingRound }) {
                 {missionPageRequirements}
               </div>
 
-              {name === "Dev Tooling" && (
-                <div className="">
-                  <div className="bg-secondary h-[2px] mt-5 mb-5" />
-                  <div>
-                    <span className="font-bold pr-1">Learn More</span>
-                    <span>
-                      in the{" "}
-                      <ExternalLink
-                        href="https://gov.optimism.io/t/season-7-retro-funding-missions/9295"
-                        className="underline"
-                      >
-                        Collective Governance Forum: Retro Funding Mission: Dev
-                        Tooling
-                      </ExternalLink>
-                    </span>
-                  </div>
-                </div>
-              )}
+              {footer}
             </div>
           </div>
         </div>

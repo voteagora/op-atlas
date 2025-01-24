@@ -21,6 +21,7 @@ export type FundingRound = {
   }
   missionPageRequirements?: React.ReactNode
   missionPageEligibility?: React.ReactNode
+  footer?: React.ReactNode
   eligibility?: any
   rewards?: any
 }
@@ -44,7 +45,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     applyBy: new Date("2025-01-25T21:53:13.300Z"),
     missionPageEligibility: (
       <div>
-        <ul className="list-disc pl-5">
+        <ul className="list-disc 6">
           <li>
             <span className="font-bold">All applications</span> must verify
             ownership of GitHub repo(s) in OP Atlas.
@@ -91,7 +92,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
           meet these requirements to earn rewards:
         </p>
 
-        <ol className="list-decimal pl-5">
+        <ol className="list-decimal pl-6">
           <li>
             Must have at least one release on GitHub within the past 6 months.
           </li>
@@ -105,6 +106,23 @@ export const FUNDING_ROUNDS: FundingRound[] = [
             .
           </li>
         </ol>
+      </div>
+    ),
+    footer: (
+      <div>
+        <div className="bg-secondary h-[2px] mt-5 mb-5" />
+        <div>
+          <span className="font-bold pr-1">Learn More</span>
+          <span>
+            in the{" "}
+            <ExternalLink
+              href="https://gov.optimism.io/t/season-7-retro-funding-missions/9295"
+              className="underline"
+            >
+              Collective Governance Forum: Retro Funding Mission: Dev Tooling
+            </ExternalLink>
+          </span>
+        </div>
       </div>
     ),
     eligibility: {
@@ -181,6 +199,114 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     startsAt: new Date("2025-02-01T21:53:13.300Z"),
     endsAt: new Date("2025-06-30T21:53:13.300Z"),
     applyBy: new Date("2025-01-25T21:53:13.300Z"),
+    missionPageEligibility: (
+      <div>
+        <p>Applications must meet these criteria:</p>
+        <ul className="list-decimal pl-6 py-6">
+          <li>
+            <span className="font-bold">Onchain deployment:</span> Your project
+            must have a verified contract on one of the following OP Chains:
+            Arena Z, Base, Ethernity, Ink, Lisk, Metal L2, Mode, OP Mainnet,
+            RACE, Shape, Superseed, Swan Chain, Swellchain, Unichain, World
+            Chain, Zora.
+          </li>
+          <li>
+            <span className="font-bold">Contract Verification:</span> To verify
+            ownership of a contract, the deployer address of the contract must
+            sign a message in the “Contracts” step of project setup in OP Atlas.
+          </li>
+          <li>
+            <span className="font-bold">Contract Attribution:</span> Contracts
+            deployed by factories are attributed to the factory deployer.
+            Contracts must have a single project owner applying for Retro
+            Funding; overlapping claims are not allowed.
+          </li>
+        </ul>
+        <VideoCallout
+          href="https://youtube.com"
+          text="How to verify onchain contracts in OP Atlas"
+        />
+
+        <div className="flex flex-col gap-6 mt-6">
+          <p>
+            To be considered for additional DeFi rewards, projects must meet
+            these criteria:
+          </p>
+          <ol className="list-disc pl-6">
+            <li>
+              <span className="font-bold">Adapter requirement:</span> DeFi
+              projects must have a functioning{" "}
+              <ExternalLink
+                className="underline"
+                href={"https://defillama.com/"}
+              >
+                DefiLlama adapter.
+              </ExternalLink>{" "}
+              A link to the adaptor must be provided in in the “Contracts” step
+              of project setup in OP Atlas.
+            </li>
+          </ol>
+          <p>
+            To be considered for additional Account Abstraction rewards,
+            projects must meet these criteria:
+          </p>
+          <ol className="list-disc pl-6">
+            <li>
+              <span className="font-bold">Operator registry requirement:</span>{" "}
+              AA projects must be included in the{" "}
+              <ExternalLink
+                href={"https://www.bundlebear.com/overview/all"}
+                className="underline"
+              >
+                BundleBear
+              </ExternalLink>{" "}
+              operator registry (contract addresses verified in OP Atlas must be
+              present in the registry). Add your project to the BundleBear-app
+              in GitHub.
+            </li>
+          </ol>
+        </div>
+      </div>
+    ),
+    missionPageRequirements: (
+      <div className="flex flex-col gap-6">
+        <p>
+          <span className="font-bold">All projects</span> must meet minimum
+          activity requirements (measured over the last 180 days) to earn
+          rewards:
+        </p>
+
+        <ul className="list-disc pl-6">
+          <li>At least 1000 transactions</li>
+          <li>At least 420 qualified addresses (ex: no bots)</li>
+          <li>At least 10 distinct days of onchain activity</li>
+        </ul>
+
+        <p>
+          <span className="font-bold">DeFi projects</span> can earn additional
+          TVL rewards if they had at least $1M average TVL over the last 180
+          days.
+        </p>
+      </div>
+    ),
+    footer: (
+      <div>
+        <div className="bg-secondary h-[2px] mt-5 mb-5" />
+        <div>
+          <span className="font-bold pr-1">Learn More</span>
+          <span>
+            in the{" "}
+            <ExternalLink
+              href="https://gov.optimism.io/t/season-7-retro-funding-missions/9295"
+              className="underline"
+            >
+              Collective Governance Forum: Retro Funding Mission: Onchain
+              Builders
+            </ExternalLink>
+          </span>
+        </div>
+      </div>
+    ),
     eligibility: {
       criteria: [
         {
