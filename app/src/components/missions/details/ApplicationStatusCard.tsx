@@ -25,8 +25,6 @@ export const ApplicationStatusCard = ({
 
   const { data } = useSession()
 
-  const activeBadge = <GreenBadge />
-
   let result
   if (!data) {
     result = (
@@ -80,8 +78,7 @@ export const ApplicationStatusCard = ({
                           </p>
                         </div>
 
-                        {/* {element.status == "Pending" ? pendingBadge : activeBadge} */}
-                        {activeBadge}
+                        <GreenBadge />
                       </div>
                     )
                   },
