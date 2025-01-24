@@ -2,6 +2,7 @@
 import { ChevronRight, X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useMemo } from "react"
 
 import {
@@ -11,6 +12,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
+import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { FundingRound, ModernFundingRound } from "@/lib/mocks"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
@@ -21,8 +23,6 @@ import { Checkbox } from "../../ui/checkbox"
 import { FormField } from "../../ui/form"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
-import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
-import { useSession } from "next-auth/react"
 
 const incompleteBadge = <RedBadge text="Incomplete" />
 const notEligibleBadge = <RedBadge text="Not eligible" />

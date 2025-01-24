@@ -3,10 +3,12 @@
 import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { memo, useState } from "react"
+import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
 import { Button } from "@/components/common/Button"
+import { DialogProps } from "@/components/dialogs/types"
 import {
   Dialog,
   DialogContent,
@@ -15,11 +17,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { useUpdateEmail } from "@/lib/hooks"
 
-import { Input } from "@/components/ui/input"
-import { DialogProps } from "@/components/dialogs/types"
-import { UseFormReturn } from "react-hook-form"
 import { ApplicationFormSchema } from "../MissionApplication"
 
 const schema = z.object({

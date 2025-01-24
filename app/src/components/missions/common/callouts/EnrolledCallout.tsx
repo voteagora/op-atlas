@@ -1,14 +1,14 @@
 import { ChevronRight } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 import ExternalLink from "@/components/ExternalLink"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
+import { MODERN_FUNDING_ROUNDS } from "@/lib/mocks"
+import { ApplicationWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX } from "@/lib/utils"
 
 import { Callout } from "../../../common/Callout"
-import { useRouter } from "next/navigation"
-import { MODERN_FUNDING_ROUNDS } from "@/lib/mocks"
-import { useUserApplications } from "@/hooks/db/useUserApplications"
-import { ApplicationWithDetails } from "@/lib/types"
 
 export function EnrolledCallout({
   application,

@@ -8,6 +8,7 @@ import { z } from "zod"
 import CircleWithCheckmark from "@/components/common/CircleWithGreenCheckmark"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +28,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { copyToClipboard } from "@/lib/utils"
 
 import { ReposFormSchema } from "./schema"
-import { Checkbox } from "@/components/ui/checkbox"
 
 export const GithubForm = ({
   form,

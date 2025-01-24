@@ -13,11 +13,11 @@ import { uploadToPinata } from "../pinata"
 import { CategoryWithImpact } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { formatApplicationMetadata } from "../utils/metadata"
-import { verifyAdminStatus } from "./utils"
 import {
   getApplicationsForRound,
   getUserApplicationsForRound,
 } from "./projects"
+import { verifyAdminStatus } from "./utils"
 
 const whitelist: string[] = []
 
