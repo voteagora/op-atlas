@@ -21,6 +21,8 @@ import { Checkbox } from "../../ui/checkbox"
 import { FormField } from "../../ui/form"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
+import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
+import { useSession } from "next-auth/react"
 
 const incompleteBadge = <RedBadge text="Incomplete" />
 const notEligibleBadge = <RedBadge text="Not eligible" />
@@ -54,6 +56,8 @@ export const ProjectApplication = ({
   isAppliedToRound: boolean
 }) => {
   const round = useMissionFromPath()
+
+  const { isLoading } = useUserRoundApplications(round?.number)
 
   const { progressPercent, completedSections: completedSectionsCriteria } =
     useMemo(() => {
@@ -129,7 +133,7 @@ export const ProjectApplication = ({
                     control={form.control}
                     render={({ field }) => (
                       <Checkbox
-                        disabled={!isValidForEnrollment}
+                        disabled={!isValidForEnrollment || isLoading}
                         name={field.name}
                         checked={field.value}
                         onCheckedChange={field.onChange}

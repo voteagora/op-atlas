@@ -49,8 +49,11 @@ export function MissionApplicationTabs({
   const [currentTab, setCurrentTab] = useState("details")
   const router = useRouter()
 
-  const { data: projects = [], isLoading } = useUserProjects(round?.number)
-  const { data: applications = [] } = useUserRoundApplications(round?.number)
+  const { data: projects = [], isLoading: isLoadingProjects } = useUserProjects(
+    round?.number,
+  )
+  const { data: applications = [], isLoading: isLoadingApplications } =
+    useUserRoundApplications(round?.number)
 
   useEffect(() => {
     if (projects.length > 0) {
@@ -90,7 +93,7 @@ export function MissionApplicationTabs({
         <TabsTrigger
           className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
           value="terms"
-          disabled={!isFormValid}
+          disabled={!isFormValid && !isLoadingApplications}
         >
           <span className="pr-2">2</span> Agree to terms
         </TabsTrigger>
@@ -119,7 +122,7 @@ export function MissionApplicationTabs({
               <Button
                 className="mt-10"
                 variant={"destructive"}
-                disabled={!isFormValid}
+                disabled={!isFormValid || isLoadingApplications}
                 onClick={() => {
                   setCurrentTab("terms")
                 }}
@@ -127,7 +130,7 @@ export function MissionApplicationTabs({
                 Next
               </Button>
             </>
-          ) : isLoading ? (
+          ) : isLoadingProjects ? (
             <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
               <p className="font-bold">{"Loading your projects..."}</p>
             </div>

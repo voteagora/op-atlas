@@ -24,6 +24,8 @@ export function MissionApplicationTerms({
 
   const canSubmitForm = agreedTerms.every((term) => term)
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const toggleAgreedTerm = (idx: number) => {
     setAgreedTerms((prev) => {
       const updated = [...prev]
@@ -70,8 +72,11 @@ export function MissionApplicationTerms({
       <Button
         className="mt-10"
         variant={"destructive"}
-        disabled={!canSubmitForm}
-        onClick={onSubmit}
+        disabled={!canSubmitForm || isSubmitting}
+        onClick={() => {
+          setIsSubmitting(true)
+          onSubmit()
+        }}
       >
         Submit
       </Button>
