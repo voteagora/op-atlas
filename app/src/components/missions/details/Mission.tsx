@@ -11,30 +11,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { ApplicationStatusCard } from "@/components/missions/details/ApplicationStatusCard"
-import { EnrolledProjectsCard } from "@/components/missions/details/EnrolledProjectsCard"
 import React from "react"
 import { Eligibility } from "@/components/missions/details/Eligibility"
-import { FundingRound } from "@/lib/mocks"
+import { FUNDING_ROUNDS, FundingRound } from "@/lib/mocks"
 import { format } from "date-fns"
 import Header from "@/components/missions/details/Header"
 import Rewards from "@/components/missions/details/Rewards"
-import { ApplicationStatusCardAtlas } from "./ApplicationStatusCardAtlas"
-import { EnrolledProjectsCardAtlas } from "./EnrolledProjectsCardAtlas"
+import { UserRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
+import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
 
-export default function Mission({
-  round,
-  applications,
-  missionApplications,
-  projects,
-  pageName,
-}: {
-  round: FundingRound
-  applications: { icon: string | null; name: string }[]
-  missionApplications: { icon: string | null; opReward: number }[]
-  projects: any[]
-  pageName: string
-}) {
+export default function Mission({ round }: { round: FundingRound }) {
   const {
     name,
     details,
@@ -101,18 +87,8 @@ export default function Mission({
         </div>
 
         <div className="flex flex-col gap-y-6 ml-auto w-[290px]">
-          <ApplicationStatusCardAtlas pageName={pageName} />
-          <EnrolledProjectsCardAtlas pageName={pageName} />
-
-          <ApplicationStatusCard
-            applyByDate={applyBy && format(applyBy, "MMM d")}
-            startDate={startsAt && format(startsAt, "MMM d")}
-            userProjectCount={projects.length}
-            userAppliedProjects={applications}
-            pageName={round.pageName}
-          />
-
-          <EnrolledProjectsCard projects={missionApplications} />
+          <UserRoundApplicationStatusCard round={round} />
+          <RoundEnrolledProjectsCard round={round} />
         </div>
       </div>
     </div>

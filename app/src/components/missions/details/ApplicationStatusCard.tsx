@@ -15,7 +15,6 @@ export const ApplicationStatusCard = ({
   userAppliedProjects,
   pageName,
 }: {
-  className?: string
   applyByDate: string | undefined
   startDate: string | undefined
   userProjectCount?: number
@@ -37,7 +36,7 @@ export const ApplicationStatusCard = ({
           <p className="text-sm text-secondary-foreground text-center">
             {`Apply by ${format(applyByDate, "MMM d")}`}
             <span>
-              {`to be evaluated for rewards starting 
+              {` to be evaluated for rewards starting 
           ${startDate}.`}
             </span>
           </p>
@@ -63,21 +62,24 @@ export const ApplicationStatusCard = ({
                     return (
                       <div
                         key={"userAppliedProject-" + index}
-                        className="flex items-center gap-1"
+                        className="flex items-center justify-between"
                       >
-                        {element.icon ? (
-                          <Image
-                            src={element.icon}
-                            width={32}
-                            height={32}
-                            alt="Project"
-                          />
-                        ) : (
-                          <></>
-                        )}
-                        <p className="overflow-hidden truncate">
-                          {element.name}
-                        </p>
+                        <div className="flex items-center gap-1">
+                          {element.icon ? (
+                            <Image
+                              src={element.icon}
+                              width={32}
+                              height={32}
+                              alt="Project"
+                            />
+                          ) : (
+                            <></>
+                          )}
+                          <p className="overflow-hidden truncate">
+                            {element.name}
+                          </p>
+                        </div>
+
                         {/* {element.status == "Pending" ? pendingBadge : activeBadge} */}
                         {activeBadge}
                       </div>
@@ -148,9 +150,5 @@ export const ApplicationStatusCard = ({
     }
   }
 
-  return (
-    <div className="flex flex-col items-center justify-center gap-y-3 p-6 border border-2 border-grey-900 rounded-xl">
-      {result}
-    </div>
-  )
+  return <div className="flex flex-col gap-y-3 p-6">{result}</div>
 }
