@@ -45,7 +45,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     applyBy: new Date("2025-01-25T21:53:13.300Z"),
     missionPageEligibility: (
       <div>
-        <ul className="list-disc 6">
+        <ul className="list-disc pl-6">
           <li>
             <span className="font-bold">All applications</span> must verify
             ownership of GitHub repo(s) in OP Atlas.
@@ -269,7 +269,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
       </div>
     ),
     missionPageRequirements: (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 my-6">
         <p>
           <span className="font-bold">All projects</span> must meet minimum
           activity requirements (measured over the last 180 days) to earn

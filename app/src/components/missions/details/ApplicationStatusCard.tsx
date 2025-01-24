@@ -120,7 +120,7 @@ export const ApplicationStatusCard = ({
       }
     } else {
       result = (
-        <>
+        <div className="flex flex-col items-center gap-2">
           <p className="font-bold">{"Add project to apply"}</p>
 
           <p className="text-sm text-secondary-foreground text-center">
@@ -142,7 +142,7 @@ export const ApplicationStatusCard = ({
               View Dashboard
             </Button>
           </div>
-        </>
+        </div>
       )
     }
   }
