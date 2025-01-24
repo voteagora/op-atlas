@@ -112,7 +112,7 @@ export const ProjectApplication = ({
   const isValidForEnrollment = !isActive && !isNotEligible
 
   return (
-    <div className="p-8 border border-input rounded-xl">
+    <div className="p-8 border border-input rounded-xl my-4">
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="item-1">
           <AccordionTrigger className="!p-0">
