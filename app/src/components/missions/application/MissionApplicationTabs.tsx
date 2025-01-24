@@ -46,17 +46,17 @@ export const ApplicationFormSchema = z.object({
 export function MissionApplicationTabs({
   onSubmit,
 }: {
-  onSubmit: (projects: any) => void
+  onSubmit: (
+    projects: z.infer<typeof ApplicationFormSchema>["projects"],
+  ) => void
 }) {
   const round = useMissionFromPath()
 
   const [currentTab, setCurrentTab] = useState("details")
   const router = useRouter()
 
-  const { data: projects = [] } = useUserProjects(round?.number)
+  const { data: projects = [], isLoading } = useUserProjects(round?.number)
   const { data: applications = [] } = useUserRoundApplications(round?.number)
-
-  // console.log(projects)
 
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
@@ -80,9 +80,6 @@ export function MissionApplicationTabs({
   const isFormValid = projectsForm?.some((project) => {
     return project.selected
   })
-
-  const values = form.getValues()
-  console.log(values)
 
   return (
     <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
@@ -112,8 +109,6 @@ export function MissionApplicationTabs({
       </TabsList>
       <div className="mt-12">
         <TabsContent value="details">
-          <p className="text-2xl font-bold mb-5">Choose projects</p>
-
           {projects.length > 0 ? (
             <>
               {projects.map((field, index) => (
@@ -144,6 +139,10 @@ export function MissionApplicationTabs({
                 Next
               </Button>
             </>
+          ) : isLoading ? (
+            <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
+              <p className="font-bold">{"Loading your projects..."}</p>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
               <p className="font-bold">

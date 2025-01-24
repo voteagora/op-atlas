@@ -1,62 +1,41 @@
 "use client"
 import { Application } from "@prisma/client"
 import { format } from "date-fns"
-import { usePathname } from "next/navigation"
 import React, { useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { submitApplications } from "@/lib/actions/applications"
-import {
-  FundingRound,
-  MODERN_FUNDING_ROUNDS,
-  ModernFundingRound,
-} from "@/lib/mocks"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
-import { MissionApplicationTabs } from "./MissionApplicationTabs"
+import {
+  ApplicationFormSchema,
+  MissionApplicationTabs,
+} from "./MissionApplicationTabs"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
-import { useUserApplications } from "@/hooks/db/useUserApplications"
 import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
 
-export const ApplicationFormSchema = z.object({
-  projects: z.array(
-    z.object({
-      projectId: z.string(),
-      category: z.string(),
-      selected: z.boolean(),
-      projectDescriptionOptions: z.array(z.string()),
-      impactStatement: z.record(z.string(), z.string()),
-    }),
-  ),
-})
-
-export function MissionApplication({}: // projects,
-// applications,
-{
-  // projects: ProjectWithDetails[]
-  // applications: ApplicationWithDetails[]
-}) {
+export function MissionApplication() {
   const round = useMissionFromPath()
 
-  const { data: projects } = useUserProjects(round?.number)
-  const { data: applications, refetch } = useUserRoundApplications(
-    round?.number,
-  )
+  const { data: projects, isLoading } = useUserProjects(round?.number)
+  const { data: applications } = useUserRoundApplications(round?.number)
 
   const [submittedApplications, setSubmittedApplications] = useState<
     Application[]
   >([])
 
-  const submitApplication = async (selectedProjects: any) => {
+  const submitApplication = async (
+    selectedProjects: z.infer<typeof ApplicationFormSchema>["projects"],
+  ) => {
     const promise: Promise<Application[]> = new Promise(
       async (resolve, reject) => {
         try {
           const result = await submitApplications(
-            selectedProjects.map((project: any) => ({
+            selectedProjects.map((project) => ({
               categoryId: project.category,
               projectId: project.projectId,
               projectDescriptionOptions: project.projectDescriptionOptions,

@@ -43,19 +43,16 @@ const sectionsCriteria: ProjectSection[] = [
 ]
 
 export const ProjectApplication = ({
-  // round,
   project,
   index,
   form,
   isAppliedToRound,
 }: {
-  // round: ModernFundingRound
   project: ProjectWithDetails
   index: number
   form: any
   isAppliedToRound: boolean
 }) => {
-  const router = useRouter()
   const round = useMissionFromPath()
 
   const { progressPercent, completedSections: completedSectionsCriteria } =
@@ -94,9 +91,6 @@ export const ProjectApplication = ({
   )
 
   const isActive = isAppliedToRound
-  // const isIncomplete = !sectionsCriteria.every((section) =>
-  //   completedSectionsCriteria.includes(section),
-  // )
   const isNotEligible =
     !roundEligibilityCriteriaChecks.every((check: boolean) => check) ||
     !sectionsCriteria.every((section) =>
