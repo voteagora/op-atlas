@@ -1,8 +1,9 @@
 "use client"
 import React, { useState } from "react"
+
+import ExternalLink from "../../ExternalLink"
 import { Button } from "../../ui/button"
 import { Checkbox } from "../../ui/checkbox"
-import ExternalLink from "../../ExternalLink"
 
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",

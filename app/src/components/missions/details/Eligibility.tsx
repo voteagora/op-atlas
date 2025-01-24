@@ -1,7 +1,8 @@
-import ExternalLink from "../../ExternalLink"
-import { VideoCallout } from "../common/callouts/VideoCallout"
-import { DocumentCallout } from "../common/callouts/DocumentCallout"
 import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+
+import ExternalLink from "../../ExternalLink"
+import { DocumentCallout } from "../common/callouts/DocumentCallout"
+import { VideoCallout } from "../common/callouts/VideoCallout"
 export const Eligibility = () => {
   const mission = useMissionFromPath()
 

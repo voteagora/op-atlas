@@ -1,8 +1,10 @@
 import { ChevronRight } from "lucide-react"
-import { Callout } from "../../../common/Callout"
 import Image from "next/image"
+
 import ExternalLink from "@/components/ExternalLink"
 import { EAS_URL_PREFIX } from "@/lib/utils"
+
+import { Callout } from "../../../common/Callout"
 
 export function EnrolledCallout({
   name,

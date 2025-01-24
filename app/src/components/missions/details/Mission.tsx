@@ -1,8 +1,14 @@
 "use client"
 
+import { format } from "date-fns"
 import Image from "next/image"
-import ExternalLink from "../../ExternalLink"
+import { usePathname } from "next/navigation"
+import React from "react"
+
 import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
+import { Eligibility } from "@/components/missions/details/Eligibility"
+import Header from "@/components/missions/details/Header"
+import Rewards from "@/components/missions/details/Rewards"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,16 +17,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import React from "react"
-import { Eligibility } from "@/components/missions/details/Eligibility"
-import { FUNDING_ROUNDS, FundingRound, ModernFundingRound } from "@/lib/mocks"
-import { format } from "date-fns"
-import Header from "@/components/missions/details/Header"
-import Rewards from "@/components/missions/details/Rewards"
-import { UserRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
-import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
-import { usePathname } from "next/navigation"
 import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { FUNDING_ROUNDS, FundingRound, ModernFundingRound } from "@/lib/mocks"
+
+import ExternalLink from "../../ExternalLink"
+import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
+import { UserRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
 
 export default function Mission() {
   const mission = useMissionFromPath()

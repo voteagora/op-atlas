@@ -1,7 +1,8 @@
 "use client"
 
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 import React from "react"
+
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
 export default function Rewards() {
   const mission = useMissionFromPath()

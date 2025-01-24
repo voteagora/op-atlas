@@ -1,12 +1,12 @@
+import { format } from "date-fns"
 import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 
-import ExternalLink from "../ExternalLink"
 import { Callout } from "../common/Callout"
-import { format } from "date-fns"
+import ExternalLink from "../ExternalLink"
 
 export function NoRewardsCallout({
   roundName,

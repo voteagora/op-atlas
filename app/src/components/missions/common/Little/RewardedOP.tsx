@@ -1,4 +1,5 @@
 import { formatNumber } from "@/lib/utils"
+
 import { Little } from "./Little"
 
 export function RewardedOP({ amount }: { amount: number }) {

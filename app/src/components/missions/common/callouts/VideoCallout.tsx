@@ -1,6 +1,7 @@
 import { ArrowUpRightIcon } from "lucide-react"
-import { Callout } from "../../../common/Callout"
 import Image from "next/image"
+
+import { Callout } from "../../../common/Callout"
 import ExternalLink from "../../../ExternalLink"
 
 export function VideoCallout({ text, href }: { text: string; href: string }) {

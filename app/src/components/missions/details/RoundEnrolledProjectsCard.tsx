@@ -1,9 +1,10 @@
 "use client"
 
-import { IconList } from "./EnrolledProjectsCard"
-import { FundingRound } from "@/lib/mocks"
-import { useRoundApplications } from "@/hooks/useRoundApplications"
 import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useRoundApplications } from "@/hooks/useRoundApplications"
+import { FundingRound } from "@/lib/mocks"
+
+import { IconList } from "./EnrolledProjectsCard"
 
 export const RoundEnrolledProjectsCard = () => {
   const round = useMissionFromPath()

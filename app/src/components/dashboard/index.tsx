@@ -34,6 +34,7 @@ import {
   UnclaimedRecipientCallout,
 } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
+import RewardsMonthlyDialog from "./dialogs/RewardsMonthlyDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import MakeFirstOrganization from "./MakeFirstOrganization"
@@ -41,7 +42,6 @@ import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
-import RewardsMonthlyDialog from "./dialogs/RewardsMonthlyDialog"
 
 const SHOW_APPLICATIONS = false
 const ROUND_ID = "5"

@@ -1,5 +1,6 @@
-import { Badge } from "@/components/ui/badge"
 import { Loader2 } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
 
 export const BlueBadge = ({
   showIcon = false,

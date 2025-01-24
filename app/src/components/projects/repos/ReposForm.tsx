@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { partition } from "ramda"
 import { useCallback, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
+import { useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -36,7 +37,6 @@ import { GithubForm } from "./GithubForm"
 import { LinkForm } from "./LinkForm"
 import { ReposFormSchema } from "./schema"
 import VerifyGithubRepoDialog from "./VerifyGithubRepoDialog"
-import { useWatch } from "react-hook-form"
 
 function toFormValues(project: ProjectWithDetails) {
   const [githubs] = partition((repo) => repo.type === "github", project.repos)

@@ -1,24 +1,26 @@
 "use client"
-import { ProjectWithDetails } from "@/lib/types"
+import { ChevronRight, X } from "lucide-react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useMemo } from "react"
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import Image from "next/image"
-import { FormField } from "../../ui/form"
-import { Checkbox } from "../../ui/checkbox"
-import { getProjectStatus, ProjectSection } from "@/lib/utils"
-import { useMemo } from "react"
-import { ChevronRight, X } from "lucide-react"
-import { Button } from "../../ui/button"
-import { useRouter } from "next/navigation"
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 import { FundingRound, ModernFundingRound } from "@/lib/mocks"
+import { ProjectWithDetails } from "@/lib/types"
+import { getProjectStatus, ProjectSection } from "@/lib/utils"
+
 import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
+import { Button } from "../../ui/button"
+import { Checkbox } from "../../ui/checkbox"
+import { FormField } from "../../ui/form"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
 const incompleteBadge = <RedBadge text="Incomplete" />
 const notEligibleBadge = <RedBadge text="Not eligible" />

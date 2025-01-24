@@ -5,6 +5,8 @@ import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import CircleWithCheckmark from "@/components/common/CircleWithGreenCheckmark"
+import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -25,8 +27,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { copyToClipboard } from "@/lib/utils"
 
 import { ReposFormSchema } from "./schema"
-import CircleWithCheckmark from "@/components/common/CircleWithGreenCheckmark"
-import ExternalLink from "@/components/ExternalLink"
 
 export const GithubForm = ({
   form,

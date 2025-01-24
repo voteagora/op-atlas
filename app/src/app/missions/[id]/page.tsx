@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation"
 import React from "react"
-import { FUNDING_ROUNDS, MODERN_FUNDING_ROUNDS } from "@/lib/mocks"
+
 import Mission from "@/components/missions/details/Mission"
+import { FUNDING_ROUNDS, MODERN_FUNDING_ROUNDS } from "@/lib/mocks"
 
 export default async function MissionPage({
   params,

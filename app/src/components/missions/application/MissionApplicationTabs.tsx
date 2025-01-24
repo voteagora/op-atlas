@@ -1,18 +1,14 @@
 "use client"
-import React, { useState } from "react"
-import { FundingRound, ModernFundingRound } from "@/lib/mocks"
-import { ProjectApplication } from "@/components/missions/application/ProjectApplication"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
-import { Button } from "../../ui/button"
-import { useRouter } from "next/navigation"
-import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
 import { Application } from "@prisma/client"
-import { submitApplications } from "@/lib/actions/applications"
+import { format } from "date-fns"
+import { useRouter } from "next/navigation"
+import React, { useState } from "react"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { z } from "zod"
+
+import { ProjectApplication } from "@/components/missions/application/ProjectApplication"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,11 +17,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { format } from "date-fns"
-import { ApplicationSubmitted } from "./ApplicationSubmitted"
-import { MissionApplicationTerms } from "./MissionApplicationTerms"
-import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { submitApplications } from "@/lib/actions/applications"
+import { FundingRound, ModernFundingRound } from "@/lib/mocks"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+
+import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
+import { Button } from "../../ui/button"
+import { ApplicationSubmitted } from "./ApplicationSubmitted"
+import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
+import { MissionApplicationTerms } from "./MissionApplicationTerms"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(

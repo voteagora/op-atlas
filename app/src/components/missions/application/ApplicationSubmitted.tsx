@@ -1,12 +1,15 @@
 "use client"
 
+import { Application } from "@prisma/client"
 import { format } from "date-fns"
 import { ArrowDownToLine } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
 
+import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -18,10 +21,7 @@ import {
   XOptimism,
 } from "../../icons/socials"
 import { Button } from "../../ui/button"
-import { useRouter } from "next/navigation"
-import { Application } from "@prisma/client"
 import { GreenBadge } from "../common/badges/GreenBadge"
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
 
 const SOCIALS = [
   {

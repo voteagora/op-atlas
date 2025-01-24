@@ -1,7 +1,9 @@
 "use client"
 import { format } from "date-fns"
 import Link from "next/link"
+
 import { FundingRound } from "@/lib/mocks"
+
 import { Button } from "../ui/button"
 
 export function FundingRoundPast({

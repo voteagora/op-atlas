@@ -1,5 +1,6 @@
-import { Callout } from "../../../common/Callout"
 import Image from "next/image"
+
+import { Callout } from "../../../common/Callout"
 import ExternalLink from "../../../ExternalLink"
 
 export function NewIn2025Callout() {

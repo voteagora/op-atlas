@@ -8,13 +8,13 @@ import { optimism } from "viem/chains"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { FundingRound, ModernFundingRound } from "@/lib/mocks"
+import { ApplicationWithDetails } from "@/lib/types"
 import { cn, titlecase } from "@/lib/utils"
 
 import { ChainLogo } from "../common/ChainLogo"
 import { Badge } from "../ui/badge"
-import { FundingRoundPast } from "./FundingRoundPast"
 import { FundingRoundOngoing } from "./FundingRoundOngoing"
-import { ApplicationWithDetails } from "@/lib/types"
+import { FundingRoundPast } from "./FundingRoundPast"
 
 export const FundingRounds = ({
   className,

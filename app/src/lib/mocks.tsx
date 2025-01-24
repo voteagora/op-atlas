@@ -1,6 +1,7 @@
+import React from "react"
+
 import ExternalLink from "@/components/ExternalLink"
 import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
-import React from "react"
 
 export type ModernFundingRound = FundingRound & {
   pageName: string
