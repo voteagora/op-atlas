@@ -93,7 +93,7 @@ export function MissionApplicationTabs({
         <TabsTrigger
           className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
           value="terms"
-          disabled={!isFormValid && !isLoadingApplications}
+          disabled={!isFormValid || isLoadingApplications}
         >
           <span className="pr-2">2</span> Agree to terms
         </TabsTrigger>
