@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react"
 import { optimism } from "viem/chains"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { FundingRound } from "@/lib/mocks"
+import { FundingRound, ModernFundingRound } from "@/lib/mocks"
 import { cn, titlecase } from "@/lib/utils"
 
 import { ChainLogo } from "../common/ChainLogo"
@@ -122,16 +122,10 @@ const Round = ({
           : "Open"
     }
     SelectedContent = (
-      <button
-        onClick={() => {
-          router.push(`/missions/${fundingRound.pageName}`)
-        }}
-      >
-        <FundingRoundOngoing
-          fundingRound={fundingRound}
-          userApplicationState={userApplicationState}
-        />
-      </button>
+      <FundingRoundOngoing
+        fundingRound={fundingRound as ModernFundingRound}
+        userApplicationState={userApplicationState}
+      />
     )
   } else {
     SelectedContent = <FundingRoundContent fundingRound={fundingRound} />
