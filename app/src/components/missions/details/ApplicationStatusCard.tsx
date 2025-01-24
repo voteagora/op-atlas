@@ -30,7 +30,7 @@ export const ApplicationStatusCard = ({
   let result
   if (!data) {
     result = (
-      <>
+      <div className="flex flex-col items-center gap-2">
         <p className="font-bold">{"Apply"}</p>
         {applyByDate && (
           <p className="text-sm text-secondary-foreground text-center">
@@ -43,13 +43,13 @@ export const ApplicationStatusCard = ({
         )}
 
         <Account />
-      </>
+      </div>
     )
   } else {
     if (userProjectCount && userProjectCount > 0) {
       if (userAppliedProjects && userAppliedProjects?.length > 0) {
         result = (
-          <>
+          <div>
             <p className="font-bold">{"Your status"}</p>
 
             <div className="text-sm text-secondary-foreground text-center">
@@ -97,11 +97,11 @@ export const ApplicationStatusCard = ({
                 </Button>
               </div>
             </div>
-          </>
+          </div>
         )
       } else {
         result = (
-          <>
+          <div className="flex flex-col items-center gap-2">
             <p className="font-bold">{"Apply"}</p>
 
             <p className="text-sm text-secondary-foreground text-center">
@@ -117,7 +117,7 @@ export const ApplicationStatusCard = ({
             >
               Apply
             </Button>
-          </>
+          </div>
         )
       }
     } else {

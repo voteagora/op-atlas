@@ -15,7 +15,7 @@ export const IconList = ({
       {headerContent}
 
       <div
-        className={`flex flex-wrap gap-1 max-h-[120px] rounded-lg overflow-hidden items-start`}
+        className={`flex flex-wrap gap-1 max-h-[120px] overflow-hidden items-start`}
       >
         {icons.map((icon: any, index: number) => {
           return (
@@ -25,6 +25,7 @@ export const IconList = ({
               height={44}
               alt="Project"
               key={"projectsEnrolled-" + index}
+              className="rounded-lg"
             />
           )
         })}
