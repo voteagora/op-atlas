@@ -298,19 +298,53 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
                   </h3>
                   <p className="text-text-secondary">
                     Voters can add additional rewards for open source projects.
-                    If your project is open source, then make sure you have a
-                    license in your Github repo. If you don’t have a license in
-                    your repo, your project will not qualify as open source and
-                    won’t be rewarded as such.
                   </p>
-                  <p className="text-secondary-foreground">
+
+                  <p>
+                    License your Github repo by providing a{" "}
+                    <ExternalLink
+                      className="underline"
+                      href={"https://opensource.org/licenses"}
+                    >
+                      license.txt
+                    </ExternalLink>{" "}
+                    or{" "}
+                    <ExternalLink
+                      className="underline"
+                      href={"https://license.md/"}
+                    >
+                      license.md
+                    </ExternalLink>
+                    {
+                      " in the root of the repo. If you don’t have a license in your repo, your project will not qualify as open source and won’t be rewarded as such."
+                    }
+                  </p>
+
+                  <p>
                     To get a license, visit the{" "}
                     <ExternalLink
-                      href="https://opensource.org/"
-                      className="text-foreground font-medium"
+                      className="underline"
+                      href={"https://opensource.org"}
                     >
                       Open Source Initiative
+                    </ExternalLink>{" "}
+                    or{" "}
+                    <ExternalLink
+                      className="underline"
+                      href={"https://license.md/"}
+                    >
+                      License.md
                     </ExternalLink>
+                    . Learn how to apply your license by visiting{" "}
+                    <ExternalLink
+                      className="underline"
+                      href={
+                        "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository"
+                      }
+                    >
+                      Licensing a repository in GitHub docs
+                    </ExternalLink>
+                    .
                   </p>
                 </div>
 

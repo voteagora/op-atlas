@@ -39,7 +39,7 @@ export const GithubForm = ({
   onVerify: (index: number) => void
   onRemove: (index: number) => void
 }) => {
-  const [isFormExpanded, setIsRepoFormExpanded] = useState(true)
+  const [isFormExpanded, setIsRepoFormExpanded] = useState(false)
 
   const url = form.watch(`githubRepos.${index}.url`)
   const isVerified = form.watch(`githubRepos.${index}.verified`)
