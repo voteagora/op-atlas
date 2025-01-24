@@ -9,7 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
 export function MissionApplicationBreadcrumbs() {
   const mission = useMissionFromPath()

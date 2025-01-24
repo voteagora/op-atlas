@@ -15,7 +15,7 @@ import { ChainLogo } from "../common/ChainLogo"
 import { Badge } from "../ui/badge"
 import { FundingRoundOngoing } from "./FundingRoundOngoing"
 import { FundingRoundPast } from "./FundingRoundPast"
-import { useUserApplications } from "@/hooks/useUserApplications"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
 
 export const FundingRounds = ({
   className,

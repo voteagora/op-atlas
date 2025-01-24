@@ -10,7 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { FundingRound, ModernFundingRound } from "@/lib/mocks"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"

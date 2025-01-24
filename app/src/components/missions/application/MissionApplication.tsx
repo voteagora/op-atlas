@@ -6,7 +6,7 @@ import React, { useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { submitApplications } from "@/lib/actions/applications"
 import {
   FundingRound,

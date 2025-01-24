@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
 export default function Rewards() {
   const mission = useMissionFromPath()

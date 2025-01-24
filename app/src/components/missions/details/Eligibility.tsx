@@ -1,4 +1,4 @@
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
 import ExternalLink from "../../ExternalLink"
 import { DocumentCallout } from "../common/callouts/DocumentCallout"

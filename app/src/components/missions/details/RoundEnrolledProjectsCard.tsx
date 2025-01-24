@@ -1,7 +1,7 @@
 "use client"
 
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
-import { useRoundApplications } from "@/hooks/useRoundApplications"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
+import { useRoundApplications } from "@/hooks/db/useRoundApplications"
 import { FundingRound } from "@/lib/mocks"
 
 import { IconList } from "./EnrolledProjectsCard"

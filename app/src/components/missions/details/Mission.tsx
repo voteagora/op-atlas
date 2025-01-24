@@ -17,7 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { FUNDING_ROUNDS, FundingRound, ModernFundingRound } from "@/lib/mocks"
 
 import ExternalLink from "../../ExternalLink"

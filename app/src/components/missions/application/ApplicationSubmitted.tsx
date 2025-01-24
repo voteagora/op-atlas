@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react"
 import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
 
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 

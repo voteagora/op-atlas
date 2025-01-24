@@ -15,9 +15,9 @@ import { FeedbackButton } from "../common/FeedbackButton"
 import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
-import { useUserProjects } from "@/hooks/useUserProjects"
-import { useAdminProjects } from "@/hooks/useAdminProjects"
-import { useUserApplications } from "@/hooks/useUserApplications"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { useAdminProjects } from "@/hooks/db/useAdminProjects"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
 
 export function Rounds({ user }: { user?: UserWithAddresses | null }) {
   const { data } = useSession()

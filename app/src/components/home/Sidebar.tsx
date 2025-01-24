@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
-import { useGetRandomProjects } from "@/hooks/useGetRandomProjects"
+import { useGetRandomProjects } from "@/hooks/db/useGetRandomProjects"
 
 const ROUND_ID = "5"
 

@@ -2,9 +2,9 @@
 
 import { format } from "date-fns"
 
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
-import { useUserProjects } from "@/hooks/useUserProjects"
-import { useUserRoundApplications } from "@/hooks/useUserRoundApplications"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { FundingRound } from "@/lib/mocks"
 
 import { ApplicationStatusCard } from "./ApplicationStatusCard"

@@ -18,7 +18,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { submitApplications } from "@/lib/actions/applications"
 import { FundingRound, ModernFundingRound } from "@/lib/mocks"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"

@@ -4,7 +4,7 @@ import { format } from "date-fns"
 import Image from "next/image"
 import React from "react"
 
-import { useMissionFromPath } from "@/hooks/useMissionFromPath"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
 import { NewIn2025Callout } from "../common/callouts/NewIn2025Callout"
 export default function Header() {
