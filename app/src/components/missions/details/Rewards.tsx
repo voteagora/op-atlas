@@ -10,9 +10,7 @@ export default function Rewards() {
   return (
     <div className="flex flex-col gap-6">
       <p className="text-xl font-semibold">Rewards</p>
-      <p className="font-light">
-        Your impact will be rewarded based on the following criteria:
-      </p>
+      <p>Your impact will be rewarded based on the following criteria:</p>
 
       <ol className="list-decimal pl-6">
         {mission?.rewards.criteria.map((element: any, index: number) => {
