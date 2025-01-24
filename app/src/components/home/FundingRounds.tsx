@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react"
 import { optimism } from "viem/chains"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
 import { FundingRound, ModernFundingRound } from "@/lib/mocks"
 import { ApplicationWithDetails } from "@/lib/types"
 import { cn, titlecase } from "@/lib/utils"
@@ -15,7 +16,6 @@ import { ChainLogo } from "../common/ChainLogo"
 import { Badge } from "../ui/badge"
 import { FundingRoundOngoing } from "./FundingRoundOngoing"
 import { FundingRoundPast } from "./FundingRoundPast"
-import { useUserApplications } from "@/hooks/db/useUserApplications"
 
 export const FundingRounds = ({
   className,

@@ -3,6 +3,9 @@
 import { Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
+import { useAdminProjects } from "@/hooks/db/useAdminProjects"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
 import { FUNDING_ROUNDS } from "@/lib/mocks"
 import {
   ApplicationWithDetails,
@@ -15,9 +18,6 @@ import { FeedbackButton } from "../common/FeedbackButton"
 import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
-import { useUserProjects } from "@/hooks/db/useUserProjects"
-import { useAdminProjects } from "@/hooks/db/useAdminProjects"
-import { useUserApplications } from "@/hooks/db/useUserApplications"
 
 export function Rounds({ user }: { user?: UserWithAddresses | null }) {
   const { data } = useSession()

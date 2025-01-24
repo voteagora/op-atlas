@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
+import { useGetRandomProjects } from "@/hooks/db/useGetRandomProjects"
 import { updateInteractions } from "@/lib/actions/users"
 import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
 import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
@@ -17,7 +18,6 @@ import {
 import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
-import { useGetRandomProjects } from "@/hooks/db/useGetRandomProjects"
 
 const ROUND_ID = "5"
 

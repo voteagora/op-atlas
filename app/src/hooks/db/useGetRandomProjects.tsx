@@ -1,6 +1,6 @@
+import { Project } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 
-import { Project } from "@prisma/client"
 import { getRandomProjects } from "@/db/projects"
 
 export function useGetRandomProjects(): {
