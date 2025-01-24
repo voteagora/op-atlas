@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import React from "react"
-import { FUNDING_ROUNDS } from "@/lib/mocks"
+import { FUNDING_ROUNDS, MODERN_FUNDING_ROUNDS } from "@/lib/mocks"
 import Mission from "@/components/missions/details/Mission"
 
 export default async function MissionPage({
@@ -8,7 +8,9 @@ export default async function MissionPage({
 }: {
   params: { id: string }
 }) {
-  const foundRound = FUNDING_ROUNDS.find((page) => page.pageName === params.id)
+  const foundRound = MODERN_FUNDING_ROUNDS.find(
+    (page) => page.pageName === params.id,
+  )
   if (foundRound === undefined) notFound()
 
   return (

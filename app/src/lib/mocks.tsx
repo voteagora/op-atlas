@@ -3,12 +3,12 @@ import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout
 import React from "react"
 
 export type ModernFundingRound = FundingRound & {
-  pageName?: string
-  missionPageRequirements?: React.ReactNode
-  missionPageEligibility?: React.ReactNode
+  pageName: string
+  missionPageRequirements: React.ReactNode
+  missionPageEligibility: React.ReactNode
   applicationPageEligibility: { reactNode: React.ReactNode; type?: string }[]
-  footer?: React.ReactNode
-  rewards?: any
+  footer: React.ReactNode
+  rewards: { measurement: string; criteria: string[] }
 }
 
 export type FundingRound = {
