@@ -2,21 +2,20 @@
 import { format } from "date-fns"
 import Image from "next/image"
 import { FundingRound } from "@/lib/mocks"
-import { Badge } from "../ui/badge"
-import { Check } from "lucide-react"
 import { BlueBadge } from "../missions/common/badges/BlueBadge"
 import { GreenBadge } from "../missions/common/badges/GreenBadge"
+import { GreyBadge } from "../missions/common/badges/GreyBadge"
 
 export function FundingRoundOngoing({
   fundingRound,
   userApplicationState,
 }: {
   fundingRound: FundingRound
-  userApplicationState: "Open" | "Pending" | "Active"
+  userApplicationState: "Open" | "Active" | "Coming Soon"
 }) {
   const openBadge = <BlueBadge text="Open" />
-  const pendingBadge = <BlueBadge text="Pending" />
   const activeBadge = <GreenBadge />
+  const comingSoonBadge = <GreyBadge text="Coming soon" />
 
   let selectedBadge
 
@@ -24,11 +23,12 @@ export function FundingRoundOngoing({
     case "Open":
       selectedBadge = openBadge
       break
-    case "Pending":
-      selectedBadge = pendingBadge
-      break
+
     case "Active":
       selectedBadge = activeBadge
+      break
+    case "Coming Soon":
+      selectedBadge = comingSoonBadge
       break
     default:
       throw new Error("Unhandled application state")
@@ -47,8 +47,9 @@ export function FundingRoundOngoing({
           <p className="text-base font-normal text-secondary-foreground">
             {fundingRound.endsAt && (
               <span className="text-base font-normal text-secondary-foreground">
-                {format(fundingRound.startsAt, "MMM d")} -
-                {" " + format(fundingRound.endsAt, "MMMM d, yyyy")}
+                {fundingRound.startsAt &&
+                  format(fundingRound.startsAt, "MMM d")}{" "}
+                -{" " + format(fundingRound.endsAt, "MMMM d, yyyy")}
               </span>
             )}
           </p>

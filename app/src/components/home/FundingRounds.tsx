@@ -106,35 +106,20 @@ const Round = ({
   if (fundingRound.status === "past") {
     SelectedContent = <FundingRoundPast fundingRound={fundingRound} />
   } else if (fundingRound.status === "ongoing") {
-    // console.log(
-    //   applications?.find(
-    //     (app) => app.roundId === fundingRound.number.toString(),
-    //   ),
-    // )
+    let userApplicationState: "Open" | "Active" | "Coming Soon" = "Open"
 
-    // applications
-    //   ? applications.find(
-    //       (app) => app.roundId === fundingRound.number.toString(),
-    //     )
-    //   : "Open"
+    console.log(fundingRound.startsAt)
+    console.log(new Date())
 
-    let userApplicationState: "Open" | "Pending" | "Active" = "Open"
-
-    if (applications) {
+    if (fundingRound.startsAt && new Date() < fundingRound.startsAt) {
+      userApplicationState = "Coming Soon"
+    } else if (applications) {
       userApplicationState =
         applications.filter(
           (app) => app.roundId === fundingRound.number.toString(),
         ).length > 0
           ? "Active"
           : "Open"
-      // const applicationStates = ["Active", "Pending", "Active"]
-
-      // if (applicationStates.length > 0) {
-      //   const areAnyPending = applicationStates.some((state) => {
-      //     return state === "Pending"
-      //   })
-      //   userApplicationState = areAnyPending ? "Pending" : "Active"
-      // }
     }
     SelectedContent = (
       <button
@@ -212,7 +197,8 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                     </span>
                   ) : (
                     <span className="font-normal text-secondary-foreground">
-                      {format(fundingRound.startsAt, "MMM yyyy")}
+                      {fundingRound.startsAt &&
+                        format(fundingRound.startsAt, "MMM yyyy")}
                     </span>
                   )}
                 </p>

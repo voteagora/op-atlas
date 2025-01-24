@@ -34,7 +34,7 @@ export const FUNDING_ROUNDS: FundingRound[] = [
     resultsLink: "/round/results/6",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/Frame 2485.png",
-    startsAt: new Date("2025-02-01T21:53:13.300Z"),
+    startsAt: new Date("2025-01-01T21:53:13.300Z"),
     endsAt: new Date("2025-06-30T21:53:13.300Z"),
     applyBy: new Date("2025-01-25T21:53:13.300Z"),
     eligibility: {
