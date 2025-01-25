@@ -27,9 +27,8 @@ export const ApplicationStatusCard = ({
 
   const { data } = useSession()
 
-  let result
   if (!data) {
-    result = (
+    return (
       <div className="flex flex-col items-center gap-2">
         <p className="font-bold">{"Apply"}</p>
         {applyByDate && (
