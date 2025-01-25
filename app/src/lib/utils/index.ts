@@ -191,6 +191,8 @@ export function profileProgress(user: UserWithAddresses): number {
     progress += 33.33
   }
 
+  console.log(progress)
+
   return progress
 }
 

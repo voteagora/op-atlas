@@ -18,22 +18,22 @@ export default async function Page() {
     redirect("/")
   }
 
-  const [user, applications, organizations, adminProjects] = await Promise.all([
-    getUserById(session.user.id),
+  const [applications, organizations, adminProjects] = await Promise.all([
+    // getUserById(session.user.id),
     // getProjects(session.user.id),
     getApplications(session.user.id),
     getUserOrganizations(session.user.id),
     getAdminProjects(session.user.id),
   ])
 
-  if (!user) {
-    redirect("/")
-  }
+  // if (!user) {
+  //   redirect("/")
+  // }
 
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
       <Dashboard
-        user={user}
+        // user={user}
         // projects={projects}
         applications={applications}
         organizations={organizations}

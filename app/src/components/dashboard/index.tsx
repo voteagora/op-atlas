@@ -40,21 +40,20 @@ import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { useUserById } from "@/hooks/db/useUserById"
 
 const SHOW_APPLICATIONS = false
 const ROUND_ID = "5"
 
 const Dashboard = ({
   className,
-  user,
-  // projects,
+  // user,
   applications,
   organizations,
   adminProjects,
 }: {
   className?: string
-  user: UserWithAddresses
-  // projects: ProjectWithDetails[]
+  // user: UserWithAddresses
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
   adminProjects: ProjectWithDetails[]
@@ -90,11 +89,17 @@ const Dashboard = ({
 
   const { track } = useAnalytics()
 
-  const profileInitiallyComplete = useRef(profileProgress(user) === 100)
+  const { data: user = null, isLoading: isLoadingUser } = useUserById()
 
-  const userIsBadgeholder = useMemo(() => {
-    return isBadgeholder(user)
-  }, [user])
+  const profileInitiallyComplete = useRef(
+    user ? profileProgress(user) === 100 : 0,
+  )
+
+  console.log(profileInitiallyComplete)
+
+  // const userIsBadgeholder = useMemo(() => {
+  //   return isBadgeholder(user)
+  // }, [user])
 
   useEffect(() => {
     // User has submitted at least one application but didn't receive any rewards
@@ -121,7 +126,7 @@ const Dashboard = ({
   }, [adminProjects, projects])
 
   useEffect(() => {
-    if (profileInitiallyComplete.current) {
+    if (user && profileInitiallyComplete.current) {
       toast.success("Profile complete! 🎉", {
         action: {
           label: "View Profile",
@@ -131,7 +136,7 @@ const Dashboard = ({
       // Set to false after showing toast so it doesn't show again
       profileInitiallyComplete.current = false
     }
-  }, [user])
+  }, [user, profileInitiallyComplete.current])
 
   // TODO: hide rewards section if all rewards are claimed
   const showRewardsSection = Boolean(
@@ -205,13 +210,17 @@ const Dashboard = ({
             onOpenChange={(open) => setJoinProjectDialogOpen(open)}
           />
         )}
-        <ProfileDetailCard user={user} />
+        {isLoadingUser ? (
+          <div className="h-64 bg-gray-100 rounded animate-pulse mb-4" />
+        ) : (
+          user && <ProfileDetailCard user={user} />
+        )}
 
         {(!projects.length ||
           !!!organizations?.length ||
           !profileInitiallyComplete.current) && (
           <div className="flex flex-col gap-4">
-            {!profileInitiallyComplete.current && (
+            {!profileInitiallyComplete.current && user && (
               <CompleteProfileCallout user={user} />
             )}
             {!organizations?.length && (
@@ -244,7 +253,7 @@ const Dashboard = ({
                 Add project
               </Button>
             </div>
-            <div className="h-40 bg-gray-100 rounded animate-pulse mb-4"></div>
+            <div className="h-40 bg-gray-100 rounded animate-pulse mb-4" />
           </div>
         ) : (
           projects.length > 0 && (
@@ -304,10 +313,13 @@ const Dashboard = ({
         {organizations?.map((organization) => {
           return (
             <div key={organization.id} className="flex flex-col gap-4">
-              <UserOrganizationInfoRow
-                user={user}
-                organization={organization}
-              />
+              {user && (
+                <UserOrganizationInfoRow
+                  user={user}
+                  organization={organization}
+                />
+              )}
+
               {organization.organization.projects?.length > 0 ? (
                 <>
                   {organization.organization.projects?.map((project) => (
