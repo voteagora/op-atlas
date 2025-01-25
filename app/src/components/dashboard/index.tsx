@@ -39,6 +39,7 @@ import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
 
 const SHOW_APPLICATIONS = false
 const ROUND_ID = "5"
@@ -46,18 +47,24 @@ const ROUND_ID = "5"
 const Dashboard = ({
   className,
   user,
-  projects,
+  // projects,
   applications,
   organizations,
   adminProjects,
 }: {
   className?: string
   user: UserWithAddresses
-  projects: ProjectWithDetails[]
+  // projects: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
   adminProjects: ProjectWithDetails[]
 }) => {
+  const { data: projects = [], isLoading: isLoadingProjects } =
+    useUserProjects()
+
+  // const projects: any[] = []
+  // const isLoadingProjects = true
+
   const hasSubmittedToCurrentRound = applications.some(
     (application) => application.roundId === ROUND_ID,
   )
@@ -219,7 +226,53 @@ const Dashboard = ({
           </div>
         )}
 
-        {projects.length > 0 && (
+        {isLoadingProjects ? (
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h3>Your projects</h3>
+              <Button
+                className="flex items-center gap-2"
+                variant="secondary"
+                onClick={() => (window.location.href = "/projects/new")}
+              >
+                <Image
+                  src="/assets/icons/plus.svg"
+                  width={9}
+                  height={9}
+                  alt="Plus"
+                />
+                Add project
+              </Button>
+            </div>
+            <div className="h-40 bg-gray-100 rounded animate-pulse mb-4"></div>
+          </div>
+        ) : (
+          projects.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-center">
+                <h3>Your projects</h3>
+                <Button
+                  className="flex items-center gap-2"
+                  variant="secondary"
+                  onClick={() => (window.location.href = "/projects/new")}
+                >
+                  <Image
+                    src="/assets/icons/plus.svg"
+                    width={9}
+                    height={9}
+                    alt="Plus"
+                  />
+                  Add project
+                </Button>
+              </div>
+
+              {projects.map((project) => (
+                <UserProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          )
+        )}
+        {/* {projects.length > 0 && (
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h3>Your projects</h3>
@@ -238,11 +291,15 @@ const Dashboard = ({
               </Button>
             </div>
 
-            {projects.map((project) => (
-              <UserProjectCard key={project.id} project={project} />
-            ))}
+            {!isLoadingProjects ? (
+              projects.map((project) => (
+                <UserProjectCard key={project.id} project={project} />
+              ))
+            ) : (
+              <div className="h-40 bg-gray-100 rounded animate-pulse mb-4"></div>
+            )}
           </div>
-        )}
+        )} */}
 
         {organizations?.map((organization) => {
           return (

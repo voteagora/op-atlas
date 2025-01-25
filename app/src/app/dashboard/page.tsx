@@ -8,7 +8,7 @@ import { getUserOrganizations } from "@/lib/actions/organizations"
 import {
   getAdminProjects,
   getApplications,
-  getProjects,
+  // getProjects,
 } from "@/lib/actions/projects"
 
 export default async function Page() {
@@ -18,14 +18,13 @@ export default async function Page() {
     redirect("/")
   }
 
-  const [user, projects, applications, organizations, adminProjects] =
-    await Promise.all([
-      getUserById(session.user.id),
-      getProjects(session.user.id),
-      getApplications(session.user.id),
-      getUserOrganizations(session.user.id),
-      getAdminProjects(session.user.id),
-    ])
+  const [user, applications, organizations, adminProjects] = await Promise.all([
+    getUserById(session.user.id),
+    // getProjects(session.user.id),
+    getApplications(session.user.id),
+    getUserOrganizations(session.user.id),
+    getAdminProjects(session.user.id),
+  ])
 
   if (!user) {
     redirect("/")
@@ -35,7 +34,7 @@ export default async function Page() {
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
       <Dashboard
         user={user}
-        projects={projects}
+        // projects={projects}
         applications={applications}
         organizations={organizations}
         adminProjects={adminProjects}
