@@ -1,7 +1,4 @@
 import { default as BaseMailchimp } from "@mailchimp/mailchimp_marketing"
-import dotenv from "dotenv"
-
-dotenv.config()
 
 class Mailchimp {
   private static instance: typeof mailchimp

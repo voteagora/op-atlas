@@ -54,30 +54,8 @@ async function exportEmailsToMailchimp() {
       })
 
       const newMembers = (res as any).new_members
-      const subscribedMembers = newMembers.map((member: any) => ({
-        subscriber_hash: member.id,
-        email_address: member.email_address,
-      })) as SUBSCRIBED_MEMBER[]
-
-      const data = await prisma.$transaction(
-        subscribedMembers.map((member) =>
-          prisma.userEmail.update({
-            where: {
-              id: userEmails.find(
-                (userEmail) => userEmail.email === member.email_address,
-              )?.id,
-            },
-            data: {
-              mailchimp_subscriber_hash: member.subscriber_hash,
-            },
-          }),
-        ),
-      )
-
-      data.forEach((userEmail) => {
-        console.log(
-          `Email ${userEmail.email} exported to Mailchimp with subscriber hash ${userEmail.mailchimp_subscriber_hash}`,
-        )
+      newMembers.forEach((member: SUBSCRIBED_MEMBER) => {
+        console.log(`Added ${member.email_address} to Mailchimp`)
       })
     }
   } catch (error) {
