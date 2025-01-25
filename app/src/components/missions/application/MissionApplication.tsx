@@ -116,7 +116,7 @@ export function MissionApplication() {
     )
   }
   return (
-    <div>
+    <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
       {showDialog && (
         <EmailSignupDialog
           open
@@ -124,24 +124,21 @@ export function MissionApplication() {
           form={form}
           onSubmit={submitApplication}
         />
-      )}
-      <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
-        {" "}
-        <MissionApplicationBreadcrumbs />
-        <div className="flex flex-col mt-10">
-          <h2 className="text-4xl mb-2">
-            {"Apply for Retro Funding: " + round?.name}
-          </h2>
-          {`Submit this application by ${format(
-            round!.applyBy,
-            "MMM d",
-          )} to be evaluated for rewards starting 
+      )}{" "}
+      <MissionApplicationBreadcrumbs />
+      <div className="flex flex-col mt-10">
+        <h2 className="text-4xl mb-2">
+          {"Apply for Retro Funding: " + round?.name}
+        </h2>
+        {`Submit this application by ${format(
+          round!.applyBy,
+          "MMM d",
+        )} to be evaluated for rewards starting 
                     ${format(round!.startsAt, "MMM d")}.`}
-          <div className="h-[2px] bg-secondary" />
-        </div>
-        <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
-          <MissionApplicationTabs form={form} onSubmit={submitApplication} />
-        </div>
+        <div className="h-[2px] bg-secondary" />
+      </div>
+      <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
+        <MissionApplicationTabs form={form} onSubmit={submitApplication} />
       </div>
     </div>
   )
