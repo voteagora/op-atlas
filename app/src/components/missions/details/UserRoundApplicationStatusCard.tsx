@@ -21,7 +21,7 @@ export const UserRoundApplicationStatusCard = () => {
   return (
     <>
       {!isLoadingApplications && !isLoadingProjects && (
-        <div className="border-2 border-grey-900 rounded-xl">
+        <div className="border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
           <ApplicationStatusCard
             applyByDate={mission?.applyBy && format(mission.applyBy, "MMM d")}
             startDate={mission?.startsAt && format(mission?.startsAt, "MMM d")}

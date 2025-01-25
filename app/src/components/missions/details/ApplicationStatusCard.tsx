@@ -47,7 +47,7 @@ export const ApplicationStatusCard = ({
   } else {
     if (userProjectCount && userProjectCount > 0) {
       if (userAppliedProjects && userAppliedProjects?.length > 0) {
-        result = (
+        return (
           <div>
             <p className="font-bold">{"Your status"}</p>
 
@@ -99,7 +99,7 @@ export const ApplicationStatusCard = ({
           </div>
         )
       } else {
-        result = (
+        return (
           <div className="flex flex-col items-center gap-2">
             <p className="font-bold">{"Apply"}</p>
 
@@ -120,7 +120,7 @@ export const ApplicationStatusCard = ({
         )
       }
     } else {
-      result = (
+      return (
         <div className="flex flex-col items-center gap-2">
           <p className="font-bold">{"Add project to apply"}</p>
 
@@ -147,6 +147,4 @@ export const ApplicationStatusCard = ({
       )
     }
   }
-
-  return <div className="flex flex-col gap-y-3 p-6">{result}</div>
 }
