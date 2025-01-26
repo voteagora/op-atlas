@@ -70,9 +70,8 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
             Please add email for important messages
           </DialogTitle>
           <DialogDescription className="text-center text-base font-normal text-text-secondary mt-1 flex flex-col gap-6">
-            This step is required to claim Retro Funding. It should be a
-            personal email where we can reliably reach you. Don&apos;t worry,
-            we&apos;ll keep it private.
+            It should be a personal email where we can reliably reach you.
+            Don&apos;t worry, we&apos;ll keep it private.
             <div className="flex flex-col gap-2">
               <div className="text-sm font-medium self-start">Email</div>
               <Input
