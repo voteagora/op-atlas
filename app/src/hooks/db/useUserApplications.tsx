@@ -1,21 +1,21 @@
-import { useQuery } from "@tanstack/react-query"
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult,
+} from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
 import { getApplications } from "@/lib/actions/projects"
 import { ApplicationWithDetails } from "@/lib/types"
 
-export function useUserApplications(): {
-  data: ApplicationWithDetails[] | undefined
-  isLoading: boolean
-  error: Error | null
-} {
+export function useUserApplications(
+  queryOptions?: Partial<UseQueryOptions<ApplicationWithDetails[], Error>>,
+): UseQueryResult<ApplicationWithDetails[], Error> {
   const session = useSession()
 
-  const { data, isLoading, error } = useQuery({
+  return useQuery({
     queryKey: ["userApplications"],
     queryFn: () => getApplications(session?.data?.user.id as string),
     enabled: session?.data?.user.id !== undefined,
   })
-
-  return { data, isLoading, error }
 }

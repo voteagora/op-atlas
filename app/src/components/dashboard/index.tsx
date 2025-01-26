@@ -49,17 +49,37 @@ const SHOW_APPLICATIONS = false
 const ROUND_ID = "5"
 
 const Dashboard = ({ className }: { className?: string }) => {
-  const { data: organizations = [], isLoading: isLoadingOrganizations } =
-    useUserOrganizations()
+  const {
+    data: user = null,
+    isLoading: isLoadingUser,
+    isSuccess: isUserLoaded,
+  } = useUserById()
 
-  const { data: adminProjects = [], isLoading: isLoadingAdminProjects } =
-    useUserAdminProjects()
+  const {
+    data: projects = [],
+    isLoading: isLoadingProjects,
+    isSuccess: isProjectsLoaded,
+  } = useUserProjects({
+    enabled: isUserLoaded,
+  })
 
-  const { data: applications = [], isLoading: isLoadingApplications } =
-    useUserApplications()
+  const {
+    data: organizations = [],
+    isLoading: isLoadingOrganizations,
+    isSuccess: isOrganizationsLoaded,
+  } = useUserOrganizations({ enabled: isProjectsLoaded })
 
-  const { data: projects = [], isLoading: isLoadingProjects } =
-    useUserProjects()
+  const {
+    data: adminProjects = [],
+    isLoading: isLoadingAdminProjects,
+    isSuccess: isAdminProjectsLoaded,
+  } = useUserAdminProjects({ enabled: isOrganizationsLoaded })
+
+  const {
+    data: applications = [],
+    isLoading: isLoadingApplications,
+    // isSuccess: isUserApplicationsLoaded,
+  } = useUserApplications({ enabled: isAdminProjectsLoaded })
 
   const hasSubmittedToCurrentRound = applications.some(
     (application) => application.roundId === ROUND_ID,
@@ -86,8 +106,6 @@ const Dashboard = ({ className }: { className?: string }) => {
 
   const { track } = useAnalytics()
 
-  const { data: user = null, isLoading: isLoadingUser } = useUserById()
-
   const profileInitiallyComplete = useRef(
     user ? profileProgress(user) === 100 : 0,
   )
@@ -108,7 +126,7 @@ const Dashboard = ({ className }: { className?: string }) => {
     if (adminProjects.find((project) => unclaimedRewards(project).length)) {
       setShowUnclaimedRewardsDialog(true)
       const unclaimedReward = projects
-        .map((project) => project.rewards)
+        ?.map((project) => project.rewards)
         .flat()
         .find((reward) => !reward.claim || reward.claim.status !== "claimed")!
 
@@ -174,7 +192,7 @@ const Dashboard = ({ className }: { className?: string }) => {
         <UnclaimedRewardsDialog
           open
           onOpenChange={setShowUnclaimedRewardsDialog}
-          projects={projects}
+          projects={projects && projects}
         />
       )}
       {showApplicationDialogue && (
@@ -215,7 +233,7 @@ const Dashboard = ({ className }: { className?: string }) => {
 
         {!isLoadingUser &&
           !isLoadingOrganizations &&
-          (!projects.length ||
+          (!projects?.length ||
             !!!organizations?.length ||
             !profileInitiallyComplete.current) && (
             <div className="flex flex-col gap-4">
@@ -228,7 +246,7 @@ const Dashboard = ({ className }: { className?: string }) => {
                 />
               )}
 
-              {!projects.length && !organizations?.length && (
+              {!projects?.length && !organizations?.length && (
                 <Link href="/projects/new">
                   <AddFirstProject />
                 </Link>
@@ -257,7 +275,7 @@ const Dashboard = ({ className }: { className?: string }) => {
             <div className="h-40 bg-gray-300 rounded animate-pulse mb-4" />
           </div>
         ) : (
-          projects.length > 0 && (
+          projects!.length > 0 && (
             <div className="flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <h3>Your projects</h3>
@@ -276,7 +294,7 @@ const Dashboard = ({ className }: { className?: string }) => {
                 </Button>
               </div>
 
-              {projects.map((project) => (
+              {projects?.map((project) => (
                 <UserProjectCard key={project.id} project={project} />
               ))}
             </div>
@@ -306,40 +324,51 @@ const Dashboard = ({ className }: { className?: string }) => {
                 <UserProjectCard key={project.id} project={project} />
               ))
             ) : (
-              <div className="h-40 bg-gray-100 rounded animate-pulse mb-4"></div>
+              <div className="h-40 bg-gray-100 rounded animate-pulse mb-4"/></div>
             )}
           </div>
         )} */}
 
-        {organizations?.map((organization) => {
-          return (
-            <div key={organization.id} className="flex flex-col gap-4">
-              {user && (
-                <UserOrganizationInfoRow
-                  user={user}
-                  organization={organization}
-                />
-              )}
+        {organizations.length > 0 &&
+          (isLoadingOrganizations ? (
+            <>
+              <p className="text-2xl">Organizations</p>
+              <div className="h-40 bg-gray-100 rounded animate-pulse mb-4" />
+            </>
+          ) : (
+            <>
+              <p className="text-2xl">Organizations</p>
+              {organizations?.map((organization) => {
+                return (
+                  <div key={organization.id} className="flex flex-col gap-4">
+                    {user && (
+                      <UserOrganizationInfoRow
+                        user={user}
+                        organization={organization}
+                      />
+                    )}
 
-              {organization.organization.projects?.length > 0 ? (
-                <>
-                  {organization.organization.projects?.map((project) => (
-                    <UserProjectCard
-                      key={project.id}
-                      project={project.project as ProjectWithDetails}
-                    />
-                  ))}
-                </>
-              ) : (
-                <Link
-                  href={`/projects/new?orgId=${organization.organizationId}`}
-                >
-                  <AddFirstOrganizationProject />
-                </Link>
-              )}
-            </div>
-          )
-        })}
+                    {organization.organization.projects?.length > 0 ? (
+                      <>
+                        {organization.organization.projects?.map((project) => (
+                          <UserProjectCard
+                            key={project.id}
+                            project={project.project as ProjectWithDetails}
+                          />
+                        ))}
+                      </>
+                    ) : (
+                      <Link
+                        href={`/projects/new?orgId=${organization.organizationId}`}
+                      >
+                        <AddFirstOrganizationProject />
+                      </Link>
+                    )}
+                  </div>
+                )
+              })}
+            </>
+          ))}
 
         {showRewardsSection && (
           <div className="flex flex-col gap-6">

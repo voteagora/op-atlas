@@ -1,21 +1,22 @@
-import { useQuery } from "@tanstack/react-query"
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult,
+} from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
 import { getProjects } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 
-export function useUserProjects(): {
-  data: ProjectWithDetails[] | undefined
-  isLoading: boolean
-  error: Error | null
-} {
+export function useUserProjects(
+  queryOptions?: Partial<UseQueryOptions<ProjectWithDetails[], Error>>,
+): UseQueryResult<ProjectWithDetails[], Error> {
   const session = useSession()
 
-  const { data, isLoading, error } = useQuery({
+  return useQuery({
     queryKey: ["projects", session?.data?.user?.id],
     queryFn: () => getProjects(session?.data?.user?.id as string),
-    enabled: session?.data?.user?.id !== undefined,
+    enabled: session?.data?.user?.id !== undefined, // Default enabled logic
+    ...queryOptions, // Merge custom options
   })
-
-  return { data, isLoading, error }
 }

@@ -1,22 +1,22 @@
-import { useQuery } from "@tanstack/react-query"
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult,
+} from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
 
 import { getAdminProjects } from "@/lib/actions/projects"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import { ProjectWithDetails } from "@/lib/types"
 
-export function useUserAdminProjects(): {
-  data: ProjectWithDetails[] | undefined
-  isLoading: boolean
-  error: Error | null
-} {
+export function useUserAdminProjects(
+  queryOptions?: Partial<UseQueryOptions<ProjectWithDetails[], Error>>,
+): UseQueryResult<ProjectWithDetails[], Error> {
   const session = useSession()
 
-  const { data, isLoading, error } = useQuery({
+  return useQuery({
     queryKey: ["adminProjects", session?.data?.user.id],
     queryFn: () => getAdminProjects(session?.data?.user.id as string),
     enabled: session?.data?.user.id !== undefined,
+    ...queryOptions,
   })
-
-  return { data, isLoading, error }
 }
