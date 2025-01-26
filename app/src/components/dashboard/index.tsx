@@ -41,28 +41,25 @@ import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
 import { useUserById } from "@/hooks/db/useUserById"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
+import { useUserAdminProjects } from "@/hooks/db/useUserAdminProjects"
+import { useUserOrganizations } from "@/hooks/db/useUserOrganizations"
 
 const SHOW_APPLICATIONS = false
 const ROUND_ID = "5"
 
-const Dashboard = ({
-  className,
-  // user,
-  applications,
-  organizations,
-  adminProjects,
-}: {
-  className?: string
-  // user: UserWithAddresses
-  applications: ApplicationWithDetails[]
-  organizations?: UserOrganizationsWithDetails[]
-  adminProjects: ProjectWithDetails[]
-}) => {
+const Dashboard = ({ className }: { className?: string }) => {
+  const { data: organizations = [], isLoading: isLoadingOrganizations } =
+    useUserOrganizations()
+
+  const { data: adminProjects = [], isLoading: isLoadingAdminProjects } =
+    useUserAdminProjects()
+
+  const { data: applications = [], isLoading: isLoadingApplications } =
+    useUserApplications()
+
   const { data: projects = [], isLoading: isLoadingProjects } =
     useUserProjects()
-
-  // const projects: any[] = []
-  // const isLoadingProjects = true
 
   const hasSubmittedToCurrentRound = applications.some(
     (application) => application.roundId === ROUND_ID,
@@ -211,29 +208,33 @@ const Dashboard = ({
           />
         )}
         {isLoadingUser ? (
-          <div className="h-64 bg-gray-100 rounded animate-pulse mb-4" />
+          <div className="h-64 bg-gray-300 rounded animate-pulse mb-4" />
         ) : (
           user && <ProfileDetailCard user={user} />
         )}
 
-        {(!projects.length ||
-          !!!organizations?.length ||
-          !profileInitiallyComplete.current) && (
-          <div className="flex flex-col gap-4">
-            {!profileInitiallyComplete.current && user && (
-              <CompleteProfileCallout user={user} />
-            )}
-            {!organizations?.length && (
-              <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
-            )}
+        {!isLoadingUser &&
+          !isLoadingOrganizations &&
+          (!projects.length ||
+            !!!organizations?.length ||
+            !profileInitiallyComplete.current) && (
+            <div className="flex flex-col gap-4">
+              {!profileInitiallyComplete.current && user && (
+                <CompleteProfileCallout user={user} />
+              )}
+              {!organizations?.length && (
+                <MakeFirstOrganization
+                  onClick={() => setShowOnBoarding(true)}
+                />
+              )}
 
-            {!projects.length && !organizations?.length && (
-              <Link href="/projects/new">
-                <AddFirstProject />
-              </Link>
-            )}
-          </div>
-        )}
+              {!projects.length && !organizations?.length && (
+                <Link href="/projects/new">
+                  <AddFirstProject />
+                </Link>
+              )}
+            </div>
+          )}
 
         {isLoadingProjects ? (
           <div className="flex flex-col gap-4">
@@ -253,7 +254,7 @@ const Dashboard = ({
                 Add project
               </Button>
             </div>
-            <div className="h-40 bg-gray-100 rounded animate-pulse mb-4" />
+            <div className="h-40 bg-gray-300 rounded animate-pulse mb-4" />
           </div>
         ) : (
           projects.length > 0 && (
@@ -343,27 +344,41 @@ const Dashboard = ({
         {showRewardsSection && (
           <div className="flex flex-col gap-6">
             <h3>Your Retro Funding rewards</h3>
-            {adminProjects.map((project) => (
-              <ProjectRewardRow key={project.id} project={project} />
-            ))}
+            {isLoadingAdminProjects ? (
+              <div className="h-40 bg-gray-300 rounded animate-pulse mb-4" />
+            ) : (
+              <>
+                {adminProjects.map((project) => (
+                  <ProjectRewardRow key={project.id} project={project} />
+                ))}
+              </>
+            )}
           </div>
         )}
 
         {SHOW_APPLICATIONS && (
           <div className="flex flex-col gap-y-6">
             <h3>Your Retro Funding applications</h3>
-            {/* canApply is false now that applications are closed */}
-            <ApplicationBanner application={applications[0]} canApply={false} />
+            {isLoadingApplications ? (
+              <div className="h-40 bg-gray-300 rounded animate-pulse mb-4" />
+            ) : (
+              <>
+                <ApplicationBanner
+                  application={applications[0]}
+                  canApply={false}
+                />
 
-            <ExternalLink
-              href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
-              className="flex items-center gap-x-2 no-underline text-secondary-foreground"
-            >
-              <p className="text-sm font-medium">
-                Learn more about Retro Funding Round 4
-              </p>
-              <ArrowUpRight size={16} />
-            </ExternalLink>
+                <ExternalLink
+                  href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
+                  className="flex items-center gap-x-2 no-underline text-secondary-foreground"
+                >
+                  <p className="text-sm font-medium">
+                    Learn more about Retro Funding Round 4
+                  </p>
+                  <ArrowUpRight size={16} />
+                </ExternalLink>
+              </>
+            )}
           </div>
         )}
 
