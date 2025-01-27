@@ -43,13 +43,19 @@ async function exportEmailsToMailchimp() {
     return data
   })
 
+  // We should consider this being dynamic via DB
+  const LIST_ID = process.env.MAILCHIMP_LIST_ID
+  if (!LIST_ID) {
+    throw new Error("MAILCHIMP_LIST_ID is not defined")
+  }
+
   console.log(`Exporting ${batchMembers.length} emails to Mailchimp...`)
 
   try {
     for (let i = 0; i < batchMembers.length; i += BATCH_SIZE) {
       const batch = batchMembers.slice(i, i + BATCH_SIZE)
 
-      const res = await mailchimp.lists.batchListMembers("ae53f4c952", {
+      const res = await mailchimp.lists.batchListMembers(LIST_ID, {
         members: batch,
       })
 
