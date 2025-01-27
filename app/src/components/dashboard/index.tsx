@@ -77,7 +77,7 @@ const Dashboard = ({ className }: { className?: string }) => {
     isSuccess: isAdminProjectsLoaded,
   } = useUserAdminProjects()
 
-  console.log(isLoadingAdminProjects)
+  // console.log(isLoadingAdminProjects)
 
   const {
     data: applications = [],
