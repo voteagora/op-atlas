@@ -337,7 +337,7 @@ export default function ProjectDetailsForm({
         />
       )}
 
-      {isLoadingProject ? (
+      {isLoadingProject && isLoadingUserOrgs ? (
         <div className="flex flex-col gap-6">
           <h2>Project details</h2>
           <div className="h-96 bg-gray-300 rounded animate-pulse mb-4" />{" "}
