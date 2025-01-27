@@ -2,16 +2,14 @@ import { notFound } from "next/navigation"
 import React from "react"
 
 import { MissionApplication } from "@/components/missions/application/MissionApplication"
-import { MODERN_FUNDING_ROUNDS } from "@/lib/mocks"
+import { MISSIONS } from "@/lib/MissionsAndRoundData"
 
 export default async function MissionApplicationPage({
   params,
 }: {
   params: { id: string }
 }) {
-  const round = MODERN_FUNDING_ROUNDS.find(
-    (page) => page.pageName === params.id,
-  )
+  const round = MISSIONS.find((page) => page.pageName === params.id)
   if (round === undefined) notFound()
 
   return (

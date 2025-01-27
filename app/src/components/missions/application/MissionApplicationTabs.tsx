@@ -23,7 +23,7 @@ import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
 import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { submitApplications } from "@/lib/actions/applications"
-import { FundingRound, ModernFundingRound } from "@/lib/mocks"
+import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 
 import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"

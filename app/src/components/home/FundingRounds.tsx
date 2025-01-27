@@ -8,7 +8,7 @@ import { optimism } from "viem/chains"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { useUserApplications } from "@/hooks/db/useUserApplications"
-import { FundingRound, ModernFundingRound } from "@/lib/mocks"
+import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
 import { ApplicationWithDetails } from "@/lib/types"
 import { cn, titlecase } from "@/lib/utils"
 
@@ -22,13 +22,13 @@ export const FundingRounds = ({
   fundingRounds,
 }: {
   className?: string
-  fundingRounds: FundingRound[]
+  fundingRounds: FundingRoundData[]
 }) => {
   const { open, upcoming, past, ongoing } = useMemo(() => {
-    const n: FundingRound[] = []
-    const u: FundingRound[] = []
-    const p: FundingRound[] = []
-    const o: FundingRound[] = []
+    const n: FundingRoundData[] = []
+    const u: FundingRoundData[] = []
+    const p: FundingRoundData[] = []
+    const o: FundingRoundData[] = []
 
     fundingRounds.forEach((round) => {
       switch (round.status) {
@@ -52,7 +52,7 @@ export const FundingRounds = ({
 
   const renderSection = (
     status: "open" | "upcoming" | "past" | "ongoing",
-    rounds: FundingRound[],
+    rounds: FundingRoundData[],
   ) => {
     return (
       <div className="flex flex-col gap-y-4">
@@ -90,7 +90,7 @@ const Round = ({
   fundingRound,
 }: {
   className?: string
-  fundingRound: FundingRound
+  fundingRound: FundingRoundData
 }) => {
   const router = useRouter()
 
@@ -118,7 +118,7 @@ const Round = ({
     }
     SelectedContent = (
       <FundingRoundOngoing
-        fundingRound={fundingRound as ModernFundingRound}
+        fundingRound={fundingRound as MissionData}
         userApplicationState={userApplicationState}
       />
     )
@@ -135,7 +135,11 @@ const Round = ({
   return content
 }
 
-function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
+function FundingRoundContent({
+  fundingRound,
+}: {
+  fundingRound: FundingRoundData
+}) {
   const router = useRouter()
   const { status } = useSession()
   return (

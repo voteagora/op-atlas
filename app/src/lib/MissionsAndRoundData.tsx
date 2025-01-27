@@ -3,7 +3,7 @@ import React from "react"
 import ExternalLink from "@/components/ExternalLink"
 import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
 
-export type ModernFundingRound = FundingRound & {
+export type MissionData = FundingRoundData & {
   pageName: string
   missionPageRequirements: React.ReactNode
   missionPageEligibility: React.ReactNode
@@ -13,7 +13,7 @@ export type ModernFundingRound = FundingRound & {
   applyBy: Date
 }
 
-export type FundingRound = {
+export type FundingRoundData = {
   number: number
   name: string
   details: string
@@ -31,7 +31,7 @@ export type FundingRound = {
   }
 }
 
-export const MODERN_FUNDING_ROUNDS: ModernFundingRound[] = [
+export const MISSIONS: MissionData[] = [
   {
     pageName: "retro-funding-dev-tooling",
     name: "Dev Tooling",
@@ -337,8 +337,8 @@ export const MODERN_FUNDING_ROUNDS: ModernFundingRound[] = [
   },
 ]
 
-export const FUNDING_ROUNDS: FundingRound[] = [
-  ...MODERN_FUNDING_ROUNDS,
+export const FUNDING_ROUNDS: FundingRoundData[] = [
+  ...MISSIONS,
   {
     name: "Round 6: Governance",
     number: 6,

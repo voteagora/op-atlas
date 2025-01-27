@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react"
 import { useAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useUserApplications } from "@/hooks/db/useUserApplications"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
-import { FUNDING_ROUNDS } from "@/lib/mocks"
+import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
 import {
   ApplicationWithDetails,
   ProjectWithDetails,

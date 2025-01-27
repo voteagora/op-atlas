@@ -18,7 +18,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { FUNDING_ROUNDS, FundingRound, ModernFundingRound } from "@/lib/mocks"
+import {
+  FUNDING_ROUNDS,
+  FundingRoundData,
+  MissionData,
+} from "@/lib/MissionsAndRoundData"
 
 import ExternalLink from "../../ExternalLink"
 import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"

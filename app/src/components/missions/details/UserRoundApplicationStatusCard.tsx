@@ -5,7 +5,7 @@ import { format } from "date-fns"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
 import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
-import { FundingRound } from "@/lib/mocks"
+import { FundingRoundData } from "@/lib/MissionsAndRoundData"
 
 import { ApplicationStatusCard } from "./ApplicationStatusCard"
 

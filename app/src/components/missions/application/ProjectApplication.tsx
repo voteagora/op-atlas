@@ -4,6 +4,8 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useMemo } from "react"
+import { UseFormReturn } from "react-hook-form"
+import { z } from "zod"
 
 import {
   Accordion,
@@ -13,7 +15,7 @@ import {
 } from "@/components/ui/accordion"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
-import { FundingRound, ModernFundingRound } from "@/lib/mocks"
+import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 
@@ -23,9 +25,7 @@ import { Checkbox } from "../../ui/checkbox"
 import { FormField } from "../../ui/form"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
-import { UseFormReturn } from "react-hook-form"
 import { ApplicationFormSchema } from "./MissionApplication"
-import { z } from "zod"
 
 const incompleteBadge = <RedBadge text="Incomplete" />
 const notEligibleBadge = <RedBadge text="Not eligible" />

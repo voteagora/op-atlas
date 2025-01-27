@@ -2,7 +2,7 @@
 
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useRoundApplications } from "@/hooks/db/useRoundApplications"
-import { FundingRound } from "@/lib/mocks"
+import { FundingRoundData } from "@/lib/MissionsAndRoundData"
 
 import { IconList } from "./EnrolledProjectsCard"
 

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 
 import ExternalLink from "@/components/ExternalLink"
 import { useUserApplications } from "@/hooks/db/useUserApplications"
-import { MODERN_FUNDING_ROUNDS } from "@/lib/mocks"
+import { MISSIONS } from "@/lib/MissionsAndRoundData"
 import { ApplicationWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX } from "@/lib/utils"
 
@@ -19,7 +19,7 @@ export function EnrolledCallout({
 }) {
   const router = useRouter()
 
-  const round = MODERN_FUNDING_ROUNDS.find(
+  const round = MISSIONS.find(
     (round) => round.number.toString() === application.roundId,
   )
 

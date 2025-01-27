@@ -2,14 +2,14 @@
 import { format } from "date-fns"
 import Link from "next/link"
 
-import { FundingRound } from "@/lib/mocks"
+import { FundingRoundData } from "@/lib/MissionsAndRoundData"
 
 import { Button } from "../ui/button"
 
 export function FundingRoundPast({
   fundingRound,
 }: {
-  fundingRound: FundingRound
+  fundingRound: FundingRoundData
 }) {
   return (
     <div className="flex justify-between items-center w-full p-10">

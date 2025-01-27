@@ -3,7 +3,7 @@ import { format } from "date-fns"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
-import { FundingRound, ModernFundingRound } from "@/lib/mocks"
+import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
 
 import { BlueBadge } from "../missions/common/badges/BlueBadge"
 import { GreenBadge } from "../missions/common/badges/GreenBadge"
@@ -13,7 +13,7 @@ export function FundingRoundOngoing({
   fundingRound,
   userApplicationState,
 }: {
-  fundingRound: ModernFundingRound
+  fundingRound: MissionData
   userApplicationState: "Open" | "Active" | "Coming Soon"
 }) {
   const router = useRouter()
