@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 
 export const dynamic = "force-dynamic"
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   if (
     request.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`
   ) {
@@ -15,17 +15,20 @@ export function GET(request: NextRequest) {
   if (task === "add") {
     console.log("Adding tags to Mailchimp contacts...")
 
-    // Add tags to contacts
+    await addTagsToContacts()
 
     return new Response(`Mailchimp contacts tagged`, { status: 200 })
   }
   if (task === "remove") {
     console.log("Removing tags from Mailchimp contacts...")
 
-    // Remove tags from contacts
+    await removeTagsFromContacts()
 
     return new Response(`Mailchimp contacts untagged`, { status: 200 })
   }
 
   return new Response(`Task not found`, { status: 404 })
 }
+
+const addTagsToContacts = async () => {}
+const removeTagsFromContacts = async () => {}
