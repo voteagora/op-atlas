@@ -76,130 +76,122 @@ export const ProjectStatusSidebar = memo(
             className="ml-2"
           />
         </Button>
+        <>
+          {isLoadingProject ? (
+            <div className="h-8 bg-gray-300 rounded animate-pulse w-full" />
+          ) : (
+            <>
+              <h2 className="max-w-48 line-clamp-2 text-2xl font-semibold text-secondary-foreground pl-2">
+                {project?.name ?? "New project"}
+              </h2>
+              {hasNotBeenPublished && (
+                <div className="flex flex-col gap-2 pl-2">
+                  <Progress value={progressPercent} className="w-[228px] h-2" />
+                  <p className="text-sm font-normal">
+                    {progressPercent}% complete
+                  </p>
+                </div>
+              )}
+            </>
+          )}
 
-        {isLoadingProject ? (
-          <div className="h-96 bg-gray-300 rounded animate-pulse mb-4 w-48" />
-        ) : (
-          <>
-            <h2 className="max-w-48 line-clamp-2 text-2xl font-semibold text-secondary-foreground pl-2">
-              {project?.name ?? "New project"}
-            </h2>
-
-            {hasNotBeenPublished && (
-              <div className="flex flex-col gap-2 pl-2">
-                <Progress value={progressPercent} className="w-[228px] h-2" />
-                <p className="text-sm font-normal">
-                  {progressPercent}% complete
-                </p>
-              </div>
-            )}
-
-            <div className="w-full gap-2">
-              {Object.values(ProjectSection).map((option, index) => (
-                <div
-                  key={index}
-                  className="text-sm text-secondary-foreground flex-row gap-2 px-2 py-1.5 rounded-md hover:bg-tertiary w-full"
-                >
-                  {project ? (
-                    <Link
-                      href={`/projects/${project.id}/${option.toLowerCase()}`}
-                      className={cn(
-                        "flex items-center justify-start gap-2",
-                        currentPage === option.toLowerCase()
-                          ? "font-medium text-foreground"
-                          : "",
-                      )}
-                    >
-                      <div className="w-4 flex justify-center">
-                        {completedSections.includes(option) ? (
-                          <Image
-                            src="/assets/icons/tickIcon.svg"
-                            width={16}
-                            height={16}
-                            alt="Check"
-                          />
-                        ) : (
-                          <Image
-                            src="/assets/icons/circle-fill.svg"
-                            width={6.67}
-                            height={6.67}
-                            alt="Dot"
-                          />
-                        )}
-                      </div>
-                      {option === "Repos"
-                        ? "Repos & Links"
-                        : option === "Grants"
-                        ? "Pricing & Grants"
-                        : option}
-                    </Link>
-                  ) : (
-                    <div className="flex justify-start items-center gap-2">
-                      <div className="w-4 flex justify-center">
+          <div className="w-full gap-2">
+            {Object.values(ProjectSection).map((option, index) => (
+              <div
+                key={index}
+                className="text-sm text-secondary-foreground flex-row gap-2 px-2 py-1.5 rounded-md hover:bg-tertiary w-full"
+              >
+                {!isLoadingProject && project ? (
+                  <Link
+                    href={`/projects/${project.id}/${option.toLowerCase()}`}
+                    className={cn(
+                      "flex items-center justify-start gap-2",
+                      currentPage === option.toLowerCase()
+                        ? "font-medium text-foreground"
+                        : "",
+                    )}
+                  >
+                    <div className="w-4 flex justify-center">
+                      {completedSections.includes(option) ? (
+                        <Image
+                          src="/assets/icons/tickIcon.svg"
+                          width={16}
+                          height={16}
+                          alt="Check"
+                        />
+                      ) : (
                         <Image
                           src="/assets/icons/circle-fill.svg"
                           width={6.67}
                           height={6.67}
                           alt="Dot"
                         />
-                      </div>
-
-                      <p className="text-sm">{option}</p>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="w-full flex flex-col gap-2 px-2">
-              <Separator />
-              {project && (
-                <>
-                  <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
-                    <Link
-                      className={
-                        currentPage === "rewards"
-                          ? "font-medium text-foreground"
-                          : ""
-                      }
-                      href={`/projects/${project.id}/rewards`}
-                    >
-                      Rewards
-                    </Link>
+                    {option === "Repos"
+                      ? "Repos & Links"
+                      : option === "Grants"
+                      ? "Pricing & Grants"
+                      : option}
+                  </Link>
+                ) : (
+                  <div className="flex justify-start items-center gap-2">
+                    <div className="h-4 bg-gray-300 rounded animate-pulse w-4" />
+                    <p className="text-sm">{option}</p>
                   </div>
-                  <Separator />
-                </>
-              )}
-            </div>
-
-            <div className="flex flex-col w-full ml-2">
-              <ExternalLink
-                className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary"
-                href="https://discord.com/invite/optimism"
-              >
-                Get help
-              </ExternalLink>
-              {project && isAdmin && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className=" justify-start px-2 py-1.5 font-normal text-sm text-secondary-foreground w-full rounded-md hover:opacity-100 hover:bg-tertiary"
-                  style={{ height: "unset" }}
-                  onClick={() => setDeletingProject(true)}
-                >
-                  Delete project
-                </Button>
-              )}
-            </div>
-
-            {deletingProject && (
-              <DeleteProjectDialog
-                open
-                onConfirm={deleteProject}
-                onOpenChange={(open) => !open && setDeletingProject(false)}
-              />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="w-full flex flex-col gap-2 px-2">
+            <Separator />
+            {project && (
+              <>
+                <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
+                  <Link
+                    className={
+                      currentPage === "rewards"
+                        ? "font-medium text-foreground"
+                        : ""
+                    }
+                    href={`/projects/${project.id}/rewards`}
+                  >
+                    Rewards
+                  </Link>
+                </div>
+                <Separator />
+              </>
             )}
-          </>
-        )}
+          </div>
+
+          <div className="flex flex-col w-full ml-2">
+            <ExternalLink
+              className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary"
+              href="https://discord.com/invite/optimism"
+            >
+              Get help
+            </ExternalLink>
+            {project && isAdmin && (
+              <Button
+                type="button"
+                variant="ghost"
+                className=" justify-start px-2 py-1.5 font-normal text-sm text-secondary-foreground w-full rounded-md hover:opacity-100 hover:bg-tertiary"
+                style={{ height: "unset" }}
+                onClick={() => setDeletingProject(true)}
+              >
+                Delete project
+              </Button>
+            )}
+          </div>
+
+          {deletingProject && (
+            <DeleteProjectDialog
+              open
+              onConfirm={deleteProject}
+              onOpenChange={(open) => !open && setDeletingProject(false)}
+            />
+          )}
+        </>
       </div>
     )
   },
