@@ -59,27 +59,31 @@ const Dashboard = ({ className }: { className?: string }) => {
     data: projects = [],
     isLoading: isLoadingProjects,
     isSuccess: isProjectsLoaded,
-  } = useUserProjects({
-    enabled: isUserLoaded,
-  })
+  } = useUserProjects()
 
   const {
     data: organizations = [],
     isLoading: isLoadingOrganizations,
     isSuccess: isOrganizationsLoaded,
-  } = useUserOrganizations({ enabled: isProjectsLoaded })
+  } = useUserOrganizations()
+
+  // const isOrganizationsLoaded = false
+  // const organizations: any[] = []
+  // const isLoadingOrganizations = true
 
   const {
     data: adminProjects = [],
     isLoading: isLoadingAdminProjects,
     isSuccess: isAdminProjectsLoaded,
-  } = useUserAdminProjects({ enabled: isOrganizationsLoaded })
+  } = useUserAdminProjects()
+
+  console.log(isLoadingAdminProjects)
 
   const {
     data: applications = [],
     isLoading: isLoadingApplications,
     // isSuccess: isUserApplicationsLoaded,
-  } = useUserApplications({ enabled: isAdminProjectsLoaded })
+  } = useUserApplications()
 
   const hasSubmittedToCurrentRound = applications.some(
     (application) => application.roundId === ROUND_ID,
@@ -110,7 +114,7 @@ const Dashboard = ({ className }: { className?: string }) => {
     user ? profileProgress(user) === 100 : 0,
   )
 
-  console.log(profileInitiallyComplete)
+  // console.log(profileInitiallyComplete)
 
   // const userIsBadgeholder = useMemo(() => {
   //   return isBadgeholder(user)
@@ -154,9 +158,9 @@ const Dashboard = ({ className }: { className?: string }) => {
   }, [user, profileInitiallyComplete.current])
 
   // TODO: hide rewards section if all rewards are claimed
-  const showRewardsSection = Boolean(
-    adminProjects?.find((project) => project.applications.length),
-  )
+  // const showRewardsSection = Boolean(
+  //   adminProjects?.find((project) => project.applications.length),
+  // )
 
   const handleShowMore = () => {
     setVisibleCardsCount((prevCount) =>
@@ -228,31 +232,30 @@ const Dashboard = ({ className }: { className?: string }) => {
         {isLoadingUser ? (
           <div className="h-64 bg-gray-300 rounded animate-pulse mb-4" />
         ) : (
-          user && <ProfileDetailCard user={user} />
-        )}
-
-        {!isLoadingUser &&
-          !isLoadingOrganizations &&
-          (!projects?.length ||
-            !!!organizations?.length ||
-            !profileInitiallyComplete.current) && (
+          <>
+            {user && <ProfileDetailCard user={user} />}
             <div className="flex flex-col gap-4">
               {!profileInitiallyComplete.current && user && (
                 <CompleteProfileCallout user={user} />
               )}
-              {!organizations?.length && (
+
+              {isOrganizationsLoaded && !organizations.length && (
                 <MakeFirstOrganization
                   onClick={() => setShowOnBoarding(true)}
                 />
               )}
 
-              {!projects?.length && !organizations?.length && (
-                <Link href="/projects/new">
-                  <AddFirstProject />
-                </Link>
-              )}
+              {isProjectsLoaded &&
+                isOrganizationsLoaded &&
+                !projects.length &&
+                !organizations.length && (
+                  <Link href="/projects/new">
+                    <AddFirstProject />
+                  </Link>
+                )}
             </div>
-          )}
+          </>
+        )}
 
         {isLoadingProjects ? (
           <div className="flex flex-col gap-4">
@@ -275,7 +278,7 @@ const Dashboard = ({ className }: { className?: string }) => {
             <div className="h-40 bg-gray-300 rounded animate-pulse mb-4" />
           </div>
         ) : (
-          projects!.length > 0 && (
+          projects.length > 0 && (
             <div className="flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <h3>Your projects</h3>
@@ -300,42 +303,14 @@ const Dashboard = ({ className }: { className?: string }) => {
             </div>
           )
         )}
-        {/* {projects.length > 0 && (
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <h3>Your projects</h3>
-              <Button
-                className="flex items-center gap-2"
-                variant="secondary"
-                onClick={() => (window.location.href = "/projects/new")}
-              >
-                <Image
-                  src="/assets/icons/plus.svg"
-                  width={9}
-                  height={9}
-                  alt="Plus"
-                />
-                Add project
-              </Button>
-            </div>
 
-            {!isLoadingProjects ? (
-              projects.map((project) => (
-                <UserProjectCard key={project.id} project={project} />
-              ))
-            ) : (
-              <div className="h-40 bg-gray-100 rounded animate-pulse mb-4"/></div>
-            )}
-          </div>
-        )} */}
-
-        {organizations.length > 0 &&
-          (isLoadingOrganizations ? (
-            <>
-              <p className="text-2xl">Organizations</p>
-              <div className="h-40 bg-gray-100 rounded animate-pulse mb-4" />
-            </>
-          ) : (
+        {isLoadingOrganizations ? (
+          <>
+            <p className="text-2xl">Organizations</p>
+            <div className="h-40 bg-gray-100 rounded animate-pulse mb-4" />
+          </>
+        ) : (
+          organizations.length > 0 && (
             <>
               <p className="text-2xl">Organizations</p>
               {organizations?.map((organization) => {
@@ -368,21 +343,23 @@ const Dashboard = ({ className }: { className?: string }) => {
                 )
               })}
             </>
-          ))}
+          )
+        )}
 
-        {showRewardsSection && (
-          <div className="flex flex-col gap-6">
+        {isLoadingAdminProjects ? (
+          <div className="flex flex-col gap-4">
             <h3>Your Retro Funding rewards</h3>
-            {isLoadingAdminProjects ? (
-              <div className="h-40 bg-gray-300 rounded animate-pulse mb-4" />
-            ) : (
-              <>
-                {adminProjects.map((project) => (
-                  <ProjectRewardRow key={project.id} project={project} />
-                ))}
-              </>
-            )}
+            <div className="h-40 bg-gray-300 rounded animate-pulse mb-4" />
           </div>
+        ) : (
+          adminProjects.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <h3>Your Retro Funding rewards</h3>
+              {adminProjects.map((project) => (
+                <ProjectRewardRow key={project.id} project={project} />
+              ))}
+            </div>
+          )
         )}
 
         {SHOW_APPLICATIONS && (
