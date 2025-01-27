@@ -50,6 +50,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
+import { useProject } from "@/hooks/db/useProject"
 
 const CategoryEnum = z.enum([
   "CeFi",
@@ -90,12 +91,16 @@ function fromStringObjectArr(objs: { value: string }[]) {
 }
 
 export default function ProjectDetailsForm({
-  project,
+  projectId,
+  // project,
   organizations,
 }: {
-  project?: ProjectWithDetails
+  projectId?: string
+  // project?: ProjectWithDetails
   organizations: Organization[]
 }) {
+  const { data: project } = useProject(projectId!)
+
   const router = useRouter()
   const { track } = useAnalytics()
 

@@ -28,7 +28,8 @@ export default async function Page({
 
   return (
     <ProjectDetailsForm
-      project={project}
+      projectId={params.projectId}
+      // project={project}
       organizations={
         userOrganizations?.organizations.map((org) => org.organization) ?? []
       }
