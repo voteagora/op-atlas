@@ -6,7 +6,7 @@ import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -96,8 +96,6 @@ export default function ProjectDetailsForm({
 }: {
   projectId?: string
 }) {
-  const { data: project } = useProject(projectId!)
-
   const { data: userOrganizations = [] } = useUserAdminOrganizations()
 
   const organizations =
@@ -108,6 +106,8 @@ export default function ProjectDetailsForm({
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  const { data: project } = useProject(projectId!)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -130,6 +130,29 @@ export default function ProjectDetailsForm({
       mirror: project?.mirror ?? undefined,
     },
   })
+
+  useEffect(() => {
+    if (project) {
+      form.reset({
+        name: project?.name ?? "",
+        description: project?.description ?? "",
+        organization: project?.organization?.organization
+          ? {
+              name: project?.organization?.organization.name,
+              id: project?.organization?.organizationId,
+              avatarUrl: project?.organization?.organization.avatarUrl,
+            }
+          : null,
+        category: project?.category
+          ? (project.category as z.infer<typeof CategoryEnum>)
+          : "CeFi",
+        website: toStringObjectArr(project?.website ?? [""]),
+        farcaster: toStringObjectArr(project?.farcaster ?? [""]),
+        twitter: project?.twitter ?? undefined,
+        mirror: project?.mirror ?? undefined,
+      })
+    }
+  }, [form.reset, project])
 
   const { fields: websiteFields, append: addWebsiteField } = useFieldArray({
     control: form.control,
