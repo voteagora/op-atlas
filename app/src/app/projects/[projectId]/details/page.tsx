@@ -17,22 +17,10 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const [project, userOrganizations] = await Promise.all([
-    getProject({ id: params.projectId }),
-    getAdminOrganizations(session?.user.id),
-  ])
+  //TODO: Implement this commented out code client-side
+  // if (!project || !isUserMember(project, session?.user.id)) {
+  //   redirect("/dashboard")
+  // }
 
-  if (!project || !isUserMember(project, session?.user.id)) {
-    redirect("/dashboard")
-  }
-
-  return (
-    <ProjectDetailsForm
-      projectId={params.projectId}
-      // project={project}
-      organizations={
-        userOrganizations?.organizations.map((org) => org.organization) ?? []
-      }
-    />
-  )
+  return <ProjectDetailsForm projectId={params.projectId} />
 }

@@ -15,7 +15,7 @@ export default async function Page() {
     redirect("/dashboard")
   }
 
-  const userOrganizations = await getAdminOrganizations(session?.user.id)
+  // const userOrganizations = await getAdminOrganizations(session?.user.id)
 
   return (
     <div className="h-full bg-secondary flex flex-1 px-6">
@@ -26,10 +26,10 @@ export default async function Page() {
         <ProjectStatusSidebar />
         <div className="card flex-1">
           <ProjectDetailsForm
-            organizations={
-              userOrganizations?.organizations.map((org) => org.organization) ??
-              []
-            }
+          // organizations={
+          //   userOrganizations?.organizations.map((org) => org.organization) ??
+          //   []
+          // }
           />
         </div>
       </div>

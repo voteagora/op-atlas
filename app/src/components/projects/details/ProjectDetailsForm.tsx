@@ -51,6 +51,7 @@ import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
 import { useProject } from "@/hooks/db/useProject"
+import { useUserAdminOrganizations } from "@/hooks/db/useUserAdminOrganizations"
 
 const CategoryEnum = z.enum([
   "CeFi",
@@ -92,14 +93,15 @@ function fromStringObjectArr(objs: { value: string }[]) {
 
 export default function ProjectDetailsForm({
   projectId,
-  // project,
-  organizations,
 }: {
   projectId?: string
-  // project?: ProjectWithDetails
-  organizations: Organization[]
 }) {
   const { data: project } = useProject(projectId!)
+
+  const { data: userOrganizations = [] } = useUserAdminOrganizations()
+
+  const organizations =
+    userOrganizations?.organizations?.map((org: any) => org.organization) ?? []
 
   const router = useRouter()
   const { track } = useAnalytics()
@@ -369,7 +371,7 @@ export default function ProjectDetailsForm({
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="!w-[750px]">
-                    {organizations?.map((organization) => (
+                    {organizations?.map((organization: any) => (
                       <DropdownMenuCheckboxItem
                         className="text-sm font-normal text-secondary-foreground w-full"
                         checked={field.value?.id === organization.id}
