@@ -411,9 +411,8 @@ export async function removeProjectOrganization({
 }
 
 export async function deleteProject({ id }: { id: string }) {
-  console.log("Deleted " + id)
   return prisma.$transaction(async (tx) => {
-    await tx.project.update({
+    const updatedProject = await tx.project.update({
       where: {
         id,
       },
@@ -421,9 +420,11 @@ export async function deleteProject({ id }: { id: string }) {
         deletedAt: new Date(),
       },
     })
-    await tx.projectRepository.deleteMany({
+    const deletedRepositories = await tx.projectRepository.deleteMany({
       where: { projectId: id },
     })
+
+    return { updatedProject, deletedRepositories }
   })
 }
 
