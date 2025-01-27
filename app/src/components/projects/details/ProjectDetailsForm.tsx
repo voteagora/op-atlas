@@ -96,7 +96,8 @@ export default function ProjectDetailsForm({
 }: {
   projectId?: string
 }) {
-  const { data: userOrganizations = [] } = useUserAdminOrganizations()
+  const { data: userOrganizations = [], isLoading: isLoadingUserOrgs } =
+    useUserAdminOrganizations()
 
   const organizations =
     userOrganizations?.organizations?.map((org: any) => org.organization) ?? []
@@ -107,7 +108,7 @@ export default function ProjectDetailsForm({
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  const { data: project } = useProject(projectId!)
+  const { data: project, isLoading: isLoadingProject } = useProject(projectId!)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -335,370 +336,380 @@ export default function ProjectDetailsForm({
           }}
         />
       )}
-      <form
-        onSubmit={form.handleSubmit(onSubmit(false))}
-        className="flex flex-col gap-12"
-      >
+
+      {isLoadingProject ? (
         <div className="flex flex-col gap-6">
           <h2>Project details</h2>
+          <div className="h-96 bg-gray-300 rounded animate-pulse mb-4" />{" "}
+        </div>
+      ) : (
+        <form
+          onSubmit={form.handleSubmit(onSubmit(false))}
+          className="flex flex-col gap-12"
+        >
+          <div className="flex flex-col gap-6">
+            <h2>Project details</h2>
 
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Name<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
-                <Input
-                  type=""
-                  id="name"
-                  placeholder="Add a project name"
-                  className="line-clamp-2"
-                  {...field}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="organization"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Organization<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <div className="h-10 py-2.5 px-3 flex text-foreground items-center rounded-lg border border-input mt-2 cursor-pointer">
-                      {field.value?.avatarUrl && (
-                        <Avatar className="w-5 h-5 mr-2">
-                          <AvatarImage
-                            src={field.value?.avatarUrl ?? ""}
-                            alt="avatar"
-                          />
-                          <AvatarFallback>{field.value?.name}</AvatarFallback>
-                        </Avatar>
-                      )}
-                      <p className="text-sm text-foreground">
-                        {field.value?.name ?? "No Organization"}
-                      </p>
-                      <Image
-                        className="ml-auto"
-                        src="/assets/icons/arrowDownIcon.svg"
-                        height={8}
-                        width={10}
-                        alt="Arrow up"
-                      />
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="!w-[750px]">
-                    {organizations?.map((organization: any) => (
-                      <DropdownMenuCheckboxItem
-                        className="text-sm font-normal text-secondary-foreground w-full"
-                        checked={field.value?.id === organization.id}
-                        key={organization.id}
-                        onCheckedChange={() => {
-                          field.onChange(organization)
-                        }}
-                      >
-                        <Avatar className="w-5 h-5 mr-2">
-                          <AvatarImage
-                            src={organization.avatarUrl || ""}
-                            alt="avatar"
-                          />
-                          <AvatarFallback>{organization.name}</AvatarFallback>
-                        </Avatar>
-                        {organization.name}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-
-                    <DropdownMenuCheckboxItem
-                      className="text-sm font-normal text-secondary-foreground w-full"
-                      checked={field.value === null}
-                      onCheckedChange={() => {
-                        field.onChange(null)
-                      }}
-                    >
-                      No organization
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
-                      <Link href="/profile/organizations/new">
-                        Make an organization
-                      </Link>
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Description<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
-                <FormDescription className="!mt-0 text-secondary-foreground">
-                  Introduce your project to the Optimism Collective. Share who
-                  you are and what you do.
-                </FormDescription>
-                <Textarea
-                  id="description"
-                  placeholder="Add a description"
-                  className="resize-none"
-                  {...field}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div>
-            <div>
-              <FormLabel>
-                Project avatar and cover image
-                <span className="ml-0.5 text-destructive">*</span>
-              </FormLabel>
-              <div className="text-sm text-muted-foreground">
-                Images must be no larger than 4.5 MB.
-              </div>
-            </div>
-            <div className="flex flex-1 gap-x-2 mt-2 relative pb-10">
-              <FileUploadInput
-                className="absolute bottom-0 left-6"
-                onChange={(e) => {
-                  if (!e.target.files || e.target.files.length < 1) return
-
-                  const file = e.target.files[0]
-                  setAvatarSrc(URL.createObjectURL(file))
-                }}
-              >
-                <div className="border border-solid rounded-md overflow-hidden h-32 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
-                  {avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={avatarUrl}
-                      alt="project avatar"
-                      className="w-full h-full object-cover object-center"
-                    />
-                  ) : (
-                    <>
-                      <Image
-                        src="/assets/icons/upload.svg"
-                        width={20}
-                        height={20}
-                        alt="img"
-                      />
-                      <p className="text-muted-foreground text-xs">Avatar</p>
-                    </>
-                  )}
-                </div>
-              </FileUploadInput>
-              <FileUploadInput
-                className="w-full"
-                onChange={(e) => {
-                  if (!e.target.files || e.target.files.length < 1) return
-
-                  const file = e.target.files[0]
-                  setBannerSrc(URL.createObjectURL(file))
-                }}
-              >
-                <div className="border border-solid h-40 overflow-hidden bg-secondary rounded-md flex flex-col justify-center items-center gap-2 select-none">
-                  {bannerUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={bannerUrl}
-                      alt="project avatar"
-                      className="w-full h-full object-cover object-center"
-                    />
-                  ) : (
-                    <>
-                      <Image
-                        src="/assets/icons/upload.svg"
-                        width={20}
-                        height={20}
-                        alt="img"
-                      />
-                      <p className="text-muted-foreground text-xs">
-                        Cover image
-                      </p>
-                    </>
-                  )}
-                </div>
-              </FileUploadInput>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <div>
-              <FormLabel className="text-sm font-medium">
-                Category<span className="ml-0.5 text-destructive">*</span>
-              </FormLabel>
-              <div className="text-secondary-foreground text-sm">
-                Choose a single category that best applies to this project. Your
-                selection won&apos;t be visible to voters and has no impact on
-                Retro Funding.
-              </div>
-            </div>
             <FormField
               control={form.control}
-              name="category"
+              name="name"
               render={({ field }) => (
-                <FormItem className="gap-3">
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="grid md:grid-cols-3 grid-cols-1 gap-2"
-                    >
-                      {CategoryEnum.options.map((category) => (
-                        <FormItem key={category}>
-                          <FormLabel className="flex-1 min-w-6 basis-0 p-3 flex items-center gap-3 border rounded-sm">
-                            <FormControl>
-                              <RadioGroupItem value={category} />
-                            </FormControl>
-                            {category}
-                          </FormLabel>
-                        </FormItem>
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Name<span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <Input
+                    type=""
+                    id="name"
+                    placeholder="Add a project name"
+                    className="line-clamp-2"
+                    {...field}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Organization
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="h-10 py-2.5 px-3 flex text-foreground items-center rounded-lg border border-input mt-2 cursor-pointer">
+                        {field.value?.avatarUrl && (
+                          <Avatar className="w-5 h-5 mr-2">
+                            <AvatarImage
+                              src={field.value?.avatarUrl ?? ""}
+                              alt="avatar"
+                            />
+                            <AvatarFallback>{field.value?.name}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <p className="text-sm text-foreground">
+                          {field.value?.name ?? "No Organization"}
+                        </p>
+                        <Image
+                          className="ml-auto"
+                          src="/assets/icons/arrowDownIcon.svg"
+                          height={8}
+                          width={10}
+                          alt="Arrow up"
+                        />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="!w-[750px]">
+                      {organizations?.map((organization: any) => (
+                        <DropdownMenuCheckboxItem
+                          className="text-sm font-normal text-secondary-foreground w-full"
+                          checked={field.value?.id === organization.id}
+                          key={organization.id}
+                          onCheckedChange={() => {
+                            field.onChange(organization)
+                          }}
+                        >
+                          <Avatar className="w-5 h-5 mr-2">
+                            <AvatarImage
+                              src={organization.avatarUrl || ""}
+                              alt="avatar"
+                            />
+                            <AvatarFallback>{organization.name}</AvatarFallback>
+                          </Avatar>
+                          {organization.name}
+                        </DropdownMenuCheckboxItem>
                       ))}
-                    </RadioGroup>
+
+                      <DropdownMenuCheckboxItem
+                        className="text-sm font-normal text-secondary-foreground w-full"
+                        checked={field.value === null}
+                        onCheckedChange={() => {
+                          field.onChange(null)
+                        }}
+                      >
+                        No organization
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
+                        <Link href="/profile/organizations/new">
+                          Make an organization
+                        </Link>
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Description
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <FormDescription className="!mt-0 text-secondary-foreground">
+                    Introduce your project to the Optimism Collective. Share who
+                    you are and what you do.
+                  </FormDescription>
+                  <Textarea
+                    id="description"
+                    placeholder="Add a description"
+                    className="resize-none"
+                    {...field}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div>
+              <div>
+                <FormLabel>
+                  Project avatar and cover image
+                  <span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  Images must be no larger than 4.5 MB.
+                </div>
+              </div>
+              <div className="flex flex-1 gap-x-2 mt-2 relative pb-10">
+                <FileUploadInput
+                  className="absolute bottom-0 left-6"
+                  onChange={(e) => {
+                    if (!e.target.files || e.target.files.length < 1) return
+
+                    const file = e.target.files[0]
+                    setAvatarSrc(URL.createObjectURL(file))
+                  }}
+                >
+                  <div className="border border-solid rounded-md overflow-hidden h-32 aspect-square flex-1 bg-secondary flex flex-col justify-center items-center gap-2 select-none">
+                    {avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatarUrl}
+                        alt="project avatar"
+                        className="w-full h-full object-cover object-center"
+                      />
+                    ) : (
+                      <>
+                        <Image
+                          src="/assets/icons/upload.svg"
+                          width={20}
+                          height={20}
+                          alt="img"
+                        />
+                        <p className="text-muted-foreground text-xs">Avatar</p>
+                      </>
+                    )}
+                  </div>
+                </FileUploadInput>
+                <FileUploadInput
+                  className="w-full"
+                  onChange={(e) => {
+                    if (!e.target.files || e.target.files.length < 1) return
+
+                    const file = e.target.files[0]
+                    setBannerSrc(URL.createObjectURL(file))
+                  }}
+                >
+                  <div className="border border-solid h-40 overflow-hidden bg-secondary rounded-md flex flex-col justify-center items-center gap-2 select-none">
+                    {bannerUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={bannerUrl}
+                        alt="project avatar"
+                        className="w-full h-full object-cover object-center"
+                      />
+                    ) : (
+                      <>
+                        <Image
+                          src="/assets/icons/upload.svg"
+                          width={20}
+                          height={20}
+                          alt="img"
+                        />
+                        <p className="text-muted-foreground text-xs">
+                          Cover image
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </FileUploadInput>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <div>
+                <FormLabel className="text-sm font-medium">
+                  Category<span className="ml-0.5 text-destructive">*</span>
+                </FormLabel>
+                <div className="text-secondary-foreground text-sm">
+                  Choose a single category that best applies to this project.
+                  Your selection won&apos;t be visible to voters and has no
+                  impact on Retro Funding.
+                </div>
+              </div>
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem className="gap-3">
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="grid md:grid-cols-3 grid-cols-1 gap-2"
+                      >
+                        {CategoryEnum.options.map((category) => (
+                          <FormItem key={category}>
+                            <FormLabel className="flex-1 min-w-6 basis-0 p-3 flex items-center gap-3 border rounded-sm">
+                              <FormControl>
+                                <RadioGroupItem value={category} />
+                              </FormControl>
+                              {category}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Accordion type="single" collapsible className="w-fit">
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>
+                    <p className="text-sm font-medium">
+                      View category definitions
+                    </p>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <CategoryDefinitions />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <div>
+                <FormLabel className="text-sm font-medium">Website</FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  If your organization has more than one website, you can add
+                  rows.
+                </div>
+              </div>
+              {websiteFields.map((field, index) => (
+                <FormField
+                  key={field.id}
+                  control={form.control}
+                  name={`website.${index}.value`}
+                  render={({ field: innerField }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...innerField} placeholder="Add a link" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => addWebsiteField({ value: "" })}
+                className="w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add
+              </Button>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <div>
+                <p className="text-sm font-medium">Farcaster</p>
+              </div>
+              {farcasterFields.map((field, index) => (
+                <FormField
+                  key={field.id}
+                  control={form.control}
+                  name={`farcaster.${index}.value`}
+                  render={({ field: innerField }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...innerField} placeholder="Add a link" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => addFarcasterField({ value: "" })}
+                className="w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add
+              </Button>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="twitter"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel>Twitter</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Add a link" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Accordion type="single" collapsible className="w-fit">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>
-                  <p className="text-sm font-medium">
-                    View category definitions
-                  </p>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <CategoryDefinitions />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+
+            <FormField
+              control={form.control}
+              name="mirror"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel>Mirror</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Add a link" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <div>
-              <FormLabel className="text-sm font-medium">Website</FormLabel>
-              <div className="text-sm text-muted-foreground">
-                If your organization has more than one website, you can add
-                rows.
-              </div>
-            </div>
-            {websiteFields.map((field, index) => (
-              <FormField
-                key={field.id}
-                control={form.control}
-                name={`website.${index}.value`}
-                render={({ field: innerField }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input {...innerField} placeholder="Add a link" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
+          <div className="flex gap-2">
             <Button
+              isLoading={isSaving}
+              disabled={!canSubmit || isSaving}
+              onClick={form.handleSubmit(onSubmit(true))}
               type="button"
-              variant="secondary"
-              onClick={() => addWebsiteField({ value: "" })}
-              className="w-fit"
+              variant="destructive"
+              className="self-start"
             >
-              <Plus size={16} className="mr-2.5" /> Add
+              Save
+            </Button>
+            <Button
+              isLoading={isLoading}
+              disabled={!canSubmit || isLoading}
+              type="submit"
+              variant="secondary"
+              className="self-start"
+            >
+              Next
             </Button>
           </div>
-
-          <div className="flex flex-col gap-1.5">
-            <div>
-              <p className="text-sm font-medium">Farcaster</p>
-            </div>
-            {farcasterFields.map((field, index) => (
-              <FormField
-                key={field.id}
-                control={form.control}
-                name={`farcaster.${index}.value`}
-                render={({ field: innerField }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input {...innerField} placeholder="Add a link" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => addFarcasterField({ value: "" })}
-              className="w-fit"
-            >
-              <Plus size={16} className="mr-2.5" /> Add
-            </Button>
-          </div>
-
-          <FormField
-            control={form.control}
-            name="twitter"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel>Twitter</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Add a link" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="mirror"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel>Mirror</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Add a link" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            isLoading={isSaving}
-            disabled={!canSubmit || isSaving}
-            onClick={form.handleSubmit(onSubmit(true))}
-            type="button"
-            variant="destructive"
-            className="self-start"
-          >
-            Save
-          </Button>
-          <Button
-            isLoading={isLoading}
-            disabled={!canSubmit || isLoading}
-            type="submit"
-            variant="secondary"
-            className="self-start"
-          >
-            Next
-          </Button>
-        </div>
-      </form>
+        </form>
+      )}
     </Form>
   )
 }
