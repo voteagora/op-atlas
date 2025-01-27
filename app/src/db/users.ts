@@ -1,6 +1,12 @@
 "use server"
 
-import { Prisma, User } from "@prisma/client"
+import {
+  Prisma,
+  User,
+  UserAddress,
+  UserEmail,
+  UserInteraction,
+} from "@prisma/client"
 
 import { UserAddressSource } from "@/lib/types"
 
@@ -31,17 +37,58 @@ export async function getUserByFarcasterId(farcasterId: string) {
   })
 }
 
-export async function getUserByUsername(username: string) {
-  return prisma.user.findFirst({
-    where: {
-      username,
-    },
-    include: {
-      addresses: true,
-      interaction: true,
-      emails: true,
-    },
-  })
+export async function getUserByUsername(username: string): Promise<
+  | (User & {
+      addresses: UserAddress[]
+      interaction: UserInteraction | null
+      emails: UserEmail[]
+    })
+  | null
+> {
+  const result = await prisma.$queryRaw<
+    (User & {
+      addresses: UserAddress[]
+      interaction: UserInteraction | null
+      emails: UserEmail[]
+    })[]
+  >`
+    SELECT 
+      u.*,
+      json_agg(DISTINCT a) FILTER (WHERE a."address" IS NOT NULL) as "addresses",
+      json_agg(DISTINCT e) FILTER (WHERE e."email" IS NOT NULL) as "emails",
+      CASE 
+        WHEN i."id" IS NOT NULL THEN
+          json_build_object(
+            'id', i."id",
+            'userId', i."userId",
+            'finishSetupLinkClicked', i."finishSetupLinkClicked",
+            'orgSettingsVisited', i."orgSettingsVisited",
+            'profileVisitCount', i."profileVisitCount",
+            'viewProfileClicked', i."viewProfileClicked",
+            'homePageViewCount', i."homePageViewCount",
+            'lastInteracted', i."lastInteracted"
+          )
+        ELSE NULL
+      END as "interaction"
+    FROM "User" u
+    LEFT JOIN "UserAddress" a ON u."id" = a."userId"
+    LEFT JOIN "UserEmail" e ON u."id" = e."userId"
+    LEFT JOIN "UserInteraction" i ON u."id" = i."userId"
+    WHERE u."username" = ${username}
+    GROUP BY 
+      u."id", 
+      i."id", 
+      i."userId", 
+      i."finishSetupLinkClicked", 
+      i."orgSettingsVisited", 
+      i."profileVisitCount", 
+      i."viewProfileClicked", 
+      i."homePageViewCount", 
+      i."lastInteracted"
+    LIMIT 1;
+  `
+
+  return result?.[0] || null
 }
 
 export async function searchUsersByUsername({
