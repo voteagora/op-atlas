@@ -84,6 +84,8 @@ To make a contribution, please follow the git-flow workflow:
      git commit -m "A brief description of the changes"
      ```
 
+   NOTE: Make sure to run `pnpm app:lint:fix` so that the app's linter can make any neccesary improvements.
+
 5. **Push Changes to GitHub**
 
    - Push your changes to your fork on GitHub:
