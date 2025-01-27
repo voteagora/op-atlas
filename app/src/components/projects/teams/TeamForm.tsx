@@ -25,16 +25,25 @@ import AddTeamMemberDialog from "./AddTeamMemberDialog"
 import ConfirmTeamCheckbox from "./ConfirmTeamCheckbox"
 import DeleteTeamMemberDialog from "./DeleteTeamMemberDialog"
 import { TeamMemberCard } from "./TeamMemberCard"
+import { useProjectFromPathname } from "@/hooks/useProjectFromPathname"
 
-export default function AddTeamDetailsForm({
-  project,
-}: {
-  project: ProjectWithDetails
+export default function AddTeamDetailsForm({}: // project,
+{
+  // project: ProjectWithDetails
 }) {
-  const team = sortBy(
-    (member) => member.user.name?.toLowerCase() ?? "",
-    projectMembers(project),
-  )
+  const {
+    data: project,
+    isLoading: isLoadingProjects,
+    isSuccess,
+  } = useProjectFromPathname()
+
+  const team =
+    (project &&
+      sortBy(
+        (member) => member.user.name?.toLowerCase() ?? "",
+        projectMembers(project),
+      )) ||
+    []
 
   const router = useRouter()
   const { data } = useSession()
@@ -42,10 +51,10 @@ export default function AddTeamDetailsForm({
   const currentUser = data?.user
 
   const [isTeamConfirmed, setIsTeamConfirmed] = useState(
-    project.addedTeamMembers,
+    (project && project.addedTeamMembers) || false,
   )
 
-  const isAdmin = useIsAdmin(project)
+  const isAdmin = useIsAdmin(project || undefined)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -57,21 +66,21 @@ export default function AddTeamDetailsForm({
   const handleAddMembers = async (userIds: string[]) => {
     // TODO: Optimistic UI
     // TODO: Analytics to track adding team members by farcasterId
-    await addMembersToProject(project.id, userIds)
+    await addMembersToProject(project!.id, userIds)
     setIsShowingAdd(false)
   }
 
   const handleToggleRole = async (user: User, role: TeamRole) => {
     // TODO: Optimistic UI
     const newRole = role === "member" ? "admin" : "member"
-    await setMemberRole(project.id, user.id, newRole)
+    await setMemberRole(project!.id, user.id, newRole)
   }
 
   const handleConfirmDelete = async () => {
     if (!isShowingRemove) return
 
     // TODO: Optimistic UI
-    await removeMemberFromProject(project.id, isShowingRemove.id)
+    await removeMemberFromProject(project!.id, isShowingRemove.id)
     setIsShowingRemove(null)
   }
 
@@ -79,12 +88,12 @@ export default function AddTeamDetailsForm({
     try {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
 
-      await updateProjectDetails(project.id, {
-        addedTeamMembers: isTeamConfirmed,
+      await updateProjectDetails(project!.id, {
+        addedTeamMembers: isTeamConfirmed || false,
       })
       toast.success("Project saved")
 
-      !isSave && router.push(`/projects/${project.id}/repos`)
+      !isSave && router.push(`/projects/${project?.id}/repos`)
     } catch (error) {
       console.error("Error updating project", error)
     } finally {
@@ -96,82 +105,96 @@ export default function AddTeamDetailsForm({
   return (
     <>
       <div className="flex flex-col gap-y-6">
-        <div className="flex flex-col gap-y-6">
-          <h2>Contributors</h2>
-          <p className="text-secondary-foreground">
-            You can edit contributors here, and it won’t effect your
-            organization’s settings. All contributors will have edit access to
-            this project. Only project admins can delete the project or remove
-            contributors.
-          </p>
-          <Callout
-            type="info"
-            text="Access to an admin account is needed to claim Retro Funding rewards"
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <p className="text-foreground text-sm font-medium">Contributors</p>
-          {team.map(({ user, role, organizationId }) => (
-            <TeamMemberCard
-              key={user.id}
-              user={user}
-              organizationName={
-                organizationId && project.organization?.organization.name
-              }
-              role={role as TeamRole}
-              isUserAdmin={!!isAdmin}
-              isCurrentUser={currentUser?.id === user.id}
-              onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
-              onRemove={() => setIsShowingRemove(user)}
+        {isSuccess ? (
+          <>
+            <div className="flex flex-col gap-y-6">
+              <h2>Contributors</h2>
+
+              <p className="text-secondary-foreground">
+                You can edit contributors here, and it won’t effect your
+                organization’s settings. All contributors will have edit access
+                to this project. Only project admins can delete the project or
+                remove contributors.
+              </p>
+              <Callout
+                type="info"
+                text="Access to an admin account is needed to claim Retro Funding rewards"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <p className="text-foreground text-sm font-medium">
+                Contributors
+              </p>
+              {team?.map(({ user, role, organizationId }) => (
+                <TeamMemberCard
+                  key={user.id}
+                  user={user}
+                  organizationName={
+                    organizationId && project?.organization?.organization.name
+                  }
+                  role={role as TeamRole}
+                  isUserAdmin={!!isAdmin}
+                  isCurrentUser={currentUser?.id === user.id}
+                  onToggleAdmin={() => handleToggleRole(user, role as TeamRole)}
+                  onRemove={() => setIsShowingRemove(user)}
+                />
+              ))}
+
+              <Button
+                onClick={() => {
+                  track("Add Collaborators")
+                  setIsShowingAdd(true)
+                }}
+                type="button"
+                variant="secondary"
+                className="w-fit font-medium"
+              >
+                <Plus size={16} className="mr-2.5" /> Add contributors
+              </Button>
+            </div>
+
+            <ConfirmTeamCheckbox
+              setIsTeamConfirmed={setIsTeamConfirmed}
+              isTeamConfirmed={isTeamConfirmed}
             />
-          ))}
 
-          <Button
-            onClick={() => {
-              track("Add Collaborators")
-              setIsShowingAdd(true)
-            }}
-            type="button"
-            variant="secondary"
-            className="w-fit font-medium"
-          >
-            <Plus size={16} className="mr-2.5" /> Add contributors
-          </Button>
-        </div>
-
-        <ConfirmTeamCheckbox
-          setIsTeamConfirmed={setIsTeamConfirmed}
-          isTeamConfirmed={isTeamConfirmed}
-        />
-
-        <div className="flex gap-2">
-          <Button
-            isLoading={isSaving}
-            onClick={() => handleNextClicked(true)}
-            disabled={isSaving}
-            type="button"
-            variant="destructive"
-            className="self-start"
-          >
-            Save
-          </Button>
-          <Button
-            isLoading={isSubmitting}
-            onClick={() => handleNextClicked()}
-            disabled={isSubmitting}
-            variant="secondary"
-            className="w-fit"
-          >
-            Next
-          </Button>
-        </div>
+            <div className="flex gap-2">
+              <Button
+                isLoading={isSaving}
+                onClick={() => handleNextClicked(true)}
+                disabled={isSaving}
+                type="button"
+                variant="destructive"
+                className="self-start"
+              >
+                Save
+              </Button>
+              <Button
+                isLoading={isSubmitting}
+                onClick={() => handleNextClicked()}
+                disabled={isSubmitting}
+                variant="secondary"
+                className="w-fit"
+              >
+                Next
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col gap-y-6">
+              <h2>Contributors</h2>
+              <div className="h-96 bg-gray-300 rounded animate-pulse mb-4" />{" "}
+            </div>
+          </>
+        )}
       </div>
 
       <AddTeamMemberDialog
         open={isShowingAdd}
         onOpenChange={(open) => setIsShowingAdd(open)}
         team={team
-          .filter((user) => user.organizationId && user.role === "admin")
+          ?.filter((user) => user.organizationId && user.role === "admin")
           .map((member) => member.user)}
         addMembers={handleAddMembers}
       />

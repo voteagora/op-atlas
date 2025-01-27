@@ -52,6 +52,7 @@ import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
 import { useProject } from "@/hooks/db/useProject"
 import { useUserAdminOrganizations } from "@/hooks/db/useUserAdminOrganizations"
+import { useProjectFromPathname } from "@/hooks/useProjectFromPathname"
 
 const CategoryEnum = z.enum([
   "CeFi",
@@ -91,11 +92,7 @@ function fromStringObjectArr(objs: { value: string }[]) {
   return objs.map(({ value }) => value).filter(Boolean) // remove empty strings
 }
 
-export default function ProjectDetailsForm({
-  projectId,
-}: {
-  projectId?: string
-}) {
+export default function ProjectDetailsForm({}: {}) {
   const { data: userOrganizations = [], isLoading: isLoadingUserOrgs } =
     useUserAdminOrganizations()
 
@@ -108,7 +105,8 @@ export default function ProjectDetailsForm({
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  const { data: project, isLoading: isLoadingProject } = useProject(projectId!)
+  const { data: project, isLoading: isLoadingProject } =
+    useProjectFromPathname()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

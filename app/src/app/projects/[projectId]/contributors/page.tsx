@@ -10,12 +10,12 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const session = await auth()
-  const project = await getProject({ id: params.projectId })
+  // const session = await auth()
+  // const project = await getProject({ id: params.projectId })
 
-  if (!project || !isUserMember(project, session?.user.id)) {
-    redirect("/dashboard")
-  }
+  // if (!project || !isUserMember(project, session?.user.id)) {
+  //   redirect("/dashboard")
+  // }
 
-  return <TeamForm project={project} />
+  return <TeamForm />
 }

@@ -22,5 +22,5 @@ export default async function Page({
   //   redirect("/dashboard")
   // }
 
-  return <ProjectDetailsForm projectId={params.projectId} />
+  return <ProjectDetailsForm />
 }
