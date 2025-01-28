@@ -81,7 +81,7 @@ export const mockDbData = [
   },
   {
     deployerAddress: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-    address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
     chain: "34443",
   },
 ]
@@ -105,6 +105,17 @@ export const mockOsoContracts = [
   },
 ]
 
+export const mockOsoContracts2 = [
+  {
+    address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+    chain: "8453",
+  },
+  {
+    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+    chain: "34443",
+  },
+]
+
 const mockOsoData = [
   {
     address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
@@ -112,7 +123,7 @@ const mockOsoData = [
   },
   {
     address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-    contracts: [...mockOsoContracts],
+    contracts: [...mockOsoContracts2],
   },
 ]
 // const EMPTY_CONTRACT = {
@@ -327,10 +338,11 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   useEffect(() => {
     const populateForm = async () => {
       //1. Get DB Data
+      const fetchedDbData = mockDbData
       // TODO: Implement
 
       //2. Consolodiate DB Data
-      const consolidatedData = mockDbData.reduce(
+      const consolidatedDbData = fetchedDbData.reduce(
         (acc: any, { deployerAddress, ...contract }) => {
           if (!acc[deployerAddress]) {
             acc[deployerAddress] = { deployerAddress, contracts: [] }
@@ -340,17 +352,18 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
         },
         {},
       )
-      const fetchedDbData: any = Object.values(consolidatedData)
-      console.log(fetchedDbData)
+      const consolidatedDbDataArray: any = Object.values(consolidatedDbData)
+      console.log(consolidatedDbDataArray)
 
       //3. Get OSO Data
       const fetchedOsoData = mockOsoData
 
-      // for (let i = 0; i < fetchedDbData.length; i++) {
-      //   const osoResult = await oso.getContracts(fetchedDbData[i].deployerAddress);
+      // for (let i = 0; i < consolidatedDbDataArray.length; i++) {
+      //   const osoResult = await oso.getContracts(consolidatedDbDataArray[i].deployerAddress);
       //   fetchedOsoData.push(osoResult);
       // }
 
+      //4. Cross Reference
       const formDeployers = fetchedOsoData.map((deployer) => {
         return {
           address: deployer.address,
@@ -369,27 +382,6 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
           }),
         }
       })
-
-      //4. Cross Reference
-
-      // const b = osoData.map((deployer) => {
-      //   return {
-      //     address: deployer.address,
-      //     contracts: deployer.contracts.map((contract) => {
-      //       return {
-      //         ...contract,
-      //         excluded:
-      //           mockDbData.find((entry) => {
-      //             return (
-      //               entry.deployerAddress === deployer.address &&
-      //               entry.chain === contract.chain &&
-      //               entry.address === contract.address
-      //             )
-      //           }) !== undefined,
-      //       }
-      //     }),
-      //   }
-      // })
 
       form.setValue("deployers", formDeployers)
     }
