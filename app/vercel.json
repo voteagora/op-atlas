@@ -5,7 +5,11 @@
       "schedule": "* * * * *"
     },
     {
-      "path": "/api/tag-contacts",
+      "path": "/api/tag-contacts?task=add",
+      "schedule": "59 23 * * *"
+    },
+    {
+      "path": "/api/tag-contacts?task=remove",
       "schedule": "59 23 * * *"
     }
   ]
