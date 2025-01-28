@@ -45,6 +45,7 @@ import { AddressSchema } from "./commonSchema"
 import { ContractDropdownButton } from "./ContractDropdownButton"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { copyToClipboard } from "@/lib/utils"
+import { VerifyButton } from "./VerifyButton"
 
 function truncate(value: string, numToShow: number) {
   return `${value.slice(0, numToShow)}${
@@ -55,6 +56,46 @@ function truncate(value: string, numToShow: number) {
 const EMPTY_DEPLOYER = {
   deployerAddress: "",
   contracts: [],
+}
+
+export const mockOsoContracts = [
+  {
+    address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+    chain: "8453",
+  },
+  {
+    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+    chain: "34443",
+  },
+  {
+    address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
+    chain: "34443",
+  },
+  {
+    address: "0xEA5aE0568DF87515885F3BA6B760E76a29ea2D24",
+    chain: "34443",
+  },
+]
+
+const osoData = {
+  address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+  contracts: [...mockOsoContracts],
+}
+
+export const mockDbContracts = [
+  {
+    address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+    chain: "8453",
+  },
+  {
+    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+    chain: "34443",
+  },
+]
+
+const mockDbData = {
+  address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+  contracts: [...mockDbContracts],
 }
 
 // const EMPTY_CONTRACT = {
@@ -256,6 +297,9 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     reValidateMode: "onChange",
   })
 
+  const validateForm = (data: z.infer<typeof ContractsSchema2>) => {
+    // console.log(data)
+  }
   // Form submission handler
   const onSubmit = (data: z.infer<typeof ContractsSchema2>) => {
     console.log(data)
@@ -274,47 +318,11 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   useEffect(() => {
     const populateForm = async () => {
-      const osoData = {
-        address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-        contracts: [
-          {
-            address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-            chain: "8453",
-          },
-          {
-            address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
-            chain: "34443",
-          },
-          {
-            address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
-            chain: "34443",
-          },
-          {
-            address: "0xEA5aE0568DF87515885F3BA6B760E76a29ea2D24",
-            chain: "34443",
-          },
-        ],
-      }
-
-      const dbData = {
-        address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-        contracts: [
-          {
-            address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-            chain: "8453",
-          },
-          {
-            address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
-            chain: "34443",
-          },
-        ],
-      }
-
-      setDbData(dbData)
+      setDbData(mockDbData)
       const resultingData = osoData.contracts.map((contract) => {
         // Check if the contract is present in dbData
-        const isInDb = dbData.contracts.some(
-          (dbContract) =>
+        const isInDb = mockDbData.contracts.some(
+          (dbContract: any) =>
             dbContract.address === contract.address &&
             dbContract.chain === contract.chain,
         )
@@ -327,13 +335,14 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
       form.setValue("deployers", [
         {
-          address: dbData.address,
+          address: mockDbData.address,
           contracts: resultingData,
         },
       ])
       // form.setValue("address", dbData.address)
       // form.setValue("contracts", resultingData)
     }
+
     populateForm()
   }, [form])
 
@@ -374,7 +383,13 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                               <Input {...addressField} />
                               <FormMessage />
 
-                              <FormField
+                              <VerifyButton
+                                form={form}
+                                deployerIndex={deployerIndex}
+                                validateForm={validateForm}
+                              />
+
+                              {/* <FormField
                                 control={form.control}
                                 name={`deployers.${deployerIndex}.contracts`}
                                 render={({ field: contractsField }) => (
@@ -384,13 +399,19 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                                         variant={"destructive"}
                                         type="button"
                                         className="w-20"
+                                        onClick={form.handleSubmit(
+                                          validateForm,
+                                        )}
                                       >
-                                        Verify
+                                        {form?.formState?.errors?.deployers
+                                          ?.message
+                                          ? "Retry"
+                                          : "Verify"}
                                       </Button>
                                     )}
                                   </>
                                 )}
-                              />
+                              /> */}
 
                               <FormField
                                 control={form.control}
