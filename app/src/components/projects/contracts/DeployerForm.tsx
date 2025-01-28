@@ -26,16 +26,16 @@ const onCopyValue = async (value: string) => {
 export function DeployerForm({
   deployerIndex,
   form,
+  dbData,
 }: {
   form: UseFormReturn<z.infer<typeof ContractsSchema2>>
   deployerIndex: number
+  dbData: any
 }) {
   const initialMaxContractViewCount = 3
   const [contractViewCount, setContractViewCount] = useState(
     initialMaxContractViewCount,
   )
-
-  const [dbData, setDbData] = useState<{ contracts: any[] }>()
 
   async function OnVerify() {
     setIsVerifying(true)

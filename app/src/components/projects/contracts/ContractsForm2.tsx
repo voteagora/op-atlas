@@ -352,11 +352,21 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
         },
         {},
       )
+
       const consolidatedDbDataArray: any = Object.values(consolidatedDbData)
-      console.log(consolidatedDbDataArray)
+
+      const mockOSOData = consolidatedDbDataArray.map((deployer: any) => {
+        return {
+          address: deployer.deployerAddress,
+          contracts: mockOsoContracts,
+        }
+      })
+
+      console.log(mockOSOData)
+      setAllDbData(consolidatedDbDataArray)
 
       //3. Get OSO Data
-      const fetchedOsoData = mockOsoData
+      const fetchedOsoData = mockOSOData
 
       // for (let i = 0; i < consolidatedDbDataArray.length; i++) {
       //   const osoResult = await oso.getContracts(consolidatedDbDataArray[i].deployerAddress);
@@ -364,10 +374,10 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
       // }
 
       //4. Cross Reference
-      const formDeployers = fetchedOsoData.map((deployer) => {
+      const formDeployers = fetchedOsoData.map((deployer: any) => {
         return {
           address: deployer.address,
-          contracts: deployer.contracts.map((contract) => {
+          contracts: deployer.contracts.map((contract: any) => {
             return {
               ...contract,
               excluded:
@@ -411,7 +421,11 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                 {deployersField.value &&
                   deployersField.value.map((deployer, deployerIndex) => {
                     return (
-                      <DeployerForm form={form} deployerIndex={deployerIndex} />
+                      <DeployerForm
+                        form={form}
+                        deployerIndex={deployerIndex}
+                        dbData={allDbData[deployerIndex]}
+                      />
                     )
                   })}
 
