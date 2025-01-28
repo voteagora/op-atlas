@@ -12,7 +12,7 @@ import { ReactNode, useEffect, useState } from "react"
 import { truncate } from "@/lib/utils/contracts"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
-import { mockOsoContracts } from "./ContractsForm2"
+import { getDeployerOSOData } from "./ContractsForm2"
 
 const onCopyValue = async (value: string) => {
   try {
@@ -62,17 +62,17 @@ export function DeployerForm({
 
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    form.setValue(
-      `deployers.${deployerIndex}.contracts`,
-      mockOsoContracts.map((contract) => {
-        return {
-          ...contract,
-          excluded: true,
-        }
-      }),
+    const osoDataForDeployer = getDeployerOSOData(
+      form.getValues().deployers[deployerIndex].address,
     )
 
-    if (form.getValues().deployers[deployerIndex].contracts.length <= 0) {
+    console.log(osoDataForDeployer)
+
+    if (
+      !osoDataForDeployer ||
+      (osoDataForDeployer?.contracts &&
+        osoDataForDeployer.contracts.length <= 0)
+    ) {
       setErrorMessage(
         <p className="text-rose-600">
           We couldn’t find any contracts deployed by this address. Learn more
@@ -81,16 +81,16 @@ export function DeployerForm({
       )
     }
 
-    setIsVerifying(false)
-
-    const resultingData = mockOsoContracts.map((contract) => {
+    const formData = osoDataForDeployer?.contracts.map((contract) => {
       return {
         ...contract,
         excluded: false,
       }
     })
 
-    form.setValue(`deployers.${deployerIndex}.contracts`, [...resultingData])
+    form.setValue(`deployers.${deployerIndex}.contracts`, [...(formData || [])])
+
+    setIsVerifying(false)
   }
 
   const [isVerifying, setIsVerifying] = useState(false)

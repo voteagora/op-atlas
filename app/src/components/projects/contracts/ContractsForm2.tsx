@@ -86,25 +86,6 @@ export const mockDbData = [
   // },
 ]
 
-export const mockOsoContracts = [
-  {
-    address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-    chain: "8453",
-  },
-  {
-    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
-    chain: "34443",
-  },
-  {
-    address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
-    chain: "34443",
-  },
-  {
-    address: "0xEA5aE0568DF87515885F3BA6B760E76a29ea2D24",
-    chain: "34443",
-  },
-]
-
 export const mockOsoContracts2 = [
   {
     address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
@@ -116,16 +97,48 @@ export const mockOsoContracts2 = [
   },
 ]
 
-const mockOsoData = [
+const mockBackendOSOData = [
   {
     address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-    contracts: [...mockOsoContracts],
+    contracts: [
+      {
+        address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+        chain: "8453",
+      },
+      {
+        address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+        chain: "34443",
+      },
+      {
+        address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
+        chain: "34443",
+      },
+      {
+        address: "0xEA5aE0568DF87515885F3BA6B760E76a29ea2D24",
+        chain: "34443",
+      },
+    ],
   },
   {
     address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-    contracts: [...mockOsoContracts2],
+    contracts: [
+      {
+        address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
+        chain: "34443",
+      },
+      {
+        address: "0xEA5aE0568DF87515885F3BA6B760E76a29ea2D24",
+        chain: "34443",
+      },
+    ],
   },
 ]
+
+export function getDeployerOSOData(address: string) {
+  return mockBackendOSOData.find((deployer) => {
+    return address === deployer.address
+  })
+}
 
 export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   const form = useForm<z.infer<typeof ContractsSchema2>>({
@@ -144,8 +157,26 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   useEffect(() => {
     const populateForm = async () => {
       //1. Get DB Data
-      const fetchedDbData = mockDbData
       // TODO: Implement
+      const fetchedDbData = mockDbData
+
+      const fetchedDatabaseData = [
+        {
+          deployerAddress: "0x123",
+          address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+          chain: "8453",
+        },
+        {
+          deployerAddress: "0x123",
+          address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+          chain: "8453",
+        },
+        {
+          deployerAddress: "0x456",
+          address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+          chain: "8453",
+        },
+      ]
 
       //2. Consolodiate DB Data
       const consolidatedDbData = fetchedDbData.reduce(
@@ -161,18 +192,30 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
       const consolidatedDbDataArray: any = Object.values(consolidatedDbData)
 
-      const mockOSOData = consolidatedDbDataArray.map((deployer: any) => {
-        return {
-          address: deployer.deployerAddress,
-          contracts: mockOsoContracts,
-        }
-      })
+      const mockFetchedOSOData = consolidatedDbDataArray.map(
+        (deployer: any) => {
+          const result = getDeployerOSOData(deployer.deployerAddress)
+          if (result) {
+            return {
+              address: result.address,
+              contracts: result.contracts,
+            }
+          }
+        },
+      )
 
-      console.log(mockOSOData)
+      // const mockOSOData = consolidatedDbDataArray.map((deployer: any) => {
+      //   return {
+      //     address: deployer.deployerAddress,
+      //     contracts: mockOsoContracts,
+      //   }
+      // })
+
+      // console.log(mockOSOData)
       setAllDbData(consolidatedDbDataArray)
 
       //3. Get OSO Data
-      const fetchedOsoData = mockOSOData
+      // const fetchedOsoData = mockOSOData
 
       // for (let i = 0; i < consolidatedDbDataArray.length; i++) {
       //   const osoResult = await oso.getContracts(consolidatedDbDataArray[i].deployerAddress);
@@ -180,7 +223,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
       // }
 
       //4. Cross Reference
-      const formDeployers = fetchedOsoData.map((deployer: any) => {
+      const formDeployers = mockFetchedOSOData.map((deployer: any) => {
         return {
           address: deployer.address,
           contracts: deployer.contracts.map((contract: any) => {
