@@ -41,6 +41,23 @@ export function DeployerForm({
     setIsVerifying(true)
     setErrorMessage(undefined)
 
+    if (
+      form.getValues().deployers.filter((deployer) => {
+        return (
+          deployer.address === form.getValues().deployers[deployerIndex].address
+        )
+      }).length > 1
+    ) {
+      setErrorMessage(
+        <p className="text-rose-600">
+          You've already verified this deployer. Please try another.
+        </p>,
+      )
+
+      setIsVerifying(false)
+      return
+    }
+
     // get OSO data
 
     await new Promise((resolve) => setTimeout(resolve, 2000))
