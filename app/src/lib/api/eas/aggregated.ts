@@ -12,15 +12,9 @@ export const getAggregatedData = async (): Promise<AggregatedDataResponse> => {
     // headers: {
     //   Authorization: `Bearer ${process.env.EAS_INDEXER_API_SECRET}`,
     // },
+  }).catch((error) => {
+    console.error(error)
   })
-    .then((res) => {
-      const data = res.json()
-
-      return data
-    })
-    .catch((error) => {
-      console.error(error)
-    })
 
   return records
 }

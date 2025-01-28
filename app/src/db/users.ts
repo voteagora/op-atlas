@@ -232,12 +232,32 @@ export async function updateUserInteraction(
   })
 }
 
-async function getAllNonTaggedCitizens() {
+async function getAllNonTaggedCitizens(records: AggregatedDataResponse) {
   return prisma.userAddress.findMany({
     where: {
-      tag: {
-        not: "citizen",
-      },
+      AND: [
+        {
+          address: {
+            in: records.citizen,
+          },
+        },
+        {
+          OR: [
+            {
+              tags: {
+                isEmpty: true,
+              },
+            },
+            {
+              NOT: {
+                tags: {
+                  has: "citizen",
+                },
+              },
+            },
+          ],
+        },
+      ],
     },
     select: {
       address: true,
@@ -257,8 +277,10 @@ async function getAllNonTaggedCitizens() {
 async function getAllNonTaggedBadgeholders() {
   return prisma.userAddress.findMany({
     where: {
-      tag: {
-        not: "badgeholder",
+      NOT: {
+        tags: {
+          has: "badgeholder",
+        },
       },
     },
     select: {
@@ -279,8 +301,10 @@ async function getAllNonTaggedBadgeholders() {
 async function getAllNonTaggedGovContributors() {
   return prisma.userAddress.findMany({
     where: {
-      tag: {
-        not: "gov_contribution",
+      NOT: {
+        tags: {
+          has: "gov_contribution",
+        },
       },
     },
     select: {
@@ -301,8 +325,10 @@ async function getAllNonTaggedGovContributors() {
 async function getAllNonTaggedRFVoters() {
   return prisma.userAddress.findMany({
     where: {
-      tag: {
-        not: "rf_voter",
+      NOT: {
+        tags: {
+          has: "rf_voter",
+        },
       },
     },
     select: {
@@ -322,7 +348,7 @@ async function getAllNonTaggedRFVoters() {
 
 export async function getAggregatedRecords(records: AggregatedDataResponse) {
   const [citizen, badgeholder, gov_contribution, rf_voter] = await Promise.all([
-    getAllNonTaggedCitizens(),
+    getAllNonTaggedCitizens(records),
     getAllNonTaggedBadgeholders(),
     getAllNonTaggedGovContributors(),
     getAllNonTaggedRFVoters(),

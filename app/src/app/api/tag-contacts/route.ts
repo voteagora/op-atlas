@@ -1,4 +1,4 @@
-import m from "@mailchimp/mailchimp_marketing"
+import { Prisma } from "@prisma/client"
 import { NextRequest } from "next/server"
 
 import { prisma } from "@/db/client"
@@ -86,11 +86,35 @@ const fetchRecords = async (): Promise<EntityRecords> => {
 }
 
 const addTag = async (addresses: EntityObject[], tag: Entity) => {
+  if (addresses.length === 0) {
+    console.log("No addresses to tag")
+    return
+  }
+
+  const updatedUsersTags = await prisma.$queryRaw<
+    { address: string; tags: string[] }[]
+  >(
+    Prisma.sql`
+    UPDATE "UserAddress"
+    SET "tags" = array_append("tags", ${tag})
+    WHERE "address" = ANY(${Prisma.sql`ARRAY[${Prisma.join(
+      addresses.map((address) => address.address),
+    )}]::text[]`})
+    RETURNING "address", "tags"
+  `,
+  )
+
+  console.log(`Updated user addresses, added tag "${tag}"`)
+
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
   const results = await mailchimp.lists.batchListMembers(LIST_ID!, {
     members: addresses.map((address) => ({
       email_address: address.email,
-      tags: [tag],
+      tags: [
+        ...(updatedUsersTags.find((user) => user.address === address.address)
+          ?.tags ?? []),
+        tag,
+      ],
       email_type: "html",
       status: "transactional",
     })),
@@ -100,29 +124,31 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
   const updatedMembers = (results as any).updated_members.map(
     (member: any) => ({
       email: member.email_address,
-      tag: member.tags.at(-1),
+      tags: member.tags,
     }),
   )
 
   console.log(`Added tags to ${updatedMembers.length} Mailchimp contacts`)
-
-  await prisma.userAddress.updateMany({
-    where: {
-      address: {
-        in: addresses.map((address) => address.address),
-      },
-    },
-    data: {
-      tag: {
-        set: tag,
-      },
-    },
-  })
-
-  console.log(`Updated ${updatedMembers.length} user addresses`)
 }
 
 const removeTag = async (addresses: EntityObject[], tag: Entity) => {
+  if (addresses.length === 0) {
+    console.log("No addresses to tag")
+    return
+  }
+
+  await prisma.$executeRaw(
+    Prisma.sql`
+      UPDATE "UserAddress"
+      SET "tags" = array_remove("tags", ${tag})
+      WHERE "address" = ANY(ARRAY[${Prisma.join(
+        addresses.map((address) => address.address),
+      )}]::text[])
+    `,
+  )
+
+  console.log(`Updated user addresses, removed tag "${tag}"`)
+
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
   const results = await mailchimp.lists.batchListMembers(LIST_ID!, {
     members: addresses.map((address) => ({
@@ -139,21 +165,6 @@ const removeTag = async (addresses: EntityObject[], tag: Entity) => {
   )
 
   console.log(`Removed tags from ${updatedMembers.length} Mailchimp contacts`)
-
-  await prisma.userAddress.updateMany({
-    where: {
-      address: {
-        in: addresses.map((address) => address.address),
-      },
-    },
-    data: {
-      tag: {
-        set: null,
-      },
-    },
-  })
-
-  console.log(`Updated ${updatedMembers.length} user addresses`)
 }
 
 const handleAddCitizenEntity = async (
