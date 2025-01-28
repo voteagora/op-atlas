@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react"
 
 export function ContractDropdownButton({
   form,
+  field,
   index,
 }: {
   form: any
+  field: any
   index: number
 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -49,16 +51,23 @@ export function ContractDropdownButton({
                 <button
                   type="button"
                   className="block w-full py-2 hover:bg-gray-100"
-                  onClick={() =>
-                    form.setValue(
-                      `contracts.${index}.excluded`,
-                      !form.watch(`contracts.${index}.excluded`),
-                    )
+                  onClick={
+                    () => field.onChange(!field.value)
+                    // field.value.excluded = !field.value.excluded
+
+                    // form.setValue(
+                    //   `contracts.${index}.excluded`,
+                    //   !form.watch(`contracts.${index}.excluded`),
+                    // )
                   }
                 >
-                  {form.getValues().contracts[index].excluded
+                  {field.value ? "Include in project" : "Exclude from project"}
+                  {/* {field.value.excluded
                     ? "Include in project"
-                    : "Exclude from project"}
+                    : "Exclude from project"} */}
+                  {/* {form.getValues().contracts[index].excluded
+                    ? "Include in project"
+                    : "Exclude from project"} */}
                 </button>
               </li>
               <li>
