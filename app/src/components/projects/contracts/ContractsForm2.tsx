@@ -126,212 +126,18 @@ const mockOsoData = [
     contracts: [...mockOsoContracts2],
   },
 ]
-// const EMPTY_CONTRACT = {
-//   contractAddress: "",
-//   chain: Chain.options[0],
-//   name: "",
-//   description: "",
-// } satisfies z.infer<typeof ContractSchema2>
-
-// function toFormValues(
-//   contract: ProjectContract,
-// ): z.infer<typeof ContractSchema2> {
-//   return {
-//     contractAddress: contract.contractAddress,
-//     chain: contract.chainId.toString(),
-//     name: contract.name ?? "",
-//     description: contract.description ?? "",
-//   }
-// }
-
-// function getDefaultValues(
-//   project?: ProjectWithDetails,
-// ): z.infer<typeof ContractsSchema2> {
-//   if (!project) {
-//     return {
-//       isOffChain: false,
-
-//       submittedToOSO: false,
-//       osoSlug: "",
-//       deployers: [
-//         {
-//           ...EMPTY_DEPLOYER,
-//         },
-//       ],
-//     }
-//   }
-
-//   const deployers: any[] = []
-
-//   return {
-//     isOffChain: project.isOnChainContract === false,
-//     deployers: deployers.length > 0 ? deployers : [{ ...EMPTY_DEPLOYER }],
-//     submittedToOSO: !!project.openSourceObserverSlug,
-//     osoSlug: project.openSourceObserverSlug ?? "",
-//   }
-// }
-
-const mockDeployerContracts = [
-  {
-    deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-    contracts: [
-      {
-        address: "0x123",
-        chain: 8453,
-        selected: true,
-        initialSelected: true,
-      },
-      {
-        address: "0x456",
-        chain: 34443,
-        selected: true,
-        initialSelected: true,
-      },
-      {
-        address: "0x789",
-        chain: 10,
-        selected: true,
-        initialSelected: true,
-      },
-
-      {
-        address: "0x111",
-        chain: 10,
-        selected: true,
-        initialSelected: true,
-      },
-    ],
-  },
-]
 
 export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
-  // const router = useRouter()
-  // const [isSubmitting, setIsSubmitting] = useState(false)
-  // const [isSaving, setIsSaving] = useState(false)
-
-  // const deployers = []
-
-  // useEffect(() => {
-  //   console.log("RESET")
-  //   form.reset({
-  //     deployers: {
-  //       ...mockDeployerContracts,
-  //     },
-  //   })
-  // }, [form.reset, mockDeployerContracts])
-  // const {
-  //   fields: deployejkrFields,
-  //   append: addDeployerField,
-  //   // remove: removeContractsFields,
-  // } = useFieldArray({
-  //   control: form.control,
-  //   name: "deployers",
-  // })
-
-  // // Locally, this runs twice because of strict mode but dw about it
-  // useEffect(() => {
-  //   toast.info("We recommend asking your developer to complete this step")
-  // }, [])
-
-  // // const onRemoveContract = async (index: number) => {
-  // //   try {
-  // //     const isOnlyContract = contractsFields.length === 1
-  // //     const contract = form.getValues(`contracts.${index}`)
-
-  // //     await removeContract({
-  // //       projectId: project.id,
-  // //       address: contract.contractAddress,
-  // //       chainId: parseInt(contract.chain),
-  // //     })
-
-  // //     removeContractsFields(index)
-
-  // //     if (isOnlyContract) {
-  // //       addContractsFields({ ...EMPTY_CONTRACT })
-  // //     }
-  // //   } catch (error) {
-  // //     console.error("Error removing repo", error)
-  // //   }
-  // // }
-
-  // const onSubmit =
-  //   (isSave: boolean) => (values: z.infer<typeof ContractsSchema2>) => {
-  //     console.log(values)
-  //   }
-  // const onSubmit =
-  //   (isSave: boolean) => async (values: z.infer<typeof ContractsSchema>) => {
-  //     isSave ? setIsSaving(true) : setIsSubmitting(true)
-
-  //     try {
-  //       const [result] = await Promise.all([
-  //         updateProjectOSOStatus({
-  //           projectId: project.id,
-  //           osoProjectName: values.osoSlug,
-  //         }),
-  //         updateProjectDetails(project.id, {
-  //           isOnChainContract: !values.isOffChain,
-  //         }),
-  //         !values.isOffChain &&
-  //           updateContractDetails({
-  //             projectId: project.id,
-  //             contractAddress: values.contracts[0].contractAddress,
-  //             chainId: parseInt(values.contracts[0].chain),
-  //             name: values.contracts[0].name,
-  //             description: values.contracts[0].description,
-  //           }),
-  //       ])
-
-  //       if (result.error) {
-  //         throw new Error(result.error)
-  //       }
-
-  //       !isSave && router.push(`/projects/${project.id}/grants`)
-  //       setIsSaving(false)
-  //       toast.success("Project saved")
-  //     } catch (error) {
-  //       toast.error("There was an error updating project OSO status.")
-  //       isSave ? setIsSaving(false) : setIsSubmitting(false)
-  //     }
-  //   }
-
-  // const formValues = useWatch({
-  //   control: form.control,
-  // })
-
-  // const canSubmit = (function () {
-  //   return (
-  //     (!!formValues.submittedToOSO &&
-  //       formValues.contracts &&
-  //       formValues.contracts.length > 0) ||
-  //     formValues.isOffChain
-  //   )
-  // })()
-
-  // can add a new contract once the previous one is verified
-  // const canAddContract =
-  //   formValues.contracts.length < 1 ||
-  //   Boolean(formValues.contracts[formValues.contracts.length - 1].signature)
-
-  // console.log(deployejkrFields)
-
-  const DeployerSchema = z.object({
-    address: AddressSchema,
-    contracts: z.array(ContractSchema2),
-  })
-
   const form = useForm<z.infer<typeof ContractsSchema2>>({
     resolver: zodResolver(ContractsSchema2),
     mode: "onSubmit",
     reValidateMode: "onChange",
   })
 
-  const validateForm = (data: z.infer<typeof ContractsSchema2>) => {
-    // console.log(data)
-  }
-  // Form submission handler
-  const onSubmit = (data: z.infer<typeof ContractsSchema2>) => {
-    console.log(data)
-  }
+  const { append } = useFieldArray({
+    control: form.control,
+    name: "deployers", // Name of the array field
+  })
 
   const [allDbData, setAllDbData] = useState<any>()
 
@@ -399,12 +205,10 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     populateForm()
   }, [form])
 
-  // const deployerIndex = 0
-
-  const { append } = useFieldArray({
-    control: form.control,
-    name: "deployers", // Name of the array field
-  })
+  // Form submission handler
+  const onSubmit = (data: z.infer<typeof ContractsSchema2>) => {
+    console.log(data)
+  }
 
   return (
     <div>
