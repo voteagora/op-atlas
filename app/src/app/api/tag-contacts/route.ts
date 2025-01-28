@@ -95,12 +95,25 @@ const fetchRecords = async (): Promise<EntityRecords> => {
   const [citizen, badgeholder, gov_contribution, rf_voter] = await Promise.all([
     prisma.userAddress.findMany({
       where: {
-        address: {
-          in: records.citizen,
-        },
-        // tag: {
-        //   not: "citizen",
-        // },
+        AND: [
+          {
+            address: {
+              in: records.citizen,
+            },
+          },
+          {
+            OR: [
+              {
+                tag: {
+                  not: "citizen",
+                },
+              },
+              {
+                tag: null,
+              },
+            ],
+          },
+        ],
       },
       select: {
         address: true,
@@ -117,12 +130,25 @@ const fetchRecords = async (): Promise<EntityRecords> => {
     }),
     prisma.userAddress.findMany({
       where: {
-        address: {
-          in: records.badgeholder,
-        },
-        tag: {
-          not: "badgeholder",
-        },
+        AND: [
+          {
+            address: {
+              in: records.badgeholder,
+            },
+          },
+          {
+            OR: [
+              {
+                tag: {
+                  not: "badgeholder",
+                },
+              },
+              {
+                tag: null,
+              },
+            ],
+          },
+        ],
       },
       select: {
         address: true,
@@ -139,12 +165,25 @@ const fetchRecords = async (): Promise<EntityRecords> => {
     }),
     prisma.userAddress.findMany({
       where: {
-        address: {
-          in: records.gov_contribution,
-        },
-        tag: {
-          not: "gov_contribution",
-        },
+        AND: [
+          {
+            address: {
+              in: records.gov_contribution,
+            },
+          },
+          {
+            OR: [
+              {
+                tag: {
+                  not: "gov_contribution",
+                },
+              },
+              {
+                tag: null,
+              },
+            ],
+          },
+        ],
       },
       select: {
         address: true,
@@ -161,12 +200,25 @@ const fetchRecords = async (): Promise<EntityRecords> => {
     }),
     prisma.userAddress.findMany({
       where: {
-        address: {
-          in: records.rf_voter,
-        },
-        tag: {
-          not: "rf_voter",
-        },
+        AND: [
+          {
+            address: {
+              in: records.rf_voter,
+            },
+          },
+          {
+            OR: [
+              {
+                tag: {
+                  not: "rf_voter",
+                },
+              },
+              {
+                tag: null,
+              },
+            ],
+          },
+        ],
       },
       select: {
         address: true,
