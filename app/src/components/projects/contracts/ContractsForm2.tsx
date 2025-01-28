@@ -46,6 +46,7 @@ import { ContractDropdownButton } from "./ContractDropdownButton"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { copyToClipboard } from "@/lib/utils"
 import { VerifyButton } from "./VerifyButton"
+// import { ExcludedTag } from "./ExcludedTag"
 
 function truncate(value: string, numToShow: number) {
   return `${value.slice(0, numToShow)}${
@@ -389,30 +390,6 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                                 validateForm={validateForm}
                               />
 
-                              {/* <FormField
-                                control={form.control}
-                                name={`deployers.${deployerIndex}.contracts`}
-                                render={({ field: contractsField }) => (
-                                  <>
-                                    {contractsField.value.length <= 0 && (
-                                      <Button
-                                        variant={"destructive"}
-                                        type="button"
-                                        className="w-20"
-                                        onClick={form.handleSubmit(
-                                          validateForm,
-                                        )}
-                                      >
-                                        {form?.formState?.errors?.deployers
-                                          ?.message
-                                          ? "Retry"
-                                          : "Verify"}
-                                      </Button>
-                                    )}
-                                  </>
-                                )}
-                              /> */}
-
                               <FormField
                                 control={form.control}
                                 name={`deployers.${deployerIndex}.contracts`}
@@ -492,6 +469,8 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                                                       </div>
 
                                                       <div className="flex gap-4">
+                                                        {/* <ExcludedTag form={form} contractField={contractField} deployerIndex={deployerIndex} index={index}/> */}
+
                                                         <FormField
                                                           control={form.control}
                                                           name={`deployers.${deployerIndex}.contracts.${index}.excluded`}

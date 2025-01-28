@@ -24,12 +24,7 @@ export function VerifyButton({
     //load from OSO - and append contracts
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    // const deployer = form.getValues().deployers[deployerIndex]
-
-    // const contracts = form.getValues().deployers[deployerIndex].contracts;
-
-    form.setValue(`deployers.${deployerIndex}.contracts`, mockOsoContracts)
-    // deployer.contracts = mockDbContracts
+    form.setValue(`deployers.${deployerIndex}.contracts`, mockDbContracts)
 
     if (form.getValues().deployers[deployerIndex].contracts.length <= 0) {
       setErrorMessage(
