@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ProjectContract } from "@prisma/client"
-import { Check, Plus, X } from "lucide-react"
+import { Check, Ellipsis, Plus, X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -42,6 +42,7 @@ import { ContractSchema2, ContractsSchema2 } from "./schema2"
 import { Chain } from "./schema"
 import { DeployerForm } from "./DeployerForm"
 import { AddressSchema } from "./commonSchema"
+import { ContractDropdownButton } from "./ContractDropdownButton"
 
 const EMPTY_DEPLOYER = {
   deployerAddress: "",
@@ -255,6 +256,8 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   const [dbData, setDbData] = useState<any>()
 
+  const [isDropdownOpens, setIsDropdownOpens] = useState<boolean[]>([])
+
   useEffect(() => {
     const populateForm = async () => {
       const osoData = {
@@ -294,7 +297,6 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
       }
 
       setDbData(dbData)
-
       const resultingData = osoData.contracts.map((contract) => {
         // Check if the contract is present in dbData
         const isInDb = dbData.contracts.some(
@@ -308,6 +310,12 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
           excluded: !isInDb, // Mark as excluded if not found in dbData
         }
       })
+
+      setIsDropdownOpens([
+        ...resultingData.map(() => {
+          return true
+        }),
+      ])
 
       form.setValue("address", dbData.address)
       form.setValue("contracts", resultingData)
@@ -358,44 +366,36 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                             )}
                             <p>{field.value.address}</p>
                           </div>
-                          {field.value.excluded &&
-                            dbData.contracts.some(
-                              (dbContract: any) =>
-                                dbContract.address === field.value.address &&
-                                dbContract.chain === field.value.chain,
-                            ) && (
-                              <p className="bg-gray-300 rounded-lg px-2 py.5">
-                                Exclude
-                              </p>
-                            )}
 
-                          {!field.value.excluded &&
-                            !dbData.contracts.some(
-                              (dbContract: any) =>
-                                dbContract.address === field.value.address &&
-                                dbContract.chain === field.value.chain,
-                            ) && (
-                              <p className="bg-gray-300 rounded-lg px-2 py.5">
-                                Include
-                              </p>
-                            )}
+                          <div className="flex gap-4">
+                            {field.value.excluded &&
+                              dbData.contracts.some(
+                                (dbContract: any) =>
+                                  dbContract.address === field.value.address &&
+                                  dbContract.chain === field.value.chain,
+                              ) && (
+                                <p className="bg-gray-300 rounded-lg px-2 py.5">
+                                  Exclude
+                                </p>
+                              )}
+
+                            {!field.value.excluded &&
+                              !dbData.contracts.some(
+                                (dbContract: any) =>
+                                  dbContract.address === field.value.address &&
+                                  dbContract.chain === field.value.chain,
+                              ) && (
+                                <p className="bg-gray-300 rounded-lg px-2 py.5">
+                                  Include
+                                </p>
+                              )}
+
+                            <ContractDropdownButton form={form} index={index} />
+                          </div>
 
                           {/* Example */}
                           {/* Add more fields related to the contract here */}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            form.setValue(
-                              `contracts.${index}.excluded`,
-                              !form.watch(`contracts.${index}.excluded`),
-                            )
-                          }}
-                        >
-                          {field.value.excluded
-                            ? "Include in project"
-                            : "Exclude from project"}
-                        </button>
                       </div>
                     )}
                   />
