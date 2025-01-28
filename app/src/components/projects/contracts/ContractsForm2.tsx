@@ -44,6 +44,13 @@ import { DeployerForm } from "./DeployerForm"
 import { AddressSchema } from "./commonSchema"
 import { ContractDropdownButton } from "./ContractDropdownButton"
 import { ChainLogo } from "@/components/common/ChainLogo"
+import { copyToClipboard } from "@/lib/utils"
+
+function truncate(value: string, numToShow: number) {
+  return `${value.slice(0, numToShow)}${
+    numToShow < value.length / 2 ? "..." : ""
+  }${value.slice(-numToShow)}`
+}
 
 const EMPTY_DEPLOYER = {
   deployerAddress: "",
@@ -256,6 +263,15 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   const [dbData, setDbData] = useState<any>()
 
+  const onCopyValue = async (value: string) => {
+    try {
+      await copyToClipboard(value)
+      toast("Copied to clipboard")
+    } catch (error) {
+      toast.error("Error copying to clipboard")
+    }
+  }
+
   useEffect(() => {
     const populateForm = async () => {
       const osoData = {
@@ -326,7 +342,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     initialMaxContractViewCount,
   )
 
-  const deployerIndex = 0
+  // const deployerIndex = 0
 
   return (
     <div>
@@ -334,127 +350,192 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
-            name={`deployers.${deployerIndex}.address`}
-            render={({ field: addressField }) => (
-              <div>
-                <FormLabel>Address</FormLabel>
-                <Input {...addressField} />
-                <FormMessage />
-                <FormField
-                  control={form.control}
-                  name={`deployers.${deployerIndex}.contracts`}
-                  render={({ field: contractsField }) => (
-                    <div>
-                      {contractsField.value?.map((contract, index) => {
-                        if (index >= contractViewCount) return
+            name={`deployers`}
+            render={({ field: deployersField }) => (
+              <>
+                {deployersField.value &&
+                  deployersField.value.map((deployer, deployerIndex) => {
+                    return (
+                      <FormField
+                        control={form.control}
+                        name={`deployers.${deployerIndex}.address`}
+                        render={({ field: addressField }) => (
+                          <div>
+                            <FormLabel>Address</FormLabel>
+                            <Input {...addressField} />
+                            <FormMessage />
+                            <FormField
+                              control={form.control}
+                              name={`deployers.${deployerIndex}.contracts`}
+                              render={({ field: contractsField }) => (
+                                <div>
+                                  {contractsField.value?.map(
+                                    (contract, index) => {
+                                      if (index >= contractViewCount) return
 
-                        return (
-                          <FormField
-                            control={form.control}
-                            name={`deployers.${deployerIndex}.contracts.${index}`}
-                            render={({ field: contractField }) => (
-                              <div className="flex">
-                                <div
-                                  key={index}
-                                  className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  <div className="flex items-center">
-                                    <FormField
-                                      control={form.control}
-                                      name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
-                                      render={({ field: excludedField }) => (
-                                        <div>
-                                          {excludedField.value ? (
-                                            <X width={16} height={16} />
-                                          ) : (
-                                            <Check width={16} height={16} />
+                                      return (
+                                        <FormField
+                                          control={form.control}
+                                          name={`deployers.${deployerIndex}.contracts.${index}`}
+                                          render={({
+                                            field: contractField,
+                                          }) => (
+                                            <div className="flex">
+                                              <div
+                                                key={index}
+                                                className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                              >
+                                                <div className="flex items-center gap-2">
+                                                  <FormField
+                                                    control={form.control}
+                                                    name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
+                                                    render={({
+                                                      field: excludedField,
+                                                    }) => (
+                                                      <div>
+                                                        {excludedField.value ? (
+                                                          <X
+                                                            width={16}
+                                                            height={16}
+                                                          />
+                                                        ) : (
+                                                          <Check
+                                                            width={16}
+                                                            height={16}
+                                                          />
+                                                        )}
+                                                      </div>
+                                                    )}
+                                                  />
+                                                  <ChainLogo
+                                                    chainId={
+                                                      contractField.value.chain
+                                                    }
+                                                  />
+                                                  <button
+                                                    className="relative group"
+                                                    type="button"
+                                                    onClick={() => {
+                                                      onCopyValue(
+                                                        contractField.value
+                                                          .address,
+                                                      )
+                                                    }}
+                                                  >
+                                                    {truncate(
+                                                      contractField.value
+                                                        .address,
+                                                      10,
+                                                    )}
+                                                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg">
+                                                      {
+                                                        contractField.value
+                                                          .address
+                                                      }
+                                                    </span>
+                                                  </button>
+                                                </div>
+
+                                                <div className="flex gap-4">
+                                                  <FormField
+                                                    control={form.control}
+                                                    name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
+                                                    render={({
+                                                      field: excludedField,
+                                                    }) => (
+                                                      <>
+                                                        {excludedField.value &&
+                                                          dbData.contracts.some(
+                                                            (dbContract: any) =>
+                                                              dbContract.address ===
+                                                                contractField
+                                                                  .value
+                                                                  .address &&
+                                                              dbContract.chain ===
+                                                                contractField
+                                                                  .value.chain,
+                                                          ) && (
+                                                            <p className="bg-gray-300 rounded-lg px-2 py.5">
+                                                              Exclude
+                                                            </p>
+                                                          )}
+
+                                                        {!excludedField.value &&
+                                                          !dbData.contracts.some(
+                                                            (dbContract: any) =>
+                                                              dbContract.address ===
+                                                                contractField
+                                                                  .value
+                                                                  .address &&
+                                                              dbContract.chain ===
+                                                                contractField
+                                                                  .value.chain,
+                                                          ) && (
+                                                            <p className="bg-gray-300 rounded-lg px-2 py.5">
+                                                              Include
+                                                            </p>
+                                                          )}
+
+                                                        <ContractDropdownButton
+                                                          form={form}
+                                                          field={excludedField}
+                                                          index={index}
+                                                        />
+                                                      </>
+                                                    )}
+                                                  />
+                                                </div>
+
+                                                {/* Example */}
+                                                {/* Add more fields related to the contract here */}
+                                              </div>
+                                            </div>
                                           )}
-                                        </div>
-                                      )}
-                                    />
-                                    <ChainLogo
-                                      chainId={contractField.value.chain}
-                                    />
-                                    <p>{contractField.value.address}</p>
-                                  </div>
+                                        />
+                                      )
+                                    },
+                                  )}
 
-                                  <div className="flex gap-4">
-                                    <FormField
-                                      control={form.control}
-                                      name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
-                                      render={({ field: excludedField }) => (
-                                        <>
-                                          {excludedField.value &&
-                                            dbData.contracts.some(
-                                              (dbContract: any) =>
-                                                dbContract.address ===
-                                                  contractField.value.address &&
-                                                dbContract.chain ===
-                                                  contractField.value.chain,
-                                            ) && (
-                                              <p className="bg-gray-300 rounded-lg px-2 py.5">
-                                                Exclude
-                                              </p>
-                                            )}
-
-                                          {!excludedField.value &&
-                                            !dbData.contracts.some(
-                                              (dbContract: any) =>
-                                                dbContract.address ===
-                                                  contractField.value.address &&
-                                                dbContract.chain ===
-                                                  contractField.value.chain,
-                                            ) && (
-                                              <p className="bg-gray-300 rounded-lg px-2 py.5">
-                                                Include
-                                              </p>
-                                            )}
-
-                                          <ContractDropdownButton
-                                            form={form}
-                                            field={excludedField}
-                                            index={index}
-                                          />
-                                        </>
-                                      )}
-                                    />
-                                  </div>
-
-                                  {/* Example */}
-                                  {/* Add more fields related to the contract here */}
+                                  {contractsField.value &&
+                                    contractsField.value.length > 0 &&
+                                    contractViewCount <
+                                      contractsField.value.length && (
+                                      <button
+                                        className="flex items-center gap-2"
+                                        onClick={() => {
+                                          setContractViewCount(
+                                            contractsField.value.length,
+                                          )
+                                        }}
+                                      >
+                                        <p>
+                                          Show{" "}
+                                          {contractsField.value.length -
+                                            initialMaxContractViewCount}{" "}
+                                          more contract(s)
+                                        </p>
+                                        <ChevronDown width={16} height={16} />
+                                      </button>
+                                    )}
                                 </div>
-                              </div>
-                            )}
-                          />
-                        )
-                      })}
-
-                      {contractsField.value &&
-                        contractsField.value.length > 0 &&
-                        contractViewCount < contractsField.value.length && (
-                          <button
-                            className="flex items-center gap-2"
-                            onClick={() => {
-                              setContractViewCount(contractsField.value.length)
-                            }}
-                          >
-                            <p>
-                              Show{" "}
-                              {contractsField.value.length -
-                                initialMaxContractViewCount}{" "}
-                              more contract(s)
-                            </p>
-                            <ChevronDown width={16} height={16} />
-                          </button>
+                              )}
+                            />
+                          </div>
                         )}
-                    </div>
-                  )}
-                />
-              </div>
+                      />
+                    )
+                  })}
+
+                <Button variant={"ghost"} className="bg-gray-300" type="button">
+                  Add another project
+                </Button>
+              </>
             )}
           />
 
-          <button type="submit">Save</button>
+          <Button variant={"destructive"} type="submit">
+            Save
+          </Button>
         </form>
       </Form>
       {/* <Form {...form}> */}
