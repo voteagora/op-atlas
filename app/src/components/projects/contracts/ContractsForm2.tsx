@@ -48,16 +48,43 @@ import { copyToClipboard } from "@/lib/utils"
 import { VerifyButton } from "./VerifyButton"
 // import { ExcludedTag } from "./ExcludedTag"
 
-function truncate(value: string, numToShow: number) {
-  return `${value.slice(0, numToShow)}${
-    numToShow < value.length / 2 ? "..." : ""
-  }${value.slice(-numToShow)}`
-}
-
 const EMPTY_DEPLOYER = {
   deployerAddress: "",
   contracts: [],
 }
+
+export const mockDbContracts = [
+  {
+    address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+    chain: "8453",
+  },
+  {
+    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+    chain: "34443",
+  },
+]
+export const mockDbDataOriginal = {
+  deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+  contracts: [...mockDbContracts],
+}
+
+export const mockDbData = [
+  {
+    deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+    address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+    chain: "8453",
+  },
+  {
+    deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+    chain: "34443",
+  },
+  {
+    deployerAddress: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+    address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+    chain: "34443",
+  },
+]
 
 export const mockOsoContracts = [
   {
@@ -78,27 +105,16 @@ export const mockOsoContracts = [
   },
 ]
 
-const osoData = {
-  address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-  contracts: [...mockOsoContracts],
-}
-
-export const mockDbContracts = [
+const mockOsoData = [
+  {
+    address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+    contracts: [...mockOsoContracts],
+  },
   {
     address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-    chain: "8453",
-  },
-  {
-    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
-    chain: "34443",
+    contracts: [...mockOsoContracts],
   },
 ]
-
-const mockDbData = {
-  address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-  contracts: [...mockDbContracts],
-}
-
 // const EMPTY_CONTRACT = {
 //   contractAddress: "",
 //   chain: Chain.options[0],
@@ -306,51 +322,80 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     console.log(data)
   }
 
-  const [dbData, setDbData] = useState<any>()
-
-  const onCopyValue = async (value: string) => {
-    try {
-      await copyToClipboard(value)
-      toast("Copied to clipboard")
-    } catch (error) {
-      toast.error("Error copying to clipboard")
-    }
-  }
+  const [allDbData, setAllDbData] = useState<any>()
 
   useEffect(() => {
     const populateForm = async () => {
-      setDbData(mockDbData)
-      const resultingData = osoData.contracts.map((contract) => {
-        // Check if the contract is present in dbData
-        const isInDb = mockDbData.contracts.some(
-          (dbContract: any) =>
-            dbContract.address === contract.address &&
-            dbContract.chain === contract.chain,
-        )
+      //1. Get DB Data
+      // TODO: Implement
 
+      //2. Consolodiate DB Data
+      const consolidatedData = mockDbData.reduce(
+        (acc: any, { deployerAddress, ...contract }) => {
+          if (!acc[deployerAddress]) {
+            acc[deployerAddress] = { deployerAddress, contracts: [] }
+          }
+          acc[deployerAddress].contracts.push(contract)
+          return acc
+        },
+        {},
+      )
+      const fetchedDbData: any = Object.values(consolidatedData)
+      console.log(fetchedDbData)
+
+      //3. Get OSO Data
+      const fetchedOsoData = mockOsoData
+
+      // for (let i = 0; i < fetchedDbData.length; i++) {
+      //   const osoResult = await oso.getContracts(fetchedDbData[i].deployerAddress);
+      //   fetchedOsoData.push(osoResult);
+      // }
+
+      const formDeployers = fetchedOsoData.map((deployer) => {
         return {
-          ...contract,
-          excluded: !isInDb, // Mark as excluded if not found in dbData
+          address: deployer.address,
+          contracts: deployer.contracts.map((contract) => {
+            return {
+              ...contract,
+              excluded:
+                mockDbData.find((entry) => {
+                  return (
+                    entry.deployerAddress === deployer.address &&
+                    entry.chain === contract.chain &&
+                    entry.address === contract.address
+                  )
+                }) !== undefined,
+            }
+          }),
         }
       })
 
-      form.setValue("deployers", [
-        {
-          address: mockDbData.address,
-          contracts: resultingData,
-        },
-      ])
-      // form.setValue("address", dbData.address)
-      // form.setValue("contracts", resultingData)
+      //4. Cross Reference
+
+      // const b = osoData.map((deployer) => {
+      //   return {
+      //     address: deployer.address,
+      //     contracts: deployer.contracts.map((contract) => {
+      //       return {
+      //         ...contract,
+      //         excluded:
+      //           mockDbData.find((entry) => {
+      //             return (
+      //               entry.deployerAddress === deployer.address &&
+      //               entry.chain === contract.chain &&
+      //               entry.address === contract.address
+      //             )
+      //           }) !== undefined,
+      //       }
+      //     }),
+      //   }
+      // })
+
+      form.setValue("deployers", formDeployers)
     }
 
     populateForm()
   }, [form])
-
-  const initialMaxContractViewCount = 3
-  const [contractViewCount, setContractViewCount] = useState(
-    initialMaxContractViewCount,
-  )
 
   // const deployerIndex = 0
 
@@ -374,204 +419,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                 {deployersField.value &&
                   deployersField.value.map((deployer, deployerIndex) => {
                     return (
-                      <>
-                        <FormField
-                          control={form.control}
-                          name={`deployers.${deployerIndex}.address`}
-                          render={({ field: addressField }) => (
-                            <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
-                              <FormLabel>Deployer Address</FormLabel>
-                              <Input {...addressField} />
-                              <FormMessage />
-
-                              <VerifyButton
-                                form={form}
-                                deployerIndex={deployerIndex}
-                                validateForm={validateForm}
-                              />
-
-                              <FormField
-                                control={form.control}
-                                name={`deployers.${deployerIndex}.contracts`}
-                                render={({ field: contractsField }) => (
-                                  <div>
-                                    {contractsField.value.length > 0 && (
-                                      <>
-                                        <FormLabel>Contracts</FormLabel>
-                                        {contractsField.value?.map(
-                                          (contract, index) => {
-                                            if (index >= contractViewCount)
-                                              return
-
-                                            return (
-                                              <FormField
-                                                control={form.control}
-                                                name={`deployers.${deployerIndex}.contracts.${index}`}
-                                                render={({
-                                                  field: contractField,
-                                                }) => (
-                                                  <div className="flex">
-                                                    <div
-                                                      key={index}
-                                                      className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    >
-                                                      <div className="flex items-center gap-2">
-                                                        <FormField
-                                                          control={form.control}
-                                                          name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
-                                                          render={({
-                                                            field:
-                                                              excludedField,
-                                                          }) => (
-                                                            <div>
-                                                              {excludedField.value ? (
-                                                                <X
-                                                                  width={16}
-                                                                  height={16}
-                                                                />
-                                                              ) : (
-                                                                <Check
-                                                                  width={16}
-                                                                  height={16}
-                                                                />
-                                                              )}
-                                                            </div>
-                                                          )}
-                                                        />
-                                                        <ChainLogo
-                                                          chainId={
-                                                            contractField.value
-                                                              .chain
-                                                          }
-                                                        />
-                                                        <button
-                                                          className="relative group hover:bg-gray-200 px-2 rounded-lg"
-                                                          type="button"
-                                                          onClick={() => {
-                                                            onCopyValue(
-                                                              contractField
-                                                                .value.address,
-                                                            )
-                                                          }}
-                                                        >
-                                                          {truncate(
-                                                            contractField.value
-                                                              .address,
-                                                            10,
-                                                          )}
-                                                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg">
-                                                            {
-                                                              contractField
-                                                                .value.address
-                                                            }
-                                                          </span>
-                                                        </button>
-                                                      </div>
-
-                                                      <div className="flex gap-4">
-                                                        {/* <ExcludedTag form={form} contractField={contractField} deployerIndex={deployerIndex} index={index}/> */}
-
-                                                        <FormField
-                                                          control={form.control}
-                                                          name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
-                                                          render={({
-                                                            field:
-                                                              excludedField,
-                                                          }) => (
-                                                            <>
-                                                              {excludedField.value &&
-                                                                dbData.contracts.some(
-                                                                  (
-                                                                    dbContract: any,
-                                                                  ) =>
-                                                                    dbContract.address ===
-                                                                      contractField
-                                                                        .value
-                                                                        .address &&
-                                                                    dbContract.chain ===
-                                                                      contractField
-                                                                        .value
-                                                                        .chain,
-                                                                ) && (
-                                                                  <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
-                                                                    Exclude
-                                                                  </p>
-                                                                )}
-
-                                                              {!excludedField.value &&
-                                                                !dbData.contracts.some(
-                                                                  (
-                                                                    dbContract: any,
-                                                                  ) =>
-                                                                    dbContract.address ===
-                                                                      contractField
-                                                                        .value
-                                                                        .address &&
-                                                                    dbContract.chain ===
-                                                                      contractField
-                                                                        .value
-                                                                        .chain,
-                                                                ) && (
-                                                                  <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
-                                                                    Include
-                                                                  </p>
-                                                                )}
-
-                                                              <ContractDropdownButton
-                                                                form={form}
-                                                                field={
-                                                                  excludedField
-                                                                }
-                                                                index={index}
-                                                              />
-                                                            </>
-                                                          )}
-                                                        />
-                                                      </div>
-
-                                                      {/* Example */}
-                                                      {/* Add more fields related to the contract here */}
-                                                    </div>
-                                                  </div>
-                                                )}
-                                              />
-                                            )
-                                          },
-                                        )}
-
-                                        {contractsField.value &&
-                                          contractsField.value.length > 0 &&
-                                          contractViewCount <
-                                            contractsField.value.length && (
-                                            <button
-                                              className="flex items-center gap-2"
-                                              onClick={() => {
-                                                setContractViewCount(
-                                                  contractsField.value.length,
-                                                )
-                                              }}
-                                            >
-                                              <p>
-                                                Show{" "}
-                                                {contractsField.value.length -
-                                                  initialMaxContractViewCount}{" "}
-                                                more contract(s)
-                                              </p>
-                                              <ChevronDown
-                                                width={16}
-                                                height={16}
-                                              />
-                                            </button>
-                                          )}
-                                      </>
-                                    )}
-                                  </div>
-                                )}
-                              />
-                            </div>
-                          )}
-                        />
-                      </>
+                      <DeployerForm form={form} deployerIndex={deployerIndex} />
                     )
                   })}
 

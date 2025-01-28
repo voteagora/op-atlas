@@ -1,364 +1,236 @@
-import {
-  useFieldArray,
-  useFormContext,
-  UseFormReturn,
-  useWatch,
-} from "react-hook-form"
-import { isAddress } from "viem"
+import { UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { ContractsSchema2 } from "./schema2"
-import { useState } from "react"
-import { Check, ChevronDown, Ellipsis, Loader2, Plus } from "lucide-react"
+import { FormField, FormLabel, FormMessage } from "@/components/ui/form"
+import { VerifyButton } from "./VerifyButton"
+import { Input } from "@/components/ui/input"
 import { ChainLogo } from "@/components/common/ChainLogo"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Callout } from "@/components/common/Callout"
-import { CalloutDeleteAndReplaceMe } from "./CalloutDeleteAndReplaceMe"
-import { DropdownMenu } from "@/components/ui/dropdown-menu"
-import DropdownItem from "@/components/common/DropdownItem"
-import { DeployerContract } from "./DeployerContract"
+import { Check, ChevronDown, X } from "lucide-react"
+import { ContractDropdownButton } from "./ContractDropdownButton"
+import { ReactNode, useEffect, useState } from "react"
+import { truncate } from "@/lib/utils/contracts"
+import { copyToClipboard } from "@/lib/utils"
+import { toast } from "sonner"
+import { mockOsoContracts } from "./ContractsForm2"
 
-// const mockDeployerContracts = [
-//   {
-//     deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-//     contracts: [
-//       {
-//         address: "0x123",
-//         chain: 8453,
-//         selected: true,
-//         initialSelected: true,
-//       },
-//       {
-//         address: "0x456",
-//         chain: 34443,
-//         selected: true,
-//         initialSelected: true,
-//       },
-//       {
-//         address: "0x789",
-//         chain: 10,
-//         selected: true,
-//         initialSelected: true,
-//       },
-
-//       {
-//         address: "0x111",
-//         chain: 10,
-//         selected: true,
-//         initialSelected: true,
-//       },
-//     ],
-//   },
-// ]
-
-const initialMaxContractViewCount = 4
+const onCopyValue = async (value: string) => {
+  try {
+    await copyToClipboard(value)
+    toast("Copied to clipboard")
+  } catch (error) {
+    toast.error("Error copying to clipboard")
+  }
+}
 
 export function DeployerForm({
-  index,
+  deployerIndex,
   form,
 }: {
   form: UseFormReturn<z.infer<typeof ContractsSchema2>>
-  index: number
+  deployerIndex: number
 }) {
+  const initialMaxContractViewCount = 3
   const [contractViewCount, setContractViewCount] = useState(
     initialMaxContractViewCount,
   )
 
-  const [userDeployerContractViewCount, setUserDeployerContractViewCount] =
-    useState(initialMaxContractViewCount)
+  const [dbData, setDbData] = useState<{ contracts: any[] }>()
 
-  const { deployers } = useWatch({
-    control: form.control,
-  })
-
-  const { fields, append, update } = useFieldArray({
-    control: form.control,
-    name: "deployers",
-  })
-
-  const isValidAddress = isAddress(deployers[index]?.deployerAddress)
-
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<
-    React.ReactNode | undefined
-  >()
-
-  const [isValidDeployer, setIsValidDeployer] = useState(false)
-
-  const handleOnClick = async () => {
-    setErrorMessage(undefined)
+  async function OnVerify() {
     setIsVerifying(true)
+    setErrorMessage(undefined)
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // get OSO data
+
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    form.setValue(
+      `deployers.${deployerIndex}.contracts`,
+      mockOsoContracts.map((contract) => {
+        return {
+          ...contract,
+          excluded: true,
+        }
+      }),
+    )
+
+    if (form.getValues().deployers[deployerIndex].contracts.length <= 0) {
+      setErrorMessage(
+        <p className="text-rose-600">
+          We couldn’t find any contracts deployed by this address. Learn more
+          about <span className="underline">missing contracts</span>
+        </p>,
+      )
+    }
 
     setIsVerifying(false)
 
-    // const deployerContracts: {
-    //   deployerAddress: string
-    //   contracts: { address: string; chain: number }[]
-    // }[] = mockDeployerContracts
+    const resultingData = mockOsoContracts.map((contract) => {
+      return {
+        ...contract,
+        excluded: false,
+      }
+    })
 
-    const formValue = form.getValues(`deployers.${index}.deployerAddress`)
-
-    console.log(formValue)
-
-    // const foundMock = deployerContracts.find(
-    //   (deployerContract) => deployerContract.deployerAddress === formValue,
-    // )
-
-    // console.log(foundMock)
-
-    // const contractsWithSelected = foundMock?.contracts.map((contract) => {
-    //   return { ...contract }
-    // })
-
-    // const contractsWithSelected = deployerContracts.find((deployerContract)=> deployerContract.deployerAddress === form.getValues(`deployers.${index}.deployerAddress`)).map((contract) => {
-    //   return { ...contract, selected: false }
-    // })
-
-    // if (contractsWithSelected) {
-    //   const updatedContracts = [...contractsWithSelected]
-
-    //   console.log(updatedContracts)
-
-    //   update(index, {
-    //     ...fields[index],
-    //     contracts: updatedContracts,
-    //   })
-
-    //   if (updatedContracts.length <= 0) {
-    //     setErrorMessage(
-    //       <p className="text-rose-600">
-    //         We couldn’t find any contracts deployed by this address. Learn more
-    //         about <span className="underline">missing contracts</span>
-    //       </p>,
-    //     )
-    //     setIsValidDeployer(false)
-    //   } else {
-    //     toast.success(`Loaded ${contractsWithSelected.length} contracts.`)
-    //     setIsSelectingContracts(true)
-    //   }
-    // }
+    form.setValue(`deployers.${deployerIndex}.contracts`, [...resultingData])
   }
 
-  // const contracts = form.getValues().deployers[index].contracts
+  const [isVerifying, setIsVerifying] = useState(false)
 
-  // const isAllContractsSelected = contracts.every(
-  //   (contract: any) => contract.selected,
-  // )
-
-  // async function handleSelectAllContracts() {
-  //   contracts.forEach((contract: any, contractIndex: number) => {
-  //     form.setValue(
-  //       `deployers.${index}.contracts.${contractIndex}.selected`,
-  //       !isAllContractsSelected,
-  //     )
-  //   })
-  // }
-
-  const [userDeployerContracts, setUserDeployerContracts] = useState([])
-
-  const [isSelectingContracts, setIsSelectingContracts] = useState(true)
+  const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
   return (
     <>
       <FormField
         control={form.control}
-        name={`deployers.${index}.deployerAddress`}
-        render={({ field }) => (
-          <FormItem className="flex flex-col gap-1.5">
-            <FormLabel className="text-foreground">Deployer address</FormLabel>
-            <FormControl>
-              <Input {...field} placeholder="0x..." className="" />
-            </FormControl>
+        name={`deployers.${deployerIndex}.address`}
+        render={({ field: addressField }) => (
+          <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
+            <FormLabel>Deployer Address</FormLabel>
+            <Input {...addressField} />
             <FormMessage />
 
-            {errorMessage}
-          </FormItem>
-        )}
-      />
+            <VerifyButton
+              form={form}
+              deployerIndex={deployerIndex}
+              isVerifying={isVerifying}
+              errorMessage={errorMessage}
+              onVerify={OnVerify}
+            />
 
-      <FormField
-        control={form.control}
-        name={`deployers.${index}.contracts`}
-        render={({ field }) => (
-          <>
-            <FormItem className="flex flex-col gap-1.5">
-              {field.value.length > 0 ||
-                (userDeployerContracts.length > 0 && <p>Contracts</p>)}
+            <FormField
+              control={form.control}
+              name={`deployers.${deployerIndex}.contracts`}
+              render={({ field: contractsField }) => (
+                <div>
+                  {contractsField.value.length > 0 && (
+                    <>
+                      <FormLabel>Contracts</FormLabel>
+                      {contractsField.value?.map((contract, index) => {
+                        if (index >= contractViewCount) return
 
-              {isSelectingContracts && (
-                <>
-                  {/* {contracts.length > 0 && (
-            <div>
-              <Checkbox
-                checked={isAllContractsSelected}
-                onCheckedChange={handleSelectAllContracts}
-              />
-              Select all contracts
-            </div>
-          )} */}
+                        return (
+                          <FormField
+                            control={form.control}
+                            name={`deployers.${deployerIndex}.contracts.${index}`}
+                            render={({ field: contractField }) => (
+                              <div className="flex">
+                                <div
+                                  key={index}
+                                  className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <FormField
+                                      control={form.control}
+                                      name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
+                                      render={({ field: excludedField }) => (
+                                        <div>
+                                          {excludedField.value ? (
+                                            <X width={16} height={16} />
+                                          ) : (
+                                            <Check width={16} height={16} />
+                                          )}
+                                        </div>
+                                      )}
+                                    />
+                                    <ChainLogo
+                                      chainId={contractField.value.chain}
+                                    />
+                                    <button
+                                      className="relative group hover:bg-gray-200 px-2 rounded-lg"
+                                      type="button"
+                                      onClick={() => {
+                                        onCopyValue(contractField.value.address)
+                                      }}
+                                    >
+                                      {truncate(
+                                        contractField.value.address,
+                                        10,
+                                      )}
+                                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg">
+                                        {contractField.value.address}
+                                      </span>
+                                    </button>
+                                  </div>
 
-                  <p>Contracts</p>
-                  {field.value.map((contract: any, contractIndex: number) => {
-                    if (contractIndex >= contractViewCount) return
+                                  <div className="flex gap-4">
+                                    {/* <ExcludedTag form={form} contractField={contractField} deployerIndex={deployerIndex} index={index}/> */}
 
-                    return (
-                      <DeployerContract
-                        key={contractIndex}
-                        form={form}
-                        contract={contract}
-                        deployerIndex={index}
-                        contractIndex={contractIndex}
-                      />
-                    )
-                  })}
+                                    <FormField
+                                      control={form.control}
+                                      name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
+                                      render={({ field: excludedField }) => (
+                                        <>
+                                          {excludedField.value &&
+                                            dbData?.contracts.some(
+                                              (dbContract: any) =>
+                                                dbContract.address ===
+                                                  contractField.value.address &&
+                                                dbContract.chain ===
+                                                  contractField.value.chain,
+                                            ) && (
+                                              <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
+                                                Exclude
+                                              </p>
+                                            )}
 
-                  {field.value.length > 0 &&
-                    contractViewCount !== field.value.length && (
-                      <button
-                        className="flex items-center gap-2"
-                        onClick={() => {
-                          setContractViewCount(field.value.length)
-                        }}
-                      >
-                        <p>
-                          Show{" "}
-                          {field.value.length - initialMaxContractViewCount}{" "}
-                          more contracts
-                        </p>
-                        <ChevronDown width={16} height={16} />
-                      </button>
-                    )}
+                                          {!excludedField.value &&
+                                            !dbData?.contracts.some(
+                                              (dbContract: any) =>
+                                                dbContract.address ===
+                                                  contractField.value.address &&
+                                                dbContract.chain ===
+                                                  contractField.value.chain,
+                                            ) && (
+                                              <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
+                                                Include
+                                              </p>
+                                            )}
 
-                  {field.value.length > 0 && (
-                    <div className="flex justify-between items-end">
-                      <Button
-                        disabled={
-                          !field.value.some(
-                            (contract: any) => contract.selected,
-                          )
-                        }
-                        variant={"destructive"}
-                        className="gap-2"
-                        onClick={() => {
-                          setUserDeployerContracts(
-                            field.value.filter(
-                              (contract: any) => contract.selected,
-                            ),
-                          )
+                                          <ContractDropdownButton
+                                            form={form}
+                                            field={excludedField}
+                                            index={index}
+                                          />
+                                        </>
+                                      )}
+                                    />
+                                  </div>
 
-                          setIsSelectingContracts(false)
-                        }}
-                      >
-                        {field.value.filter(
-                          (contract: any) => contract.selected,
-                        ).length > 0 && (
-                          <p className="px-2 py-0.5 rounded-lg bg-rose-900">
-                            {
-                              field.value.filter(
-                                (contract: any) => contract.selected,
-                              ).length
-                            }
-                          </p>
+                                  {/* Example */}
+                                  {/* Add more fields related to the contract here */}
+                                </div>
+                              </div>
+                            )}
+                          />
+                        )
+                      })}
+
+                      {contractsField.value &&
+                        contractsField.value.length > 0 &&
+                        contractViewCount < contractsField.value.length && (
+                          <button
+                            className="flex items-center gap-2"
+                            onClick={() => {
+                              setContractViewCount(contractsField.value.length)
+                            }}
+                          >
+                            <p>
+                              Show{" "}
+                              {contractsField.value.length -
+                                initialMaxContractViewCount}{" "}
+                              more contract(s)
+                            </p>
+                            <ChevronDown width={16} height={16} />
+                          </button>
                         )}
-
-                        <p>Add to project</p>
-                      </Button>
-                    </div>
+                    </>
                   )}
-                </>
-              )}
-
-              {!isSelectingContracts && userDeployerContracts.length > 0 && (
-                <>
-                  <CalloutDeleteAndReplaceMe
-                    type="info"
-                    rightHandSide={
-                      <p>
-                        To see all contracts from this deployer, choose
-                        <button
-                          className="m-1 underline"
-                          onClick={() => {
-                            setIsSelectingContracts(true)
-                          }}
-                        >
-                          view and edit contracts
-                        </button>
-                        .
-                      </p>
-                    }
-                  />
-                  {userDeployerContracts.map(
-                    (contract: any, contractIndex: number) => {
-                      if (contractIndex >= userDeployerContractViewCount) return
-
-                      return (
-                        <div className="flex">
-                          <div className="flex items-center space-x-2 border border-input p-3 h-10 rounded-lg w-full">
-                            <Check width={16} height={16} />
-                            <ChainLogo chainId={contract.chain} size={24} />
-                            <p>{contract.address}</p>
-                          </div>
-                        </div>
-                      )
-                    },
-                  )}
-
-                  {userDeployerContracts.length > 0 &&
-                    userDeployerContractViewCount !==
-                      userDeployerContracts.length && (
-                      <button
-                        className="flex items-center gap-2"
-                        onClick={() => {
-                          setUserDeployerContractViewCount(
-                            userDeployerContracts.length,
-                          )
-                        }}
-                      >
-                        <p>
-                          Show{" "}
-                          {userDeployerContracts.length -
-                            initialMaxContractViewCount}{" "}
-                          more contracts
-                        </p>
-                        <ChevronDown width={16} height={16} />
-                      </button>
-                    )}
-                </>
-              )}
-
-              {isVerifying && (
-                <div className="flex items-center">
-                  <Loader2 width={16} height={16} />
-                  <p>Searching for contracts</p>
                 </div>
               )}
-
-              {field.value.length <= 0 && (
-                <div className="flex justify-between items-end">
-                  <Button
-                    variant="destructive"
-                    type="button"
-                    onClick={handleOnClick}
-                  >
-                    {errorMessage ? "Retry" : "Verify"}
-                  </Button>
-                </div>
-              )}
-            </FormItem>
-          </>
+            />
+          </div>
         )}
       />
     </>
