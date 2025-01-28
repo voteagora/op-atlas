@@ -7,12 +7,17 @@ import { auth, signIn } from "@/auth"
 import {
   getUserByFarcasterId,
   searchUsersByUsername,
+  updateUserDiscord,
   updateUserEmail,
   updateUserGithub,
   updateUserGovForumProfileUrl,
   updateUserHasGithub,
   updateUserInteraction,
 } from "@/db/users"
+
+export const connectDiscord = async () => {
+  await signIn("discord")
+}
 
 export const connectGithub = async () => {
   await signIn("github")
@@ -43,6 +48,29 @@ export const updateEmail = async (email: string) => {
   console.info(
     `Email updated for user farcasterId ${session.user.farcasterId}: ${email}`,
   )
+
+  return {
+    error: null,
+    user: updated,
+  }
+}
+
+export const removeDiscord = async () => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const updated = await updateUserDiscord({
+    id: session.user.id,
+    discord: null,
+  })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/profile/connected-apps")
 
   return {
     error: null,

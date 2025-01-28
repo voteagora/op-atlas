@@ -34,7 +34,20 @@ const config = {
         background: "hsl(var(--background))",
         backgroundaccent: "hsl(var(--background-accent))",
         backgroundSecondary: "hsl(var(--background-secondary))",
+        backgroundSecondaryHover: "hsl(var(--background-secondary-hover))",
         tertiary: "#E0E2EB",
+        button: {
+          primary: {
+            DEFAULT: "hsl(var(--button-primary))",
+            foreground: "hsl(var(--button-primary-text))",
+            hover: "hsla(var(--button-primary), 0.8)",
+          },
+          secondary: {
+            DEFAULT: "hsl(var(--button-secondary))",
+            foreground: "hsl(var(--button-secondary-foreground))",
+            hover: "hsla(var(--button-secondary), 0.8)",
+          },
+        },
         text: {
           primary: "hsl(var(--text-primary))",
           secondary: "hsl(var(--text-secondary))",

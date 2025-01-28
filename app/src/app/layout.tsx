@@ -21,11 +21,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://atlas.optimism.io"),
   title: "Atlas",
-  description: "Results are in for Round 6: Governance",
+  description: "",
   icons: "/favicon.ico",
   openGraph: {
     title: "Atlas",
-    description: "Results are in for Round 6: Governance",
+    description: "",
     url: "https://atlas.optimism.io",
     images: [
       {

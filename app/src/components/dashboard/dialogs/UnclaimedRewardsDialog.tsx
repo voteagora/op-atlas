@@ -83,7 +83,7 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
       </div>
       <div className="flex items-center gap-2">
         <Image
-          src="/assets/chain-logos/optimism.png"
+          src="/assets/icons/op-icon.svg"
           height={24}
           width={24}
           alt="Optimism"

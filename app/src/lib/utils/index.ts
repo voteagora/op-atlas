@@ -9,6 +9,7 @@ import { ProjectWithDetails, UserWithAddresses } from "../types"
 export const APPLICATIONS_CLOSED =
   process.env.NEXT_PUBLIC_APPLICATIONS_CLOSED === "true"
 
+export const DISCORD_REDIRECT_COOKIE = "discord-auth-redirect"
 export const GITHUB_REDIRECT_COOKIE = "github-auth-redirect"
 
 export const EAS_URL_PREFIX =

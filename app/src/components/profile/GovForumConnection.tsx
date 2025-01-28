@@ -4,17 +4,18 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { Button } from "@/components/common/Button"
 import { updateGovForumProfileUrl } from "@/lib/actions/users"
 import { UserWithEmails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 
 export function GovForumConnection({ user }: { user: UserWithEmails }) {
   const [govForumProfileUrl, setGovForumProfileUrl] = useState(
     user.govForumProfileUrl || "",
   )
+  const [isEditing, setIsEditing] = useState(false)
 
   const [loading, setLoading] = useState(false)
 
@@ -44,6 +45,7 @@ export function GovForumConnection({ user }: { user: UserWithEmails }) {
       toast.success("Profile URL updated")
     }
     setLoading(false)
+    setIsEditing(false)
   }
 
   useEffect(() => {
@@ -68,30 +70,32 @@ export function GovForumConnection({ user }: { user: UserWithEmails }) {
   }, [user])
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-[6px]">
-        <Image
-          src="/assets/icons/op-icon.svg"
-          alt="Gov Forum"
-          height={20}
-          width={20}
-        />
-        <h3 className="text-xl font-semibold text-foreground">
-          Collective Governance Forum
-        </h3>
+    <div className="flex flex-col space-y-4">
+      <div>
+        <div className="flex items-center space-x-1.5">
+          <Image
+            src="/assets/icons/op-icon.svg"
+            alt="Gov Forum"
+            height={20}
+            width={20}
+          />
+          <h3 className="text-xl font-semibold text-foreground">
+            Collective Governance Forum
+          </h3>
+        </div>
+        <p className="text-secondary-foreground">
+          Link your profile so anyone can find you on{" "}
+          <a
+            href="https://gov.optimism.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            gov.optimism.io
+          </a>
+          .
+        </p>
       </div>
-      <p className="text-secondary-foreground">
-        Link your profile so anyone can find you on{" "}
-        <a
-          href="https://gov.optimism.io"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline"
-        >
-          gov.optimism.io
-        </a>
-        .
-      </p>
 
       <div className="flex gap-x-2">
         <div className="relative flex-1">
@@ -110,15 +114,25 @@ export function GovForumConnection({ user }: { user: UserWithEmails }) {
             value={govForumProfileUrl}
             onChange={(e) => setGovForumProfileUrl(e.target.value)}
             className={cn(user.govForumProfileUrl && "pl-10")}
+            readOnly={!isEditing}
           />
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={loading}
-          variant={user.govForumProfileUrl ? "secondary" : "destructive"}
-        >
-          {user.govForumProfileUrl ? "Edit" : "Save"}
-        </Button>
+        {isEditing ? (
+          <Button
+            onClick={handleSave}
+            disabled={
+              loading ||
+              user.govForumProfileUrl === govForumProfileUrl ||
+              !govForumProfileUrl
+            }
+          >
+            Save
+          </Button>
+        ) : (
+          <Button onClick={() => setIsEditing(true)} variant="secondary">
+            Edit
+          </Button>
+        )}
       </div>
     </div>
   )

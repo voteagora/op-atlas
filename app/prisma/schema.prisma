@@ -14,6 +14,7 @@ model User {
   farcasterId         String  @unique
   imageUrl            String?
   bio                 String?
+  discord             String?
   github              String?
   notDeveloper        Boolean @default(false)
   govForumProfileUrl  String?

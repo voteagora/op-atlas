@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
+import { Button } from "@/components/common/Button"
 import { syncFarcasterAddresses } from "@/lib/actions/addresses"
 import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
 import { isBadgeholderAddress } from "@/lib/badgeholders"
@@ -24,7 +25,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion"
-import { Button } from "../ui/button"
 
 export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
   const progress = profileProgress(user)
@@ -143,22 +143,22 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
               Please add email for important messages.
             </div>
           </div>
-          {user.emails.length > 0 && (
-            <div className="flex items-center self-start p-3 border border-border rounded-md gap-1">
-              <Mail size={14} />
-              <div className="text-secondary-foreground">
-                {user.emails[0].email}
+          <div className="flex space-x-1.5 items-center">
+            {user.emails.length > 0 && (
+              <div className="input-container">
+                <Mail size={16} fill="#0F111A" color="#fff" />
+                <span>{user.emails[0].email}</span>
               </div>
-            </div>
-          )}
+            )}
+            <Button
+              onClick={() => setOpenDialog("email")}
+              variant={user.emails.length > 0 ? "secondary" : "primary"}
+            >
+              {user.emails.length > 0 ? "Edit" : "Add email"}
+            </Button>
+          </div>
         </div>
       </div>
-      <Button
-        onClick={() => setOpenDialog("email")}
-        variant={user.emails.length > 0 ? "secondary" : "destructive"}
-      >
-        {user.emails.length > 0 ? "Edit" : "Add email"}
-      </Button>
     </div>
   )
 }
@@ -213,30 +213,26 @@ function ConnectYourGithubStep({ user }: { user: User }) {
               <div className="text-secondary-foreground">{user.github}</div>
             </div>
           )}
-          <div
-            className={cn(
-              "text-sm font-medium self-start text-foreground p-3 flex gap-1 items-center border border-border rounded-md",
-              !isDeveloper && "bg-secondary",
+          <div className="flex space-x-1.5 items-center">
+            <div
+              className={cn("input-container", !isDeveloper && "bg-secondary")}
+            >
+              <input
+                type="checkbox"
+                checked={!isDeveloper}
+                onChange={(e) => toggleIsDeveloper(!e.target.checked)}
+              />
+              I&apos;m not a developer
+            </div>
+
+            {!user.github && (
+              <Button onClick={() => connectGithub()} disabled={!isDeveloper}>
+                Connect Github
+              </Button>
             )}
-          >
-            <input
-              type="checkbox"
-              checked={!isDeveloper}
-              onChange={(e) => toggleIsDeveloper(!e.target.checked)}
-            />
-            I&apos;m not a developer
           </div>
         </div>
       </div>
-      {!user.github && (
-        <Button
-          variant="destructive"
-          onClick={() => connectGithub()}
-          disabled={!isDeveloper}
-        >
-          Connect Github
-        </Button>
-      )}
     </div>
   )
 }
@@ -291,7 +287,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
               <div className="text-sm text-foreground font-medium">
                 Your verified addresses
               </div>
-              <div className="flex gap-[6px] flex-wrap">
+              <div className="flex space-x-1.5 items-center">
                 {user.addresses.map(({ address, source }) => (
                   <VerifiedAddress
                     key={address}
@@ -314,10 +310,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
         </div>
       </div>
       {user.addresses.length < 1 && (
-        <Button
-          onClick={() => setOpenDialog("verify_address")}
-          variant="destructive"
-        >
+        <Button onClick={() => setOpenDialog("verify_address")}>
           Verify Address
         </Button>
       )}

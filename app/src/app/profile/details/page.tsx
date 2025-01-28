@@ -1,11 +1,9 @@
-import { MoveUpRight } from "lucide-react"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-import ExternalLink from "@/components/ExternalLink"
+import ExtendedLink from "@/components/common/ExtendedLink"
 import { EditEmail } from "@/components/profile/EditEmail"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getUserById } from "@/db/users"
 import { updateInteractions } from "@/lib/actions/users"
@@ -74,11 +72,11 @@ export default async function Page() {
                 <Input value={user.bio ?? ""} disabled />
               </div>
 
-              <ExternalLink href="https://warpcast.com/">
-                <Button className="flex items-center gap-2" variant="secondary">
-                  <div>Edit on Warpcast</div> <MoveUpRight size={12} />
-                </Button>
-              </ExternalLink>
+              <ExtendedLink
+                as="button"
+                href="https://warpcast.com/"
+                text="Edit on Warpcast"
+              />
             </div>
           </div>
         </div>

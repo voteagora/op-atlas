@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { toast } from "sonner"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/common/Button"
 import {
   deleteUserAddress,
   syncFarcasterAddresses,
@@ -113,19 +113,11 @@ export function VerifiedAddressesContent({
         </div>
       )}
       <div className="flex items-center gap-2">
-        <Button
-          className="self-start"
-          onClick={() => setOpenDialog("verify_address")}
-          variant="destructive"
-        >
+        <Button onClick={() => setOpenDialog("verify_address")}>
           Verify {hasAddress && "another "}address
         </Button>
 
-        <Button
-          className="self-start"
-          onClick={onSyncFarcaster}
-          variant="secondary"
-        >
+        <Button onClick={onSyncFarcaster} variant="secondary">
           Import from Farcaster
         </Button>
       </div>

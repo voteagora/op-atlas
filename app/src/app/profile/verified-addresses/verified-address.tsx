@@ -24,7 +24,7 @@ export const VerifiedAddress = ({
 }) => {
   return (
     <div className="flex items-center gap-1.5">
-      <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
+      <div className="input-container">
         {showCheckmark && (
           <Image
             src="/assets/icons/circle-check-green.svg"
