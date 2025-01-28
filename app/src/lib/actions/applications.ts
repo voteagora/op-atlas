@@ -13,6 +13,10 @@ import { uploadToPinata } from "../pinata"
 import { CategoryWithImpact } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { formatApplicationMetadata } from "../utils/metadata"
+import {
+  getApplicationsForRound,
+  getUserApplicationsForRound,
+} from "./projects"
 import { verifyAdminStatus } from "./utils"
 
 const whitelist: string[] = []
@@ -104,6 +108,21 @@ const createProjectApplication = async (
     }
   }
 
+  const applications = await getUserApplicationsForRound(
+    session?.user?.id,
+    round,
+  )
+
+  const result = applications.find(
+    (application) => application.projectId === project.id,
+  )
+
+  console.log(result)
+
+  if (result) {
+    return { error: "Project has already been submitted to this round!" }
+  }
+
   // Issue attestation
   const latestSnapshot = sortBy(
     (snapshot) => -snapshot.createdAt,
@@ -137,7 +156,7 @@ export const submitApplications = async (
     projectDescriptionOptions: string[]
   }[],
   round: number,
-  categories: CategoryWithImpact[],
+  categories?: CategoryWithImpact[],
 ) => {
   const session = await auth()
 
@@ -173,7 +192,7 @@ export const submitApplications = async (
       project,
       session.user.farcasterId,
       round,
-      categories.find((category) => category.id === project.categoryId)!,
+      categories?.find((category) => category.id === project.categoryId)!,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)

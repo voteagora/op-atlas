@@ -9,6 +9,7 @@ import {
   createProject,
   CreateProjectParams,
   deleteProject,
+  getAllApplicationsForRound,
   getAllPublishedUserProjects,
   getProjectTeam,
   getUserAdminProjectsWithDetail,
@@ -73,7 +74,17 @@ export const getApplications = async (userId: string) => {
   return userApplications
 }
 
-export const getRoundApplications = async (userId: string, roundId: number) => {
+export const getApplicationsForRound = async (roundId: number) => {
+  const userApplications = await getAllApplicationsForRound({
+    roundId: roundId.toString(),
+  })
+  return userApplications
+}
+
+export const getUserApplicationsForRound = async (
+  userId: string,
+  roundId: number,
+) => {
   const userApplications = await getUserApplications({
     userId,
     roundId: roundId.toString(),

@@ -1,16 +1,16 @@
 import {
   base,
   fraxtal,
-  mode,
-  optimism,
-  zora,
-  worldchain,
+  ink,
   lisk,
   metalL2,
-  superseed,
+  mode,
+  optimism,
   shape,
+  superseed,
   swan,
-  ink,
+  worldchain,
+  zora,
 } from "viem/chains"
 
 export enum Chain {

@@ -208,7 +208,7 @@ export function formatOrganizationMetadata(
 
 export type ApplicationMetadata = {
   round: number
-  category: string
+  category?: string
   subcategory: string[]
   impactStatement: {
     question: string
@@ -226,18 +226,20 @@ export function formatApplicationMetadata({
   round: number
   categoryId: string
   impactStatement: Record<string, string>
-  category: CategoryWithImpact
+  category?: CategoryWithImpact
   projectDescriptionOptions: string[]
 }): ApplicationMetadata {
   const metadata = {
     round: round,
-    category: category.name,
+    category: category?.name,
     subcategory: projectDescriptionOptions,
-    impactStatement: Object.entries(impactStatement).map(([id, answer]) => ({
-      question:
-        category.impactStatements.find((i) => i.id === id)?.question ?? "",
-      answer,
-    })),
+    impactStatement: impactStatement
+      ? Object.entries(impactStatement).map(([id, answer]) => ({
+          question:
+            category?.impactStatements.find((i) => i.id === id)?.question ?? "",
+          answer,
+        }))
+      : [],
   }
 
   return metadata

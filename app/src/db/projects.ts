@@ -976,24 +976,53 @@ export async function createApplication({
           id: round.toString(),
         },
       },
-      category: {
-        connect: {
-          id: categoryId,
-        },
-      },
+      category: categoryId
+        ? {
+            connect: {
+              id: categoryId,
+            },
+          }
+        : undefined,
       impactStatementAnswer: {
         createMany: {
-          data: Object.entries(impactStatement).map(
-            ([impactStatementId, answer]) => ({
-              impactStatementId,
-              answer,
-            }),
-          ),
+          data: impactStatement
+            ? Object.entries(impactStatement).map(
+                ([impactStatementId, answer]) => ({
+                  impactStatementId,
+                  answer,
+                }),
+              )
+            : [],
         },
       },
     },
   })
 }
+
+async function getAllApplicationsForRoundFn({
+  roundId,
+}: {
+  roundId: string
+}): Promise<ApplicationWithDetails[]> {
+  const applications = await prisma.application.findMany({
+    where: {
+      roundId,
+    },
+    include: {
+      project: true,
+      impactStatementAnswer: {
+        include: {
+          impactStatement: true,
+        },
+      },
+      round: true,
+    },
+  })
+
+  return applications
+}
+
+export const getAllApplicationsForRound = cache(getAllApplicationsForRoundFn)
 
 async function getUserApplicationsFn({
   userId,

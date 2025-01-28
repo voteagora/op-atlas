@@ -1,10 +1,100 @@
-import { ArrowRight, ArrowUpRight } from "lucide-react"
+import { format } from "date-fns"
+import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 
+import { Callout } from "../common/Callout"
 import ExternalLink from "../ExternalLink"
+
+export function NoRewardsCallout({
+  roundName,
+  rewardPeriodStart,
+  rewardPeriodEnd,
+}: {
+  roundName: string
+  rewardPeriodStart: Date
+  rewardPeriodEnd: Date
+}) {
+  return (
+    <Callout
+      type="plain"
+      showIcon={false}
+      className="mt-10 py-2 bg-white border border-outline"
+      leftAlignedContent={
+        <div className="flex gap-4 items-center">
+          <Image
+            alt="Info"
+            src={"/assets/icons/sunny-red.svg"}
+            width={10}
+            height={10}
+            className="w-12 h-12"
+          />
+
+          <div>
+            <p className="font-bold">
+              {"You didn't receive rewards in Retro Funding: " + roundName}
+            </p>
+            <p>
+              {"Rewards for " +
+                format(rewardPeriodStart, "MMM d") +
+                " - " +
+                format(rewardPeriodEnd, "MMM d")}
+            </p>
+          </div>
+        </div>
+      }
+    />
+  )
+}
+
+export function RewardsCallout({
+  roundName,
+  rewardPeriodStart,
+  rewardPeriodEnd,
+}: {
+  roundName: string
+  rewardPeriodStart: Date
+  rewardPeriodEnd: Date
+}) {
+  return (
+    <Callout
+      type="optimism"
+      showIcon={false}
+      className="mt-10 py-2"
+      leftAlignedContent={
+        <div className="flex gap-4 items-center">
+          <Image
+            alt="Info"
+            src={"/assets/icons/sunny-white.svg"}
+            width={10}
+            height={10}
+            className="w-12 h-12"
+          />
+
+          <div>
+            <p className="font-bold">
+              {"Congratulations! You received rewards in Retro Funding: " +
+                roundName}
+            </p>
+            <p>
+              {"Rewards for " +
+                format(rewardPeriodStart, "MMM d") +
+                " - " +
+                format(rewardPeriodEnd, "MMM d")}
+            </p>
+          </div>
+        </div>
+      }
+      rightAlignedContent={
+        <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
+          <ChevronRight width={16} height={16} />
+        </div>
+      }
+    />
+  )
+}
 
 export function GovCandidateCallout() {
   return (

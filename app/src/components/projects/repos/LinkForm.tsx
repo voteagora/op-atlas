@@ -23,7 +23,7 @@ export const LinkForm = ({
   form: UseFormReturn<z.infer<typeof ReposFormSchema>>
   index: number
 }) => {
-  const [isFormExpanded, setIsRepoFormExpanded] = useState(true)
+  const [isFormExpanded, setIsRepoFormExpanded] = useState(false)
   return (
     <div className="p-6 border border-input rounded-lg">
       <div className="flex flex-col gap-6">

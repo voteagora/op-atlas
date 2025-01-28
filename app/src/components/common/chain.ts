@@ -1,6 +1,7 @@
 import {
   base,
   fraxtal,
+  ink,
   lisk,
   metalL2,
   mode,
@@ -10,7 +11,6 @@ import {
   swan,
   worldchain,
   zora,
-  ink,
 } from "viem/chains"
 
 export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =

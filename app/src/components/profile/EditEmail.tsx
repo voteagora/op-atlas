@@ -8,7 +8,6 @@ import { useUpdateEmail } from "@/lib/hooks"
 import { UserWithEmails } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { Badge } from "../common/Badge"
 import { Input } from "../ui/input"
 
 export function EditEmail({ user }: { user: UserWithEmails }) {

@@ -3,7 +3,7 @@ import { useState } from "react"
 
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import { Badge } from "@/components/ui/badge"
-import useGithubProximity from "@/hooks/useGithubProximity"
+import useGithubProximity from "@/hooks/db/useGithubProximity"
 import { UserWithAddresses } from "@/lib/types"
 
 const labels = [

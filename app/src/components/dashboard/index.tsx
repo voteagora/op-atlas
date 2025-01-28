@@ -29,9 +29,12 @@ import ApplicationBanner from "./ApplicationBanner"
 import {
   ApplicationSubmittedCallout,
   FundingRoundAnnouncementCallout,
+  NoRewardsCallout,
+  RewardsCallout,
   UnclaimedRecipientCallout,
 } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
+import RewardsMonthlyDialog from "./dialogs/RewardsMonthlyDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import MakeFirstOrganization from "./MakeFirstOrganization"
@@ -73,6 +76,8 @@ const Dashboard = ({
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
   const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
+    useState(false)
+  const [showRewardsMonthlyDialog, setShowRewardsMonthlyDialog] =
     useState(false)
 
   const [showOnBoarding, setShowOnBoarding] = useState(false)
@@ -138,6 +143,16 @@ const Dashboard = ({
   }
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
+      {/* <RewardsCallout
+        roundName="Onchain Builders"
+        rewardPeriodStart={new Date("2025-02-01T21:53:13.300Z")}
+        rewardPeriodEnd={new Date("2025-02-15T21:53:13.300Z")}
+      />
+      <NoRewardsCallout
+        roundName="Dev Tooling"
+        rewardPeriodStart={new Date("2025-02-01T21:53:13.300Z")}
+        rewardPeriodEnd={new Date("2025-02-15T21:53:13.300Z")}
+      /> */}
       {cardComponents.slice(0, visibleCardsCount)}
 
       {visibleCardsCount < cardComponents.length && (
@@ -157,6 +172,9 @@ const Dashboard = ({
         </Button>
       )}
 
+      {showRewardsMonthlyDialog && (
+        <RewardsMonthlyDialog open onOpenChange={setShowRewardsMonthlyDialog} />
+      )}
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
@@ -191,6 +209,7 @@ const Dashboard = ({
           onOpenChange={setShowCreateOrganizationDialog}
         />
       )}
+
       <div className="card flex flex-col w-full gap-y-12">
         {joinProjectDialogOpen && (
           <JoinProjectDialog
@@ -223,6 +242,7 @@ const Dashboard = ({
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h3>Your projects</h3>
+
               <Button
                 className="flex items-center gap-2"
                 variant="secondary"
@@ -239,7 +259,14 @@ const Dashboard = ({
             </div>
 
             {projects.map((project) => (
-              <UserProjectCard key={project.id} project={project} />
+              <UserProjectCard
+                key={project.id}
+                project={project}
+                handleActiveRoundHelpClick={() => {
+                  setShowRewardsMonthlyDialog(true)
+                }}
+                applications={applications}
+              />
             ))}
           </div>
         )}
@@ -257,6 +284,10 @@ const Dashboard = ({
                     <UserProjectCard
                       key={project.id}
                       project={project.project as ProjectWithDetails}
+                      handleActiveRoundHelpClick={() => {
+                        setShowRewardsMonthlyDialog(true)
+                      }}
+                      applications={applications}
                     />
                   ))}
                 </>
@@ -305,19 +336,22 @@ const Dashboard = ({
             className="flex items-center justify-center gap-x-2 no-underline text-secondary-foreground"
           >
             <p className="text-sm font-medium">
-              To join an existing project or organization, please have their
-              admin add you.
+              Join an existing project or organization
             </p>
-            <Image
-              src="/assets/icons/arrow-left.svg"
-              className="h-3"
-              height={12}
-              width={12}
-              alt="left"
-            />
           </Button>
         )}
       </div>
+
+      <p className="text-sm text-secondary-foreground text-center">
+        Need support?
+        <ExternalLink
+          className="font-bold"
+          href="https://discord.com/invite/optimism"
+        >
+          {" "}
+          Get help in Discord.
+        </ExternalLink>
+      </p>
     </div>
   )
 }

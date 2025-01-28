@@ -2,6 +2,7 @@ import { isAddress, isHex } from "viem"
 import {
   base,
   fraxtal,
+  ink,
   lisk,
   liskSepolia,
   metalL2,
@@ -12,7 +13,6 @@ import {
   swan,
   worldchain,
   zora,
-  ink,
 } from "viem/chains"
 import { z } from "zod"
 
