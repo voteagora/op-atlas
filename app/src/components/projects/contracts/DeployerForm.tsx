@@ -152,6 +152,29 @@ export function DeployerForm({
                                         {contractField.value.address}
                                       </span>
                                     </button>
+
+                                    {dbData?.contracts.some(
+                                      (dbContract: any) =>
+                                        dbContract.address ===
+                                          contractField.value.address &&
+                                        dbContract.chain ===
+                                          contractField.value.chain,
+                                    ) && (
+                                      <div className="bg-rose-300 rounded-lg px-2">
+                                        Excluded
+                                      </div>
+                                    )}
+                                    {!dbData?.contracts.some(
+                                      (dbContract: any) =>
+                                        dbContract.address ===
+                                          contractField.value.address &&
+                                        dbContract.chain ===
+                                          contractField.value.chain,
+                                    ) && (
+                                      <div className="bg-green-300 rounded-lg px-2">
+                                        Included
+                                      </div>
+                                    )}
                                   </div>
 
                                   <div className="flex gap-4">
@@ -163,7 +186,7 @@ export function DeployerForm({
                                       render={({ field: excludedField }) => (
                                         <>
                                           {excludedField.value &&
-                                            dbData?.contracts.some(
+                                            !dbData?.contracts.some(
                                               (dbContract: any) =>
                                                 dbContract.address ===
                                                   contractField.value.address &&
@@ -176,7 +199,7 @@ export function DeployerForm({
                                             )}
 
                                           {!excludedField.value &&
-                                            !dbData?.contracts.some(
+                                            dbData?.contracts.some(
                                               (dbContract: any) =>
                                                 dbContract.address ===
                                                   contractField.value.address &&
