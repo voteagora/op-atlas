@@ -1,3 +1,4 @@
+import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import {
   base,
   fraxtal,
@@ -62,5 +63,21 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [zora.id.toString()]: {
       logo: "/assets/chain-logos/zora.png",
       name: "Zora",
+    },
+    [arenaZ.id.toString()]: {
+      logo: "/assets/chain-logos/arenaZ.png",
+      name: "ArenaZ",
+    },
+    [ethernity.id.toString()]: {
+      logo: "/assets/chain-logos/ethernity.jpg",
+      name: "Ethernity",
+    },
+    [race.id.toString()]: {
+      logo: "/assets/chain-logos/race.jpeg",
+      name: "Race",
+    },
+    [swell.id.toString()]: {
+      logo: "/assets/chain-logos/swell.svg",
+      name: "Swell",
     },
   }

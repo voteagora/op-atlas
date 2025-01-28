@@ -1,16 +1,17 @@
+import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import {
   base,
   fraxtal,
-  mode,
-  optimism,
-  zora,
-  worldchain,
+  ink,
   lisk,
   metalL2,
-  superseed,
+  mode,
+  optimism,
   shape,
+  superseed,
   swan,
-  ink,
+  worldchain,
+  zora,
 } from "viem/chains"
 
 export enum Chain {
@@ -26,6 +27,10 @@ export enum Chain {
   Swan = swan.id,
   Worldchain = worldchain.id,
   Zora = zora.id,
+  ArenaZ = arenaZ.id,
+  Ethernity = ethernity.id,
+  Race = race.id,
+  Swell = swell.id,
 }
 
 export const getMessage = (address: string) =>
