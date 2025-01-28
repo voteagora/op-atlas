@@ -17,22 +17,22 @@ import {
 import { z } from "zod"
 
 export const Chain = z.enum([
+  arenaZ.id.toString(),
   base.id.toString(),
+  ethernity.id.toString(),
   fraxtal.id.toString(),
   ink.id.toString(),
   lisk.id.toString(),
   metalL2.id.toString(),
   mode.id.toString(),
   optimism.id.toString(),
+  race.id.toString(),
   shape.id.toString(),
   superseed.id.toString(),
   swan.id.toString(),
+  swell.id.toString(),
   worldchain.id.toString(),
   zora.id.toString(),
-  arenaZ.id.toString(),
-  ethernity.id.toString(),
-  race.id.toString(),
-  swell.id.toString(),
 ])
 
 const AddressSchema = z.custom<string>(

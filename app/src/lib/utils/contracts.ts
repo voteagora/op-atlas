@@ -15,22 +15,22 @@ import {
 } from "viem/chains"
 
 export enum Chain {
+  ArenaZ = arenaZ.id,
   Base = base.id,
+  Ethernity = ethernity.id,
   Fraxtal = fraxtal.id,
   Ink = ink.id,
   Lisk = lisk.id,
   MetalL2 = metalL2.id,
   Mode = mode.id,
   Optimism = optimism.id,
+  Race = race.id,
   Shape = shape.id,
   Superseed = superseed.id,
   Swan = swan.id,
+  Swell = swell.id,
   Worldchain = worldchain.id,
   Zora = zora.id,
-  ArenaZ = arenaZ.id,
-  Ethernity = ethernity.id,
-  Race = race.id,
-  Swell = swell.id,
 }
 
 export const getMessage = (address: string) =>

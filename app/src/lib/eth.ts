@@ -35,11 +35,15 @@ export type TraceCall = {
 }
 
 const clients = {
+  [Chain.ArenaZ]: createClient(arenaZ, "https://rpc.arena-z.gg"),
   [Chain.Base]: createClient(
     base,
     `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-
+  [Chain.Ethernity]: createClient(
+    ethernity,
+    "https://mainnet.ethernitychain.io",
+  ),
   [Chain.Fraxtal]: createClient(fraxtal, "https://rpc.frax.com"),
   [Chain.Ink]: createClient(ink, "https://rpc-gel.inkonchain.com"),
   [Chain.Lisk]: createClient(lisk, "https://rpc.api.lisk.com"),
@@ -49,24 +53,19 @@ const clients = {
     optimism,
     `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
+  [Chain.Race]: createClient(race, "https://racemainnet.io"),
   [Chain.Shape]: createClient(
     shape,
     `https://shape-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
   [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
   [Chain.Swan]: createClient(swan, "https://mainnet-rpc.swanchain.org"),
+  [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
   [Chain.Worldchain]: createClient(
     worldchain,
     `https://worldchain-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
   [Chain.Zora]: createClient(zora, "https://rpc.zora.energy"),
-  [Chain.ArenaZ]: createClient(arenaZ, "https://rpc.arena-z.gg"),
-  [Chain.Ethernity]: createClient(
-    ethernity,
-    "https://mainnet.ethernitychain.io",
-  ),
-  [Chain.Race]: createClient(race, "https://racemainnet.io"),
-  [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
 }
 
 // We extend the default client to include a trace call for in-depth contract verification
