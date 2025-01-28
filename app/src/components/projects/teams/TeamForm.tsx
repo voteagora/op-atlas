@@ -106,7 +106,8 @@ export default function AddTeamDetailsForm({
           </p>
           <Callout
             type="info"
-            text="Access to an admin account is needed to claim Retro Funding rewards"
+            leftAlignedContent="Access to an admin account is needed to claim Retro Funding rewards"
+            leftHandSize="sm"
           />
         </div>
         <div className="flex flex-col gap-1.5">
