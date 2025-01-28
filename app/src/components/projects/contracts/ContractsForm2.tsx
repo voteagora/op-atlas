@@ -67,32 +67,32 @@ const EMPTY_DEPLOYER = {
 //   }
 // }
 
-function getDefaultValues(
-  project?: ProjectWithDetails,
-): z.infer<typeof ContractsSchema2> {
-  if (!project) {
-    return {
-      isOffChain: false,
+// function getDefaultValues(
+//   project?: ProjectWithDetails,
+// ): z.infer<typeof ContractsSchema2> {
+//   if (!project) {
+//     return {
+//       isOffChain: false,
 
-      submittedToOSO: false,
-      osoSlug: "",
-      deployers: [
-        {
-          ...EMPTY_DEPLOYER,
-        },
-      ],
-    }
-  }
+//       submittedToOSO: false,
+//       osoSlug: "",
+//       deployers: [
+//         {
+//           ...EMPTY_DEPLOYER,
+//         },
+//       ],
+//     }
+//   }
 
-  const deployers: any[] = []
+//   const deployers: any[] = []
 
-  return {
-    isOffChain: project.isOnChainContract === false,
-    deployers: deployers.length > 0 ? deployers : [{ ...EMPTY_DEPLOYER }],
-    submittedToOSO: !!project.openSourceObserverSlug,
-    osoSlug: project.openSourceObserverSlug ?? "",
-  }
-}
+//   return {
+//     isOffChain: project.isOnChainContract === false,
+//     deployers: deployers.length > 0 ? deployers : [{ ...EMPTY_DEPLOYER }],
+//     submittedToOSO: !!project.openSourceObserverSlug,
+//     osoSlug: project.openSourceObserverSlug ?? "",
+//   }
+// }
 
 const mockDeployerContracts = [
   {
@@ -239,24 +239,21 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   const DeployerSchema = z.object({
     address: AddressSchema,
-    // deployerAddress: AddressSchema,
     contracts: z.array(ContractSchema2),
   })
 
-  const form = useForm<z.infer<typeof DeployerSchema>>({
-    resolver: zodResolver(DeployerSchema),
+  const form = useForm<z.infer<typeof ContractsSchema2>>({
+    resolver: zodResolver(ContractsSchema2),
     mode: "onSubmit",
     reValidateMode: "onChange",
   })
 
   // Form submission handler
-  const onSubmit = (data: z.infer<typeof DeployerSchema>) => {
+  const onSubmit = (data: z.infer<typeof ContractsSchema2>) => {
     console.log(data)
   }
 
   const [dbData, setDbData] = useState<any>()
-
-  const [isDropdownOpens, setIsDropdownOpens] = useState<boolean[]>([])
 
   useEffect(() => {
     const populateForm = async () => {
@@ -311,14 +308,14 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
         }
       })
 
-      setIsDropdownOpens([
-        ...resultingData.map(() => {
-          return true
-        }),
+      form.setValue("deployers", [
+        {
+          address: dbData.address,
+          contracts: resultingData,
+        },
       ])
-
-      form.setValue("address", dbData.address)
-      form.setValue("contracts", resultingData)
+      // form.setValue("address", dbData.address)
+      // form.setValue("contracts", resultingData)
     }
     populateForm()
   }, [form])
@@ -328,25 +325,29 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     initialMaxContractViewCount,
   )
 
+  const deployerIndex = 0
+
   return (
     <div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          {/* Name Field */}
           <FormField
             control={form.control}
-            name={`address`}
+            name={`deployers.${deployerIndex}.address`}
             render={({ field: addressField }) => (
               <div>
                 <FormLabel>Address</FormLabel>
                 <Input {...addressField} />
-                {form.formState.errors.address && (
+                {}
+
+                <FormMessage />
+                {/* {form.formState.errors.address && (
                   <p>{form.formState.errors.address.message}</p>
-                )}
+                )} */}
 
                 <FormField
                   control={form.control}
-                  name={`contracts`}
+                  name={`deployers.${deployerIndex}.contracts`}
                   render={({ field: contractsField }) => (
                     <div>
                       {contractsField.value?.map((contract, index) => {
@@ -355,7 +356,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                         return (
                           <FormField
                             control={form.control}
-                            name={`contracts.${index}`}
+                            name={`deployers.${deployerIndex}.contracts.${index}`}
                             render={({ field: contractField }) => (
                               <div className="flex">
                                 <div
@@ -365,7 +366,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                                   <div className="flex items-center">
                                     <FormField
                                       control={form.control}
-                                      name={`contracts.${index}.excluded`}
+                                      name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
                                       render={({ field: excludedField }) => (
                                         <div>
                                           {excludedField.value ? (
@@ -383,7 +384,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                                   <div className="flex gap-4">
                                     <FormField
                                       control={form.control}
-                                      name={`contracts.${index}.excluded`}
+                                      name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
                                       render={({ field: excludedField }) => (
                                         <>
                                           {excludedField.value &&

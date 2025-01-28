@@ -10,7 +10,7 @@ export const ContractSchema2 = z.object({
 })
 
 export const DeployerSchema = z.object({
-  deployerAddress: AddressSchema,
+  address: AddressSchema,
   contracts: z.array(ContractSchema2),
 })
 
@@ -35,5 +35,7 @@ const NoContractsSchema2 = z.object({
   osoSlug: z.string().optional(),
 })
 
-export const ContractsSchema2 =
-  OffChainSchema2.or(NoContractsSchema2).or(HasContractsSchema2)
+export const ContractsSchema2 = z.object({
+  deployers: z.array(DeployerSchema),
+})
+//OffChainSchema2.or(NoContractsSchema2).or(HasContractsSchema2)

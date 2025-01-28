@@ -51,23 +51,9 @@ export function ContractDropdownButton({
                 <button
                   type="button"
                   className="block w-full py-2 hover:bg-gray-100"
-                  onClick={
-                    () => field.onChange(!field.value)
-                    // field.value.excluded = !field.value.excluded
-
-                    // form.setValue(
-                    //   `contracts.${index}.excluded`,
-                    //   !form.watch(`contracts.${index}.excluded`),
-                    // )
-                  }
+                  onClick={() => field.onChange(!field.value)}
                 >
                   {field.value ? "Include in project" : "Exclude from project"}
-                  {/* {field.value.excluded
-                    ? "Include in project"
-                    : "Exclude from project"} */}
-                  {/* {form.getValues().contracts[index].excluded
-                    ? "Include in project"
-                    : "Exclude from project"} */}
                 </button>
               </li>
               <li>
