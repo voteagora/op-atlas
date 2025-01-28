@@ -2,6 +2,7 @@ import m from "@mailchimp/mailchimp_marketing"
 import { NextRequest } from "next/server"
 
 import { prisma } from "@/db/client"
+import { getAggregatedData } from "@/lib/api/eas/aggregated"
 import mailchimp from "@/lib/mailchimp"
 
 export const dynamic = "force-dynamic"
@@ -77,20 +78,7 @@ const fetchRecords = async (): Promise<EntityRecords> => {
     throw new Error("EAS_INDEXER_API_URL is not set")
   }
 
-  const records = await fetch(`${EAS_INDEXER_API_URL}/entities/aggregated`, {
-    // NOTE: Do we need this? Not sure if our EAS Indexer is publiclly accessible as I see no authorisation anywhere
-    // headers: {
-    //   Authorization: `Bearer ${process.env.EAS_INDEXER_API_SECRET}`,
-    // },
-  })
-    .then((res) => {
-      const data = res.json()
-
-      return data
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+  const records = await getAggregatedData()
 
   const [citizen, badgeholder, gov_contribution, rf_voter] = await Promise.all([
     prisma.userAddress.findMany({
