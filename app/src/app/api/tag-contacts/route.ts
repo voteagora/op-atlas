@@ -131,21 +131,22 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
   console.log(`Added tags to ${updatedMembers.length} Mailchimp contacts`)
 }
 
-const removeTag = async (addresses: EntityObject[], tag: Entity) => {
+const removeTags = async (addresses: EntityObject[], tag: Entity) => {
   if (addresses.length === 0) {
     console.log("No addresses to tag")
     return
   }
 
-  await prisma.$executeRaw(
-    Prisma.sql`
-      UPDATE "UserAddress"
-      SET "tags" = array_remove("tags", ${tag})
-      WHERE "address" = ANY(ARRAY[${Prisma.join(
-        addresses.map((address) => address.address),
-      )}]::text[])
-    `,
-  )
+  await prisma.userAddress.updateMany({
+    where: {
+      address: {
+        in: addresses.map((address) => address.address),
+      },
+    },
+    data: {
+      tags: [],
+    },
+  })
 
   console.log(`Updated user addresses, removed tag "${tag}"`)
 
@@ -185,7 +186,7 @@ const handleAddRfVoterEntity = async (
 const handleRemoveCitizenEntity = async (
   records: Record<"citizen", EntityObject[]>,
 ) => {
-  await removeTag(records.citizen, "citizen")
+  await removeTags(records.citizen, "citizen")
 }
 const handleRemoveBadgeholderEntity = async (
   records: Record<"badgeholder", EntityObject[]>,
