@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ProjectContract } from "@prisma/client"
-import { Plus } from "lucide-react"
+import { Check, Plus, X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -344,29 +344,45 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                     control={form.control}
                     name={`contracts.${index}`}
                     render={({ field }) => (
-                      <div key={index}>
-                        {/* You can render contract details here */}
-                        <p>
-                          Contract {index + 1}: {field.value.address}
-                        </p>{" "}
-                        <p>
+                      <div className="flex">
+                        <div
+                          key={index}
+                          className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {/* You can render contract details here */}
+                          <div className="flex items-center">
+                            {field.value.excluded ? (
+                              <X width={16} height={16} />
+                            ) : (
+                              <Check width={16} height={16} />
+                            )}
+                            <p>{field.value.address}</p>
+                          </div>
                           {field.value.excluded &&
                             dbData.contracts.some(
                               (dbContract: any) =>
                                 dbContract.address === field.value.address &&
                                 dbContract.chain === field.value.chain,
-                            ) &&
-                            "Excluded"}
-                        </p>
-                        <p>
+                            ) && (
+                              <p className="bg-gray-300 rounded-lg px-2 py.5">
+                                Exclude
+                              </p>
+                            )}
+
                           {!field.value.excluded &&
                             !dbData.contracts.some(
                               (dbContract: any) =>
                                 dbContract.address === field.value.address &&
                                 dbContract.chain === field.value.chain,
-                            ) &&
-                            "Included"}
-                        </p>
+                            ) && (
+                              <p className="bg-gray-300 rounded-lg px-2 py.5">
+                                Include
+                              </p>
+                            )}
+
+                          {/* Example */}
+                          {/* Add more fields related to the contract here */}
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
@@ -380,9 +396,6 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                             ? "Include in project"
                             : "Exclude from project"}
                         </button>
-                        <p>{}</p>
-                        {/* Example */}
-                        {/* Add more fields related to the contract here */}
                       </div>
                     )}
                   />
