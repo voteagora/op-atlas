@@ -43,6 +43,7 @@ import { Chain } from "./schema"
 import { DeployerForm } from "./DeployerForm"
 import { AddressSchema } from "./commonSchema"
 import { ContractDropdownButton } from "./ContractDropdownButton"
+import { ChainLogo } from "@/components/common/ChainLogo"
 
 const EMPTY_DEPLOYER = {
   deployerAddress: "",
@@ -338,13 +339,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
               <div>
                 <FormLabel>Address</FormLabel>
                 <Input {...addressField} />
-                {}
-
                 <FormMessage />
-                {/* {form.formState.errors.address && (
-                  <p>{form.formState.errors.address.message}</p>
-                )} */}
-
                 <FormField
                   control={form.control}
                   name={`deployers.${deployerIndex}.contracts`}
@@ -377,7 +372,9 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                                         </div>
                                       )}
                                     />
-
+                                    <ChainLogo
+                                      chainId={contractField.value.chain}
+                                    />
                                     <p>{contractField.value.address}</p>
                                   </div>
 
