@@ -1,59 +1,102 @@
 import Image from "next/image"
-import Link from "next/link"
-import { memo } from "react"
+import React, { memo, ReactNode } from "react"
 
-import { cn } from "@/lib/utils"
+type CalloutProperties = {
+  backgroundColor: string
+  textColor: string
+  icon: string
+}
 
-import ExternalLink from "../ExternalLink"
+const types = {
+  info: {
+    backgroundColor: "bg-accent",
+    textColor: "text-accent-foreground",
+    icon: "/assets/icons/info-blue.svg",
+  } as CalloutProperties,
+  error: {
+    backgroundColor: "bg-red-200",
+    textColor: "text-destructive-foreground",
+    icon: "/assets/icons/info-red.svg",
+  } as CalloutProperties,
+  success: {
+    backgroundColor: "bg-green-100",
+    textColor: "text-green-800",
+    icon: "/assets/icons/info-green.svg",
+  } as CalloutProperties,
+
+  optimism: {
+    backgroundColor: "bg-optimismRed",
+    textColor: "text-white",
+  } as CalloutProperties,
+
+  optimismBright: {
+    backgroundColor: "bg-red-100",
+    textColor: "text-red-600",
+  } as CalloutProperties,
+}
+
+const textSizes = {
+  xs: "text-xs",
+  sm: "text-sm",
+  base: "",
+  lg: "text-lg",
+  xl: "text-xl",
+  xxl: "text-2xl",
+}
+
+const iconSizes = {
+  xs: 8,
+  sm: 12,
+  base: 16.5,
+  lg: 20,
+  xl: 24,
+  xxl: 28,
+}
 
 export const Callout = memo(function Callout({
-  className,
   type,
-  text,
-  linkText,
-  linkHref,
   showIcon = true,
+  leftAlignedContent,
+  rightAlignedContent,
+  leftHandSize = "base",
+  rightHandSize = "base",
+  iconSize = "base",
 }: {
-  className?: string
-  type: "info" | "error"
-  text: string
-  linkText?: string
-  linkHref?: string
+  type?: keyof typeof types
   showIcon?: boolean
+  leftAlignedContent?: ReactNode
+  rightAlignedContent?: ReactNode
+  leftHandSize?: keyof typeof textSizes
+  rightHandSize?: keyof typeof textSizes
+  iconSize?: keyof typeof iconSizes
 }) {
   return (
     <div
-      className={cn(
-        "flex items-center rounded-md py-2.5 px-3  w-full",
-        type === "error"
-          ? "bg-red-200 text-destructive-foreground"
-          : "bg-accent text-accent-foreground",
-        className,
-      )}
+      className={`flex items-center rounded-md py-2.5 px-3 w-full ${
+        type && types[type].backgroundColor
+      } ${type && types[type].textColor}`}
     >
-      {showIcon && (
+      {showIcon && type && types[type].icon && (
         <Image
           alt="Info"
-          src={
-            type === "error"
-              ? "/assets/icons/info-red.svg"
-              : "/assets/icons/info-blue.svg"
-          }
-          width={16.5}
-          height={16.5}
+          src={types[type].icon}
+          width={iconSizes[iconSize]}
+          height={iconSizes[iconSize]}
         />
       )}
-      <p className={cn("mr-5 text-sm font-medium", showIcon && "ml-2")}>
-        {text}
-      </p>
-      {linkText && (
-        <ExternalLink
-          href={linkHref ?? "#"}
-          className="ml-auto text-sm font-medium shrink-0"
-        >
-          {linkText}
-        </ExternalLink>
-      )}
+
+      <div
+        className={`mr-5 font-medium ${textSizes[leftHandSize]} ${
+          showIcon && "ml-2"
+        }`}
+      >
+        {leftAlignedContent}
+      </div>
+      <div
+        className={`ml-auto shrink-0 font-medium ${textSizes[rightHandSize]}`}
+      >
+        {rightAlignedContent}
+      </div>
     </div>
   )
 })

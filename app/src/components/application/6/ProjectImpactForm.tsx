@@ -219,9 +219,9 @@ const ProjectImpactForm = ({
                   Instead, focus on communicating your project&apos;s impact.
                 </p>
                 <Callout
-                  className="!text-sm"
                   type="info"
-                  text="Promises of future deliverables or impact are not allowed."
+                  leftAlignedContent="Promises of future deliverables or impact are not allowed."
+                  leftHandSize="sm"
                 />
 
                 {(() => {
