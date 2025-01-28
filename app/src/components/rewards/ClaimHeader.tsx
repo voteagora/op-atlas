@@ -61,7 +61,7 @@ const ClaimHeader = ({
         <div className="ml-auto flex items-center gap-2">
           <Image
             alt="op"
-            src="/assets/chain-logos/optimism.png"
+            src="/assets/icons/op-icon.svg"
             height={24}
             width={24}
           />
