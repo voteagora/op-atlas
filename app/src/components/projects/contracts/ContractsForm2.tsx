@@ -413,7 +413,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                                                     }
                                                   />
                                                   <button
-                                                    className="relative group"
+                                                    className="relative group hover:bg-gray-200 px-2 rounded-lg"
                                                     type="button"
                                                     onClick={() => {
                                                       onCopyValue(
