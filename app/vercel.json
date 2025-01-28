@@ -3,6 +3,10 @@
     {
       "path": "/api/cron",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/tag-contacts",
+      "schedule": "59 23 * * *"
     }
   ]
 }
