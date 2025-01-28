@@ -2,6 +2,7 @@
 
 import { Prisma, User } from "@prisma/client"
 
+import { AggregatedDataResponse } from "@/lib/api/eas/aggregated"
 import { UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
@@ -229,4 +230,122 @@ export async function updateUserInteraction(
     },
     create: { ...data, userId },
   })
+}
+
+async function getAllNonTaggedCitizens() {
+  return prisma.userAddress.findMany({
+    where: {
+      tag: {
+        not: "citizen",
+      },
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+async function getAllNonTaggedBadgeholders() {
+  return prisma.userAddress.findMany({
+    where: {
+      tag: {
+        not: "badgeholder",
+      },
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+async function getAllNonTaggedGovContributors() {
+  return prisma.userAddress.findMany({
+    where: {
+      tag: {
+        not: "gov_contribution",
+      },
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+async function getAllNonTaggedRFVoters() {
+  return prisma.userAddress.findMany({
+    where: {
+      tag: {
+        not: "rf_voter",
+      },
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function getAggregatedRecords(records: AggregatedDataResponse) {
+  const [citizen, badgeholder, gov_contribution, rf_voter] = await Promise.all([
+    getAllNonTaggedCitizens(),
+    getAllNonTaggedBadgeholders(),
+    getAllNonTaggedGovContributors(),
+    getAllNonTaggedRFVoters(),
+  ])
+
+  const result = {
+    citizen: citizen.map((c) => ({
+      address: c.address,
+      email: c.user.emails.at(-1)?.email ?? "",
+    })),
+    badgeholder: badgeholder.map((b) => ({
+      address: b.address,
+      email: b.user.emails.at(-1)?.email ?? "",
+    })),
+    gov_contribution: gov_contribution.map((g) => ({
+      address: g.address,
+      email: g.user.emails.at(-1)?.email ?? "",
+    })),
+    rf_voter: rf_voter.map((r) => ({
+      address: r.address,
+      email: r.user.emails.at(-1)?.email ?? "",
+    })),
+  }
+
+  return result
 }
