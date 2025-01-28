@@ -2,11 +2,11 @@ import { z } from "zod"
 import { AddressSchema, Chain } from "./commonSchema"
 
 export const ContractSchema2 = z.object({
-  contractAddress: AddressSchema,
+  address: AddressSchema,
   chain: Chain,
   name: z.string().optional(),
   description: z.string().optional(),
-  selected: z.boolean(),
+  excluded: z.boolean(),
 })
 
 export const DeployerSchema = z.object({

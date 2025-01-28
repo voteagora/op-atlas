@@ -41,6 +41,7 @@ import { ContractSchema2, ContractsSchema2 } from "./schema2"
 
 import { Chain } from "./schema"
 import { DeployerForm } from "./DeployerForm"
+import { AddressSchema } from "./commonSchema"
 
 const EMPTY_DEPLOYER = {
   deployerAddress: "",
@@ -92,55 +93,93 @@ function getDefaultValues(
   }
 }
 
+const mockDeployerContracts = [
+  {
+    deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+    contracts: [
+      {
+        address: "0x123",
+        chain: 8453,
+        selected: true,
+        initialSelected: true,
+      },
+      {
+        address: "0x456",
+        chain: 34443,
+        selected: true,
+        initialSelected: true,
+      },
+      {
+        address: "0x789",
+        chain: 10,
+        selected: true,
+        initialSelected: true,
+      },
+
+      {
+        address: "0x111",
+        chain: 10,
+        selected: true,
+        initialSelected: true,
+      },
+    ],
+  },
+]
+
 export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  // const router = useRouter()
+  // const [isSubmitting, setIsSubmitting] = useState(false)
+  // const [isSaving, setIsSaving] = useState(false)
 
-  const form = useForm<z.infer<typeof ContractsSchema2>>({
-    resolver: zodResolver(ContractsSchema2),
-    mode: "onSubmit",
-    reValidateMode: "onChange",
-    defaultValues: getDefaultValues(project),
-  })
+  // const deployers = []
 
-  const {
-    fields: deployejkrFields,
-    append: addDeployerField,
-    // remove: removeContractsFields,
-  } = useFieldArray({
-    control: form.control,
-    name: "deployers",
-  })
+  // useEffect(() => {
+  //   console.log("RESET")
+  //   form.reset({
+  //     deployers: {
+  //       ...mockDeployerContracts,
+  //     },
+  //   })
+  // }, [form.reset, mockDeployerContracts])
+  // const {
+  //   fields: deployejkrFields,
+  //   append: addDeployerField,
+  //   // remove: removeContractsFields,
+  // } = useFieldArray({
+  //   control: form.control,
+  //   name: "deployers",
+  // })
 
-  // Locally, this runs twice because of strict mode but dw about it
-  useEffect(() => {
-    toast.info("We recommend asking your developer to complete this step")
-  }, [])
+  // // Locally, this runs twice because of strict mode but dw about it
+  // useEffect(() => {
+  //   toast.info("We recommend asking your developer to complete this step")
+  // }, [])
 
-  // const onRemoveContract = async (index: number) => {
-  //   try {
-  //     const isOnlyContract = contractsFields.length === 1
-  //     const contract = form.getValues(`contracts.${index}`)
+  // // const onRemoveContract = async (index: number) => {
+  // //   try {
+  // //     const isOnlyContract = contractsFields.length === 1
+  // //     const contract = form.getValues(`contracts.${index}`)
 
-  //     await removeContract({
-  //       projectId: project.id,
-  //       address: contract.contractAddress,
-  //       chainId: parseInt(contract.chain),
-  //     })
+  // //     await removeContract({
+  // //       projectId: project.id,
+  // //       address: contract.contractAddress,
+  // //       chainId: parseInt(contract.chain),
+  // //     })
 
-  //     removeContractsFields(index)
+  // //     removeContractsFields(index)
 
-  //     if (isOnlyContract) {
-  //       addContractsFields({ ...EMPTY_CONTRACT })
-  //     }
-  //   } catch (error) {
-  //     console.error("Error removing repo", error)
+  // //     if (isOnlyContract) {
+  // //       addContractsFields({ ...EMPTY_CONTRACT })
+  // //     }
+  // //   } catch (error) {
+  // //     console.error("Error removing repo", error)
+  // //   }
+  // // }
+
+  // const onSubmit =
+  //   (isSave: boolean) => (values: z.infer<typeof ContractsSchema2>) => {
+  //     console.log(values)
   //   }
-  // }
-
-  const onSubmit =
-    (isSave: boolean) => (values: z.infer<typeof ContractsSchema2>) => {}
   // const onSubmit =
   //   (isSave: boolean) => async (values: z.infer<typeof ContractsSchema>) => {
   //     isSave ? setIsSaving(true) : setIsSubmitting(true)
@@ -197,204 +236,167 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   // console.log(deployejkrFields)
 
+  const DeployerSchema = z.object({
+    address: AddressSchema,
+    // deployerAddress: AddressSchema,
+    contracts: z.array(ContractSchema2),
+  })
+
+  const form = useForm<z.infer<typeof DeployerSchema>>({
+    resolver: zodResolver(DeployerSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  })
+
+  // Form submission handler
+  const onSubmit = (data: z.infer<typeof DeployerSchema>) => {
+    console.log(data)
+  }
+
+  const [dbData, setDbData] = useState<any>()
+
+  useEffect(() => {
+    const populateForm = async () => {
+      const osoData = {
+        address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+        contracts: [
+          {
+            address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+            chain: "8453",
+          },
+          {
+            address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+            chain: "34443",
+          },
+          {
+            address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
+            chain: "34443",
+          },
+          {
+            address: "0xEA5aE0568DF87515885F3BA6B760E76a29ea2D24",
+            chain: "34443",
+          },
+        ],
+      }
+
+      const dbData = {
+        address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
+        contracts: [
+          {
+            address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+            chain: "8453",
+          },
+          {
+            address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+            chain: "34443",
+          },
+        ],
+      }
+
+      setDbData(dbData)
+
+      const resultingData = osoData.contracts.map((contract) => {
+        // Check if the contract is present in dbData
+        const isInDb = dbData.contracts.some(
+          (dbContract) =>
+            dbContract.address === contract.address &&
+            dbContract.chain === contract.chain,
+        )
+
+        return {
+          ...contract,
+          excluded: !isInDb, // Mark as excluded if not found in dbData
+        }
+      })
+
+      form.setValue("address", dbData.address)
+      form.setValue("contracts", resultingData)
+    }
+    populateForm()
+  }, [form])
+
   return (
     <div>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit(false))}
-          className="flex flex-col gap-12"
-        >
-          <div className="flex flex-col gap-6">
-            <h3 className="text-2xl">Contracts</h3>
-            <div className="text-secondary-foreground">
-              Add your project&apos;s onchain contracts and verify ownership.
-            </div>
-
-            <h3 className="text-xl">Verified Contracts</h3>
-            <div className="text-secondary-foreground">
-              Verify ownership of your deployer address and OP Atlas will find
-              your contracts. If you&apos;ve deployed a factory, its contracts
-              will be attributed to you. Contracts deployed within 24 hours may
-              not appear—verify recent deployments with manual contract
-              verification.
-            </div>
-
-            {deployejkrFields.map((field, index) => (
-              <DeployerForm key={field.id} index={index} form={form} />
-            ))}
-
-            <div className="flex justify-between items-end">
-              <Button
-                variant={"ghost"}
-                className="gap-2"
-                onClick={() => {
-                  addDeployerField(EMPTY_DEPLOYER)
-                }}
-              >
-                <Plus width={16} height={16} />
-                Add deployer address
-              </Button>
-            </div>
-            {/* <FormField
-              control={form.control}
-              name={`deployers.${0}.deployerAddress`}
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-1.5">
-                  <FormLabel className="text-foreground">
-                    Deployer address
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="0x..." className="" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
-            {/* 
-            <div className="flex flex-col gap-2">
-              <FormField
-                control={form.control}
-                name="isOffChain"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-x-2 border border-input p-3 h-10 rounded-lg w-full">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className=" text-sm font-normal text-foreground">
-                      This project isn&apos;t onchain
-                    </FormLabel>
-                  </FormItem>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          {/* Name Field */}
+          <FormField
+            control={form.control}
+            name={`address`}
+            render={({ field }) => (
+              <div>
+                <FormLabel>Address</FormLabel>
+                <Input {...field} />
+                {form.formState.errors.address && (
+                  <p>{form.formState.errors.address.message}</p>
                 )}
-              />
-            </div> */}
-          </div>
+              </div>
+            )}
+          />
 
-          {/* <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-3">
-              <h3 className="text-xl font-semibold text-default">
-                Verified contracts
-              </h3>
-              <p className="text-base text-secondary-foreground">
-                First verify one contract, then you’ll be able to add more.
-                Additional contracts with the same deployer address will be
-                automatically verified.
-              </p>
-              <p className="text-base text-secondary-foreground">
-                There’s no need to verify contracts that were deployed by a
-                verified deployer (e.g. if you deployed a factory contract), as
-                we’ll pick those up automatically.
-              </p>
-            </div>
-            {contractsFields.map((field, index) => (
-              <ContractForm
-                key={field.id}
-                form={form}
-                index={index}
-                projectId={project.id}
-                removeEmpty={() => removeContractsFields(index)}
-                removeVerified={() => onRemoveContract(index)}
-              />
-            ))}
+          <FormField
+            control={form.control}
+            name={`contracts`}
+            render={({ field }) => (
+              <div>
+                {field.value?.map((contract, index) => (
+                  <FormField
+                    control={form.control}
+                    name={`contracts.${index}`}
+                    render={({ field }) => (
+                      <div key={index}>
+                        {/* You can render contract details here */}
+                        <p>
+                          Contract {index + 1}: {field.value.address}
+                        </p>{" "}
+                        <p>
+                          {field.value.excluded &&
+                            dbData.contracts.some(
+                              (dbContract: any) =>
+                                dbContract.address === field.value.address &&
+                                dbContract.chain === field.value.chain,
+                            ) &&
+                            "Excluded"}
+                        </p>
+                        <p>
+                          {!field.value.excluded &&
+                            !dbData.contracts.some(
+                              (dbContract: any) =>
+                                dbContract.address === field.value.address &&
+                                dbContract.chain === field.value.chain,
+                            ) &&
+                            "Included"}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            form.setValue(
+                              `contracts.${index}.excluded`,
+                              !form.watch(`contracts.${index}.excluded`),
+                            )
+                          }}
+                        >
+                          {field.value.excluded
+                            ? "Include in project"
+                            : "Exclude from project"}
+                        </button>
+                        <p>{}</p>
+                        {/* Example */}
+                        {/* Add more fields related to the contract here */}
+                      </div>
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+          />
 
-            <Tooltip>
-              <TooltipTrigger type="button" className="w-fit">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={!canAddContract}
-                  onClick={() => addContractsFields({ ...EMPTY_CONTRACT })}
-                  className="w-fit"
-                >
-                  <Plus size={16} className="mr-2.5" /> Add another contract
-                </Button>
-              </TooltipTrigger>
-              {!canAddContract && (
-                <TooltipContent>
-                  <p className="text-sm">
-                    First add one, then you can add more
-                  </p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </div> */}
-
-          <div className="flex flex-col gap-6">
-            <h3 className="text-text-default">
-              Add this project to Open Source Observer
-            </h3>
-            <div className="text-text-secondary font-normal">
-              It is highly encouraged that projects verify contracts onchain.
-              However, if you’ve lost your deployer keys, you can complete this
-              step by{" "}
-              <ExternalLink
-                href="https://www.opensource.observer"
-                className="underline"
-              >
-                adding your project to Open Source Observer.
-              </ExternalLink>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="osoSlug"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="text-foreground">
-                    Your Open Source Observer name
-                  </FormLabel>
-                  <Input placeholder="Add a name" {...field} />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="submittedToOSO"
-              render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
-                  <FormLabel className="text-foreground">
-                    Confirmation{" "}
-                  </FormLabel>
-                  <FormItem className="flex flex-row items-center gap-2 py-3 px-4 rounded-lg border">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal text-sm text-secondary-foreground">
-                      This project has been submitted to Open Source Observer
-                    </FormLabel>
-                  </FormItem>
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* <div className="flex gap-2">
-            <Button
-              isLoading={isSaving}
-              disabled={!canSubmit || isSubmitting}
-              type="button"
-              onClick={form.handleSubmit(onSubmit(true))}
-              variant="destructive"
-            >
-              Save
-            </Button>
-            <Button
-              isLoading={isSubmitting}
-              disabled={!canSubmit || isSubmitting}
-              type="submit"
-              variant="secondary"
-            >
-              Next
-            </Button>
-          </div> */}
+          <button type="submit">Save</button>
         </form>
       </Form>
+      {/* <Form {...form}> */}
+      {/* <></> */}
+      {/* </Form> */}
     </div>
   )
 }
