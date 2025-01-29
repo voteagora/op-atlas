@@ -2,7 +2,7 @@ import { ponder } from "@/generated";
 import { and, eq, graphql, isNull } from "@ponder/core";
 import * as dbSchema from "../../ponder.schema";
 import schemas from "../../schemas.config";
-import { Attestation, Entity } from "../types";
+import { Attestation, Entity, AggregatedType } from "../types";
 import { parseEntity } from "./utils";
 
 ponder.use("/", graphql());
@@ -40,7 +40,7 @@ ponder.get("/entities/aggregated", async (c) => {
     "rf_voter",
   ];
 
-  const aggregated: Record<Entity, string[]> = {
+  const aggregated: AggregatedType = {
     badgeholder: [],
     citizen: [],
     gov_contribution: [],
@@ -48,10 +48,21 @@ ponder.get("/entities/aggregated", async (c) => {
   };
 
   for (const entity of entities) {
-    const table = dbSchema[entity];
-    const data = await (c.db.query[entity] as any).findMany({
-      where: isNull(table.revoked_at),
-    });
+    const table = dbSchema[entity] as any;
+    let data = [];
+    if (entity === "rf_voter") {
+      data = await (c.db.query[entity] as any).findMany({
+        where: and(isNull(table.revoked_at), eq(table.voter_type, "rf_voter")),
+      });
+    } else if (entity === "gov_contribution") {
+      data = await (c.db.query[entity] as any).findMany({
+        where: and(isNull(table.revoked_at), eq(table.gov_season, "7")),
+      });
+    } else {
+      data = await (c.db.query[entity] as any).findMany({
+        where: isNull(table.revoked_at),
+      });
+    }
 
     if (data.length > 0) {
       aggregated[entity] = data.map((item: any) => item.address);

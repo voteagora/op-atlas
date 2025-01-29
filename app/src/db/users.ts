@@ -1,8 +1,8 @@
 "use server"
 
 import { Prisma, User } from "@prisma/client"
+import { AggregatedType } from "eas-indexer/src/types"
 
-import { AggregatedDataResponse } from "@/lib/api/eas/aggregated"
 import { UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
@@ -232,13 +232,13 @@ export async function updateUserInteraction(
   })
 }
 
-async function getAllNonTaggedCitizens(records: AggregatedDataResponse) {
+async function getAllNonTaggedCitizens(records: AggregatedType["citizen"]) {
   return prisma.userAddress.findMany({
     where: {
       AND: [
         {
           address: {
-            in: records.citizen,
+            in: records.map((record) => record.address),
           },
         },
         {
@@ -251,7 +251,7 @@ async function getAllNonTaggedCitizens(records: AggregatedDataResponse) {
             {
               NOT: {
                 tags: {
-                  has: "citizen",
+                  has: "Citizen",
                 },
               },
             },
@@ -298,14 +298,34 @@ async function getAllNonTaggedBadgeholders() {
   })
 }
 
-async function getAllNonTaggedGovContributors() {
+async function getAllNonTaggedGovContributors(
+  records: AggregatedType["gov_contribution"],
+) {
   return prisma.userAddress.findMany({
     where: {
-      NOT: {
-        tags: {
-          has: "gov_contribution",
+      AND: [
+        {
+          address: {
+            in: records.map((record) => record.address),
+          },
         },
-      },
+        {
+          OR: [
+            {
+              tags: {
+                isEmpty: true,
+              },
+            },
+            {
+              NOT: {
+                tags: {
+                  has: "S7 Elected Official",
+                },
+              },
+            },
+          ],
+        },
+      ],
     },
     select: {
       address: true,
@@ -322,14 +342,32 @@ async function getAllNonTaggedGovContributors() {
   })
 }
 
-async function getAllNonTaggedRFVoters() {
+async function getAllNonTaggedRFVoters(records: AggregatedType["rf_voter"]) {
   return prisma.userAddress.findMany({
     where: {
-      NOT: {
-        tags: {
-          has: "rf_voter",
+      AND: [
+        {
+          address: {
+            in: records.map((record) => record.address),
+          },
         },
-      },
+        {
+          OR: [
+            {
+              tags: {
+                isEmpty: true,
+              },
+            },
+            {
+              NOT: {
+                tags: {
+                  has: "Guest Voter",
+                },
+              },
+            },
+          ],
+        },
+      ],
     },
     select: {
       address: true,
@@ -346,12 +384,12 @@ async function getAllNonTaggedRFVoters() {
   })
 }
 
-export async function getAggregatedRecords(records: AggregatedDataResponse) {
+export async function getAggregatedRecords(records: AggregatedType) {
   const [citizen, badgeholder, gov_contribution, rf_voter] = await Promise.all([
-    getAllNonTaggedCitizens(records),
+    getAllNonTaggedCitizens(records.citizen),
     getAllNonTaggedBadgeholders(),
-    getAllNonTaggedGovContributors(),
-    getAllNonTaggedRFVoters(),
+    getAllNonTaggedGovContributors(records.gov_contribution),
+    getAllNonTaggedRFVoters(records.rf_voter),
   ])
 
   const result = {

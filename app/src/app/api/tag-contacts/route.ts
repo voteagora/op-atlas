@@ -173,14 +173,14 @@ const handleAddCitizenEntity = async (
 ) => {
   await addTag(records.citizen, "citizen")
 }
+const handleAddRfVoterEntity = async (
+  records: Record<"rf_voter", EntityObject[]>,
+) => {}
 const handleAddBadgeholderEntity = async (
   records: Record<"badgeholder", EntityObject[]>,
 ) => {}
 const handleAddGovContributionEntity = async (
   records: Record<"gov_contribution", EntityObject[]>,
-) => {}
-const handleAddRfVoterEntity = async (
-  records: Record<"rf_voter", EntityObject[]>,
 ) => {}
 
 const handleRemoveCitizenEntity = async (
@@ -188,12 +188,12 @@ const handleRemoveCitizenEntity = async (
 ) => {
   await removeTags(records.citizen, "citizen")
 }
+const handleRemoveRfVoterEntity = async (
+  records: Record<"rf_voter", EntityObject[]>,
+) => {}
 const handleRemoveBadgeholderEntity = async (
   records: Record<"badgeholder", EntityObject[]>,
 ) => {}
 const handleRemoveGovContributionEntity = async (
   records: Record<"gov_contribution", EntityObject[]>,
-) => {}
-const handleRemoveRfVoterEntity = async (
-  records: Record<"rf_voter", EntityObject[]>,
 ) => {}

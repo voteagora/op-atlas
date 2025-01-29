@@ -1,12 +1,8 @@
+import { AggregatedType } from "eas-indexer/src/types"
+
 import { easClient } from "./client"
 
-export type AggregatedDataResponse = {
-  citizen: string[]
-  badgeholder: string[]
-  gov_contribution: string[]
-  rf_voter: string[]
-}
-export const getAggregatedData = async (): Promise<AggregatedDataResponse> => {
+export const getAggregatedData = async (): Promise<AggregatedType> => {
   const records = await easClient("/entities/aggregated", {
     // NOTE: Do we need this? Not sure if our EAS Indexer is publiclly accessible as I see no authorisation anywhere
     // headers: {

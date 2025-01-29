@@ -14,4 +14,11 @@ export type Attestation = {
   subtext: string;
 };
 
+export type AggregatedType = {
+  badgeholder: { address: string }[];
+  citizen: { address: string }[];
+  gov_contribution: { address: string }[];
+  rf_voter: { address: string }[];
+};
+
 export type Entity = keyof typeof dbSchema;
