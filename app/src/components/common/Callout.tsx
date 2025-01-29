@@ -39,7 +39,7 @@ export const Callout = memo(function Callout({
         type === "error"
           ? "bg-red-200 text-destructive-foreground"
           : type === "info"
-          ? "bg-accent text-accent-foreground"
+          ? "bg-accent text-blue-600"
           : type === "success"
           ? "bg-green-100 text-green-800"
           : type === "optimismBright"
