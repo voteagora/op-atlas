@@ -12,8 +12,9 @@ import { ReactNode, useEffect, useState } from "react"
 import { truncate } from "@/lib/utils/contracts"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
-import { getDeployerOSOData } from "./ContractsForm2"
+import { DBData, getDeployerOSOData } from "./ContractsForm2"
 import { isAddress } from "viem"
+import { ProjectContract } from "@prisma/client"
 
 const onCopyValue = async (value: string) => {
   try {
@@ -31,7 +32,7 @@ export function DeployerForm({
 }: {
   form: UseFormReturn<z.infer<typeof ContractsSchema2>>
   deployerIndex: number
-  dbData: any
+  dbData: DBData
 }) {
   const initialMaxContractViewCount = 3
   const [contractViewCount, setContractViewCount] = useState(
@@ -108,11 +109,13 @@ export function DeployerForm({
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
-  function isInDatabase(contract: { address: string; chain: string }) {
+  console.log(dbData)
+
+  function isInDatabase(address: string, chain: string) {
     return dbData?.contracts.some(
-      (dbContract: any) =>
-        dbContract.address === contract.address &&
-        dbContract.chainId === contract.chain,
+      (dbContract: { address: string; chainId: number }) =>
+        dbContract.address === address &&
+        dbContract.chainId.toString() === chain,
     )
   }
 
@@ -158,7 +161,10 @@ export function DeployerForm({
                                 >
                                   <div className="flex items-center gap-2">
                                     <div>
-                                      {!isInDatabase(contractField.value) ? (
+                                      {!isInDatabase(
+                                        contractField.value.address,
+                                        contractField.value.chain,
+                                      ) ? (
                                         <X
                                           width={20}
                                           height={20}
@@ -173,12 +179,18 @@ export function DeployerForm({
                                       )}
                                     </div>
 
-                                    {!isInDatabase(contractField.value) && (
+                                    {!isInDatabase(
+                                      contractField.value.address,
+                                      contractField.value.chain,
+                                    ) && (
                                       <div className="bg-rose-300 rounded-lg px-2">
                                         Excluded
                                       </div>
                                     )}
-                                    {isInDatabase(contractField.value) && (
+                                    {isInDatabase(
+                                      contractField.value.address,
+                                      contractField.value.chain,
+                                    ) && (
                                       <div className="bg-green-300 rounded-lg px-2">
                                         Included
                                       </div>
@@ -214,7 +226,8 @@ export function DeployerForm({
                                         <>
                                           {excludedField.value &&
                                             isInDatabase(
-                                              contractField.value,
+                                              contractField.value.address,
+                                              contractField.value.chain,
                                             ) && (
                                               <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
                                                 Exclude
@@ -223,7 +236,8 @@ export function DeployerForm({
 
                                           {!excludedField.value &&
                                             !isInDatabase(
-                                              contractField.value,
+                                              contractField.value.address,
+                                              contractField.value.chain,
                                             ) && (
                                               <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
                                                 Include

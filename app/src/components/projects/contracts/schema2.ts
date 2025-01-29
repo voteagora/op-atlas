@@ -14,6 +14,10 @@ export const DeployerSchema = z.object({
   contracts: z.array(ContractSchema2),
 })
 
+export const ContractsSchema2 = z.object({
+  deployers: z.array(DeployerSchema),
+})
+
 const OffChainSchema2 = z.object({
   isOffChain: z.literal(true),
   deployers: z.any(),
@@ -35,7 +39,4 @@ const NoContractsSchema2 = z.object({
   osoSlug: z.string().optional(),
 })
 
-export const ContractsSchema2 = z.object({
-  deployers: z.array(DeployerSchema),
-})
 //OffChainSchema2.or(NoContractsSchema2).or(HasContractsSchema2)

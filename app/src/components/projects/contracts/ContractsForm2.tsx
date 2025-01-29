@@ -47,34 +47,49 @@ import { ChainLogo } from "@/components/common/ChainLogo"
 import { copyToClipboard } from "@/lib/utils"
 import { VerifyButton } from "./VerifyButton"
 import { isAddress } from "ethers"
+import { useProjectContracts } from "@/hooks/useProjectContracts"
 // import { ExcludedTag } from "./ExcludedTag"
+
+export type DBContract = { address: string; chainId: number }
+
+export type DBData = {
+  deployerAddress: string
+  contracts: DBContract[]
+}
 
 const EMPTY_DEPLOYER = {
   address: "",
   contracts: [],
 }
 
-export const mockDbData: {
-  deployerAddress: string
-  address: string
-  chainId: string
-}[] = [
+const USE_MOCK_DATA = true
+
+export const mockDbData = [
   {
     deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-    address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-    chainId: "8453",
+    contractAddress: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+    chainId: 8453,
   },
   {
     deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
-    address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
-    chainId: "34443",
+    contractAddress: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+    chainId: 34443,
   },
   {
     deployerAddress: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-    address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
-    chainId: "34443",
+    contractAddress: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
+    chainId: 34443,
   },
-]
+] as ProjectContract[]
+
+type OSOContract = {
+  address: string
+  chain: string
+}
+type OSOData = {
+  address: string
+  contracts: OSOContract[]
+}
 
 const mockBackendOSOData = [
   {
@@ -128,7 +143,7 @@ const mockBackendOSOData = [
       },
     ],
   },
-]
+] as OSOData[]
 
 export function getDeployerOSOData(address: string) {
   return mockBackendOSOData.find((deployer) => {
@@ -153,15 +168,24 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     name: "deployers", // Name of the array field
   })
 
-  const [allDbData, setAllDbData] = useState<any>([])
+  const [allDbData, setAllDbData] = useState<DBData[]>([])
+
+  const { data } = useProjectContracts(project.id)
 
   useEffect(() => {
     const populateForm = async () => {
+      if (data === undefined) return
+
       //1. Get DB Data
       // TODO: Implement
-      const fetchedDbData = mockDbData
 
-      console.log(fetchedDbData)
+      let fetchedDbData: ProjectContract[] = []
+
+      if (USE_MOCK_DATA) {
+        fetchedDbData = mockDbData
+      } else {
+        fetchedDbData = data
+      }
 
       if (fetchedDbData.length <= 0) {
         form.setValue("deployers", [{ address: "", contracts: [] }])
@@ -171,23 +195,27 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
       //2. Consolodiate DB Data
       const consolidatedDbData = fetchedDbData.reduce(
-        (acc: any, { deployerAddress, ...contract }) => {
+        (acc: Record<string, DBData>, { deployerAddress, ...contract }) => {
           if (!acc[deployerAddress]) {
             acc[deployerAddress] = { deployerAddress, contracts: [] }
           }
-          acc[deployerAddress].contracts.push(contract)
+          acc[deployerAddress].contracts.push({
+            address: contract.contractAddress,
+            chainId: contract.chainId,
+          })
           return acc
         },
         {},
       )
 
-      const consolidatedDbDataArray: any = Object.values(consolidatedDbData)
+      const consolidatedDbDataArray: DBData[] =
+        Object.values(consolidatedDbData)
 
       setAllDbData(consolidatedDbDataArray)
 
       //3. Get OSO Data
-      const mockFetchedOSOData = consolidatedDbDataArray.map(
-        (deployer: any) => {
+      const mockFetchedOSOData: OSOData[] = consolidatedDbDataArray
+        .map((deployer: DBData) => {
           const result = getDeployerOSOData(deployer.deployerAddress)
           if (result) {
             return {
@@ -195,34 +223,36 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
               contracts: result.contracts,
             }
           }
-        },
-      )
+        })
+        .filter((data): data is OSOData => data !== undefined)
 
       //4. Cross Reference
-      const formDeployers = mockFetchedOSOData.map((deployer: any) => {
-        return {
-          address: deployer.address,
-          contracts: deployer.contracts.map((contract: any) => {
-            return {
-              ...contract,
-              excluded:
-                mockDbData.find((entry) => {
-                  return (
-                    entry.deployerAddress === deployer.address &&
-                    entry.chainId === contract.chain &&
-                    entry.address === contract.address
-                  )
-                }) === undefined,
-            }
-          }),
-        }
-      })
+      const formDeployers: z.infer<typeof ContractsSchema2> = {
+        deployers: mockFetchedOSOData.map((deployer: OSOData) => {
+          return {
+            address: deployer.address,
+            contracts: deployer.contracts.map((contract: OSOContract) => {
+              return {
+                ...contract,
+                excluded:
+                  fetchedDbData.find((entry) => {
+                    return (
+                      entry.deployerAddress === deployer.address &&
+                      entry.chainId.toString() === contract.chain &&
+                      entry.contractAddress === contract.address
+                    )
+                  }) === undefined,
+              }
+            }),
+          }
+        }),
+      }
 
-      form.setValue("deployers", formDeployers)
+      form.setValue("deployers", formDeployers.deployers)
     }
 
     populateForm()
-  }, [form])
+  }, [form, data?.length])
 
   // Form submission handler
   const onSubmit = (data: z.infer<typeof ContractsSchema2>) => {
@@ -266,11 +296,9 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                   }) &&
                   watchedField
                     ?.map((deployer) => {
-                      console.log(deployer)
                       return isAddress(deployer.address)
                     })
                     .every((isAddressResult) => {
-                      console.log(isAddressResult)
                       return isAddressResult
                     }) && (
                     <Button

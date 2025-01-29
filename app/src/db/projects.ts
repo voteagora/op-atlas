@@ -226,6 +226,16 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
 
 export const getUserProjectsWithDetails = cache(getUserProjectsWithDetailsFn)
 
+async function getAllProjectContractsFn({ projectId }: { projectId: string }) {
+  return prisma.projectContract.findMany({
+    where: {
+      projectId: projectId,
+    },
+  })
+}
+
+export const getAllProjectContracts = cache(getAllProjectContractsFn)
+
 async function getAllPublishedUserProjectsFn({ userId }: { userId: string }) {
   return prisma.user.findUnique({
     where: {
