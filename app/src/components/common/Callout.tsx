@@ -47,7 +47,7 @@ export const Callout = memo(function Callout({
           : type === "optimism"
           ? "text-white bg-optimismRed"
           : type === "gray"
-          ? "text-gray-800 bg-gray-200"
+          ? "text-secondary-foreground bg-secondary"
           : "",
         className,
       )}
