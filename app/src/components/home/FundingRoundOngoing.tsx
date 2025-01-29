@@ -45,7 +45,7 @@ export function FundingRoundOngoing({
         router.push(`/missions/${fundingRound.pageName}`)
       }}
     >
-      <div className="flex flex-col gap-y-4 justify-start p-10">
+      <div className="flex flex-col gap-y-4 justify-start p-8">
         <div className="flex flex-col justify-between gap-y-1">
           <div className="flex justify-between space-x-2">
             <h2 className="text-base font-semibold text-text-default text-start">
