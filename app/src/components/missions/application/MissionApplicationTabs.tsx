@@ -74,7 +74,7 @@ export function MissionApplicationTabs({
 
   return (
     <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-      <TabsList className="grid w-96 grid-cols-2 bg-background">
+      <TabsList className="grid w-80 grid-cols-2 bg-background">
         <TabsTrigger
           className={`flex justify-start data-[state=active]:bg-background data-[state=active]:shadow-none px-0`}
           value="details"
