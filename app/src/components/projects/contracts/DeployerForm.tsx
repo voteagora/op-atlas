@@ -39,8 +39,6 @@ export function DeployerForm({
     initialMaxContractViewCount,
   )
 
-  useEffect(() => {}, [])
-
   async function OnVerify() {
     setIsVerifying(true)
     setErrorMessage(undefined)
@@ -74,11 +72,9 @@ export function DeployerForm({
 
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    const osoDataForDeployer = getDeployerOSOData(
+    const osoDataForDeployer = await getDeployerOSOData(
       form.getValues().deployers[deployerIndex].address,
     )
-
-    console.log(osoDataForDeployer)
 
     if (
       !osoDataForDeployer ||
@@ -108,8 +104,6 @@ export function DeployerForm({
   const [isVerifying, setIsVerifying] = useState(false)
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
-
-  console.log(dbData)
 
   function isInDatabase(address: string, chain: string) {
     return dbData?.contracts.some(

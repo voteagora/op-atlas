@@ -48,6 +48,7 @@ import { copyToClipboard } from "@/lib/utils"
 import { VerifyButton } from "./VerifyButton"
 import { isAddress } from "ethers"
 import { useProjectContracts } from "@/hooks/useProjectContracts"
+import { getDeployedContracts } from "@/lib/oso"
 // import { ExcludedTag } from "./ExcludedTag"
 
 export type DBContract = { address: string; chainId: number }
@@ -62,7 +63,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const USE_MOCK_DATA = true
+const USE_MOCK_DATA = false
 
 export const mockDbData = [
   {
@@ -145,10 +146,18 @@ const mockBackendOSOData = [
   },
 ] as OSOData[]
 
-export function getDeployerOSOData(address: string) {
-  return mockBackendOSOData.find((deployer) => {
-    return address === deployer.address
-  })
+export async function getDeployerOSOData(address: string) {
+  if (USE_MOCK_DATA) {
+    return mockBackendOSOData.find((deployer) => {
+      return address === deployer.address
+    })
+  } else {
+    const result = await getDeployedContracts({
+      deployer: address,
+    })
+
+    console.log(result)
+  }
 }
 
 function getDefaultValues(): z.infer<typeof ContractsSchema2> {
@@ -171,6 +180,18 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   const [allDbData, setAllDbData] = useState<DBData[]>([])
 
   const { data } = useProjectContracts(project.id, { enabled: !USE_MOCK_DATA })
+
+  // WORKING
+  // useEffect(() => {
+  //   async function get() {
+  //     console.log("Starting get...")
+  //     const result = await getDeployedContracts({
+  //       deployer: "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
+  //     })
+  //     console.log(result)
+  //   }
+  //   get()
+  // }, [])
 
   useEffect(() => {
     const populateForm = async () => {
@@ -215,17 +236,21 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
       setAllDbData(consolidatedDbDataArray)
 
       //3. Get OSO Data
-      const osoData: OSOData[] = consolidatedDbDataArray
-        .map((deployer: DBData) => {
-          const result = getDeployerOSOData(deployer.deployerAddress)
+      const osoData: OSOData[] = await Promise.all(
+        consolidatedDbDataArray.map(async (deployer: DBData) => {
+          const result = await getDeployerOSOData(deployer.deployerAddress)
           if (result) {
             return {
               address: result.address,
               contracts: result.contracts,
             }
           }
-        })
-        .filter((data): data is OSOData => data !== undefined)
+        }),
+      ).then((data) =>
+        data.filter((data): data is OSOData => data !== undefined),
+      )
+
+      console.log(osoData)
 
       //4. Cross Reference
       const formDeployers: z.infer<typeof ContractsSchema2> = {
