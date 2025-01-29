@@ -46,6 +46,7 @@ import { ContractDropdownButton } from "./ContractDropdownButton"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { copyToClipboard } from "@/lib/utils"
 import { VerifyButton } from "./VerifyButton"
+import { isAddress } from "ethers"
 // import { ExcludedTag } from "./ExcludedTag"
 
 const EMPTY_DEPLOYER = {
@@ -152,7 +153,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     name: "deployers", // Name of the array field
   })
 
-  const [allDbData, setAllDbData] = useState<any>()
+  const [allDbData, setAllDbData] = useState<any>([])
 
   useEffect(() => {
     const populateForm = async () => {
@@ -228,6 +229,11 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     console.log(data)
   }
 
+  const watchedField = useWatch({
+    control: form.control,
+    name: "deployers", // Specify the name of the field you want to watch
+  })
+
   return (
     <div>
       <Form {...form}>
@@ -251,16 +257,34 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                     )
                   })}
 
-                <Button
-                  variant={"ghost"}
-                  className="bg-gray-300 w-[200px]"
-                  type="button"
-                  onClick={() => {
-                    append({ address: "", contracts: [] })
-                  }}
-                >
-                  Add deployer address
-                </Button>
+                {watchedField
+                  ?.map((deployer) => {
+                    return deployer.contracts.length > 0
+                  })
+                  .every((isContractsResult) => {
+                    return isContractsResult
+                  }) &&
+                  watchedField
+                    ?.map((deployer) => {
+                      console.log(deployer)
+                      return isAddress(deployer.address)
+                    })
+                    .every((isAddressResult) => {
+                      console.log(isAddressResult)
+                      return isAddressResult
+                    }) && (
+                    <Button
+                      variant={"ghost"}
+                      className="bg-gray-300 w-[200px]"
+                      type="button"
+                      onClick={() => {
+                        append({ address: "", contracts: [] })
+                      }}
+                    >
+                      <Plus width={16} height={16} />
+                      Add deployer address
+                    </Button>
+                  )}
               </>
             )}
           />

@@ -13,6 +13,7 @@ import { truncate } from "@/lib/utils/contracts"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
 import { getDeployerOSOData } from "./ContractsForm2"
+import { isAddress } from "viem"
 
 const onCopyValue = async (value: string) => {
   try {
@@ -37,9 +38,19 @@ export function DeployerForm({
     initialMaxContractViewCount,
   )
 
+  useEffect(() => {}, [])
+
   async function OnVerify() {
     setIsVerifying(true)
     setErrorMessage(undefined)
+
+    if (!isAddress(form.getValues().deployers[deployerIndex].address)) {
+      setErrorMessage(
+        <p className="text-rose-600">This is not a valid deployer address!</p>,
+      )
+      setIsVerifying(false)
+      return
+    }
 
     if (
       form.getValues().deployers.filter((deployer) => {
@@ -146,29 +157,21 @@ export function DeployerForm({
                                   className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   <div className="flex items-center gap-2">
-                                    <FormField
-                                      control={form.control}
-                                      name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
-                                      render={({ field: excludedField }) => (
-                                        <div>
-                                          {!isInDatabase(
-                                            contractField.value,
-                                          ) ? (
-                                            <X
-                                              width={20}
-                                              height={20}
-                                              color="grey"
-                                            />
-                                          ) : (
-                                            <Check
-                                              width={20}
-                                              height={20}
-                                              color="green"
-                                            />
-                                          )}
-                                        </div>
+                                    <div>
+                                      {!isInDatabase(contractField.value) ? (
+                                        <X
+                                          width={20}
+                                          height={20}
+                                          color="grey"
+                                        />
+                                      ) : (
+                                        <Check
+                                          width={20}
+                                          height={20}
+                                          color="green"
+                                        />
                                       )}
-                                    />
+                                    </div>
 
                                     {!isInDatabase(contractField.value) && (
                                       <div className="bg-rose-300 rounded-lg px-2">
