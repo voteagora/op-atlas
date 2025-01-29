@@ -67,9 +67,13 @@ export default function Mission() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-6 ml-auto w-[290px]">
+        <div className="flex flex-col gap-y-6 ml-auto w-[290px] sticky top-20 h-full">
+          {/* <div className="sticky top-0"> */}
           <UserRoundApplicationStatusCard />
+          {/* </div> */}
+          {/* <div className="sticky top-0"> */}
           <RoundEnrolledProjectsCard />
+          {/* </div> */}
         </div>
       </div>
     </div>
