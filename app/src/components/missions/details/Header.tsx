@@ -47,14 +47,14 @@ export default function Header() {
 
       <ul className="list-disc pl-6">
         <li>
-          <span className="">{"Timeline:"}</span>
+          <span className="font-semibold">{"Timeline:"}</span>
           <span className="">{` The program will take place from `}</span>
           <span>{format(mission!.startsAt, "MMM d")}</span>
           <span>{" - "}</span>
           {<span>{format(mission!.endsAt, "MMM d, yyyy")}</span>}.
         </li>
         <li>
-          <span className="">{"Application periods:"}</span>
+          <span className="font-semibold">{"Application periods:"}</span>
           <span className="">
             {
               " Apply by the monthly application deadline, and your project will be evaluated for rewards starting the following month."
@@ -62,13 +62,13 @@ export default function Header() {
           </span>
         </li>
         <li>
-          <span className="">{"Grant delivery:"}</span>
+          <span className="font-semibold">{"Grant delivery:"}</span>
           <span className="">
             {" Rewards are delivered monthly, starting in March."}
           </span>
         </li>
         <li>
-          <span className="">{"Budget:"}</span>
+          <span className="font-semibold">{"Budget:"}</span>
           <span className="">{" Up to 8M OP"}</span>
         </li>
       </ul>
