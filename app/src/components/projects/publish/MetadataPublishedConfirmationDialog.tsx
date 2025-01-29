@@ -46,7 +46,7 @@ function MetadataPublishedConfirmationDialog({
         <DialogFooter className="w-full sm:flex-col gap-2">
           <Link href="/rounds">
             <Button className="w-full" type="button" variant="destructive">
-              View missions
+              View Reto Funding Missions
             </Button>
           </Link>
 
