@@ -130,7 +130,7 @@ const Navbar = () => {
                       } focus:outline-none focus:opacity-80`}
                       href="/rounds"
                     >
-                      Retro Missisons
+                      Retro Missions
                     </Link>
                   </div>
                 </div>
