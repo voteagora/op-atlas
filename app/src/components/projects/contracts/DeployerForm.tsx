@@ -97,6 +97,14 @@ export function DeployerForm({
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
+  function isInDatabase(contract: { address: string; chain: string }) {
+    return dbData?.contracts.some(
+      (dbContract: any) =>
+        dbContract.address === contract.address &&
+        dbContract.chainId === contract.chain,
+    )
+  }
+
   return (
     <>
       <FormField
@@ -143,14 +151,36 @@ export function DeployerForm({
                                       name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
                                       render={({ field: excludedField }) => (
                                         <div>
-                                          {excludedField.value ? (
-                                            <X width={16} height={16} />
+                                          {!isInDatabase(
+                                            contractField.value,
+                                          ) ? (
+                                            <X
+                                              width={20}
+                                              height={20}
+                                              color="grey"
+                                            />
                                           ) : (
-                                            <Check width={16} height={16} />
+                                            <Check
+                                              width={20}
+                                              height={20}
+                                              color="green"
+                                            />
                                           )}
                                         </div>
                                       )}
                                     />
+
+                                    {!isInDatabase(contractField.value) && (
+                                      <div className="bg-rose-300 rounded-lg px-2">
+                                        Excluded
+                                      </div>
+                                    )}
+                                    {isInDatabase(contractField.value) && (
+                                      <div className="bg-green-300 rounded-lg px-2">
+                                        Included
+                                      </div>
+                                    )}
+
                                     <ChainLogo
                                       chainId={contractField.value.chain}
                                     />
@@ -169,29 +199,6 @@ export function DeployerForm({
                                         {contractField.value.address}
                                       </span>
                                     </button>
-
-                                    {!dbData?.contracts.some(
-                                      (dbContract: any) =>
-                                        dbContract.address ===
-                                          contractField.value.address &&
-                                        dbContract.chain ===
-                                          contractField.value.chain,
-                                    ) && (
-                                      <div className="bg-rose-300 rounded-lg px-2">
-                                        Excluded
-                                      </div>
-                                    )}
-                                    {dbData?.contracts.some(
-                                      (dbContract: any) =>
-                                        dbContract.address ===
-                                          contractField.value.address &&
-                                        dbContract.chain ===
-                                          contractField.value.chain,
-                                    ) && (
-                                      <div className="bg-green-300 rounded-lg px-2">
-                                        Included
-                                      </div>
-                                    )}
                                   </div>
 
                                   <div className="flex gap-4">
@@ -203,12 +210,8 @@ export function DeployerForm({
                                       render={({ field: excludedField }) => (
                                         <>
                                           {excludedField.value &&
-                                            dbData?.contracts.some(
-                                              (dbContract: any) =>
-                                                dbContract.address ===
-                                                  contractField.value.address &&
-                                                dbContract.chain ===
-                                                  contractField.value.chain,
+                                            isInDatabase(
+                                              contractField.value,
                                             ) && (
                                               <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
                                                 Exclude
@@ -216,12 +219,8 @@ export function DeployerForm({
                                             )}
 
                                           {!excludedField.value &&
-                                            !dbData?.contracts.some(
-                                              (dbContract: any) =>
-                                                dbContract.address ===
-                                                  contractField.value.address &&
-                                                dbContract.chain ===
-                                                  contractField.value.chain,
+                                            !isInDatabase(
+                                              contractField.value,
                                             ) && (
                                               <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
                                                 Include

@@ -49,25 +49,29 @@ import { VerifyButton } from "./VerifyButton"
 // import { ExcludedTag } from "./ExcludedTag"
 
 const EMPTY_DEPLOYER = {
-  deployerAddress: "",
+  address: "",
   contracts: [],
 }
 
-export const mockDbData = [
+export const mockDbData: {
+  deployerAddress: string
+  address: string
+  chainId: string
+}[] = [
   {
     deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
     address: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-    chain: "8453",
+    chainId: "8453",
   },
   {
     deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
     address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
-    chain: "34443",
+    chainId: "34443",
   },
   {
     deployerAddress: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
     address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
-    chain: "34443",
+    chainId: "34443",
   },
 ]
 
@@ -106,6 +110,23 @@ const mockBackendOSOData = [
       },
     ],
   },
+  {
+    address: "0x05E4eBb06B3a4dB3138e68FeDEa0Daa106b111E8",
+    contracts: [
+      {
+        address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
+        chain: "34443",
+      },
+      {
+        address: "0xEA5aE0568DF87515885F3BA6B760E76a29ea2D24",
+        chain: "34443",
+      },
+      {
+        address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
+        chain: "34443",
+      },
+    ],
+  },
 ]
 
 export function getDeployerOSOData(address: string) {
@@ -114,6 +135,11 @@ export function getDeployerOSOData(address: string) {
   })
 }
 
+function getDefaultValues(): z.infer<typeof ContractsSchema2> {
+  return {
+    deployers: [{ ...EMPTY_DEPLOYER }],
+  }
+}
 export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   const form = useForm<z.infer<typeof ContractsSchema2>>({
     resolver: zodResolver(ContractsSchema2),
@@ -133,6 +159,14 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
       //1. Get DB Data
       // TODO: Implement
       const fetchedDbData = mockDbData
+
+      console.log(fetchedDbData)
+
+      if (fetchedDbData.length <= 0) {
+        form.setValue("deployers", [{ address: "", contracts: [] }])
+        // setAllDbData()
+        return
+      }
 
       //2. Consolodiate DB Data
       const consolidatedDbData = fetchedDbData.reduce(
@@ -174,7 +208,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                 mockDbData.find((entry) => {
                   return (
                     entry.deployerAddress === deployer.address &&
-                    entry.chain === contract.chain &&
+                    entry.chainId === contract.chain &&
                     entry.address === contract.address
                   )
                 }) === undefined,
