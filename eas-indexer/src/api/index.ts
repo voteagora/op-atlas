@@ -47,8 +47,6 @@ ponder.get("/entities/aggregated", async (c) => {
     rf_voter: [],
   };
 
-  console.log(">>> aggregated", aggregated.citizen);
-
   for (const entity of entities) {
     const table = dbSchema[entity] as any;
     let data = [];
@@ -70,8 +68,6 @@ ponder.get("/entities/aggregated", async (c) => {
       aggregated[entity] = data.map((item: any) => ({ address: item.address }));
     }
   }
-
-  console.log(">>> aggregated", aggregated.citizen);
 
   return c.json(aggregated);
 });

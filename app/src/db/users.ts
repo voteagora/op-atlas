@@ -233,7 +233,6 @@ export async function updateUserInteraction(
 }
 
 async function getAllNonTaggedCitizens(records: AggregatedType["citizen"]) {
-  console.log(">>> citizen records:", records)
   return prisma.userAddress.findMany({
     where: {
       AND: [
