@@ -170,16 +170,14 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   const [allDbData, setAllDbData] = useState<DBData[]>([])
 
-  const { data } = useProjectContracts(project.id)
+  const { data } = useProjectContracts(project.id, { enabled: !USE_MOCK_DATA })
 
   useEffect(() => {
     const populateForm = async () => {
-      if (data === undefined) return
-
       //1. Get DB Data
       // TODO: Implement
 
-      let fetchedDbData: ProjectContract[] = []
+      let fetchedDbData: ProjectContract[] | undefined = []
 
       if (USE_MOCK_DATA) {
         fetchedDbData = mockDbData
@@ -187,34 +185,37 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
         fetchedDbData = data
       }
 
-      if (fetchedDbData.length <= 0) {
+      if (fetchedDbData && fetchedDbData.length <= 0) {
         form.setValue("deployers", [{ address: "", contracts: [] }])
         // setAllDbData()
         return
       }
 
       //2. Consolodiate DB Data
-      const consolidatedDbData = fetchedDbData.reduce(
-        (acc: Record<string, DBData>, { deployerAddress, ...contract }) => {
-          if (!acc[deployerAddress]) {
-            acc[deployerAddress] = { deployerAddress, contracts: [] }
-          }
-          acc[deployerAddress].contracts.push({
-            address: contract.contractAddress,
-            chainId: contract.chainId,
-          })
-          return acc
-        },
-        {},
-      )
+      const consolidatedDbData =
+        fetchedDbData &&
+        fetchedDbData.reduce(
+          (acc: Record<string, DBData>, { deployerAddress, ...contract }) => {
+            if (!acc[deployerAddress]) {
+              acc[deployerAddress] = { deployerAddress, contracts: [] }
+            }
+            acc[deployerAddress].contracts.push({
+              address: contract.contractAddress,
+              chainId: contract.chainId,
+            })
+            return acc
+          },
+          {},
+        )
 
-      const consolidatedDbDataArray: DBData[] =
-        Object.values(consolidatedDbData)
+      const consolidatedDbDataArray: DBData[] = Object.values(
+        consolidatedDbData || [],
+      )
 
       setAllDbData(consolidatedDbDataArray)
 
       //3. Get OSO Data
-      const mockFetchedOSOData: OSOData[] = consolidatedDbDataArray
+      const osoData: OSOData[] = consolidatedDbDataArray
         .map((deployer: DBData) => {
           const result = getDeployerOSOData(deployer.deployerAddress)
           if (result) {
@@ -228,14 +229,14 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
       //4. Cross Reference
       const formDeployers: z.infer<typeof ContractsSchema2> = {
-        deployers: mockFetchedOSOData.map((deployer: OSOData) => {
+        deployers: osoData.map((deployer: OSOData) => {
           return {
             address: deployer.address,
             contracts: deployer.contracts.map((contract: OSOContract) => {
               return {
                 ...contract,
                 excluded:
-                  fetchedDbData.find((entry) => {
+                  fetchedDbData!.find((entry) => {
                     return (
                       entry.deployerAddress === deployer.address &&
                       entry.chainId.toString() === contract.chain &&
@@ -252,7 +253,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
     }
 
     populateForm()
-  }, [form, data?.length])
+  }, [form, data])
 
   // Form submission handler
   const onSubmit = (data: z.infer<typeof ContractsSchema2>) => {
