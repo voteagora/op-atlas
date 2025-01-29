@@ -1,10 +1,10 @@
+import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import { isAddress, isHex } from "viem"
 import {
   base,
   fraxtal,
   ink,
   lisk,
-  liskSepolia,
   metalL2,
   mode,
   optimism,
@@ -17,16 +17,20 @@ import {
 import { z } from "zod"
 
 export const Chain = z.enum([
+  arenaZ.id.toString(),
   base.id.toString(),
+  ethernity.id.toString(),
   fraxtal.id.toString(),
   ink.id.toString(),
   lisk.id.toString(),
   metalL2.id.toString(),
   mode.id.toString(),
   optimism.id.toString(),
+  race.id.toString(),
   shape.id.toString(),
   superseed.id.toString(),
   swan.id.toString(),
+  swell.id.toString(),
   worldchain.id.toString(),
   zora.id.toString(),
 ])

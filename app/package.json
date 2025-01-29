@@ -29,6 +29,7 @@
     "*.{css,md}": "prettier --write"
   },
   "dependencies": {
+    "@eth-optimism/viem": "^0.2.0",
     "@ethereum-attestation-service/eas-sdk": "^2.1.4",
     "@farcaster/auth-client": "^0.3.0",
     "@farcaster/auth-kit": "^0.3.1",

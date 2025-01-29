@@ -50,7 +50,7 @@ const RewardAccordion = ({
           {!isExpanded && (
             <div className="flex gap-2">
               <Image
-                src="/assets/chain-logos/optimism.png"
+                src="/assets/icons/op-icon.svg"
                 height={20}
                 width={20}
                 alt="Optimism"
@@ -67,7 +67,7 @@ const RewardAccordion = ({
             <div className="font-medium text-sm">Grant amount</div>
             <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
               <Image
-                src="/assets/chain-logos/optimism.png"
+                src="/assets/icons/op-icon.svg"
                 height={20}
                 width={20}
                 alt="Optimism"
