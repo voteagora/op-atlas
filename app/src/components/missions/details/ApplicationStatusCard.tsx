@@ -87,7 +87,7 @@ export const ApplicationStatusCard = ({
 
                 <Button
                   variant={"ghost"}
-                  className="bg-secondary mt-5"
+                  className="bg-secondary mt-5 w-full"
                   onClick={() => {
                     router.push(`/missions/${pageName}/application`)
                   }}
@@ -108,13 +108,13 @@ export const ApplicationStatusCard = ({
             ${startDate}.`}
             </p>
             <Button
-              className="bg-optimismRed text-white"
+              className="bg-optimismRed text-white w-full"
               variant={"outline"}
               onClick={() => {
                 router.push(`/missions/${pageName}/application`)
               }}
             >
-              Apply
+              Choose Projects
             </Button>
           </div>
         )
@@ -131,7 +131,10 @@ export const ApplicationStatusCard = ({
           </p>
 
           <div className="flex flex-col w-full gap-2">
-            <Button className="bg-optimismRed text-white" variant={"outline"}>
+            <Button
+              className="bg-optimismRed text-white w-full"
+              variant={"outline"}
+            >
               Add Project
             </Button>
             <Button

@@ -21,7 +21,7 @@ export const RoundEnrolledProjectsCard = () => {
   return (
     <>
       {!isLoading && icons.length > 0 && (
-        <div className="border-2 border-grey-900 rounded-xl">
+        <div className="border-[1px] border-grey-900 rounded-xl">
           <IconList
             icons={icons}
             headerContent={
