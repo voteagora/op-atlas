@@ -64,11 +64,11 @@ export const mockDbData = [
     address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
     chain: "34443",
   },
-  // {
-  //   deployerAddress: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
-  //   address: "0xC11f4675342041F5F0e5d294A120519fcfd9EF5c",
-  //   chain: "34443",
-  // },
+  {
+    deployerAddress: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
+    address: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
+    chain: "34443",
+  },
 ]
 
 const mockBackendOSOData = [
