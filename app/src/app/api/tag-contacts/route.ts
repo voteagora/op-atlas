@@ -54,7 +54,6 @@ const addTagsToContacts = async () => {
 
   await Promise.all([
     handleAddCitizenEntity({ citizen: records.citizen }),
-    handleAddBadgeholderEntity({ badgeholder: records.badgeholder }),
     handleAddGovContributionEntity({
       gov_contribution: records.gov_contribution,
     }),
@@ -66,7 +65,6 @@ const removeTagsFromContacts = async () => {
 
   await Promise.all([
     handleRemoveCitizenEntity({ citizen: records.citizen }),
-    handleRemoveBadgeholderEntity({ badgeholder: records.badgeholder }),
     handleRemoveGovContributionEntity({
       gov_contribution: records.gov_contribution,
     }),
@@ -291,13 +289,14 @@ const handleAddCitizenEntity = async (
 }
 const handleAddRfVoterEntity = async (
   records: Record<"rf_voter", EntityObject[]>,
-) => {}
-const handleAddBadgeholderEntity = async (
-  records: Record<"badgeholder", EntityObject[]>,
-) => {}
+) => {
+  await addTag(records.rf_voter, "rf_voter")
+}
 const handleAddGovContributionEntity = async (
   records: Record<"gov_contribution", EntityObject[]>,
-) => {}
+) => {
+  await addTag(records.gov_contribution, "gov_contribution")
+}
 
 const handleRemoveCitizenEntity = async (
   records: Record<"citizen", EntityObject[]>,
@@ -306,10 +305,11 @@ const handleRemoveCitizenEntity = async (
 }
 const handleRemoveRfVoterEntity = async (
   records: Record<"rf_voter", EntityObject[]>,
-) => {}
-const handleRemoveBadgeholderEntity = async (
-  records: Record<"badgeholder", EntityObject[]>,
-) => {}
+) => {
+  await removeTags(records.rf_voter, "rf_voter")
+}
 const handleRemoveGovContributionEntity = async (
   records: Record<"gov_contribution", EntityObject[]>,
-) => {}
+) => {
+  await removeTags(records.gov_contribution, "gov_contribution")
+}
