@@ -7,6 +7,7 @@ import { getAggregatedData } from "@/lib/api/eas/aggregated"
 import mailchimp from "@/lib/mailchimp"
 
 export const dynamic = "force-dynamic"
+export const revalidate = 0
 
 type Entity = "badgeholder" | "citizen" | "gov_contribution" | "rf_voter"
 type EntityObject = {
@@ -104,6 +105,36 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
   `,
   )
 
+  const onchainBuilderTag = "Onchain Builder"
+  const onchainBuilders = await prisma.$queryRaw<
+    { email: string; tags: string[] }[]
+  >(
+    Prisma.sql`
+    UPDATE "UserAddress"
+    SET "tags" = array_append("tags", ${onchainBuilderTag})
+    WHERE "userId" IN (
+      -- Get users directly in a project with a verified contract
+      SELECT u.id
+      FROM "User" u
+      WHERE EXISTS (
+        SELECT 1
+        FROM "UserProjects" up
+        JOIN "ProjectContract" pc ON up."projectId" = pc."projectId"
+        WHERE up."userId" = u.id
+      )
+      -- Get users in an org with a project that has a verified contract
+      OR EXISTS (
+        SELECT 1
+        FROM "UserOrganization" uo
+        JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
+        JOIN "ProjectContract" pc ON po."projectId" = pc."projectId"
+        WHERE uo."userId" = u.id
+      )
+    )
+    RETURNING "email", "tags";
+  `,
+  )
+
   console.log(`Updated user addresses, added tag "${tag}"`)
 
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
@@ -121,14 +152,37 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
     update_existing: true,
   })
 
+  const onchainBuildersResults = await mailchimp.lists.batchListMembers(
+    LIST_ID!,
+    {
+      members: onchainBuilders.map((builder) => ({
+        email_address: builder.email,
+        tags: builder.tags,
+        email_type: "html",
+        status: "transactional",
+      })),
+      update_existing: true,
+    },
+  )
+
   const updatedMembers = (results as any).updated_members.map(
     (member: any) => ({
       email: member.email_address,
       tags: member.tags,
     }),
   )
+  const updatedOnchainBuilders = (
+    onchainBuildersResults as any
+  ).updated_members.map((member: any) => ({
+    email: member.email_address,
+    tags: member.tags,
+  }))
 
-  console.log(`Added tags to ${updatedMembers.length} Mailchimp contacts`)
+  console.log(
+    `Added tags to ${
+      updatedMembers.length + updatedOnchainBuilders.length
+    } Mailchimp contacts`,
+  )
 }
 
 const removeTags = async (addresses: EntityObject[], tag: Entity) => {
