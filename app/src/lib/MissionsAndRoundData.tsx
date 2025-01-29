@@ -152,7 +152,7 @@ export const MISSIONS: MissionData[] = [
     applicationPageEligibility: [
       {
         reactNode: (
-          <p>
+          <p className="text-secondary-foreground">
             All applications must verify ownership of GitHub repo(s) in OP
             Atlas.
           </p>
@@ -161,7 +161,7 @@ export const MISSIONS: MissionData[] = [
       },
       {
         reactNode: (
-          <p>
+          <p className="text-secondary-foreground">
             JavaScript and Rust packages must be published on package registries
             (e.g,{" "}
             <ExternalLink className="underline" href={"https://npmjs.org"}>
@@ -337,12 +337,16 @@ export const MISSIONS: MissionData[] = [
     ),
     applicationPageEligibility: [
       {
-        reactNode: <p>Contract verified on an eligible OP chain</p>,
+        reactNode: (
+          <p className="text-secondary-foreground">
+            Contract verified on an eligible OP chain
+          </p>
+        ),
         type: "isOnChainContract",
       },
       {
         reactNode: (
-          <p>
+          <p className="text-secondary-foreground">
             DeFi projects must have a functioning{" "}
             <ExternalLink className="underline" href={"https://defillama.com"}>
               DefiLlama adapter
@@ -354,7 +358,7 @@ export const MISSIONS: MissionData[] = [
       },
       {
         reactNode: (
-          <p>
+          <p className="text-secondary-foreground">
             Account Abstraction projects must be included in the{" "}
             <ExternalLink
               className="underline"

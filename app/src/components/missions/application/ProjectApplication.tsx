@@ -156,7 +156,7 @@ export const ProjectApplication = ({
                   alt=""
                 />
                 <div className="flex flex-col text-start">
-                  <h5 className="text-base font-semibold text-secondary-foreground truncate w-96 ">
+                  <h5 className="font-semibold text-primary truncate w-96">
                     {project.name}
                   </h5>
                   <p>Admin</p>
@@ -185,7 +185,7 @@ export const ProjectApplication = ({
                     {icon}
                   </div>
                   <p className="pl-4">
-                    <span>
+                    <span className="text-secondary-foreground">
                       {sectionsTitles[key as keyof typeof sectionsTitles]}
                     </span>
                   </p>
