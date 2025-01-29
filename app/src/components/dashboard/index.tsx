@@ -3,7 +3,7 @@
 import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -61,18 +61,8 @@ const Dashboard = ({
   organizations?: UserOrganizationsWithDetails[]
   adminProjects: ProjectWithDetails[]
 }) => {
-  const hasSubmittedToCurrentRound = applications.some(
-    (application) => application.roundId === ROUND_ID,
-  )
-  const cardComponents = process.env.NEXT_PUBLIC_APPLICATIONS_CLOSED
-    ? []
-    : ([
-        hasSubmittedToCurrentRound ? (
-          <ApplicationSubmittedCallout key="applicationSubmitted" />
-        ) : (
-          <FundingRoundAnnouncementCallout key="fundingRound" />
-        ),
-      ] as React.ReactNode[])
+  const cardComponents: ReactNode[] = []
+
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
   const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
