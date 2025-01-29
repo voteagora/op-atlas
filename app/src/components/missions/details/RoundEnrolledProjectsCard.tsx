@@ -25,7 +25,7 @@ export const RoundEnrolledProjectsCard = () => {
           <IconList
             icons={icons}
             headerContent={
-              <p className="font-bold">{icons.length} projects enrolled</p>
+              <p className="font-semibold">{icons.length} projects enrolled</p>
             }
           />
         </div>

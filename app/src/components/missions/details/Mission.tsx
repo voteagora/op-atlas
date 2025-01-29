@@ -58,7 +58,7 @@ export default function Mission() {
               </div>
 
               <div className="mt-10">
-                <p className="text-xl font-bold">Requirements</p>
+                <p className="text-xl font-semibold">Requirements</p>
                 {mission?.missionPageRequirements}
               </div>
 

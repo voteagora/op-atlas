@@ -30,7 +30,7 @@ export const ApplicationStatusCard = ({
   if (!data) {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-bold">{"Apply"}</p>
+        <p className="font-semibold">{"Apply"}</p>
         {applyByDate && (
           <p className="text-sm text-secondary-foreground text-center">
             {`Apply by ${format(applyByDate, "MMM d")}`}
@@ -49,7 +49,7 @@ export const ApplicationStatusCard = ({
       if (userAppliedProjects && userAppliedProjects?.length > 0) {
         return (
           <div>
-            <p className="font-bold">{"Your status"}</p>
+            <p className="font-semibold">{"Your status"}</p>
 
             <div className="text-sm text-secondary-foreground text-center">
               <div className="flex flex-col gap-2">
@@ -101,7 +101,7 @@ export const ApplicationStatusCard = ({
       } else {
         return (
           <div className="flex flex-col items-center gap-2">
-            <p className="font-bold">{"Apply"}</p>
+            <p className="font-semibold">{"Apply"}</p>
 
             <p className="text-sm text-secondary-foreground text-center">
               {`Apply by ${applyByDate} to be evaluated for rewards starting 
@@ -122,7 +122,7 @@ export const ApplicationStatusCard = ({
     } else {
       return (
         <div className="flex flex-col items-center gap-2">
-          <p className="font-bold">{"Add project to apply"}</p>
+          <p className="font-semibold">{"Add project to apply"}</p>
 
           <p className="text-sm text-secondary-foreground text-center">
             {
