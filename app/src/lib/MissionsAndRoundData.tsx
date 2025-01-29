@@ -52,22 +52,30 @@ export const MISSIONS: MissionData[] = [
       <div>
         <ul className="list-disc pl-6">
           <li>
-            <span className="font-semibold">All applications</span> must verify
-            ownership of GitHub repo(s) in OP Atlas.
+            <span className="font-semibold">All applications</span>{" "}
+            <span className="text-secondary-foreground">
+              must verify ownership of GitHub repo(s) in OP Atlas.
+            </span>
           </li>
           <li>
-            <span className="font-semibold">JavaScript</span> and{" "}
-            <span className="font-semibold">Rust packages</span> must be
-            published on{" "}
-            <span className="font-semibold">package registries</span> (e.g,{" "}
-            <ExternalLink className="underline" href={"https://npmjs.org"}>
-              npm
-            </ExternalLink>{" "}
-            or{" "}
-            <ExternalLink className="underline" href={"https://crates.io"}>
-              crates.io
-            </ExternalLink>
-            ) with their associated Github repo verified in OP Atlas.
+            <span className="font-semibold">JavaScript</span>{" "}
+            <span className="text-secondary-foreground">and </span>
+            <span className="font-semibold">Rust packages</span>{" "}
+            <span className="text-secondary-foreground">
+              must be published on{" "}
+            </span>
+            <span className="font-semibold">package registries</span>{" "}
+            <span className="text-secondary-foreground">
+              (e.g,{" "}
+              <ExternalLink className="underline" href={"https://npmjs.org"}>
+                npm
+              </ExternalLink>{" "}
+              or{" "}
+              <ExternalLink className="underline" href={"https://crates.io"}>
+                crates.io
+              </ExternalLink>
+              ) with their associated Github repo verified in OP Atlas.
+            </span>
           </li>
         </ul>
         <div className="mt-6">
@@ -84,27 +92,35 @@ export const MISSIONS: MissionData[] = [
           <span className="font-semibold">
             All projects must be Open Source.
           </span>{" "}
-          They must have a public GitHub repository with a history of public
-          commits.
+          <span className="text-secondary-foreground">
+            They must have a public GitHub repository with a history of public
+            commits.
+          </span>
         </p>
 
         <p>
-          <span className="font-semibold">JavaScript</span> and{" "}
-          <span className="font-semibold">Rust Packages</span> must be imported
-          by at least three verified Superchain builder projects contributing
-          0.01 ETH in L2 gas fees within the past 6 months.
+          <span className="font-semibold">JavaScript</span>{" "}
+          <span className="text-secondary-foreground">and </span>
+          <span className="font-semibold">Rust Packages</span>{" "}
+          <span className="text-secondary-foreground">
+            must be imported by at least three verified Superchain builder
+            projects contributing 0.01 ETH in L2 gas fees within the past 6
+            months.
+          </span>
         </p>
 
         <p>
           <span className="font-semibold">Other Open Source Toolchains</span>{" "}
-          must meet these requirements to earn rewards:
+          <span className="text-secondary-foreground">
+            must meet these requirements to earn rewards:
+          </span>
         </p>
 
         <ol className="list-decimal pl-6">
-          <li>
+          <li className="text-secondary-foreground">
             Must have at least one release on GitHub within the past 6 months.
           </li>
-          <li>
+          <li className="text-secondary-foreground">
             Must show engagement from 10+ trusted developers (e.g., stars,
             forks, issues, or pull requests) verified using reputation
             algorithms like{" "}
@@ -121,7 +137,7 @@ export const MISSIONS: MissionData[] = [
         <div className="bg-secondary h-[2px] mt-5 mb-5" />
         <div>
           <span className="font-semibold pr-1">Learn More</span>
-          <span>
+          <span className="text-secondary-foreground">
             in the{" "}
             <ExternalLink
               href="https://gov.optimism.io/t/season-7-retro-funding-missions/9295"
@@ -188,26 +204,34 @@ export const MISSIONS: MissionData[] = [
     applyBy: new Date("2025-01-25T21:53:13.300Z"),
     missionPageEligibility: (
       <div>
-        <p>Applications must meet these criteria:</p>
+        <p className="text-secondary-foreground">
+          Applications must meet these criteria:
+        </p>
         <ul className="list-decimal pl-6 py-6">
           <li>
-            <span className="font-semibold">Onchain deployment:</span> Your
-            project must have a verified contract on one of the following OP
-            Chains: Arena Z, Base, Ethernity, Ink, Lisk, Metal L2, Mode, OP
-            Mainnet, RACE, Shape, Superseed, Swan Chain, Swellchain, Unichain,
-            World Chain, Zora.
+            <span className="font-semibold">Onchain deployment:</span>{" "}
+            <span className="text-secondary-foreground">
+              Your project must have a verified contract on one of the following
+              OP Chains: Arena Z, Base, Ethernity, Ink, Lisk, Metal L2, Mode, OP
+              Mainnet, RACE, Shape, Superseed, Swan Chain, Swellchain, Unichain,
+              World Chain, Zora.
+            </span>
           </li>
           <li>
-            <span className="font-semibold">Contract Verification:</span> To
-            verify ownership of a contract, the deployer address of the contract
-            must sign a message in the “Contracts” step of project setup in OP
-            Atlas.
+            <span className="font-semibold">Contract Verification:</span>{" "}
+            <span className="text-secondary-foreground">
+              To verify ownership of a contract, the deployer address of the
+              contract must sign a message in the “Contracts” step of project
+              setup in OP Atlas.
+            </span>
           </li>
           <li>
             <span className="font-semibold">Contract Attribution:</span>{" "}
-            Contracts deployed by factories are attributed to the factory
-            deployer. Contracts must have a single project owner applying for
-            Retro Funding; overlapping claims are not allowed.
+            <span className="text-secondary-foreground">
+              Contracts deployed by factories are attributed to the factory
+              deployer. Contracts must have a single project owner applying for
+              Retro Funding; overlapping claims are not allowed.
+            </span>
           </li>
         </ul>
         <VideoCallout
@@ -216,25 +240,27 @@ export const MISSIONS: MissionData[] = [
         />
 
         <div className="flex flex-col gap-6 mt-6">
-          <p>
+          <p className="text-secondary-foreground">
             To be considered for additional DeFi rewards, projects must meet
             these criteria:
           </p>
           <ol className="list-disc pl-6">
             <li>
-              <span className="font-semibold">Adapter requirement:</span> DeFi
-              projects must have a functioning{" "}
-              <ExternalLink
-                className="underline"
-                href={"https://defillama.com/"}
-              >
-                DefiLlama adapter.
-              </ExternalLink>{" "}
-              A link to the adaptor must be provided in in the “Contracts” step
-              of project setup in OP Atlas.
+              <span className="font-semibold">Adapter requirement:</span>{" "}
+              <span className="text-secondary-foreground">
+                DeFi projects must have a functioning{" "}
+                <ExternalLink
+                  className="underline"
+                  href={"https://defillama.com/"}
+                >
+                  DefiLlama adapter.
+                </ExternalLink>{" "}
+                A link to the adaptor must be provided in in the “Contracts”
+                step of project setup in OP Atlas.
+              </span>
             </li>
           </ol>
-          <p>
+          <p className="text-secondary-foreground">
             To be considered for additional Account Abstraction rewards,
             projects must meet these criteria:
           </p>
@@ -243,16 +269,18 @@ export const MISSIONS: MissionData[] = [
               <span className="font-semibold">
                 Operator registry requirement:
               </span>{" "}
-              AA projects must be included in the{" "}
-              <ExternalLink
-                href={"https://www.bundlebear.com/overview/all"}
-                className="underline"
-              >
-                BundleBear
-              </ExternalLink>{" "}
-              operator registry (contract addresses verified in OP Atlas must be
-              present in the registry). Add your project to the BundleBear-app
-              in GitHub.
+              <span className="text-secondary-foreground">
+                AA projects must be included in the{" "}
+                <ExternalLink
+                  href={"https://www.bundlebear.com/overview/all"}
+                  className="underline"
+                >
+                  BundleBear
+                </ExternalLink>{" "}
+                operator registry (contract addresses verified in OP Atlas must
+                be present in the registry). Add your project to the
+                BundleBear-app in GitHub.
+              </span>
             </li>
           </ol>
         </div>
@@ -261,21 +289,31 @@ export const MISSIONS: MissionData[] = [
     missionPageRequirements: (
       <div className="flex flex-col gap-6 my-6">
         <p>
-          <span className="font-semibold">All projects</span> must meet minimum
-          activity requirements (measured over the last 180 days) to earn
-          rewards:
+          <span className="font-semibold">All projects</span>{" "}
+          <span className="text-secondary-foreground">
+            must meet minimum activity requirements (measured over the last 180
+            days) to earn rewards:
+          </span>
         </p>
 
         <ul className="list-disc pl-6">
-          <li>At least 1000 transactions</li>
-          <li>At least 420 qualified addresses (ex: no bots)</li>
-          <li>At least 10 distinct days of onchain activity</li>
+          <li className="text-secondary-foreground">
+            At least 1000 transactions
+          </li>
+          <li className="text-secondary-foreground">
+            At least 420 qualified addresses (ex: no bots)
+          </li>
+          <li className="text-secondary-foreground">
+            At least 10 distinct days of onchain activity
+          </li>
         </ul>
 
         <p>
-          <span className="font-semibold">DeFi projects</span> can earn
-          additional TVL rewards if they had at least $1M average TVL over the
-          last 180 days.
+          <span className="font-semibold">DeFi projects</span>{" "}
+          <span className="text-secondary-foreground">
+            can earn additional TVL rewards if they had at least $1M average TVL
+            over the last 180 days.
+          </span>
         </p>
       </div>
     ),
@@ -284,7 +322,7 @@ export const MISSIONS: MissionData[] = [
         <div className="bg-secondary h-[2px] mt-5 mb-5" />
         <div>
           <span className="font-semibold pr-1">Learn More</span>
-          <span>
+          <span className="text-secondary-foreground">
             in the{" "}
             <ExternalLink
               href="https://gov.optimism.io/t/season-7-retro-funding-missions/9295"

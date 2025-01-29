@@ -12,9 +12,9 @@ export default function Header() {
 
   return (
     <>
-      <h2 className="text-4xl mb-2">{mission?.name}</h2>
+      <p className="text-4xl mb-2 font-semibold">{mission?.name}</p>
       <div className="flex gap-2 mb-6 items-center">
-        <p className="text-gray-700">
+        <p className="text-secondary-foreground">
           <span>{format(mission!.startsAt, "MMM d")}</span>
           <span>{" - "}</span>
           {<span>{format(mission!.endsAt, "MMM d, yyyy")}</span>}
@@ -28,7 +28,7 @@ export default function Header() {
           className="h-3 w-3"
         />
 
-        <p className="text-gray-700">Open for applications</p>
+        <p className="text-secondary-foreground">Open for applications</p>
       </div>
       {mission?.iconUrl && (
         <Image
@@ -41,21 +41,28 @@ export default function Header() {
       )}
 
       <div className="mb-5">
-        <span className="">{`Retro Funding: ${mission?.name}`}</span>{" "}
-        <span className="">{mission?.details}</span>
+        <span className="font-semibold">{`Retro Funding: ${mission?.name}`}</span>{" "}
+        <span className="text-secondary-foreground">{mission?.details}</span>
       </div>
 
       <ul className="list-disc pl-6">
         <li>
           <span className="font-semibold">{"Timeline:"}</span>
-          <span className="">{` The program will take place from `}</span>
-          <span>{format(mission!.startsAt, "MMM d")}</span>
-          <span>{" - "}</span>
-          {<span>{format(mission!.endsAt, "MMM d, yyyy")}</span>}.
+          <span className="text-secondary-foreground">{` The program will take place from `}</span>
+          <span className="text-secondary-foreground">
+            {format(mission!.startsAt, "MMM d")}
+          </span>
+          <span className="text-secondary-foreground">{" - "}</span>
+          {
+            <span className="text-secondary-foreground">
+              {format(mission!.endsAt, "MMM d, yyyy")}
+            </span>
+          }
+          .
         </li>
         <li>
           <span className="font-semibold">{"Application periods:"}</span>
-          <span className="">
+          <span className="text-secondary-foreground">
             {
               " Apply by the monthly application deadline, and your project will be evaluated for rewards starting the following month."
             }
@@ -63,13 +70,13 @@ export default function Header() {
         </li>
         <li>
           <span className="font-semibold">{"Grant delivery:"}</span>
-          <span className="">
+          <span className="text-secondary-foreground">
             {" Rewards are delivered monthly, starting in March."}
           </span>
         </li>
         <li>
           <span className="font-semibold">{"Budget:"}</span>
-          <span className="">{" Up to 8M OP"}</span>
+          <span className="text-secondary-foreground">{" Up to 8M OP"}</span>
         </li>
       </ul>
 
