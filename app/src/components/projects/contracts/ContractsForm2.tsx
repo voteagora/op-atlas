@@ -63,7 +63,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const USE_MOCK_DATA = false
+const USE_MOCK_DATA = true
 
 export const mockDbData = [
   {
