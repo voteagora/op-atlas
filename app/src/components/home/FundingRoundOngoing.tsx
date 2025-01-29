@@ -47,32 +47,36 @@ export function FundingRoundOngoing({
     >
       <div className="flex flex-col gap-y-4 justify-start p-8">
         <div className="flex flex-col justify-between gap-y-1">
-          <div className="flex justify-between space-x-2">
-            <h2 className="text-base font-semibold text-text-default text-start">
-              {fundingRound.name}
-            </h2>
-            {selectedBadge}
+          <div>
+            <div className="flex justify-between space-x-2">
+              <h2 className="text-base font-semibold text-text-default text-start">
+                {fundingRound.name}
+              </h2>
+              {selectedBadge}
+            </div>
+            <div className="flex items-center gap-x-1.5">
+              <p className="text-base font-normal text-secondary-foreground">
+                {fundingRound.endsAt && (
+                  <span className="text-base font-normal text-secondary-foreground">
+                    {fundingRound.startsAt &&
+                      format(fundingRound.startsAt, "MMM d")}{" "}
+                    -{" " + format(fundingRound.endsAt, "MMMM d, yyyy")}
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-x-1.5">
-            <p className="text-base font-normal text-secondary-foreground">
-              {fundingRound.endsAt && (
-                <span className="text-base font-normal text-secondary-foreground">
-                  {fundingRound.startsAt &&
-                    format(fundingRound.startsAt, "MMM d")}{" "}
-                  -{" " + format(fundingRound.endsAt, "MMMM d, yyyy")}
-                </span>
-              )}
-            </p>
+          <div>
+            {fundingRound.iconUrl && (
+              <Image
+                src={fundingRound.iconUrl}
+                width={124}
+                height={124}
+                className="rounded-md w-full mt-1"
+                alt="Sunny blobs"
+              />
+            )}
           </div>
-          {fundingRound.iconUrl && (
-            <Image
-              src={fundingRound.iconUrl}
-              width={124}
-              height={124}
-              className="rounded-md w-full"
-              alt="Sunny blobs"
-            />
-          )}
         </div>
         <p className="text-secondary-foreground text-start line-clamp-3 text-sm">
           {"Retro Funding: " + fundingRound.name + " "}
