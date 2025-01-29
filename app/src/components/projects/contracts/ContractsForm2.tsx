@@ -177,7 +177,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
                     entry.chain === contract.chain &&
                     entry.address === contract.address
                   )
-                }) !== undefined,
+                }) === undefined,
             }
           }),
         }

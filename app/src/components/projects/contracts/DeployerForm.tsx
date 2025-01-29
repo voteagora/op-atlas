@@ -170,7 +170,7 @@ export function DeployerForm({
                                       </span>
                                     </button>
 
-                                    {dbData?.contracts.some(
+                                    {!dbData?.contracts.some(
                                       (dbContract: any) =>
                                         dbContract.address ===
                                           contractField.value.address &&
@@ -181,7 +181,7 @@ export function DeployerForm({
                                         Excluded
                                       </div>
                                     )}
-                                    {!dbData?.contracts.some(
+                                    {dbData?.contracts.some(
                                       (dbContract: any) =>
                                         dbContract.address ===
                                           contractField.value.address &&
@@ -203,7 +203,7 @@ export function DeployerForm({
                                       render={({ field: excludedField }) => (
                                         <>
                                           {excludedField.value &&
-                                            !dbData?.contracts.some(
+                                            dbData?.contracts.some(
                                               (dbContract: any) =>
                                                 dbContract.address ===
                                                   contractField.value.address &&
@@ -216,7 +216,7 @@ export function DeployerForm({
                                             )}
 
                                           {!excludedField.value &&
-                                            dbData?.contracts.some(
+                                            !dbData?.contracts.some(
                                               (dbContract: any) =>
                                                 dbContract.address ===
                                                   contractField.value.address &&
