@@ -10,6 +10,11 @@ export default function Page() {
         <p className="font-light">Hello</p>
         <p className="font-semibold">Hello</p>
       </div>
+
+      <div>
+        <p className="leading-7">Hello</p>
+        <p className="leading-7 font-semibold">Hello</p>
+      </div>
     </div>
   )
 }
