@@ -33,7 +33,7 @@ export default function Mission() {
 
   return (
     <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
-      <div className="mt-1 flex flex-1 gap-x-5">
+      <div className="mt-1 flex flex-1 gap-x-12">
         <div className="flex flex-1 flex-col">
           <div className="flex flex-col flex-1 gap-y-12">
             <Breadcrumb>
