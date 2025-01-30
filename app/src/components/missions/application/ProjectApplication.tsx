@@ -60,6 +60,8 @@ export const ProjectApplication = ({
 }) => {
   const round = useMissionFromPath()
 
+  const router = useRouter()
+
   const { isLoading } = useUserRoundApplications(round?.number)
 
   const { progressPercent, completedSections: completedSectionsCriteria } =
@@ -230,6 +232,16 @@ export const ProjectApplication = ({
                 )
               },
             )}
+
+            <Button
+              variant={"ghost"}
+              className="bg-secondary"
+              onClick={() => {
+                router.push(`/projects/${project.id}/details`)
+              }}
+            >
+              Edit project
+            </Button>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
