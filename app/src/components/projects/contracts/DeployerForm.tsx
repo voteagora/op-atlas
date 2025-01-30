@@ -15,6 +15,7 @@ import { toast } from "sonner"
 import { DBData, getDeployerOSOData } from "./ContractsForm2"
 import { isAddress } from "viem"
 import { ProjectContract } from "@prisma/client"
+import { Button } from "@/components/ui/button"
 
 const onCopyValue = async (value: string) => {
   try {
@@ -148,7 +149,7 @@ export function DeployerForm({
                             control={form.control}
                             name={`deployers.${deployerIndex}.contracts.${index}`}
                             render={({ field: contractField }) => (
-                              <div className="flex">
+                              <div className="flex group">
                                 <div
                                   key={index}
                                   className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -173,6 +174,31 @@ export function DeployerForm({
                                       )}
                                     </div>
 
+                                    {/* {isInDatabase(
+                                      contractField.value.address,
+                                      contractField.value.chain,
+                                    ) && (
+                                      <div className="bg-green-300 rounded-lg px-2">
+                                        Included
+                                      </div>
+                                    )} */}
+
+                                    <ChainLogo
+                                      chainId={contractField.value.chain}
+                                    />
+                                    <button
+                                      className="relative group/btn hover:bg-gray-200 px-2 rounded-lg"
+                                      type="button"
+                                      onClick={() => {
+                                        onCopyValue(contractField.value.address)
+                                      }}
+                                    >
+                                      {truncate(contractField.value.address, 5)}
+                                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg">
+                                        {contractField.value.address}
+                                      </span>
+                                    </button>
+
                                     {!isInDatabase(
                                       contractField.value.address,
                                       contractField.value.chain,
@@ -181,30 +207,6 @@ export function DeployerForm({
                                         Excluded
                                       </div>
                                     )}
-                                    {isInDatabase(
-                                      contractField.value.address,
-                                      contractField.value.chain,
-                                    ) && (
-                                      <div className="bg-green-300 rounded-lg px-2">
-                                        Included
-                                      </div>
-                                    )}
-
-                                    <ChainLogo
-                                      chainId={contractField.value.chain}
-                                    />
-                                    <button
-                                      className="relative group hover:bg-gray-200 px-2 rounded-lg"
-                                      type="button"
-                                      onClick={() => {
-                                        onCopyValue(contractField.value.address)
-                                      }}
-                                    >
-                                      {truncate(contractField.value.address, 5)}
-                                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg">
-                                        {contractField.value.address}
-                                      </span>
-                                    </button>
                                   </div>
 
                                   <div className="flex gap-4">
@@ -215,7 +217,22 @@ export function DeployerForm({
                                       name={`deployers.${deployerIndex}.contracts.${index}.excluded`}
                                       render={({ field: excludedField }) => (
                                         <>
-                                          {excludedField.value &&
+                                          {
+                                            <button
+                                              type="button"
+                                              className="bg-secondary px-2 rounded-lg opacity-0 group-hover:opacity-100"
+                                              onClick={() => {
+                                                excludedField.onChange(
+                                                  !excludedField.value,
+                                                )
+                                              }}
+                                            >
+                                              {!excludedField.value
+                                                ? "Exclude"
+                                                : "Include"}
+                                            </button>
+                                          }
+                                          {/* {excludedField.value &&
                                             isInDatabase(
                                               contractField.value.address,
                                               contractField.value.chain,
@@ -233,7 +250,7 @@ export function DeployerForm({
                                               <p className="bg-gray-300 rounded-lg px-2 py.5 text-sm">
                                                 Include
                                               </p>
-                                            )}
+                                            )} */}
 
                                           <ContractDropdownButton
                                             form={form}
