@@ -1118,12 +1118,15 @@ async function getUserApplicationsFn({
     ),
   ]
 
-  const reducedApplications = applications.reduce<any[]>((acc, curr) => {
-    if (!acc.some((item) => item.id === curr.id)) {
-      acc.push(curr)
-    }
-    return acc
-  }, [])
+  const reducedApplications = applications.reduce<ApplicationWithDetails[]>(
+    (acc, curr) => {
+      if (!acc.some((item) => item.id === curr.id)) {
+        acc.push(curr)
+      }
+      return acc
+    },
+    [],
+  )
 
   return reducedApplications
 }
