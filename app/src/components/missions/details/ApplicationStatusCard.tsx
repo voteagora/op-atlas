@@ -9,6 +9,7 @@ import { Account } from "@/components/common/Account"
 
 import { Button } from "../../ui/button"
 import { GreenBadge } from "../common/badges/GreenBadge"
+import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
 export const ApplicationStatusCard = ({
   applyByDate,
@@ -41,7 +42,19 @@ export const ApplicationStatusCard = ({
           </p>
         )}
 
-        <Account />
+        <Button
+          variant={"destructive"}
+          className="w-full flex gap-2"
+          onClick={clickSignInWithFarcasterButton}
+        >
+          <Image
+            width={16}
+            height={16}
+            src={"/assets/icons/farcaster-icon-white.svg"}
+            alt=""
+          />
+          Sign in or sign up
+        </Button>
       </div>
     )
   } else {
