@@ -127,7 +127,7 @@ export const ApplicationStatusCard = ({
                 router.push(`/missions/${pageName}/application`)
               }}
             >
-              Choose Projects
+              Choose projects
             </Button>
           </div>
         )
