@@ -42,7 +42,7 @@ const dropdownList = [
   },
   {
     title: "Retro Funding",
-    href: "https://atlas.optimism.io/rounds",
+    href: "https://atlas.optimism.io/missions",
   },
   {
     title: "Forum",
@@ -57,7 +57,7 @@ const dropdownList = [
 const Navbar = () => {
   const pathname = usePathname()
   const params = useParams()
-  const isRounds = pathname === "/" || pathname === "/rounds"
+  const isRounds = pathname === "/" || pathname === "/missions"
   const isProjects = pathname.includes("/round/")
 
   const isMissions = pathname.includes("/missions")
@@ -128,7 +128,7 @@ const Navbar = () => {
                       className={`${
                         isRounds ? "mt-1" : "group-hover:mt-1"
                       } focus:outline-none focus:opacity-80`}
-                      href="/rounds"
+                      href="/missions"
                     >
                       Retro Missions
                     </Link>

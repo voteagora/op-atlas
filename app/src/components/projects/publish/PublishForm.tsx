@@ -140,7 +140,7 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
           variant="secondary"
           className="w-fit text-sm font-medium text-foreground"
         >
-          <Link href="/rounds">View rounds</Link>
+          <Link href="/missions">View Retro Funding Rounds</Link>
         </Button>
       </div>
       {showMetadataPublishedDialogue && (
