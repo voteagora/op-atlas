@@ -8,7 +8,7 @@ export function NewIn2025Callout() {
     <Callout
       type="gray"
       showIcon={false}
-      className="mt-10"
+      className="mt-10 rounded-xl"
       leftAlignedContent={
         <div className="flex gap-4 items-center p-3">
           <Image
