@@ -91,8 +91,6 @@ const createProjectApplication = async (
     return isInvalid
   }
 
-  console.log("step 7")
-
   const project = await getProject({ id: applicationData.projectId })
 
   if (!project) {
@@ -104,8 +102,6 @@ const createProjectApplication = async (
   // Project must be 100% complete
   const { progressPercent } = getProjectStatus(project)
 
-  console.log("step 8")
-
   if (progressPercent !== 100) {
     return {
       error: "Project is not complete",
@@ -116,8 +112,6 @@ const createProjectApplication = async (
     session?.user?.id,
     round,
   )
-
-  console.log("step 9")
 
   const result = applications.find(
     (application) => application.projectId === project.id,
@@ -134,8 +128,6 @@ const createProjectApplication = async (
     (snapshot) => -snapshot.createdAt,
     project.snapshots,
   )[0]
-
-  console.log("step 10")
 
   const application = await publishAndSaveApplication({
     project: {
@@ -166,7 +158,6 @@ export const submitApplications = async (
   round: number,
   categories?: CategoryWithImpact[],
 ) => {
-  console.log("step 1")
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -176,11 +167,7 @@ export const submitApplications = async (
     }
   }
 
-  console.log("step 2")
-
   const user = await getUserById(session.user.id)
-
-  console.log("step 3")
 
   if (user?.emails.length === 0) {
     return {
@@ -197,16 +184,10 @@ export const submitApplications = async (
     throw new Error("Applications are closed")
   }
 
-  console.log("step 4")
-
   const applications: Application[] = []
   let error: string | null = null
 
-  console.log("step 5")
-
   for (const project of projects) {
-    console.log("step 6")
-
     const result = await createProjectApplication(
       project,
       session.user.farcasterId,
