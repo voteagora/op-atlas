@@ -32,6 +32,7 @@ import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { ApplicationFormSchema } from "./MissionApplication"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTerms } from "./MissionApplicationTerms"
+import { useAdminProjects } from "@/hooks/useAdminProjects"
 
 export function MissionApplicationTabs({
   form,
@@ -49,9 +50,8 @@ export function MissionApplicationTabs({
   const [currentTab, setCurrentTab] = useState("details")
   const router = useRouter()
 
-  const { data: projects = [], isLoading: isLoadingProjects } = useUserProjects(
-    round?.number,
-  )
+  const { data: projects = [], isLoading: isLoadingProjects } =
+    useAdminProjects()
   const { data: applications = [], isLoading: isLoadingApplications } =
     useUserRoundApplications(round?.number)
 

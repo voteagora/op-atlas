@@ -3,13 +3,14 @@ import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
 import {
+  getAdminProjects,
   getApplicationsForRound,
   getProjects,
   getUserApplicationsForRound,
 } from "@/lib/actions/projects"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 
-export function useUserProjects(): {
+export function useAdminProjects(): {
   data: ProjectWithDetails[] | undefined
   isLoading: boolean
   error: Error | null
@@ -17,8 +18,8 @@ export function useUserProjects(): {
   const session = useSession()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["userProjects", session?.data?.user?.id],
-    queryFn: () => getProjects(session?.data?.user.id as string),
+    queryKey: ["adminProjects", session?.data?.user.id],
+    queryFn: () => getAdminProjects(session?.data?.user.id as string),
     enabled: session?.data?.user.id !== undefined,
   })
 

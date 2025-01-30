@@ -1112,9 +1112,13 @@ async function getUserApplicationsFn({
   if (!user) return []
 
   const applications = [
-    ...user.projects.flatMap((p) => p.project.applications),
+    ...(user.projects as Array<{ project: { applications: any[] } }>).map(
+      (p) => p.project.applications,
+    ),
     ...user.organizations.flatMap((o) =>
-      o.organization.projects.flatMap((p) => p.project.applications),
+      (
+        o.organization.projects as Array<{ project: { applications: any[] } }>
+      ).flatMap((p) => p.project.applications),
     ),
   ]
 

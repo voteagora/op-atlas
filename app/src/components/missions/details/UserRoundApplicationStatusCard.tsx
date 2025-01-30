@@ -14,9 +14,7 @@ export const UserRoundApplicationStatusCard = () => {
 
   const { data: applications, isLoading: isLoadingApplications } =
     useUserRoundApplications(mission?.number)
-  const { data: projects, isLoading: isLoadingProjects } = useUserProjects(
-    mission?.number,
-  )
+  const { data: projects, isLoading: isLoadingProjects } = useUserProjects()
 
   return (
     <>

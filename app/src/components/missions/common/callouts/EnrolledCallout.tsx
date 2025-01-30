@@ -12,9 +12,11 @@ import { Callout } from "../../../common/Callout"
 
 export function EnrolledCallout({
   application,
+  index,
   onRewardsClick,
 }: {
   application: ApplicationWithDetails
+  index: number
   onRewardsClick: () => void
 }) {
   const router = useRouter()
@@ -22,6 +24,9 @@ export function EnrolledCallout({
   const round = MISSIONS.find(
     (round) => round.number.toString() === application.roundId,
   )
+
+  console.log(index)
+  console.log(application)
 
   return (
     <Callout

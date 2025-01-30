@@ -150,17 +150,18 @@ const UserProjectCard = ({
       </Link>
 
       <div className="px-8 pb-8">
-        {applications?.map((application) => {
-          return application.projectId === project.id &&
-            (application.roundId === "7" || application.roundId === "8") ? (
-            <div className="mt-4">
-              <EnrolledCallout
-                application={application}
-                onRewardsClick={handleActiveRoundHelpClick}
-              />
-            </div>
-          ) : (
-            <></>
+        {applications?.map((application, index) => {
+          return (
+            application.projectId === project.id &&
+            (application.roundId === "7" || application.roundId === "8") && (
+              <div className="mt-4">
+                <EnrolledCallout
+                  application={application}
+                  index={index}
+                  onRewardsClick={handleActiveRoundHelpClick}
+                />
+              </div>
+            )
           )
         })}
       </div>

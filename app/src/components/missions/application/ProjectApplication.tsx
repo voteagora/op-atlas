@@ -159,7 +159,9 @@ export const ProjectApplication = ({
                   <h5 className="font-semibold text-primary truncate w-96">
                     {project.name}
                   </h5>
-                  <p>Admin</p>
+                  {project.organization?.organization.name && (
+                    <p>{project.organization?.organization.name}</p>
+                  )}
                 </div>
               </div>
 

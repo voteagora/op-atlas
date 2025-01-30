@@ -18,6 +18,7 @@ import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import EmailSignupDialog from "./dialogs/EmailSignupDialog"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTabs } from "./MissionApplicationTabs"
+import { useAdminProjects } from "@/hooks/useAdminProjects"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(
@@ -41,7 +42,7 @@ export function MissionApplication() {
     mode: "onChange",
   })
 
-  const { data: projects, isLoading } = useUserProjects(round?.number)
+  const { data: projects, isLoading } = useAdminProjects()
   const { data: applications } = useUserRoundApplications(round?.number)
 
   const [submittedApplications, setSubmittedApplications] = useState<
