@@ -1112,17 +1112,20 @@ async function getUserApplicationsFn({
   if (!user) return []
 
   const applications = [
-    ...(user.projects as Array<{ project: { applications: any[] } }>).map(
-      (p) => p.project.applications,
-    ),
+    ...user.projects.flatMap((p) => p.project.applications),
     ...user.organizations.flatMap((o) =>
-      (
-        o.organization.projects as Array<{ project: { applications: any[] } }>
-      ).flatMap((p) => p.project.applications),
+      o.organization.projects.flatMap((p) => p.project.applications),
     ),
   ]
 
-  return applications
+  const reducedApplications = applications.reduce<any[]>((acc, curr) => {
+    if (!acc.some((item) => item.id === curr.id)) {
+      acc.push(curr)
+    }
+    return acc
+  }, [])
+
+  return reducedApplications
 }
 
 export const getUserApplications = cache(getUserApplicationsFn)
