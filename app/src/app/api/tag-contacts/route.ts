@@ -9,7 +9,7 @@ import mailchimp from "@/lib/mailchimp"
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-type Entity = "badgeholder" | "citizen" | "gov_contribution" | "rf_voter"
+type Entity = "citizen" | "gov_contribution" | "rf_voter" | "badgeholder"
 type EntityObject = {
   address: string
   email: string
@@ -90,99 +90,134 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
     return
   }
 
+  let updatedUserTag = ""
+  switch (tag) {
+    case "gov_contribution":
+      updatedUserTag = "S7 Elected Official"
+      break
+    case "rf_voter":
+      updatedUserTag = "Guest Voter"
+      break
+    case "citizen":
+      updatedUserTag = "Citizen"
+      break
+    default:
+      updatedUserTag = ""
+      break
+  }
+
+  if (!updatedUserTag) {
+    console.error("Invalid tag")
+    return
+  }
+
   const updatedUsersTags = await prisma.$queryRaw<
-    { address: string; tags: string[] }[]
+    { address: string; tags: string[]; email: string }[]
   >(
     Prisma.sql`
     UPDATE "UserAddress"
-    SET "tags" = array_append("tags", ${tag})
+    SET "tags" = array_append("tags", ${updatedUserTag})
     WHERE "address" = ANY(${Prisma.sql`ARRAY[${Prisma.join(
-      addresses.map((address) => address.address),
+      addresses.map((a) => Prisma.sql`${a.address}`),
     )}]::text[]`})
-    RETURNING "address", "tags"
+    RETURNING "address", "tags", 
+      (SELECT ue.email FROM "UserEmail" ue 
+       WHERE ue."userId" = (SELECT u.id FROM "User" u WHERE u.id = "UserAddress"."userId") 
+       LIMIT 1) AS email
   `,
   )
 
   const onchainBuilderTag = "Onchain Builder"
-  const onchainBuilders = await prisma.$queryRaw<
-    { email: string; tags: string[] }[]
-  >(
-    Prisma.sql`
-    UPDATE "UserAddress"
-    SET "tags" = CASE
-      WHEN NOT (tags @> ARRAY[${onchainBuilderTag}]) THEN array_append(tags, ${onchainBuilderTag})
-      ELSE tags
-    END
-    WHERE "userId" IN (
-      -- Get users directly in a project with a verified contract
-      SELECT u.id
-      FROM "User" u
-      WHERE EXISTS (
-        SELECT 1
-        FROM "UserProjects" up
-        JOIN "ProjectContract" pc ON up."projectId" = pc."projectId"
-        WHERE up."userId" = u.id
-        AND pc."verificationProof" IS NOT NULL
+  const onchainBuilders = await prisma
+    .$queryRaw<{ email: string; tags: string[] }[]>(
+      Prisma.sql`
+      UPDATE "UserAddress"
+      SET "tags" = CASE
+        WHEN NOT (tags @> ARRAY[${onchainBuilderTag}]) THEN array_append(tags, ${onchainBuilderTag})
+        ELSE tags
+      END
+      WHERE "userId" IN (
+        -- Get users directly in a project with a verified contract
+        SELECT u.id
+        FROM "User" u
+        WHERE EXISTS (
+          SELECT 1
+          FROM "UserProjects" up
+          JOIN "ProjectContract" pc ON up."projectId" = pc."projectId"
+          WHERE up."userId" = u.id
+          AND pc."verificationProof" IS NOT NULL
+        )
+        -- Get users in an org with a project that has a verified contract
+        OR EXISTS (
+          SELECT 1
+          FROM "UserOrganization" uo
+          JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
+          JOIN "ProjectContract" pc ON po."projectId" = pc."projectId"
+          WHERE uo."userId" = u.id
+          AND pc."verificationProof" IS NOT NULL
+        )
       )
-      -- Get users in an org with a project that has a verified contract
-      OR EXISTS (
-        SELECT 1
-        FROM "UserOrganization" uo
-        JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
-        JOIN "ProjectContract" pc ON po."projectId" = pc."projectId"
-        WHERE uo."userId" = u.id
-        AND pc."verificationProof" IS NOT NULL
-      )
+      RETURNING "userId", "tags", 
+        (SELECT ue.email FROM "UserEmail" ue WHERE ue."userId" = "UserAddress"."userId" LIMIT 1) AS email;
+    `,
     )
-    RETURNING "email", "tags";
-  `,
-  )
+    .catch((_) => {
+      return [] // Ensure function doesn't break
+    })
 
   const githubRepoTag = "Github Repo"
-  const githubRepoBuilders = await prisma.$queryRaw<
-    { email: string; tags: string[] }[]
-  >(
-    Prisma.sql`
-    UPDATE "UserAddress"
-    SET "tags" = CASE
-      WHEN NOT (tags @> ARRAY[${githubRepoTag}]) THEN array_append(tags, ${githubRepoTag})
-      ELSE tags
-    END
-    WHERE "userId" IN (
-      -- Get users directly in a project with a verified GitHub repo
-      SELECT u.id
-      FROM "User" u
-      WHERE EXISTS (
-        SELECT 1
-        FROM "UserProjects" up
-        JOIN "ProjectRepository" pr ON up."projectId" = pr."projectId"
-        WHERE up."userId" = u.id
-        AND pr."verified" = TRUE
+  const githubRepoBuilders = await prisma
+    .$queryRaw<{ email: string; tags: string[] }[]>(
+      Prisma.sql`
+      UPDATE "UserAddress"
+      SET "tags" = CASE
+        WHEN NOT (tags @> ARRAY[${githubRepoTag}]) THEN array_append(tags, ${githubRepoTag})
+        ELSE tags
+      END
+      WHERE "userId" IN (
+        -- Get users directly in a project with a verified GitHub repo
+        SELECT u.id
+        FROM "User" u
+        WHERE EXISTS (
+          SELECT 1
+          FROM "UserProjects" up
+          JOIN "ProjectRepository" pr ON up."projectId" = pr."projectId"
+          WHERE up."userId" = u.id
+          AND pr."verified" = TRUE
+        )
+        -- Get users in an org with a project that has a verified GitHub repo
+        OR EXISTS (
+          SELECT 1
+          FROM "UserOrganization" uo
+          JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
+          JOIN "ProjectRepository" pr ON po."projectId" = pr."projectId"
+          WHERE uo."userId" = u.id
+          AND pr."verified" = TRUE
+        )
       )
-      -- Get users in an org with a project that has a verified GitHub repo
-      OR EXISTS (
-        SELECT 1
-        FROM "UserOrganization" uo
-        JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
-        JOIN "ProjectRepository" pr ON po."projectId" = pr."projectId"
-        WHERE uo."userId" = u.id
-        AND pr."verified" = TRUE
-      )
+      RETURNING "userId", "tags",
+        (SELECT ue.email FROM "UserEmail" ue WHERE ue."userId" = "UserAddress"."userId" LIMIT 1) AS email;
+    `,
     )
-    RETURNING "email", "tags";
-  `,
-  )
+    .catch((_) => {
+      return [] // Ensure function doesn't break
+    })
 
   console.log(`Updated user addresses, added tag "${tag}"`)
+
+  const combinedResults = mergeResultsByEmail([
+    onchainBuilders,
+    githubRepoBuilders,
+    updatedUsersTags,
+  ])
 
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
   const results = await mailchimp.lists.batchListMembers(LIST_ID!, {
     members: addresses.map((address) => ({
       email_address: address.email,
       tags: [
-        ...(updatedUsersTags.find((user) => user.address === address.address)
+        ...(combinedResults.find((user) => user.email === address.email)
           ?.tags ?? []),
-        tag,
       ],
       email_type: "html",
       status: "transactional",
@@ -190,59 +225,14 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
     update_existing: true,
   })
 
-  const onchainBuildersResults = await mailchimp.lists.batchListMembers(
-    LIST_ID!,
-    {
-      members: onchainBuilders.map((builder) => ({
-        email_address: builder.email,
-        tags: builder.tags,
-        email_type: "html",
-        status: "transactional",
-      })),
-      update_existing: true,
-    },
-  )
-
-  const githubRepoBuildersResults = await mailchimp.lists.batchListMembers(
-    LIST_ID!,
-    {
-      members: githubRepoBuilders.map((builder) => ({
-        email_address: builder.email,
-        tags: builder.tags,
-        email_type: "html",
-        status: "transactional",
-      })),
-      update_existing: true,
-    },
-  )
-
   const updatedMembers = (results as any).updated_members.map(
     (member: any) => ({
       email: member.email_address,
       tags: member.tags,
     }),
   )
-  const updatedOnchainBuilders = (
-    onchainBuildersResults as any
-  ).updated_members.map((member: any) => ({
-    email: member.email_address,
-    tags: member.tags,
-  }))
 
-  const updatedGithubRepoBuilders = (
-    githubRepoBuildersResults as any
-  ).updated_members.map((member: any) => ({
-    email: member.email_address,
-    tags: member.tags,
-  }))
-
-  console.log(
-    `Added tags to ${
-      updatedMembers.length +
-      updatedOnchainBuilders.length +
-      updatedGithubRepoBuilders.length
-    } Mailchimp contacts`,
-  )
+  console.log(`Added tags to ${updatedMembers.length} Mailchimp contacts`)
 }
 
 const removeTags = async (addresses: EntityObject[], tag: Entity) => {
@@ -312,4 +302,25 @@ const handleRemoveGovContributionEntity = async (
   records: Record<"gov_contribution", EntityObject[]>,
 ) => {
   await removeTags(records.gov_contribution, "gov_contribution")
+}
+
+const mergeResultsByEmail = (
+  lists: { email: string; tags: string[] }[][],
+): { email: string; tags: string[] }[] => {
+  const mergedMap = new Map<string, Set<string>>()
+
+  const flatLists = lists.flat()
+
+  flatLists.forEach(({ email, tags }) => {
+    if (!mergedMap.has(email)) {
+      mergedMap.set(email, new Set(tags))
+    } else {
+      tags?.forEach((tag) => mergedMap.get(email)!.add(tag))
+    }
+  })
+
+  return Array.from(mergedMap.entries()).map(([email, tags]) => ({
+    email,
+    tags: Array.from(tags), // Convert Set to array to remove duplicates
+  }))
 }

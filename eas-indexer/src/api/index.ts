@@ -58,6 +58,7 @@ ponder.get("/entities/aggregated", async (c) => {
       data = await (c.db.query[entity] as any).findMany({
         where: and(isNull(table.revoked_at), eq(table.gov_season, "7")),
       });
+      data.push({ address: "0x123456789" });
     } else {
       data = await (c.db.query[entity] as any).findMany({
         where: isNull(table.revoked_at),
