@@ -45,8 +45,8 @@ export function FundingRoundOngoing({
         router.push(`/missions/${fundingRound.pageName}`)
       }}
     >
-      <div className="flex flex-col gap-y-4 justify-start p-8">
-        <div className="flex flex-col justify-between gap-y-1">
+      <div className="flex flex-col justify-start p-8 gap-y-4">
+        <div className="flex flex-col justify-between">
           <div>
             <div className="flex justify-between space-x-2">
               <h2 className="text-base font-semibold text-text-default text-start">
@@ -66,17 +66,17 @@ export function FundingRoundOngoing({
               </p>
             </div>
           </div>
-          <div>
-            {fundingRound.iconUrl && (
-              <Image
-                src={fundingRound.iconUrl}
-                width={1080}
-                height={1080}
-                className="rounded-md w-full mt-1"
-                alt="Sunny blobs"
-              />
-            )}
-          </div>
+        </div>
+        <div>
+          {fundingRound.iconUrl && (
+            <Image
+              src={fundingRound.iconUrl}
+              width={1080}
+              height={1080}
+              className="rounded-md w-full"
+              alt="Sunny blobs"
+            />
+          )}
         </div>
         <p className="text-secondary-foreground text-start line-clamp-3 text-sm">
           {"Retro Funding: " + fundingRound.name + " "}
