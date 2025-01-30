@@ -116,13 +116,16 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
   >(
     Prisma.sql`
     UPDATE "UserAddress"
-    SET "tags" = array_append("tags", ${updatedUserTag})
+    SET "tags" = CASE 
+      WHEN NOT (tags @> ARRAY[${updatedUserTag}]) THEN array_append(tags, ${updatedUserTag}) 
+      ELSE tags 
+    END
     WHERE "address" = ANY(${Prisma.sql`ARRAY[${Prisma.join(
       addresses.map((a) => Prisma.sql`${a.address}`),
     )}]::text[]`})
     RETURNING "address", "tags", 
       (SELECT ue.email FROM "UserEmail" ue 
-       WHERE ue."userId" = (SELECT u.id FROM "User" u WHERE u.id = "UserAddress"."userId") 
+       WHERE ue."userId" = "UserAddress"."userId"
        LIMIT 1) AS email
   `,
   )
@@ -215,10 +218,9 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
   const results = await mailchimp.lists.batchListMembers(LIST_ID!, {
     members: addresses.map((address) => ({
       email_address: address.email,
-      tags: [
-        ...(combinedResults.find((user) => user.email === address.email)
-          ?.tags ?? []),
-      ],
+      tags:
+        combinedResults.find((user) => user.email === address.email)?.tags ??
+        [],
       email_type: "html",
       status: "transactional",
     })),

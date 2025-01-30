@@ -241,22 +241,6 @@ async function getAllNonTaggedCitizens(records: AggregatedType["citizen"]) {
             in: records.map((record) => record.address),
           },
         },
-        {
-          OR: [
-            {
-              tags: {
-                isEmpty: true,
-              },
-            },
-            {
-              NOT: {
-                tags: {
-                  has: "Citizen",
-                },
-              },
-            },
-          ],
-        },
       ],
     },
     select: {
@@ -309,22 +293,6 @@ async function getAllNonTaggedGovContributors(
             in: records.map((record) => record.address),
           },
         },
-        {
-          OR: [
-            {
-              tags: {
-                isEmpty: true,
-              },
-            },
-            {
-              NOT: {
-                tags: {
-                  has: "S7 Elected Official",
-                },
-              },
-            },
-          ],
-        },
       ],
     },
     select: {
@@ -350,22 +318,6 @@ async function getAllNonTaggedRFVoters(records: AggregatedType["rf_voter"]) {
           address: {
             in: records.map((record) => record.address),
           },
-        },
-        {
-          OR: [
-            {
-              tags: {
-                isEmpty: true,
-              },
-            },
-            {
-              NOT: {
-                tags: {
-                  has: "Guest Voter",
-                },
-              },
-            },
-          ],
         },
       ],
     },
