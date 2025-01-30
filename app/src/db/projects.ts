@@ -962,6 +962,7 @@ export async function createApplication({
   projectDescriptionOptions: string[]
   impactStatement: Record<string, string>
 }) {
+  console.log("step 15")
   return prisma.application.create({
     data: {
       attestationId,

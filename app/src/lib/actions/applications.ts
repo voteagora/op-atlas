@@ -41,6 +41,7 @@ export const publishAndSaveApplication = async ({
   metadataSnapshotId: string
   round: number
 }): Promise<Application> => {
+  console.log("step 11")
   // Upload metadata to IPFS
   const metadata = formatApplicationMetadata({
     round,
@@ -49,7 +50,12 @@ export const publishAndSaveApplication = async ({
     category,
     projectDescriptionOptions: project.projectDescriptionOptions,
   })
+
+  console.log("step 12")
+
   const ipfsHash = await uploadToPinata(project.projectId, metadata)
+
+  console.log("step 13")
 
   // Publish attestation
   const attestationId = await createApplicationAttestation({
@@ -59,6 +65,8 @@ export const publishAndSaveApplication = async ({
     snapshotRef: metadataSnapshotId,
     ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
   })
+
+  console.log("step 14")
 
   // Create application in database
   return createApplication({
@@ -150,6 +158,7 @@ const createProjectApplication = async (
     round,
   })
 
+  console.log("step 16")
   return {
     application,
     error: null,
