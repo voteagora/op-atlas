@@ -11,7 +11,6 @@ import { FundingRound } from "@/lib/mocks"
 import { cn, titlecase } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { ChainLogo } from "../common/ChainLogo"
 import ExternalLink from "../ExternalLink"
 import { Badge } from "../ui/badge"
 
@@ -193,7 +192,12 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
           {fundingRound.status === "open" && (
             <div className="flex justify-between text-secondary-foreground text-sm font-medium">
               <div className="items-center flex gap-2 pr-4 ">
-                <ChainLogo chainId={optimism.id.toString()} />
+                <Image
+                  src="/assets/icons/op-icon.svg"
+                  height={24}
+                  width={24}
+                  alt="Optimism"
+                />
                 <div className="text-sm font-medium text-secondary-foreground">
                   {fundingRound.funding?.op && (
                     <span>{fundingRound.funding.op}</span>
@@ -209,7 +213,12 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
           <div className="flex flex-row items-center gap-4">
             <div className="flex flex-row items-center gap-2 text-sm font-medium text-secondary-foreground">
               {fundingRound.funding?.op && (
-                <ChainLogo chainId={optimism.id.toString()} />
+                <Image
+                  src="/assets/icons/op-icon.svg"
+                  height={24}
+                  width={24}
+                  alt="Optimism"
+                />
               )}
               <div>
                 {fundingRound.funding?.op && (
