@@ -31,6 +31,7 @@ const config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        info: "#0E4CAF",
         background: "hsl(var(--background))",
         backgroundaccent: "hsl(var(--background-accent))",
         backgroundSecondary: "hsl(var(--background-secondary))",
