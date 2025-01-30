@@ -33,8 +33,8 @@ export default function Header() {
       {mission?.iconUrl && (
         <Image
           src={mission.iconUrl}
-          width={124}
-          height={124}
+          width={1080}
+          height={1080}
           className="rounded-md w-full mb-5"
           alt="Sunny blobs"
         />

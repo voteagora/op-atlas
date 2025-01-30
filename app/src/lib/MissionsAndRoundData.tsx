@@ -44,7 +44,7 @@ export const MISSIONS: MissionData[] = [
     status: "ongoing",
     resultsLink: "/round/results/6",
     accentColor: "#F0FFF1",
-    iconUrl: "/assets/images/Frame 2485.png",
+    iconUrl: "/assets/images/dev-tooling.png",
     startsAt: new Date("2025-01-01T21:53:13.300Z"),
     endsAt: new Date("2025-06-30T21:53:13.300Z"),
     applyBy: new Date("2025-01-25T21:53:13.300Z"),
@@ -136,7 +136,7 @@ export const MISSIONS: MissionData[] = [
       <div>
         <div className="bg-secondary h-[2px] mt-5 mb-5" />
         <div>
-          <span className="font-semibold pr-1">Learn More</span>
+          <span className="font-semibold pr-1">Learn more</span>
           <span className="text-secondary-foreground">
             in the{" "}
             <ExternalLink
@@ -198,7 +198,7 @@ export const MISSIONS: MissionData[] = [
     status: "ongoing",
     resultsLink: "/round/results/6",
     accentColor: "#F0FFF1",
-    iconUrl: "/assets/images/Frame 2486.png",
+    iconUrl: "/assets/images/onchain-builders.png",
     startsAt: new Date("2025-02-01T21:53:13.300Z"),
     endsAt: new Date("2025-06-30T21:53:13.300Z"),
     applyBy: new Date("2025-01-25T21:53:13.300Z"),
@@ -321,7 +321,7 @@ export const MISSIONS: MissionData[] = [
       <div>
         <div className="bg-secondary h-[2px] mt-5 mb-5" />
         <div>
-          <span className="font-semibold pr-1">Learn More</span>
+          <span className="font-semibold pr-1">Learn more</span>
           <span className="text-secondary-foreground">
             in the{" "}
             <ExternalLink

@@ -70,8 +70,8 @@ export function FundingRoundOngoing({
             {fundingRound.iconUrl && (
               <Image
                 src={fundingRound.iconUrl}
-                width={124}
-                height={124}
+                width={1080}
+                height={1080}
                 className="rounded-md w-full mt-1"
                 alt="Sunny blobs"
               />
