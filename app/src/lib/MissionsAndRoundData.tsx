@@ -45,9 +45,9 @@ export const MISSIONS: MissionData[] = [
     resultsLink: "/round/results/6",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/dev-tooling.png",
-    startsAt: new Date("2025-01-01T21:53:13.300Z"),
-    endsAt: new Date("2025-06-30T21:53:13.300Z"),
-    applyBy: new Date("2025-01-25T21:53:13.300Z"),
+    startsAt: new Date("2025-02-05T21:53:13.300Z"),
+    endsAt: new Date("2025-07-31T21:53:13.300Z"),
+    applyBy: new Date("2025-02-27T21:53:13.300Z"),
     missionPageEligibility: (
       <div>
         <ul className="list-disc pl-6">
@@ -199,9 +199,9 @@ export const MISSIONS: MissionData[] = [
     resultsLink: "/round/results/6",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/onchain-builders.png",
-    startsAt: new Date("2025-02-01T21:53:13.300Z"),
-    endsAt: new Date("2025-06-30T21:53:13.300Z"),
-    applyBy: new Date("2025-01-25T21:53:13.300Z"),
+    startsAt: new Date("2025-02-13T21:53:13.300Z"),
+    endsAt: new Date("2025-07-31T21:53:13.300Z"),
+    applyBy: new Date("2025-02-27T21:53:13.300Z"),
     missionPageEligibility: (
       <div>
         <p className="text-secondary-foreground">
