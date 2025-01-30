@@ -32,8 +32,8 @@ export default function Mission() {
   const mission = useMissionFromPath()
 
   return (
-    <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
-      <div className="mt-1 flex flex-1 gap-x-12">
+    <div className="mt-20 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
+      <div className="flex flex-1 gap-x-12">
         <div className="flex flex-1 flex-col">
           <div className="flex flex-col flex-1 gap-y-12">
             <Breadcrumb>
@@ -67,7 +67,7 @@ export default function Mission() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-6 ml-auto w-[290px] sticky top-20 h-full">
+        <div className="flex flex-col gap-y-6 ml-auto w-[290px] sticky top-40 h-full">
           <UserRoundApplicationStatusCard />
           <RoundEnrolledProjectsCard />
         </div>
