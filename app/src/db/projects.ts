@@ -25,10 +25,8 @@ async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
       'projects', COALESCE(
         (
           SELECT jsonb_agg(
+            to_jsonb(up.*) || 
             jsonb_build_object(
-              'projectId', up."projectId",
-              'userId', up."userId",
-              'deletedAt', up."deletedAt",
               'project', to_jsonb(p.*)
             )
           )
