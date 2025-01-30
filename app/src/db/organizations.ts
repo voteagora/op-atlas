@@ -395,39 +395,116 @@ async function getOrganizationFn({ id }: { id: string }) {
 
 export const getOrganization = cache(getOrganizationFn)
 
-function getOrganizationWithDetailsFn({ id }: { id: string }) {
-  return prisma.organization.findUnique({
-    where: { id },
-    include: {
-      team: {
+async function getOrganizationWithDetailsFn({ id }: { id: string }) {
+  const result = await prisma.$queryRaw<
+    {
+      result: Prisma.OrganizationGetPayload<{
         include: {
-          user: {},
-        },
-        where: {
-          deletedAt: null,
-        },
-      },
-      projects: {
-        where: {
-          deletedAt: null,
-          project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: {
+          team: {
             include: {
-              funding: true,
-              snapshots: true,
-              applications: true,
-              links: true,
-              rewards: { include: { claim: true } },
-            },
-          },
-        },
-      },
-    },
-  })
+              user: true
+            }
+          }
+          projects: {
+            include: {
+              project: {
+                include: {
+                  funding: true
+                  snapshots: true
+                  applications: true
+                  links: true
+                  rewards: {
+                    include: {
+                      claim: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }>
+    }[]
+  >`
+    WITH active_projects AS (
+      SELECT p.*
+      FROM "Project" p
+      JOIN "ProjectOrganization" po ON p.id = po."projectId"
+      WHERE po."organizationId" = ${id}
+        AND p."deletedAt" IS NULL
+        AND po."deletedAt" IS NULL
+    ),
+    project_details AS (
+      SELECT 
+        p.id as project_id,
+        jsonb_build_object(
+          'id', p.id,
+          'name', p.name,
+          'description', p.description,
+          'funding', COALESCE((
+            SELECT jsonb_agg(to_jsonb(f.*))
+            FROM "ProjectFunding" f
+            WHERE f."projectId" = p.id
+          ), '[]'),
+          'snapshots', COALESCE((
+            SELECT jsonb_agg(to_jsonb(s.*))
+            FROM "ProjectSnapshot" s
+            WHERE s."projectId" = p.id
+          ), '[]'),
+          'applications', COALESCE((
+            SELECT jsonb_agg(to_jsonb(a.*))
+            FROM "Application" a
+            WHERE a."projectId" = p.id
+          ), '[]'),
+          'links', COALESCE((
+            SELECT jsonb_agg(to_jsonb(l.*))
+            FROM "ProjectLinks" l
+            WHERE l."projectId" = p.id
+          ), '[]'),
+          'rewards', COALESCE((
+            SELECT jsonb_agg(
+              jsonb_build_object(
+                'id', r.id,
+                'claim', to_jsonb(c.*)
+              )
+            )
+            FROM "FundingReward" r
+            LEFT JOIN "RewardClaim" c ON r.id = c."rewardId"
+            WHERE r."projectId" = p.id
+          ), '[]')
+        ) as project_data
+      FROM active_projects p
+    )
+    SELECT 
+      to_jsonb(o.*) || 
+      jsonb_build_object(
+        'team', COALESCE((
+          SELECT jsonb_agg(
+            to_jsonb(t.*) || 
+            jsonb_build_object('user', to_jsonb(u.*))
+          )
+          FROM "UserOrganization" t
+          JOIN "User" u ON t."userId" = u.id
+          WHERE t."organizationId" = o.id
+            AND t."deletedAt" IS NULL
+        ), '[]'),
+        'projects', COALESCE((
+          SELECT jsonb_agg(
+            to_jsonb(po.*) || 
+            jsonb_build_object('project', pd.project_data)
+          )
+          FROM "ProjectOrganization" po
+          JOIN project_details pd ON pd.project_id = po."projectId"
+          WHERE po."organizationId" = o.id
+            AND po."deletedAt" IS NULL
+        ), '[]')
+      ) as result
+    FROM "Organization" o
+    WHERE o.id = ${id}
+      AND o."deletedAt" IS NULL
+  `
+
+  return result[0]?.result || { organization: null }
 }
 
 export const getOrganizationWithDetails = cache(getOrganizationWithDetailsFn)
