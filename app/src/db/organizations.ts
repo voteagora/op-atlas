@@ -1,7 +1,9 @@
 "use server"
 
-import { Organization } from "@prisma/client"
+import { Organization, Prisma } from "@prisma/client"
 import { cache } from "react"
+
+import { OrganizationWithDetails } from "@/lib/types"
 
 import { prisma } from "./client"
 
@@ -86,45 +88,81 @@ async function getUserProjectOrganizationsFn(
   farcasterId: string,
   projectId: string,
 ) {
-  return prisma.user.findUnique({
-    where: { farcasterId },
-    select: {
-      organizations: {
-        where: { deletedAt: null, organization: { deletedAt: null } },
-        include: {
-          organization: {
-            include: {
-              team: {
-                include: {
-                  user: {},
-                },
-                where: {
-                  deletedAt: null,
-                },
-              },
-              projects: {
-                where: {
-                  deletedAt: null,
-                  project: {
-                    deletedAt: null,
-                  },
-                  projectId,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
+  const result = await prisma.$queryRaw<
+    {
+      result: {
+        organizations: Array<
+          Prisma.UserOrganizationGetPayload<{}> & {
+            organization: OrganizationWithDetails
+          }
+        >
+      }
+    }[]
+  >`
+    SELECT jsonb_build_object(
+      'organizations', COALESCE(
+        (
+          SELECT jsonb_agg(
+            to_jsonb(uo.*) ||
+            jsonb_build_object(
+              'organization', (
+                SELECT
+                  to_jsonb(o.*) ||
+                  jsonb_build_object(
+                    'team', (
+                      SELECT jsonb_agg(
+                        to_jsonb(t.*) || 
+                        jsonb_build_object(
+                          'user', to_jsonb(u.*)
+                        )
+                      )
+                      FROM "UserOrganization" t
+                      JOIN "User" u ON t."userId" = u.id
+                      WHERE t."organizationId" = o.id
+                        AND t."deletedAt" IS NULL
+                    ),
+                    'projects', (
+                      SELECT jsonb_agg(to_jsonb(p.*))
+                      FROM "ProjectOrganization" p
+                      WHERE p."organizationId" = o.id
+                        AND p."deletedAt" IS NULL
+                        AND p."projectId" = ${projectId}
+                    )
+                  )
+                FROM "Organization" o
+                WHERE o.id = uo."organizationId"
+                  AND o."deletedAt" IS NULL
+              )
+            )
+          )
+          FROM "UserOrganization" uo
+          JOIN "User" u ON u.id = uo."userId"
+          JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
+          WHERE u."farcasterId" = ${farcasterId}
+            AND uo."deletedAt" IS NULL
+            AND po."projectId" = ${projectId}
+        ),
+        '[]'::jsonb
+      )
+    ) as result
+  `
+
+  console.log("result for data", result)
+
+  // Transform the raw result to match the expected structure
+  const transformed = result[0]?.result || {
+    organizations: [],
+  }
+
+  return transformed
 }
 
 export const getUserProjectOrganizations = cache(getUserProjectOrganizationsFn)
 
 // Get all organizations with detail a user is part of
-async function getUserOrganizationsWithDetailsFn(farcasterId: string) {
+async function getUserOrganizationsWithDetailsFn(userId: string) {
   return prisma.user.findUnique({
-    where: { id: farcasterId },
+    where: { id: userId },
     select: {
       organizations: {
         where: { deletedAt: null, organization: { deletedAt: null } },
