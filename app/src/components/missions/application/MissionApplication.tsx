@@ -132,11 +132,11 @@ export function MissionApplication() {
           {"Apply for Retro Funding: " + round?.name}
         </h2>
         <div className="text-secondary-foreground">
-          {`Submit this application by ${format(
+          {`Apply by ${format(
             round!.applyBy,
             "MMM d",
           )} to be evaluated for rewards starting 
-                    ${format(round!.startsAt, "MMM d")}.`}
+                    Mar 5.`}
         </div>
         <div className="h-[2px] bg-secondary" />
       </div>
