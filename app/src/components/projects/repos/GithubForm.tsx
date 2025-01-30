@@ -265,6 +265,7 @@ export const GithubForm = ({
       <Button
         onClick={() => setIsRepoFormExpanded(!isFormExpanded)}
         variant="ghost"
+        type="button"
         className="!p-0 text-sm font-medium text-secondary-foreground"
       >
         {isFormExpanded ? "Hide additional inputs" : "Show additional inputs"}{" "}
