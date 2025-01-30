@@ -244,14 +244,9 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
     WITH project_data AS (
       SELECT 
         p.*,
-        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-          'id', t."id",
-          'role', t."role",
-          'userId', t."userId",
-          'projectId', t."projectId",
-          'deletedAt', t."deletedAt",
-          'user', to_jsonb(u.*)
-        )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || 
+          jsonb_build_object('user', to_jsonb(u.*))
+        ) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
@@ -259,13 +254,8 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
         COALESCE(jsonb_agg(
-          DISTINCT jsonb_build_object(
-            'id', fr."id",
-            'roundId', fr."roundId",
-            'projectId', fr."projectId",
-            'amount', fr."amount",
-            'createdAt', fr."createdAt",
-            'updatedAt', fr."updatedAt",
+          DISTINCT to_jsonb(fr.*) || 
+          jsonb_build_object(
             'claim', to_jsonb(rc.*)
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
@@ -273,14 +263,9 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
         CASE 
           WHEN po."id" IS NOT NULL THEN jsonb_build_object(
             'organization', jsonb_build_object(
-              'team', COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-                'id', ot."id",
-                'role', ot."role",
-                'userId', ot."userId",
-                'organizationId', ot."organizationId",
-                'deletedAt', ot."deletedAt",
-                'user', to_jsonb(ou.*)
-              )) FILTER (WHERE ot."id" IS NOT NULL), '[]'::jsonb)
+              'team', COALESCE(jsonb_agg(DISTINCT to_jsonb(ot.*) || 
+                jsonb_build_object('user', to_jsonb(ou.*))
+              ) FILTER (WHERE ot."id" IS NOT NULL), '[]'::jsonb)
             )
           )
           ELSE NULL
@@ -346,14 +331,9 @@ async function getAllPublishedUserProjectsFn({
         COALESCE(json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL), '[]') as "applications",
         COALESCE(json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL), '[]') as "links",
         COALESCE(json_agg(
-          DISTINCT jsonb_build_object(
-            'id', fr."id",
-            'roundId', fr."roundId",
-            'projectId', fr."projectId",
-            'amount', fr."amount",
-            'createdAt', fr."createdAt",
-            'updatedAt', fr."updatedAt",
-            'claim', rc
+          DISTINCT to_jsonb(fr.*) || 
+          jsonb_build_object(
+            'claim', to_jsonb(rc.*)
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]') as "rewards"
       FROM "Project" p
@@ -378,14 +358,9 @@ async function getAllPublishedUserProjectsFn({
         COALESCE(json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL), '[]') as "applications",
         COALESCE(json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL), '[]') as "links",
         COALESCE(json_agg(
-          DISTINCT jsonb_build_object(
-            'id', fr."id",
-            'roundId', fr."roundId",
-            'projectId', fr."projectId",
-            'amount', fr."amount",
-            'createdAt', fr."createdAt",
-            'updatedAt', fr."updatedAt",
-            'claim', rc
+          DISTINCT to_jsonb(fr.*) || 
+          jsonb_build_object(
+            'claim', to_jsonb(rc.*)
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]') as "rewards",
         o."id" as "organization_id",
@@ -413,44 +388,17 @@ async function getAllPublishedUserProjectsFn({
         "organization_name",
         jsonb_agg(
           jsonb_build_object(
-            'project', jsonb_build_object(
-              'id', "id",
-              'name', "name",
-              'description', "description",
-              'category', "category",
-              'thumbnailUrl', "thumbnailUrl",
-              'bannerUrl', "bannerUrl",
-              'website', "website",
-              'farcaster', "farcaster",
-              'twitter', "twitter",
-              'mirror', "mirror",
-              'pricingModel', "pricingModel",
-              'pricingModelDetails', "pricingModelDetails",
-              'openSourceObserverSlug', "openSourceObserverSlug",
-              'addedTeamMembers', "addedTeamMembers",
-              'addedFunding', "addedFunding",
-              'hasCodeRepositories', "hasCodeRepositories",
-              'isOnChainContract', "isOnChainContract",
-              'lastMetadataUpdate', "lastMetadataUpdate",
-              'createdAt', "createdAt",
-              'updatedAt', "updatedAt",
-              'deletedAt', "deletedAt",
-              'funding', "funding",
-              'snapshots', "snapshots",
-              'applications', "applications",
-              'links', "links",
-              'rewards', "rewards"
-            )
+            'project',  to_jsonb(op.*)
           )
         ) as projects
-      FROM "org_projects"
+      FROM "org_projects" op
       GROUP BY "organization_id", "organization_name"
     )
     SELECT jsonb_build_object(
       'projects', COALESCE(
         (SELECT jsonb_agg(
           jsonb_build_object(
-            'project', to_jsonb(up.*) - 'organization_id' - 'organization_name'
+            'project', to_jsonb(up.*)
           )
         )
         FROM "user_projects" up),
@@ -459,11 +407,7 @@ async function getAllPublishedUserProjectsFn({
       'organizations', COALESCE(
         (SELECT jsonb_agg(
           jsonb_build_object(
-            'organization', jsonb_build_object(
-              'id', og."organization_id",
-              'name', og."organization_name",
-              'projects', og.projects
-            )
+            'organization', to_jsonb(og.*)
           )
         )
         FROM "org_projects_grouped" og),
@@ -501,12 +445,7 @@ async function getProjectFn({
     project_data AS (
       SELECT 
         p.*,
-        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-          'id', t."id",
-          'role', t."role",
-          'userId', t."userId",
-          'projectId', t."projectId",
-          'deletedAt', t."deletedAt",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
@@ -514,47 +453,22 @@ async function getProjectFn({
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE(jsonb_agg(to_jsonb(s.*) ORDER BY s."createdAt" ASC) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
-        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-          'id', a."id",
-          'projectId', a."projectId",
-          'roundId', a."roundId",
-          'attestationId', a."attestationId",
-          'projectDescriptionOptions', a."projectDescriptionOptions",
-          'createdAt', a."createdAt",
-          'updatedAt', a."updatedAt",
-          'category', jsonb_build_object(
-            'id', cat."id",
-            'name', cat."name",
-            'description', cat."description",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*) || jsonb_build_object(
+          'category', to_jsonb(cat.*) || jsonb_build_object(
             'impactStatements', ist.statements
           ),
           'impactStatementAnswer', to_jsonb(isa.*),
           'round', to_jsonb(rnd.*)
         )) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
-        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-          'id', fr."id",
-          'roundId', fr."roundId",
-          'projectId', fr."projectId",
-          'amount', fr."amount",
-          'createdAt', fr."createdAt",
-          'updatedAt', fr."updatedAt",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(fr.*) || jsonb_build_object(
           'claim', to_jsonb(rc.*)
         )) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
         CASE 
           WHEN po."id" IS NOT NULL THEN jsonb_build_object(
-            'id', po."id",
-            'projectId', po."projectId",
-            'organizationId', po."organizationId",
-            'deletedAt', po."deletedAt",
             'organization', jsonb_build_object(
               'id', o."id",
               'name', o."name",
-              'team', COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-                'id', ot."id",
-                'role', ot."role",
-                'userId', ot."userId",
-                'organizationId', ot."organizationId",
-                'deletedAt', ot."deletedAt",
+              'team', COALESCE(jsonb_agg(DISTINCT to_jsonb(ot.*) || jsonb_build_object(
                 'user', to_jsonb(ou.*)
               )) FILTER (WHERE ot."id" IS NOT NULL AND ot."deletedAt" IS NULL), '[]'::jsonb)
             )
@@ -661,11 +575,7 @@ async function getUserApplicationsFn({
         to_jsonb(fr.*) as "round",
         COALESCE(
           jsonb_agg(
-            DISTINCT jsonb_build_object(
-              'id', isa."id",
-              'applicationId', isa."applicationId",
-              'impactStatementId', isa."impactStatementId",
-              'answer', isa."answer",
+            DISTINCT to_jsonb(isa.*) || jsonb_build_object(
               'impactStatement', to_jsonb(ist.*)
             )
           ) FILTER (WHERE isa."id" IS NOT NULL),
