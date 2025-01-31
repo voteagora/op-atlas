@@ -1,6 +1,8 @@
+import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import {
   base,
   fraxtal,
+  ink,
   lisk,
   metalL2,
   mode,
@@ -10,14 +12,21 @@ import {
   swan,
   worldchain,
   zora,
-  ink,
 } from "viem/chains"
 
 export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
   {
+    [arenaZ.id.toString()]: {
+      logo: "/assets/chain-logos/arenaZ.png",
+      name: "ArenaZ",
+    },
     [base.id.toString()]: {
       logo: "/assets/chain-logos/base.png",
       name: "Base",
+    },
+    [ethernity.id.toString()]: {
+      logo: "/assets/chain-logos/ethernity.jpg",
+      name: "Ethernity",
     },
     [fraxtal.id.toString()]: {
       logo: "/assets/chain-logos/fraxtal.png",
@@ -40,8 +49,12 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
       name: "Mode",
     },
     [optimism.id.toString()]: {
-      logo: "/assets/chain-logos/optimism.png",
+      logo: "/assets/chain-logos/optimism.svg",
       name: "OP Mainnet",
+    },
+    [race.id.toString()]: {
+      logo: "/assets/chain-logos/race.jpeg",
+      name: "Race",
     },
     [shape.id.toString()]: {
       logo: "/assets/chain-logos/shape.png",
@@ -54,6 +67,10 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [swan.id.toString()]: {
       logo: "/assets/chain-logos/swan.png",
       name: "Swan",
+    },
+    [swell.id.toString()]: {
+      logo: "/assets/chain-logos/swell.svg",
+      name: "Swell",
     },
     [worldchain.id.toString()]: {
       logo: "/assets/chain-logos/worldchain.png",

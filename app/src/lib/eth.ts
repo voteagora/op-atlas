@@ -1,18 +1,19 @@
+import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import { Address, createPublicClient, Hash, http } from "viem"
 import {
   base,
   Chain as ViemChain,
   fraxtal,
-  mode,
-  optimism,
-  zora,
-  worldchain,
+  ink,
   lisk,
   metalL2,
-  superseed,
+  mode,
+  optimism,
   shape,
+  superseed,
   swan,
-  ink,
+  worldchain,
+  zora,
 } from "viem/chains"
 
 import { Chain } from "./utils/contracts"
@@ -34,11 +35,15 @@ export type TraceCall = {
 }
 
 const clients = {
+  [Chain.ArenaZ]: createClient(arenaZ, "https://rpc.arena-z.gg"),
   [Chain.Base]: createClient(
     base,
     `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-
+  [Chain.Ethernity]: createClient(
+    ethernity,
+    "https://mainnet.ethernitychain.io",
+  ),
   [Chain.Fraxtal]: createClient(fraxtal, "https://rpc.frax.com"),
   [Chain.Ink]: createClient(ink, "https://rpc-gel.inkonchain.com"),
   [Chain.Lisk]: createClient(lisk, "https://rpc.api.lisk.com"),
@@ -48,12 +53,14 @@ const clients = {
     optimism,
     `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
+  [Chain.Race]: createClient(race, "https://racemainnet.io"),
   [Chain.Shape]: createClient(
     shape,
     `https://shape-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
   [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
   [Chain.Swan]: createClient(swan, "https://mainnet-rpc.swanchain.org"),
+  [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
   [Chain.Worldchain]: createClient(
     worldchain,
     `https://worldchain-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
