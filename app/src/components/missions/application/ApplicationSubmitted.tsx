@@ -109,7 +109,7 @@ export const ApplicationSubmitted = ({
             width={124}
           />
 
-          <h2 className="text-center">You're Enrolled!</h2>
+          <h2 className="text-center">{"You're Enrolled!"}</h2>
           <p className="text-center">
             Your application to{" "}
             {
