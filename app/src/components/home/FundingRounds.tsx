@@ -3,16 +3,13 @@ import { format } from "date-fns"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { useEffect, useMemo, useState } from "react"
-import { optimism } from "viem/chains"
+import { useMemo } from "react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { useUserApplications } from "@/hooks/db/useUserApplications"
 import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
-import { ApplicationWithDetails } from "@/lib/types"
 import { cn, titlecase } from "@/lib/utils"
 
-import { ChainLogo } from "../common/ChainLogo"
 import { Badge } from "../ui/badge"
 import { FundingRoundOngoing } from "./FundingRoundOngoing"
 import { FundingRoundPast } from "./FundingRoundPast"
@@ -207,7 +204,12 @@ function FundingRoundContent({
           {fundingRound.status === "open" && (
             <div className="flex justify-between text-secondary-foreground text-sm font-medium">
               <div className="items-center flex gap-2 pr-4 ">
-                <ChainLogo chainId={optimism.id.toString()} />
+                <Image
+                  src="/assets/icons/op-icon.svg"
+                  height={24}
+                  width={24}
+                  alt="Optimism"
+                />
                 <div className="text-sm font-medium text-secondary-foreground">
                   {fundingRound.funding?.op && (
                     <span>{fundingRound.funding.op}</span>
@@ -223,7 +225,12 @@ function FundingRoundContent({
           <div className="flex flex-row items-center gap-4">
             <div className="flex flex-row items-center gap-2 text-sm font-medium text-secondary-foreground">
               {fundingRound.funding?.op && (
-                <ChainLogo chainId={optimism.id.toString()} />
+                <Image
+                  src="/assets/icons/op-icon.svg"
+                  height={24}
+                  width={24}
+                  alt="Optimism"
+                />
               )}
               <div>
                 {fundingRound.funding?.op && (
