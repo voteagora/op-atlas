@@ -173,7 +173,7 @@ export const ApplicationSubmitted = ({
           <p className="font-semibold">All projects are reviewed</p>
           <p className="text-secondary-foreground">
             {
-              "If there’s an issue with your application, we’ll reach out via email."
+              "If there's an issue with your application, we'll reach out via email."
             }
           </p>
         </div>
