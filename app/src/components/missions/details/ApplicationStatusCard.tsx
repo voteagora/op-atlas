@@ -85,7 +85,7 @@ export const ApplicationStatusCard = ({
     if (userProjectCount && userProjectCount > 0) {
       if (userAppliedProjects && userAppliedProjects?.length > 0) {
         return (
-          <div>
+          <div className="flex flex-col gap-4">
             <p className="font-semibold">{"Your status"}</p>
 
             <div className="text-sm text-secondary-foreground text-center">
@@ -100,13 +100,14 @@ export const ApplicationStatusCard = ({
                         key={"userAppliedProject-" + index}
                         className="flex items-center justify-between"
                       >
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-2">
                           {element.icon ? (
                             <Image
                               src={element.icon}
                               width={32}
                               height={32}
                               alt="Project"
+                              className="rounded-lg"
                             />
                           ) : (
                             <></>
