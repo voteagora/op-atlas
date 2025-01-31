@@ -110,7 +110,7 @@ export default function ProjectDetailsForm({
       organization: project?.organization?.organization
         ? {
             name: project?.organization?.organization.name,
-            id: project?.organization?.organizationId,
+            id: project?.organization?.organization.id,
             avatarUrl: project?.organization?.organization.avatarUrl,
           }
         : null,
