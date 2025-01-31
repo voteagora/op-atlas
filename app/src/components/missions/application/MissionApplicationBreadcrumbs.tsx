@@ -18,7 +18,9 @@ export function MissionApplicationBreadcrumbs() {
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href="/">Retro Funding Missions</BreadcrumbLink>
+          <BreadcrumbLink href="/missions">
+            Retro Funding Missions
+          </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
