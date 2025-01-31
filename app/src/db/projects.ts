@@ -465,9 +465,7 @@ async function getProjectFn({
         )) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
         CASE 
           WHEN po."id" IS NOT NULL THEN jsonb_build_object(
-            'organization', jsonb_build_object(
-              'id', o."id",
-              'name', o."name",
+            'organization', to_jsonb(o.*) || jsonb_build_object(
               'team', COALESCE(jsonb_agg(DISTINCT to_jsonb(ot.*) || jsonb_build_object(
                 'user', to_jsonb(ou.*)
               )) FILTER (WHERE ot."id" IS NOT NULL AND ot."deletedAt" IS NULL), '[]'::jsonb)
