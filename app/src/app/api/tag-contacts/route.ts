@@ -1,4 +1,6 @@
 import { Prisma } from "@prisma/client"
+import { CONTRIBUTOR_ELIGIBLE_ADDRESSES } from "eas-indexer/src/constants"
+import { type AggregatedType } from "eas-indexer/src/types"
 import { NextRequest } from "next/server"
 
 import { prisma } from "@/db/client"
@@ -9,7 +11,7 @@ import mailchimp from "@/lib/mailchimp"
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-type Entity = "citizen" | "gov_contribution" | "rf_voter" | "badgeholder"
+type Entity = keyof AggregatedType
 type EntityObject = {
   address: string
   email: string
@@ -32,15 +34,11 @@ export async function GET(request: NextRequest) {
 
   const task = searchParams.get("task")
   if (task === "add") {
-    console.log("Adding tags to Mailchimp contacts...")
-
     await addTagsToContacts()
 
     return new Response(`Mailchimp contacts tagged`, { status: 200 })
   }
   if (task === "remove") {
-    console.log("Removing tags from Mailchimp contacts...")
-
     await removeTagsFromContacts()
 
     return new Response(`Mailchimp contacts untagged`, { status: 200 })
@@ -52,13 +50,65 @@ export async function GET(request: NextRequest) {
 const addTagsToContacts = async () => {
   const records = await fetchRecords()
 
-  await Promise.all([
+  const [
+    citizens,
+    gov_contributions,
+    rf_voters,
+    community_contributors,
+    onchain_builders,
+    githubrepo_builders,
+  ] = await Promise.all([
     handleAddCitizenEntity({ citizen: records.citizen }),
     handleAddGovContributionEntity({
       gov_contribution: records.gov_contribution,
     }),
     handleAddRfVoterEntity({ rf_voter: records.rf_voter }),
+    handleAddCommunityContributorEntity({ contributors: records.contributors }),
+    handleAddOnchainBuilderEntity({
+      onchain_builders: records.onchain_builders,
+    }),
+    handleAddGithubRepoBuilderEntity({
+      github_repo_builders: records.github_repo_builders,
+    }),
   ])
+
+  const flattenedUsers = mergeResultsByEmail([
+    citizens,
+    gov_contributions,
+    rf_voters,
+    community_contributors,
+    onchain_builders,
+    githubrepo_builders,
+  ])
+
+  const LIST_ID = process.env.MAILCHIMP_LIST_ID
+  await mailchimp.lists
+    .batchListMembers(LIST_ID!, {
+      members: flattenedUsers.map((user) => ({
+        email_address: user.email,
+        tags: user.tags ?? [],
+        email_type: "html",
+        status: "transactional",
+      })),
+      update_existing: true,
+    })
+    .then((results: any) => {
+      console.log(
+        `[+] Mailchimp contacts tagged: ${results.updated_members.length}`,
+      )
+      results.updated_members.forEach((member: any) => {
+        console.log(
+          `  - ${member.email_address}; tags: ${
+            flattenedUsers.find((m) => {
+              return m.email === member.email_address
+            })?.tags
+          };`,
+        )
+      })
+    })
+    .catch((error: any) => {
+      console.error(`[-] Mailchimp contacts tagging failed: ${error}`)
+    })
 }
 const removeTagsFromContacts = async () => {
   const records = await fetchRecords()
@@ -81,12 +131,12 @@ const fetchRecords = async (): Promise<EntityRecords> => {
   const records = await getAggregatedData()
   const result = await getAggregatedRecords(records)
 
-  return result
+  return result as any
 }
 
+// TODO: Move the association of tags to UserEmails instead
 const addTag = async (addresses: EntityObject[], tag: Entity) => {
   if (addresses.length === 0) {
-    console.log("No addresses to tag")
     return
   }
 
@@ -101,6 +151,18 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
     case "citizen":
       updatedUserTag = "Citizen"
       break
+    case "contributors":
+      updatedUserTag = "Contributor"
+      break
+    case "community_contributors":
+      updatedUserTag = "Community Contributor"
+      break
+    case "onchain_builders":
+      updatedUserTag = "Onchain Builder"
+      break
+    case "github_repo_builders":
+      updatedUserTag = "Github Repo"
+      break
     default:
       updatedUserTag = ""
       break
@@ -111,10 +173,9 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
     return
   }
 
-  const updatedUsersTags = await prisma.$queryRaw<
-    { address: string; tags: string[]; email: string }[]
-  >(
-    Prisma.sql`
+  const updatedUsersTags = await prisma
+    .$queryRaw<{ address: string; tags: string[]; email: string }[]>(
+      Prisma.sql`
     UPDATE "UserAddress"
     SET "tags" = CASE 
       WHEN NOT (tags @> ARRAY[${updatedUserTag}]) THEN array_append(tags, ${updatedUserTag}) 
@@ -128,118 +189,17 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
        WHERE ue."userId" = "UserAddress"."userId"
        LIMIT 1) AS email
   `,
-  )
-
-  const onchainBuilderTag = "Onchain Builder"
-  const onchainBuilders = await prisma
-    .$queryRaw<{ email: string; tags: string[] }[]>(
-      Prisma.sql`
-      UPDATE "UserAddress"
-      SET "tags" = CASE
-        WHEN NOT (tags @> ARRAY[${onchainBuilderTag}]) THEN array_append(tags, ${onchainBuilderTag})
-        ELSE tags
-      END
-      WHERE "userId" IN (
-        -- Get users directly in a project with a verified contract
-        SELECT u.id
-        FROM "User" u
-        WHERE EXISTS (
-          SELECT 1
-          FROM "UserProjects" up
-          JOIN "ProjectContract" pc ON up."projectId" = pc."projectId"
-          WHERE up."userId" = u.id
-          AND pc."verificationProof" IS NOT NULL
-        )
-        -- Get users in an org with a project that has a verified contract
-        OR EXISTS (
-          SELECT 1
-          FROM "UserOrganization" uo
-          JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
-          JOIN "ProjectContract" pc ON po."projectId" = pc."projectId"
-          WHERE uo."userId" = u.id
-          AND pc."verificationProof" IS NOT NULL
-        )
-      )
-      RETURNING "userId", "tags", 
-        (SELECT ue.email FROM "UserEmail" ue WHERE ue."userId" = "UserAddress"."userId" LIMIT 1) AS email;
-    `,
     )
     .catch((_) => {
-      return [] // Ensure function doesn't break
+      return []
     })
 
-  const githubRepoTag = "Github Repo"
-  const githubRepoBuilders = await prisma
-    .$queryRaw<{ email: string; tags: string[] }[]>(
-      Prisma.sql`
-      UPDATE "UserAddress"
-      SET "tags" = CASE
-        WHEN NOT (tags @> ARRAY[${githubRepoTag}]) THEN array_append(tags, ${githubRepoTag})
-        ELSE tags
-      END
-      WHERE "userId" IN (
-        -- Get users directly in a project with a verified GitHub repo
-        SELECT u.id
-        FROM "User" u
-        WHERE EXISTS (
-          SELECT 1
-          FROM "UserProjects" up
-          JOIN "ProjectRepository" pr ON up."projectId" = pr."projectId"
-          WHERE up."userId" = u.id
-          AND pr."verified" = TRUE
-        )
-        -- Get users in an org with a project that has a verified GitHub repo
-        OR EXISTS (
-          SELECT 1
-          FROM "UserOrganization" uo
-          JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
-          JOIN "ProjectRepository" pr ON po."projectId" = pr."projectId"
-          WHERE uo."userId" = u.id
-          AND pr."verified" = TRUE
-        )
-      )
-      RETURNING "userId", "tags",
-        (SELECT ue.email FROM "UserEmail" ue WHERE ue."userId" = "UserAddress"."userId" LIMIT 1) AS email;
-    `,
-    )
-    .catch((_) => {
-      return [] // Ensure function doesn't break
-    })
-
-  console.log(`Updated user addresses, added tag "${tag}"`)
-
-  const combinedResults = mergeResultsByEmail([
-    onchainBuilders,
-    githubRepoBuilders,
-    updatedUsersTags,
-  ])
-
-  const LIST_ID = process.env.MAILCHIMP_LIST_ID
-  const results = await mailchimp.lists.batchListMembers(LIST_ID!, {
-    members: addresses.map((address) => ({
-      email_address: address.email,
-      tags:
-        combinedResults.find((user) => user.email === address.email)?.tags ??
-        [],
-      email_type: "html",
-      status: "transactional",
-    })),
-    update_existing: true,
-  })
-
-  const updatedMembers = (results as any).updated_members.map(
-    (member: any) => ({
-      email: member.email_address,
-      tags: member.tags,
-    }),
-  )
-
-  console.log(`Added tags to ${updatedMembers.length} Mailchimp contacts`)
+  return mergeResultsByEmail([updatedUsersTags])
 }
 
+// TODO: Remove only relevant tags that come from the eas-indexer
 const removeTags = async (addresses: EntityObject[], tag: Entity) => {
   if (addresses.length === 0) {
-    console.log("No addresses to tag")
     return
   }
 
@@ -253,8 +213,6 @@ const removeTags = async (addresses: EntityObject[], tag: Entity) => {
       tags: [],
     },
   })
-
-  console.log(`Updated user addresses, removed tag "${tag}"`)
 
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
   const results = await mailchimp.lists.batchListMembers(LIST_ID!, {
@@ -270,24 +228,39 @@ const removeTags = async (addresses: EntityObject[], tag: Entity) => {
   const updatedMembers = (results as any).updated_members.map(
     (member: any) => member.email_address,
   )
-
-  console.log(`Removed tags from ${updatedMembers.length} Mailchimp contacts`)
 }
 
 const handleAddCitizenEntity = async (
   records: Record<"citizen", EntityObject[]>,
 ) => {
-  await addTag(records.citizen, "citizen")
+  return (await addTag(records.citizen, "citizen")) ?? []
 }
 const handleAddRfVoterEntity = async (
   records: Record<"rf_voter", EntityObject[]>,
 ) => {
-  await addTag(records.rf_voter, "rf_voter")
+  return (await addTag(records.rf_voter, "rf_voter")) ?? []
 }
 const handleAddGovContributionEntity = async (
   records: Record<"gov_contribution", EntityObject[]>,
 ) => {
-  await addTag(records.gov_contribution, "gov_contribution")
+  return (await addTag(records.gov_contribution, "gov_contribution")) ?? []
+}
+const handleAddCommunityContributorEntity = async (
+  records: Record<"contributors", EntityObject[]>,
+) => {
+  return (await addTag(records.contributors, "contributors")) ?? []
+}
+const handleAddOnchainBuilderEntity = async (
+  records: Record<"onchain_builders", EntityObject[]>,
+) => {
+  return (await addTag(records.onchain_builders, "onchain_builders")) ?? []
+}
+const handleAddGithubRepoBuilderEntity = async (
+  records: Record<"github_repo_builders", EntityObject[]>,
+) => {
+  return (
+    (await addTag(records.github_repo_builders, "github_repo_builders")) ?? []
+  )
 }
 
 const handleRemoveCitizenEntity = async (
