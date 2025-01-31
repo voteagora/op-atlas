@@ -91,9 +91,16 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
         {project.snapshots.length > 0 ? (
           <div className="flex flex-col gap-2">
             <p className="text-sm  font-medium text-foreground">Published</p>
-            {sortBy((s) => -s.createdAt, project.snapshots).map((snapshot) => (
-              <Snapshot key={snapshot.id} snapshot={snapshot} />
-            ))}
+            {project.snapshots
+              .sort((a, b) => {
+                return (
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+                )
+              })
+              .map((snapshot) => {
+                return <Snapshot key={snapshot.id} snapshot={snapshot} />
+              })}
 
             {/* Only show this when applications are open */}
             {/* {project.snapshots.length > 0 ? (
