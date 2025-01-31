@@ -250,7 +250,15 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
+        COALESCE((
+          SELECT jsonb_agg(to_jsonb(s.*))
+          FROM (
+            SELECT DISTINCT ON (s2."id") s2.*
+            FROM "ProjectSnapshot" s2
+            WHERE s2."projectId" = p."id"
+            ORDER BY s2."id", s2."createdAt" ASC
+          ) s
+        ), '[]'::jsonb) as "snapshots",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
         COALESCE(jsonb_agg(
@@ -452,7 +460,15 @@ async function getProjectFn({
         COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
-        COALESCE(jsonb_agg(to_jsonb(s.*) ORDER BY s."createdAt" ASC) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
+        COALESCE((
+          SELECT jsonb_agg(to_jsonb(s.*))
+          FROM (
+            SELECT DISTINCT ON (s2."id") s2.*
+            FROM "ProjectSnapshot" s2
+            WHERE s2."projectId" = p."id"
+            ORDER BY s2."id", s2."createdAt" ASC
+          ) s
+        ), '[]'::jsonb) as "snapshots",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*) || jsonb_build_object(
           'category', to_jsonb(cat.*) || jsonb_build_object(
             'impactStatements', ist.statements
@@ -498,6 +514,8 @@ async function getProjectFn({
     SELECT to_jsonb(pd.*) as result
     FROM project_data pd;
   `
+
+  console.log("result[0]?.result", result[0]?.result)
 
   return result[0]?.result
 }
