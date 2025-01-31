@@ -38,6 +38,16 @@ const UserProjectCard = ({
     return progressPercent
   }, [project])
 
+  const uniqueApplications = applications?.filter(
+    (application, index, self) => {
+      return (
+        application.projectId === project.id &&
+        (application.roundId === "7" || application.roundId === "8") &&
+        self.findIndex((app) => app.roundId === application.roundId) === index
+      )
+    },
+  )
+
   return (
     <div
       className={cn(
@@ -150,7 +160,8 @@ const UserProjectCard = ({
       </Link>
 
       <div className="px-8 pb-8">
-        {applications?.map((application, index) => {
+        {}
+        {uniqueApplications?.map((application, index) => {
           return (
             application.projectId === project.id &&
             (application.roundId === "7" || application.roundId === "8") && (
