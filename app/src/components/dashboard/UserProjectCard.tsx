@@ -167,6 +167,7 @@ const UserProjectCard = ({
             (application.roundId === "7" || application.roundId === "8") && (
               <div className="mt-4">
                 <EnrolledCallout
+                  key={"ApplicationEnrolled" + index}
                   application={application}
                   index={index}
                   onRewardsClick={handleActiveRoundHelpClick}
