@@ -34,35 +34,27 @@ export const publishAndSaveApplication = async ({
   farcasterId,
   metadataSnapshotId,
   round,
+  roundName,
 }: {
   project: SubmitApplicationRequest
   category: CategoryWithImpact
   farcasterId: string
   metadataSnapshotId: string
   round: number
+  roundName?: string
 }): Promise<Application> => {
-  // Upload metadata to IPFS
-  const metadata = formatApplicationMetadata({
-    round,
-    categoryId: project.categoryId,
-    impactStatement: project.impactStatement,
-    category,
-    projectDescriptionOptions: project.projectDescriptionOptions,
-  })
-  const ipfsHash = await uploadToPinata(project.projectId, metadata)
-
   // Publish attestation
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId: project.projectId,
-    round,
-    snapshotRef: metadataSnapshotId,
-    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    round: `${roundName ?? round}`,
+    snapshotRef: "", // Skipping snapshot for S7
+    ipfsUrl: "", // Skipping IPFS for S7
   })
 
   // Create application in database
   return createApplication({
-    round,
+    round: round,
     ...project,
     attestationId,
   })
@@ -73,6 +65,7 @@ const createProjectApplication = async (
   farcasterId: string,
   round: number,
   category: CategoryWithImpact,
+  roundName?: string,
 ) => {
   const session = await auth()
 
@@ -140,6 +133,7 @@ const createProjectApplication = async (
     farcasterId,
     metadataSnapshotId: latestSnapshot.attestationId,
     round,
+    roundName,
   })
 
   return {
@@ -157,6 +151,7 @@ export const submitApplications = async (
   }[],
   round: number,
   categories?: CategoryWithImpact[],
+  roundName?: string,
 ) => {
   const session = await auth()
 
@@ -193,6 +188,7 @@ export const submitApplications = async (
       session.user.farcasterId,
       round,
       categories?.find((category) => category.id === project.categoryId)!,
+      roundName,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)

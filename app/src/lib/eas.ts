@@ -159,12 +159,12 @@ export async function createApplicationAttestation({
 }: {
   farcasterId: number
   projectId: string
-  round: number
+  round: string
   snapshotRef: string
   ipfsUrl: string
 }) {
   const data = applicationSchema.encodeData([
-    { name: "round", value: round.toString(), type: "string" },
+    { name: "round", value: round, type: "string" },
     { name: "farcasterID", value: farcasterId, type: "uint256" },
     { name: "metadataSnapshotRefUID", value: snapshotRef, type: "bytes32" },
     { name: "metadataType", value: "0", type: "uint8" },

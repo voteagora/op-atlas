@@ -5,6 +5,7 @@ import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout
 
 export type MissionData = FundingRoundData & {
   pageName: string
+  roundName: string
   missionPageRequirements: React.ReactNode
   missionPageEligibility: React.ReactNode
   applicationPageEligibility: { reactNode: React.ReactNode; type?: string }[]
@@ -36,6 +37,7 @@ export const MISSIONS: MissionData[] = [
     pageName: "retro-funding-dev-tooling",
     name: "Dev Tooling",
     number: 7,
+    roundName: "S7 Dev Tooling",
     funding: {
       op: "Up to 3.5M",
     },
@@ -190,6 +192,7 @@ export const MISSIONS: MissionData[] = [
     pageName: "retro-funding-onchain-builders",
     name: "Onchain Builders",
     number: 8,
+    roundName: "S7 Onchain Builders",
     funding: {
       op: "Up to 3.5M",
     },
