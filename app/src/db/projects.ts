@@ -1199,7 +1199,7 @@ export async function createApplication({
   return prisma.application.create({
     data: {
       attestationId,
-      projectDescriptionOptions,
+      projectDescriptionOptions: [],
       project: {
         connect: {
           id: projectId,
