@@ -52,13 +52,13 @@ export function EnrolledCallout({
       }
       rightAlignedContent={
         <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
-          <ExternalLink
+          {/* <ExternalLink
             className="flex items-center text-sm text-success-foreground font-medium"
             href={`${EAS_URL_PREFIX}${application.attestationId}`}
           >
             Confirmation
             <ChevronRight width={16} height={16} />
-          </ExternalLink>
+          </ExternalLink> */}
           <button
             className="flex items-center text-sm text-success-foreground font-medium"
             onClick={onRewardsClick}
