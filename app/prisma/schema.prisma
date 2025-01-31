@@ -31,6 +31,8 @@ model User {
   interaction       UserInteraction?
 
   @@index([username])
+  @@index([farcasterId])
+  @@index([deletedAt])
 }
 
 model UserEmail {
@@ -56,6 +58,8 @@ model UserInteraction {
   viewProfileClicked     Boolean  @default(false)
   homePageViewCount      Int      @default(0)
   lastInteracted         DateTime @default(now())
+
+  @@index([userId])
 }
 
 model UserAddress {
@@ -260,6 +264,8 @@ model Application {
   impactStatementAnswer ImpactStatementAnswer[]
 
   @@index([projectId])
+  @@index([roundId])
+  @@index([categoryId])
 }
 
 model Category {
