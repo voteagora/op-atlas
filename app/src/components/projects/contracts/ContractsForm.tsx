@@ -171,7 +171,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
         setIsSaving(false)
         toast.success("Project saved")
       } catch (error) {
-        toast.error("There was an error updating project OSO status.")
+        toast.error("There was an error saving the project.")
         isSave ? setIsSaving(false) : setIsSubmitting(false)
       }
     }
