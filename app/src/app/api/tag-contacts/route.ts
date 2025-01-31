@@ -79,6 +79,10 @@ const addTagsToContacts = async () => {
     community_contributors,
     onchain_builders,
     githubrepo_builders,
+    records.community_contributors.map((c) => ({
+      email: c.email,
+      tags: ["Community Contributor"],
+    })),
   ])
 
   const LIST_ID = process.env.MAILCHIMP_LIST_ID

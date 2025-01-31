@@ -83,6 +83,7 @@ ponder.get("/entities/aggregated", async (c) => {
         }
         return acc;
       }, []);
+      aggregated.community_contributors.push({ address: "0x123456789" });
     }
   }
 

@@ -1,7 +1,5 @@
 "use server"
 
-import { CONTRIBUTOR_ELIGIBLE_ADDRESSES } from "eas-indexer/src/constants"
-import { AggregatedType } from "eas-indexer/src/types"
 import {
   Prisma,
   User,
@@ -9,6 +7,8 @@ import {
   UserEmail,
   UserInteraction,
 } from "@prisma/client"
+import { CONTRIBUTOR_ELIGIBLE_ADDRESSES } from "eas-indexer/src/constants"
+import { AggregatedType } from "eas-indexer/src/types"
 
 import { UserAddressSource } from "@/lib/types"
 
@@ -526,6 +526,27 @@ async function getAllGithubRepoBuiulders() {
     },
   })
 }
+async function getAllCommunityContributors(addresses: string[]) {
+  return prisma.userAddress.findMany({
+    where: {
+      address: {
+        in: addresses,
+      },
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
 
 export async function getAggregatedRecords(records: AggregatedType) {
   const [
@@ -536,6 +557,7 @@ export async function getAggregatedRecords(records: AggregatedType) {
     contributors,
     onchain_builders,
     github_repo_builders,
+    community_contributors,
   ] = await Promise.all([
     getAllCitizens(records.citizen),
     getAllBadgeholders(),
@@ -544,6 +566,9 @@ export async function getAggregatedRecords(records: AggregatedType) {
     getAllContributors(records.contributors),
     getAllOnchainBuilders(),
     getAllGithubRepoBuiulders(),
+    getAllCommunityContributors(
+      records.community_contributors.map((c) => c.address),
+    ),
   ])
 
   const result: Partial<AggregatedType> = {
@@ -580,6 +605,10 @@ export async function getAggregatedRecords(records: AggregatedType) {
         address: grb.addresses.at(-1)?.address ?? "",
         email: grb.emails.at(-1)?.email ?? "",
       })) ?? [],
+    community_contributors: community_contributors.map((cc) => ({
+      address: cc.address,
+      email: cc.user.emails.at(-1)?.email ?? "",
+    })),
   }
 
   return result
