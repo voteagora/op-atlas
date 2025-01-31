@@ -12,11 +12,13 @@ import { prisma } from "./client"
 
 async function getOrganizationsFn(userId: string) {
   const result = await prisma.$queryRaw<
-    Array<{
-      organizations: Array<{
-        organization: Organization
-      }>
-    }>
+    {
+      result: {
+        organizations: Array<{
+          organization: Organization
+        }>
+      }
+    }[]
   >`
     SELECT jsonb_build_object(
       'organizations', COALESCE(
@@ -38,7 +40,7 @@ async function getOrganizationsFn(userId: string) {
   `
 
   // Transform the raw result to match the expected structure
-  const transformed = result[0] || { organizations: [] }
+  const transformed = result[0]?.result || { organizations: [] }
 
   // Ensure null arrays are converted to empty arrays
   transformed.organizations = transformed.organizations || []
