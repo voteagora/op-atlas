@@ -110,7 +110,6 @@ export function MissionApplication() {
   if (submittedProjects?.length > 0 && applications) {
     return (
       <ApplicationSubmitted
-        className="mt-18 max-w-4xl"
         application={submittedApplications[0]}
         submittedProjects={submittedProjects}
       />
