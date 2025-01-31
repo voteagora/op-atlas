@@ -3,30 +3,48 @@
 import { Prisma, Project } from "@prisma/client"
 import { cache } from "react"
 
-import { ApplicationWithDetails, TeamRole } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  ProjectContractWithProject,
+  ProjectWithFullDetails,
+  ProjectWithTeam,
+  PublishedUserProjectsResult,
+  TeamRole,
+  UserProjectsWithDetails,
+  UserProjectWithDetails,
+  UserWithProjects,
+} from "@/lib/types"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
-  return prisma.user.findUnique({
-    where: {
-      farcasterId,
-    },
-    select: {
-      projects: {
-        where: {
-          deletedAt: null,
-          project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: true,
-        },
-      },
-    },
-  })
+  const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
+    SELECT jsonb_build_object(
+      'id', u.id,
+      'projects', COALESCE(
+        (
+          SELECT jsonb_agg(
+            to_jsonb(up.*) || 
+            jsonb_build_object(
+              'project', to_jsonb(p.*)
+            )
+          )
+          FROM "Project" p
+          JOIN "UserProjects" up ON p."id" = up."projectId"
+          WHERE up."userId" = u.id
+            AND up."deletedAt" IS NULL
+            AND p."deletedAt" IS NULL
+        ),
+        '[]'::jsonb
+      )
+    ) as result
+    FROM "User" u
+    WHERE u."farcasterId" = ${farcasterId}
+    LIMIT 1;
+  `
+
+  return result[0]?.result
 }
 
 export const getUserProjects = cache(getUserProjectsFn)
@@ -37,120 +55,168 @@ async function getUserAdminProjectsWithDetailFn({
 }: {
   userId: string
   roundId?: string
-}) {
-  return prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      projects: {
-        where: {
-          deletedAt: null,
-          role: "admin" satisfies TeamRole,
-          project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: {
-            include: {
-              team: { where: { deletedAt: null }, include: { user: true } },
-              repos: true,
-              contracts: true,
-              funding: true,
-              snapshots: true,
-              organization: {
-                where: { deletedAt: null, organization: { deletedAt: null } },
-                include: {
-                  organization: {
-                    include: {
-                      team: {
-                        where: { deletedAt: null },
-                        include: { user: true },
-                      },
-                    },
-                  },
-                },
-              },
-              applications: {
-                where: {
-                  roundId,
-                },
-                orderBy: {
-                  createdAt: "desc",
-                },
-              },
-              links: true,
-              rewards: { include: { claim: true } },
-            },
-          },
-        },
-        orderBy: {
-          project: {
-            createdAt: "asc",
-          },
-        },
-      },
-      organizations: {
-        where: {
-          deletedAt: null,
-          role: "admin" satisfies TeamRole,
-          organization: { deletedAt: null },
-        },
-        select: {
-          organization: {
-            include: {
-              projects: {
-                where: { deletedAt: null, project: { deletedAt: null } },
-                include: {
-                  project: {
-                    include: {
-                      team: {
-                        where: { deletedAt: null },
-                        include: { user: true },
-                      },
-                      repos: true,
-                      contracts: true,
-                      funding: true,
-                      snapshots: true,
-                      organization: {
-                        where: { deletedAt: null },
-                        include: {
-                          organization: {
-                            include: {
-                              team: {
-                                where: { deletedAt: null },
-                                include: { user: true },
-                              },
-                            },
-                          },
-                        },
-                      },
-                      applications: {
-                        where: {
-                          roundId,
-                        },
-                        orderBy: {
-                          createdAt: "desc",
-                        },
-                      },
-                      links: true,
-                      rewards: { include: { claim: true } },
-                    },
-                  },
-                },
-                orderBy: {
-                  project: {
-                    createdAt: "asc",
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
+}): Promise<UserProjectsWithDetails | null> {
+  const result = await prisma.$queryRaw<{ result: UserProjectsWithDetails }[]>`
+    WITH user_projects AS (
+      SELECT 
+        p.*,
+        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
+          'id', t."id",
+          'role', t."role",
+          'userId', t."userId",
+          'projectId', t."projectId",
+          'deletedAt', t."deletedAt",
+          'user', to_jsonb(u.*)
+        )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
+        COALESCE(jsonb_agg(
+          DISTINCT jsonb_build_object(
+            'id', fr."id",
+            'roundId', fr."roundId",
+            'projectId', fr."projectId",
+            'amount', fr."amount",
+            'createdAt', fr."createdAt",
+            'updatedAt', fr."updatedAt",
+            'claim', to_jsonb(rc.*)
+          )
+        ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
+        po."organizationId",
+        o."name" as "organization_name",
+        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
+          'id', ot."id",
+          'role', ot."role",
+          'userId', ot."userId",
+          'organizationId', ot."organizationId",
+          'deletedAt', ot."deletedAt",
+          'user', to_jsonb(ou.*)
+        )) FILTER (WHERE ot."id" IS NOT NULL), '[]'::jsonb) as "organization_team"
+      FROM "Project" p
+      LEFT JOIN "UserProjects" up ON p."id" = up."projectId" AND up."deletedAt" IS NULL
+      LEFT JOIN "UserProjects" t ON p."id" = t."projectId" AND t."deletedAt" IS NULL
+      LEFT JOIN "User" u ON t."userId" = u."id"
+      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
+      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
+      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
+      LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
+      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId" 
+        AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      LEFT JOIN "ProjectOrganization" po ON p."id" = po."projectId" AND po."deletedAt" IS NULL
+      LEFT JOIN "Organization" o ON po."organizationId" = o."id" AND o."deletedAt" IS NULL
+      LEFT JOIN "UserOrganization" ot ON o."id" = ot."organizationId" AND ot."deletedAt" IS NULL
+      LEFT JOIN "User" ou ON ot."userId" = ou."id"
+      WHERE up."userId" = ${userId}
+        AND up."role" = 'admin'
+        AND p."deletedAt" IS NULL
+      GROUP BY p."id", po."organizationId", o."name"
+    ),
+    org_projects AS (
+      SELECT 
+        p.*,
+        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
+          'id', t."id",
+          'role', t."role",
+          'userId', t."userId",
+          'projectId', t."projectId",
+          'deletedAt', t."deletedAt",
+          'user', to_jsonb(u.*)
+        )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
+        COALESCE(jsonb_agg(
+          DISTINCT jsonb_build_object(
+            'id', fr."id",
+            'roundId', fr."roundId",
+            'projectId', fr."projectId",
+            'amount', fr."amount",
+            'createdAt', fr."createdAt",
+            'updatedAt', fr."updatedAt",
+            'claim', to_jsonb(rc.*)
+          )
+        ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
+        o."id" as "organization_id",
+        o."name" as "organization_name"
+      FROM "Project" p
+      JOIN "ProjectOrganization" po ON p."id" = po."projectId" AND po."deletedAt" IS NULL
+      JOIN "Organization" o ON po."organizationId" = o."id" AND o."deletedAt" IS NULL
+      JOIN "UserOrganization" uo ON o."id" = uo."organizationId" 
+        AND uo."userId" = ${userId}
+        AND uo."role" = 'admin'
+        AND uo."deletedAt" IS NULL
+      LEFT JOIN "UserProjects" t ON p."id" = t."projectId" AND t."deletedAt" IS NULL
+      LEFT JOIN "User" u ON t."userId" = u."id"
+      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
+      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
+      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
+      LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
+      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId"
+        AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      WHERE p."deletedAt" IS NULL
+      GROUP BY p."id", o."id", o."name"
+    ),
+    org_projects_grouped AS (
+      SELECT 
+        "organization_id",
+        "organization_name",
+        jsonb_agg(
+          jsonb_build_object(
+            'project', to_jsonb(op.*)
+          )
+        ) as projects
+      FROM org_projects op
+      GROUP BY "organization_id", "organization_name"
+    )
+    SELECT jsonb_build_object(
+      'projects', COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'project', to_jsonb(up.*) - 'organization_id' - 'organization_name' - 'organization_team' ||
+            CASE 
+              WHEN up."organizationId" IS NOT NULL THEN jsonb_build_object(
+                'organization', jsonb_build_object(
+                  'id', up."organizationId",
+                  'name', up."organization_name",
+                  'team', up."organization_team"
+                )
+              )
+              ELSE '{}'::jsonb
+            END
+          )
+        )
+        FROM user_projects up),
+        '[]'::jsonb
+      ),
+      'organizations', COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'organization', jsonb_build_object(
+              'id', og."organization_id",
+              'name', og."organization_name",
+              'projects', og.projects
+            )
+          )
+        )
+        FROM org_projects_grouped og),
+        '[]'::jsonb
+      )
+    ) as result;
+  `
+
+  return result[0]?.result
 }
 
 export const getUserAdminProjectsWithDetail = cache(
@@ -172,129 +238,383 @@ const getRandomProjectsFn = () => {
 export const getRandomProjects = cache(getRandomProjectsFn)
 
 async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
-  return prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      projects: {
-        where: {
-          deletedAt: null,
-          project: {
-            deletedAt: null,
-            organization: {
-              is: null,
-            },
-          },
-        },
-        include: {
-          project: {
-            include: {
-              team: { where: { deletedAt: null }, include: { user: true } },
-              repos: true,
-              contracts: true,
-              funding: true,
-              snapshots: true,
-              organization: {
-                where: { deletedAt: null },
-                include: {
-                  organization: {
-                    include: {
-                      team: {
-                        where: { deletedAt: null },
-                        include: { user: true },
-                      },
-                    },
-                  },
-                },
-              },
-              applications: true,
-              links: true,
-              rewards: { include: { claim: true } },
-            },
-          },
-        },
-        orderBy: {
-          project: {
-            createdAt: "asc",
-          },
-        },
-      },
-    },
-  })
+  const result = await prisma.$queryRaw<
+    { result: { projects: { project: UserProjectWithDetails }[] } }[]
+  >`
+    WITH project_data AS (
+      SELECT 
+        p.*,
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || 
+          jsonb_build_object('user', to_jsonb(u.*))
+        ) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
+        COALESCE(jsonb_agg(
+          DISTINCT to_jsonb(fr.*) || 
+          jsonb_build_object(
+            'claim', to_jsonb(rc.*)
+          )
+        ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
+        po."organizationId",
+        CASE 
+          WHEN po."id" IS NOT NULL THEN jsonb_build_object(
+            'organization', jsonb_build_object(
+              'team', COALESCE(jsonb_agg(DISTINCT to_jsonb(ot.*) || 
+                jsonb_build_object('user', to_jsonb(ou.*))
+              ) FILTER (WHERE ot."id" IS NOT NULL), '[]'::jsonb)
+            )
+          )
+          ELSE NULL
+        END as "organization"
+      FROM "Project" p
+      JOIN "UserProjects" up ON p."id" = up."projectId" 
+        AND up."userId" = ${userId}
+        AND up."deletedAt" IS NULL
+      LEFT JOIN "UserProjects" t ON p."id" = t."projectId" 
+        AND t."deletedAt" IS NULL
+      LEFT JOIN "User" u ON t."userId" = u."id"
+      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
+      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
+      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
+      LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
+      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId"
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      LEFT JOIN "ProjectOrganization" po ON p."id" = po."projectId" 
+        AND po."deletedAt" IS NULL
+      LEFT JOIN "Organization" o ON po."organizationId" = o."id" 
+        AND o."deletedAt" IS NULL
+      LEFT JOIN "UserOrganization" ot ON o."id" = ot."organizationId" 
+        AND ot."deletedAt" IS NULL
+      LEFT JOIN "User" ou ON ot."userId" = ou."id"
+      WHERE p."deletedAt" IS NULL
+        AND (po."id" IS NULL)
+      GROUP BY p."id", po."id", po."organizationId"
+      ORDER BY p."createdAt" ASC
+    )
+    SELECT jsonb_build_object(
+      'projects', COALESCE(
+        jsonb_agg(
+          jsonb_build_object(
+            'project', to_jsonb(pd.*) - 'organizationId'
+          )
+        ),
+        '[]'::jsonb
+      )
+    ) as result
+    FROM project_data pd;
+  `
+
+  return result[0]?.result
 }
 
 export const getUserProjectsWithDetails = cache(getUserProjectsWithDetailsFn)
 
-async function getAllPublishedUserProjectsFn({ userId }: { userId: string }) {
-  return prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      projects: {
-        where: {
-          deletedAt: null,
-          project: {
-            deletedAt: null,
-            organization: {
-              is: null,
-            },
-          },
-        },
-        include: {
-          project: {
-            include: {
-              funding: true,
-              snapshots: true,
-              applications: true,
-              links: true,
-              rewards: { include: { claim: true } },
-            },
-          },
-        },
-        orderBy: {
-          project: {
-            createdAt: "asc",
-          },
-        },
-      },
-      organizations: {
-        where: {
-          deletedAt: null,
-          organization: { deletedAt: null },
-        },
-        select: {
-          organization: {
-            include: {
-              projects: {
-                where: {
-                  deletedAt: null,
-                  project: {
-                    deletedAt: null,
-                  },
-                },
-                include: {
-                  project: {
-                    include: {
-                      funding: true,
-                      snapshots: true,
-                      applications: true,
-                      links: true,
-                      rewards: { include: { claim: true } },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
+async function getAllPublishedUserProjectsFn({
+  userId,
+}: {
+  userId: string
+}): Promise<PublishedUserProjectsResult> {
+  const result = await prisma.$queryRaw<
+    [{ result: PublishedUserProjectsResult }]
+  >`
+    WITH "user_projects" AS (
+      SELECT 
+        p.*,
+        COALESCE(json_agg(DISTINCT pf.*) FILTER (WHERE pf."id" IS NOT NULL), '[]') as "funding",
+        COALESCE(json_agg(DISTINCT ps.*) FILTER (WHERE ps."id" IS NOT NULL), '[]') as "snapshots",
+        COALESCE(json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL), '[]') as "applications",
+        COALESCE(json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL), '[]') as "links",
+        COALESCE(json_agg(
+          DISTINCT to_jsonb(fr.*) || 
+          jsonb_build_object(
+            'claim', to_jsonb(rc.*)
+          )
+        ) FILTER (WHERE fr."id" IS NOT NULL), '[]') as "rewards"
+      FROM "Project" p
+      LEFT JOIN "UserProjects" up ON p."id" = up."projectId" 
+        AND up."deletedAt" IS NULL
+      LEFT JOIN "ProjectFunding" pf ON p."id" = pf."projectId"
+      LEFT JOIN "ProjectSnapshot" ps ON p."id" = ps."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId"
+      LEFT JOIN "ProjectLinks" pl ON p."id" = pl."projectId"
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      WHERE up."userId" = ${userId}
+        AND p."deletedAt" IS NULL
+        AND p."id" NOT IN (SELECT "projectId" FROM "ProjectOrganization")
+      GROUP BY p."id"
+    ),
+    "org_projects" AS (
+      SELECT 
+        p.*,
+        COALESCE(json_agg(DISTINCT pf.*) FILTER (WHERE pf."id" IS NOT NULL), '[]') as "funding",
+        COALESCE(json_agg(DISTINCT ps.*) FILTER (WHERE ps."id" IS NOT NULL), '[]') as "snapshots",
+        COALESCE(json_agg(DISTINCT a.*) FILTER (WHERE a."id" IS NOT NULL), '[]') as "applications",
+        COALESCE(json_agg(DISTINCT pl.*) FILTER (WHERE pl."id" IS NOT NULL), '[]') as "links",
+        COALESCE(json_agg(
+          DISTINCT to_jsonb(fr.*) || 
+          jsonb_build_object(
+            'claim', to_jsonb(rc.*)
+          )
+        ) FILTER (WHERE fr."id" IS NOT NULL), '[]') as "rewards",
+        o."id" as "organization_id",
+        o."name" as "organization_name"
+      FROM "Project" p
+      JOIN "ProjectOrganization" po ON p."id" = po."projectId" 
+        AND po."deletedAt" IS NULL
+      JOIN "Organization" o ON po."organizationId" = o."id" 
+        AND o."deletedAt" IS NULL
+      JOIN "UserOrganization" uo ON o."id" = uo."organizationId" 
+        AND uo."userId" = ${userId}
+        AND uo."deletedAt" IS NULL
+      LEFT JOIN "ProjectFunding" pf ON p."id" = pf."projectId"
+      LEFT JOIN "ProjectSnapshot" ps ON p."id" = ps."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId"
+      LEFT JOIN "ProjectLinks" pl ON p."id" = pl."projectId"
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      WHERE p."deletedAt" IS NULL
+      GROUP BY p."id", o."id", o."name"
+    ),
+    "org_projects_grouped" AS (
+      SELECT 
+        "organization_id",
+        "organization_name",
+        jsonb_agg(
+          jsonb_build_object(
+            'project',  to_jsonb(op.*)
+          )
+        ) as projects
+      FROM "org_projects" op
+      GROUP BY "organization_id", "organization_name"
+    )
+    SELECT jsonb_build_object(
+      'projects', COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'project', to_jsonb(up.*)
+          )
+        )
+        FROM "user_projects" up),
+        '[]'::jsonb
+      ),
+      'organizations', COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'organization', to_jsonb(og.*)
+          )
+        )
+        FROM "org_projects_grouped" og),
+        '[]'::jsonb
+      )
+    ) as result;
+  `
+
+  // Transform the raw result to match the expected structure
+  const transformed = result[0]?.result || { projects: [], organizations: [] }
+
+  // Ensure null arrays are converted to empty arrays
+  transformed.projects = transformed.projects || []
+  transformed.organizations = transformed.organizations || []
+
+  return transformed
 }
 
 export const getAllPublishedUserProjects = cache(getAllPublishedUserProjectsFn)
+
+async function getProjectFn({
+  id,
+}: {
+  id: string
+}): Promise<ProjectWithFullDetails | null> {
+  const result = await prisma.$queryRaw<{ result: ProjectWithFullDetails }[]>`
+    WITH impact_statements AS (
+      SELECT 
+        cat."id" as category_id,
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(imp.*)), '[]'::jsonb) as statements
+      FROM "Category" cat
+      LEFT JOIN "ImpactStatement" imp ON cat."id" = imp."categoryId"
+      GROUP BY cat."id"
+    ),
+    project_data AS (
+      SELECT 
+        p.*,
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
+          'user', to_jsonb(u.*)
+        )) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
+        COALESCE(jsonb_agg(to_jsonb(s.*) ORDER BY s."createdAt" ASC) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*) || jsonb_build_object(
+          'category', to_jsonb(cat.*) || jsonb_build_object(
+            'impactStatements', ist.statements
+          ),
+          'impactStatementAnswer', to_jsonb(isa.*),
+          'round', to_jsonb(rnd.*)
+        )) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(fr.*) || jsonb_build_object(
+          'claim', to_jsonb(rc.*)
+        )) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
+        CASE 
+          WHEN po."id" IS NOT NULL THEN jsonb_build_object(
+            'organization', jsonb_build_object(
+              'id', o."id",
+              'name', o."name",
+              'team', COALESCE(jsonb_agg(DISTINCT to_jsonb(ot.*) || jsonb_build_object(
+                'user', to_jsonb(ou.*)
+              )) FILTER (WHERE ot."id" IS NOT NULL AND ot."deletedAt" IS NULL), '[]'::jsonb)
+            )
+          )
+          ELSE NULL
+        END as "organization"
+      FROM "Project" p
+      LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
+      LEFT JOIN "User" u ON t."userId" = u."id"
+      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
+      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
+      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
+      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
+      LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
+      LEFT JOIN "Application" a ON p."id" = a."projectId"
+      LEFT JOIN "Category" cat ON a."categoryId" = cat."id"
+      LEFT JOIN impact_statements ist ON cat."id" = ist.category_id
+      LEFT JOIN "ImpactStatementAnswer" isa ON a."id" = isa."applicationId"
+      LEFT JOIN "FundingRound" rnd ON a."roundId" = rnd."id"
+      LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
+      LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      LEFT JOIN "ProjectOrganization" po ON p."id" = po."projectId" AND po."deletedAt" IS NULL
+      LEFT JOIN "Organization" o ON po."organizationId" = o."id" AND o."deletedAt" IS NULL
+      LEFT JOIN "UserOrganization" ot ON o."id" = ot."organizationId"
+      LEFT JOIN "User" ou ON ot."userId" = ou."id"
+      WHERE p."id" = ${id}
+      GROUP BY p."id", po."id", o."id", o."name"
+    )
+    SELECT to_jsonb(pd.*) as result
+    FROM project_data pd;
+  `
+
+  return result[0]?.result
+}
+
+export const getProject = cache(getProjectFn)
+
+async function getProjectTeamFn({
+  id,
+}: {
+  id: string
+}): Promise<ProjectWithTeam | null> {
+  const result = await prisma.$queryRaw<{ result: ProjectWithTeam }[]>`
+    WITH project_data AS (
+      SELECT 
+        p.*,
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*)) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team"
+      FROM "Project" p
+      LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
+      WHERE p."id" = ${id}
+      GROUP BY p."id"
+    )
+    SELECT to_jsonb(pd.*) as result
+    FROM project_data pd;
+  `
+
+  return result[0]?.result
+}
+
+export const getProjectTeam = cache(getProjectTeamFn)
+
+async function getProjectContractsFn({
+  projectId,
+  deployerAddress,
+}: {
+  projectId: string
+  deployerAddress: string
+}): Promise<ProjectContractWithProject[]> {
+  const result = await prisma.$queryRaw<
+    { result: ProjectContractWithProject[] }[]
+  >`
+    WITH contract_data AS (
+      SELECT 
+        c.*,
+        to_jsonb(p.*) as "project"
+      FROM "ProjectContract" c
+      LEFT JOIN "Project" p ON c."projectId" = p."id"
+      WHERE c."projectId" = ${projectId}
+        AND c."deployerAddress" = ${deployerAddress}
+    )
+    SELECT jsonb_build_object(
+      'result', COALESCE(jsonb_agg(to_jsonb(cd.*)), '[]'::jsonb)
+    ) as result
+    FROM contract_data cd;
+  `
+
+  return result[0]?.result || []
+}
+
+export const getProjectContracts = cache(getProjectContractsFn)
+
+async function getUserApplicationsFn({
+  userId,
+  roundId,
+}: {
+  userId: string
+  roundId?: string
+}): Promise<ApplicationWithDetails[]> {
+  const result = await prisma.$queryRaw<{ result: ApplicationWithDetails[] }[]>`
+    WITH user_applications AS (
+      SELECT DISTINCT
+        a.*,
+        to_jsonb(p.*) as "project",
+        to_jsonb(fr.*) as "round",
+        COALESCE(
+          jsonb_agg(
+            DISTINCT to_jsonb(isa.*) || jsonb_build_object(
+              'impactStatement', to_jsonb(ist.*)
+            )
+          ) FILTER (WHERE isa."id" IS NOT NULL),
+          '[]'::jsonb
+        ) as "impactStatementAnswer",
+        a."projectDescriptionOptions"
+      FROM "User" u
+      LEFT JOIN "UserProjects" up ON u."id" = up."userId" AND up."deletedAt" IS NULL
+      LEFT JOIN "Project" p1 ON up."projectId" = p1."id" AND p1."deletedAt" IS NULL
+      LEFT JOIN "Application" a1 ON p1."id" = a1."projectId"
+      LEFT JOIN "UserOrganization" uo ON u."id" = uo."userId" AND uo."deletedAt" IS NULL
+      LEFT JOIN "Organization" o ON uo."organizationId" = o."id" AND o."deletedAt" IS NULL
+      LEFT JOIN "ProjectOrganization" po ON o."id" = po."organizationId" AND po."deletedAt" IS NULL
+      LEFT JOIN "Project" p2 ON po."projectId" = p2."id" AND p2."deletedAt" IS NULL
+      LEFT JOIN "Application" a2 ON p2."id" = a2."projectId"
+      LEFT JOIN "Project" p ON COALESCE(a1."projectId", a2."projectId") = p."id"
+      LEFT JOIN "Application" a ON COALESCE(a1."id", a2."id") = a."id"
+      LEFT JOIN "FundingRound" fr ON a."roundId" = fr."id"
+      LEFT JOIN "ImpactStatementAnswer" isa ON a."id" = isa."applicationId"
+      LEFT JOIN "ImpactStatement" ist ON isa."impactStatementId" = ist."id"
+      WHERE u."id" = ${userId}
+        AND a."id" IS NOT NULL
+      ${roundId ? Prisma.sql`AND a."roundId" = ${roundId}` : Prisma.empty}
+      GROUP BY a.id, p.id, fr.id
+    )
+    SELECT COALESCE(
+      jsonb_agg(
+        to_jsonb(ua.*)
+        ORDER BY ua."createdAt" DESC
+      ),
+      '[]'::jsonb
+    ) as result
+    FROM user_applications ua;
+  `
+
+  return result[0]?.result || []
+}
+
+export const getUserApplications = cache(getUserApplicationsFn)
 
 export type CreateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
@@ -420,70 +740,6 @@ export async function deleteProject({ id }: { id: string }) {
     },
   })
 }
-
-async function getProjectFn({ id }: { id: string }) {
-  return prisma.project.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      team: { where: { deletedAt: null }, include: { user: true } },
-      organization: {
-        where: { deletedAt: null, organization: { deletedAt: null } },
-        include: {
-          organization: {
-            include: {
-              team: {
-                where: { deletedAt: null },
-                include: { user: true },
-              },
-            },
-          },
-        },
-      },
-      repos: true,
-      contracts: true,
-      links: true,
-      funding: true,
-      snapshots: {
-        orderBy: {
-          createdAt: "asc",
-        },
-      },
-      applications: {
-        include: {
-          category: {
-            include: {
-              impactStatements: true,
-            },
-          },
-          impactStatementAnswer: true,
-          round: true,
-        },
-      },
-      rewards: { include: { claim: true } },
-    },
-  })
-}
-
-export const getProject = cache(getProjectFn)
-
-async function getProjectTeamFn({ id }: { id: string }) {
-  return prisma.project.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      team: {
-        where: {
-          deletedAt: null,
-        },
-      },
-    },
-  })
-}
-
-export const getProjectTeam = cache(getProjectTeamFn)
 
 export async function addTeamMembers({
   projectId,
@@ -698,26 +954,6 @@ export async function removeProjectContract({
 
   return prisma.$transaction([contractDelete, projectUpdate])
 }
-
-async function getProjectContractsFn({
-  projectId,
-  deployerAddress,
-}: {
-  projectId: string
-  deployerAddress: string
-}) {
-  return prisma.projectContract.findMany({
-    where: {
-      projectId,
-      deployerAddress,
-    },
-    include: {
-      project: true,
-    },
-  })
-}
-
-export const getProjectContracts = cache(getProjectContractsFn)
 
 export async function addProjectRepository({
   projectId,
@@ -994,105 +1230,6 @@ export async function createApplication({
     },
   })
 }
-
-async function getUserApplicationsFn({
-  userId,
-  roundId,
-}: {
-  userId: string
-  roundId?: string
-}): Promise<ApplicationWithDetails[]> {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    select: {
-      projects: {
-        where: {
-          project: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          project: {
-            include: {
-              applications: {
-                include: {
-                  impactStatementAnswer: {
-                    include: {
-                      impactStatement: true,
-                    },
-                  },
-                  project: true,
-                  round: true,
-                },
-                where: {
-                  roundId,
-                },
-                orderBy: {
-                  createdAt: "desc",
-                },
-              },
-            },
-          },
-        },
-      },
-      organizations: {
-        where: {
-          organization: {
-            deletedAt: null,
-          },
-        },
-        include: {
-          organization: {
-            include: {
-              projects: {
-                where: {
-                  project: {
-                    deletedAt: null,
-                  },
-                },
-                include: {
-                  project: {
-                    include: {
-                      applications: {
-                        include: {
-                          impactStatementAnswer: true,
-                          project: true,
-                          round: true,
-                        },
-                        where: {
-                          roundId,
-                        },
-                        orderBy: {
-                          createdAt: "desc",
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
-
-  // merge organization applications with user applications
-  if (!user) return []
-
-  const applications = [
-    ...user.projects.flatMap((p) => p.project.applications),
-    ...user.organizations.flatMap((o) =>
-      o.organization.projects.flatMap((p) => p.project.applications),
-    ),
-  ]
-
-  return applications
-}
-
-export const getUserApplications = cache(getUserApplicationsFn)
 
 export async function updateAllForProject(
   project: ProjectMetadata,
