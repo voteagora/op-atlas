@@ -1,6 +1,12 @@
 "use client"
 
-import { AlignJustify, ArrowUpRight, ChevronUp, X } from "lucide-react"
+import {
+  AlignJustify,
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp,
+  X,
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams, usePathname } from "next/navigation"
@@ -36,7 +42,7 @@ const dropdownList = [
   },
   {
     title: "Retro Funding",
-    href: "https://atlas.optimism.io/rounds",
+    href: "https://atlas.optimism.io/missions",
   },
   {
     title: "Forum",
@@ -51,8 +57,10 @@ const dropdownList = [
 const Navbar = () => {
   const pathname = usePathname()
   const params = useParams()
-  const isRounds = pathname === "/" || pathname === "/rounds"
+  const isRounds = pathname === "/" || pathname === "/missions"
   const isProjects = pathname.includes("/round/")
+
+  const isMissions = pathname.includes("/missions")
 
   const [showMobileNav, setShowMobileNav] = useState(false)
 
@@ -60,12 +68,12 @@ const Navbar = () => {
     <>
       <nav
         className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-20 ${
-          params.id ? "" : "shadow-sm"
+          params.id || isMissions ? "" : "shadow-sm"
         }`}
       >
         <div
           className={`flex items-center justify-between h-full w-full mx-auto ${
-            params.id ? "bg-background" : ""
+            params.id || isMissions ? "bg-background" : ""
           }`}
         >
           <div className="flex h-full">
@@ -105,7 +113,7 @@ const Navbar = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            {params.id === undefined ? (
+            {params.id === undefined || isMissions ? (
               <div className="flex gap-12">
                 <div
                   className={cn(
@@ -120,9 +128,9 @@ const Navbar = () => {
                       className={`${
                         isRounds ? "mt-1" : "group-hover:mt-1"
                       } focus:outline-none focus:opacity-80`}
-                      href="/rounds"
+                      href="/missions"
                     >
-                      Retro Rounds
+                      Retro Missions
                     </Link>
                   </div>
                 </div>
@@ -150,7 +158,7 @@ const Navbar = () => {
                     <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
                       <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
                         <div>More</div>
-                        <ChevronUp size={12} />
+                        <ChevronDown size={12} />
                       </div>
                     </div>
                   </DropdownMenuTrigger>

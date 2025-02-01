@@ -27,10 +27,14 @@ const config = {
       spacing: {
         "18": "4.5rem",
       },
+      width: {
+        body: "712px",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        info: "#0E4CAF",
         background: "hsl(var(--background))",
         backgroundaccent: "hsl(var(--background-accent))",
         backgroundSecondary: "hsl(var(--background-secondary))",

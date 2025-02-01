@@ -4,28 +4,28 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useMemo } from "react"
-import { optimism } from "viem/chains"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { FundingRound } from "@/lib/mocks"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
+import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
 import { cn, titlecase } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
-import ExternalLink from "../ExternalLink"
 import { Badge } from "../ui/badge"
+import { FundingRoundOngoing } from "./FundingRoundOngoing"
+import { FundingRoundPast } from "./FundingRoundPast"
 
 export const FundingRounds = ({
   className,
   fundingRounds,
 }: {
   className?: string
-  fundingRounds: FundingRound[]
+  fundingRounds: FundingRoundData[]
 }) => {
   const { open, upcoming, past, ongoing } = useMemo(() => {
-    const n: FundingRound[] = []
-    const u: FundingRound[] = []
-    const p: FundingRound[] = []
-    const o: FundingRound[] = []
+    const n: FundingRoundData[] = []
+    const u: FundingRoundData[] = []
+    const p: FundingRoundData[] = []
+    const o: FundingRoundData[] = []
 
     fundingRounds.forEach((round) => {
       switch (round.status) {
@@ -49,7 +49,7 @@ export const FundingRounds = ({
 
   const renderSection = (
     status: "open" | "upcoming" | "past" | "ongoing",
-    rounds: FundingRound[],
+    rounds: FundingRoundData[],
   ) => {
     return (
       <div className="flex flex-col gap-y-4">
@@ -58,19 +58,26 @@ export const FundingRounds = ({
             {status === "open" ? "Open for applications" : titlecase(status)}
           </h3>
         </div>
-        {rounds.map((fundingRound) => (
-          <Round key={fundingRound.number} fundingRound={fundingRound} />
-        ))}
+
+        <div
+          className={`flex gap-4 ${
+            status === "ongoing" ? "flex flex-wrap" : "flex-col"
+          }`}
+        >
+          {rounds.map((fundingRound) => (
+            <Round key={fundingRound.number} fundingRound={fundingRound} />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
     <div className={cn("flex flex-col gap-y-12 w-full", className)}>
-      {open.length > 0 && renderSection("open", open)}
-      {upcoming.length > 0 && renderSection("upcoming", upcoming)}
       {ongoing.length > 0 && renderSection("ongoing", ongoing)}
       {past.length > 0 && renderSection("past", past)}
+      {open.length > 0 && renderSection("open", open)}
+      {upcoming.length > 0 && renderSection("upcoming", upcoming)}
     </div>
   )
 }
@@ -80,56 +87,60 @@ const Round = ({
   fundingRound,
 }: {
   className?: string
-  fundingRound: FundingRound
+  fundingRound: FundingRoundData
 }) => {
   const router = useRouter()
-  const { status } = useSession()
-  const { setOpenDialog } = useAppDialogs()
 
-  const onClick = () => {
-    if (fundingRound.status === "open") {
-      if (status === "authenticated") {
-        router.push("/dashboard")
-      } else {
-        setOpenDialog("get_started")
-      }
-      return
+  const { data: applications } = useUserApplications()
+
+  let SelectedContent: React.ReactNode
+
+  if (fundingRound.status === "past") {
+    SelectedContent = <FundingRoundPast fundingRound={fundingRound} />
+  } else if (fundingRound.status === "ongoing") {
+    let userApplicationState: "Open" | "Active" | "Coming Soon" = "Open"
+
+    console.log(fundingRound.startsAt)
+    console.log(new Date())
+
+    if (fundingRound.startsAt && new Date() < fundingRound.startsAt) {
+      userApplicationState = "Coming Soon"
+    } else if (applications) {
+      userApplicationState =
+        applications.filter(
+          (app) => app.roundId === fundingRound.number.toString(),
+        ).length > 0
+          ? "Active"
+          : "Open"
     }
-
-    fundingRound.link && router.push(fundingRound.link)
-  }
-
-  if (fundingRound.status === "open") {
-    return (
-      <div className={cn("flex gap-x-6 border rounded-xl p-10", className)}>
-        <FundingRoundContent fundingRound={fundingRound} />
-      </div>
+    SelectedContent = (
+      <FundingRoundOngoing
+        fundingRound={fundingRound as MissionData}
+        userApplicationState={userApplicationState}
+      />
     )
+  } else {
+    SelectedContent = <FundingRoundContent fundingRound={fundingRound} />
   }
 
-  if (!fundingRound.link) {
-    return (
-      <div className={cn("flex gap-x-6 border rounded-xl p-10", className)}>
-        <FundingRoundContent fundingRound={fundingRound} />
-      </div>
-    )
-  }
-
-  return (
-    <ExternalLink
-      href={fundingRound.link}
-      className={cn("flex gap-x-6 border rounded-xl p-10", className)}
-    >
-      <FundingRoundContent fundingRound={fundingRound} />
-    </ExternalLink>
+  const content = (
+    <div className={cn(`flex flex-1 gap-x-1 border rounded-xl`, className)}>
+      {SelectedContent}
+    </div>
   )
+
+  return content
 }
 
-function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
+function FundingRoundContent({
+  fundingRound,
+}: {
+  fundingRound: FundingRoundData
+}) {
   const router = useRouter()
   const { status } = useSession()
   return (
-    <>
+    <div className="p-10">
       {fundingRound.status !== "past" && fundingRound.iconUrl && (
         <Image
           src={fundingRound.iconUrl}
@@ -176,7 +187,8 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
                     </span>
                   ) : (
                     <span className="font-normal text-secondary-foreground">
-                      {format(fundingRound.startsAt, "MMM yyyy")}
+                      {fundingRound.startsAt &&
+                        format(fundingRound.startsAt, "MMM yyyy")}
                     </span>
                   )}
                 </p>
@@ -239,6 +251,6 @@ function FundingRoundContent({ fundingRound }: { fundingRound: FundingRound }) {
           </div>
         )}
       </div>
-    </>
+    </div>
   )
 }

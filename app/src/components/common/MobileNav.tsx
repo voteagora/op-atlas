@@ -13,7 +13,11 @@ import { menuList } from "./Navbar"
 export function MobileNav({ onClose }: { onClose: () => void }) {
   return (
     <div className="absolute z-50 bg-white top-18 w-full h-[calc(100vh-72px)] py-6 px-8 flex flex-col gap-6">
-      <Link className="text-2xl font-semibold" href="/rounds" onClick={onClose}>
+      <Link
+        className="text-2xl font-semibold"
+        href="/missions"
+        onClick={onClose}
+      >
         Rounds
       </Link>
       <Link

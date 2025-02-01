@@ -66,16 +66,21 @@ export const createProjectSnapshot = async (projectId: string) => {
     })
 
     // If the project has an application, we need to publish a new one to reference this snapshot.
-    const application = project.applications.sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    )[0]
+
+    const application = project.applications.sort((a, b) => {
+      console.log(b.createdAt)
+      console.log(a.createdAt)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })[0]
+
+    console.log(application)
 
     if (application && !APPLICATIONS_CLOSED) {
       await publishAndSaveApplication({
         project: {
           projectId: project.id,
           categoryId: application.categoryId ?? "",
-          impactStatement: application.impactStatementAnswer.reduce(
+          impactStatement: application.impactStatementAnswer?.reduce(
             (acc, { impactStatementId, answer }) => {
               acc[impactStatementId] = answer
               return acc

@@ -38,39 +38,17 @@ function MetadataPublishedConfirmationDialog({
             </DialogTitle>
             <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">
               Adding a project is the first step. To receive Retro Funding, you
-              must also submit an application with each round.
+              must also submit an application with each mission.
             </DialogDescription>
           </div>
         </DialogHeader>
 
         <DialogFooter className="w-full sm:flex-col gap-2">
-          {APPLICATIONS_CLOSED ? (
-            <Link href="/rounds">
-              <Button className="w-full" type="button" variant="destructive">
-                View rounds
-              </Button>
-            </Link>
-          ) : (
-            <Link
-              href="/application/6"
-              className={cn(
-                "flex items-center rounded-xl p-6 w-full",
-                "bg-accent text-accent-foreground",
-              )}
-            >
-              <Image
-                alt="Info"
-                src="/assets/icons/sunny-callout.png"
-                width={48}
-                height={48}
-              />
-              <div className="ml-4 mr-5 flex-1">
-                <p className="text-base font-semibold">Round 6: Governance</p>
-                <div className="text-base font-normal">Apply by Oct 14th</div>
-              </div>
-              <ArrowRight size={20} />
-            </Link>
-          )}
+          <Link href="/missions">
+            <Button className="w-full" type="button" variant="destructive">
+              View Reto Funding Missions
+            </Button>
+          </Link>
 
           <Button
             onClick={() => onOpenChange(false)}
