@@ -14,4 +14,15 @@ export type Attestation = {
   subtext: string;
 };
 
+export type AggregatedType = {
+  badgeholder: { address: string; email?: string }[];
+  citizen: { address: string; email?: string }[];
+  gov_contribution: { address: string; email?: string }[];
+  rf_voter: { address: string; email?: string }[];
+  contributors: { address: string; email?: string }[];
+  community_contributors: { address: string; email?: string }[];
+  onchain_builders: { address: string; email?: string }[];
+  github_repo_builders: { address: string; email?: string }[];
+};
+
 export type Entity = keyof typeof dbSchema;

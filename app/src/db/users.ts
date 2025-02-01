@@ -7,6 +7,8 @@ import {
   UserEmail,
   UserInteraction,
 } from "@prisma/client"
+import { CONTRIBUTOR_ELIGIBLE_ADDRESSES } from "eas-indexer/src/constants"
+import { AggregatedType } from "eas-indexer/src/types"
 
 import { UserAddressSource } from "@/lib/types"
 
@@ -276,4 +278,311 @@ export async function updateUserInteraction(
     },
     create: { ...data, userId },
   })
+}
+
+async function getAllCitizens(records: AggregatedType["citizen"]) {
+  return prisma.userAddress.findMany({
+    where: {
+      AND: [
+        {
+          address: {
+            in: records.map((record) => record.address),
+          },
+        },
+      ],
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+async function getAllBadgeholders() {
+  return []
+}
+
+async function getAllGovContributors(
+  records: AggregatedType["gov_contribution"],
+) {
+  return prisma.userAddress.findMany({
+    where: {
+      AND: [
+        {
+          address: {
+            in: records.map((record) => record.address),
+          },
+        },
+      ],
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+async function getAllRFVoters(records: AggregatedType["rf_voter"]) {
+  return prisma.userAddress.findMany({
+    where: {
+      address: {
+        in: records.map((record) => record.address),
+      },
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+async function getAllContributors(records: AggregatedType["contributors"]) {
+  return prisma.project.findMany({
+    where: {
+      id: {
+        in: CONTRIBUTOR_ELIGIBLE_ADDRESSES,
+      },
+    },
+    select: {
+      team: {
+        select: {
+          user: {
+            select: {
+              addresses: {
+                select: {
+                  address: true,
+                },
+              },
+              emails: {
+                select: {
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+async function getAllOnchainBuilders() {
+  return prisma.user.findMany({
+    where: {
+      OR: [
+        {
+          projects: {
+            some: {
+              project: {
+                contracts: {
+                  some: {
+                    verificationProof: {
+                      not: {
+                        equals: "",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          organizations: {
+            some: {
+              organization: {
+                projects: {
+                  some: {
+                    project: {
+                      contracts: {
+                        some: {
+                          verificationProof: {
+                            not: {
+                              equals: "",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    select: {
+      addresses: {
+        select: {
+          address: true,
+        },
+      },
+      emails: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  })
+}
+async function getAllGithubRepoBuiulders() {
+  return prisma.user.findMany({
+    where: {
+      OR: [
+        {
+          projects: {
+            some: {
+              project: {
+                repos: {
+                  some: {
+                    verified: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          organizations: {
+            some: {
+              organization: {
+                projects: {
+                  some: {
+                    project: {
+                      repos: {
+                        some: {
+                          verified: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    select: {
+      addresses: {
+        select: {
+          address: true,
+        },
+      },
+      emails: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  })
+}
+async function getAllCommunityContributors(addresses: string[]) {
+  return prisma.userAddress.findMany({
+    where: {
+      address: {
+        in: addresses,
+      },
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function getAggregatedRecords(records: AggregatedType) {
+  const [
+    citizen,
+    badgeholder,
+    gov_contribution,
+    rf_voter,
+    contributors,
+    onchain_builders,
+    github_repo_builders,
+    community_contributors,
+  ] = await Promise.all([
+    getAllCitizens(records.citizen),
+    getAllBadgeholders(),
+    getAllGovContributors(records.gov_contribution),
+    getAllRFVoters(records.rf_voter),
+    getAllContributors(records.contributors),
+    getAllOnchainBuilders(),
+    getAllGithubRepoBuiulders(),
+    getAllCommunityContributors(
+      records.community_contributors.map((c) => c.address),
+    ),
+  ])
+
+  const result = {
+    citizen: citizen?.map((c) => ({
+      address: c.address,
+      email: c.user.emails.at(-1)?.email ?? "",
+    })),
+    badgeholder,
+    gov_contribution: gov_contribution?.map((gc) => ({
+      address: gc.address,
+      email: gc.user.emails.at(-1)?.email ?? "",
+    })),
+    rf_voter: rf_voter?.map((rv) => ({
+      address: rv.address,
+      email: rv.user.emails.at(-1)?.email ?? "",
+    })),
+    contributors:
+      contributors?.flatMap((c) =>
+        c.team?.map((t) => ({
+          address: t.user.addresses.at(-1)?.address ?? "",
+          email: t.user.emails.at(-1)?.email ?? "",
+        })),
+      ) ?? [],
+    onchain_builders:
+      onchain_builders?.map((ob) => ({
+        address: ob.addresses.at(-1)?.address ?? "",
+        email: ob.emails.at(-1)?.email ?? "",
+      })) ?? [],
+    github_repo_builders:
+      github_repo_builders?.map((grb) => ({
+        address: grb.addresses.at(-1)?.address ?? "",
+        email: grb.emails.at(-1)?.email ?? "",
+      })) ?? [],
+    community_contributors: community_contributors?.map((cc) => ({
+      address: cc.address,
+      email: cc.user.emails.at(-1)?.email ?? "",
+    })),
+  }
+
+  return result
 }
