@@ -307,27 +307,7 @@ async function getAllCitizens(records: AggregatedType["citizen"]) {
 }
 
 async function getAllBadgeholders() {
-  return prisma.userAddress.findMany({
-    where: {
-      NOT: {
-        tags: {
-          has: "badgeholder",
-        },
-      },
-    },
-    select: {
-      address: true,
-      user: {
-        select: {
-          emails: {
-            select: {
-              email: true,
-            },
-          },
-        },
-      },
-    },
-  })
+  return []
 }
 
 async function getAllGovContributors(
@@ -361,13 +341,9 @@ async function getAllGovContributors(
 async function getAllRFVoters(records: AggregatedType["rf_voter"]) {
   return prisma.userAddress.findMany({
     where: {
-      AND: [
-        {
-          address: {
-            in: records.map((record) => record.address),
-          },
-        },
-      ],
+      address: {
+        in: records.map((record) => record.address),
+      },
     },
     select: {
       address: true,
@@ -571,41 +547,38 @@ export async function getAggregatedRecords(records: AggregatedType) {
     ),
   ])
 
-  const result: Partial<AggregatedType> = {
-    citizen: citizen.map((c) => ({
+  const result = {
+    citizen: citizen?.map((c) => ({
       address: c.address,
       email: c.user.emails.at(-1)?.email ?? "",
     })),
-    badgeholder: badgeholder.map((b) => ({
-      address: b.address,
-      email: b.user.emails.at(-1)?.email ?? "",
-    })),
-    gov_contribution: gov_contribution.map((gc) => ({
+    badgeholder,
+    gov_contribution: gov_contribution?.map((gc) => ({
       address: gc.address,
       email: gc.user.emails.at(-1)?.email ?? "",
     })),
-    rf_voter: rf_voter.map((rv) => ({
+    rf_voter: rf_voter?.map((rv) => ({
       address: rv.address,
       email: rv.user.emails.at(-1)?.email ?? "",
     })),
     contributors:
-      contributors.flatMap((c) =>
-        c.team.map((t) => ({
+      contributors?.flatMap((c) =>
+        c.team?.map((t) => ({
           address: t.user.addresses.at(-1)?.address ?? "",
           email: t.user.emails.at(-1)?.email ?? "",
         })),
       ) ?? [],
     onchain_builders:
-      onchain_builders.map((ob) => ({
+      onchain_builders?.map((ob) => ({
         address: ob.addresses.at(-1)?.address ?? "",
         email: ob.emails.at(-1)?.email ?? "",
       })) ?? [],
     github_repo_builders:
-      github_repo_builders.map((grb) => ({
+      github_repo_builders?.map((grb) => ({
         address: grb.addresses.at(-1)?.address ?? "",
         email: grb.emails.at(-1)?.email ?? "",
       })) ?? [],
-    community_contributors: community_contributors.map((cc) => ({
+    community_contributors: community_contributors?.map((cc) => ({
       address: cc.address,
       email: cc.user.emails.at(-1)?.email ?? "",
     })),

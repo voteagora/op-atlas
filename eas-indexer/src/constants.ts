@@ -1,3 +1,16 @@
+import { AggregatedType } from "./types";
+
+export const TAG_BY_ENTITY: Record<keyof AggregatedType, string> = {
+  citizen: "Citizen",
+  contributors: "Contributor",
+  community_contributors: "Community Contributor",
+  onchain_builders: "Onchain Builder",
+  github_repo_builders: "Github Repo",
+  badgeholder: "Badgeholder",
+  gov_contribution: "S7 Elected Official",
+  rf_voter: "Guest Voter",
+};
+
 export const COMMUNITY_CONTRIBUTORS_ATTEST_ADDRESS =
   "0xc975707485575a611b1aaf9cf9aada04a066b690e40aec7eb5cb17e22336d703";
 
