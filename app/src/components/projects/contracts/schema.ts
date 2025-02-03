@@ -29,6 +29,7 @@ export const Chain = z.enum([
   optimism.id.toString(),
   race.id.toString(),
   shape.id.toString(),
+  soneium.id.toString(),
   superseed.id.toString(),
   swan.id.toString(),
   swell.id.toString(),

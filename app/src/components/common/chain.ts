@@ -62,7 +62,7 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
       name: "Shape",
     },
     [soneium.id.toString()]: {
-      logo: "/assets/chain-logos/soneium.png",
+      logo: "/assets/chain-logos/soneium.jpg",
       name: "Soneium",
     },
     [superseed.id.toString()]: {
