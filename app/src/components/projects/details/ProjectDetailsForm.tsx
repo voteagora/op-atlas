@@ -5,7 +5,7 @@ import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -99,6 +99,13 @@ export default function ProjectDetailsForm({
   const router = useRouter()
   const { track } = useAnalytics()
 
+  const searchParams = useSearchParams()
+  const orgId = searchParams.get("orgId") // Extract orgId from query parameters
+
+  const selectedOrg = organizations.find((org) => {
+    return org.id === orgId
+  })
+
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -107,11 +114,11 @@ export default function ProjectDetailsForm({
     defaultValues: {
       name: project?.name ?? "",
       description: project?.description ?? "",
-      organization: project?.organization?.organization
+      organization: selectedOrg
         ? {
-            name: project?.organization?.organization.name,
-            id: project?.organization?.organization.id,
-            avatarUrl: project?.organization?.organization.avatarUrl,
+            name: selectedOrg.name,
+            id: selectedOrg.id,
+            avatarUrl: selectedOrg.avatarUrl,
           }
         : null,
       category: project?.category
@@ -334,76 +341,80 @@ export default function ProjectDetailsForm({
           <FormField
             control={form.control}
             name="organization"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Organization<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <div className="h-10 py-2.5 px-3 flex text-foreground items-center rounded-lg border border-input mt-2 cursor-pointer">
-                      {field.value?.avatarUrl && (
-                        <Avatar className="w-5 h-5 mr-2">
-                          <AvatarImage
-                            src={field.value?.avatarUrl ?? ""}
-                            alt="avatar"
-                          />
-                          <AvatarFallback>{field.value?.name}</AvatarFallback>
-                        </Avatar>
-                      )}
-                      <p className="text-sm text-foreground">
-                        {field.value?.name ?? "No Organization"}
-                      </p>
-                      <Image
-                        className="ml-auto"
-                        src="/assets/icons/arrowDownIcon.svg"
-                        height={8}
-                        width={10}
-                        alt="Arrow up"
-                      />
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="!w-[750px]">
-                    {organizations?.map((organization) => (
+            render={({ field }) => {
+              console.log(field)
+              return (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Organization
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="h-10 py-2.5 px-3 flex text-foreground items-center rounded-lg border border-input mt-2 cursor-pointer">
+                        {field.value?.avatarUrl && (
+                          <Avatar className="w-5 h-5 mr-2">
+                            <AvatarImage
+                              src={field.value?.avatarUrl ?? ""}
+                              alt="avatar"
+                            />
+                            <AvatarFallback>{field.value?.name}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <p className="text-sm text-foreground">
+                          {field.value?.name ?? "No Organization"}
+                        </p>
+                        <Image
+                          className="ml-auto"
+                          src="/assets/icons/arrowDownIcon.svg"
+                          height={8}
+                          width={10}
+                          alt="Arrow up"
+                        />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="!w-[750px]">
+                      {organizations?.map((organization) => (
+                        <DropdownMenuCheckboxItem
+                          className="text-sm font-normal text-secondary-foreground w-full"
+                          checked={field.value?.id === organization.id}
+                          key={organization.id}
+                          onCheckedChange={() => {
+                            field.onChange(organization)
+                          }}
+                        >
+                          <Avatar className="w-5 h-5 mr-2">
+                            <AvatarImage
+                              src={organization.avatarUrl || ""}
+                              alt="avatar"
+                            />
+                            <AvatarFallback>{organization.name}</AvatarFallback>
+                          </Avatar>
+                          {organization.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+
                       <DropdownMenuCheckboxItem
                         className="text-sm font-normal text-secondary-foreground w-full"
-                        checked={field.value?.id === organization.id}
-                        key={organization.id}
+                        checked={field.value === null}
                         onCheckedChange={() => {
-                          field.onChange(organization)
+                          field.onChange(null)
                         }}
                       >
-                        <Avatar className="w-5 h-5 mr-2">
-                          <AvatarImage
-                            src={organization.avatarUrl || ""}
-                            alt="avatar"
-                          />
-                          <AvatarFallback>{organization.name}</AvatarFallback>
-                        </Avatar>
-                        {organization.name}
+                        No organization
                       </DropdownMenuCheckboxItem>
-                    ))}
-
-                    <DropdownMenuCheckboxItem
-                      className="text-sm font-normal text-secondary-foreground w-full"
-                      checked={field.value === null}
-                      onCheckedChange={() => {
-                        field.onChange(null)
-                      }}
-                    >
-                      No organization
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
-                      <Link href="/profile/organizations/new">
-                        Make an organization
-                      </Link>
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <FormMessage />
-              </FormItem>
-            )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
+                        <Link href="/profile/organizations/new">
+                          Make an organization
+                        </Link>
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <FormMessage />
+                </FormItem>
+              )
+            }}
           />
           <FormField
             control={form.control}
