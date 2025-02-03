@@ -35,7 +35,7 @@ export default function Header() {
           src={mission.iconUrl}
           width={1080}
           height={1080}
-          className="rounded-md w-full mb-5"
+          className="rounded-xl w-full mb-5"
           alt="Sunny blobs"
         />
       )}
