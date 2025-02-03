@@ -15,11 +15,11 @@ export const timeThis = async <T>(
     throw error
   } finally {
     const end = performance.now()
-    // console.log(
-    //   util.inspect(
-    //     { ...log_fields, time: end - start },
-    //     { showHidden: false, depth: null, colors: true },
-    //   ),
-    // )
+    console.log(
+      util.inspect(
+        { ...log_fields, time: end - start },
+        { showHidden: false, depth: null, colors: true },
+      ),
+    )
   }
 }
