@@ -100,6 +100,7 @@ export function MissionApplicationTabs({
       </TabsList>
       <div className="mt-12">
         <TabsContent value="details">
+          <p className="text-2xl font-bold mb-5">Choose projects</p>
           {projects.length > 0 ? (
             <>
               {projects.map((field, index) => (
