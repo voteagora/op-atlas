@@ -1,3 +1,4 @@
+import { polynomial } from "@/components/common/chain"
 import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import {
   base,
@@ -24,6 +25,7 @@ export enum Chain {
   MetalL2 = metalL2.id,
   Mode = mode.id,
   Optimism = optimism.id,
+  Polynomial = polynomial.id,
   Race = race.id,
   Shape = shape.id,
   Soneium = soneium.id,

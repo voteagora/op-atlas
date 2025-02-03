@@ -1,6 +1,7 @@
 import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import {
   base,
+  Chain,
   fraxtal,
   ink,
   lisk,
@@ -13,6 +14,10 @@ import {
   worldchain,
   zora,
 } from "viem/chains"
+
+export const polynomial = {
+  id: 8008,
+} as Chain
 
 export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
   {
@@ -51,6 +56,10 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [optimism.id.toString()]: {
       logo: "/assets/chain-logos/optimism.svg",
       name: "OP Mainnet",
+    },
+    [polynomial.id.toString()]: {
+      logo: "/assets/chain-logos/polynomial.png",
+      name: "Polynomial",
     },
     [race.id.toString()]: {
       logo: "/assets/chain-logos/race.jpeg",
