@@ -12,7 +12,6 @@ import {
   shape,
   soneium,
   superseed,
-  swan,
   worldchain,
   zora,
 } from "viem/chains"
@@ -61,7 +60,6 @@ const clients = {
   ),
   [Chain.Soneium]: createClient(soneium, "https://rpc.soneium.org/"),
   [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
-  [Chain.Swan]: createClient(swan, "https://mainnet-rpc.swanchain.org"),
   [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
   [Chain.Worldchain]: createClient(
     worldchain,

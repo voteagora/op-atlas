@@ -10,7 +10,6 @@ import {
   shape,
   soneium,
   superseed,
-  swan,
   worldchain,
   zora,
 } from "viem/chains"
@@ -68,10 +67,6 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [superseed.id.toString()]: {
       logo: "/assets/chain-logos/superseed.jpg",
       name: "Superseed",
-    },
-    [swan.id.toString()]: {
-      logo: "/assets/chain-logos/swan.png",
-      name: "Swan",
     },
     [swell.id.toString()]: {
       logo: "/assets/chain-logos/swell.svg",
