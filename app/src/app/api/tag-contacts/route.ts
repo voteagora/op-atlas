@@ -126,6 +126,10 @@ const removeTagsFromContacts = async () => {
   ])
   if (!flattenedUsers) return
 
+  flattenedUsers.forEach((user) => {
+    console.log(`  - ${user.email}; tags: ${user.tags.join(", ")};`)
+  })
+
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
   await mailchimp.lists
     .batchListMembers(LIST_ID!, {
@@ -135,6 +139,7 @@ const removeTagsFromContacts = async () => {
         email_type: "html",
         status: "transactional",
       })),
+      sync_tags: true,
       update_existing: true,
     })
     .then((results: any) => {
@@ -142,13 +147,13 @@ const removeTagsFromContacts = async () => {
         `[+] Mailchimp contacts untagged: ${results.updated_members.length}`,
       )
       results.updated_members.forEach((member: any) => {
-        console.log(
-          `  - ${member.email_address}; tags: ${
-            flattenedUsers.find((m) => {
-              return m.email === member.email_address
-            })?.tags
-          };`,
-        )
+        const memberTags = member.tags.map((t: any) => t.name).join(", ")
+        if (!memberTags.length) {
+          console.log(`  - ${member.email_address}; tags: []`)
+          return
+        }
+
+        console.log(`  - ${member.email_address}; tags: ${memberTags};`)
       })
     })
     .catch((error: any) => {
@@ -324,7 +329,6 @@ const removeTags_old = async (addresses: EntityObject[], tag: Entity) => {
   if (usersToUpdate.length === 0) return usersToUpdate
 
   const mergedUsersToUpdate = mergeResultsByEmail([usersToUpdate])
-  console.log(">>> mergedUsersToUpdate", mergedUsersToUpdate)
 
   await prisma.$transaction(
     mergedUsersToUpdate.map((user) => {
