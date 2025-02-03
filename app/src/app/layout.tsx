@@ -36,6 +36,25 @@ export const metadata: Metadata = {
       },
     ],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Atlas",
+    description: "",
+    images: [
+      {
+        url: "/og-twitter-large.png",
+        width: 1200,
+        height: 600,
+        alt: "Atlas",
+      },
+      {
+        url: "/og-twitter-small.png",
+        width: 400,
+        height: 400,
+        alt: "Atlas",
+      },
+    ],
+  },
 }
 
 export default function RootLayout({
