@@ -8,6 +8,7 @@ import {
   mode,
   optimism,
   shape,
+  soneium,
   superseed,
   swan,
   worldchain,
@@ -59,6 +60,10 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [shape.id.toString()]: {
       logo: "/assets/chain-logos/shape.png",
       name: "Shape",
+    },
+    [soneium.id.toString()]: {
+      logo: "/assets/chain-logos/soneium.png",
+      name: "Soneium",
     },
     [superseed.id.toString()]: {
       logo: "/assets/chain-logos/superseed.jpg",

@@ -9,6 +9,7 @@ import {
   mode,
   optimism,
   shape,
+  soneium,
   superseed,
   swan,
   worldchain,
