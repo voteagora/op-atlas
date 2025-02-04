@@ -180,49 +180,44 @@ const ApplicationFormTabs = ({
     .some((project) => project.selected)
 
   const submitApplication = async () => {
-    setIsLoading(true)
-
-    const filterProjects = form
-      .getValues()
-      .projects.filter((project) => project.selected)
-
-    const promise: Promise<Application> = new Promise(
-      async (resolve, reject) => {
-        try {
-          const result = await submitApplications(
-            filterProjects.map((project) => ({
-              categoryId: project.category,
-              projectId: project.projectId,
-              projectDescriptionOptions: project.projectDescriptionOptions,
-              impactStatement: project.impactStatement,
-            })),
-            round,
-            categories,
-          )
-
-          if (result.error !== null || result.applications.length === 0) {
-            throw new Error(result.error ?? "Error submitting application")
-          }
-
-          resolve(result.applications[0])
-        } catch (error) {
-          console.error("Error submitting application", error)
-          reject(error)
-        }
-      },
-    )
-
-    toast.promise(promise, {
-      loading: "Submitting application...",
-      success: (application) => {
-        onApplied(application as ApplicationWithDetails)
-        return "Application submitted"
-      },
-      error: (error) => {
-        setIsLoading(false)
-        return error.message
-      },
-    })
+    // setIsLoading(true)
+    // const filterProjects = form
+    //   .getValues()
+    //   .projects.filter((project) => project.selected)
+    // const promise: Promise<Application> = new Promise(
+    //   async (resolve, reject) => {
+    //     try {
+    //       const result = await submitApplications(
+    //         filterProjects.map((project) => ({
+    //           categoryId: project.category,
+    //           projectId: project.projectId,
+    //           projectDescriptionOptions: project.projectDescriptionOptions,
+    //           impactStatement: project.impactStatement,
+    //         })),
+    //         round,
+    //         categories,
+    //       )
+    //       if (result.error !== null || result.applications.length === 0) {
+    //         throw new Error(result.error ?? "Error submitting application")
+    //       }
+    //       resolve(result.applications[0])
+    //     } catch (error) {
+    //       console.error("Error submitting application", error)
+    //       reject(error)
+    //     }
+    //   },
+    // )
+    // toast.promise(promise, {
+    //   loading: "Submitting application...",
+    //   success: (application) => {
+    //     onApplied(application as ApplicationWithDetails)
+    //     return "Application submitted"
+    //   },
+    //   error: (error) => {
+    //     setIsLoading(false)
+    //     return error.message
+    //   },
+    // })
   }
 
   useEffect(() => {
