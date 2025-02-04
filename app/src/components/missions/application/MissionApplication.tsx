@@ -69,7 +69,9 @@ export function MissionApplication() {
               projectDescriptionOptions: project.projectDescriptionOptions,
               impactStatement: project.impactStatement,
             })),
-            mission!,
+            mission!.startsAt,
+            mission!.roundName,
+            mission!.number,
             undefined,
           )
 

@@ -150,7 +150,10 @@ export const submitApplications = async (
     impactStatement: Record<string, string>
     projectDescriptionOptions: string[]
   }[],
-  round: MissionData,
+  // round: MissionData,
+  roundStartDate: Date,
+  roundName: string,
+  roundNumber: number,
   categories?: CategoryWithImpact[],
 ) => {
   const session = await auth()
@@ -179,7 +182,7 @@ export const submitApplications = async (
   //   throw new Error("Applications are closed")
   // }
 
-  const isOpenForEnrollment = round.startsAt < new Date()
+  const isOpenForEnrollment = roundStartDate < new Date()
 
   if (!isOpenForEnrollment) {
     throw new Error("Applications are closed")
@@ -192,9 +195,9 @@ export const submitApplications = async (
     const result = await createProjectApplication(
       project,
       session.user.farcasterId,
-      round.number,
+      roundNumber,
       categories?.find((category) => category.id === project.categoryId)!,
-      round.roundName,
+      roundName,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)
