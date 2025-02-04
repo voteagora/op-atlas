@@ -1,7 +1,7 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
+// import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
 
 export const rewardMeasurementDate = new Date("2025-03-10T21:53:13.300Z")
 
@@ -85,12 +85,12 @@ export const MISSIONS: MissionData[] = [
             </span>
           </li>
         </ul>
-        <div className="mt-6">
+        {/* <div className="mt-6">
           <VideoCallout
             href="https://youtube.com"
             text="How to verify a Github repo in OP Atlas"
           />
-        </div>
+        </div> */}
       </div>
     ),
     missionPageRequirements: (
@@ -244,10 +244,10 @@ export const MISSIONS: MissionData[] = [
             </span>
           </li>
         </ul>
-        <VideoCallout
+        {/* <VideoCallout
           href="https://youtube.com"
           text="How to verify onchain contracts in OP Atlas"
-        />
+        /> */}
 
         <div className="flex flex-col gap-6 mt-6">
           <p className="text-secondary-foreground">

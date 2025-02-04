@@ -5,7 +5,6 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import React from "react"
 
-import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
 import { Eligibility } from "@/components/missions/details/Eligibility"
 import Header from "@/components/missions/details/Header"
 import Rewards from "@/components/missions/details/Rewards"

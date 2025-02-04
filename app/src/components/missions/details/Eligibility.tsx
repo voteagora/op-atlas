@@ -1,8 +1,9 @@
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
 import ExternalLink from "../../ExternalLink"
-import { DocumentCallout } from "../common/callouts/DocumentCallout"
-import { VideoCallout } from "../common/callouts/VideoCallout"
+// import { DocumentCallout } from "../common/callouts/DocumentCallout"
+// import { VideoCallout } from "../common/callouts/VideoCallout"
+
 export const Eligibility = () => {
   const mission = useMissionFromPath()
 
@@ -14,10 +15,11 @@ export const Eligibility = () => {
           "In order to apply, your Dev Tooling project must first be added to OP Atlas. A project can't be considered for enrollment until its setup is complete."
         }
       </p>
-      <VideoCallout
+
+      {/* <VideoCallout
         text="How to add a project in OP Atlas"
         href="https://youtube.com"
-      />
+      /> */}
 
       {mission?.missionPageEligibility}
     </div>
