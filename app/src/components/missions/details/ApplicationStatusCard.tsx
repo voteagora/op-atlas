@@ -100,7 +100,7 @@ export const ApplicationStatusCard = ({
                         key={"userAppliedProject-" + index}
                         className="flex items-center justify-between"
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-3/4">
                           {element.icon ? (
                             <Image
                               src={element.icon}
