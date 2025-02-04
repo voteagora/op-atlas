@@ -515,7 +515,7 @@ async function getProjectFn({
     FROM project_data pd;
   `
 
-  console.log("result[0]?.result", result[0]?.result)
+  // console.log("result[0]?.result", result[0]?.result)
 
   return result[0]?.result
 }

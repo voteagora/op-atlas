@@ -106,8 +106,6 @@ export default function ProjectDetailsForm({
 
   const orgId = searchParams.get("orgId")
 
-  // console.log(orgId)
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -232,15 +230,13 @@ export default function ProjectDetailsForm({
       const isCreating = !project
 
       const promise: Promise<Project> = new Promise(async (resolve, reject) => {
-        // console.log(values.organization?.id)
-
         try {
           const [response, res] = project
             ? await Promise.all([
                 updateProjectDetails(project.id, newValues),
                 setProjectOrganization(
                   project.id,
-                  project.organization?.organizationId,
+                  project.organization?.organization?.id,
                   values.organization?.id,
                 ),
               ])
@@ -342,7 +338,6 @@ export default function ProjectDetailsForm({
             control={form.control}
             name="organization"
             render={({ field }) => {
-              // console.log(field)
               return (
                 <FormItem className="flex flex-col gap-1.5">
                   <FormLabel className="text-foreground">
