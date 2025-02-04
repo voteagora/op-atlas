@@ -7,7 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -281,6 +281,38 @@ export default function ProjectDetailsForm({
     }
 
   const canSubmit = form.formState.isValid && !form.formState.isSubmitting
+
+  const websiteLinks = useWatch({
+    control: form.control,
+    name: "website", // Watch the "links" field
+    defaultValue: [], // Provide a default value
+  })
+
+  const farcasterLinks = useWatch({
+    control: form.control,
+    name: "farcaster", // Watch the "links" field
+    defaultValue: [], // Provide a default value
+  })
+
+  const isValidToAddSite = useMemo(() => {
+    return (
+      websiteLinks[websiteLinks.length - 1]?.value !== "" &&
+      z
+        .string()
+        .url()
+        .safeParse(websiteLinks[websiteLinks.length - 1]?.value).success
+    )
+  }, [websiteLinks])
+
+  const isValidToAddFarcasterLinks = useMemo(() => {
+    return (
+      farcasterLinks[farcasterLinks.length - 1]?.value !== "" &&
+      z
+        .string()
+        .url()
+        .safeParse(farcasterLinks[farcasterLinks.length - 1]?.value).success
+    )
+  }, [farcasterLinks])
 
   return (
     <Form {...form}>
@@ -571,9 +603,10 @@ export default function ProjectDetailsForm({
                 rows.
               </div>
             </div>
-            {websiteFields.map((field, index) => (
+
+            {websiteFields.map((website, index) => (
               <FormField
-                key={field.id}
+                key={website.id}
                 control={form.control}
                 name={`website.${index}.value`}
                 render={({ field: innerField }) => (
@@ -586,14 +619,20 @@ export default function ProjectDetailsForm({
                 )}
               />
             ))}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => addWebsiteField({ value: "" })}
-              className="w-fit"
-            >
-              <Plus size={16} className="mr-2.5" /> Add
-            </Button>
+
+            <FormItem>
+              {isValidToAddSite && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => addWebsiteField({ value: "" })}
+                  className="w-fit"
+                >
+                  <Plus size={16} className="mr-2.5" /> Add
+                </Button>
+              )}
+              <FormMessage />
+            </FormItem>
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -615,14 +654,16 @@ export default function ProjectDetailsForm({
                 )}
               />
             ))}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => addFarcasterField({ value: "" })}
-              className="w-fit"
-            >
-              <Plus size={16} className="mr-2.5" /> Add
-            </Button>
+            {isValidToAddFarcasterLinks && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => addFarcasterField({ value: "" })}
+                className="w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add
+              </Button>
+            )}
           </div>
 
           <FormField
