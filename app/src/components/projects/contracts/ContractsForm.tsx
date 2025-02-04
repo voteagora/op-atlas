@@ -148,7 +148,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
         const [result] = await Promise.all([
           updateProjectOSOStatus({
             projectId: project.id,
-            osoProjectName: values.osoSlug,
+            osoProjectName: values.submittedToOSO ? values.osoSlug : "",
           }),
           updateProjectDetails(project.id, {
             isOnChainContract: !values.isOffChain,
