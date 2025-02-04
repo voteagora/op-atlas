@@ -16,17 +16,11 @@ export async function generateMetadata({
   return {
     ...sharedMetadata,
     title: `Retro Funding: ${mission?.name ?? ""} - OP Atlas`,
-    description:
-      mission?.pageName === "dev-tooling"
-        ? "Retro Funding: Dev Tooling is distributing up to 8M OP in H1 2025. If you built tooling on Optimism, sign up to check if you qualify for grants"
-        : "Retro Funding: Onchain Builders is allocating up to 8M OP in H1 2025. If you've built on Optimism, sign up to see if you qualify for grants.",
+    description: mission?.ogDescription,
     openGraph: {
       ...sharedMetadata.openGraph,
       title: `Retro Funding: ${mission?.name ?? ""} - OP Atlas`,
-      description:
-        mission?.pageName === "dev-tooling"
-          ? "Retro Funding: Dev Tooling is distributing up to 8M OP in H1 2025. If you built tooling on Optimism, sign up to check if you qualify for grants"
-          : "Retro Funding: Onchain Builders is allocating up to 8M OP in H1 2025. If you've built on Optimism, sign up to see if you qualify for grants.",
+      description: mission?.ogDescription,
     },
   }
 }
