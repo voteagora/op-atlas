@@ -224,6 +224,7 @@ export default function ProjectDetailsForm({
         mirror: values.mirror,
         thumbnailUrl,
         bannerUrl,
+        isSubmittedToOso: false,
         website: fromStringObjectArr(values.website),
         farcaster: fromStringObjectArr(values.farcaster),
       }
