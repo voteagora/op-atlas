@@ -98,11 +98,7 @@ export type ProjectStatus = {
 export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   const completedSections: ProjectSection[] = []
 
-  const hasDetails =
-    project.name &&
-    project.description &&
-    project.thumbnailUrl &&
-    project.bannerUrl
+  const hasDetails = project.name && project.description
   if (hasDetails) {
     completedSections.push(ProjectSection.Details)
   }

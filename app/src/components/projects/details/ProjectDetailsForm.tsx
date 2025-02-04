@@ -65,7 +65,7 @@ const StringValue = z.object({ value: z.string() }) // use a intermediate object
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string(),
+  description: z.string().min(1, "Description is required"),
   organization: z
     .object({
       id: z.string(),
@@ -125,6 +125,7 @@ export default function ProjectDetailsForm({
       twitter: project?.twitter ?? undefined,
       mirror: project?.mirror ?? undefined,
     },
+    mode: "onChange",
   })
 
   const { fields: websiteFields, append: addWebsiteField } = useFieldArray({
@@ -342,7 +343,7 @@ export default function ProjectDetailsForm({
                 <FormItem className="flex flex-col gap-1.5">
                   <FormLabel className="text-foreground">
                     Organization
-                    <span className="ml-0.5 text-destructive">*</span>
+                    {/* <span className="ml-0.5 text-destructive">*</span> */}
                   </FormLabel>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -438,7 +439,7 @@ export default function ProjectDetailsForm({
             <div>
               <FormLabel>
                 Project avatar and cover image
-                <span className="ml-0.5 text-destructive">*</span>
+                {/* <span className="ml-0.5 text-destructive">*</span> */}
               </FormLabel>
               <div className="text-sm text-muted-foreground">
                 Images must be no larger than 4.5 MB.
