@@ -25,7 +25,6 @@ export function useUserRoundApplications(roundNumber: number | undefined): {
         session?.data?.user.id as string,
         roundNumber as number,
       ),
-    enabled: session?.data?.user.id !== undefined && roundNumber !== undefined,
   })
 
   return { data, isLoading, error, refetch }

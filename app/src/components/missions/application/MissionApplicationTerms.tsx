@@ -42,7 +42,7 @@ export function MissionApplicationTerms({
         {TERMS.map((term, idx) => (
           <div key={idx} className="flex gap-x-4">
             <Checkbox
-              className="mt-1"
+              className="mt-1 w-6 h-6"
               checked={agreedTerms[idx]}
               onCheckedChange={() => toggleAgreedTerm(idx)}
             />
@@ -52,7 +52,7 @@ export function MissionApplicationTerms({
 
         <div className="flex gap-x-4">
           <Checkbox
-            className="mt-1"
+            className="mt-1 w-6 h-6"
             checked={agreedTerms[TERMS.length]}
             onCheckedChange={() => toggleAgreedTerm(TERMS.length)}
           />

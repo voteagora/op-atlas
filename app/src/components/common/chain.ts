@@ -1,6 +1,7 @@
 import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import {
   base,
+  Chain,
   fraxtal,
   ink,
   lisk,
@@ -8,11 +9,15 @@ import {
   mode,
   optimism,
   shape,
+  soneium,
   superseed,
-  swan,
   worldchain,
   zora,
 } from "viem/chains"
+
+export const polynomial = {
+  id: 8008,
+} as Chain
 
 export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
   {
@@ -52,6 +57,10 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
       logo: "/assets/chain-logos/optimism.svg",
       name: "OP Mainnet",
     },
+    [polynomial.id.toString()]: {
+      logo: "/assets/chain-logos/polynomial.png",
+      name: "Polynomial",
+    },
     [race.id.toString()]: {
       logo: "/assets/chain-logos/race.jpeg",
       name: "Race",
@@ -60,13 +69,13 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
       logo: "/assets/chain-logos/shape.png",
       name: "Shape",
     },
+    [soneium.id.toString()]: {
+      logo: "/assets/chain-logos/soneium.jpg",
+      name: "Soneium",
+    },
     [superseed.id.toString()]: {
       logo: "/assets/chain-logos/superseed.jpg",
       name: "Superseed",
-    },
-    [swan.id.toString()]: {
-      logo: "/assets/chain-logos/swan.png",
-      name: "Swan",
     },
     [swell.id.toString()]: {
       logo: "/assets/chain-logos/swell.svg",

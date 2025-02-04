@@ -1,3 +1,4 @@
+import { polynomial } from "@/components/common/chain"
 import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import { isAddress, isHex } from "viem"
 import {
@@ -9,8 +10,8 @@ import {
   mode,
   optimism,
   shape,
+  soneium,
   superseed,
-  swan,
   worldchain,
   zora,
 } from "viem/chains"
@@ -26,10 +27,11 @@ export const Chain = z.enum([
   metalL2.id.toString(),
   mode.id.toString(),
   optimism.id.toString(),
+  polynomial.id.toString(),
   race.id.toString(),
   shape.id.toString(),
+  soneium.id.toString(),
   superseed.id.toString(),
-  swan.id.toString(),
   swell.id.toString(),
   worldchain.id.toString(),
   zora.id.toString(),

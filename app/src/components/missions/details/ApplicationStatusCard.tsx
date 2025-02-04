@@ -12,12 +12,14 @@ import { GreenBadge } from "../common/badges/GreenBadge"
 import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
 export const ApplicationStatusCard = ({
+  isLoading,
   applyByDate,
   startDate,
   userProjectCount,
   userAppliedProjects,
   pageName,
 }: {
+  isLoading?: boolean
   applyByDate: string | undefined
   startDate: string | undefined
   userProjectCount?: number
@@ -27,6 +29,28 @@ export const ApplicationStatusCard = ({
   const router = useRouter()
 
   const { data } = useSession()
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <p className="font-semibold">{"Apply"}</p>
+
+        <p className="text-sm text-secondary-foreground text-center">
+          {`Apply by ${applyByDate} to be evaluated for rewards starting 
+        ${startDate}.`}
+        </p>
+        <Button
+          className="bg-optimismRed text-white w-full"
+          variant={"outline"}
+          onClick={() => {
+            router.push(`/missions/${pageName}/application`)
+          }}
+        >
+          Choose projects
+        </Button>
+      </div>
+    )
+  }
 
   if (!data) {
     return (
@@ -61,7 +85,7 @@ export const ApplicationStatusCard = ({
     if (userProjectCount && userProjectCount > 0) {
       if (userAppliedProjects && userAppliedProjects?.length > 0) {
         return (
-          <div>
+          <div className="flex flex-col gap-4">
             <p className="font-semibold">{"Your status"}</p>
 
             <div className="text-sm text-secondary-foreground text-center">
@@ -76,13 +100,14 @@ export const ApplicationStatusCard = ({
                         key={"userAppliedProject-" + index}
                         className="flex items-center justify-between"
                       >
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-2">
                           {element.icon ? (
                             <Image
                               src={element.icon}
                               width={32}
                               height={32}
                               alt="Project"
+                              className="rounded-lg"
                             />
                           ) : (
                             <></>

@@ -20,7 +20,6 @@ export function useAdminProjects(): {
   const { data, isLoading, error } = useQuery({
     queryKey: ["adminProjects", session?.data?.user.id],
     queryFn: () => getAdminProjects(session?.data?.user.id as string),
-    enabled: session?.data?.user.id !== undefined,
   })
 
   return { data, isLoading, error }

@@ -27,7 +27,7 @@ export function DocumentCallout({
               className="w-5 h-5"
             />
 
-            <p>{text}</p>
+            <p className="text-sm">{text}</p>
           </div>
         }
         rightAlignedContent={

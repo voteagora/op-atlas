@@ -112,7 +112,6 @@ export function MissionApplication() {
   if (submittedProjects?.length > 0 && applications) {
     return (
       <ApplicationSubmitted
-        className="mt-18 max-w-4xl"
         application={submittedApplications[0]}
         submittedProjects={submittedProjects}
       />
@@ -129,8 +128,8 @@ export function MissionApplication() {
         />
       )}{" "}
       <MissionApplicationBreadcrumbs />
-      <div className="flex flex-col mt-10 gap-6">
-        <h2 className="text-4xl mb-2">
+      <div className="flex flex-col mt-10 gap-2">
+        <h2 className="text-4xl">
           {"Apply for Retro Funding: " + round?.name}
         </h2>
         <div className="text-secondary-foreground">
@@ -140,9 +139,9 @@ export function MissionApplication() {
           )} to be evaluated for rewards starting 
                     Mar 5.`}
         </div>
-        <div className="h-[2px] bg-secondary" />
+        <div className="h-[2px] bg-secondary mt-6" />
       </div>
-      <div className="mt-16 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
+      <div className="mt-6 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
         <MissionApplicationTabs form={form} onSubmit={submitApplication} />
       </div>
     </div>

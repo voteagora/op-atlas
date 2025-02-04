@@ -27,6 +27,9 @@ const config = {
       spacing: {
         "18": "4.5rem",
       },
+      width: {
+        body: "712px",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
