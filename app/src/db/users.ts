@@ -7,7 +7,7 @@ import {
   UserEmail,
   UserInteraction,
 } from "@prisma/client"
-import { CONTRIBUTOR_ELIGIBLE_ADDRESSES } from "eas-indexer/src/constants"
+import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "eas-indexer/src/constants"
 import { AggregatedType } from "eas-indexer/src/types"
 
 import { UserAddressSource } from "@/lib/types"
@@ -366,7 +366,7 @@ export async function getAllContributors(
   const data = await prisma.project.findMany({
     where: {
       id: {
-        in: CONTRIBUTOR_ELIGIBLE_ADDRESSES,
+        in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
       },
     },
     select: {

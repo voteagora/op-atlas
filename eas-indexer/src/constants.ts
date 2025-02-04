@@ -14,7 +14,7 @@ export const TAG_BY_ENTITY: Record<keyof AggregatedType, string> = {
 export const COMMUNITY_CONTRIBUTORS_ATTEST_ADDRESS =
   "0xc975707485575a611b1aaf9cf9aada04a066b690e40aec7eb5cb17e22336d703";
 
-export const CONTRIBUTOR_ELIGIBLE_ADDRESSES = [
+export const CONTRIBUTOR_ELIGIBLE_PROJECTS = [
   "0x000c2ce4773defb3010a58d3800d0ec9d432189c574ba26d3103f1db44a5af6d",
   "0x04b1cd5a7c59117474ce414b309fa48e985bdaab4b0dab72045f74d04ebd8cff",
   "0x08df6e20a3cfabbaf8f34d4f4d048fe7da40447c24be0f3ad513db6f13c755dd",
