@@ -456,13 +456,7 @@ async function getAllOnchainBuilders() {
             some: {
               project: {
                 contracts: {
-                  some: {
-                    verificationProof: {
-                      not: {
-                        equals: "",
-                      },
-                    },
-                  },
+                  some: {},
                 },
               },
             },
@@ -476,13 +470,7 @@ async function getAllOnchainBuilders() {
                   some: {
                     project: {
                       contracts: {
-                        some: {
-                          verificationProof: {
-                            not: {
-                              equals: "",
-                            },
-                          },
-                        },
+                        some: {},
                       },
                     },
                   },
