@@ -85,7 +85,7 @@ const addTagsToContacts = async () => {
   ])
 
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
-  await mailchimp.lists
+  const results = (await mailchimp.lists
     .batchListMembers(LIST_ID!, {
       members: flattenedUsers.map((user) => ({
         email_address: user.email,
@@ -95,23 +95,23 @@ const addTagsToContacts = async () => {
       })),
       update_existing: true,
     })
-    .then((results: any) => {
-      console.log(
-        `[+] Mailchimp contacts tagged: ${results.updated_members.length}`,
-      )
-      results.updated_members.forEach((member: any) => {
-        console.log(
-          `  - ${member.email_address}; tags: ${
-            flattenedUsers.find((m) => {
-              return m.email === member.email_address
-            })?.tags
-          };`,
-        )
-      })
-    })
     .catch((error: any) => {
       console.error(`[-] Mailchimp contacts tagging failed: ${error}`)
-    })
+    })) as any
+
+  console.log(
+    `[+] Mailchimp contacts tagged: ${results.updated_members.length}`,
+  )
+
+  results.updated_members.forEach((member: any) => {
+    console.log(
+      `  - ${member.email_address}; tags: ${
+        flattenedUsers.find((m) => {
+          return m.email === member.email_address
+        })?.tags
+      };`,
+    )
+  })
 }
 const removeTagsFromContacts = async () => {
   const records = await fetchRecords()
