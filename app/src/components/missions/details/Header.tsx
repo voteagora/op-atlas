@@ -10,6 +10,8 @@ import { NewIn2025Callout } from "../common/callouts/NewIn2025Callout"
 export default function Header() {
   const mission = useMissionFromPath()
 
+  const isOpenForEnrollment = mission && mission?.startsAt < new Date()
+
   return (
     <>
       <p className="text-4xl mb-2 font-semibold">{mission?.name}</p>
@@ -20,15 +22,34 @@ export default function Header() {
           {<span>{format(mission!.endsAt, "MMM d, yyyy")}</span>}
         </p>
         <div className="w-[1px] bg-gray-300 h-full"></div>
-        <Image
-          src={"/assets/icons/triangular-flag-full.png"}
-          width={1}
-          height={1}
-          alt="Sunny blobs"
-          className="h-3 w-3"
-        />
 
-        <p className="text-secondary-foreground">Open for applications</p>
+        {!isOpenForEnrollment && (
+          <>
+            <Image
+              src={"/assets/icons/triangular-flag-muted-foreground.svg"}
+              width={16}
+              height={16}
+              alt="Flag"
+            />
+
+            <p className="text-secondary-foreground">
+              Not open for enrollment-coming soon
+            </p>
+          </>
+        )}
+
+        {isOpenForEnrollment && (
+          <>
+            <Image
+              src={"/assets/icons/triangular-flag-full.svg"}
+              width={20}
+              height={20}
+              alt="Flag"
+            />
+
+            <p className="text-secondary-foreground">Open for applications</p>
+          </>
+        )}
       </div>
       {mission?.iconUrl && (
         <Image

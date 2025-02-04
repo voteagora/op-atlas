@@ -44,7 +44,7 @@ export function MissionApplicationTabs({
     projects: z.infer<typeof ApplicationFormSchema>["projects"],
   ) => void
 }) {
-  const round = useMissionFromPath()
+  const mission = useMissionFromPath()
   const session = useSession()
 
   const [currentTab, setCurrentTab] = useState("details")
@@ -53,7 +53,7 @@ export function MissionApplicationTabs({
   const { data: projects = [], isLoading: isLoadingProjects } =
     useAdminProjects()
   const { data: applications = [], isLoading: isLoadingApplications } =
-    useUserRoundApplications(round?.number)
+    useUserRoundApplications(mission?.number)
 
   useEffect(() => {
     if (projects.length > 0) {
@@ -71,6 +71,20 @@ export function MissionApplicationTabs({
   const isFormValid = projectsForm?.some((project) => {
     return project.selected
   })
+
+  const isOpenForEnrollment = mission && mission?.startsAt < new Date()
+
+  const viewMissionDetailsBtn = (
+    <Button
+      className="w-44"
+      variant={"outline"}
+      onClick={() => {
+        router.push(`/missions/${mission?.pageName}`)
+      }}
+    >
+      View Mission Details
+    </Button>
+  )
 
   return (
     <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
@@ -101,67 +115,73 @@ export function MissionApplicationTabs({
       <div className="mt-12">
         <TabsContent value="details">
           <p className="text-2xl font-bold mb-5">Choose projects</p>
-          {projects.length > 0 ? (
-            <>
-              {projects.map((field, index) => (
-                <ProjectApplication
-                  key={field.id}
-                  index={index}
-                  project={field}
-                  isAppliedToRound={
-                    applications?.find(
-                      (app) =>
-                        app.project.id === field.id &&
-                        app.roundId === round?.number.toString(),
-                    )
-                      ? true
-                      : false
-                  }
-                  form={form}
-                />
-              ))}
-              <Button
-                className="mt-10"
-                variant={"destructive"}
-                disabled={!isFormValid || isLoadingApplications}
-                onClick={() => {
-                  setCurrentTab("terms")
-                }}
-              >
-                Next
-              </Button>
-            </>
-          ) : isLoadingProjects ? (
-            <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
-              <p className="font-bold">{"Loading your projects..."}</p>
-            </div>
-          ) : (
+
+          {!isOpenForEnrollment && (
             <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
               <p className="font-bold">
-                {"You haven't added or joined any projects"}
+                {"Not open for enrollment-coming soon"}
               </p>
-
-              <p className="text-sm text-secondary-foreground text-center">
-                {
-                  "To apply for this Retro Funding Mission, first add your project to OP Atlas."
-                }
-              </p>
-
-              <div className="flex gap-4">
-                <Button className="w-44" variant={"destructive"}>
-                  Add Project
-                </Button>
-                <Button
-                  className="w-44"
-                  variant={"outline"}
-                  onClick={() => {
-                    router.push(`/missions/${round?.pageName}`)
-                  }}
-                >
-                  View Mission Details
-                </Button>
-              </div>
+              {viewMissionDetailsBtn}
             </div>
+          )}
+
+          {isOpenForEnrollment && (
+            <>
+              {projects.length > 0 ? (
+                <>
+                  {projects.map((field, index) => (
+                    <ProjectApplication
+                      key={field.id}
+                      index={index}
+                      project={field}
+                      isAppliedToRound={
+                        applications?.find(
+                          (app) =>
+                            app.project.id === field.id &&
+                            app.roundId === mission?.number.toString(),
+                        )
+                          ? true
+                          : false
+                      }
+                      form={form}
+                    />
+                  ))}
+                  <Button
+                    className="mt-10"
+                    variant={"destructive"}
+                    disabled={!isFormValid || isLoadingApplications}
+                    onClick={() => {
+                      setCurrentTab("terms")
+                    }}
+                  >
+                    Next
+                  </Button>
+                </>
+              ) : isLoadingProjects ? (
+                <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
+                  <p className="font-bold">{"Loading your projects..."}</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
+                  <p className="font-bold">
+                    {"You haven't added or joined any projects"}
+                  </p>
+
+                  <p className="text-sm text-secondary-foreground text-center">
+                    {
+                      "To apply for this Retro Funding Mission, first add your project to OP Atlas."
+                    }
+                  </p>
+
+                  <div className="flex gap-4">
+                    <Button className="w-44" variant={"destructive"}>
+                      Add Project
+                    </Button>
+                    {viewMissionDetailsBtn}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </TabsContent>
         <TabsContent value="terms">

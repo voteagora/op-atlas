@@ -18,6 +18,7 @@ import {
   getUserApplicationsForRound,
 } from "./projects"
 import { verifyAdminStatus } from "./utils"
+import { MissionData } from "../MissionsAndRoundData"
 
 const whitelist: string[] = []
 
@@ -149,9 +150,8 @@ export const submitApplications = async (
     impactStatement: Record<string, string>
     projectDescriptionOptions: string[]
   }[],
-  round: number,
+  round: MissionData,
   categories?: CategoryWithImpact[],
-  roundName?: string,
 ) => {
   const session = await auth()
 
@@ -171,11 +171,17 @@ export const submitApplications = async (
     }
   }
 
-  const isWhitelisted = projects.some((project) =>
-    whitelist.includes(project.projectId),
-  )
+  // const isWhitelisted = projects.some((project) =>
+  //   whitelist.includes(project.projectId),
+  // )
 
-  if (APPLICATIONS_CLOSED && !isWhitelisted) {
+  // if (APPLICATIONS_CLOSED && !isWhitelisted) {
+  //   throw new Error("Applications are closed")
+  // }
+
+  const isOpenForEnrollment = round.startsAt < new Date()
+
+  if (!isOpenForEnrollment) {
     throw new Error("Applications are closed")
   }
 
@@ -186,9 +192,9 @@ export const submitApplications = async (
     const result = await createProjectApplication(
       project,
       session.user.farcasterId,
-      round,
+      round.number,
       categories?.find((category) => category.id === project.categoryId)!,
-      roundName,
+      round.roundName,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)

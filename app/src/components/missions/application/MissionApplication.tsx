@@ -34,8 +34,8 @@ export const ApplicationFormSchema = z.object({
 })
 
 export function MissionApplication() {
-  const round = useMissionFromPath()
-  const session = useSession()
+  const mission = useMissionFromPath()
+  const isOpenForEnrollment = mission && mission?.startsAt < new Date()
 
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
@@ -44,7 +44,7 @@ export function MissionApplication() {
   })
 
   const { data: projects, isLoading } = useAdminProjects()
-  const { data: applications } = useUserRoundApplications(round?.number)
+  const { data: applications } = useUserRoundApplications(mission?.number)
 
   const [submittedApplications, setSubmittedApplications] = useState<
     Application[]
@@ -69,9 +69,8 @@ export function MissionApplication() {
               projectDescriptionOptions: project.projectDescriptionOptions,
               impactStatement: project.impactStatement,
             })),
-            round!.number,
+            mission!,
             undefined,
-            round!.roundName,
           )
 
           if (result.error !== null || result.applications.length === 0) {
@@ -131,15 +130,20 @@ export function MissionApplication() {
       <MissionApplicationBreadcrumbs />
       <div className="flex flex-col mt-10 gap-2">
         <h2 className="text-4xl">
-          {"Apply for Retro Funding: " + round?.name}
+          {"Apply for Retro Funding: " + mission?.name}
         </h2>
-        <div className="text-secondary-foreground">
-          {`Apply by ${format(
-            round!.applyBy,
-            "MMM d",
-          )} to be evaluated for rewards in 
+
+        <p className="text-secondary-foreground">
+          {isOpenForEnrollment &&
+            `Apply by ${format(
+              mission!.applyBy,
+              "MMM d",
+            )} to be evaluated for rewards in 
                     ${format(rewardMeasurementDate, "MMMM")}.`}
-        </div>
+
+          {!isOpenForEnrollment && "Not open for enrollment--coming soon"}
+        </p>
+
         <div className="h-[2px] bg-secondary mt-6" />
       </div>
       <div className="mt-6 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">

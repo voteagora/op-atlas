@@ -34,8 +34,8 @@ export default function Mission() {
   return (
     <div className="mt-20 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">
       <div className="flex flex-1 gap-x-12">
-        <div className="flex flex-1 flex-col">
-          <div className="flex flex-col flex-1 gap-y-12">
+        <div className="flex flex-1 flex-col items-center">
+          <div className="flex flex-col gap-y-12 w-[686px]">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
@@ -67,10 +67,14 @@ export default function Mission() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-6 ml-auto w-[290px] sticky top-40 h-full">
-          <UserRoundApplicationStatusCard />
-          <RoundEnrolledProjectsCard />
-        </div>
+        {mission && new Date() > mission?.startsAt && (
+          <div className="flex flex-col gap-y-6 ml-auto w-[290px] sticky top-40 h-full">
+            <>
+              <UserRoundApplicationStatusCard />
+              <RoundEnrolledProjectsCard />
+            </>
+          </div>
+        )}
       </div>
     </div>
   )
