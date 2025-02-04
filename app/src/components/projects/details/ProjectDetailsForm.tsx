@@ -571,29 +571,50 @@ export default function ProjectDetailsForm({
                 rows.
               </div>
             </div>
-            {websiteFields.map((field, index) => (
-              <FormField
-                key={field.id}
-                control={form.control}
-                name={`website.${index}.value`}
-                render={({ field: innerField }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input {...innerField} placeholder="Add a link" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ))}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => addWebsiteField({ value: "" })}
-              className="w-fit"
-            >
-              <Plus size={16} className="mr-2.5" /> Add
-            </Button>
+
+            <FormField
+              key={"websites23"}
+              control={form.control}
+              name={`website`}
+              render={({ field: innerField }) => {
+                console.log(innerField)
+                return (
+                  <>
+                    {websiteFields.map((website, index) => (
+                      <FormField
+                        key={website.id}
+                        control={form.control}
+                        name={`website.${index}.value`}
+                        render={({ field: innerField }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input {...innerField} placeholder="Add a link" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+
+                    <FormItem>
+                      {form.getValues("website").every((site) => {
+                        return site.value.length > 0
+                      }) && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => addWebsiteField({ value: "" })}
+                          className="w-fit"
+                        >
+                          <Plus size={16} className="mr-2.5" /> Add
+                        </Button>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  </>
+                )
+              }}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
