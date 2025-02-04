@@ -21,11 +21,7 @@ export const POST = async (req: NextRequest) => {
     const { name, farcasterId } = payloadValidator.parse(await req.json())
 
     const { id } = await upsertUser({ farcasterId })
-    const project = await createNewProjectOnBehalf(
-      { name, isSubmittedToOso: false },
-      id,
-      farcasterId,
-    )
+    const project = await createNewProjectOnBehalf({ name }, id, farcasterId)
 
     return NextResponse.json({ attestationId: project.id })
   } catch (e) {
