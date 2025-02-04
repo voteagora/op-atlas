@@ -361,7 +361,7 @@ async function getAllRFVoters(records: AggregatedType["rf_voter"]) {
 }
 
 async function getAllContributors(records: AggregatedType["contributors"]) {
-  return prisma.project.findMany({
+  const data = await prisma.project.findMany({
     where: {
       id: {
         in: CONTRIBUTOR_ELIGIBLE_ADDRESSES,
@@ -386,8 +386,65 @@ async function getAllContributors(records: AggregatedType["contributors"]) {
           },
         },
       },
+      organization: {
+        select: {
+          project: {
+            select: {
+              team: {
+                select: {
+                  user: {
+                    select: {
+                      addresses: {
+                        select: {
+                          address: true,
+                        },
+                      },
+                      emails: {
+                        select: {
+                          email: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   })
+
+  const mergedContributors = data
+    .flatMap((d) => {
+      const team = d.team.map((t) => ({
+        user: t.user,
+        organization: null,
+      }))
+
+      const organization =
+        d.organization?.project.team.map((t) => ({
+          user: t.user,
+          organization: d.organization,
+        })) ?? []
+
+      return [...team, ...organization]
+    })
+    .flatMap((c) => {
+      const mergedUsers = [
+        c.user,
+        ...(c.organization?.project.team.map((t) => t.user) ?? []),
+      ]
+      const uniqueUsers = Array.from(
+        new Set(mergedUsers.map((u) => u.emails.at(-1)?.email)),
+      ).map((email) => {
+        return mergedUsers.find((u) => u.emails.at(-1)?.email === email)
+      })
+
+      return uniqueUsers
+    })
+
+  return mergedContributors
 }
 
 async function getAllOnchainBuilders() {
@@ -562,12 +619,10 @@ export async function getAggregatedRecords(records: AggregatedType) {
       email: rv.user.emails.at(-1)?.email ?? "",
     })),
     contributors:
-      contributors?.flatMap((c) =>
-        c.team?.map((t) => ({
-          address: t.user.addresses.at(-1)?.address ?? "",
-          email: t.user.emails.at(-1)?.email ?? "",
-        })),
-      ) ?? [],
+      contributors?.map((c) => ({
+        address: c?.addresses.at(-1)?.address ?? "",
+        email: c?.emails.at(-1)?.email ?? "",
+      })) ?? [],
     onchain_builders:
       onchain_builders?.map((ob) => ({
         address: ob.addresses.at(-1)?.address ?? "",
