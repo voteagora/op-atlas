@@ -1,8 +1,22 @@
 import { Metadata } from "next"
 
+const sharedKeywords = [
+  "optimism retro funding",
+  "retro funding",
+  "optimism grants",
+  "optimism",
+  "optimism coin",
+  "optimism crypto",
+  "op coin",
+  "op mainnet",
+  "optism",
+  "optimism token",
+].join(", ")
+
 export const sharedMetadata: Metadata = {
   metadataBase: new URL("https://atlas.optimism.io"),
   icons: "/favicon.ico",
+  keywords: sharedKeywords,
   openGraph: {
     title: "Atlas",
     description: "",
