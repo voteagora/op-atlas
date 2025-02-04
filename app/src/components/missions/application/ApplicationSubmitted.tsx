@@ -56,7 +56,6 @@ const confettiConfig = {
   stagger: 3,
   width: "10px",
   height: "10px",
-  perspective: "500px",
   colors: ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"],
 }
 
@@ -94,33 +93,40 @@ export const ApplicationSubmitted = ({
   return (
     <div
       className={cn(
-        "flex flex-col gap-y-12 w-full rounded-3xl p-16",
+        "w-body flex flex-col gap-y-12 w-full rounded-3xl pt-20",
         className,
       )}
     >
       {/* Header */}
-      <div className="flex flex-col items-center gap-y-6">
+      <div className="flex flex-col items-center">
         <Confetti active={showConfetti} config={confettiConfig} />
 
-        <Image
-          alt="sunny"
-          src="/assets/icons/sunny-smiling.png"
-          height={124}
-          width={124}
-        />
-        <h2 className="text-center">Application Submitted!</h2>
-        <p className="text-center">
-          Your application to{" "}
-          {
-            <>
-              <span className="font-bold"> Retro Funding: {mission?.name}</span>{" "}
-              was submitted on {format(application.createdAt, "MMMM d")} at{" "}
-              {format(application?.createdAt, "h:mm a")}. You&apos;ll receive a
-              confirmation email at{" "}
-              <span className="text-accent-foreground">{email}</span>.
-            </>
-          }
-        </p>
+        <div className="flex flex-col items-center gap-y-6">
+          <Image
+            alt="sunny"
+            src="/assets/icons/sunny-smiling.png"
+            height={124}
+            width={124}
+          />
+
+          <h2 className="text-center">{"You're Enrolled!"}</h2>
+          <p className="text-center">
+            Your application to{" "}
+            {
+              <>
+                <span className="font-semibold">
+                  {" "}
+                  Retro Funding: {mission?.name}
+                </span>{" "}
+                was submitted on{" "}
+                {application && format(application.createdAt, "MMMM d")} at{" "}
+                {application && format(application.createdAt, "h:mm a")}.
+                You&apos;ll receive a confirmation email at{" "}
+                <span className="text-accent-foreground">{email}</span>.
+              </>
+            }
+          </p>
+        </div>
       </div>
 
       {onClose && (
@@ -134,7 +140,7 @@ export const ApplicationSubmitted = ({
         </Button>
       )}
 
-      <div className="flex flex-col">
+      <div className="flex flex-col p-6">
         {submittedProjects.map((application, index) => {
           return (
             <div
@@ -148,10 +154,11 @@ export const ApplicationSubmitted = ({
                     src={application.thumbnailUrl}
                     height={48}
                     width={48}
+                    className="rounded-lg"
                   />
                 )}
 
-                <p className="font-bold">{application.name}</p>
+                <p className="font-semibold">{application.name}</p>
               </div>
 
               <GreenBadge />
@@ -163,23 +170,18 @@ export const ApplicationSubmitted = ({
       {/* Expectations */}
       <div className="flex flex-col gap-y-6 text-center">
         <div>
-          <h3 className="text-lg font-semibold">
-            All projects are reviewed before earning rewards
-          </h3>
-          <p className="font-medium">
-            Check your email for updates regarding your potential rewards.
+          <p className="font-semibold">All projects are reviewed</p>
+          <p className="text-secondary-foreground">
+            {
+              "If there's an issue with your application, we'll reach out via email."
+            }
           </p>
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold">
-            Rewards are paid out monthly
-          </h3>
-          <p className="font-medium">
-            The next rewards tracking period is{" "}
-            {format(payoutTrackingPeriodStartDate, "MMM, d")} -{" "}
-            {format(payoutTrackingPeriodEndDate, "MMM, d")}, with payout
-            starting {format(payoutStartDate, "MMM, d")}.
+          <p className="font-semibold">Rewards are paid out monthly</p>
+          <p className="text-secondary-foreground">
+            Impact evaluation starts at the beginning of each month.
           </p>
         </div>
 
@@ -198,7 +200,7 @@ export const ApplicationSubmitted = ({
       </div>
 
       {/* Social share */}
-      <div className="flex flex-col justify-center items-center gap-y-6 p-10 bg-background border rounded-2xl ">
+      {/* <div className="flex flex-col justify-center items-center gap-y-6 p-10 bg-background border rounded-2xl ">
         <h3 className="text-xl font-semibold">Share with your community</h3>
         <div className="w-full h-[356px] relative">
           <Image
@@ -237,7 +239,7 @@ export const ApplicationSubmitted = ({
             </Button>
           </a>
         </div>
-      </div>
+      </div> */}
 
       {/* Join the conversation */}
       <div className="flex flex-col gap-y-6">
@@ -255,6 +257,17 @@ export const ApplicationSubmitted = ({
           ))}
         </div>
       </div>
+
+      <p className="text-sm text-secondary-foreground text-center">
+        Need support?
+        <ExternalLink
+          className="font-bold"
+          href="https://discord.com/invite/optimism"
+        >
+          {" "}
+          Get help in Discord.
+        </ExternalLink>
+      </p>
     </div>
   )
 }

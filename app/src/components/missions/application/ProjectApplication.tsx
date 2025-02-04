@@ -185,7 +185,7 @@ export const ProjectApplication = ({
 
               return (
                 <div className="flex items-center py-1" key={key}>
-                  <div className="relative w-5 h-5 flex items-center justify-center">
+                  <div className="relative w-6 h-6 flex items-center justify-center">
                     {icon}
                   </div>
                   <p className="pl-4">
@@ -213,10 +213,10 @@ export const ProjectApplication = ({
                   if (isCriterionComplete) {
                     icon = <CircleWithCheckmark />
                   } else {
-                    icon = <X className="w-5 h-5" color="red" />
+                    icon = <X className="w-6 h-6" color="red" />
                   }
                 } else {
-                  icon = <div className="w-[20px] h-[3px] bg-gray-400 m-1" />
+                  icon = <div className="w-6 h-[3px] bg-gray-400 m-1" />
                 }
 
                 return (
@@ -224,7 +224,7 @@ export const ProjectApplication = ({
                     className="flex items-center py-1 gap-2"
                     key={"criterion-" + index}
                   >
-                    <div className="relative w-5 h-5 flex items-center justify-center">
+                    <div className="relative w-6 h-6 flex items-center justify-center">
                       {icon}
                     </div>
                     {criterion.reactNode}

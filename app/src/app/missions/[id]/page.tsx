@@ -40,7 +40,7 @@ export default async function MissionPage({
   if (round === undefined) notFound()
 
   return (
-    <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
+    <main className="flex flex-col flex-1 h-full items-center pb-20 relative">
       <Mission />
     </main>
   )

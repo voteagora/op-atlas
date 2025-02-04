@@ -39,7 +39,7 @@ export default function Mission() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/">
+                  <BreadcrumbLink href="/missions">
                     Retro Funding Missions
                   </BreadcrumbLink>
                 </BreadcrumbItem>

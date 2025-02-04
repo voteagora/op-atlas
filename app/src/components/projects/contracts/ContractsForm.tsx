@@ -180,19 +180,14 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
     control: form.control,
   })
 
-  const canSubmit = (function () {
-    return (
-      (!!formValues.submittedToOSO &&
-        formValues.contracts &&
-        formValues.contracts.length > 0) ||
-      formValues.isOffChain
-    )
-  })()
-
   // can add a new contract once the previous one is verified
   const canAddContract =
     formValues.contracts.length < 1 ||
     Boolean(formValues.contracts[formValues.contracts.length - 1].signature)
+
+  const canSubmit = (function () {
+    return canAddContract || formValues.isOffChain
+  })()
 
   return (
     <div>
