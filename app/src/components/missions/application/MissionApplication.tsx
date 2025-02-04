@@ -137,8 +137,8 @@ export function MissionApplication() {
           {`Apply by ${format(
             round!.applyBy,
             "MMM d",
-          )} to be evaluated for rewards starting 
-                    ${format(rewardMeasurementDate, "MMM d")}`}
+          )} to be evaluated for rewards in 
+                    ${format(rewardMeasurementDate, "MMMM")}.`}
         </div>
         <div className="h-[2px] bg-secondary mt-6" />
       </div>

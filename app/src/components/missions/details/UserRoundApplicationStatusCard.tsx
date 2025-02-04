@@ -26,7 +26,7 @@ export const UserRoundApplicationStatusCard = () => {
           isLoading={isLoadingApplications && isLoadingProjects}
           applyByDate={mission?.applyBy && format(mission.applyBy, "MMM d")}
           rewardsDate={
-            rewardMeasurementDate && format(rewardMeasurementDate, "MMM d")
+            rewardMeasurementDate && format(rewardMeasurementDate, "MMMM")
           }
           userProjectCount={projects?.length}
           userAppliedProjects={applications?.map((application) => {
