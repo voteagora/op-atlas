@@ -3,7 +3,7 @@ import { type AggregatedType } from "eas-indexer/src/types"
 import { NextRequest } from "next/server"
 
 import { prisma } from "@/db/client"
-import { getAggregatedRecords } from "@/db/users"
+import { getAggregatedRecords } from "@/lib/actions/tags"
 import { getAggregatedData } from "@/lib/api/eas/aggregated"
 import mailchimp from "@/lib/mailchimp"
 

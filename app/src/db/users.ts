@@ -280,7 +280,7 @@ export async function updateUserInteraction(
   })
 }
 
-async function getAllCitizens(records: AggregatedType["citizen"]) {
+export async function getAllCitizens(records: AggregatedType["citizen"]) {
   return prisma.userAddress.findMany({
     where: {
       AND: [
@@ -306,11 +306,11 @@ async function getAllCitizens(records: AggregatedType["citizen"]) {
   })
 }
 
-async function getAllBadgeholders() {
+export async function getAllBadgeholders() {
   return []
 }
 
-async function getAllGovContributors(
+export async function getAllGovContributors(
   records: AggregatedType["gov_contribution"],
 ) {
   return prisma.userAddress.findMany({
@@ -338,7 +338,7 @@ async function getAllGovContributors(
   })
 }
 
-async function getAllRFVoters(records: AggregatedType["rf_voter"]) {
+export async function getAllRFVoters(records: AggregatedType["rf_voter"]) {
   return prisma.userAddress.findMany({
     where: {
       address: {
@@ -360,7 +360,9 @@ async function getAllRFVoters(records: AggregatedType["rf_voter"]) {
   })
 }
 
-async function getAllContributors(records: AggregatedType["contributors"]) {
+export async function getAllContributors(
+  records: AggregatedType["contributors"],
+) {
   const data = await prisma.project.findMany({
     where: {
       id: {
@@ -447,7 +449,7 @@ async function getAllContributors(records: AggregatedType["contributors"]) {
   return mergedContributors
 }
 
-async function getAllOnchainBuilders() {
+export async function getAllOnchainBuilders() {
   return prisma.user.findMany({
     where: {
       OR: [
@@ -495,7 +497,7 @@ async function getAllOnchainBuilders() {
     },
   })
 }
-async function getAllGithubRepoBuiulders() {
+export async function getAllGithubRepoBuiulders() {
   return prisma.user.findMany({
     where: {
       OR: [
@@ -547,7 +549,7 @@ async function getAllGithubRepoBuiulders() {
     },
   })
 }
-async function getAllCommunityContributors(addresses: string[]) {
+export async function getAllCommunityContributors(addresses: string[]) {
   return prisma.userAddress.findMany({
     where: {
       address: {
@@ -567,65 +569,4 @@ async function getAllCommunityContributors(addresses: string[]) {
       },
     },
   })
-}
-
-export async function getAggregatedRecords(records: AggregatedType) {
-  const [
-    citizen,
-    badgeholder,
-    gov_contribution,
-    rf_voter,
-    contributors,
-    onchain_builders,
-    github_repo_builders,
-    community_contributors,
-  ] = await Promise.all([
-    getAllCitizens(records.citizen),
-    getAllBadgeholders(),
-    getAllGovContributors(records.gov_contribution),
-    getAllRFVoters(records.rf_voter),
-    getAllContributors(records.contributors),
-    getAllOnchainBuilders(),
-    getAllGithubRepoBuiulders(),
-    getAllCommunityContributors(
-      records.community_contributors.map((c) => c.address),
-    ),
-  ])
-
-  const result = {
-    citizen: citizen?.map((c) => ({
-      address: c.address,
-      email: c.user.emails.at(-1)?.email ?? "",
-    })),
-    badgeholder,
-    gov_contribution: gov_contribution?.map((gc) => ({
-      address: gc.address,
-      email: gc.user.emails.at(-1)?.email ?? "",
-    })),
-    rf_voter: rf_voter?.map((rv) => ({
-      address: rv.address,
-      email: rv.user.emails.at(-1)?.email ?? "",
-    })),
-    contributors:
-      contributors?.map((c) => ({
-        address: c?.addresses.at(-1)?.address ?? "",
-        email: c?.emails.at(-1)?.email ?? "",
-      })) ?? [],
-    onchain_builders:
-      onchain_builders?.map((ob) => ({
-        address: ob.addresses.at(-1)?.address ?? "",
-        email: ob.emails.at(-1)?.email ?? "",
-      })) ?? [],
-    github_repo_builders:
-      github_repo_builders?.map((grb) => ({
-        address: grb.addresses.at(-1)?.address ?? "",
-        email: grb.emails.at(-1)?.email ?? "",
-      })) ?? [],
-    community_contributors: community_contributors?.map((cc) => ({
-      address: cc.address,
-      email: cc.user.emails.at(-1)?.email ?? "",
-    })),
-  }
-
-  return result
 }
