@@ -3,6 +3,8 @@ import React from "react"
 import ExternalLink from "@/components/ExternalLink"
 import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
 
+export const rewardMeasurementDate = new Date("2025-03-10T21:53:13.300Z")
+
 export type MissionData = FundingRoundData & {
   pageName: string
   ogDescription: string

@@ -14,14 +14,14 @@ import { clickSignInWithFarcasterButton } from "@/lib/utils"
 export const ApplicationStatusCard = ({
   isLoading,
   applyByDate,
-  startDate,
+  rewardsDate,
   userProjectCount,
   userAppliedProjects,
   pageName,
 }: {
   isLoading?: boolean
   applyByDate: string | undefined
-  startDate: string | undefined
+  rewardsDate: string | undefined
   userProjectCount?: number
   userAppliedProjects: { icon: string | null; name: string }[] | undefined
   pageName?: string
@@ -37,7 +37,7 @@ export const ApplicationStatusCard = ({
 
         <p className="text-sm text-secondary-foreground text-center">
           {`Apply by ${applyByDate} to be evaluated for rewards starting 
-        ${startDate}.`}
+        ${rewardsDate}.`}
         </p>
         <Button
           className="bg-optimismRed text-white w-full"
@@ -61,7 +61,7 @@ export const ApplicationStatusCard = ({
             {`Apply by ${format(applyByDate, "MMM d")}`}
             <span>
               {` to be evaluated for rewards starting 
-          ${startDate}.`}
+          ${rewardsDate}.`}
             </span>
           </p>
         )}
@@ -143,7 +143,7 @@ export const ApplicationStatusCard = ({
 
             <p className="text-sm text-secondary-foreground text-center">
               {`Apply by ${applyByDate} to be evaluated for rewards starting 
-            ${startDate}.`}
+            ${rewardsDate}.`}
             </p>
             <Button
               className="bg-optimismRed text-white w-full"

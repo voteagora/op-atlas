@@ -19,6 +19,7 @@ import EmailSignupDialog from "./dialogs/EmailSignupDialog"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTabs } from "./MissionApplicationTabs"
 import { useAdminProjects } from "@/hooks/useAdminProjects"
+import { rewardMeasurementDate } from "@/lib/MissionsAndRoundData"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(
@@ -137,7 +138,7 @@ export function MissionApplication() {
             round!.applyBy,
             "MMM d",
           )} to be evaluated for rewards starting 
-                    Mar 5.`}
+                    ${format(rewardMeasurementDate, "MMM d")}`}
         </div>
         <div className="h-[2px] bg-secondary mt-6" />
       </div>

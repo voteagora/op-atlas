@@ -5,7 +5,10 @@ import { format } from "date-fns"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
 import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
-import { FundingRoundData } from "@/lib/MissionsAndRoundData"
+import {
+  FundingRoundData,
+  rewardMeasurementDate,
+} from "@/lib/MissionsAndRoundData"
 
 import { ApplicationStatusCard } from "./ApplicationStatusCard"
 
@@ -22,7 +25,9 @@ export const UserRoundApplicationStatusCard = () => {
         <ApplicationStatusCard
           isLoading={isLoadingApplications && isLoadingProjects}
           applyByDate={mission?.applyBy && format(mission.applyBy, "MMM d")}
-          startDate={mission?.startsAt && format(mission?.startsAt, "MMM d")}
+          rewardsDate={
+            rewardMeasurementDate && format(rewardMeasurementDate, "MMM d")
+          }
           userProjectCount={projects?.length}
           userAppliedProjects={applications?.map((application) => {
             return {
