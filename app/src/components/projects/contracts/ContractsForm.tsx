@@ -88,7 +88,7 @@ function getDefaultValues(
   return {
     isOffChain: project.isOnChainContract === false,
     contracts: contracts.length > 0 ? contracts : [{ ...EMPTY_CONTRACT }],
-    submittedToOSO: !!project.openSourceObserverSlug,
+    submittedToOSO: project.isSubmittedToOso,
     osoSlug: project.openSourceObserverSlug ?? "",
   }
 }
@@ -148,7 +148,8 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
         const [result] = await Promise.all([
           updateProjectOSOStatus({
             projectId: project.id,
-            osoProjectName: values.submittedToOSO ? values.osoSlug : "",
+            osoProjectName: values.osoSlug,
+            isSubmittedToOso: values.submittedToOSO,
           }),
           updateProjectDetails(project.id, {
             isOnChainContract: !values.isOffChain,

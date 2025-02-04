@@ -250,9 +250,11 @@ export const removeContract = async ({
 export const updateProjectOSOStatus = async ({
   projectId,
   osoProjectName,
+  isSubmittedToOso,
 }: {
   projectId: string
   osoProjectName: string | null
+  isSubmittedToOso: boolean
 }) => {
   const session = await auth()
   if (!session) {
@@ -268,6 +270,7 @@ export const updateProjectOSOStatus = async ({
 
   const project = await updateProjectDetails(projectId, {
     openSourceObserverSlug: osoProjectName,
+    isSubmittedToOso: isSubmittedToOso,
   })
 
   revalidatePath("/dashboard")

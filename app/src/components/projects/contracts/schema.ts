@@ -62,7 +62,7 @@ export const HasDeployerKeysOption = z.enum(["Yes", "No", "Some, but not all"])
 const OffChainSchema = z.object({
   isOffChain: z.literal(true),
   contracts: z.any(),
-  submittedToOSO: z.any(),
+  submittedToOSO: z.boolean(),
   osoSlug: z.any(),
 })
 
