@@ -99,28 +99,26 @@ export default function ProjectDetailsForm({
   const router = useRouter()
   const { track } = useAnalytics()
 
-  const searchParams = useSearchParams()
-  const orgId = searchParams.get("orgId") // Extract orgId from query parameters
-
-  const selectedOrg = organizations.find((org) => {
-    return org.id === orgId
-  })
-
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  const searchParams = useSearchParams()
+
+  const orgId = searchParams.get("orgId")
+
+  // console.log(orgId)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: project?.name ?? "",
       description: project?.description ?? "",
-      organization: selectedOrg
-        ? {
-            name: selectedOrg.name,
-            id: selectedOrg.id,
-            avatarUrl: selectedOrg.avatarUrl,
-          }
-        : null,
+      organization:
+        organizations.find((org) => {
+          return org.id === orgId
+        }) ||
+        project?.organization?.organization ||
+        null,
       category: project?.category
         ? (project.category as z.infer<typeof CategoryEnum>)
         : "CeFi",
@@ -234,6 +232,8 @@ export default function ProjectDetailsForm({
       const isCreating = !project
 
       const promise: Promise<Project> = new Promise(async (resolve, reject) => {
+        // console.log(values.organization?.id)
+
         try {
           const [response, res] = project
             ? await Promise.all([
@@ -342,7 +342,7 @@ export default function ProjectDetailsForm({
             control={form.control}
             name="organization"
             render={({ field }) => {
-              console.log(field)
+              // console.log(field)
               return (
                 <FormItem className="flex flex-col gap-1.5">
                   <FormLabel className="text-foreground">

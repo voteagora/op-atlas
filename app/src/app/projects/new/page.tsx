@@ -17,6 +17,13 @@ export default async function Page() {
 
   const userOrganizations = await getAdminOrganizations(session?.user.id)
 
+  // const searchParams = new URLSearchParams(window.location.search)
+  // const paramValue = searchParams.get("orgId")
+
+  // const selectedOrg = userOrganizations.organizations.find((org) => {
+  //   return org.organization.id === router.query["orgId"]
+  // })?.organization
+
   return (
     <div className="h-full bg-secondary flex flex-1 px-6">
       <div className="fixed bottom-4 left-4">
