@@ -243,7 +243,6 @@ const removeTags = async (addresses: EntityRecords, tags: Entity[]) => {
   const tagsToRemove = tags.map((tag) => TAG_BY_ENTITY[tag]).filter(Boolean)
   if (!tagsToRemove.length) return
 
-  // Extract unique emails from all entity records
   const emailsToUpdate = Array.from(
     new Set(
       Object.values(addresses)
@@ -251,73 +250,10 @@ const removeTags = async (addresses: EntityRecords, tags: Entity[]) => {
         .map((a) => a.email),
     ),
   )
-
-  let retries = 5
-  let remainingUsers = emailsToUpdate
-
-  while (retries > 0 && remainingUsers.length > 0) {
-    const usersToUpdate = await prisma.userEmail.findMany({
-      where: {
-        email: { in: remainingUsers },
-        tags: { hasSome: tagsToRemove }, // Users that have at least one of the tags
-      },
-      select: {
-        id: true,
-        email: true,
-        tags: true,
-      },
-    })
-
-    if (usersToUpdate.length === 0) break // All updates done
-
-    await prisma.$transaction(
-      usersToUpdate.map((user) =>
-        prisma.userEmail.update({
-          where: { id: user.id },
-          data: {
-            tags: { set: user.tags.filter((t) => !tagsToRemove.includes(t)) },
-          },
-        }),
-      ),
-    )
-
-    // Fetch users that still have any of the tags
-    const updatedUsersTags = await prisma.userEmail.findMany({
-      where: {
-        email: { in: usersToUpdate.map((u) => u.email) },
-        tags: { hasSome: tagsToRemove },
-      },
-      select: { email: true, tags: true },
-    })
-
-    remainingUsers = updatedUsersTags.map((u) => u.email)
-    retries--
-
-    if (remainingUsers.length > 0) {
-      console.warn(
-        `Retrying removal for ${remainingUsers.length} users... ${retries} retries left`,
-      )
-      await new Promise((resolve) => setTimeout(resolve, 100)) // Small delay for DB consistency
-    }
-  }
-
-  return await prisma.userEmail.findMany({
-    where: { email: { in: emailsToUpdate } },
-    select: { email: true, tags: true },
-  })
-}
-
-// TODO: Fix not all tags being removed
-const removeTags_old = async (addresses: EntityObject[], tag: Entity) => {
-  if (addresses.length === 0) return
-
-  let updatedUserTag = TAG_BY_ENTITY[tag] || ""
-  if (!updatedUserTag) return
-
   const usersToUpdate = await prisma.userEmail.findMany({
     where: {
-      email: { in: addresses.map((a) => a.email) },
-      tags: { has: updatedUserTag },
+      email: { in: emailsToUpdate },
+      tags: { hasSome: tagsToRemove },
     },
     select: {
       id: true,
@@ -326,27 +262,21 @@ const removeTags_old = async (addresses: EntityObject[], tag: Entity) => {
     },
   })
 
-  if (usersToUpdate.length === 0) return usersToUpdate
-
-  const mergedUsersToUpdate = mergeResultsByEmail([usersToUpdate])
-
   await prisma.$transaction(
-    mergedUsersToUpdate.map((user) => {
-      const newTags = user.tags.filter((t) => t !== updatedUserTag)
-
-      return prisma.userEmail.update({
+    usersToUpdate.map((user) =>
+      prisma.userEmail.update({
         where: { id: user.id },
-        data: { tags: { set: newTags } },
-      })
-    }),
+        data: {
+          tags: { set: user.tags.filter((t) => !tagsToRemove.includes(t)) },
+        },
+      }),
+    ),
   )
 
-  const updatedUsersTags = await prisma.userEmail.findMany({
-    where: { email: { in: usersToUpdate.map((u) => u.email) } },
+  return await prisma.userEmail.findMany({
+    where: { email: { in: emailsToUpdate } },
     select: { email: true, tags: true },
   })
-
-  return updatedUsersTags
 }
 
 const handleAddCitizenEntity = async (
