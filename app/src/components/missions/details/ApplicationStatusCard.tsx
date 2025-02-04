@@ -36,8 +36,7 @@ export const ApplicationStatusCard = ({
         <p className="font-semibold">{"Apply"}</p>
 
         <p className="text-sm text-secondary-foreground text-center">
-          {`Apply by ${applyByDate} to be evaluated for rewards in 
-        ${rewardsDate}.`}
+          {`Apply by ${applyByDate} to be evaluated for rewards starting in ${rewardsDate}.`}
         </p>
         <Button
           className="bg-optimismRed text-white w-full"
@@ -60,7 +59,7 @@ export const ApplicationStatusCard = ({
           <p className="text-sm text-secondary-foreground text-center">
             {`Apply by ${format(applyByDate, "MMM d")}`}
             <span>
-              {` to be evaluated for rewards in 
+              {` to be evaluated for rewards starting in 
           ${rewardsDate}.`}
             </span>
           </p>
@@ -142,7 +141,7 @@ export const ApplicationStatusCard = ({
             <p className="font-semibold">{"Apply"}</p>
 
             <p className="text-sm text-secondary-foreground text-center">
-              {`Apply by ${applyByDate} to be evaluated for rewards in 
+              {`Apply by ${applyByDate} to be evaluated for rewards starting in 
             ${rewardsDate}.`}
             </p>
             <Button
