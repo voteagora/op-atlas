@@ -5,6 +5,7 @@ import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout
 
 export type MissionData = FundingRoundData & {
   pageName: string
+  ogDescription: string
   roundName: string
   missionPageRequirements: React.ReactNode
   missionPageEligibility: React.ReactNode
@@ -43,6 +44,8 @@ export const MISSIONS: MissionData[] = [
     },
     details:
       "rewards toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain.",
+    ogDescription:
+      "Retro Funding: Dev Tooling is distributing up to 8M OP in H1 2025. If you built tooling on Optimism, sign up to check if you qualify for grants.",
     status: "ongoing",
     resultsLink: "/round/results/6",
     accentColor: "#F0FFF1",
@@ -198,6 +201,8 @@ export const MISSIONS: MissionData[] = [
     },
     details:
       "rewards projects that drive cross-chain asset transfers, enabled through interop, by growing the Superchain across eligible OP Chains.",
+    ogDescription:
+      "Retro Funding: Onchain Builders is allocating up to 8M OP in H1 2025. If you've built on Optimism, sign up to see if you qualify for grants.",
     status: "ongoing",
     resultsLink: "/round/results/6",
     accentColor: "#F0FFF1",
