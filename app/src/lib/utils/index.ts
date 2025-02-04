@@ -151,23 +151,11 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
 export function projectHasUnpublishedChanges(
   project: ProjectWithDetails,
 ): boolean {
-  // const latestSnapshot = sortBy((s) => -s.createdAt, project.snapshots)[0]
-  const latestSnapshotDate = new Date(
-    Math.max(
-      ...project.snapshots.map((item) => new Date(item.createdAt).getTime()),
-    ),
-  )
-
-  if (!latestSnapshotDate) {
-    console.log("HERE 1")
-    return true
-  }
-
-  // console.log("Latest date/time:", latestDate.toISOString());
-
-  console.log("HERE")
-  console.log(latestSnapshotDate)
-  console.log(project.lastMetadataUpdate)
+  const latestSnapshot = sortBy(
+    (s) => -new Date(s.createdAt).getTime(),
+    project.snapshots,
+  )[0]
+  if (!latestSnapshot) return true
 
   return new Date(latestSnapshotDate) < new Date(project.lastMetadataUpdate)
 }

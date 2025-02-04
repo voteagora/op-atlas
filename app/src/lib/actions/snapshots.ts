@@ -15,13 +15,11 @@ import {
   createProjectMetadataAttestation,
 } from "../eas"
 import { uploadToPinata } from "../pinata"
-import { APPLICATIONS_CLOSED } from "../utils"
 import {
   formatOrganizationMetadata,
   formatProjectMetadata,
   ProjectMetadata,
 } from "../utils/metadata"
-import { publishAndSaveApplication } from "./applications"
 import { verifyMembership } from "./utils"
 
 export const createProjectSnapshot = async (projectId: string) => {
@@ -64,37 +62,6 @@ export const createProjectSnapshot = async (projectId: string) => {
       ipfsHash,
       attestationId,
     })
-
-    // If the project has an application, we need to publish a new one to reference this snapshot.
-
-    const application = project.applications.sort((a, b) => {
-      console.log(b.createdAt)
-      console.log(a.createdAt)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    })[0]
-
-    console.log(application)
-
-    if (application && !APPLICATIONS_CLOSED) {
-      await publishAndSaveApplication({
-        project: {
-          projectId: project.id,
-          categoryId: application.categoryId ?? "",
-          impactStatement: application.impactStatementAnswer?.reduce(
-            (acc, { impactStatementId, answer }) => {
-              acc[impactStatementId] = answer
-              return acc
-            },
-            {} as Record<string, string>,
-          ),
-          projectDescriptionOptions: application.projectDescriptionOptions,
-        },
-        category: application.category!,
-        farcasterId: session.user.farcasterId,
-        metadataSnapshotId: snapshot.attestationId,
-        round: Number(application.round.id),
-      })
-    }
 
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")
