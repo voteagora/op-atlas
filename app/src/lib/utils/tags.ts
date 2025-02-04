@@ -16,7 +16,6 @@ export const mergeResultsByEmail = (
       const existingEntry = mergedMap.get(email)!
       tags?.forEach((tag) => existingEntry.tags.add(tag))
 
-      // If the existing entry has no ID but the new entry does, update it
       if (!existingEntry.id && id) {
         existingEntry.id = id
       }
@@ -26,7 +25,7 @@ export const mergeResultsByEmail = (
   return Array.from(mergedMap.entries()).map(([email, { id, tags }]) => ({
     id,
     email,
-    tags: Array.from(tags), // Convert Set to array to remove duplicates
+    tags: Array.from(tags),
   }))
 }
 

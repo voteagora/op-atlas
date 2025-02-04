@@ -12,7 +12,6 @@ import { TAG_BY_ENTITY } from "eas-indexer/src/constants"
 import { AggregatedType } from "eas-indexer/src/types"
 
 import { UserAddressSource } from "@/lib/types"
-import { mergeResultsByEmail } from "@/lib/utils/tags"
 
 import { prisma } from "./client"
 
@@ -580,102 +579,29 @@ export async function getAllCommunityContributors(addresses: string[]) {
   })
 }
 
-export async function addTag(addresses: EntityObject[], tag: Entity) {
-  if (addresses.length === 0) {
-    return
-  }
+export async function addTags(records: EntityRecords) {
+  const entityKeys = Object.keys(records) as (keyof typeof records)[]
+  const userTagsMap = new Map<string, Set<string>>()
 
-  let updatedUserTag = TAG_BY_ENTITY[tag] || ""
-  if (!updatedUserTag) {
-    console.error("Invalid tag")
-    return
-  }
+  entityKeys.forEach((entity) => {
+    records[entity].forEach((user) => {
+      const userTag = TAG_BY_ENTITY[entity]
 
-  const usersToUpdate = await prisma.userEmail.findMany({
-    where: {
-      email: {
-        in: addresses.map((a) => a.email),
-      },
-      NOT: {
-        tags: {
-          has: updatedUserTag,
-        },
-      },
-    },
-    select: {
-      email: true,
-      tags: true,
-    },
-  })
-
-  if (usersToUpdate.length === 0) {
-    return await prisma.userEmail.findMany({
-      where: {
-        email: {
-          in: addresses.map((a) => a.email),
-        },
-      },
-      select: {
-        email: true,
-        tags: true,
-      },
+      if (!userTagsMap.has(user.email)) {
+        userTagsMap.set(user.email, new Set([userTag]))
+      } else {
+        userTagsMap.get(user.email)?.add(userTag)
+      }
     })
-  }
-
-  await prisma.userEmail.updateMany({
-    where: {
-      email: {
-        in: usersToUpdate.map((u) => u.email),
-      },
-    },
-    data: {
-      tags: {
-        push: updatedUserTag,
-      },
-    },
   })
 
-  const updatedUsersTags = await prisma.userEmail.findMany({
-    where: {
-      email: {
-        in: usersToUpdate.map((u) => u.email),
-      },
-    },
-    select: {
-      email: true,
-      tags: true,
-    },
-  })
+  const emailsToUpdate = Array.from(userTagsMap.keys())
 
-  return mergeResultsByEmail([updatedUsersTags])
-}
-
-export async function removeTags(addresses: EntityRecords, tags: Entity[]) {
-  if (
-    !tags.length ||
-    Object.values(addresses).every((list) => list.length === 0)
-  )
-    return
-
-  const tagsToRemove = tags.map((tag) => TAG_BY_ENTITY[tag]).filter(Boolean)
-  if (!tagsToRemove.length) return
-
-  const emailsToUpdate = Array.from(
-    new Set(
-      Object.values(addresses)
-        .flat()
-        .map((a) => a.email),
-    ),
-  )
   const usersToUpdate = await prisma.userEmail.findMany({
     where: {
-      email: { in: emailsToUpdate },
-      tags: { hasSome: tagsToRemove },
-    },
-    select: {
-      id: true,
-      email: true,
-      tags: true,
+      email: {
+        in: emailsToUpdate,
+      },
     },
   })
 
@@ -683,15 +609,14 @@ export async function removeTags(addresses: EntityRecords, tags: Entity[]) {
     usersToUpdate.map((user) =>
       prisma.userEmail.update({
         where: { id: user.id },
-        data: {
-          tags: { set: user.tags.filter((t) => !tagsToRemove.includes(t)) },
-        },
+        data: { tags: Array.from(userTagsMap.get(user.email) ?? []) },
       }),
     ),
   )
 
-  return await prisma.userEmail.findMany({
-    where: { email: { in: emailsToUpdate } },
-    select: { email: true, tags: true },
-  })
+  return usersToUpdate.map((user) => ({
+    id: user.id,
+    email: user.email,
+    tags: Array.from(userTagsMap.get(user.email) ?? []),
+  }))
 }

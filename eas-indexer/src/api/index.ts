@@ -33,6 +33,7 @@ entities.forEach((entity: Entity) => {
   });
 });
 
+// TODO: Pull all the entities in the same query and then separate into entity keys
 ponder.get("/entities/aggregated", async (c) => {
   const entities: Entity[] = [
     "badgeholder",
