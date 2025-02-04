@@ -5,6 +5,7 @@ import { NextRequest } from "next/server"
 import { prisma } from "@/db/client"
 import { getAggregatedRecords } from "@/lib/actions/tags"
 import { getAggregatedData } from "@/lib/api/eas/aggregated"
+import { updateMailchimpTags } from "@/lib/api/mailchimp"
 import mailchimp from "@/lib/mailchimp"
 
 export const dynamic = "force-dynamic"
@@ -83,35 +84,9 @@ const addTagsToContacts = async () => {
       tags: ["Community Contributor"],
     })),
   ])
+  if (!flattenedUsers) return
 
-  const LIST_ID = process.env.MAILCHIMP_LIST_ID
-  const results = (await mailchimp.lists
-    .batchListMembers(LIST_ID!, {
-      members: flattenedUsers.map((user) => ({
-        email_address: user.email,
-        tags: user.tags ?? [],
-        email_type: "html",
-        status: "transactional",
-      })),
-      update_existing: true,
-    })
-    .catch((error: any) => {
-      console.error(`[-] Mailchimp contacts tagging failed: ${error}`)
-    })) as any
-
-  console.log(
-    `[+] Mailchimp contacts tagged: ${results.updated_members.length}`,
-  )
-
-  results.updated_members.forEach((member: any) => {
-    console.log(
-      `  - ${member.email_address}; tags: ${
-        flattenedUsers.find((m) => {
-          return m.email === member.email_address
-        })?.tags
-      };`,
-    )
-  })
+  await updateMailchimpTags(flattenedUsers)
 }
 const removeTagsFromContacts = async () => {
   const records = await fetchRecords()
@@ -126,39 +101,7 @@ const removeTagsFromContacts = async () => {
   ])
   if (!flattenedUsers) return
 
-  flattenedUsers.forEach((user) => {
-    console.log(`  - ${user.email}; tags: ${user.tags.join(", ")};`)
-  })
-
-  const LIST_ID = process.env.MAILCHIMP_LIST_ID
-  await mailchimp.lists
-    .batchListMembers(LIST_ID!, {
-      members: flattenedUsers.map((user) => ({
-        email_address: user.email,
-        tags: user.tags ?? [],
-        email_type: "html",
-        status: "transactional",
-      })),
-      sync_tags: true,
-      update_existing: true,
-    })
-    .then((results: any) => {
-      console.log(
-        `[+] Mailchimp contacts untagged: ${results.updated_members.length}`,
-      )
-      results.updated_members.forEach((member: any) => {
-        const memberTags = member.tags.map((t: any) => t.name).join(", ")
-        if (!memberTags.length) {
-          console.log(`  - ${member.email_address}; tags: []`)
-          return
-        }
-
-        console.log(`  - ${member.email_address}; tags: ${memberTags};`)
-      })
-    })
-    .catch((error: any) => {
-      console.error(`[-] Mailchimp contacts untagging failed: ${error}`)
-    })
+  await updateMailchimpTags(flattenedUsers)
 }
 
 const fetchRecords = async (): Promise<EntityRecords> => {
