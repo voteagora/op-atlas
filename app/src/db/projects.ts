@@ -636,7 +636,6 @@ export type CreateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
 > & {
   name: string
-  isSubmittedToOso: boolean
 }
 
 export async function createProject({
