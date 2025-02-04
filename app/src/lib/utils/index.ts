@@ -157,7 +157,9 @@ export function projectHasUnpublishedChanges(
   )[0]
   if (!latestSnapshot) return true
 
-  return new Date(latestSnapshotDate) < new Date(project.lastMetadataUpdate)
+  return (
+    new Date(latestSnapshot.createdAt) < new Date(project.lastMetadataUpdate)
+  )
 }
 
 /*
