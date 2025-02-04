@@ -6,29 +6,29 @@ import { sharedMetadata } from "@/app/shared-metadata"
 import Mission from "@/components/missions/details/Mission"
 import { MISSIONS } from "@/lib/MissionsAndRoundData"
 
-export const metadata: Metadata = {
-  ...sharedMetadata,
-  title: `Retro Funding: ${
-    MISSIONS.find(
-      (page) => page.pageName === window.location.pathname.split("/").pop(),
-    )?.name ?? ""
-  } - OP Atlas`,
-  description:
-    MISSIONS.find(
-      (page) => page.pageName === window.location.pathname.split("/").pop(),
-    )?.ogDescription ?? "",
-  openGraph: {
-    ...sharedMetadata.openGraph,
-    title: `Retro Funding: ${
-      MISSIONS.find(
-        (page) => page.pageName === window.location.pathname.split("/").pop(),
-      )?.name ?? ""
-    } - OP Atlas`,
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string }
+}): Promise<Metadata> {
+  const mission = MISSIONS.find((page) => page.pageName === params.id)
+
+  return {
+    ...sharedMetadata,
+    title: `Retro Funding: ${mission?.name ?? ""} - OP Atlas`,
     description:
-      MISSIONS.find(
-        (page) => page.pageName === window.location.pathname.split("/").pop(),
-      )?.ogDescription ?? "",
-  },
+      mission?.pageName === "dev-tooling"
+        ? "Retro Funding: Dev Tooling is distributing up to 8M OP in H1 2025. If you built tooling on Optimism, sign up to check if you qualify for grants"
+        : "Retro Funding: Onchain Builders is allocating up to 8M OP in H1 2025. If you've built on Optimism, sign up to see if you qualify for grants.",
+    openGraph: {
+      ...sharedMetadata.openGraph,
+      title: `Retro Funding: ${mission?.name ?? ""} - OP Atlas`,
+      description:
+        mission?.pageName === "dev-tooling"
+          ? "Retro Funding: Dev Tooling is distributing up to 8M OP in H1 2025. If you built tooling on Optimism, sign up to check if you qualify for grants"
+          : "Retro Funding: Onchain Builders is allocating up to 8M OP in H1 2025. If you've built on Optimism, sign up to see if you qualify for grants.",
+    },
+  }
 }
 
 export default async function MissionPage({
