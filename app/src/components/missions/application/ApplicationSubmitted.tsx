@@ -93,7 +93,7 @@ export const ApplicationSubmitted = ({
   return (
     <div
       className={cn(
-        "w-body flex flex-col gap-y-12 w-full rounded-3xl pt-20",
+        "w-body flex flex-col gap-y-12 rounded-3xl pt-20",
         className,
       )}
     >
@@ -109,7 +109,7 @@ export const ApplicationSubmitted = ({
             width={124}
           />
 
-          <h2 className="text-center">{"You're Enrolled!"}</h2>
+          <h2 className="text-center">{"You're enrolled!"}</h2>
           <p className="text-center">
             Your application to{" "}
             {
@@ -145,7 +145,7 @@ export const ApplicationSubmitted = ({
           return (
             <div
               key={"Application" + index}
-              className="flex justify-between items-center gap-y-6 p-5 bg-background border rounded-2xl"
+              className="flex justify-between items-center gap-y-6 p-6 bg-background border rounded-3xl"
             >
               <div className="flex items-center gap-4">
                 {application.thumbnailUrl && (
@@ -186,7 +186,14 @@ export const ApplicationSubmitted = ({
         </div>
 
         <div className="flex justify-center gap-4">
-          <Button variant={"destructive"}>Back to details</Button>
+          <Button
+            variant={"destructive"}
+            onClick={() => {
+              router.push(`/missions/${mission?.pageName}`)
+            }}
+          >
+            Back to details
+          </Button>
 
           <Button
             variant={"outline"}
