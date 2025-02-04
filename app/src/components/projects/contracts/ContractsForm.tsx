@@ -188,12 +188,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
 
   const canSubmit = (function () {
     return (
-      (canAddContract && form.getValues().submittedToOSO
-        ? form.getValues().submittedToOSO && form.getValues().osoSlug.length > 0
-        : false) ||
-      (form.getValues().submittedToOSO &&
-        form.getValues().osoSlug.length > 0) ||
-      formValues.isOffChain
+      formValues.isOffChain || canAddContract || form.getValues().submittedToOSO
     )
   })()
 
@@ -237,7 +232,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
               control={form.control}
               name="isOffChain"
               render={({ field }) => {
-                return !field.value ? (
+                return (
                   <>
                     <div className="flex flex-col gap-6">
                       <div className="flex flex-col gap-3">
@@ -312,7 +307,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                         name="submittedToOSO"
                         render={({ field }) => (
                           <>
-                            {field.value && (
+                            {
                               <FormField
                                 control={form.control}
                                 name="osoSlug"
@@ -328,7 +323,7 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                                   </FormItem>
                                 )}
                               />
-                            )}
+                            }
 
                             <FormItem className="flex flex-col gap-2">
                               <FormLabel className="text-foreground">
@@ -352,8 +347,6 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
                       />
                     </div>
                   </>
-                ) : (
-                  <></>
                 )
               }}
             />
