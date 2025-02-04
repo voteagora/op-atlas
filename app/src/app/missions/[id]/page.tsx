@@ -1,8 +1,35 @@
+import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import React from "react"
 
+import { sharedMetadata } from "@/app/shared-metadata"
 import Mission from "@/components/missions/details/Mission"
 import { MISSIONS } from "@/lib/MissionsAndRoundData"
+
+export const metadata: Metadata = {
+  ...sharedMetadata,
+  title: `Retro Funding: ${
+    MISSIONS.find(
+      (page) => page.pageName === window.location.pathname.split("/").pop(),
+    )?.name ?? ""
+  } - OP Atlas`,
+  description:
+    MISSIONS.find(
+      (page) => page.pageName === window.location.pathname.split("/").pop(),
+    )?.ogDescription ?? "",
+  openGraph: {
+    ...sharedMetadata.openGraph,
+    title: `Retro Funding: ${
+      MISSIONS.find(
+        (page) => page.pageName === window.location.pathname.split("/").pop(),
+      )?.name ?? ""
+    } - OP Atlas`,
+    description:
+      MISSIONS.find(
+        (page) => page.pageName === window.location.pathname.split("/").pop(),
+      )?.ogDescription ?? "",
+  },
+}
 
 export default async function MissionPage({
   params,
