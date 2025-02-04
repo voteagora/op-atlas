@@ -188,7 +188,9 @@ export function ContractsForm({ project }: { project: ProjectWithDetails }) {
 
   const canSubmit = (function () {
     return (
-      canAddContract ||
+      (canAddContract && form.getValues().submittedToOSO
+        ? form.getValues().submittedToOSO && form.getValues().osoSlug.length > 0
+        : false) ||
       (form.getValues().submittedToOSO &&
         form.getValues().osoSlug.length > 0) ||
       formValues.isOffChain
