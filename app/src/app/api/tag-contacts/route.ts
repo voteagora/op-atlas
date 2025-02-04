@@ -145,7 +145,17 @@ const addTag = async (addresses: EntityObject[], tag: Entity) => {
   })
 
   if (usersToUpdate.length === 0) {
-    return usersToUpdate
+    return await prisma.userEmail.findMany({
+      where: {
+        email: {
+          in: addresses.map((a) => a.email),
+        },
+      },
+      select: {
+        email: true,
+        tags: true,
+      },
+    })
   }
 
   await prisma.userEmail.updateMany({
