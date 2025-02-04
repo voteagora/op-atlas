@@ -25,9 +25,6 @@ export function EnrolledCallout({
     (round) => round.number.toString() === application.roundId,
   )
 
-  console.log(index)
-  console.log(application)
-
   return (
     <Callout
       type="success"
