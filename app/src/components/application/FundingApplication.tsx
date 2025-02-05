@@ -240,9 +240,12 @@ export const FundingApplication = ({
         {projects.length === 0 ? (
           <Callout
             type="error"
-            text="You haven't created or joined any projects"
-            linkText="View projects"
-            linkHref="/dashboard"
+            leftAlignedContent={"You haven't created or joined any projects"}
+            rightAlignedContent={
+              <ExternalLink href={"/dashboard"}>View projects</ExternalLink>
+            }
+            leftHandSize="sm"
+            rightHandSize="sm"
           />
         ) : (
           <div className="flex flex-col gap-y-2">
