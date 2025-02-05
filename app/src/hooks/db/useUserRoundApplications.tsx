@@ -2,6 +2,7 @@ import {
   QueryObserverResult,
   RefetchOptions,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
@@ -18,28 +19,19 @@ export function useUserRoundApplications(roundNumber: number | undefined): {
 } {
   const { data: session } = useSession()
 
-  const [data, setData] = useState<ApplicationWithDetails[] | undefined>()
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
-    async function get() {
-      setIsLoading(true)
-      const result = await getUserApplicationsForRound(
-        session?.user.id!,
-        roundNumber!,
-      )
-      setData(result)
-      setIsLoading(false)
-    }
+    queryClient.invalidateQueries({
+      queryKey: ["userApplicationsForRound", session?.user.id],
+    })
+  }, [session?.user.id])
 
-    get()
-  }, [!!session])
-
-  // const { data, isLoading, error, refetch } = useQuery({
-  //   queryKey: ["userApplicationsForRound", session?.user.id],
-  //   queryFn: () => getUserApplicationsForRound(session?.user.id!, roundNumber!),
-  //   enabled: !!session && !!roundNumber,
-  // })
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["userApplicationsForRound", session?.user.id],
+    queryFn: () => getUserApplicationsForRound(session?.user.id!, roundNumber!),
+    enabled: !!session?.user.id && !!roundNumber,
+  })
 
   return { data, isLoading }
 }

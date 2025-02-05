@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
 import { getApplications } from "@/lib/actions/projects"
@@ -11,25 +11,19 @@ export function useUserApplications(): {
 } {
   const { data: session } = useSession()
 
-  const [data, setData] = useState<ApplicationWithDetails[] | undefined>()
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
-    async function get() {
-      setIsLoading(true)
-      const result = await getApplications(session?.user?.id!)
-      setData(result)
-      setIsLoading(false)
-    }
+    queryClient.invalidateQueries({
+      queryKey: ["userApplications", session?.user?.id],
+    })
+  }, [session?.user.id])
 
-    get()
-  }, [!!session])
-
-  // const { data, isLoading, error } = useQuery({
-  //   queryKey: ["userApplications", session?.user?.id],
-  //   queryFn: () => getApplications(session?.user?.id!),
-  //   enabled: !!session,
-  // })
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["userApplications", session?.user?.id],
+    queryFn: () => getApplications(session?.user?.id!),
+    enabled: !!session?.user.id,
+  })
 
   return { data, isLoading }
 }
