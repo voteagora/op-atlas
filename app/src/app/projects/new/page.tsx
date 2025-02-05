@@ -30,6 +30,7 @@ export default async function Page() {
               userOrganizations?.organizations.map((org) => org.organization) ??
               []
             }
+            isAutoAdvanceOnSave={true}
           />
         </div>
       </div>

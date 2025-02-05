@@ -92,9 +92,11 @@ function fromStringObjectArr(objs: { value: string }[]) {
 export default function ProjectDetailsForm({
   project,
   organizations,
+  isAutoAdvanceOnSave = false,
 }: {
   project?: ProjectWithDetails
   organizations: Organization[]
+  isAutoAdvanceOnSave?: boolean
 }) {
   const router = useRouter()
   const { track } = useAnalytics()
@@ -267,9 +269,16 @@ export default function ProjectDetailsForm({
       toast.promise(promise, {
         loading: isCreating ? "Creating project onchain..." : "Saving project",
         success: (project) => {
-          isSave
-            ? router.replace(`/projects/${project.id}/details`)
-            : router.push(`/projects/${project.id}/contributors`)
+          if (isSave) {
+            if (isAutoAdvanceOnSave) {
+              router.push(`/projects/${project.id}/contributors`)
+            } else {
+              router.replace(`/projects/${project.id}/details`)
+            }
+          } else {
+            router.push(`/projects/${project.id}/contributors`)
+          }
+
           setIsSaving(false)
           return isCreating ? "Project created onchain!" : "Project saved"
         },
