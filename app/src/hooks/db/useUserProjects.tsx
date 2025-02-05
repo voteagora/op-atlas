@@ -14,12 +14,12 @@ export function useUserProjects(): {
   isLoading: boolean
   error: Error | null
 } {
-  const session = useSession()
+  const { data: session } = useSession()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["userProjects", session?.data?.user?.id],
-    queryFn: () => getProjects(session?.data?.user.id as string),
-    enabled: session?.data?.user.id !== undefined,
+    queryKey: ["userProjects", session?.user.id],
+    queryFn: () => getProjects(session?.user.id!),
+    enabled: !!session,
   })
 
   return { data, isLoading, error }

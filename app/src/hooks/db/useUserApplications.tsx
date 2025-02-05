@@ -9,12 +9,12 @@ export function useUserApplications(): {
   isLoading: boolean
   error: Error | null
 } {
-  const session = useSession()
+  const { data: session } = useSession()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["userApplications"],
-    queryFn: () => getApplications(session?.data?.user.id as string),
-    enabled: session?.data?.user.id !== undefined,
+    queryKey: ["userApplications", session?.user?.id],
+    queryFn: () => getApplications(session?.user?.id!),
+    enabled: !!session,
   })
 
   return { data, isLoading, error }

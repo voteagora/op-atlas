@@ -32,7 +32,7 @@ import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { ApplicationFormSchema } from "./MissionApplication"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTerms } from "./MissionApplicationTerms"
-import { useAdminProjects } from "@/hooks/useAdminProjects"
+import { useAdminProjects } from "@/hooks/db/useAdminProjects"
 
 export function MissionApplicationTabs({
   form,

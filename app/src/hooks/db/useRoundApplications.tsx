@@ -11,8 +11,8 @@ export function useRoundApplications(roundNumber: number | undefined): {
 } {
   const { data, isLoading, error } = useQuery({
     queryKey: ["applicationsForRound", roundNumber],
-    queryFn: () => getApplicationsForRound(roundNumber as number),
-    enabled: roundNumber !== undefined,
+    queryFn: () => getApplicationsForRound(roundNumber!),
+    enabled: !!roundNumber,
   })
 
   return { data, isLoading, error }
