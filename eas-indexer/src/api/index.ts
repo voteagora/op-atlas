@@ -47,9 +47,7 @@ ponder.get("/entities/aggregated", async (c) => {
     citizen: [],
     gov_contribution: [],
     rf_voter: [],
-    contributors: [],
     community_contributors: [],
-    github_repo_builders: [],
     onchain_builders: [],
   };
 
@@ -79,6 +77,9 @@ ponder.get("/entities/aggregated", async (c) => {
         }
         return acc;
       }, []);
+      // aggregated.citizen.push({
+      //   address: "0x7699FB55f8517A0089452aaF9c12F364b4E0Eee5",
+      // });
     }
   }
 

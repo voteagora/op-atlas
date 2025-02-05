@@ -2,10 +2,8 @@ import { AggregatedType } from "./types";
 
 export const TAG_BY_ENTITY: Record<keyof AggregatedType, string> = {
   citizen: "Citizen",
-  contributors: "Contributor",
   community_contributors: "Community Contributor",
   onchain_builders: "Onchain Builder",
-  github_repo_builders: "Github Repo",
   badgeholder: "Badgeholder",
   gov_contribution: "S7 Elected Official",
   rf_voter: "Guest Voter",

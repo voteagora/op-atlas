@@ -8,9 +8,9 @@ import {
   UserInteraction,
 } from "@prisma/client"
 import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "eas-indexer/src/constants"
-import { TAG_BY_ENTITY } from "eas-indexer/src/constants"
-import { AggregatedType } from "eas-indexer/src/types"
 
+import { EXTENDED_TAG_BY_ENTITY as TAG_BY_ENTITY } from "@/lib/constants"
+import { ExtendedAggregatedType as AggregatedType } from "@/lib/types"
 import { UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
