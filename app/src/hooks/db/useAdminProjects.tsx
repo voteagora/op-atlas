@@ -13,15 +13,27 @@ import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 export function useAdminProjects(): {
   data: ProjectWithDetails[] | undefined
   isLoading: boolean
-  error: Error | null
 } {
   const { data: session } = useSession()
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["adminProjects", session?.user.id],
-    queryFn: () => getAdminProjects(session?.user.id as string),
-    enabled: !!session,
-  })
+  const [data, setData] = useState<ProjectWithDetails[] | undefined>()
+  const [isLoading, setIsLoading] = useState(false)
 
-  return { data, isLoading, error }
+  useEffect(() => {
+    async function get() {
+      setIsLoading(true)
+      const result = await getAdminProjects(session?.user?.id!)
+      setData(result)
+      setIsLoading(false)
+    }
+
+    get()
+  }, [!!session])
+  // const { data, isLoading, error } = useQuery({
+  //   queryKey: ["adminProjects", session?.user.id],
+  //   queryFn: () => getAdminProjects(session?.user.id as string),
+  //   enabled: !!session,
+  // })
+
+  return { data, isLoading }
 }

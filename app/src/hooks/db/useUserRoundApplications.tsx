@@ -5,48 +5,41 @@ import {
 } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
-import { getUserApplicationsForRound } from "@/lib/actions/projects"
-import { ApplicationWithDetails } from "@/lib/types"
+import {
+  getProjects,
+  getUserApplicationsForRound,
+} from "@/lib/actions/projects"
+import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { useEffect, useState } from "react"
 
 export function useUserRoundApplications(roundNumber: number | undefined): {
   data: ApplicationWithDetails[] | undefined
   isLoading: boolean
-  error: Error | null
-  refetch: (
-    options?: RefetchOptions | undefined,
-  ) => Promise<QueryObserverResult<ApplicationWithDetails[]>>
 } {
   const { data: session } = useSession()
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["userApplicationsForRound", session?.user.id],
-    queryFn: () => getUserApplicationsForRound(session?.user.id!, roundNumber!),
-    enabled: !!session && !!roundNumber,
-  })
+  const [data, setData] = useState<ApplicationWithDetails[] | undefined>()
+  const [isLoading, setIsLoading] = useState(false)
 
-  // const session = useSession()
+  useEffect(() => {
+    async function get() {
+      setIsLoading(true)
+      const result = await getUserApplicationsForRound(
+        session?.user.id!,
+        roundNumber!,
+      )
+      setData(result)
+      setIsLoading(false)
+    }
 
-  // console.log(session.data?.user.id)
-  // const [isMounted, setIsMounted] = useState<boolean>(false)
-
-  // useEffect(() => {
-  //   setIsMounted(true)
-
-  //   return () => {
-  //     setIsMounted(false)
-  //   }
-  // }, [])
+    get()
+  }, [!!session])
 
   // const { data, isLoading, error, refetch } = useQuery({
-  //   queryKey: ["userApplicationsForRound", roundNumber],
-  //   queryFn: () =>
-  //     getUserApplicationsForRound(
-  //       session.data.user.id,
-  //       roundNumber as number,
-  //     ),
-  //     enabled: session?.data?.user?.id !== undefined
+  //   queryKey: ["userApplicationsForRound", session?.user.id],
+  //   queryFn: () => getUserApplicationsForRound(session?.user.id!, roundNumber!),
+  //   enabled: !!session && !!roundNumber,
   // })
 
-  return { data, isLoading, error, refetch }
+  return { data, isLoading }
 }
