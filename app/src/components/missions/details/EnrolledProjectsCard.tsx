@@ -19,16 +19,14 @@ export const IconList = ({
       >
         {icons.map((icon: string | null, index: number) => {
           return (
-            icon && (
-              <Image
-                src={icon}
-                width={44}
-                height={44}
-                alt="Project"
-                key={"projectsEnrolled-" + index}
-                className="rounded-lg"
-              />
-            )
+            <Image
+              src={icon ?? "/assets/images/social-share-background.png"}
+              width={44}
+              height={44}
+              alt="Project"
+              key={"projectsEnrolled-" + index}
+              className="rounded-lg"
+            />
           )
         })}
       </div>
