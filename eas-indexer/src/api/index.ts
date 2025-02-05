@@ -33,7 +33,6 @@ entities.forEach((entity: Entity) => {
   });
 });
 
-// TODO: Pull all the entities in the same query and then separate into entity keys
 ponder.get("/entities/aggregated", async (c) => {
   const entities: Entity[] = [
     "badgeholder",
@@ -77,9 +76,6 @@ ponder.get("/entities/aggregated", async (c) => {
         }
         return acc;
       }, []);
-      // aggregated.citizen.push({
-      //   address: "0x7699FB55f8517A0089452aaF9c12F364b4E0Eee5",
-      // });
     }
   }
 
