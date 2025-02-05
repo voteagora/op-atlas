@@ -172,9 +172,8 @@ const UserProjectCard = ({
         {}
         {uniqueApplications?.map((application, index) => {
           return (
-            <div className="mt-4">
+            <div className="mt-4" key={"ApplicationEnrolled" + index}>
               <EnrolledCallout
-                key={"ApplicationEnrolled" + index}
                 application={application}
                 index={index}
                 onRewardsClick={handleActiveRoundHelpClick}
