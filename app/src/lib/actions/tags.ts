@@ -1,7 +1,5 @@
 "use server"
 
-import { AggregatedType } from "eas-indexer/src/types"
-
 import {
   getAllBadgeholders,
   getAllCitizens,
@@ -13,7 +11,9 @@ import {
   getAllRFVoters,
 } from "@/db/users"
 
-export async function getAggregatedRecords(records: AggregatedType) {
+import { ExtendedAggregatedType } from "../types"
+
+export async function getAggregatedRecords(records: ExtendedAggregatedType) {
   const [
     citizen,
     badgeholder,

@@ -9,13 +9,13 @@ import {
 } from "@prisma/client"
 import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "eas-indexer/src/constants"
 
-import { EXTENDED_TAG_BY_ENTITY as TAG_BY_ENTITY } from "@/lib/constants"
-import { ExtendedAggregatedType as AggregatedType } from "@/lib/types"
+import { EXTENDED_TAG_BY_ENTITY } from "@/lib/constants"
+import { ExtendedAggregatedType } from "@/lib/types"
 import { UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
 
-export type Entity = keyof AggregatedType
+export type Entity = keyof ExtendedAggregatedType
 export type EntityObject = {
   address: string
   email: string
@@ -288,7 +288,9 @@ export async function updateUserInteraction(
   })
 }
 
-export async function getAllCitizens(records: AggregatedType["citizen"]) {
+export async function getAllCitizens(
+  records: ExtendedAggregatedType["citizen"],
+) {
   return prisma.userAddress.findMany({
     where: {
       AND: [
@@ -319,7 +321,7 @@ export async function getAllBadgeholders() {
 }
 
 export async function getAllGovContributors(
-  records: AggregatedType["gov_contribution"],
+  records: ExtendedAggregatedType["gov_contribution"],
 ) {
   return prisma.userAddress.findMany({
     where: {
@@ -346,7 +348,9 @@ export async function getAllGovContributors(
   })
 }
 
-export async function getAllRFVoters(records: AggregatedType["rf_voter"]) {
+export async function getAllRFVoters(
+  records: ExtendedAggregatedType["rf_voter"],
+) {
   return prisma.userAddress.findMany({
     where: {
       address: {
@@ -369,7 +373,7 @@ export async function getAllRFVoters(records: AggregatedType["rf_voter"]) {
 }
 
 export async function getAllContributors(
-  records: AggregatedType["contributors"],
+  records: ExtendedAggregatedType["contributors"],
 ) {
   const data = await prisma.project.findMany({
     where: {
@@ -585,7 +589,7 @@ export async function addTags(records: EntityRecords) {
 
   entityKeys.forEach((entity) => {
     records[entity].forEach((user) => {
-      const userTag = TAG_BY_ENTITY[entity]
+      const userTag = EXTENDED_TAG_BY_ENTITY[entity]
       if (!userTagsMap.has(user.email)) {
         userTagsMap.set(user.email, new Set([userTag]))
       } else {
