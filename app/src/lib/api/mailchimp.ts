@@ -16,13 +16,9 @@ export async function updateMailchimpTags(
   }
 
   try {
-    const usersWithTags = users.filter((u) => u.tags.length > 0)
-    const usersWithoutTags = users.filter((u) => u.tags.length === 0)
-
-    // Update users with tags
-    if (usersWithTags.length > 0) {
+    if (users.length > 0) {
       const results = (await mailchimp.lists.batchListMembers(LIST_ID, {
-        members: usersWithTags.map((user) => ({
+        members: users.map((user) => ({
           email_address: user.email,
           tags: user.tags,
           email_type: "html",
@@ -43,24 +39,6 @@ export async function updateMailchimpTags(
           };`,
         )
       })
-    }
-
-    // Remove users without tags from Mailchimp
-    if (usersWithoutTags.length > 0) {
-      console.log(
-        `[-] Removing ${usersWithoutTags.length} contacts from Mailchimp list`,
-      )
-      await Promise.all(
-        usersWithoutTags.map((user) =>
-          mailchimp.lists
-            .deleteListMember(LIST_ID, user.email)
-            .catch((err: any) => {
-              console.error(
-                `[-] Failed to remove ${user.email} from Mailchimp: ${err}`,
-              )
-            }),
-        ),
-      )
     }
 
     return { success: true }
