@@ -198,8 +198,6 @@ async function getUserAdminProjectsWithDetailFn({
     ) as result;
   `
 
-  console.log("result[0]?.result", result[0]?.result.projects)
-
   return result[0]?.result
 }
 
