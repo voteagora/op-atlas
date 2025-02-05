@@ -586,7 +586,6 @@ export async function addTags(records: EntityRecords) {
   entityKeys.forEach((entity) => {
     records[entity].forEach((user) => {
       const userTag = TAG_BY_ENTITY[entity]
-
       if (!userTagsMap.has(user.email)) {
         userTagsMap.set(user.email, new Set([userTag]))
       } else {
@@ -605,18 +604,50 @@ export async function addTags(records: EntityRecords) {
     },
   })
 
-  await prisma.$transaction(
-    usersToUpdate.map((user) =>
+  const usersToUntagCondition = {
+    AND: [
+      {
+        NOT: {
+          tags: {
+            isEmpty: true,
+          },
+        },
+      },
+      {
+        email: {
+          notIn: emailsToUpdate,
+        },
+      },
+    ],
+  }
+
+  const usersToUntag = await prisma.userEmail.findMany({
+    where: usersToUntagCondition,
+  })
+
+  await prisma.$transaction([
+    ...usersToUpdate.map((user) =>
       prisma.userEmail.update({
         where: { id: user.id },
         data: { tags: Array.from(userTagsMap.get(user.email) ?? []) },
       }),
     ),
-  )
+    prisma.userEmail.updateMany({
+      where: usersToUntagCondition,
+      data: { tags: [] },
+    }),
+  ])
 
-  return usersToUpdate.map((user) => ({
-    id: user.id,
-    email: user.email,
-    tags: Array.from(userTagsMap.get(user.email) ?? []),
-  }))
+  return [
+    ...usersToUpdate.map((user) => ({
+      id: user.id,
+      email: user.email,
+      tags: Array.from(userTagsMap.get(user.email) ?? []),
+    })),
+    ...usersToUntag.map((user) => ({
+      id: user.id,
+      email: user.email,
+      tags: [],
+    })),
+  ]
 }
