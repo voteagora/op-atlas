@@ -15,12 +15,12 @@ export function useAdminProjects(): {
   isLoading: boolean
   error: Error | null
 } {
-  const session = useSession()
+  const { data: session } = useSession()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["adminProjects", session?.data?.user.id],
-    queryFn: () => getAdminProjects(session?.data?.user.id as string),
-    enabled: session?.data?.user.id !== undefined,
+    queryKey: ["adminProjects", session?.user.id],
+    queryFn: () => getAdminProjects(session?.user.id as string),
+    enabled: !!session,
   })
 
   return { data, isLoading, error }
