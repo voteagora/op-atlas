@@ -221,6 +221,8 @@ model Project {
   pricingModelDetails String?
 
   openSourceObserverSlug String?
+  isSubmittedToOso Boolean @default(false)
+
   addedTeamMembers       Boolean  @default(false)
   addedFunding           Boolean  @default(false)
   hasCodeRepositories    Boolean  @default(true)

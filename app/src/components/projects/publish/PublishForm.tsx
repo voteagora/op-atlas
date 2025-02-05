@@ -42,10 +42,13 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
   }, [project])
 
   const hasPublishedLatestChanges = useMemo(() => {
-    const latestSnapshot = sortBy((s) => -s.createdAt, project.snapshots)[0]
-    if (!latestSnapshot) return false
+    const sortedSnapshots = project.snapshots.slice().sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
 
-    return latestSnapshot.createdAt >= project.lastMetadataUpdate
+    if (!sortedSnapshots[0]) return false
+
+    return sortedSnapshots[0].createdAt >= project.lastMetadataUpdate
   }, [project])
 
   const hasUnpublishedChanges = useMemo(() => {
@@ -91,19 +94,17 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
         {project.snapshots.length > 0 ? (
           <div className="flex flex-col gap-2">
             <p className="text-sm  font-medium text-foreground">Published</p>
-            {sortBy((s) => -s.createdAt, project.snapshots).map((snapshot) => (
-              <Snapshot key={snapshot.id} snapshot={snapshot} />
-            ))}
-
-            {/* Only show this when applications are open */}
-            {/* {project.snapshots.length > 0 ? (
-            <Callout
-              type="info"
-              text="You can apply for Retro Funding Round 4"
-              linkHref="/application"
-              linkText="Apply"
-            />
-          ) : null} */}
+            {project.snapshots
+              .slice()
+              .sort((a, b) => {
+                return (
+                  new Date(a.createdAt).getTime() -
+                  new Date(b.createdAt).getTime()
+                )
+              })
+              .map((snapshot) => {
+                return <Snapshot key={snapshot.id} snapshot={snapshot} />
+              })}
           </div>
         ) : null}
 
@@ -140,7 +141,7 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
           variant="secondary"
           className="w-fit text-sm font-medium text-foreground"
         >
-          <Link href="/rounds">View rounds</Link>
+          <Link href="/missions">View Retro Funding Rounds</Link>
         </Button>
       </div>
       {showMetadataPublishedDialogue && (

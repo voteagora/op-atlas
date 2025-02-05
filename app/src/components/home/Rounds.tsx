@@ -3,8 +3,15 @@
 import { Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
-import { FUNDING_ROUNDS } from "@/lib/mocks"
-import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
+import { useAdminProjects } from "@/hooks/db/useAdminProjects"
+import { useUserApplications } from "@/hooks/db/useUserApplications"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
+import {
+  ApplicationWithDetails,
+  ProjectWithDetails,
+  UserWithAddresses,
+} from "@/lib/types"
 
 import { Account } from "../common/Account"
 import { FeedbackButton } from "../common/FeedbackButton"
@@ -12,48 +19,25 @@ import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
 
-export function Rounds({
-  projects,
-  user,
-  userProjects,
-}: {
-  projects: Project[]
-  user?: UserWithAddresses | null
-  userProjects?: ProjectWithDetails[] | null
-}) {
+export function Rounds({ user }: { user?: UserWithAddresses | null }) {
   const { data } = useSession()
+
+  const { data: userProjects } = useAdminProjects()
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      {!data && (
+      {/* {!data && (
         <div className="z-10 w-full py-3 text-center text-background text-sm font-medium bg-accent-foreground">
           The results are in! Sign in to see your Retro Funding 6 rewards.
         </div>
-      )}
-      {/* Background image */}
-      <div
-        className="absolute h-[500px] w-full"
-        style={{
-          backgroundImage: 'url("/assets/images/gradient-background.svg")',
-          backgroundSize: "cover",
-        }}
-      />
-
+      )} */}
       {/* Main content */}
-      <div className="mt-36 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
+      <div className="mt-8 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
         <div className="flex flex-col w-full">
-          <h1 className="text-4xl font-semibold">Rounds</h1>
-          <p className="mt-2 text-muted-foreground">
-            Build together, benefit together.
-          </p>
-          {!data?.user && (
-            <div className="mt-6">
-              <Account />
-            </div>
-          )}
+          <h1 className="text-4xl font-semibold">Retro Funding Missions</h1>
         </div>
 
-        <div className="mt-10 flex flex-1 gap-x-6">
+        <div className="mt-10 flex flex-1 gap-x-10">
           <div className="flex flex-col flex-1 gap-y-12">
             <FundingRounds fundingRounds={FUNDING_ROUNDS} />
             <div className="flex flex-col">
@@ -93,7 +77,6 @@ export function Rounds({
           </div>
           <Sidebar
             className="ml-auto w-[260px] pt-12"
-            projects={projects}
             user={user}
             userProjects={userProjects}
           />

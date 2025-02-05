@@ -5,9 +5,9 @@ import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -65,7 +65,7 @@ const StringValue = z.object({ value: z.string() }) // use a intermediate object
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string(),
+  description: z.string().min(1, "Description is required"),
   organization: z
     .object({
       id: z.string(),
@@ -102,18 +102,21 @@ export default function ProjectDetailsForm({
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
+  const searchParams = useSearchParams()
+
+  const orgId = searchParams.get("orgId")
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: project?.name ?? "",
       description: project?.description ?? "",
-      organization: project?.organization?.organization
-        ? {
-            name: project?.organization?.organization.name,
-            id: project?.organization?.organization.id,
-            avatarUrl: project?.organization?.organization.avatarUrl,
-          }
-        : null,
+      organization:
+        organizations.find((org) => {
+          return org.id === orgId
+        }) ||
+        project?.organization?.organization ||
+        null,
       category: project?.category
         ? (project.category as z.infer<typeof CategoryEnum>)
         : "CeFi",
@@ -122,6 +125,7 @@ export default function ProjectDetailsForm({
       twitter: project?.twitter ?? undefined,
       mirror: project?.mirror ?? undefined,
     },
+    mode: "onChange",
   })
 
   const { fields: websiteFields, append: addWebsiteField } = useFieldArray({
@@ -233,7 +237,7 @@ export default function ProjectDetailsForm({
                 updateProjectDetails(project.id, newValues),
                 setProjectOrganization(
                   project.id,
-                  project.organization?.organizationId,
+                  project.organization?.organization?.id,
                   values.organization?.id,
                 ),
               ])
@@ -277,6 +281,38 @@ export default function ProjectDetailsForm({
     }
 
   const canSubmit = form.formState.isValid && !form.formState.isSubmitting
+
+  const websiteLinks = useWatch({
+    control: form.control,
+    name: "website", // Watch the "links" field
+    defaultValue: [], // Provide a default value
+  })
+
+  const farcasterLinks = useWatch({
+    control: form.control,
+    name: "farcaster", // Watch the "links" field
+    defaultValue: [], // Provide a default value
+  })
+
+  const isValidToAddSite = useMemo(() => {
+    return (
+      websiteLinks[websiteLinks.length - 1]?.value !== "" &&
+      z
+        .string()
+        .url()
+        .safeParse(websiteLinks[websiteLinks.length - 1]?.value).success
+    )
+  }, [websiteLinks])
+
+  const isValidToAddFarcasterLinks = useMemo(() => {
+    return (
+      farcasterLinks[farcasterLinks.length - 1]?.value !== "" &&
+      z
+        .string()
+        .url()
+        .safeParse(farcasterLinks[farcasterLinks.length - 1]?.value).success
+    )
+  }, [farcasterLinks])
 
   return (
     <Form {...form}>
@@ -334,76 +370,79 @@ export default function ProjectDetailsForm({
           <FormField
             control={form.control}
             name="organization"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-1.5">
-                <FormLabel className="text-foreground">
-                  Organization<span className="ml-0.5 text-destructive">*</span>
-                </FormLabel>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <div className="h-10 py-2.5 px-3 flex text-foreground items-center rounded-lg border border-input mt-2 cursor-pointer">
-                      {field.value?.avatarUrl && (
-                        <Avatar className="w-5 h-5 mr-2">
-                          <AvatarImage
-                            src={field.value?.avatarUrl ?? ""}
-                            alt="avatar"
-                          />
-                          <AvatarFallback>{field.value?.name}</AvatarFallback>
-                        </Avatar>
-                      )}
-                      <p className="text-sm text-foreground">
-                        {field.value?.name ?? "No Organization"}
-                      </p>
-                      <Image
-                        className="ml-auto"
-                        src="/assets/icons/arrowDownIcon.svg"
-                        height={8}
-                        width={10}
-                        alt="Arrow up"
-                      />
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="!w-[750px]">
-                    {organizations?.map((organization) => (
+            render={({ field }) => {
+              return (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Organization
+                    {/* <span className="ml-0.5 text-destructive">*</span> */}
+                  </FormLabel>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="h-10 py-2.5 px-3 flex text-foreground items-center rounded-lg border border-input mt-2 cursor-pointer">
+                        {field.value?.avatarUrl && (
+                          <Avatar className="w-5 h-5 mr-2">
+                            <AvatarImage
+                              src={field.value?.avatarUrl ?? ""}
+                              alt="avatar"
+                            />
+                            <AvatarFallback>{field.value?.name}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <p className="text-sm text-foreground">
+                          {field.value?.name ?? "No Organization"}
+                        </p>
+                        <Image
+                          className="ml-auto"
+                          src="/assets/icons/arrowDownIcon.svg"
+                          height={8}
+                          width={10}
+                          alt="Arrow up"
+                        />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="!w-[750px]">
+                      {organizations?.map((organization) => (
+                        <DropdownMenuCheckboxItem
+                          className="text-sm font-normal text-secondary-foreground w-full"
+                          checked={field.value?.id === organization.id}
+                          key={organization.id}
+                          onCheckedChange={() => {
+                            field.onChange(organization)
+                          }}
+                        >
+                          <Avatar className="w-5 h-5 mr-2">
+                            <AvatarImage
+                              src={organization.avatarUrl || ""}
+                              alt="avatar"
+                            />
+                            <AvatarFallback>{organization.name}</AvatarFallback>
+                          </Avatar>
+                          {organization.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+
                       <DropdownMenuCheckboxItem
                         className="text-sm font-normal text-secondary-foreground w-full"
-                        checked={field.value?.id === organization.id}
-                        key={organization.id}
+                        checked={field.value === null}
                         onCheckedChange={() => {
-                          field.onChange(organization)
+                          field.onChange(null)
                         }}
                       >
-                        <Avatar className="w-5 h-5 mr-2">
-                          <AvatarImage
-                            src={organization.avatarUrl || ""}
-                            alt="avatar"
-                          />
-                          <AvatarFallback>{organization.name}</AvatarFallback>
-                        </Avatar>
-                        {organization.name}
+                        No organization
                       </DropdownMenuCheckboxItem>
-                    ))}
-
-                    <DropdownMenuCheckboxItem
-                      className="text-sm font-normal text-secondary-foreground w-full"
-                      checked={field.value === null}
-                      onCheckedChange={() => {
-                        field.onChange(null)
-                      }}
-                    >
-                      No organization
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
-                      <Link href="/profile/organizations/new">
-                        Make an organization
-                      </Link>
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <FormMessage />
-              </FormItem>
-            )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
+                        <Link href="/profile/organizations/new">
+                          Make an organization
+                        </Link>
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <FormMessage />
+                </FormItem>
+              )
+            }}
           />
           <FormField
             control={form.control}
@@ -432,7 +471,7 @@ export default function ProjectDetailsForm({
             <div>
               <FormLabel>
                 Project avatar and cover image
-                <span className="ml-0.5 text-destructive">*</span>
+                {/* <span className="ml-0.5 text-destructive">*</span> */}
               </FormLabel>
               <div className="text-sm text-muted-foreground">
                 Images must be no larger than 4.5 MB.
@@ -564,9 +603,10 @@ export default function ProjectDetailsForm({
                 rows.
               </div>
             </div>
-            {websiteFields.map((field, index) => (
+
+            {websiteFields.map((website, index) => (
               <FormField
-                key={field.id}
+                key={website.id}
                 control={form.control}
                 name={`website.${index}.value`}
                 render={({ field: innerField }) => (
@@ -579,14 +619,20 @@ export default function ProjectDetailsForm({
                 )}
               />
             ))}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => addWebsiteField({ value: "" })}
-              className="w-fit"
-            >
-              <Plus size={16} className="mr-2.5" /> Add
-            </Button>
+
+            <FormItem>
+              {isValidToAddSite && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => addWebsiteField({ value: "" })}
+                  className="w-fit"
+                >
+                  <Plus size={16} className="mr-2.5" /> Add
+                </Button>
+              )}
+              <FormMessage />
+            </FormItem>
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -608,14 +654,16 @@ export default function ProjectDetailsForm({
                 )}
               />
             ))}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => addFarcasterField({ value: "" })}
-              className="w-fit"
-            >
-              <Plus size={16} className="mr-2.5" /> Add
-            </Button>
+            {isValidToAddFarcasterLinks && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => addFarcasterField({ value: "" })}
+                className="w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add
+              </Button>
+            )}
           </div>
 
           <FormField

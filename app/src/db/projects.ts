@@ -515,7 +515,7 @@ async function getProjectFn({
     FROM project_data pd;
   `
 
-  console.log("result[0]?.result", result[0]?.result)
+  // console.log("result[0]?.result", result[0]?.result)
 
   return result[0]?.result
 }
@@ -1224,7 +1224,7 @@ export async function createApplication({
   return prisma.application.create({
     data: {
       attestationId,
-      projectDescriptionOptions,
+      projectDescriptionOptions: [],
       project: {
         connect: {
           id: projectId,
@@ -1235,24 +1235,53 @@ export async function createApplication({
           id: round.toString(),
         },
       },
-      category: {
-        connect: {
-          id: categoryId,
-        },
-      },
+      category: categoryId
+        ? {
+            connect: {
+              id: categoryId,
+            },
+          }
+        : undefined,
       impactStatementAnswer: {
         createMany: {
-          data: Object.entries(impactStatement).map(
-            ([impactStatementId, answer]) => ({
-              impactStatementId,
-              answer,
-            }),
-          ),
+          data: impactStatement
+            ? Object.entries(impactStatement).map(
+                ([impactStatementId, answer]) => ({
+                  impactStatementId,
+                  answer,
+                }),
+              )
+            : [],
         },
       },
     },
   })
 }
+
+async function getAllApplicationsForRoundFn({
+  roundId,
+}: {
+  roundId: string
+}): Promise<ApplicationWithDetails[]> {
+  const applications = await prisma.application.findMany({
+    where: {
+      roundId,
+    },
+    include: {
+      project: true,
+      impactStatementAnswer: {
+        include: {
+          impactStatement: true,
+        },
+      },
+      round: true,
+    },
+  })
+
+  return applications
+}
+
+export const getAllApplicationsForRound = cache(getAllApplicationsForRoundFn)
 
 export async function updateAllForProject(
   project: ProjectMetadata,

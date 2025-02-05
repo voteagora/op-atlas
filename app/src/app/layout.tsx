@@ -11,6 +11,8 @@ import { InfoIconFilled } from "@/components/icons/infoIconFilled"
 import { Toaster } from "@/components/ui/sonner"
 import Providers from "@/providers/Providers"
 
+import { sharedMetadata } from "./shared-metadata"
+
 const GOOGLE_ANALYTICS_ID = process.env.GOOGLE_ANALYTICS_ID || ""
 
 const inter = Inter({
@@ -19,22 +21,15 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://atlas.optimism.io"),
-  title: "Atlas",
-  description: "",
-  icons: "/favicon.ico",
+  ...sharedMetadata,
+  title: "OP Atlas",
+  description:
+    "OP Atlas is the home of Optimism Contributors. Discover Retro Funding, grants and governance opportunities on the Superchain.",
   openGraph: {
-    title: "Atlas",
-    description: "",
-    url: "https://atlas.optimism.io",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Atlas",
-      },
-    ],
+    ...sharedMetadata.openGraph,
+    title: "OP Atlas",
+    description:
+      "OP Atlas is the home of Optimism Contributors. Discover Retro Funding, grants and governance opportunities on the Superchain.",
   },
 }
 
