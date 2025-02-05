@@ -38,15 +38,24 @@ const UserProjectCard = ({
     return progressPercent
   }, [project])
 
-  const uniqueApplications = applications?.filter(
-    (application, index, self) => {
-      return (
-        application.projectId === project.id &&
-        (application.roundId === "7" || application.roundId === "8") &&
-        self.findIndex((app) => app.roundId === application.roundId) === index
-      )
+  const projectApplications = applications.filter((application) => {
+    return application.projectId === project.id
+  })
+
+  const correctRoundsApplications = projectApplications.filter(
+    (application) => {
+      return application.roundId === "7" || application.roundId === "8"
     },
   )
+
+  const uniqueApplications: ApplicationWithDetails[] = []
+  correctRoundsApplications.forEach((application) => {
+    if (
+      !uniqueApplications.some((item) => item.roundId === application.roundId)
+    ) {
+      uniqueApplications.push(application)
+    }
+  })
 
   return (
     <div
@@ -163,17 +172,14 @@ const UserProjectCard = ({
         {}
         {uniqueApplications?.map((application, index) => {
           return (
-            application.projectId === project.id &&
-            (application.roundId === "7" || application.roundId === "8") && (
-              <div className="mt-4">
-                <EnrolledCallout
-                  key={"ApplicationEnrolled" + index}
-                  application={application}
-                  index={index}
-                  onRewardsClick={handleActiveRoundHelpClick}
-                />
-              </div>
-            )
+            <div className="mt-4">
+              <EnrolledCallout
+                key={"ApplicationEnrolled" + index}
+                application={application}
+                index={index}
+                onRewardsClick={handleActiveRoundHelpClick}
+              />
+            </div>
           )
         })}
       </div>
