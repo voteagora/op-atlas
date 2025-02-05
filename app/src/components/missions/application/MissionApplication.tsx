@@ -140,8 +140,7 @@ export function MissionApplication() {
             `Apply by ${format(
               mission!.applyBy,
               "MMM d",
-            )} to be evaluated for rewards starting in 
-                    ${format(rewardMeasurementDate, "MMMM")}.`}
+            )} to earn rewards for your performance in February.`}
 
           {!isOpenForEnrollment && "Not open for enrollment--coming soon"}
         </p>
