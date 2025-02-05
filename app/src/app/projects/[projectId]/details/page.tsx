@@ -26,18 +26,6 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  // const searchParams = new URLSearchParams(window.location.search)
-  // const paramValue = searchParams.get("orgId")
-
-  // console.log("start")
-  // console.log(paramValue)
-  // console.log("after")
-  // const orgId = searchParams.get("orgId") // Extract orgId from query parameters
-
-  // const selectedOrg = userOrganizations.organizations.find((org) => {
-  //   return org.organization.id === router.query["orgId"]
-  // })?.organization
-
   return (
     <ProjectDetailsForm
       project={project}
