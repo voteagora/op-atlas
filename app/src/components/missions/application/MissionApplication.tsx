@@ -9,8 +9,8 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { useUserProjects } from "@/hooks/db/useUserProjects"
-import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
+import { useSessionProjects } from "@/hooks/db/useUserProjects"
+import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
 
@@ -44,7 +44,7 @@ export function MissionApplication() {
   })
 
   const { data: projects, isLoading } = useAdminProjects()
-  const { data: applications } = useUserRoundApplications(mission?.number)
+  const { data: applications } = useSessionRoundApplications(mission?.number)
 
   const [submittedApplications, setSubmittedApplications] = useState<
     Application[]

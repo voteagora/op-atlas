@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { useUserProjects } from "@/hooks/db/useUserProjects"
-import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
+import { useSessionProjects } from "@/hooks/db/useUserProjects"
+import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { submitApplications } from "@/lib/actions/applications"
 import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
@@ -54,7 +54,7 @@ export function MissionApplicationTabs({
   const { data: projects = [], isLoading: isLoadingProjects } =
     useAdminProjects()
   const { data: applications = [], isLoading: isLoadingApplications } =
-    useUserRoundApplications(mission?.number)
+    useSessionRoundApplications(mission?.number)
 
   useEffect(() => {
     if (projects.length > 0) {
