@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
@@ -13,15 +13,22 @@ import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 export function useAdminProjects(): {
   data: ProjectWithDetails[] | undefined
   isLoading: boolean
-  error: Error | null
 } {
   const { data: session } = useSession()
+
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    queryClient.invalidateQueries({
+      queryKey: ["adminProjects", session?.user.id],
+    })
+  }, [session?.user.id])
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["adminProjects", session?.user.id],
     queryFn: () => getAdminProjects(session?.user.id as string),
-    enabled: !!session,
+    enabled: !!session?.user.id,
   })
 
-  return { data, isLoading, error }
+  return { data, isLoading }
 }
