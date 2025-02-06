@@ -149,6 +149,45 @@ export const verifyGithubRepo = async (
   projectId: string,
   owner: string,
   slug: string,
+) => {
+  const funding = await fetchFundingFile(owner, slug)
+  if (!funding) {
+    return {
+      error: "No funding file found",
+    }
+  }
+
+  const isValid = isValidFundingFile(funding, projectId)
+  if (!isValid) {
+    return {
+      error: "Invalid funding file",
+    }
+  }
+
+  // Fetch license to determine open source status
+  const license = await getLicense(owner, slug)
+  const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
+
+  const repoFiles = await getContents(owner, slug)
+
+  const [isCrate, isNpmPackage] = await Promise.all([
+    verifyCrate(owner, slug, repoFiles),
+    verifyNpm(owner, slug, repoFiles),
+  ])
+
+  return {
+    repo: {
+      isOpenSource,
+      isNpmPackage,
+      isCrate,
+    },
+  }
+}
+
+export const createGithubRepo = async (
+  projectId: string,
+  owner: string,
+  slug: string,
   name?: string,
   description?: string,
 ) => {
@@ -165,41 +204,19 @@ export const verifyGithubRepo = async (
     return isInvalid
   }
 
+  const verification = await verifyGithubRepo(projectId, owner, slug)
+  if (verification.error) return { error: verification.error }
+
   try {
-    const funding = await fetchFundingFile(owner, slug)
-    if (!funding) {
-      return {
-        error: "No funding file found",
-      }
-    }
-
-    const isValid = isValidFundingFile(funding, projectId)
-    if (!isValid) {
-      return {
-        error: "Invalid funding file",
-      }
-    }
-
-    // Fetch license to determine open source status
-    const license = await getLicense(owner, slug)
-    const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
-
-    const repoFiles = await getContents(owner, slug)
-
-    const [isCrate, isNpmPackage] = await Promise.all([
-      verifyCrate(owner, slug, repoFiles),
-      verifyNpm(owner, slug, repoFiles),
-    ])
-
     const repo = await addProjectRepository({
       projectId,
       repo: {
         type: "github",
         url: `https://github.com/${owner}/${slug}`,
         verified: true,
-        openSource: !!isOpenSource,
-        npmPackage: !!isNpmPackage,
-        crate: !!isCrate,
+        openSource: !!verification.repo?.isOpenSource,
+        npmPackage: !!verification.repo?.isNpmPackage,
+        crate: !!verification.repo?.isCrate,
         name,
         description,
       },
