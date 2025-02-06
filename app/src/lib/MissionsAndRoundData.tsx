@@ -168,7 +168,7 @@ export const MISSIONS: MissionData[] = [
       },
       {
         reactNode: (
-          <p className="text-secondary-foreground">
+          <p className="text-secondary-foreground flex-1">
             JavaScript and Rust packages must be published on package registries
             (e.g,{" "}
             <ExternalLink className="underline" href={"https://npmjs.org"}>
@@ -181,6 +181,7 @@ export const MISSIONS: MissionData[] = [
             ) with their associated Github repo verified in OP Atlas.
           </p>
         ),
+        type: "hasJavaScriptAndOrRustPackages",
       },
     ],
     rewards: {

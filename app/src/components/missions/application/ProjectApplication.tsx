@@ -210,10 +210,22 @@ export const ProjectApplication = ({
                 let icon
 
                 if (criterion.type) {
-                  if (isCriterionComplete) {
-                    icon = <CircleWithCheckmark />
+                  if (criterion.type === "hasJavaScriptAndOrRustPackages") {
+                    if (
+                      project.repos.some(
+                        (repo) => repo.npmPackage || repo.crate,
+                      )
+                    ) {
+                      icon = <CircleWithCheckmark />
+                    } else {
+                      icon = <div className="w-6 h-[3px] bg-gray-400 m-1" />
+                    }
                   } else {
-                    icon = <X className="w-6 h-6" color="red" />
+                    if (isCriterionComplete) {
+                      icon = <CircleWithCheckmark />
+                    } else {
+                      icon = <X className="w-6 h-6" color="red" />
+                    }
                   }
                 } else {
                   icon = <div className="w-6 h-[3px] bg-gray-400 m-1" />
