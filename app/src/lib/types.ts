@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client"
+import { AggregatedType } from "eas-indexer/src/types"
 
 export type TeamRole = "member" | "admin"
 
@@ -323,3 +324,8 @@ export type CategoryWithImpact = Prisma.CategoryGetPayload<{
     impactStatements: true
   }
 }>
+
+export type ExtendedAggregatedType = AggregatedType & {
+  contributors: { address: string; email?: string }[]
+  github_repo_builders: { address: string; email?: string }[]
+}
