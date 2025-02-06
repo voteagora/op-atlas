@@ -16,6 +16,8 @@ export function useUserProjects(): {
 } {
   const { data: session } = useSession()
 
+  console.log("here is something")
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["userProjects", session?.user.id],
     queryFn: () => getProjects(session?.user.id!),
