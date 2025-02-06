@@ -94,25 +94,22 @@ export const ApplicationStatusCard = ({
                   ) => {
                     return (
                       <div
-                        key={"userAppliedProject-" + index}
-                        className="flex items-center justify-between"
+                        key={"userAppliedProject" + index}
+                        className="flex items-center gap-2"
                       >
-                        <div className="flex items-center gap-2 w-3/4">
-                          {element.icon ? (
-                            <Image
-                              src={element.icon}
-                              width={32}
-                              height={32}
-                              alt="Project"
-                              className="rounded-lg"
-                            />
-                          ) : (
-                            <></>
-                          )}
-                          <p className="overflow-hidden truncate">
-                            {element.name}
-                          </p>
-                        </div>
+                        <Image
+                          src={
+                            element.icon ??
+                            "/assets/images/social-share-background.png"
+                          }
+                          width={32}
+                          height={32}
+                          alt="Project"
+                          className="rounded-lg object-cover"
+                        />
+                        <p className="flex-1 truncate text-left text-sm pr-3">
+                          {element.name}
+                        </p>
 
                         <GreenBadge />
                       </div>

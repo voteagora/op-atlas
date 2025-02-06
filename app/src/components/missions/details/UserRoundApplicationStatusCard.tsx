@@ -21,7 +21,7 @@ export const UserRoundApplicationStatusCard = () => {
 
   return (
     <>
-      <div className="border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
+      <div className="border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-5">
         <ApplicationStatusCard
           isLoading={isLoadingApplications && isLoadingProjects}
           applyByDate={mission?.applyBy && format(mission.applyBy, "MMM d")}
