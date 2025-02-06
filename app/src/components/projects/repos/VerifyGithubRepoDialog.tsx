@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea"
 import {
   findRepo,
   updateGithubRepo,
-  verifyGithubRepo,
+  createGithubRepo,
 } from "@/lib/actions/repos"
 import { copyToClipboard } from "@/lib/utils"
 
@@ -103,7 +103,7 @@ const VerifyGithubRepoDialog = ({
 
   const onFoundRepo = async () => {
     try {
-      const result = await verifyGithubRepo(projectId, owner, slug)
+      const result = await createGithubRepo(projectId, owner, slug)
       if (result.error === null && result.repo) {
         onVerified(result.repo)
         return
@@ -300,7 +300,7 @@ const VerifyFundingStep = ({
     try {
       setIsLoading(true)
 
-      const result = await verifyGithubRepo(projectId, owner, slug)
+      const result = await createGithubRepo(projectId, owner, slug)
       if (result.error === null && result.repo) {
         setError(null)
         onVerified(result.repo)
