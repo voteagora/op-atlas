@@ -614,27 +614,6 @@ export async function getAllGithubRepoBuiulders() {
     },
   })
 }
-export async function getAllCommunityContributors(addresses: string[]) {
-  return prisma.userAddress.findMany({
-    where: {
-      address: {
-        in: addresses,
-      },
-    },
-    select: {
-      address: true,
-      user: {
-        select: {
-          emails: {
-            select: {
-              email: true,
-            },
-          },
-        },
-      },
-    },
-  })
-}
 
 export async function addTags(records: EntityRecords) {
   const entityKeys = Object.keys(records) as (keyof typeof records)[]

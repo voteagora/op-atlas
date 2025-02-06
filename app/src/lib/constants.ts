@@ -2,7 +2,7 @@ export const EXTENDED_TAG_BY_ENTITY = {
   citizen: "Citizen",
   gov_contribution: "S7 Elected Official",
   rf_voter: "Guest Voter",
-  contributors: "Contributor",
+  contributors: "Contributor to Eligible Projects",
   github_repo_builders: "Github Repo",
   onchain_builders: "Onchain Builder",
   community_contributors: "Community Contributor",
