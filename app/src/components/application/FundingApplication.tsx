@@ -68,46 +68,46 @@ export const FundingApplication = ({
   }
 
   const { track } = useAnalytics()
-  const submitApplication = async () => {
-    if (selectedProjectIds.length === 0) return
+  // const submitApplication = async () => {
+  //   if (selectedProjectIds.length === 0) return
 
-    setIsLoading(true)
+  //   setIsLoading(true)
 
-    const promise: Promise<Application> = new Promise(
-      async (resolve, reject) => {
-        try {
-          const result = await submitApplications([], 4, [])
-          if (result.error !== null || result.applications.length === 0) {
-            throw new Error(result.error ?? "Error submitting application")
-          }
+  //   const promise: Promise<Application> = new Promise(
+  //     async (resolve, reject) => {
+  //       try {
+  //         const result = await submitApplications([], 4, [])
+  //         if (result.error !== null || result.applications.length === 0) {
+  //           throw new Error(result.error ?? "Error submitting application")
+  //         }
 
-          for (const application of result.applications) {
-            // track("Apply", {
-            //   projectIds: application.projectId,
-            //   attestationId: application.attestationId,
-            // })
-          }
+  //         for (const application of result.applications) {
+  //           // track("Apply", {
+  //           //   projectIds: application.projectId,
+  //           //   attestationId: application.attestationId,
+  //           // })
+  //         }
 
-          resolve(result.applications[0])
-        } catch (error) {
-          console.error("Error submitting application", error)
-          reject(error)
-        }
-      },
-    )
+  //         resolve(result.applications[0])
+  //       } catch (error) {
+  //         console.error("Error submitting application", error)
+  //         reject(error)
+  //       }
+  //     },
+  //   )
 
-    toast.promise(promise, {
-      loading: "Submitting application...",
-      success: (application) => {
-        // onApplied(application)
-        return "Application submitted"
-      },
-      error: (error) => {
-        setIsLoading(false)
-        return error.message
-      },
-    })
-  }
+  //   toast.promise(promise, {
+  //     loading: "Submitting application...",
+  //     success: (application) => {
+  //       // onApplied(application)
+  //       return "Application submitted"
+  //     },
+  //     error: (error) => {
+  //       setIsLoading(false)
+  //       return error.message
+  //     },
+  //   })
+  // }
 
   const canSubmit =
     agreedTerms.every((term) => term) && selectedProjectIds.length > 0

@@ -10,13 +10,14 @@ import {
   mode,
   optimism,
   shape,
+  soneium,
   superseed,
-  swan,
   worldchain,
   zora,
 } from "viem/chains"
 
 import { Chain } from "./utils/contracts"
+import { polynomial } from "@/components/common/chain"
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
 if (!ALCHEMY_API_KEY) {
@@ -53,13 +54,14 @@ const clients = {
     optimism,
     `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
+  [Chain.Polynomial]: createClient(polynomial, "https://rpc.polynomial.fi"),
   [Chain.Race]: createClient(race, "https://racemainnet.io"),
   [Chain.Shape]: createClient(
     shape,
     `https://shape-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
+  [Chain.Soneium]: createClient(soneium, "https://rpc.soneium.org/"),
   [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
-  [Chain.Swan]: createClient(swan, "https://mainnet-rpc.swanchain.org"),
   [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
   [Chain.Worldchain]: createClient(
     worldchain,

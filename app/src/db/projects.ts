@@ -60,12 +60,7 @@ async function getUserAdminProjectsWithDetailFn({
     WITH user_projects AS (
       SELECT 
         p.*,
-        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-          'id', t."id",
-          'role', t."role",
-          'userId', t."userId",
-          'projectId', t."projectId",
-          'deletedAt', t."deletedAt",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
@@ -75,24 +70,23 @@ async function getUserAdminProjectsWithDetailFn({
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
         COALESCE(jsonb_agg(
-          DISTINCT jsonb_build_object(
-            'id', fr."id",
-            'roundId', fr."roundId",
-            'projectId', fr."projectId",
-            'amount', fr."amount",
-            'createdAt', fr."createdAt",
-            'updatedAt', fr."updatedAt",
+          DISTINCT to_jsonb(fr.*) || jsonb_build_object(
             'claim', to_jsonb(rc.*)
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
-        po."organizationId",
-        o."name" as "organization_name",
-        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-          'id', ot."id",
-          'role', ot."role",
-          'userId', ot."userId",
-          'organizationId', ot."organizationId",
-          'deletedAt', ot."deletedAt",
+        CASE 
+          WHEN po."organizationId" IS NOT NULL THEN jsonb_build_object(
+            'organization', jsonb_build_object(
+              'id', po."organizationId",
+              'name', o."name",
+              'team', COALESCE(jsonb_agg(DISTINCT to_jsonb(ot.*) || jsonb_build_object(
+                'user', to_jsonb(ou.*)
+              )) FILTER (WHERE ot."id" IS NOT NULL), '[]'::jsonb)
+            )
+          )
+          ELSE NULL
+        END as "organization",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(ot.*) || jsonb_build_object(
           'user', to_jsonb(ou.*)
         )) FILTER (WHERE ot."id" IS NOT NULL), '[]'::jsonb) as "organization_team"
       FROM "Project" p
@@ -120,12 +114,7 @@ async function getUserAdminProjectsWithDetailFn({
     org_projects AS (
       SELECT 
         p.*,
-        COALESCE(jsonb_agg(DISTINCT jsonb_build_object(
-          'id', t."id",
-          'role', t."role",
-          'userId', t."userId",
-          'projectId', t."projectId",
-          'deletedAt', t."deletedAt",
+        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
@@ -135,18 +124,21 @@ async function getUserAdminProjectsWithDetailFn({
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
         COALESCE(jsonb_agg(
-          DISTINCT jsonb_build_object(
-            'id', fr."id",
-            'roundId', fr."roundId",
-            'projectId', fr."projectId",
-            'amount', fr."amount",
-            'createdAt', fr."createdAt",
-            'updatedAt', fr."updatedAt",
+          DISTINCT to_jsonb(fr.*) || jsonb_build_object(
             'claim', to_jsonb(rc.*)
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
         o."id" as "organization_id",
-        o."name" as "organization_name"
+        o."name" as "organization_name",
+        jsonb_build_object(
+            'organization', jsonb_build_object(
+              'id', o.id,
+              'name', o."name",
+              'team', COALESCE(jsonb_agg(DISTINCT to_jsonb(uo.*) || jsonb_build_object(
+                'user', to_jsonb(uo.*)
+              )) FILTER (WHERE uo."id" IS NOT NULL), '[]'::jsonb)
+            )
+        ) as "organization"
       FROM "Project" p
       JOIN "ProjectOrganization" po ON p."id" = po."projectId" AND po."deletedAt" IS NULL
       JOIN "Organization" o ON po."organizationId" = o."id" AND o."deletedAt" IS NULL
@@ -184,17 +176,7 @@ async function getUserAdminProjectsWithDetailFn({
       'projects', COALESCE(
         (SELECT jsonb_agg(
           jsonb_build_object(
-            'project', to_jsonb(up.*) - 'organization_id' - 'organization_name' - 'organization_team' ||
-            CASE 
-              WHEN up."organizationId" IS NOT NULL THEN jsonb_build_object(
-                'organization', jsonb_build_object(
-                  'id', up."organizationId",
-                  'name', up."organization_name",
-                  'team', up."organization_team"
-                )
-              )
-              ELSE '{}'::jsonb
-            END
+            'project', to_jsonb(up.*)
           )
         )
         FROM user_projects up),
@@ -515,7 +497,7 @@ async function getProjectFn({
     FROM project_data pd;
   `
 
-  console.log("result[0]?.result", result[0]?.result)
+  // console.log("result[0]?.result", result[0]?.result)
 
   return result[0]?.result
 }
@@ -1224,7 +1206,7 @@ export async function createApplication({
   return prisma.application.create({
     data: {
       attestationId,
-      projectDescriptionOptions,
+      projectDescriptionOptions: [],
       project: {
         connect: {
           id: projectId,
@@ -1235,24 +1217,53 @@ export async function createApplication({
           id: round.toString(),
         },
       },
-      category: {
-        connect: {
-          id: categoryId,
-        },
-      },
+      category: categoryId
+        ? {
+            connect: {
+              id: categoryId,
+            },
+          }
+        : undefined,
       impactStatementAnswer: {
         createMany: {
-          data: Object.entries(impactStatement).map(
-            ([impactStatementId, answer]) => ({
-              impactStatementId,
-              answer,
-            }),
-          ),
+          data: impactStatement
+            ? Object.entries(impactStatement).map(
+                ([impactStatementId, answer]) => ({
+                  impactStatementId,
+                  answer,
+                }),
+              )
+            : [],
         },
       },
     },
   })
 }
+
+async function getAllApplicationsForRoundFn({
+  roundId,
+}: {
+  roundId: string
+}): Promise<ApplicationWithDetails[]> {
+  const applications = await prisma.application.findMany({
+    where: {
+      roundId,
+    },
+    include: {
+      project: true,
+      impactStatementAnswer: {
+        include: {
+          impactStatement: true,
+        },
+      },
+      round: true,
+    },
+  })
+
+  return applications
+}
+
+export const getAllApplicationsForRound = cache(getAllApplicationsForRoundFn)
 
 export async function updateAllForProject(
   project: ProjectMetadata,
