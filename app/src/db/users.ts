@@ -387,9 +387,40 @@ export async function getAllRFVoters(
 export async function getAllContributors() {
   const data = await prisma.project.findMany({
     where: {
-      id: {
-        in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
-      },
+      AND: [
+        {
+          deletedAt: null,
+          id: {
+            in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
+          },
+        },
+        {
+          team: {
+            some: {
+              deletedAt: null,
+              user: {
+                deletedAt: null,
+              },
+            },
+          },
+        },
+        {
+          organization: {
+            deletedAt: null,
+            project: {
+              deletedAt: null,
+              team: {
+                some: {
+                  deletedAt: null,
+                  user: {
+                    deletedAt: null,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
     },
     select: {
       team: {
@@ -478,10 +509,12 @@ export async function getAllOnchainBuilders() {
         {
           projects: {
             some: {
+              deletedAt: null,
               project: {
                 contracts: {
                   some: {},
                 },
+                deletedAt: null,
               },
             },
           },
@@ -489,13 +522,17 @@ export async function getAllOnchainBuilders() {
         {
           organizations: {
             some: {
+              deletedAt: null,
               organization: {
+                deletedAt: null,
                 projects: {
                   some: {
+                    deletedAt: null,
                     project: {
                       contracts: {
                         some: {},
                       },
+                      deletedAt: null,
                     },
                   },
                 },
@@ -526,7 +563,9 @@ export async function getAllGithubRepoBuiulders() {
         {
           projects: {
             some: {
+              deletedAt: null,
               project: {
+                deletedAt: null,
                 repos: {
                   some: {
                     verified: true,
@@ -539,10 +578,14 @@ export async function getAllGithubRepoBuiulders() {
         {
           organizations: {
             some: {
+              deletedAt: null,
               organization: {
+                deletedAt: null,
                 projects: {
                   some: {
+                    deletedAt: null,
                     project: {
+                      deletedAt: null,
                       repos: {
                         some: {
                           verified: true,
