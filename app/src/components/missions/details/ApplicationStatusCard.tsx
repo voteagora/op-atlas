@@ -166,23 +166,16 @@ export const ApplicationStatusCard = ({
 
           <div className="flex flex-col w-full gap-2">
             <div>
-              <ExtendedLink
-                as="button"
-                variant="primary"
-                className="w-full"
-                href="/projects/new"
-                text="Add Project"
-              />
+              <div>
+                <ExtendedLink
+                  as="button"
+                  href="/projects/new"
+                  text="Add Project"
+                  variant="primary"
+                  className="w-full"
+                />
+              </div>
             </div>
-            {/* <Button
-              className="bg-optimismRed text-white w-full"
-              variant={"outline"}
-              onClick={() => {
-                router.push(`/projects/new`)
-              }}
-            >
-              Add Project
-            </Button> */}
             <Button
               variant={"ghost"}
               onClick={() => {

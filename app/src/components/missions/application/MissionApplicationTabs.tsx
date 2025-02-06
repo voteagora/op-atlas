@@ -33,6 +33,7 @@ import { ApplicationFormSchema } from "./MissionApplication"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTerms } from "./MissionApplicationTerms"
 import { useAdminProjects } from "@/hooks/db/useAdminProjects"
+import ExtendedLink from "@/components/common/ExtendedLink"
 
 export function MissionApplicationTabs({
   form,
@@ -174,15 +175,13 @@ export function MissionApplicationTabs({
                   </p>
 
                   <div className="flex gap-4">
-                    <Button
-                      className="w-44"
-                      variant={"destructive"}
-                      onClick={() => {
-                        router.push(`/projects/new`)
-                      }}
-                    >
-                      Add Project
-                    </Button>
+                    <ExtendedLink
+                      as="button"
+                      href="/projects/new"
+                      text="Add Project"
+                      variant="primary"
+                      className="w-full"
+                    />
                     {viewMissionDetailsBtn}
                   </div>
                 </div>

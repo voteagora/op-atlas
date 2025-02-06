@@ -29,7 +29,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             "group flex items-center gap-x-1.5 ",
             {
               "button-secondary text-inherit": variant === "default",
-              "bg-optimismRed text-white": variant === "primary",
+              "bg-optimismRed text-white hover:bg-optimismRed/70":
+                variant === "primary",
             },
             className,
           )}
