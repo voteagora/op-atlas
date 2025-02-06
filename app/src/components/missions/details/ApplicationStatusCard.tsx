@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 
 import { Account } from "@/components/common/Account"
+import ExtendedLink from "@/components/common/ExtendedLink"
+import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
 import { Button } from "../../ui/button"
 import { GreenBadge } from "../common/badges/GreenBadge"
-import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
 export const ApplicationStatusCard = ({
   isLoading,
@@ -164,12 +165,17 @@ export const ApplicationStatusCard = ({
           </p>
 
           <div className="flex flex-col w-full gap-2">
-            <Button
-              className="bg-optimismRed text-white w-full"
-              variant={"outline"}
-            >
-              Add Project
-            </Button>
+            <div>
+              <div>
+                <ExtendedLink
+                  as="button"
+                  href="/projects/new"
+                  text="Add Project"
+                  variant="primary"
+                  className="w-full"
+                />
+              </div>
+            </div>
             <Button
               variant={"ghost"}
               onClick={() => {

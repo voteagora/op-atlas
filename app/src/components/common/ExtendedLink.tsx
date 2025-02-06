@@ -13,16 +13,25 @@ interface ButtonProps {
   icon?: React.ReactNode
   text?: string
   subtext?: string
+  variant?: "default" | "primary"
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ icon, text, subtext, href, className, ...props }, ref) => {
+  (
+    { icon, text, subtext, href, variant = "default", className, ...props },
+    ref,
+  ) => {
     return (
       <NextLink href={href} passHref target="_blank" className="w-fit">
         <ShadcnButton
           ref={ref}
           className={cn(
-            "group flex items-center gap-x-1.5 button-secondary text-inherit",
+            "group flex items-center gap-x-1.5 ",
+            {
+              "button-secondary text-inherit": variant === "default",
+              "bg-optimismRed text-white hover:bg-optimismRed/70":
+                variant === "primary",
+            },
             className,
           )}
         >
