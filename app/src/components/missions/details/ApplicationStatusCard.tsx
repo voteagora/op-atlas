@@ -167,6 +167,9 @@ export const ApplicationStatusCard = ({
             <Button
               className="bg-optimismRed text-white w-full"
               variant={"outline"}
+              onClick={() => {
+                router.push(`/projects/new`)
+              }}
             >
               Add Project
             </Button>

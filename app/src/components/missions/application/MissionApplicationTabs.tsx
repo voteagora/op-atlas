@@ -174,7 +174,13 @@ export function MissionApplicationTabs({
                   </p>
 
                   <div className="flex gap-4">
-                    <Button className="w-44" variant={"destructive"}>
+                    <Button
+                      className="w-44"
+                      variant={"destructive"}
+                      onClick={() => {
+                        router.push(`/projects/new`)
+                      }}
+                    >
                       Add Project
                     </Button>
                     {viewMissionDetailsBtn}
