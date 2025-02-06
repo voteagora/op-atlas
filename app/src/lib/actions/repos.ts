@@ -79,7 +79,7 @@ const isValidFundingFile = (contents: string, projectId: string) => {
 
 const getFilesByName = (files: any[], name: string) => {
   return files.filter((element: any) => {
-    return element.name.toLowerCase() === name
+    return element?.name.toLowerCase() === name
   })
 }
 
@@ -92,7 +92,7 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
   )
 
   const crates = await Promise.all(
-    contents.map((content) => getCrate(content.package.name)),
+    contents.map((content) => getCrate(content.package?.name)),
   )
 
   return crates.some((crate) => {
