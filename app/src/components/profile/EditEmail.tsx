@@ -28,7 +28,6 @@ export function EditEmail({ user }: { user: UserWithEmails }) {
 
     startUpdateTransition(async () => {
       const emailExists = Boolean(user.emails[0]?.email)
-      console.log(">>>", user.emails[0]?.email)
       await updateEmail(email)
 
       if (!emailExists) {
