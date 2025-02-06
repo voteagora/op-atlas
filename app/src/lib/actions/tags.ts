@@ -1,39 +1,31 @@
 "use server"
 
+import { AggregatedType } from "eas-indexer/src/types"
+
 import {
-  getAllBadgeholders,
   getAllCitizens,
-  getAllCommunityContributors,
   getAllContributors,
   getAllGithubRepoBuiulders,
-  getAllGovContributors,
   getAllOnchainBuilders,
   getAllRFVoters,
+  getAllS7GovContributors,
 } from "@/db/users"
 
-import { ExtendedAggregatedType } from "../types"
-
-export async function getAggregatedRecords(records: ExtendedAggregatedType) {
+export async function getAggregatedRecords(records: AggregatedType) {
   const [
     citizen,
-    badgeholder,
     gov_contribution,
     rf_voter,
     contributors,
     onchain_builders,
     github_repo_builders,
-    community_contributors,
   ] = await Promise.all([
     getAllCitizens(records.citizen),
-    getAllBadgeholders(),
-    getAllGovContributors(records.gov_contribution),
+    getAllS7GovContributors(records.gov_contribution),
     getAllRFVoters(records.rf_voter),
-    getAllContributors(records.contributors),
+    getAllContributors(),
     getAllOnchainBuilders(),
     getAllGithubRepoBuiulders(),
-    getAllCommunityContributors(
-      records.community_contributors.map((c) => c.address),
-    ),
   ])
 
   const result = {
@@ -41,7 +33,6 @@ export async function getAggregatedRecords(records: ExtendedAggregatedType) {
       address: c.address,
       email: c.user.emails.at(-1)?.email ?? "",
     })),
-    badgeholder,
     gov_contribution: gov_contribution?.map((gc) => ({
       address: gc.address,
       email: gc.user.emails.at(-1)?.email ?? "",
@@ -65,10 +56,6 @@ export async function getAggregatedRecords(records: ExtendedAggregatedType) {
         address: grb.addresses.at(-1)?.address ?? "",
         email: grb.emails.at(-1)?.email ?? "",
       })) ?? [],
-    community_contributors: community_contributors?.map((cc) => ({
-      address: cc.address,
-      email: cc.user.emails.at(-1)?.email ?? "",
-    })),
   }
 
   return result

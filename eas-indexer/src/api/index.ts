@@ -34,50 +34,59 @@ entities.forEach((entity: Entity) => {
 });
 
 ponder.get("/entities/aggregated", async (c) => {
-  const entities: Entity[] = [
-    "badgeholder",
-    "citizen",
-    "gov_contribution",
-    "rf_voter",
-  ];
-
-  const aggregated: AggregatedType = {
-    badgeholder: [],
-    citizen: [],
-    gov_contribution: [],
-    rf_voter: [],
-    community_contributors: [],
-    onchain_builders: [],
-  };
+  const aggregated: AggregatedType = entities.reduce((acc, entity) => {
+    (acc as Record<Entity, Attestation[]>)[entity] = [];
+    return acc;
+  }, {} as AggregatedType);
 
   for (const entity of entities) {
-    const table = dbSchema[entity] as any;
-    let data = [];
-    if (entity === "rf_voter") {
-      data = await (c.db.query[entity] as any).findMany({
-        where: and(isNull(table.revoked_at), eq(table.voter_type, "rf_voter")),
-      });
-    } else if (entity === "gov_contribution") {
-      data = await (c.db.query[entity] as any).findMany({
-        where: and(isNull(table.revoked_at), eq(table.gov_season, "7")),
-      });
-    } else {
-      data = await (c.db.query[entity] as any).findMany({
-        where: isNull(table.revoked_at),
-      });
-    }
+    const attestations: Attestation[] = [];
+
+    const table = dbSchema[entity];
+    const data = await (c.db.query[entity] as any).findMany({
+      where: isNull(table.revoked_at),
+    });
 
     if (data.length > 0) {
-      aggregated[entity] = data.map((item: any) => ({ address: item.address }));
-
-      aggregated.community_contributors = data.reduce((acc: any, item: any) => {
-        if (item.attester === COMMUNITY_CONTRIBUTORS_ATTEST_ADDRESS) {
-          acc.push({ address: item.address });
-        }
-        return acc;
-      }, []);
+      data.forEach((item: any) => {
+        const parsed = parseEntity(item, entity);
+        attestations.push(parsed);
+      });
     }
+
+    aggregated[entity] = attestations;
   }
+
+  // for (const entity of entities) {
+  //   const table = dbSchema[entity] as any;
+  //   const data = await (c.db.query[entity] as any).findMany({
+  //     where: isNull(table.revoked_at),
+  //   });
+
+  // if (entity === "rf_voter") {
+  //   data = await (c.db.query[entity] as any).findMany({
+  //     where: and(isNull(table.revoked_at), eq(table.voter_type, "rf_voter")),
+  //   });
+  // } else if (entity === "gov_contribution") {
+  //   data = await (c.db.query[entity] as any).findMany({
+  //     where: and(isNull(table.revoked_at), eq(table.gov_season, "7")),
+  //   });
+  // } else {
+  //   data = await (c.db.query[entity] as any).findMany({
+  //     where: isNull(table.revoked_at),
+  //   });
+  // }
+
+  // aggregated[entity] = data
+
+  // aggregated.community_contributors = data.reduce((acc: any, item: any) => {
+  //   if (item.attester === COMMUNITY_CONTRIBUTORS_ATTEST_ADDRESS) {
+  //     acc.push({ address: item.address });
+  //   }
+  //   return acc;
+  // }, []);
+  // }
+  // }
 
   return c.json(aggregated);
 });

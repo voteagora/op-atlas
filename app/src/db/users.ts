@@ -8,6 +8,7 @@ import {
   UserInteraction,
 } from "@prisma/client"
 import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "eas-indexer/src/constants"
+import { AggregatedType } from "eas-indexer/src/types"
 
 import { EXTENDED_TAG_BY_ENTITY } from "@/lib/constants"
 import { ExtendedAggregatedType } from "@/lib/types"
@@ -20,7 +21,10 @@ export type EntityObject = {
   address: string
   email: string
 }
-export type EntityRecords = Record<Entity, EntityObject[]>
+export type EntityRecords = Record<
+  Exclude<Entity, "badgeholder">,
+  EntityObject[]
+>
 
 export async function getUserById(userId: string) {
   return prisma.user.findUnique({
@@ -320,15 +324,19 @@ export async function getAllBadgeholders() {
   return []
 }
 
-export async function getAllGovContributors(
-  records: ExtendedAggregatedType["gov_contribution"],
+export async function getAllS7GovContributors(
+  records: AggregatedType["gov_contribution"],
 ) {
+  const round7Addresses = records.filter(
+    (record) => record.metadata.round === 7,
+  )
+
   return prisma.userAddress.findMany({
     where: {
       AND: [
         {
           address: {
-            in: records.map((record) => record.address),
+            in: round7Addresses.map((record) => record.address),
           },
         },
       ],
@@ -351,10 +359,14 @@ export async function getAllGovContributors(
 export async function getAllRFVoters(
   records: ExtendedAggregatedType["rf_voter"],
 ) {
+  const guestVoters = records.filter(
+    (record) => record.metadata.voter_type === "Guest",
+  )
+
   return prisma.userAddress.findMany({
     where: {
       address: {
-        in: records.map((record) => record.address),
+        in: guestVoters.map((record) => record.address),
       },
     },
     select: {
@@ -372,9 +384,7 @@ export async function getAllRFVoters(
   })
 }
 
-export async function getAllContributors(
-  records: ExtendedAggregatedType["contributors"],
-) {
+export async function getAllContributors() {
   const data = await prisma.project.findMany({
     where: {
       id: {

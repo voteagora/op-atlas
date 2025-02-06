@@ -12,15 +12,9 @@ export type Attestation = {
   address: string;
   name: string;
   subtext: string;
+  metadata: Record<string, any>;
 };
 
-export type AggregatedType = {
-  badgeholder: { address: string; email?: string }[];
-  citizen: { address: string; email?: string }[];
-  gov_contribution: { address: string; email?: string }[];
-  rf_voter: { address: string; email?: string }[];
-  community_contributors: { address: string; email?: string }[];
-  onchain_builders: { address: string; email?: string }[];
-};
+export type AggregatedType = Record<keyof typeof dbSchema, Attestation[]>;
 
 export type Entity = keyof typeof dbSchema;
