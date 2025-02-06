@@ -7,10 +7,24 @@ import {
   UserEmail,
   UserInteraction,
 } from "@prisma/client"
+import { AggregatedType } from "eas-indexer/src/types"
 
+import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "@/lib/constants"
+import { EXTENDED_TAG_BY_ENTITY } from "@/lib/constants"
+import { ExtendedAggregatedType } from "@/lib/types"
 import { UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
+
+export type Entity = keyof ExtendedAggregatedType
+export type EntityObject = {
+  address: string
+  email: string
+}
+export type EntityRecords = Record<
+  Exclude<Entity, "badgeholder">,
+  EntityObject[]
+>
 
 export async function getUserById(userId: string) {
   return prisma.user.findUnique({
@@ -276,4 +290,400 @@ export async function updateUserInteraction(
     },
     create: { ...data, userId },
   })
+}
+
+export async function getAllCitizens(
+  records: ExtendedAggregatedType["citizen"],
+) {
+  return prisma.userAddress.findMany({
+    where: {
+      AND: [
+        {
+          address: {
+            in: records.map((record) => record.address),
+          },
+        },
+      ],
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function getAllBadgeholders() {
+  return []
+}
+
+export async function getAllS7GovContributors(
+  records: AggregatedType["gov_contribution"],
+) {
+  const round7Addresses = records.filter(
+    (record) => record.metadata.round === 7,
+  )
+
+  return prisma.userAddress.findMany({
+    where: {
+      AND: [
+        {
+          address: {
+            in: round7Addresses.map((record) => record.address),
+          },
+        },
+      ],
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function getAllRFVoters(
+  records: ExtendedAggregatedType["rf_voter"],
+) {
+  const guestVoters = records.filter(
+    (record) => record.metadata.voter_type === "Guest",
+  )
+
+  return prisma.userAddress.findMany({
+    where: {
+      address: {
+        in: guestVoters.map((record) => record.address),
+      },
+    },
+    select: {
+      address: true,
+      user: {
+        select: {
+          emails: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function getAllContributors() {
+  const data = await prisma.project.findMany({
+    where: {
+      AND: [
+        {
+          deletedAt: null,
+          id: {
+            in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
+          },
+        },
+        {
+          team: {
+            some: {
+              deletedAt: null,
+              user: {
+                deletedAt: null,
+              },
+            },
+          },
+        },
+        {
+          organization: {
+            deletedAt: null,
+            project: {
+              deletedAt: null,
+              team: {
+                some: {
+                  deletedAt: null,
+                  user: {
+                    deletedAt: null,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    select: {
+      team: {
+        select: {
+          user: {
+            select: {
+              addresses: {
+                select: {
+                  address: true,
+                },
+              },
+              emails: {
+                select: {
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      organization: {
+        select: {
+          project: {
+            select: {
+              team: {
+                select: {
+                  user: {
+                    select: {
+                      addresses: {
+                        select: {
+                          address: true,
+                        },
+                      },
+                      emails: {
+                        select: {
+                          email: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  const mergedContributors = data
+    .flatMap((d) => {
+      const team = d.team.map((t) => ({
+        user: t.user,
+        organization: null,
+      }))
+
+      const organization =
+        d.organization?.project.team.map((t) => ({
+          user: t.user,
+          organization: d.organization,
+        })) ?? []
+
+      return [...team, ...organization]
+    })
+    .flatMap((c) => {
+      const mergedUsers = [
+        c.user,
+        ...(c.organization?.project.team.map((t) => t.user) ?? []),
+      ]
+      const uniqueUsers = Array.from(
+        new Set(mergedUsers.map((u) => u.emails.at(-1)?.email)),
+      ).map((email) => {
+        return mergedUsers.find((u) => u.emails.at(-1)?.email === email)
+      })
+
+      return uniqueUsers
+    })
+
+  return mergedContributors
+}
+
+export async function getAllOnchainBuilders() {
+  return prisma.user.findMany({
+    where: {
+      OR: [
+        {
+          projects: {
+            some: {
+              deletedAt: null,
+              project: {
+                contracts: {
+                  some: {},
+                },
+                deletedAt: null,
+              },
+            },
+          },
+        },
+        {
+          organizations: {
+            some: {
+              deletedAt: null,
+              organization: {
+                deletedAt: null,
+                projects: {
+                  some: {
+                    deletedAt: null,
+                    project: {
+                      contracts: {
+                        some: {},
+                      },
+                      deletedAt: null,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    select: {
+      addresses: {
+        select: {
+          address: true,
+        },
+      },
+      emails: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  })
+}
+export async function getAllGithubRepoBuiulders() {
+  return prisma.user.findMany({
+    where: {
+      OR: [
+        {
+          projects: {
+            some: {
+              deletedAt: null,
+              project: {
+                deletedAt: null,
+                repos: {
+                  some: {
+                    verified: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          organizations: {
+            some: {
+              deletedAt: null,
+              organization: {
+                deletedAt: null,
+                projects: {
+                  some: {
+                    deletedAt: null,
+                    project: {
+                      deletedAt: null,
+                      repos: {
+                        some: {
+                          verified: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    select: {
+      addresses: {
+        select: {
+          address: true,
+        },
+      },
+      emails: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  })
+}
+
+export async function addTags(records: EntityRecords) {
+  const entityKeys = Object.keys(records) as (keyof typeof records)[]
+  const userTagsMap = new Map<string, Set<string>>()
+
+  entityKeys.forEach((entity) => {
+    records[entity].forEach((user) => {
+      const userTag = EXTENDED_TAG_BY_ENTITY[entity]
+      if (!userTagsMap.has(user.email)) {
+        userTagsMap.set(user.email, new Set([userTag]))
+      } else {
+        userTagsMap.get(user.email)?.add(userTag)
+      }
+    })
+  })
+
+  const emailsToUpdate = Array.from(userTagsMap.keys())
+
+  const usersToUpdate = await prisma.userEmail.findMany({
+    where: {
+      email: {
+        in: emailsToUpdate,
+      },
+    },
+  })
+
+  const usersToUntagCondition = {
+    AND: [
+      {
+        NOT: {
+          tags: {
+            isEmpty: true,
+          },
+        },
+      },
+      {
+        email: {
+          notIn: emailsToUpdate,
+        },
+      },
+    ],
+  }
+
+  const usersToUntag = await prisma.userEmail.findMany({
+    where: usersToUntagCondition,
+  })
+
+  await prisma.$transaction([
+    ...usersToUpdate.map((user) =>
+      prisma.userEmail.update({
+        where: { id: user.id },
+        data: { tags: Array.from(userTagsMap.get(user.email) ?? []) },
+      }),
+    ),
+    prisma.userEmail.updateMany({
+      where: usersToUntagCondition,
+      data: { tags: [] },
+    }),
+  ])
+
+  return [
+    ...usersToUpdate.map((user) => ({
+      id: user.id,
+      email: user.email,
+      tags: Array.from(userTagsMap.get(user.email) ?? []),
+    })),
+    ...usersToUntag.map((user) => ({
+      id: user.id,
+      email: user.email,
+      tags: [],
+    })),
+  ]
 }

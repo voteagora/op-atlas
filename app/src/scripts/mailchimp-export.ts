@@ -52,6 +52,12 @@ async function exportEmailsToMailchimp() {
         self.findIndex((t) => t.email_address === member.email_address),
     )
 
+  // We should consider this being dynamic via DB
+  const LIST_ID = process.env.MAILCHIMP_LIST_ID
+  if (!LIST_ID) {
+    throw new Error("MAILCHIMP_LIST_ID is not defined")
+  }
+
   console.log(`Exporting ${batchMembers.length} emails to Mailchimp...`)
 
   if (!LIST_ID) {

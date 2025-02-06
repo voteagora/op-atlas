@@ -10,11 +10,19 @@ const entityConfigs = {
   gov_contribution: {
     getName: (item: GovContribution) => item.gov_role,
     getSubtext: (item: GovContribution) => `Season ${item.gov_season}`,
+    getMetadata: (item: GovContribution) => ({
+      role: item.gov_role,
+      season: item.gov_season,
+    }),
   },
   rf_voter: {
     getName: () => "Retro Funding Voter",
     getSubtext: (item: RfVoter) =>
       `Voter Type: ${item.voter_type}; Round ${item.round}`,
+    getMetadata: (item: RfVoter) => ({
+      voterType: item.voter_type,
+      round: item.round,
+    }),
   },
   citizen: {
     getName: () => "Citizen",
@@ -26,10 +34,12 @@ const entityConfigs = {
           year: "numeric",
         }
       )}`,
+    getMetadata: (item: Citizen) => ({}),
   },
   badgeholder: {
     getName: () => "Retro Funding Voter",
     getSubtext: (item: Badgeholder) => `Round ${item.rpgf_round}`,
+    getMetadata: (item: Badgeholder) => ({}),
   },
 } as const;
 
@@ -46,5 +56,6 @@ export function parseEntity<T extends Entity>(
     address: item.address,
     name: config.getName(item),
     subtext: config.getSubtext(item),
+    metadata: config.getMetadata(item),
   };
 }

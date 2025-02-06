@@ -12,6 +12,9 @@ export type Attestation = {
   address: string;
   name: string;
   subtext: string;
+  metadata: Record<string, any>;
 };
+
+export type AggregatedType = Record<keyof typeof dbSchema, Attestation[]>;
 
 export type Entity = keyof typeof dbSchema;
