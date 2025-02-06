@@ -68,6 +68,14 @@ const FUNDING_ROUNDS = [
     label: "Round 4",
     value: "4",
   },
+  {
+    label: "Round 5",
+    value: "5",
+  },
+  {
+    label: "Round 6",
+    value: "6",
+  },
 ] as const
 
 const FUNDING_YEARS = [
