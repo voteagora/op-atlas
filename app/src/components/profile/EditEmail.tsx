@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
+import { useMailchimp } from "@/hooks/mailchimp/useMailchimp"
 import { useUpdateEmail } from "@/lib/hooks"
 import { UserWithEmails } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -11,8 +12,10 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 import { Input } from "../ui/input"
 
 export function EditEmail({ user }: { user: UserWithEmails }) {
+  const { addContact, updateContactEmail } = useMailchimp()
   const [email, setEmail] = useState(user.emails[0]?.email)
   const [isEditing, setIsEditing] = useState(false)
+  const [updatePending, startUpdateTransition] = useTransition()
   const updateEmail = useUpdateEmail()
   const { setOpenDialog } = useAppDialogs()
 
@@ -23,7 +26,18 @@ export function EditEmail({ user }: { user: UserWithEmails }) {
       return
     }
 
-    await updateEmail(email)
+    startUpdateTransition(async () => {
+      const emailExists = Boolean(user.emails[0]?.email)
+      console.log(">>>", user.emails[0]?.email)
+      await updateEmail(email)
+
+      if (!emailExists) {
+        await addContact(email)
+      } else {
+        console.log("updating email")
+        await updateContactEmail(user.emails[0]?.email, email)
+      }
+    })
     setIsEditing(false)
     toast.success("Email updated")
   }
@@ -53,7 +67,7 @@ export function EditEmail({ user }: { user: UserWithEmails }) {
             />
             {isEditing ? (
               <Button
-                disabled={email === ""}
+                disabled={email === "" || updatePending}
                 onClick={onEditEmail}
                 variant={
                   user.emails[0]?.email === email ? "secondary" : "primary"

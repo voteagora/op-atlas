@@ -17,7 +17,6 @@ import {
 import { getUserById } from "@/db/users"
 import { isBadgeholder } from "@/lib/badgeholders"
 import { usePrevious } from "@/lib/hooks"
-import { UserWithAddresses } from "@/lib/types"
 import {
   hasShownWelcomeBadgeholderDialog,
   isFirstTimeUser,

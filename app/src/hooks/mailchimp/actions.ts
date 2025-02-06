@@ -5,6 +5,8 @@ import { z } from "zod"
 
 import mailchimp from "@/lib/mailchimp"
 
+import { getContact, tryParseError } from "./utils"
+
 const ContactSchema = z.object({
   email: z.string().email(),
 })
@@ -35,14 +37,18 @@ export async function addContactToListAction(data: FormData) {
 
   const { email } = parsedData.data
 
+  const contact = await getContact(email)
+  if (contact) {
+    return
+  }
+
   try {
     await mailchimp.lists.addListMember(LIST_ID, {
       email_address: email,
       status: "subscribed",
     })
-  } catch (error) {
-    console.error("Error adding contact to list", error)
-    throw new Error("Error adding contact to list")
+  } catch (error: any) {
+    console.log("Error adding contact email", tryParseError(error))
   }
 }
 
@@ -69,9 +75,8 @@ export async function removeContactFromListAction(data: FormData) {
 
   try {
     await mailchimp.lists.deleteListMember(LIST_ID, email)
-  } catch (error) {
-    console.error("Error removing contact from list", error)
-    throw new Error("Error removing contact from list")
+  } catch (error: any) {
+    console.log("Error removing contact email", tryParseError(error))
   }
 }
 
@@ -98,13 +103,19 @@ export async function updateContactEmailAction(data: FormData) {
 
   const { currentEmail, newEmail } = parsedData.data
 
+  const contact = (await getContact(newEmail)) as any
+  if (contact && contact.status !== "archived") {
+    return
+  }
+
   try {
     const subscriberHash = Md5.hashStr(currentEmail)
-    await mailchimp.lists.updateListMember(LIST_ID, subscriberHash, {
+    await mailchimp.lists.setListMember(LIST_ID, subscriberHash, {
       email_address: newEmail,
+      status: "subscribed",
+      status_if_new: "subscribed",
     })
-  } catch (error) {
-    console.error("Error changing contact email", error)
-    throw new Error("Error changing contact email")
+  } catch (error: any) {
+    console.log("Error updating contact email", tryParseError(error))
   }
 }
