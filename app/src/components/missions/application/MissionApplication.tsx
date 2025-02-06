@@ -9,8 +9,8 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { useUserProjects } from "@/hooks/db/useUserProjects"
-import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
+import { useSessionProjects } from "@/hooks/db/useUserProjects"
+import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
 
@@ -18,7 +18,7 @@ import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import EmailSignupDialog from "./dialogs/EmailSignupDialog"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTabs } from "./MissionApplicationTabs"
-import { useAdminProjects } from "@/hooks/db/useAdminProjects"
+import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { rewardMeasurementDate } from "@/lib/MissionsAndRoundData"
 
 export const ApplicationFormSchema = z.object({
@@ -43,8 +43,8 @@ export function MissionApplication() {
     mode: "onChange",
   })
 
-  const { data: projects, isLoading } = useAdminProjects()
-  const { data: applications } = useUserRoundApplications(mission?.number)
+  const { data: projects, isLoading } = useSessionAdminProjects()
+  const { data: applications } = useSessionRoundApplications(mission?.number)
 
   const [submittedApplications, setSubmittedApplications] = useState<
     Application[]

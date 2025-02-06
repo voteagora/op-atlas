@@ -3,9 +3,9 @@
 import { Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
-import { useAdminProjects } from "@/hooks/db/useAdminProjects"
+import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useUserApplications } from "@/hooks/db/useUserApplications"
-import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { useSessionProjects } from "@/hooks/db/useUserProjects"
 import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
 import {
   ApplicationWithDetails,
@@ -22,7 +22,7 @@ import { Sidebar } from "./Sidebar"
 export function Rounds({ user }: { user?: UserWithAddresses | null }) {
   const { data } = useSession()
 
-  const { data: userProjects } = useAdminProjects()
+  const { data: userProjects } = useSessionAdminProjects()
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">

@@ -9,18 +9,26 @@ import {
 } from "@/lib/actions/projects"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 
-export function useUserProjects(): {
+export function useUserProjects(userId: string | undefined): {
+  data: ProjectWithDetails[] | undefined
+  isLoading: boolean
+  error: Error | null
+} {
+  console.log(userId)
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["userProjects", userId],
+    queryFn: () => getProjects(userId!),
+    enabled: !!userId,
+  })
+
+  return { data, isLoading, error }
+}
+
+export function useSessionProjects(): {
   data: ProjectWithDetails[] | undefined
   isLoading: boolean
   error: Error | null
 } {
   const { data: session } = useSession()
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["userProjects", session?.user.id],
-    queryFn: () => getProjects(session?.user.id!),
-    enabled: !!session,
-  })
-
-  return { data, isLoading, error }
+  return useUserProjects(session?.user.id)
 }

@@ -14,7 +14,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
+import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
@@ -62,7 +62,7 @@ export const ProjectApplication = ({
 
   const router = useRouter()
 
-  const { isLoading } = useUserRoundApplications(round?.number)
+  const { isLoading } = useSessionRoundApplications(round?.number)
 
   const { progressPercent, completedSections: completedSectionsCriteria } =
     useMemo(() => {

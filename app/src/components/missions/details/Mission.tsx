@@ -25,7 +25,10 @@ import {
 
 import ExternalLink from "../../ExternalLink"
 import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
-import { UserRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
+import {
+  SessionRoundApplicationStatusCard,
+  UserRoundApplicationStatusCard,
+} from "./UserRoundApplicationStatusCard"
 
 export default function Mission() {
   const mission = useMissionFromPath()
@@ -69,7 +72,7 @@ export default function Mission() {
         {mission && new Date() > mission?.startsAt && (
           <div className="flex flex-col gap-y-6 ml-auto w-[290px] sticky top-40 h-full">
             <>
-              <UserRoundApplicationStatusCard />
+              <SessionRoundApplicationStatusCard />
               <RoundEnrolledProjectsCard />
             </>
           </div>
