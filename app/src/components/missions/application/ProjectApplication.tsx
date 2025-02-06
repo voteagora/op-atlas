@@ -89,6 +89,12 @@ export const ProjectApplication = ({
       roundEligibilityCriteriaChecks[i] =
         project.isOnChainContract && project.contracts.length > 0
     }
+
+    if (criterion.type && criterion.type === "hasJavaScriptAndOrRustPackages") {
+      roundEligibilityCriteriaChecks[i] = project.repos.some(
+        (project) => project.npmPackage || project.crate,
+      )
+    }
   }
 
   const isSectionsCriteriaMet = sectionsCriteria.reduce(
@@ -213,7 +219,11 @@ export const ProjectApplication = ({
                   if (isCriterionComplete) {
                     icon = <CircleWithCheckmark />
                   } else {
-                    icon = <X className="w-6 h-6" color="red" />
+                    if (criterion.type === "hasJavaScriptAndOrRustPackages") {
+                      icon = <div className="w-6 h-[3px] bg-gray-400 m-1" />
+                    } else {
+                      icon = <X className="w-6 h-6" color="red" />
+                    }
                   }
                 } else {
                   icon = <div className="w-6 h-[3px] bg-gray-400 m-1" />
