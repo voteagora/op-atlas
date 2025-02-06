@@ -32,7 +32,7 @@ import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { ApplicationFormSchema } from "./MissionApplication"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTerms } from "./MissionApplicationTerms"
-import { useAdminProjects } from "@/hooks/db/useAdminProjects"
+import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import ExtendedLink from "@/components/common/ExtendedLink"
 
 export function MissionApplicationTabs({
@@ -52,7 +52,7 @@ export function MissionApplicationTabs({
   const router = useRouter()
 
   const { data: projects = [], isLoading: isLoadingProjects } =
-    useAdminProjects()
+    useSessionAdminProjects()
   const { data: applications = [], isLoading: isLoadingApplications } =
     useSessionRoundApplications(mission?.number)
 

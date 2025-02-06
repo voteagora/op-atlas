@@ -10,18 +10,26 @@ import {
 } from "@/lib/actions/projects"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 
-export function useAdminProjects(): {
+export function useAdminProjects(userId: string | undefined): {
+  data: ProjectWithDetails[] | undefined
+  isLoading: boolean
+  error: Error | null
+} {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["adminProjects", userId],
+    queryFn: () => getAdminProjects(userId!),
+    enabled: !!userId,
+  })
+
+  return { data, isLoading, error }
+}
+
+export function useSessionAdminProjects(): {
   data: ProjectWithDetails[] | undefined
   isLoading: boolean
   error: Error | null
 } {
   const { data: session } = useSession()
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["adminProjects", session?.user.id],
-    queryFn: () => getAdminProjects(session?.user.id as string),
-    enabled: !!session,
-  })
-
-  return { data, isLoading, error }
+  return useAdminProjects(session?.user.id)
 }

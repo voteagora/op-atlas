@@ -15,6 +15,7 @@ import {
 
 import { ApplicationStatusCard } from "./ApplicationStatusCard"
 import { useSession } from "next-auth/react"
+import { useAdminProjects } from "@/hooks/db/useAdminProjects"
 
 export const UserRoundApplicationStatusCard = ({
   userId,
@@ -26,7 +27,7 @@ export const UserRoundApplicationStatusCard = ({
   const { data: applications, isLoading: isLoadingApplications } =
     useUserRoundApplications(userId, mission?.number)
   const { data: projects, isLoading: isLoadingProjects } =
-    useUserProjects(userId)
+    useAdminProjects(userId)
 
   return (
     <>

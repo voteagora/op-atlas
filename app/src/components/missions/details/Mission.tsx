@@ -72,7 +72,6 @@ export default function Mission() {
         {mission && new Date() > mission?.startsAt && (
           <div className="flex flex-col gap-y-6 ml-auto w-[290px] sticky top-40 h-full">
             <>
-              <UserRoundApplicationStatusCard userId="53d84a3d-0b1b-4f02-b923-6528855ad8c2" />
               <SessionRoundApplicationStatusCard />
               <RoundEnrolledProjectsCard />
             </>
