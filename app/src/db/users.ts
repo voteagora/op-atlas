@@ -7,9 +7,9 @@ import {
   UserEmail,
   UserInteraction,
 } from "@prisma/client"
-import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "eas-indexer/src/constants"
 import { AggregatedType } from "eas-indexer/src/types"
 
+import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "@/lib/constants"
 import { EXTENDED_TAG_BY_ENTITY } from "@/lib/constants"
 import { ExtendedAggregatedType } from "@/lib/types"
 import { UserAddressSource } from "@/lib/types"
