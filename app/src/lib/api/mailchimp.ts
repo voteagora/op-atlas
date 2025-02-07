@@ -66,3 +66,20 @@ export async function getContact(email: string) {
     throw new Error("Error getting contact", error)
   }
 }
+
+export async function getContactTags(email: string) {
+  const LIST_ID = process.env.MAILCHIMP_LIST_ID
+  if (!LIST_ID) {
+    throw new Error("MAILCHIMP_LIST_ID not set")
+  }
+
+  try {
+    return await mailchimp.lists.getListMemberTags(LIST_ID, Md5.hashStr(email))
+  } catch (error: any) {
+    if (error.status === 404) {
+      return null
+    }
+
+    throw new Error("Error getting contact", error)
+  }
+}

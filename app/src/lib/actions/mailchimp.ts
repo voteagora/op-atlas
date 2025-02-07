@@ -102,17 +102,12 @@ export async function updateContactEmailAction(data: FormData) {
 
   const { currentEmail, newEmail } = parsedData.data
 
-  const contact = (await getContact(newEmail)) as any
-  if (contact && contact.status !== "archived") {
-    return
-  }
-
   try {
     const subscriberHash = Md5.hashStr(currentEmail)
-    await mailchimp.lists.setListMember(LIST_ID, subscriberHash, {
+
+    await mailchimp.lists.updateListMember(LIST_ID, subscriberHash, {
       email_address: newEmail,
       status: "subscribed",
-      status_if_new: "subscribed",
     })
   } catch (error: any) {
     console.log("Error updating contact email", error)
