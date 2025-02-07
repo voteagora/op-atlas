@@ -41,33 +41,28 @@ export const updateEmail = async (email: string) => {
     }
   }
 
-  const [previous, updated] = await updateUserEmail({ id: user.id, email })
-  if (previous?.email) {
-    if (!updated.email) {
-      return {
-        error: "Invalid email",
-        user: null,
-      }
+  if (!email) {
+    return {
+      error: "Invalid email",
+      user: null,
     }
+  }
 
+  const previousEmail = user.emails[0]?.email
+  if (previousEmail) {
     const data = new FormData()
-    data.append("currentEmail", previous.email)
-    data.append("newEmail", updated.email)
+    data.append("currentEmail", previousEmail)
+    data.append("newEmail", email)
 
     await updateContactEmailAction(data)
   } else {
-    if (!updated.email) {
-      return {
-        error: "Invalid email",
-        user: null,
-      }
-    }
-
     const data = new FormData()
-    data.append("email", updated.email)
+    data.append("email", email)
 
     await addContactToListAction(data)
   }
+
+  const [_, updated] = await updateUserEmail({ id: user.id, email })
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/details")

@@ -1,19 +1,10 @@
 "use server"
 
 import { Md5 } from "ts-md5"
-import { z } from "zod"
 
+import { auth } from "@/auth"
 import { getContact } from "@/lib/api/mailchimp"
 import mailchimp from "@/lib/mailchimp"
-
-const ContactSchema = z.object({
-  email: z.string().email(),
-})
-
-const UpdateContactEmailSchema = z.object({
-  currentEmail: z.string().email(),
-  newEmail: z.string().email(),
-})
 
 /**
  *
@@ -26,15 +17,7 @@ export async function addContactToListAction(data: FormData) {
     throw new Error("MAILCHIMP_LIST_ID not set")
   }
 
-  const parsedData = ContactSchema.safeParse({
-    email: data.get("email"),
-  })
-
-  if (!parsedData.success) {
-    throw new Error("Invalid form data")
-  }
-
-  const { email } = parsedData.data
+  const email = data.get("email") as string
 
   const contact = await getContact(email)
   if (contact) {
@@ -62,15 +45,7 @@ export async function removeContactFromListAction(data: FormData) {
     throw new Error("MAILCHIMP_LIST_ID not set")
   }
 
-  const parsedData = ContactSchema.safeParse({
-    email: data.get("email"),
-  })
-
-  if (!parsedData.success) {
-    throw new Error("Invalid form data")
-  }
-
-  const { email } = parsedData.data
+  const email = data.get("email") as string
 
   try {
     await mailchimp.lists.deleteListMember(LIST_ID, email)
@@ -91,16 +66,8 @@ export async function updateContactEmailAction(data: FormData) {
     throw new Error("MAILCHIMP_LIST_ID not set")
   }
 
-  const parsedData = UpdateContactEmailSchema.safeParse({
-    currentEmail: data.get("currentEmail"),
-    newEmail: data.get("newEmail"),
-  })
-
-  if (!parsedData.success) {
-    throw new Error("Invalid form data")
-  }
-
-  const { currentEmail, newEmail } = parsedData.data
+  const currentEmail = data.get("currentEmail") as string
+  const newEmail = data.get("newEmail") as string
 
   try {
     const subscriberHash = Md5.hashStr(currentEmail)
