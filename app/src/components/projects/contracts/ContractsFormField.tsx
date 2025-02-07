@@ -8,6 +8,8 @@ import { DeployersSchema } from "./schema3"
 import { z } from "zod"
 import { UseFormReturn } from "react-hook-form"
 import { ContractFormField } from "./ContractFormField"
+import { useState } from "react"
+import { ChevronDown, ChevronUp } from "lucide-react"
 
 export function ContractsFormField({
   form,
@@ -16,15 +18,23 @@ export function ContractsFormField({
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
   deployerIndex: number
 }) {
+  const initialMaxContractViewCount = 3
+  const [contractViewCount, setContractViewCount] = useState(
+    initialMaxContractViewCount,
+  )
+
   return (
     <FormItem className="flex flex-col gap-1.5">
-      <FormLabel>Contracts</FormLabel>
       <FormField
         control={form.control}
         name={`deployers.${deployerIndex}.contracts`}
         render={({ field: contracts }) => (
           <div>
+            <FormLabel>Contracts</FormLabel>
+
             {contracts.value.map((contract, index) => {
+              if (index >= contractViewCount) return
+
               return (
                 <ContractFormField
                   form={form}
@@ -33,6 +43,36 @@ export function ContractsFormField({
                 />
               )
             })}
+
+            {contractViewCount < contracts.value.length && (
+              <button
+                className="flex items-center gap-2"
+                onClick={() => {
+                  setContractViewCount(contracts.value.length)
+                }}
+              >
+                <p>
+                  Show {contracts.value.length - initialMaxContractViewCount}{" "}
+                  more contract(s)
+                </p>
+                <ChevronDown width={16} height={16} />
+              </button>
+            )}
+
+            {contractViewCount >= contracts.value.length && (
+              <button
+                className="flex items-center gap-2"
+                onClick={() => {
+                  setContractViewCount(initialMaxContractViewCount)
+                }}
+              >
+                <p>
+                  Hide {contracts.value.length - initialMaxContractViewCount}{" "}
+                  contract(s)
+                </p>
+                <ChevronUp width={16} height={16} />
+              </button>
+            )}
           </div>
         )}
       />
