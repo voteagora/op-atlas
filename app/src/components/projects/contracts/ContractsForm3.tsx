@@ -99,9 +99,9 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   const { data: projectContractsData } = useProjectContracts(project.id)
 
-  const { data: osoDeployerContractsData } = useOsoDeployedContracts(
-    "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
-  )
+  // const { data: osoDeployerContractsData } = useOsoDeployedContracts(
+  //   "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
+  // )
 
   const deployerAddresses = projectContractsData?.map((projectContractData) => {
     return projectContractData.deployerAddress
@@ -132,11 +132,11 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       : projectContractsData
   }
 
-  async function getOsoDeployerContractsData() {
-    return IS_USING_MOCK_DATA
-      ? mockOsoDeployerContractsData
-      : osoDeployerContractsData
-  }
+  // async function getOsoDeployerContractsData() {
+  //   return IS_USING_MOCK_DATA
+  //     ? mockOsoDeployerContractsData
+  //     : osoDeployerContractsData
+  // }
 
   async function getOsoDeployersContractsData() {
     return IS_USING_MOCK_DATA
@@ -144,14 +144,51 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       : osoDeployersContractsData
   }
 
+  async function convertChains() {}
+
+  interface GroupedDataItem {
+    deployerAddress: string
+    contractAddresses: string[]
+    chainIds: number[]
+  }
+
+  function groupByDeployer(deployments: ProjectContract[]): {
+    [key: string]: GroupedDataItem
+  } {
+    const groupedMap: { [key: string]: GroupedDataItem } = {}
+
+    for (const deployment of deployments) {
+      if (!groupedMap[deployment.deployerAddress]) {
+        groupedMap[deployment.deployerAddress] = {
+          deployerAddress: deployment.deployerAddress,
+          contractAddresses: [],
+          chainIds: [],
+        }
+      }
+      groupedMap[deployment.deployerAddress].contractAddresses.push(
+        deployment.contractAddress,
+      )
+      groupedMap[deployment.deployerAddress].chainIds.push(deployment.chainId)
+    }
+
+    // Convert the map to an array
+    return groupedMap
+  }
+
   useEffect(() => {
     async function get() {
       const projectContracts = await getProjectContractsData()
 
-      // console.log("projects contracts:")
-      // console.log(projectContracts)
+      console.log("projects contracts:")
+      console.log(projectContracts)
 
-      const osoDeployerContracts = await getOsoDeployerContractsData()
+      const uniqueDeployments = Object.values(
+        groupByDeployer(projectContracts!),
+      )
+
+      console.log(uniqueDeployments)
+
+      // const osoDeployerContracts = await getOsoDeployerContractsData()
 
       // console.log("oso deployer contracts:")
       // console.log(osoDeployerContracts)
