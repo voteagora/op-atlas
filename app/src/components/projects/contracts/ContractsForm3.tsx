@@ -65,7 +65,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = false
+const IS_USING_MOCK_DATA = true
 const IS_USING_EMPTY_MOCK_DATA = false
 
 export async function getDeployerOSOData(address: string) {
@@ -108,8 +108,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   })
 
   const { data: osoDeployersContractsData } = useOsoDeployersDeployedContracts(
-    // deployerAddresses!,
-    ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
+    deployerAddresses!,
+    // ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
   )
 
   // WORKING
@@ -148,13 +148,13 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     async function get() {
       const projectContracts = await getProjectContractsData()
 
-      console.log("projects contracts:")
-      console.log(projectContracts)
+      // console.log("projects contracts:")
+      // console.log(projectContracts)
 
       const osoDeployerContracts = await getOsoDeployerContractsData()
 
-      console.log("oso deployer contracts:")
-      console.log(osoDeployerContracts)
+      // console.log("oso deployer contracts:")
+      // console.log(osoDeployerContracts)
 
       const osoDeployersContracts = await getOsoDeployersContractsData()
 
@@ -163,7 +163,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     }
 
     get()
-  }, [projectContractsData, osoDeployerContractsData])
+  }, [projectContractsData, osoDeployersContractsData])
 
   useEffect(() => {
     const populateForm = async () => {

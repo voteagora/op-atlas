@@ -27,10 +27,12 @@ export function useOsoDeployersDeployedContracts(
 any {
   return useQuery({
     queryKey: ["osoDeployersContracts", deployers],
-    queryFn: () =>
-      deployers.map(async (deployer) => {
-        return await getDeployedContracts(deployer)
-      }),
-    ...queryOptions, // Merge custom options
+    queryFn: async () => {
+      const deployedContracts = await Promise.all(
+        deployers.map((deployer) => getDeployedContracts(deployer)),
+      )
+      return deployedContracts
+    },
+    ...queryOptions,
   })
 }
