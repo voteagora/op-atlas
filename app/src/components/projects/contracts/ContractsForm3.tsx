@@ -73,7 +73,7 @@ const IS_USING_EMPTY_MOCK_DATA = false
 const supportedMappings = {
   OPTIMISM: 10,
   BASE: 8453,
-  MODE: 34443,
+  // MODE: 34443,
 }
 
 export async function getDeployerOSOData(address: string) {
@@ -315,7 +315,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
             contracts: deployer.contracts.map((contract) => {
               return {
                 address: contract.address,
-                chain: contract.chainId.toString(),
+                chainId: contract.chainId.toString(),
               }
             }),
           }

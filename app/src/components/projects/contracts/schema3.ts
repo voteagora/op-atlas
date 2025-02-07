@@ -3,7 +3,7 @@ import { AddressSchema, Chain } from "./commonSchema"
 
 export const ContractSchema = z.object({
   address: AddressSchema,
-  chain: Chain,
+  chainId: Chain,
   //   name: z.string().optional(),
   //   description: z.string().optional(),
   //   excluded: z.boolean(),
