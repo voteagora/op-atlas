@@ -11,6 +11,8 @@ import { CHAIN_INFO } from "@/components/common/chain"
 import { ContractDropdownButton } from "./ContractDropdownButton"
 import { addProjectContract } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
+import { removeContract } from "@/lib/actions/contracts"
+import { Address, getAddress } from "viem"
 
 const onCopyValue = async (value: string) => {
   try {
@@ -39,12 +41,15 @@ export function ContractFormField({
     console.log(form.getValues())
 
     if (!value) {
-      const contract = await addProjectContract({
+      const addr = getAddress(
+        form.getValues().deployers[deployerIndex].contracts[contractIndex]
+          .address,
+      )
+
+      await addProjectContract({
         projectId,
         contract: {
-          contractAddress:
-            form.getValues().deployers[deployerIndex].contracts[contractIndex]
-              .address,
+          contractAddress: addr,
           deployerAddress: form.getValues().deployers[deployerIndex].address,
           deploymentHash: "",
           verificationProof: "",
@@ -55,6 +60,29 @@ export function ContractFormField({
           name: "",
           description: "",
         },
+      })
+    } else {
+      console.log(projectId)
+      console.log(
+        form.getValues().deployers[deployerIndex].contracts[contractIndex]
+          .address as Address,
+      )
+
+      console.log(
+        parseInt(
+          form.getValues().deployers[deployerIndex].contracts[contractIndex]
+            .chainId,
+        ),
+      )
+      await removeContract({
+        projectId,
+        address: form.getValues().deployers[deployerIndex].contracts[
+          contractIndex
+        ].address as Address,
+        chainId: parseInt(
+          form.getValues().deployers[deployerIndex].contracts[contractIndex]
+            .chainId,
+        ),
       })
     }
   }

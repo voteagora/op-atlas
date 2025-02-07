@@ -687,6 +687,10 @@ export async function removeProjectContract({
   address: string
   chainId: number
 }) {
+  console.log(projectId)
+  console.log(address)
+  console.log(chainId)
+
   const contractDelete = prisma.projectContract.delete({
     where: {
       projectId,
