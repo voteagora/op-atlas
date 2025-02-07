@@ -22,7 +22,11 @@ import {
   mockOsoDeployerContractsData,
   mockOsoDeployersContractsData,
 } from "./MockOsoDeployerContractsData"
-import { mockProjectContractsData } from "./MockProjectContractsData"
+import {
+  IS_USING_EMPTY_MOCK_DATA,
+  IS_USING_MOCK_DATA,
+  mockProjectContractsData,
+} from "./MockProjectContractsData"
 import { DeployersSchema } from "./schema3"
 import { DeployersFormField } from "./DeployersFormField"
 import {
@@ -35,9 +39,6 @@ const EMPTY_DEPLOYER = {
   address: "",
   contracts: [],
 }
-
-const IS_USING_MOCK_DATA = false
-const IS_USING_EMPTY_MOCK_DATA = false
 
 function getDefaultValues(): z.infer<typeof ContractsSchema2> {
   return {
@@ -67,14 +68,14 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     },
   )
 
-  console.log(deployerAddresses)
+  // console.log(deployerAddresses)
 
   const { data: osoDeployersContractsData } = useOsoDeployersDeployedContracts(
     deployerAddresses ?? [],
     // ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
   )
 
-  console.log(osoDeployersContractsData)
+  // console.log(osoDeployersContractsData)
 
   async function getProjectContractsData() {
     return IS_USING_MOCK_DATA
@@ -106,24 +107,24 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       if (projectContracts === undefined || osoDeployersContracts === undefined)
         return
 
-      console.log("projects contracts:")
-      console.log(projectContracts)
+      // console.log("projects contracts:")
+      // console.log(projectContracts)
 
       // const projectContractsByDeployer = Object.values(
       //   groupByDeployer(projectContracts!),
       // )
 
-      console.log("projects contracts (unique):")
+      // console.log("projects contracts (unique):")
 
-      console.log(projectContractsByDeployer)
+      // console.log(projectContractsByDeployer)
 
       // const osoDeployerContracts = await getOsoDeployerContractsData()
 
       // console.log("oso deployer contracts:")
       // console.log(osoDeployerContracts)
 
-      console.log("oso deployers contracts:")
-      console.log(osoDeployersContracts)
+      // console.log("oso deployers contracts:")
+      // console.log(osoDeployersContracts)
 
       // deep clones as to not alter the original object
       const osoDeployersContracts__ChainCorrected =
@@ -131,15 +132,15 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
           JSON.parse(JSON.stringify(osoDeployersContracts)),
         )
 
-      console.log("oso deployers contracts (chain corrected):")
-      console.log(osoDeployersContracts__ChainCorrected)
+      // console.log("oso deployers contracts (chain corrected):")
+      // console.log(osoDeployersContracts__ChainCorrected)
 
       const osoDeployersContracts__DeployerFormatted = convertContracts(
         osoDeployersContracts__ChainCorrected,
       )
 
-      console.log("oso deployers contracts (unique)")
-      console.log(osoDeployersContracts__DeployerFormatted)
+      // console.log("oso deployers contracts (unique)")
+      // console.log(osoDeployersContracts__DeployerFormatted)
 
       const deployersFormData: z.infer<typeof DeployersSchema> = {
         deployers: osoDeployersContracts__DeployerFormatted.map((deployer) => {
@@ -162,7 +163,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
       form3.setValue("deployers", deployersFormData.deployers)
 
-      console.log(deployersFormData)
+      // console.log(deployersFormData)
     }
 
     get()

@@ -1,5 +1,8 @@
 import { ProjectContract } from "@prisma/client"
 
+export const IS_USING_MOCK_DATA = false
+export const IS_USING_EMPTY_MOCK_DATA = false
+
 export const mockProjectContractsData = [
   {
     deployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",

@@ -13,6 +13,9 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { isAddress } from "ethers"
+import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
+import { getDeployedContracts } from "@/lib/oso"
+import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
 
 export function DeployerFormField({
   form,
@@ -21,11 +24,40 @@ export function DeployerFormField({
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
   deployerIndex: number
 }) {
+  const { append } = useFieldArray({
+    control: form.control,
+    name: `deployers.${deployerIndex}.contracts`, // Name of the array field
+  })
+
   const [isVerifying, setIsVerifying] = useState(false)
 
   async function onVerify() {
     setIsVerifying(true)
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    if (IS_USING_MOCK_DATA) {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+    } else {
+      const deployer = await getDeployedContracts(
+        form.getValues().deployers[deployerIndex].address,
+      )
+
+      const corrected = replaceArtifactSourceWithNumber(
+        JSON.parse(JSON.stringify([deployer])),
+      )
+
+      append(
+        corrected[0].oso_contractsV0.map((contract) => {
+          return {
+            address: contract.contractAddress,
+            chainId: contract.artifactSource,
+            excluded: true,
+          }
+        }),
+      )
+      //   append()
+      console.log(corrected)
+    }
+
     setIsVerifying(false)
   }
 
