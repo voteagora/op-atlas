@@ -62,10 +62,11 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const USE_MOCK_DATA = true
+const IS_USING_MOCK_DATA = true
+const IS_USING_EMPTY_MOCK_DATA = false
 
 export async function getDeployerOSOData(address: string) {
-  if (USE_MOCK_DATA) {
+  if (IS_USING_MOCK_DATA) {
     return mockBackendOSOData.find((deployer) => {
       return address === deployer.address
     })
@@ -83,7 +84,7 @@ function getDefaultValues(): z.infer<typeof ContractsSchema2> {
     deployers: [{ ...EMPTY_DEPLOYER }],
   }
 }
-export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
+export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   const form = useForm<z.infer<typeof ContractsSchema2>>({
     resolver: zodResolver(ContractsSchema2),
     mode: "onSubmit",
@@ -97,7 +98,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   const [allDbData, setAllDbData] = useState<DBData[]>([])
 
-  const { data } = useProjectContracts(project.id, { enabled: !USE_MOCK_DATA })
+  const { data } = useProjectContracts(project.id)
 
   // WORKING
   // useEffect(() => {
@@ -111,6 +112,23 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
   //   get()
   // }, [])
 
+  async function getContracts() {
+    return IS_USING_MOCK_DATA
+      ? IS_USING_EMPTY_MOCK_DATA
+        ? []
+        : mockProjectContractsData
+      : data
+  }
+
+  useEffect(() => {
+    async function get() {
+      const contracts = await getContracts()
+      console.log(contracts)
+    }
+
+    get()
+  }, [data])
+
   useEffect(() => {
     const populateForm = async () => {
       //1. Get DB Data
@@ -118,7 +136,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
       let fetchedDbData: ProjectContract[] | undefined = []
 
-      if (USE_MOCK_DATA) {
+      if (IS_USING_MOCK_DATA) {
         fetchedDbData = mockProjectContractsData
       } else {
         fetchedDbData = data
@@ -168,7 +186,7 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
         data.filter((data): data is OSOData => data !== undefined),
       )
 
-      console.log(osoData)
+      // console.log(osoData)
 
       //4. Cross Reference
       const formDeployers: z.infer<typeof ContractsSchema2> = {
@@ -210,6 +228,12 @@ export function ContractsForm2({ project }: { project: ProjectWithDetails }) {
 
   return (
     <div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <p>hello</p>
+        </form>
+      </Form>
+      <div className="w-full h-10 bg-primary" />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}

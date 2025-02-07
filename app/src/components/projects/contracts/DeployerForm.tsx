@@ -12,10 +12,11 @@ import { ReactNode, useEffect, useState } from "react"
 import { truncate } from "@/lib/utils/contracts"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
-import { DBData, getDeployerOSOData } from "./ContractsForm2"
+import { getDeployerOSOData } from "./ContractsForm2"
 import { isAddress } from "viem"
 import { ProjectContract } from "@prisma/client"
 import { Button } from "@/components/ui/button"
+import { DBData } from "./mockDBData"
 
 const onCopyValue = async (value: string) => {
   try {
