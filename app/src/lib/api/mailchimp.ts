@@ -1,3 +1,7 @@
+import "server-only"
+
+import { Md5 } from "ts-md5"
+
 import mailchimp from "@/lib/mailchimp"
 
 export async function updateMailchimpTags(
@@ -45,5 +49,96 @@ export async function updateMailchimpTags(
   } catch (error) {
     console.error(`[-] Mailchimp contacts tagging failed: ${error}`)
     return { success: false, error }
+  }
+}
+
+/**
+ *
+ * @param {FormData} data - Must contain:
+ *   - `email` (string): The user's email address.
+ */
+export async function addContactToList({ email }: { email: string }) {
+  const LIST_ID = process.env.MAILCHIMP_LIST_ID
+  if (!LIST_ID) {
+    throw new Error("MAILCHIMP_LIST_ID not set")
+  }
+
+  const contact = await getContact(email)
+  if (contact) {
+    return
+  }
+
+  try {
+    await mailchimp.lists.addListMember(LIST_ID, {
+      email_address: email,
+      status: "subscribed",
+    })
+  } catch (error: any) {
+    console.log("Error adding contact email", error)
+  }
+}
+
+/**
+ *
+ * @param {FormData} data - Must contain:
+ *   - `email` (string): The user's email address.
+ */
+export async function removeContactFromList({ email }: { email: string }) {
+  const LIST_ID = process.env.MAILCHIMP_LIST_ID
+  if (!LIST_ID) {
+    throw new Error("MAILCHIMP_LIST_ID not set")
+  }
+
+  try {
+    await mailchimp.lists.deleteListMember(LIST_ID, email)
+  } catch (error: any) {
+    console.log("Error removing contact email", error)
+  }
+}
+
+/**
+ *
+ * @param {FormData} data - Must contain:
+ *   - `currentEmail` (string): The user's current email address.
+ *   - `newEmail` (string): The user's new email address.
+ */
+export async function updateContactEmail({
+  currentEmail,
+  newEmail,
+}: {
+  currentEmail: string
+  newEmail: string
+}) {
+  const LIST_ID = process.env.MAILCHIMP_LIST_ID
+  if (!LIST_ID) {
+    throw new Error("MAILCHIMP_LIST_ID not set")
+  }
+
+  try {
+    const subscriberHash = Md5.hashStr(currentEmail)
+
+    await mailchimp.lists.updateListMember(LIST_ID, subscriberHash, {
+      email_address: newEmail,
+      status: "subscribed",
+    })
+  } catch (error: any) {
+    console.log("Error updating contact email", error)
+  }
+}
+
+async function getContact(email: string) {
+  const LIST_ID = process.env.MAILCHIMP_LIST_ID
+  if (!LIST_ID) {
+    throw new Error("MAILCHIMP_LIST_ID not set")
+  }
+
+  try {
+    return await mailchimp.lists.getListMember(LIST_ID, Md5.hashStr(email))
+  } catch (error: any) {
+    if (error.status === 404) {
+      return null
+    }
+
+    throw new Error("Error getting contact", error)
   }
 }
