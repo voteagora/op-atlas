@@ -32,9 +32,9 @@ export function DeployersFormField({
           {deployers?.value?.map((deployer, deployerIndex) => {
             return (
               <DeployerFormField
+                key={"Deployer" + deployerIndex}
                 form={form}
                 deployerIndex={deployerIndex}
-                key={"Deployer" + deployerIndex}
               />
             )
           })}

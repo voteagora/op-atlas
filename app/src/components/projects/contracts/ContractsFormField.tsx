@@ -38,6 +38,7 @@ export function ContractsFormField({
 
                 return (
                   <ContractFormField
+                    key={"Contracts-" + deployerIndex + "-" + index}
                     form={form}
                     deployerIndex={deployerIndex}
                     contractIndex={index}
