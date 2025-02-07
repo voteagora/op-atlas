@@ -1,14 +1,7 @@
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 import { DeployersSchema } from "./schema3"
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { ContractsFormField } from "./ContractsFormField"
+import { FormField } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DeployerFormField } from "./DeployerFormField"

@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { ContractsFormField } from "./ContractsFormField"
 import { Button } from "@/components/ui/button"
-import { Loader2, Plus } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { isAddress } from "ethers"
 

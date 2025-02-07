@@ -61,10 +61,14 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     return projectContractData.deployerAddress
   })
 
+  console.log(deployerAddresses)
+
   const { data: osoDeployersContractsData } = useOsoDeployersDeployedContracts(
     deployerAddresses ?? [],
     // ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
   )
+
+  console.log(osoDeployersContractsData)
 
   async function getProjectContractsData() {
     return IS_USING_MOCK_DATA
