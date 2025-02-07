@@ -65,9 +65,6 @@ export const updateEmail = async (email: string) => {
       newEmail: parsedEmail,
     })
   } else {
-    const data = new FormData()
-    data.append("email", parsedEmail)
-
     await addContactToList({
       email: parsedEmail,
     })
