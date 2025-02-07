@@ -14,8 +14,7 @@ import {
   updateUserHasGithub,
   updateUserInteraction,
 } from "@/db/users"
-
-import { addContactToListAction, updateContactEmailAction } from "./mailchimp"
+import { addContactToList, updateContactEmail } from "@/lib/api/mailchimp"
 
 export const connectDiscord = async () => {
   await signIn("discord")
@@ -54,12 +53,12 @@ export const updateEmail = async (email: string) => {
     data.append("currentEmail", previousEmail)
     data.append("newEmail", email)
 
-    await updateContactEmailAction(data)
+    await updateContactEmail(data)
   } else {
     const data = new FormData()
     data.append("email", email)
 
-    await addContactToListAction(data)
+    await addContactToList(data)
   }
 
   const [_, updated] = await updateUserEmail({ id: user.id, email })
