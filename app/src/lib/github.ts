@@ -64,6 +64,55 @@ export const getFilesContentsToml = async (
   )
 }
 
+export async function getPackageJsonFiles(
+  owner: string,
+  slug: string,
+  path = "",
+) {
+  const response = await octokit.request(
+    "GET /repos/{owner}/{repo}/contents/{path}",
+    {
+      owner,
+      path,
+      repo: slug,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    },
+  )
+
+  let contents = response.data
+
+  if (!Array.isArray(contents)) {
+    contents = [contents]
+  }
+
+  let packageFiles: { path: string; content: object }[] = []
+
+  for (const item of contents) {
+    if (item.type === "file" && item.name === "package.json") {
+      const content = await getFileContentBase64Decoded(owner, slug, item.path)
+      try {
+        const parsedContent = JSON.parse(content)
+        if (typeof parsedContent === "object") {
+          packageFiles.push({
+            path: item.path,
+            content: parsedContent,
+          })
+        }
+      } catch (err) {
+        // skip invalid package.jsons
+        console.error(err)
+      }
+    } else if (item.type === "dir") {
+      const subFiles = await getPackageJsonFiles(owner, slug, item.path)
+      packageFiles = packageFiles.concat(subFiles)
+    }
+  }
+
+  return packageFiles
+}
+
 export const getFilesContentsJson = async (
   owner: string,
   repo: string,

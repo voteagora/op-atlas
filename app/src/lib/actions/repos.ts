@@ -20,6 +20,7 @@ import {
   getFilesContentsJson,
   getFilesContentsToml,
   getLicense,
+  getPackageJsonFiles,
   getRepository,
 } from "../github"
 import { OPEN_SOURCE_LICENSES } from "../licenses"
@@ -108,16 +109,18 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
   })
 }
 
-const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
-  const packageJsons = getFilesByName(repoFiles, "package.json")
-  const contents = await getFilesContentsJson(
-    owner,
-    slug,
-    packageJsons.map((item) => item.path),
-  )
+const verifyNpm = async (owner: string, slug: string) => {
+  const packageJsons = await getPackageJsonFiles(owner, slug)
 
   const packages = await Promise.all(
-    contents.map((content) => getNpmPackage(content.name)),
+    packageJsons
+      .filter(
+        (
+          packageJson,
+        ): packageJson is { path: string; content: { name: string } } =>
+          packageJson.content.hasOwnProperty("name"),
+      )
+      .map((packageJson) => getNpmPackage(packageJson.content.name)),
   )
 
   return packages.some(
@@ -172,7 +175,7 @@ export const verifyGithubRepo = async (
 
   const [isCrate, isNpmPackage] = await Promise.all([
     verifyCrate(owner, slug, repoFiles),
-    verifyNpm(owner, slug, repoFiles),
+    verifyNpm(owner, slug),
   ])
 
   return {
