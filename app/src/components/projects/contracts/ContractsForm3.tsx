@@ -226,8 +226,6 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   interface ProjectContractsByDeployer {
     deployerAddress: string
     contracts: Array<{ address: string; chainId: number }>
-    // contractAddresses: string[]
-    // chainIds: number[]
   }
 
   function groupByDeployer(deployments: ProjectContract[]): {
@@ -309,13 +307,21 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       console.log("oso deployers contracts (unique)")
       console.log(osoDeployersContracts__DeployerFormatted)
 
-      // const deployersFormData: z.infer<typeof DeployersSchema> = {
-      //   deployers: osoDeployersContracts__DeployerFormatted.map((deployer)=> { return {
-      //     address: deployer.deployerAddress,
-      //     contracts: deployer.
-      //   }
-      //   })
-      // }
+      const deployersFormData: z.infer<typeof DeployersSchema> = {
+        deployers: osoDeployersContracts__DeployerFormatted.map((deployer) => {
+          return {
+            address: deployer.deployerAddress,
+            contracts: deployer.contracts.map((contract) => {
+              return {
+                address: contract.address,
+                chain: contract.chainId.toString(),
+              }
+            }),
+          }
+        }),
+      }
+
+      console.log(deployersFormData)
     }
 
     get()
