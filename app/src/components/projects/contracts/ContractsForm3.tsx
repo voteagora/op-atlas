@@ -68,7 +68,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = false
+const IS_USING_MOCK_DATA = true
 const IS_USING_EMPTY_MOCK_DATA = false
 
 const supportedMappings = {

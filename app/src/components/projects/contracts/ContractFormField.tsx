@@ -39,17 +39,11 @@ export function ContractFormField({
               <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                 <div className="flex items-center gap-2">
                   <div>
-                    {
-                      // !isInDatabase(
-                      //   contract.value.address,
-                      //   contract.value.chainId,
-                      // )
-                      contract.value.excluded ? (
-                        <X width={20} height={20} color="grey" />
-                      ) : (
-                        <Check width={20} height={20} color="green" />
-                      )
-                    }
+                    {contract.value.excluded ? (
+                      <X width={20} height={20} color="grey" />
+                    ) : (
+                      <Check width={20} height={20} color="green" />
+                    )}
                   </div>
 
                   {contract.value?.chainId === "NaN" ? (
@@ -80,6 +74,10 @@ export function ContractFormField({
                       {contract.value?.address}
                     </span>
                   </button>
+
+                  {contract.value.excluded && (
+                    <div className="bg-rose-300 rounded-lg px-2">Excluded</div>
+                  )}
                 </div>
 
                 <div className="flex gap-4">
