@@ -8,6 +8,7 @@ import { truncate } from "@/lib/utils/contracts"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
 import { CHAIN_INFO } from "@/components/common/chain"
+import { ContractDropdownButton } from "./ContractDropdownButton"
 
 const onCopyValue = async (value: string) => {
   try {
@@ -65,6 +66,34 @@ export function ContractFormField({
                       {contract.value?.address}
                     </span>
                   </button>
+                </div>
+
+                <div className="flex gap-4">
+                  <FormField
+                    control={form.control}
+                    name={`deployers.${deployerIndex}.contracts.${contractIndex}.excluded`}
+                    render={({ field: excludedField }) => (
+                      <>
+                        {
+                          <button
+                            type="button"
+                            className="bg-secondary px-2 rounded-lg opacity-0 group-hover:opacity-100"
+                            onClick={() => {
+                              excludedField.onChange(!excludedField.value)
+                            }}
+                          >
+                            {!excludedField.value ? "Exclude" : "Include"}
+                          </button>
+                        }
+
+                        <ContractDropdownButton
+                          form={form}
+                          field={excludedField}
+                          index={contractIndex}
+                        />
+                      </>
+                    )}
+                  />
                 </div>
               </div>
             </div>

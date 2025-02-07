@@ -317,6 +317,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
               return {
                 address: contract.address,
                 chainId: contract.chainId.toString(),
+                excluded: true,
               }
             }),
           }

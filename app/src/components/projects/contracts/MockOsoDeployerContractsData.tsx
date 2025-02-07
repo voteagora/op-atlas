@@ -9,7 +9,7 @@ export const mockOsoDeployerContractsData: OsoDeployerContractsReturnType = {
     },
     {
       artifactSource: "BASE",
-      contractAddress: "0x4740A33a3F53212d5269e9f5D0e79fc861AADA05",
+      contractAddress: "0xae7efef5d13279c78e821fecc67e625e5eee242a",
       rootDeployerAddress: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",
     },
   ],

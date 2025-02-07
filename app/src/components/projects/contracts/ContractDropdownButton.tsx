@@ -36,16 +36,18 @@ export function ContractDropdownButton({
   }, [])
 
   return (
-    <button
-      type="button"
-      ref={buttonRef}
-      className="flex items-center"
-      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-    >
-      <Ellipsis width={16} height={16} />
+    <>
+      <button
+        type="button"
+        ref={buttonRef}
+        className="flex items-center"
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+      >
+        <Ellipsis width={16} height={16} />
+      </button>
       {isDropdownOpen && (
         <div ref={dropdownRef} className="relative inline-block text-left">
-          <div className="absolute mt-2 -right-1 w-48 bg-white border rounded-md shadow-lg">
+          <div className="absolute mt-4 -right-1 w-48 bg-white border rounded-md shadow-lg">
             <ul className="py-1 text-sm text-gray-700">
               <li>
                 <button
@@ -78,6 +80,6 @@ export function ContractDropdownButton({
           </div>
         </div>
       )}
-    </button>
+    </>
   )
 }
