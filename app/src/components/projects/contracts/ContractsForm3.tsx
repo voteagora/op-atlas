@@ -153,8 +153,47 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   async function getOsoDeployersContractsData() {
     return IS_USING_MOCK_DATA
-      ? mockOsoDeployersContractsData
+      ? IS_USING_EMPTY_MOCK_DATA
+        ? []
+        : mockOsoDeployersContractsData
       : osoDeployersContractsData
+  }
+
+  function convertContracts(
+    data: OsoDeployerContractsReturnType[],
+  ): ProjectContractsByDeployer[] {
+    const result: ProjectContractsByDeployer[] = []
+
+    for (const item of data) {
+      for (const contract of item.oso_contractsV0) {
+        // Find existing entry for this deployer or create a new one
+        let entry = result.find(
+          (e) => e.deployerAddress === contract.rootDeployerAddress,
+        )
+        if (!entry) {
+          entry = {
+            deployerAddress: contract.rootDeployerAddress,
+            contracts: [],
+          }
+          result.push(entry)
+        }
+
+        // Add contract address if it's not already in the list
+        if (
+          !entry.contracts.find(
+            (entryContract) =>
+              entryContract.address === contract.contractAddress,
+          )
+        ) {
+          entry.contracts.push({
+            address: contract.contractAddress,
+            chainId: Number(contract.artifactSource),
+          })
+        }
+      }
+    }
+
+    return result
   }
 
   function replaceArtifactSourceWithNumber(
@@ -186,8 +225,9 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   interface ProjectContractsByDeployer {
     deployerAddress: string
-    contractAddresses: string[]
-    chainIds: number[]
+    contracts: Array<{ address: string; chainId: number }>
+    // contractAddresses: string[]
+    // chainIds: number[]
   }
 
   function groupByDeployer(deployments: ProjectContract[]): {
@@ -199,14 +239,13 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       if (!groupedMap[deployment.deployerAddress]) {
         groupedMap[deployment.deployerAddress] = {
           deployerAddress: deployment.deployerAddress,
-          contractAddresses: [],
-          chainIds: [],
+          contracts: [],
         }
       }
-      groupedMap[deployment.deployerAddress].contractAddresses.push(
-        deployment.contractAddress,
-      )
-      groupedMap[deployment.deployerAddress].chainIds.push(deployment.chainId)
+      groupedMap[deployment.deployerAddress].contracts.push({
+        address: deployment.contractAddress,
+        chainId: deployment.chainId,
+      })
     }
 
     // Convert the map to an array
@@ -262,6 +301,21 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       console.log(osoDeployersContracts__ChainCorrected)
 
       setFormValidOsoDeployers(osoDeployersContracts__ChainCorrected)
+
+      const osoDeployersContracts__DeployerFormatted = convertContracts(
+        osoDeployersContracts__ChainCorrected,
+      )
+
+      console.log("oso deployers contracts (unique)")
+      console.log(osoDeployersContracts__DeployerFormatted)
+
+      // const deployersFormData: z.infer<typeof DeployersSchema> = {
+      //   deployers: osoDeployersContracts__DeployerFormatted.map((deployer)=> { return {
+      //     address: deployer.deployerAddress,
+      //     contracts: deployer.
+      //   }
+      //   })
+      // }
     }
 
     get()
