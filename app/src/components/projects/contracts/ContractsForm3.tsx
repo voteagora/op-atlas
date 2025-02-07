@@ -50,8 +50,14 @@ import { isAddress } from "ethers"
 import { useProjectContracts } from "@/hooks/useProjectContracts"
 import { getDeployedContracts } from "@/lib/oso"
 import { DBData, mockBackendOSOData, OSOContract, OSOData } from "./mockDBData"
-import { useOsoDeployedContracts } from "@/hooks/useOsoDeployedContracts"
-import { mockOsoDeployerContractsData } from "./MockOsoDeployerContractsData"
+import {
+  useOsoDeployedContracts,
+  useOsoDeployersDeployedContracts,
+} from "@/hooks/useOsoDeployedContracts"
+import {
+  mockOsoDeployerContractsData,
+  mockOsoDeployersContractsData,
+} from "./MockOsoDeployerContractsData"
 import { mockProjectContractsData } from "./MockProjectContractsData"
 
 const EMPTY_DEPLOYER = {
@@ -59,7 +65,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = true
+const IS_USING_MOCK_DATA = false
 const IS_USING_EMPTY_MOCK_DATA = false
 
 export async function getDeployerOSOData(address: string) {
@@ -97,6 +103,15 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
   )
 
+  const deployerAddresses = projectContractsData?.map((projectContractData) => {
+    return projectContractData.deployerAddress
+  })
+
+  const { data: osoDeployersContractsData } = useOsoDeployersDeployedContracts(
+    // deployerAddresses!,
+    ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
+  )
+
   // WORKING
   // useEffect(() => {
   //   async function get() {
@@ -123,6 +138,12 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       : osoDeployerContractsData
   }
 
+  async function getOsoDeployersContractsData() {
+    return IS_USING_MOCK_DATA
+      ? mockOsoDeployersContractsData
+      : osoDeployersContractsData
+  }
+
   useEffect(() => {
     async function get() {
       const projectContracts = await getProjectContractsData()
@@ -134,6 +155,11 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
       console.log("oso deployer contracts:")
       console.log(osoDeployerContracts)
+
+      const osoDeployersContracts = await getOsoDeployersContractsData()
+
+      console.log("oso deployers contracts:")
+      console.log(osoDeployersContracts)
     }
 
     get()

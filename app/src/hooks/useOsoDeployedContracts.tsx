@@ -18,3 +18,19 @@ export function useOsoDeployedContracts(
     ...queryOptions, // Merge custom options
   })
 }
+
+export function useOsoDeployersDeployedContracts(
+  deployers: string[],
+  queryOptions?: Partial<any>,
+  // UseQueryOptions<OsoDeployerContractsReturnType[], Error>
+): //UseQueryResult<OsoDeployerContractsReturnType[], Error>
+any {
+  return useQuery({
+    queryKey: ["osoDeployersContracts", deployers],
+    queryFn: () =>
+      deployers.map(async (deployer) => {
+        return await getDeployedContracts(deployer)
+      }),
+    ...queryOptions, // Merge custom options
+  })
+}

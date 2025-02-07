@@ -9,3 +9,7 @@ export const mockOsoDeployerContractsData: OsoDeployerContractsReturnType = {
     },
   ],
 }
+
+export const mockOsoDeployersContractsData: OsoDeployerContractsReturnType[] = [
+  mockOsoDeployerContractsData,
+]
