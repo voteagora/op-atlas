@@ -18,7 +18,7 @@ export function ContractsFormField({
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
   deployerIndex: number
 }) {
-  const initialMaxContractViewCount = 3
+  const initialMaxContractViewCount = 6
   const [contractViewCount, setContractViewCount] = useState(
     initialMaxContractViewCount,
   )

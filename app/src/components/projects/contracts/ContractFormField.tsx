@@ -90,6 +90,12 @@ export function ContractFormField({
     }
   }
 
+  console.log(
+    form.getValues(
+      `deployers.${deployerIndex}.contracts.${contractIndex}.chainId`,
+    ),
+  )
+
   return (
     <FormField
       control={form.control}
@@ -114,7 +120,8 @@ export function ContractFormField({
                     )}
                   />
 
-                  {contract.value?.chainId === "NaN" ? (
+                  {contract.value?.chainId === "NaN" ||
+                  contract.value?.chainId === "UNSUPPORTED" ? (
                     <div className="relative group/btn">
                       <FileQuestion className="w-6 h-6" />
                       <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg w-80 text-center">
@@ -125,7 +132,7 @@ export function ContractFormField({
                     <div className="relative group/btn">
                       <ChainLogo chainId={contract.value?.chainId} size={24} />
                       <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg text-center">
-                        {CHAIN_INFO[contract.value?.chainId].name}
+                        {CHAIN_INFO[contract.value?.chainId]?.name}
                       </span>
                     </div>
                   )}
