@@ -2,6 +2,7 @@
 
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { z } from "zod"
 
 import { auth, signIn } from "@/auth"
 import {
@@ -15,6 +16,13 @@ import {
   updateUserInteraction,
 } from "@/db/users"
 import { addContactToList, updateContactEmail } from "@/lib/api/mailchimp"
+
+const UpdateEmailSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: "This field has to be filled." })
+    .email("This is not a valid email."),
+})
 
 export const connectDiscord = async () => {
   await signIn("discord")
@@ -40,35 +48,42 @@ export const updateEmail = async (email: string) => {
     }
   }
 
-  if (!email) {
+  const { data, success, error } = UpdateEmailSchema.safeParse({ email })
+  if (!success) {
     return {
-      error: "Invalid email",
+      error,
       user: null,
     }
   }
 
-  const previousEmail = user.emails[0]?.email
-  if (previousEmail) {
-    const data = new FormData()
-    data.append("currentEmail", previousEmail)
-    data.append("newEmail", email)
+  const { email: parsedEmail } = data
 
-    await updateContactEmail(data)
+  const currentEmail = user.emails[0]?.email
+  if (currentEmail) {
+    await updateContactEmail({
+      currentEmail,
+      newEmail: parsedEmail,
+    })
   } else {
     const data = new FormData()
-    data.append("email", email)
+    data.append("email", parsedEmail)
 
-    await addContactToList(data)
+    await addContactToList({
+      email: parsedEmail,
+    })
   }
 
-  const [_, updated] = await updateUserEmail({ id: user.id, email })
+  const [_, updated] = await updateUserEmail({
+    id: user.id,
+    email: parsedEmail,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/details")
   revalidatePath("/rewards/[rewardId]/page", "page")
 
   console.info(
-    `Email updated for user farcasterId ${session.user.farcasterId}: ${email}`,
+    `Email updated for user farcasterId ${session.user.farcasterId}: ${parsedEmail}`,
   )
 
   return {

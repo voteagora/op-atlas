@@ -153,16 +153,16 @@ export async function updateUserEmail({
   id: string
   email?: string | null
 }) {
-  const previousEmail = await prisma.userEmail.findFirst({
+  const currentEmail = await prisma.userEmail.findFirst({
     where: {
       userId: id,
     },
   })
-  const deleteEmails = previousEmail
+  const deleteEmails = currentEmail
     ? [
         prisma.userEmail.delete({
           where: {
-            id: previousEmail.id,
+            id: currentEmail.id,
           },
         }),
       ]
