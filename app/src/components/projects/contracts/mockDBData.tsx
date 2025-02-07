@@ -35,6 +35,20 @@ export const mockProjectContractsData = [
   },
 ] as Array<ProjectContract>
 
+export type OsoDeployerContracts = {
+  artifactSource: string
+  contractAddress: string
+  rootDeployerAddress: string
+}
+
+export type OsoDeployerContractsReturnType = {
+  osoContractsV0: Array<OsoDeployerContracts>
+}
+
+export const mockOsoDeployerContractsData: OsoDeployerContractsReturnType = {
+  osoContractsV0: [],
+}
+
 export const mockBackendOSOData = [
   {
     address: "0xEa6F889692CF943f30969EEbe6DDb323CD7b9Ac1",

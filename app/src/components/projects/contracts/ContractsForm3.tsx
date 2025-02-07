@@ -52,17 +52,19 @@ import { getDeployedContracts } from "@/lib/oso"
 import {
   DBData,
   mockBackendOSOData,
+  mockOsoDeployerContractsData,
   mockProjectContractsData,
   OSOContract,
   OSOData,
 } from "./mockDBData"
+import { useOsoDeployedContracts } from "@/hooks/useOsoDeployedContracts"
 
 const EMPTY_DEPLOYER = {
   address: "",
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = true
+const IS_USING_MOCK_DATA = false
 const IS_USING_EMPTY_MOCK_DATA = false
 
 export async function getDeployerOSOData(address: string) {
@@ -71,11 +73,7 @@ export async function getDeployerOSOData(address: string) {
       return address === deployer.address
     })
   } else {
-    const result = await getDeployedContracts({
-      deployer: address,
-    })
-
-    console.log(result)
+    const result = await getDeployedContracts(address)
   }
 }
 
@@ -98,7 +96,11 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   const [allDbData, setAllDbData] = useState<DBData[]>([])
 
-  const { data } = useProjectContracts(project.id)
+  const { data: projectContractsData } = useProjectContracts(project.id)
+
+  const { data: osoDeployerContractsData } = useOsoDeployedContracts(
+    "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
+  )
 
   // WORKING
   // useEffect(() => {
@@ -112,22 +114,35 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   //   get()
   // }, [])
 
-  async function getContracts() {
+  async function getOsoDeployerContractsData() {
+    return IS_USING_MOCK_DATA
+      ? mockOsoDeployerContractsData
+      : osoDeployerContractsData
+  }
+
+  async function getProjectContractsData() {
     return IS_USING_MOCK_DATA
       ? IS_USING_EMPTY_MOCK_DATA
         ? []
         : mockProjectContractsData
-      : data
+      : projectContractsData
   }
 
   useEffect(() => {
     async function get() {
-      const contracts = await getContracts()
-      console.log(contracts)
+      const projectContracts = await getProjectContractsData()
+
+      console.log("projects contracts:")
+      console.log(projectContracts)
+
+      const osoDeployerContracts = await getOsoDeployerContractsData()
+
+      console.log("oso deployer contracts:")
+      console.log(osoDeployerContracts)
     }
 
     get()
-  }, [data])
+  }, [projectContractsData, osoDeployerContractsData])
 
   useEffect(() => {
     const populateForm = async () => {
@@ -139,7 +154,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       if (IS_USING_MOCK_DATA) {
         fetchedDbData = mockProjectContractsData
       } else {
-        fetchedDbData = data
+        fetchedDbData = projectContractsData
       }
 
       if (fetchedDbData && fetchedDbData.length <= 0) {
@@ -214,7 +229,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     }
 
     populateForm()
-  }, [form, data])
+  }, [form, projectContractsData])
 
   // Form submission handler
   const onSubmit = (data: z.infer<typeof ContractsSchema2>) => {
