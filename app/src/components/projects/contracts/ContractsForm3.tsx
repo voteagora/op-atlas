@@ -68,7 +68,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = false
+const IS_USING_MOCK_DATA = true
 const IS_USING_EMPTY_MOCK_DATA = false
 
 const supportedMappings = {
@@ -440,10 +440,13 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
             control={form3.control}
             name={`deployers`}
             render={({ field: deployers }) => (
-              <div>
+              <div className="flex flex-col gap-4">
                 {deployers?.value?.map((deployer, deployerIndex) => {
                   return (
-                    <div key={"Deployer" + deployerIndex}>
+                    <div
+                      key={"Deployer" + deployerIndex}
+                      className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6"
+                    >
                       <FormField
                         control={form3.control}
                         name={`deployers.${deployerIndex}.address`}

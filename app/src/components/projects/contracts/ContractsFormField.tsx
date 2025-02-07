@@ -32,17 +32,19 @@ export function ContractsFormField({
           <div>
             <FormLabel>Contracts</FormLabel>
 
-            {contracts.value.map((contract, index) => {
-              if (index >= contractViewCount) return
+            <div className="flex flex-col gap-2">
+              {contracts.value.map((contract, index) => {
+                if (index >= contractViewCount) return
 
-              return (
-                <ContractFormField
-                  form={form}
-                  deployerIndex={deployerIndex}
-                  contractIndex={index}
-                />
-              )
-            })}
+                return (
+                  <ContractFormField
+                    form={form}
+                    deployerIndex={deployerIndex}
+                    contractIndex={index}
+                  />
+                )
+              })}
+            </div>
 
             {contractViewCount < contracts.value.length && (
               <button
@@ -59,7 +61,7 @@ export function ContractsFormField({
               </button>
             )}
 
-            {contractViewCount >= contracts.value.length && (
+            {contractViewCount > initialMaxContractViewCount && (
               <button
                 className="flex items-center gap-2"
                 onClick={() => {
