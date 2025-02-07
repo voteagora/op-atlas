@@ -3,9 +3,8 @@
 import { Md5 } from "ts-md5"
 import { z } from "zod"
 
+import { getContact } from "@/lib/api/mailchimp"
 import mailchimp from "@/lib/mailchimp"
-
-import { getContact, tryParseError } from "./utils"
 
 const ContactSchema = z.object({
   email: z.string().email(),
@@ -48,7 +47,7 @@ export async function addContactToListAction(data: FormData) {
       status: "subscribed",
     })
   } catch (error: any) {
-    console.log("Error adding contact email", tryParseError(error))
+    console.log("Error adding contact email", error)
   }
 }
 
@@ -76,7 +75,7 @@ export async function removeContactFromListAction(data: FormData) {
   try {
     await mailchimp.lists.deleteListMember(LIST_ID, email)
   } catch (error: any) {
-    console.log("Error removing contact email", tryParseError(error))
+    console.log("Error removing contact email", error)
   }
 }
 
@@ -116,6 +115,6 @@ export async function updateContactEmailAction(data: FormData) {
       status_if_new: "subscribed",
     })
   } catch (error: any) {
-    console.log("Error updating contact email", tryParseError(error))
+    console.log("Error updating contact email", error)
   }
 }

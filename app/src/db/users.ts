@@ -153,11 +153,20 @@ export async function updateUserEmail({
   id: string
   email?: string | null
 }) {
-  const deleteEmails = prisma.userEmail.deleteMany({
+  const previousEmail = await prisma.userEmail.findFirst({
     where: {
       userId: id,
     },
   })
+  const deleteEmails = previousEmail
+    ? [
+        prisma.userEmail.delete({
+          where: {
+            id: previousEmail.id,
+          },
+        }),
+      ]
+    : []
 
   const createEmail = email
     ? [
@@ -170,7 +179,7 @@ export async function updateUserEmail({
       ]
     : []
 
-  return prisma.$transaction([deleteEmails, ...createEmail])
+  return prisma.$transaction([...deleteEmails, ...createEmail])
 }
 
 export async function updateUserHasGithub({

@@ -15,6 +15,8 @@ import {
   updateUserInteraction,
 } from "@/db/users"
 
+import { addContactToListAction, updateContactEmailAction } from "./mailchimp"
+
 export const connectDiscord = async () => {
   await signIn("discord")
 }
@@ -39,7 +41,33 @@ export const updateEmail = async (email: string) => {
     }
   }
 
-  const updated = await updateUserEmail({ id: user.id, email })
+  const [previous, updated] = await updateUserEmail({ id: user.id, email })
+  if (previous?.email) {
+    if (!updated.email) {
+      return {
+        error: "Invalid email",
+        user: null,
+      }
+    }
+
+    const data = new FormData()
+    data.append("currentEmail", previous.email)
+    data.append("newEmail", updated.email)
+
+    await updateContactEmailAction(data)
+  } else {
+    if (!updated.email) {
+      return {
+        error: "Invalid email",
+        user: null,
+      }
+    }
+
+    const data = new FormData()
+    data.append("email", updated.email)
+
+    await addContactToListAction(data)
+  }
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/details")

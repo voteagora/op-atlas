@@ -4,7 +4,6 @@ import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import { useMailchimp } from "@/hooks/mailchimp/useMailchimp"
 import { useUpdateEmail } from "@/lib/hooks"
 import { UserWithEmails } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -12,7 +11,6 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 import { Input } from "../ui/input"
 
 export function EditEmail({ user }: { user: UserWithEmails }) {
-  const { addContact, updateContactEmail } = useMailchimp()
   const [email, setEmail] = useState(user.emails[0]?.email)
   const [isEditing, setIsEditing] = useState(false)
   const [updatePending, startUpdateTransition] = useTransition()
@@ -27,15 +25,7 @@ export function EditEmail({ user }: { user: UserWithEmails }) {
     }
 
     startUpdateTransition(async () => {
-      const emailExists = Boolean(user.emails[0]?.email)
       await updateEmail(email)
-
-      if (!emailExists) {
-        await addContact(email)
-      } else {
-        console.log("updating email")
-        await updateContactEmail(user.emails[0]?.email, email)
-      }
     })
     setIsEditing(false)
     toast.success("Email updated")
