@@ -36,7 +36,7 @@ export function ContractDropdownButton({
   }, [])
 
   return (
-    <>
+    <div className="relative">
       <button
         type="button"
         ref={buttonRef}
@@ -46,40 +46,41 @@ export function ContractDropdownButton({
         <Ellipsis width={16} height={16} />
       </button>
       {isDropdownOpen && (
-        <div ref={dropdownRef} className="relative inline-block text-left">
-          <div className="absolute mt-4 -right-1 w-48 bg-white border rounded-md shadow-lg">
-            <ul className="py-1 text-sm text-gray-700">
-              <li>
-                <button
-                  type="button"
-                  className="block w-full py-2 hover:bg-gray-100"
-                  onClick={() => field.onChange(!field.value)}
-                >
-                  {field.value ? "Include in project" : "Exclude from project"}
-                </button>
-              </li>
-              <li>
-                {/* TODO:// Complete functionality */}
-                {/* <button className="block w-full py-2 hover:bg-gray-100">
+        <div
+          ref={dropdownRef}
+          className="absolute mt-1 -right-1 w-48 bg-white border rounded-md shadow-lg z-[1]"
+        >
+          <ul className="py-1 text-sm text-gray-700">
+            <li>
+              <button
+                type="button"
+                className="block w-full py-2 hover:bg-gray-100"
+                onClick={() => field.onChange(!field.value)}
+              >
+                {field.value ? "Include in project" : "Exclude from project"}
+              </button>
+            </li>
+            <li>
+              {/* TODO:// Complete functionality */}
+              {/* <button className="block w-full py-2 hover:bg-gray-100">
                   Copy address
                 </button> */}
-              </li>
-              <li>
-                {/* TODO:// Complete functionality */}
-                {/* <button className="block w-full py-2 hover:bg-gray-100">
+            </li>
+            <li>
+              {/* TODO:// Complete functionality */}
+              {/* <button className="block w-full py-2 hover:bg-gray-100">
                   Edit name
                 </button> */}
-              </li>
-              <li>
-                {/* TODO:// Complete functionality */}
-                {/* <button className="block w-full py-2 hover:bg-gray-100">
+            </li>
+            <li>
+              {/* TODO:// Complete functionality */}
+              {/* <button className="block w-full py-2 hover:bg-gray-100">
                   View attestation
                 </button> */}
-              </li>
-            </ul>
-          </div>
+            </li>
+          </ul>
         </div>
       )}
-    </>
+    </div>
   )
 }
