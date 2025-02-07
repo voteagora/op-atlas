@@ -9,6 +9,8 @@ import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
 import { CHAIN_INFO } from "@/components/common/chain"
 import { ContractDropdownButton } from "./ContractDropdownButton"
+import { addProjectContract } from "@/db/projects"
+import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 
 const onCopyValue = async (value: string) => {
   try {
@@ -28,6 +30,35 @@ export function ContractFormField({
   deployerIndex: number
   contractIndex: number
 }) {
+  const projectId = useProjectFromPath()
+
+  console.log(projectId)
+
+  async function onToggle(value: boolean) {
+    console.log(value)
+    console.log(form.getValues())
+
+    if (!value) {
+      const contract = await addProjectContract({
+        projectId,
+        contract: {
+          contractAddress:
+            form.getValues().deployers[deployerIndex].contracts[contractIndex]
+              .address,
+          deployerAddress: form.getValues().deployers[deployerIndex].address,
+          deploymentHash: "",
+          verificationProof: "",
+          chainId: parseInt(
+            form.getValues().deployers[deployerIndex].contracts[contractIndex]
+              .chainId,
+          ),
+          name: "",
+          description: "",
+        },
+      })
+    }
+  }
+
   return (
     <FormField
       control={form.control}
@@ -106,7 +137,8 @@ export function ContractFormField({
                           <button
                             type="button"
                             className="bg-secondary px-2 rounded-lg opacity-0 group-hover:opacity-100"
-                            onClick={() => {
+                            onClick={async () => {
+                              await onToggle(!excludedField.value)
                               excludedField.onChange(!excludedField.value)
                             }}
                           >
@@ -116,8 +148,9 @@ export function ContractFormField({
 
                         <ContractDropdownButton
                           form={form}
-                          field={excludedField}
-                          index={contractIndex}
+                          deployerIndex={deployerIndex}
+                          contractIndex={contractIndex}
+                          onToggle={onToggle}
                         />
                       </>
                     )}

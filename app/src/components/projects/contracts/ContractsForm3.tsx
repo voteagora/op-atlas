@@ -36,7 +36,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = true
+const IS_USING_MOCK_DATA = false
 const IS_USING_EMPTY_MOCK_DATA = false
 
 function getDefaultValues(): z.infer<typeof ContractsSchema2> {
@@ -53,13 +53,19 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   const { data: projectContractsData } = useProjectContracts(project.id)
 
+  const projectContractsByDeployer = Object.values(
+    groupByDeployer(projectContractsData || []),
+  )
+
   // const { data: osoDeployerContractsData } = useOsoDeployedContracts(
   //   "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
   // )
 
-  const deployerAddresses = projectContractsData?.map((projectContractData) => {
-    return projectContractData.deployerAddress
-  })
+  const deployerAddresses = projectContractsByDeployer?.map(
+    (projectContractData) => {
+      return projectContractData.deployerAddress
+    },
+  )
 
   console.log(deployerAddresses)
 
@@ -103,9 +109,9 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       console.log("projects contracts:")
       console.log(projectContracts)
 
-      const projectContractsByDeployer = Object.values(
-        groupByDeployer(projectContracts!),
-      )
+      // const projectContractsByDeployer = Object.values(
+      //   groupByDeployer(projectContracts!),
+      // )
 
       console.log("projects contracts (unique):")
 
