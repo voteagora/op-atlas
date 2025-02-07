@@ -3,7 +3,7 @@ import { DeployersSchema } from "./schema3"
 import { z } from "zod"
 import { UseFormReturn } from "react-hook-form"
 import { ChainLogo } from "@/components/common/ChainLogo"
-import { FileQuestion } from "lucide-react"
+import { Check, FileQuestion, X } from "lucide-react"
 import { truncate } from "@/lib/utils/contracts"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
@@ -38,6 +38,20 @@ export function ContractFormField({
             <div className="flex group">
               <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                 <div className="flex items-center gap-2">
+                  <div>
+                    {
+                      // !isInDatabase(
+                      //   contract.value.address,
+                      //   contract.value.chainId,
+                      // )
+                      contract.value.excluded ? (
+                        <X width={20} height={20} color="grey" />
+                      ) : (
+                        <Check width={20} height={20} color="green" />
+                      )
+                    }
+                  </div>
+
                   {contract.value?.chainId === "NaN" ? (
                     <div className="relative group/btn">
                       <FileQuestion className="w-6 h-6" />
