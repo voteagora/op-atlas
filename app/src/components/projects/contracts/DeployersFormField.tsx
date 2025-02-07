@@ -5,11 +5,14 @@ import { FormField } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DeployerFormField } from "./DeployerFormField"
+import { ProjectContract } from "@prisma/client"
 
 export function DeployersFormField({
   form,
+  projectContracts,
 }: {
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
+  projectContracts: ProjectContract[]
 }) {
   const { append } = useFieldArray({
     control: form.control,
@@ -28,6 +31,7 @@ export function DeployersFormField({
                 key={"Deployer" + deployerIndex}
                 form={form}
                 deployerIndex={deployerIndex}
+                projectContracts={projectContracts}
               />
             )
           })}

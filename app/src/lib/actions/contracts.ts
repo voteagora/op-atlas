@@ -233,6 +233,8 @@ export const removeContract = async ({
 
   const contractAddress = getAddress(contractAddressRaw)
 
+  console.log(contractAddress)
+
   await removeProjectContract({
     projectId,
     address: contractAddress,

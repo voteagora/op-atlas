@@ -12,17 +12,20 @@ import { ContractsFormField } from "./ContractsFormField"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
-import { isAddress } from "ethers"
+import { getAddress, isAddress } from "ethers"
 import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
 import { getDeployedContracts } from "@/lib/oso"
 import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
+import { ProjectContract } from "@prisma/client"
 
 export function DeployerFormField({
   form,
   deployerIndex,
+  projectContracts,
 }: {
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
   deployerIndex: number
+  projectContracts: ProjectContract[]
 }) {
   const { append } = useFieldArray({
     control: form.control,
@@ -50,7 +53,12 @@ export function DeployerFormField({
           return {
             address: contract.contractAddress,
             chainId: contract.artifactSource,
-            excluded: true,
+            excluded:
+              projectContracts?.find(
+                (projectContract) =>
+                  getAddress(projectContract.contractAddress) ===
+                  getAddress(contract.contractAddress),
+              ) === undefined,
           }
         }),
       )

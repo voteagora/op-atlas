@@ -34,6 +34,7 @@ import {
   groupByDeployer,
   replaceArtifactSourceWithNumber,
 } from "@/lib/utils/contractForm"
+import { getAddress } from "viem"
 
 const EMPTY_DEPLOYER = {
   address: "",
@@ -77,7 +78,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   // console.log(osoDeployersContractsData)
 
-  async function getProjectContractsData() {
+  function getProjectContractsData() {
     return IS_USING_MOCK_DATA
       ? IS_USING_EMPTY_MOCK_DATA
         ? []
@@ -91,7 +92,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   //     : osoDeployerContractsData
   // }
 
-  async function getOsoDeployersContractsData() {
+  function getOsoDeployersContractsData() {
     return IS_USING_MOCK_DATA
       ? IS_USING_EMPTY_MOCK_DATA
         ? []
@@ -101,14 +102,14 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   useEffect(() => {
     async function get() {
-      const projectContracts = await getProjectContractsData()
-      const osoDeployersContracts = await getOsoDeployersContractsData()
+      const projectContracts = getProjectContractsData()
+      const osoDeployersContracts = getOsoDeployersContractsData()
 
       if (projectContracts === undefined || osoDeployersContracts === undefined)
         return
 
-      // console.log("projects contracts:")
-      // console.log(projectContracts)
+      console.log("projects contracts:")
+      console.log(projectContracts)
 
       // const projectContractsByDeployer = Object.values(
       //   groupByDeployer(projectContracts!),
@@ -139,8 +140,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
         osoDeployersContracts__ChainCorrected,
       )
 
-      // console.log("oso deployers contracts (unique)")
-      // console.log(osoDeployersContracts__DeployerFormatted)
+      console.log("oso deployers contracts (unique)")
+      console.log(osoDeployersContracts__DeployerFormatted)
 
       const deployersFormData: z.infer<typeof DeployersSchema> = {
         deployers: osoDeployersContracts__DeployerFormatted.map((deployer) => {
@@ -153,7 +154,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
                 excluded:
                   projectContracts?.find(
                     (projectContract) =>
-                      projectContract.contractAddress === contract.address,
+                      getAddress(projectContract.contractAddress) ===
+                      getAddress(contract.address),
                   ) === undefined,
               }
             }),
@@ -173,10 +175,15 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     console.log(data)
   }
 
+  const projectContracts = getProjectContractsData()
+
   return (
     <Form {...form3}>
       <form onSubmit={form3.handleSubmit(onSubmit3)}>
-        <DeployersFormField form={form3} />
+        <DeployersFormField
+          form={form3}
+          projectContracts={projectContracts || []}
+        />
       </form>
 
       <Button variant={"destructive"} type="submit" className="w-20">

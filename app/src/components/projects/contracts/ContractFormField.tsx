@@ -34,56 +34,59 @@ export function ContractFormField({
 }) {
   const projectId = useProjectFromPath()
 
-  console.log(projectId)
-
   async function onToggle(value: boolean) {
-    console.log(value)
-    console.log(form.getValues())
-
     if (!value) {
       const addr = getAddress(
         form.getValues().deployers[deployerIndex].contracts[contractIndex]
           .address,
       )
 
-      await addProjectContract({
-        projectId,
-        contract: {
-          contractAddress: addr,
-          deployerAddress: form.getValues().deployers[deployerIndex].address,
-          deploymentHash: "",
-          verificationProof: "",
+      try {
+        toast.info(`Adding contract...`)
+        const result = await addProjectContract({
+          projectId,
+          contract: {
+            contractAddress: addr,
+            deployerAddress: form.getValues().deployers[deployerIndex].address,
+            deploymentHash: "",
+            verificationProof: "",
+            chainId: parseInt(
+              form.getValues().deployers[deployerIndex].contracts[contractIndex]
+                .chainId,
+            ),
+            name: "",
+            description: "",
+          },
+        })
+
+        // if (result.error !== null) {
+        //   throw result.error
+        // }
+        toast.success("Contract Added!")
+      } catch (error: unknown) {
+        toast.error("Error adding contract, please try again")
+      } finally {
+        // setLoading(false)
+      }
+    } else {
+      try {
+        toast.info(`Removing contract...`)
+
+        const result = await removeContract({
+          projectId,
+          address: getAddress(
+            form.getValues().deployers[deployerIndex].contracts[contractIndex]
+              .address,
+          ),
           chainId: parseInt(
             form.getValues().deployers[deployerIndex].contracts[contractIndex]
               .chainId,
           ),
-          name: "",
-          description: "",
-        },
-      })
-    } else {
-      console.log(projectId)
-      console.log(
-        form.getValues().deployers[deployerIndex].contracts[contractIndex]
-          .address as Address,
-      )
-
-      console.log(
-        parseInt(
-          form.getValues().deployers[deployerIndex].contracts[contractIndex]
-            .chainId,
-        ),
-      )
-      await removeContract({
-        projectId,
-        address: form.getValues().deployers[deployerIndex].contracts[
-          contractIndex
-        ].address as Address,
-        chainId: parseInt(
-          form.getValues().deployers[deployerIndex].contracts[contractIndex]
-            .chainId,
-        ),
-      })
+        })
+        toast.success("Contract Removed!")
+      } catch (error: unknown) {
+        toast.error("Error removing contract, please try again")
+      }
     }
   }
 
