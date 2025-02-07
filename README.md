@@ -31,7 +31,17 @@ Each package has its own README with detailed setup and development instructions
    - Copy `.env.example` to `.env` in the `app` directory
    - Fill in required environment variables
 
-4. Start the development server:
+4. Set up a postgres database
+
+5. Run the migrations:
+
+   ```bash
+   cd app
+   pnpm db:generate
+   pnpm db:migrate
+   ```
+
+6. Start the development server:
 
    ```bash
    cd app
