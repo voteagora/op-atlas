@@ -2,7 +2,7 @@ import { User } from "@prisma/client"
 import { ArrowUpRight, Check, Mail, Plus, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
@@ -36,6 +36,10 @@ export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
       syncFarcasterAddresses()
     }
   }, [user])
+
+  const profileInitiallyComplete = useRef(profileProgress(user) === 100)
+
+  if (profileInitiallyComplete.current) return <></>
 
   return (
     <Accordion
