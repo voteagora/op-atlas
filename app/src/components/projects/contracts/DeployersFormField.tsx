@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { ContractsFormField } from "./ContractsFormField"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { DeployerFormField } from "./DeployerFormField"
 
 export function DeployersFormField({
   form,
@@ -30,24 +31,11 @@ export function DeployersFormField({
         <div className="flex flex-col gap-4">
           {deployers?.value?.map((deployer, deployerIndex) => {
             return (
-              <div
+              <DeployerFormField
+                form={form}
+                deployerIndex={deployerIndex}
                 key={"Deployer" + deployerIndex}
-                className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6"
-              >
-                <FormField
-                  control={form.control}
-                  name={`deployers.${deployerIndex}.address`}
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col gap-1.5">
-                      <FormLabel>Deployer Address</FormLabel>
-                      <Input {...field} placeholder="Add a deployer address" />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <ContractsFormField form={form} deployerIndex={deployerIndex} />
-              </div>
+              />
             )
           })}
 
