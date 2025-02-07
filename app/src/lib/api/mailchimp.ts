@@ -36,7 +36,7 @@ export async function updateMailchimpTags(
           email_address: user.email,
           tags: user.tags,
           email_type: "html",
-          status: "transactional",
+          status: "subscribed",
         })),
         update_existing: true,
         sync_tags: true,
