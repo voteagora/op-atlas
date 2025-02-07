@@ -321,11 +321,17 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
         }),
       }
 
+      form3.setValue("deployers", deployersFormData.deployers)
+
       console.log(deployersFormData)
     }
 
     get()
   }, [projectContractsData, osoDeployersContractsData])
+
+  const onSubmit3 = (data: z.infer<typeof DeployersSchema>) => {
+    console.log(data)
+  }
 
   useEffect(() => {
     const populateForm = async () => {
@@ -426,8 +432,38 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   return (
     <div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+      <Form {...form3}>
+        <form onSubmit={form3.handleSubmit(onSubmit3)}>
+          <FormField
+            control={form3.control}
+            name={`deployers`}
+            render={({ field: deployers }) => (
+              <div>
+                {deployers?.value?.map((deployer, index) => {
+                  return (
+                    <div key={"Deployer" + index}>
+                      <FormField
+                        control={form3.control}
+                        name={`deployers.${index}.address`}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col gap-1.5">
+                            <FormLabel>Deployer Address</FormLabel>
+                            <Input
+                              {...field}
+                              placeholder="Add a deployer address"
+                            />
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          />
+
           <p>hello</p>
         </form>
       </Form>
