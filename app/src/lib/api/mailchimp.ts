@@ -19,12 +19,6 @@ export async function updateMailchimpTags(
     return { success: false, error: "Missing Mailchimp credentials" }
   }
 
-  // remove duplicates
-  users = users.filter(
-    (user, index, self) =>
-      index === self.findIndex((t) => t.email === user.email),
-  )
-
   if (users.length > 0) {
     const BATCH_SIZE = 500
     let totalUpdated = 0

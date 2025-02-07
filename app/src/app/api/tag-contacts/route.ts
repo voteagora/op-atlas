@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 
 import { addTags } from "@/db/users"
 import { updateMailchimpTags } from "@/lib/api/mailchimp"
-import { fetchRecords } from "@/lib/utils/tags"
+import { fetchRecords, mergeResultsByEmail } from "@/lib/utils/tags"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   try {
     const records = await fetchRecords()
     const flattenedUsers = await addTags(records)
-    await updateMailchimpTags(flattenedUsers)
+    await updateMailchimpTags(mergeResultsByEmail([flattenedUsers]))
   } catch (error) {
     console.error("Error tagging contacts", error)
     return new Response(`Error tagging contacts: ${error}`, { status: 500 })
