@@ -60,6 +60,7 @@ import {
 } from "./MockOsoDeployerContractsData"
 import { mockProjectContractsData } from "./MockProjectContractsData"
 import { DeployersSchema } from "./schema3"
+import { ContractFormField } from "./ContractFormField"
 
 const EMPTY_DEPLOYER = {
   address: "",
@@ -466,25 +467,10 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
                             <div>
                               {contracts.value.map((contract, index) => {
                                 return (
-                                  <FormField
-                                    control={form3.control}
-                                    name={`deployers.${deployerIndex}.contracts.${index}`}
-                                    render={({ field: contract }) => (
-                                      <div>
-                                        <FormItem className="flex flex-col gap-1.5">
-                                          <div className="flex group">
-                                            <div
-                                              key={index}
-                                              className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                            >
-                                              <div className="flex items-center gap-2">
-                                                {contract.value?.address}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </FormItem>
-                                      </div>
-                                    )}
+                                  <ContractFormField
+                                    form={form3}
+                                    deployerIndex={deployerIndex}
+                                    contractIndex={index}
                                   />
                                 )
                               })}
