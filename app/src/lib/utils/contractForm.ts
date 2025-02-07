@@ -5,9 +5,9 @@ import {
 import { ProjectContract } from "@prisma/client"
 
 const supportedMappings = {
-  OPTIMISM: 10,
-  BASE: 8453,
-  MODE: 34443,
+  OPTIMISM: "10",
+  BASE: "8453",
+  MODE: "34443",
 }
 
 export function convertContracts(
@@ -32,7 +32,9 @@ export function convertContracts(
       // Add contract address if it's not already in the list
       if (
         !entry.contracts.find(
-          (entryContract) => entryContract.address === contract.contractAddress,
+          (entryContract) =>
+            entryContract.address === contract.contractAddress &&
+            entryContract.chainId === parseInt(contract.artifactSource),
         )
       ) {
         entry.contracts.push({
@@ -60,9 +62,7 @@ export function replaceArtifactSourceWithNumber(
             supportedMappings[
               contract.artifactSource as keyof typeof supportedMappings
             ].toString()
-        } catch (e) {
-          contract.artifactSource = "UNSUPPORTED"
-        }
+        } catch (e) {}
 
         return contract
       })

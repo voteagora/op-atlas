@@ -90,12 +90,6 @@ export function ContractFormField({
     }
   }
 
-  console.log(
-    form.getValues(
-      `deployers.${deployerIndex}.contracts.${contractIndex}.chainId`,
-    ),
-  )
-
   return (
     <FormField
       control={form.control}

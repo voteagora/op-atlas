@@ -115,17 +115,16 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       //   groupByDeployer(projectContracts!),
       // )
 
-      // console.log("projects contracts (unique):")
-
-      // console.log(projectContractsByDeployer)
+      console.log("projects contracts (unique):")
+      console.log(projectContractsByDeployer)
 
       // const osoDeployerContracts = await getOsoDeployerContractsData()
 
       // console.log("oso deployer contracts:")
       // console.log(osoDeployerContracts)
 
-      // console.log("oso deployers contracts:")
-      // console.log(osoDeployersContracts)
+      console.log("oso deployers contracts:")
+      console.log(osoDeployersContracts)
 
       // deep clones as to not alter the original object
       const osoDeployersContracts__ChainCorrected =
@@ -133,8 +132,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
           JSON.parse(JSON.stringify(osoDeployersContracts)),
         )
 
-      // console.log("oso deployers contracts (chain corrected):")
-      // console.log(osoDeployersContracts__ChainCorrected)
+      console.log("oso deployers contracts (chain corrected):")
+      console.log(osoDeployersContracts__ChainCorrected)
 
       const osoDeployersContracts__DeployerFormatted = convertContracts(
         osoDeployersContracts__ChainCorrected,
@@ -155,7 +154,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
                   projectContracts?.find(
                     (projectContract) =>
                       getAddress(projectContract.contractAddress) ===
-                      getAddress(contract.address),
+                        getAddress(contract.address) &&
+                      projectContract.chainId === contract.chainId,
                   ) === undefined,
               }
             }),
