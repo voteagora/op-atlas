@@ -9,13 +9,13 @@ export const ContractSchema2 = z.object({
   excluded: z.boolean(),
 })
 
-export const DeployerSchema = z.object({
+export const DeployerSchema2 = z.object({
   address: AddressSchema,
   contracts: z.array(ContractSchema2),
 })
 
 export const ContractsSchema2 = z.object({
-  deployers: z.array(DeployerSchema),
+  deployers: z.array(DeployerSchema2),
 })
 
 const OffChainSchema2 = z.object({
@@ -27,7 +27,7 @@ const OffChainSchema2 = z.object({
 
 const HasContractsSchema2 = z.object({
   isOffChain: z.literal(false),
-  deployers: z.array(DeployerSchema),
+  deployers: z.array(DeployerSchema2),
   submittedToOSO: z.boolean(),
   osoSlug: z.string().optional(),
 })

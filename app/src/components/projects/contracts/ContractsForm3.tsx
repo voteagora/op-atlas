@@ -59,18 +59,20 @@ import {
   mockOsoDeployersContractsData,
 } from "./MockOsoDeployerContractsData"
 import { mockProjectContractsData } from "./MockProjectContractsData"
+import { DeployersSchema } from "./schema3"
 
 const EMPTY_DEPLOYER = {
   address: "",
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = false
+const IS_USING_MOCK_DATA = true
 const IS_USING_EMPTY_MOCK_DATA = false
 
 const supportedMappings = {
   OPTIMISM: 10,
   BASE: 8453,
+  MODE: 34443,
 }
 
 export async function getDeployerOSOData(address: string) {
@@ -89,6 +91,12 @@ function getDefaultValues(): z.infer<typeof ContractsSchema2> {
   }
 }
 export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
+  const form3 = useForm<z.infer<typeof DeployersSchema>>({
+    resolver: zodResolver(DeployersSchema),
+    mode: "onSubmit",
+    // reValidateMode: "onChange",
+  })
+
   const form = useForm<z.infer<typeof ContractsSchema2>>({
     resolver: zodResolver(ContractsSchema2),
     mode: "onSubmit",
@@ -176,16 +184,16 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     })
   }
 
-  interface GroupedDataItem {
+  interface ProjectContractsByDeployer {
     deployerAddress: string
     contractAddresses: string[]
     chainIds: number[]
   }
 
   function groupByDeployer(deployments: ProjectContract[]): {
-    [key: string]: GroupedDataItem
+    [key: string]: ProjectContractsByDeployer
   } {
-    const groupedMap: { [key: string]: GroupedDataItem } = {}
+    const groupedMap: { [key: string]: ProjectContractsByDeployer } = {}
 
     for (const deployment of deployments) {
       if (!groupedMap[deployment.deployerAddress]) {
@@ -204,6 +212,12 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     // Convert the map to an array
     return groupedMap
   }
+
+  const [formValidProjectContracts, setFormValidProjectContracts] = useState<
+    ProjectContractsByDeployer[]
+  >([])
+  const [formValidOsoDeployers, setFormValidOsoDeployers] =
+    useState<OsoDeployerContractsReturnType[]>()
 
   useEffect(() => {
     async function get() {
@@ -226,6 +240,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
       console.log(projectContractsByDeployer)
 
+      setFormValidProjectContracts(projectContractsByDeployer)
+
       // const osoDeployerContracts = await getOsoDeployerContractsData()
 
       // console.log("oso deployer contracts:")
@@ -244,6 +260,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
       console.log("oso deployers contracts (chain corrected):")
       console.log(osoDeployersContracts__ChainCorrected)
+
+      setFormValidOsoDeployers(osoDeployersContracts__ChainCorrected)
     }
 
     get()
