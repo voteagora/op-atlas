@@ -199,5 +199,5 @@ export type OsoDeployerContracts = {
 }
 
 export type OsoDeployerContractsReturnType = {
-  osoContractsV0: Array<OsoDeployerContracts>
+  oso_contractsV0: Array<OsoDeployerContracts>
 }

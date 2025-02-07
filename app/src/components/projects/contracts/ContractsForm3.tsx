@@ -34,7 +34,7 @@ import {
   updateProjectOSOStatus,
 } from "@/lib/actions/contracts"
 import { updateProjectDetails } from "@/lib/actions/projects"
-import { ProjectWithDetails } from "@/lib/types"
+import { OsoDeployerContractsReturnType, ProjectWithDetails } from "@/lib/types"
 
 import { ContractForm } from "./ContractForm"
 import { ContractSchema2, ContractsSchema2 } from "./schema2"
@@ -65,8 +65,12 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = true
+const IS_USING_MOCK_DATA = false
 const IS_USING_EMPTY_MOCK_DATA = false
+
+const supportedMappings = {
+  OPTIMISM: 10,
+}
 
 export async function getDeployerOSOData(address: string) {
   if (IS_USING_MOCK_DATA) {
@@ -144,7 +148,32 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       : osoDeployersContractsData
   }
 
-  async function convertChains() {}
+  function replaceArtifactSourceWithNumber(
+    data: OsoDeployerContractsReturnType[],
+  ) {
+    // Define a counter for unique numbers
+
+    // Use map to create a new array with the modified data
+    return data.map((item) => {
+      // If oso_contractsV0 exists and is an array, modify each contract
+      if (Array.isArray(item.oso_contractsV0)) {
+        item.oso_contractsV0 = item.oso_contractsV0.map((contract) => {
+          try {
+            // Replace artifactSource with a number
+            contract.artifactSource =
+              supportedMappings[
+                contract.artifactSource as keyof typeof supportedMappings
+              ].toString()
+          } catch (e) {
+            contract.artifactSource = "UNSUPPORTED"
+          }
+
+          return contract
+        })
+      }
+      return item
+    })
+  }
 
   interface GroupedDataItem {
     deployerAddress: string
@@ -182,11 +211,13 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       console.log("projects contracts:")
       console.log(projectContracts)
 
-      const uniqueDeployments = Object.values(
+      const projectContractsByDeployer = Object.values(
         groupByDeployer(projectContracts!),
       )
 
-      console.log(uniqueDeployments)
+      console.log("projects contracts (unique):")
+
+      console.log(projectContractsByDeployer)
 
       // const osoDeployerContracts = await getOsoDeployerContractsData()
 
@@ -197,6 +228,14 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
       console.log("oso deployers contracts:")
       console.log(osoDeployersContracts)
+
+      const osoDeployersContracts__ChainCorrected =
+        replaceArtifactSourceWithNumber(
+          JSON.parse(JSON.stringify(osoDeployersContracts)),
+        )
+
+      console.log("oso deployers contracts (chain corrected):")
+      console.log(osoDeployersContracts__ChainCorrected)
     }
 
     get()

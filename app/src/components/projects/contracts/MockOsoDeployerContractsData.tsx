@@ -1,7 +1,7 @@
 import { OsoDeployerContractsReturnType } from "@/lib/types"
 
 export const mockOsoDeployerContractsData: OsoDeployerContractsReturnType = {
-  osoContractsV0: [
+  oso_contractsV0: [
     {
       artifactSource: "OPTIMISM",
       contractAddress: "0xCA40c9aBDe6EC4b9a4d6C2cADe48513802740B6d",
@@ -12,5 +12,5 @@ export const mockOsoDeployerContractsData: OsoDeployerContractsReturnType = {
 
 export const mockOsoDeployersContractsData: OsoDeployerContractsReturnType[] = [
   mockOsoDeployerContractsData,
-  { osoContractsV0: [] },
+  { oso_contractsV0: [] },
 ]
