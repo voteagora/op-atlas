@@ -36,7 +36,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = true
+const IS_USING_MOCK_DATA = false
 const IS_USING_EMPTY_MOCK_DATA = false
 
 function getDefaultValues(): z.infer<typeof ContractsSchema2> {
@@ -62,7 +62,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   })
 
   const { data: osoDeployersContractsData } = useOsoDeployersDeployedContracts(
-    deployerAddresses!,
+    deployerAddresses ?? [],
     // ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
   )
 
@@ -91,6 +91,10 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   useEffect(() => {
     async function get() {
       const projectContracts = await getProjectContractsData()
+      const osoDeployersContracts = await getOsoDeployersContractsData()
+
+      if (projectContracts === undefined || osoDeployersContracts === undefined)
+        return
 
       console.log("projects contracts:")
       console.log(projectContracts)
@@ -107,8 +111,6 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
       // console.log("oso deployer contracts:")
       // console.log(osoDeployerContracts)
-
-      const osoDeployersContracts = await getOsoDeployersContractsData()
 
       console.log("oso deployers contracts:")
       console.log(osoDeployersContracts)
