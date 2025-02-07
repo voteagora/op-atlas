@@ -62,6 +62,7 @@ import { mockProjectContractsData } from "./MockProjectContractsData"
 import { DeployersSchema } from "./schema3"
 import { ContractFormField } from "./ContractFormField"
 import { ContractsFormField } from "./ContractsFormField"
+import { DeployersFormField } from "./DeployersFormField"
 
 const EMPTY_DEPLOYER = {
   address: "",
@@ -105,10 +106,10 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     reValidateMode: "onChange",
   })
 
-  const { append } = useFieldArray({
-    control: form.control,
-    name: "deployers", // Name of the array field
-  })
+  // const { append } = useFieldArray({
+  //   control: form.control,
+  //   name: "deployers", // Name of the array field
+  // })
 
   const [allDbData, setAllDbData] = useState<DBData[]>([])
 
@@ -441,43 +442,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     <div>
       <Form {...form3}>
         <form onSubmit={form3.handleSubmit(onSubmit3)}>
-          <FormField
-            control={form3.control}
-            name={`deployers`}
-            render={({ field: deployers }) => (
-              <div className="flex flex-col gap-4">
-                {deployers?.value?.map((deployer, deployerIndex) => {
-                  return (
-                    <div
-                      key={"Deployer" + deployerIndex}
-                      className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6"
-                    >
-                      <FormField
-                        control={form3.control}
-                        name={`deployers.${deployerIndex}.address`}
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col gap-1.5">
-                            <FormLabel>Deployer Address</FormLabel>
-                            <Input
-                              {...field}
-                              placeholder="Add a deployer address"
-                            />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <ContractsFormField
-                        form={form3}
-                        deployerIndex={deployerIndex}
-                      />
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          />
-
+          <DeployersFormField form={form3} />
           <p>hello</p>
         </form>
       </Form>
@@ -503,7 +468,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
                     )
                   })}
 
-                {watchedField
+                {/* {watchedField
                   ?.map((deployer) => {
                     return deployer.contracts.length > 0
                   })
@@ -528,7 +493,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
                       <Plus width={16} height={16} />
                       Add deployer address
                     </Button>
-                  )}
+                  )} */}
               </>
             )}
           />

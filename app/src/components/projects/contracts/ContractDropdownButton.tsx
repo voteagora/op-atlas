@@ -55,7 +55,12 @@ export function ContractDropdownButton({
               <button
                 type="button"
                 className="block w-full py-2 hover:bg-gray-100"
-                onClick={() => field.onChange(!field.value)}
+                onClick={() => {
+                  setIsDropdownOpen(false)
+
+                  //replace this with call to database
+                  field.onChange(!field.value)
+                }}
               >
                 {field.value ? "Include in project" : "Exclude from project"}
               </button>
