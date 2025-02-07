@@ -70,6 +70,7 @@ const IS_USING_EMPTY_MOCK_DATA = false
 
 const supportedMappings = {
   OPTIMISM: 10,
+  BASE: 8453,
 }
 
 export async function getDeployerOSOData(address: string) {
@@ -206,6 +207,12 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   useEffect(() => {
     async function get() {
+      // Steps to get data properly
+      // 1. Load project contracts from Database
+      // 2. Sort project contracts by deployer
+      // 3. Get OSO data
+      // 4. Correct OSO data chains
+
       const projectContracts = await getProjectContractsData()
 
       console.log("projects contracts:")
@@ -229,6 +236,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       console.log("oso deployers contracts:")
       console.log(osoDeployersContracts)
 
+      // deep clones as to not alter the original object
       const osoDeployersContracts__ChainCorrected =
         replaceArtifactSourceWithNumber(
           JSON.parse(JSON.stringify(osoDeployersContracts)),
