@@ -61,6 +61,7 @@ import {
 import { mockProjectContractsData } from "./MockProjectContractsData"
 import { DeployersSchema } from "./schema3"
 import { ContractFormField } from "./ContractFormField"
+import { ContractsFormField } from "./ContractsFormField"
 
 const EMPTY_DEPLOYER = {
   address: "",
@@ -73,7 +74,7 @@ const IS_USING_EMPTY_MOCK_DATA = false
 const supportedMappings = {
   OPTIMISM: 10,
   BASE: 8453,
-  // MODE: 34443,
+  MODE: 34443,
 }
 
 export async function getDeployerOSOData(address: string) {
@@ -458,27 +459,10 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
                         )}
                       />
 
-                      <FormItem className="flex flex-col gap-1.5">
-                        <FormLabel>Contracts</FormLabel>
-                        <FormField
-                          control={form3.control}
-                          name={`deployers.${deployerIndex}.contracts`}
-                          render={({ field: contracts }) => (
-                            <div>
-                              {contracts.value.map((contract, index) => {
-                                return (
-                                  <ContractFormField
-                                    form={form3}
-                                    deployerIndex={deployerIndex}
-                                    contractIndex={index}
-                                  />
-                                )
-                              })}
-                            </div>
-                          )}
-                        />
-                        <FormMessage />
-                      </FormItem>
+                      <ContractsFormField
+                        form={form3}
+                        deployerIndex={deployerIndex}
+                      />
                     </div>
                   )
                 })}
