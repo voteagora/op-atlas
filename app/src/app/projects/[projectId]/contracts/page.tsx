@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { ContractsForm } from "@/components/projects/contracts/ContractsForm"
 import { getProject } from "@/db/projects"
 import { isUserMember } from "@/lib/actions/utils"
+import { ContractsForm3 } from "@/components/projects/contracts/ContractsForm3"
 
 export default async function Page({
   params,
@@ -17,5 +18,5 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  return <ContractsForm project={project} />
+  return <ContractsForm3 project={project} />
 }
