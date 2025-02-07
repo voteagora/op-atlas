@@ -21,10 +21,10 @@ export function useOsoDeployedContracts(
 
 export function useOsoDeployersDeployedContracts(
   deployers: string[],
-  queryOptions?: Partial<any>,
-  // UseQueryOptions<OsoDeployerContractsReturnType[], Error>
-): //UseQueryResult<OsoDeployerContractsReturnType[], Error>
-any {
+  queryOptions?: Partial<
+    UseQueryOptions<OsoDeployerContractsReturnType[], Error>
+  >,
+): UseQueryResult<OsoDeployerContractsReturnType[], Error> {
   return useQuery({
     queryKey: ["osoDeployersContracts", deployers],
     queryFn: async () => {
