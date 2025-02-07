@@ -1,4 +1,4 @@
-import { OsoDeployerContractsReturnType } from "@/components/projects/contracts/mockDBData"
+import { OsoDeployerContractsReturnType } from "@/lib/types"
 import { gql, GraphQLClient } from "graphql-request"
 
 const SUBGRAPH_URL = "https://www.opensource.observer/api/v1/graphql"

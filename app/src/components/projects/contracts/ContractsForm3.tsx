@@ -49,22 +49,17 @@ import { VerifyButton } from "./VerifyButton"
 import { isAddress } from "ethers"
 import { useProjectContracts } from "@/hooks/useProjectContracts"
 import { getDeployedContracts } from "@/lib/oso"
-import {
-  DBData,
-  mockBackendOSOData,
-  mockOsoDeployerContractsData,
-  mockProjectContractsData,
-  OSOContract,
-  OSOData,
-} from "./mockDBData"
+import { DBData, mockBackendOSOData, OSOContract, OSOData } from "./mockDBData"
 import { useOsoDeployedContracts } from "@/hooks/useOsoDeployedContracts"
+import { mockOsoDeployerContractsData } from "./MockOsoDeployerContractsData"
+import { mockProjectContractsData } from "./MockProjectContractsData"
 
 const EMPTY_DEPLOYER = {
   address: "",
   contracts: [],
 }
 
-const IS_USING_MOCK_DATA = false
+const IS_USING_MOCK_DATA = true
 const IS_USING_EMPTY_MOCK_DATA = false
 
 export async function getDeployerOSOData(address: string) {
@@ -114,18 +109,18 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   //   get()
   // }, [])
 
-  async function getOsoDeployerContractsData() {
-    return IS_USING_MOCK_DATA
-      ? mockOsoDeployerContractsData
-      : osoDeployerContractsData
-  }
-
   async function getProjectContractsData() {
     return IS_USING_MOCK_DATA
       ? IS_USING_EMPTY_MOCK_DATA
         ? []
         : mockProjectContractsData
       : projectContractsData
+  }
+
+  async function getOsoDeployerContractsData() {
+    return IS_USING_MOCK_DATA
+      ? mockOsoDeployerContractsData
+      : osoDeployerContractsData
   }
 
   useEffect(() => {

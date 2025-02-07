@@ -49,13 +49,8 @@ import { VerifyButton } from "./VerifyButton"
 import { isAddress } from "ethers"
 import { useProjectContracts } from "@/hooks/useProjectContracts"
 import { getDeployedContracts } from "@/lib/oso"
-import {
-  DBData,
-  mockBackendOSOData,
-  mockProjectContractsData,
-  OSOContract,
-  OSOData,
-} from "./mockDBData"
+import { DBData, mockBackendOSOData, OSOContract, OSOData } from "./mockDBData"
+import { mockProjectContractsData } from "./MockProjectContractsData"
 
 const EMPTY_DEPLOYER = {
   address: "",
@@ -70,9 +65,7 @@ export async function getDeployerOSOData(address: string) {
       return address === deployer.address
     })
   } else {
-    const result = await getDeployedContracts({
-      deployer: address,
-    })
+    const result = await getDeployedContracts(address)
 
     console.log(result)
   }
