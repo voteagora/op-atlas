@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
-import { Form } from "@/components/ui/form"
+import { Form, FormMessage } from "@/components/ui/form"
 
 import { OsoDeployerContractsReturnType, ProjectWithDetails } from "@/lib/types"
 
@@ -36,6 +36,10 @@ import {
 } from "@/lib/utils/contractForm"
 import { getAddress } from "viem"
 
+const osoLiveTestDeployerAddresses = [
+  "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
+  "0x3fab184622dc19b6109349b94811493bf2a45362",
+]
 const EMPTY_DEPLOYER = {
   address: "",
   contracts: [],
@@ -50,7 +54,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   const form3 = useForm<z.infer<typeof DeployersSchema>>({
     resolver: zodResolver(DeployersSchema),
     mode: "onSubmit",
-    // reValidateMode: "onChange",
+    reValidateMode: "onChange",
   })
 
   const { data: projectContractsData } = useProjectContracts(project.id)

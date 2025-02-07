@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { ContractsFormField } from "./ContractsFormField"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
-import { useState } from "react"
+import { ReactNode, useState } from "react"
 import { getAddress, isAddress } from "ethers"
 import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
 import { getDeployedContracts } from "@/lib/oso"
@@ -34,6 +34,12 @@ export function DeployerFormField({
 
   const [isVerifying, setIsVerifying] = useState(false)
 
+  const [errorMessage, setErrorMessage] = useState<ReactNode>()
+
+  const theForm = form.watch("deployers")
+
+  console.log(theForm)
+
   async function onVerify() {
     setIsVerifying(true)
 
@@ -47,6 +53,22 @@ export function DeployerFormField({
       const corrected = replaceArtifactSourceWithNumber(
         JSON.parse(JSON.stringify([deployer])),
       )
+
+      if (corrected[0].oso_contractsV0.length <= 0) {
+        setErrorMessage(
+          <p className="text-rose-700 text-sm">
+            {
+              "We couldn’t find any contracts deployed by this address. Learn about "
+            }
+
+            <span className="underline">{"missing contracts"}</span>
+            {"."}
+          </p>,
+        )
+
+        setIsVerifying(false)
+        return
+      }
 
       append(
         corrected[0].oso_contractsV0.map((contract) => {
@@ -64,10 +86,32 @@ export function DeployerFormField({
       )
       //   append()
       console.log(corrected)
+
+      setErrorMessage(undefined)
     }
 
     setIsVerifying(false)
   }
+
+  function isUnique() {
+    const deployers = theForm // Get the deployers array from form
+
+    for (let i = 0; i < deployers.length; i++) {
+      if (i !== deployerIndex) {
+        const address = theForm[i].address
+        console.log(
+          "Comparing " + address + " against " + theForm[deployerIndex].address,
+        )
+        if (address === theForm[deployerIndex].address) {
+          return false
+        }
+      }
+    }
+
+    return true
+  }
+
+  console.log(isUnique())
 
   return (
     <FormField
@@ -91,6 +135,8 @@ export function DeployerFormField({
                   name={`deployers.${deployerIndex}.contracts`}
                   render={({ field: contracts }) => (
                     <>
+                      {errorMessage}
+
                       {contracts.value.length > 0 ? (
                         <ContractsFormField
                           form={form}
@@ -109,7 +155,9 @@ export function DeployerFormField({
                             </div>
                           ) : (
                             <Button
-                              disabled={!isAddress(address.value)}
+                              disabled={
+                                !isAddress(address.value) || !isUnique()
+                              }
                               variant={"destructive"}
                               className="w-20"
                               onClick={onVerify}

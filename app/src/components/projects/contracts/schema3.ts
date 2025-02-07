@@ -15,5 +15,14 @@ export const DeployerSchema = z.object({
 })
 
 export const DeployersSchema = z.object({
-  deployers: z.array(DeployerSchema),
+  deployers: z.array(DeployerSchema).refine(
+    (deployers) => {
+      console.log("REFINED")
+      const addresses = deployers.map((d) => d.address)
+      return new Set(addresses).size === addresses.length
+    },
+    {
+      message: "Addresses must be unique",
+    },
+  ),
 })
