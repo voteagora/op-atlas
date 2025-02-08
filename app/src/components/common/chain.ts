@@ -1,11 +1,12 @@
 import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import {
   base,
+  bob,
   Chain,
-  fraxtal,
   ink,
   lisk,
   metalL2,
+  mint,
   mode,
   optimism,
   shape,
@@ -25,6 +26,10 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
       logo: "/assets/chain-logos/arenaZ.png",
       name: "ArenaZ",
     },
+    [bob.id.toString()]: {
+      logo: "/assets/chain-logos/bob.png",
+      name: "Bob",
+    },
     [base.id.toString()]: {
       logo: "/assets/chain-logos/base.png",
       name: "Base",
@@ -32,10 +37,6 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [ethernity.id.toString()]: {
       logo: "/assets/chain-logos/ethernity.jpg",
       name: "Ethernity",
-    },
-    [fraxtal.id.toString()]: {
-      logo: "/assets/chain-logos/fraxtal.png",
-      name: "Fraxtal",
     },
     [ink.id.toString()]: {
       logo: "/assets/chain-logos/ink.jpg",
@@ -48,6 +49,10 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [metalL2.id.toString()]: {
       logo: "/assets/chain-logos/metalL2.png",
       name: "MetalL2",
+    },
+    [mint.id.toString()]: {
+      logo: "/assets/chain-logos/mint.png",
+      name: "Mint",
     },
     [mode.id.toString()]: {
       logo: "/assets/chain-logos/mode.png",

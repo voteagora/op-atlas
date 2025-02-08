@@ -2,11 +2,12 @@ import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import { Address, createPublicClient, Hash, http } from "viem"
 import {
   base,
+  bob,
   Chain as ViemChain,
-  fraxtal,
   ink,
   lisk,
   metalL2,
+  mint,
   mode,
   optimism,
   shape,
@@ -16,8 +17,9 @@ import {
   zora,
 } from "viem/chains"
 
-import { Chain } from "./utils/contracts"
 import { polynomial } from "@/components/common/chain"
+
+import { Chain } from "./utils/contracts"
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
 if (!ALCHEMY_API_KEY) {
@@ -41,14 +43,15 @@ const clients = {
     base,
     `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
+  [Chain.Bob]: createClient(bob, "https://rpc.gobob.xyz"),
   [Chain.Ethernity]: createClient(
     ethernity,
     "https://mainnet.ethernitychain.io",
   ),
-  [Chain.Fraxtal]: createClient(fraxtal, "https://rpc.frax.com"),
   [Chain.Ink]: createClient(ink, "https://rpc-gel.inkonchain.com"),
   [Chain.Lisk]: createClient(lisk, "https://rpc.api.lisk.com"),
   [Chain.MetalL2]: createClient(metalL2, "https://rpc.metall2.com"),
+  [Chain.Mint]: createClient(mint, "https://rpc.mintchain.io"),
   [Chain.Mode]: createClient(mode, "https://mainnet.mode.network"),
   [Chain.Optimism]: createClient(
     optimism,
