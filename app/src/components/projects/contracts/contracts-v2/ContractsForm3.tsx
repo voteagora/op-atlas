@@ -7,7 +7,14 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
-import { Form, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
 import { OsoDeployerContractsReturnType, ProjectWithDetails } from "@/lib/types"
 
@@ -38,6 +45,7 @@ import { getAddress, isAddress } from "viem"
 import { DeployerFormField } from "./DeployerFormField"
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
 import { Plus } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 
 const osoLiveTestDeployerAddresses = [
   "0xa18d0226043a76683950f3baabf0a87cfb32e1cb", // OSO Sample
@@ -51,6 +59,8 @@ const EMPTY_DEPLOYER = {
 
 function getDefaultValues(): z.infer<typeof DeployersSchema> {
   return {
+    submittedToOSO: false,
+    isOffChain: false,
     deployers: [EMPTY_DEPLOYER],
   }
 }
@@ -171,6 +181,9 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
             excluded: boolean
           }>
         }>,
+        submittedToOSO: false,
+        osoSlug: "",
+        isOffChain: false,
       }
 
       // Merge the deployers data from both sources
@@ -280,27 +293,47 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     )
   }
 
-  const formValues = useWatch({
-    control: form3.control,
-  })
+  const isOffchain = form3.watch("isOffChain")
+  const submittedToOso = form3.watch("submittedToOSO")
+  const deployers = form3.watch("deployers")
 
-  // const isOffchain = form3.watch("isOffchain")
-  // const submittedToOso = form3.watch("submittedToOSO")
-  // const deployers = form3.watch("deployers")
+  const canAddContract = deployers.every(
+    (deployer) => deployer.contracts.length > 1,
+  )
 
-  // const canAddContract = deployers.every(
-  //   (deployer) => deployer.contracts.length < 1,
-  // )
-
-  // const canSubmit = (function () {
-  //   return isOffchain || canAddContract || submittedToOso
-  // })()
-
-  const canSubmit = true
+  const canSubmit = (function () {
+    return isOffchain || canAddContract || submittedToOso
+  })()
 
   return (
     <Form {...form3}>
       <form onSubmit={form3.handleSubmit(onSubmit3)}>
+        <div className="flex flex-col gap-6">
+          <h3 className="text-2xl">Contracts</h3>
+          <div className="text-secondary-foreground">
+            {"Add your project's onchain contracts and verify ownership."}
+          </div>
+          <div className="flex flex-col gap-2">
+            <FormField
+              control={form3.control}
+              name="isOffChain"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2 border border-input p-3 h-10 rounded-lg w-full">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className=" text-sm font-normal text-foreground">
+                    {"This project isn't onchain"}
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
         <DeployersFormField form={form3} />
       </form>
 

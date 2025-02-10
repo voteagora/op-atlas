@@ -25,4 +25,7 @@ export const DeployersSchema = z.object({
       message: "Addresses must be unique",
     },
   ),
+  submittedToOSO: z.boolean(),
+  isOffChain: z.boolean(),
+  osoSlug: z.string().optional(),
 })

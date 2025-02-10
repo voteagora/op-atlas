@@ -33,15 +33,25 @@ export function DeployersFormField({
 
   return (
     <>
-      <div className="flex flex-col gap-2">
-        {deployersFields.map((field, index) => (
-          <DeployerFormField
-            key={field.id}
-            form={form}
-            deployerIndex={index}
-            onRemove={onRemoveDeployerField}
-          />
-        ))}
+      <div className="flex flex-col gap-10 mt-10">
+        <h3 className="text-xl">Verified contracts</h3>
+        <p>
+          {"Verify ownership of your  "}
+          <span className="font-semibold">deployer address</span>
+          {
+            " and OP Atlas will find your contracts. If you've deployed a factory, its contracts will be attributed to you. (Contracts deployed within 24 hours may not appear)."
+          }
+        </p>
+        <div className="flex flex-col gap-2">
+          {deployersFields.map((field, index) => (
+            <DeployerFormField
+              key={field.id}
+              form={form}
+              deployerIndex={index}
+              onRemove={onRemoveDeployerField}
+            />
+          ))}
+        </div>
       </div>
 
       {form.getValues(`deployers`).every((deployer) => {
