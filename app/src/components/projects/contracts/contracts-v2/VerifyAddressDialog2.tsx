@@ -21,16 +21,10 @@ export function VerifyAddressDialog2({
   onOpenChange,
   projectId,
   deployerAddress,
-  // contractAddress,
-  // deploymentTxHash,
-  chain,
   onSubmit,
 }: DialogProps<{
   projectId: string
   deployerAddress: Address
-  // contractAddress: Address
-  // deploymentTxHash: `0x${string}`
-  chain?: Chain
   onSubmit: (signature: string) => void
 }>) {
   const [page, setPage] = useState(0)
