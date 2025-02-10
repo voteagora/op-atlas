@@ -30,6 +30,8 @@ export function ContractsFormField({
 
   return (
     <>
+      {contractsFields.length > 0 && <p>Contracts</p>}
+
       {contractsFields.map((field, index) => {
         if (index >= contractViewCount) return
 
@@ -73,65 +75,5 @@ export function ContractsFormField({
         </button>
       )}
     </>
-    // <FormItem className="flex flex-col gap-1.5">
-    //   <FormField
-    //     control={form.control}
-    //     name={`deployers.${deployerIndex}.contracts`}
-    //     render={({ field: contracts }) => {
-    //       console.log(contracts.value)
-    //       return (
-    //         <div>
-    //           <FormLabel>Contracts</FormLabel>
-
-    //           <div className="flex flex-col gap-2">
-    //             {contracts.value.map((contract, index) => {
-    //               if (index >= contractViewCount) return
-
-    //               return (
-    //                 <ContractFormField
-    //                   key={"Contracts-" + deployerIndex + "-" + index}
-    //                   form={form}
-    //                   deployerIndex={deployerIndex}
-    //                   contractIndex={index}
-    //                 />
-    //               )
-    //             })}
-    //           </div>
-
-    //           {contractViewCount < contracts.value.length && (
-    //             <button
-    //               className="flex items-center gap-2"
-    //               onClick={() => {
-    //                 setContractViewCount(contracts.value.length)
-    //               }}
-    //             >
-    //               <p>
-    //                 Show {contracts.value.length - initialMaxContractViewCount}{" "}
-    //                 more contract(s)
-    //               </p>
-    //               <ChevronDown width={16} height={16} />
-    //             </button>
-    //           )}
-
-    //           {contractViewCount > initialMaxContractViewCount && (
-    //             <button
-    //               className="flex items-center gap-2"
-    //               onClick={() => {
-    //                 setContractViewCount(initialMaxContractViewCount)
-    //               }}
-    //             >
-    //               <p>
-    //                 Hide {contracts.value.length - initialMaxContractViewCount}{" "}
-    //                 contract(s)
-    //               </p>
-    //               <ChevronUp width={16} height={16} />
-    //             </button>
-    //           )}
-    //         </div>
-    //       )
-    //     }}
-    //   />
-    //   <FormMessage />
-    // </FormItem>
   )
 }

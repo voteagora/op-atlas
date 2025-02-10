@@ -51,7 +51,7 @@ export function DeployerFormField({
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
-  const theForm = form.watch("deployers")
+  const address = form.watch(`deployers.${deployerIndex}.address`)
 
   async function onVerify() {
     setIsVerifying(true)
@@ -87,7 +87,7 @@ export function DeployerFormField({
         const contracts = corrected[0].oso_contractsV0.map((contract) => {
           return {
             contractAddress: getAddress(contract.contractAddress),
-            deployerAddress: theForm[deployerIndex].address,
+            deployerAddress: address,
             deploymentHash: "",
             verificationProof: "",
             chainId: parseInt(contract.contractNamespace),
@@ -123,8 +123,6 @@ export function DeployerFormField({
     setIsVerifying(false)
   }
 
-  const address = form.watch(`deployers.${deployerIndex}.address`)
-
   const onCopy = async () => {
     try {
       await copyToClipboard(address)
@@ -141,49 +139,40 @@ export function DeployerFormField({
 
   return (
     <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
-      <FormField
-        control={form.control}
-        name={`deployers.${deployerIndex}.address`}
-        render={({ field: address }) => (
-          <>
-            <FormItem className="flex flex-col gap-1.5">
-              <FormLabel>Deployer Address</FormLabel>
-              {contractsFields.length > 0 && (
-                <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                  <div className="flex items-center gap-2">
-                    {truncate(theForm[deployerIndex].address, 5)}
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant={"ghost"}>
-                        <Ellipsis size={16} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={onCopy}
-                      >
-                        Copy address
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => onRemove(deployerIndex)}
-                      >
-                        Remove
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
+      <p>Deployer</p>
+      {contractsFields.length > 0 && (
+        <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+          <div className="flex items-center gap-2">{truncate(address, 5)}</div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"ghost"}>
+                <Ellipsis size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="cursor-pointer" onClick={onCopy}>
+                Copy address
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => onRemove(deployerIndex)}
+              >
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
 
-              {contractsFields.length <= 0 && (
-                <Input {...address} placeholder="Add a deployer address" />
-              )}
-            </FormItem>
-          </>
-        )}
-      />
+      {contractsFields.length <= 0 && (
+        <FormField
+          control={form.control}
+          name={`deployers.${deployerIndex}.address`}
+          render={({ field: address }) => (
+            <Input {...address} placeholder="Add a deployer address" />
+          )}
+        />
+      )}
 
       <ContractsFormField form={form} deployerIndex={deployerIndex} />
     </div>
