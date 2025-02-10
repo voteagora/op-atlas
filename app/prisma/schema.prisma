@@ -68,6 +68,8 @@ model UserAddress {
   userId  String
   source  String
 
+  primary Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
