@@ -10,11 +10,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { makeUserAddressPrimary } from "@/db/users"
 import { UserAddressSource } from "@/lib/types"
-import { cn } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
-
-import { makeUserAddressPrimary } from "./actions"
 
 export const VerifiedAddress = ({
   address,

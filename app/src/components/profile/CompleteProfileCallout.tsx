@@ -346,6 +346,7 @@ function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
             text="Set primary address"
             variant="primary"
             disabled={user.addresses.length < 2}
+            target="_self"
           />
         </div>
       </div>

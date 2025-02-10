@@ -17,11 +17,21 @@ interface ButtonProps extends Omit<ShadcnButtonProps, "variant"> {
   text?: string
   subtext?: string
   variant?: "default" | "primary"
+  target?: React.HTMLAttributeAnchorTarget
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { icon, text, subtext, href, variant = "default", className, ...props },
+    {
+      icon,
+      text,
+      subtext,
+      href,
+      variant = "default",
+      className,
+      target = "_blank",
+      ...props
+    },
     ref,
   ) => {
     if (props.disabled) {
@@ -51,7 +61,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     return (
-      <NextLink href={href} passHref target="_blank" className="w-fit">
+      <NextLink href={href} passHref target={target} className="w-fit">
         <ShadcnButton
           ref={ref}
           className={cn(
