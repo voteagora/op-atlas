@@ -3,7 +3,7 @@ import { DeployersSchema } from "./schema3"
 import { z } from "zod"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { ChainLogo } from "@/components/common/ChainLogo"
-import { Check, FileQuestion, X } from "lucide-react"
+import { Check, Ellipsis, FileQuestion, X } from "lucide-react"
 import { truncate } from "@/lib/utils/contracts"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
@@ -13,8 +13,15 @@ import { addProjectContract } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { removeContract } from "@/lib/actions/contracts"
 import { Address, getAddress } from "viem"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
+import { Button } from "@/components/ui/button"
 
-const onCopyValue = async (value: string) => {
+const onCopy = async (value: string) => {
   try {
     await copyToClipboard(value)
     toast("Copied to clipboard")
@@ -32,11 +39,25 @@ export function ContractFormField({
   deployerIndex: number
   contractIndex: number
 }) {
-  const theForm = form.watch(
-    `deployers.${deployerIndex}.contracts.${contractIndex}`,
+  const address = form.watch(
+    `deployers.${deployerIndex}.contracts.${contractIndex}.address`,
+  )
+  const chainId = form.watch(
+    `deployers.${deployerIndex}.contracts.${contractIndex}.chainId`,
+  )
+
+  const excluded = form.watch(
+    `deployers.${deployerIndex}.contracts.${contractIndex}.excluded`,
   )
 
   const projectId = useProjectFromPath()
+
+  async function onToggle2() {
+    form.setValue(
+      `deployers.${deployerIndex}.contracts.${contractIndex}.excluded`,
+      !excluded,
+    )
+  }
 
   async function onToggle(value: boolean) {
     if (!value) {
@@ -47,21 +68,21 @@ export function ContractFormField({
 
       try {
         toast.info(`Adding contract...`)
-        const result = await addProjectContract({
-          projectId,
-          contract: {
-            contractAddress: addr,
-            deployerAddress: form.getValues().deployers[deployerIndex].address,
-            deploymentHash: "",
-            verificationProof: "",
-            chainId: parseInt(
-              form.getValues().deployers[deployerIndex].contracts[contractIndex]
-                .chainId,
-            ),
-            name: "",
-            description: "",
-          },
-        })
+        // const result = await addProjectContract({
+        //   projectId,
+        //   contract: {
+        //     contractAddress: addr,
+        //     deployerAddress: form.getValues().deployers[deployerIndex].address,
+        //     deploymentHash: "",
+        //     verificationProof: "",
+        //     chainId: parseInt(
+        //       form.getValues().deployers[deployerIndex].contracts[contractIndex]
+        //         .chainId,
+        //     ),
+        //     name: "",
+        //     description: "",
+        //   },
+        // })
 
         // if (result.error !== null) {
         //   throw result.error
@@ -76,11 +97,11 @@ export function ContractFormField({
       try {
         toast.info(`Removing contract...`)
 
-        const result = await removeContract({
-          projectId,
-          address: getAddress(theForm.address),
-          chainId: parseInt(theForm.chainId),
-        })
+        // const result = await removeContract({
+        //   projectId,
+        //   address: getAddress(address),
+        //   chainId: parseInt(chainId),
+        // })
         toast.success("Contract Removed!")
       } catch (error: unknown) {
         toast.error("Error removing contract, please try again")
@@ -88,115 +109,92 @@ export function ContractFormField({
     }
   }
 
-  const { remove } = useFieldArray({
-    control: form.control,
-    name: `deployers.${deployerIndex}.contracts`, // Name of the array field
-  })
-
   return (
-    <FormField
-      control={form.control}
-      name={`deployers.${deployerIndex}.contracts.${contractIndex}`}
-      render={({ field: contract }) => (
-        <div>
-          <FormItem className="flex flex-col gap-1.5">
-            <div className="flex group">
-              <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                <div className="flex items-center gap-2">
-                  <FormField
-                    control={form.control}
-                    name={`deployers.${deployerIndex}.contracts.${contractIndex}.excluded`}
-                    render={({ field: excludedField }) => (
-                      <>
-                        {excludedField.value ? (
-                          <X width={20} height={20} color="grey" />
-                        ) : (
-                          <Check width={20} height={20} color="green" />
-                        )}
-                      </>
-                    )}
-                  />
+    <div>
+      <div className="flex group">
+        <div className="flex justify-between h-10 w-full rounded-md border border-input px-2">
+          <div className="flex items-center gap-2">
+            <>
+              {!excluded && <Check width={20} height={20} color="green" />}
 
-                  {contract.value?.chainId === "NaN" ||
-                  contract.value?.chainId === "UNSUPPORTED" ? (
-                    <div className="relative group/btn">
-                      <FileQuestion className="w-6 h-6" />
-                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg w-80 text-center">
-                        {"This contract is on an unsupported chain."}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="relative group/btn">
-                      <ChainLogo chainId={contract.value?.chainId} size={24} />
-                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg text-center">
-                        {CHAIN_INFO[contract.value?.chainId]?.name}
-                      </span>
-                    </div>
-                  )}
+              {excluded && <X width={20} height={20} color="grey" />}
+            </>
 
-                  <button
-                    className="relative group/btn hover:bg-gray-200 px-2 rounded-lg"
-                    type="button"
+            {chainId === "NaN" || chainId === "UNSUPPORTED" ? (
+              <div className="relative group/btn">
+                <FileQuestion className="w-6 h-6" />
+                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg w-80 text-center">
+                  {"This contract is on an unsupported chain."}
+                </span>
+              </div>
+            ) : (
+              <div className="relative group/btn">
+                <ChainLogo chainId={chainId} size={24} />
+                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg text-center">
+                  {CHAIN_INFO[chainId]?.name}
+                </span>
+              </div>
+            )}
+
+            <button
+              className="relative group/btn hover:bg-gray-200 px-2 rounded-lg"
+              type="button"
+              onClick={() => {
+                onCopy(address)
+              }}
+            >
+              {truncate(address, 5)}
+              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg">
+                {address}
+              </span>
+            </button>
+
+            <>
+              {excluded && (
+                <div className="bg-rose-300 rounded-lg px-2">Excluded</div>
+              )}
+            </>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <>
+              {
+                <button
+                  type="button"
+                  className="bg-secondary px-2 rounded-lg opacity-0 group-hover:opacity-100"
+                  onClick={onToggle2}
+                >
+                  {!excluded ? "Exclude" : "Include"}
+                </button>
+              }
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant={"ghost"}>
+                    <Ellipsis size={16} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
                     onClick={() => {
-                      onCopyValue(contract.value.address)
+                      onCopy(address)
                     }}
                   >
-                    {truncate(contract.value?.address, 5)}
-                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg">
-                      {contract.value?.address}
-                    </span>
-                  </button>
-
-                  <FormField
-                    control={form.control}
-                    name={`deployers.${deployerIndex}.contracts.${contractIndex}.excluded`}
-                    render={({ field: excludedField }) => (
-                      <>
-                        {excludedField.value && (
-                          <div className="bg-rose-300 rounded-lg px-2">
-                            Excluded
-                          </div>
-                        )}
-                      </>
-                    )}
-                  />
-                </div>
-
-                <div className="flex gap-4">
-                  <FormField
-                    control={form.control}
-                    name={`deployers.${deployerIndex}.contracts.${contractIndex}.excluded`}
-                    render={({ field: excludedField }) => (
-                      <>
-                        {
-                          <button
-                            type="button"
-                            className="bg-secondary px-2 rounded-lg opacity-0 group-hover:opacity-100"
-                            onClick={async () => {
-                              remove(contractIndex)
-                              //   await onToggle(!excludedField.value)
-                              //   excludedField.onChange(!excludedField.value)
-                            }}
-                          >
-                            {!excludedField.value ? "Exclude" : "Include"}
-                          </button>
-                        }
-
-                        <ContractDropdownButton
-                          form={form}
-                          deployerIndex={deployerIndex}
-                          contractIndex={contractIndex}
-                          onToggle={onToggle}
-                        />
-                      </>
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
-          </FormItem>
+                    Copy address
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={onToggle2}
+                  >
+                    {excluded ? "Include" : "Exclude"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          </div>
         </div>
-      )}
-    />
+      </div>
+    </div>
   )
 }
