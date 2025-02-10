@@ -8,6 +8,7 @@ const supportedMappings = {
   OP: "10",
   BASE: "8453",
   MODE: "34443",
+  WORLDCHAIN: "480",
 }
 
 export function convertContracts(

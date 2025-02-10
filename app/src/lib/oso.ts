@@ -15,7 +15,7 @@ export async function getDeployedContracts(
   const variables = {
     where: {
       // Example where filter; replace with your actual filter conditions
-      rootDeployerAddress: { _eq: deployer },
+      rootDeployerAddress: { _ilike: deployer },
     },
   }
 
