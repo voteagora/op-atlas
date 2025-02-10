@@ -1,7 +1,7 @@
 import { FormField, FormItem } from "@/components/ui/form"
 import { DeployersSchema } from "./schema3"
 import { z } from "zod"
-import { UseFormReturn } from "react-hook-form"
+import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { Check, FileQuestion, X } from "lucide-react"
 import { truncate } from "@/lib/utils/contracts"
@@ -88,6 +88,11 @@ export function ContractFormField({
     }
   }
 
+  const { remove } = useFieldArray({
+    control: form.control,
+    name: `deployers.${deployerIndex}.contracts`, // Name of the array field
+  })
+
   return (
     <FormField
       control={form.control}
@@ -168,8 +173,9 @@ export function ContractFormField({
                             type="button"
                             className="bg-secondary px-2 rounded-lg opacity-0 group-hover:opacity-100"
                             onClick={async () => {
-                              await onToggle(!excludedField.value)
-                              excludedField.onChange(!excludedField.value)
+                              remove(contractIndex)
+                              //   await onToggle(!excludedField.value)
+                              //   excludedField.onChange(!excludedField.value)
                             }}
                           >
                             {!excludedField.value ? "Exclude" : "Include"}

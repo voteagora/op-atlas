@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { ContractsFormField } from "./ContractsFormField"
 import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
+import { Ellipsis, Loader2 } from "lucide-react"
 import { ReactNode, useState } from "react"
 import { getAddress, isAddress } from "ethers"
 import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
@@ -21,30 +21,35 @@ import { addProjectContract, addProjectContracts } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { truncate } from "@/lib/utils/contracts"
 import { DeployerDropdownButton } from "./DeployerDropdownButton"
+import { ContractFormField } from "./ContractFormField"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function DeployerFormField({
   form,
   deployerIndex,
-  projectContracts,
+  onRemove,
 }: {
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
   deployerIndex: number
-  projectContracts: ProjectContract[]
+  onRemove: (index: number) => void
 }) {
   const projectId = useProjectFromPath()
 
-  const { append } = useFieldArray({
-    control: form.control,
-    name: `deployers.${deployerIndex}.contracts`, // Name of the array field
-  })
+  // const { append } = useFieldArray({
+  //   control: form.control,
+  //   name: `deployers.${deployerIndex}.contracts`, // Name of the array field
+  // })
 
   const [isVerifying, setIsVerifying] = useState(false)
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
   const theForm = form.watch("deployers")
-
-  console.log(theForm)
 
   async function onVerify() {
     setIsVerifying(true)
@@ -92,20 +97,20 @@ export function DeployerFormField({
 
         await addProjectContracts(projectId, contracts)
 
-        append(
-          corrected[0].oso_contractsV0.map((contract) => {
-            return {
-              address: contract.contractAddress,
-              chainId: contract.contractNamespace,
-              excluded: false,
-              //   projectContracts?.find(
-              //     (projectContract) =>
-              //       getAddress(projectContract.contractAddress) ===
-              //       getAddress(contract.contractAddress),
-              //   ) === undefined,
-            }
-          }),
-        )
+        // append(
+        //   corrected[0].oso_contractsV0.map((contract) => {
+        //     return {
+        //       address: contract.contractAddress,
+        //       chainId: contract.contractNamespace,
+        //       excluded: false,
+        //       //   projectContracts?.find(
+        //       //     (projectContract) =>
+        //       //       getAddress(projectContract.contractAddress) ===
+        //       //       getAddress(contract.contractAddress),
+        //       //   ) === undefined,
+        //     }
+        //   }),
+        // )
 
         setErrorMessage(undefined)
       } catch (e) {
@@ -116,101 +121,55 @@ export function DeployerFormField({
     setIsVerifying(false)
   }
 
-  function isUnique() {
-    const deployers = theForm // Get the deployers array from form
-
-    for (let i = 0; i < deployers.length; i++) {
-      if (i !== deployerIndex) {
-        const address = theForm[i].address
-        console.log(
-          "Comparing " + address + " against " + theForm[deployerIndex].address,
-        )
-        if (address === theForm[deployerIndex].address) {
-          return false
-        }
-      }
-    }
-
-    return true
-  }
+  const { fields: contractsFields } = useFieldArray({
+    control: form.control,
+    name: `deployers.${deployerIndex}.contracts`,
+  })
 
   return (
-    <FormField
-      control={form.control}
-      name={`deployers.${deployerIndex}`}
-      render={({ field: deployer }) => (
-        <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
-          <FormField
-            control={form.control}
-            name={`deployers.${deployerIndex}.address`}
-            render={({ field: address }) => (
-              <>
-                <FormItem className="flex flex-col gap-1.5">
-                  <FormLabel>Deployer Address</FormLabel>
-                  {theForm[deployerIndex].contracts.length > 0 && (
-                    <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                      <div className="flex items-center gap-2">
-                        {truncate(theForm[deployerIndex].address, 5)}
-                      </div>
-                      <DeployerDropdownButton
-                        form={form}
-                        deployerIndex={deployerIndex}
-                        onToggle={async (val: boolean) => {}}
-                      />
-                    </div>
-                  )}
+    <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
+      <FormField
+        control={form.control}
+        name={`deployers.${deployerIndex}.address`}
+        render={({ field: address }) => (
+          <>
+            <FormItem className="flex flex-col gap-1.5">
+              <FormLabel>Deployer Address</FormLabel>
+              {contractsFields.length > 0 && (
+                <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                  <div className="flex items-center gap-2">
+                    {truncate(theForm[deployerIndex].address, 5)}
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant={"ghost"}>
+                        <Ellipsis size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {/* <DropdownMenuItem className="cursor-pointer" onClick={onCopy}>
+                    Copy URL
+                  </DropdownMenuItem> */}
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => onRemove(deployerIndex)}
+                      >
+                        Remove
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
 
-                  {theForm[deployerIndex].contracts.length <= 0 && (
-                    <Input {...address} placeholder="Add a deployer address" />
-                  )}
-                  <FormMessage />
-                </FormItem>
+              {contractsFields.length <= 0 && (
+                <Input {...address} placeholder="Add a deployer address" />
+              )}
+            </FormItem>
+          </>
+        )}
+      />
 
-                <FormField
-                  control={form.control}
-                  name={`deployers.${deployerIndex}.contracts`}
-                  render={({ field: contracts }) => (
-                    <>
-                      {errorMessage}
-
-                      {contracts.value.length > 0 ? (
-                        <ContractsFormField
-                          form={form}
-                          deployerIndex={deployerIndex}
-                        />
-                      ) : (
-                        <>
-                          {isVerifying ? (
-                            <div className="flex items-center">
-                              <Loader2
-                                width={16}
-                                height={16}
-                                className="animate-spin"
-                              />
-                              <p>Searching for contracts</p>
-                            </div>
-                          ) : (
-                            <Button
-                              disabled={
-                                !isAddress(address.value) || !isUnique()
-                              }
-                              variant={"destructive"}
-                              className="w-20"
-                              onClick={onVerify}
-                            >
-                              Verify
-                            </Button>
-                          )}
-                        </>
-                      )}
-                    </>
-                  )}
-                />
-              </>
-            )}
-          />
-        </div>
-      )}
-    />
+      <ContractsFormField form={form} deployerIndex={deployerIndex} />
+    </div>
   )
 }

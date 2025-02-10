@@ -51,8 +51,8 @@ export function convertContracts(
 export function replaceArtifactSourceWithNumber(
   data: OsoDeployerContractsReturnType[],
 ) {
-  console.log("THIS DATA")
-  console.log(data)
+  //   console.log("THIS DATA")
+  //   console.log(data)
   // Use map to create a new array with the modified data
   return data.map((item) => {
     // If oso_contractsV0 exists and is an array, modify each contract

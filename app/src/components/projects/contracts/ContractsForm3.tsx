@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ProjectContract } from "@prisma/client"
 import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,10 @@ import {
   groupByDeployer,
   replaceArtifactSourceWithNumber,
 } from "@/lib/utils/contractForm"
-import { getAddress } from "viem"
+import { getAddress, isAddress } from "viem"
+import { DeployerFormField } from "./DeployerFormField"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { Plus } from "lucide-react"
 
 const osoLiveTestDeployerAddresses = [
   "0xa18d0226043a76683950f3baabf0a87cfb32e1cb", // OSO Sample
@@ -48,7 +51,7 @@ const EMPTY_DEPLOYER = {
 
 function getDefaultValues(): z.infer<typeof ContractsSchema2> {
   return {
-    deployers: [{ ...EMPTY_DEPLOYER }],
+    deployers: [],
   }
 }
 export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
@@ -56,6 +59,16 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     resolver: zodResolver(DeployersSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
+    defaultValues: getDefaultValues(),
+  })
+
+  const {
+    fields: deployersFields,
+    append: addDeployerField,
+    remove: removeDeployerField,
+  } = useFieldArray({
+    control: form3.control,
+    name: "deployers",
   })
 
   const { data: projectContractsData } = useProjectContracts(project.id)
@@ -113,23 +126,23 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       if (projectContracts === undefined || osoDeployersContracts === undefined)
         return
 
-      console.log("projects contracts:")
-      console.log(projectContracts)
+      // console.log("projects contracts:")
+      // console.log(projectContracts)
 
       // const projectContractsByDeployer = Object.values(
       //   groupByDeployer(projectContracts!),
       // )
 
-      console.log("projects contracts (unique):")
-      console.log(projectContractsByDeployer)
+      // console.log("projects contracts (unique):")
+      // console.log(projectContractsByDeployer)
 
       // const osoDeployerContracts = await getOsoDeployerContractsData()
 
       // console.log("oso deployer contracts:")
       // console.log(osoDeployerContracts)
 
-      console.log("oso deployers contracts:")
-      console.log(osoDeployersContracts)
+      // console.log("oso deployers contracts:")
+      // console.log(osoDeployersContracts)
 
       // deep clones as to not alter the original object
       const osoDeployersContracts__ChainCorrected =
@@ -137,15 +150,15 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
           JSON.parse(JSON.stringify(osoDeployersContracts)),
         )
 
-      console.log("oso deployers contracts (chain corrected):")
-      console.log(osoDeployersContracts__ChainCorrected)
+      // console.log("oso deployers contracts (chain corrected):")
+      // console.log(osoDeployersContracts__ChainCorrected)
 
       const osoDeployersContracts__DeployerFormatted = convertContracts(
         osoDeployersContracts__ChainCorrected,
       )
 
-      console.log("oso deployers contracts (unique)")
-      console.log(osoDeployersContracts__DeployerFormatted)
+      // console.log("oso deployers contracts (unique)")
+      // console.log(osoDeployersContracts__DeployerFormatted)
 
       const mergedDeployersFormData: z.infer<typeof DeployersSchema> = {
         deployers: [] as Array<{
@@ -245,6 +258,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
       form3.setValue("deployers", mergedDeployersFormData.deployers)
 
+      console.log("I RAN")
       // console.log(deployersFormData)
     }
 
@@ -260,10 +274,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   return (
     <Form {...form3}>
       <form onSubmit={form3.handleSubmit(onSubmit3)}>
-        <DeployersFormField
-          form={form3}
-          projectContracts={projectContracts || []}
-        />
+        <DeployersFormField form={form3} />
       </form>
 
       <Button variant={"destructive"} type="submit" className="w-20">
