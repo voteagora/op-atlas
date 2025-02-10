@@ -48,6 +48,8 @@ export function VerifyAddressDialog2({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const [selectedChain, setSelectedChain] = useState<number>()
+
   const onConfirmSignature = async () => {
     try {
       setLoading(true)
@@ -55,6 +57,7 @@ export function VerifyAddressDialog2({
       const verificationResult = await verifyDeployer(
         projectId,
         deployerAddress,
+        selectedChain!,
         signature as `0x${string}`,
       )
 
@@ -71,8 +74,6 @@ export function VerifyAddressDialog2({
       setLoading(false)
     }
   }
-
-  const [selectedChain, setSelectedChain] = useState<number>()
 
   async function onChainChange(value: string) {
     setSelectedChain(parseInt(value))

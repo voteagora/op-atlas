@@ -1,7 +1,13 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
+import {
+  Address,
+  createPublicClient,
+  getAddress,
+  isAddressEqual,
+  verifyMessage,
+} from "viem"
 
 import { auth } from "@/auth"
 import {
@@ -12,7 +18,7 @@ import {
   updateProjectContract,
 } from "@/db/projects"
 
-import { getTransaction, getTransactionTrace, TraceCall } from "../eth"
+import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
@@ -20,13 +26,15 @@ import { verifyMembership } from "./utils"
 export const verifyDeployer = async (
   projectId: string,
   deployerAddress: Address,
+  chainId: number,
   signature: `0x${string}`,
 ) => {
   const result = await verifyAuthentication(projectId)
   if (result.error !== null) return result
 
-  // Verify that the deployer is the one that signed the message
-  const isValidSignature = await verifyMessage({
+  const client = clients[chainId]
+
+  const isValidSignature = client.verifyMessage({
     address: getAddress(deployerAddress),
     message: getMessage(getAddress(deployerAddress)),
     signature: signature as `0x${string}`,

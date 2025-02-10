@@ -26,7 +26,7 @@ export type TraceCall = {
   type: "CALL" | "STATICCALL" | "DELEGATECALL" | "CREATE" | "CREATE2"
 }
 
-const clients = {
+export const clients = {
   [Chain.Base]: createClient(
     base,
     `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
