@@ -183,7 +183,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
         })),
 
         ...osoDeployersContracts__DeployerFormatted.map((deployer) => ({
-          address: deployer.deployerAddress,
+          address: getAddress(deployer.deployerAddress),
           contracts: deployer.contracts.map((contract) => {
             const isContractExcluded =
               projectContracts?.find(
