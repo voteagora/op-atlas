@@ -528,6 +528,16 @@ async function getProjectTeamFn({
 
 export const getProjectTeam = cache(getProjectTeamFn)
 
+async function getAllProjectContractsFn({ projectId }: { projectId: string }) {
+  return prisma.projectContract.findMany({
+    where: {
+      projectId: projectId,
+    },
+  })
+}
+
+export const getAllProjectContracts = cache(getAllProjectContractsFn)
+
 async function getProjectContractsFn({
   projectId,
   deployerAddress,
