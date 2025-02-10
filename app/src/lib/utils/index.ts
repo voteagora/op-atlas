@@ -188,6 +188,10 @@ export function profileProgress(user: UserWithAddresses): number {
     progress += step
   }
 
+  if (user.addresses.some((addr) => addr.primary)) {
+    progress += step
+  }
+
   // If all conditions are met, return 100
   return progress === 100 ? 100 : progress
 }

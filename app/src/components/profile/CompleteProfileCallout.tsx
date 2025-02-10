@@ -325,7 +325,11 @@ function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
-        {user.addresses.length > 1 ? <GreenCheck /> : <StepNumber num={4} />}
+        {user.addresses.some((addr) => addr.primary) ? (
+          <GreenCheck />
+        ) : (
+          <StepNumber num={4} />
+        )}
         <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-[2px]">
             <div className="font-medium">Set your primary address</div>
