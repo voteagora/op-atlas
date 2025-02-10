@@ -17,7 +17,11 @@ import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
 import { getDeployedContracts } from "@/lib/oso"
 import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
 import { ProjectContract } from "@prisma/client"
-import { addProjectContract, addProjectContracts } from "@/db/projects"
+import {
+  addProjectContract,
+  addProjectContracts,
+  removeProjectContracts,
+} from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { truncate } from "@/lib/utils/contracts"
 import { DeployerDropdownButton } from "./DeployerDropdownButton"
@@ -40,10 +44,25 @@ export function DeployerFormField({
   deployerIndex: number
   onRemove: (index: number) => void
 }) {
-  async function onRemoveDeployerField(index: number) {
+  const address = form.watch(`deployers.${deployerIndex}.address`)
+
+  const { fields: contractsFields } = useFieldArray({
+    control: form.control,
+    name: `deployers.${deployerIndex}.contracts`,
+  })
+
+  async function onRemoveDeployerField() {
     try {
       toast.info("Removing deployer...")
-      // await removeProjectContracts(projectId)
+      await removeProjectContracts(
+        projectId,
+        contractsFields.map((contract) => {
+          return {
+            address: contract.address,
+            chainId: contract.chainId,
+          }
+        }),
+      )
       toast.success("Succesfully removed deployer!")
       onRemove(deployerIndex)
     } catch (e) {
@@ -56,8 +75,6 @@ export function DeployerFormField({
   const [isVerifying, setIsVerifying] = useState(false)
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
-
-  const address = form.watch(`deployers.${deployerIndex}.address`)
 
   async function onVerify() {
     setIsVerifying(true)
@@ -138,10 +155,10 @@ export function DeployerFormField({
     }
   }
 
-  const { fields: contractsFields } = useFieldArray({
-    control: form.control,
-    name: `deployers.${deployerIndex}.contracts`,
-  })
+  // const { fields: contractsFields } = useFieldArray({
+  //   control: form.control,
+  //   name: `deployers.${deployerIndex}.contracts`,
+  // })
 
   return (
     <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
@@ -161,7 +178,7 @@ export function DeployerFormField({
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => onRemoveDeployerField(deployerIndex)}
+                onClick={onRemoveDeployerField}
               >
                 Remove
               </DropdownMenuItem>
