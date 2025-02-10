@@ -19,6 +19,8 @@ import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
 import { ProjectContract } from "@prisma/client"
 import { addProjectContract, addProjectContracts } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
+import { truncate } from "@/lib/utils/contracts"
+import { DeployerDropdownButton } from "./DeployerDropdownButton"
 
 export function DeployerFormField({
   form,
@@ -74,39 +76,41 @@ export function DeployerFormField({
         return
       }
 
-      const contracts = corrected[0].oso_contractsV0.map((contract) => {
-        return {
-          contractAddress: contract.contractAddress,
-          deployerAddress: theForm[deployerIndex].address,
-          deploymentHash: "",
-          verificationProof: "",
-          chainId: parseInt(contract.contractNamespace),
-          name: "",
-          description: "",
-          projectId,
-        }
-      })
-
-      await addProjectContracts(projectId, contracts)
-
-      append(
-        corrected[0].oso_contractsV0.map((contract) => {
+      try {
+        const contracts = corrected[0].oso_contractsV0.map((contract) => {
           return {
-            address: contract.contractAddress,
-            chainId: contract.contractNamespace,
-            excluded: false,
-            //   projectContracts?.find(
-            //     (projectContract) =>
-            //       getAddress(projectContract.contractAddress) ===
-            //       getAddress(contract.contractAddress),
-            //   ) === undefined,
+            contractAddress: contract.contractAddress,
+            deployerAddress: theForm[deployerIndex].address,
+            deploymentHash: "",
+            verificationProof: "",
+            chainId: parseInt(contract.contractNamespace),
+            name: "",
+            description: "",
+            projectId,
           }
-        }),
-      )
-      //   append()
-      console.log(corrected)
+        })
 
-      setErrorMessage(undefined)
+        await addProjectContracts(projectId, contracts)
+
+        append(
+          corrected[0].oso_contractsV0.map((contract) => {
+            return {
+              address: contract.contractAddress,
+              chainId: contract.contractNamespace,
+              excluded: false,
+              //   projectContracts?.find(
+              //     (projectContract) =>
+              //       getAddress(projectContract.contractAddress) ===
+              //       getAddress(contract.contractAddress),
+              //   ) === undefined,
+            }
+          }),
+        )
+
+        setErrorMessage(undefined)
+      } catch (e) {
+        console.error("unexpected error occured adding contract(s): ", e)
+      }
     }
 
     setIsVerifying(false)
@@ -130,8 +134,6 @@ export function DeployerFormField({
     return true
   }
 
-  console.log(isUnique())
-
   return (
     <FormField
       control={form.control}
@@ -145,7 +147,22 @@ export function DeployerFormField({
               <>
                 <FormItem className="flex flex-col gap-1.5">
                   <FormLabel>Deployer Address</FormLabel>
-                  <Input {...address} placeholder="Add a deployer address" />
+                  {theForm[deployerIndex].contracts.length > 0 && (
+                    <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                      <div className="flex items-center gap-2">
+                        {truncate(theForm[deployerIndex].address, 5)}
+                      </div>
+                      <DeployerDropdownButton
+                        form={form}
+                        deployerIndex={deployerIndex}
+                        onToggle={async (val: boolean) => {}}
+                      />
+                    </div>
+                  )}
+
+                  {theForm[deployerIndex].contracts.length <= 0 && (
+                    <Input {...address} placeholder="Add a deployer address" />
+                  )}
                   <FormMessage />
                 </FormItem>
 

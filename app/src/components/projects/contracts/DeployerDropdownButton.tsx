@@ -1,22 +1,28 @@
 import { FormField } from "@/components/ui/form"
+import { removeProjectContract, removeProjectContracts } from "@/db/projects"
+import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { Ellipsis } from "lucide-react"
+import { project } from "ramda"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 
-export function ContractDropdownButton({
+export function DeployerDropdownButton({
   form,
   deployerIndex,
-  contractIndex,
   onToggle,
 }: {
   form: any
   deployerIndex: number
-  contractIndex: number
   onToggle: (value: boolean) => Promise<void>
 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const theForm = form.watch("deployers")
+
+  const projectId = useProjectFromPath()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,7 +46,7 @@ export function ContractDropdownButton({
   return (
     <FormField
       control={form.control}
-      name={`deployers.${deployerIndex}.contracts.${contractIndex}.excluded`}
+      name={`deployers.${deployerIndex}`}
       render={({ field: excludedField }) => (
         <div className="relative">
           <button
@@ -64,15 +70,22 @@ export function ContractDropdownButton({
                     onClick={async () => {
                       setIsDropdownOpen(false)
 
-                      await onToggle(!excludedField.value)
+                      toast.info("Removing Deployer...")
 
-                      //replace this with call to database
-                      excludedField.onChange(!excludedField.value)
+                      try {
+                        await removeProjectContracts(
+                          projectId,
+                          theForm[deployerIndex].contracts,
+                        )
+                        toast.success("Succesfully removed deployer!")
+                      } catch (e) {
+                        toast.error(
+                          "There was an issue removing the deployer. Please try again in a bit.",
+                        )
+                      }
                     }}
                   >
-                    {excludedField.value
-                      ? "Include in project"
-                      : "Exclude from project"}
+                    Remove
                   </button>
                 </li>
                 <li>
