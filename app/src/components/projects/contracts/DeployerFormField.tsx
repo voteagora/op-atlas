@@ -28,6 +28,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { copyToClipboard } from "@/lib/utils"
+import { toast } from "sonner"
 
 export function DeployerFormField({
   form,
@@ -121,6 +123,17 @@ export function DeployerFormField({
     setIsVerifying(false)
   }
 
+  const address = form.watch(`deployers.${deployerIndex}.address`)
+
+  const onCopy = async () => {
+    try {
+      await copyToClipboard(address)
+      toast("Copied to clipboard")
+    } catch (error) {
+      toast.error("Error copying URL")
+    }
+  }
+
   const { fields: contractsFields } = useFieldArray({
     control: form.control,
     name: `deployers.${deployerIndex}.contracts`,
@@ -147,9 +160,12 @@ export function DeployerFormField({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {/* <DropdownMenuItem className="cursor-pointer" onClick={onCopy}>
-                    Copy URL
-                  </DropdownMenuItem> */}
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={onCopy}
+                      >
+                        Copy address
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer"
                         onClick={() => onRemove(deployerIndex)}
