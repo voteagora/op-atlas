@@ -28,6 +28,7 @@ import { VerifyAddressDialog } from "../contracts-v1/VerifyAddressDialog"
 import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
 import { MissingContractsDialog } from "./MissingContractsDialog"
 import Image from "next/image"
+import { RedBadge } from "@/components/missions/common/badges/RedBadge"
 
 export function ContractsFormField({
   form,
@@ -146,6 +147,8 @@ export function ContractsFormField({
 
   const [dialogPage, setDialogPage] = useState(0)
 
+  const [excludedToggle, setExcludedToggle] = useState(false)
+
   return (
     <>
       {isMissingContractsDialogOpen && (
@@ -183,6 +186,26 @@ export function ContractsFormField({
           <FormLabel>Contracts</FormLabel>
 
           <div className="flex gap-4 items-center">
+            <button
+              className="flex items-center gap-1 text-sm"
+              onClick={() => setExcludedToggle(!excludedToggle)}
+            >
+              <Image
+                src={`/assets/icons/${
+                  excludedToggle ? "eye-close-line-1.svg" : "eye-line.svg"
+                }`}
+                width={16}
+                height={16}
+                alt="eye"
+              />
+              Excluded
+              <RedBadge
+                className="py-0 px-1"
+                text={contractsFields
+                  .filter((contract) => contract.excluded)
+                  .length.toString()}
+              ></RedBadge>
+            </button>
             <button
               type="button"
               onClick={() => {
