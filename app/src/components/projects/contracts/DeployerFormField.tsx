@@ -79,7 +79,7 @@ export function DeployerFormField({
       try {
         const contracts = corrected[0].oso_contractsV0.map((contract) => {
           return {
-            contractAddress: contract.contractAddress,
+            contractAddress: getAddress(contract.contractAddress),
             deployerAddress: theForm[deployerIndex].address,
             deploymentHash: "",
             verificationProof: "",

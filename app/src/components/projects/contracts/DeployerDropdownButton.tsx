@@ -1,5 +1,9 @@
 import { FormField } from "@/components/ui/form"
-import { removeProjectContract, removeProjectContracts } from "@/db/projects"
+import {
+  removeProjectContract,
+  removeProjectContracts,
+  removeProjectContractsByDeployer,
+} from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { Ellipsis } from "lucide-react"
 import { project } from "ramda"
@@ -73,9 +77,9 @@ export function DeployerDropdownButton({
                       toast.info("Removing Deployer...")
 
                       try {
-                        await removeProjectContracts(
+                        await removeProjectContractsByDeployer(
                           projectId,
-                          theForm[deployerIndex].contracts,
+                          theForm[deployerIndex].address,
                         )
                         toast.success("Succesfully removed deployer!")
                       } catch (e) {

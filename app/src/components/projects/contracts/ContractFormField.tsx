@@ -32,6 +32,10 @@ export function ContractFormField({
   deployerIndex: number
   contractIndex: number
 }) {
+  const theForm = form.watch(
+    `deployers.${deployerIndex}.contracts.${contractIndex}`,
+  )
+
   const projectId = useProjectFromPath()
 
   async function onToggle(value: boolean) {
@@ -74,14 +78,8 @@ export function ContractFormField({
 
         const result = await removeContract({
           projectId,
-          address: getAddress(
-            form.getValues().deployers[deployerIndex].contracts[contractIndex]
-              .address,
-          ),
-          chainId: parseInt(
-            form.getValues().deployers[deployerIndex].contracts[contractIndex]
-              .chainId,
-          ),
+          address: getAddress(theForm.address),
+          chainId: parseInt(theForm.chainId),
         })
         toast.success("Contract Removed!")
       } catch (error: unknown) {
