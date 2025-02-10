@@ -51,7 +51,7 @@ const EMPTY_DEPLOYER = {
 
 function getDefaultValues(): z.infer<typeof DeployersSchema> {
   return {
-    deployers: [],
+    deployers: [EMPTY_DEPLOYER],
   }
 }
 export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
@@ -258,7 +258,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
       console.log(mergedDeployersFormData)
 
-      form3.setValue("deployers", mergedDeployersFormData.deployers)
+      if (mergedDeployersFormData.deployers.length > 0)
+        form3.setValue("deployers", mergedDeployersFormData.deployers)
 
       console.log("I RAN")
       // console.log(deployersFormData)
