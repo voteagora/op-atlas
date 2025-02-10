@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -46,6 +47,8 @@ import { DeployerFormField } from "./DeployerFormField"
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
 import { Plus } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
+import ExternalLink from "@/components/ExternalLink"
+import { Input } from "@/components/ui/input"
 
 const osoLiveTestDeployerAddresses = [
   "0xa18d0226043a76683950f3baabf0a87cfb32e1cb", // OSO Sample
@@ -335,6 +338,93 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
         </div>
 
         <DeployersFormField form={form3} />
+
+        <div className="flex flex-col gap-6 mt-10">
+          <h3 className="text-text-default">Additional Data</h3>
+
+          <FormField
+            control={form3.control}
+            name="defillamaAdapter"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-2">
+                <FormLabel className="text-foreground">
+                  DefiLlama adapter
+                </FormLabel>
+                <FormDescription>
+                  For Defi projects, include a link to your{" "}
+                  <ExternalLink
+                    className="underline"
+                    href={"https://defillama.com/"}
+                  >
+                    DefiLlama adapter
+                  </ExternalLink>
+                  .
+                </FormDescription>
+                <Input
+                  placeholder="https://defillama.com/protocol/..."
+                  {...field}
+                />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="flex flex-col gap-6 mt-10">
+          <h3 className="text-text-default">
+            Add this project to Open Source Observer
+          </h3>
+          <div className="text-text-secondary font-normal">
+            It is highly encouraged that projects verify contracts onchain.
+            However, if you’ve lost your deployer keys, you can complete this
+            step by{" "}
+            <ExternalLink
+              href="https://www.opensource.observer"
+              className="underline"
+            >
+              adding your project to Open Source Observer.
+            </ExternalLink>
+          </div>
+
+          <FormField
+            control={form3.control}
+            name="submittedToOSO"
+            render={({ field }) => (
+              <>
+                {
+                  <FormField
+                    control={form3.control}
+                    name="osoSlug"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormLabel className="text-foreground">
+                          Your Open Source Observer name
+                        </FormLabel>
+                        <Input placeholder="Add a name" {...field} />
+                      </FormItem>
+                    )}
+                  />
+                }
+
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel className="text-foreground">
+                    Confirmation{" "}
+                  </FormLabel>
+                  <FormItem className="flex flex-row items-center gap-2 py-3 px-4 rounded-lg border">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal text-sm text-secondary-foreground">
+                      This project has been submitted to Open Source Observer
+                    </FormLabel>
+                  </FormItem>
+                </FormItem>
+              </>
+            )}
+          />
+        </div>
       </form>
 
       <Button

@@ -28,4 +28,5 @@ export const DeployersSchema = z.object({
   submittedToOSO: z.boolean(),
   isOffChain: z.boolean(),
   osoSlug: z.string().optional(),
+  defillamaAdapter: z.string().optional(),
 })
