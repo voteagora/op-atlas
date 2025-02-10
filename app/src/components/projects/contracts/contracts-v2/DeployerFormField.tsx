@@ -36,6 +36,7 @@ import { toast } from "sonner"
 import { onCopy } from "@/components/ui/utils/copy"
 import { removeContracts } from "@/lib/actions/contracts"
 import { Address } from "viem"
+import { MissingContractsDialog } from "./MissingContractsDialog"
 
 export function DeployerFormField({
   form,
@@ -71,46 +72,50 @@ export function DeployerFormField({
   }
 
   return (
-    <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
-      <p>Deployer</p>
-      {contractsFields.length > 0 && (
-        <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-          <div className="flex items-center gap-2">{truncate(address, 5)}</div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"ghost"}>
-                <Ellipsis size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => onCopy(address)}
-              >
-                Copy address
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={onRemoveDeployerField}
-              >
-                Remove
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
+    <>
+      <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
+        <p>Deployer</p>
+        {contractsFields.length > 0 && (
+          <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+            <div className="flex items-center gap-2">
+              {truncate(address, 5)}
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"}>
+                  <Ellipsis size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => onCopy(address)}
+                >
+                  Copy address
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={onRemoveDeployerField}
+                >
+                  Remove
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
 
-      {contractsFields.length <= 0 && (
-        <FormField
-          control={form.control}
-          name={`deployers.${deployerIndex}.address`}
-          render={({ field: address }) => (
-            <Input {...address} placeholder="Add a deployer address" />
-          )}
-        />
-      )}
+        {contractsFields.length <= 0 && (
+          <FormField
+            control={form.control}
+            name={`deployers.${deployerIndex}.address`}
+            render={({ field: address }) => (
+              <Input {...address} placeholder="Add a deployer address" />
+            )}
+          />
+        )}
 
-      <ContractsFormField form={form} deployerIndex={deployerIndex} />
-    </div>
+        <ContractsFormField form={form} deployerIndex={deployerIndex} />
+      </div>
+    </>
   )
 }

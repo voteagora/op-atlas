@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button"
 import { getAddress, isAddress } from "viem"
 import { VerifyAddressDialog } from "../contracts-v1/VerifyAddressDialog"
 import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
+import { MissingContractsDialog } from "./MissingContractsDialog"
 
 export function ContractsFormField({
   form,
@@ -60,7 +61,12 @@ export function ContractsFormField({
               "We couldn’t find any contracts deployed by this address. Learn about "
             }
 
-            <span className="underline">{"missing contracts"}</span>
+            <button
+              onClick={() => setIsMissingContractsDialogOpen(true)}
+              className="underline"
+            >
+              {"missing contracts"}
+            </button>
             {"."}
           </p>,
         )
@@ -111,8 +117,27 @@ export function ContractsFormField({
 
   const [isVerifiyingDialog, setIsVerifyingDialog] = useState(false)
 
+  const [isMissingContractsDialogOpen, setIsMissingContractsDialogOpen] =
+    useState(false)
+
   return (
     <>
+      {isMissingContractsDialogOpen && (
+        <MissingContractsDialog
+          open
+          onOpenChange={(open) =>
+            !open && setIsMissingContractsDialogOpen(false)
+          }
+          projectId={projectId}
+          deployerAddress={address as `0x${string}`}
+          // onSubmit={(signature: string) => {
+          //   setIsVerifyingDialog(false)
+          //   onVerify(signature)
+          // }}
+          // chain={chain}
+        />
+      )}
+
       {isVerifiyingDialog && (
         <VerifyAddressDialog2
           open
