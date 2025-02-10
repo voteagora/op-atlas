@@ -101,17 +101,6 @@ DialogProps<{
                 </p>
               </div>
             </div>
-            <div className="flex flex-col self-stretch gap-1">
-              <FormLabel>Message to sign</FormLabel>
-              <Textarea
-                disabled
-                value={messageToSign}
-                className="resize-none"
-              />
-              <Button type="button" onClick={onCopy} variant="secondary">
-                {copied ? "Copied!" : "Copy"}
-              </Button>
-            </div>
 
             <button onClick={() => setPage(1)}>
               <Callout
@@ -123,7 +112,11 @@ DialogProps<{
                     contract verification.
                   </p>
                 }
-                rightAlignedContent={<ArrowRight width={16} height={16} />}
+                rightAlignedContent={
+                  <div className="flex">
+                    <ArrowRight width={20} height={20} />
+                  </div>
+                }
               />
             </button>
 
@@ -141,10 +134,10 @@ DialogProps<{
                   </p>
                 }
                 rightAlignedContent={
-                  <>
-                    Help
-                    <ArrowUpRight width={16} height={16} />
-                  </>
+                  <div className="flex">
+                    <p className="text-sm">Help</p>
+                    <ArrowUpRight width={20} height={20} />
+                  </div>
                 }
               />
             </button>
@@ -163,10 +156,10 @@ DialogProps<{
                   </p>
                 }
                 rightAlignedContent={
-                  <>
-                    Help
-                    <ArrowUpRight width={16} height={16} />
-                  </>
+                  <div className="flex">
+                    <p className="text-sm">Help</p>
+                    <ArrowUpRight width={20} height={20} />
+                  </div>
                 }
               />
             </button>
