@@ -13,6 +13,8 @@ import { verifyContract, verifyDeployer } from "@/lib/actions/contracts"
 import { Chain, getMessage } from "@/lib/utils/contracts"
 import { ChainSelector } from "../contracts-v1/ChainSelector"
 import { ChainSelector2 } from "./ChainSelector2"
+import { Callout } from "@/components/common/Callout"
+import { ArrowRight, ArrowUpRight } from "lucide-react"
 
 const defaultSelectedChain = 10
 
@@ -90,7 +92,6 @@ DialogProps<{
         {page === 0 && (
           <>
             <div className="flex flex-col items-center text-center gap-4">
-              <Badge text="Verify contract" />
               <div className="flex flex-col items-center gap-1">
                 <h3>Missing contracts</h3>
 
@@ -111,11 +112,71 @@ DialogProps<{
                 {copied ? "Copied!" : "Copy"}
               </Button>
             </div>
+
+            <button onClick={() => setPage(1)}>
+              <Callout
+                showIcon={false}
+                type="gray"
+                leftAlignedContent={
+                  <p className="text-sm">
+                    Contracts deployed within the last 24 hours—try manual
+                    contract verification.
+                  </p>
+                }
+                rightAlignedContent={<ArrowRight width={16} height={16} />}
+              />
+            </button>
+
+            <button
+              //TODO:// Add link
+              onClick={() => {}}
+            >
+              <Callout
+                showIcon={false}
+                type="gray"
+                leftAlignedContent={
+                  <p className="text-sm">
+                    Contracts deployed via Create2, Optimism Bridge, or another
+                    less common schema.
+                  </p>
+                }
+                rightAlignedContent={
+                  <>
+                    Help
+                    <ArrowUpRight width={16} height={16} />
+                  </>
+                }
+              />
+            </button>
+
+            <button
+              //TODO:// Add link
+              onClick={() => {}}
+            >
+              <Callout
+                showIcon={false}
+                type="gray"
+                leftAlignedContent={
+                  <p className="text-sm">
+                    Contracts deployed via a protocol like Zora, Sound.xyz,
+                    Memecoin Launchpad, etc.
+                  </p>
+                }
+                rightAlignedContent={
+                  <>
+                    Help
+                    <ArrowUpRight width={16} height={16} />
+                  </>
+                }
+              />
+            </button>
+
             <Button
               className="self-stretch"
               variant="destructive"
               type="button"
-              onClick={() => setPage(1)}
+              //TODO:// Add link
+              onClick={() => {}}
             >
               Get help on Discord
             </Button>
