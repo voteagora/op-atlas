@@ -75,7 +75,7 @@ export function ContractFormField({
 
         const result = await removeContract({
           projectId,
-          address: getAddress(address),
+          address: address as Address,
           chainId: parseInt(chainId),
         })
         toast.success("Contract Removed!")

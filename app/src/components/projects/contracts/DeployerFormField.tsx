@@ -34,6 +34,8 @@ import {
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
 import { onCopy } from "@/components/ui/utils/copy"
+import { removeContracts } from "@/lib/actions/contracts"
+import { Address } from "viem"
 
 export function DeployerFormField({
   form,
@@ -44,25 +46,19 @@ export function DeployerFormField({
   deployerIndex: number
   onRemove: (index: number) => void
 }) {
-  const address = form.watch(`deployers.${deployerIndex}.address`)
-
-  const contractsFields = form.watch(`deployers.${deployerIndex}.contracts`)
-
-  // const { fields: contractsFields, append: appendContracts } = useFieldArray({
-  //   control: form.control,
-  //   name: `deployers.${deployerIndex}.contracts`,
-  // })
-
   const projectId = useProjectFromPath()
+
+  const address = form.watch(`deployers.${deployerIndex}.address`)
+  const contractsFields = form.watch(`deployers.${deployerIndex}.contracts`)
 
   async function onRemoveDeployerField() {
     try {
       toast.info("Removing deployer...")
-      await removeProjectContracts(
+      await removeContracts(
         projectId,
         contractsFields.map((contract) => {
           return {
-            address: contract.address,
+            address: contract.address as Address,
             chainId: contract.chainId,
           }
         }),

@@ -50,6 +50,7 @@ export function ContractsFormField({
         JSON.parse(JSON.stringify([deployer])),
       )
 
+      console.log(corrected)
       if (corrected[0].oso_contractsV0.length <= 0) {
         setErrorMessage(
           <p className="text-rose-700 text-sm">
@@ -82,8 +83,6 @@ export function ContractsFormField({
 
         await addProjectContracts(projectId, contracts)
 
-        console.log(corrected)
-
         appendContracts(
           corrected[0].oso_contractsV0.map((contract) => {
             return {
@@ -94,8 +93,6 @@ export function ContractsFormField({
           }),
         )
 
-        console.log("appended")
-
         setErrorMessage(undefined)
       } catch (e) {
         console.error("unexpected error occured adding contract(s): ", e)
@@ -104,9 +101,6 @@ export function ContractsFormField({
 
     setIsVerifying(false)
   }
-
-  console.log(deployerIndex)
-  console.log(contractsFields)
 
   const initialMaxContractViewCount = 6
   const [contractViewCount, setContractViewCount] = useState(
@@ -160,6 +154,7 @@ export function ContractsFormField({
         </button>
       )}
 
+      {errorMessage}
       {contractsFields.length <= 0 &&
         (isVerifying ? (
           <div className="flex items-center">

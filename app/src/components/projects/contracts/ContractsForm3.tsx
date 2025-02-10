@@ -42,7 +42,7 @@ import { Plus } from "lucide-react"
 const osoLiveTestDeployerAddresses = [
   "0xa18d0226043a76683950f3baabf0a87cfb32e1cb", // OSO Sample
   "0x3fab184622dc19b6109349b94811493bf2a45362", // OSO image
-  "0x83bc3055649f9a829bebeccbc86e090d6a157161",
+  "0x83bc3055649f9a829bebeccbc86e090d6a157161", // chainlink
 ]
 const EMPTY_DEPLOYER = {
   address: "",
