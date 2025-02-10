@@ -1,7 +1,10 @@
 import { auth } from "@/auth"
 import { ApplicationFlow } from "@/components/application/6"
 import { getCategories } from "@/db/category"
-import { getAdminProjects, getRoundApplications } from "@/lib/actions/projects"
+import {
+  getAdminProjects,
+  getUserApplicationsForRound,
+} from "@/lib/actions/projects"
 
 export const maxDuration = 120
 
@@ -11,7 +14,7 @@ export default async function Page() {
   const [projects, applications, categories] = session
     ? await Promise.all([
         getAdminProjects(session.user.id, "6"),
-        getRoundApplications(session.user.id, 6),
+        getUserApplicationsForRound(session.user.id, 6),
         getCategories(),
       ])
     : [[], [], []]

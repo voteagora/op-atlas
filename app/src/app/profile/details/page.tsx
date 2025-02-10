@@ -15,14 +15,13 @@ export default async function Page() {
     redirect("/")
   }
 
-  const [user] = await Promise.all([
-    getUserById(session.user.id),
-    updateInteractions({ userId: session.user.id, profileVisitCount: 1 }),
-  ])
+  const user = await getUserById(session.user.id)
 
   if (!user) {
     redirect("/")
   }
+
+  updateInteractions({ userId: session.user.id, profileVisitCount: 1 })
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">

@@ -29,6 +29,10 @@ model User {
   addresses         UserAddress[]
   RewardClaim       RewardClaim[]
   interaction       UserInteraction?
+
+  @@index([username])
+  @@index([farcasterId])
+  @@index([deletedAt])
 }
 
 model UserEmail {
@@ -36,10 +40,13 @@ model UserEmail {
   email     String
   userId    String
   verified  Boolean @default(false)
+  tags      String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model UserInteraction {
@@ -52,6 +59,8 @@ model UserInteraction {
   viewProfileClicked     Boolean  @default(false)
   homePageViewCount      Int      @default(0)
   lastInteracted         DateTime @default(now())
+
+  @@index([userId])
 }
 
 model UserAddress {
@@ -141,6 +150,8 @@ model Organization {
   team      UserOrganization[]
   projects  ProjectOrganization[]
   snapshots OrganizationSnapshot[]
+
+  @@index([deletedAt])
 }
 
 model OrganizationSnapshot {
@@ -173,6 +184,8 @@ model UserOrganization {
   @@unique([userId, organizationId])
   @@index([organizationId])
   @@index([userId, deletedAt, role])
+  @@index([deletedAt])
+  @@index([userId])
 }
 
 model ProjectOrganization {
@@ -209,6 +222,8 @@ model Project {
   pricingModelDetails String?
 
   openSourceObserverSlug String?
+  isSubmittedToOso Boolean @default(false)
+
   addedTeamMembers       Boolean  @default(false)
   addedFunding           Boolean  @default(false)
   hasCodeRepositories    Boolean  @default(true)
@@ -230,6 +245,7 @@ model Project {
   links        ProjectLinks[]
 
   @@index([deletedAt, createdAt])
+  @@index([deletedAt])
 }
 
 model Application {
@@ -251,6 +267,8 @@ model Application {
   impactStatementAnswer ImpactStatementAnswer[]
 
   @@index([projectId])
+  @@index([roundId])
+  @@index([categoryId])
 }
 
 model Category {

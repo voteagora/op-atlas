@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea"
 import {
   findRepo,
   updateGithubRepo,
-  verifyGithubRepo,
+  createGithubRepo,
 } from "@/lib/actions/repos"
 import { copyToClipboard } from "@/lib/utils"
 
@@ -103,7 +103,7 @@ const VerifyGithubRepoDialog = ({
 
   const onFoundRepo = async () => {
     try {
-      const result = await verifyGithubRepo(projectId, owner, slug)
+      const result = await createGithubRepo(projectId, owner, slug)
       if (result.error === null && result.repo) {
         onVerified(result.repo)
         return
@@ -300,7 +300,7 @@ const VerifyFundingStep = ({
     try {
       setIsLoading(true)
 
-      const result = await verifyGithubRepo(projectId, owner, slug)
+      const result = await createGithubRepo(projectId, owner, slug)
       if (result.error === null && result.repo) {
         setError(null)
         onVerified(result.repo)
@@ -321,7 +321,9 @@ const VerifyFundingStep = ({
             "The funding.json file is not valid JSON or is missing the project ID.",
           )
         } else if (error.message === "Repo already exists") {
-          setError("This repo is already verified.")
+          setError(
+            "The repository you are trying to verify has already been verified by this project or another one.",
+          )
         } else {
           setError(
             "Unable to validate funding.json file. Please make sure the changes have been merged into the default branch and try again",

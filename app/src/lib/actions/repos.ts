@@ -13,17 +13,18 @@ import {
   updateProjectRepository,
 } from "@/db/projects"
 
+import { getCrate } from "../crates"
 import {
   getContents,
   getFileOrFolder,
   getFilesContentsJson,
   getFilesContentsToml,
   getLicense,
+  getPackageJsonFiles,
   getRepository,
 } from "../github"
-import { getCrate } from "../crates"
-import { getNpmPackage } from "../npm"
 import { OPEN_SOURCE_LICENSES } from "../licenses"
+import { getNpmPackage } from "../npm"
 import { verifyMembership } from "./utils"
 
 export const findRepo = async (owner: string, slug: string) => {
@@ -79,7 +80,7 @@ const isValidFundingFile = (contents: string, projectId: string) => {
 
 const getFilesByName = (files: any[], name: string) => {
   return files.filter((element: any) => {
-    return element.name.toLowerCase() === name
+    return element?.name.toLowerCase() === name
   })
 }
 
@@ -92,7 +93,7 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
   )
 
   const crates = await Promise.all(
-    contents.map((content) => getCrate(content.package.name)),
+    contents.map((content) => getCrate(content.package?.name)),
   )
 
   return crates.some((crate) => {
@@ -108,16 +109,18 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
   })
 }
 
-const verifyNpm = async (owner: string, slug: string, repoFiles: any[]) => {
-  const packageJsons = getFilesByName(repoFiles, "package.json")
-  const contents = await getFilesContentsJson(
-    owner,
-    slug,
-    packageJsons.map((item) => item.path),
-  )
+const verifyNpm = async (owner: string, slug: string) => {
+  const packageJsons = await getPackageJsonFiles(owner, slug)
 
   const packages = await Promise.all(
-    contents.map((content) => getNpmPackage(content.name)),
+    packageJsons
+      .filter(
+        (
+          packageJson,
+        ): packageJson is { path: string; content: { name: string } } =>
+          packageJson.content.hasOwnProperty("name"),
+      )
+      .map((packageJson) => getNpmPackage(packageJson.content.name)),
   )
 
   return packages.some(
@@ -149,6 +152,45 @@ export const verifyGithubRepo = async (
   projectId: string,
   owner: string,
   slug: string,
+) => {
+  const funding = await fetchFundingFile(owner, slug)
+  if (!funding) {
+    return {
+      error: "No funding file found",
+    }
+  }
+
+  const isValid = isValidFundingFile(funding, projectId)
+  if (!isValid) {
+    return {
+      error: "Invalid funding file",
+    }
+  }
+
+  // Fetch license to determine open source status
+  const license = await getLicense(owner, slug)
+  const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
+
+  const repoFiles = await getContents(owner, slug)
+
+  const [isCrate, isNpmPackage] = await Promise.all([
+    verifyCrate(owner, slug, repoFiles),
+    verifyNpm(owner, slug),
+  ])
+
+  return {
+    repo: {
+      isOpenSource,
+      isNpmPackage,
+      isCrate,
+    },
+  }
+}
+
+export const createGithubRepo = async (
+  projectId: string,
+  owner: string,
+  slug: string,
   name?: string,
   description?: string,
 ) => {
@@ -165,41 +207,19 @@ export const verifyGithubRepo = async (
     return isInvalid
   }
 
+  const verification = await verifyGithubRepo(projectId, owner, slug)
+  if (verification.error) return { error: verification.error }
+
   try {
-    const funding = await fetchFundingFile(owner, slug)
-    if (!funding) {
-      return {
-        error: "No funding file found",
-      }
-    }
-
-    const isValid = isValidFundingFile(funding, projectId)
-    if (!isValid) {
-      return {
-        error: "Invalid funding file",
-      }
-    }
-
-    // Fetch license to determine open source status
-    const license = await getLicense(owner, slug)
-    const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
-
-    const repoFiles = await getContents(owner, slug)
-
-    const [isCrate, isNpmPackage] = await Promise.all([
-      verifyCrate(owner, slug, repoFiles),
-      verifyNpm(owner, slug, repoFiles),
-    ])
-
     const repo = await addProjectRepository({
       projectId,
       repo: {
         type: "github",
         url: `https://github.com/${owner}/${slug}`,
         verified: true,
-        openSource: !!isOpenSource,
-        npmPackage: !!isNpmPackage,
-        crate: !!isCrate,
+        openSource: !!verification.repo?.isOpenSource,
+        npmPackage: !!verification.repo?.isNpmPackage,
+        crate: !!verification.repo?.isCrate,
         name,
         description,
       },

@@ -2,7 +2,7 @@ import { ponder } from "@/generated";
 import { and, eq, graphql, isNull } from "@ponder/core";
 import * as dbSchema from "../../ponder.schema";
 import schemas from "../../schemas.config";
-import { Attestation, Entity } from "../types";
+import { Attestation, Entity, AggregatedType } from "../types";
 import { parseEntity } from "./utils";
 
 ponder.use("/", graphql());
@@ -30,6 +30,33 @@ entities.forEach((entity: Entity) => {
       );
     }
   });
+});
+
+ponder.get("/entities/aggregated", async (c) => {
+  const aggregated: AggregatedType = entities.reduce((acc, entity) => {
+    (acc as Record<Entity, Attestation[]>)[entity] = [];
+    return acc;
+  }, {} as AggregatedType);
+
+  for (const entity of entities) {
+    const attestations: Attestation[] = [];
+
+    const table = dbSchema[entity];
+    const data = await (c.db.query[entity] as any).findMany({
+      where: isNull(table.revoked_at),
+    });
+
+    if (data.length > 0) {
+      data.forEach((item: any) => {
+        const parsed = parseEntity(item, entity);
+        attestations.push(parsed);
+      });
+    }
+
+    aggregated[entity] = attestations;
+  }
+
+  return c.json(aggregated);
 });
 
 ponder.get("/attestations/:address", async (c) => {

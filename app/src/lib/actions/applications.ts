@@ -13,7 +13,12 @@ import { uploadToPinata } from "../pinata"
 import { CategoryWithImpact } from "../types"
 import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
 import { formatApplicationMetadata } from "../utils/metadata"
+import {
+  getApplicationsForRound,
+  getUserApplicationsForRound,
+} from "./projects"
 import { verifyAdminStatus } from "./utils"
+import { MissionData } from "../MissionsAndRoundData"
 
 const whitelist: string[] = []
 
@@ -30,35 +35,27 @@ export const publishAndSaveApplication = async ({
   farcasterId,
   metadataSnapshotId,
   round,
+  roundName,
 }: {
   project: SubmitApplicationRequest
   category: CategoryWithImpact
   farcasterId: string
   metadataSnapshotId: string
   round: number
+  roundName?: string
 }): Promise<Application> => {
-  // Upload metadata to IPFS
-  const metadata = formatApplicationMetadata({
-    round,
-    categoryId: project.categoryId,
-    impactStatement: project.impactStatement,
-    category,
-    projectDescriptionOptions: project.projectDescriptionOptions,
-  })
-  const ipfsHash = await uploadToPinata(project.projectId, metadata)
-
   // Publish attestation
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId: project.projectId,
-    round,
-    snapshotRef: metadataSnapshotId,
-    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    round: `${roundName ?? round}`,
+    snapshotRef: "", // Skipping snapshot for S7
+    ipfsUrl: "", // Skipping IPFS for S7
   })
 
   // Create application in database
   return createApplication({
-    round,
+    round: round,
     ...project,
     attestationId,
   })
@@ -69,6 +66,7 @@ const createProjectApplication = async (
   farcasterId: string,
   round: number,
   category: CategoryWithImpact,
+  roundName?: string,
 ) => {
   const session = await auth()
 
@@ -104,6 +102,21 @@ const createProjectApplication = async (
     }
   }
 
+  const applications = await getUserApplicationsForRound(
+    session?.user?.id,
+    round,
+  )
+
+  const result = applications.find(
+    (application) => application.projectId === project.id,
+  )
+
+  console.log(result)
+
+  if (result) {
+    return { error: "Project has already been submitted to this round!" }
+  }
+
   // Issue attestation
   const latestSnapshot = sortBy(
     (snapshot) => -snapshot.createdAt,
@@ -121,6 +134,7 @@ const createProjectApplication = async (
     farcasterId,
     metadataSnapshotId: latestSnapshot.attestationId,
     round,
+    roundName,
   })
 
   return {
@@ -136,8 +150,11 @@ export const submitApplications = async (
     impactStatement: Record<string, string>
     projectDescriptionOptions: string[]
   }[],
-  round: number,
-  categories: CategoryWithImpact[],
+  // round: MissionData,
+  roundStartDate: Date,
+  roundName: string,
+  roundNumber: number,
+  categories?: CategoryWithImpact[],
 ) => {
   const session = await auth()
 
@@ -157,11 +174,17 @@ export const submitApplications = async (
     }
   }
 
-  const isWhitelisted = projects.some((project) =>
-    whitelist.includes(project.projectId),
-  )
+  // const isWhitelisted = projects.some((project) =>
+  //   whitelist.includes(project.projectId),
+  // )
 
-  if (APPLICATIONS_CLOSED && !isWhitelisted) {
+  // if (APPLICATIONS_CLOSED && !isWhitelisted) {
+  //   throw new Error("Applications are closed")
+  // }
+
+  const isOpenForEnrollment = roundStartDate < new Date()
+
+  if (!isOpenForEnrollment) {
     throw new Error("Applications are closed")
   }
 
@@ -172,8 +195,9 @@ export const submitApplications = async (
     const result = await createProjectApplication(
       project,
       session.user.farcasterId,
-      round,
-      categories.find((category) => category.id === project.categoryId)!,
+      roundNumber,
+      categories?.find((category) => category.id === project.categoryId)!,
+      roundName,
     )
     if (result.error === null && result.application) {
       applications.push(result.application)

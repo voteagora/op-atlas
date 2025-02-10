@@ -1,12 +1,23 @@
+import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import { Address, createPublicClient, Hash, http } from "viem"
 import {
   base,
+  bob,
   Chain as ViemChain,
-  fraxtal,
+  ink,
+  lisk,
+  metalL2,
+  mint,
   mode,
   optimism,
+  shape,
+  soneium,
+  superseed,
+  worldchain,
   zora,
 } from "viem/chains"
+
+import { polynomial } from "@/components/common/chain"
 
 import { Chain } from "./utils/contracts"
 
@@ -27,15 +38,37 @@ export type TraceCall = {
 }
 
 export const clients = {
+  [Chain.ArenaZ]: createClient(arenaZ, "https://rpc.arena-z.gg"),
   [Chain.Base]: createClient(
     base,
     `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-  [Chain.Fraxtal]: createClient(fraxtal, "https://rpc.frax.com"),
+  [Chain.Bob]: createClient(bob, "https://rpc.gobob.xyz"),
+  [Chain.Ethernity]: createClient(
+    ethernity,
+    "https://mainnet.ethernitychain.io",
+  ),
+  [Chain.Ink]: createClient(ink, "https://rpc-gel.inkonchain.com"),
+  [Chain.Lisk]: createClient(lisk, "https://rpc.api.lisk.com"),
+  [Chain.MetalL2]: createClient(metalL2, "https://rpc.metall2.com"),
+  [Chain.Mint]: createClient(mint, "https://rpc.mintchain.io"),
   [Chain.Mode]: createClient(mode, "https://mainnet.mode.network"),
   [Chain.Optimism]: createClient(
     optimism,
     `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+  ),
+  [Chain.Polynomial]: createClient(polynomial, "https://rpc.polynomial.fi"),
+  [Chain.Race]: createClient(race, "https://racemainnet.io"),
+  [Chain.Shape]: createClient(
+    shape,
+    `https://shape-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+  ),
+  [Chain.Soneium]: createClient(soneium, "https://rpc.soneium.org/"),
+  [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
+  [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
+  [Chain.Worldchain]: createClient(
+    worldchain,
+    `https://worldchain-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
   [Chain.Zora]: createClient(zora, "https://rpc.zora.energy"),
 }

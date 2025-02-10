@@ -1,7 +1,7 @@
 import Image from "next/image"
 
-import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import ExtendedLink from "@/components/common/ExtendedLink"
+import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import { ProjectWithDetailsLite } from "@/lib/types"
 
 function ProjectWithLink({ project }: { project: ProjectWithDetailsLite }) {

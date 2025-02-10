@@ -92,6 +92,7 @@ function toFormValues(
 
 function fromFormValues(
   projectId: string,
+  selectedNone: boolean,
   values: z.infer<typeof FundingFormSchema>,
 ): Prisma.ProjectFundingCreateManyInput[] {
   const funding: Prisma.ProjectFundingCreateManyInput[] = []
@@ -149,6 +150,22 @@ function fromFormValues(
     })
   })
 
+  if (
+    values.investment.length === 0 &&
+    otherGrants.length === 0 &&
+    optimismGrants.length === 0 &&
+    values.retroFunding.length === 0 &&
+    selectedNone
+  ) {
+    funding.push({
+      type: "none",
+      amount: "0",
+      details: "",
+      receivedAt: "N/A",
+      projectId,
+    })
+  }
+
   return funding
 }
 
@@ -165,7 +182,9 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
   })
 
   const [selectedNone, setSelectedNone] = useState(
-    project.funding.length === 0 && project.addedFunding,
+    project.funding.find((fund) => {
+      return fund.type === "none"
+    }) !== undefined,
   )
 
   const {
@@ -204,7 +223,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
         return retroFundingFields.length > 0
       case "grants":
         return grantsFields.length > 0
-      case "revenue":
+      case "venture":
         return investmentFields.length > 0
       case "none":
         return selectedNone
@@ -249,10 +268,17 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
         setRevenueFields([])
       }
     } else if (type === "none") {
-      setRetroFunding([])
-      setGrantsFields([])
-      setRevenueFields([])
-      setSelectedNone(!selectedNone)
+      if (!selectedNone) {
+        setRetroFunding([])
+        setGrantsFields([])
+        setRevenueFields([])
+        setSelectedNone(true)
+      } else {
+        setRetroFunding([])
+        setGrantsFields([])
+        setRevenueFields([])
+        setSelectedNone(false)
+      }
     }
   }
 
@@ -292,7 +318,10 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
     (isSave: boolean) => async (values: z.infer<typeof FundingFormSchema>) => {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
       try {
-        await setProjectFunding(project.id, fromFormValues(project.id, values))
+        await setProjectFunding(
+          project.id,
+          fromFormValues(project.id, selectedNone, values),
+        )
         await updateProjectDetails(project.id, {
           pricingModel: values.pricingModel,
           pricingModelDetails: values.pricingModelDetail,
@@ -309,12 +338,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
 
   const pricingModel = form.watch("pricingModel")
 
-  const canSubmit =
-    (selectedNone ||
-      retroFundingFields.length > 0 ||
-      grantsFields.length > 0 ||
-      investmentFields.length > 0) &&
-    pricingModel
+  const canSubmit = pricingModel
 
   console.log(retroFundingFields, grantsFields, investmentFields, "data")
 
@@ -334,7 +358,7 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
           </p>
           <Callout
             type="info"
-            text="Failure to report will result in disqualification from Retro Funding"
+            text="This information is required for some missions"
           />
           <div className="flex flex-col gap-y-2">
             <p className="text-sm font-medium text-foreground">
@@ -364,7 +388,6 @@ export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
             <div>
               <p className="text-sm font-medium text-foreground">
                 What kinds of grants and investment have you received?
-                <span className="text-destructive">*</span>
               </p>
               <p className="text-sm font-normal text-secondary-foreground">
                 Select all that apply.

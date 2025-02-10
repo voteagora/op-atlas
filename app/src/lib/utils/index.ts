@@ -98,11 +98,7 @@ export type ProjectStatus = {
 export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   const completedSections: ProjectSection[] = []
 
-  const hasDetails =
-    project.name &&
-    project.description &&
-    project.thumbnailUrl &&
-    project.bannerUrl
+  const hasDetails = project.name && project.description
   if (hasDetails) {
     completedSections.push(ProjectSection.Details)
   }
@@ -151,10 +147,15 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
 export function projectHasUnpublishedChanges(
   project: ProjectWithDetails,
 ): boolean {
-  const latestSnapshot = sortBy((s) => -s.createdAt, project.snapshots)[0]
+  const latestSnapshot = sortBy(
+    (s) => -new Date(s.createdAt).getTime(),
+    project.snapshots,
+  )[0]
   if (!latestSnapshot) return true
 
-  return latestSnapshot.createdAt < project.lastMetadataUpdate
+  return (
+    new Date(latestSnapshot.createdAt) < new Date(project.lastMetadataUpdate)
+  )
 }
 
 /*

@@ -1,12 +1,42 @@
+import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import { isAddress, isHex } from "viem"
-import { base, fraxtal, liskSepolia, mode, optimism, zora } from "viem/chains"
+import {
+  base,
+  bob,
+  ink,
+  lisk,
+  metalL2,
+  mint,
+  mode,
+  optimism,
+  shape,
+  soneium,
+  superseed,
+  worldchain,
+  zora,
+} from "viem/chains"
 import { z } from "zod"
 
+import { polynomial } from "@/components/common/chain"
+
 export const Chain = z.enum([
+  arenaZ.id.toString(),
   base.id.toString(),
-  fraxtal.id.toString(),
+  bob.id.toString(),
+  ethernity.id.toString(),
+  ink.id.toString(),
+  lisk.id.toString(),
+  metalL2.id.toString(),
+  mint.id.toString(),
   mode.id.toString(),
   optimism.id.toString(),
+  polynomial.id.toString(),
+  race.id.toString(),
+  shape.id.toString(),
+  soneium.id.toString(),
+  superseed.id.toString(),
+  swell.id.toString(),
+  worldchain.id.toString(),
   zora.id.toString(),
 ])
 
@@ -35,7 +65,7 @@ export const HasDeployerKeysOption = z.enum(["Yes", "No", "Some, but not all"])
 const OffChainSchema = z.object({
   isOffChain: z.literal(true),
   contracts: z.any(),
-  submittedToOSO: z.any(),
+  submittedToOSO: z.boolean(),
   osoSlug: z.any(),
 })
 

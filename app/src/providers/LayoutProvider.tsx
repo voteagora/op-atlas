@@ -13,6 +13,7 @@ const MOBILE_BREAKPOINT = 640 // Tailwind's `sm` breakpoint
 // TODO: Remove this once all routes are mobile-friendly
 const RESTRICTED_MOBILE_ROUTES = [
   "/rounds",
+  "/missions",
   "/dashboard",
   "/profile",
   "/projects",

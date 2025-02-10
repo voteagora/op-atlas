@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client"
+import { AggregatedType } from "eas-indexer/src/types"
 
 export type TeamRole = "member" | "admin"
 
@@ -19,6 +20,110 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     rewards: { include: { claim: true } }
   }
 }>
+
+export type ProjectWithFullDetails = Prisma.ProjectGetPayload<{
+  include: {
+    team: {
+      include: {
+        user: true
+      }
+    }
+    organization: {
+      include: {
+        organization: {
+          include: {
+            team: {
+              include: {
+                user: true
+              }
+            }
+          }
+        }
+      }
+    }
+    repos: true
+    contracts: true
+    links: true
+    funding: true
+    snapshots: true
+    applications: {
+      include: {
+        category: {
+          include: {
+            impactStatements: true
+          }
+        }
+        impactStatementAnswer: true
+        round: true
+      }
+    }
+    rewards: {
+      include: {
+        claim: true
+      }
+    }
+  }
+}>
+
+export type UserProjectWithDetails = Prisma.ProjectGetPayload<{
+  include: {
+    team: {
+      include: {
+        user: true
+      }
+    }
+    repos: true
+    contracts: true
+    funding: true
+    snapshots: true
+    organization: {
+      include: {
+        organization: {
+          include: {
+            team: {
+              include: {
+                user: true
+              }
+            }
+          }
+        }
+      }
+    }
+    applications: true
+    links: true
+    rewards: {
+      include: {
+        claim: true
+      }
+    }
+  }
+}>
+
+export type UserProjectsWithDetails = {
+  projects: {
+    project: UserProjectWithDetails
+  }[]
+  organizations: {
+    organization: {
+      projects: {
+        project: UserProjectWithDetails
+      }[]
+    }
+  }[]
+}
+
+export type PublishedUserProjectsResult = {
+  projects: Array<{
+    project: ProjectWithDetailsLite
+  }>
+  organizations: Array<{
+    organization: {
+      projects: Array<{
+        project: ProjectWithDetailsLite
+      }>
+    }
+  }>
+}
 
 export type ProjectWithDetailsLite = Prisma.ProjectGetPayload<{
   include: {
@@ -42,8 +147,36 @@ export type ProjectWithDetailsWithoutOrganization = Prisma.ProjectGetPayload<{
   }
 }>
 
+export type ProjectWithTeam = Prisma.ProjectGetPayload<{
+  include: {
+    team: true
+  }
+}>
+
+export type ProjectContractWithProject = Prisma.ProjectContractGetPayload<{
+  include: {
+    project: true
+  }
+}>
+
 export type RewardWithClaim = Prisma.FundingRewardGetPayload<{
   include: { claim: true }
+}>
+
+export type UserWithProjects = Prisma.UserGetPayload<{
+  select: {
+    projects: {
+      where: {
+        deletedAt: null
+        project: {
+          deletedAt: null
+        }
+      }
+      include: {
+        project: true
+      }
+    }
+  }
 }>
 
 export type UserWithAddresses = Prisma.UserGetPayload<{
@@ -205,4 +338,9 @@ export type OsoDeployerContractsReturnType = {
 export interface ProjectContractsByDeployer {
   deployerAddress: string
   contracts: Array<{ address: string; chainId: number }>
+}
+
+export type ExtendedAggregatedType = AggregatedType & {
+  contributors: { address: string; email?: string }[]
+  github_repo_builders: { address: string; email?: string }[]
 }
