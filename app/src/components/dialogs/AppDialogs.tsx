@@ -8,6 +8,7 @@ import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
+import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
 import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
@@ -43,6 +44,12 @@ export default function AppDialogs() {
         <GovernanceTestimonialRequestDialog
           open
           onOpenChange={onOpenChange("governance_testimonial_request")}
+        />
+      )}
+      {openDialog === "not_recognized_address" && (
+        <NotRecognizedAddressDialog
+          open
+          onOpenChange={onOpenChange("not_recognized_address")}
         />
       )}
     </>

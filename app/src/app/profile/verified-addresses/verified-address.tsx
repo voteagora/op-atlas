@@ -4,7 +4,6 @@ import Image from "next/image"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
-import { Button } from "@/components/common/Button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { UserAddressSource } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { makeUserAddressPrimary } from "./actions"
 
@@ -33,6 +33,8 @@ export const VerifiedAddress = ({
   onRemove?: (address: string) => void
   showCheckmark?: boolean
 }) => {
+  const { setOpenDialog } = useAppDialogs()
+
   return (
     <div className="flex items-center gap-1.5">
       <div className="input-container justify-between">
@@ -87,9 +89,14 @@ export const VerifiedAddress = ({
               </DropdownMenuItem>
             )}
             <hr className="border-t my-1.5" />
-            <DropdownMenuItem className="cursor-pointer flex space-x-1.5 justify-between w-full">
-              <span>I don&apos;t recognize this address</span>
-              <CircleHelp fill="#000" className="text-white" size={16} />
+            <DropdownMenuItem>
+              <button
+                className="flex space-x-1.5 justify-between w-full"
+                onClick={() => setOpenDialog("not_recognized_address")}
+              >
+                <span>I don&apos;t recognize this address</span>
+                <CircleHelp fill="#000" className="text-white" size={16} />
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
