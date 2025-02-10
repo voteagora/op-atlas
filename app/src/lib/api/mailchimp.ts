@@ -19,37 +19,44 @@ export async function updateMailchimpTags(
     return { success: false, error: "Missing Mailchimp credentials" }
   }
 
-  try {
-    if (users.length > 0) {
+  if (users.length > 0) {
+    const BATCH_SIZE = 500
+    let totalUpdated = 0
+
+    for (let i = 0; i < users.length; i += BATCH_SIZE) {
+      const batch = users.slice(i, i + BATCH_SIZE)
+      console.log(
+        `Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(
+          users.length / BATCH_SIZE,
+        )} (${batch.length} users)`,
+      )
+
       const results = (await mailchimp.lists.batchListMembers(LIST_ID, {
-        members: users.map((user) => ({
+        members: batch.map((user) => ({
           email_address: user.email,
           tags: user.tags,
           email_type: "html",
-          status: "transactional",
+          status: "subscribed",
         })),
         update_existing: true,
         sync_tags: true,
       })) as any
 
-      console.log(
-        `[+] Mailchimp contacts tagged: ${results.updated_members.length}`,
-      )
+      totalUpdated += results.updated_members.length
 
       results.updated_members.forEach((member: any) => {
         console.log(
-          `  - ${member.email_address}; tags: ${
-            users.find((u) => u.email === member.email_address)?.tags
+          `  - ${member.id}; tags: ${
+            batch.find((u) => u.email === member.email_address)?.tags
           };`,
         )
       })
     }
 
-    return { success: true }
-  } catch (error) {
-    console.error(`[-] Mailchimp contacts tagging failed: ${error}`)
-    return { success: false, error }
+    console.log(`[+] Total Mailchimp contacts tagged: ${totalUpdated}`)
   }
+
+  return { success: true }
 }
 
 /**

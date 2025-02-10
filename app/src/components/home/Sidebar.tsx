@@ -82,58 +82,6 @@ export const Sidebar = ({
 
   return (
     <div className={cn("flex flex-col gap-y-6", className)}>
-      {/* Your project not received card */}
-      {showNoRewards && (
-        <div className="flex flex-col items-center gap-y-3 p-6 border border-[#E0E2EB] bg-[#FBFCFE] rounded-xl">
-          <Image
-            alt="empty profile"
-            src="/assets/images/big-sunny.png"
-            width={76}
-            height={76}
-          />
-
-          <p className="text-sm font-medium text-foreground text-center">
-            Your project did not receive rewards in Round 5
-          </p>
-          <Link className="w-full" href="/profile/details">
-            <Button
-              onClick={handleViewProfileClicked}
-              variant="outline"
-              className="text-sm font-medium text-foreground justify-center  w-full"
-            >
-              View profile
-            </Button>
-          </Link>
-        </div>
-      )}
-
-      {/* Your project not received card */}
-      {!!unclaimedReward && (
-        <div className="flex flex-col items-center gap-y-3 p-6 border border-red-200 bg-red-100 rounded-xl">
-          <Image
-            alt="empty profile"
-            src="/assets/images/big-sunny.png"
-            width={76}
-            height={76}
-          />
-          <p className="text-sm font-medium text-foreground text-center">
-            Congratulations!
-          </p>
-          <p className="text-sm text-secondary-foreground text-center">
-            Your project received rewards in Round 5: OP Stack
-          </p>
-          <Link className="w-full" href={`/rewards/${unclaimedReward.id}`}>
-            <Button
-              type="button"
-              variant="destructive"
-              className="text-sm font-medium text-white justify-center w-full"
-            >
-              Claim rewards
-            </Button>
-          </Link>
-        </div>
-      )}
-
       {/* Explore projects */}
       <div className="flex flex-col items-center justify-center gap-y-3 p-6 border border-secondary bg-secondary rounded-xl">
         <div className="relative flex justify-center items-center py-4 w-full h-20">
