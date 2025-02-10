@@ -17,6 +17,8 @@ import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
 import { getDeployedContracts } from "@/lib/oso"
 import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
 import { ProjectContract } from "@prisma/client"
+import { addProjectContract, addProjectContracts } from "@/db/projects"
+import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 
 export function DeployerFormField({
   form,
@@ -27,6 +29,8 @@ export function DeployerFormField({
   deployerIndex: number
   projectContracts: ProjectContract[]
 }) {
+  const projectId = useProjectFromPath()
+
   const { append } = useFieldArray({
     control: form.control,
     name: `deployers.${deployerIndex}.contracts`, // Name of the array field
@@ -70,17 +74,32 @@ export function DeployerFormField({
         return
       }
 
+      const contracts = corrected[0].oso_contractsV0.map((contract) => {
+        return {
+          contractAddress: contract.contractAddress,
+          deployerAddress: theForm[deployerIndex].address,
+          deploymentHash: "",
+          verificationProof: "",
+          chainId: parseInt(contract.contractNamespace),
+          name: "",
+          description: "",
+          projectId,
+        }
+      })
+
+      await addProjectContracts(projectId, contracts)
+
       append(
         corrected[0].oso_contractsV0.map((contract) => {
           return {
             address: contract.contractAddress,
-            chainId: contract.artifactSource,
-            excluded:
-              projectContracts?.find(
-                (projectContract) =>
-                  getAddress(projectContract.contractAddress) ===
-                  getAddress(contract.contractAddress),
-              ) === undefined,
+            chainId: contract.contractNamespace,
+            excluded: false,
+            //   projectContracts?.find(
+            //     (projectContract) =>
+            //       getAddress(projectContract.contractAddress) ===
+            //       getAddress(contract.contractAddress),
+            //   ) === undefined,
           }
         }),
       )

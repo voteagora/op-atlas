@@ -614,6 +614,33 @@ export async function removeTeamMember({
   return prisma.$transaction([memberDelete, projectUpdate])
 }
 
+export async function addProjectContracts(
+  projectId: string,
+  contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
+) {
+  const contractsCreate = prisma.projectContract.createMany({
+    data: contracts.map((contract) => ({
+      ...contract,
+      // project: {
+      //   connect: {
+      //     id: projectId,
+      //   },
+      // },
+    })),
+  })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([contractsCreate, projectUpdate])
+}
+
 export async function addProjectContract({
   projectId,
   contract,

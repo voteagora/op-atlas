@@ -23,32 +23,35 @@ export function DeployersFormField({
     <FormField
       control={form.control}
       name={`deployers`}
-      render={({ field: deployers }) => (
-        <div className="flex flex-col gap-4">
-          {deployers?.value?.map((deployer, deployerIndex) => {
-            return (
-              <DeployerFormField
-                key={"Deployer" + deployerIndex}
-                form={form}
-                deployerIndex={deployerIndex}
-                projectContracts={projectContracts}
-              />
-            )
-          })}
+      render={({ field: deployers }) => {
+        console.log(deployers?.value)
+        return (
+          <div className="flex flex-col gap-4">
+            {deployers?.value?.map((deployer, deployerIndex) => {
+              return (
+                <DeployerFormField
+                  key={"Deployer" + deployerIndex}
+                  form={form}
+                  deployerIndex={deployerIndex}
+                  projectContracts={projectContracts}
+                />
+              )
+            })}
 
-          <Button
-            variant={"ghost"}
-            className="bg-secondary w-[200px]"
-            type="button"
-            onClick={() => {
-              append({ address: "", contracts: [] })
-            }}
-          >
-            <Plus width={16} height={16} />
-            Add deployer address
-          </Button>
-        </div>
-      )}
+            <Button
+              variant={"ghost"}
+              className="bg-secondary w-[200px]"
+              type="button"
+              onClick={() => {
+                append({ address: "", contracts: [] })
+              }}
+            >
+              <Plus width={16} height={16} />
+              Add deployer address
+            </Button>
+          </div>
+        )
+      }}
     />
   )
 }

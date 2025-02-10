@@ -193,7 +193,7 @@ export type CategoryWithImpact = Prisma.CategoryGetPayload<{
 }>
 
 export type OsoDeployerContracts = {
-  artifactSource: string
+  contractNamespace: string
   contractAddress: string
   rootDeployerAddress: string
 }

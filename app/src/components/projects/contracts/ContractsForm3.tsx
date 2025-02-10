@@ -37,8 +37,9 @@ import {
 import { getAddress } from "viem"
 
 const osoLiveTestDeployerAddresses = [
-  "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
-  "0x3fab184622dc19b6109349b94811493bf2a45362",
+  "0xa18d0226043a76683950f3baabf0a87cfb32e1cb", // OSO Sample
+  "0x3fab184622dc19b6109349b94811493bf2a45362", // OSO image
+  "0x83bc3055649f9a829bebeccbc86e090d6a157161",
 ]
 const EMPTY_DEPLOYER = {
   address: "",
@@ -146,28 +147,103 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       console.log("oso deployers contracts (unique)")
       console.log(osoDeployersContracts__DeployerFormatted)
 
-      const deployersFormData: z.infer<typeof DeployersSchema> = {
-        deployers: osoDeployersContracts__DeployerFormatted.map((deployer) => {
-          return {
-            address: deployer.deployerAddress,
-            contracts: deployer.contracts.map((contract) => {
-              return {
-                address: contract.address,
-                chainId: contract.chainId.toString(),
-                excluded:
-                  projectContracts?.find(
-                    (projectContract) =>
-                      getAddress(projectContract.contractAddress) ===
-                        getAddress(contract.address) &&
-                      projectContract.chainId === contract.chainId,
-                  ) === undefined,
-              }
-            }),
-          }
-        }),
+      const mergedDeployersFormData: z.infer<typeof DeployersSchema> = {
+        deployers: [] as Array<{
+          address: string
+          contracts: Array<{
+            address: string
+            chainId: string
+            excluded: boolean
+          }>
+        }>,
       }
 
-      form3.setValue("deployers", deployersFormData.deployers)
+      // Merge the deployers data from both sources
+      const deployersData = [
+        ...projectContractsByDeployer.map((deployer) => ({
+          address: deployer.deployerAddress,
+          contracts: deployer.contracts.map((contract) => ({
+            address: contract.address,
+            chainId: contract.chainId.toString(),
+            excluded: false,
+          })),
+        })),
+
+        ...osoDeployersContracts__DeployerFormatted.map((deployer) => ({
+          address: deployer.deployerAddress,
+          contracts: deployer.contracts.map((contract) => {
+            const isContractExcluded =
+              projectContracts?.find(
+                (projectContract) =>
+                  getAddress(projectContract.contractAddress) ===
+                    getAddress(contract.address) &&
+                  projectContract.chainId === contract.chainId,
+              ) === undefined
+
+            return {
+              address: contract.address,
+              chainId: contract.chainId.toString(),
+              excluded: isContractExcluded,
+            }
+          }),
+        })),
+      ]
+
+      // Now we need to merge the deployers based on `deployerAddress`
+      const mergedDeployers = new Map<
+        string,
+        {
+          address: string
+          contracts: Array<{
+            address: string
+            chainId: string
+            excluded: boolean
+          }>
+        }
+      >()
+
+      deployersData.forEach((deployer) => {
+        if (!mergedDeployers.has(deployer.address)) {
+          mergedDeployers.set(deployer.address, {
+            address: deployer.address,
+            contracts: [],
+          })
+        }
+
+        // Merge contracts for the same deployer
+        const existingDeployer = mergedDeployers.get(deployer.address)
+        deployer.contracts.forEach((contract) => {
+          // Check if contract already exists, if not, add it
+          const existingContract = existingDeployer!.contracts.find(
+            (existingContract) =>
+              getAddress(existingContract.address) ===
+                getAddress(contract.address) &&
+              existingContract.chainId === contract.chainId,
+          )
+          if (!existingContract) {
+            existingDeployer!.contracts.push(contract)
+          } else {
+            // Update the excluded status if needed
+            existingContract.excluded =
+              existingContract.excluded || contract.excluded
+          }
+        })
+      })
+
+      // Convert the merged data into the expected structure
+      mergedDeployersFormData.deployers = Array.from(mergedDeployers.values())
+
+      // // const a = [
+      // //   ...deployersFormData2.deployers,
+      // //   deployersFormData.deployers,
+      // // ];
+
+      // console.log([
+      //   ...deployersFormData2.deployers,
+      //   deployersFormData.deployers,
+      // ])
+
+      form3.setValue("deployers", mergedDeployersFormData.deployers)
 
       // console.log(deployersFormData)
     }

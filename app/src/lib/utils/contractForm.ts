@@ -5,7 +5,7 @@ import {
 import { ProjectContract } from "@prisma/client"
 
 const supportedMappings = {
-  OPTIMISM: "10",
+  OP: "10",
   BASE: "8453",
   MODE: "34443",
 }
@@ -34,12 +34,12 @@ export function convertContracts(
         !entry.contracts.find(
           (entryContract) =>
             entryContract.address === contract.contractAddress &&
-            entryContract.chainId === parseInt(contract.artifactSource),
+            entryContract.chainId === parseInt(contract.contractNamespace),
         )
       ) {
         entry.contracts.push({
           address: contract.contractAddress,
-          chainId: Number(contract.artifactSource),
+          chainId: Number(contract.contractNamespace),
         })
       }
     }
@@ -51,6 +51,8 @@ export function convertContracts(
 export function replaceArtifactSourceWithNumber(
   data: OsoDeployerContractsReturnType[],
 ) {
+  console.log("THIS DATA")
+  console.log(data)
   // Use map to create a new array with the modified data
   return data.map((item) => {
     // If oso_contractsV0 exists and is an array, modify each contract
@@ -58,9 +60,9 @@ export function replaceArtifactSourceWithNumber(
       item.oso_contractsV0 = item.oso_contractsV0.map((contract) => {
         try {
           // Replace artifactSource with a number
-          contract.artifactSource =
+          contract.contractNamespace =
             supportedMappings[
-              contract.artifactSource as keyof typeof supportedMappings
+              contract.contractNamespace as keyof typeof supportedMappings
             ].toString()
         } catch (e) {}
 

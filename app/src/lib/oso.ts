@@ -22,8 +22,8 @@ export async function getDeployedContracts(
   const query = gql`
     query ExampleQuery($where: Oso_ContractsV0BoolExp) {
       oso_contractsV0(where: $where) {
-        artifactSource
         contractAddress
+        contractNamespace
         rootDeployerAddress
       }
     }
