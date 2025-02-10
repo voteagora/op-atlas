@@ -40,12 +40,18 @@ export function DeployerFormField({
   deployerIndex: number
   onRemove: (index: number) => void
 }) {
-  const projectId = useProjectFromPath()
+  async function onRemoveDeployerField(index: number) {
+    try {
+      toast.info("Removing deployer...")
+      // await removeProjectContracts(projectId)
+      toast.success("Succesfully removed deployer!")
+      onRemove(deployerIndex)
+    } catch (e) {
+      toast("There was an error trying to remove the deployer")
+    }
+  }
 
-  // const { append } = useFieldArray({
-  //   control: form.control,
-  //   name: `deployers.${deployerIndex}.contracts`, // Name of the array field
-  // })
+  const projectId = useProjectFromPath()
 
   const [isVerifying, setIsVerifying] = useState(false)
 
@@ -155,7 +161,7 @@ export function DeployerFormField({
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => onRemove(deployerIndex)}
+                onClick={() => onRemoveDeployerField(deployerIndex)}
               >
                 Remove
               </DropdownMenuItem>

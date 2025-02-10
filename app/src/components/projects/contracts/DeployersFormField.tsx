@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { DeployerFormField } from "./DeployerFormField"
 import { isAddress } from "viem"
+import { toast } from "sonner"
+import { removeProjectContracts } from "@/db/projects"
+import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 
 export function DeployersFormField({
   form,
@@ -23,6 +26,8 @@ export function DeployersFormField({
   async function onAddDeployerField() {
     addDeployerField({ address: "", contracts: [] })
   }
+
+  const projectId = useProjectFromPath()
 
   async function onRemoveDeployerField(index: number) {
     removeDeployerField(index)
