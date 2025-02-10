@@ -27,8 +27,6 @@ export function DeployersFormField({
     addDeployerField({ address: "", contracts: [] })
   }
 
-  const projectId = useProjectFromPath()
-
   async function onRemoveDeployerField(index: number) {
     removeDeployerField(index)
   }
@@ -49,7 +47,6 @@ export function DeployersFormField({
         variant="secondary"
         disabled={
           !form.getValues(`deployers`).every((deployer, index, array) => {
-            // Check that each repo.name is not empty and is unique
             return (
               deployer.address &&
               isAddress(deployer.address) &&

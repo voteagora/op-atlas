@@ -20,15 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
 import { Button } from "@/components/ui/button"
-
-const onCopy = async (value: string) => {
-  try {
-    await copyToClipboard(value)
-    toast("Copied to clipboard")
-  } catch (error) {
-    toast.error("Error copying to clipboard")
-  }
-}
+import { onCopy } from "@/components/ui/utils/copy"
 
 export function ContractFormField({
   form,

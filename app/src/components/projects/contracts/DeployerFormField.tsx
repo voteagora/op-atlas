@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
+import { onCopy } from "@/components/ui/utils/copy"
 
 export function DeployerFormField({
   form,
@@ -46,10 +47,14 @@ export function DeployerFormField({
 }) {
   const address = form.watch(`deployers.${deployerIndex}.address`)
 
-  const { fields: contractsFields } = useFieldArray({
-    control: form.control,
-    name: `deployers.${deployerIndex}.contracts`,
-  })
+  const contractsFields = form.watch(`deployers.${deployerIndex}.contracts`)
+
+  // const { fields: contractsFields, append: appendContracts } = useFieldArray({
+  //   control: form.control,
+  //   name: `deployers.${deployerIndex}.contracts`,
+  // })
+
+  const projectId = useProjectFromPath()
 
   async function onRemoveDeployerField() {
     try {
@@ -70,95 +75,80 @@ export function DeployerFormField({
     }
   }
 
-  const projectId = useProjectFromPath()
+  // const projectId = useProjectFromPath()
 
-  const [isVerifying, setIsVerifying] = useState(false)
+  // const [isVerifying, setIsVerifying] = useState(false)
 
-  const [errorMessage, setErrorMessage] = useState<ReactNode>()
+  // const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
-  async function onVerify() {
-    setIsVerifying(true)
+  // async function onVerify() {
+  //   setIsVerifying(true)
 
-    if (IS_USING_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-    } else {
-      const deployer = await getDeployedContracts(
-        form.getValues().deployers[deployerIndex].address,
-      )
+  //   if (IS_USING_MOCK_DATA) {
+  //     await new Promise((resolve) => setTimeout(resolve, 2000))
+  //   } else {
+  //     const deployer = await getDeployedContracts(
+  //       form.getValues().deployers[deployerIndex].address,
+  //     )
 
-      const corrected = replaceArtifactSourceWithNumber(
-        JSON.parse(JSON.stringify([deployer])),
-      )
+  //     const corrected = replaceArtifactSourceWithNumber(
+  //       JSON.parse(JSON.stringify([deployer])),
+  //     )
 
-      if (corrected[0].oso_contractsV0.length <= 0) {
-        setErrorMessage(
-          <p className="text-rose-700 text-sm">
-            {
-              "We couldn’t find any contracts deployed by this address. Learn about "
-            }
+  //     if (corrected[0].oso_contractsV0.length <= 0) {
+  //       setErrorMessage(
+  //         <p className="text-rose-700 text-sm">
+  //           {
+  //             "We couldn’t find any contracts deployed by this address. Learn about "
+  //           }
 
-            <span className="underline">{"missing contracts"}</span>
-            {"."}
-          </p>,
-        )
+  //           <span className="underline">{"missing contracts"}</span>
+  //           {"."}
+  //         </p>,
+  //       )
 
-        setIsVerifying(false)
-        return
-      }
+  //       setIsVerifying(false)
+  //       return
+  //     }
 
-      try {
-        const contracts = corrected[0].oso_contractsV0.map((contract) => {
-          return {
-            contractAddress: getAddress(contract.contractAddress),
-            deployerAddress: address,
-            deploymentHash: "",
-            verificationProof: "",
-            chainId: parseInt(contract.contractNamespace),
-            name: "",
-            description: "",
-            projectId,
-          }
-        })
+  //     try {
+  //       // const contracts = corrected[0].oso_contractsV0.map((contract) => {
+  //       //   return {
+  //       //     contractAddress: getAddress(contract.contractAddress),
+  //       //     deployerAddress: address,
+  //       //     deploymentHash: "",
+  //       //     verificationProof: "",
+  //       //     chainId: parseInt(contract.contractNamespace),
+  //       //     name: "",
+  //       //     description: "",
+  //       //     projectId,
+  //       //   }
+  //       // })
 
-        await addProjectContracts(projectId, contracts)
+  //       // await addProjectContracts(projectId, contracts)
 
-        // append(
-        //   corrected[0].oso_contractsV0.map((contract) => {
-        //     return {
-        //       address: contract.contractAddress,
-        //       chainId: contract.contractNamespace,
-        //       excluded: false,
-        //       //   projectContracts?.find(
-        //       //     (projectContract) =>
-        //       //       getAddress(projectContract.contractAddress) ===
-        //       //       getAddress(contract.contractAddress),
-        //       //   ) === undefined,
-        //     }
-        //   }),
-        // )
+  //       console.log(corrected)
 
-        setErrorMessage(undefined)
-      } catch (e) {
-        console.error("unexpected error occured adding contract(s): ", e)
-      }
-    }
+  //       appendContracts(
+  //         corrected[0].oso_contractsV0.map((contract) => {
+  //           return {
+  //             address: contract.contractAddress,
+  //             chainId: contract.contractNamespace,
+  //             excluded: false,
+  //           }
+  //         }),
+  //       )
 
-    setIsVerifying(false)
-  }
+  //       console.log("appended")
 
-  const onCopy = async () => {
-    try {
-      await copyToClipboard(address)
-      toast("Copied to clipboard")
-    } catch (error) {
-      toast.error("Error copying URL")
-    }
-  }
+  //       setErrorMessage(undefined)
+  //     } catch (e) {
+  //       console.error("unexpected error occured adding contract(s): ", e)
+  //     }
+  //   }
 
-  // const { fields: contractsFields } = useFieldArray({
-  //   control: form.control,
-  //   name: `deployers.${deployerIndex}.contracts`,
-  // })
+  //   setIsVerifying(false)
+  // }
 
   return (
     <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
@@ -173,7 +163,10 @@ export function DeployerFormField({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="cursor-pointer" onClick={onCopy}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => onCopy(address)}
+              >
                 Copy address
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -197,7 +190,11 @@ export function DeployerFormField({
         />
       )}
 
-      <ContractsFormField form={form} deployerIndex={deployerIndex} />
+      <ContractsFormField
+        form={form}
+        deployerIndex={deployerIndex}
+        onRemove={onRemove}
+      />
     </div>
   )
 }
