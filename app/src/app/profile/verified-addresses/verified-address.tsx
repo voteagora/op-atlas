@@ -10,9 +10,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { makeUserAddressPrimary } from "@/db/users"
 import { UserAddressSource } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
+
+import { makeUserAddressPrimaryAction } from "./actions"
 
 export const VerifiedAddress = ({
   address,
@@ -61,7 +62,10 @@ export const VerifiedAddress = ({
           <DropdownMenuContent align="end">
             {!primary && (
               <DropdownMenuItem>
-                <button onClick={async () => makeUserAddressPrimary(address)}>
+                <button
+                  className="w-full flex justify-start"
+                  onClick={async () => makeUserAddressPrimaryAction(address)}
+                >
                   Set as primary address
                 </button>
               </DropdownMenuItem>
