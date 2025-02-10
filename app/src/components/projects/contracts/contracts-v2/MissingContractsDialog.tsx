@@ -1,13 +1,19 @@
 import Image from "next/image"
 import { useMemo, useState } from "react"
-import { type Address, checksumAddress } from "viem"
+import { type Address, checksumAddress, isAddress, isHex } from "viem"
 
 import { Badge } from "@/components/common/Badge"
 import { DialogProps } from "@/components/dialogs/types"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { FormLabel } from "@/components/ui/form"
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { verifyContract, verifyDeployer } from "@/lib/actions/contracts"
 import { Chain, getMessage } from "@/lib/utils/contracts"
@@ -15,6 +21,8 @@ import { ChainSelector } from "../contracts-v1/ChainSelector"
 import { ChainSelector2 } from "./ChainSelector2"
 import { Callout } from "@/components/common/Callout"
 import { ArrowRight, ArrowUpRight } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 
 const defaultSelectedChain = 10
 
@@ -23,34 +31,18 @@ export function MissingContractsDialog({
   onOpenChange,
   projectId,
   deployerAddress,
-}: // contractAddress,
-// deploymentTxHash,
-// chain,
-// onSubmit,
-DialogProps<{
+  signature,
+  onSubmit,
+}: DialogProps<{
   projectId: string
   deployerAddress: Address
-  // contractAddress: Address
-  // deploymentTxHash: `0x${string}`
-  // chain?: Chain
-  // onSubmit: (signature: string) => void
+  signature: string
+  onSubmit: (contract: { address: string; chainId: string }) => void
 }>) {
   const [page, setPage] = useState(0)
   const [copied, setCopied] = useState(false)
-  const [signature, setSignature] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>()
-
-  const messageToSign = useMemo(() => {
-    const checksummedAddress = checksumAddress(deployerAddress)
-    return getMessage(checksummedAddress)
-  }, [deployerAddress])
-
-  const onCopy = () => {
-    navigator.clipboard.writeText(messageToSign)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   const [selectedChain, setSelectedChain] =
     useState<number>(defaultSelectedChain)
@@ -59,21 +51,33 @@ DialogProps<{
     try {
       setLoading(true)
 
-      const verificationResult = await verifyDeployer(
+      toast.info("Verifying contract...")
+
+      const verificationResult = await verifyContract({
         projectId,
-        deployerAddress,
-        selectedChain!,
-        signature as `0x${string}`,
-      )
+        contractAddress: contract as `0x${string}`,
+        deployerAddress: deployer as `0x${string}`,
+        deploymentTxHash: txHash as `0x${string}`,
+        signature: signature as `0x${string}`,
+        chain: selectedChain!,
+      })
 
       if (verificationResult.error !== null) {
+        toast.error(verificationResult.error)
         setError(verificationResult.error)
         return
       }
 
       setError(undefined)
-      // onSubmit(signature)
+
+      toast.success("Successfully verified contract!")
+      onSubmit({
+        address: verificationResult.contract[0].contractAddress,
+        chainId: verificationResult.contract[0].chainId.toString(),
+      })
     } catch (_) {
+      toast.error("An error occurred, please try again")
+
       setError("An error occurred, please try again")
     } finally {
       setLoading(false)
@@ -84,7 +88,21 @@ DialogProps<{
     setSelectedChain(parseInt(value))
   }
 
-  console.log(selectedChain)
+  const [contract, setContract] = useState("")
+  const [txHash, setTxHash] = useState("")
+  const [deployer, setDeployer] = useState(deployerAddress)
+
+  async function onContractChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setContract(event.target.value)
+  }
+
+  async function onTxHashChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setTxHash(event.target.value)
+  }
+
+  async function onDeployerChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setDeployer(event.target.value as `0x${string}`)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -176,47 +194,81 @@ DialogProps<{
           </>
         )}
         {page === 1 && (
-          <>
-            <Button
-              variant="ghost"
-              type="button"
-              className="p-1 absolute left-[12px] top-[12px]"
-              onClick={() => setPage(0)}
-            >
-              <Image
-                src="/assets/icons/arrowLeftIcon.svg"
-                width={13}
-                height={12}
-                alt="Back"
-              />
-            </Button>
-            <div className="flex flex-col items-center text-center gap-4">
-              <Badge text="Verify contract" />
-              <h3>
-                Enter the resulting signature hash from your signed message
-              </h3>
-            </div>
-            <div className="flex flex-col self-stretch gap-1">
-              <FormLabel>Signature hash</FormLabel>
-              <Textarea
-                value={signature}
-                onChange={(e) => setSignature(e.target.value)}
-                className="resize-none"
-              />
-              {error && (
-                <p className="text-destructive text-sm font-medium">{error}</p>
+          <div className="flex flex-col self-stretch gap-4">
+            <FormField
+              name={``}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Deployer address
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      defaultValue={deployerAddress}
+                      placeholder="0x..."
+                      className=""
+                      onChange={onDeployerChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
+
+            <FormField
+              name={``}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground !mt-0">
+                    Contract
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="0x…"
+                      onChange={onContractChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name={``}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1.5">
+                  <FormLabel className="text-foreground">
+                    Deployment tx hash
+                    <span className="ml-0.5 text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="0x..."
+                      className=""
+                      onChange={onTxHashChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <ChainSelector2 defaultValue={"10"} onChange={onChainChange} />
+
             <Button
-              className="self-stretch"
-              variant="destructive"
-              type="button"
-              disabled={!signature || loading}
+              variant={"destructive"}
+              className="mt-10"
+              disabled={
+                !isAddress(deployer) || !isAddress(contract) || !isHex(txHash)
+              }
               onClick={onConfirmSignature}
             >
-              Continue
+              Verify
             </Button>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>

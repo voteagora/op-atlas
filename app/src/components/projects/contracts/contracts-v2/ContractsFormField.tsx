@@ -41,6 +41,8 @@ export function ContractsFormField({
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
+  const [signature, setSignature] = useState("")
+
   async function onVerify(signature: string) {
     setIsVerifying(true)
 
@@ -52,6 +54,8 @@ export function ContractsFormField({
       const corrected = replaceArtifactSourceWithNumber(
         JSON.parse(JSON.stringify([deployer])),
       )
+
+      setSignature(signature)
 
       console.log(corrected)
       if (corrected[0].oso_contractsV0.length <= 0) {
@@ -110,6 +114,19 @@ export function ContractsFormField({
     setIsVerifying(false)
   }
 
+  async function onContractVerified(contract: {
+    address: string
+    chainId: string
+  }) {
+    appendContracts({
+      address: contract.address,
+      chainId: contract.chainId,
+      excluded: false,
+    })
+
+    setErrorMessage(undefined)
+  }
+
   const initialMaxContractViewCount = 6
   const [contractViewCount, setContractViewCount] = useState(
     initialMaxContractViewCount,
@@ -130,10 +147,11 @@ export function ContractsFormField({
           }
           projectId={projectId}
           deployerAddress={address as `0x${string}`}
-          // onSubmit={(signature: string) => {
-          //   setIsVerifyingDialog(false)
-          //   onVerify(signature)
-          // }}
+          signature={signature}
+          onSubmit={(contract: { address: string; chainId: string }) => {
+            setIsMissingContractsDialogOpen(false)
+            onContractVerified(contract)
+          }}
           // chain={chain}
         />
       )}

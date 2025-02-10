@@ -90,7 +90,7 @@ export function VerifyAddressDialog2({
         {page === 0 && (
           <>
             <div className="flex flex-col items-center text-center gap-4">
-              <Badge text="Verify contract" />
+              <Badge text="Verify deployer" />
               <div className="flex flex-col items-center gap-1">
                 <h3>
                   Copy and sign the message below using your preferred provider
