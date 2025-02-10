@@ -27,6 +27,7 @@ import { getAddress, isAddress } from "viem"
 import { VerifyAddressDialog } from "../contracts-v1/VerifyAddressDialog"
 import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
 import { MissingContractsDialog } from "./MissingContractsDialog"
+import Image from "next/image"
 
 export function ContractsFormField({
   form,
@@ -158,7 +159,6 @@ export function ContractsFormField({
             setIsMissingContractsDialogOpen(false)
             onContractVerified(contract)
           }}
-          // chain={chain}
         />
       )}
 
@@ -168,34 +168,36 @@ export function ContractsFormField({
           onOpenChange={(open) => !open && setIsVerifyingDialog(false)}
           projectId={projectId}
           deployerAddress={address as `0x${string}`}
-          // contractAddress={getAddress(contractAddress)}
-          // deploymentTxHash={deploymentTxHash}
           onSubmit={(signature: string) => {
             setIsVerifyingDialog(false)
             onVerify(signature)
           }}
-          // chain={chain}
         />
       )}
 
       {contractsFields.length > 0 && (
-        <div className="flex justify-between">
-          <p>Contracts</p>
+        <div className="flex justify-between items-center">
+          <FormLabel>Contracts</FormLabel>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <button
               type="button"
               onClick={() => setIsMissingContractsDialogOpen(true)}
-              className="flex"
+              className="flex items-center gap-1 text-sm"
             >
-              <Plus width={20} height={20} />
+              <Plus width={16} height={16} />
               Add
             </button>{" "}
             <button
               type="button"
               onClick={() => setIsMissingContractsDialogOpen(true)}
             >
-              <FileQuestion width={20} height={20} />
+              <Image
+                src="/assets/icons/question-fill.svg"
+                alt="?"
+                width={20}
+                height={20}
+              />
             </button>
           </div>
         </div>

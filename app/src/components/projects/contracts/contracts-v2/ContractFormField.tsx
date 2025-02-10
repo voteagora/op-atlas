@@ -20,6 +20,7 @@ import {
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { onCopy } from "@/components/ui/utils/copy"
+import Image from "next/image"
 
 export function ContractFormField({
   form,
@@ -157,18 +158,30 @@ export function ContractFormField({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    className="cursor-pointer justify-between gap-8"
+                    onClick={() => onToggle(excluded)}
+                  >
+                    {excluded ? "Include in project" : "Exclude from project"}
+                    {excluded ? (
+                      <Check width={16} height={16} />
+                    ) : (
+                      <X width={16} height={16} />
+                    )}
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    className="cursor-pointer justify-between gap-8"
                     onClick={() => {
                       onCopy(address)
                     }}
                   >
                     Copy address
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => onToggle(excluded)}
-                  >
-                    {excluded ? "Include" : "Exclude"}
+                    <Image
+                      src="/assets/icons/copy-icon.svg"
+                      width={16}
+                      height={16}
+                      alt="Copy"
+                    />
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
