@@ -71,7 +71,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     name: "deployers",
   })
 
-  const { data: projectContractsData } = useProjectContracts(project.id)
+  const { data: projectContractsData, isFetched: isProjectContractsFetched } =
+    useProjectContracts(project.id)
 
   const projectContractsByDeployer = Object.values(
     groupByDeployer(projectContractsData || []),
@@ -89,10 +90,11 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   // console.log(deployerAddresses)
 
-  const { data: osoDeployersContractsData } = useOsoDeployersDeployedContracts(
-    deployerAddresses ?? [],
-    // ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
-  )
+  const { data: osoDeployersContractsData, isFetched: isOsoContractsFetched } =
+    useOsoDeployersDeployedContracts(
+      deployerAddresses ?? [],
+      // ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
+    )
 
   // console.log(osoDeployersContractsData)
 
@@ -272,7 +274,11 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     console.log(data)
   }
 
-  const projectContracts = getProjectContractsData()
+  if (!isProjectContractsFetched || !isOsoContractsFetched) {
+    return (
+      <div className="w-full h-96 bg-secondary rounded-lg animate-pulse"></div>
+    )
+  }
 
   return (
     <Form {...form3}>

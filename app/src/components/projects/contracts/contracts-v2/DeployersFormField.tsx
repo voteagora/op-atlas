@@ -33,14 +33,16 @@ export function DeployersFormField({
 
   return (
     <>
-      {deployersFields.map((field, index) => (
-        <DeployerFormField
-          key={field.id}
-          form={form}
-          deployerIndex={index}
-          onRemove={onRemoveDeployerField}
-        />
-      ))}
+      <div className="flex flex-col gap-2">
+        {deployersFields.map((field, index) => (
+          <DeployerFormField
+            key={field.id}
+            form={form}
+            deployerIndex={index}
+            onRemove={onRemoveDeployerField}
+          />
+        ))}
+      </div>
 
       {form.getValues(`deployers`).every((deployer) => {
         return deployer.contracts.length > 0
