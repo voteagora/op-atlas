@@ -89,32 +89,16 @@ DialogProps<{
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         {page === 0 && (
           <>
-            <p>Me hoy menoy</p>
             <div className="flex flex-col items-center text-center gap-4">
               <Badge text="Verify contract" />
               <div className="flex flex-col items-center gap-1">
-                <h3>
-                  Copy and sign the message below using your preferred provider
-                </h3>
+                <h3>Missing contracts</h3>
+
                 <p className="text-secondary-foreground">
-                  Then, return here and continue to the next step.
-                  <br />
-                  You can{" "}
-                  <ExternalLink
-                    href="https://optimistic.etherscan.io/verifiedSignatures"
-                    className="underline"
-                  >
-                    use Etherscan
-                  </ExternalLink>{" "}
-                  to generate a signature.
+                  Common reasons why contracts may not appear under your
+                  deployer address:
                 </p>
               </div>
-            </div>
-            <div className="flex flex-col self-stretch gap-1">
-              <ChainSelector2
-                defaultValue={defaultSelectedChain.toString()}
-                onChange={onChainChange}
-              />
             </div>
             <div className="flex flex-col self-stretch gap-1">
               <FormLabel>Message to sign</FormLabel>
@@ -133,7 +117,7 @@ DialogProps<{
               type="button"
               onClick={() => setPage(1)}
             >
-              Continue
+              Get help on Discord
             </Button>
           </>
         )}
