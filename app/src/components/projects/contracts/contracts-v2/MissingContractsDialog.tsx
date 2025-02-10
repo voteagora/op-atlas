@@ -27,6 +27,7 @@ import { toast } from "sonner"
 const defaultSelectedChain = 10
 
 export function MissingContractsDialog({
+  defaultPage,
   open,
   onOpenChange,
   projectId,
@@ -34,12 +35,13 @@ export function MissingContractsDialog({
   signature,
   onSubmit,
 }: DialogProps<{
+  defaultPage: number
   projectId: string
   deployerAddress: Address
   signature: string
   onSubmit: (contract: { address: string; chainId: string }) => void
 }>) {
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(defaultPage)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>()

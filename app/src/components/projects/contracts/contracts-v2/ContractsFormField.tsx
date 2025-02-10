@@ -144,10 +144,13 @@ export function ContractsFormField({
   const [isMissingContractsDialogOpen, setIsMissingContractsDialogOpen] =
     useState(false)
 
+  const [dialogPage, setDialogPage] = useState(0)
+
   return (
     <>
       {isMissingContractsDialogOpen && (
         <MissingContractsDialog
+          defaultPage={dialogPage}
           open
           onOpenChange={(open) =>
             !open && setIsMissingContractsDialogOpen(false)
@@ -182,7 +185,10 @@ export function ContractsFormField({
           <div className="flex gap-4 items-center">
             <button
               type="button"
-              onClick={() => setIsMissingContractsDialogOpen(true)}
+              onClick={() => {
+                setDialogPage(1)
+                setIsMissingContractsDialogOpen(true)
+              }}
               className="flex items-center gap-1 text-sm"
             >
               <Plus width={16} height={16} />
@@ -190,7 +196,10 @@ export function ContractsFormField({
             </button>{" "}
             <button
               type="button"
-              onClick={() => setIsMissingContractsDialogOpen(true)}
+              onClick={() => {
+                setDialogPage(0)
+                setIsMissingContractsDialogOpen(true)
+              }}
             >
               <Image
                 src="/assets/icons/question-fill.svg"
