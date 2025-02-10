@@ -256,6 +256,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
       //   deployersFormData.deployers,
       // ])
 
+      console.log(mergedDeployersFormData)
+
       form3.setValue("deployers", mergedDeployersFormData.deployers)
 
       console.log("I RAN")

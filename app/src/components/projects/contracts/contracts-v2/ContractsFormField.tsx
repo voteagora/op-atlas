@@ -9,7 +9,13 @@ import { z } from "zod"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { ContractFormField } from "./ContractFormField"
 import { ReactNode, useState } from "react"
-import { ChevronDown, ChevronUp, Loader2 } from "lucide-react"
+import {
+  ChevronDown,
+  ChevronUp,
+  FileQuestion,
+  Loader2,
+  Plus,
+} from "lucide-react"
 import { toast } from "sonner"
 import { addProjectContracts, removeProjectContracts } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
@@ -172,7 +178,28 @@ export function ContractsFormField({
         />
       )}
 
-      {contractsFields.length > 0 && <p>Contracts</p>}
+      {contractsFields.length > 0 && (
+        <div className="flex justify-between">
+          <p>Contracts</p>
+
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => setIsMissingContractsDialogOpen(true)}
+              className="flex"
+            >
+              <Plus width={20} height={20} />
+              Add
+            </button>{" "}
+            <button
+              type="button"
+              onClick={() => setIsMissingContractsDialogOpen(true)}
+            >
+              <FileQuestion width={20} height={20} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {contractsFields.map((field, index) => {
         if (index >= contractViewCount) return
