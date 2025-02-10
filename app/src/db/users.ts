@@ -395,83 +395,85 @@ export async function getAllRFVoters(
 }
 
 export async function getAllContributors() {
-  const projectContributors = await prisma.userProjects.findMany({
-    where: {
-      projectId: {
-        in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
-      },
-      deletedAt: null,
-      user: {
+  const [projectContributors, orgContributors] = await Promise.all([
+    prisma.userProjects.findMany({
+      where: {
+        projectId: {
+          in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
+        },
         deletedAt: null,
+        user: {
+          deletedAt: null,
+        },
       },
-    },
-    select: {
-      user: {
-        select: {
-          emails: {
-            orderBy: {
-              createdAt: "desc",
+      select: {
+        user: {
+          select: {
+            emails: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              select: {
+                email: true,
+              },
+              where: {
+                email: {
+                  not: "",
+                },
+              },
             },
-            select: {
-              email: true,
-            },
-            where: {
-              email: {
-                not: "",
+            addresses: {
+              select: {
+                address: true,
               },
             },
           },
-          addresses: {
-            select: {
-              address: true,
-            },
-          },
         },
       },
-    },
-  })
+    }),
 
-  const orgContributors = await prisma.projectOrganization.findMany({
-    where: {
-      projectId: {
-        in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
-      },
-      deletedAt: null,
-      organization: {
+    prisma.projectOrganization.findMany({
+      where: {
+        projectId: {
+          in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
+        },
         deletedAt: null,
-        team: {
-          some: {
-            deletedAt: null,
-            user: {
+        organization: {
+          deletedAt: null,
+          team: {
+            some: {
               deletedAt: null,
+              user: {
+                deletedAt: null,
+              },
             },
           },
         },
       },
-    },
-    select: {
-      organization: {
-        select: {
-          team: {
-            select: {
-              user: {
-                select: {
-                  emails: {
-                    orderBy: {
-                      createdAt: "desc",
-                    },
-                    select: {
-                      email: true,
-                    },
-                    where: {
-                      email: {
-                        not: "",
+      select: {
+        organization: {
+          select: {
+            team: {
+              select: {
+                user: {
+                  select: {
+                    emails: {
+                      orderBy: {
+                        createdAt: "desc",
+                      },
+                      select: {
+                        email: true,
+                      },
+                      where: {
+                        email: {
+                          not: "",
+                        },
                       },
                     },
-                  },
-                  addresses: {
-                    select: {
-                      address: true,
+                    addresses: {
+                      select: {
+                        address: true,
+                      },
                     },
                   },
                 },
@@ -480,8 +482,8 @@ export async function getAllContributors() {
           },
         },
       },
-    },
-  })
+    }),
+  ])
 
   const formattedProjectContributors = projectContributors.map(
     (contributor) => contributor.user,
