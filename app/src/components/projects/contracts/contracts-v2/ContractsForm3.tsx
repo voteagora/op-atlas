@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ProjectContract } from "@prisma/client"
 import { useEffect, useState } from "react"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -280,13 +280,36 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     )
   }
 
+  const formValues = useWatch({
+    control: form3.control,
+  })
+
+  // const isOffchain = form3.watch("isOffchain")
+  // const submittedToOso = form3.watch("submittedToOSO")
+  // const deployers = form3.watch("deployers")
+
+  // const canAddContract = deployers.every(
+  //   (deployer) => deployer.contracts.length < 1,
+  // )
+
+  // const canSubmit = (function () {
+  //   return isOffchain || canAddContract || submittedToOso
+  // })()
+
+  const canSubmit = true
+
   return (
     <Form {...form3}>
       <form onSubmit={form3.handleSubmit(onSubmit3)}>
         <DeployersFormField form={form3} />
       </form>
 
-      <Button variant={"destructive"} type="submit" className="w-20">
+      <Button
+        variant={"destructive"}
+        type="submit"
+        className="w-20"
+        disabled={!canSubmit}
+      >
         Save
       </Button>
     </Form>
