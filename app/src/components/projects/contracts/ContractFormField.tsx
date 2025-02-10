@@ -8,7 +8,6 @@ import { truncate } from "@/lib/utils/contracts"
 import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
 import { CHAIN_INFO } from "@/components/common/chain"
-import { ContractDropdownButton } from "./ContractDropdownButton"
 import { addProjectContract } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { removeContract } from "@/lib/actions/contracts"
@@ -31,18 +30,18 @@ export function ContractFormField({
   deployerIndex: number
   contractIndex: number
 }) {
+  const projectId = useProjectFromPath()
+
   const address = form.watch(
     `deployers.${deployerIndex}.contracts.${contractIndex}.address`,
   )
   const chainId = form.watch(
     `deployers.${deployerIndex}.contracts.${contractIndex}.chainId`,
   )
-
   const excluded = form.watch(
     `deployers.${deployerIndex}.contracts.${contractIndex}.excluded`,
   )
-
-  const projectId = useProjectFromPath()
+  const deployerAddress = form.watch(`deployers.${deployerIndex}.address`)
 
   async function onToggle(excluded: boolean) {
     if (excluded) {
@@ -52,7 +51,7 @@ export function ContractFormField({
           projectId,
           contract: {
             contractAddress: getAddress(address),
-            deployerAddress: form.getValues().deployers[deployerIndex].address,
+            deployerAddress: deployerAddress,
             deploymentHash: "",
             verificationProof: "",
             chainId: parseInt(chainId),

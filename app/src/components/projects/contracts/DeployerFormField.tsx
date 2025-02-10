@@ -24,7 +24,6 @@ import {
 } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { truncate } from "@/lib/utils/contracts"
-import { DeployerDropdownButton } from "./DeployerDropdownButton"
 import { ContractFormField } from "./ContractFormField"
 import {
   DropdownMenu,
