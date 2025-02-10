@@ -100,11 +100,12 @@ export function VerifiedAddressesContent({
           <div className="font-medium text-sm text-foreground">
             Your verified addresses
           </div>
-          {user.addresses.map(({ address, source }) => (
+          {user.addresses.map(({ address, source, primary }) => (
             <VerifiedAddress
               key={address}
               address={address}
               source={source as UserAddressSource}
+              primary={primary}
               isBadgeholder={isBadgeholderAddress(address)}
               onCopy={onCopy}
               onRemove={onRemove}

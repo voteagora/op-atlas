@@ -291,10 +291,11 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                 Your verified addresses
               </div>
               <div className="flex space-x-1.5 items-center">
-                {user.addresses.map(({ address, source }) => (
+                {user.addresses.map(({ address, source, primary }) => (
                   <VerifiedAddress
                     key={address}
                     address={shortenAddress(address)}
+                    primary={primary}
                     showCheckmark={false}
                     source={source as UserAddressSource}
                     isBadgeholder={isBadgeholderAddress(address)}

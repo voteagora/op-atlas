@@ -32,7 +32,11 @@ export async function getUserById(userId: string) {
       id: userId,
     },
     include: {
-      addresses: true,
+      addresses: {
+        orderBy: {
+          primary: "desc",
+        },
+      },
       interaction: true,
       emails: true,
     },
