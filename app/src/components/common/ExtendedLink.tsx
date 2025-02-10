@@ -3,10 +3,13 @@ import { default as NextLink, LinkProps as NextLinkProps } from "next/link"
 import { forwardRef } from "react"
 import { UrlObject } from "url"
 
-import { Button as ShadcnButton } from "@/components/ui/button"
+import {
+  Button as ShadcnButton,
+  ButtonProps as ShadcnButtonProps,
+} from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-interface ButtonProps {
+interface ButtonProps extends Omit<ShadcnButtonProps, "variant"> {
   as?: "button"
   href: string | UrlObject
   className?: string
@@ -14,15 +17,51 @@ interface ButtonProps {
   text?: string
   subtext?: string
   variant?: "default" | "primary"
+  target?: React.HTMLAttributeAnchorTarget
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { icon, text, subtext, href, variant = "default", className, ...props },
+    {
+      icon,
+      text,
+      subtext,
+      href,
+      variant = "default",
+      className,
+      target = "_blank",
+      ...props
+    },
     ref,
   ) => {
+    if (props.disabled) {
+      return (
+        <div>
+          <ShadcnButton
+            ref={ref}
+            className={cn(
+              "group flex items-center gap-x-1.5 ",
+              {
+                "button-secondary text-inherit": variant === "default",
+                "bg-optimismRed text-white hover:bg-optimismRed/70":
+                  variant === "primary",
+              },
+              className,
+            )}
+            {...props}
+          >
+            <div>{icon}</div>
+            <span>{text}</span>
+            {subtext && (
+              <span className="text-md text-gray-500">{subtext}</span>
+            )}
+          </ShadcnButton>
+        </div>
+      )
+    }
+
     return (
-      <NextLink href={href} passHref target="_blank" className="w-fit">
+      <NextLink href={href} passHref target={target} className="w-fit">
         <ShadcnButton
           ref={ref}
           className={cn(
@@ -34,6 +73,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             },
             className,
           )}
+          {...props}
         >
           <div>{icon}</div>
           <span>{text}</span>

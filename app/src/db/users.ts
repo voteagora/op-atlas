@@ -33,7 +33,11 @@ export async function getUserById(userId: string) {
       id: userId,
     },
     include: {
-      addresses: true,
+      addresses: {
+        orderBy: {
+          primary: "desc",
+        },
+      },
       interaction: true,
       emails: true,
     },
@@ -691,4 +695,38 @@ export async function addTags(records: EntityRecords) {
       tags: [],
     })),
   ]
+}
+
+export async function makeUserAddressPrimary(address: string, userId: string) {
+  const existingPrimary = await prisma.userAddress.findFirst({
+    where: {
+      primary: true,
+      userId,
+    },
+  })
+  if (existingPrimary) {
+    await prisma.userAddress.update({
+      where: {
+        address_userId: {
+          address: existingPrimary.address,
+          userId,
+        },
+      },
+      data: {
+        primary: false,
+      },
+    })
+  }
+
+  await prisma.userAddress.update({
+    where: {
+      address_userId: {
+        address,
+        userId,
+      },
+    },
+    data: {
+      primary: true,
+    },
+  })
 }

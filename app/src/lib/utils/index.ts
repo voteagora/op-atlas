@@ -170,29 +170,30 @@ export function clickSignInWithFarcasterButton() {
 }
 
 export function profileProgress(user: UserWithAddresses): number {
-  // check email, github (or not developer), and addresses
-  if (
-    user.emails.length > 0 &&
-    (user.github || user.notDeveloper) &&
-    user.addresses.length
-  ) {
-    return 100
-  }
+  // Define the number of steps dynamically
+  const numberOfSteps = 4
+  const step = 100 / numberOfSteps
 
   let progress = 0
+
   if (user.emails.length > 0) {
-    progress += 33.33
+    progress += step
   }
 
   if (user.github || user.notDeveloper) {
-    progress += 33.33
+    progress += step
   }
 
-  if (user.addresses.length) {
-    progress += 33.33
+  if (user.addresses.length > 1) {
+    progress += step
   }
 
-  return progress
+  if (user.addresses.some((addr) => addr.primary)) {
+    progress += step
+  }
+
+  // If all conditions are met, return 100
+  return progress === 100 ? 100 : progress
 }
 
 export function shortenAddress(address: string) {
