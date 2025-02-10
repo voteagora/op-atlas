@@ -21,8 +21,10 @@ import {
 import { ContractsSchema } from "./schema"
 import { Chain } from "./commonSchema"
 export function ChainSelector2({
+  defaultValue,
   onChange,
 }: {
+  defaultValue: string
   onChange: (value: string) => void
 }) {
   return (
@@ -31,7 +33,7 @@ export function ChainSelector2({
       render={({ field }) => (
         <FormItem className="w-full">
           <FormLabel>Chain</FormLabel>
-          <Select onValueChange={onChange} defaultValue={field.value}>
+          <Select onValueChange={onChange} defaultValue={defaultValue}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select" />

@@ -14,6 +14,8 @@ import { Chain, getMessage } from "@/lib/utils/contracts"
 import { ChainSelector } from "./ChainSelector"
 import { ChainSelector2 } from "./ChainSelector2"
 
+const defaultSelectedChain = 10
+
 export function VerifyAddressDialog2({
   open,
   onOpenChange,
@@ -48,7 +50,8 @@ export function VerifyAddressDialog2({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const [selectedChain, setSelectedChain] = useState<number>()
+  const [selectedChain, setSelectedChain] =
+    useState<number>(defaultSelectedChain)
 
   const onConfirmSignature = async () => {
     try {
@@ -107,7 +110,10 @@ export function VerifyAddressDialog2({
               </div>
             </div>
             <div className="flex flex-col self-stretch gap-1">
-              <ChainSelector2 onChange={onChainChange} />
+              <ChainSelector2
+                defaultValue={defaultSelectedChain.toString()}
+                onChange={onChainChange}
+              />
             </div>
             <div className="flex flex-col self-stretch gap-1">
               <FormLabel>Message to sign</FormLabel>

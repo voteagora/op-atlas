@@ -116,7 +116,7 @@ export function ContractsFormField({
       {isVerifiyingDialog && (
         <VerifyAddressDialog2
           open
-          onOpenChange={(open) => !open && setIsVerifying(false)}
+          onOpenChange={(open) => !open && setIsVerifyingDialog(false)}
           projectId={projectId}
           deployerAddress={address as `0x${string}`}
           // contractAddress={getAddress(contractAddress)}
