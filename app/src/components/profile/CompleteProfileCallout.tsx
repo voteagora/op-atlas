@@ -7,6 +7,7 @@ import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
 import { Button } from "@/components/common/Button"
+import ExtendedLink from "@/components/common/ExtendedLink"
 import { syncFarcasterAddresses } from "@/lib/actions/addresses"
 import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
 import { isBadgeholderAddress } from "@/lib/badgeholders"
@@ -118,6 +119,8 @@ function ProfileSteps({ user }: { user: UserWithAddresses }) {
       <ConnectYourGithubStep user={user} />
       <hr className="border border-border w-full" />
       <AddVerifiedAddressesStep user={user} />
+      <hr className="border border-border w-full" />
+      <SetPrimaryAddress user={user} />
     </div>
   )
 }
@@ -248,7 +251,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
-        {user.addresses.length ? <GreenCheck /> : <StepNumber num={3} />}
+        {user.addresses.length > 1 ? <GreenCheck /> : <StepNumber num={3} />}
         <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-[2px]">
@@ -282,7 +285,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
             </div>
           </div>
 
-          {user.addresses.length > 0 && (
+          {user.addresses.length > 1 && (
             <div className="flex flex-col gap-2">
               <div className="text-sm text-foreground font-medium">
                 Your verified addresses
@@ -307,13 +310,40 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
               </div>
             </div>
           )}
+          {user.addresses.length < 2 && (
+            <Button onClick={() => setOpenDialog("verify_address")}>
+              Verify Address
+            </Button>
+          )}
         </div>
       </div>
-      {user.addresses.length < 1 && (
-        <Button onClick={() => setOpenDialog("verify_address")}>
-          Verify Address
-        </Button>
-      )}
+    </div>
+  )
+}
+
+function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
+  return (
+    <div className="flex justify-between py-4 gap-6">
+      <div className="flex gap-4">
+        {user.addresses.length > 1 ? <GreenCheck /> : <StepNumber num={4} />}
+        <div className="flex flex-col gap-4 flex-1">
+          <div className="flex flex-col gap-[2px]">
+            <div className="font-medium">Set your primary address</div>
+            <div className="text-secondary-foreground">
+              Choose one of your verified address to receive attestations from
+              Optimism (including the voting badge for Citizens and Guest
+              Voters).
+            </div>
+          </div>
+          <ExtendedLink
+            as="button"
+            href="/profile/verified-addresses"
+            text="Set primary address"
+            variant="primary"
+            disabled={user.addresses.length < 2}
+          />
+        </div>
+      </div>
     </div>
   )
 }
