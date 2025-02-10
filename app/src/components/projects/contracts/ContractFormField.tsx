@@ -44,37 +44,22 @@ export function ContractFormField({
 
   const projectId = useProjectFromPath()
 
-  async function onToggle2() {
-    form.setValue(
-      `deployers.${deployerIndex}.contracts.${contractIndex}.excluded`,
-      !excluded,
-    )
-  }
-
-  async function onToggle(value: boolean) {
-    if (!value) {
-      const addr = getAddress(
-        form.getValues().deployers[deployerIndex].contracts[contractIndex]
-          .address,
-      )
-
+  async function onToggle(excluded: boolean) {
+    if (excluded) {
       try {
         toast.info(`Adding contract...`)
-        // const result = await addProjectContract({
-        //   projectId,
-        //   contract: {
-        //     contractAddress: addr,
-        //     deployerAddress: form.getValues().deployers[deployerIndex].address,
-        //     deploymentHash: "",
-        //     verificationProof: "",
-        //     chainId: parseInt(
-        //       form.getValues().deployers[deployerIndex].contracts[contractIndex]
-        //         .chainId,
-        //     ),
-        //     name: "",
-        //     description: "",
-        //   },
-        // })
+        const result = await addProjectContract({
+          projectId,
+          contract: {
+            contractAddress: getAddress(address),
+            deployerAddress: form.getValues().deployers[deployerIndex].address,
+            deploymentHash: "",
+            verificationProof: "",
+            chainId: parseInt(chainId),
+            name: "",
+            description: "",
+          },
+        })
 
         // if (result.error !== null) {
         //   throw result.error
@@ -89,16 +74,21 @@ export function ContractFormField({
       try {
         toast.info(`Removing contract...`)
 
-        // const result = await removeContract({
-        //   projectId,
-        //   address: getAddress(address),
-        //   chainId: parseInt(chainId),
-        // })
+        const result = await removeContract({
+          projectId,
+          address: getAddress(address),
+          chainId: parseInt(chainId),
+        })
         toast.success("Contract Removed!")
       } catch (error: unknown) {
         toast.error("Error removing contract, please try again")
       }
     }
+
+    form.setValue(
+      `deployers.${deployerIndex}.contracts.${contractIndex}.excluded`,
+      !excluded,
+    )
   }
 
   return (
@@ -154,7 +144,7 @@ export function ContractFormField({
                 <button
                   type="button"
                   className="bg-secondary px-2 rounded-lg opacity-0 group-hover:opacity-100"
-                  onClick={onToggle2}
+                  onClick={() => onToggle(excluded)}
                 >
                   {!excluded ? "Exclude" : "Include"}
                 </button>
@@ -177,7 +167,7 @@ export function ContractFormField({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={onToggle2}
+                    onClick={() => onToggle(excluded)}
                   >
                     {excluded ? "Include" : "Exclude"}
                   </DropdownMenuItem>

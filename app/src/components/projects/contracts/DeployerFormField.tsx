@@ -75,81 +75,6 @@ export function DeployerFormField({
     }
   }
 
-  // const projectId = useProjectFromPath()
-
-  // const [isVerifying, setIsVerifying] = useState(false)
-
-  // const [errorMessage, setErrorMessage] = useState<ReactNode>()
-
-  // async function onVerify() {
-  //   setIsVerifying(true)
-
-  //   if (IS_USING_MOCK_DATA) {
-  //     await new Promise((resolve) => setTimeout(resolve, 2000))
-  //   } else {
-  //     const deployer = await getDeployedContracts(
-  //       form.getValues().deployers[deployerIndex].address,
-  //     )
-
-  //     const corrected = replaceArtifactSourceWithNumber(
-  //       JSON.parse(JSON.stringify([deployer])),
-  //     )
-
-  //     if (corrected[0].oso_contractsV0.length <= 0) {
-  //       setErrorMessage(
-  //         <p className="text-rose-700 text-sm">
-  //           {
-  //             "We couldn’t find any contracts deployed by this address. Learn about "
-  //           }
-
-  //           <span className="underline">{"missing contracts"}</span>
-  //           {"."}
-  //         </p>,
-  //       )
-
-  //       setIsVerifying(false)
-  //       return
-  //     }
-
-  //     try {
-  //       // const contracts = corrected[0].oso_contractsV0.map((contract) => {
-  //       //   return {
-  //       //     contractAddress: getAddress(contract.contractAddress),
-  //       //     deployerAddress: address,
-  //       //     deploymentHash: "",
-  //       //     verificationProof: "",
-  //       //     chainId: parseInt(contract.contractNamespace),
-  //       //     name: "",
-  //       //     description: "",
-  //       //     projectId,
-  //       //   }
-  //       // })
-
-  //       // await addProjectContracts(projectId, contracts)
-
-  //       console.log(corrected)
-
-  //       appendContracts(
-  //         corrected[0].oso_contractsV0.map((contract) => {
-  //           return {
-  //             address: contract.contractAddress,
-  //             chainId: contract.contractNamespace,
-  //             excluded: false,
-  //           }
-  //         }),
-  //       )
-
-  //       console.log("appended")
-
-  //       setErrorMessage(undefined)
-  //     } catch (e) {
-  //       console.error("unexpected error occured adding contract(s): ", e)
-  //     }
-  //   }
-
-  //   setIsVerifying(false)
-  // }
-
   return (
     <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
       <p>Deployer</p>
@@ -190,11 +115,7 @@ export function DeployerFormField({
         />
       )}
 
-      <ContractsFormField
-        form={form}
-        deployerIndex={deployerIndex}
-        onRemove={onRemove}
-      />
+      <ContractsFormField form={form} deployerIndex={deployerIndex} />
     </div>
   )
 }

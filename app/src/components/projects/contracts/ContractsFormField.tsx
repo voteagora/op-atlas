@@ -11,29 +11,30 @@ import { ContractFormField } from "./ContractFormField"
 import { ReactNode, useState } from "react"
 import { ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 import { toast } from "sonner"
-import { removeProjectContracts } from "@/db/projects"
+import { addProjectContracts, removeProjectContracts } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
 import { getDeployedContracts } from "@/lib/oso"
 import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
 import { Button } from "@/components/ui/button"
-import { isAddress } from "viem"
+import { getAddress, isAddress } from "viem"
 
 export function ContractsFormField({
   form,
   deployerIndex,
-  onRemove,
 }: {
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
   deployerIndex: number
-  onRemove: (index: number) => void
 }) {
   const { fields: contractsFields, append: appendContracts } = useFieldArray({
     control: form.control,
     name: `deployers.${deployerIndex}.contracts`,
   })
 
+  const address = form.watch(`deployers.${deployerIndex}.address`)
   const [isVerifying, setIsVerifying] = useState(false)
+
+  const projectId = useProjectFromPath()
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
@@ -43,9 +44,7 @@ export function ContractsFormField({
     if (IS_USING_MOCK_DATA) {
       await new Promise((resolve) => setTimeout(resolve, 2000))
     } else {
-      const deployer = await getDeployedContracts(
-        form.getValues().deployers[deployerIndex].address,
-      )
+      const deployer = await getDeployedContracts(address)
 
       const corrected = replaceArtifactSourceWithNumber(
         JSON.parse(JSON.stringify([deployer])),
@@ -68,20 +67,20 @@ export function ContractsFormField({
       }
 
       try {
-        // const contracts = corrected[0].oso_contractsV0.map((contract) => {
-        //   return {
-        //     contractAddress: getAddress(contract.contractAddress),
-        //     deployerAddress: address,
-        //     deploymentHash: "",
-        //     verificationProof: "",
-        //     chainId: parseInt(contract.contractNamespace),
-        //     name: "",
-        //     description: "",
-        //     projectId,
-        //   }
-        // })
+        const contracts = corrected[0].oso_contractsV0.map((contract) => {
+          return {
+            contractAddress: getAddress(contract.contractAddress),
+            deployerAddress: address,
+            deploymentHash: "",
+            verificationProof: "",
+            chainId: parseInt(contract.contractNamespace),
+            name: "",
+            description: "",
+            projectId,
+          }
+        })
 
-        // await addProjectContracts(projectId, contracts)
+        await addProjectContracts(projectId, contracts)
 
         console.log(corrected)
 
