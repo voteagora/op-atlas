@@ -169,7 +169,7 @@ export function VerifyAddressDialog2({
               )}
             </div>
             <Button
-              className="self-stretch"
+              className="self-stretch disabled:bg-destructive/80 disabled:text-white"
               variant="destructive"
               type="button"
               disabled={!signature || loading}

@@ -262,7 +262,7 @@ export function MissingContractsDialog({
 
             <Button
               variant={"destructive"}
-              className="mt-10"
+              className="mt-10 disabled:bg-destructive/80 disabled:text-white"
               disabled={
                 !isAddress(deployer) || !isAddress(contract) || !isHex(txHash)
               }

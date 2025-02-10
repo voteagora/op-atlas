@@ -275,7 +275,7 @@ export function ContractsFormField({
               })
             }
             variant={"destructive"}
-            className="w-20"
+            className="w-20 disabled:bg-destructive/80 disabled:text-white"
             onClick={() => setIsVerifyingDialog(true)}
           >
             Verify
