@@ -18,7 +18,7 @@ import { getDeployedContracts } from "@/lib/oso"
 import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
 import { Button } from "@/components/ui/button"
 import { getAddress, isAddress } from "viem"
-import { VerifyAddressDialog } from "./VerifyAddressDialog"
+import { VerifyAddressDialog } from "../contracts-v1/VerifyAddressDialog"
 import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
 
 export function ContractsFormField({

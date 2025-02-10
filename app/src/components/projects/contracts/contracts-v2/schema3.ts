@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { AddressSchema, Chain } from "./commonSchema"
+import { AddressSchema, Chain } from "../commonSchema"
 
 export const ContractSchema = z.object({
   address: AddressSchema,

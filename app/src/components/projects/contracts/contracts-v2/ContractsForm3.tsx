@@ -11,7 +11,7 @@ import { Form, FormMessage } from "@/components/ui/form"
 
 import { OsoDeployerContractsReturnType, ProjectWithDetails } from "@/lib/types"
 
-import { ContractsSchema2 } from "./schema2"
+// import { ContractsSchema2 } from "../schema2"
 
 import { useProjectContracts } from "@/hooks/useProjectContracts"
 import {
@@ -49,7 +49,7 @@ const EMPTY_DEPLOYER = {
   contracts: [],
 }
 
-function getDefaultValues(): z.infer<typeof ContractsSchema2> {
+function getDefaultValues(): z.infer<typeof DeployersSchema> {
   return {
     deployers: [],
   }

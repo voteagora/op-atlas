@@ -18,8 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { ContractsSchema } from "./schema"
-import { Chain } from "./commonSchema"
+import { ContractsSchema } from "../contracts-v1/schema"
+import { Chain } from "../commonSchema"
 export function ChainSelector2({
   defaultValue,
   onChange,
