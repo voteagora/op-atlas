@@ -18,6 +18,8 @@ import { getDeployedContracts } from "@/lib/oso"
 import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
 import { Button } from "@/components/ui/button"
 import { getAddress, isAddress } from "viem"
+import { VerifyAddressDialog } from "./VerifyAddressDialog"
+import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
 
 export function ContractsFormField({
   form,
@@ -38,7 +40,7 @@ export function ContractsFormField({
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
-  async function onVerify() {
+  async function onVerify(signature: string) {
     setIsVerifying(true)
 
     if (IS_USING_MOCK_DATA) {
@@ -73,7 +75,7 @@ export function ContractsFormField({
             contractAddress: getAddress(contract.contractAddress),
             deployerAddress: address,
             deploymentHash: "",
-            verificationProof: "",
+            verificationProof: signature,
             chainId: parseInt(contract.contractNamespace),
             name: "",
             description: "",
@@ -107,8 +109,26 @@ export function ContractsFormField({
     initialMaxContractViewCount,
   )
 
+  const [isVerifiyingDialog, setIsVerifyingDialog] = useState(false)
+
   return (
     <>
+      {isVerifiyingDialog && (
+        <VerifyAddressDialog2
+          open
+          onOpenChange={(open) => !open && setIsVerifying(false)}
+          projectId={projectId}
+          deployerAddress={address as `0x${string}`}
+          // contractAddress={getAddress(contractAddress)}
+          // deploymentTxHash={deploymentTxHash}
+          onSubmit={(signature: string) => {
+            setIsVerifyingDialog(false)
+            onVerify(signature)
+          }}
+          // chain={chain}
+        />
+      )}
+
       {contractsFields.length > 0 && <p>Contracts</p>}
 
       {contractsFields.map((field, index) => {
@@ -175,7 +195,7 @@ export function ContractsFormField({
             }
             variant={"destructive"}
             className="w-20"
-            onClick={onVerify}
+            onClick={() => setIsVerifyingDialog(true)}
           >
             Verify
           </Button>

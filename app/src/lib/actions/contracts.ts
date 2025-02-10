@@ -17,6 +17,32 @@ import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
 
+export const verifyDeployer = async (
+  projectId: string,
+  deployerAddress: Address,
+  signature: `0x${string}`,
+) => {
+  const result = await verifyAuthentication(projectId)
+  if (result.error !== null) return result
+
+  // Verify that the deployer is the one that signed the message
+  const isValidSignature = await verifyMessage({
+    address: getAddress(deployerAddress),
+    message: getMessage(getAddress(deployerAddress)),
+    signature: signature as `0x${string}`,
+  })
+
+  if (!isValidSignature) {
+    return {
+      error: "Invalid signature",
+    }
+  }
+
+  return {
+    error: null,
+  }
+}
+
 export const verifyContract = async ({
   projectId,
   contractAddress: contractAddressRaw,
