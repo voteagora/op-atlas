@@ -13,6 +13,7 @@ import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "@/lib/constants"
 import { EXTENDED_TAG_BY_ENTITY } from "@/lib/constants"
 import { ExtendedAggregatedType } from "@/lib/types"
 import { UserAddressSource } from "@/lib/types"
+import { mergeResultsByEmail } from "@/lib/utils/tags"
 
 import { prisma } from "./client"
 
@@ -394,16 +395,51 @@ export async function getAllRFVoters(
 }
 
 export async function getAllContributors() {
-  const data = await prisma.project.findMany({
-    where: {
-      AND: [
-        {
+  const [projectContributors, orgContributors] = await Promise.all([
+    prisma.userProjects.findMany({
+      where: {
+        projectId: {
+          in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
+        },
+        deletedAt: null,
+        user: {
           deletedAt: null,
-          id: {
-            in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
+        },
+      },
+      select: {
+        user: {
+          select: {
+            emails: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              select: {
+                email: true,
+              },
+              where: {
+                email: {
+                  not: "",
+                },
+              },
+            },
+            addresses: {
+              select: {
+                address: true,
+              },
+            },
           },
         },
-        {
+      },
+    }),
+
+    prisma.projectOrganization.findMany({
+      where: {
+        projectId: {
+          in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
+        },
+        deletedAt: null,
+        organization: {
+          deletedAt: null,
           team: {
             some: {
               deletedAt: null,
@@ -413,60 +449,30 @@ export async function getAllContributors() {
             },
           },
         },
-        {
-          organization: {
-            deletedAt: null,
-            project: {
-              deletedAt: null,
-              team: {
-                some: {
-                  deletedAt: null,
-                  user: {
-                    deletedAt: null,
-                  },
-                },
-              },
-            },
-          },
-        },
-      ],
-    },
-    select: {
-      team: {
-        select: {
-          user: {
-            select: {
-              addresses: {
-                select: {
-                  address: true,
-                },
-              },
-              emails: {
-                select: {
-                  email: true,
-                },
-              },
-            },
-          },
-        },
       },
-      organization: {
-        select: {
-          project: {
-            select: {
-              team: {
-                select: {
-                  user: {
-                    select: {
-                      addresses: {
-                        select: {
-                          address: true,
+      select: {
+        organization: {
+          select: {
+            team: {
+              select: {
+                user: {
+                  select: {
+                    emails: {
+                      orderBy: {
+                        createdAt: "desc",
+                      },
+                      select: {
+                        email: true,
+                      },
+                      where: {
+                        email: {
+                          not: "",
                         },
                       },
-                      emails: {
-                        select: {
-                          email: true,
-                        },
+                    },
+                    addresses: {
+                      select: {
+                        address: true,
                       },
                     },
                   },
@@ -476,39 +482,29 @@ export async function getAllContributors() {
           },
         },
       },
-    },
-  })
+    }),
+  ])
 
-  const mergedContributors = data
-    .flatMap((d) => {
-      const team = d.team.map((t) => ({
-        user: t.user,
-        organization: null,
-      }))
+  const formattedProjectContributors = projectContributors.map(
+    (contributor) => contributor.user,
+  )
 
-      const organization =
-        d.organization?.project.team.map((t) => ({
-          user: t.user,
-          organization: d.organization,
-        })) ?? []
+  const formattedOrgContributors = orgContributors.flatMap((org) =>
+    org.organization.team.map((uo) => uo.user),
+  )
 
-      return [...team, ...organization]
-    })
-    .flatMap((c) => {
-      const mergedUsers = [
-        c.user,
-        ...(c.organization?.project.team.map((t) => t.user) ?? []),
-      ]
-      const uniqueUsers = Array.from(
-        new Set(mergedUsers.map((u) => u.emails.at(-1)?.email)),
-      ).map((email) => {
-        return mergedUsers.find((u) => u.emails.at(-1)?.email === email)
-      })
+  const mergedContributors = [
+    ...formattedProjectContributors,
+    ...formattedOrgContributors,
+  ]
 
-      return uniqueUsers
-    })
+  const uniqueContributors = Array.from(
+    new Map(
+      mergedContributors.map((user) => [user.emails.at(0)?.email, user]),
+    ).values(),
+  )
 
-  return mergedContributors
+  return uniqueContributors
 }
 
 export async function getAllOnchainBuilders() {
