@@ -10,7 +10,6 @@ import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { syncFarcasterAddresses } from "@/lib/actions/addresses"
 import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
-import { isBadgeholderAddress } from "@/lib/badgeholders"
 import {
   UserAddressSource,
   UserWithAddresses,
