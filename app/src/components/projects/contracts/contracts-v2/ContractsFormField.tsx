@@ -150,6 +150,13 @@ export function ContractsFormField({
 
   const contracts = form.watch(`deployers.${deployerIndex}.contracts`)
 
+  function getTrueFilterCount() {
+    return (
+      contracts.length -
+      contracts.filter((contract) => excludedToggle && contract.excluded).length
+    )
+  }
+
   return (
     <>
       {isMissingContractsDialogOpen && (
@@ -252,7 +259,7 @@ export function ContractsFormField({
         )
       })}
 
-      {contractViewCount < contracts.length && (
+      {contractViewCount < getTrueFilterCount() && (
         <button
           className="flex items-center gap-2"
           onClick={() => {
@@ -260,7 +267,7 @@ export function ContractsFormField({
           }}
         >
           <p>
-            Show {contracts.length - initialMaxContractViewCount} more
+            Show {getTrueFilterCount() - initialMaxContractViewCount} more
             contract(s)
           </p>
           <ChevronDown width={16} height={16} />
@@ -275,7 +282,8 @@ export function ContractsFormField({
           }}
         >
           <p>
-            Hide {contracts.length - initialMaxContractViewCount} contract(s)
+            Hide {getTrueFilterCount() - initialMaxContractViewCount}{" "}
+            contract(s)
           </p>
           <ChevronUp width={16} height={16} />
         </button>
