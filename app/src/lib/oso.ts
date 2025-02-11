@@ -1,11 +1,15 @@
 import { OsoDeployerContractsReturnType } from "@/lib/types"
 import { gql, GraphQLClient } from "graphql-request"
 
+if (!process.env.NEXT_PUBLIC_OSO_AUTH_TOKEN) {
+  throw new Error("OSO_AUTH_TOKEN is missing from env")
+}
+
 const SUBGRAPH_URL = "https://www.opensource.observer/api/v1/graphql"
 
 const client = new GraphQLClient(SUBGRAPH_URL, {
   headers: {
-    Authorization: `Bearer ${"XMT6GzRP1q7lk4KuiV3950B/IOC64jo_"}`,
+    Authorization: `Bearer ${process.env.NEXT_PUBLIC_OSO_AUTH_TOKEN}`,
   },
 })
 
