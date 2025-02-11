@@ -1,7 +1,9 @@
 import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { isAddress } from "viem"
 
 import { updateEmail } from "./actions/users"
+import { getBadgeholder } from "./api/eas/badgeholder"
 import { OrganizationWithDetails, ProjectWithDetails } from "./types"
 
 export function useIsAdmin(project?: ProjectWithDetails) {
@@ -55,4 +57,23 @@ export function useUpdateEmail() {
     },
     [update],
   )
+}
+
+export function useBadgeholderAddress(address: string) {
+  const [isBadgeholderAddress, setIsBadgeholderAddress] = useState<
+    boolean | null
+  >(null)
+
+  useEffect(() => {
+    if (!isAddress(address)) {
+      setIsBadgeholderAddress(false)
+      return
+    }
+
+    getBadgeholder(address).then((result) =>
+      setIsBadgeholderAddress(Boolean(result)),
+    )
+  }, [address])
+
+  return { isBadgeholderAddress }
 }

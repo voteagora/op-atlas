@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { isBadgeholderAddress } from "@/lib/badgeholders"
+import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -33,15 +33,7 @@ export const VerifiedAddress = ({
   showCheckmark?: boolean
 }) => {
   const { setOpenDialog } = useAppDialogs()
-  const [hasBadgeholderAddress, setHasBadgeholderAddress] = useState(false)
-
-  useEffect(() => {
-    const fetchBadgeholder = async () => {
-      setHasBadgeholderAddress(await isBadgeholderAddress(address))
-    }
-
-    fetchBadgeholder()
-  }, [address])
+  const { isBadgeholderAddress } = useBadgeholderAddress(address)
 
   return (
     <div className="flex items-center gap-1.5">
@@ -59,7 +51,7 @@ export const VerifiedAddress = ({
           <p className="text-sm">{address}</p>
 
           {primary && <Badge text="Primary address" />}
-          {hasBadgeholderAddress && <Badgeholder />}
+          {isBadgeholderAddress && <Badgeholder />}
           {source === "farcaster" && <Badge text="Farcaster" />}
         </div>
         <DropdownMenu>
