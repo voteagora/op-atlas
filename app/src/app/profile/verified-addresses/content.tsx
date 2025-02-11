@@ -106,7 +106,6 @@ export function VerifiedAddressesContent({
               address={address}
               source={source as UserAddressSource}
               primary={primary}
-              isBadgeholder={isBadgeholderAddress(address)}
               onCopy={onCopy}
               onRemove={onRemove}
             />

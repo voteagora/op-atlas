@@ -80,10 +80,6 @@ const Dashboard = ({
 
   const profileInitiallyComplete = useRef(profileProgress(user) === 100)
 
-  const userIsBadgeholder = useMemo(() => {
-    return isBadgeholder(user)
-  }, [user])
-
   useEffect(() => {
     // User has submitted at least one application but didn't receive any rewards
     if (false) {

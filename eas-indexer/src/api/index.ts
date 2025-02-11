@@ -32,6 +32,28 @@ entities.forEach((entity: Entity) => {
   });
 });
 
+entities.forEach((entity: Entity) => {
+  ponder.get(`/${entity}/all`, async (c) => {
+    const table = dbSchema[entity];
+    const data = await (c.db.query[entity] as any).findMany({
+      where: isNull(table.revoked_at),
+    });
+
+    if (data.length > 0) {
+      return c.json({
+        [entity]: data,
+      });
+    } else {
+      return c.json(
+        {
+          error: `${entity} not found`,
+        },
+        404
+      );
+    }
+  });
+});
+
 ponder.get("/entities/aggregated", async (c) => {
   const aggregated: AggregatedType = entities.reduce((acc, entity) => {
     (acc as Record<Entity, Attestation[]>)[entity] = [];

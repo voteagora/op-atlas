@@ -66,7 +66,7 @@ export function Account() {
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
-    if (!user || !isBadgeholder(user)) return
+    if (!user || !(await isBadgeholder(user))) return
 
     if (!hasShownWelcomeBadgeholderDialog()) {
       setOpenDialog("welcome_badgeholder")

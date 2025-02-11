@@ -1,5 +1,6 @@
-import { Address, checksumAddress, getAddress, isAddress } from "viem"
+import { Address, getAddress, isAddress } from "viem"
 
+import { getAllBadgeholders, getBadgeholder } from "./api/eas/badgeholder"
 import BadgeholderData from "./badgeholders.json"
 import { UserWithAddresses } from "./types"
 
@@ -7,16 +8,21 @@ export const BADGEHOLDER_ADDRESSES = new Set(
   BadgeholderData.map(({ address }) => getAddress(address)),
 )
 
-export function isBadgeholderAddress(address: string) {
+export async function isBadgeholderAddress(address: string) {
   if (!isAddress(address)) {
     return false
   }
 
-  return BADGEHOLDER_ADDRESSES.has(getAddress(address))
+  return Boolean(await getBadgeholder(address))
 }
 
-export function isBadgeholder(user: UserWithAddresses) {
+export async function isBadgeholder(user: UserWithAddresses) {
+  const allBadgeholders = await getAllBadgeholders()
+  const allBadgeholderAddresses = allBadgeholders.map(
+    (badgeholder) => badgeholder.address,
+  )
+
   return user.addresses.some((address) =>
-    BADGEHOLDER_ADDRESSES.has(checksumAddress(address.address as Address)),
+    allBadgeholderAddresses.includes(address.address),
   )
 }

@@ -12,3 +12,12 @@ export const getBadgeholder = async (
     return null
   }
 }
+
+export const getAllBadgeholders = async (): Promise<Badgeholder[]> => {
+  try {
+    const response = await easClient("/badgeholder/all")
+    return response
+  } catch (error) {
+    return []
+  }
+}

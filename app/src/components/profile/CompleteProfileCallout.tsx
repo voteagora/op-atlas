@@ -298,7 +298,6 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                     primary={primary}
                     showCheckmark={false}
                     source={source as UserAddressSource}
-                    isBadgeholder={isBadgeholderAddress(address)}
                     onCopy={onCopy}
                   />
                 ))}
