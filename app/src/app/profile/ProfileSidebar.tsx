@@ -9,7 +9,7 @@ export async function ProfileSidebar() {
   const user = await auth()
 
   if (!user?.user.id) {
-    return redirect("/dashbaord")
+    return redirect("/dashboard")
   }
 
   const organizations = await getOrganizations(user.user.id)

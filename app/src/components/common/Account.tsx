@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getUserById } from "@/db/users"
-import { isBadgeholder } from "@/lib/badgeholders"
+import { useIsBadgeholder } from "@/lib/hooks"
 import { usePrevious } from "@/lib/hooks"
 import {
   hasShownWelcomeBadgeholderDialog,
@@ -30,6 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
 export function Account() {
   const { data: session, status } = useSession()
+  const { isBadgeholder } = useIsBadgeholder()
   const previousAuthStatus = usePrevious(status)
   const [error, setError] = useState(false)
   const router = useRouter()
@@ -66,7 +67,7 @@ export function Account() {
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
-    if (!user || !isBadgeholder(user)) return
+    if (!user || !isBadgeholder) return
 
     if (!hasShownWelcomeBadgeholderDialog()) {
       setOpenDialog("welcome_badgeholder")

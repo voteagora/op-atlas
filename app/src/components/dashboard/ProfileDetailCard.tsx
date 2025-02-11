@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import React, { memo } from "react"
 
-import { isBadgeholderAddress } from "@/lib/badgeholders"
+import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -27,16 +27,13 @@ const ProfileDetailCard = ({
   user: UserWithAddresses
 }) => {
   const { setOpenDialog } = useAppDialogs()
+  const { isBadgeholder } = useIsBadgeholder(user)
 
   const initials = (user?.name ?? "")
     .split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-
-  const isBadgeholder = user.addresses?.find(({ address }) =>
-    isBadgeholderAddress(address),
-  )
 
   return (
     <div className={cn("flex gap-x-4", className)}>
