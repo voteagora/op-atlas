@@ -148,6 +148,8 @@ export function ContractsFormField({
 
   const [excludedToggle, setExcludedToggle] = useState(false)
 
+  const contracts = form.watch(`deployers.${deployerIndex}.contracts`)
+
   return (
     <>
       {isMissingContractsDialogOpen && (
@@ -180,13 +182,14 @@ export function ContractsFormField({
         />
       )}
 
-      {contractsFields.length > 0 && (
+      {contracts.length > 0 && (
         <div className="flex justify-between items-center">
           <FormLabel>Contracts</FormLabel>
 
           <div className="flex gap-4 items-center">
             <button
               className="flex items-center gap-1 text-sm"
+              type="button"
               onClick={() => setExcludedToggle(!excludedToggle)}
             >
               <Image
@@ -234,12 +237,14 @@ export function ContractsFormField({
         </div>
       )}
 
-      {contractsFields.map((field, index) => {
+      {contracts.map((field, index) => {
         if (index >= contractViewCount) return
+
+        if (excludedToggle) if (field.excluded) return
 
         return (
           <ContractFormField
-            key={field.id}
+            key={index + "contract"}
             form={form}
             deployerIndex={deployerIndex}
             contractIndex={index}
@@ -247,15 +252,15 @@ export function ContractsFormField({
         )
       })}
 
-      {contractViewCount < contractsFields.length && (
+      {contractViewCount < contracts.length && (
         <button
           className="flex items-center gap-2"
           onClick={() => {
-            setContractViewCount(contractsFields.length)
+            setContractViewCount(contracts.length)
           }}
         >
           <p>
-            Show {contractsFields.length - initialMaxContractViewCount} more
+            Show {contracts.length - initialMaxContractViewCount} more
             contract(s)
           </p>
           <ChevronDown width={16} height={16} />
@@ -270,8 +275,7 @@ export function ContractsFormField({
           }}
         >
           <p>
-            Hide {contractsFields.length - initialMaxContractViewCount}{" "}
-            contract(s)
+            Hide {contracts.length - initialMaxContractViewCount} contract(s)
           </p>
           <ChevronUp width={16} height={16} />
         </button>

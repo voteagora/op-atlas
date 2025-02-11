@@ -263,7 +263,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
           } else {
             // Update the excluded status if needed
             existingContract.excluded =
-              existingContract.excluded || contract.excluded
+              contract.excluded || existingContract.excluded
           }
         })
       })
