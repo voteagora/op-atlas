@@ -8,7 +8,6 @@ import {
   deleteUserAddress,
   syncFarcasterAddresses,
 } from "@/lib/actions/addresses"
-import { isBadgeholderAddress } from "@/lib/badgeholders"
 import { UserAddressSource, UserWithAddresses } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -106,7 +105,6 @@ export function VerifiedAddressesContent({
               address={address}
               source={source as UserAddressSource}
               primary={primary}
-              isBadgeholder={isBadgeholderAddress(address)}
               onCopy={onCopy}
               onRemove={onRemove}
             />

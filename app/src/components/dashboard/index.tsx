@@ -7,7 +7,6 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { isBadgeholder } from "@/lib/badgeholders"
 import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
@@ -79,10 +78,6 @@ const Dashboard = ({
   const { track } = useAnalytics()
 
   const profileInitiallyComplete = useRef(profileProgress(user) === 100)
-
-  const userIsBadgeholder = useMemo(() => {
-    return isBadgeholder(user)
-  }, [user])
 
   useEffect(() => {
     // User has submitted at least one application but didn't receive any rewards

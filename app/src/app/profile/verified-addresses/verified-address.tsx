@@ -1,6 +1,7 @@
 import { CircleHelp, Copy, X } from "lucide-react"
 import { Ellipsis } from "lucide-react"
 import Image from "next/image"
+import { useEffect, useState } from "react"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
@@ -10,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -19,7 +21,6 @@ export const VerifiedAddress = ({
   address,
   source,
   primary,
-  isBadgeholder = false,
   onCopy,
   onRemove,
   showCheckmark = true,
@@ -27,12 +28,12 @@ export const VerifiedAddress = ({
   address: string
   source: UserAddressSource
   primary: boolean
-  isBadgeholder?: boolean
   onCopy: (address: string) => void
   onRemove?: (address: string) => void
   showCheckmark?: boolean
 }) => {
   const { setOpenDialog } = useAppDialogs()
+  const { isBadgeholderAddress } = useBadgeholderAddress(address)
 
   return (
     <div className="flex items-center gap-1.5">
@@ -50,7 +51,7 @@ export const VerifiedAddress = ({
           <p className="text-sm">{address}</p>
 
           {primary && <Badge text="Primary address" />}
-          {isBadgeholder && <Badgeholder />}
+          {isBadgeholderAddress && <Badgeholder />}
           {source === "farcaster" && <Badge text="Farcaster" />}
         </div>
         <DropdownMenu>
