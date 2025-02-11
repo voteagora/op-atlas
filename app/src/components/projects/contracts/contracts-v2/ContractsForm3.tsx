@@ -306,6 +306,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     (isSave: boolean) => async (values: z.infer<typeof DeployersSchema>) => {
       isSave ? setIsSaving(true) : setIsSubmitting(true)
 
+      toast.info("Saving project...")
       try {
         const [result] = await Promise.all([
           updateProjectOSOStatus({
@@ -335,6 +336,8 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
   const submittedToOso = form3.watch("submittedToOSO")
   const deployers = form3.watch("deployers")
 
+  console.log(deployers)
+
   const canAddContract = deployers.every(
     (deployer) => deployer.contracts.length > 1,
   )
@@ -351,7 +354,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
 
   return (
     <Form {...form3}>
-      <form onSubmit={form3.handleSubmit(onSubmit(false))}>
+      <form onSubmit={form3.handleSubmit(onSubmit(true))}>
         <div className="flex flex-col gap-6">
           <h3 className="text-2xl">Contracts</h3>
           <div className="text-secondary-foreground">
@@ -466,16 +469,24 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
             )}
           />
         </div>
+        <Button
+          isLoading={isSaving}
+          disabled={!canSubmit || isSubmitting}
+          type="button"
+          onClick={form3.handleSubmit(onSubmit(true))}
+          variant="destructive"
+        >
+          Save
+        </Button>
+        <Button
+          isLoading={isSubmitting}
+          disabled={!canSubmit || isSubmitting}
+          type="submit"
+          variant="secondary"
+        >
+          Next
+        </Button>
       </form>
-
-      <Button
-        variant={"destructive"}
-        type="submit"
-        className="w-20"
-        disabled={!canSubmit}
-      >
-        Save
-      </Button>
     </Form>
   )
 }
