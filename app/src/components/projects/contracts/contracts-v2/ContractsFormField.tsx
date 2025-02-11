@@ -65,7 +65,6 @@ export function ContractsFormField({
 
       setSignature(signature)
 
-      console.log(corrected)
       if (corrected[0].oso_contractsV0.length <= 0) {
         setErrorMessage(
           <p className="text-rose-700 text-sm">
@@ -297,6 +296,7 @@ export function ContractsFormField({
                 )
               })
             }
+            type="button"
             variant={"destructive"}
             className="w-20 disabled:bg-destructive/80 disabled:text-white"
             onClick={() => setIsVerifyingDialog(true)}

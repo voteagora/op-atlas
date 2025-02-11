@@ -15,18 +15,9 @@ export const DeployerSchema = z.object({
 })
 
 export const DeployersSchema = z.object({
-  deployers: z.array(DeployerSchema).refine(
-    (deployers) => {
-      console.log("REFINED")
-      const addresses = deployers.map((d) => d.address)
-      return new Set(addresses).size === addresses.length
-    },
-    {
-      message: "Addresses must be unique",
-    },
-  ),
+  deployers: z.array(DeployerSchema),
   submittedToOSO: z.boolean(),
   isOffChain: z.boolean(),
-  osoSlug: z.string().optional(),
-  defillamaAdapter: z.string().optional(),
+  osoSlug: z.string(),
+  defillamaAdapter: z.string(),
 })

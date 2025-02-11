@@ -122,7 +122,7 @@ export function MissingContractsDialog({
               </div>
             </div>
 
-            <button onClick={() => setPage(1)}>
+            <button type="button" onClick={() => setPage(1)}>
               <Callout
                 showIcon={false}
                 type="gray"
@@ -141,6 +141,7 @@ export function MissingContractsDialog({
             </button>
 
             <button
+              type="button"
               //TODO:// Add link
               onClick={() => {}}
             >
@@ -163,6 +164,7 @@ export function MissingContractsDialog({
             </button>
 
             <button
+              type="button"
               //TODO:// Add link
               onClick={() => {}}
             >
@@ -261,6 +263,7 @@ export function MissingContractsDialog({
             <ChainSelector2 defaultValue={"10"} onChange={onChainChange} />
 
             <Button
+              type="button"
               variant={"destructive"}
               className="mt-10 disabled:bg-destructive/80 disabled:text-white"
               disabled={

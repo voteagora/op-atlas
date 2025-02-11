@@ -76,8 +76,6 @@ export function VerifyAddressDialog2({
     setSelectedChain(parseInt(value))
   }
 
-  console.log(selectedChain)
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">

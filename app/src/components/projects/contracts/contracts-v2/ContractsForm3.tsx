@@ -49,6 +49,10 @@ import { Plus } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import ExternalLink from "@/components/ExternalLink"
 import { Input } from "@/components/ui/input"
+import { updateProjectOSOStatus } from "@/lib/actions/contracts"
+import { updateProjectDetails } from "@/lib/actions/projects"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 const osoLiveTestDeployerAddresses = [
   "0xa18d0226043a76683950f3baabf0a87cfb32e1cb", // OSO Sample
@@ -64,7 +68,9 @@ function getDefaultValues(): z.infer<typeof DeployersSchema> {
   return {
     submittedToOSO: false,
     isOffChain: false,
+    osoSlug: "",
     deployers: [EMPTY_DEPLOYER],
+    defillamaAdapter: "",
   }
 }
 export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
@@ -187,6 +193,7 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
         submittedToOSO: false,
         osoSlug: "",
         isOffChain: false,
+        defillamaAdapter: "",
       }
 
       // Merge the deployers data from both sources
@@ -290,11 +297,39 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     console.log(data)
   }
 
-  if (!isProjectContractsFetched || !isOsoContractsFetched) {
-    return (
-      <div className="w-full h-96 bg-secondary rounded-lg animate-pulse"></div>
-    )
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const router = useRouter()
+
+  const onSubmit =
+    (isSave: boolean) => async (values: z.infer<typeof DeployersSchema>) => {
+      isSave ? setIsSaving(true) : setIsSubmitting(true)
+
+      try {
+        const [result] = await Promise.all([
+          updateProjectOSOStatus({
+            projectId: project.id,
+            osoProjectName: values.osoSlug,
+            isSubmittedToOso: values.submittedToOSO,
+          }),
+          updateProjectDetails(project.id, {
+            isOnChainContract: !values.isOffChain,
+          }),
+        ])
+
+        if (result.error) {
+          throw new Error(result.error)
+        }
+
+        !isSave && router.push(`/projects/${project.id}/grants`)
+        setIsSaving(false)
+        toast.success("Project saved")
+      } catch (error) {
+        toast.error("There was an error saving the project.")
+        isSave ? setIsSaving(false) : setIsSubmitting(false)
+      }
+    }
 
   const isOffchain = form3.watch("isOffChain")
   const submittedToOso = form3.watch("submittedToOSO")
@@ -308,9 +343,15 @@ export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
     return isOffchain || canAddContract || submittedToOso
   })()
 
+  if (!isProjectContractsFetched || !isOsoContractsFetched) {
+    return (
+      <div className="w-full h-96 bg-secondary rounded-lg animate-pulse"></div>
+    )
+  }
+
   return (
     <Form {...form3}>
-      <form onSubmit={form3.handleSubmit(onSubmit3)}>
+      <form onSubmit={form3.handleSubmit(onSubmit(false))}>
         <div className="flex flex-col gap-6">
           <h3 className="text-2xl">Contracts</h3>
           <div className="text-secondary-foreground">

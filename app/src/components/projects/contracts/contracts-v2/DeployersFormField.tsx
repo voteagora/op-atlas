@@ -29,6 +29,10 @@ export function DeployersFormField({
 
   async function onRemoveDeployerField(index: number) {
     removeDeployerField(index)
+
+    if (deployersFields.length <= 1) {
+      onAddDeployerField()
+    }
   }
 
   return (
