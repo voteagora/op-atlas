@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { isAddress } from "viem"
@@ -61,48 +62,35 @@ export function useUpdateEmail() {
 }
 
 export function useBadgeholderAddress(address: string) {
-  const [isBadgeholderAddress, setIsBadgeholderAddress] = useState<
-    boolean | null
-  >(null)
-
-  useEffect(() => {
-    if (!isAddress(address)) {
-      setIsBadgeholderAddress(false)
-      return
-    }
-
-    getBadgeholder(address).then((result) =>
-      setIsBadgeholderAddress(Boolean(result)),
-    )
-  }, [address])
+  const { data: isBadgeholderAddress } = useQuery({
+    queryKey: ["badgeholder", address],
+    queryFn: async () => {
+      if (!isAddress(address)) return false
+      return Boolean(await getBadgeholder(address))
+    },
+    enabled: Boolean(address),
+  })
 
   return { isBadgeholderAddress }
 }
 
 export function useIsBadgeholder(user?: Partial<UserWithAddresses>) {
-  const [isBadgeholder, setIsBadgeholder] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    async function checkBadgeholder() {
-      if (!user?.addresses) {
-        setIsBadgeholder(false)
-        return
-      }
+  const { data: isBadgeholder } = useQuery({
+    queryKey: ["badgeholders", user],
+    queryFn: async () => {
+      if (!user?.addresses?.length) return false
 
       const allBadgeholders = await getAllBadgeholders()
       const allBadgeholderAddresses = new Set(
         allBadgeholders.map((badgeholder) => badgeholder.address),
       )
 
-      setIsBadgeholder(
-        user.addresses.some((address) =>
-          allBadgeholderAddresses.has(address.address),
-        ),
+      return user.addresses.some((address) =>
+        allBadgeholderAddresses.has(address.address),
       )
-    }
-
-    checkBadgeholder()
-  }, [user])
+    },
+    enabled: Boolean(user?.addresses?.length),
+  })
 
   return { isBadgeholder }
 }
