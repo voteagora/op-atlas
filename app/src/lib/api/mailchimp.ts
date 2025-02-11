@@ -3,7 +3,7 @@ import "server-only"
 import { Md5 } from "ts-md5"
 
 import mailchimp from "@/lib/mailchimp"
-import { arrayDifference } from "@/lib/utils/tags"
+import { arrayDifference } from "@/lib/utils"
 
 export async function updateMailchimpTags(
   users: {
