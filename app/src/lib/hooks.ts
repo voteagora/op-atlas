@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { isAddress } from "viem"
 
 import { updateEmail } from "./actions/users"
-import { getBadgeholder } from "./api/eas/badgeholder"
+import { getAllBadgeholders, getBadgeholder } from "./api/eas/badgeholder"
+import { UserWithAddresses } from "./types"
 import { OrganizationWithDetails, ProjectWithDetails } from "./types"
 
 export function useIsAdmin(project?: ProjectWithDetails) {
@@ -76,4 +77,32 @@ export function useBadgeholderAddress(address: string) {
   }, [address])
 
   return { isBadgeholderAddress }
+}
+
+export function useIsBadgeholder(user?: Partial<UserWithAddresses>) {
+  const [isBadgeholder, setIsBadgeholder] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    async function checkBadgeholder() {
+      if (!user?.addresses) {
+        setIsBadgeholder(false)
+        return
+      }
+
+      const allBadgeholders = await getAllBadgeholders()
+      const allBadgeholderAddresses = new Set(
+        allBadgeholders.map((badgeholder) => badgeholder.address),
+      )
+
+      setIsBadgeholder(
+        user.addresses.some((address) =>
+          allBadgeholderAddresses.has(address.address),
+        ),
+      )
+    }
+
+    checkBadgeholder()
+  }, [user])
+
+  return { isBadgeholder }
 }
