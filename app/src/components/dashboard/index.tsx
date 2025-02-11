@@ -7,7 +7,6 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { isBadgeholder } from "@/lib/badgeholders"
 import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
