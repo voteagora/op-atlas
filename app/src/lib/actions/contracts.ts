@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache"
 import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
-import { getDeployedContractsServer } from "@/app/api/oso/contracts/[address]/route"
 import { auth } from "@/auth"
 import {
   addProjectContract,
@@ -15,11 +14,11 @@ import {
 } from "@/db/projects"
 
 import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
-import { getDeployedContracts } from "../oso"
 import { osoNamespaceToChainId } from "../utils/contractForm"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
+import { getDeployedContractsServer } from "@/app/api/oso/common"
 
 export const verifyDeployer = async (
   projectId: string,
