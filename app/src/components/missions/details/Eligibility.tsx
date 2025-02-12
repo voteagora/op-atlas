@@ -12,7 +12,7 @@ export const Eligibility = () => {
       <p className="text-xl font-semibold">Eligibility</p>
       <p className="text-secondary-foreground">
         {
-          "In order to apply, your Dev Tooling project must first be added to OP Atlas. A project can't be considered for enrollment until its setup is complete."
+          "In order to apply, your project must first be added to OP Atlas. A project can't be considered for enrollment until its setup is complete."
         }
       </p>
 
