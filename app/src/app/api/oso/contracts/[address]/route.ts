@@ -10,12 +10,12 @@ export async function GET(
 ) {
   const { address } = params
 
-  const contracts = await getDeployedContracts(address)
+  const contracts = await getDeployedContractsServer(address)
 
   return NextResponse.json(contracts)
 }
 
-async function getDeployedContracts(
+export async function getDeployedContractsServer(
   deployer: string,
 ): Promise<OsoDeployerContractsReturnType> {
   const variables = {

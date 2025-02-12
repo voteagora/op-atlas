@@ -1,3 +1,4 @@
+import { ProjectContract } from "@prisma/client"
 import Image from "next/image"
 import { useMemo, useState } from "react"
 import { type Address, checksumAddress } from "viem"
@@ -9,9 +10,9 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { FormLabel } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
-import { verifyContract, verifyDeployer } from "@/lib/actions/contracts"
-import { Chain, getMessage } from "@/lib/utils/contracts"
-import { ChainSelector } from "../contracts-v1/ChainSelector"
+import { verifyDeployer } from "@/lib/actions/contracts"
+import { getMessage } from "@/lib/utils/contracts"
+
 import { ChainSelector2 } from "./ChainSelector2"
 
 const defaultSelectedChain = 10
@@ -25,7 +26,10 @@ export function VerifyAddressDialog2({
 }: DialogProps<{
   projectId: string
   deployerAddress: Address
-  onSubmit: (signature: string) => void
+  onSubmit: (
+    includedContracts: ProjectContract[],
+    excludedContracts: ProjectContract[],
+  ) => void
 }>) {
   const [page, setPage] = useState(0)
   const [copied, setCopied] = useState(false)
@@ -64,7 +68,10 @@ export function VerifyAddressDialog2({
       }
 
       setError(undefined)
-      onSubmit(signature)
+      onSubmit(
+        verificationResult.contracts.included as ProjectContract[],
+        verificationResult.contracts.excluded as ProjectContract[],
+      )
     } catch (_) {
       setError("An error occurred, please try again")
     } finally {

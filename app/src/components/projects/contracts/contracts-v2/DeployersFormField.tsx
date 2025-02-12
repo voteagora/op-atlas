@@ -1,13 +1,12 @@
-import { useFieldArray, UseFormReturn } from "react-hook-form"
-import { z } from "zod"
-import { DeployersSchema } from "./schema3"
-import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import { DeployerFormField } from "./DeployerFormField"
+import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { isAddress } from "viem"
-import { toast } from "sonner"
-import { removeProjectContracts } from "@/db/projects"
-import { useProjectFromPath } from "@/hooks/useProjectFromPath"
+import { z } from "zod"
+
+import { Button } from "@/components/ui/button"
+
+import { DeployerFormField } from "./DeployerFormField"
+import { DeployersSchema } from "./schema3"
 
 export function DeployersFormField({
   form,

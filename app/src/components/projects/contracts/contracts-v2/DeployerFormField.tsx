@@ -1,7 +1,9 @@
-import { Ellipsis } from "lucide-react"
+import { ProjectContract } from "@prisma/client"
+import { Ellipsis, Loader2 } from "lucide-react"
+import { useState } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
-import { Address } from "viem"
+import { Address, isAddress } from "viem"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -14,12 +16,14 @@ import {
 import { FormField, FormLabel } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { onCopy } from "@/components/ui/utils/copy"
+import { useOsoDeployedContracts } from "@/hooks/useOsoDeployedContracts"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
-import { removeContracts } from "@/lib/actions/contracts"
+import { removeContracts, verifyDeployer } from "@/lib/actions/contracts"
 import { truncate } from "@/lib/utils/contracts"
 
 import { ContractsFormField } from "./ContractsFormField"
 import { DeployersSchema } from "./schema3"
+import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
 
 export function DeployerFormField({
   form,
@@ -52,6 +56,45 @@ export function DeployerFormField({
     } catch (e) {
       toast("There was an error trying to remove the deployer")
     }
+  }
+
+  // We don't really need this for the default use case
+  // TODO: We'll need to merge the contracts that were excluded when user returns to this page
+  const { data: osoContracts, isLoading: isLoadingContracts } =
+    useOsoDeployedContracts(address)
+
+  const [isVerifyingDialog, setIsVerifyingDialog] = useState(false)
+  const [isVerified, setIsVerified] = useState(contractsFields.length > 0) // If there're contracts, it's verified
+
+  // On verify the address, we need to fetch the contracts based on the address
+  async function onVerifySuccess(
+    includedContracts: ProjectContract[],
+    excludedContracts: ProjectContract[],
+  ) {
+    // Set the contracts to the form
+    form.setValue(`deployers.${deployerIndex}.contracts`, [
+      ...includedContracts.map((contract) => {
+        return {
+          address: contract.contractAddress,
+          chainId: contract.chainId.toString(),
+          excluded: false,
+        }
+      }),
+      ...excludedContracts.map((contract) => {
+        return {
+          address: contract.contractAddress,
+          chainId: contract.chainId.toString(),
+          excluded: true,
+        }
+      }),
+    ])
+
+    setIsVerified(true)
+
+    // add all contracts to the DB
+    // batch add { address[], chainId[], deployerAddress: address, signature: string }
+
+    // no form? or still add the contracts to the form?
   }
 
   return (
@@ -97,7 +140,59 @@ export function DeployerFormField({
           />
         )}
 
-        <ContractsFormField form={form} deployerIndex={deployerIndex} />
+        {isVerifyingDialog && (
+          <VerifyAddressDialog2
+            open
+            onOpenChange={(open) => !open && setIsVerifyingDialog(false)}
+            projectId={projectId}
+            deployerAddress={address as `0x${string}`}
+            onSubmit={(
+              includedContracts: ProjectContract[],
+              excludedContracts: ProjectContract[],
+            ) => {
+              setIsVerifyingDialog(false)
+              onVerifySuccess(includedContracts, excludedContracts)
+            }}
+          />
+        )}
+
+        {/* 3 states:
+        1. Not verified -> show the verify button
+        2. Verified -> show the contracts form
+        3. Loading -> show the loading state
+        */}
+
+        {isVerified && !isLoadingContracts && (
+          <ContractsFormField form={form} deployerIndex={deployerIndex} />
+        )}
+
+        {isLoadingContracts && isVerified && (
+          <div className="flex items-center">
+            <Loader2 width={16} height={16} className="animate-spin" />
+            <p>Searching for contracts</p>
+          </div>
+        )}
+
+        {!isVerified && (
+          <Button
+            disabled={
+              !form.getValues(`deployers`).every((deployer, index, array) => {
+                return (
+                  deployer.address &&
+                  isAddress(deployer.address) &&
+                  array.findIndex((r) => r.address === deployer.address) ===
+                    index
+                )
+              })
+            }
+            type="button"
+            variant={"destructive"}
+            className="w-20 disabled:bg-destructive/80 disabled:text-white"
+            onClick={() => setIsVerifyingDialog(true)}
+          >
+            Verify
+          </Button>
+        )}
       </div>
     </>
   )

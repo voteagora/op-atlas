@@ -1,17 +1,13 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import {
-  Address,
-  createPublicClient,
-  getAddress,
-  isAddressEqual,
-  verifyMessage,
-} from "viem"
+import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
+import { getDeployedContractsServer } from "@/app/api/oso/contracts/[address]/route"
 import { auth } from "@/auth"
 import {
   addProjectContract,
+  addProjectContracts,
   getProjectContracts,
   removeProjectContract,
   removeProjectContracts,
@@ -19,6 +15,8 @@ import {
 } from "@/db/projects"
 
 import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
+import { getDeployedContracts } from "../oso"
+import { osoNamespaceToChainId } from "../utils/contractForm"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
@@ -29,16 +27,24 @@ export const verifyDeployer = async (
   chainId: number,
   signature: `0x${string}`,
 ) => {
-  const result = await verifyAuthentication(projectId)
+  const [contracts, result] = await Promise.all([
+    getDeployedContractsServer(deployerAddress),
+    verifyAuthenticatedMember(projectId),
+  ])
   if (result.error !== null) return result
+
+  // TODO: Handle the case where the deployer address is not found
+  // TODO: Handle the case where there're no contracts
 
   const client = clients[chainId]
 
-  const isValidSignature = client.verifyMessage({
+  const isValidSignature = await client.verifyMessage({
     address: getAddress(deployerAddress),
     message: getMessage(getAddress(deployerAddress)),
     signature: signature as `0x${string}`,
   })
+
+  console.log("isValidSignature", isValidSignature)
 
   if (!isValidSignature) {
     return {
@@ -46,8 +52,27 @@ export const verifyDeployer = async (
     }
   }
 
+  // Add all contracts to the DB
+  const addedContracts = await addProjectContracts(
+    projectId,
+    contracts?.oso_contractsV0.map((contract) => {
+      return {
+        chainId: osoNamespaceToChainId(contract.contractNamespace),
+        contractAddress: contract.contractAddress,
+        deployerAddress: deployerAddress,
+        projectId,
+        deploymentHash: "",
+        verificationProof: signature,
+      }
+    }),
+  )
+
   return {
     error: null,
+    contracts: {
+      included: addedContracts.createdContracts,
+      excluded: addedContracts.failedContracts,
+    },
   }
 }
 
@@ -245,7 +270,7 @@ export const updateContractDetails = async ({
   }
 }
 
-async function verifyAuthentication(projectId: string) {
+async function verifyAuthenticatedMember(projectId: string) {
   const session = await auth()
   if (!session) {
     return {
@@ -267,7 +292,7 @@ export const removeContracts = async (
   projectId: string,
   contracts: { address: Address; chainId: string }[],
 ) => {
-  const result = await verifyAuthentication(projectId)
+  const result = await verifyAuthenticatedMember(projectId)
   if (result.error !== null) return result.error
 
   await removeProjectContracts(
@@ -297,7 +322,7 @@ export const removeContract = async ({
   address: Address
   chainId: number
 }) => {
-  const result = await verifyAuthentication(projectId)
+  const result = await verifyAuthenticatedMember(projectId)
   if (result.error !== null) return result.error
 
   const contractAddress = getAddress(contractAddressRaw)

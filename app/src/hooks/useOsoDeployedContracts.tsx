@@ -3,6 +3,7 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query"
+
 import { getDeployedContracts } from "@/lib/oso"
 import { OsoDeployerContractsReturnType } from "@/lib/types"
 
@@ -15,7 +16,7 @@ export function useOsoDeployedContracts(
   return useQuery({
     queryKey: ["osoDeployerContracts", deployer],
     queryFn: () => getDeployedContracts(deployer),
-    ...queryOptions, // Merge custom options
+    ...queryOptions,
   })
 }
 

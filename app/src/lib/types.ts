@@ -336,7 +336,7 @@ export type OsoDeployerContractsReturnType = {
 }
 
 export interface ProjectContractsByDeployer {
-  deployerAddress: string
+  address: string
   contracts: Array<{ address: string; chainId: number }>
 }
 
