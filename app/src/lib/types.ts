@@ -325,6 +325,21 @@ export type CategoryWithImpact = Prisma.CategoryGetPayload<{
   }
 }>
 
+export type OsoDeployerContracts = {
+  contractNamespace: string
+  contractAddress: string
+  rootDeployerAddress: string
+}
+
+export type OsoDeployerContractsReturnType = {
+  oso_contractsV0: Array<OsoDeployerContracts>
+}
+
+export interface ProjectContractsByDeployer {
+  deployerAddress: string
+  contracts: Array<{ address: string; chainId: number }>
+}
+
 export type ExtendedAggregatedType = AggregatedType & {
   contributors: { address: string; email?: string }[]
   github_repo_builders: { address: string; email?: string }[]

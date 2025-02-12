@@ -37,7 +37,7 @@ export type TraceCall = {
   type: "CALL" | "STATICCALL" | "DELEGATECALL" | "CREATE" | "CREATE2"
 }
 
-const clients = {
+export const clients = {
   [Chain.ArenaZ]: createClient(arenaZ, "https://rpc.arena-z.gg"),
   [Chain.Base]: createClient(
     base,

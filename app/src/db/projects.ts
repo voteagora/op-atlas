@@ -528,6 +528,16 @@ async function getProjectTeamFn({
 
 export const getProjectTeam = cache(getProjectTeamFn)
 
+async function getAllProjectContractsFn({ projectId }: { projectId: string }) {
+  return prisma.projectContract.findMany({
+    where: {
+      projectId: projectId,
+    },
+  })
+}
+
+export const getAllProjectContracts = cache(getAllProjectContractsFn)
+
 async function getProjectContractsFn({
   projectId,
   deployerAddress,
@@ -865,6 +875,28 @@ export async function removeTeamMember({
   return prisma.$transaction([memberDelete, projectUpdate])
 }
 
+export async function addProjectContracts(
+  projectId: string,
+  contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
+) {
+  const contractsCreate = prisma.projectContract.createMany({
+    data: contracts.map((contract) => ({
+      ...contract,
+    })),
+  })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([contractsCreate, projectUpdate])
+}
+
 export async function addProjectContract({
   projectId,
   contract,
@@ -929,6 +961,55 @@ export async function updateProjectContract({
   return prisma.$transaction([contractUpdate, projectUpdate])
 }
 
+export async function removeProjectContractsByDeployer(
+  projectId: string,
+  deployer: string,
+) {
+  const contractDelete = prisma.projectContract.deleteMany({
+    where: {
+      projectId: projectId,
+      deployerAddress: deployer,
+    },
+  })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([contractDelete, projectUpdate])
+}
+
+export async function removeProjectContracts(
+  projectId: string,
+  contracts: { address: string; chainId: string }[],
+) {
+  const contractDelete = prisma.projectContract.deleteMany({
+    where: {
+      OR: contracts.map((contract) => ({
+        contractAddress: contract.address,
+        chainId: parseInt(contract.chainId),
+        projectId: projectId,
+      })),
+    },
+  })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([contractDelete, projectUpdate])
+}
+
 export async function removeProjectContract({
   projectId,
   address,
@@ -938,6 +1019,10 @@ export async function removeProjectContract({
   address: string
   chainId: number
 }) {
+  console.log(projectId)
+  console.log(address)
+  console.log(chainId)
+
   const contractDelete = prisma.projectContract.delete({
     where: {
       projectId,

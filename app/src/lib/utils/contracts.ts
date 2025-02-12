@@ -17,6 +17,12 @@ import {
 
 import { polynomial } from "@/components/common/chain"
 
+export function truncate(value: string, numToShow: number) {
+  return `${value.slice(0, numToShow)}${
+    numToShow < value.length / 2 ? "..." : ""
+  }${value.slice(-numToShow)}`
+}
+
 export enum Chain {
   ArenaZ = arenaZ.id,
   Base = base.id,

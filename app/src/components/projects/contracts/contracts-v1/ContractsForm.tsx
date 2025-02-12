@@ -37,11 +37,12 @@ import { ProjectWithDetails } from "@/lib/types"
 
 import { ContractForm } from "./ContractForm"
 import {
-  Chain,
   ContractSchema,
   ContractsSchema,
   HasDeployerKeysOption,
 } from "./schema"
+
+import { Chain } from "../commonSchema"
 
 const EMPTY_CONTRACT = {
   contractAddress: "",

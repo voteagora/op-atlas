@@ -1,0 +1,492 @@
+"use client"
+
+import { zodResolver } from "@hookform/resolvers/zod"
+import { ProjectContract } from "@prisma/client"
+import { useEffect, useState } from "react"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
+
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+
+import { OsoDeployerContractsReturnType, ProjectWithDetails } from "@/lib/types"
+
+// import { ContractsSchema2 } from "../schema2"
+
+import { useProjectContracts } from "@/hooks/useProjectContracts"
+import {
+  useOsoDeployedContracts,
+  useOsoDeployersDeployedContracts,
+} from "@/hooks/useOsoDeployedContracts"
+import {
+  mockOsoDeployerContractsData,
+  mockOsoDeployersContractsData,
+} from "./MockOsoDeployerContractsData"
+import {
+  IS_USING_EMPTY_MOCK_DATA,
+  IS_USING_MOCK_DATA,
+  mockProjectContractsData,
+} from "./MockProjectContractsData"
+import { DeployersSchema } from "./schema3"
+import { DeployersFormField } from "./DeployersFormField"
+import {
+  convertContracts,
+  groupByDeployer,
+  replaceArtifactSourceWithNumber,
+} from "@/lib/utils/contractForm"
+import { getAddress, isAddress } from "viem"
+import { DeployerFormField } from "./DeployerFormField"
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip"
+import { Plus } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import ExternalLink from "@/components/ExternalLink"
+import { Input } from "@/components/ui/input"
+import { updateProjectOSOStatus } from "@/lib/actions/contracts"
+import { updateProjectDetails } from "@/lib/actions/projects"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+
+const osoLiveTestDeployerAddresses = [
+  "0xa18d0226043a76683950f3baabf0a87cfb32e1cb", // OSO Sample
+  "0x3fab184622dc19b6109349b94811493bf2a45362", // OSO image
+  "0x83bc3055649f9a829bebeccbc86e090d6a157161", // chainlink
+]
+const EMPTY_DEPLOYER = {
+  address: "",
+  contracts: [],
+}
+
+function getDefaultValues(): z.infer<typeof DeployersSchema> {
+  return {
+    submittedToOSO: false,
+    isOffChain: false,
+    osoSlug: "",
+    deployers: [EMPTY_DEPLOYER],
+    defillamaAdapter: "",
+  }
+}
+export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
+  const form3 = useForm<z.infer<typeof DeployersSchema>>({
+    resolver: zodResolver(DeployersSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    defaultValues: getDefaultValues(),
+  })
+
+  const {
+    fields: deployersFields,
+    append: addDeployerField,
+    remove: removeDeployerField,
+  } = useFieldArray({
+    control: form3.control,
+    name: "deployers",
+  })
+
+  const { data: projectContractsData, isFetched: isProjectContractsFetched } =
+    useProjectContracts(project.id)
+
+  const projectContractsByDeployer = Object.values(
+    groupByDeployer(projectContractsData || []),
+  )
+
+  // const { data: osoDeployerContractsData } = useOsoDeployedContracts(
+  //   "0xa18d0226043a76683950f3baabf0a87cfb32e1cb",
+  // )
+
+  const deployerAddresses = projectContractsByDeployer?.map(
+    (projectContractData) => {
+      return projectContractData.deployerAddress
+    },
+  )
+
+  // console.log(deployerAddresses)
+
+  const { data: osoDeployersContractsData, isFetched: isOsoContractsFetched } =
+    useOsoDeployersDeployedContracts(
+      deployerAddresses ?? [],
+      // ["0xa18d0226043a76683950f3baabf0a87cfb32e1cb"],
+    )
+
+  // console.log(osoDeployersContractsData)
+
+  function getProjectContractsData() {
+    return IS_USING_MOCK_DATA
+      ? IS_USING_EMPTY_MOCK_DATA
+        ? []
+        : mockProjectContractsData
+      : projectContractsData
+  }
+
+  // async function getOsoDeployerContractsData() {
+  //   return IS_USING_MOCK_DATA
+  //     ? mockOsoDeployerContractsData
+  //     : osoDeployerContractsData
+  // }
+
+  function getOsoDeployersContractsData() {
+    return IS_USING_MOCK_DATA
+      ? IS_USING_EMPTY_MOCK_DATA
+        ? []
+        : mockOsoDeployersContractsData
+      : osoDeployersContractsData
+  }
+
+  useEffect(() => {
+    async function get() {
+      const projectContracts = getProjectContractsData()
+      const osoDeployersContracts = getOsoDeployersContractsData()
+
+      if (projectContracts === undefined || osoDeployersContracts === undefined)
+        return
+
+      // console.log("projects contracts:")
+      // console.log(projectContracts)
+
+      // const projectContractsByDeployer = Object.values(
+      //   groupByDeployer(projectContracts!),
+      // )
+
+      // console.log("projects contracts (unique):")
+      // console.log(projectContractsByDeployer)
+
+      // const osoDeployerContracts = await getOsoDeployerContractsData()
+
+      // console.log("oso deployer contracts:")
+      // console.log(osoDeployerContracts)
+
+      // console.log("oso deployers contracts:")
+      // console.log(osoDeployersContracts)
+
+      // deep clones as to not alter the original object
+      const osoDeployersContracts__ChainCorrected =
+        replaceArtifactSourceWithNumber(
+          JSON.parse(JSON.stringify(osoDeployersContracts)),
+        )
+
+      // console.log("oso deployers contracts (chain corrected):")
+      // console.log(osoDeployersContracts__ChainCorrected)
+
+      const osoDeployersContracts__DeployerFormatted = convertContracts(
+        osoDeployersContracts__ChainCorrected,
+      )
+
+      // console.log("oso deployers contracts (unique)")
+      // console.log(osoDeployersContracts__DeployerFormatted)
+
+      const mergedDeployersFormData: z.infer<typeof DeployersSchema> = {
+        deployers: [] as Array<{
+          address: string
+          contracts: Array<{
+            address: string
+            chainId: string
+            excluded: boolean
+          }>
+        }>,
+        submittedToOSO: false,
+        osoSlug: "",
+        isOffChain: false,
+        defillamaAdapter: "",
+      }
+
+      // Merge the deployers data from both sources
+      const deployersData = [
+        ...projectContractsByDeployer.map((deployer) => ({
+          address: deployer.deployerAddress,
+          contracts: deployer.contracts.map((contract) => ({
+            address: contract.address,
+            chainId: contract.chainId.toString(),
+            excluded: false,
+          })),
+        })),
+
+        ...osoDeployersContracts__DeployerFormatted.map((deployer) => ({
+          address: getAddress(deployer.deployerAddress),
+          contracts: deployer.contracts.map((contract) => {
+            const isContractExcluded =
+              projectContracts?.find(
+                (projectContract) =>
+                  getAddress(projectContract.contractAddress) ===
+                    getAddress(contract.address) &&
+                  projectContract.chainId === contract.chainId,
+              ) === undefined
+
+            return {
+              address: contract.address,
+              chainId: contract.chainId.toString(),
+              excluded: isContractExcluded,
+            }
+          }),
+        })),
+      ]
+
+      // Now we need to merge the deployers based on `deployerAddress`
+      const mergedDeployers = new Map<
+        string,
+        {
+          address: string
+          contracts: Array<{
+            address: string
+            chainId: string
+            excluded: boolean
+          }>
+        }
+      >()
+
+      deployersData.forEach((deployer) => {
+        if (!mergedDeployers.has(deployer.address)) {
+          mergedDeployers.set(deployer.address, {
+            address: deployer.address,
+            contracts: [],
+          })
+        }
+
+        // Merge contracts for the same deployer
+        const existingDeployer = mergedDeployers.get(deployer.address)
+        deployer.contracts.forEach((contract) => {
+          // Check if contract already exists, if not, add it
+          const existingContract = existingDeployer!.contracts.find(
+            (existingContract) =>
+              getAddress(existingContract.address) ===
+                getAddress(contract.address) &&
+              existingContract.chainId === contract.chainId,
+          )
+          if (!existingContract) {
+            existingDeployer!.contracts.push(contract)
+          } else {
+            // Update the excluded status if needed
+            existingContract.excluded =
+              contract.excluded || existingContract.excluded
+          }
+        })
+      })
+
+      // Convert the merged data into the expected structure
+      mergedDeployersFormData.deployers = Array.from(mergedDeployers.values())
+
+      // // const a = [
+      // //   ...deployersFormData2.deployers,
+      // //   deployersFormData.deployers,
+      // // ];
+
+      // console.log([
+      //   ...deployersFormData2.deployers,
+      //   deployersFormData.deployers,
+      // ])
+
+      console.log(mergedDeployersFormData)
+
+      if (mergedDeployersFormData.deployers.length > 0)
+        form3.setValue("deployers", mergedDeployersFormData.deployers)
+
+      console.log("I RAN")
+      // console.log(deployersFormData)
+    }
+
+    get()
+  }, [projectContractsData, osoDeployersContractsData])
+
+  const onSubmit3 = (data: z.infer<typeof DeployersSchema>) => {
+    console.log(data)
+  }
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const router = useRouter()
+
+  const onSubmit =
+    (isSave: boolean) => async (values: z.infer<typeof DeployersSchema>) => {
+      isSave ? setIsSaving(true) : setIsSubmitting(true)
+
+      toast.info("Saving project...")
+      try {
+        const [result] = await Promise.all([
+          updateProjectOSOStatus({
+            projectId: project.id,
+            osoProjectName: values.osoSlug,
+            isSubmittedToOso: values.submittedToOSO,
+          }),
+          updateProjectDetails(project.id, {
+            isOnChainContract: !values.isOffChain,
+          }),
+        ])
+
+        if (result.error) {
+          throw new Error(result.error)
+        }
+
+        !isSave && router.push(`/projects/${project.id}/grants`)
+        setIsSaving(false)
+        toast.success("Project saved")
+      } catch (error) {
+        toast.error("There was an error saving the project.")
+        isSave ? setIsSaving(false) : setIsSubmitting(false)
+      }
+    }
+
+  const isOffchain = form3.watch("isOffChain")
+  const submittedToOso = form3.watch("submittedToOSO")
+  const deployers = form3.watch("deployers")
+
+  console.log(deployers)
+
+  const canAddContract = deployers.every(
+    (deployer) => deployer.contracts.length > 1,
+  )
+
+  const canSubmit = (function () {
+    return isOffchain || canAddContract || submittedToOso
+  })()
+
+  if (!isProjectContractsFetched || !isOsoContractsFetched) {
+    return (
+      <div className="w-full h-96 bg-secondary rounded-lg animate-pulse"></div>
+    )
+  }
+
+  return (
+    <Form {...form3}>
+      <form onSubmit={form3.handleSubmit(onSubmit(true))}>
+        <div className="flex flex-col gap-6">
+          <h3 className="text-2xl">Contracts</h3>
+          <div className="text-secondary-foreground">
+            {"Add your project's onchain contracts and verify ownership."}
+          </div>
+          <div className="flex flex-col gap-2">
+            <FormField
+              control={form3.control}
+              name="isOffChain"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2 border border-input p-3 h-10 rounded-lg w-full">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className=" text-sm font-normal text-foreground">
+                    {"This project isn't onchain"}
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <DeployersFormField form={form3} />
+
+        <div className="flex flex-col gap-6 mt-10">
+          <h3 className="text-text-default">Additional Data</h3>
+
+          <FormField
+            control={form3.control}
+            name="defillamaAdapter"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-2">
+                <FormLabel className="text-foreground">
+                  DefiLlama adapter
+                </FormLabel>
+                <FormDescription>
+                  For Defi projects, include a link to your{" "}
+                  <ExternalLink
+                    className="underline"
+                    href={"https://defillama.com/"}
+                  >
+                    DefiLlama adapter
+                  </ExternalLink>
+                  .
+                </FormDescription>
+                <Input
+                  placeholder="https://defillama.com/protocol/..."
+                  {...field}
+                />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="flex flex-col gap-6 mt-10">
+          <h3 className="text-text-default">
+            Add this project to Open Source Observer
+          </h3>
+          <div className="text-text-secondary font-normal">
+            It is highly encouraged that projects verify contracts onchain.
+            However, if you’ve lost your deployer keys, you can complete this
+            step by{" "}
+            <ExternalLink
+              href="https://www.opensource.observer"
+              className="underline"
+            >
+              adding your project to Open Source Observer.
+            </ExternalLink>
+          </div>
+
+          <FormField
+            control={form3.control}
+            name="submittedToOSO"
+            render={({ field }) => (
+              <>
+                {
+                  <FormField
+                    control={form3.control}
+                    name="osoSlug"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <FormLabel className="text-foreground">
+                          Your Open Source Observer name
+                        </FormLabel>
+                        <Input placeholder="Add a name" {...field} />
+                      </FormItem>
+                    )}
+                  />
+                }
+
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel className="text-foreground">
+                    Confirmation{" "}
+                  </FormLabel>
+                  <FormItem className="flex flex-row items-center gap-2 py-3 px-4 rounded-lg border">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal text-sm text-secondary-foreground">
+                      This project has been submitted to Open Source Observer
+                    </FormLabel>
+                  </FormItem>
+                </FormItem>
+              </>
+            )}
+          />
+        </div>
+        <Button
+          isLoading={isSaving}
+          disabled={!canSubmit || isSubmitting}
+          type="button"
+          onClick={form3.handleSubmit(onSubmit(true))}
+          variant="destructive"
+        >
+          Save
+        </Button>
+        <Button
+          isLoading={isSubmitting}
+          disabled={!canSubmit || isSubmitting}
+          type="submit"
+          variant="secondary"
+        >
+          Next
+        </Button>
+      </form>
+    </Form>
+  )
+}

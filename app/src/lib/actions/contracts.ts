@@ -1,20 +1,55 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
+import {
+  Address,
+  createPublicClient,
+  getAddress,
+  isAddressEqual,
+  verifyMessage,
+} from "viem"
 
 import { auth } from "@/auth"
 import {
   addProjectContract,
   getProjectContracts,
   removeProjectContract,
+  removeProjectContracts,
   updateProjectContract,
 } from "@/db/projects"
 
-import { getTransaction, getTransactionTrace, TraceCall } from "../eth"
+import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
+
+export const verifyDeployer = async (
+  projectId: string,
+  deployerAddress: Address,
+  chainId: number,
+  signature: `0x${string}`,
+) => {
+  const result = await verifyAuthentication(projectId)
+  if (result.error !== null) return result
+
+  const client = clients[chainId]
+
+  const isValidSignature = client.verifyMessage({
+    address: getAddress(deployerAddress),
+    message: getMessage(getAddress(deployerAddress)),
+    signature: signature as `0x${string}`,
+  })
+
+  if (!isValidSignature) {
+    return {
+      error: "Invalid signature",
+    }
+  }
+
+  return {
+    error: null,
+  }
+}
 
 export const verifyContract = async ({
   projectId,
@@ -210,15 +245,7 @@ export const updateContractDetails = async ({
   }
 }
 
-export const removeContract = async ({
-  projectId,
-  address: contractAddressRaw,
-  chainId,
-}: {
-  projectId: string
-  address: Address
-  chainId: number
-}) => {
+async function verifyAuthentication(projectId: string) {
   const session = await auth()
   if (!session) {
     return {
@@ -230,6 +257,48 @@ export const removeContract = async ({
   if (isInvalid?.error) {
     return isInvalid
   }
+
+  return {
+    error: null,
+  }
+}
+
+export const removeContracts = async (
+  projectId: string,
+  contracts: { address: Address; chainId: string }[],
+) => {
+  const result = await verifyAuthentication(projectId)
+  if (result.error !== null) return result.error
+
+  await removeProjectContracts(
+    projectId,
+    contracts.map((contract) => {
+      return {
+        address: getAddress(contract.address),
+        chainId: contract.chainId,
+      }
+    }),
+  )
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+  }
+}
+
+export const removeContract = async ({
+  projectId,
+  address: contractAddressRaw,
+  chainId,
+}: {
+  projectId: string
+  address: Address
+  chainId: number
+}) => {
+  const result = await verifyAuthentication(projectId)
+  if (result.error !== null) return result.error
 
   const contractAddress = getAddress(contractAddressRaw)
 
