@@ -23,7 +23,7 @@ import { truncate } from "@/lib/utils/contracts"
 
 import { ContractsFormField } from "./ContractsFormField"
 import { DeployersSchema } from "./ContractFormSchema"
-import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
+import { VerifyAddressDialog } from "./VerifyAddressDialog"
 
 export function DeployerFormField({
   form,
@@ -128,7 +128,7 @@ export function DeployerFormField({
         )}
 
         {isVerifyingDialog && (
-          <VerifyAddressDialog2
+          <VerifyAddressDialog
             open
             onOpenChange={(open) => !open && setIsVerifyingDialog(false)}
             projectId={projectId}

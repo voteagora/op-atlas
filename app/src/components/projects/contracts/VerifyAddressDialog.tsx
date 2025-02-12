@@ -17,7 +17,7 @@ import { ChainSelector } from "./ChainSelector"
 
 const defaultSelectedChain = 10
 
-export function VerifyAddressDialog2({
+export function VerifyAddressDialog({
   open,
   onOpenChange,
   projectId,
