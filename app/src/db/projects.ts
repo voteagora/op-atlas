@@ -1079,32 +1079,6 @@ export async function removeProjectContractsByDeployer(
   return prisma.$transaction([contractDelete, projectUpdate])
 }
 
-export async function removeProjectContracts(
-  projectId: string,
-  contracts: { address: string; chainId: string }[],
-) {
-  const contractDelete = prisma.projectContract.deleteMany({
-    where: {
-      OR: contracts.map((contract) => ({
-        contractAddress: contract.address,
-        chainId: parseInt(contract.chainId),
-        projectId: projectId,
-      })),
-    },
-  })
-
-  const projectUpdate = prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
-  })
-
-  return prisma.$transaction([contractDelete, projectUpdate])
-}
-
 export async function removeProjectContract({
   projectId,
   address,

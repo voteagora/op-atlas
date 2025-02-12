@@ -10,7 +10,7 @@ import {
   addProjectContracts,
   getProjectContractsByDeployer,
   removeProjectContract,
-  removeProjectContracts,
+  removeProjectContractsByDeployer,
   updateProjectContract,
 } from "@/db/projects"
 
@@ -288,22 +288,14 @@ async function verifyAuthenticatedMember(projectId: string) {
   }
 }
 
-export const removeContracts = async (
+export const removeContractsByDeployer = async (
   projectId: string,
-  contracts: { address: Address; chainId: string }[],
+  deployerAddress: Address,
 ) => {
   const result = await verifyAuthenticatedMember(projectId)
   if (result.error !== null) return result.error
 
-  await removeProjectContracts(
-    projectId,
-    contracts.map((contract) => {
-      return {
-        address: getAddress(contract.address),
-        chainId: contract.chainId,
-      }
-    }),
-  )
+  await removeProjectContractsByDeployer(projectId, deployerAddress)
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")

@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { onCopy } from "@/components/ui/utils/copy"
 import { useOsoDeployedContracts } from "@/hooks/useOsoDeployedContracts"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
-import { removeContracts, verifyDeployer } from "@/lib/actions/contracts"
+import { removeContractsByDeployer } from "@/lib/actions/contracts"
 import { truncate } from "@/lib/utils/contracts"
 
 import { ContractsFormField } from "./ContractsFormField"
@@ -42,15 +42,7 @@ export function DeployerFormField({
   async function onRemoveDeployerField() {
     try {
       toast.info("Removing deployer...")
-      await removeContracts(
-        projectId,
-        contractsFields.map((contract) => {
-          return {
-            address: contract.address as Address,
-            chainId: contract.chainId,
-          }
-        }),
-      )
+      await removeContractsByDeployer(projectId, address as Address)
       toast.success("Succesfully removed deployer!")
       onRemove(deployerIndex)
     } catch (e) {
