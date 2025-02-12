@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
-import { verifyContract, verifyDeployer } from "@/lib/actions/contracts"
+import { verifyContract } from "@/lib/actions/contracts"
 import { Chain, getMessage } from "@/lib/utils/contracts"
 import { ChainSelector } from "../contracts-v1/ChainSelector"
 import { ChainSelector2 } from "./ChainSelector2"

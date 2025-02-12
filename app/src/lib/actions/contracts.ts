@@ -40,11 +40,11 @@ export const verifyDeployer = async (
     signature: signature as `0x${string}`,
   })
 
-  // if (!isValidSignature) {
-  //   return {
-  //     error: "Invalid signature",
-  //   }
-  // }
+  if (!isValidSignature) {
+    return {
+      error: "Invalid signature",
+    }
+  }
 
   return {
     error: null,
