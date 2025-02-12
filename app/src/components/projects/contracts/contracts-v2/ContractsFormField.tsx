@@ -6,18 +6,21 @@ import { z } from "zod"
 
 import { RedBadge } from "@/components/missions/common/badges/RedBadge"
 import { FormLabel } from "@/components/ui/form"
-import { useOsoDeployedContracts } from "@/hooks/useOsoDeployedContracts"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 
 import { ContractFormField } from "./ContractFormField"
 import { MissingContractsDialog } from "./MissingContractsDialog"
 import { DeployersSchema } from "./schema3"
+import { OsoDeployerContracts } from "@/lib/types"
+import { osoNamespaceToChainId } from "@/lib/utils/contractForm"
 
 export function ContractsFormField({
   form,
+  osoContracts,
   deployerIndex,
 }: {
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
+  osoContracts: OsoDeployerContracts[]
   deployerIndex: number
 }) {
   const { fields: contractsFields, append: appendContracts } = useFieldArray({
@@ -25,11 +28,28 @@ export function ContractsFormField({
     name: `deployers.${deployerIndex}.contracts`,
   })
 
-  const address = form.watch(`deployers.${deployerIndex}.address`)
+  // Add "excluded" contracts from oso results
+  if (osoContracts.length > 0) {
+    osoContracts.forEach((contract) => {
+      const isContractExists = contractsFields.some(
+        (existingContract) =>
+          existingContract.address.toLowerCase() ===
+            contract.contractAddress.toLowerCase() &&
+          existingContract.chainId ===
+            osoNamespaceToChainId(contract.contractNamespace).toString(),
+      )
 
-  // Fetch the contarcts based on the deployer address
-  const { data: osoContracts, isLoading: isLoadingOsoContracts } =
-    useOsoDeployedContracts(address)
+      if (!isContractExists) {
+        appendContracts({
+          address: contract.contractAddress,
+          chainId: osoNamespaceToChainId(contract.contractNamespace).toString(),
+          excluded: true,
+        })
+      }
+    })
+  }
+
+  const address = form.watch(`deployers.${deployerIndex}.address`)
 
   const projectId = useProjectFromPath()
 
@@ -190,10 +210,10 @@ export function ContractsFormField({
         </button>
       )}
 
-      {!osoContracts?.oso_contractsV0.length && !isLoadingOsoContracts && (
+      {!osoContracts.length && (
         <p className="text-rose-700 text-sm">
           {
-            "We couldn’t find any contracts deployed by this address. Learn about "
+            "We couldn't find any contracts deployed by this address. Learn about "
           }
 
           <button

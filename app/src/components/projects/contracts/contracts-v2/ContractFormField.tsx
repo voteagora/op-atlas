@@ -59,14 +59,9 @@ export function ContractFormField({
           },
         })
 
-        // if (result.error !== null) {
-        //   throw result.error
-        // }
         toast.success("Contract Added!")
       } catch (error: unknown) {
         toast.error("Error adding contract, please try again")
-      } finally {
-        // setLoading(false)
       }
     } else {
       try {

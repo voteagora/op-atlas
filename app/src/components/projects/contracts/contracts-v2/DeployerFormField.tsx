@@ -155,7 +155,11 @@ export function DeployerFormField({
         */}
 
         {isVerified && !isLoadingContracts && (
-          <ContractsFormField form={form} deployerIndex={deployerIndex} />
+          <ContractsFormField
+            form={form}
+            deployerIndex={deployerIndex}
+            osoContracts={osoContracts?.oso_contractsV0 || []}
+          />
         )}
 
         {isLoadingContracts && isVerified && (
