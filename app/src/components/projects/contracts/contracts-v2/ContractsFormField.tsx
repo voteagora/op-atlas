@@ -1,34 +1,23 @@
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { DeployersSchema } from "./schema3"
-import { z } from "zod"
-import { useFieldArray, UseFormReturn } from "react-hook-form"
-import { ContractFormField } from "./ContractFormField"
+import { ChevronDown, ChevronUp, Loader2, Plus } from "lucide-react"
+import Image from "next/image"
 import { ReactNode, useState } from "react"
-import {
-  ChevronDown,
-  ChevronUp,
-  FileQuestion,
-  Loader2,
-  Plus,
-} from "lucide-react"
-import { toast } from "sonner"
-import { addProjectContracts, removeProjectContracts } from "@/db/projects"
+import { useFieldArray, UseFormReturn } from "react-hook-form"
+import { getAddress, isAddress } from "viem"
+import { z } from "zod"
+
+import { RedBadge } from "@/components/missions/common/badges/RedBadge"
+import { Button } from "@/components/ui/button"
+import { FormLabel } from "@/components/ui/form"
+import { addProjectContracts } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
-import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
 import { getDeployedContracts } from "@/lib/oso"
 import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
-import { Button } from "@/components/ui/button"
-import { getAddress, isAddress } from "viem"
-import { VerifyAddressDialog } from "../contracts-v1/VerifyAddressDialog"
-import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
+
+import { ContractFormField } from "./ContractFormField"
 import { MissingContractsDialog } from "./MissingContractsDialog"
-import Image from "next/image"
-import { RedBadge } from "@/components/missions/common/badges/RedBadge"
+import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
+import { DeployersSchema } from "./schema3"
+import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
 
 export function ContractsFormField({
   form,

@@ -1,42 +1,25 @@
-import { useFieldArray, UseFormReturn } from "react-hook-form"
+import { Ellipsis } from "lucide-react"
+import { UseFormReturn } from "react-hook-form"
+import { toast } from "sonner"
+import { Address } from "viem"
 import { z } from "zod"
-import { DeployersSchema } from "./schema3"
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { ContractsFormField } from "./ContractsFormField"
+
 import { Button } from "@/components/ui/button"
-import { Ellipsis, Loader2 } from "lucide-react"
-import { ReactNode, useState } from "react"
-import { getAddress, isAddress } from "ethers"
-import { IS_USING_MOCK_DATA } from "./MockProjectContractsData"
-import { getDeployedContracts } from "@/lib/oso"
-import { replaceArtifactSourceWithNumber } from "@/lib/utils/contractForm"
-import { ProjectContract } from "@prisma/client"
-import {
-  addProjectContract,
-  addProjectContracts,
-  removeProjectContracts,
-} from "@/db/projects"
-import { useProjectFromPath } from "@/hooks/useProjectFromPath"
-import { truncate } from "@/lib/utils/contracts"
-import { ContractFormField } from "./ContractFormField"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { copyToClipboard } from "@/lib/utils"
-import { toast } from "sonner"
+import { FormField, FormLabel } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import { onCopy } from "@/components/ui/utils/copy"
+import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { removeContracts } from "@/lib/actions/contracts"
-import { Address } from "viem"
-import { MissingContractsDialog } from "./MissingContractsDialog"
+import { truncate } from "@/lib/utils/contracts"
+
+import { ContractsFormField } from "./ContractsFormField"
+import { DeployersSchema } from "./schema3"
 
 export function DeployerFormField({
   form,
