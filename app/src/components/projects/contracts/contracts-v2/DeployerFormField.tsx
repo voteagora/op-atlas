@@ -22,7 +22,7 @@ import { removeContractsByDeployer } from "@/lib/actions/contracts"
 import { truncate } from "@/lib/utils/contracts"
 
 import { ContractsFormField } from "./ContractsFormField"
-import { DeployersSchema } from "./schema3"
+import { DeployersSchema } from "./ContractFormSchema"
 import { VerifyAddressDialog2 } from "./VerifyAddressDialog2"
 
 export function DeployerFormField({
@@ -50,18 +50,16 @@ export function DeployerFormField({
     }
   }
 
-  // We don't really need this for the default use case
-  // TODO: We'll need to merge the contracts that were excluded when user returns to this page
   const { data: osoContracts, isLoading: isLoadingContracts } =
     useOsoDeployedContracts(address)
 
   const [isVerifyingDialog, setIsVerifyingDialog] = useState(false)
   const [isVerified, setIsVerified] = useState(contractsFields.length > 0) // If there're contracts, it's verified
 
-  // On verify the address, we need to fetch the contracts based on the address
   async function onVerifySuccess(
     includedContracts: ProjectContract[],
     excludedContracts: ProjectContract[],
+    signature: string,
   ) {
     // Set the contracts to the form
     form.setValue(`deployers.${deployerIndex}.contracts`, [
@@ -81,12 +79,9 @@ export function DeployerFormField({
       }),
     ])
 
+    form.setValue(`deployers.${deployerIndex}.signature`, signature)
+
     setIsVerified(true)
-
-    // add all contracts to the DB
-    // batch add { address[], chainId[], deployerAddress: address, signature: string }
-
-    // no form? or still add the contracts to the form?
   }
 
   return (
@@ -141,9 +136,10 @@ export function DeployerFormField({
             onSubmit={(
               includedContracts: ProjectContract[],
               excludedContracts: ProjectContract[],
+              signature: string,
             ) => {
               setIsVerifyingDialog(false)
-              onVerifySuccess(includedContracts, excludedContracts)
+              onVerifySuccess(includedContracts, excludedContracts, signature)
             }}
           />
         )}

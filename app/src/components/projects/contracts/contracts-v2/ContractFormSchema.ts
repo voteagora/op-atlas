@@ -12,6 +12,7 @@ export const ContractSchema = z.object({
 export const DeployerSchema = z.object({
   address: AddressSchema,
   contracts: z.array(ContractSchema),
+  signature: z.string(),
 })
 
 export const DeployersSchema = z.object({

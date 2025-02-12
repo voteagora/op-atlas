@@ -1,4 +1,4 @@
-import { DeployersSchema } from "./schema3"
+import { DeployersSchema } from "./ContractFormSchema"
 import { z } from "zod"
 import { UseFormReturn } from "react-hook-form"
 import { ChainLogo } from "@/components/common/ChainLogo"
@@ -40,6 +40,7 @@ export function ContractFormField({
     `deployers.${deployerIndex}.contracts.${contractIndex}.excluded`,
   )
   const deployerAddress = form.watch(`deployers.${deployerIndex}.address`)
+  const signature = form.watch(`deployers.${deployerIndex}.signature`)
 
   async function onToggle(excluded: boolean) {
     if (excluded) {
@@ -51,8 +52,7 @@ export function ContractFormField({
             contractAddress: address,
             deployerAddress: deployerAddress,
             deploymentHash: "",
-            // TODO: make sure to include the signature
-            verificationProof: "",
+            verificationProof: signature,
             chainId: parseInt(chainId),
             name: "",
             description: "",

@@ -10,7 +10,7 @@ import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 
 import { ContractFormField } from "./ContractFormField"
 import { MissingContractsDialog } from "./MissingContractsDialog"
-import { DeployersSchema } from "./schema3"
+import { DeployersSchema } from "./ContractFormSchema"
 import { OsoDeployerContracts } from "@/lib/types"
 import { osoNamespaceToChainId } from "@/lib/utils/contractForm"
 

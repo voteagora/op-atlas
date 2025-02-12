@@ -6,7 +6,7 @@ import { z } from "zod"
 import { Button } from "@/components/ui/button"
 
 import { DeployerFormField } from "./DeployerFormField"
-import { DeployersSchema } from "./schema3"
+import { DeployersSchema } from "./ContractFormSchema"
 
 export function DeployersFormField({
   form,
@@ -23,7 +23,7 @@ export function DeployersFormField({
   })
 
   async function onAddDeployerField() {
-    addDeployerField({ address: "", contracts: [] })
+    addDeployerField({ address: "", contracts: [], signature: "" })
   }
 
   async function onRemoveDeployerField(index: number) {

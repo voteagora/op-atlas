@@ -25,7 +25,7 @@ import { ProjectContracts } from "@/lib/types"
 import { groupByDeployer } from "@/lib/utils/contractForm"
 
 import { DeployersFormField } from "./DeployersFormField"
-import { DeployersSchema } from "./schema3"
+import { DeployersSchema } from "./ContractFormSchema"
 
 function getDefaultValues(
   projectContracts: ProjectContracts,
@@ -45,6 +45,7 @@ function getDefaultValues(
         chainId: contract.chainId.toString(),
         excluded: false,
       })),
+      signature: projectContracts.contracts[0]?.verificationProof ?? "",
     })),
     defillamaAdapter: "",
   }
