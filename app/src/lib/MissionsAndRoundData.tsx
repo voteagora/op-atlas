@@ -224,8 +224,8 @@ export const MISSIONS: MissionData[] = [
             <span className="text-secondary-foreground">
               Your project must have a verified contract on one of the following
               OP Chains: Arena Z, Base, Ethernity, Ink, Lisk, Metal L2, Mode, OP
-              Mainnet, RACE, Shape, Superseed, Swan Chain, Swellchain, Unichain,
-              World Chain, Zora.
+              Mainnet, RACE, Shape, Superseed, Swellchain, Unichain,
+              World Chain, Zora, Soneium, Polynomial, Mint, Bob.
             </span>
           </li>
           <li>
