@@ -1,6 +1,3 @@
-import { UseFormReturn } from "react-hook-form"
-import { z } from "zod"
-
 import { CHAIN_INFO } from "@/components/common/chain"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import {
@@ -18,9 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { ContractsSchema } from "../contracts-v1/schema"
-import { Chain } from "../commonSchema"
-export function ChainSelector2({
+import { Chain } from "./ContractFormSchema"
+
+export function ChainSelector({
   defaultValue,
   onChange,
 }: {

@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-import { ContractsForm } from "@/components/projects/contracts/contracts-v1/ContractsForm"
-import { ContractsForm3 } from "@/components/projects/contracts/contracts-v2/ContractsForm3"
+import { ContractsForm } from "@/components/projects/contracts/ContractsForm"
 import { getConsolidatedProjectTeam, getProjectContracts } from "@/db/projects"
 import { isUserMemberOfProject } from "@/lib/actions/utils"
 
@@ -29,5 +28,5 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  return <ContractsForm3 project={projectContracts} />
+  return <ContractsForm project={projectContracts} />
 }

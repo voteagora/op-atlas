@@ -1,3 +1,4 @@
+import { ProjectContract } from "@prisma/client"
 import Image from "next/image"
 import { useMemo, useState } from "react"
 import { type Address, checksumAddress } from "viem"
@@ -9,25 +10,27 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { FormLabel } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
-import { verifyContract } from "@/lib/actions/contracts"
-import { Chain, getMessage } from "@/lib/utils/contracts"
+import { verifyDeployer } from "@/lib/actions/contracts"
+import { getMessage } from "@/lib/utils/contracts"
 
-export function VerifyAddressDialog({
+import { ChainSelector } from "./ChainSelector"
+
+const defaultSelectedChain = 10
+
+export function VerifyAddressDialog2({
   open,
   onOpenChange,
   projectId,
   deployerAddress,
-  contractAddress,
-  deploymentTxHash,
-  chain,
   onSubmit,
 }: DialogProps<{
   projectId: string
   deployerAddress: Address
-  contractAddress: Address
-  deploymentTxHash: `0x${string}`
-  chain: Chain
-  onSubmit: (signature: string) => void
+  onSubmit: (
+    includedContracts: ProjectContract[],
+    excludedContracts: ProjectContract[],
+    signature: string,
+  ) => void
 }>) {
   const [page, setPage] = useState(0)
   const [copied, setCopied] = useState(false)
@@ -46,18 +49,19 @@ export function VerifyAddressDialog({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const [selectedChain, setSelectedChain] =
+    useState<number>(defaultSelectedChain)
+
   const onConfirmSignature = async () => {
     try {
       setLoading(true)
 
-      const verificationResult = await verifyContract({
+      const verificationResult = await verifyDeployer(
         projectId,
-        contractAddress,
         deployerAddress,
-        deploymentTxHash,
-        signature: signature as `0x${string}`,
-        chain,
-      })
+        selectedChain!,
+        signature as `0x${string}`,
+      )
 
       if (verificationResult.error !== null) {
         setError(verificationResult.error)
@@ -65,12 +69,20 @@ export function VerifyAddressDialog({
       }
 
       setError(undefined)
-      onSubmit(signature)
+      onSubmit(
+        verificationResult.contracts.included as ProjectContract[],
+        verificationResult.contracts.excluded as ProjectContract[],
+        signature,
+      )
     } catch (_) {
       setError("An error occurred, please try again")
     } finally {
       setLoading(false)
     }
+  }
+
+  async function onChainChange(value: string) {
+    setSelectedChain(parseInt(value))
   }
 
   return (
@@ -79,7 +91,7 @@ export function VerifyAddressDialog({
         {page === 0 && (
           <>
             <div className="flex flex-col items-center text-center gap-4">
-              <Badge text="Verify contract" />
+              <Badge text="Verify deployer" />
               <div className="flex flex-col items-center gap-1">
                 <h3>
                   Copy and sign the message below using your preferred provider
@@ -97,6 +109,12 @@ export function VerifyAddressDialog({
                   to generate a signature.
                 </p>
               </div>
+            </div>
+            <div className="flex flex-col self-stretch gap-1">
+              <ChainSelector
+                defaultValue={defaultSelectedChain.toString()}
+                onChange={onChainChange}
+              />
             </div>
             <div className="flex flex-col self-stretch gap-1">
               <FormLabel>Message to sign</FormLabel>
@@ -152,7 +170,7 @@ export function VerifyAddressDialog({
               )}
             </div>
             <Button
-              className="self-stretch"
+              className="self-stretch disabled:bg-destructive/80 disabled:text-white"
               variant="destructive"
               type="button"
               disabled={!signature || loading}

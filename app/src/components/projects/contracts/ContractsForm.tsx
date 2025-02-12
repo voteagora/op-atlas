@@ -51,7 +51,7 @@ function getDefaultValues(
   }
 }
 
-export function ContractsForm3({ project }: { project: ProjectContracts }) {
+export function ContractsForm({ project }: { project: ProjectContracts }) {
   const form3 = useForm<z.infer<typeof DeployersSchema>>({
     resolver: zodResolver(DeployersSchema),
     mode: "onSubmit",

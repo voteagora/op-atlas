@@ -1,10 +1,7 @@
-import Image from "next/image"
-import { useMemo, useState } from "react"
-import { type Address, checksumAddress, isAddress, isHex } from "viem"
+import { useState } from "react"
+import { type Address, isAddress, isHex } from "viem"
 
-import { Badge } from "@/components/common/Badge"
 import { DialogProps } from "@/components/dialogs/types"
-import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import {
@@ -14,11 +11,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
 import { verifyContract } from "@/lib/actions/contracts"
-import { Chain, getMessage } from "@/lib/utils/contracts"
-import { ChainSelector } from "../contracts-v1/ChainSelector"
-import { ChainSelector2 } from "./ChainSelector2"
+import { ChainSelector } from "./ChainSelector"
 import { Callout } from "@/components/common/Callout"
 import { ArrowRight, ArrowUpRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -260,7 +254,7 @@ export function MissingContractsDialog({
               )}
             />
 
-            <ChainSelector2 defaultValue={"10"} onChange={onChainChange} />
+            <ChainSelector defaultValue={"10"} onChange={onChainChange} />
 
             <Button
               type="button"
