@@ -210,7 +210,7 @@ export const MISSIONS: MissionData[] = [
     resultsLink: "/round/results/6",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/onchain-builders.png",
-    startsAt: new Date("2025-02-13T00:00:00.000Z"),
+    startsAt: new Date("2025-02-18T00:00:00.000Z"),
     endsAt: new Date("2025-07-31T00:00:00.000Z"),
     applyBy: new Date("2025-02-27T00:00:00.000Z"),
     missionPageEligibility: (
@@ -224,8 +224,8 @@ export const MISSIONS: MissionData[] = [
             <span className="text-secondary-foreground">
               Your project must have a verified contract on one of the following
               OP Chains: Arena Z, Base, Ethernity, Ink, Lisk, Metal L2, Mode, OP
-              Mainnet, RACE, Shape, Superseed, Swellchain, Unichain,
-              World Chain, Zora, Soneium, Polynomial, Mint, Bob.
+              Mainnet, RACE, Shape, Superseed, Swellchain, Unichain, World
+              Chain, Zora, Soneium, Polynomial, Mint, Bob.
             </span>
           </li>
           <li>
