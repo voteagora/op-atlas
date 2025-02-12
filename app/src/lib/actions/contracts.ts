@@ -8,7 +8,7 @@ import { auth } from "@/auth"
 import {
   addProjectContract,
   addProjectContracts,
-  getProjectContracts,
+  getProjectContractsByDeployer,
   removeProjectContract,
   removeProjectContracts,
   updateProjectContract,
@@ -111,7 +111,7 @@ export const verifyContract = async ({
   const deployerAddress = getAddress(deployerAddressRaw)
 
   // Fetch other contracts from this proejct with the same deployer address
-  const existingContracts = await getProjectContracts({
+  const existingContracts = await getProjectContractsByDeployer({
     projectId,
     deployerAddress,
   })

@@ -116,9 +116,8 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   }
 
   const hasContracts =
-    project.contracts.length > 0 ||
-    !!project.openSourceObserverSlug ||
-    project.isOnChainContract === false
+    // contracts.contracts.length > 0 ||
+    !!project.openSourceObserverSlug || project.isOnChainContract === false
   if (hasContracts) {
     completedSections.push(ProjectSection.Contracts)
   }

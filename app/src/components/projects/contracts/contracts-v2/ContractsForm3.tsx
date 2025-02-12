@@ -21,23 +21,23 @@ import {
 import { Input } from "@/components/ui/input"
 import { updateProjectOSOStatus } from "@/lib/actions/contracts"
 import { updateProjectDetails } from "@/lib/actions/projects"
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectContracts } from "@/lib/types"
 import { groupByDeployer } from "@/lib/utils/contractForm"
 
 import { DeployersFormField } from "./DeployersFormField"
 import { DeployersSchema } from "./schema3"
 
 function getDefaultValues(
-  project: ProjectWithDetails,
+  projectContracts: ProjectContracts,
 ): z.infer<typeof DeployersSchema> {
   const projectContractsByDeployer = Object.values(
-    groupByDeployer(project.contracts || []),
+    groupByDeployer(projectContracts.contracts),
   )
 
   return {
-    submittedToOSO: project.isSubmittedToOso,
-    isOffChain: !project.isOnChainContract,
-    osoSlug: project.openSourceObserverSlug ?? "",
+    submittedToOSO: projectContracts.isSubmittedToOso,
+    isOffChain: !projectContracts.isOnChainContract,
+    osoSlug: projectContracts.openSourceObserverSlug ?? "",
     deployers: projectContractsByDeployer.map((deployer) => ({
       address: deployer.address,
       contracts: deployer.contracts.map((contract) => ({
@@ -50,7 +50,7 @@ function getDefaultValues(
   }
 }
 
-export function ContractsForm3({ project }: { project: ProjectWithDetails }) {
+export function ContractsForm3({ project }: { project: ProjectContracts }) {
   const form3 = useForm<z.infer<typeof DeployersSchema>>({
     resolver: zodResolver(DeployersSchema),
     mode: "onSubmit",

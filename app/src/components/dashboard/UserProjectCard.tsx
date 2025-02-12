@@ -93,7 +93,7 @@ const UserProjectCard = ({
               </Badge>
             )}
 
-            {project.contracts.length > 0 ? (
+            {/* {project.contracts.length > 0 ? (
               <div className="h-full flex flex-row-reverse items-center w-fit mr-3">
                 {reverse(uniqBy((c) => c.chainId, project.contracts)).map(
                   (contract, idx) => (
@@ -107,7 +107,7 @@ const UserProjectCard = ({
                   ),
                 )}
               </div>
-            ) : null}
+            ) : null} */}
 
             <div className="h-full flex flex-row-reverse items-center w-fit ml-1.5">
               {reverse(project.team).map(({ user }) => (

@@ -2,21 +2,32 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import { ContractsForm } from "@/components/projects/contracts/contracts-v1/ContractsForm"
-import { getProject } from "@/db/projects"
-import { isUserMember } from "@/lib/actions/utils"
 import { ContractsForm3 } from "@/components/projects/contracts/contracts-v2/ContractsForm3"
+import { getConsolidatedProjectTeam, getProjectContracts } from "@/db/projects"
+import { isUserMemberOfProject } from "@/lib/actions/utils"
 
 export default async function Page({
   params,
 }: {
   params: { projectId: string }
 }) {
-  const session = await auth()
-  const project = await getProject({ id: params.projectId })
+  const [session, projectContracts, projectTeam] = await Promise.all([
+    auth(),
+    getProjectContracts({
+      projectId: params.projectId,
+    }),
+    getConsolidatedProjectTeam({
+      projectId: params.projectId,
+    }),
+  ])
 
-  if (!project || !isUserMember(project, session?.user.id)) {
+  if (
+    !projectContracts ||
+    !projectTeam ||
+    !isUserMemberOfProject(projectTeam, session?.user.id)
+  ) {
     redirect("/dashboard")
   }
 
-  return <ContractsForm3 project={project} />
+  return <ContractsForm3 project={projectContracts} />
 }

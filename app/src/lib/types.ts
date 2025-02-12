@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client"
+import { Prisma, User } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 
 export type TeamRole = "member" | "admin"
@@ -12,12 +12,29 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
       }
     }
     repos: true
-    contracts: true
     funding: true
     snapshots: true
     applications: true
     links: true
     rewards: { include: { claim: true } }
+  }
+}>
+
+export type ProjectTeam = {
+  id: string
+  name: string
+  team: {
+    id: string
+    role: TeamRole
+    projectId?: string
+    organizationId?: string
+    user: User[]
+  }[]
+}
+
+export type ProjectContracts = Prisma.ProjectGetPayload<{
+  include: {
+    contracts: true
   }
 }>
 
@@ -42,7 +59,6 @@ export type ProjectWithFullDetails = Prisma.ProjectGetPayload<{
       }
     }
     repos: true
-    contracts: true
     links: true
     funding: true
     snapshots: true
@@ -73,7 +89,6 @@ export type UserProjectWithDetails = Prisma.ProjectGetPayload<{
       }
     }
     repos: true
-    contracts: true
     funding: true
     snapshots: true
     organization: {

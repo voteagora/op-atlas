@@ -44,6 +44,8 @@ export function ContractFormField({
   )
   const deployerAddress = form.watch(`deployers.${deployerIndex}.address`)
 
+  console.log(form.getValues())
+
   async function onToggle(excluded: boolean) {
     if (excluded) {
       try {
