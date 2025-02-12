@@ -306,21 +306,19 @@ export const removeContractsByDeployer = async (
 
 export const removeContract = async ({
   projectId,
-  address: contractAddressRaw,
+  address,
   chainId,
 }: {
   projectId: string
-  address: Address
+  address: string
   chainId: number
 }) => {
   const result = await verifyAuthenticatedMember(projectId)
   if (result.error !== null) return result.error
 
-  const contractAddress = getAddress(contractAddressRaw)
-
   await removeProjectContract({
     projectId,
-    address: contractAddress,
+    address,
     chainId,
   })
 

@@ -1,17 +1,14 @@
-import { FormField, FormItem } from "@/components/ui/form"
 import { DeployersSchema } from "./schema3"
 import { z } from "zod"
-import { useFieldArray, UseFormReturn } from "react-hook-form"
+import { UseFormReturn } from "react-hook-form"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { Check, Ellipsis, FileQuestion, X } from "lucide-react"
 import { truncate } from "@/lib/utils/contracts"
-import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
 import { CHAIN_INFO } from "@/components/common/chain"
 import { addProjectContract } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { removeContract } from "@/lib/actions/contracts"
-import { Address, getAddress } from "viem"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,12 +45,13 @@ export function ContractFormField({
     if (excluded) {
       try {
         toast.info(`Adding contract...`)
-        const result = await addProjectContract({
+        await addProjectContract({
           projectId,
           contract: {
-            contractAddress: getAddress(address),
+            contractAddress: address,
             deployerAddress: deployerAddress,
             deploymentHash: "",
+            // TODO: make sure to include the signature
             verificationProof: "",
             chainId: parseInt(chainId),
             name: "",
@@ -74,9 +72,9 @@ export function ContractFormField({
       try {
         toast.info(`Removing contract...`)
 
-        const result = await removeContract({
+        await removeContract({
           projectId,
-          address: address as Address,
+          address,
           chainId: parseInt(chainId),
         })
         toast.success("Contract Removed!")
