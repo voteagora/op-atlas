@@ -28,6 +28,8 @@ export function ContractsFormField({
     name: `deployers.${deployerIndex}.contracts`,
   })
 
+  const signature = form.watch(`deployers.${deployerIndex}.signature`)
+
   // Add "excluded" contracts from oso results
   if (osoContracts.length > 0) {
     osoContracts.forEach((contract) => {
@@ -54,8 +56,6 @@ export function ContractsFormField({
   const projectId = useProjectFromPath()
 
   const [errorMessage, setErrorMessage] = useState<ReactNode>()
-
-  const [signature, setSignature] = useState("")
 
   async function onContractVerified(contract: {
     address: string

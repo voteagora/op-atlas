@@ -36,7 +36,6 @@ export function MissingContractsDialog({
   onSubmit: (contract: { address: string; chainId: string }) => void
 }>) {
   const [page, setPage] = useState(defaultPage)
-  const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -55,7 +54,7 @@ export function MissingContractsDialog({
         deployerAddress: deployer as `0x${string}`,
         deploymentTxHash: txHash as `0x${string}`,
         signature: signature as `0x${string}`,
-        chain: selectedChain!,
+        chain: selectedChain,
       })
 
       if (verificationResult.error !== null) {
