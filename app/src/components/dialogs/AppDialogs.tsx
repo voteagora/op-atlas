@@ -2,7 +2,6 @@
 
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { VerifyAddressDialog } from "../projects/contracts/contracts-v1/VerifyAddressDialog"
 import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
