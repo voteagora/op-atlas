@@ -30,12 +30,10 @@ export function convertContracts(
   for (const item of data) {
     for (const contract of item.oso_contractsV0) {
       // Find existing entry for this deployer or create a new one
-      let entry = result.find(
-        (e) => e.deployerAddress === contract.rootDeployerAddress,
-      )
+      let entry = result.find((e) => e.address === contract.rootDeployerAddress)
       if (!entry) {
         entry = {
-          deployerAddress: contract.rootDeployerAddress,
+          address: contract.rootDeployerAddress,
           contracts: [],
         }
         result.push(entry)
@@ -97,7 +95,7 @@ export function groupByDeployer(deployments: ProjectContract[]): {
   for (const deployment of deployments) {
     if (!groupedMap[deployment.deployerAddress]) {
       groupedMap[deployment.deployerAddress] = {
-        deployerAddress: deployment.deployerAddress,
+        address: deployment.deployerAddress,
         contracts: [],
       }
     }
