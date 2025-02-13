@@ -14,6 +14,7 @@ import { verifyDeployer } from "@/lib/actions/contracts"
 import { getMessage } from "@/lib/utils/contracts"
 
 import { ChainSelector } from "./ChainSelector"
+import { Loader2 } from "lucide-react"
 
 const defaultSelectedChain = 10
 
@@ -171,7 +172,11 @@ export function VerifyAddressDialog({
               disabled={!signature || loading}
               onClick={onConfirmSignature}
             >
-              Continue
+              {loading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                "Continue"
+              )}
             </Button>
           </>
         )}
