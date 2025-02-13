@@ -116,7 +116,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
 
   return (
     <Form {...form3}>
-      <form onSubmit={form3.handleSubmit(onSubmit(true))}>
+      <form onSubmit={form3.handleSubmit(onSubmit(false))}>
         <div className="flex flex-col gap-6">
           <h3 className="text-2xl">Contracts</h3>
           <div className="text-secondary-foreground">
