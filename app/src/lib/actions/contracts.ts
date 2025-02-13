@@ -43,8 +43,6 @@ export const verifyDeployer = async (
     signature: signature as `0x${string}`,
   })
 
-  console.log("isValidSignature", isValidSignature)
-
   if (!isValidSignature) {
     return {
       error: "Invalid signature",

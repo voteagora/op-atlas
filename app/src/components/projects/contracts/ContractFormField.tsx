@@ -84,8 +84,6 @@ export function ContractFormField({
     )
   }
 
-  console.log(excluded)
-
   return (
     <div>
       <div className="flex group">

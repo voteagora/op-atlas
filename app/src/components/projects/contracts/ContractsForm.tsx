@@ -27,6 +27,13 @@ import { groupByDeployer } from "@/lib/utils/contractForm"
 import { DeployersFormField } from "./DeployersFormField"
 import { DeployersSchema } from "./ContractFormSchema"
 
+function formatDefillamaSlug(slug: string) {
+  if (slug.startsWith("https://defillama.com/protocol/")) {
+    return slug.replace("https://defillama.com/protocol/", "")
+  }
+  return slug
+}
+
 function getDefaultValues(
   projectContracts: ProjectContracts,
 ): z.infer<typeof DeployersSchema> {
@@ -47,7 +54,7 @@ function getDefaultValues(
       })),
       signature: projectContracts.contracts[0]?.verificationProof ?? "",
     })),
-    defillamaAdapter: "",
+    defillamaSlug: projectContracts.defiLlamaSlug[0] ?? "",
   }
 }
 
@@ -57,15 +64,6 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: getDefaultValues(project),
-  })
-
-  const {
-    fields: deployersFields,
-    append: addDeployerField,
-    remove: removeDeployerField,
-  } = useFieldArray({
-    control: form3.control,
-    name: "deployers",
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -87,6 +85,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
           }),
           updateProjectDetails(project.id, {
             isOnChainContract: !values.isOffChain,
+            defiLlamaSlug: [values.defillamaSlug],
           }),
         ])
 
@@ -106,8 +105,6 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
   const isOffchain = form3.watch("isOffChain")
   const submittedToOso = form3.watch("submittedToOSO")
   const deployers = form3.watch("deployers")
-
-  console.log(deployers)
 
   const canAddContract = deployers.every(
     (deployer) => deployer.contracts.length > 1,
@@ -153,7 +150,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
 
           <FormField
             control={form3.control}
-            name="defillamaAdapter"
+            name="defillamaSlug"
             render={({ field }) => (
               <FormItem className="flex flex-col gap-2">
                 <FormLabel className="text-foreground">
@@ -172,6 +169,14 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
                 <Input
                   placeholder="https://defillama.com/protocol/..."
                   {...field}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value.startsWith("https://defillama.com/protocol/")) {
+                      field.onChange(formatDefillamaSlug(value))
+                    } else {
+                      field.onChange(value)
+                    }
+                  }}
                 />
               </FormItem>
             )}
