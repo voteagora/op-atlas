@@ -112,7 +112,7 @@ export function ContractFormField({
             )}
 
             <button
-              className="relative group/btn hover:bg-gray-200 px-2 rounded-lg"
+              className="relative group/btn hover:bg-gray-200 px-2 rounded-lg text-sm"
               type="button"
               onClick={() => {
                 onCopy(address)
@@ -123,7 +123,9 @@ export function ContractFormField({
 
             <>
               {excluded && (
-                <div className="bg-rose-300 rounded-lg px-2">Excluded</div>
+                <div className="bg-red-200 rounded-xl px-2 text-sm text-red-700">
+                  Excluded
+                </div>
               )}
             </>
           </div>
@@ -133,7 +135,7 @@ export function ContractFormField({
               {
                 <button
                   type="button"
-                  className="bg-secondary px-2 rounded-lg opacity-0 group-hover:opacity-100"
+                  className="bg-secondary px-2 rounded-md p-1 opacity-0 group-hover:opacity-100 text-sm "
                   onClick={() => onToggle(excluded)}
                 >
                   {!excluded ? "Exclude" : "Include"}

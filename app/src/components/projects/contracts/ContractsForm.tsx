@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -239,23 +239,25 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
             )}
           />
         </div>
-        <Button
-          isLoading={isSaving}
-          disabled={!canSubmit || isSubmitting}
-          type="button"
-          onClick={form3.handleSubmit(onSubmit(true))}
-          variant="destructive"
-        >
-          Save
-        </Button>
-        <Button
-          isLoading={isSubmitting}
-          disabled={!canSubmit || isSubmitting}
-          type="submit"
-          variant="secondary"
-        >
-          Next
-        </Button>
+        <div className="flex gap-2 mt-10">
+          <Button
+            isLoading={isSaving}
+            disabled={!canSubmit || isSubmitting}
+            type="button"
+            onClick={form3.handleSubmit(onSubmit(true))}
+            variant="destructive"
+          >
+            Save
+          </Button>
+          <Button
+            isLoading={isSubmitting}
+            disabled={!canSubmit || isSubmitting}
+            type="submit"
+            variant="secondary"
+          >
+            Next
+          </Button>
+        </div>
       </form>
     </Form>
   )
