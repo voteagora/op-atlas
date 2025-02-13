@@ -32,14 +32,11 @@ export const verifyDeployer = async (
   ])
   if (result.error !== null) return result
 
-  // TODO: Handle the case where the deployer address is not found
-  // TODO: Handle the case where there're no contracts
-
   const client = clients[chainId]
 
   const isValidSignature = await client.verifyMessage({
     address: getAddress(deployerAddress),
-    message: getMessage(getAddress(deployerAddress)),
+    message: getMessage(projectId),
     signature: signature as `0x${string}`,
   })
 
@@ -117,7 +114,7 @@ export const verifyContract = async ({
     // Verify that the deployer is the one that signed the message
     const isValidSignature = await verifyMessage({
       address: deployerAddress,
-      message: getMessage(deployerAddress),
+      message: getMessage(projectId),
       signature: signature as `0x${string}`,
     })
 

@@ -1,7 +1,7 @@
 import { ProjectContract } from "@prisma/client"
 import Image from "next/image"
-import { useMemo, useState } from "react"
-import { type Address, checksumAddress } from "viem"
+import { useState } from "react"
+import { type Address } from "viem"
 
 import { Badge } from "@/components/common/Badge"
 import { DialogProps } from "@/components/dialogs/types"
@@ -38,13 +38,8 @@ export function VerifyAddressDialog({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>()
 
-  const messageToSign = useMemo(() => {
-    const checksummedAddress = checksumAddress(deployerAddress)
-    return getMessage(checksummedAddress)
-  }, [deployerAddress])
-
   const onCopy = () => {
-    navigator.clipboard.writeText(messageToSign)
+    navigator.clipboard.writeText(getMessage(projectId))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -120,7 +115,7 @@ export function VerifyAddressDialog({
               <FormLabel>Message to sign</FormLabel>
               <Textarea
                 disabled
-                value={messageToSign}
+                value={getMessage(projectId)}
                 className="resize-none"
               />
               <Button type="button" onClick={onCopy} variant="secondary">
