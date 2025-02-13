@@ -639,6 +639,11 @@ async function getProjectContractsFn({
     },
     include: {
       contracts: true,
+      publishedContracts: {
+        where: {
+          revokedAt: null,
+        },
+      },
     },
   })
 }
@@ -1338,6 +1343,36 @@ export async function addProjectSnapshot({
   })
 }
 
+export async function addPublishedContracts(
+  contracts: {
+    id: string
+    contract: string
+    deploymentTx: string
+    deployer: string
+    verificationChainId: number
+    signature: string
+    chainId: number
+    projectId: string
+  }[],
+) {
+  return prisma.publishedContract.createMany({
+    data: contracts,
+  })
+}
+
+export async function revokePublishedContracts(attestationIds: string[]) {
+  return prisma.publishedContract.updateMany({
+    where: {
+      id: {
+        in: attestationIds,
+      },
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  })
+}
+
 export async function createApplication({
   round,
   projectId,
@@ -1416,7 +1451,15 @@ async function getAllApplicationsForRoundFn({
 export const getAllApplicationsForRound = cache(getAllApplicationsForRoundFn)
 
 export async function updateAllForProject(
-  project: ProjectMetadata,
+  project: ProjectMetadata & {
+    contracts: {
+      address: string
+      deploymentTxHash: string
+      deployerAddress: string
+      verificationProof: string | null
+      chainId: number
+    }[]
+  },
   projectId: string,
 ) {
   // Update project

@@ -35,6 +35,7 @@ export type ProjectTeam = {
 export type ProjectContracts = Prisma.ProjectGetPayload<{
   include: {
     contracts: true
+    publishedContracts: true
   }
 }>
 
