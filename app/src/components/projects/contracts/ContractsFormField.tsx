@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp, Plus } from "lucide-react"
 import Image from "next/image"
-import { ReactNode, useState } from "react"
+import { useState, useEffect } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 
@@ -30,32 +30,40 @@ export function ContractsFormField({
 
   const signature = form.watch(`deployers.${deployerIndex}.signature`)
 
-  // Add "excluded" contracts from oso results
-  if (osoContracts.length > 0) {
-    osoContracts.forEach((contract) => {
-      const isContractExists = contractsFields.some(
-        (existingContract) =>
-          existingContract.address.toLowerCase() ===
-            contract.contractAddress.toLowerCase() &&
-          existingContract.chainId ===
-            osoNamespaceToChainId(contract.contractNamespace).toString(),
-      )
+  useEffect(() => {
+    // Add "excluded" contracts from oso results
+    if (osoContracts.length > 0) {
+      const existingContracts =
+        form.getValues(`deployers.${deployerIndex}.contracts`) || []
+      const updatedContracts = [...existingContracts]
 
-      if (!isContractExists) {
-        appendContracts({
-          address: contract.contractAddress,
-          chainId: osoNamespaceToChainId(contract.contractNamespace).toString(),
-          excluded: true,
-        })
-      }
-    })
-  }
+      osoContracts.forEach((contract) => {
+        const isContractExists = updatedContracts.some(
+          (existingContract) =>
+            existingContract.address.toLowerCase() ===
+              contract.contractAddress.toLowerCase() &&
+            existingContract.chainId ===
+              osoNamespaceToChainId(contract.contractNamespace).toString(),
+        )
+
+        if (!isContractExists) {
+          updatedContracts.push({
+            address: contract.contractAddress,
+            chainId: osoNamespaceToChainId(
+              contract.contractNamespace,
+            ).toString(),
+            excluded: true,
+          })
+        }
+      })
+
+      form.setValue(`deployers.${deployerIndex}.contracts`, updatedContracts)
+    }
+  }, [osoContracts, deployerIndex, form])
 
   const address = form.watch(`deployers.${deployerIndex}.address`)
 
   const projectId = useProjectFromPath()
-
-  const [errorMessage, setErrorMessage] = useState<ReactNode>()
 
   async function onContractVerified(contract: {
     address: string
@@ -66,8 +74,6 @@ export function ContractsFormField({
       chainId: contract.chainId,
       excluded: false,
     })
-
-    setErrorMessage(undefined)
   }
 
   const initialMaxContractViewCount = 6
