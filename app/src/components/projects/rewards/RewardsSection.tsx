@@ -47,6 +47,7 @@ export function RewardsSection({
         <p className="text-secondary-foreground">
           KYC (identity verification) is required for each address.
         </p>
+        {/* TODO: Use `userInOrganization` check instead. This is for testing purposes */}
         {!userInOrganization ? (
           <ExtendedLink
             as="button"
