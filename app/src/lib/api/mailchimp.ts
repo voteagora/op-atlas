@@ -3,6 +3,7 @@ import "server-only"
 import { Md5 } from "ts-md5"
 
 import mailchimp from "@/lib/mailchimp"
+import { arrayDifference } from "@/lib/utils"
 
 export async function updateMailchimpTags(
   users: {
@@ -20,6 +21,15 @@ export async function updateMailchimpTags(
   }
 
   if (users.length > 0) {
+    const existingTagsMap = new Map<string, string[]>()
+    const existingTags = (await mailchimp.lists.getListMembersInfo(LIST_ID, {
+      fields: ["members.email_address", "members.tags"],
+      count: 9999, // There is no way to specify which emails to get the info for so we can't batch. We have to get all of them at once
+    })) as any
+    existingTags.members.forEach((member: any) => {
+      existingTagsMap.set(member.email_address, member.tags) // Pushing to Map so retrival is O(1) instead of O(n)
+    })
+
     const BATCH_SIZE = 500
     let totalUpdated = 0
 
@@ -31,10 +41,20 @@ export async function updateMailchimpTags(
         )} (${batch.length} users)`,
       )
 
+      const usersTagsDifference = new Map(
+        batch.map((user) => [
+          user.email,
+          arrayDifference(
+            existingTagsMap.get(user.email)?.map((tag: any) => tag.name) || [],
+            user.tags,
+          ),
+        ]),
+      )
+
       const results = (await mailchimp.lists.batchListMembers(LIST_ID, {
         members: batch.map((user) => ({
           email_address: user.email,
-          tags: user.tags,
+          tags: [...user.tags, ...(usersTagsDifference.get(user.email) ?? [])],
           email_type: "html",
           status: "subscribed",
         })),
