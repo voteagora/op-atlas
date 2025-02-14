@@ -18,16 +18,18 @@ import {
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 const FormSchema = z.object({
+  address: z.string().nonempty(),
   confirmIsOpMainnet: z.boolean().default(false),
   confirmCanMakeContractCalls: z.boolean().default(false),
 })
 
 export default function AddGrantDeliveryAddressForm() {
-  const { setOpenDialog } = useAppDialogs()
+  const { setOpenDialog, setAddress } = useAppDialogs()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
+      address: "",
       confirmIsOpMainnet: false,
       confirmCanMakeContractCalls: false,
     },
@@ -38,7 +40,8 @@ export default function AddGrantDeliveryAddressForm() {
     form.watch("confirmCanMakeContractCalls")
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log("Submitted data:", data)
+    setAddress(data.address)
+    setOpenDialog("verify_grant_delivery_address")
   }
 
   return (
@@ -57,13 +60,26 @@ export default function AddGrantDeliveryAddressForm() {
               ),
               content: (
                 <form
-                  onSubmit={form.handleSubmit(onSubmit)}
+                  onSubmit={(e) => {
+                    form.handleSubmit(onSubmit)(e)
+                  }}
                   className="w-full space-y-4"
                 >
                   <div className="w-full space-y-2">
-                    <Input
-                      leftIcon="/assets/icons/awardsIcon.svg"
-                      placeholder="0x..."
+                    <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center space-x-3">
+                          <FormControl>
+                            <Input
+                              leftIcon="/assets/chain-logos/optimism.svg"
+                              placeholder="0x..."
+                              {...field}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
                     />
                     <FormField
                       control={form.control}
@@ -104,7 +120,6 @@ export default function AddGrantDeliveryAddressForm() {
                     variant="primary"
                     type="submit"
                     disabled={!submitEnabled}
-                    onClick={() => setOpenDialog("verify_address")}
                   >
                     Verify
                   </Button>
