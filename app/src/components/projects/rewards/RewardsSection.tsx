@@ -3,9 +3,16 @@
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { ProjectWithDetails } from "@/lib/types"
 
+import AddGrantDeliveryAddressForm from "./AddGrantDeliveryAddressForm"
 import RewardAccordion from "./RewardAccordion"
 
-export function RewardsSection({ project }: { project: ProjectWithDetails }) {
+export function RewardsSection({
+  project,
+  userInOrganization,
+}: {
+  project: ProjectWithDetails
+  userInOrganization: boolean
+}) {
   const rewards = project.rewards
 
   return (
@@ -40,12 +47,16 @@ export function RewardsSection({ project }: { project: ProjectWithDetails }) {
         <p className="text-secondary-foreground">
           KYC (identity verification) is required for each address.
         </p>
-        <ExtendedLink
-          as="button"
-          href="/organization"
-          text="Go to organization settings"
-          variant="primary"
-        />
+        {!userInOrganization ? (
+          <ExtendedLink
+            as="button"
+            href="/profile/organizations/new"
+            text="Go to organization settings"
+            variant="primary"
+          />
+        ) : (
+          <AddGrantDeliveryAddressForm />
+        )}
       </div>
     </div>
   )
