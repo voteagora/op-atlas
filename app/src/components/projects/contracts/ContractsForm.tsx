@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -13,7 +13,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,14 +24,18 @@ import { ProjectContracts } from "@/lib/types"
 import { groupByDeployer } from "@/lib/utils/contractForm"
 
 import { DeployersFormField } from "./DeployersFormField"
-import { DeployersSchema } from "./ContractFormSchema"
-
-function formatDefillamaSlug(slug: string) {
-  if (slug.startsWith("https://defillama.com/protocol/")) {
-    return slug.replace("https://defillama.com/protocol/", "")
-  }
-  return slug
-}
+import {
+  DeployersSchema,
+  formatDefillamaSlug,
+  reverseFormatDefillamaSlug,
+} from "./ContractFormSchema"
+import { DefiLlamaFormFiled } from "./DefiLlamaFormFiled"
+import { Plus } from "lucide-react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 function getDefaultValues(
   projectContracts: ProjectContracts,
@@ -54,22 +57,58 @@ function getDefaultValues(
       })),
       signature: projectContracts.contracts[0]?.verificationProof ?? "",
     })),
-    defillamaSlug: projectContracts.defiLlamaSlug[0] ?? "",
+    defillamaSlug:
+      projectContracts.defiLlamaSlug.length === 0
+        ? [{ slug: "" }]
+        : projectContracts.defiLlamaSlug.map((slug) => ({
+            slug: reverseFormatDefillamaSlug(slug),
+          })),
   }
 }
 
 export function ContractsForm({ project }: { project: ProjectContracts }) {
-  const form3 = useForm<z.infer<typeof DeployersSchema>>({
+  const form = useForm<z.infer<typeof DeployersSchema>>({
     resolver: zodResolver(DeployersSchema),
-    mode: "onSubmit",
+    mode: "onChange",
     reValidateMode: "onChange",
+    shouldFocusError: true,
     defaultValues: getDefaultValues(project),
+    criteriaMode: "all",
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
   const router = useRouter()
+
+  const {
+    fields: defillamaSlugFields,
+    append: addDefillamaSlugField,
+    remove: removeDefillamaSlugField,
+  } = useFieldArray({
+    control: form.control,
+    name: "defillamaSlug",
+  })
+
+  const onAddDefillamaSlugField = async () => {
+    const valid = form.getValues("defillamaSlug").every((slug) => slug)
+    if (valid) {
+      addDefillamaSlugField({ slug: "" })
+    }
+  }
+
+  const onRemoveDefillamaSlugField = async (index: number) => {
+    try {
+      const isOnlyRepo = defillamaSlugFields.length === 1
+      removeDefillamaSlugField(index)
+
+      if (isOnlyRepo) {
+        addDefillamaSlugField({ slug: "" })
+      }
+    } catch (error) {
+      console.error("Error removing defillama url", error)
+    }
+  }
 
   const onSubmit =
     (isSave: boolean) => async (values: z.infer<typeof DeployersSchema>) => {
@@ -85,7 +124,9 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
           }),
           updateProjectDetails(project.id, {
             isOnChainContract: !values.isOffChain,
-            defiLlamaSlug: [values.defillamaSlug],
+            defiLlamaSlug: values.defillamaSlug
+              .filter((slug) => slug.slug)
+              .map((slug) => formatDefillamaSlug(slug.slug)),
           }),
         ])
 
@@ -102,9 +143,9 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
       }
     }
 
-  const isOffchain = form3.watch("isOffChain")
-  const submittedToOso = form3.watch("submittedToOSO")
-  const deployers = form3.watch("deployers")
+  const isOffchain = form.watch("isOffChain")
+  const submittedToOso = form.watch("submittedToOSO")
+  const deployers = form.watch("deployers")
 
   const canAddContract = deployers.every(
     (deployer) => deployer.contracts.length > 1,
@@ -115,8 +156,8 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
   })()
 
   return (
-    <Form {...form3}>
-      <form onSubmit={form3.handleSubmit(onSubmit(false))}>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit(false))}>
         <div className="flex flex-col gap-6">
           <h3 className="text-2xl">Contracts</h3>
           <div className="text-secondary-foreground">
@@ -124,7 +165,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
           </div>
           <div className="flex flex-col gap-2">
             <FormField
-              control={form3.control}
+              control={form.control}
               name="isOffChain"
               render={({ field }) => (
                 <FormItem className="flex items-center space-x-2 border border-input p-3 h-10 rounded-lg w-full">
@@ -143,44 +184,48 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
           </div>
         </div>
 
-        <DeployersFormField form={form3} />
+        <DeployersFormField form={form} />
 
         <div className="flex flex-col gap-6 mt-10">
           <h3 className="text-text-default">Additional Data</h3>
 
-          <FormField
-            control={form3.control}
-            name="defillamaSlug"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-2">
-                <FormLabel className="text-foreground">
-                  DefiLlama adapter
-                </FormLabel>
-                <FormDescription>
-                  For Defi projects, include a link to your{" "}
-                  <ExternalLink
-                    className="underline"
-                    href={"https://defillama.com/"}
-                  >
-                    DefiLlama adapter
-                  </ExternalLink>
-                  .
-                </FormDescription>
-                <Input
-                  placeholder="https://defillama.com/protocol/..."
-                  {...field}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    if (value.startsWith("https://defillama.com/protocol/")) {
-                      field.onChange(formatDefillamaSlug(value))
-                    } else {
-                      field.onChange(value)
-                    }
-                  }}
-                />
-              </FormItem>
+          <p className="mt-2 text-base font-normal text-secondary-foreground text-sm">
+            <p className="text-sm font-medium">DefiLlama adapter</p>
+            For Defi projects, include a link to your{" "}
+            <ExternalLink className="underline" href={"https://defillama.com/"}>
+              DefiLlama adapter
+            </ExternalLink>
+            .
+          </p>
+          {defillamaSlugFields.map((field, index) => (
+            <DefiLlamaFormFiled
+              key={field.id}
+              form={form}
+              index={index}
+              onRemove={onRemoveDefillamaSlugField}
+            />
+          ))}
+          <Tooltip>
+            <TooltipTrigger type="button" className="w-fit">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={
+                  !form.getValues("defillamaSlug").every((slug) => slug.slug)
+                }
+                onClick={onAddDefillamaSlugField}
+                className="mt-4 w-fit"
+              >
+                <Plus size={16} className="mr-2.5" /> Add another DefiLlama
+                adapter
+              </Button>
+            </TooltipTrigger>
+            {!form.getValues("defillamaSlug").every((slug) => slug) && (
+              <TooltipContent>
+                <p className="text-sm">First add one, then you can add more</p>
+              </TooltipContent>
             )}
-          />
+          </Tooltip>
         </div>
 
         <div className="flex flex-col gap-6 mt-10">
@@ -189,7 +234,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
           </h3>
           <div className="text-text-secondary font-normal">
             It is highly encouraged that projects verify contracts onchain.
-            However, if you’ve lost your deployer keys, you can complete this
+            However, if you've lost your deployer keys, you can complete this
             step by{" "}
             <ExternalLink
               href="https://www.opensource.observer"
@@ -200,13 +245,13 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
           </div>
 
           <FormField
-            control={form3.control}
+            control={form.control}
             name="submittedToOSO"
             render={({ field }) => (
               <>
                 {
                   <FormField
-                    control={form3.control}
+                    control={form.control}
                     name="osoSlug"
                     render={({ field }) => (
                       <FormItem className="flex flex-col gap-2">
@@ -244,7 +289,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
             isLoading={isSaving}
             disabled={!canSubmit || isSubmitting}
             type="button"
-            onClick={form3.handleSubmit(onSubmit(true))}
+            onClick={form.handleSubmit(onSubmit(true))}
             variant="destructive"
           >
             Save

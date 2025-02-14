@@ -63,10 +63,29 @@ export const DeployerSchema = z.object({
   signature: z.string(),
 })
 
+// Separate URL and slug patterns for clarity
+const defillamaUrlPattern =
+  /^https:\/\/defillama\.com\/protocol\/[a-zA-Z0-9-]+$/i
+
+export const DefiLlamaSchema = z.object({
+  slug: z.string().regex(defillamaUrlPattern, "Invalid DefiLlama protocol URL"),
+})
+
 export const DeployersSchema = z.object({
-  deployers: z.array(DeployerSchema),
   submittedToOSO: z.boolean(),
   isOffChain: z.boolean(),
   osoSlug: z.string(),
-  defillamaSlug: z.string(),
+  defillamaSlug: z.array(DefiLlamaSchema),
+  deployers: z.array(DeployerSchema),
 })
+
+export function formatDefillamaSlug(slug: string) {
+  if (slug.startsWith("https://defillama.com/protocol/")) {
+    return slug.replace("https://defillama.com/protocol/", "")
+  }
+  return slug
+}
+
+export function reverseFormatDefillamaSlug(slug: string) {
+  return `https://defillama.com/protocol/${slug}`
+}
