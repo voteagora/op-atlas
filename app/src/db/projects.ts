@@ -1,6 +1,6 @@
 "use server"
 
-import { Prisma, Project } from "@prisma/client"
+import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 
 import {
@@ -649,6 +649,34 @@ async function getProjectContractsFn({
 }
 
 export const getProjectContracts = cache(getProjectContractsFn)
+
+async function getPublishedProjectContractsFn({
+  contacts,
+}: {
+  contacts: {
+    chainId: number
+    contractAddress: string
+  }[]
+}): Promise<PublishedContract[]> {
+  return prisma.publishedContract.findMany({
+    where: {
+      AND: [
+        {
+          OR: contacts.map((c) => ({
+            AND: [{ contract: c.contractAddress }, { chainId: c.chainId }],
+          })),
+        },
+        {
+          revokedAt: null,
+        },
+      ],
+    },
+  })
+}
+
+export const getPublishedProjectContracts = cache(
+  getPublishedProjectContractsFn,
+)
 
 async function getUserApplicationsFn({
   userId,
