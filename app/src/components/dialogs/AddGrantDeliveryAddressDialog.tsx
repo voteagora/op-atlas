@@ -90,19 +90,18 @@ export function AddGrantDeliveryAddressDialog({
         {page === 0 && (
           <>
             <div className="flex flex-col items-center text-center gap-4">
-              <Badge text="Verify address" />
               <div className="flex flex-col items-center gap-1">
                 <h3>Copy and sign the message below</h3>
                 <p className="text-secondary-foreground">
-                  Be sure to sign using the desired address, then return here
-                  and continue to the next step. You can{" "}
+                  You can{" "}
                   <ExternalLink
                     href="https://optimistic.etherscan.io/verifiedSignatures"
                     className="underline"
                   >
                     use Etherscan
                   </ExternalLink>{" "}
-                  to generate a signature.
+                  to generate a signature. Then return here with your signature
+                  hash and continue to the next step.
                 </p>
               </div>
             </div>
