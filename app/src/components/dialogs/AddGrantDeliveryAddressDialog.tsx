@@ -1,8 +1,12 @@
-import Image from "next/image"
+"use client"
+
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useSession } from "next-auth/react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useTransition } from "react"
+import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { isAddress } from "viem"
+import { z } from "zod"
 
 import { Badge } from "@/components/common/Badge"
 import Input from "@/components/common/Input"
@@ -14,6 +18,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { verifyUserAddress } from "@/lib/actions/addresses"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
+const formSchema = z.object({
+  signature: z.string().min(1, "Signature is required"),
+})
+
 export function AddGrantDeliveryAddressDialog({
   open,
   onOpenChange,
@@ -21,163 +29,129 @@ export function AddGrantDeliveryAddressDialog({
   const { data: session } = useSession()
   const { address } = useAppDialogs()
 
-  const [page, setPage] = useState(0)
-  const [copied, setCopied] = useState(false)
-  const [signature, setSignature] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string>()
+  const [isPending, startTransition] = useTransition()
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      signature: "",
+    },
+  })
 
-  const messageToSign = useMemo(() => {
-    return `I verify that I am ${session?.user.farcasterId} on Farcaster and I'm an optimist.`
-  }, [session?.user.farcasterId])
+  const messageToSign = `I verify that I am ${session?.user.farcasterId} on Farcaster and I'm an optimist.`
 
-  const onCopy = () => {
+  const handleClose = useCallback(
+    (isOpen: boolean) => {
+      onOpenChange(isOpen)
+      if (!isOpen) {
+        reset()
+      }
+    },
+    [onOpenChange, reset],
+  )
+
+  const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(messageToSign)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    toast.success("Copied to clipboard")
+  }, [messageToSign])
 
-  const onConfirmSignature = async () => {
-    if (!address || !signature) {
-      return
-    }
+  const onSubmit = useCallback(
+    async (data: { signature: string }) => {
+      console.log(">>> onSubmit", address, data.signature)
+      if (!address) return
 
-    try {
-      setLoading(true)
-      if (!isAddress(address)) {
-        throw new Error("Invalid address")
-      }
-      if (!signature.startsWith("0x")) {
-        throw new Error("Invalid signature")
-      }
+      startTransition(async () => {
+        try {
+          if (!isAddress(address)) throw new Error("Invalid address")
+          if (!data.signature.startsWith("0x"))
+            throw new Error("Invalid signature")
 
-      const result = await verifyUserAddress(
-        address,
-        signature as `0x${string}`,
-      )
+          const result = await verifyUserAddress(
+            address,
+            data.signature as `0x${string}`,
+          )
+          if (result.error) throw new Error(result.error)
 
-      if (result.error !== null) {
-        throw new Error(result.error)
-      }
-
-      onOpenChange(false)
-      toast.success("Address verified")
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message)
-      } else {
-        setError("An error occurred, please try again")
-      }
-      setLoading(false)
-    }
-  }
-
-  // Clear state after closing
-  useEffect(() => {
-    if (!open) {
-      setTimeout(() => {
-        setPage(0)
-        setSignature("")
-        setError(undefined)
-        setLoading(false)
-      }, 500)
-    }
-  }, [open])
+          toast.success("Address verified")
+          handleClose(false)
+        } catch (err) {
+          toast.error(
+            err instanceof Error
+              ? err.message
+              : "An error occurred, please try again",
+          )
+        }
+      })
+    },
+    [address, handleClose],
+  )
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
-        {page === 0 && (
-          <>
-            <div className="flex flex-col items-center text-center gap-4">
-              <div className="flex flex-col items-center gap-1">
-                <h3>Copy and sign the message below</h3>
-                <p className="text-secondary-foreground">
-                  You can{" "}
-                  <ExternalLink
-                    href="https://optimistic.etherscan.io/verifiedSignatures"
-                    className="underline"
-                  >
-                    use Etherscan
-                  </ExternalLink>{" "}
-                  to generate a signature. Then return here with your signature
-                  hash and continue to the next step.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col self-stretch gap-1">
-              <div className="text-sm font-medium">Chain</div>
-              <Input
-                className="text-secondary-foreground text-sm"
-                readOnly
-                value={"OP Mainnet"}
-                leftIcon="/assets/chain-logos/optimism.svg"
-              />
-            </div>
-            <div className="flex flex-col self-stretch gap-1">
-              <div className="text-sm font-medium">Message to sign</div>
-              <Textarea
-                disabled
-                value={messageToSign}
-                className="resize-none"
-              />
-              <Button type="button" onClick={onCopy} variant="secondary">
-                {copied ? "Copied!" : "Copy"}
-              </Button>
-            </div>
-            <Button
-              className="self-stretch"
-              variant="destructive"
-              type="button"
-              onClick={() => setPage(1)}
-            >
-              Continue
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
+          <div className="flex flex-col items-center text-center gap-4">
+            <h3>Copy and sign the message below</h3>
+            <p className="text-secondary-foreground">
+              You can{" "}
+              <ExternalLink
+                href="https://optimistic.etherscan.io/verifiedSignatures"
+                className="underline"
+              >
+                use Etherscan
+              </ExternalLink>{" "}
+              to generate a signature. Then return here with your signature hash
+              and continue to the next step.
+            </p>
+          </div>
+
+          <div className="flex flex-col self-stretch gap-1">
+            <div className="text-sm font-medium">Chain</div>
+            <Input
+              className="text-secondary-foreground text-sm"
+              readOnly
+              value="OP Mainnet"
+              leftIcon="/assets/chain-logos/optimism.svg"
+            />
+          </div>
+
+          <div className="flex flex-col self-stretch gap-1">
+            <div className="text-sm font-medium">Message to sign</div>
+            <Textarea disabled value={messageToSign} className="resize-none" />
+            <Button type="button" onClick={handleCopy} variant="secondary">
+              Copy
             </Button>
-          </>
-        )}
-        {page === 1 && (
-          <>
-            <Button
-              variant="ghost"
-              type="button"
-              className="p-1 absolute left-[12px] top-[12px]"
-              onClick={() => setPage(0)}
-            >
-              <Image
-                src="/assets/icons/arrowLeftIcon.svg"
-                width={13}
-                height={12}
-                alt="Back"
-              />
-            </Button>
-            <div className="flex flex-col items-center text-center gap-4">
-              <Badge text="Verify address" />
-              <h3>
-                Enter the resulting signature hash from your signed message
-              </h3>
-            </div>
-            <div className="flex flex-col self-stretch gap-1">
-              <div>Signature hash</div>
-              <Textarea
-                value={signature}
-                onChange={(e) => setSignature(e.target.value)}
-                className="resize-none"
-              />
-              {error && (
-                <p className="text-destructive text-sm font-medium">{error}</p>
+          </div>
+
+          <div className="flex flex-col self-stretch gap-1">
+            <div>Signature hash</div>
+            <Controller
+              control={control}
+              name="signature"
+              render={({ field }) => (
+                <Textarea {...field} className="resize-none" />
               )}
-            </div>
-            <Button
-              className="self-stretch"
-              variant="destructive"
-              type="button"
-              disabled={!signature || loading}
-              onClick={onConfirmSignature}
-            >
-              Continue
-            </Button>
-          </>
-        )}
+            />
+            {errors.signature && (
+              <p className="text-destructive text-sm font-medium">
+                {errors.signature.message}
+              </p>
+            )}
+          </div>
+
+          <Button
+            className="self-stretch"
+            variant="destructive"
+            type="submit"
+            disabled={isPending}
+          >
+            {isPending ? "Verifying..." : "Continue"}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   )
