@@ -56,7 +56,9 @@ export function RewardsSection({
             variant="primary"
           />
         ) : (
-          <AddGrantDeliveryAddressForm />
+          <AddGrantDeliveryAddressForm
+            userInOrganization={userInOrganization}
+          />
         )}
       </div>
     </div>

@@ -18,6 +18,7 @@ interface ButtonProps extends Omit<ShadcnButtonProps, "variant"> {
   subtext?: string
   variant?: "default" | "primary"
   target?: React.HTMLAttributeAnchorTarget
+  showOutboundLinkIcon?: boolean
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -30,6 +31,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "default",
       className,
       target = "_blank",
+      showOutboundLinkIcon = true,
       ...props
     },
     ref,
@@ -77,7 +79,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         >
           <div>{icon}</div>
           <span>{text}</span>
-          {href.toString().startsWith("http") && (
+          {showOutboundLinkIcon && href.toString().startsWith("http") && (
             <Image
               src="/assets/icons/arrow-up-right.svg"
               width={10}
@@ -101,11 +103,21 @@ interface LinkProps extends NextLinkProps {
   icon?: React.ReactNode
   text?: string
   subtext?: string
+  showOutboundLinkIcon?: boolean
 }
 
 const Link = forwardRef<HTMLAnchorElement, LinkProps>(
   (
-    { href, icon, text, subtext, className, showUnderline = true, ...props },
+    {
+      href,
+      icon,
+      text,
+      subtext,
+      className,
+      showUnderline = true,
+      showOutboundLinkIcon = true,
+      ...props
+    },
     ref,
   ) => {
     return (
@@ -137,7 +149,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
             <span className={cn([{ "group-hover:underline": showUnderline }])}>
               {text}
             </span>
-            {href.toString().startsWith("http") && (
+            {showOutboundLinkIcon && href.toString().startsWith("http") && (
               <div className="mt-2">
                 <Image
                   src="/assets/icons/arrow-up-right.svg"
