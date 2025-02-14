@@ -61,6 +61,7 @@ export const DeployerSchema = z.object({
   address: AddressSchema,
   contracts: z.array(ContractSchema),
   signature: z.string(),
+  verificationChainId: Chain,
 })
 
 // Separate URL and slug patterns for clarity

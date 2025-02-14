@@ -56,6 +56,8 @@ function getDefaultValues(
         excluded: false,
       })),
       signature: projectContracts.contracts[0]?.verificationProof ?? "",
+      verificationChainId:
+        projectContracts.contracts[0]?.verificationChainId?.toString() ?? "",
     })),
     defillamaSlug:
       projectContracts.defiLlamaSlug.length === 0

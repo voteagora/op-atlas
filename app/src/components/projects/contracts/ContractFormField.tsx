@@ -18,6 +18,7 @@ import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { onCopy } from "@/components/ui/utils/copy"
 import Image from "next/image"
+import { useState } from "react"
 
 export function ContractFormField({
   form,
@@ -41,8 +42,14 @@ export function ContractFormField({
   )
   const deployerAddress = form.watch(`deployers.${deployerIndex}.address`)
   const signature = form.watch(`deployers.${deployerIndex}.signature`)
+  const verificationChainId = form.watch(
+    `deployers.${deployerIndex}.verificationChainId`,
+  )
+
+  const [isToggleLoading, setIsToggleLoading] = useState(false)
 
   async function onToggle(excluded: boolean) {
+    setIsToggleLoading(true)
     if (excluded) {
       try {
         toast.info(`Adding contract...`)
@@ -56,6 +63,7 @@ export function ContractFormField({
             chainId: parseInt(chainId),
             name: "",
             description: "",
+            verificationChainId: parseInt(verificationChainId),
           },
         })
 
@@ -82,6 +90,7 @@ export function ContractFormField({
       `deployers.${deployerIndex}.contracts.${contractIndex}.excluded`,
       !excluded,
     )
+    setIsToggleLoading(false)
   }
 
   return (
@@ -137,6 +146,7 @@ export function ContractFormField({
                   type="button"
                   className="bg-secondary px-2 rounded-md p-1 opacity-0 group-hover:opacity-100 text-sm "
                   onClick={() => onToggle(excluded)}
+                  disabled={isToggleLoading}
                 >
                   {!excluded ? "Exclude" : "Include"}
                 </button>

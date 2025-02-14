@@ -1000,8 +1000,21 @@ export async function addProjectContract({
   projectId: string
   contract: Omit<Prisma.ProjectContractCreateInput, "project">
 }) {
-  const contractCreate = prisma.projectContract.create({
-    data: {
+  const contractCreate = prisma.projectContract.upsert({
+    where: {
+      contractAddress_chainId: {
+        contractAddress: contract.contractAddress,
+        chainId: contract.chainId,
+      },
+    },
+    update: {
+      project: {
+        connect: {
+          id: projectId,
+        },
+      },
+    },
+    create: {
       ...contract,
       project: {
         connect: {
