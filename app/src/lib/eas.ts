@@ -265,18 +265,13 @@ export async function createFullProjectSnapshotAttestations({
     ipfsUrl: string
   }
   contracts: {
-    toPublish: {
-      contractAddress: string
-      chainId: number
-      deployer: string
-      deploymentTx: string
-      signature: string
-      verificationChainId: number
-    }[]
-    toRevoke: {
-      attestationId: string
-    }[]
-  }
+    contractAddress: string
+    chainId: number
+    deployer: string
+    deploymentTx: string
+    signature: string
+    verificationChainId: number
+  }[]
 }) {
   const attestations = [
     buildProjectMetadataAttestation({
@@ -287,7 +282,7 @@ export async function createFullProjectSnapshotAttestations({
       ipfsUrl: project.ipfsUrl,
     }),
     ...buildContractAttestations({
-      contracts: contracts.toPublish,
+      contracts,
       projectId: project.projectId,
       farcasterId: project.farcasterId,
     }),

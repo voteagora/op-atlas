@@ -108,21 +108,15 @@ const createProjectMetadataAttestations = async ({
       category: project.category ?? "",
       ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
     },
-    contracts: {
-      toPublish:
-        unpublishedContractChanges?.toPublish?.map((c) => ({
-          contractAddress: c.contractAddress,
-          chainId: c.chainId,
-          deployer: c.deployerAddress,
-          deploymentTx: c.deploymentHash,
-          signature: c.verificationProof,
-          verificationChainId: c.verificationChainId || c.chainId,
-        })) ?? [],
-      toRevoke:
-        unpublishedContractChanges?.toRevoke?.map((c) => ({
-          attestationId: c.id,
-        })) ?? [],
-    },
+    contracts:
+      unpublishedContractChanges?.toPublish?.map((c) => ({
+        contractAddress: c.contractAddress,
+        chainId: c.chainId,
+        deployer: c.deployerAddress,
+        deploymentTx: c.deploymentHash,
+        signature: c.verificationProof,
+        verificationChainId: c.verificationChainId || c.chainId,
+      })) ?? [],
   })
 
   // Update database
