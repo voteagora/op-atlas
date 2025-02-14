@@ -57,6 +57,7 @@ export const verifyDeployer = async (
         projectId,
         deploymentHash: "",
         verificationProof: signature,
+        verificationChainId: chainId,
       }
     }),
   )

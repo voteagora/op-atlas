@@ -19,7 +19,6 @@ import { onCopy } from "@/components/ui/utils/copy"
 import { useOsoDeployedContracts } from "@/hooks/useOsoDeployedContracts"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { removeContractsByDeployer } from "@/lib/actions/contracts"
-import { truncate } from "@/lib/utils/contracts"
 
 import { ContractsFormField } from "./ContractsFormField"
 import { DeployersSchema } from "./ContractFormSchema"

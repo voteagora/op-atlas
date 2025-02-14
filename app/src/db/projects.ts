@@ -961,26 +961,22 @@ export async function addProjectContracts(
   projectId: string,
   contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
 ) {
-  const createdContracts = await prisma.$transaction(
-    async (tx) => {
-      const createPromises = contracts.map((contract) =>
-        tx.projectContract
-          .create({ data: contract })
-          .then((user) => ({ success: true, data: user }))
-          .catch((error) => ({ success: false, error, data: contract })),
-      )
+  const createOperations = contracts.map(async (contract) => {
+    try {
+      const result = await prisma.projectContract.create({ data: contract })
+      return { success: true, data: result }
+    } catch (error) {
+      console.error(`Failed to create contract:`, error)
+      return { success: false, data: contract, error }
+    }
+  })
 
-      const results = await Promise.all(createPromises)
+  const results = await Promise.all(createOperations)
 
-      return {
-        succeeded: results.filter((r) => r.success).map((r) => r.data),
-        failed: results.filter((r) => !r.success).map((r) => r.data),
-      }
-    },
-    {
-      timeout: 10000,
-    },
-  )
+  const createdContracts = {
+    succeeded: results.filter((r) => r.success).map((r) => r.data),
+    failed: results.filter((r) => !r.success).map((r) => r.data),
+  }
 
   await prisma.project.update({
     where: {
