@@ -188,20 +188,20 @@ export function ContractsFormField({
         )
       })}
 
-      {contractViewCount < getTrueFilterCount() && (
-        <button
-          className="flex items-center gap-2"
-          onClick={() => {
-            setContractViewCount(contracts.length)
-          }}
-        >
-          <p>
-            Show {getTrueFilterCount() - initialMaxContractViewCount} more
-            contract(s)
-          </p>
-          <ChevronDown width={16} height={16} />
-        </button>
-      )}
+      {contractViewCount < getTrueFilterCount() &&
+        getTrueFilterCount() > initialMaxContractViewCount && (
+          <button
+            className="flex items-center gap-2"
+            onClick={() => {
+              setContractViewCount(contracts.length)
+            }}
+          >
+            <p>
+              Show {getTrueFilterCount() - contractViewCount} more contract(s)
+            </p>
+            <ChevronDown width={16} height={16} />
+          </button>
+        )}
 
       {contractViewCount > initialMaxContractViewCount && (
         <button
