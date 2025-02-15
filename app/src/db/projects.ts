@@ -1112,7 +1112,7 @@ export async function removeProjectContractsByDeployer(
   const contractDelete = prisma.projectContract.deleteMany({
     where: {
       projectId: projectId,
-      deployerAddress: deployer,
+      deployerAddress: getAddress(deployer),
     },
   })
 
@@ -1141,7 +1141,7 @@ export async function removeProjectContract({
     where: {
       projectId,
       contractAddress_chainId: {
-        contractAddress: address,
+        contractAddress: getAddress(address),
         chainId,
       },
     },
