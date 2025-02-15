@@ -23,10 +23,12 @@ export function ContractsFormField({
   osoContracts: OsoDeployerContracts[]
   deployerIndex: number
 }) {
-  const { fields: contractsFields, append: appendContracts } = useFieldArray({
+  const { append: appendContracts } = useFieldArray({
     control: form.control,
     name: `deployers.${deployerIndex}.contracts`,
   })
+
+  const contractsFields = form.watch(`deployers.${deployerIndex}.contracts`)
 
   const signature = form.watch(`deployers.${deployerIndex}.signature`)
 
