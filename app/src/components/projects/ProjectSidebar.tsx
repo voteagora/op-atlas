@@ -1,9 +1,12 @@
-import { getProject } from "@/db/projects"
+import { getProject, getProjectContracts } from "@/db/projects"
 
 import { ProjectStatusSidebar } from "./ProjectStatusSidebar"
 
 export async function ProjectSidebar({ projectId }: { projectId: string }) {
-  const project = (await getProject({ id: projectId })) ?? undefined
+  const [project, contracts] = await Promise.all([
+    getProject({ id: projectId }),
+    getProjectContracts({ projectId }),
+  ])
 
-  return <ProjectStatusSidebar project={project} />
+  return <ProjectStatusSidebar project={project} contracts={contracts} />
 }

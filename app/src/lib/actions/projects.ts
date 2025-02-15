@@ -11,7 +11,9 @@ import {
   deleteProject,
   getAllApplicationsForRound,
   getAllPublishedUserProjects,
+  getProjectContracts,
   getProjectTeam,
+  getPublishedProjectContracts,
   getUserAdminProjectsWithDetail,
   getUserApplications,
   getUserProjectsWithDetails,
@@ -90,6 +92,32 @@ export const getUserApplicationsForRound = async (
     roundId: roundId.toString(),
   })
   return userApplications
+}
+
+export const getUnpublishedContractChanges = async (projectId: string) => {
+  const project = await getProjectContracts({ projectId })
+  const allRelatedPublishedContracts = await getPublishedProjectContracts({
+    contacts:
+      project?.contracts.map((c) => ({
+        contractAddress: c.contractAddress,
+        chainId: c.chainId,
+      })) ?? [],
+  })
+
+  return {
+    toPublish: project?.contracts.filter(
+      (c) =>
+        !project?.publishedContracts.some(
+          (pc) => pc.contract === c.contractAddress && pc.chainId === c.chainId,
+        ),
+    ),
+    toRevoke: allRelatedPublishedContracts.filter(
+      (pc) =>
+        !project?.contracts.some(
+          (c) => c.contractAddress === pc.contract && c.chainId === pc.chainId,
+        ) || projectId !== pc.projectId,
+    ),
+  }
 }
 
 export const createNewProject = async (

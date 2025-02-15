@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form } from "@/components/ui/form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getProjectContracts } from "@/db/projects"
 import { submitApplications } from "@/lib/actions/applications"
 import {
   ApplicationWithDetails,
@@ -135,8 +136,9 @@ const ApplicationFormTabs = ({
   )
 
   const completedProjects = useMemo(() => {
-    return projects?.filter((project) => {
-      return getProjectStatus(project).progressPercent === 100
+    return projects?.filter(async (project) => {
+      const contract = await getProjectContracts({ projectId: project.id })
+      return getProjectStatus(project, contract ?? null).progressPercent === 100
     })
   }, [projects])
 

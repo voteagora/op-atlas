@@ -1,11 +1,76 @@
+import { ProjectContract } from "@prisma/client"
+import { z } from "zod"
+
 import {
-  ApplicationWithDetails,
   CategoryWithImpact,
   OrganizationWithDetails,
   ProjectWithDetails,
 } from "../types"
 
-export type ProjectMetadata = {
+export const FullProjectMetadataValidator = z.object({
+  name: z.string(),
+  description: z.string().nullable().default(null),
+  projectAvatarUrl: z.string().nullable().default(null),
+  projectCoverImageUrl: z.string().nullable().default(null),
+  category: z.string().nullable().default(null),
+  osoSlug: z.string().nullable().default(null),
+  socialLinks: z.object({
+    website: z.array(z.string()),
+    farcaster: z.array(z.string()),
+    twitter: z.string().nullable().default(null),
+    mirror: z.string().nullable().default(null),
+  }),
+  team: z.array(z.string()),
+  github: z.array(z.string()),
+  packages: z.array(z.string()),
+  contracts: z.array(
+    z.object({
+      address: z.string(),
+      deploymentTxHash: z.string(),
+      deployerAddress: z.string(),
+      verificationProof: z.string().nullable().default(null),
+      chainId: z.number().min(1),
+    }),
+  ),
+  grantsAndFunding: z.object({
+    ventureFunding: z.array(
+      z.object({
+        amount: z.string(),
+        year: z.string(),
+        details: z.string().nullable().default(null),
+      }),
+    ),
+    grants: z.array(
+      z.object({
+        grant: z.string().nullable().default(null),
+        link: z.string().nullable().default(null),
+        amount: z.string(),
+        date: z.string(),
+        details: z.string().nullable().default(null),
+      }),
+    ),
+    revenue: z.array(
+      z.object({
+        amount: z.string(),
+        details: z.string().nullable().default(null),
+      }),
+    ),
+  }),
+  pricingModel: z.string().nullable().default(null),
+  pricingModelDetails: z.string().nullable().default(null),
+  links: z
+    .array(
+      z.object({
+        url: z.string(),
+        name: z.string().nullable().default(null),
+        description: z.string().nullable().default(null),
+      }),
+    )
+    .optional()
+    .default([]),
+})
+
+export type FullProjectMetadata = {
   name: string
   description: string | null
   projectAvatarUrl: string | null
@@ -63,6 +128,8 @@ export type ProjectMetadata = {
   }[]
 }
 
+export type ProjectMetadata = Omit<FullProjectMetadata, "contracts">
+
 export function formatProjectMetadata(
   project: ProjectWithDetails,
 ): ProjectMetadata {
@@ -87,14 +154,6 @@ export function formatProjectMetadata(
         description: repo.description,
       }
     })
-
-  const contracts = project.contracts.map((contract) => ({
-    address: contract.contractAddress,
-    deploymentTxHash: contract.deploymentHash,
-    deployerAddress: contract.deployerAddress,
-    verificationProof: contract.verificationProof,
-    chainId: contract.chainId,
-  }))
 
   const investments = project.funding
     .filter((funding) => funding.type === "venture")
@@ -149,7 +208,6 @@ export function formatProjectMetadata(
     team,
     github,
     packages,
-    contracts,
     grantsAndFunding: {
       ventureFunding: investments,
       grants,
@@ -166,6 +224,23 @@ export function formatProjectMetadata(
   }
 
   return metadata
+}
+
+export function buildFullProjectMetadata(
+  project: ProjectWithDetails,
+  contracts: ProjectContract[],
+): FullProjectMetadata {
+  const metadata = formatProjectMetadata(project)
+  return {
+    ...metadata,
+    contracts: contracts.map((contract) => ({
+      address: contract.contractAddress,
+      deploymentTxHash: contract.deploymentHash,
+      deployerAddress: contract.deployerAddress,
+      verificationProof: contract.verificationProof,
+      chainId: contract.chainId,
+    })),
+  }
 }
 
 export type OrganizationMetadata = {

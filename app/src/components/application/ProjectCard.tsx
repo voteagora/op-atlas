@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { memo, useMemo, useState } from "react"
 
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 
@@ -21,9 +22,11 @@ export const ProjectCard = memo(function ProjectCard({
   isSelected: boolean
   onSelect: (projectId: string) => void
 }) {
+  const { data: contracts } = useProjectContracts(project.id)
+
   const isEligible = useMemo(() => {
-    return getProjectStatus(project).progressPercent === 100
-  }, [project])
+    return getProjectStatus(project, contracts ?? null).progressPercent === 100
+  }, [project, contracts])
 
   const [ineligibleDialogOpen, setIneligibleDialogOpen] = useState(false)
 

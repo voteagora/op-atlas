@@ -20,6 +20,7 @@ import { CategoryWithImpact, ProjectWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX, getProjectStatus } from "@/lib/utils"
 
 import { ApplicationFormSchema } from "./ApplicationFormTabs"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 
 const ProjectImpactForm = ({
   project,
@@ -32,9 +33,11 @@ const ProjectImpactForm = ({
   categories: CategoryWithImpact[]
   index: number
 }) => {
+  const { data: contracts } = useProjectContracts(project.id)
+
   const isEligible = useMemo(() => {
-    return getProjectStatus(project).progressPercent === 100
-  }, [project])
+    return getProjectStatus(project, contracts ?? null).progressPercent === 100
+  }, [project, contracts])
 
   const hasApplied = project.applications[0]?.status === "submitted"
   const attestationId = project.applications[0]?.attestationId

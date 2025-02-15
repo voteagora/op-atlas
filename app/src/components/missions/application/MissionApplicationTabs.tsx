@@ -1,39 +1,21 @@
 "use client"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Application } from "@prisma/client"
-import { format } from "date-fns"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React, { useEffect, useState } from "react"
-import { useForm, UseFormReturn } from "react-hook-form"
-import { toast } from "sonner"
+import { UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 
+import ExtendedLink from "@/components/common/ExtendedLink"
 import { ProjectApplication } from "@/components/missions/application/ProjectApplication"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { useSessionProjects } from "@/hooks/db/useUserProjects"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
-import { submitApplications } from "@/lib/actions/applications"
-import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 
 import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
 import { Button } from "../../ui/button"
-import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { ApplicationFormSchema } from "./MissionApplication"
-import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTerms } from "./MissionApplicationTerms"
-import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
-import ExtendedLink from "@/components/common/ExtendedLink"
 
 export function MissionApplicationTabs({
   form,
@@ -58,12 +40,16 @@ export function MissionApplicationTabs({
 
   useEffect(() => {
     if (projects.length > 0) {
-      form.reset({
-        projects: projects.map((project) => ({
+      form.setValue(
+        "projects",
+        projects.map((project) => ({
           selected: false,
           projectId: project.id,
+          category: "",
+          projectDescriptionOptions: [],
+          impactStatement: {},
         })),
-      })
+      )
     }
   }, [projects, form])
 
@@ -136,13 +122,11 @@ export function MissionApplicationTabs({
                       index={index}
                       project={field}
                       isAppliedToRound={
-                        applications?.find(
+                        !!applications?.find(
                           (app) =>
                             app.project.id === field.id &&
                             app.roundId === mission?.number.toString(),
                         )
-                          ? true
-                          : false
                       }
                       form={form}
                     />

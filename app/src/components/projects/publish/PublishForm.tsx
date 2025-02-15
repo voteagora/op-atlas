@@ -7,7 +7,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { createProjectSnapshot } from "@/lib/actions/snapshots"
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectContracts, ProjectWithDetails } from "@/lib/types"
 import {
   getProjectStatus,
   projectHasUnpublishedChanges,
@@ -18,7 +18,13 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import MetadataPublishedConfirmationDialog from "./MetadataPublishedConfirmationDialog"
 import { Snapshot } from "./Snapshot"
 
-export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
+export const PublishForm = ({
+  project,
+  contracts,
+}: {
+  project: ProjectWithDetails
+  contracts: ProjectContracts | null
+}) => {
   const [isPublishing, setIsPublishing] = useState(false)
   const [showMetadataPublishedDialogue, setShowMetadataPublishedDialogue] =
     useState(false)
@@ -26,7 +32,7 @@ export const PublishForm = ({ project }: { project: ProjectWithDetails }) => {
   const { track } = useAnalytics()
 
   const isReadyToPublish = useMemo(() => {
-    const { completedSections } = getProjectStatus(project)
+    const { completedSections } = getProjectStatus(project, contracts)
     return (
       intersection(
         [
