@@ -1,5 +1,3 @@
-import { format } from "date-fns"
-import { Check, ChevronRight, CircleHelp, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { reverse, uniqBy } from "ramda"
@@ -11,13 +9,13 @@ import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 import { projectHasUnpublishedChanges } from "@/lib/utils"
 
-import { Callout } from "../common/Callout"
-import { ChainLogo } from "../common/ChainLogo"
 import ExternalLink from "../ExternalLink"
 import { EnrolledCallout } from "../missions/common/callouts/EnrolledCallout"
 import { Avatar, AvatarImage } from "../ui/avatar"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
+
 const UserProjectCard = ({
   className,
   project,
@@ -33,10 +31,12 @@ const UserProjectCard = ({
   const projectHasChanges = projectHasUnpublishedChanges(project)
   const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
+  const { data: contracts } = useProjectContracts(project.id)
+
   const progress = useMemo(() => {
-    const { progressPercent } = getProjectStatus(project)
+    const { progressPercent } = getProjectStatus(project, contracts ?? null)
     return progressPercent
-  }, [project])
+  }, [project, contracts])
 
   const uniqueApplications = applications?.filter(
     (application, index, self) => {

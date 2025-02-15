@@ -67,9 +67,9 @@ export const ProjectApplication = ({
   const { progressPercent, completedSections: completedSectionsCriteria } =
     useMemo(() => {
       return project
-        ? getProjectStatus(project)
+        ? getProjectStatus(project, contracts ?? null)
         : { progressPercent: 0, completedSections: [] }
-    }, [project])
+    }, [project, contracts])
 
   const roundEligibilityCriteriaChecks = round!.applicationPageEligibility.map(
     () => {

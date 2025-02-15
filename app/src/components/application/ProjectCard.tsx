@@ -7,6 +7,7 @@ import { cn, getProjectStatus } from "@/lib/utils"
 import { Badge } from "../common/Badge"
 import { Checkbox } from "../ui/checkbox"
 import IneligibleDialog from "./IneligibleDialog"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 
 export const ProjectCard = memo(function ProjectCard({
   className,
@@ -21,9 +22,11 @@ export const ProjectCard = memo(function ProjectCard({
   isSelected: boolean
   onSelect: (projectId: string) => void
 }) {
+  const { data: contracts } = useProjectContracts(project.id)
+
   const isEligible = useMemo(() => {
-    return getProjectStatus(project).progressPercent === 100
-  }, [project])
+    return getProjectStatus(project, contracts ?? null).progressPercent === 100
+  }, [project, contracts])
 
   const [ineligibleDialogOpen, setIneligibleDialogOpen] = useState(false)
 
