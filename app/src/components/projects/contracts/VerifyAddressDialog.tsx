@@ -31,6 +31,7 @@ export function VerifyAddressDialog({
     includedContracts: ProjectContract[],
     excludedContracts: ProjectContract[],
     signature: string,
+    verificationChainId: string,
   ) => void
 }>) {
   const [page, setPage] = useState(0)
@@ -69,6 +70,7 @@ export function VerifyAddressDialog({
         verificationResult.contracts.included as ProjectContract[],
         verificationResult.contracts.excluded as ProjectContract[],
         signature,
+        selectedChain.toString(),
       )
     } catch (_) {
       setError("An error occurred, please try again")

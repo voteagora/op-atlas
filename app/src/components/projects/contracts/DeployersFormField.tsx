@@ -23,7 +23,12 @@ export function DeployersFormField({
   })
 
   async function onAddDeployerField() {
-    addDeployerField({ address: "", contracts: [], signature: "" })
+    addDeployerField({
+      address: "",
+      contracts: [],
+      signature: "",
+      verificationChainId: "",
+    })
   }
 
   async function onRemoveDeployerField(index: number) {

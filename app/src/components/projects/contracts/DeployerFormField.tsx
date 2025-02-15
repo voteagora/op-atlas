@@ -59,6 +59,7 @@ export function DeployerFormField({
     includedContracts: ProjectContract[],
     excludedContracts: ProjectContract[],
     signature: string,
+    verificationChainId: string,
   ) {
     // Set the contracts to the form
     form.setValue(`deployers.${deployerIndex}.contracts`, [
@@ -79,6 +80,10 @@ export function DeployerFormField({
     ])
 
     form.setValue(`deployers.${deployerIndex}.signature`, signature)
+    form.setValue(
+      `deployers.${deployerIndex}.verificationChainId`,
+      verificationChainId,
+    )
 
     setIsVerified(true)
   }
@@ -134,9 +139,15 @@ export function DeployerFormField({
               includedContracts: ProjectContract[],
               excludedContracts: ProjectContract[],
               signature: string,
+              verificationChainId: string,
             ) => {
               setIsVerifyingDialog(false)
-              onVerifySuccess(includedContracts, excludedContracts, signature)
+              onVerifySuccess(
+                includedContracts,
+                excludedContracts,
+                signature,
+                verificationChainId,
+              )
             }}
           />
         )}
