@@ -48,17 +48,28 @@ function getDefaultValues(
     submittedToOSO: projectContracts.isSubmittedToOso,
     isOffChain: !projectContracts.isOnChainContract,
     osoSlug: projectContracts.openSourceObserverSlug ?? "",
-    deployers: projectContractsByDeployer.map((deployer) => ({
-      address: deployer.address,
-      contracts: deployer.contracts.map((contract) => ({
-        address: contract.address,
-        chainId: contract.chainId.toString(),
-        excluded: false,
-      })),
-      signature: projectContracts.contracts[0]?.verificationProof ?? "",
-      verificationChainId:
-        projectContracts.contracts[0]?.verificationChainId?.toString() ?? "",
-    })),
+    deployers:
+      projectContractsByDeployer.length > 0
+        ? projectContractsByDeployer.map((deployer) => ({
+            address: deployer.address,
+            contracts: deployer.contracts.map((contract) => ({
+              address: contract.address,
+              chainId: contract.chainId.toString(),
+              excluded: false,
+            })),
+            signature: projectContracts.contracts[0]?.verificationProof ?? "",
+            verificationChainId:
+              projectContracts.contracts[0]?.verificationChainId?.toString() ??
+              "",
+          }))
+        : [
+            {
+              address: "",
+              contracts: [],
+              signature: "",
+              verificationChainId: "",
+            },
+          ],
     defillamaSlug:
       projectContracts.defiLlamaSlug.length === 0
         ? [{ slug: "" }]
