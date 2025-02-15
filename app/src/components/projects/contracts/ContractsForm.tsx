@@ -165,7 +165,12 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
   )
 
   const canSubmit = (function () {
-    return isOffchain || canAddContract || submittedToOso
+    return (
+      isOffchain ||
+      canAddContract ||
+      submittedToOso ||
+      deployers.some((d) => d.contracts.length > 0)
+    )
   })()
 
   return (
@@ -300,7 +305,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
         <div className="flex gap-2 mt-10">
           <Button
             isLoading={isSaving}
-            disabled={!canSubmit || isSubmitting}
+            disabled={!canSubmit || isSubmitting || !form.formState.isDirty}
             type="button"
             onClick={form.handleSubmit(onSubmit(true))}
             variant="destructive"
