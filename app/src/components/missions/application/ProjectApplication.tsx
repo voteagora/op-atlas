@@ -87,8 +87,7 @@ export const ProjectApplication = ({
 
     if (criterion.type && criterion.type === "isOnChainContract") {
       roundEligibilityCriteriaChecks[i] =
-        (project.isOnChainContract &&
-          (contracts?.contracts?.length ?? 0) > 0) ||
+        (contracts?.contracts?.length ?? 0) > 0 ||
         !!project.openSourceObserverSlug
     }
   }
