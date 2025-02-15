@@ -1,24 +1,26 @@
-import { DeployersSchema } from "./ContractFormSchema"
-import { z } from "zod"
-import { UseFormReturn } from "react-hook-form"
-import { ChainLogo } from "@/components/common/ChainLogo"
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
 import { Check, Ellipsis, FileQuestion, X } from "lucide-react"
-import { truncate } from "@/lib/utils/contracts"
+import Image from "next/image"
+import { useState } from "react"
+import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
+import { z } from "zod"
+
 import { CHAIN_INFO } from "@/components/common/chain"
-import { addProjectContract } from "@/db/projects"
-import { useProjectFromPath } from "@/hooks/useProjectFromPath"
-import { removeContract } from "@/lib/actions/contracts"
+import { ChainLogo } from "@/components/common/ChainLogo"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
-import { Button } from "@/components/ui/button"
 import { onCopy } from "@/components/ui/utils/copy"
-import Image from "next/image"
-import { useState } from "react"
+import { addProjectContract } from "@/db/projects"
+import { useProjectFromPath } from "@/hooks/useProjectFromPath"
+import { removeContract } from "@/lib/actions/contracts"
+import { truncate } from "@/lib/utils/contracts"
+
+import { DeployersSchema } from "./ContractFormSchema"
 
 export function ContractFormField({
   form,

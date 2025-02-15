@@ -16,11 +16,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { CategoryWithImpact, ProjectWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX, getProjectStatus } from "@/lib/utils"
 
 import { ApplicationFormSchema } from "./ApplicationFormTabs"
-import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 
 const ProjectImpactForm = ({
   project,

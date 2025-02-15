@@ -1,5 +1,6 @@
 "use server"
 
+import { ProjectContract, PublishedContract } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -19,15 +20,14 @@ import {
   revokeContractAttestations,
 } from "../eas"
 import { uploadToPinata } from "../pinata"
+import { ProjectWithFullDetails } from "../types"
 import {
   formatOrganizationMetadata,
   formatProjectMetadata,
   ProjectMetadata,
 } from "../utils/metadata"
-import { verifyMembership } from "./utils"
 import { getUnpublishedContractChanges } from "./projects"
-import { ProjectWithFullDetails } from "../types"
-import { ProjectContract, PublishedContract } from "@prisma/client"
+import { verifyMembership } from "./utils"
 
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()

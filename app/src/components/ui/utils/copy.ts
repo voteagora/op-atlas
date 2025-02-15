@@ -1,5 +1,6 @@
-import { copyToClipboard } from "@/lib/utils"
 import { toast } from "sonner"
+
+import { copyToClipboard } from "@/lib/utils"
 
 export const onCopy = async (value: string) => {
   try {

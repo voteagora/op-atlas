@@ -1,10 +1,11 @@
 import { ProjectContract } from "@prisma/client"
+import { z } from "zod"
+
 import {
   CategoryWithImpact,
   OrganizationWithDetails,
   ProjectWithDetails,
 } from "../types"
-import { z } from "zod"
 
 export const FullProjectMetadataValidator = z.object({
   name: z.string(),

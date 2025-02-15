@@ -1,5 +1,6 @@
-import { OsoDeployerContractsReturnType } from "@/lib/types"
 import { gql, GraphQLClient } from "graphql-request"
+
+import { OsoDeployerContractsReturnType } from "@/lib/types"
 
 export const osoClient = new GraphQLClient(
   "https://www.opensource.observer/api/v1/graphql",

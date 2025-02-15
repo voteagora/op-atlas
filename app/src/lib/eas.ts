@@ -1,5 +1,6 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
+
 import { ProjectWithFullDetails } from "./types"
 
 const ENTITY_SCHEMA_ID =

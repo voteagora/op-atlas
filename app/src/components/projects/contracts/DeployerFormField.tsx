@@ -20,8 +20,8 @@ import { useOsoDeployedContracts } from "@/hooks/useOsoDeployedContracts"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { removeContractsByDeployer } from "@/lib/actions/contracts"
 
-import { ContractsFormField } from "./ContractsFormField"
 import { DeployersSchema } from "./ContractFormSchema"
+import { ContractsFormField } from "./ContractsFormField"
 import { VerifyAddressDialog } from "./VerifyAddressDialog"
 
 export function DeployerFormField({

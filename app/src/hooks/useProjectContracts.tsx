@@ -1,10 +1,11 @@
+import { ProjectContract } from "@prisma/client"
 import {
   useQuery,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query"
+
 import { getAllProjectContracts } from "@/db/projects"
-import { ProjectContract } from "@prisma/client"
 
 export function useProjectContracts(
   projectId: string,

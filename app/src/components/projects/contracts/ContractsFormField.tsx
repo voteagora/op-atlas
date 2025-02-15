@@ -1,18 +1,18 @@
 import { ChevronDown, ChevronUp, Plus } from "lucide-react"
 import Image from "next/image"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 
 import { RedBadge } from "@/components/missions/common/badges/RedBadge"
 import { FormLabel } from "@/components/ui/form"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
-
-import { ContractFormField } from "./ContractFormField"
-import { MissingContractsDialog } from "./MissingContractsDialog"
-import { DeployersSchema } from "./ContractFormSchema"
 import { OsoDeployerContracts } from "@/lib/types"
 import { osoNamespaceToChainId } from "@/lib/utils/contractForm"
+
+import { ContractFormField } from "./ContractFormField"
+import { DeployersSchema } from "./ContractFormSchema"
+import { MissingContractsDialog } from "./MissingContractsDialog"
 
 export function ContractsFormField({
   form,

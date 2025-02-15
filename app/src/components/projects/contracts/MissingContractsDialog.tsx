@@ -1,6 +1,9 @@
+import { ArrowRight, ArrowUpRight } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 import { type Address, isAddress, isHex } from "viem"
 
+import { Callout } from "@/components/common/Callout"
 import { DialogProps } from "@/components/dialogs/types"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -11,12 +14,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { verifyContract } from "@/lib/actions/contracts"
-import { ChainSelector } from "./ChainSelector"
-import { Callout } from "@/components/common/Callout"
-import { ArrowRight, ArrowUpRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
+import { verifyContract } from "@/lib/actions/contracts"
+
+import { ChainSelector } from "./ChainSelector"
 
 const defaultSelectedChain = 10
 

@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import { isAddress, isHex } from "viem"
 import {
   base,
@@ -15,7 +15,8 @@ import {
   worldchain,
   zora,
 } from "viem/chains"
-import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
+import { z } from "zod"
+
 import { polynomial } from "@/components/common/chain"
 
 export const Chain = z.enum([

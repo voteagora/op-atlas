@@ -13,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
@@ -24,7 +25,6 @@ import { FormField } from "../../ui/form"
 import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
 import { ApplicationFormSchema } from "./MissionApplication"
-import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 
 const notEligibleBadge = <RedBadge text="Not eligible" />
 const activeBadge = <GreenBadge showIcon={true} />

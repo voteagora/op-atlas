@@ -2,6 +2,7 @@
 
 import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
+import { Address, getAddress } from "viem"
 
 import {
   ApplicationWithDetails,
@@ -19,7 +20,6 @@ import {
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
-import { Address, getAddress } from "viem"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`

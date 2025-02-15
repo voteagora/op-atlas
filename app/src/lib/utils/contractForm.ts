@@ -1,8 +1,9 @@
+import { ProjectContract } from "@prisma/client"
+
 import {
   OsoDeployerContractsReturnType,
   ProjectContractsByDeployer,
 } from "../types"
-import { ProjectContract } from "@prisma/client"
 
 const supportedMappings = {
   OP: 10,

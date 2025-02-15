@@ -4,6 +4,7 @@ import { reverse, uniqBy } from "ramda"
 import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useIsAdmin } from "@/lib/hooks"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
@@ -14,7 +15,6 @@ import { EnrolledCallout } from "../missions/common/callouts/EnrolledCallout"
 import { Avatar, AvatarImage } from "../ui/avatar"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
-import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 
 const UserProjectCard = ({
   className,

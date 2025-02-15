@@ -1,6 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -18,24 +19,23 @@ import {
   FormLabel,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { updateProjectOSOStatus } from "@/lib/actions/contracts"
 import { updateProjectDetails } from "@/lib/actions/projects"
 import { ProjectContracts } from "@/lib/types"
 import { groupByDeployer } from "@/lib/utils/contractForm"
 
-import { DeployersFormField } from "./DeployersFormField"
 import {
   DeployersSchema,
   formatDefillamaSlug,
   reverseFormatDefillamaSlug,
 } from "./ContractFormSchema"
 import { DefiLlamaFormFiled } from "./DefiLlamaFormFiled"
-import { Plus } from "lucide-react"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { DeployersFormField } from "./DeployersFormField"
 
 function getDefaultValues(
   projectContracts: ProjectContracts,
@@ -252,8 +252,8 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
           </h3>
           <div className="text-text-secondary font-normal">
             It is highly encouraged that projects verify contracts onchain.
-            However, if you've lost your deployer keys, you can complete this
-            step by{" "}
+            However, if you&apos;ve lost your deployer keys, you can complete
+            this step by{" "}
             <ExternalLink
               href="https://www.opensource.observer"
               className="underline"

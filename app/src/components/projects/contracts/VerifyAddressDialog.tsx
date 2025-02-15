@@ -1,4 +1,5 @@
 import { ProjectContract } from "@prisma/client"
+import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { type Address } from "viem"
@@ -14,7 +15,6 @@ import { verifyDeployer } from "@/lib/actions/contracts"
 import { getMessage } from "@/lib/utils/contracts"
 
 import { ChainSelector } from "./ChainSelector"
-import { Loader2 } from "lucide-react"
 
 const defaultSelectedChain = 10
 
