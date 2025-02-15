@@ -19,6 +19,7 @@ import {
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
+import { Address, getAddress } from "viem"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -615,9 +616,7 @@ async function getProjectContractsByDeployerFn({
       WHERE c."projectId" = ${projectId}
         AND c."deployerAddress" = ${deployerAddress}
     )
-    SELECT jsonb_build_object(
-      'result', COALESCE(jsonb_agg(to_jsonb(cd.*)), '[]'::jsonb)
-    ) as result
+    SELECT COALESCE(jsonb_agg(to_jsonb(cd.*)), '[]'::jsonb) as result
     FROM contract_data cd;
   `
 
@@ -991,7 +990,13 @@ export async function addProjectContracts(
 ) {
   const createOperations = contracts.map(async (contract) => {
     try {
-      const result = await prisma.projectContract.create({ data: contract })
+      const result = await prisma.projectContract.create({
+        data: {
+          ...contract,
+          contractAddress: getAddress(contract.contractAddress),
+          deployerAddress: getAddress(contract.deployerAddress),
+        },
+      })
       return { success: true, data: result }
     } catch (error) {
       console.error(`Failed to create contract:`, error)
@@ -1044,6 +1049,8 @@ export async function addProjectContract({
     },
     create: {
       ...contract,
+      contractAddress: getAddress(contract.contractAddress),
+      deployerAddress: getAddress(contract.deployerAddress),
       project: {
         connect: {
           id: projectId,
@@ -1071,7 +1078,7 @@ export async function updateProjectContract({
   updates,
 }: {
   projectId: string
-  contractAddress: string
+  contractAddress: Address
   chainId: number
   updates: Prisma.ProjectContractUpdateInput
 }) {

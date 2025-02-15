@@ -52,8 +52,8 @@ export const verifyDeployer = async (
     contracts?.oso_contractsV0.map((contract) => {
       return {
         chainId: osoNamespaceToChainId(contract.contractNamespace),
-        contractAddress: contract.contractAddress,
-        deployerAddress: deployerAddress,
+        contractAddress: getAddress(contract.contractAddress),
+        deployerAddress: getAddress(deployerAddress),
         projectId,
         deploymentHash: "",
         verificationProof: signature,
@@ -110,6 +110,17 @@ export const verifyContract = async ({
     projectId,
     deployerAddress,
   })
+
+  // If the contract is already verified, return
+  if (
+    existingContracts?.find(
+      (contract) => contract.contractAddress === contractAddress,
+    )
+  ) {
+    return {
+      error: "Contract already verified",
+    }
+  }
 
   if (existingContracts.length === 0) {
     // Verify that the deployer is the one that signed the message
