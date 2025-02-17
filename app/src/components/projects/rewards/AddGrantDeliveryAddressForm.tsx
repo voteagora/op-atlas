@@ -1,3 +1,6 @@
+import { CheckIcon, Loader2 } from "lucide-react"
+import Link from "next/link"
+
 import Accordion from "@/components/common/Accordion"
 import ExtendedLink from "@/components/common/ExtendedLink"
 
@@ -54,6 +57,80 @@ export default function AddGrantDeliveryAddressForm({
               </div>
             ),
           },
+          {
+            title: <AccordionTitleContainer i={3} text="Complete KYC" />,
+            content: (
+              <div className="space-y-4">
+                <div className="text-secondary-foreground space-y-4">
+                  <p className="text-sm font-normal">
+                    Each person or business identified in the grant eligibility
+                    form must verify their identity—individuals at{" "}
+                    <Link
+                      href="https://kyc.optimism.io"
+                      className="underline hover:opacity-80"
+                    >
+                      kyc.optimism.io
+                    </Link>{" "}
+                    and businesses at{" "}
+                    <Link
+                      href="https://kyb.optimism.io"
+                      className="underline hover:opacity-80"
+                    >
+                      kyb.optimism.io
+                    </Link>
+                    .
+                  </p>
+                  <p className="text-sm font-normal">
+                    If a person or business has been verified within the last
+                    calendar year, they do not need to verify again.
+                  </p>
+                  <p className="text-sm font-normal">
+                    After completing KYC or KYB, your status will be updated
+                    (within 48 hours).{" "}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <span className="font-medium text-sm">Persons</span>
+                  <KYCEntryContainer
+                    name="John Doe"
+                    email="JohnD@mail.io"
+                    verified={true}
+                  />
+                  <KYCEntryContainer
+                    name="Jonas Seiferth"
+                    email="Jonas@optimism.io"
+                    verified={false}
+                  />
+                  <KYCEntryContainer
+                    name="Shaun Lind"
+                    email="shaun@optimism.io"
+                    verified={false}
+                  />
+                  {/* TODO: Replace this with actual data */}
+                  <p className="text-muted-foreground text-sm font-normal">
+                    Submitted by shaun@optimism.io
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <span className="font-medium text-sm">Entities</span>
+                  <KYCEntryContainer
+                    name="John Doe INC"
+                    email="contact@johndoe.io"
+                    verified={false}
+                  />
+                  {/* TODO: Replace this with actual data */}
+                  <p className="text-muted-foreground text-sm font-normal">
+                    Submitted by shaun@optimism.io
+                  </p>
+                </div>
+                <p className="text-destructive text-sm font-normal">
+                  We are checking for verifications. Please ensure every person
+                  and business named in the grant eligibility form has taken
+                  action and allow 48 hours before writing in.
+                </p>
+              </div>
+            ),
+          },
         ]}
       />
     </div>
@@ -65,6 +142,28 @@ function AccordionTitleContainer({ i, text }: { i: number; text: string }) {
     <div className="font-medium text-sm flex items-center space-x-2">
       <span>{i}</span>
       <span>{text}</span>
+    </div>
+  )
+}
+
+function KYCEntryContainer({
+  name,
+  email,
+  verified = false,
+}: {
+  name: string
+  email: string
+  verified: boolean
+}) {
+  return (
+    <div className="input-container space-x-2">
+      {verified ? (
+        <CheckIcon size={18} />
+      ) : (
+        <Loader2 size={18} className="animate-spin" />
+      )}
+      <span className="font-medium text-sm">{name}</span>
+      <span className="text-muted-foreground text-sm">{email}</span>
     </div>
   )
 }
