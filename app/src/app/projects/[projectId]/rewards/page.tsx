@@ -24,5 +24,5 @@ export default async function Page({
 
   const organizations = await getOrganizations(session.user.id)
 
-  return <RewardsSection project={project} userInOrganization={organizations} />
+  return <RewardsSection project={project} userOrganizations={organizations} />
 }

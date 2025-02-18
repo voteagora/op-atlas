@@ -1,6 +1,7 @@
 "use client"
 
 import { Organization } from "@prisma/client"
+import React from "react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { ProjectWithDetails } from "@/lib/types"
@@ -10,12 +11,22 @@ import RewardAccordion from "./RewardAccordion"
 
 export function RewardsSection({
   project,
-  userInOrganization,
+  userOrganizations,
 }: {
   project: ProjectWithDetails
-  userInOrganization: Organization[]
+  userOrganizations: Organization[]
 }) {
   const rewards = project.rewards
+  const userInOrganization = React.useMemo(() => {
+    return userOrganizations.length > 0
+  }, [userOrganizations])
+  const organizationUrl = React.useMemo(() => {
+    if (!userInOrganization) {
+      return "/profile/organizations/new"
+    }
+
+    return `/profile/organizations/${userOrganizations[0].id}`
+  }, [userOrganizations, userInOrganization])
 
   return (
     <div className="flex flex-col gap-12">
@@ -52,7 +63,7 @@ export function RewardsSection({
         {userInOrganization ? (
           <ExtendedLink
             as="button"
-            href="/profile/organizations/new"
+            href={organizationUrl}
             text="Go to organization settings"
             variant="primary"
           />
