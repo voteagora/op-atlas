@@ -23,7 +23,7 @@ export default async function Page() {
         <FeedbackButton />
       </div>
       <div className="flex items-start w-full max-w-6xl mx-auto my-18 gap-x-10">
-        <ProjectStatusSidebar />
+        <ProjectStatusSidebar project={null} contracts={null} />
         <div className="card flex-1">
           <ProjectDetailsForm
             organizations={

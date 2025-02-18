@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client"
+import { Prisma, User } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 
 export type TeamRole = "member" | "admin"
@@ -12,12 +12,30 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
       }
     }
     repos: true
-    contracts: true
     funding: true
     snapshots: true
     applications: true
     links: true
     rewards: { include: { claim: true } }
+  }
+}>
+
+export type ProjectTeam = {
+  id: string
+  name: string
+  team: {
+    id: string
+    role: TeamRole
+    projectId?: string
+    organizationId?: string
+    user: User[]
+  }[]
+}
+
+export type ProjectContracts = Prisma.ProjectGetPayload<{
+  include: {
+    contracts: true
+    publishedContracts: true
   }
 }>
 
@@ -42,7 +60,6 @@ export type ProjectWithFullDetails = Prisma.ProjectGetPayload<{
       }
     }
     repos: true
-    contracts: true
     links: true
     funding: true
     snapshots: true
@@ -73,7 +90,6 @@ export type UserProjectWithDetails = Prisma.ProjectGetPayload<{
       }
     }
     repos: true
-    contracts: true
     funding: true
     snapshots: true
     organization: {
@@ -324,6 +340,21 @@ export type CategoryWithImpact = Prisma.CategoryGetPayload<{
     impactStatements: true
   }
 }>
+
+export type OsoDeployerContracts = {
+  contractNamespace: string
+  contractAddress: string
+  rootDeployerAddress: string
+}
+
+export type OsoDeployerContractsReturnType = {
+  oso_contractsV0: Array<OsoDeployerContracts>
+}
+
+export interface ProjectContractsByDeployer {
+  address: string
+  contracts: Array<{ address: string; chainId: number }>
+}
 
 export type ExtendedAggregatedType = AggregatedType & {
   contributors: { address: string; email?: string }[]

@@ -17,6 +17,12 @@ import {
 
 import { polynomial } from "@/components/common/chain"
 
+export function truncate(value: string, numToShow: number) {
+  return `${value.slice(0, numToShow)}${
+    numToShow < value.length / 2 ? "..." : ""
+  }${value.slice(-numToShow)}`
+}
+
 export enum Chain {
   ArenaZ = arenaZ.id,
   Base = base.id,
@@ -38,5 +44,5 @@ export enum Chain {
   Zora = zora.id,
 }
 
-export const getMessage = (address: string) =>
-  `I verify that I'm the owner of ${address} and I'm an optimist.`
+export const getMessage = (projectId: string) =>
+  `I verify that my contracts are for Project ${projectId} and I'm an optimist.`
