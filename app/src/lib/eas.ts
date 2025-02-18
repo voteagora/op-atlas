@@ -349,7 +349,11 @@ function buildContractAttestations({
       { name: "chainId", value: c.chainId, type: "uint32" },
       { name: "deployer", value: c.deployer, type: "address" },
       { name: "deploymentTx", value: c.deploymentTx, type: "bytes32" },
-      { name: "signature", value: c.signature, type: "bytes" },
+      {
+        name: "signature",
+        value: parseZeroSignature(c.signature),
+        type: "bytes",
+      },
       {
         name: "verificationChainId",
         value: c.verificationChainId,
@@ -364,4 +368,11 @@ function buildContractAttestations({
     data: d,
     refUID: projectId,
   }))
+}
+
+function parseZeroSignature(signature: string) {
+  if (signature === "0x0") {
+    return "0x"
+  }
+  return signature
 }
