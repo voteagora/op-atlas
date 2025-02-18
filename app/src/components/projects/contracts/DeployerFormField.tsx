@@ -37,6 +37,7 @@ export function DeployerFormField({
 
   const address = form.watch(`deployers.${deployerIndex}.address`)
   const contractsFields = form.watch(`deployers.${deployerIndex}.contracts`)
+  const signature = form.watch(`deployers.${deployerIndex}.signature`)
 
   async function onRemoveDeployerField() {
     try {
@@ -53,7 +54,7 @@ export function DeployerFormField({
     useOsoDeployedContracts(address)
 
   const [isVerifyingDialog, setIsVerifyingDialog] = useState(false)
-  const [isVerified, setIsVerified] = useState(contractsFields.length > 0) // If there're contracts, it's verified
+  const [isVerified, setIsVerified] = useState(!!signature) // If there're signature, it's verified
 
   async function onVerifySuccess(
     includedContracts: ProjectContract[],
@@ -126,6 +127,7 @@ export function DeployerFormField({
             render={({ field: address }) => (
               <Input {...address} placeholder="Add a deployer address" />
             )}
+            disabled={isVerified}
           />
         )}
 
