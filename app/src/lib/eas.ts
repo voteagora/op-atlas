@@ -1,6 +1,8 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
+import { ProjectWithFullDetails } from "./types"
+
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x5eefb359bc596699202474fd99e92172d1b788aa34280f385c498875d1bfb424"
@@ -15,6 +17,10 @@ const APPLICATION_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0xb50a1973d1aab9206545cd1da93e0dc1b5314989928bb35f58762020e2027154"
     : "0x2169b74bfcb5d10a6616bbc8931dc1c56f8d1c305319a9eeca77623a991d4b80"
+const CONTRACT_SCHEMA_ID =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0x5e84bc14268e9bf1275ed4e796a9903e2c2c8b489a4de5f381a21634fe0fcb9a"
+    : "0xe687fc8f419477f1253c99889c28f3aee7e3472a4df28d3d20e88ced6acb1ddc"
 
 const entitySchema = new SchemaEncoder("uint256 farcasterID,string type")
 const projectMetadataSchema = new SchemaEncoder(
@@ -25,6 +31,9 @@ const organizationMetadataSchema = new SchemaEncoder(
 )
 const applicationSchema = new SchemaEncoder(
   "string round, uint256 farcasterID, bytes32 metadataSnapshotRefUID, uint8 metadataType, string metadataUrl",
+)
+const contractSchema = new SchemaEncoder(
+  "address contract, uint8 chainId, address deployer, bytes32 deploymentTx, bytes signature, uint8 verificationChainId, uint256 farcasterID",
 )
 
 const EAS_SIGNER_PRIVATE_KEY = process.env.EAS_SIGNER_PRIVATE_KEY
@@ -66,6 +75,45 @@ async function createAttestation(
   return await tx.wait()
 }
 
+async function createMultiAttestations(
+  attestations: {
+    schema: string
+    data: string
+    refUID?: string
+  }[],
+) {
+  const tx = await eas.multiAttest(
+    attestations.map((a) => ({
+      schema: a.schema,
+      data: [
+        {
+          recipient: "0x0000000000000000000000000000000000000000",
+          expirationTime: BigInt(0),
+          revocable: true,
+          data: a.data,
+          refUID: a.refUID,
+        },
+      ],
+    })),
+  )
+
+  return await tx.wait()
+}
+
+async function revokeMultiAttestations(
+  schemaId: string,
+  attestationIds: string[],
+) {
+  const tx = await eas.multiRevoke([
+    {
+      schema: schemaId,
+      data: attestationIds.map((id) => ({ uid: id })),
+    },
+  ])
+
+  return await tx.wait()
+}
+
 export async function createEntityAttestation({
   farcasterId,
   type,
@@ -97,21 +145,20 @@ export async function createProjectMetadataAttestation({
   category: string
   ipfsUrl: string
 }) {
-  const data = projectMetadataSchema.encodeData([
-    { name: "projectRefUID", value: projectId, type: "bytes32" },
-    { name: "farcasterID", value: farcasterId, type: "uint256" },
-    { name: "name", value: name, type: "string" },
-    { name: "category", value: category, type: "string" },
-    { name: "parentProjectRefUID", value: "", type: "bytes32" },
-    { name: "metadataType", value: "0", type: "uint8" },
-    { name: "metadataUrl", value: ipfsUrl, type: "string" },
-  ])
+  const attestation = buildProjectMetadataAttestation({
+    farcasterId,
+    projectId,
+    name,
+    category,
+    ipfsUrl,
+  })
 
   const attestationId = await createAttestation(
-    PROJECT_METADATA_SCHEMA_ID,
-    data,
-    projectId,
+    attestation.schema,
+    attestation.data,
+    attestation.refUID,
   )
+
   console.info("Created project metadata attestation:", attestationId)
 
   return attestationId
@@ -178,4 +225,145 @@ export async function createApplicationAttestation({
   )
 
   return attestationId
+}
+
+export async function createContractAttestations({
+  contracts,
+  projectId,
+  farcasterId,
+}: {
+  contracts: {
+    contractAddress: string
+    chainId: number
+    deployer: string
+    deploymentTx: string
+    signature: string
+    verificationChainId: number
+  }[]
+  projectId: string
+  farcasterId: number
+}) {
+  const attestations = buildContractAttestations({
+    contracts,
+    projectId,
+    farcasterId,
+  })
+
+  const attestationIds = await createMultiAttestations(attestations)
+
+  return attestationIds
+}
+
+export async function createFullProjectSnapshotAttestations({
+  project,
+  contracts,
+}: {
+  project: {
+    farcasterId: number
+    projectId: string
+    name: string
+    category: string
+    ipfsUrl: string
+  }
+  contracts: {
+    contractAddress: string
+    chainId: number
+    deployer: string
+    deploymentTx: string
+    signature: string
+    verificationChainId: number
+  }[]
+}) {
+  const attestations = [
+    buildProjectMetadataAttestation({
+      farcasterId: project.farcasterId,
+      projectId: project.projectId,
+      name: project.name,
+      category: project.category,
+      ipfsUrl: project.ipfsUrl,
+    }),
+    ...buildContractAttestations({
+      contracts,
+      projectId: project.projectId,
+      farcasterId: project.farcasterId,
+    }),
+  ]
+
+  return createMultiAttestations(attestations)
+}
+
+export async function revokeContractAttestations(attestationIds: string[]) {
+  if (attestationIds.length === 0) {
+    return
+  }
+  return await revokeMultiAttestations(CONTRACT_SCHEMA_ID, attestationIds)
+}
+
+function buildProjectMetadataAttestation({
+  farcasterId,
+  projectId,
+  name,
+  category,
+  ipfsUrl,
+}: {
+  farcasterId: number
+  projectId: string
+  name: string
+  category: string
+  ipfsUrl: string
+}) {
+  const data = projectMetadataSchema.encodeData([
+    { name: "projectRefUID", value: projectId, type: "bytes32" },
+    { name: "farcasterID", value: farcasterId, type: "uint256" },
+    { name: "name", value: name, type: "string" },
+    { name: "category", value: category, type: "string" },
+    { name: "parentProjectRefUID", value: "", type: "bytes32" },
+    { name: "metadataType", value: "0", type: "uint8" },
+    { name: "metadataUrl", value: ipfsUrl, type: "string" },
+  ])
+
+  return {
+    schema: PROJECT_METADATA_SCHEMA_ID,
+    data,
+    refUID: projectId,
+  }
+}
+
+function buildContractAttestations({
+  contracts,
+  projectId,
+  farcasterId,
+}: {
+  contracts: {
+    contractAddress: string
+    chainId: number
+    deployer: string
+    deploymentTx: string
+    signature: string
+    verificationChainId: number
+  }[]
+  projectId: string
+  farcasterId: number
+}) {
+  const data = contracts.map((c) =>
+    contractSchema.encodeData([
+      { name: "contract", value: c.contractAddress, type: "address" },
+      { name: "chainId", value: c.chainId, type: "uint8" },
+      { name: "deployer", value: c.deployer, type: "address" },
+      { name: "deploymentTx", value: c.deploymentTx, type: "bytes32" },
+      { name: "signature", value: c.signature, type: "bytes" },
+      {
+        name: "verificationChainId",
+        value: c.verificationChainId,
+        type: "uint8",
+      },
+      { name: "farcasterID", value: farcasterId, type: "uint256" },
+    ]),
+  )
+
+  return data.map((d) => ({
+    schema: CONTRACT_SCHEMA_ID,
+    data: d,
+    refUID: projectId,
+  }))
 }

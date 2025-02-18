@@ -268,7 +268,7 @@ const Dashboard = ({
                   {organization.organization.projects?.map((project) => (
                     <UserProjectCard
                       key={project.id}
-                      project={project.project as ProjectWithDetails}
+                      project={project.project as unknown as ProjectWithDetails}
                       handleActiveRoundHelpClick={() => {
                         setShowRewardsMonthlyDialog(true)
                       }}

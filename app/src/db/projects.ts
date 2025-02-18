@@ -1,11 +1,14 @@
 "use server"
 
-import { Prisma, Project } from "@prisma/client"
+import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
+import { Address, getAddress } from "viem"
 
 import {
   ApplicationWithDetails,
+  ProjectContracts,
   ProjectContractWithProject,
+  ProjectTeam,
   ProjectWithFullDetails,
   ProjectWithTeam,
   PublishedUserProjectsResult,
@@ -64,7 +67,6 @@ async function getUserAdminProjectsWithDetailFn({
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
@@ -94,7 +96,6 @@ async function getUserAdminProjectsWithDetailFn({
       LEFT JOIN "UserProjects" t ON p."id" = t."projectId" AND t."deletedAt" IS NULL
       LEFT JOIN "User" u ON t."userId" = u."id"
       LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
-      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
       LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
       LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
       LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
@@ -118,7 +119,6 @@ async function getUserAdminProjectsWithDetailFn({
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
@@ -149,7 +149,6 @@ async function getUserAdminProjectsWithDetailFn({
       LEFT JOIN "UserProjects" t ON p."id" = t."projectId" AND t."deletedAt" IS NULL
       LEFT JOIN "User" u ON t."userId" = u."id"
       LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
-      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
       LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
       LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
       LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
@@ -230,7 +229,6 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
           jsonb_build_object('user', to_jsonb(u.*))
         ) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE((
           SELECT jsonb_agg(to_jsonb(s.*))
@@ -268,7 +266,6 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
         AND t."deletedAt" IS NULL
       LEFT JOIN "User" u ON t."userId" = u."id"
       LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
-      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
       LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
       LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
       LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
@@ -439,7 +436,6 @@ async function getProjectFn({
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(c.*)) FILTER (WHERE c."id" IS NOT NULL), '[]'::jsonb) as "contracts",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE((
@@ -475,7 +471,6 @@ async function getProjectFn({
       LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
       LEFT JOIN "User" u ON t."userId" = u."id"
       LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
-      LEFT JOIN "ProjectContract" c ON p."id" = c."projectId"
       LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
       LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
       LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
@@ -528,7 +523,81 @@ async function getProjectTeamFn({
 
 export const getProjectTeam = cache(getProjectTeamFn)
 
-async function getProjectContractsFn({
+async function getConsolidatedProjectTeamFn({
+  projectId,
+}: {
+  projectId: string
+}): Promise<ProjectTeam | null> {
+  const result = await prisma.$queryRaw<{ result: ProjectTeam }[]>`
+    WITH project_data AS (
+      SELECT 
+        p.*,
+        COALESCE(jsonb_agg(
+          jsonb_build_object(
+            'id', t."id",
+            'role', t."role",
+            'projectId', t."projectId",
+            'user', ARRAY[to_jsonb(u.*)]
+          )
+        ) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team"
+      FROM "Project" p
+      LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
+      LEFT JOIN "User" u ON t."userId" = u."id"
+      WHERE p."id" = ${projectId}
+      GROUP BY p."id"
+    ),
+    organization_data AS (
+      SELECT 
+        o.*,
+        COALESCE(jsonb_agg(
+          jsonb_build_object(
+            'id', uo."id",
+            'role', uo."role",
+            'organizationId', uo."organizationId",
+            'user', ARRAY[to_jsonb(u.*)]
+          )
+        ) FILTER (WHERE uo."id" IS NOT NULL AND uo."deletedAt" IS NULL), '[]'::jsonb) as "team"
+      FROM "Organization" o
+      LEFT JOIN "ProjectOrganization" po ON o."id" = po."organizationId"
+      LEFT JOIN "UserOrganization" uo ON o."id" = uo."organizationId"
+      LEFT JOIN "User" u ON uo."userId" = u."id"
+      WHERE po."projectId" = ${projectId}
+      GROUP BY o."id"
+    ),
+    result AS (
+      SELECT to_jsonb(pd.*) as result
+      FROM project_data pd
+      UNION ALL
+      SELECT to_jsonb(od.*) as result
+      FROM organization_data od
+    )
+    SELECT result
+    FROM (
+      SELECT jsonb_build_object(
+        'id', r.result->>'id',
+        'name', r.result->>'name',
+        'team', r.result->'team'
+      ) as result
+      FROM result r
+    ) final;
+  `
+
+  return result[0]?.result
+}
+
+export const getConsolidatedProjectTeam = cache(getConsolidatedProjectTeamFn)
+
+async function getAllProjectContractsFn({ projectId }: { projectId: string }) {
+  return prisma.projectContract.findMany({
+    where: {
+      projectId: projectId,
+    },
+  })
+}
+
+export const getAllProjectContracts = cache(getAllProjectContractsFn)
+
+async function getProjectContractsByDeployerFn({
   projectId,
   deployerAddress,
 }: {
@@ -547,16 +616,66 @@ async function getProjectContractsFn({
       WHERE c."projectId" = ${projectId}
         AND c."deployerAddress" = ${deployerAddress}
     )
-    SELECT jsonb_build_object(
-      'result', COALESCE(jsonb_agg(to_jsonb(cd.*)), '[]'::jsonb)
-    ) as result
+    SELECT COALESCE(jsonb_agg(to_jsonb(cd.*)), '[]'::jsonb) as result
     FROM contract_data cd;
   `
 
   return result[0]?.result || []
 }
 
+export const getProjectContractsByDeployer = cache(
+  getProjectContractsByDeployerFn,
+)
+
+async function getProjectContractsFn({
+  projectId,
+}: {
+  projectId: string
+}): Promise<ProjectContracts | null> {
+  return prisma.project.findFirst({
+    where: {
+      id: projectId,
+    },
+    include: {
+      contracts: true,
+      publishedContracts: {
+        where: {
+          revokedAt: null,
+        },
+      },
+    },
+  })
+}
+
 export const getProjectContracts = cache(getProjectContractsFn)
+
+async function getPublishedProjectContractsFn({
+  contacts,
+}: {
+  contacts: {
+    chainId: number
+    contractAddress: string
+  }[]
+}): Promise<PublishedContract[]> {
+  return prisma.publishedContract.findMany({
+    where: {
+      AND: [
+        {
+          OR: contacts.map((c) => ({
+            AND: [{ contract: c.contractAddress }, { chainId: c.chainId }],
+          })),
+        },
+        {
+          revokedAt: null,
+        },
+      ],
+    },
+  })
+}
+
+export const getPublishedProjectContracts = cache(
+  getPublishedProjectContractsFn,
+)
 
 async function getUserApplicationsFn({
   userId,
@@ -865,6 +984,48 @@ export async function removeTeamMember({
   return prisma.$transaction([memberDelete, projectUpdate])
 }
 
+export async function addProjectContracts(
+  projectId: string,
+  contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
+) {
+  const createOperations = contracts.map(async (contract) => {
+    try {
+      const result = await prisma.projectContract.create({
+        data: {
+          ...contract,
+          contractAddress: getAddress(contract.contractAddress),
+          deployerAddress: getAddress(contract.deployerAddress),
+        },
+      })
+      return { success: true, data: result }
+    } catch (error) {
+      console.error(`Failed to create contract:`, error)
+      return { success: false, data: contract, error }
+    }
+  })
+
+  const results = await Promise.all(createOperations)
+
+  const createdContracts = {
+    succeeded: results.filter((r) => r.success).map((r) => r.data),
+    failed: results.filter((r) => !r.success).map((r) => r.data),
+  }
+
+  await prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return {
+    createdContracts: createdContracts.succeeded,
+    failedContracts: createdContracts.failed,
+  }
+}
+
 export async function addProjectContract({
   projectId,
   contract,
@@ -872,9 +1033,24 @@ export async function addProjectContract({
   projectId: string
   contract: Omit<Prisma.ProjectContractCreateInput, "project">
 }) {
-  const contractCreate = prisma.projectContract.create({
-    data: {
+  const contractCreate = prisma.projectContract.upsert({
+    where: {
+      contractAddress_chainId: {
+        contractAddress: contract.contractAddress,
+        chainId: contract.chainId,
+      },
+    },
+    update: {
+      project: {
+        connect: {
+          id: projectId,
+        },
+      },
+    },
+    create: {
       ...contract,
+      contractAddress: getAddress(contract.contractAddress),
+      deployerAddress: getAddress(contract.deployerAddress),
       project: {
         connect: {
           id: projectId,
@@ -902,7 +1078,7 @@ export async function updateProjectContract({
   updates,
 }: {
   projectId: string
-  contractAddress: string
+  contractAddress: Address
   chainId: number
   updates: Prisma.ProjectContractUpdateInput
 }) {
@@ -929,6 +1105,29 @@ export async function updateProjectContract({
   return prisma.$transaction([contractUpdate, projectUpdate])
 }
 
+export async function removeProjectContractsByDeployer(
+  projectId: string,
+  deployer: string,
+) {
+  const contractDelete = prisma.projectContract.deleteMany({
+    where: {
+      projectId: projectId,
+      deployerAddress: getAddress(deployer),
+    },
+  })
+
+  const projectUpdate = prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+
+  return prisma.$transaction([contractDelete, projectUpdate])
+}
+
 export async function removeProjectContract({
   projectId,
   address,
@@ -942,7 +1141,7 @@ export async function removeProjectContract({
     where: {
       projectId,
       contractAddress_chainId: {
-        contractAddress: address,
+        contractAddress: getAddress(address),
         chainId,
       },
     },
@@ -1188,6 +1387,36 @@ export async function addProjectSnapshot({
   })
 }
 
+export async function addPublishedContracts(
+  contracts: {
+    id: string
+    contract: string
+    deploymentTx: string
+    deployer: string
+    verificationChainId: number
+    signature: string
+    chainId: number
+    projectId: string
+  }[],
+) {
+  return prisma.publishedContract.createMany({
+    data: contracts,
+  })
+}
+
+export async function revokePublishedContracts(attestationIds: string[]) {
+  return prisma.publishedContract.updateMany({
+    where: {
+      id: {
+        in: attestationIds,
+      },
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  })
+}
+
 export async function createApplication({
   round,
   projectId,
@@ -1266,7 +1495,15 @@ async function getAllApplicationsForRoundFn({
 export const getAllApplicationsForRound = cache(getAllApplicationsForRoundFn)
 
 export async function updateAllForProject(
-  project: ProjectMetadata,
+  project: ProjectMetadata & {
+    contracts: {
+      address: string
+      deploymentTxHash: string
+      deployerAddress: string
+      verificationProof: string | null
+      chainId: number
+    }[]
+  },
   projectId: string,
 ) {
   // Update project
@@ -1300,7 +1537,7 @@ export async function updateAllForProject(
       contractAddress: contract.address,
       deploymentHash: contract.deploymentTxHash,
       deployerAddress: contract.deployerAddress,
-      verificationProof: contract.verificationProof ?? "",
+      verificationProof: contract.verificationProof ?? "0x0",
       chainId: contract.chainId,
       projectId,
     })),

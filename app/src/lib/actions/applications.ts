@@ -5,20 +5,18 @@ import { revalidatePath } from "next/cache"
 import { sortBy } from "ramda"
 
 import { auth } from "@/auth"
-import { createApplication, getProject } from "@/db/projects"
+import {
+  createApplication,
+  getProject,
+  getProjectContracts,
+} from "@/db/projects"
 import { getUserById } from "@/db/users"
 
 import { createApplicationAttestation } from "../eas"
-import { uploadToPinata } from "../pinata"
 import { CategoryWithImpact } from "../types"
-import { APPLICATIONS_CLOSED, getProjectStatus } from "../utils"
-import { formatApplicationMetadata } from "../utils/metadata"
-import {
-  getApplicationsForRound,
-  getUserApplicationsForRound,
-} from "./projects"
+import { getProjectStatus } from "../utils"
+import { getUserApplicationsForRound } from "./projects"
 import { verifyAdminStatus } from "./utils"
-import { MissionData } from "../MissionsAndRoundData"
 
 const whitelist: string[] = []
 
@@ -85,7 +83,12 @@ const createProjectApplication = async (
     return isInvalid
   }
 
-  const project = await getProject({ id: applicationData.projectId })
+  const [project, contracts] = await Promise.all([
+    getProject({ id: applicationData.projectId }),
+    getProjectContracts({
+      projectId: applicationData.projectId,
+    }),
+  ])
 
   if (!project) {
     return {
@@ -94,7 +97,7 @@ const createProjectApplication = async (
   }
 
   // Project must be 100% complete
-  const { progressPercent } = getProjectStatus(project)
+  const { progressPercent } = getProjectStatus(project, contracts)
 
   if (progressPercent !== 100) {
     return {

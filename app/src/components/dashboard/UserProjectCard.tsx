@@ -1,23 +1,21 @@
-import { format } from "date-fns"
-import { Check, ChevronRight, CircleHelp, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { reverse, uniqBy } from "ramda"
 import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useIsAdmin } from "@/lib/hooks"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 import { projectHasUnpublishedChanges } from "@/lib/utils"
 
-import { Callout } from "../common/Callout"
-import { ChainLogo } from "../common/ChainLogo"
 import ExternalLink from "../ExternalLink"
 import { EnrolledCallout } from "../missions/common/callouts/EnrolledCallout"
 import { Avatar, AvatarImage } from "../ui/avatar"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
+
 const UserProjectCard = ({
   className,
   project,
@@ -33,10 +31,12 @@ const UserProjectCard = ({
   const projectHasChanges = projectHasUnpublishedChanges(project)
   const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
+  const { data: contracts } = useProjectContracts(project.id)
+
   const progress = useMemo(() => {
-    const { progressPercent } = getProjectStatus(project)
+    const { progressPercent } = getProjectStatus(project, contracts ?? null)
     return progressPercent
-  }, [project])
+  }, [project, contracts])
 
   const uniqueApplications = applications?.filter(
     (application, index, self) => {
@@ -93,7 +93,7 @@ const UserProjectCard = ({
               </Badge>
             )}
 
-            {project.contracts.length > 0 ? (
+            {/* {project.contracts.length > 0 ? (
               <div className="h-full flex flex-row-reverse items-center w-fit mr-3">
                 {reverse(uniqBy((c) => c.chainId, project.contracts)).map(
                   (contract, idx) => (
@@ -107,7 +107,7 @@ const UserProjectCard = ({
                   ),
                 )}
               </div>
-            ) : null}
+            ) : null} */}
 
             <div className="h-full flex flex-row-reverse items-center w-fit ml-1.5">
               {reverse(project.team).map(({ user }) => (

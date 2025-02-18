@@ -3,18 +3,73 @@
 import { revalidatePath } from "next/cache"
 import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
+import { getDeployedContractsServer } from "@/app/api/oso/common"
 import { auth } from "@/auth"
 import {
   addProjectContract,
-  getProjectContracts,
+  addProjectContracts,
+  getProjectContractsByDeployer,
   removeProjectContract,
+  removeProjectContractsByDeployer,
   updateProjectContract,
 } from "@/db/projects"
 
-import { getTransaction, getTransactionTrace, TraceCall } from "../eth"
+import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
+import { osoNamespaceToChainId } from "../utils/contractForm"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
+
+export const verifyDeployer = async (
+  projectId: string,
+  deployerAddress: Address,
+  chainId: number,
+  signature: `0x${string}`,
+) => {
+  const [contracts, result] = await Promise.all([
+    getDeployedContractsServer(deployerAddress),
+    verifyAuthenticatedMember(projectId),
+  ])
+  if (result.error !== null) return result
+
+  const client = clients[chainId]
+
+  const isValidSignature = await client.verifyMessage({
+    address: getAddress(deployerAddress),
+    message: getMessage(projectId),
+    signature: signature as `0x${string}`,
+  })
+
+  if (!isValidSignature) {
+    return {
+      error: "Invalid signature",
+    }
+  }
+
+  // Add all contracts to the DB
+  const addedContracts = await addProjectContracts(
+    projectId,
+    contracts?.oso_contractsV0.map((contract) => {
+      return {
+        chainId: osoNamespaceToChainId(contract.contractNamespace),
+        contractAddress: getAddress(contract.contractAddress),
+        deployerAddress: getAddress(deployerAddress),
+        projectId,
+        deploymentHash: "",
+        verificationProof: signature,
+        verificationChainId: chainId,
+      }
+    }),
+  )
+
+  return {
+    error: null,
+    contracts: {
+      included: addedContracts.createdContracts,
+      excluded: addedContracts.failedContracts,
+    },
+  }
+}
 
 export const verifyContract = async ({
   projectId,
@@ -51,16 +106,27 @@ export const verifyContract = async ({
   const deployerAddress = getAddress(deployerAddressRaw)
 
   // Fetch other contracts from this proejct with the same deployer address
-  const existingContracts = await getProjectContracts({
+  const existingContracts = await getProjectContractsByDeployer({
     projectId,
     deployerAddress,
   })
+
+  // If the contract is already verified, return
+  if (
+    existingContracts?.find(
+      (contract) => contract.contractAddress === contractAddress,
+    )
+  ) {
+    return {
+      error: "Contract already verified",
+    }
+  }
 
   if (existingContracts.length === 0) {
     // Verify that the deployer is the one that signed the message
     const isValidSignature = await verifyMessage({
       address: deployerAddress,
-      message: getMessage(deployerAddress),
+      message: getMessage(projectId),
       signature: signature as `0x${string}`,
     })
 
@@ -210,15 +276,7 @@ export const updateContractDetails = async ({
   }
 }
 
-export const removeContract = async ({
-  projectId,
-  address: contractAddressRaw,
-  chainId,
-}: {
-  projectId: string
-  address: Address
-  chainId: number
-}) => {
+async function verifyAuthenticatedMember(projectId: string) {
   const session = await auth()
   if (!session) {
     return {
@@ -231,11 +289,43 @@ export const removeContract = async ({
     return isInvalid
   }
 
-  const contractAddress = getAddress(contractAddressRaw)
+  return {
+    error: null,
+  }
+}
+
+export const removeContractsByDeployer = async (
+  projectId: string,
+  deployerAddress: Address,
+) => {
+  const result = await verifyAuthenticatedMember(projectId)
+  if (result.error !== null) return result.error
+
+  await removeProjectContractsByDeployer(projectId, deployerAddress)
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+  }
+}
+
+export const removeContract = async ({
+  projectId,
+  address,
+  chainId,
+}: {
+  projectId: string
+  address: string
+  chainId: number
+}) => {
+  const result = await verifyAuthenticatedMember(projectId)
+  if (result.error !== null) return result.error
 
   await removeProjectContract({
     projectId,
-    address: contractAddress,
+    address,
     chainId,
   })
 

@@ -4,7 +4,11 @@ import { customAlphabet } from "nanoid"
 import { sortBy } from "ramda"
 import { twMerge } from "tailwind-merge"
 
-import { ProjectWithDetails, UserWithAddresses } from "../types"
+import {
+  ProjectContracts,
+  ProjectWithDetails,
+  UserWithAddresses,
+} from "../types"
 
 export const APPLICATIONS_CLOSED =
   process.env.NEXT_PUBLIC_APPLICATIONS_CLOSED === "true"
@@ -95,7 +99,10 @@ export type ProjectStatus = {
   progressPercent: number
 }
 
-export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
+export function getProjectStatus(
+  project: ProjectWithDetails,
+  contracts: ProjectContracts | null,
+): ProjectStatus {
   const completedSections: ProjectSection[] = []
 
   const hasDetails = project.name && project.description
@@ -116,7 +123,7 @@ export function getProjectStatus(project: ProjectWithDetails): ProjectStatus {
   }
 
   const hasContracts =
-    project.contracts.length > 0 ||
+    (contracts && contracts?.contracts.length > 0) ||
     !!project.openSourceObserverSlug ||
     project.isOnChainContract === false
   if (hasContracts) {
