@@ -38,7 +38,12 @@ export default function Accordion({
   collapsible = true,
 }: AccordionProps) {
   return (
-    <ShadcnAccordion type={type} collapsible={collapsible} className="w-full">
+    <ShadcnAccordion
+      type={type as any}
+      collapsible={collapsible}
+      className="w-full"
+      defaultValue="item-0"
+    >
       {items?.map(({ content, title }, index) => {
         const wrappedTitle =
           typeof title === "string" ? (
@@ -52,6 +57,7 @@ export default function Accordion({
             value={`item-${index}`}
             key={index}
             className="w-full space-y-1"
+            defaultValue="item-0"
           >
             <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
             <AccordionContent>{content}</AccordionContent>

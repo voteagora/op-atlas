@@ -63,9 +63,10 @@ export function RewardsSection({
         {userInOrganization ? (
           <ExtendedLink
             as="button"
-            href={organizationUrl}
+            href={`${organizationUrl}/grant-address`}
             text="Go to organization settings"
             variant="primary"
+            target="_self"
           />
         ) : (
           <AddGrantDeliveryAddressForm
