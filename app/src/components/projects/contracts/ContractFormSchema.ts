@@ -12,6 +12,7 @@ import {
   shape,
   soneium,
   superseed,
+  unichain,
   worldchain,
   zora,
 } from "viem/chains"
@@ -36,6 +37,7 @@ export const Chain = z.enum([
   soneium.id.toString(),
   superseed.id.toString(),
   swell.id.toString(),
+  unichain.id.toString(),
   worldchain.id.toString(),
   zora.id.toString(),
 ])

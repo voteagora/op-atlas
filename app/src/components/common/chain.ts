@@ -12,6 +12,7 @@ import {
   shape,
   soneium,
   superseed,
+  unichain,
   worldchain,
   zora,
 } from "viem/chains"
@@ -85,6 +86,10 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [swell.id.toString()]: {
       logo: "/assets/chain-logos/swell.svg",
       name: "Swell",
+    },
+    [unichain.id.toString()]: {
+      logo: "/assets/chain-logos/unichain.jpg",
+      name: "Unichain",
     },
     [worldchain.id.toString()]: {
       logo: "/assets/chain-logos/worldchain.png",
