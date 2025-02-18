@@ -657,6 +657,10 @@ async function getPublishedProjectContractsFn({
     contractAddress: string
   }[]
 }): Promise<PublishedContract[]> {
+  if (contacts.length === 0) {
+    return []
+  }
+
   return prisma.publishedContract.findMany({
     where: {
       AND: [
