@@ -72,7 +72,7 @@ function getDefaultValues(
           ],
     defillamaSlug:
       projectContracts.defiLlamaSlug.length === 0
-        ? [{ slug: "" }]
+        ? [{ slug: undefined }]
         : projectContracts.defiLlamaSlug.map((slug) => ({
             slug: reverseFormatDefillamaSlug(slug),
           })),
@@ -106,7 +106,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
   const onAddDefillamaSlugField = async () => {
     const valid = form.getValues("defillamaSlug").every((slug) => slug)
     if (valid) {
-      addDefillamaSlugField({ slug: "" })
+      addDefillamaSlugField({ slug: undefined })
     }
   }
 
@@ -116,7 +116,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
       removeDefillamaSlugField(index)
 
       if (isOnlyRepo) {
-        addDefillamaSlugField({ slug: "" })
+        addDefillamaSlugField({ slug: undefined })
       }
     } catch (error) {
       console.error("Error removing defillama url", error)
@@ -139,7 +139,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
             isOnChainContract: !values.isOffChain,
             defiLlamaSlug: values.defillamaSlug
               .filter((slug) => slug.slug)
-              .map((slug) => formatDefillamaSlug(slug.slug)),
+              .map((slug) => formatDefillamaSlug(slug.slug!)),
           }),
         ])
 

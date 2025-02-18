@@ -62,7 +62,7 @@ export const DeployerSchema = z.object({
   address: AddressSchema,
   contracts: z.array(ContractSchema),
   signature: z.string(),
-  verificationChainId: Chain,
+  verificationChainId: z.string(),
 })
 
 // Separate URL and slug patterns for clarity
@@ -70,7 +70,10 @@ const defillamaUrlPattern =
   /^https:\/\/defillama\.com\/protocol\/[a-zA-Z0-9-]+$/i
 
 export const DefiLlamaSchema = z.object({
-  slug: z.string().regex(defillamaUrlPattern, "Invalid DefiLlama protocol URL"),
+  slug: z
+    .string()
+    .regex(defillamaUrlPattern, "Invalid DefiLlama protocol URL")
+    .optional(),
 })
 
 export const DeployersSchema = z.object({

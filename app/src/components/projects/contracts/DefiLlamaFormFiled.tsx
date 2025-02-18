@@ -26,6 +26,13 @@ export function DefiLlamaFormFiled({
             <Input
               placeholder="https://defillama.com/protocol/..."
               {...field}
+              onChange={(e) => {
+                if (e.target.value === "") {
+                  field.onChange(undefined)
+                } else {
+                  field.onChange(e.target.value)
+                }
+              }}
               className={
                 form.formState.errors.defillamaSlug?.[index]?.slug
                   ? "border-red-500"
