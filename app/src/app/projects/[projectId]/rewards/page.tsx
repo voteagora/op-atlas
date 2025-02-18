@@ -22,12 +22,7 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const { organizations } = await getOrganizations(session.user.id)
+  const organizations = await getOrganizations(session.user.id)
 
-  return (
-    <RewardsSection
-      project={project}
-      userInOrganization={Boolean(organizations.length)}
-    />
-  )
+  return <RewardsSection project={project} userInOrganization={organizations} />
 }

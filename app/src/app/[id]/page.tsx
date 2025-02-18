@@ -38,10 +38,7 @@ export default async function PublicProfile({
   return (
     <PublicUserProfile
       user={user}
-      organizations={
-        organizations?.organizations.map(({ organization }) => organization) ||
-        []
-      }
+      organizations={organizations || []}
       projects={projects}
     />
   )

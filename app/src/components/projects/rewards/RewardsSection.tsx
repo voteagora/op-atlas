@@ -1,5 +1,7 @@
 "use client"
 
+import { Organization } from "@prisma/client"
+
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { ProjectWithDetails } from "@/lib/types"
 
@@ -11,7 +13,7 @@ export function RewardsSection({
   userInOrganization,
 }: {
   project: ProjectWithDetails
-  userInOrganization: boolean
+  userInOrganization: Organization[]
 }) {
   const rewards = project.rewards
 
@@ -47,8 +49,7 @@ export function RewardsSection({
         <p className="text-secondary-foreground">
           KYC (identity verification) is required for each address.
         </p>
-        {/* TODO: Use `userInOrganization` check instead. This is for testing purposes */}
-        {!userInOrganization ? (
+        {userInOrganization ? (
           <ExtendedLink
             as="button"
             href="/profile/organizations/new"
