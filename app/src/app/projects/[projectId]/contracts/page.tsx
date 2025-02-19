@@ -22,8 +22,9 @@ export default async function Page({
 
   if (
     !projectContracts ||
-    !projectTeam ||
-    !isUserMemberOfProject(projectTeam, session?.user.id)
+    !projectTeam
+    //  ||
+    // !isUserMemberOfProject(projectTeam, session?.user.id)
   ) {
     redirect("/dashboard")
   }

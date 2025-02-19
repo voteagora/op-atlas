@@ -40,7 +40,7 @@ function osoNamespaceToChainId(namespace: string) {
   return supportedMappings[namespace as keyof typeof supportedMappings]
 }
 
-function parseOsoDeployerContract(
+export function parseOsoDeployerContract(
   contract: OsoDeployerContractsReturnType | null,
 ): ParsedOsoDeployerContract[] {
   if (!contract) {

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
-import { getDeployedContractsServer } from "@/app/api/oso/common"
+import { getDeployedContractsServerParsed } from "@/app/api/oso/common"
 import { auth } from "@/auth"
 import {
   addProjectContract,
@@ -15,7 +15,6 @@ import {
 } from "@/db/projects"
 
 import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
-import { osoNamespaceToChainId } from "../utils/contractForm"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
@@ -27,7 +26,7 @@ export const verifyDeployer = async (
   signature: `0x${string}`,
 ) => {
   const [contracts, result] = await Promise.all([
-    getDeployedContractsServer(deployerAddress),
+    getDeployedContractsServerParsed(deployerAddress),
     verifyAuthenticatedMember(projectId),
   ])
   if (result.error !== null) return result
@@ -49,9 +48,9 @@ export const verifyDeployer = async (
   // Add all contracts to the DB
   const addedContracts = await addProjectContracts(
     projectId,
-    contracts?.oso_contractsV0.map((contract) => {
+    contracts?.map((contract) => {
       return {
-        chainId: osoNamespaceToChainId(contract.contractNamespace),
+        chainId: contract.chainId,
         contractAddress: getAddress(contract.contractAddress),
         deployerAddress: getAddress(deployerAddress),
         projectId,
