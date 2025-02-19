@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
+import { shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { makeUserAddressPrimaryAction } from "./actions"
@@ -48,9 +49,9 @@ export const VerifiedAddress = ({
             />
           )}
 
-          <p className="text-sm">{address}</p>
+          <p className="text-sm">{shortenAddress(address)}</p>
 
-          {primary && <Badge text="Primary address" />}
+          {primary && <Badge text="Primary address" className="shrink-0" />}
           {isBadgeholderAddress && <Badgeholder />}
           {source === "farcaster" && <Badge text="Farcaster" />}
         </div>
