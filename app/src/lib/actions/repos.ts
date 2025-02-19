@@ -17,13 +17,12 @@ import { getCrate } from "../crates"
 import {
   getContents,
   getFileOrFolder,
-  getFilesContentsJson,
   getFilesContentsToml,
   getLicense,
   getPackageJsonFiles,
   getRepository,
 } from "../github"
-import { OPEN_SOURCE_LICENSES } from "../licenses"
+import { isOpenSourceLicense } from "../licenses"
 import { getNpmPackage } from "../npm"
 import { verifyMembership } from "./utils"
 
@@ -167,20 +166,17 @@ export const verifyGithubRepo = async (
     }
   }
 
-  // Fetch license to determine open source status
-  const license = await getLicense(owner, slug)
-  const isOpenSource = license && OPEN_SOURCE_LICENSES.includes(license)
-
   const repoFiles = await getContents(owner, slug)
 
-  const [isCrate, isNpmPackage] = await Promise.all([
+  const [isCrate, isNpmPackage, license] = await Promise.all([
     verifyCrate(owner, slug, repoFiles),
     verifyNpm(owner, slug),
+    getLicense(owner, slug),
   ])
 
   return {
     repo: {
-      isOpenSource,
+      isOpenSource: license && isOpenSourceLicense(license),
       isNpmPackage,
       isCrate,
     },
@@ -205,7 +201,7 @@ export const validateGithubRepo = async (owner: string, slug: string) => {
   ])
 
   return {
-    isOpenSource: license && OPEN_SOURCE_LICENSES.includes(license),
+    isOpenSource: license && isOpenSourceLicense(license),
     isNpmPackage,
     isCrate,
   }

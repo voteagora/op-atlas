@@ -118,3 +118,11 @@ export const OPEN_SOURCE_LICENSES = [
   "LGPL-3.0",
   "GPL-3.0",
 ]
+
+export const isOpenSourceLicense = (license: string) => {
+  const licenseWithoutOnly = license + "-only"
+  return (
+    OPEN_SOURCE_LICENSES.includes(license) ||
+    OPEN_SOURCE_LICENSES.includes(licenseWithoutOnly)
+  )
+}
