@@ -1,10 +1,11 @@
 import { Check, ChevronDown, ChevronUp, Ellipsis } from "lucide-react"
 import Image from "next/image"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import CircleWithCheckmark from "@/components/common/CircleWithGreenCheckmark"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,7 +25,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { validateGithubRepo } from "@/lib/actions/repos"
 import { copyToClipboard } from "@/lib/utils"
 
 import { ReposFormSchema } from "./schema"
@@ -67,23 +68,6 @@ export const GithubForm = ({
     } catch (error) {
       return false
     }
-  }, [url])
-
-  useEffect(() => {
-    const validate = async () => {
-      const owner = url.split("/")[3]
-      const slug = url.split("/")[4]
-      const { isNpmPackage, isCrate, isOpenSource } = await validateGithubRepo(
-        owner,
-        slug,
-      )
-
-      form.setValue(`githubRepos.${index}.npmPackage`, !!isNpmPackage)
-      form.setValue(`githubRepos.${index}.crate`, !!isCrate)
-      form.setValue(`githubRepos.${index}.openSource`, !!isOpenSource)
-    }
-
-    validate()
   }, [url])
 
   function split() {
@@ -133,11 +117,10 @@ export const GithubForm = ({
 
                             {isNpmPackage && (
                               <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
-                                <Image
+                                <img
                                   src="/assets/icons/npm.svg"
                                   alt="npm"
-                                  width={12}
-                                  height={12}
+                                  className="w-3 h-3"
                                 />
 
                                 <p className="text-xs font-medium">NPM</p>
@@ -145,11 +128,10 @@ export const GithubForm = ({
                             )}
                             {isCrate && (
                               <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
-                                <Image
+                                <img
                                   src="/assets/icons/rust.svg"
                                   alt="rust"
-                                  width={12}
-                                  height={12}
+                                  className="w-3 h-3"
                                 />
                                 <p className="text-xs font-medium">Crate</p>
                               </div>
@@ -157,11 +139,10 @@ export const GithubForm = ({
 
                             {isOpenSource && (
                               <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
-                                <Image
+                                <img
                                   src="/assets/icons/oss.svg"
                                   alt="oss"
-                                  width={12}
-                                  height={12}
+                                  className="w-3 h-3"
                                 />
                                 <p className="text-xs font-medium">
                                   Open source

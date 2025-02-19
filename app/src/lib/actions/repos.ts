@@ -321,9 +321,6 @@ export const updateGithubRepos = async (
       containsContracts?: boolean
       name?: string
       description?: string
-      isNpmPackage?: boolean
-      isCrate?: boolean
-      isOpenSource?: boolean
     }
   }[],
 ) => {
@@ -357,9 +354,6 @@ export const updateGithubRepos = async (
             containsContracts: repo.updates.containsContracts,
             name: repo.updates.name,
             description: repo.updates.description,
-            openSource: repo.updates.isOpenSource,
-            npmPackage: repo.updates.isNpmPackage,
-            crate: repo.updates.isCrate,
           },
         }),
       ),
