@@ -4,36 +4,16 @@ import {
   UseQueryResult,
 } from "@tanstack/react-query"
 
-import { getDeployedContracts } from "@/lib/oso"
-import { OsoDeployerContractsReturnType } from "@/lib/types"
+import { getParsedDeployedContracts } from "@/lib/oso"
+import { ParsedOsoDeployerContract } from "@/lib/types"
 
 export function useOsoDeployedContracts(
   deployer: string,
-  queryOptions?: Partial<
-    UseQueryOptions<OsoDeployerContractsReturnType, Error>
-  >,
-): UseQueryResult<OsoDeployerContractsReturnType, Error> {
+  queryOptions?: Partial<UseQueryOptions<ParsedOsoDeployerContract[], Error>>,
+): UseQueryResult<ParsedOsoDeployerContract[], Error> {
   return useQuery({
     queryKey: ["osoDeployerContracts", deployer],
-    queryFn: () => getDeployedContracts(deployer),
-    ...queryOptions,
-  })
-}
-
-export function useOsoDeployersDeployedContracts(
-  deployers: string[],
-  queryOptions?: Partial<
-    UseQueryOptions<OsoDeployerContractsReturnType[], Error>
-  >,
-): UseQueryResult<OsoDeployerContractsReturnType[], Error> {
-  return useQuery({
-    queryKey: ["osoDeployersContracts", deployers],
-    queryFn: async () => {
-      const deployedContracts = await Promise.all(
-        deployers.map((deployer) => getDeployedContracts(deployer)),
-      )
-      return deployedContracts
-    },
+    queryFn: () => getParsedDeployedContracts(deployer),
     ...queryOptions,
   })
 }

@@ -164,7 +164,7 @@ export function DeployerFormField({
           <ContractsFormField
             form={form}
             deployerIndex={deployerIndex}
-            osoContracts={osoContracts?.oso_contractsV0 || []}
+            osoContracts={osoContracts || []}
           />
         )}
 
