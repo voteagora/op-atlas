@@ -36,7 +36,8 @@ export default function DeliveryAddressVerificationForm() {
 
   const submitEnabled =
     form.watch("confirmIsOpMainnet") &&
-    form.watch("confirmCanMakeContractCalls")
+    form.watch("confirmCanMakeContractCalls") &&
+    form.watch("address")
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setAddress(data.address)

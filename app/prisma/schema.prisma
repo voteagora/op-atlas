@@ -484,3 +484,33 @@ model GithubProximity {
 
   @@unique([peer])
 }
+
+enum KYCStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model KYC {
+  id          String    @id @default(uuid())
+  email       String
+  status      KYCStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  teamId      String?
+
+  team        KYCTeam?  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+}
+
+model KYCTeam {
+  id             String       @id @default(uuid())
+  grantAddress   String       @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  kycs           KYC[]
+
+  @@index([id, grantAddress])
+}
