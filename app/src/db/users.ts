@@ -718,10 +718,6 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
     })
   }
 
-  console.log(">>> data", {
-    address,
-    userId,
-  })
   await prisma.userAddress.update({
     where: {
       address_userId: {
