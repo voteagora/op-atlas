@@ -293,6 +293,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                 {user.addresses.map(({ address, source, primary }) => (
                   <VerifiedAddress
                     key={address}
+                    shouldShortenAddress
                     address={address}
                     primary={primary}
                     showCheckmark={false}

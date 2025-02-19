@@ -25,6 +25,7 @@ export const VerifiedAddress = ({
   onCopy,
   onRemove,
   showCheckmark = true,
+  shouldShortenAddress = false,
 }: {
   address: string
   source: UserAddressSource
@@ -32,6 +33,7 @@ export const VerifiedAddress = ({
   onCopy: (address: string) => void
   onRemove?: (address: string) => void
   showCheckmark?: boolean
+  shouldShortenAddress?: boolean
 }) => {
   const { setOpenDialog } = useAppDialogs()
   const { isBadgeholderAddress } = useBadgeholderAddress(address)
@@ -49,7 +51,9 @@ export const VerifiedAddress = ({
             />
           )}
 
-          <p className="text-sm">{shortenAddress(address)}</p>
+          <p className="text-sm">
+            {shouldShortenAddress ? shortenAddress(address) : address}
+          </p>
 
           {primary && <Badge text="Primary address" className="shrink-0" />}
           {isBadgeholderAddress && <Badgeholder />}
