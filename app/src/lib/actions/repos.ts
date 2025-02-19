@@ -198,12 +198,11 @@ export const validateGithubRepo = async (owner: string, slug: string) => {
 
   const repoFiles = await getContents(owner, slug)
 
-  const [isCrate, isNpmPackage] = await Promise.all([
+  const [isCrate, isNpmPackage, license] = await Promise.all([
     verifyCrate(owner, slug, repoFiles),
     verifyNpm(owner, slug),
+    getLicense(owner, slug),
   ])
-
-  const license = await getLicense(owner, slug)
 
   return {
     isOpenSource: license && OPEN_SOURCE_LICENSES.includes(license),
