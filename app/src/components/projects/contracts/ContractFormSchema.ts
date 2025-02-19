@@ -43,7 +43,7 @@ export const Chain = z.enum([
 ])
 
 export const AddressSchema = z.custom<string>(
-  (val) => typeof val === "string" && isAddress(val),
+  (val) => typeof val === "string" && (isAddress(val) || val === ""),
   "Valid address is required",
 )
 
