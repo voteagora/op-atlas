@@ -216,6 +216,9 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
           name: field.name,
           description: field.description,
           containsContracts: field.containsContracts,
+          isNpmPackage: field.npmPackage,
+          isCrate: field.crate,
+          isOpenSource: field.openSource,
         },
       }))
 

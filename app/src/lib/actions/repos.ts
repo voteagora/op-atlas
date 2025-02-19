@@ -187,6 +187,31 @@ export const verifyGithubRepo = async (
   }
 }
 
+export const validateGithubRepo = async (owner: string, slug: string) => {
+  const repo = await getRepository(owner, slug)
+
+  if (!repo) {
+    return {
+      error: "Repo not found",
+    }
+  }
+
+  const repoFiles = await getContents(owner, slug)
+
+  const [isCrate, isNpmPackage] = await Promise.all([
+    verifyCrate(owner, slug, repoFiles),
+    verifyNpm(owner, slug),
+  ])
+
+  const license = await getLicense(owner, slug)
+
+  return {
+    isOpenSource: license && OPEN_SOURCE_LICENSES.includes(license),
+    isNpmPackage,
+    isCrate,
+  }
+}
+
 export const createGithubRepo = async (
   projectId: string,
   owner: string,
@@ -301,6 +326,9 @@ export const updateGithubRepos = async (
       containsContracts?: boolean
       name?: string
       description?: string
+      isNpmPackage?: boolean
+      isCrate?: boolean
+      isOpenSource?: boolean
     }
   }[],
 ) => {
@@ -334,6 +362,9 @@ export const updateGithubRepos = async (
             containsContracts: repo.updates.containsContracts,
             name: repo.updates.name,
             description: repo.updates.description,
+            openSource: repo.updates.isOpenSource,
+            npmPackage: repo.updates.isNpmPackage,
+            crate: repo.updates.isCrate,
           },
         }),
       ),
