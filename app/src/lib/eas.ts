@@ -109,7 +109,9 @@ async function revokeMultiAttestations(
     },
   ])
 
-  return await tx.wait()
+  await tx.wait()
+
+  return attestationIds
 }
 
 export async function createEntityAttestation({
@@ -294,7 +296,12 @@ export async function revokeContractAttestations(attestationIds: string[]) {
   if (attestationIds.length === 0) {
     return
   }
-  return await revokeMultiAttestations(CONTRACT_SCHEMA_ID, attestationIds)
+
+  return processAttestationsInBatches(
+    attestationIds,
+    async (batch) => revokeMultiAttestations(CONTRACT_SCHEMA_ID, batch),
+    20,
+  )
 }
 
 function buildProjectMetadataAttestation({
@@ -381,7 +388,7 @@ export async function processAttestationsInBatches<T>(
   attestations: T[],
   processFn: (batch: T[]) => Promise<string[]>,
   batchSize = 50,
-  maxRetries = 3,
+  maxRetries = 5,
 ): Promise<string[]> {
   function* batchGenerator<T>(items: T[], size: number) {
     for (let i = 0; i < items.length; i += size) {
@@ -406,13 +413,13 @@ export async function processAttestationsInBatches<T>(
       )
       await new Promise((resolve) =>
         setTimeout(resolve, Math.pow(2, retryCount) * 1000),
-      ) // Exponential backoff
+      )
       return processBatchWithRetry(batch, retryCount + 1)
     }
   }
 
-  const allResults: string[] = []
-  for (const batch of Array.from(batchGenerator(attestations, batchSize))) {
+  const allResults = []
+  for await (const batch of batchGenerator(attestations, batchSize)) {
     const batchResults = await processBatchWithRetry(batch)
     allResults.push(...batchResults)
   }
