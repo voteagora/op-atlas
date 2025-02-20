@@ -381,12 +381,41 @@ export async function processAttestationsInBatches<T>(
   attestations: T[],
   processFn: (batch: T[]) => Promise<string[]>,
   batchSize = 50,
+  maxRetries = 3,
 ): Promise<string[]> {
-  const batches = []
-  for (let i = 0; i < attestations.length; i += batchSize) {
-    batches.push(attestations.slice(i, i + batchSize))
+  function* batchGenerator<T>(items: T[], size: number) {
+    for (let i = 0; i < items.length; i += size) {
+      yield items.slice(i, i + size)
+    }
   }
 
-  const allResults = await Promise.all(batches.map((batch) => processFn(batch)))
-  return allResults.flat()
+  async function processBatchWithRetry(
+    batch: T[],
+    retryCount = 0,
+  ): Promise<string[]> {
+    try {
+      return await processFn(batch)
+    } catch (error) {
+      if (retryCount >= maxRetries) {
+        throw new Error(`Failed after ${maxRetries} retries: ${error}`)
+      }
+      console.warn(
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+          batch.length
+        } items`,
+      )
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.pow(2, retryCount) * 1000),
+      ) // Exponential backoff
+      return processBatchWithRetry(batch, retryCount + 1)
+    }
+  }
+
+  const allResults: string[] = []
+  for (const batch of Array.from(batchGenerator(attestations, batchSize))) {
+    const batchResults = await processBatchWithRetry(batch)
+    allResults.push(...batchResults)
+  }
+
+  return allResults
 }
