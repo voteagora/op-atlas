@@ -287,7 +287,7 @@ export async function createFullProjectSnapshotAttestations({
     }),
   ]
 
-  return createMultiAttestations(attestations)
+  return processAttestationsInBatches(attestations, createMultiAttestations)
 }
 
 export async function revokeContractAttestations(attestationIds: string[]) {
@@ -375,4 +375,18 @@ function parseZeroSignature(signature: string) {
     return "0x"
   }
   return signature
+}
+
+export async function processAttestationsInBatches<T>(
+  attestations: T[],
+  processFn: (batch: T[]) => Promise<string[]>,
+  batchSize = 50,
+): Promise<string[]> {
+  const batches = []
+  for (let i = 0; i < attestations.length; i += batchSize) {
+    batches.push(attestations.slice(i, i + batchSize))
+  }
+
+  const allResults = await Promise.all(batches.map((batch) => processFn(batch)))
+  return allResults.flat()
 }
