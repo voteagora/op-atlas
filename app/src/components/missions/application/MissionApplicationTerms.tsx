@@ -6,6 +6,7 @@ import { Button } from "../../ui/button"
 import { Checkbox } from "../../ui/checkbox"
 
 const TERMS = [
+  "I understand that the outcome of my Retro Funding application(s) will be determined by an algorithm selected by the Optimism community without human review.",
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
   "I understand that any Retro Funding rewards that are awarded must be claimed within a year of results being announced, or risk forfeiture.",
   "I certify that no member of the team receiving the grant is a citizen or resident of, or incorporated in, any jurisdiction designated, blocked, or sanctioned by the United Nations, the European Union, the U.K. Treasury, or the U.S. Treasury’s Office of Foreign Assets Control, including but not limited to Cuba, Belarus, the Democratic Republic of Congo, Iran, North Korea, the Russian Federation, Syria, Yemen, or the Crimea, Donetsk, or Luhansk regions of Ukraine.",

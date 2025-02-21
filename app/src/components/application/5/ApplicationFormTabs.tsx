@@ -22,6 +22,7 @@ import { getProjectStatus } from "@/lib/utils"
 
 import ApplicationDetails from "./ApplicationDetails"
 import ApplicationProjectImpact from "./ApplicationProjectImpact"
+import { getProjectContracts } from "@/db/projects"
 
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",
@@ -134,8 +135,9 @@ const ApplicationFormTabs = ({
   )
 
   const completedProjects = useMemo(() => {
-    return projects?.filter((project) => {
-      return getProjectStatus(project).progressPercent === 100
+    return projects?.filter(async (project) => {
+      const contract = await getProjectContracts({ projectId: project.id })
+      return getProjectStatus(project, contract).progressPercent === 100
     })
   }, [projects])
 

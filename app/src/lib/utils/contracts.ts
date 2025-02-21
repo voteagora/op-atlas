@@ -11,11 +11,18 @@ import {
   shape,
   soneium,
   superseed,
+  unichain,
   worldchain,
   zora,
 } from "viem/chains"
 
 import { polynomial } from "@/components/common/chain"
+
+export function truncate(value: string, numToShow: number) {
+  return `${value.slice(0, numToShow)}${
+    numToShow < value.length / 2 ? "..." : ""
+  }${value.slice(-numToShow)}`
+}
 
 export enum Chain {
   ArenaZ = arenaZ.id,
@@ -34,9 +41,10 @@ export enum Chain {
   Soneium = soneium.id,
   Superseed = superseed.id,
   Swell = swell.id,
+  Unichain = unichain.id,
   Worldchain = worldchain.id,
   Zora = zora.id,
 }
 
-export const getMessage = (address: string) =>
-  `I verify that I'm the owner of ${address} and I'm an optimist.`
+export const getMessage = (projectId: string) =>
+  `I verify that my contracts are for Project ${projectId} and I'm an optimist.`

@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react"
 
 import { getUserApplicationsForRound } from "@/lib/actions/projects"
 import { ApplicationWithDetails } from "@/lib/types"
-import { useEffect, useState } from "react"
 
 export function useUserRoundApplications(
   userId: string | undefined,

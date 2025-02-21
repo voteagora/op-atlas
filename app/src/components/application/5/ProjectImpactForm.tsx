@@ -1,4 +1,3 @@
-import { CheckedState } from "@radix-ui/react-checkbox"
 import Image from "next/image"
 import React, { memo, useEffect, useMemo } from "react"
 import { UseFormReturn, useWatch } from "react-hook-form"
@@ -17,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { CategoryWithImpact, ProjectWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX, getProjectStatus } from "@/lib/utils"
 
@@ -33,9 +33,11 @@ const ProjectImpactForm = ({
   categories: CategoryWithImpact[]
   index: number
 }) => {
+  const { data: contract } = useProjectContracts(project.id)
+
   const isEligible = useMemo(() => {
-    return getProjectStatus(project).progressPercent === 100
-  }, [project])
+    return getProjectStatus(project, contract ?? null).progressPercent === 100
+  }, [project, contract])
 
   const hasApplied = project.applications[0]?.status === "submitted"
   const attestationId = project.applications[0]?.attestationId

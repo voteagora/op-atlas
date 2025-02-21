@@ -1,8 +1,7 @@
 "use client"
-import { ChevronRight, X } from "lucide-react"
+import { X } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { useMemo } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { z } from "zod"
@@ -14,8 +13,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
-import { FundingRoundData, MissionData } from "@/lib/MissionsAndRoundData"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 
@@ -27,7 +26,6 @@ import { GreenBadge } from "../common/badges/GreenBadge"
 import { RedBadge } from "../common/badges/RedBadge"
 import { ApplicationFormSchema } from "./MissionApplication"
 
-const incompleteBadge = <RedBadge text="Incomplete" />
 const notEligibleBadge = <RedBadge text="Not eligible" />
 const activeBadge = <GreenBadge showIcon={true} />
 
@@ -64,12 +62,14 @@ export const ProjectApplication = ({
 
   const { isLoading } = useSessionRoundApplications(round?.number)
 
+  const { data: contracts } = useProjectContracts(project.id)
+
   const { progressPercent, completedSections: completedSectionsCriteria } =
     useMemo(() => {
       return project
-        ? getProjectStatus(project)
+        ? getProjectStatus(project, contracts ?? null)
         : { progressPercent: 0, completedSections: [] }
-    }, [project])
+    }, [project, contracts])
 
   const roundEligibilityCriteriaChecks = round!.applicationPageEligibility.map(
     () => {
@@ -78,7 +78,7 @@ export const ProjectApplication = ({
   )
 
   for (let i = 0; i < round!.applicationPageEligibility.length; i++) {
-    var criterion = round!.applicationPageEligibility[i]
+    const criterion = round!.applicationPageEligibility[i]
 
     if (criterion.type && criterion.type === "hasCodeRepositories") {
       roundEligibilityCriteriaChecks[i] =
@@ -87,7 +87,8 @@ export const ProjectApplication = ({
 
     if (criterion.type && criterion.type === "isOnChainContract") {
       roundEligibilityCriteriaChecks[i] =
-        project.isOnChainContract && project.contracts.length > 0
+        (contracts?.contracts?.length ?? 0) > 0 ||
+        !!project.openSourceObserverSlug
     }
   }
 

@@ -289,11 +289,12 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
               <div className="text-sm text-foreground font-medium">
                 Your verified addresses
               </div>
-              <div className="flex space-x-1.5 items-center">
+              <div className="flex items-center flex-wrap gap-1.5">
                 {user.addresses.map(({ address, source, primary }) => (
                   <VerifiedAddress
                     key={address}
-                    address={shortenAddress(address)}
+                    shouldShortenAddress
+                    address={address}
                     primary={primary}
                     showCheckmark={false}
                     source={source as UserAddressSource}

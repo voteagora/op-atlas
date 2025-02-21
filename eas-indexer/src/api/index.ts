@@ -33,7 +33,7 @@ entities.forEach((entity: Entity) => {
 });
 
 entities.forEach((entity: Entity) => {
-  ponder.get(`/${entity}/all`, async (c) => {
+  ponder.get(`/${entity}`, async (c) => {
     const table = dbSchema[entity];
     const data = await (c.db.query[entity] as any).findMany({
       where: isNull(table.revoked_at),

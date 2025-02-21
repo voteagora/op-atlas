@@ -1,6 +1,3 @@
-import { UseFormReturn } from "react-hook-form"
-import { z } from "zod"
-
 import { CHAIN_INFO } from "@/components/common/chain"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import {
@@ -18,26 +15,22 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { Chain, ContractsSchema } from "./schema"
+import { Chain } from "./ContractFormSchema"
 
 export function ChainSelector({
-  index,
-  form,
+  defaultValue,
+  onChange,
 }: {
-  form: UseFormReturn<z.infer<typeof ContractsSchema>>
-  index: number
+  defaultValue: string
+  onChange: (value: string) => void
 }) {
   return (
     <FormField
-      control={form.control}
-      name={`contracts.${index}.chain`}
+      name={``}
       render={({ field }) => (
         <FormItem className="w-full">
-          <FormLabel>
-            Chain
-            <span className="ml-0.5 text-destructive">*</span>
-          </FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <FormLabel>Chain</FormLabel>
+          <Select onValueChange={onChange} defaultValue={defaultValue}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select" />

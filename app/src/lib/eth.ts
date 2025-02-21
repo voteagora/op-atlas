@@ -13,6 +13,7 @@ import {
   shape,
   soneium,
   superseed,
+  unichain,
   worldchain,
   zora,
 } from "viem/chains"
@@ -37,7 +38,7 @@ export type TraceCall = {
   type: "CALL" | "STATICCALL" | "DELEGATECALL" | "CREATE" | "CREATE2"
 }
 
-const clients = {
+export const clients = {
   [Chain.ArenaZ]: createClient(arenaZ, "https://rpc.arena-z.gg"),
   [Chain.Base]: createClient(
     base,
@@ -48,7 +49,10 @@ const clients = {
     ethernity,
     "https://mainnet.ethernitychain.io",
   ),
-  [Chain.Ink]: createClient(ink, "https://rpc-gel.inkonchain.com"),
+  [Chain.Ink]: createClient(
+    ink,
+    `https://ink-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+  ),
   [Chain.Lisk]: createClient(lisk, "https://rpc.api.lisk.com"),
   [Chain.MetalL2]: createClient(metalL2, "https://rpc.metall2.com"),
   [Chain.Mint]: createClient(mint, "https://rpc.mintchain.io"),
@@ -63,9 +67,13 @@ const clients = {
     shape,
     `https://shape-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-  [Chain.Soneium]: createClient(soneium, "https://rpc.soneium.org/"),
+  [Chain.Soneium]: createClient(
+    soneium,
+    `https://soneium-minato.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+  ),
   [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
   [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
+  [Chain.Unichain]: createClient(unichain, "https://mainnet.unichain.org"),
   [Chain.Worldchain]: createClient(
     worldchain,
     `https://worldchain-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
