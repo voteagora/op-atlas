@@ -92,7 +92,7 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
   )
 
   const crates = await Promise.all(
-    contents.map((content) => getCrate(content.package?.name)),
+    contents.map((content) => getCrate(content?.package?.name)),
   )
 
   return crates.some((crate) => {

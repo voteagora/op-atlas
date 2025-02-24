@@ -144,21 +144,18 @@ const getFileContentToml = async (
   owner: string,
   repo: string,
   path: string = "",
-): Promise<object | null> => {
-  return cacheGitHubData<object | null>(
-    `file_toml:${owner}:${repo}:${path}`,
-    async () => {
-      const base64Decoded = await getFileContentBase64Decoded(owner, repo, path)
-      if (!base64Decoded) return null
+) => {
+  return cacheGitHubData(`file_toml:${owner}:${repo}:${path}`, async () => {
+    const base64Decoded = await getFileContentBase64Decoded(owner, repo, path)
+    if (!base64Decoded) return null
 
-      try {
-        return toml.parse(base64Decoded)
-      } catch (error) {
-        console.error("Error parsing TOML file:", error)
-        return null
-      }
-    },
-  )
+    try {
+      return toml.parse(base64Decoded)
+    } catch (error) {
+      console.error("Error parsing TOML file:", error)
+      return null
+    }
+  })
 }
 
 const getFileContentJson = async (
