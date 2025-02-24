@@ -2,7 +2,8 @@ import Image from "next/image"
 
 import { cn } from "@/lib/utils"
 
-interface BadgeButtonProps {
+interface BadgeButtonProps
+  extends Omit<React.HTMLProps<HTMLButtonElement>, "size"> {
   as?: "button"
   className?: string
   accent?: boolean
@@ -23,6 +24,7 @@ const ButtonBadge = ({
   textClassName,
   onClick,
   tooltipText,
+  ...props
 }: BadgeButtonProps) => {
   return (
     <button
@@ -35,6 +37,8 @@ const ButtonBadge = ({
         className,
       )}
       onClick={onClick}
+      {...props}
+      type={props.type as "button" | "submit" | "reset" | undefined}
     >
       {leftIcon && (
         <Image

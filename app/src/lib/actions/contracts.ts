@@ -6,6 +6,7 @@ import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 import { getDeployedContractsServerParsed } from "@/app/api/oso/common"
 import { auth } from "@/auth"
 import {
+  addAllExcludedProjectContracts,
   addProjectContract,
   addProjectContracts,
   getProjectContractsByDeployer,
@@ -304,6 +305,28 @@ export const removeContractsByDeployer = async (
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+  }
+}
+
+export const addAllExcludedProjectContractsAction = async (
+  deployer: string,
+  projectId: string,
+  signature: string,
+) => {
+  const result = await verifyAuthenticatedMember(projectId)
+  if (result.error !== null) return result.error
+
+  try {
+    await addAllExcludedProjectContracts(deployer, projectId, signature)
+  } catch (error: unknown) {
+    console.error("Error adding all contracts", error)
+    return {
+      error: "Error adding all contracts",
+    }
+  }
 
   return {
     error: null,

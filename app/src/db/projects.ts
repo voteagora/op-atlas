@@ -4,6 +4,7 @@ import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
 
+import { getParsedDeployedContracts } from "@/lib/oso"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -1052,6 +1053,54 @@ export async function addProjectContracts(
     createdContracts: createdContracts.succeeded,
     failedContracts: createdContracts.failed,
   }
+}
+
+export async function addAllExcludedProjectContracts(
+  deployer: string,
+  projectId: string,
+  signature: string,
+) {
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+    },
+    include: {
+      contracts: true,
+      publishedContracts: {
+        where: {
+          revokedAt: null,
+        },
+      },
+    },
+  })
+  if (!project) {
+    return
+  }
+  const existingContracts = project.contracts.map((c) => ({
+    contractAddress: c.contractAddress,
+    chainId: c.chainId,
+  }))
+  const osoContracts = await getParsedDeployedContracts(deployer)
+
+  // Excluded contracts are those that are not already in the project
+  const excludedContracts = osoContracts.filter(
+    (c) =>
+      !existingContracts.some(
+        (ec) =>
+          ec.contractAddress === c.contractAddress && ec.chainId === c.chainId,
+      ),
+  )
+
+  await prisma.projectContract.createMany({
+    data: excludedContracts.map((c) => ({
+      projectId,
+      contractAddress: c.contractAddress,
+      chainId: c.chainId,
+      deployerAddress: deployer,
+      deploymentHash: "",
+      verificationProof: signature,
+    })),
+  })
 }
 
 export async function addProjectContract({

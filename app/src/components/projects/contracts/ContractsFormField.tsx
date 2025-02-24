@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { ChevronDown, ChevronUp, Plus } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
@@ -7,6 +8,7 @@ import { z } from "zod"
 import { RedBadge } from "@/components/missions/common/badges/RedBadge"
 import { FormLabel } from "@/components/ui/form"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
+import { addAllExcludedProjectContractsAction } from "@/lib/actions/contracts"
 import { ParsedOsoDeployerContract } from "@/lib/types"
 
 import { ContractFormField } from "./ContractFormField"
@@ -16,12 +18,16 @@ import { MissingContractsDialog } from "./MissingContractsDialog"
 export function ContractsFormField({
   form,
   osoContracts,
+  deployer,
   deployerIndex,
 }: {
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
   osoContracts: ParsedOsoDeployerContract[]
+  deployer: string
   deployerIndex: number
 }) {
+  const queryClient = useQueryClient()
+
   const { append: appendContracts } = useFieldArray({
     control: form.control,
     name: `deployers.${deployerIndex}.contracts`,
@@ -118,7 +124,7 @@ export function ContractsFormField({
         <div className="flex justify-between items-center">
           <FormLabel>Contracts</FormLabel>
 
-          <div className="flex gap-4 items-center">
+          <div className="flex space-x-2 items-center">
             <button
               className="flex items-center gap-1 text-sm"
               type="button"
@@ -139,6 +145,26 @@ export function ContractsFormField({
                   .filter((contract) => contract.excluded)
                   .length.toString()}
               ></RedBadge>
+            </button>
+            <button
+              type="button"
+              className="text-sm group relative flex items-center rounded-full transition-colors px-2 py-0.5 bg-backgroundSecondary hover:bg-backgroundSecondaryHover"
+              onClick={async () => {
+                await addAllExcludedProjectContractsAction(
+                  deployer,
+                  projectId,
+                  signature,
+                )
+
+                for (let i = 0; i < contracts.length; i++) {
+                  form.setValue(
+                    `deployers.${deployerIndex}.contracts.${i}.excluded`,
+                    false,
+                  )
+                }
+              }}
+            >
+              Include All
             </button>
             <button
               type="button"

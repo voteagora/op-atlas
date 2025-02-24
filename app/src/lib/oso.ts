@@ -24,7 +24,9 @@ const supportedMappings = {
 export async function getDeployedContracts(
   deployer: string,
 ): Promise<OsoDeployerContractsReturnType> {
-  const contracts = await fetch(`/api/oso/contracts/${deployer}`)
+  const contracts = await fetch(
+    `https://nikola.ngrok.dev/api/oso/contracts/${deployer}`,
+  )
 
   return contracts.json()
 }

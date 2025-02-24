@@ -18,7 +18,6 @@ import { onCopy } from "@/components/ui/utils/copy"
 import { addProjectContract } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { removeContract } from "@/lib/actions/contracts"
-import { truncate } from "@/lib/utils/contracts"
 
 import { DeployersSchema } from "./ContractFormSchema"
 
