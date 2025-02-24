@@ -22,7 +22,7 @@ export default async function Page({
     getAdminOrganizations(session?.user.id),
   ])
 
-  if (!project || !isUserMember(project, session?.user.id)) {
+  if (!project || !(await isUserMember(project, session?.user.id))) {
     redirect("/dashboard")
   }
 
