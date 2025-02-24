@@ -148,7 +148,7 @@ export function ContractsFormField({
             </button>
             <button
               type="button"
-              className="text-sm group relative flex items-center rounded-full transition-colors px-2 py-0.5 bg-backgroundSecondary hover:bg-backgroundSecondaryHover"
+              className="text-xs group relative flex items-center rounded-full transition-colors px-2 py-0.5 bg-backgroundSecondary hover:bg-backgroundSecondaryHover"
               onClick={async () => {
                 await addAllExcludedProjectContractsAction(
                   deployer,
