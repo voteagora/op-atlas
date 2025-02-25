@@ -81,7 +81,7 @@ export function ContractFormField({
           address,
           chainId: parseInt(chainId),
         })
-        toast.success("Contract Removed!")
+        toast.success("Contract Removed")
       } catch (error: unknown) {
         toast.error("Error removing contract, please try again")
       }

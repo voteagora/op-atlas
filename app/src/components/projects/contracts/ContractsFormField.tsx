@@ -151,12 +151,17 @@ export function ContractsFormField({
               type="button"
               className="text-xs group relative flex items-center rounded-full transition-colors px-2 py-0.5 bg-backgroundSecondary hover:bg-backgroundSecondaryHover"
               onClick={async () => {
-                await addAllExcludedProjectContractsAction(
+                const { error } = await addAllExcludedProjectContractsAction(
                   deployer,
                   projectId,
                   signature,
                   parseInt(verificationChainId),
                 )
+
+                if (error) {
+                  toast.error(error)
+                  return
+                }
 
                 for (let i = 0; i < contracts.length; i++) {
                   form.setValue(

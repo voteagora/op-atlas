@@ -318,7 +318,7 @@ export const addAllExcludedProjectContractsAction = async (
   verificationChainId: number,
 ) => {
   const result = await verifyAuthenticatedMember(projectId)
-  if (result.error !== null) return result.error
+  if (result.error !== null) return { error: result.error }
 
   try {
     await addAllExcludedProjectContracts(
