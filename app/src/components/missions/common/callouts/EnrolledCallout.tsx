@@ -2,13 +2,10 @@ import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
-import ExternalLink from "@/components/ExternalLink"
-import { useUserApplications } from "@/hooks/db/useUserApplications"
+import { Callout } from "@/components/common/Callout"
+import ExtendedLink from "@/components/common/ExtendedLink"
 import { MISSIONS } from "@/lib/MissionsAndRoundData"
 import { ApplicationWithDetails } from "@/lib/types"
-import { EAS_URL_PREFIX } from "@/lib/utils"
-
-import { Callout } from "../../../common/Callout"
 
 export function EnrolledCallout({
   application,
@@ -37,14 +34,11 @@ export function EnrolledCallout({
             width={20}
             height={20}
           />
-          <button
-            onClick={() => {
-              router.push(`/missions/${round?.pageName}`)
-            }}
+          <ExtendedLink
+            href={`/missions/${round?.pageName}`}
             className="text-sm font-medium mr-5 ml-2"
-          >
-            {`Enrolled in Retro Funding: ` + application?.round.name}
-          </button>
+            text={`Enrolled in Retro Funding: ` + application?.round.name}
+          />
         </div>
       }
       rightAlignedContent={

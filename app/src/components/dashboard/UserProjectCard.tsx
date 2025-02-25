@@ -38,15 +38,20 @@ const UserProjectCard = ({
     return progressPercent
   }, [project, contracts])
 
-  const uniqueApplications = applications?.filter(
-    (application, index, self) => {
-      return (
-        application.projectId === project.id &&
-        (application.roundId === "7" || application.roundId === "8") &&
-        self.findIndex((app) => app.roundId === application.roundId) === index
+  const uniqueApplications = useMemo(() => {
+    return applications
+      ?.filter(
+        (application) =>
+          application.projectId === project.id &&
+          (application.roundId === "7" || application.roundId === "8"),
       )
-    },
-  )
+      .reduce<ApplicationWithDetails[]>((acc, application) => {
+        if (!acc.some((app) => app.roundId === application.roundId)) {
+          acc.push(application)
+        }
+        return acc
+      }, [])
+  }, [applications, project.id])
 
   return (
     <div
@@ -160,22 +165,16 @@ const UserProjectCard = ({
       </Link>
 
       <div className="px-8 pb-8">
-        {}
-        {uniqueApplications?.map((application, index) => {
-          return (
-            application.projectId === project.id &&
-            (application.roundId === "7" || application.roundId === "8") && (
-              <div className="mt-4">
-                <EnrolledCallout
-                  key={"ApplicationEnrolled" + index}
-                  application={application}
-                  index={index}
-                  onRewardsClick={handleActiveRoundHelpClick}
-                />
-              </div>
-            )
-          )
-        })}
+        {uniqueApplications?.map((application, i) => (
+          <div key={application.id} className="mt-4">
+            <EnrolledCallout
+              key={application.id}
+              application={application}
+              index={i}
+              onRewardsClick={handleActiveRoundHelpClick}
+            />
+          </div>
+        ))}
       </div>
     </div>
   )
