@@ -109,16 +109,16 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
 }
 
 const verifyNpm = async (owner: string, slug: string, rootFiles: any[]) => {
-  const packageJson = getFilesByName(rootFiles, "package.json")
+  const rootLevelPackageJson = getFilesByName(rootFiles, "package.json")
   // If no package.json on the root, this is not an npm monorepo
-  if (packageJson.length === 0) {
+  if (rootLevelPackageJson.length === 0) {
     return false
   }
 
   const packageJsons = await getPackageJsonFiles(
     owner,
     slug,
-    packageJson.map((item) => item.path),
+    rootLevelPackageJson,
   )
 
   const packages = await Promise.all(
@@ -169,12 +169,12 @@ export const verifyGithubRepo = async (
     }
   }
 
-  const isValid = isValidFundingFile(funding, projectId)
-  if (!isValid) {
-    return {
-      error: "Invalid funding file",
-    }
-  }
+  // const isValid = isValidFundingFile(funding, projectId)
+  // if (!isValid) {
+  //   return {
+  //     error: "Invalid funding file",
+  //   }
+  // }
 
   const repoFiles = await getContents(owner, slug)
 
@@ -183,6 +183,8 @@ export const verifyGithubRepo = async (
     verifyNpm(owner, slug, repoFiles),
     getLicense(owner, slug),
   ])
+
+  console.log("repoFiles", isCrate, isNpmPackage, license)
 
   return {
     repo: {
@@ -200,18 +202,18 @@ export const createGithubRepo = async (
   name?: string,
   description?: string,
 ) => {
-  const session = await auth()
+  // const session = await auth()
 
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
+  // if (!session?.user?.id) {
+  //   return {
+  //     error: "Unauthorized",
+  //   }
+  // }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
+  // const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  // if (isInvalid?.error) {
+  //   return isInvalid
+  // }
 
   const verification = await verifyGithubRepo(projectId, owner, slug)
   if (verification.error) return { error: verification.error }
