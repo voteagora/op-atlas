@@ -1019,8 +1019,17 @@ export async function addProjectContracts(
 ) {
   const createOperations = contracts.map(async (contract) => {
     try {
-      const result = await prisma.projectContract.create({
-        data: {
+      const result = await prisma.projectContract.upsert({
+        where: {
+          contractAddress_chainId: {
+            contractAddress: contract.contractAddress,
+            chainId: contract.chainId,
+          },
+        },
+        update: {
+          projectId,
+        },
+        create: {
           ...contract,
           contractAddress: getAddress(contract.contractAddress),
           deployerAddress: getAddress(contract.deployerAddress),
@@ -1059,6 +1068,7 @@ export async function addAllExcludedProjectContracts(
   deployer: string,
   projectId: string,
   signature: string,
+  verificationChainId: number,
 ) {
   const project = await prisma.project.findFirst({
     where: {
@@ -1098,6 +1108,7 @@ export async function addAllExcludedProjectContracts(
       chainId: c.chainId,
       deployerAddress: deployer,
       deploymentHash: "",
+      verificationChainId,
       verificationProof: signature,
     })),
   })

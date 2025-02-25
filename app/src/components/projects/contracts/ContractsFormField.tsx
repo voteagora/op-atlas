@@ -1,8 +1,8 @@
-import { useQueryClient } from "@tanstack/react-query"
 import { ChevronDown, ChevronUp, Plus } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { RedBadge } from "@/components/missions/common/badges/RedBadge"
@@ -26,8 +26,6 @@ export function ContractsFormField({
   deployer: string
   deployerIndex: number
 }) {
-  const queryClient = useQueryClient()
-
   const { append: appendContracts } = useFieldArray({
     control: form.control,
     name: `deployers.${deployerIndex}.contracts`,
@@ -36,6 +34,9 @@ export function ContractsFormField({
   const contractsFields = form.watch(`deployers.${deployerIndex}.contracts`)
 
   const signature = form.watch(`deployers.${deployerIndex}.signature`)
+  const verificationChainId = form.watch(
+    `deployers.${deployerIndex}.verificationChainId`,
+  )
 
   useEffect(() => {
     // Add "excluded" contracts from oso results
@@ -154,6 +155,7 @@ export function ContractsFormField({
                   deployer,
                   projectId,
                   signature,
+                  parseInt(verificationChainId),
                 )
 
                 for (let i = 0; i < contracts.length; i++) {
@@ -162,6 +164,8 @@ export function ContractsFormField({
                     false,
                   )
                 }
+
+                toast.success("All contracts included")
               }}
             >
               Include All

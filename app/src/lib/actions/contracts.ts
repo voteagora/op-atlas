@@ -315,12 +315,18 @@ export const addAllExcludedProjectContractsAction = async (
   deployer: string,
   projectId: string,
   signature: string,
+  verificationChainId: number,
 ) => {
   const result = await verifyAuthenticatedMember(projectId)
   if (result.error !== null) return result.error
 
   try {
-    await addAllExcludedProjectContracts(deployer, projectId, signature)
+    await addAllExcludedProjectContracts(
+      deployer,
+      projectId,
+      signature,
+      verificationChainId,
+    )
   } catch (error: unknown) {
     console.error("Error adding all contracts", error)
     return {
