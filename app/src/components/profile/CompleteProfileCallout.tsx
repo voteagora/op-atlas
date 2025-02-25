@@ -26,7 +26,13 @@ import {
   AccordionTrigger,
 } from "../ui/accordion"
 
-export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
+export function CompleteProfileCallout({
+  user,
+  setIsCompleteProfileAccordionDismissed,
+}: {
+  user: UserWithAddresses
+  setIsCompleteProfileAccordionDismissed: (dismissed: boolean) => void
+}) {
   const progress = profileProgress(user)
   const isComplete = progress === 100
 
@@ -36,6 +42,12 @@ export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
       syncFarcasterAddresses()
     }
   }, [user])
+
+  const onDismiss = () => {
+    document.cookie =
+      "completeProfileAccordionDismissed=true; max-age=31536000; path=/"
+    setIsCompleteProfileAccordionDismissed(true)
+  }
 
   return (
     <Accordion
@@ -71,12 +83,13 @@ export function CompleteProfileCallout({ user }: { user: UserWithAddresses }) {
         </AccordionTrigger>
         <AccordionContent>
           <ProfileSteps user={user} />
-          <AccordionTrigger
-            className="p-8 py-4 text-xs font-medium text-secondary-foreground"
-            hideChevron
+          <button
+            className="flex space-x-2 px-8 py-4 text-xs font-medium text-secondary-foreground"
+            onClick={onDismiss}
           >
-            <X size={14} /> Dismiss — you can always add this info later!
-          </AccordionTrigger>
+            <X size={14} />{" "}
+            <span>Dismiss — you can always add this info later!</span>
+          </button>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

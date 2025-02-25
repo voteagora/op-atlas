@@ -60,6 +60,14 @@ const Dashboard = ({
   organizations?: UserOrganizationsWithDetails[]
   adminProjects: ProjectWithDetails[]
 }) => {
+  const completeProfileAccordionDismissed = document.cookie.includes(
+    "completeProfileAccordionDismissed",
+  )
+  const [
+    isCompleteProfileAccordionDismissed,
+    setIsCompleteProfileAccordionDismissed,
+  ] = useState(completeProfileAccordionDismissed)
+
   const cardComponents: ReactNode[] = []
 
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
@@ -208,9 +216,15 @@ const Dashboard = ({
           !!!organizations?.length ||
           !profileInitiallyComplete.current) && (
           <div className="flex flex-col gap-4">
-            {!profileInitiallyComplete.current && (
-              <CompleteProfileCallout user={user} />
-            )}
+            {!isCompleteProfileAccordionDismissed &&
+              !profileInitiallyComplete.current && (
+                <CompleteProfileCallout
+                  user={user}
+                  setIsCompleteProfileAccordionDismissed={
+                    setIsCompleteProfileAccordionDismissed
+                  }
+                />
+              )}
             {!organizations?.length && (
               <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
             )}
