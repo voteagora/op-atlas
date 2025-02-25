@@ -210,14 +210,16 @@ export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
         }))
         .filter((field) => z.string().url().safeParse(field.url).success)
 
-      const projectRepos = values.githubRepos.map((field) => ({
-        url: field.url,
-        updates: {
-          name: field.name,
-          description: field.description,
-          containsContracts: field.containsContracts,
-        },
-      }))
+      const projectRepos = values.githubRepos
+        .filter((field) => field.verified)
+        .map((field) => ({
+          url: field.url,
+          updates: {
+            name: field.name,
+            description: field.description,
+            containsContracts: field.containsContracts,
+          },
+        }))
 
       try {
         await Promise.allSettled([

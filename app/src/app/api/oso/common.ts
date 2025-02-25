@@ -1,6 +1,10 @@
 import { gql, GraphQLClient } from "graphql-request"
 
-import { OsoDeployerContractsReturnType } from "@/lib/types"
+import { parseOsoDeployerContract } from "@/lib/oso"
+import {
+  OsoDeployerContractsReturnType,
+  ParsedOsoDeployerContract,
+} from "@/lib/types"
 
 export const osoClient = new GraphQLClient(
   "https://www.opensource.observer/api/v1/graphql",
@@ -35,4 +39,11 @@ export async function getDeployedContractsServer(
   )
 
   return req
+}
+
+export async function getDeployedContractsServerParsed(
+  deployer: string,
+): Promise<ParsedOsoDeployerContract[]> {
+  const contracts = await getDeployedContractsServer(deployer)
+  return parseOsoDeployerContract(contracts)
 }

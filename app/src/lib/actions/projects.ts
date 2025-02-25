@@ -97,6 +97,7 @@ export const getUserApplicationsForRound = async (
 export const getUnpublishedContractChanges = async (projectId: string) => {
   const project = await getProjectContracts({ projectId })
   const allRelatedPublishedContracts = await getPublishedProjectContracts({
+    projectId,
     contacts:
       project?.contracts.map((c) => ({
         contractAddress: c.contractAddress,

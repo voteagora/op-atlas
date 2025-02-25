@@ -351,6 +351,12 @@ export type OsoDeployerContractsReturnType = {
   oso_contractsV0: Array<OsoDeployerContracts>
 }
 
+export type ParsedOsoDeployerContract = {
+  contractAddress: string
+  chainId: number
+  rootDeployerAddress: string
+}
+
 export interface ProjectContractsByDeployer {
   address: string
   contracts: Array<{ address: string; chainId: number }>

@@ -150,7 +150,7 @@ export const ApplicationSubmitted = ({
               <div className="flex items-center gap-4">
                 {application.thumbnailUrl && (
                   <Image
-                    alt="sunny"
+                    alt={application.name}
                     src={application.thumbnailUrl}
                     height={48}
                     width={48}

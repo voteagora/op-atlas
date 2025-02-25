@@ -650,27 +650,55 @@ async function getProjectContractsFn({
 export const getProjectContracts = cache(getProjectContractsFn)
 
 async function getPublishedProjectContractsFn({
+  projectId,
   contacts,
 }: {
+  projectId: string
   contacts: {
     chainId: number
     contractAddress: string
   }[]
 }): Promise<PublishedContract[]> {
-  return prisma.publishedContract.findMany({
-    where: {
-      AND: [
-        {
-          OR: contacts.map((c) => ({
-            AND: [{ contract: c.contractAddress }, { chainId: c.chainId }],
-          })),
+  const [projectContracts, relatedContracts] = await Promise.all([
+    prisma.publishedContract.findMany({
+      where: {
+        projectId,
+        AND: [
+          {
+            revokedAt: null,
+            NOT: {
+              OR: contacts.map((c) => ({
+                AND: [{ contract: c.contractAddress }, { chainId: c.chainId }],
+              })),
+            },
+          },
+        ],
+      },
+    }),
+
+    await (async () => {
+      if (contacts.length === 0) {
+        return []
+      }
+
+      return prisma.publishedContract.findMany({
+        where: {
+          AND: [
+            {
+              OR: contacts.map((c) => ({
+                AND: [{ contract: c.contractAddress }, { chainId: c.chainId }],
+              })),
+            },
+            {
+              revokedAt: null,
+            },
+          ],
         },
-        {
-          revokedAt: null,
-        },
-      ],
-    },
-  })
+      })
+    })(),
+  ])
+
+  return [...projectContracts, ...relatedContracts]
 }
 
 export const getPublishedProjectContracts = cache(
@@ -1036,7 +1064,7 @@ export async function addProjectContract({
   const contractCreate = prisma.projectContract.upsert({
     where: {
       contractAddress_chainId: {
-        contractAddress: contract.contractAddress,
+        contractAddress: getAddress(contract.contractAddress),
         chainId: contract.chainId,
       },
     },
@@ -1086,7 +1114,7 @@ export async function updateProjectContract({
     where: {
       projectId,
       contractAddress_chainId: {
-        contractAddress,
+        contractAddress: getAddress(contractAddress),
         chainId,
       },
     },

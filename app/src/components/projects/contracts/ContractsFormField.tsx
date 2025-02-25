@@ -7,8 +7,7 @@ import { z } from "zod"
 import { RedBadge } from "@/components/missions/common/badges/RedBadge"
 import { FormLabel } from "@/components/ui/form"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
-import { OsoDeployerContracts } from "@/lib/types"
-import { osoNamespaceToChainId } from "@/lib/utils/contractForm"
+import { ParsedOsoDeployerContract } from "@/lib/types"
 
 import { ContractFormField } from "./ContractFormField"
 import { DeployersSchema } from "./ContractFormSchema"
@@ -20,7 +19,7 @@ export function ContractsFormField({
   deployerIndex,
 }: {
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
-  osoContracts: OsoDeployerContracts[]
+  osoContracts: ParsedOsoDeployerContract[]
   deployerIndex: number
 }) {
   const { append: appendContracts } = useFieldArray({
@@ -44,16 +43,13 @@ export function ContractsFormField({
           (existingContract) =>
             existingContract.address.toLowerCase() ===
               contract.contractAddress.toLowerCase() &&
-            existingContract.chainId ===
-              osoNamespaceToChainId(contract.contractNamespace).toString(),
+            existingContract.chainId === contract.chainId.toString(),
         )
 
         if (!isContractExists) {
           updatedContracts.push({
             address: contract.contractAddress,
-            chainId: osoNamespaceToChainId(
-              contract.contractNamespace,
-            ).toString(),
+            chainId: contract.chainId.toString(),
             excluded: true,
           })
         }

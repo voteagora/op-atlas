@@ -1,8 +1,6 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
-import { ProjectWithFullDetails } from "./types"
-
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x5eefb359bc596699202474fd99e92172d1b788aa34280f385c498875d1bfb424"
@@ -19,8 +17,8 @@ const APPLICATION_SCHEMA_ID =
     : "0x2169b74bfcb5d10a6616bbc8931dc1c56f8d1c305319a9eeca77623a991d4b80"
 const CONTRACT_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0x5e84bc14268e9bf1275ed4e796a9903e2c2c8b489a4de5f381a21634fe0fcb9a"
-    : "0xe687fc8f419477f1253c99889c28f3aee7e3472a4df28d3d20e88ced6acb1ddc"
+    ? "0xb4c6ea838744caa6f0bfce726c0223cffefb94d98e5690f818cf0e2800e7a8f2"
+    : "0x5560b68760b2ec5a727e6a66e1f9754c307384fe7624ae4e0138c530db14a70b"
 
 const entitySchema = new SchemaEncoder("uint256 farcasterID,string type")
 const projectMetadataSchema = new SchemaEncoder(
@@ -33,7 +31,7 @@ const applicationSchema = new SchemaEncoder(
   "string round, uint256 farcasterID, bytes32 metadataSnapshotRefUID, uint8 metadataType, string metadataUrl",
 )
 const contractSchema = new SchemaEncoder(
-  "address contract, uint8 chainId, address deployer, bytes32 deploymentTx, bytes signature, uint8 verificationChainId, uint256 farcasterID",
+  "address contract, uint32 chainId, address deployer, bytes32 deploymentTx, bytes signature, uint32 verificationChainId, uint256 farcasterID",
 )
 
 const EAS_SIGNER_PRIVATE_KEY = process.env.EAS_SIGNER_PRIVATE_KEY
@@ -111,7 +109,9 @@ async function revokeMultiAttestations(
     },
   ])
 
-  return await tx.wait()
+  await tx.wait()
+
+  return attestationIds
 }
 
 export async function createEntityAttestation({
@@ -289,14 +289,19 @@ export async function createFullProjectSnapshotAttestations({
     }),
   ]
 
-  return createMultiAttestations(attestations)
+  return processAttestationsInBatches(attestations, createMultiAttestations)
 }
 
 export async function revokeContractAttestations(attestationIds: string[]) {
   if (attestationIds.length === 0) {
     return
   }
-  return await revokeMultiAttestations(CONTRACT_SCHEMA_ID, attestationIds)
+
+  return processAttestationsInBatches(
+    attestationIds,
+    async (batch) => revokeMultiAttestations(CONTRACT_SCHEMA_ID, batch),
+    20,
+  )
 }
 
 function buildProjectMetadataAttestation({
@@ -348,14 +353,18 @@ function buildContractAttestations({
   const data = contracts.map((c) =>
     contractSchema.encodeData([
       { name: "contract", value: c.contractAddress, type: "address" },
-      { name: "chainId", value: c.chainId, type: "uint8" },
+      { name: "chainId", value: c.chainId, type: "uint32" },
       { name: "deployer", value: c.deployer, type: "address" },
       { name: "deploymentTx", value: c.deploymentTx, type: "bytes32" },
-      { name: "signature", value: c.signature, type: "bytes" },
+      {
+        name: "signature",
+        value: parseZeroSignature(c.signature),
+        type: "bytes",
+      },
       {
         name: "verificationChainId",
         value: c.verificationChainId,
-        type: "uint8",
+        type: "uint32",
       },
       { name: "farcasterID", value: farcasterId, type: "uint256" },
     ]),
@@ -366,4 +375,54 @@ function buildContractAttestations({
     data: d,
     refUID: projectId,
   }))
+}
+
+function parseZeroSignature(signature: string) {
+  if (signature === "0x0") {
+    return "0x"
+  }
+  return signature
+}
+
+export async function processAttestationsInBatches<T>(
+  attestations: T[],
+  processFn: (batch: T[]) => Promise<string[]>,
+  batchSize = 50,
+  maxRetries = 5,
+): Promise<string[]> {
+  function* batchGenerator<T>(items: T[], size: number) {
+    for (let i = 0; i < items.length; i += size) {
+      yield items.slice(i, i + size)
+    }
+  }
+
+  async function processBatchWithRetry(
+    batch: T[],
+    retryCount = 0,
+  ): Promise<string[]> {
+    try {
+      return await processFn(batch)
+    } catch (error) {
+      if (retryCount >= maxRetries) {
+        throw new Error(`Failed after ${maxRetries} retries: ${error}`)
+      }
+      console.warn(
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+          batch.length
+        } items`,
+      )
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.pow(2, retryCount) * 1000),
+      )
+      return processBatchWithRetry(batch, retryCount + 1)
+    }
+  }
+
+  const allResults = []
+  for await (const batch of batchGenerator(attestations, batchSize)) {
+    const batchResults = await processBatchWithRetry(batch)
+    allResults.push(...batchResults)
+  }
+
+  return allResults
 }

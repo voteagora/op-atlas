@@ -11,6 +11,7 @@ import {
   shape,
   soneium,
   superseed,
+  unichain,
   worldchain,
   zora,
 } from "viem/chains"
@@ -40,6 +41,7 @@ export enum Chain {
   Soneium = soneium.id,
   Superseed = superseed.id,
   Swell = swell.id,
+  Unichain = unichain.id,
   Worldchain = worldchain.id,
   Zora = zora.id,
 }

@@ -12,6 +12,7 @@ import {
   shape,
   soneium,
   superseed,
+  unichain,
   worldchain,
   zora,
 } from "viem/chains"
@@ -36,12 +37,13 @@ export const Chain = z.enum([
   soneium.id.toString(),
   superseed.id.toString(),
   swell.id.toString(),
+  unichain.id.toString(),
   worldchain.id.toString(),
   zora.id.toString(),
 ])
 
 export const AddressSchema = z.custom<string>(
-  (val) => typeof val === "string" && isAddress(val),
+  (val) => typeof val === "string" && (isAddress(val) || val === ""),
   "Valid address is required",
 )
 
@@ -62,7 +64,7 @@ export const DeployerSchema = z.object({
   address: AddressSchema,
   contracts: z.array(ContractSchema),
   signature: z.string(),
-  verificationChainId: Chain,
+  verificationChainId: z.string(),
 })
 
 // Separate URL and slug patterns for clarity
@@ -70,7 +72,10 @@ const defillamaUrlPattern =
   /^https:\/\/defillama\.com\/protocol\/[a-zA-Z0-9-]+$/i
 
 export const DefiLlamaSchema = z.object({
-  slug: z.string().regex(defillamaUrlPattern, "Invalid DefiLlama protocol URL"),
+  slug: z
+    .string()
+    .regex(defillamaUrlPattern, "Invalid DefiLlama protocol URL")
+    .optional(),
 })
 
 export const DeployersSchema = z.object({
