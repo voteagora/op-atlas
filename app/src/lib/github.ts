@@ -80,54 +80,69 @@ export const getFilesContentsToml = async (
 export async function getPackageJsonFiles(
   owner: string,
   slug: string,
+  files: any[] = [],
   path = "",
+  level = 0,
 ): Promise<{ path: string; content: object }[]> {
-  return cacheGitHubData<{ path: string; content: object }[]>(
-    `package_json:${owner}:${slug}:${path}`,
-    async () => {
-      const response = await octokit.request(
-        "GET /repos/{owner}/{repo}/contents/{path}",
-        {
-          owner,
-          path,
-          repo: slug,
-          headers: { "X-GitHub-Api-Version": "2022-11-28" },
-        },
+  let packageFiles: { path: string; content: object }[] = []
+
+  for (const item of files) {
+    if (item.type === "file" && item.name === "package.json") {
+      const content = await processPackageJson(owner, slug, item.path)
+      if (content) {
+        packageFiles.push({ path: item.path, content })
+      }
+      // Only traverse 2 levels deep
+    } else if (item.type === "dir" && level < 3) {
+      const subContents = await getContentsFromPath(owner, slug, item.path)
+
+      const subFiles = await getPackageJsonFiles(
+        owner,
+        slug,
+        subContents,
+        path + item.path + "/",
+        level + 1,
       )
+      packageFiles = packageFiles.concat(subFiles)
+    }
+  }
 
-      const contents = response.data ?? []
+  return packageFiles
+}
 
-      if (!Array.isArray(contents)) {
-        return []
-      }
+async function getContentsFromPath(owner: string, slug: string, path: string) {
+  return cacheGitHubData(`contents:${owner}:${slug}:${path}`, async () => {
+    const response = await octokit.request(
+      "GET /repos/{owner}/{repo}/contents/{path}",
+      {
+        owner,
+        path,
+        repo: slug,
+        headers: { "X-GitHub-Api-Version": "2022-11-28" },
+      },
+    )
 
-      let packageFiles: { path: string; content: object }[] = []
+    const contents = response.data ?? []
 
-      for (const item of contents) {
-        if (item.type === "file" && item.name === "package.json") {
-          const content = await getFileContentBase64Decoded(
-            owner,
-            slug,
-            item.path,
-          )
+    if (!Array.isArray(contents)) {
+      return []
+    }
 
-          try {
-            const parsedContent = content ? JSON.parse(content) : null
-            if (parsedContent && typeof parsedContent === "object") {
-              packageFiles.push({ path: item.path, content: parsedContent })
-            }
-          } catch (err) {
-            console.error("Error parsing package.json:", err)
-          }
-        } else if (item.type === "dir") {
-          const subFiles = await getPackageJsonFiles(owner, slug, item.path)
-          packageFiles = packageFiles.concat(subFiles)
-        }
-      }
+    return contents
+  })
+}
 
-      return packageFiles
-    },
-  )
+async function processPackageJson(owner: string, slug: string, path: string) {
+  const content = await getFileContentBase64Decoded(owner, slug, path)
+
+  try {
+    const parsedContent = content ? JSON.parse(content) : null
+    if (parsedContent && typeof parsedContent === "object") {
+      return parsedContent
+    }
+  } catch (err) {
+    console.error("Error parsing package.json:", err)
+  }
 }
 
 export const getFilesContentsJson = async (

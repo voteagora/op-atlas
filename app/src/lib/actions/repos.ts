@@ -108,8 +108,18 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
   })
 }
 
-const verifyNpm = async (owner: string, slug: string) => {
-  const packageJsons = await getPackageJsonFiles(owner, slug)
+const verifyNpm = async (owner: string, slug: string, rootFiles: any[]) => {
+  const packageJson = getFilesByName(rootFiles, "package.json")
+  // If no package.json on the root, this is not an npm monorepo
+  if (packageJson.length === 0) {
+    return false
+  }
+
+  const packageJsons = await getPackageJsonFiles(
+    owner,
+    slug,
+    packageJson.map((item) => item.path),
+  )
 
   const packages = await Promise.all(
     packageJsons
@@ -170,7 +180,7 @@ export const verifyGithubRepo = async (
 
   const [isCrate, isNpmPackage, license] = await Promise.all([
     verifyCrate(owner, slug, repoFiles),
-    verifyNpm(owner, slug),
+    verifyNpm(owner, slug, repoFiles),
     getLicense(owner, slug),
   ])
 
@@ -180,30 +190,6 @@ export const verifyGithubRepo = async (
       isNpmPackage,
       isCrate,
     },
-  }
-}
-
-export const validateGithubRepo = async (owner: string, slug: string) => {
-  const repo = await getRepository(owner, slug)
-
-  if (!repo) {
-    return {
-      error: "Repo not found",
-    }
-  }
-
-  const repoFiles = await getContents(owner, slug)
-
-  const [isCrate, isNpmPackage, license] = await Promise.all([
-    verifyCrate(owner, slug, repoFiles),
-    verifyNpm(owner, slug),
-    getLicense(owner, slug),
-  ])
-
-  return {
-    isOpenSource: license && isOpenSourceLicense(license),
-    isNpmPackage,
-    isCrate,
   }
 }
 
