@@ -1064,7 +1064,7 @@ export async function addProjectContract({
   const contractCreate = prisma.projectContract.upsert({
     where: {
       contractAddress_chainId: {
-        contractAddress: contract.contractAddress,
+        contractAddress: getAddress(contract.contractAddress),
         chainId: contract.chainId,
       },
     },
@@ -1114,7 +1114,7 @@ export async function updateProjectContract({
     where: {
       projectId,
       contractAddress_chainId: {
-        contractAddress,
+        contractAddress: getAddress(contractAddress),
         chainId,
       },
     },
