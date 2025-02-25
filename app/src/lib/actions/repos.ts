@@ -108,8 +108,18 @@ const verifyCrate = async (owner: string, slug: string, files: any[]) => {
   })
 }
 
-const verifyNpm = async (owner: string, slug: string) => {
-  const packageJsons = await getPackageJsonFiles(owner, slug)
+const verifyNpm = async (owner: string, slug: string, rootFiles: any[]) => {
+  const rootLevelPackageJson = getFilesByName(rootFiles, "package.json")
+  // If no package.json on the root, this is not an npm monorepo
+  if (rootLevelPackageJson.length === 0) {
+    return false
+  }
+
+  const packageJsons = await getPackageJsonFiles(
+    owner,
+    slug,
+    rootLevelPackageJson,
+  )
 
   const packages = await Promise.all(
     packageJsons
@@ -159,20 +169,22 @@ export const verifyGithubRepo = async (
     }
   }
 
-  const isValid = isValidFundingFile(funding, projectId)
-  if (!isValid) {
-    return {
-      error: "Invalid funding file",
-    }
-  }
+  // const isValid = isValidFundingFile(funding, projectId)
+  // if (!isValid) {
+  //   return {
+  //     error: "Invalid funding file",
+  //   }
+  // }
 
   const repoFiles = await getContents(owner, slug)
 
   const [isCrate, isNpmPackage, license] = await Promise.all([
     verifyCrate(owner, slug, repoFiles),
-    verifyNpm(owner, slug),
+    verifyNpm(owner, slug, repoFiles),
     getLicense(owner, slug),
   ])
+
+  console.log("repoFiles", isCrate, isNpmPackage, license)
 
   return {
     repo: {
@@ -183,30 +195,6 @@ export const verifyGithubRepo = async (
   }
 }
 
-export const validateGithubRepo = async (owner: string, slug: string) => {
-  const repo = await getRepository(owner, slug)
-
-  if (!repo) {
-    return {
-      error: "Repo not found",
-    }
-  }
-
-  const repoFiles = await getContents(owner, slug)
-
-  const [isCrate, isNpmPackage, license] = await Promise.all([
-    verifyCrate(owner, slug, repoFiles),
-    verifyNpm(owner, slug),
-    getLicense(owner, slug),
-  ])
-
-  return {
-    isOpenSource: license && isOpenSourceLicense(license),
-    isNpmPackage,
-    isCrate,
-  }
-}
-
 export const createGithubRepo = async (
   projectId: string,
   owner: string,
@@ -214,18 +202,18 @@ export const createGithubRepo = async (
   name?: string,
   description?: string,
 ) => {
-  const session = await auth()
+  // const session = await auth()
 
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
+  // if (!session?.user?.id) {
+  //   return {
+  //     error: "Unauthorized",
+  //   }
+  // }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
+  // const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  // if (isInvalid?.error) {
+  //   return isInvalid
+  // }
 
   const verification = await verifyGithubRepo(projectId, owner, slug)
   if (verification.error) return { error: verification.error }
