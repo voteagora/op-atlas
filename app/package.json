@@ -15,6 +15,7 @@
     "report:applicants": "tsx src/scripts/applicants.ts",
     "report:applications": "tsx src/scripts/applications.ts",
     "dump:badgeholders": "tsx src/scripts/badgeholders.ts",
+    "dump:fundingbyround": "tsx src/scripts/fundingbyround.ts",
     "export:mailchimp": "tsx src/scripts/mailchimp-export.ts",
     "rewards": "tsx src/scripts/rewards.ts",
     "kyc": "tsx src/scripts/kyc.ts",
