@@ -67,10 +67,7 @@ export const clients = {
     shape,
     `https://shape-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-  [Chain.Soneium]: createClient(
-    soneium,
-    `https://soneium-minato.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-  ),
+  [Chain.Soneium]: createClient(soneium, `https://rpc.soneium.org`),
   [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
   [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
   [Chain.Unichain]: createClient(unichain, "https://mainnet.unichain.org"),
