@@ -68,7 +68,7 @@ export function RewardsSection({
         <p className="text-secondary-foreground">
           KYC (identity verification) is required for each address.
         </p>
-        {!userInOrganization ? (
+        {userInOrganization ? (
           <ExtendedLink
             as="button"
             href={`${organizationUrl}/grant-address`}
@@ -79,7 +79,7 @@ export function RewardsSection({
         ) : (
           !isLoading && (
             <AddGrantDeliveryAddressForm
-              userInOrganization={!userInOrganization}
+              userInOrganization={userInOrganization}
               kycTeam={kycTeam}
             />
           )
