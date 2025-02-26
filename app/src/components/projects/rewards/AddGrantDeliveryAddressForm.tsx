@@ -1,15 +1,25 @@
+import { KYCUser } from "@prisma/client"
 import { CheckIcon, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 import Accordion from "@/components/common/Accordion"
 import ExtendedLink from "@/components/common/ExtendedLink"
+import { shortenAddress } from "@/lib/utils"
 
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
 
 export default function AddGrantDeliveryAddressForm({
   userInOrganization,
+  kycTeam,
 }: {
   userInOrganization: boolean
+  kycTeam?: {
+    grantAddress: {
+      address: string
+      validUntil: string
+    }
+    team?: KYCUser[]
+  }
 }) {
   return (
     <div className="p-6 border rounded-md space-y-6 w-full">
@@ -24,7 +34,21 @@ export default function AddGrantDeliveryAddressForm({
                 text="Enter your grant delivery address"
               />
             ),
-            content: <DeliveryAddressVerificationForm />,
+            content: kycTeam?.grantAddress ? (
+              <div className="input-container space-x-1.5">
+                <span className="text-sm text-foreground">
+                  {shortenAddress(kycTeam.grantAddress.address)}
+                </span>
+                <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
+                  <CheckIcon size={12} />
+                  <span>Valid until {kycTeam.grantAddress.validUntil}</span>
+                </div>
+              </div>
+            ) : (
+              <DeliveryAddressVerificationForm
+                userInOrganization={userInOrganization}
+              />
+            ),
           },
           {
             title: (

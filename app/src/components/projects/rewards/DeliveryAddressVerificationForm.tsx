@@ -22,8 +22,12 @@ const FormSchema = z.object({
   confirmCanMakeContractCalls: z.boolean().default(false),
 })
 
-export default function DeliveryAddressVerificationForm() {
-  const { setOpenDialog, setAddress } = useAppDialogs()
+export default function DeliveryAddressVerificationForm({
+  userInOrganization,
+}: {
+  userInOrganization: boolean
+}) {
+  const { setOpenDialog, setData } = useAppDialogs()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -40,7 +44,7 @@ export default function DeliveryAddressVerificationForm() {
     form.watch("address")
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setAddress(data.address)
+    setData({ address: data.address, userInOrganization })
     setOpenDialog("verify_grant_delivery_address")
   }
 

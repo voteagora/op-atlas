@@ -5,9 +5,11 @@ import { auth } from "@/auth"
 import {
   addOrganizationMembers,
   createOrganization,
+  createOrganizationKycTeam,
   CreateOrganizationParams,
   CreateTeamMemberParams,
   deleteOrganization,
+  getOrganizationKYCTeams,
   getOrganizationTeam,
   getUserOrganizationsWithDetails,
   removeOrganizationMember,
@@ -200,4 +202,52 @@ export const removeMemberFromOrganization = async (
   await removeOrganizationMember({ organizationId, userId })
   revalidatePath("/dashboard")
   revalidatePath("/profile", "layout")
+}
+
+export const createOrganizationKycTeamAction = async ({
+  walletAddress,
+  organizationId,
+}: {
+  walletAddress: string
+  organizationId: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyOrganizationAdmin(
+    organizationId,
+    session.user.id,
+  )
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  await createOrganizationKycTeam({ walletAddress, organizationId })
+
+  revalidatePath("/organizations", "layout")
+}
+
+export const getOrganizationKycTeamsAction = async ({
+  organizationId,
+}: {
+  organizationId: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyOrganizationAdmin(
+    organizationId,
+    session.user.id,
+  )
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  return getOrganizationKYCTeams({ organizationId })
 }

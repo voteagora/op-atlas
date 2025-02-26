@@ -1,6 +1,8 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQueryClient } from "@tanstack/react-query"
+import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCallback, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -8,7 +10,6 @@ import { toast } from "sonner"
 import { isAddress } from "viem"
 import { z } from "zod"
 
-import { Badge } from "@/components/common/Badge"
 import Input from "@/components/common/Input"
 import { DialogProps } from "@/components/dialogs/types"
 import ExternalLink from "@/components/ExternalLink"
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { verifyUserAddress } from "@/lib/actions/addresses"
+import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 const formSchema = z.object({
@@ -26,8 +28,10 @@ export function AddGrantDeliveryAddressDialog({
   open,
   onOpenChange,
 }: DialogProps<object>) {
+  const params = useParams()
+  const queryClient = useQueryClient()
   const { data: session } = useSession()
-  const { address } = useAppDialogs()
+  const { data: grantDeliveryData } = useAppDialogs()
 
   const [isPending, startTransition] = useTransition()
   const {
@@ -61,20 +65,36 @@ export function AddGrantDeliveryAddressDialog({
 
   const onSubmit = useCallback(
     async (data: { signature: string }) => {
-      console.log(">>> onSubmit", address, data.signature)
-      if (!address) return
-
       startTransition(async () => {
         try {
-          if (!isAddress(address)) throw new Error("Invalid address")
+          if (!grantDeliveryData.address) return
+
+          if (!isAddress(grantDeliveryData.address))
+            throw new Error("Invalid address")
           if (!data.signature.startsWith("0x"))
             throw new Error("Invalid signature")
 
           const result = await verifyUserAddress(
-            address,
+            grantDeliveryData.address,
             data.signature as `0x${string}`,
           )
           if (result.error) throw new Error(result.error)
+
+          if (grantDeliveryData.userInOrganization) {
+            const organizationId = params.organizationId as string
+            if (!organizationId) return
+
+            await createOrganizationKycTeamAction({
+              walletAddress: grantDeliveryData.address,
+              organizationId,
+            })
+
+            queryClient.invalidateQueries({
+              queryKey: ["kyc-teams", "organization", organizationId],
+            })
+          } else {
+            // TODO: Add User KYC action
+          }
 
           toast.success("Address verified")
           handleClose(false)
@@ -87,7 +107,8 @@ export function AddGrantDeliveryAddressDialog({
         }
       })
     },
-    [address, handleClose],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [grantDeliveryData, handleClose],
   )
 
   return (

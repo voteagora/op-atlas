@@ -6,6 +6,9 @@ import { z } from "zod"
 
 import { auth, signIn } from "@/auth"
 import {
+  createKycTeam,
+  createOrganizationKycTeam,
+  createProjectKycTeam,
   getUserByFarcasterId,
   searchUsersByUsername,
   updateUserDiscord,
