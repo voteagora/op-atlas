@@ -18,6 +18,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { verifyUserAddress } from "@/lib/actions/addresses"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
+import { createProjectKycTeamAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 const formSchema = z.object({
@@ -74,11 +75,11 @@ export function AddGrantDeliveryAddressDialog({
           if (!data.signature.startsWith("0x"))
             throw new Error("Invalid signature")
 
-          const result = await verifyUserAddress(
-            grantDeliveryData.address,
-            data.signature as `0x${string}`,
-          )
-          if (result.error) throw new Error(result.error)
+          // const result = await verifyUserAddress(
+          //   grantDeliveryData.address,
+          //   data.signature as `0x${string}`,
+          // )
+          // if (result.error) throw new Error(result.error)
 
           if (grantDeliveryData.userInOrganization) {
             const organizationId = params.organizationId as string
@@ -93,10 +94,22 @@ export function AddGrantDeliveryAddressDialog({
               queryKey: ["kyc-teams", "organization", organizationId],
             })
           } else {
-            // TODO: Add User KYC action
+            const projectId = params.projectId as string
+            if (!projectId) return
+
+            console.log(">>> grantDeliveryData", grantDeliveryData)
+
+            await createProjectKycTeamAction({
+              walletAddress: grantDeliveryData.address,
+              projectId,
+            })
+
+            queryClient.invalidateQueries({
+              queryKey: ["kyc-teams", "project", projectId],
+            })
           }
 
-          toast.success("Address verified")
+          toast.success("Team created successfully")
           handleClose(false)
         } catch (err) {
           toast.error(

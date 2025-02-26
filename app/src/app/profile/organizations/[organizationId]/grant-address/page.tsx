@@ -8,6 +8,7 @@ import React from "react"
 import { Button } from "@/components/common/Button"
 import AddGrantDeliveryAddressForm from "@/components/projects/rewards/AddGrantDeliveryAddressForm"
 import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
+import { getValidUntil } from "@/lib/utils"
 
 export default function GrantAddress() {
   const params = useParams()
@@ -20,16 +21,6 @@ export default function GrantAddress() {
   })
 
   const [addMoreActive, setAddMoreActive] = React.useState(false)
-
-  const getValidUntil = (createdAt: Date) => {
-    return new Date(
-      new Date(createdAt).setFullYear(new Date(createdAt).getFullYear() + 1),
-    ).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
 
   return (
     <div className="space-y-12">

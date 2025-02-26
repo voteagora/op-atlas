@@ -14,7 +14,7 @@ export default function AddGrantDeliveryAddressForm({
 }: {
   userInOrganization: boolean
   kycTeam?: {
-    grantAddress: {
+    grantAddress?: {
       address: string
       validUntil: string
     }

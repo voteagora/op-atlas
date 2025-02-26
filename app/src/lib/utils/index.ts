@@ -223,3 +223,13 @@ export function arrayDifference(arr1: string[], arr2: string[]) {
   const set2 = new Set(arr2)
   return arr1.filter((item) => !set2.has(item))
 }
+
+export const getValidUntil = (createdAt: Date) => {
+  return new Date(
+    new Date(createdAt).setFullYear(new Date(createdAt).getFullYear() + 1),
+  ).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
+}

@@ -1,9 +1,11 @@
 "use client"
 
 import { Organization } from "@prisma/client"
+import { useQuery } from "@tanstack/react-query"
 import React from "react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
+import { getProjectKycTeamAction } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 
 import AddGrantDeliveryAddressForm from "./AddGrantDeliveryAddressForm"
@@ -16,6 +18,12 @@ export function RewardsSection({
   project: ProjectWithDetails
   userOrganizations: Organization[]
 }) {
+  const { data: kycTeam, isLoading } = useQuery({
+    queryKey: ["kyc-teams", "project", project.id],
+    queryFn: async () => {
+      return await getProjectKycTeamAction(project.id)
+    },
+  })
   const rewards = project.rewards
   const userInOrganization = React.useMemo(() => {
     return userOrganizations.length > 0
@@ -60,7 +68,7 @@ export function RewardsSection({
         <p className="text-secondary-foreground">
           KYC (identity verification) is required for each address.
         </p>
-        {userInOrganization ? (
+        {!userInOrganization ? (
           <ExtendedLink
             as="button"
             href={`${organizationUrl}/grant-address`}
@@ -69,9 +77,12 @@ export function RewardsSection({
             target="_self"
           />
         ) : (
-          <AddGrantDeliveryAddressForm
-            userInOrganization={userInOrganization}
-          />
+          !isLoading && (
+            <AddGrantDeliveryAddressForm
+              userInOrganization={!userInOrganization}
+              kycTeam={kycTeam}
+            />
+          )
         )}
       </div>
     </div>
