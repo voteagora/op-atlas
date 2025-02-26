@@ -2,11 +2,13 @@ import { ChevronDown, ChevronUp, Plus } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { RedBadge } from "@/components/missions/common/badges/RedBadge"
 import { FormLabel } from "@/components/ui/form"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
+import { addAllExcludedProjectContractsAction } from "@/lib/actions/contracts"
 import { ParsedOsoDeployerContract } from "@/lib/types"
 
 import { ContractFormField } from "./ContractFormField"
@@ -16,10 +18,12 @@ import { MissingContractsDialog } from "./MissingContractsDialog"
 export function ContractsFormField({
   form,
   osoContracts,
+  deployer,
   deployerIndex,
 }: {
   form: UseFormReturn<z.infer<typeof DeployersSchema>>
   osoContracts: ParsedOsoDeployerContract[]
+  deployer: string
   deployerIndex: number
 }) {
   const { append: appendContracts } = useFieldArray({
@@ -30,6 +34,9 @@ export function ContractsFormField({
   const contractsFields = form.watch(`deployers.${deployerIndex}.contracts`)
 
   const signature = form.watch(`deployers.${deployerIndex}.signature`)
+  const verificationChainId = form.watch(
+    `deployers.${deployerIndex}.verificationChainId`,
+  )
 
   useEffect(() => {
     // Add "excluded" contracts from oso results
@@ -118,7 +125,7 @@ export function ContractsFormField({
         <div className="flex justify-between items-center">
           <FormLabel>Contracts</FormLabel>
 
-          <div className="flex gap-4 items-center">
+          <div className="flex space-x-2 items-center">
             <button
               className="flex items-center gap-1 text-sm"
               type="button"
@@ -139,6 +146,34 @@ export function ContractsFormField({
                   .filter((contract) => contract.excluded)
                   .length.toString()}
               ></RedBadge>
+            </button>
+            <button
+              type="button"
+              className="text-xs group relative flex items-center rounded-full transition-colors px-2 py-0.5 bg-backgroundSecondary hover:bg-backgroundSecondaryHover"
+              onClick={async () => {
+                const { error } = await addAllExcludedProjectContractsAction(
+                  deployer,
+                  projectId,
+                  signature,
+                  parseInt(verificationChainId),
+                )
+
+                if (error) {
+                  toast.error(error)
+                  return
+                }
+
+                for (let i = 0; i < contracts.length; i++) {
+                  form.setValue(
+                    `deployers.${deployerIndex}.contracts.${i}.excluded`,
+                    false,
+                  )
+                }
+
+                toast.success("All contracts included")
+              }}
+            >
+              Include All
             </button>
             <button
               type="button"
