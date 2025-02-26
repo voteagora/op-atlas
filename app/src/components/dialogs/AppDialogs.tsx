@@ -2,6 +2,8 @@
 
 import { useAppDialogs } from "@/providers/DialogProvider"
 
+import { VerifyAddressDialog } from "../projects/contracts/VerifyAddressDialog"
+import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
@@ -31,6 +33,12 @@ export default function AppDialogs() {
         <AddVerifiedAddressDialog
           open
           onOpenChange={onOpenChange("verify_address")}
+        />
+      )}
+      {openDialog === "verify_grant_delivery_address" && (
+        <AddGrantDeliveryAddressDialog
+          open
+          onOpenChange={onOpenChange("verify_grant_delivery_address")}
         />
       )}
       {openDialog === "welcome_badgeholder" && (

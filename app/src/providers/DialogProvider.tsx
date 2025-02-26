@@ -14,6 +14,8 @@ import { DialogType } from "@/components/dialogs/types"
 type AppDialog = {
   openDialog: DialogType | undefined
   setOpenDialog: Dispatch<SetStateAction<DialogType | undefined>>
+  address: string
+  setAddress: Dispatch<SetStateAction<string>>
 }
 const AppDialogContext = createContext<AppDialog>({} as AppDialog)
 
@@ -26,8 +28,11 @@ export function useAppDialogs() {
 
 export function DialogProvider({ children }: PropsWithChildren) {
   const [openDialog, setOpenDialog] = useState<DialogType>()
+  const [address, setAddress] = useState<string>("")
   return (
-    <AppDialogContext.Provider value={{ openDialog, setOpenDialog }}>
+    <AppDialogContext.Provider
+      value={{ openDialog, setOpenDialog, address, setAddress }}
+    >
       {children}
     </AppDialogContext.Provider>
   )

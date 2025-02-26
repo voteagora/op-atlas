@@ -40,10 +40,10 @@ async function getOrganizationsFn(userId: string) {
   `
 
   // Transform the raw result to match the expected structure
-  const transformed = result[0]?.result || { organizations: [] }
-
-  // Ensure null arrays are converted to empty arrays
-  transformed.organizations = transformed.organizations || []
+  const transformed =
+    result[0]?.result.organizations.map(
+      (organizationObj) => organizationObj.organization,
+    ) || []
 
   return transformed
 }

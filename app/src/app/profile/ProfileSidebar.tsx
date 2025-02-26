@@ -14,11 +14,5 @@ export async function ProfileSidebar() {
 
   const organizations = await getOrganizations(user.user.id)
 
-  return (
-    <UserProfileSidebar
-      organizations={organizations?.organizations.map(
-        ({ organization }) => organization,
-      )}
-    />
-  )
+  return <UserProfileSidebar organizations={organizations} />
 }
