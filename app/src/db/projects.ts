@@ -1085,6 +1085,15 @@ export async function addProjectContrats(
       verificationProof: c.verificationProof,
     })),
   })
+
+  await prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
 }
 
 export async function addProjectContract({
