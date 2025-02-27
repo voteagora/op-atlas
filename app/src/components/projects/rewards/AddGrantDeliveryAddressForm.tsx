@@ -21,6 +21,12 @@ export default function AddGrantDeliveryAddressForm({
     team?: KYCUser[]
   }
 }) {
+  const teamMembers = kycTeam?.team?.filter(
+    (teamMember) => !Boolean(teamMember.businessName),
+  )
+  const entities = kycTeam?.team?.filter((teamMember) =>
+    Boolean(teamMember.businessName),
+  )
   return (
     <div className="p-6 border rounded-md space-y-6 w-full">
       <h4 className="font-semibold">Add an address</h4>
@@ -63,13 +69,12 @@ export default function AddGrantDeliveryAddressForm({
                   After submitting the form, your status will be updated (within
                   1 hour).
                 </p>
-                {/* TODO: Disable conditionally depending on address verification */}
                 <div>
                   <ExtendedLink
                     as="button"
                     variant="primary"
-                    // TODO: Check if form already submitted and conditionally change text to 'Resubmit the form'
                     text={"Fill out the form"}
+                    disabled={!Boolean(kycTeam?.grantAddress?.address)}
                     href={
                       userInOrganization
                         ? "https://kyb.optimism.io/form"
@@ -113,45 +118,43 @@ export default function AddGrantDeliveryAddressForm({
                     (within 48 hours).{" "}
                   </p>
                 </div>
-                <div className="space-y-1.5">
-                  <span className="font-medium text-sm">Persons</span>
-                  <KYCEntryContainer
-                    name="John Doe"
-                    email="JohnD@mail.io"
-                    verified={true}
-                  />
-                  <KYCEntryContainer
-                    name="Jonas Seiferth"
-                    email="Jonas@optimism.io"
-                    verified={false}
-                  />
-                  <KYCEntryContainer
-                    name="Shaun Lind"
-                    email="shaun@optimism.io"
-                    verified={false}
-                  />
-                  {/* TODO: Replace this with actual data */}
-                  <p className="text-muted-foreground text-sm font-normal">
-                    Submitted by shaun@optimism.io
+                {teamMembers?.length && (
+                  <div className="space-y-1.5">
+                    <span className="font-medium text-sm">Persons</span>
+                    {teamMembers.map((teamMember, i) => (
+                      <KYCEntryContainer
+                        key={teamMember.id}
+                        name={`${teamMember.firstName} ${teamMember.lastName}`}
+                        email={teamMember.email}
+                        verified={true}
+                      />
+                    ))}
+                  </div>
+                )}
+                {entities?.length && (
+                  <div className="space-y-1.5">
+                    <span className="font-medium text-sm">Entities</span>
+                    {entities.map((entity) => (
+                      <KYCEntryContainer
+                        key={entity.id}
+                        name={entity.businessName ?? "No name"}
+                        email={entity.email}
+                        verified={false}
+                      />
+                    ))}
+                  </div>
+                )}
+                {/* TODO: Update KYCTeam model to have submittedBy column */}
+                {/* <p className="text-muted-foreground text-sm font-normal">
+                  Submitted by shaun@optimism.io
+                </p> */}
+                {kycTeam?.team?.length === 0 && (
+                  <p className="text-destructive text-sm font-normal">
+                    We are checking for verifications. Please ensure every
+                    person and business named in the grant eligibility form has
+                    taken action and allow 48 hours before writing in.
                   </p>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="font-medium text-sm">Entities</span>
-                  <KYCEntryContainer
-                    name="John Doe INC"
-                    email="contact@johndoe.io"
-                    verified={false}
-                  />
-                  {/* TODO: Replace this with actual data */}
-                  <p className="text-muted-foreground text-sm font-normal">
-                    Submitted by shaun@optimism.io
-                  </p>
-                </div>
-                <p className="text-destructive text-sm font-normal">
-                  We are checking for verifications. Please ensure every person
-                  and business named in the grant eligibility form has taken
-                  action and allow 48 hours before writing in.
-                </p>
+                )}
               </div>
             ),
           },
