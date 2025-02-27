@@ -4,7 +4,6 @@ import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
 
-import { getParsedDeployedContracts } from "@/lib/oso"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -1064,52 +1063,26 @@ export async function addProjectContracts(
   }
 }
 
-export async function addAllExcludedProjectContracts(
-  deployer: string,
+export async function addProjectContrats(
   projectId: string,
-  signature: string,
-  verificationChainId: number,
+  contracts: {
+    contractAddress: string
+    chainId: number
+    deployerAddress: string
+    deploymentHash: string
+    verificationChainId: number
+    verificationProof: string
+  }[],
 ) {
-  const project = await prisma.project.findFirst({
-    where: {
-      id: projectId,
-    },
-    include: {
-      contracts: true,
-      publishedContracts: {
-        where: {
-          revokedAt: null,
-        },
-      },
-    },
-  })
-  if (!project) {
-    return
-  }
-  const existingContracts = project.contracts.map((c) => ({
-    contractAddress: c.contractAddress,
-    chainId: c.chainId,
-  }))
-  const osoContracts = await getParsedDeployedContracts(deployer)
-
-  // Excluded contracts are those that are not already in the project
-  const excludedContracts = osoContracts.filter(
-    (c) =>
-      !existingContracts.some(
-        (ec) =>
-          ec.contractAddress === c.contractAddress && ec.chainId === c.chainId,
-      ),
-  )
-
   await prisma.projectContract.createMany({
-    data: excludedContracts.map((c) => ({
+    data: contracts.map((c) => ({
       projectId,
       contractAddress: c.contractAddress,
       chainId: c.chainId,
-      deployerAddress: deployer,
-      deploymentHash: "",
-      verificationChainId,
-      verificationProof: signature,
+      deployerAddress: c.deployerAddress,
+      deploymentHash: c.deploymentHash,
+      verificationChainId: c.verificationChainId,
+      verificationProof: c.verificationProof,
     })),
   })
 }

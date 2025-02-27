@@ -6,9 +6,10 @@ import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 import { getDeployedContractsServerParsed } from "@/app/api/oso/common"
 import { auth } from "@/auth"
 import {
-  addAllExcludedProjectContracts,
   addProjectContract,
   addProjectContracts,
+  addProjectContrats,
+  getProjectContracts,
   getProjectContractsByDeployer,
   removeProjectContract,
   removeProjectContractsByDeployer,
@@ -320,12 +321,30 @@ export const addAllExcludedProjectContractsAction = async (
   const result = await verifyAuthenticatedMember(projectId)
   if (result.error !== null) return { error: result.error }
 
+  const osoContracts = await getDeployedContractsServerParsed(deployer)
+  const projectContracts = await getProjectContracts({
+    projectId,
+  })
+
+  const excludedContracts = osoContracts.filter((c) => {
+    return !projectContracts?.contracts.some(
+      (pc) =>
+        pc.contractAddress === c.contractAddress && pc.chainId === c.chainId,
+    )
+  })
+
   try {
-    await addAllExcludedProjectContracts(
-      deployer,
+    await addProjectContrats(
       projectId,
-      signature,
-      verificationChainId,
+      excludedContracts.map((c) => ({
+        contractAddress: c.contractAddress,
+        chainId: c.chainId,
+        verificationProof: signature,
+        verificationChainId,
+        deployerAddress: deployer,
+        deploymentHash: "",
+        projectId,
+      })),
     )
   } catch (error: unknown) {
     console.error("Error adding all contracts", error)
