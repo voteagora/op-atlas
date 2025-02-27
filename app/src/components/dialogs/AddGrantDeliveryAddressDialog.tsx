@@ -97,8 +97,6 @@ export function AddGrantDeliveryAddressDialog({
             const projectId = params.projectId as string
             if (!projectId) return
 
-            console.log(">>> grantDeliveryData", grantDeliveryData)
-
             await createProjectKycTeamAction({
               walletAddress: grantDeliveryData.address,
               projectId,
