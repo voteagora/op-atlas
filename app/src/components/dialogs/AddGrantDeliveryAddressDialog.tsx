@@ -75,12 +75,6 @@ export function AddGrantDeliveryAddressDialog({
           if (!data.signature.startsWith("0x"))
             throw new Error("Invalid signature")
 
-          // const result = await verifyUserAddress(
-          //   grantDeliveryData.address,
-          //   data.signature as `0x${string}`,
-          // )
-          // if (result.error) throw new Error(result.error)
-
           if (grantDeliveryData.userInOrganization) {
             const organizationId = params.organizationId as string
             if (!organizationId) return
