@@ -224,9 +224,9 @@ export function arrayDifference(arr1: string[], arr2: string[]) {
   return arr1.filter((item) => !set2.has(item))
 }
 
-export const getValidUntil = (createdAt: Date) => {
+export const getValidUntil = (value: Date) => {
   return new Date(
-    new Date(createdAt).setFullYear(new Date(createdAt).getFullYear() + 1),
+    new Date(value).setFullYear(new Date(value).getFullYear() + 1),
   ).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",

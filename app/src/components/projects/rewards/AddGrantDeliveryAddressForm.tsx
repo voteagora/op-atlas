@@ -118,32 +118,31 @@ export default function AddGrantDeliveryAddressForm({
                     (within 48 hours).{" "}
                   </p>
                 </div>
-                {teamMembers?.length && (
-                  <div className="space-y-1.5">
-                    <span className="font-medium text-sm">Persons</span>
-                    {teamMembers.map((teamMember, i) => (
-                      <KYCEntryContainer
-                        key={teamMember.id}
-                        name={`${teamMember.firstName} ${teamMember.lastName}`}
-                        email={teamMember.email}
-                        verified={true}
-                      />
-                    ))}
-                  </div>
-                )}
-                {entities?.length && (
-                  <div className="space-y-1.5">
-                    <span className="font-medium text-sm">Entities</span>
-                    {entities.map((entity) => (
-                      <KYCEntryContainer
-                        key={entity.id}
-                        name={entity.businessName ?? "No name"}
-                        email={entity.email}
-                        verified={false}
-                      />
-                    ))}
-                  </div>
-                )}
+
+                <div className="space-y-1.5">
+                  <span className="font-medium text-sm">Persons</span>
+                  {teamMembers?.map((teamMember, i) => (
+                    <KYCEntryContainer
+                      key={teamMember.id}
+                      name={`${teamMember.firstName} ${teamMember.lastName}`}
+                      email={teamMember.email}
+                      verified={teamMember.status === "APPROVED"}
+                    />
+                  ))}
+                </div>
+
+                <div className="space-y-1.5">
+                  <span className="font-medium text-sm">Entities</span>
+                  {entities?.map((entity) => (
+                    <KYCEntryContainer
+                      key={entity.id}
+                      name={entity.businessName ?? "No name"}
+                      email={entity.email}
+                      verified={entity.status === "APPROVED"}
+                    />
+                  ))}
+                </div>
+
                 {/* TODO: Update KYCTeam model to have submittedBy column */}
                 {/* <p className="text-muted-foreground text-sm font-normal">
                   Submitted by shaun@optimism.io

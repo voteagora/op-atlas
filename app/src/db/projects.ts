@@ -1698,3 +1698,80 @@ export async function getProjectKycTeam({
     team: kycTeam.team.team.map((ut) => ut.users),
   }
 }
+
+export async function addKYCTeamMembers({
+  kycTeamId,
+  individuals,
+  businesses,
+}: {
+  kycTeamId: string
+  individuals: {
+    firstName: string
+    lastName: string
+    email: string
+  }[]
+  businesses: {
+    firstName: string
+    lastName: string
+    email: string
+    companyName: string
+  }[]
+}) {
+  await Promise.all([
+    prisma.$transaction(async (tx) => {
+      await tx.kYCUser.createMany({
+        data: individuals.map((individual) => ({
+          teamId: kycTeamId,
+          email: individual.email,
+          firstName: individual.firstName,
+          lastName: individual.lastName,
+          expiry: new Date(),
+        })),
+      })
+
+      const userIds = await tx.kYCUser.findMany({
+        where: {
+          teamId: kycTeamId,
+        },
+        select: {
+          id: true,
+        },
+      })
+
+      await tx.kYCUserTeams.createMany({
+        data: userIds.map((user) => ({
+          kycTeamId,
+          kycUserId: user.id,
+        })),
+      })
+    }),
+    prisma.$transaction(async (tx) => {
+      await tx.kYCUser.createMany({
+        data: businesses.map((business) => ({
+          teamId: kycTeamId,
+          email: business.email,
+          firstName: business.firstName,
+          lastName: business.lastName,
+          businessName: business.companyName,
+          expiry: new Date(),
+        })),
+      })
+
+      const userIds = await tx.kYCUser.findMany({
+        where: {
+          teamId: kycTeamId,
+        },
+        select: {
+          id: true,
+        },
+      })
+
+      await tx.kYCUserTeams.createMany({
+        data: userIds.map((user) => ({
+          kycTeamId,
+          kycUserId: user.id,
+        })),
+      })
+    }),
+  ])
+}
