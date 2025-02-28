@@ -8,12 +8,14 @@ import {
   addTeamMembers,
   createProject,
   createProjectKycTeam,
+  createProjectKycTeams,
   CreateProjectParams,
   deleteProject,
   getAllApplicationsForRound,
   getAllPublishedUserProjects,
   getProjectContracts,
   getProjectKycTeam,
+  getProjectKycTeams,
   getProjectTeam,
   getPublishedProjectContracts,
   getUserAdminProjectsWithDetail,
@@ -440,4 +442,40 @@ export const getProjectKycTeamAction = async (projectId: string) => {
   }
 
   return await getProjectKycTeam({ projectId })
+}
+
+export const createProjectKYCTeamsAction = async ({
+  projectIds,
+  kycTeamId,
+}: {
+  projectIds: string[]
+  kycTeamId: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  projectIds.forEach(async (projectId) => {
+    const isInvalid = await verifyMembership(
+      projectId,
+      session.user.farcasterId,
+    )
+    if (isInvalid?.error) {
+      throw new Error(isInvalid.error)
+    }
+  })
+
+  return await createProjectKycTeams({ projectIds, kycTeamId })
+}
+
+export const getProjectKYCTeamsAction = async (kycTeamId: string) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  return await getProjectKycTeams({ kycTeamId })
 }

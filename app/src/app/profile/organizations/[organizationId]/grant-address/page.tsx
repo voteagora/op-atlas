@@ -41,6 +41,7 @@ export default function GrantAddress() {
             key={organizationKycTeam.id}
             userInOrganization
             kycTeam={{
+              id: organizationKycTeam.id,
               grantAddress: {
                 address: organizationKycTeam.grantAddress.address,
                 validUntil: getValidUntil(

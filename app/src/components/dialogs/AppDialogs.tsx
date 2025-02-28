@@ -10,6 +10,7 @@ import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
+import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
 import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
@@ -57,6 +58,12 @@ export default function AppDialogs() {
         <NotRecognizedAddressDialog
           open
           onOpenChange={onOpenChange("not_recognized_address")}
+        />
+      )}
+      {openDialog === "select_kyc_project" && (
+        <SelectKYCProjectDialog
+          open
+          onOpenChange={onOpenChange("select_kyc_project")}
         />
       )}
     </>

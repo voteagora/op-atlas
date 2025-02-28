@@ -1657,17 +1657,7 @@ export async function createProjectKycTeam({
   })
 }
 
-export async function getProjectKycTeam({
-  projectId,
-}: {
-  projectId: string
-}): Promise<{
-  grantAddress?: {
-    address: string
-    validUntil: string
-  }
-  team?: KYCUser[]
-}> {
+export async function getProjectKycTeam({ projectId }: { projectId: string }) {
   const kycTeam = await prisma.projectKYCTeam.findFirst({
     where: {
       projectId,
@@ -1694,6 +1684,7 @@ export async function getProjectKycTeam({
   const validUntil = getValidUntil(createdAt)
 
   return {
+    id: kycTeam.id,
     grantAddress: { address, validUntil },
     team: kycTeam.team.team.map((ut) => ut.users),
   }
@@ -1774,4 +1765,30 @@ export async function addKYCTeamMembers({
       })
     }),
   ])
+}
+
+export async function createProjectKycTeams({
+  projectIds,
+  kycTeamId,
+}: {
+  projectIds: string[]
+  kycTeamId: string
+}) {
+  return prisma.projectKYCTeam.createMany({
+    data: projectIds.map((projectId) => ({
+      projectId,
+      kycTeamId,
+    })),
+  })
+}
+
+export async function getProjectKycTeams({ kycTeamId }: { kycTeamId: string }) {
+  return prisma.projectKYCTeam.findMany({
+    where: {
+      kycTeamId,
+    },
+    include: {
+      project: true,
+    },
+  })
 }

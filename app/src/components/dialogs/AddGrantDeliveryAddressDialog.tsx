@@ -101,7 +101,7 @@ export function AddGrantDeliveryAddressDialog({
             })
           }
 
-          toast.success("Team created successfully")
+          toast.success("Grant delivery address verified")
           handleClose(false)
         } catch (err) {
           toast.error(

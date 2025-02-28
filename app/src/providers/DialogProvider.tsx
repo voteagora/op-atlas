@@ -16,6 +16,8 @@ type DataType = {
   userInOrganization?: boolean
   projectId?: string
   organizationId?: string
+  kycTeamId?: string
+  alreadySelectedProjectIds?: string[]
 }
 
 type AppDialog = {
@@ -43,6 +45,7 @@ export function DialogProvider({ children }: PropsWithChildren) {
     userInOrganization: false,
     projectId: "",
     organizationId: "",
+    kycTeamId: "",
   })
 
   return (

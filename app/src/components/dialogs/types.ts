@@ -7,6 +7,7 @@ export type DialogType =
   | "welcome_badgeholder"
   | "governance_testimonial_request"
   | "not_recognized_address"
+  | "select_kyc_project"
 export type DialogProps<T> = {
   open: boolean
   onOpenChange: (open: boolean) => void

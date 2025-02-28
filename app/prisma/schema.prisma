@@ -532,8 +532,8 @@ model KYCUserTeams {
 	createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 	
-	users       KYCUser   @relation(fields: [kycUserId], references: [id]) 
-	team        KYCTeam   @relation(fields: [kycTeamId], references: [id]) 
+	users       KYCUser   @relation(fields: [kycUserId], references: [id], onDelete: Cascade) 
+	team        KYCTeam   @relation(fields: [kycTeamId], references: [id], onDelete: Cascade) 
 	
 	@@index([kycUserId])
 	@@index([kycTeamId])
