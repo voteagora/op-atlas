@@ -2,12 +2,15 @@
 
 import { useAppDialogs } from "@/providers/DialogProvider"
 
+import { VerifyAddressDialog } from "../projects/contracts/VerifyAddressDialog"
+import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
+import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
 import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
@@ -33,6 +36,12 @@ export default function AppDialogs() {
           onOpenChange={onOpenChange("verify_address")}
         />
       )}
+      {openDialog === "verify_grant_delivery_address" && (
+        <AddGrantDeliveryAddressDialog
+          open
+          onOpenChange={onOpenChange("verify_grant_delivery_address")}
+        />
+      )}
       {openDialog === "welcome_badgeholder" && (
         <WelcomeBadgeholderDialog
           open
@@ -49,6 +58,12 @@ export default function AppDialogs() {
         <NotRecognizedAddressDialog
           open
           onOpenChange={onOpenChange("not_recognized_address")}
+        />
+      )}
+      {openDialog === "select_kyc_project" && (
+        <SelectKYCProjectDialog
+          open
+          onOpenChange={onOpenChange("select_kyc_project")}
         />
       )}
     </>
