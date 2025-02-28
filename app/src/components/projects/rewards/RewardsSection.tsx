@@ -29,12 +29,8 @@ export function RewardsSection({
     return userOrganizations.length > 0
   }, [userOrganizations])
   const organizationUrl = React.useMemo(() => {
-    if (!userInOrganization) {
-      return "/profile/organizations/new"
-    }
-
     return `/profile/organizations/${userOrganizations[0].id}`
-  }, [userOrganizations, userInOrganization])
+  }, [userOrganizations])
 
   return (
     <div className="flex flex-col gap-12">
