@@ -14,6 +14,7 @@ import {
   getApplications,
   getProjects,
 } from "@/lib/actions/projects"
+import posthog from "@/lib/posthog"
 
 export default async function Page() {
   const session = await auth()
@@ -35,8 +36,14 @@ export default async function Page() {
     redirect("/")
   }
 
+  const isMyFlagEnabledForUser = await posthog.isFeatureEnabled(
+    "server-feature-flag",
+    session.user.id,
+  )
+
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
+      {isMyFlagEnabledForUser && <div>Server Feature Flag Item</div>}
       <Dashboard
         user={user}
         projects={projects}

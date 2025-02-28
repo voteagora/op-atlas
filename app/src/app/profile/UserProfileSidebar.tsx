@@ -5,6 +5,7 @@ import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useFeatureFlagEnabled } from "posthog-js/react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -17,6 +18,7 @@ export function UserProfileSidebar({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const flagEnabled = useFeatureFlagEnabled("client-feature-flag")
 
   const currentPage = pathname.split("/").slice(-1)[0]
 
@@ -100,6 +102,9 @@ export function UserProfileSidebar({
             </div>
             Verified addresses
           </Link>
+          {flagEnabled && (
+            <div className="ml-6 font-bold">Client Feature Flag Item</div>
+          )}
         </div>
       </div>
       <div>

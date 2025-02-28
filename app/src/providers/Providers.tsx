@@ -11,6 +11,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { AnalyticsProvider } from "./AnalyticsProvider"
 import { DialogProvider } from "./DialogProvider"
 import { LayoutWrapper } from "./LayoutProvider"
+import { PostHogProvider } from "./PosthogProvider"
 
 if (
   process.env.NEXT_PUBLIC_VERCEL_ENV === "production" &&
@@ -41,7 +42,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <AnalyticsProvider>
             <DialogProvider>
               <TooltipProvider>
-                <LayoutWrapper>{children}</LayoutWrapper>
+                <LayoutWrapper>
+                  <PostHogProvider>{children}</PostHogProvider>
+                </LayoutWrapper>
               </TooltipProvider>
             </DialogProvider>
           </AnalyticsProvider>

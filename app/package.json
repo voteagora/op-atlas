@@ -80,6 +80,8 @@
     "next-themes": "^0.3.0",
     "octokit": "^3.2.0",
     "pinata-web3": "^0.5.3",
+    "posthog-js": "^1.224.1",
+    "posthog-node": "^4.8.1",
     "prisma": "^5.12.1",
     "ramda": "^0.30.0",
     "react": "^18",

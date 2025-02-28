@@ -163,6 +163,12 @@ importers:
       pinata-web3:
         specifier: ^0.5.3
         version: 0.5.3
+      posthog-js:
+        specifier: ^1.224.1
+        version: 1.224.1(@rrweb/types@2.0.0-alpha.18)
+      posthog-node:
+        specifier: ^4.8.1
+        version: 4.8.1
       prisma:
         specifier: ^5.12.1
         version: 5.22.0
@@ -3098,6 +3104,9 @@ packages:
   cookies-next@4.3.0:
     resolution: {integrity: sha512-XxeCwLR30cWwRd94sa9X5lRCDLVujtx73tv+N0doQCFIDl83fuuYdxbu/WQUt9aSV7EJx7bkMvJldjvzuFqr4w==}
 
+  core-js@3.40.0:
+    resolution: {integrity: sha512-7vsMc/Lty6AGnn7uFpYT56QesI5D2Y/UkgKounk87OP9Z2H9Z8kj6jzcSGAxFmUtDOS0ntK6lbQz+Nsa0Jj6mQ==}
+
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
 
@@ -5415,6 +5424,15 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
+  posthog-js@1.224.1:
+    resolution: {integrity: sha512-C/0adjCiqvJ9JlGdlBT7HyxqBbMB8wFwb7/DKULyXfT4GJX/8ETaqXaJuSL3HLcuUJjxYPqDinBC6mt8QoVYnA==}
+    peerDependencies:
+      '@rrweb/types': 2.0.0-alpha.17
+
+  posthog-node@4.8.1:
+    resolution: {integrity: sha512-ApMEC1+DbctP/88+VhaCl8SRKpIoReibMf7Mb3rxw3yMthr1rKaM4opbHdZJ0buLhwS5zX8B2ckqLjpwpSjRPg==}
+    engines: {node: '>=15.0.0'}
+
   preact-render-to-string@5.2.3:
     resolution: {integrity: sha512-aPDxUn5o3GhWdtJtW0svRC2SS/l8D9MAgo2+AWml+BhDImb27ALf04Q2d+AHqUUOc6RdSXFIBVa2gxzgMKgtZA==}
     peerDependencies:
@@ -5422,6 +5440,9 @@ packages:
 
   preact@10.11.3:
     resolution: {integrity: sha512-eY93IVpod/zG3uMF22Unl8h9KkrcKIRs2EGar8hwLZZDU1lkjph303V9HZBwufh2s736U6VXuhD109LYqPoffg==}
+
+  preact@10.26.4:
+    resolution: {integrity: sha512-KJhO7LBFTjP71d83trW+Ilnjbo+ySsaAgCfXOXUlmGzJ4ygYPWmysm77yg4emwfmoz3b22yvH5IsVFHbhUaH5w==}
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -6446,6 +6467,9 @@ packages:
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
+
+  web-vitals@4.2.4:
+    resolution: {integrity: sha512-r4DIlprAGwJ7YM11VZp4R884m0Vmgr6EAKe3P+kO0PPj3Unqyvv59rczf6UiGcb9Z8QxZVcqKNwv/g0WNdWwsw==}
 
   webauthn-p256@0.0.10:
     resolution: {integrity: sha512-EeYD+gmIT80YkSIDb2iWq0lq2zbHo1CxHlQTeJ+KkCILWpVy3zASH3ByD4bopzfk0uCwXxLqKGLqp2W4O28VFA==}
@@ -9665,6 +9689,8 @@ snapshots:
       '@types/cookie': 0.6.0
       cookie: 0.7.2
 
+  core-js@3.40.0: {}
+
   core-util-is@1.0.3: {}
 
   create-hash@1.2.0:
@@ -12394,12 +12420,28 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
+  posthog-js@1.224.1(@rrweb/types@2.0.0-alpha.18):
+    dependencies:
+      '@rrweb/types': 2.0.0-alpha.18
+      core-js: 3.40.0
+      fflate: 0.4.8
+      preact: 10.26.4
+      web-vitals: 4.2.4
+
+  posthog-node@4.8.1:
+    dependencies:
+      axios: 1.7.9
+    transitivePeerDependencies:
+      - debug
+
   preact-render-to-string@5.2.3(preact@10.11.3):
     dependencies:
       preact: 10.11.3
       pretty-format: 3.8.0
 
   preact@10.11.3: {}
+
+  preact@10.26.4: {}
 
   prelude-ls@1.2.1: {}
 
@@ -13509,6 +13551,8 @@ snapshots:
       makeerror: 1.0.12
 
   web-streams-polyfill@3.3.3: {}
+
+  web-vitals@4.2.4: {}
 
   webauthn-p256@0.0.10:
     dependencies:
