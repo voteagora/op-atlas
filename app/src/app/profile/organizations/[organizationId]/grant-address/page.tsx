@@ -39,7 +39,6 @@ export default function GrantAddress() {
         {organizationKycTeams?.map((organizationKycTeam) => (
           <AddGrantDeliveryAddressForm
             key={organizationKycTeam.id}
-            userInOrganization
             kycTeam={{
               id: organizationKycTeam.id,
               grantAddress: {
@@ -53,10 +52,11 @@ export default function GrantAddress() {
           />
         ))}
         {(organizationKycTeams?.length === 0 || addMoreActive) && (
-          <AddGrantDeliveryAddressForm userInOrganization />
+          <AddGrantDeliveryAddressForm />
         )}
         <Button
           variant="secondary"
+          disabled={addMoreActive}
           leftIcon={<PlusIcon size={16} />}
           onClick={() => setAddMoreActive(true)}
         >

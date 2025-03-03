@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query"
 import { CheckIcon, ChevronRight, Loader2, SquareCheck } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 
 import Accordion from "@/components/common/Accordion"
 import ExtendedLink from "@/components/common/ExtendedLink"
@@ -15,10 +16,8 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
 
 export default function AddGrantDeliveryAddressForm({
-  userInOrganization,
   kycTeam,
 }: {
-  userInOrganization: boolean
   kycTeam?: {
     id?: string
     grantAddress?: {
@@ -28,6 +27,7 @@ export default function AddGrantDeliveryAddressForm({
     team?: KYCUser[]
   }
 }) {
+  const params = useParams()
   const { setData, setOpenDialog } = useAppDialogs()
   const { data: kycTeamProjects } = useQuery({
     queryKey: ["kycTeamProjects", kycTeam?.id],
@@ -38,15 +38,17 @@ export default function AddGrantDeliveryAddressForm({
     },
   })
 
+  const organizationProject = params.organizationId as string
+
   const teamMembers = kycTeam?.team?.filter(
     (teamMember) => !Boolean(teamMember.businessName),
   )
   const entities = kycTeam?.team?.filter((teamMember) =>
     Boolean(teamMember.businessName),
   )
-  const allTeamMembersVerified = teamMembers?.every(
-    (teamMember) => teamMember.status === "APPROVED",
-  )
+  const allTeamMembersVerified =
+    Boolean(teamMembers?.length) &&
+    teamMembers?.every((teamMember) => teamMember.status === "APPROVED")
 
   const openSelectKYCProjectDialog = () => {
     setData({
@@ -84,36 +86,46 @@ export default function AddGrantDeliveryAddressForm({
                   </div>
                   <div className="space-y-2">
                     <div className="w-full flex justify-between items-center">
-                      <span className="font-medium text-sm">Projects</span>
-                      <button
-                        className="flex items-center space-x-1"
-                        onClick={openSelectKYCProjectDialog}
-                      >
-                        <SquareCheck size={18} />
-                        <span>Choose</span>
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>
-                    <ul className="space-y-2 w-full">
-                      {kycTeamProjects?.map((team) => (
-                        <li
-                          key={team.id}
-                          className="input-container space-x-2 text-sm text"
+                      <span className="font-medium text-sm">
+                        {organizationProject ? "Projects" : "Project"}
+                      </span>
+                      {organizationProject && (
+                        <button
+                          className="flex items-center space-x-1"
+                          onClick={openSelectKYCProjectDialog}
                         >
-                          {team.project.thumbnailUrl && (
-                            <Image
-                              src={team.project.thumbnailUrl}
-                              width={24}
-                              height={24}
-                              alt={team.project.name}
-                            />
-                          )}
-                          <span className="text-sm font-normal">
-                            {team.project.name}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                          <SquareCheck size={18} />
+                          <span>Choose</span>
+                          <ChevronRight size={14} />
+                        </button>
+                      )}
+                    </div>
+                    {Boolean(kycTeamProjects?.length) ? (
+                      <ul className="space-y-2 w-full">
+                        {kycTeamProjects?.map((team) => (
+                          <li
+                            key={team.id}
+                            className="input-container space-x-2 text-sm text"
+                          >
+                            {team.project.thumbnailUrl && (
+                              <Image
+                                src={team.project.thumbnailUrl}
+                                width={24}
+                                height={24}
+                                alt={team.project.name}
+                              />
+                            )}
+                            <span className="text-sm font-normal">
+                              {team.project.name}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-muted-foreground text-sm pt-2">
+                        No projects selected
+                      </div>
+                    )}
                   </div>
                 </div>
               ),
@@ -143,7 +155,7 @@ export default function AddGrantDeliveryAddressForm({
                 </div>
               ) : (
                 <DeliveryAddressVerificationForm
-                  userInOrganization={userInOrganization}
+                  organizationProject={Boolean(organizationProject)}
                 />
               ),
             },
@@ -164,10 +176,14 @@ export default function AddGrantDeliveryAddressForm({
                     <ExtendedLink
                       as="button"
                       variant="primary"
-                      text={"Fill out the form"}
+                      text={
+                        Boolean(teamMembers?.length)
+                          ? "Refill the form"
+                          : "Fill out the form"
+                      }
                       disabled={!Boolean(kycTeam?.grantAddress?.address)}
                       href={
-                        userInOrganization
+                        organizationProject
                           ? "https://kyb.optimism.io/form"
                           : "https://kyc.optimism.io/form"
                       }
@@ -210,35 +226,38 @@ export default function AddGrantDeliveryAddressForm({
                     </p>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <span className="font-medium text-sm">Persons</span>
-                    {teamMembers?.map((teamMember, i) => (
-                      <KYCEntryContainer
-                        key={teamMember.id}
-                        name={`${teamMember.firstName} ${teamMember.lastName}`}
-                        email={teamMember.email}
-                        verified={teamMember.status === "APPROVED"}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <span className="font-medium text-sm">Entities</span>
-                    {entities?.map((entity) => (
-                      <KYCEntryContainer
-                        key={entity.id}
-                        name={entity.businessName ?? "No name"}
-                        email={entity.email}
-                        verified={entity.status === "APPROVED"}
-                      />
-                    ))}
-                  </div>
+                  {Boolean(teamMembers?.length) && (
+                    <div className="space-y-1.5">
+                      <span className="font-medium text-sm">Persons</span>
+                      {teamMembers?.map((teamMember, i) => (
+                        <KYCEntryContainer
+                          key={teamMember.id}
+                          name={`${teamMember.firstName} ${teamMember.lastName}`}
+                          email={teamMember.email}
+                          verified={teamMember.status === "APPROVED"}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {Boolean(entities?.length) && (
+                    <div className="space-y-1.5">
+                      <span className="font-medium text-sm">Entities</span>
+                      {entities?.map((entity) => (
+                        <KYCEntryContainer
+                          key={entity.id}
+                          name={entity.businessName ?? "No name"}
+                          email={entity.email}
+                          verified={entity.status === "APPROVED"}
+                        />
+                      ))}
+                    </div>
+                  )}
 
                   {/* TODO: Update KYCTeam model to have submittedBy column */}
                   {/* <p className="text-muted-foreground text-sm font-normal">
                     Submitted by shaun@optimism.io
                   </p> */}
-                  {kycTeam?.team?.length === 0 && (
+                  {kycTeam?.team?.length !== 0 && (
                     <p className="text-destructive text-sm font-normal">
                       We are checking for verifications. Please ensure every
                       person and business named in the grant eligibility form

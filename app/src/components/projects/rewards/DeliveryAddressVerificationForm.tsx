@@ -23,9 +23,9 @@ const FormSchema = z.object({
 })
 
 export default function DeliveryAddressVerificationForm({
-  userInOrganization,
+  organizationProject,
 }: {
-  userInOrganization: boolean
+  organizationProject: boolean
 }) {
   const { setOpenDialog, setData } = useAppDialogs()
 
@@ -44,7 +44,7 @@ export default function DeliveryAddressVerificationForm({
     form.watch("address")
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setData({ address: data.address, userInOrganization })
+    setData({ address: data.address, organizationProject })
     setOpenDialog("verify_grant_delivery_address")
   }
 
@@ -53,6 +53,7 @@ export default function DeliveryAddressVerificationForm({
       <form
         onSubmit={(e) => {
           form.handleSubmit(onSubmit)(e)
+          form.reset()
         }}
         className="w-full space-y-4"
       >

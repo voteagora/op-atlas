@@ -75,7 +75,7 @@ export function AddGrantDeliveryAddressDialog({
           if (!data.signature.startsWith("0x"))
             throw new Error("Invalid signature")
 
-          if (grantDeliveryData.userInOrganization) {
+          if (grantDeliveryData.organizationProject) {
             const organizationId = params.organizationId as string
             if (!organizationId) return
 

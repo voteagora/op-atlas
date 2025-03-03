@@ -11,13 +11,7 @@ import { ProjectWithDetails } from "@/lib/types"
 import AddGrantDeliveryAddressForm from "./AddGrantDeliveryAddressForm"
 import RewardAccordion from "./RewardAccordion"
 
-export function RewardsSection({
-  project,
-  userOrganizations,
-}: {
-  project: ProjectWithDetails
-  userOrganizations: Organization[]
-}) {
+export function RewardsSection({ project }: { project: ProjectWithDetails }) {
   const { data: kycTeam, isLoading } = useQuery({
     queryKey: ["kyc-teams", "project", project.id],
     queryFn: async () => {
@@ -25,12 +19,6 @@ export function RewardsSection({
     },
   })
   const rewards = project.rewards
-  const userInOrganization = React.useMemo(() => {
-    return userOrganizations.length > 0
-  }, [userOrganizations])
-  const organizationUrl = React.useMemo(() => {
-    return `/profile/organizations/${userOrganizations[0].id}`
-  }, [userOrganizations])
 
   return (
     <div className="flex flex-col gap-12">
@@ -64,21 +52,16 @@ export function RewardsSection({
         <p className="text-secondary-foreground">
           KYC (identity verification) is required for each address.
         </p>
-        {userInOrganization ? (
+        {Boolean(project.organization) ? (
           <ExtendedLink
             as="button"
-            href={`${organizationUrl}/grant-address`}
+            href={`/profile/organizations/${project.organization?.id}/grant-address`}
             text="Go to organization settings"
             variant="primary"
             target="_self"
           />
         ) : (
-          !isLoading && (
-            <AddGrantDeliveryAddressForm
-              userInOrganization={userInOrganization}
-              kycTeam={kycTeam}
-            />
-          )
+          !isLoading && <AddGrantDeliveryAddressForm kycTeam={kycTeam} />
         )}
       </div>
     </div>
