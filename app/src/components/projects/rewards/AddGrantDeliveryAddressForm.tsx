@@ -47,8 +47,8 @@ export default function AddGrantDeliveryAddressForm({
     Boolean(teamMember.businessName),
   )
   const allTeamMembersVerified =
-    Boolean(teamMembers?.length) &&
-    teamMembers?.every((teamMember) => teamMember.status === "APPROVED")
+    Boolean(kycTeam?.team?.length) &&
+    kycTeam?.team?.every((teamMember) => teamMember.status === "APPROVED")
 
   const openSelectKYCProjectDialog = () => {
     setData({
@@ -67,7 +67,7 @@ export default function AddGrantDeliveryAddressForm({
       )}
       {allTeamMembersVerified ? (
         <Accordion
-          type="single"
+          type="multiple"
           items={[
             {
               title: (
@@ -280,12 +280,14 @@ export default function AddGrantDeliveryAddressForm({
                         variant="primary"
                         text="Verify my ID"
                         href="https://kyc.optimism.io/form"
+                        disabled={!Boolean(entities?.length)}
                       />
                       <ExtendedLink
                         as="button"
                         variant="primary"
                         text="Verify my Business ID"
                         href="https://kyb.optimism.io/form"
+                        disabled={!Boolean(entities?.length)}
                       />
                     </div>
                   </div>
