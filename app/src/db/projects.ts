@@ -1657,8 +1657,8 @@ export async function createProjectKycTeam({
   })
 }
 
-export async function getProjectKycTeam({ projectId }: { projectId: string }) {
-  const kycTeam = await prisma.projectKYCTeam.findFirst({
+export async function getKycTeam({ projectId }: { projectId: string }) {
+  const projectKycTeam = await prisma.projectKYCTeam.findFirst({
     where: {
       projectId,
     },
@@ -1675,18 +1675,18 @@ export async function getProjectKycTeam({ projectId }: { projectId: string }) {
     },
   })
 
-  if (!kycTeam) {
+  if (!projectKycTeam) {
     return {}
   }
 
-  const address = kycTeam.team.walletAddress
-  const createdAt = kycTeam.team.createdAt
+  const address = projectKycTeam.team.walletAddress
+  const createdAt = projectKycTeam.team.createdAt
   const validUntil = getValidUntil(createdAt)
 
   return {
-    id: kycTeam.id,
+    id: projectKycTeam.kycTeamId,
     grantAddress: { address, validUntil },
-    team: kycTeam.team.team.map((ut) => ut.users),
+    team: projectKycTeam.team.team.map((ut) => ut.users),
   }
 }
 

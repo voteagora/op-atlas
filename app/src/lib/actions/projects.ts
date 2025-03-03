@@ -13,8 +13,8 @@ import {
   deleteProject,
   getAllApplicationsForRound,
   getAllPublishedUserProjects,
+  getKycTeam,
   getProjectContracts,
-  getProjectKycTeam,
   getProjectKycTeams,
   getProjectTeam,
   getPublishedProjectContracts,
@@ -429,7 +429,7 @@ export const createProjectKycTeamAction = async ({
   return createProjectKycTeam({ projectId, walletAddress })
 }
 
-export const getProjectKycTeamAction = async (projectId: string) => {
+export const getKycTeamAction = async (projectId: string) => {
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -441,7 +441,7 @@ export const getProjectKycTeamAction = async (projectId: string) => {
     throw new Error(isInvalid.error)
   }
 
-  return await getProjectKycTeam({ projectId })
+  return await getKycTeam({ projectId })
 }
 
 export const createProjectKYCTeamsAction = async ({

@@ -44,7 +44,10 @@ export default function DeliveryAddressVerificationForm({
     form.watch("address")
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setData({ address: data.address, organizationProject })
+    setData({
+      address: data.address,
+      organizationProject,
+    })
     setOpenDialog("verify_grant_delivery_address")
   }
 

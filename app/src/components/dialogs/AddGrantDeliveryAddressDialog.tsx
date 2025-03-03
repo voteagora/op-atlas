@@ -97,6 +97,9 @@ export function AddGrantDeliveryAddressDialog({
             })
 
             queryClient.invalidateQueries({
+              queryKey: ["kycTeamProjects", grantDeliveryData.kycTeamId],
+            })
+            queryClient.invalidateQueries({
               queryKey: ["kyc-teams", "project", projectId],
             })
           }

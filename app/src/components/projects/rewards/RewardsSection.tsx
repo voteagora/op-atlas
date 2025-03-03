@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query"
 import React from "react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { getProjectKycTeamAction } from "@/lib/actions/projects"
+import { getKycTeamAction } from "@/lib/actions/projects"
 import { ProjectWithDetails } from "@/lib/types"
 
 import AddGrantDeliveryAddressForm from "./AddGrantDeliveryAddressForm"
@@ -15,7 +15,7 @@ export function RewardsSection({ project }: { project: ProjectWithDetails }) {
   const { data: kycTeam, isLoading } = useQuery({
     queryKey: ["kyc-teams", "project", project.id],
     queryFn: async () => {
-      return await getProjectKycTeamAction(project.id)
+      return await getKycTeamAction(project.id)
     },
   })
   const rewards = project.rewards
