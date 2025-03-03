@@ -24,11 +24,11 @@ const KYCRequestSchema = z.object({
 })
 
 export const POST = async (req: NextRequest) => {
-  const authResponse = await authenticateApiUser(req)
+  // const authResponse = await authenticateApiUser(req)
 
-  if (!authResponse.authenticated) {
-    return new Response(authResponse.failReason, { status: 401 })
-  }
+  // if (!authResponse.authenticated) {
+  //   return new Response(authResponse.failReason, { status: 401 })
+  // }
 
   try {
     const jsonData = await req.json()

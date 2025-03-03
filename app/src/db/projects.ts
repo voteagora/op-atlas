@@ -1734,6 +1734,7 @@ export async function addKYCTeamMembers({
           firstName: business.firstName,
           lastName: business.lastName,
           expiry: new Date(),
+          businessName: business.companyName,
         })),
       })
       await tx.kYCUserTeams.createMany({

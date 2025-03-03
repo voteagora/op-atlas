@@ -28,7 +28,9 @@ export default function SelectKYCProjectDialog({
     queryKey: ["userProjects"],
     queryFn: async () => {
       if (!session.data?.user.id) return []
-      return await getAdminProjects(session.data.user.id)
+      return (await getAdminProjects(session.data.user.id)).filter((project) =>
+        Boolean(project.organization),
+      )
     },
   })
   const { mutate: createProjectKYCTeams, isPending } = useMutation({
