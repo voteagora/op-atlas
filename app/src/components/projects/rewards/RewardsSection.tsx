@@ -11,7 +11,11 @@ import { ProjectWithDetails } from "@/lib/types"
 import AddGrantDeliveryAddressForm from "./AddGrantDeliveryAddressForm"
 import RewardAccordion from "./RewardAccordion"
 
-export function RewardsSection({ project }: { project: ProjectWithDetails }) {
+export function RewardsSection({
+  project,
+}: {
+  project: ProjectWithDetails & { organizationId?: string }
+}) {
   const { data: kycTeam, isLoading } = useQuery({
     queryKey: ["kyc-teams", "project", project.id],
     queryFn: async () => {
@@ -19,6 +23,8 @@ export function RewardsSection({ project }: { project: ProjectWithDetails }) {
     },
   })
   const rewards = project.rewards
+
+  console.log(">>> project", project)
 
   return (
     <div className="flex flex-col gap-12">
@@ -55,7 +61,7 @@ export function RewardsSection({ project }: { project: ProjectWithDetails }) {
         {Boolean(project.organization) ? (
           <ExtendedLink
             as="button"
-            href={`/profile/organizations/${project.organization?.id}/grant-address`}
+            href={`/profile/organizations/${project.organizationId}/grant-address`}
             text="Go to organization settings"
             variant="primary"
             target="_self"

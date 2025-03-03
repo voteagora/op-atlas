@@ -433,6 +433,7 @@ async function getProjectFn({
     project_data AS (
       SELECT 
         p.*,
+        po."organizationId",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team",
@@ -487,7 +488,7 @@ async function getProjectFn({
       LEFT JOIN "UserOrganization" ot ON o."id" = ot."organizationId"
       LEFT JOIN "User" ou ON ot."userId" = ou."id"
       WHERE p."id" = ${id}
-      GROUP BY p."id", po."id", o."id", o."name"
+      GROUP BY p."id", po."id", po."organizationId", o."id", o."name"
     )
     SELECT to_jsonb(pd.*) as result
     FROM project_data pd;
