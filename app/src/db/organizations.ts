@@ -635,17 +635,25 @@ export async function createOrganizationKycTeam({
   walletAddress: string
   organizationId: string
 }) {
-  const kycTeam = await prisma.kYCTeam.create({
-    data: {
-      walletAddress,
-    },
-  })
-  return prisma.organizationKYCTeam.create({
-    data: {
-      organizationId,
-      kycTeamId: kycTeam.id,
-    },
-  })
+  try {
+    const kycTeam = await prisma.kYCTeam.create({
+      data: {
+        walletAddress,
+      },
+    })
+    return prisma.organizationKYCTeam.create({
+      data: {
+        organizationId,
+        kycTeamId: kycTeam.id,
+      },
+    })
+  } catch (error: any) {
+    if (error.message.includes("Unique constraint failed")) {
+      throw new Error("KYC team with this Wallet Address already exists")
+    }
+
+    throw new Error(error.message)
+  }
 }
 
 export async function getOrganizationKYCTeams({
