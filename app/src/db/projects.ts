@@ -1710,7 +1710,7 @@ export async function addKYCTeamMembers({
 }) {
   await Promise.all([
     prisma.$transaction(async (tx) => {
-      await tx.kYCUser.createMany({
+      const kycUsers = await tx.kYCUser.createManyAndReturn({
         data: individuals.map((individual) => ({
           teamId: kycTeamId,
           email: individual.email,
@@ -1719,46 +1719,25 @@ export async function addKYCTeamMembers({
           expiry: new Date(),
         })),
       })
-
-      const userIds = await tx.kYCUser.findMany({
-        where: {
-          teamId: kycTeamId,
-        },
-        select: {
-          id: true,
-        },
-      })
-
       await tx.kYCUserTeams.createMany({
-        data: userIds.map((user) => ({
+        data: kycUsers.map((user) => ({
           kycTeamId,
           kycUserId: user.id,
         })),
       })
     }),
     prisma.$transaction(async (tx) => {
-      await tx.kYCUser.createMany({
+      const kycUsers = await tx.kYCUser.createManyAndReturn({
         data: businesses.map((business) => ({
           teamId: kycTeamId,
           email: business.email,
           firstName: business.firstName,
           lastName: business.lastName,
-          businessName: business.companyName,
           expiry: new Date(),
         })),
       })
-
-      const userIds = await tx.kYCUser.findMany({
-        where: {
-          teamId: kycTeamId,
-        },
-        select: {
-          id: true,
-        },
-      })
-
       await tx.kYCUserTeams.createMany({
-        data: userIds.map((user) => ({
+        data: kycUsers.map((user) => ({
           kycTeamId,
           kycUserId: user.id,
         })),

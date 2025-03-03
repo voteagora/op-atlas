@@ -28,19 +28,7 @@ export default function SelectKYCProjectDialog({
     queryKey: ["userProjects"],
     queryFn: async () => {
       if (!session.data?.user.id) return []
-      const userProjects = await getProjects(session.data.user.id)
-      const adminProjects = await getAdminProjects(session.data.user.id)
-      const mergedProjects = [...userProjects, ...adminProjects]
-      const projectIds = mergedProjects.map((project) => project.id)
-
-      // Dedup by project id
-      const deduppedProjects = mergedProjects.filter(
-        (project, index) => projectIds.indexOf(project.id) === index,
-      )
-
-      return deduppedProjects.filter(
-        (project) => !alreadySelectedProjectIds?.includes(project.id),
-      )
+      return await getAdminProjects(session.data.user.id)
     },
   })
   const { mutate: createProjectKYCTeams, isPending } = useMutation({
