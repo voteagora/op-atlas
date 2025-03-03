@@ -178,7 +178,7 @@ export default function AddGrantDeliveryAddressForm({
                       variant="primary"
                       text={
                         Boolean(teamMembers?.length)
-                          ? "Refill the form"
+                          ? "Resubmit the form"
                           : "Fill out the form"
                       }
                       disabled={!Boolean(kycTeam?.grantAddress?.address)}
@@ -187,7 +187,6 @@ export default function AddGrantDeliveryAddressForm({
                           ? "https://kyb.optimism.io/form"
                           : "https://kyc.optimism.io/form"
                       }
-                      showOutboundLinkIcon={false}
                     />
                   </div>
                 </div>
@@ -264,6 +263,32 @@ export default function AddGrantDeliveryAddressForm({
                       has taken action and allow 48 hours before writing in.
                     </p>
                   )}
+                  <div className="space-y-4">
+                    <div className="text-sm text-secondary-foreground font-normal">
+                      Is something missing or incorrect? You’ll need to{" "}
+                      <Link
+                        className="underline hover:opacity-80 transition-colors duration-300"
+                        href={`https://superchain.typeform.com/to/Pq0c7jYJ#l2_address=${kycTeam?.grantAddress?.address}&kyc_team_id=${kycTeam?.id}`}
+                      >
+                        cancel and start over
+                      </Link>
+                      .
+                    </div>
+                    <div className="flex space-x-2">
+                      <ExtendedLink
+                        as="button"
+                        variant="primary"
+                        text="Verify my ID"
+                        href="https://kyc.optimism.io/form"
+                      />
+                      <ExtendedLink
+                        as="button"
+                        variant="primary"
+                        text="Verify my Business ID"
+                        href="https://kyb.optimism.io/form"
+                      />
+                    </div>
+                  </div>
                 </div>
               ),
             },

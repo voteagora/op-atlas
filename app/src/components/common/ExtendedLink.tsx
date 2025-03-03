@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import { default as NextLink, LinkProps as NextLinkProps } from "next/link"
 import { forwardRef } from "react"
@@ -54,6 +55,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           >
             <div>{icon}</div>
             <span>{text}</span>
+            {showOutboundLinkIcon && href.toString().startsWith("http") && (
+              <ArrowUpRight className="ml-0.5 w-4 h-4" />
+            )}
             {subtext && (
               <span className="text-md text-gray-500">{subtext}</span>
             )}
@@ -80,13 +84,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           <div>{icon}</div>
           <span>{text}</span>
           {showOutboundLinkIcon && href.toString().startsWith("http") && (
-            <Image
-              src="/assets/icons/arrow-up-right.svg"
-              width={10}
-              height={10}
-              alt="External link"
-              className="ml-0.5"
-            />
+            <ArrowUpRight className="ml-0.5 w-4 h-4" />
           )}
           {subtext && <span className="text-md text-gray-500">{subtext}</span>}
         </ShadcnButton>
@@ -150,13 +148,8 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
               {text}
             </span>
             {showOutboundLinkIcon && href.toString().startsWith("http") && (
-              <div className="mt-2">
-                <Image
-                  src="/assets/icons/arrow-up-right.svg"
-                  width={10}
-                  height={10}
-                  alt="External link"
-                />
+              <div className="mt-2 text-white">
+                <ArrowUpRight className="ml-0.5 w-4 h-4" />
               </div>
             )}
           </div>
