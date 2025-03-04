@@ -1,102 +1,192 @@
-import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
-import {
-  base,
-  bob,
-  Chain,
-  ink,
-  lisk,
-  metalL2,
-  mint,
-  mode,
-  optimism,
-  shape,
-  soneium,
-  superseed,
-  unichain,
-  worldchain,
-  zora,
-} from "viem/chains"
+import { atlasSupportedChains } from "@/lib/utils/contracts"
+import { Chain } from "viem"
 
-export const polynomial = {
-  id: 8008,
-} as Chain
+type ChainAttributes = {
+  logo?: string
+  name?: string
+}
 
-export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
-  {
-    [arenaZ.id.toString()]: {
-      logo: "/assets/chain-logos/arenaZ.png",
-      name: "ArenaZ",
+export type ChainWithAttributes = Chain & Partial<ChainAttributes>
+export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
+  [atlasSupportedChains.arenaZ.id.toString()]: {
+    logo: "/assets/chain-logos/arenaZ.png",
+    name: "ArenaZ",
+  },
+  [atlasSupportedChains.bob.id.toString()]: {
+    logo: "/assets/chain-logos/bob.png",
+    name: "Bob",
+  },
+  [atlasSupportedChains.base.id.toString()]: {
+    logo: "/assets/chain-logos/base.png",
+    name: "Base",
+  },
+  [atlasSupportedChains.ethernity.id.toString()]: {
+    logo: "/assets/chain-logos/ethernity.jpg",
+    name: "Ethernity",
+  },
+  [atlasSupportedChains.ink.id.toString()]: {
+    logo: "/assets/chain-logos/ink.jpg",
+    name: "Ink",
+  },
+  [atlasSupportedChains.lisk.id.toString()]: {
+    logo: "/assets/chain-logos/lisk.png",
+    name: "Lisk",
+  },
+  [atlasSupportedChains.metalL2.id.toString()]: {
+    logo: "/assets/chain-logos/metalL2.png",
+    name: "MetalL2",
+  },
+  [atlasSupportedChains.mint.id.toString()]: {
+    logo: "/assets/chain-logos/mint.png",
+    name: "Mint",
+  },
+  [atlasSupportedChains.mode.id.toString()]: {
+    logo: "/assets/chain-logos/mode.png",
+    name: "Mode",
+  },
+  [atlasSupportedChains.optimism.id.toString()]: {
+    logo: "/assets/chain-logos/optimism.svg",
+    name: "OP Mainnet",
+  },
+  [atlasSupportedChains.polynomial.id.toString()]: {
+    logo: "/assets/chain-logos/polynomial.png",
+    name: "Polynomial",
+  },
+  [atlasSupportedChains.race.id.toString()]: {
+    logo: "/assets/chain-logos/race.jpeg",
+    name: "Race",
+  },
+  [atlasSupportedChains.shape.id.toString()]: {
+    logo: "/assets/chain-logos/shape.png",
+    name: "Shape",
+  },
+  [atlasSupportedChains.soneium.id.toString()]: {
+    logo: "/assets/chain-logos/soneium.jpg",
+    name: "Soneium",
+  },
+  [atlasSupportedChains.superseed.id.toString()]: {
+    logo: "/assets/chain-logos/superseed.jpg",
+    name: "Superseed",
+  },
+  [atlasSupportedChains.swell.id.toString()]: {
+    logo: "/assets/chain-logos/swell.svg",
+    name: "Swell",
+  },
+  [atlasSupportedChains.unichain.id.toString()]: {
+    logo: "/assets/chain-logos/unichain.jpg",
+    name: "Unichain",
+  },
+  [atlasSupportedChains.worldchain.id.toString()]: {
+    logo: "/assets/chain-logos/worldchain.png",
+    name: "Worldchain",
+  },
+  [atlasSupportedChains.zora.id.toString()]: {
+    logo: "/assets/chain-logos/zora.png",
+    name: "Zora",
+  },
+}
+
+export function getAtlasSupportedNetworksWithAttributes(): Record<
+  string,
+  ChainWithAttributes
+> {
+  return Object.fromEntries(
+    Object.entries(atlasSupportedChains).map(([key, targetNetwork]) => [
+      key,
+      {
+        ...targetNetwork,
+        ...NETWORKS_EXTRA_DATA[targetNetwork.id.toString()],
+      },
+    ]),
+  )
+}
+
+export function getAtlasSupportedNetworksWithAttributes2(): any {
+  return Object.entries(atlasSupportedChains).map(([key, targetNetwork]) => [
+    key,
+    {
+      ...targetNetwork,
+      ...NETWORKS_EXTRA_DATA[targetNetwork.id.toString()],
     },
-    [bob.id.toString()]: {
-      logo: "/assets/chain-logos/bob.png",
-      name: "Bob",
-    },
-    [base.id.toString()]: {
-      logo: "/assets/chain-logos/base.png",
-      name: "Base",
-    },
-    [ethernity.id.toString()]: {
-      logo: "/assets/chain-logos/ethernity.jpg",
-      name: "Ethernity",
-    },
-    [ink.id.toString()]: {
-      logo: "/assets/chain-logos/ink.jpg",
-      name: "Ink",
-    },
-    [lisk.id.toString()]: {
-      logo: "/assets/chain-logos/lisk.png",
-      name: "Lisk",
-    },
-    [metalL2.id.toString()]: {
-      logo: "/assets/chain-logos/metalL2.png",
-      name: "MetalL2",
-    },
-    [mint.id.toString()]: {
-      logo: "/assets/chain-logos/mint.png",
-      name: "Mint",
-    },
-    [mode.id.toString()]: {
-      logo: "/assets/chain-logos/mode.png",
-      name: "Mode",
-    },
-    [optimism.id.toString()]: {
-      logo: "/assets/chain-logos/optimism.svg",
-      name: "OP Mainnet",
-    },
-    [polynomial.id.toString()]: {
-      logo: "/assets/chain-logos/polynomial.png",
-      name: "Polynomial",
-    },
-    [race.id.toString()]: {
-      logo: "/assets/chain-logos/race.jpeg",
-      name: "Race",
-    },
-    [shape.id.toString()]: {
-      logo: "/assets/chain-logos/shape.png",
-      name: "Shape",
-    },
-    [soneium.id.toString()]: {
-      logo: "/assets/chain-logos/soneium.jpg",
-      name: "Soneium",
-    },
-    [superseed.id.toString()]: {
-      logo: "/assets/chain-logos/superseed.jpg",
-      name: "Superseed",
-    },
-    [swell.id.toString()]: {
-      logo: "/assets/chain-logos/swell.svg",
-      name: "Swell",
-    },
-    [unichain.id.toString()]: {
-      logo: "/assets/chain-logos/unichain.jpg",
-      name: "Unichain",
-    },
-    [worldchain.id.toString()]: {
-      logo: "/assets/chain-logos/worldchain.png",
-      name: "Worldchain",
-    },
-    [zora.id.toString()]: {
-      logo: "/assets/chain-logos/zora.png",
-      name: "Zora",
-    },
-  }
+  ])
+}
+
+// export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
+//   {
+//     [atlasSupportedChains.arenaZ.id.toString()]: {
+//       logo: "/assets/chain-logos/arenaZ.png",
+//       name: "ArenaZ",
+//     },
+//     [atlasSupportedChains.bob.id.toString()]: {
+//       logo: "/assets/chain-logos/bob.png",
+//       name: "Bob",
+//     },
+//     [atlasSupportedChains.base.id.toString()]: {
+//       logo: "/assets/chain-logos/base.png",
+//       name: "Base",
+//     },
+//     [atlasSupportedChains.ethernity.id.toString()]: {
+//       logo: "/assets/chain-logos/ethernity.jpg",
+//       name: "Ethernity",
+//     },
+//     [atlasSupportedChains.ink.id.toString()]: {
+//       logo: "/assets/chain-logos/ink.jpg",
+//       name: "Ink",
+//     },
+//     [atlasSupportedChains.lisk.id.toString()]: {
+//       logo: "/assets/chain-logos/lisk.png",
+//       name: "Lisk",
+//     },
+//     [atlasSupportedChains.metalL2.id.toString()]: {
+//       logo: "/assets/chain-logos/metalL2.png",
+//       name: "MetalL2",
+//     },
+//     [atlasSupportedChains.mint.id.toString()]: {
+//       logo: "/assets/chain-logos/mint.png",
+//       name: "Mint",
+//     },
+//     [atlasSupportedChains.mode.id.toString()]: {
+//       logo: "/assets/chain-logos/mode.png",
+//       name: "Mode",
+//     },
+//     [atlasSupportedChains.optimism.id.toString()]: {
+//       logo: "/assets/chain-logos/optimism.svg",
+//       name: "OP Mainnet",
+//     },
+//     [atlasSupportedChains.polynomial.id.toString()]: {
+//       logo: "/assets/chain-logos/polynomial.png",
+//       name: "Polynomial",
+//     },
+//     [atlasSupportedChains.race.id.toString()]: {
+//       logo: "/assets/chain-logos/race.jpeg",
+//       name: "Race",
+//     },
+//     [atlasSupportedChains.shape.id.toString()]: {
+//       logo: "/assets/chain-logos/shape.png",
+//       name: "Shape",
+//     },
+//     [atlasSupportedChains.soneium.id.toString()]: {
+//       logo: "/assets/chain-logos/soneium.jpg",
+//       name: "Soneium",
+//     },
+//     [atlasSupportedChains.superseed.id.toString()]: {
+//       logo: "/assets/chain-logos/superseed.jpg",
+//       name: "Superseed",
+//     },
+//     [atlasSupportedChains.swell.id.toString()]: {
+//       logo: "/assets/chain-logos/swell.svg",
+//       name: "Swell",
+//     },
+//     [atlasSupportedChains.unichain.id.toString()]: {
+//       logo: "/assets/chain-logos/unichain.jpg",
+//       name: "Unichain",
+//     },
+//     [atlasSupportedChains.worldchain.id.toString()]: {
+//       logo: "/assets/chain-logos/worldchain.png",
+//       name: "Worldchain",
+//     },
+//     [atlasSupportedChains.zora.id.toString()]: {
+//       logo: "/assets/chain-logos/zora.png",
+//       name: "Zora",
+//     },
+//   }

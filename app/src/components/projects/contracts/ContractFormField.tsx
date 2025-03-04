@@ -6,7 +6,8 @@ import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { CHAIN_INFO } from "@/components/common/chain"
+import { getAtlasSupportedNetworksWithAttributes } from "@/components/common/chain"
+
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { Button } from "@/components/ui/button"
 import {
@@ -94,6 +95,12 @@ export function ContractFormField({
     setIsToggleLoading(false)
   }
 
+  console.log(
+    Object.values(getAtlasSupportedNetworksWithAttributes()).find((chain) =>
+      chain.id.toString(),
+    )?.name,
+  )
+
   return (
     <div>
       <div className="flex group">
@@ -116,7 +123,11 @@ export function ContractFormField({
               <div className="relative group/btn">
                 <ChainLogo chainId={chainId} size={24} />
                 <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg text-center">
-                  {CHAIN_INFO[chainId]?.name}
+                  {
+                    Object.values(
+                      getAtlasSupportedNetworksWithAttributes(),
+                    ).find((chain) => chain.id.toString() === chainId)?.name
+                  }
                 </span>
               </div>
             )}

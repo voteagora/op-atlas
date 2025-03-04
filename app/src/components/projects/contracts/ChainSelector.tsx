@@ -1,4 +1,3 @@
-import { CHAIN_INFO } from "@/components/common/chain"
 import { ChainLogo } from "@/components/common/ChainLogo"
 import {
   FormControl,
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/select"
 
 import { Chain } from "./ContractFormSchema"
+import { getAtlasSupportedNetworksWithAttributes } from "@/components/common/chain"
 
 export function ChainSelector({
   defaultValue,
@@ -41,7 +41,13 @@ export function ChainSelector({
                 <SelectItem key={chain} value={chain}>
                   <div className="flex gap-2 items-center py-1">
                     <ChainLogo chainId={chain} />
-                    <div>{CHAIN_INFO[chain]?.name}</div>
+                    <div>
+                      {
+                        Object.values(
+                          getAtlasSupportedNetworksWithAttributes(),
+                        ).find((chain2) => chain2.id.toString() === chain)?.name
+                      }
+                    </div>
                   </div>
                 </SelectItem>
               ))}

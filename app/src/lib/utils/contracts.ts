@@ -2,6 +2,7 @@ import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import {
   base,
   bob,
+  Chain,
   ink,
   lisk,
   metalL2,
@@ -16,7 +17,31 @@ import {
   zora,
 } from "viem/chains"
 
-import { polynomial } from "@/components/common/chain"
+export const polynomial = {
+  id: 8008,
+} as Chain
+
+export const atlasSupportedChains = {
+  arenaZ,
+  ethernity,
+  race,
+  swell,
+  base,
+  bob,
+  ink,
+  lisk,
+  metalL2,
+  mint,
+  mode,
+  optimism,
+  shape,
+  soneium,
+  superseed,
+  unichain,
+  worldchain,
+  zora,
+  polynomial,
+}
 
 export function truncate(value: string, numToShow: number) {
   return `${value.slice(0, numToShow)}${
@@ -24,27 +49,27 @@ export function truncate(value: string, numToShow: number) {
   }${value.slice(-numToShow)}`
 }
 
-export enum Chain {
-  ArenaZ = arenaZ.id,
-  Base = base.id,
-  Bob = bob.id,
-  Ethernity = ethernity.id,
-  Ink = ink.id,
-  Lisk = lisk.id,
-  MetalL2 = metalL2.id,
-  Mint = mint.id,
-  Mode = mode.id,
-  Optimism = optimism.id,
-  Polynomial = polynomial.id,
-  Race = race.id,
-  Shape = shape.id,
-  Soneium = soneium.id,
-  Superseed = superseed.id,
-  Swell = swell.id,
-  Unichain = unichain.id,
-  Worldchain = worldchain.id,
-  Zora = zora.id,
-}
+// export enum Chain {
+//   ArenaZ = arenaZ.id,
+//   Base = base.id,
+//   Bob = bob.id,
+//   Ethernity = ethernity.id,
+//   Ink = ink.id,
+//   Lisk = lisk.id,
+//   MetalL2 = metalL2.id,
+//   Mint = mint.id,
+//   Mode = mode.id,
+//   Optimism = optimism.id,
+//   Polynomial = polynomial.id,
+//   Race = race.id,
+//   Shape = shape.id,
+//   Soneium = soneium.id,
+//   Superseed = superseed.id,
+//   Swell = swell.id,
+//   Unichain = unichain.id,
+//   Worldchain = worldchain.id,
+//   Zora = zora.id,
+// }
 
 export const getMessage = (projectId: string) =>
   `I verify that my contracts are for Project ${projectId} and I'm an optimist.`
