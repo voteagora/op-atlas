@@ -43,8 +43,8 @@ export default function Accordion({
     <ShadcnAccordion
       type={type as any}
       collapsible={collapsible}
-      className="w-full"
-      defaultValue="item-0"
+      className="w-full space-y-1"
+      defaultValue={type === "multiple" ? (["item-0"] as any) : "item-0"}
     >
       {items?.map(({ content, title }, index) => {
         const wrappedTitle =
@@ -61,14 +61,18 @@ export default function Accordion({
             className="w-full space-y-1"
             defaultValue="item-0"
           >
-            {collapsible && triggerLocation === "top" ? (
-              <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+            {collapsible ? (
+              triggerLocation === "top" && (
+                <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+              )
             ) : (
               <h4 className="h-9 pt-2">{wrappedTitle}</h4>
             )}
             <AccordionContent>{content}</AccordionContent>
-            {collapsible && triggerLocation === "bottom" ? (
-              <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+            {collapsible ? (
+              triggerLocation === "bottom" && (
+                <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+              )
             ) : (
               <h4 className="h-9 pt-2">{wrappedTitle}</h4>
             )}
