@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select"
 
 import { Chain } from "./ContractFormSchema"
-import { getAtlasSupportedNetworksWithAttributes } from "@/components/common/chain"
+import { getAtlasSupportedNetworkWithAttributes } from "@/components/common/chain"
 
 export function ChainSelector({
   defaultValue,
@@ -37,20 +37,24 @@ export function ChainSelector({
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {Chain.options.map((chain) => (
-                <SelectItem key={chain} value={chain}>
-                  <div className="flex gap-2 items-center py-1">
-                    <ChainLogo chainId={Number(chain)} />
-                    <div>
-                      {
-                        Object.values(
-                          getAtlasSupportedNetworksWithAttributes(),
-                        ).find((chain2) => chain2.id.toString() === chain)?.name
-                      }
+              {Chain.options.map((chain) => {
+                var chainIdConvertedFromZodEnum = Number(chain)
+
+                return (
+                  <SelectItem key={chain} value={chain}>
+                    <div className="flex gap-2 items-center py-1">
+                      <ChainLogo chainId={chainIdConvertedFromZodEnum} />
+                      <div>
+                        {
+                          getAtlasSupportedNetworkWithAttributes(
+                            chainIdConvertedFromZodEnum,
+                          )?.name
+                        }
+                      </div>
                     </div>
-                  </div>
-                </SelectItem>
-              ))}
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
           <FormMessage />

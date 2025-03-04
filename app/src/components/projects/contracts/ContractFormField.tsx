@@ -6,7 +6,10 @@ import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { getAtlasSupportedNetworksWithAttributes } from "@/components/common/chain"
+import {
+  getAtlasSupportedNetworksWithAttributes,
+  getAtlasSupportedNetworkWithAttributes,
+} from "@/components/common/chain"
 
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { Button } from "@/components/ui/button"
@@ -118,9 +121,8 @@ export function ContractFormField({
                 <ChainLogo chainId={Number(chainId)} size={24} />
                 <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg text-center">
                   {
-                    Object.values(
-                      getAtlasSupportedNetworksWithAttributes(),
-                    ).find((chain) => chain.id.toString() === chainId)?.name
+                    getAtlasSupportedNetworkWithAttributes(Number(chainId))
+                      ?.name
                   }
                 </span>
               </div>
