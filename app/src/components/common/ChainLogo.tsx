@@ -14,6 +14,8 @@ export function ChainLogo({
     getAtlasSupportedNetworksWithAttributes(),
   ).find((chain) => chain.id.toString() === chainId)
 
+  console.log(chainInfo)
+
   if (!chainInfo) return null
 
   return (

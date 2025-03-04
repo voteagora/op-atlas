@@ -8,79 +8,79 @@ type ChainAttributes = {
 
 export type ChainWithAttributes = Chain & Partial<ChainAttributes>
 export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
-  [atlasSupportedChains.arenaZ.id.toString()]: {
+  [atlasSupportedChains.arenaZ.id]: {
     logo: "/assets/chain-logos/arenaZ.png",
     name: "ArenaZ",
   },
-  [atlasSupportedChains.bob.id.toString()]: {
+  [atlasSupportedChains.bob.id]: {
     logo: "/assets/chain-logos/bob.png",
     name: "Bob",
   },
-  [atlasSupportedChains.base.id.toString()]: {
+  [atlasSupportedChains.base.id]: {
     logo: "/assets/chain-logos/base.png",
     name: "Base",
   },
-  [atlasSupportedChains.ethernity.id.toString()]: {
+  [atlasSupportedChains.ethernity.id]: {
     logo: "/assets/chain-logos/ethernity.jpg",
     name: "Ethernity",
   },
-  [atlasSupportedChains.ink.id.toString()]: {
+  [atlasSupportedChains.ink.id]: {
     logo: "/assets/chain-logos/ink.jpg",
     name: "Ink",
   },
-  [atlasSupportedChains.lisk.id.toString()]: {
+  [atlasSupportedChains.lisk.id]: {
     logo: "/assets/chain-logos/lisk.png",
     name: "Lisk",
   },
-  [atlasSupportedChains.metalL2.id.toString()]: {
+  [atlasSupportedChains.metalL2.id]: {
     logo: "/assets/chain-logos/metalL2.png",
     name: "MetalL2",
   },
-  [atlasSupportedChains.mint.id.toString()]: {
+  [atlasSupportedChains.mint.id]: {
     logo: "/assets/chain-logos/mint.png",
     name: "Mint",
   },
-  [atlasSupportedChains.mode.id.toString()]: {
+  [atlasSupportedChains.mode.id]: {
     logo: "/assets/chain-logos/mode.png",
     name: "Mode",
   },
-  [atlasSupportedChains.optimism.id.toString()]: {
+  [atlasSupportedChains.optimism.id]: {
     logo: "/assets/chain-logos/optimism.svg",
     name: "OP Mainnet",
   },
-  [atlasSupportedChains.polynomial.id.toString()]: {
+  [atlasSupportedChains.polynomial.id]: {
     logo: "/assets/chain-logos/polynomial.png",
     name: "Polynomial",
   },
-  [atlasSupportedChains.race.id.toString()]: {
+  [atlasSupportedChains.race.id]: {
     logo: "/assets/chain-logos/race.jpeg",
     name: "Race",
   },
-  [atlasSupportedChains.shape.id.toString()]: {
+  [atlasSupportedChains.shape.id]: {
     logo: "/assets/chain-logos/shape.png",
     name: "Shape",
   },
-  [atlasSupportedChains.soneium.id.toString()]: {
+  [atlasSupportedChains.soneium.id]: {
     logo: "/assets/chain-logos/soneium.jpg",
     name: "Soneium",
   },
-  [atlasSupportedChains.superseed.id.toString()]: {
+  [atlasSupportedChains.superseed.id]: {
     logo: "/assets/chain-logos/superseed.jpg",
     name: "Superseed",
   },
-  [atlasSupportedChains.swell.id.toString()]: {
+  [atlasSupportedChains.swell.id]: {
     logo: "/assets/chain-logos/swell.svg",
     name: "Swell",
   },
-  [atlasSupportedChains.unichain.id.toString()]: {
+  [atlasSupportedChains.unichain.id]: {
     logo: "/assets/chain-logos/unichain.jpg",
     name: "Unichain",
   },
-  [atlasSupportedChains.worldchain.id.toString()]: {
+  [atlasSupportedChains.worldchain.id]: {
     logo: "/assets/chain-logos/worldchain.png",
     name: "Worldchain",
   },
-  [atlasSupportedChains.zora.id.toString()]: {
+  [atlasSupportedChains.zora.id]: {
     logo: "/assets/chain-logos/zora.png",
     name: "Zora",
   },
@@ -95,8 +95,16 @@ export function getAtlasSupportedNetworksWithAttributes(): Record<
       key,
       {
         ...targetNetwork,
-        ...NETWORKS_EXTRA_DATA[targetNetwork.id.toString()],
+        ...NETWORKS_EXTRA_DATA[targetNetwork.id],
       },
     ]),
+  )
+}
+
+export function getAtlasSupportedNetworkWithAttributes(
+  chainId: number,
+): ChainWithAttributes | undefined {
+  return Object.values(atlasSupportedChains).find(
+    (chain) => chain.id === chainId,
   )
 }
