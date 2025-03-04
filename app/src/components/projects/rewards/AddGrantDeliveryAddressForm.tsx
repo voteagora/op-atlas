@@ -7,6 +7,7 @@ import { useParams } from "next/navigation"
 
 import Accordion from "@/components/common/Accordion"
 import ExtendedLink from "@/components/common/ExtendedLink"
+import { cn } from "@/lib/utils"
 import { shortenAddress } from "@/lib/utils"
 
 import CompletedGrantDeliveryForm from "./CompletedGrantDeliveryForm"
@@ -251,7 +252,9 @@ function AccordionTitleContainer({
 }) {
   return (
     <div className="font-medium text-sm flex items-center space-x-2">
-      {i && <span>{i}</span>}
+      {i && (
+        <span className={cn([{ "w-3.5": typeof i === "number" }])}>{i}</span>
+      )}
       <span>{text}</span>
     </div>
   )
@@ -269,9 +272,9 @@ function KYCEntryContainer({
   return (
     <div className="input-container space-x-2">
       {verified ? (
-        <CheckIcon size={18} />
+        <CheckIcon size={14} className="text-green-600" />
       ) : (
-        <Loader2 size={18} className="animate-spin" />
+        <Loader2 size={14} className="animate-spin" />
       )}
       <span className="font-medium text-sm">{name}</span>
       <span className="text-muted-foreground text-sm">{email}</span>
