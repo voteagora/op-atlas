@@ -1709,10 +1709,36 @@ export async function addKYCTeamMembers({
     companyName: string
   }[]
 }) {
+  const existingUsers = await prisma.kYCUser.findMany({
+    where: {
+      OR: [
+        {
+          email: {
+            in: individuals.map((i) => i.email),
+          },
+        },
+        {
+          email: {
+            in: businesses.map((b) => b.email),
+          },
+        },
+      ],
+    },
+  })
+  const existingIndividuals = existingUsers.filter((u) => !u.businessName)
+  const existingBusinesses = existingUsers.filter((u) => u.businessName)
+
+  const filteredIndividuals = individuals.filter(
+    (i) => !existingIndividuals.some((u) => u.email === i.email),
+  )
+  const filteredBusinesses = businesses.filter(
+    (b) => !existingBusinesses.some((u) => u.email === b.email),
+  )
+
   await Promise.all([
     prisma.$transaction(async (tx) => {
-      const kycUsers = await tx.kYCUser.createManyAndReturn({
-        data: individuals.map((individual) => ({
+      const individualUsers = await tx.kYCUser.createManyAndReturn({
+        data: filteredIndividuals.map((individual) => ({
           teamId: kycTeamId,
           email: individual.email,
           firstName: individual.firstName,
@@ -1720,16 +1746,21 @@ export async function addKYCTeamMembers({
           expiry: new Date(),
         })),
       })
+      const combinedIndividuals = [...individualUsers, ...existingIndividuals]
+      const deduppedIndividuals = combinedIndividuals.filter(
+        (user, index, self) =>
+          index === self.findIndex((u) => u.email === user.email),
+      )
       await tx.kYCUserTeams.createMany({
-        data: kycUsers.map((user) => ({
+        data: deduppedIndividuals.map((user) => ({
           kycTeamId,
           kycUserId: user.id,
         })),
       })
     }),
     prisma.$transaction(async (tx) => {
-      const kycUsers = await tx.kYCUser.createManyAndReturn({
-        data: businesses.map((business) => ({
+      const businessUsers = await tx.kYCUser.createManyAndReturn({
+        data: filteredBusinesses.map((business) => ({
           teamId: kycTeamId,
           email: business.email,
           firstName: business.firstName,
@@ -1738,8 +1769,13 @@ export async function addKYCTeamMembers({
           businessName: business.companyName,
         })),
       })
+      const combinedBusinesses = [...businessUsers, ...existingBusinesses]
+      const deduppedBusinesses = combinedBusinesses.filter(
+        (user, index, self) =>
+          index === self.findIndex((u) => u.email === user.email),
+      )
       await tx.kYCUserTeams.createMany({
-        data: kycUsers.map((user) => ({
+        data: deduppedBusinesses.map((user) => ({
           kycTeamId,
           kycUserId: user.id,
         })),
@@ -1770,6 +1806,25 @@ export async function getProjectKycTeams({ kycTeamId }: { kycTeamId: string }) {
     },
     include: {
       project: true,
+    },
+  })
+}
+
+export async function deleteProjectKycTeam({
+  projectId,
+  kycTeamId,
+}: {
+  projectId: string
+  kycTeamId: string
+}) {
+  await prisma.kYCUserTeams.deleteMany({
+    where: {
+      kycTeamId,
+    },
+  })
+  return await prisma.projectKYCTeam.delete({
+    where: {
+      id: projectId,
     },
   })
 }

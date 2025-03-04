@@ -24,8 +24,6 @@ export function RewardsSection({
   })
   const rewards = project.rewards
 
-  console.log(">>> project", project)
-
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col space-y-6">
@@ -67,7 +65,11 @@ export function RewardsSection({
             target="_self"
           />
         ) : (
-          !isLoading && <AddGrantDeliveryAddressForm kycTeam={kycTeam} />
+          !isLoading && (
+            <AddGrantDeliveryAddressForm
+              kycTeam={{ ...kycTeam, projectId: project.id }}
+            />
+          )
         )}
       </div>
     </div>

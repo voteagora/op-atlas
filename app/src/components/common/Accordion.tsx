@@ -14,6 +14,7 @@ type AccordionProps = {
   items: Item[]
   type: "single" | "multiple"
   collapsible?: boolean
+  triggerLocation?: "top" | "bottom"
 }
 
 /**
@@ -36,6 +37,7 @@ export default function Accordion({
   items,
   type,
   collapsible = true,
+  triggerLocation = "top",
 }: AccordionProps) {
   return (
     <ShadcnAccordion
@@ -59,8 +61,13 @@ export default function Accordion({
             className="w-full space-y-1"
             defaultValue="item-0"
           >
-            <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+            {triggerLocation === "top" && (
+              <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+            )}
             <AccordionContent>{content}</AccordionContent>
+            {triggerLocation === "bottom" && (
+              <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+            )}
           </AccordionItem>
         )
       })}

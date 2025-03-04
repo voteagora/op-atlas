@@ -1,18 +1,15 @@
 "use client"
 
 import { KYCUser } from "@prisma/client"
-import { useQuery } from "@tanstack/react-query"
 import { CheckIcon, ChevronRight, Loader2, SquareCheck } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 
 import Accordion from "@/components/common/Accordion"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { getProjectKYCTeamsAction } from "@/lib/actions/projects"
 import { shortenAddress } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
+import CompletedGrantDeliveryForm from "./CompletedGrantDeliveryForm"
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
 
 export default function AddGrantDeliveryAddressForm({
@@ -24,20 +21,12 @@ export default function AddGrantDeliveryAddressForm({
       address: string
       validUntil: string
     }
+    projectId?: string
     team?: KYCUser[]
   }
 }) {
+  console.log("kycTeam", kycTeam)
   const params = useParams()
-  const { setData, setOpenDialog } = useAppDialogs()
-  const { data: kycTeamProjects } = useQuery({
-    queryKey: ["kycTeamProjects", kycTeam?.id],
-    queryFn: async () => {
-      if (!kycTeam?.id) return []
-
-      return getProjectKYCTeamsAction(kycTeam.id)
-    },
-  })
-
   const organizationProject = params.organizationId as string
 
   const teamMembers = kycTeam?.team?.filter(
@@ -49,16 +38,6 @@ export default function AddGrantDeliveryAddressForm({
   const allTeamMembersVerified =
     Boolean(kycTeam?.team?.length) &&
     kycTeam?.team?.every((teamMember) => teamMember.status === "APPROVED")
-
-  const openSelectKYCProjectDialog = () => {
-    setData({
-      kycTeamId: kycTeam?.id,
-      alreadySelectedProjectIds: kycTeamProjects?.map(
-        (team) => team.project.id,
-      ),
-    })
-    setOpenDialog("select_kyc_project")
-  }
 
   return (
     <div className="p-6 border rounded-md space-y-6 w-full">
@@ -74,66 +53,19 @@ export default function AddGrantDeliveryAddressForm({
                 <AccordionTitleContainer i={1} text="Grant delivery address" />
               ),
               content: kycTeam?.grantAddress && (
-                <div className="space-y-6">
-                  <div className="input-container space-x-1.5">
-                    <span className="text-sm text-foreground">
-                      {shortenAddress(kycTeam.grantAddress.address)}
-                    </span>
-                    <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
-                      <CheckIcon size={12} />
-                      <span>Valid until {kycTeam.grantAddress.validUntil}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="w-full flex justify-between items-center">
-                      <span className="font-medium text-sm">
-                        {organizationProject ? "Projects" : "Project"}
-                      </span>
-                      {organizationProject && (
-                        <button
-                          className="flex items-center space-x-1"
-                          onClick={openSelectKYCProjectDialog}
-                        >
-                          <SquareCheck size={18} />
-                          <span>Choose</span>
-                          <ChevronRight size={14} />
-                        </button>
-                      )}
-                    </div>
-                    {Boolean(kycTeamProjects?.length) ? (
-                      <ul className="space-y-2 w-full">
-                        {kycTeamProjects?.map((team) => (
-                          <li
-                            key={team.id}
-                            className="input-container space-x-2 text-sm text"
-                          >
-                            {team.project.thumbnailUrl && (
-                              <Image
-                                src={team.project.thumbnailUrl}
-                                width={24}
-                                height={24}
-                                alt={team.project.name}
-                              />
-                            )}
-                            <span className="text-sm font-normal">
-                              {team.project.name}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="text-muted-foreground text-sm pt-2">
-                        No projects selected
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <CompletedGrantDeliveryForm
+                  kycTeam={kycTeam}
+                  organizationProject={Boolean(organizationProject)}
+                  teamMembers={teamMembers}
+                  entities={entities}
+                />
               ),
             },
           ]}
         />
       ) : (
         <Accordion
+          collapsible
           type="multiple"
           items={[
             {
