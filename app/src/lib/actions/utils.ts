@@ -61,7 +61,7 @@ export const verifyMembership = async (
     ({ organization }) => organization.projects.length > 0,
   )
 
-  if (!organizationMembership || !projectMembership) {
+  if (!organizationMembership && !projectMembership) {
     return {
       error: "Unauthorized",
     }
