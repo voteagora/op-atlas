@@ -18,7 +18,6 @@ import { onCopy } from "@/components/ui/utils/copy"
 import { addProjectContract } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
 import { removeContract } from "@/lib/actions/contracts"
-import { truncate } from "@/lib/utils/contracts"
 
 import { DeployersSchema } from "./ContractFormSchema"
 
@@ -82,7 +81,7 @@ export function ContractFormField({
           address,
           chainId: parseInt(chainId),
         })
-        toast.success("Contract Removed!")
+        toast.success("Contract Removed")
       } catch (error: unknown) {
         toast.error("Error removing contract, please try again")
       }

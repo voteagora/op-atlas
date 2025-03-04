@@ -8,6 +8,8 @@ import { auth } from "@/auth"
 import {
   addProjectContract,
   addProjectContracts,
+  addProjectContrats,
+  getProjectContracts,
   getProjectContractsByDeployer,
   removeProjectContract,
   removeProjectContractsByDeployer,
@@ -304,6 +306,52 @@ export const removeContractsByDeployer = async (
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
+
+  return {
+    error: null,
+  }
+}
+
+export const addAllExcludedProjectContractsAction = async (
+  deployer: string,
+  projectId: string,
+  signature: string,
+  verificationChainId: number,
+) => {
+  const result = await verifyAuthenticatedMember(projectId)
+  if (result.error !== null) return { error: result.error }
+
+  const osoContracts = await getDeployedContractsServerParsed(deployer)
+  const projectContracts = await getProjectContracts({
+    projectId,
+  })
+
+  const excludedContracts = osoContracts.filter((c) => {
+    return !projectContracts?.contracts.some(
+      (pc) =>
+        pc.contractAddress === c.contractAddress && pc.chainId === c.chainId,
+    )
+  })
+
+  try {
+    await addProjectContrats(
+      projectId,
+      excludedContracts.map((c) => ({
+        contractAddress: c.contractAddress,
+        chainId: c.chainId,
+        verificationProof: signature,
+        verificationChainId,
+        deployerAddress: deployer,
+        deploymentHash: "",
+        projectId,
+      })),
+    )
+  } catch (error: unknown) {
+    console.error("Error adding all contracts", error)
+    return {
+      error: "Error adding all contracts",
+    }
+  }
 
   return {
     error: null,

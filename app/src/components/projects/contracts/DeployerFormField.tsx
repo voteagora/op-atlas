@@ -91,7 +91,7 @@ export function DeployerFormField({
 
   return (
     <>
-      <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-6">
+      <div className="flex flex-col gap-4 border-2 border-grey-900 rounded-xl gap-y-3 p-6">
         <FormLabel>Deployer</FormLabel>
         {contractsFields.length > 0 && (
           <div className="flex justify-between h-10 w-full rounded-md border border-input bg-background text-foreground px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
@@ -163,6 +163,7 @@ export function DeployerFormField({
         {isVerified && !isLoadingContracts && (
           <ContractsFormField
             form={form}
+            deployer={address}
             deployerIndex={deployerIndex}
             osoContracts={osoContracts || []}
           />

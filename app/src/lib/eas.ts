@@ -378,7 +378,7 @@ function buildContractAttestations({
 }
 
 function parseZeroSignature(signature: string) {
-  if (signature === "0x0") {
+  if (signature === "0x0" || signature === "") {
     return "0x"
   }
   return signature
