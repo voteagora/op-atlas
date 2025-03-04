@@ -6,10 +6,7 @@ import { UseFormReturn } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import {
-  getAtlasSupportedNetworksWithAttributes,
-  getAtlasSupportedNetworkWithAttributes,
-} from "@/components/common/chain"
+import { getAtlasSupportedNetworkWithAttributes } from "@/components/common/chain"
 
 import { ChainLogo } from "@/components/common/ChainLogo"
 import { Button } from "@/components/ui/button"
