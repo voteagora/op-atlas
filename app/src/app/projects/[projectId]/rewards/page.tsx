@@ -16,8 +16,6 @@ export default async function Page({
     redirect("/login")
   }
 
-  const project = await getProject({ id: params.projectId })
-
   if (!session?.user.id) {
     redirect("/dashboard")
   }
