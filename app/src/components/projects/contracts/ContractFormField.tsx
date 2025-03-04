@@ -115,7 +115,7 @@ export function ContractFormField({
               </div>
             ) : (
               <div className="relative group/btn">
-                <ChainLogo chainId={chainId} size={24} />
+                <ChainLogo chainId={Number(chainId)} size={24} />
                 <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover/btn:block px-2 py-1 text-sm text-white bg-gray-800 rounded-md shadow-lg text-center">
                   {
                     Object.values(

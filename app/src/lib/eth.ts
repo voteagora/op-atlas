@@ -11,8 +11,6 @@ type ChainAttributes = {
   clientUrl: string
 }
 
-export type ChainWithAttributes = Chain & Partial<ChainAttributes>
-
 type AtlasSupportedChains = typeof atlasSupportedChains
 
 type StrictClientUrls = {

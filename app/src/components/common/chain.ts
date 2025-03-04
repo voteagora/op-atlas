@@ -104,7 +104,9 @@ export function getAtlasSupportedNetworksWithAttributes(): Record<
 export function getAtlasSupportedNetworkWithAttributes(
   chainId: number,
 ): ChainWithAttributes | undefined {
-  return Object.values(atlasSupportedChains).find(
+  const chain = Object.values(atlasSupportedChains).find(
     (chain) => chain.id === chainId,
-  )
+  ) as Chain
+
+  return { ...chain, ...NETWORKS_EXTRA_DATA[chain!.id] }
 }

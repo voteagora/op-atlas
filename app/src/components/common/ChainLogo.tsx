@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { getAtlasSupportedNetworksWithAttributes } from "./chain"
+import { getAtlasSupportedNetworkWithAttributes } from "./chain"
 
 export function ChainLogo({
   className,
@@ -7,14 +7,10 @@ export function ChainLogo({
   size = 24,
 }: {
   className?: string
-  chainId: string
+  chainId: number
   size?: number
 }) {
-  const chainInfo = Object.values(
-    getAtlasSupportedNetworksWithAttributes(),
-  ).find((chain) => chain.id.toString() === chainId)
-
-  console.log(chainInfo)
+  const chainInfo = getAtlasSupportedNetworkWithAttributes(chainId)
 
   if (!chainInfo) return null
 

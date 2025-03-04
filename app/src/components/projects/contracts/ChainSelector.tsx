@@ -40,7 +40,7 @@ export function ChainSelector({
               {Chain.options.map((chain) => (
                 <SelectItem key={chain} value={chain}>
                   <div className="flex gap-2 items-center py-1">
-                    <ChainLogo chainId={chain} />
+                    <ChainLogo chainId={Number(chain)} />
                     <div>
                       {
                         Object.values(
