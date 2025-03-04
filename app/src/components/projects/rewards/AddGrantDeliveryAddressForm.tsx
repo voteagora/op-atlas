@@ -48,9 +48,7 @@ export default function AddGrantDeliveryAddressForm({
           type="multiple"
           items={[
             {
-              title: (
-                <AccordionTitleContainer i={1} text="Grant delivery address" />
-              ),
+              title: <AccordionTitleContainer text="Grant delivery address" />,
               content: kycTeam?.grantAddress && (
                 <CompletedGrantDeliveryForm
                   kycTeam={kycTeam}
@@ -70,7 +68,13 @@ export default function AddGrantDeliveryAddressForm({
             {
               title: (
                 <AccordionTitleContainer
-                  i={1}
+                  i={
+                    kycTeam?.grantAddress?.address ? (
+                      <CheckIcon size={14} className="text-green-600" />
+                    ) : (
+                      1
+                    )
+                  }
                   text="Enter your grant delivery address"
                 />
               ),
@@ -93,7 +97,13 @@ export default function AddGrantDeliveryAddressForm({
             {
               title: (
                 <AccordionTitleContainer
-                  i={2}
+                  i={
+                    Boolean(Boolean(kycTeam?.team?.length)) ? (
+                      <CheckIcon size={14} className="text-green-600" />
+                    ) : (
+                      2
+                    )
+                  }
                   text="Submit the grant eligibility form"
                 />
               ),
@@ -232,10 +242,16 @@ export default function AddGrantDeliveryAddressForm({
   )
 }
 
-function AccordionTitleContainer({ i, text }: { i: number; text: string }) {
+function AccordionTitleContainer({
+  i,
+  text,
+}: {
+  i?: number | React.ReactNode
+  text: string
+}) {
   return (
     <div className="font-medium text-sm flex items-center space-x-2">
-      <span>{i}</span>
+      {i && <span>{i}</span>}
       <span>{text}</span>
     </div>
   )

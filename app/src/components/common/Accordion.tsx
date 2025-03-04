@@ -56,8 +56,8 @@ export default function Accordion({
 
         return (
           <AccordionItem
-            value={`item-${index}`}
             key={index}
+            value={`item-${index}`}
             className="w-full space-y-1"
             defaultValue="item-0"
           >
