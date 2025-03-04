@@ -17,7 +17,7 @@ import {
 } from "@/db/projects"
 
 import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
-import { Chain, getMessage } from "../utils/contracts"
+import { getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
 
@@ -78,7 +78,7 @@ export const verifyContract = async ({
   deployerAddress: deployerAddressRaw,
   deploymentTxHash,
   signature,
-  chain,
+  chainId,
   name,
   description,
 }: {
@@ -87,7 +87,7 @@ export const verifyContract = async ({
   deployerAddress: Address
   deploymentTxHash: `0x${string}`
   signature: `0x${string}`
-  chain: Chain
+  chainId: number
   name?: string
   description?: string
 }) => {
@@ -139,7 +139,7 @@ export const verifyContract = async ({
   }
 
   // Get the tx and ensure the deployer is the one who created the contract
-  const tx = await getTransaction(deploymentTxHash, chain)
+  const tx = await getTransaction(deploymentTxHash, chainId)
   if (!tx) {
     return {
       error: "Deployment transaction not found",
@@ -165,7 +165,7 @@ export const verifyContract = async ({
 
   // More complex case: use the trace to see if a create2 call was used to deploy
   if (!tx.contractAddress) {
-    const trace = await getTransactionTrace(deploymentTxHash, chain)
+    const trace = await getTransactionTrace(deploymentTxHash, chainId)
     if (!trace) {
       return {
         error: "Transaction trace not found",
@@ -198,7 +198,7 @@ export const verifyContract = async ({
         deployerAddress,
         deploymentHash: deploymentTxHash,
         verificationProof: signature,
-        chainId: parseInt(chain.toString()),
+        chainId: parseInt(chainId.toString()),
         name,
         description,
       },

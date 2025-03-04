@@ -1,26 +1,27 @@
-import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
+// import { arenaZ, ethernity, race, swell } from "@eth-optimism/viem/chains"
 import { Address, createPublicClient, Hash, http } from "viem"
+import { atlasSupportedChains } from "./utils/contracts"
 import {
-  base,
-  bob,
+  // base,
+  // bob,
   Chain as ViemChain,
-  ink,
-  lisk,
-  metalL2,
-  mint,
-  mode,
-  optimism,
-  shape,
-  soneium,
-  superseed,
-  unichain,
-  worldchain,
-  zora,
+  // ink,
+  // lisk,
+  // metalL2,
+  // mint,
+  // mode,
+  // optimism,
+  // shape,
+  // soneium,
+  // superseed,
+  // unichain,
+  // worldchain,
+  // zora,
 } from "viem/chains"
 
-import { polynomial } from "@/components/common/chain"
+// import { polynomial } from "@/components/common/chain"
 
-import { Chain } from "./utils/contracts"
+// import { Chain } from "./utils/contracts"
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
 if (!ALCHEMY_API_KEY) {
@@ -39,43 +40,82 @@ export type TraceCall = {
 }
 
 export const clients = {
-  [Chain.ArenaZ]: createClient(arenaZ, "https://rpc.arena-z.gg"),
-  [Chain.Base]: createClient(
-    base,
+  [atlasSupportedChains.arenaZ.id]: createClient(
+    atlasSupportedChains.arenaZ,
+    "https://rpc.arena-z.gg",
+  ),
+  [atlasSupportedChains.base.id]: createClient(
+    atlasSupportedChains.base,
     `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-  [Chain.Bob]: createClient(bob, "https://rpc.gobob.xyz"),
-  [Chain.Ethernity]: createClient(
-    ethernity,
+  [atlasSupportedChains.bob.id]: createClient(
+    atlasSupportedChains.bob,
+    "https://rpc.gobob.xyz",
+  ),
+  [atlasSupportedChains.ethernity.id]: createClient(
+    atlasSupportedChains.ethernity,
     "https://mainnet.ethernitychain.io",
   ),
-  [Chain.Ink]: createClient(
-    ink,
+  [atlasSupportedChains.ink.id]: createClient(
+    atlasSupportedChains.ink,
     `https://ink-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-  [Chain.Lisk]: createClient(lisk, "https://rpc.api.lisk.com"),
-  [Chain.MetalL2]: createClient(metalL2, "https://rpc.metall2.com"),
-  [Chain.Mint]: createClient(mint, "https://rpc.mintchain.io"),
-  [Chain.Mode]: createClient(mode, "https://mainnet.mode.network"),
-  [Chain.Optimism]: createClient(
-    optimism,
+  [atlasSupportedChains.lisk.id]: createClient(
+    atlasSupportedChains.lisk,
+    "https://rpc.api.lisk.com",
+  ),
+  [atlasSupportedChains.metalL2.id]: createClient(
+    atlasSupportedChains.metalL2,
+    "https://rpc.metall2.com",
+  ),
+  [atlasSupportedChains.mint.id]: createClient(
+    atlasSupportedChains.mint,
+    "https://rpc.mintchain.io",
+  ),
+  [atlasSupportedChains.mode.id]: createClient(
+    atlasSupportedChains.mode,
+    "https://mainnet.mode.network",
+  ),
+  [atlasSupportedChains.optimism.id]: createClient(
+    atlasSupportedChains.optimism,
     `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-  [Chain.Polynomial]: createClient(polynomial, "https://rpc.polynomial.fi"),
-  [Chain.Race]: createClient(race, "https://racemainnet.io"),
-  [Chain.Shape]: createClient(
-    shape,
+  [atlasSupportedChains.polynomial.id]: createClient(
+    atlasSupportedChains.polynomial,
+    "https://rpc.polynomial.fi",
+  ),
+  [atlasSupportedChains.race.id]: createClient(
+    atlasSupportedChains.race,
+    "https://racemainnet.io",
+  ),
+  [atlasSupportedChains.shape.id]: createClient(
+    atlasSupportedChains.shape,
     `https://shape-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-  [Chain.Soneium]: createClient(soneium, `https://rpc.soneium.org`),
-  [Chain.Superseed]: createClient(superseed, "https://mainnet.superseed.xyz"),
-  [Chain.Swell]: createClient(swell, "https://swell-mainnet.alt.technology"),
-  [Chain.Unichain]: createClient(unichain, "https://mainnet.unichain.org"),
-  [Chain.Worldchain]: createClient(
-    worldchain,
+  [atlasSupportedChains.soneium.id]: createClient(
+    atlasSupportedChains.soneium,
+    `https://rpc.soneium.org`,
+  ),
+  [atlasSupportedChains.superseed.id]: createClient(
+    atlasSupportedChains.superseed,
+    "https://mainnet.superseed.xyz",
+  ),
+  [atlasSupportedChains.swell.id]: createClient(
+    atlasSupportedChains.swell,
+    "https://swell-mainnet.alt.technology",
+  ),
+  [atlasSupportedChains.unichain.id]: createClient(
+    atlasSupportedChains.unichain,
+    "https://mainnet.unichain.org",
+  ),
+  [atlasSupportedChains.worldchain.id]: createClient(
+    atlasSupportedChains.worldchain,
     `https://worldchain-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
-  [Chain.Zora]: createClient(zora, "https://rpc.zora.energy"),
+  [atlasSupportedChains.zora.id]: createClient(
+    atlasSupportedChains.zora,
+    "https://rpc.zora.energy",
+  ),
 }
 
 // We extend the default client to include a trace call for in-depth contract verification
@@ -95,10 +135,10 @@ function createClient(chain: ViemChain, url: string) {
   }))
 }
 
-export async function getTransaction(hash: `0x${string}`, chain: Chain) {
-  const client = clients[chain]
+export async function getTransaction(hash: `0x${string}`, chainId: number) {
+  const client = clients[chainId]
   if (!client) {
-    throw new Error(`Client not found for chain ${chain}`)
+    throw new Error(`Client not found for chain ${chainId}`)
   }
 
   try {
@@ -110,10 +150,13 @@ export async function getTransaction(hash: `0x${string}`, chain: Chain) {
   }
 }
 
-export async function getTransactionTrace(hash: `0x${string}`, chain: Chain) {
-  const client = clients[chain]
+export async function getTransactionTrace(
+  hash: `0x${string}`,
+  chainId: number,
+) {
+  const client = clients[chainId]
   if (!client) {
-    throw new Error(`Client not found for chain ${chain}`)
+    throw new Error(`Client not found for chain ${chainId}`)
   }
 
   try {

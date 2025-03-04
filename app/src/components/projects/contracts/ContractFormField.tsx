@@ -95,12 +95,6 @@ export function ContractFormField({
     setIsToggleLoading(false)
   }
 
-  console.log(
-    Object.values(getAtlasSupportedNetworksWithAttributes()).find((chain) =>
-      chain.id.toString(),
-    )?.name,
-  )
-
   return (
     <div>
       <div className="flex group">

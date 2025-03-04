@@ -55,7 +55,7 @@ export function MissingContractsDialog({
         deployerAddress: deployer as `0x${string}`,
         deploymentTxHash: txHash as `0x${string}`,
         signature: signature as `0x${string}`,
-        chain: selectedChain,
+        chainId: selectedChain,
       })
 
       if (verificationResult.error !== null) {
