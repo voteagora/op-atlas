@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { PublishForm } from "@/components/projects/publish/PublishForm"
 import { getProject, getProjectContracts } from "@/db/projects"
-import { isUserMember } from "@/lib/actions/utils"
+import { verifyMembership } from "@/lib/actions/utils"
 
 export const maxDuration = 120
 
@@ -12,13 +12,19 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const [session, project, contracts] = await Promise.all([
-    auth(),
+  const session = await auth()
+
+  if (!session?.user.id) {
+    redirect("/dashboard")
+  }
+
+  const [project, contracts, isMember] = await Promise.all([
     getProject({ id: params.projectId }),
     getProjectContracts({ projectId: params.projectId }),
+    verifyMembership(params.projectId, session?.user.farcasterId),
   ])
 
-  if (!project || !(await isUserMember(project, session?.user.id))) {
+  if (!isMember || !project) {
     redirect("/dashboard")
   }
 
