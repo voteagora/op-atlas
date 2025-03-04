@@ -65,11 +65,7 @@ export function RewardsSection({
             target="_self"
           />
         ) : (
-          !isLoading && (
-            <AddGrantDeliveryAddressForm
-              kycTeam={{ ...kycTeam, projectId: project.id }}
-            />
-          )
+          !isLoading && <AddGrantDeliveryAddressForm kycTeam={kycTeam} />
         )}
       </div>
     </div>

@@ -5,9 +5,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { CheckIcon, ChevronRight, SquareCheck } from "lucide-react"
 import { User } from "lucide-react"
 import Image from "next/image"
+import { useParams } from "next/navigation"
 
 import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
+import { deleteOrganizationKycTeam } from "@/db/organizations"
 import {
   deleteProjectKYCTeamAction,
   getProjectKYCTeamsAction,
@@ -34,6 +36,7 @@ export default function CompletedGrantDeliveryForm({
   teamMembers,
   entities,
 }: CompletedGrantDeliveryFormProps) {
+  const params = useParams()
   const queryClient = useQueryClient()
   const { setData, setOpenDialog } = useAppDialogs()
   const { data: kycTeamProjects } = useQuery({
@@ -45,18 +48,24 @@ export default function CompletedGrantDeliveryForm({
     },
   })
   const { mutate: deleteProjectKYCTeam, isPending } = useMutation({
-    mutationFn: async (projectId: string) => {
-      await deleteProjectKYCTeamAction({
-        kycTeamId: kycTeam?.id ?? "",
-        projectId,
-      })
+    mutationFn: async () => {
       if (!organizationProject) {
-        queryClient.invalidateQueries({
+        const projectId = params.projectId as string
+        await deleteProjectKYCTeamAction({
+          kycTeamId: kycTeam?.id ?? "",
+          projectId,
+        })
+        await queryClient.invalidateQueries({
           queryKey: ["kyc-teams", "project", projectId],
         })
       } else {
-        queryClient.invalidateQueries({
-          queryKey: ["kyc-teams", "organization", projectId],
+        const organizationId = params.organizationId as string
+        await deleteOrganizationKycTeam({
+          organizationId,
+          kycTeamId: kycTeam?.id ?? "",
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ["kyc-teams", "organization", organizationId],
         })
       }
     },
@@ -75,7 +84,7 @@ export default function CompletedGrantDeliveryForm({
   const onDeleteProjectKYCTeam = () => {
     if (!kycTeam?.id) return
 
-    deleteProjectKYCTeam(kycTeam.id)
+    deleteProjectKYCTeam()
   }
 
   if (!kycTeam?.grantAddress) return null

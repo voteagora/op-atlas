@@ -25,7 +25,6 @@ export default function AddGrantDeliveryAddressForm({
     team?: KYCUser[]
   }
 }) {
-  console.log("kycTeam", kycTeam)
   const params = useParams()
   const organizationProject = params.organizationId as string
 

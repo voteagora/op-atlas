@@ -663,31 +663,70 @@ export async function getOrganizationKYCTeams({
 }): Promise<
   {
     id: string
+    projectId: string | null
     grantAddress: { address: string; createdAt: Date }
     team: KYCUser[]
   }[]
 > {
-  const organizationKycTeam = await prisma.organizationKYCTeam.findMany({
+  const organizationKycTeams = await prisma.organizationKYCTeam.findMany({
     where: { organizationId },
     include: {
       team: {
         include: {
-          team: {
-            include: {
-              users: true,
-            },
-          },
+          team: { include: { users: true } },
         },
       },
     },
   })
 
-  return organizationKycTeam.map((kycTeam) => ({
+  const kycTeamIds = organizationKycTeams.map((kycTeam) => kycTeam.kycTeamId)
+
+  if (kycTeamIds.length === 0) {
+    return [] // No teams found
+  }
+
+  const projectKycTeams = await prisma.projectKYCTeam.findMany({
+    where: { kycTeamId: { in: kycTeamIds } },
+    select: { kycTeamId: true, projectId: true },
+  })
+
+  const projectMapping = new Map(
+    projectKycTeams.map((p) => [p.kycTeamId, p.projectId]),
+  )
+
+  return organizationKycTeams.map((kycTeam) => ({
     id: kycTeam.kycTeamId,
+    projectId: projectMapping.get(kycTeam.kycTeamId) || null,
     grantAddress: {
       address: kycTeam.team.walletAddress,
       createdAt: kycTeam.team.createdAt,
     },
     team: kycTeam.team.team.map((ut) => ut.users),
   }))
+}
+
+export async function deleteOrganizationKycTeam({
+  organizationId,
+  kycTeamId,
+}: {
+  organizationId: string
+  kycTeamId: string
+}) {
+  await prisma.kYCUserTeams.deleteMany({
+    where: {
+      kycTeamId,
+    },
+  })
+
+  await prisma.organizationKYCTeam.deleteMany({
+    where: {
+      kycTeamId,
+    },
+  })
+
+  await prisma.kYCTeam.delete({
+    where: {
+      id: kycTeamId,
+    },
+  })
 }

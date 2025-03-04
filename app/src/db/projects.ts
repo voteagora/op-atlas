@@ -1822,9 +1822,14 @@ export async function deleteProjectKycTeam({
       kycTeamId,
     },
   })
-  return await prisma.projectKYCTeam.delete({
+  const projectKYCTeam = await prisma.projectKYCTeam.deleteMany({
     where: {
-      id: projectId,
+      kycTeamId,
+    },
+  })
+  await prisma.kYCTeam.delete({
+    where: {
+      id: kycTeamId,
     },
   })
 }

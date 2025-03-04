@@ -47,6 +47,7 @@ export default function GrantAddress() {
                   organizationKycTeam.grantAddress.createdAt,
                 ),
               },
+              projectId: organizationKycTeam.projectId ?? "",
               team: organizationKycTeam.team,
             }}
           />
