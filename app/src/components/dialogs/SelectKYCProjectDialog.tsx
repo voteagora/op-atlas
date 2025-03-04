@@ -22,9 +22,13 @@ export default function SelectKYCProjectDialog({
   const queryClient = useQueryClient()
   const session = useSession()
   const {
-    data: { kycTeamId, alreadySelectedProjectIds },
+    data: { kycTeamId },
   } = useAppDialogs()
-  const { data: projects } = useQuery({
+  const {
+    data: projects,
+    isLoading: projectsLoading,
+    isPending: projectsPending,
+  } = useQuery({
     queryKey: ["userProjects"],
     queryFn: async () => {
       if (!session.data?.user.id) return []
@@ -49,6 +53,28 @@ export default function SelectKYCProjectDialog({
   const [selectedProjectIds, setSelectedProjectIds] = React.useState<string[]>(
     [],
   )
+
+  if (projectsLoading || projectsPending) {
+    return (
+      <Dialog open>
+        <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
+          <DialogTitle className="text-center leading-7 font-semibold text-xl">
+            Choose the projects that will use this grant delivery address
+          </DialogTitle>
+          <div className="space-y-6 z-50 w-full h-full">
+            <div className="w-full space-y-2">
+              <div className="w-full h-10 rounded-md animate-pulse bg-gray-200" />
+            </div>
+            <div className="space-y-2">
+              <div className="rounded-md h-10 bg-gray-200 animate-pulse w-full" />
+              <div className="rounded-md h-10 bg-gray-200 animate-pulse w-full" />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
