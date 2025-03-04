@@ -46,7 +46,8 @@ export default function AddGrantDeliveryAddressForm({
       )}
       {allTeamMembersVerified ? (
         <Accordion
-          type="multiple"
+          collapsible={false}
+          type="single"
           items={[
             {
               title: <AccordionTitleContainer text="Grant delivery address" />,

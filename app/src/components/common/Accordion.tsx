@@ -61,12 +61,16 @@ export default function Accordion({
             className="w-full space-y-1"
             defaultValue="item-0"
           >
-            {triggerLocation === "top" && (
+            {collapsible && triggerLocation === "top" ? (
               <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+            ) : (
+              <h4 className="h-9 pt-2">{wrappedTitle}</h4>
             )}
             <AccordionContent>{content}</AccordionContent>
-            {triggerLocation === "bottom" && (
+            {collapsible && triggerLocation === "bottom" ? (
               <AccordionTrigger>{wrappedTitle}</AccordionTrigger>
+            ) : (
+              <h4 className="h-9 pt-2">{wrappedTitle}</h4>
             )}
           </AccordionItem>
         )
