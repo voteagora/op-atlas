@@ -422,10 +422,10 @@ export const createProjectKycTeamAction = async ({
     }
   }
 
-  // const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  // if (isInvalid?.error) {
-  //   return isInvalid
-  // }
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
 
   return createProjectKycTeam({ projectId, walletAddress })
 }
@@ -437,10 +437,10 @@ export const getKycTeamAction = async (projectId: string) => {
     throw new Error("Unauthorized")
   }
 
-  // const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  // if (isInvalid?.error) {
-  //   throw new Error(isInvalid.error)
-  // }
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
 
   return await getKycTeam({ projectId })
 }
@@ -458,15 +458,15 @@ export const createProjectKYCTeamsAction = async ({
     throw new Error("Unauthorized")
   }
 
-  // projectIds.forEach(async (projectId) => {
-  //   const isInvalid = await verifyMembership(
-  //     projectId,
-  //     session.user.farcasterId,
-  //   )
-  //   if (isInvalid?.error) {
-  //     throw new Error(isInvalid.error)
-  //   }
-  // })
+  projectIds.forEach(async (projectId) => {
+    const isInvalid = await verifyMembership(
+      projectId,
+      session.user.farcasterId,
+    )
+    if (isInvalid?.error) {
+      throw new Error(isInvalid.error)
+    }
+  })
 
   return await createProjectKycTeams({ projectIds, kycTeamId })
 }

@@ -217,13 +217,13 @@ export const createOrganizationKycTeamAction = async ({
     throw new Error("Unauthorized")
   }
 
-  // const isInvalid = await verifyOrganizationAdmin(
-  //   organizationId,
-  //   session.user.id,
-  // )
-  // if (isInvalid?.error) {
-  //   return isInvalid
-  // }
+  const isInvalid = await verifyOrganizationAdmin(
+    organizationId,
+    session.user.id,
+  )
+  if (isInvalid?.error) {
+    return isInvalid
+  }
 
   await createOrganizationKycTeam({ walletAddress, organizationId })
 
@@ -241,13 +241,13 @@ export const getOrganizationKycTeamsAction = async ({
     throw new Error("Unauthorized")
   }
 
-  // const isInvalid = await verifyOrganizationAdmin(
-  //   organizationId,
-  //   session.user.id,
-  // )
-  // if (isInvalid?.error) {
-  //   throw new Error(isInvalid.error)
-  // }
+  const isInvalid = await verifyOrganizationAdmin(
+    organizationId,
+    session.user.id,
+  )
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
 
   return getOrganizationKYCTeams({ organizationId })
 }
