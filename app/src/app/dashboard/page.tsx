@@ -3,10 +3,6 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
-import {
-  GovCandidateCallout,
-  RewardsCallout,
-} from "@/components/dashboard/Callouts"
 import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import {
@@ -36,14 +32,8 @@ export default async function Page() {
     redirect("/")
   }
 
-  const isMyFlagEnabledForUser = await posthog.isFeatureEnabled(
-    "server-feature-flag",
-    session.user.id,
-  )
-
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
-      {isMyFlagEnabledForUser && <div>Server Feature Flag Item</div>}
       <Dashboard
         user={user}
         projects={projects}
