@@ -1768,10 +1768,8 @@ export async function addKYCTeamMembers({
   const newBusinesses = businesses.filter((b) => !existingUserMap.has(b.email))
 
   await prisma.$transaction(async (tx) => {
-    // Create new individual users
     const createdIndividuals = await tx.kYCUser.createManyAndReturn({
       data: newIndividuals.map((i) => ({
-        teamId: kycTeamId,
         email: i.email,
         firstName: i.firstName,
         lastName: i.lastName,
@@ -1781,7 +1779,6 @@ export async function addKYCTeamMembers({
 
     const createdBusinesses = await tx.kYCUser.createManyAndReturn({
       data: newBusinesses.map((b) => ({
-        teamId: kycTeamId,
         email: b.email,
         firstName: b.firstName,
         lastName: b.lastName,

@@ -505,7 +505,6 @@ model KYCUser {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
-  teamId      String
   KYCUserTeams KYCUserTeams[]
   
   @@index([email])

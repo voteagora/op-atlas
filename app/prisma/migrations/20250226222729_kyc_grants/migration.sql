@@ -12,7 +12,6 @@ CREATE TABLE "KYCUser" (
     "expiry" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "teamId" TEXT NOT NULL,
 
     CONSTRAINT "KYCUser_pkey" PRIMARY KEY ("id")
 );
