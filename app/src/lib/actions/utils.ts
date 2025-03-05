@@ -3,7 +3,7 @@ import {
   getUserProjectOrganizations,
   isUserAdminOfOrganization,
 } from "@/db/organizations"
-import { getProjectTeam, getUserProjects } from "@/db/projects"
+import { getProject, getProjectTeam, getUserProjects } from "@/db/projects"
 
 import { ProjectWithDetails } from "../types"
 
@@ -49,12 +49,12 @@ export const verifyMembership = async (
   projectId: string,
   farcasterId: string,
 ) => {
-  const [projectTeam, userProjectOrganizations] = await Promise.all([
-    getProjectTeam({ id: projectId }),
+  const [projects, userProjectOrganizations] = await Promise.all([
+    getUserProjects({ farcasterId }),
     getUserProjectOrganizations(farcasterId, projectId),
   ])
-  const projectMembership = projectTeam?.team.find(
-    ({ userId }) => userId === farcasterId,
+  const projectMembership = projects?.projects.find(
+    ({ project }) => project.id === projectId,
   )
 
   const organizationMembership = userProjectOrganizations?.organizations.find(
