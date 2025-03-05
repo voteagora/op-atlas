@@ -22,7 +22,7 @@ export default function SelectKYCProjectDialog({
   const queryClient = useQueryClient()
   const session = useSession()
   const {
-    data: { kycTeamId },
+    data: { kycTeamId, alreadySelectedProjectIds },
   } = useAppDialogs()
   const {
     data: projects,
@@ -32,8 +32,10 @@ export default function SelectKYCProjectDialog({
     queryKey: ["userProjects"],
     queryFn: async () => {
       if (!session.data?.user.id) return []
-      return (await getAdminProjects(session.data.user.id)).filter((project) =>
-        Boolean(project.organization),
+      return (await getAdminProjects(session.data.user.id)).filter(
+        (project) =>
+          Boolean(project.organization) &&
+          !alreadySelectedProjectIds?.includes(project.id),
       )
     },
   })
@@ -78,11 +80,15 @@ export default function SelectKYCProjectDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
-        <DialogTitle className="text-center leading-7 font-semibold text-xl">
-          Choose the projects that will use this grant delivery address
-        </DialogTitle>
+        {projects?.length !== 0 && (
+          <DialogTitle className="text-center leading-7 font-semibold text-xl">
+            Choose the projects that will use this grant delivery address
+          </DialogTitle>
+        )}
         {projects?.length === 0 ? (
-          <span>No unselected projects</span>
+          <span className="text-sm text-secondary-foreground">
+            No projects left unselected
+          </span>
         ) : (
           <>
             <ul className="space-y-2 w-full">

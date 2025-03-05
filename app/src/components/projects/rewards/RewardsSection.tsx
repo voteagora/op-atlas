@@ -66,11 +66,11 @@ export function RewardsSection({
           />
         ) : isLoading ? (
           <div className="p-6 border rounded-md space-y-6 w-full h-[356px]">
-            <div className="animate-pulse bg-gray-200 rounded-md h-8 w-1/2" />
+            <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
             <div className="space-y-4">
-              <div className="animate-pulse bg-gray-200 rounded-md h-[146px] w-1/2" />
-              <div className="animate-pulse bg-gray-200 rounded-md h-8 w-1/2" />
-              <div className="animate-pulse bg-gray-200 rounded-md h-8 w-1/2" />
+              <div className="animate-pulse bg-gray-200 rounded-md h-[146px] w-full" />
+              <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
+              <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
             </div>
           </div>
         ) : (

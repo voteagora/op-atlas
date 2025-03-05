@@ -12,7 +12,7 @@ import { getValidUntil } from "@/lib/utils"
 
 export default function GrantAddress() {
   const params = useParams()
-  const { data: organizationKycTeams } = useQuery({
+  const { data: organizationKycTeams, isLoading } = useQuery({
     queryKey: ["kyc-teams", "organization", params.organizationId],
     queryFn: async () => {
       const organizationId = params.organizationId as string
@@ -36,22 +36,33 @@ export default function GrantAddress() {
       </div>
       <div className="space-y-6">
         <h3>Your grant delivery addresses</h3>
-        {organizationKycTeams?.map((organizationKycTeam) => (
-          <AddGrantDeliveryAddressForm
-            key={organizationKycTeam.id}
-            kycTeam={{
-              id: organizationKycTeam.id,
-              grantAddress: {
-                address: organizationKycTeam.grantAddress.address,
-                validUntil: getValidUntil(
-                  organizationKycTeam.grantAddress.createdAt,
-                ),
-              },
-              projectId: organizationKycTeam.projectId ?? "",
-              team: organizationKycTeam.team,
-            }}
-          />
-        ))}
+        {isLoading ? (
+          <div className="p-6 border rounded-md space-y-6 w-full h-[356px]">
+            <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
+            <div className="space-y-4">
+              <div className="animate-pulse bg-gray-200 rounded-md h-[146px] w-full" />
+              <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
+              <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
+            </div>
+          </div>
+        ) : (
+          organizationKycTeams?.map((organizationKycTeam) => (
+            <AddGrantDeliveryAddressForm
+              key={organizationKycTeam.id}
+              kycTeam={{
+                id: organizationKycTeam.id,
+                grantAddress: {
+                  address: organizationKycTeam.grantAddress.address,
+                  validUntil: getValidUntil(
+                    organizationKycTeam.grantAddress.createdAt,
+                  ),
+                },
+                projectId: organizationKycTeam.projectId ?? "",
+                team: organizationKycTeam.team,
+              }}
+            />
+          ))
+        )}
         {(organizationKycTeams?.length === 0 || addMoreActive) && (
           <AddGrantDeliveryAddressForm />
         )}

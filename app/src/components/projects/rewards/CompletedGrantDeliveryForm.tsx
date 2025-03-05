@@ -155,21 +155,23 @@ export default function CompletedGrantDeliveryForm({
             ),
             content: (
               <div className="space-y-6 mb-6">
-                <div className="space-y-1.5">
-                  <span className="font-medium text-sm text-foreground">
-                    Verified persons
-                  </span>
-                  <ul className="space-y-1.5">
-                    {teamMembers?.map((member) => (
-                      <li key={member.id}>
-                        <VerifiedTeamMemberContainer
-                          name={`${member.firstName} ${member.lastName}`}
-                          email={member.email}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {Boolean(teamMembers?.length) && (
+                  <div className="space-y-1.5">
+                    <span className="font-medium text-sm text-foreground">
+                      Verified persons
+                    </span>
+                    <ul className="space-y-1.5">
+                      {teamMembers?.map((member) => (
+                        <li key={member.id}>
+                          <VerifiedTeamMemberContainer
+                            name={`${member.firstName} ${member.lastName}`}
+                            email={member.email}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {Boolean(entities?.length) && (
                   <div className="space-y-1.5">
                     <span className="font-medium text-sm text-foreground">
