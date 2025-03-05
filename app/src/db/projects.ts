@@ -1751,79 +1751,59 @@ export async function addKYCTeamMembers({
     companyName: string
   }[]
 }) {
+  const allEmails = [
+    ...individuals.map((i) => i.email),
+    ...businesses.map((b) => b.email),
+  ]
+
   const existingUsers = await prisma.kYCUser.findMany({
-    where: {
-      OR: [
-        {
-          email: {
-            in: individuals.map((i) => i.email),
-          },
-        },
-        {
-          email: {
-            in: businesses.map((b) => b.email),
-          },
-        },
-      ],
-    },
+    where: { email: { in: allEmails } },
   })
-  const existingIndividuals = existingUsers.filter((u) => !u.businessName)
-  const existingBusinesses = existingUsers.filter((u) => u.businessName)
 
-  const filteredIndividuals = individuals.filter(
-    (i) => !existingIndividuals.some((u) => u.email === i.email),
-  )
-  const filteredBusinesses = businesses.filter(
-    (b) => !existingBusinesses.some((u) => u.email === b.email),
-  )
+  const existingUserMap = new Map(existingUsers.map((u) => [u.email, u]))
 
-  await Promise.all([
-    prisma.$transaction(async (tx) => {
-      const individualUsers = await tx.kYCUser.createManyAndReturn({
-        data: filteredIndividuals.map((individual) => ({
-          teamId: kycTeamId,
-          email: individual.email,
-          firstName: individual.firstName,
-          lastName: individual.lastName,
-          expiry: new Date(),
-        })),
-      })
-      const combinedIndividuals = [...individualUsers, ...existingIndividuals]
-      const deduppedIndividuals = combinedIndividuals.filter(
-        (user, index, self) =>
-          index === self.findIndex((u) => u.email === user.email),
-      )
-      await tx.kYCUserTeams.createMany({
-        data: deduppedIndividuals.map((user) => ({
-          kycTeamId,
-          kycUserId: user.id,
-        })),
-      })
-    }),
-    prisma.$transaction(async (tx) => {
-      const businessUsers = await tx.kYCUser.createManyAndReturn({
-        data: filteredBusinesses.map((business) => ({
-          teamId: kycTeamId,
-          email: business.email,
-          firstName: business.firstName,
-          lastName: business.lastName,
-          expiry: new Date(),
-          businessName: business.companyName,
-        })),
-      })
-      const combinedBusinesses = [...businessUsers, ...existingBusinesses]
-      const deduppedBusinesses = combinedBusinesses.filter(
-        (user, index, self) =>
-          index === self.findIndex((u) => u.email === user.email),
-      )
-      await tx.kYCUserTeams.createMany({
-        data: deduppedBusinesses.map((user) => ({
-          kycTeamId,
-          kycUserId: user.id,
-        })),
-      })
-    }),
-  ])
+  const newIndividuals = individuals.filter(
+    (i) => !existingUserMap.has(i.email),
+  )
+  const newBusinesses = businesses.filter((b) => !existingUserMap.has(b.email))
+
+  await prisma.$transaction(async (tx) => {
+    // Create new individual users
+    const createdIndividuals = await tx.kYCUser.createManyAndReturn({
+      data: newIndividuals.map((i) => ({
+        teamId: kycTeamId,
+        email: i.email,
+        firstName: i.firstName,
+        lastName: i.lastName,
+        expiry: new Date(),
+      })),
+    })
+
+    const createdBusinesses = await tx.kYCUser.createManyAndReturn({
+      data: newBusinesses.map((b) => ({
+        teamId: kycTeamId,
+        email: b.email,
+        firstName: b.firstName,
+        lastName: b.lastName,
+        expiry: new Date(),
+        businessName: b.companyName,
+      })),
+    })
+
+    const allUsers = [
+      ...existingUsers,
+      ...createdIndividuals,
+      ...createdBusinesses,
+    ]
+
+    const uniqueTeamAssignments = Array.from(
+      new Map(
+        allUsers.map((user) => [user.email, { kycTeamId, kycUserId: user.id }]),
+      ).values(),
+    )
+
+    await tx.kYCUserTeams.createMany({ data: uniqueTeamAssignments })
+  })
 }
 
 export async function createProjectKycTeams({
