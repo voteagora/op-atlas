@@ -3,10 +3,6 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
-import {
-  GovCandidateCallout,
-  RewardsCallout,
-} from "@/components/dashboard/Callouts"
 import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import {
@@ -14,6 +10,7 @@ import {
   getApplications,
   getProjects,
 } from "@/lib/actions/projects"
+import posthog from "@/lib/posthog"
 
 export default async function Page() {
   const session = await auth()

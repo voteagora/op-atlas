@@ -33,6 +33,36 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 Coming soon.
 
+## Feature Flags
+
+To use feature flags we can do one of two options
+
+#### Client Side
+
+```jsx
+"use client"
+
+import { useFeatureFlagEnabled } from "posthog-js/react"
+
+function MyComponent() {
+  const flagEnabled = useFeatureFlagEnabled("feature-flag-name")
+
+  return <div>{flagEnabled && <div>Server Feature Flag Item</div>}</div>
+}
+```
+
+#### Server Side
+
+```jsx
+import posthog from "@/lib/posthog"
+
+function MyComponent() {
+   const flagEnabled = await posthog.isFeatureEnabled("feature-flag-name", userId)
+
+   return <div>{flagEnabled && <div>Server Feature Flag Item</div>}</div>
+}
+```
+
 ## Contributing
 
 We welcome contributions from the community and are pleased to have you join us in improving this project. To contribute to this project, please follow the steps outlined below:
