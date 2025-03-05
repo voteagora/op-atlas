@@ -5,6 +5,7 @@ import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useFeatureFlagEnabled } from "posthog-js/react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -15,6 +16,7 @@ export function UserProfileSidebar({
 }: {
   organizations?: Organization[]
 }) {
+  const isKycEnabled = useFeatureFlagEnabled("add-grant-delivery-address-form")
   const pathname = usePathname()
   const router = useRouter()
 
@@ -132,25 +134,27 @@ export function UserProfileSidebar({
                   </span>
                   <span>{organization.name}</span>
                 </Link>
-                <Link
-                  href={`/profile/organizations/${organization.id}/grant-address`}
-                  className={cn([
-                    "text-secondary-foreground font-normal space-x-2 pl-4",
-                    {
-                      "text-foreground font-medium": isGrantAddressActive,
-                    },
-                  ])}
-                >
-                  <span
+                {isKycEnabled && (
+                  <Link
+                    href={`/profile/organizations/${organization.id}/grant-address`}
                     className={cn([
-                      "opacity-0 text-lg",
-                      { "opacity-100": isGrantAddressActive },
+                      "text-secondary-foreground font-normal space-x-2 pl-4",
+                      {
+                        "text-foreground font-medium": isGrantAddressActive,
+                      },
                     ])}
                   >
-                    •
-                  </span>
-                  <span>Grant address</span>
-                </Link>
+                    <span
+                      className={cn([
+                        "opacity-0 text-lg",
+                        { "opacity-100": isGrantAddressActive },
+                      ])}
+                    >
+                      •
+                    </span>
+                    <span>Grant address</span>
+                  </Link>
+                )}
               </li>
             )
           })}

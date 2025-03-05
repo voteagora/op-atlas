@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { PlusIcon } from "lucide-react"
 import { useParams } from "next/navigation"
+import { notFound } from "next/navigation"
+import { useFeatureFlagEnabled } from "posthog-js/react"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
@@ -11,6 +13,7 @@ import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
 import { getValidUntil } from "@/lib/utils"
 
 export default function GrantAddress() {
+  const isKycEnabled = useFeatureFlagEnabled("add-grant-delivery-address-form")
   const params = useParams()
   const { data: organizationKycTeams, isLoading } = useQuery({
     queryKey: ["kyc-teams", "organization", params.organizationId],
@@ -18,9 +21,14 @@ export default function GrantAddress() {
       const organizationId = params.organizationId as string
       return await getOrganizationKycTeamsAction({ organizationId })
     },
+    enabled: isKycEnabled,
   })
 
   const [addMoreActive, setAddMoreActive] = React.useState(false)
+
+  if (!isKycEnabled) {
+    return notFound()
+  }
 
   return (
     <div className="space-y-12">
