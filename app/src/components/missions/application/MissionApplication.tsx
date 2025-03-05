@@ -2,7 +2,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Application } from "@prisma/client"
 import { format } from "date-fns"
-import { useSession } from "next-auth/react"
 import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -10,10 +9,8 @@ import { z } from "zod"
 
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { useSessionProjects } from "@/hooks/db/useUserProjects"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { submitApplications } from "@/lib/actions/applications"
-import { rewardMeasurementDate } from "@/lib/MissionsAndRoundData"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
@@ -140,7 +137,10 @@ export function MissionApplication() {
             `Apply by ${format(
               mission!.applyBy,
               "MMM d",
-            )} to earn rewards for your performance in February.`}
+            )} to be evaluated for rewards starting ${format(
+              new Date(new Date().getFullYear(), mission!.evaluationMonth, 1),
+              "MMM d",
+            )}.`}
 
           {!isOpenForEnrollment && "Not open for enrollment--coming soon"}
         </p>
