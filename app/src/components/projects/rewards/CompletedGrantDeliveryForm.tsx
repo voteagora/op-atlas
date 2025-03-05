@@ -100,12 +100,12 @@ export default function CompletedGrantDeliveryForm({
           <span>Valid until {kycTeam.grantAddress.validUntil}</span>
         </div>
       </div>
-      <div className="space-y-2">
-        <div className="w-full flex justify-between items-center">
-          <span className="font-medium text-sm">
-            {organizationProject ? "Projects" : "Project"}
-          </span>
-          {organizationProject && (
+      {organizationProject && (
+        <div className="space-y-2">
+          <div className="w-full flex justify-between items-center">
+            <span className="font-medium text-sm">
+              {organizationProject ? "Projects" : "Project"}
+            </span>
             <button
               className="flex items-center space-x-1"
               onClick={openSelectKYCProjectDialog}
@@ -114,33 +114,35 @@ export default function CompletedGrantDeliveryForm({
               <span>Choose</span>
               <ChevronRight size={14} />
             </button>
+          </div>
+          {Boolean(kycTeamProjects?.length) ? (
+            <ul className="space-y-2 w-full">
+              {kycTeamProjects?.map((team) => (
+                <li
+                  key={team.id}
+                  className="input-container space-x-2 text-sm text"
+                >
+                  {team.project.thumbnailUrl && (
+                    <Image
+                      src={team.project.thumbnailUrl}
+                      width={24}
+                      height={24}
+                      alt={team.project.name}
+                    />
+                  )}
+                  <span className="text-sm font-normal">
+                    {team.project.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-muted-foreground text-sm pt-2">
+              No projects selected
+            </div>
           )}
         </div>
-        {Boolean(kycTeamProjects?.length) ? (
-          <ul className="space-y-2 w-full">
-            {kycTeamProjects?.map((team) => (
-              <li
-                key={team.id}
-                className="input-container space-x-2 text-sm text"
-              >
-                {team.project.thumbnailUrl && (
-                  <Image
-                    src={team.project.thumbnailUrl}
-                    width={24}
-                    height={24}
-                    alt={team.project.name}
-                  />
-                )}
-                <span className="text-sm font-normal">{team.project.name}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="text-muted-foreground text-sm pt-2">
-            No projects selected
-          </div>
-        )}
-      </div>
+      )}
       <Accordion
         type="single"
         triggerLocation="bottom"
@@ -168,21 +170,23 @@ export default function CompletedGrantDeliveryForm({
                     ))}
                   </ul>
                 </div>
-                <div className="space-y-1.5">
-                  <span className="font-medium text-sm text-foreground">
-                    Verified entities
-                  </span>
-                  <ul className="space-y-1.5">
-                    {entities?.map((entity) => (
-                      <li key={entity.id}>
-                        <VerifiedEntityContainer
-                          businessName={entity.businessName}
-                          email={entity.email}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {Boolean(entities?.length) && (
+                  <div className="space-y-1.5">
+                    <span className="font-medium text-sm text-foreground">
+                      Verified entities
+                    </span>
+                    <ul className="space-y-1.5">
+                      {entities?.map((entity) => (
+                        <li key={entity.id}>
+                          <VerifiedEntityContainer
+                            businessName={entity.businessName}
+                            email={entity.email}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <Button
                   variant="secondary"
                   disabled={isPending}
