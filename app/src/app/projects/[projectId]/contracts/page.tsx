@@ -16,14 +16,14 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const [projectContracts, isMember] = await Promise.all([
+  const [projectContracts, membership] = await Promise.all([
     getProjectContracts({
       projectId: params.projectId,
     }),
     verifyMembership(params.projectId, session?.user.farcasterId),
   ])
 
-  if (!isMember || !projectContracts) {
+  if (membership?.error || !projectContracts) {
     redirect("/dashboard")
   }
 
