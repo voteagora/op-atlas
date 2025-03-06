@@ -10,7 +10,6 @@ import {
   getApplications,
   getProjects,
 } from "@/lib/actions/projects"
-import posthog from "@/lib/posthog"
 
 export default async function Page() {
   const session = await auth()
