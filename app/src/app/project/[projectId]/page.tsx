@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 
 import { getPublicProjectAction } from "@/lib/actions/projects"
 
-import { EnrolledInRetroFundingBanner, Header } from "./components"
+import { Description, EnrolledInRetroFundingBanner, Header } from "./components"
 
 interface PageProps {
   params: {
@@ -26,6 +26,16 @@ export default async function Page({ params }: PageProps) {
     return notFound()
   }
 
+  const author = publicProject.organization
+    ? {
+        avatarUrl: publicProject.organization.organization.avatarUrl,
+        name: publicProject.organization.organization.name,
+      }
+    : {
+        avatarUrl: publicProject.team.at(0)?.user.imageUrl,
+        name: publicProject.team.at(0)?.user.name,
+      }
+
   return (
     <div className="w-full h-full mt-6">
       <div className="mx-auto w-full max-w-7xl px-8 space-y-12">
@@ -33,6 +43,21 @@ export default async function Page({ params }: PageProps) {
         <Header
           thumbnail={publicProject.thumbnailUrl}
           banner={publicProject.bannerUrl}
+        />
+        <Description
+          name={publicProject.name}
+          tags={["Project", "Cross Chain"]}
+          author={author}
+          deployedOn={[
+            { name: "Optimism", image: "/assets/chain-logos/optimism.svg" },
+          ]}
+          description={publicProject.description}
+          socials={{
+            website: publicProject.website,
+            farcaster: publicProject.farcaster,
+            twitter: publicProject.twitter,
+            mirror: publicProject.mirror,
+          }}
         />
       </div>
     </div>

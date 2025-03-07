@@ -25,6 +25,11 @@ const nextConfig = {
         hostname: "cdn.charmverse.io",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "imagedelivery.net",
+        pathname: "/**",
+      },
     ],
   },
 }

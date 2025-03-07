@@ -1858,5 +1858,25 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
     where: {
       id: projectId,
     },
+    include: {
+      organization: {
+        select: {
+          organization: {
+            select: {
+              name: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      },
+      team: {
+        orderBy: {
+          createdAt: "asc",
+        },
+        select: {
+          user: true,
+        },
+      },
+    },
   })
 }
