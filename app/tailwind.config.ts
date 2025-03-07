@@ -57,6 +57,7 @@ const config = {
           secondary: "hsl(var(--text-secondary))",
           default: "hsl(var(--text-default))",
           muted: "hsl(var(--text-muted))",
+          destructive: "#FF0420",
         },
         foreground: "hsl(var(--foreground))",
         primary: {

@@ -7,11 +7,16 @@ import { auth } from "@/auth"
 import {
   addTeamMembers,
   createProject,
+  createProjectKycTeam,
+  createProjectKycTeams,
   CreateProjectParams,
   deleteProject,
+  deleteProjectKycTeam,
   getAllApplicationsForRound,
   getAllPublishedUserProjects,
+  getKycTeam,
   getProjectContracts,
+  getProjectKycTeams,
   getProjectTeam,
   getPublishedProjectContracts,
   getUserAdminProjectsWithDetail,
@@ -400,4 +405,91 @@ export const setProjectFunding = async (
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
+}
+
+export const createProjectKycTeamAction = async ({
+  projectId,
+  walletAddress,
+}: {
+  projectId: string
+  walletAddress: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  return createProjectKycTeam({ projectId, walletAddress })
+}
+
+export const getKycTeamAction = async (projectId: string) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  return await getKycTeam({ projectId })
+}
+
+export const createProjectKYCTeamsAction = async ({
+  projectIds,
+  kycTeamId,
+}: {
+  projectIds: string[]
+  kycTeamId: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  projectIds.forEach(async (projectId) => {
+    const isInvalid = await verifyMembership(
+      projectId,
+      session.user.farcasterId,
+    )
+    if (isInvalid?.error) {
+      throw new Error(isInvalid.error)
+    }
+  })
+
+  return await createProjectKycTeams({ projectIds, kycTeamId })
+}
+
+export const getProjectKYCTeamsAction = async (kycTeamId: string) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  return await getProjectKycTeams({ kycTeamId })
+}
+
+export const deleteProjectKYCTeamAction = async (data: {
+  projectId: string
+  kycTeamId: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  return await deleteProjectKycTeam(data)
 }

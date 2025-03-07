@@ -9,7 +9,7 @@ import {
 import { cn } from "@/lib/utils"
 
 type BaseProps = {
-  variant?: "primary" | "secondary"
+  variant?: "primary" | "secondary" | "outline"
   outline?: boolean
   leftIcon?: React.ReactNode
   className?: string
@@ -34,6 +34,7 @@ const Button = React.forwardRef<HTMLButtonElement, Props>(
     } = {
       primary: "button-primary",
       secondary: "button-secondary",
+      outline: "button-outline",
     }
 
     if (as === "dropdown") {
