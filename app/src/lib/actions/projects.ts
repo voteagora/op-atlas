@@ -18,6 +18,7 @@ import {
   getProjectContracts,
   getProjectKycTeams,
   getProjectTeam,
+  getPublicProject,
   getPublishedProjectContracts,
   getUserAdminProjectsWithDetail,
   getUserApplications,
@@ -492,4 +493,12 @@ export const deleteProjectKYCTeamAction = async (data: {
   }
 
   return await deleteProjectKycTeam(data)
+}
+
+export const getPublicProjectAction = async ({
+  projectId,
+}: {
+  projectId: string
+}) => {
+  return await getPublicProject({ projectId })
 }

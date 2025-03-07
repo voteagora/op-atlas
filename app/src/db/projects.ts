@@ -1852,3 +1852,11 @@ export async function deleteProjectKycTeam({
     },
   })
 }
+
+export async function getPublicProject({ projectId }: { projectId: string }) {
+  return await prisma.project.findFirst({
+    where: {
+      id: projectId,
+    },
+  })
+}
