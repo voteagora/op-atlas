@@ -3,7 +3,12 @@ import { notFound } from "next/navigation"
 
 import { getPublicProjectAction } from "@/lib/actions/projects"
 
-import { Description, EnrolledInRetroFundingBanner, Header } from "./components"
+import {
+  Description,
+  EnrolledInRetroFundingBanner,
+  Header,
+  Missions,
+} from "./components"
 
 interface PageProps {
   params: {
@@ -59,6 +64,7 @@ export default async function Page({ params }: PageProps) {
             mirror: publicProject.mirror,
           }}
         />
+        <Missions />
       </div>
     </div>
   )

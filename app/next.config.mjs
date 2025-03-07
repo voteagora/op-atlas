@@ -30,6 +30,11 @@ const nextConfig = {
         hostname: "imagedelivery.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "warpcast.com",
+        pathname: "/**",
+      },
     ],
   },
 }
