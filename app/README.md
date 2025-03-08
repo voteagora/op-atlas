@@ -139,3 +139,7 @@ To ensure your fork stays current with the main repository, set up the original 
 ```bash
 git remote add upstream https://github.com/original-owner-username/original-repository.git
 ```
+
+
+## Add read only user to the DB
+[Gist](https://gist.github.com/stepandel/86f524c0de8003b599d3d3e3f1f468b3)
