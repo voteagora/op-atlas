@@ -94,10 +94,13 @@ const config = {
         },
         optimismRed: "hsl(var(--destructive))",
         callout: {
+          DEFAULT: "#D6E4FF",
           foreground: "#3374DB",
         },
-        calloutAlternative: {
-          foreground: "#D6E4FF",
+        contrast: {
+          DEFAULT: "#05060B",
+          white: "#FFFFFF",
+          foreground: "#FBFCFE",
         },
       },
       borderRadius: {
