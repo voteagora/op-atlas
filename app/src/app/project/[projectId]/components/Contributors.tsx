@@ -1,13 +1,23 @@
+"use client"
 import { User } from "lucide-react"
+import { ChevronDown } from "lucide-react"
+import React from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function Contributors() {
+  const [loadedContributors, setLoadedContributors] = React.useState(
+    CONTRIBUTORS.slice(0, 12),
+  )
+  const loadMoreCount =
+    CONTRIBUTORS.length - loadedContributors.length >= 12
+      ? 12
+      : CONTRIBUTORS.length - loadedContributors.length
   return (
     <div className="w-full space-y-6">
       <h4 className="font-semibold text-xl">Contributors</h4>
-      <div className="w-full grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
-        {CONTRIBUTORS.map((contributor) => (
+      <div className="pl-6 w-full grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
+        {loadedContributors.map((contributor) => (
           <div key={contributor.name} className="flex items-center space-x-4">
             <Avatar className="w-6 h-6">
               <AvatarImage src={contributor.avatarUrl} alt={contributor.name} />
@@ -21,6 +31,19 @@ export default function Contributors() {
           </div>
         ))}
       </div>
+      {loadedContributors.length >= CONTRIBUTORS.length ? null : (
+        <button
+          className="flex items-center space-x-2 text-secondary-foreground font-medium text-sm"
+          onClick={() => {
+            setLoadedContributors(
+              CONTRIBUTORS.slice(0, loadedContributors.length + loadMoreCount),
+            )
+          }}
+        >
+          <span>Load {loadMoreCount} more</span>
+          <ChevronDown size={24} />
+        </button>
+      )}
     </div>
   )
 }
@@ -58,4 +81,8 @@ const CONTRIBUTORS = [
   { name: "Charlotte Taylor", avatarUrl: "/assets/avatars/mia-jackson.png" },
   { name: "John Martinez", avatarUrl: "/assets/avatars/alex-williams.png" },
   { name: "Michael White", avatarUrl: "/assets/avatars/sarah-johnson.png" },
+  {
+    name: "Sophia Hernandez",
+    avatarUrl: "/assets/avatars/olivia-thompson.png",
+  },
 ]

@@ -7,7 +7,7 @@ export default function RewardsTable() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue={REWARDS.at(0)?.key} className="w-full mt-12">
-        <TabsList className="bg-transparent space-x-2 flex items-center justify-between">
+        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto">
           {/* TODO: Replace MONTHS with actual data */}
           {MONTHS.map((month, index) => (
             <TabsTrigger

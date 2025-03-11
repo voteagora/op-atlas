@@ -4,3 +4,4 @@ export { default as EnrolledInRetroFundingBanner } from "./EnrolledInRetroFundin
 export { default as Header } from "./Header"
 export { default as Missions } from "./Missions"
 export { default as Performance } from "./Performance"
+export { default as Repos } from "./Repos"

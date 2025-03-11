@@ -10,6 +10,7 @@ import {
   Header,
   Missions,
   Performance,
+  Repos,
 } from "./components"
 
 interface PageProps {
@@ -69,6 +70,7 @@ export default async function Page({ params }: PageProps) {
         <Missions />
         <Performance />
         <Contributors />
+        <Repos />
       </div>
     </div>
   )
