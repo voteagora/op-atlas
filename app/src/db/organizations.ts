@@ -1,6 +1,6 @@
 "use server"
 
-import { Organization, Prisma } from "@prisma/client"
+import { KYCUser, Organization, Prisma } from "@prisma/client"
 import { cache } from "react"
 
 import {
@@ -40,10 +40,10 @@ async function getOrganizationsFn(userId: string) {
   `
 
   // Transform the raw result to match the expected structure
-  const transformed = result[0]?.result || { organizations: [] }
-
-  // Ensure null arrays are converted to empty arrays
-  transformed.organizations = transformed.organizations || []
+  const transformed =
+    result[0]?.result.organizations.map(
+      (organizationObj) => organizationObj.organization,
+    ) || []
 
   return transformed
 }
@@ -626,4 +626,107 @@ export async function isUserAdminOfOrganization(
   })
 
   return userOrganization !== null
+}
+
+export async function createOrganizationKycTeam({
+  walletAddress,
+  organizationId,
+}: {
+  walletAddress: string
+  organizationId: string
+}) {
+  try {
+    const kycTeam = await prisma.kYCTeam.create({
+      data: {
+        walletAddress,
+      },
+    })
+    return prisma.organizationKYCTeam.create({
+      data: {
+        organizationId,
+        kycTeamId: kycTeam.id,
+      },
+    })
+  } catch (error: any) {
+    if (error.message.includes("Unique constraint failed")) {
+      throw new Error("KYC team with this Wallet Address already exists")
+    }
+
+    throw new Error(error.message)
+  }
+}
+
+export async function getOrganizationKYCTeams({
+  organizationId,
+}: {
+  organizationId: string
+}): Promise<
+  {
+    id: string
+    projectId: string | null
+    grantAddress: { address: string; createdAt: Date }
+    team: KYCUser[]
+  }[]
+> {
+  const organizationKycTeams = await prisma.organizationKYCTeam.findMany({
+    where: { organizationId },
+    include: {
+      team: {
+        include: {
+          team: { include: { users: true } },
+        },
+      },
+    },
+  })
+
+  const kycTeamIds = organizationKycTeams.map((kycTeam) => kycTeam.kycTeamId)
+
+  if (kycTeamIds.length === 0) {
+    return [] // No teams found
+  }
+
+  const projectKycTeams = await prisma.projectKYCTeam.findMany({
+    where: { kycTeamId: { in: kycTeamIds } },
+    select: { kycTeamId: true, projectId: true },
+  })
+
+  const projectMapping = new Map(
+    projectKycTeams.map((p) => [p.kycTeamId, p.projectId]),
+  )
+
+  return organizationKycTeams.map((kycTeam) => ({
+    id: kycTeam.kycTeamId,
+    projectId: projectMapping.get(kycTeam.kycTeamId) || null,
+    grantAddress: {
+      address: kycTeam.team.walletAddress,
+      createdAt: kycTeam.team.createdAt,
+    },
+    team: kycTeam.team.team.map((ut) => ut.users),
+  }))
+}
+
+export async function deleteOrganizationKycTeam({
+  organizationId,
+  kycTeamId,
+}: {
+  organizationId: string
+  kycTeamId: string
+}) {
+  await prisma.kYCUserTeams.deleteMany({
+    where: {
+      kycTeamId,
+    },
+  })
+
+  await prisma.organizationKYCTeam.deleteMany({
+    where: {
+      kycTeamId,
+    },
+  })
+
+  await prisma.kYCTeam.delete({
+    where: {
+      id: kycTeamId,
+    },
+  })
 }

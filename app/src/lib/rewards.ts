@@ -10,8 +10,15 @@ export function unclaimedReward(reward: RewardWithClaim) {
   return !reward.claim || reward.claim.status !== "claimed"
 }
 
-export function noRewards(projects: ProjectWithDetails[]) {
-  return projects.every((project) => project.rewards.length === 0)
+export function noRewards(project: ProjectWithDetails) {
+  return project.rewards.length === 0
+}
+
+export function noRewardsPriorToRound(
+  project: ProjectWithDetails,
+  roundId: number,
+) {
+  return !project.rewards.some((reward) => parseInt(reward.roundId) < roundId)
 }
 
 // for every project

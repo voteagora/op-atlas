@@ -20,7 +20,8 @@ export async function getDeployedContractsServer(
 ): Promise<OsoDeployerContractsReturnType> {
   const variables = {
     where: {
-      rootDeployerAddress: { _ilike: deployer },
+      rootDeployerAddress: { _eq: deployer },
+      factoryAddress: { _eq: "" },
     },
   }
 
@@ -30,6 +31,7 @@ export async function getDeployedContractsServer(
         contractAddress
         contractNamespace
         rootDeployerAddress
+        factoryAddress
       }
     }
   `

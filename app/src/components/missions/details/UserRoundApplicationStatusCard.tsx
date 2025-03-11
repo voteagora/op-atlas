@@ -1,19 +1,10 @@
 "use client"
 
-import { format } from "date-fns"
 import { useSession } from "next-auth/react"
 
 import { useAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { useSessionProjects, useUserProjects } from "@/hooks/db/useUserProjects"
-import {
-  useSessionRoundApplications,
-  useUserRoundApplications,
-} from "@/hooks/db/useUserRoundApplications"
-import {
-  FundingRoundData,
-  rewardMeasurementDate,
-} from "@/lib/MissionsAndRoundData"
+import { useUserRoundApplications } from "@/hooks/db/useUserRoundApplications"
 
 import { ApplicationStatusCard } from "./ApplicationStatusCard"
 
@@ -34,10 +25,7 @@ export const UserRoundApplicationStatusCard = ({
       <div className="border-2 border-grey-900 rounded-xl flex flex-col gap-y-3 p-5">
         <ApplicationStatusCard
           isLoading={isLoadingApplications && isLoadingProjects}
-          applyByDate={mission?.applyBy && format(mission.applyBy, "MMM d")}
-          rewardsDate={
-            rewardMeasurementDate && format(rewardMeasurementDate, "MMMM")
-          }
+          mission={mission!}
           userProjectCount={projects?.length}
           userAppliedProjects={applications?.map((application) => {
             return {
@@ -45,7 +33,6 @@ export const UserRoundApplicationStatusCard = ({
               name: application.project.name,
             }
           })}
-          pageName={mission?.pageName}
         />
       </div>
     </>

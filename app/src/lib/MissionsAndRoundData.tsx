@@ -15,6 +15,7 @@ export type MissionData = FundingRoundData & {
   footer: React.ReactNode
   rewards: { measurement: string; criteria: string[] }
   applyBy: Date
+  evaluationMonth: number
 }
 
 export type FundingRoundData = {
@@ -54,7 +55,21 @@ export const MISSIONS: MissionData[] = [
     iconUrl: "/assets/images/dev-tooling.png",
     startsAt: new Date("2025-02-05T00:00:00.000Z"),
     endsAt: new Date("2025-07-31T00:00:00.000Z"),
-    applyBy: new Date("2025-02-27T00:00:00.000Z"),
+    applyBy: (() => {
+      const today = new Date()
+      const nextDeadline = new Date(
+        today.getFullYear(),
+        today.getMonth() + (today.getDate() > 27 ? 1 : 0),
+        27,
+      )
+      return nextDeadline
+    })(),
+    evaluationMonth: (() => {
+      const today = new Date()
+      return today.getDate() > 27
+        ? (today.getMonth() + 1) % 12
+        : today.getMonth()
+    })(),
     missionPageEligibility: (
       <div>
         <ul className="list-disc pl-6">
@@ -212,7 +227,21 @@ export const MISSIONS: MissionData[] = [
     iconUrl: "/assets/images/onchain-builders.png",
     startsAt: new Date("2025-02-18T00:00:00.000Z"),
     endsAt: new Date("2025-07-31T00:00:00.000Z"),
-    applyBy: new Date("2025-02-27T00:00:00.000Z"),
+    applyBy: (() => {
+      const today = new Date()
+      const nextDeadline = new Date(
+        today.getFullYear(),
+        today.getMonth() + (today.getDate() > 27 ? 1 : 0),
+        27,
+      )
+      return nextDeadline
+    })(),
+    evaluationMonth: (() => {
+      const today = new Date()
+      return today.getDate() > 27
+        ? (today.getMonth() + 1) % 12
+        : today.getMonth()
+    })(),
     missionPageEligibility: (
       <div>
         <p className="text-secondary-foreground">
@@ -224,8 +253,8 @@ export const MISSIONS: MissionData[] = [
             <span className="text-secondary-foreground">
               Your project must have a verified contract on one of the following
               OP Chains: Arena Z, Base, Ethernity, Ink, Lisk, Metal L2, Mode, OP
-              Mainnet, RACE, Shape, Superseed, Swellchain, Unichain,
-              World Chain, Zora, Soneium, Polynomial, Mint, BOB.
+              Mainnet, RACE, Shape, Superseed, Swellchain, Unichain, World
+              Chain, Zora, Soneium, Polynomial, Mint, BOB.
             </span>
           </li>
           <li>

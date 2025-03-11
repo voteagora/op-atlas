@@ -5,8 +5,8 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 
-import { Account } from "@/components/common/Account"
 import ExtendedLink from "@/components/common/ExtendedLink"
+import { MissionData } from "@/lib/MissionsAndRoundData"
 import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
 import { Button } from "../../ui/button"
@@ -14,18 +14,14 @@ import { GreenBadge } from "../common/badges/GreenBadge"
 
 export const ApplicationStatusCard = ({
   isLoading,
-  applyByDate,
-  rewardsDate,
+  mission,
   userProjectCount,
   userAppliedProjects,
-  pageName,
 }: {
   isLoading?: boolean
-  applyByDate: string | undefined
-  rewardsDate: string | undefined
+  mission: MissionData
   userProjectCount?: number
   userAppliedProjects: { icon: string | null; name: string }[] | undefined
-  pageName?: string
 }) => {
   const router = useRouter()
 
@@ -37,13 +33,19 @@ export const ApplicationStatusCard = ({
         <p className="font-semibold">{"Apply"}</p>
 
         <p className="text-sm text-secondary-foreground text-center">
-          {`Apply by ${applyByDate} to earn rewards for your performance in February.`}
+          {`Apply by ${format(
+            mission.applyBy,
+            "MMM d",
+          )} to earn rewards for your performance in ${format(
+            new Date(new Date().getFullYear(), mission.evaluationMonth, 1),
+            "MMMM",
+          )}.`}
         </p>
         <Button
           className="bg-optimismRed text-white w-full"
           variant={"outline"}
           onClick={() => {
-            router.push(`/missions/${pageName}/application`)
+            router.push(`/missions/${mission.pageName}/application`)
           }}
         >
           Choose projects
@@ -56,10 +58,17 @@ export const ApplicationStatusCard = ({
     return (
       <div className="flex flex-col items-center gap-2">
         <p className="font-semibold">{"Apply"}</p>
-        {applyByDate && (
+        {mission.applyBy && (
           <p className="text-sm text-secondary-foreground text-center">
-            {`Apply by ${format(applyByDate, "MMM d")}`}
-            <span>{" to earn rewards for your performance in February."}</span>
+            {`Apply by ${format(mission.applyBy, "MMM d")}`}
+            <span>
+              {" to earn rewards for your performance in "}
+              {format(
+                new Date(new Date().getFullYear(), mission.evaluationMonth, 1),
+                "MMMM",
+              )}
+              {"."}
+            </span>
           </p>
         )}
 
@@ -121,7 +130,7 @@ export const ApplicationStatusCard = ({
                   variant={"ghost"}
                   className="bg-secondary mt-5 w-full"
                   onClick={() => {
-                    router.push(`/missions/${pageName}/application`)
+                    router.push(`/missions/${mission.pageName}/application`)
                   }}
                 >
                   Apply with more projects
@@ -136,13 +145,19 @@ export const ApplicationStatusCard = ({
             <p className="font-semibold">{"Apply"}</p>
 
             <p className="text-sm text-secondary-foreground text-center">
-              {`Apply by ${applyByDate} to earn rewards for your performance in February.`}
+              {`Apply by ${format(
+                mission.applyBy,
+                "MMM d",
+              )} to earn rewards for your performance in ${format(
+                new Date(new Date().getFullYear(), mission.evaluationMonth, 1),
+                "MMMM",
+              )}.`}
             </p>
             <Button
               className="bg-optimismRed text-white w-full"
               variant={"outline"}
               onClick={() => {
-                router.push(`/missions/${pageName}/application`)
+                router.push(`/missions/${mission.pageName}/application`)
               }}
             >
               Choose projects
@@ -157,7 +172,7 @@ export const ApplicationStatusCard = ({
 
           <p className="text-sm text-secondary-foreground text-center">
             {
-              "You can’t apply for this Retro Funding Mission until you’ve added your project to OP Atlas."
+              "You can't apply for this Retro Funding Mission until you've added your project to OP Atlas."
             }
           </p>
 

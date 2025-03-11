@@ -145,6 +145,10 @@
     @apply bg-button-secondary text-button-secondary-foreground hover:!bg-button-secondary-hover;
   }
 
+  .button-outline {
+    @apply text-foreground border border-input bg-background hover:!bg-background hover:opacity-80;
+  }
+
   .input-container {
     @apply flex items-center self-start w-full px-3 py-2 border border-border rounded-md gap-1 text-secondary-foreground h-10;
   }

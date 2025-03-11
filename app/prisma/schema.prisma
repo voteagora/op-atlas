@@ -152,6 +152,7 @@ model Organization {
   team      UserOrganization[]
   projects  ProjectOrganization[]
   snapshots OrganizationSnapshot[]
+  OrganizationKYCTeams OrganizationKYCTeam[]
 
   @@index([deletedAt])
 }
@@ -251,6 +252,7 @@ model Project {
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
+  ProjectKYCTeam ProjectKYCTeam[]
 }
 
 model Application {
@@ -483,4 +485,86 @@ model GithubProximity {
   percentile Float
 
   @@unique([peer])
+}
+
+enum KYCStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model KYCUser {
+  id           String    @id @default(uuid())
+  email        String
+	firstName    String
+	lastName     String
+	businessName String?   // For businesses only
+  status       KYCStatus @default(PENDING)
+  expiry       DateTime
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  KYCUserTeams KYCUserTeams[]
+  
+  @@index([email])
+}
+model KYCTeam {
+  id             String       @id @default(uuid())
+  walletAddress  String       @unique
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+	team                       KYCUserTeams[]
+  ProjectKYCTeam             ProjectKYCTeam[]
+  OrganizationKYCTeams       OrganizationKYCTeam[]
+	
+  @@index([walletAddress])
+}
+
+model KYCUserTeams {
+	id          String    @id @default(uuid())
+	kycUserId   String
+	kycTeamId   String
+	
+	createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+	
+	users       KYCUser   @relation(fields: [kycUserId], references: [id]) 
+	team        KYCTeam   @relation(fields: [kycTeamId], references: [id], onDelete: Cascade) 
+	
+	@@index([kycUserId])
+	@@index([kycTeamId])
+}
+
+model ProjectKYCTeam { // Project can only have 1 KYCTeam
+	id          String    @id @default(uuid())
+	projectId   String
+	kycTeamId   String
+	
+	createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+	
+	project     Project   @relation(fields: [projectId], references: [id])
+	team        KYCTeam   @relation(fields: [kycTeamId], references: [id], onDelete: Cascade) 
+	
+	@@index([kycTeamId])
+}
+
+model OrganizationKYCTeam { // Organization can have many KYCTeam
+	id             String    @id @default(uuid())
+	organizationId String
+	kycTeamId      String
+	
+	createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+	
+	organization   Organization @relation(fields: [organizationId], references: [id])
+	team           KYCTeam      @relation(fields: [kycTeamId], references: [id], onDelete: Cascade) 
+	
+	@@index([organizationId])
+  @@index([kycTeamId])
 }

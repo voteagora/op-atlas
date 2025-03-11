@@ -159,7 +159,7 @@ async function canClaimToAddressFn({
         id: rewardId,
       },
     }),
-    prisma.rewardClaim.findFirst({
+    prisma.rewardClaim.findMany({
       where: {
         address: address.toLowerCase(),
       },
@@ -169,7 +169,11 @@ async function canClaimToAddressFn({
     }),
   ])
 
-  return !claim || reward?.projectId === claim.reward.projectId // can only claim to the same project
+  // Can only claim to the same address in different rounds
+  return (
+    claim.length === 0 ||
+    claim.every((c) => c.reward.roundId !== reward?.roundId)
+  )
 }
 
 export const canClaimToAddress = cache(canClaimToAddressFn)

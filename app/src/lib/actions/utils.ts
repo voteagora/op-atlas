@@ -3,29 +3,9 @@ import {
   getUserProjectOrganizations,
   isUserAdminOfOrganization,
 } from "@/db/organizations"
-import { getUserProjects } from "@/db/projects"
+import { getProject, getProjectTeam, getUserProjects } from "@/db/projects"
 
-import { ProjectTeam, ProjectWithDetails } from "../types"
-
-export const isUserMember = async (
-  project: ProjectWithDetails,
-  userId?: string,
-) => {
-  // TODO: must check the organization team as well
-  return userId && project.team.some((member) => member.userId === userId)
-}
-
-export const isUserMemberOfProject = (
-  project: ProjectTeam,
-  userId?: string,
-) => {
-  return (
-    userId &&
-    project.team.some((member) =>
-      member.user.some((user) => user.id === userId),
-    )
-  )
-}
+import { ProjectWithDetails } from "../types"
 
 export const projectMembers = (project: ProjectWithDetails) => {
   const projectTeam = project.team.map((user) => {
@@ -69,11 +49,11 @@ export const verifyMembership = async (
   projectId: string,
   farcasterId: string,
 ) => {
-  const [userProjects, userProjectOrganizations] = await Promise.all([
+  const [projects, userProjectOrganizations] = await Promise.all([
     getUserProjects({ farcasterId }),
     getUserProjectOrganizations(farcasterId, projectId),
   ])
-  const projectMembership = userProjects?.projects.find(
+  const projectMembership = projects?.projects.find(
     ({ project }) => project.id === projectId,
   )
 

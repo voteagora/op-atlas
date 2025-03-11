@@ -5,6 +5,7 @@ import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useFeatureFlagEnabled } from "posthog-js/react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -15,6 +16,7 @@ export function UserProfileSidebar({
 }: {
   organizations?: Organization[]
 }) {
+  const isKycEnabled = useFeatureFlagEnabled("add-grant-delivery-address-form")
   const pathname = usePathname()
   const router = useRouter()
 
@@ -106,27 +108,56 @@ export function UserProfileSidebar({
         <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground">
           Organizations
         </div>
-        <div className="flex flex-col gap-0.5 text-secondary-foreground text-sm">
-          {organizations?.map((organization, index) => (
-            <Link
-              key={index}
-              href={`/profile/organizations//${organization.id}`}
-              className={cn(
-                currentPage === organization.id && "text-foreground",
-                "flex gap-2 items-center",
-              )}
-            >
-              <div
-                className={cn(
-                  currentPage !== organization.id && "invisible",
-                  "text-lg text-muted-foreground pb-0.5 w-4",
+        <ul className="text-sm space-y-1.5 py-3.5">
+          {organizations?.map((organization, index) => {
+            const organizationUrl = `profile/organizations/${organization.id}`
+            const isLinkActive = pathname.includes(organizationUrl)
+            const isGrantAddressActive = pathname.includes(
+              `${organizationUrl}/grant-address`,
+            )
+            return (
+              <li key={index} className={"flex flex-col"}>
+                <Link
+                  href={`/profile/organizations/${organization.id}`}
+                  className={cn([
+                    "text-secondary-foreground font-normal space-x-2",
+                    { "text-foreground font-medium": isLinkActive },
+                  ])}
+                >
+                  <span
+                    className={cn([
+                      "opacity-0 text-lg",
+                      { "opacity-100": isLinkActive && !isGrantAddressActive },
+                    ])}
+                  >
+                    •
+                  </span>
+                  <span>{organization.name}</span>
+                </Link>
+                {isKycEnabled && (
+                  <Link
+                    href={`/profile/organizations/${organization.id}/grant-address`}
+                    className={cn([
+                      "text-secondary-foreground font-normal space-x-2 pl-4",
+                      {
+                        "text-foreground font-medium": isGrantAddressActive,
+                      },
+                    ])}
+                  >
+                    <span
+                      className={cn([
+                        "opacity-0 text-lg",
+                        { "opacity-100": isGrantAddressActive },
+                      ])}
+                    >
+                      •
+                    </span>
+                    <span>Grant address</span>
+                  </Link>
                 )}
-              >
-                •
-              </div>
-              {organization.name}
-            </Link>
-          ))}
+              </li>
+            )
+          })}
 
           {currentPage === "new" && (
             <Link
@@ -148,7 +179,7 @@ export function UserProfileSidebar({
             <Plus size={16} />
             Make an organization
           </Link>
-        </div>
+        </ul>
       </div>
     </div>
   )
