@@ -8,6 +8,7 @@ import {
   EnrolledInRetroFundingBanner,
   Header,
   Missions,
+  Performance,
 } from "./components"
 
 interface PageProps {
@@ -65,6 +66,7 @@ export default async function Page({ params }: PageProps) {
           }}
         />
         <Missions />
+        <Performance />
       </div>
     </div>
   )
