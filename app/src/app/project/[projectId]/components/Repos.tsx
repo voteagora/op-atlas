@@ -34,6 +34,8 @@ export default function Repos() {
     </div>
   )
 }
+
+// TODO: Replace this with actual data
 const TAGS = [
   {
     name: "Open Source",
@@ -67,3 +69,4 @@ const REPOS = [
     tags: TAGS,
   },
 ]
+//
