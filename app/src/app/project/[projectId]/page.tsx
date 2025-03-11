@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 
 import {
+  Contributors,
   Description,
   EnrolledInRetroFundingBanner,
   Header,
@@ -67,6 +68,7 @@ export default async function Page({ params }: PageProps) {
         />
         <Missions />
         <Performance />
+        <Contributors />
       </div>
     </div>
   )
