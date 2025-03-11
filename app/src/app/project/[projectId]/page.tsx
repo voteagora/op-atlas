@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 
 import {
+  Contracts,
   Contributors,
   Description,
   EnrolledInRetroFundingBanner,
@@ -73,6 +74,7 @@ export default async function Page({ params }: PageProps) {
         <Contributors />
         <Repos />
         <Links />
+        <Contracts />
       </div>
     </div>
   )
