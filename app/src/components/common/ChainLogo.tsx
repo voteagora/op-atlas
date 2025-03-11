@@ -1,6 +1,5 @@
 import Image from "next/image"
-
-import { CHAIN_INFO } from "./chain"
+import { getAtlasSupportedNetworkWithAttributes } from "./chain"
 
 export function ChainLogo({
   className,
@@ -8,15 +7,16 @@ export function ChainLogo({
   size = 24,
 }: {
   className?: string
-  chainId: string
+  chainId: number
   size?: number
 }) {
-  const chainInfo = CHAIN_INFO[chainId]
+  const chainInfo = getAtlasSupportedNetworkWithAttributes(chainId)
+
   if (!chainInfo) return null
 
   return (
     <Image
-      src={chainInfo.logo}
+      src={chainInfo.logo || ""}
       height={size}
       width={size}
       alt={`${chainInfo.name} logo`}
