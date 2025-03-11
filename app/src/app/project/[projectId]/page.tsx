@@ -12,6 +12,7 @@ import {
   Links,
   Missions,
   Performance,
+  PricingAndInvestment,
   Repos,
 } from "./components"
 
@@ -75,6 +76,7 @@ export default async function Page({ params }: PageProps) {
         <Repos />
         <Links />
         <Contracts />
+        <PricingAndInvestment />
       </div>
     </div>
   )
