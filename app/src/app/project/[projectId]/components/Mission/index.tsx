@@ -44,17 +44,7 @@ export default function Missions() {
                 </span>
               </div>
             </div>
-            <AccordionTrigger>
-              <div className="px-4 py-3 bg-red-100 rounded-full text-sm font-medium flex items-center space-x-1">
-                <Image
-                  src="/assets/chain-logos/optimism.svg"
-                  width={20}
-                  height={20}
-                  alt="Optimism"
-                />
-                <span>1,580 total rewards</span>
-              </div>
-            </AccordionTrigger>
+            <AccordionTrigger />
           </div>
           <AccordionContent className="space-y-12">
             <RewardsTable />

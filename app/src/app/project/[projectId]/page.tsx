@@ -11,7 +11,7 @@ import {
   Grants,
   Header,
   Links,
-  Missions,
+  Mission,
   Performance,
   PricingAndInvestment,
   Repos,
@@ -71,7 +71,7 @@ export default async function Page({ params }: PageProps) {
             mirror: publicProject.mirror,
           }}
         />
-        <Missions />
+        <Mission />
         <Performance />
         <Contributors />
         <Repos />

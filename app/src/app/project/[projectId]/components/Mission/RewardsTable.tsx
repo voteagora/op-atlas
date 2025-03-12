@@ -1,31 +1,45 @@
 import { CheckCircle2, EyeOff, Info, Triangle } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
 
+import { Button } from "@/components/common/Button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
 export default function RewardsTable() {
   return (
     <div className="space-y-6">
+      <div className="relative w-full rounded-xl border border-red-300 flex items-center justify-center space-y-6 h-64 flex-col mt-4 overflow-hidden bg-red-100">
+        <div className="text-center space-y-3 z-50">
+          <span className="font-extrabold text-4xl">1,264 OP</span>
+          <p className="text-secondary-foreground">
+            Rewards so far in Retro Funding: Onchain Builders
+          </p>
+        </div>
+        <Button variant="primary" className="z-50">
+          Claim your rewards
+        </Button>
+      </div>
       <Tabs defaultValue={REWARDS.at(0)?.key} className="w-full mt-12">
-        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto">
+        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {/* TODO: Replace MONTHS with actual data */}
           {MONTHS.map((month, index) => (
             <TabsTrigger
               key={index}
               value={month}
-              className="rounded-lg py-2 px-4 bg-background border border-tertiary min-w-36 w-full data-[state=active]:bg-contrast data-[state=active]:text-contrast-white"
+              className="rounded-lg py-2 px-4 bg-secondary text-secondary-foreground border border-tertiary min-w-36 w-full data-[state=active]:bg-background data-[state=active]:text-foreground"
             >
               {month}
             </TabsTrigger>
           ))}
         </TabsList>
-        {REWARDS.map(({ key, rewards, totalRewards }) => (
+        {REWARDS.map(({ key, achievements, totalRewards }) => (
           <TabsContent
             key={key}
             value={key}
             className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
           >
-            {rewards.map(({ value, title, trend }, index) => (
+            {achievements.map(({ value, title, trend }, index) => (
               <div
                 key={index}
                 className="flex flex-col justify-between p-6 bg-background rounded-lg border"
@@ -62,11 +76,32 @@ export default function RewardsTable() {
                 <div>{title}</div>
               </div>
             ))}
-            <div className="rounded-lg p-6 flex flex-col items-center justify-center w-full bg-background border col-span-2">
-              <span className="font-semibold">{totalRewards}</span>
-              <span className="text-secondary-foreground">
-                Rewards in {key}
-              </span>
+            <div className="rounded-lg p-6 flex items-center justify-between w-full bg-background border col-span-2 divide-x-2">
+              <div className="space-x-2 flex h-12">
+                <Image
+                  src="/assets/chain-logos/optimism-letters.svg"
+                  width={40}
+                  height={40}
+                  alt="Optimism Logo"
+                />
+                <div className="flex flex-col h-full justify-between py-0.5">
+                  <span className="font-semibold text-foreground">
+                    1,264 OP
+                  </span>
+                  <span className="text-secondary-foreground">
+                    Rewards for performance in February
+                  </span>
+                </div>
+              </div>
+              <p className="w-1/2 pl-6 text-secondary-foreground text-sm">
+                Rewards are determined by an{" "}
+                <span className="font-semibold">evaluation algorithm</span>{" "}
+                powered by onchain data, and some metrics are more valuable than
+                others.{" "}
+                <Link href={"#"} className="underline">
+                  Learn more
+                </Link>
+              </p>
             </div>
           </TabsContent>
         ))}
@@ -108,11 +143,28 @@ const getRandomTotalRewards = () => Math.floor(Math.random() * 10000)
 
 const REWARDS = MONTHS.map((month) => ({
   key: month,
-  rewards: Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => ({
-    value: getRandomValue(),
-    title: "TVL across the Superchain",
-    trend: getRandomTrend(),
-  })),
+  achievements: [
+    {
+      value: getRandomValue(),
+      title: "TVL across the Superchain",
+      trend: getRandomTrend(),
+    },
+    {
+      value: getRandomValue(),
+      title: "Transactions",
+      trend: getRandomTrend(),
+    },
+    {
+      value: getRandomValue(),
+      title: "Gas consumed",
+      trend: getRandomTrend(),
+    },
+    {
+      value: getRandomValue(),
+      title: "Qualified addresses",
+      trend: getRandomTrend(),
+    },
+  ],
   totalRewards: `${getRandomTotalRewards()} OP`,
 }))
 

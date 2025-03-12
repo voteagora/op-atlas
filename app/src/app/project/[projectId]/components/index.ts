@@ -5,7 +5,7 @@ export { default as EnrolledInRetroFundingBanner } from "./EnrolledInRetroFundin
 export { default as Grants } from "./Grants"
 export { default as Header } from "./Header"
 export { default as Links } from "./Links"
-export { default as Missions } from "./Missions"
+export { default as Mission } from "./Mission"
 export { default as Performance } from "./Performance"
 export { default as PricingAndInvestment } from "./PricingAndInvestment"
 export { default as Repos } from "./Repos"
