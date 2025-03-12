@@ -8,6 +8,7 @@ import {
   Contributors,
   Description,
   EnrolledInRetroFundingBanner,
+  Grants,
   Header,
   Links,
   Missions,
@@ -77,6 +78,7 @@ export default async function Page({ params }: PageProps) {
         <Links />
         <Contracts />
         <PricingAndInvestment />
+        <Grants />
       </div>
     </div>
   )
