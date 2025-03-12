@@ -7,19 +7,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-import Billboard from "./Billboard"
 import RewardsTable from "./RewardsTable"
-import UnclaimedRewards from "./UnclaimedRewards"
 
 export default function Missions() {
   return (
     <div className="w-full space-y-6">
       <h4 className="font-semibold text-xl">Missions</h4>
       <Accordion type="single" collapsible>
-        <AccordionItem
-          value="retro-funding"
-          className="rounded-xl border p-12 w-full h-fit"
-        >
+        <AccordionItem value="retro-funding" className="w-full">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Image
@@ -48,8 +43,6 @@ export default function Missions() {
           </div>
           <AccordionContent className="space-y-12">
             <RewardsTable />
-            <Billboard />
-            <UnclaimedRewards />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

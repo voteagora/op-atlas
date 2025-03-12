@@ -10,6 +10,7 @@ import {
   EnrolledInRetroFundingBanner,
   Grants,
   Header,
+  IncreaseYourImpact,
   Links,
   Mission,
   Performance,
@@ -72,6 +73,7 @@ export default async function Page({ params }: PageProps) {
           }}
         />
         <Mission />
+        <IncreaseYourImpact />
         <Performance />
         <Contributors />
         <Repos />

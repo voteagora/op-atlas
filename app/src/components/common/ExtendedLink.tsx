@@ -17,7 +17,7 @@ interface ButtonProps extends Omit<ShadcnButtonProps, "variant"> {
   icon?: React.ReactNode
   text?: string
   subtext?: string
-  variant?: "default" | "primary"
+  variant?: "default" | "primary" | "ghost"
   target?: React.HTMLAttributeAnchorTarget
   showOutboundLinkIcon?: boolean
 }
@@ -71,11 +71,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         <ShadcnButton
           ref={ref}
           className={cn(
-            "group flex items-center gap-x-1.5 ",
+            "group flex items-center gap-x-1.5 transition-all duration-150",
             {
               "button-secondary text-inherit": variant === "default",
               "bg-optimismRed text-white hover:bg-optimismRed/70":
                 variant === "primary",
+              "bg-transparent border hover:opacity-80 hover:bg-transparent":
+                variant === "ghost",
             },
             className,
           )}
