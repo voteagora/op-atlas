@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npx prisma generate && next dev",
+    "dev": "pnpm graphql:generate && npx prisma generate && next dev",
     "build": "prisma generate && next build && prisma migrate deploy",
     "start": "next start",
     "format": "prettier --write .",
@@ -19,7 +19,8 @@
     "rewards": "tsx src/scripts/rewards.ts",
     "kyc": "tsx src/scripts/kyc.ts",
     "prepare": "husky",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "graphql:generate": "pnpm graphql-codegen"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -69,7 +70,6 @@
     "eas-indexer": "workspace:^",
     "embla-carousel-react": "^8.0.2",
     "ethers": "^6.13.4",
-    "graphql": "^16.9.0",
     "graphql-request": "^7.1.0",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.363.0",
@@ -102,6 +102,11 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.5",
+    "@graphql-codegen/introspection": "^4.0.3",
+    "@graphql-codegen/typescript": "^4.1.5",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
+    "@graphql-codegen/typescript-operations": "^4.5.1",
     "@types/mailchimp__mailchimp_marketing": "^3.0.21",
     "@types/mixpanel-browser": "^2.49.0",
     "@types/node": "^20",
@@ -115,6 +120,8 @@
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.0",
+    "graphql": "^16.9.0",
+    "graphql-cli": "^4.1.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "postcss": "^8",
