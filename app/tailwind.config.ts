@@ -94,10 +94,13 @@ const config = {
         },
         optimismRed: "hsl(var(--destructive))",
         callout: {
+          DEFAULT: "#D6E4FF",
           foreground: "#3374DB",
         },
-        calloutAlternative: {
-          foreground: "#D6E4FF",
+        contrast: {
+          DEFAULT: "#05060B",
+          white: "#FFFFFF",
+          foreground: "#FBFCFE",
         },
       },
       borderRadius: {
@@ -114,10 +117,15 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "slow-spin": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "slow-spin": "slow-spin 2s linear infinite",
       },
     },
   },

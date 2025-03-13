@@ -233,3 +233,10 @@ export const getValidUntil = (value: Date) => {
     day: "numeric",
   })
 }
+
+export const formatNumberWithCommas = (value: string | number) => {
+  if (typeof value === "string") {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  }
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}

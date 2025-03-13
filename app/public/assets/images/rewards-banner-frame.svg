@@ -1,0 +1,33 @@
+<svg width="1064" height="276" viewBox="0 0 1064 276" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_793_4282)">
+<path d="M1180.31 106.435L28.3716 -290.941L260.204 905.355L1180.31 106.435Z" fill="url(#paint0_linear_793_4282)" stroke="white" stroke-width="0.452811"/>
+<g filter="url(#filter0_d_793_4282)">
+<path d="M209.465 -198.564L485.452 994.867L1381 159.139L209.465 -198.564Z" fill="url(#paint1_linear_793_4282)" shape-rendering="crispEdges"/>
+<path d="M1380.12 159.343L210.083 -197.902L485.716 994.001L1380.12 159.343Z" stroke="white" stroke-width="0.905622" shape-rendering="crispEdges"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_793_4282" x="207.653" y="-198.564" width="1175.16" height="1197.05" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1.81124"/>
+<feGaussianBlur stdDeviation="0.905622"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_793_4282"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_793_4282" result="shape"/>
+</filter>
+<linearGradient id="paint0_linear_793_4282" x1="611.973" y1="318.025" x2="91.9845" y2="-193.002" gradientUnits="userSpaceOnUse">
+<stop stop-color="white"/>
+<stop offset="0.825487" stop-color="#FED4C7" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint1_linear_793_4282" x1="877.259" y1="99.0589" x2="247.852" y2="-93.8385" gradientUnits="userSpaceOnUse">
+<stop offset="0.0719174" stop-color="#FED4C7" stop-opacity="0"/>
+<stop offset="0.493626" stop-color="#F2F2FF" stop-opacity="0.6"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+<clipPath id="clip0_793_4282">
+<rect width="1600" height="900" fill="white" transform="matrix(-1 0 0 1 1332 -531)"/>
+</clipPath>
+</defs>
+</svg>
