@@ -40,7 +40,7 @@ export default function RewardsTable() {
           </div>
         </div>
       </div>
-      <Tabs defaultValue={REWARDS.at(0)?.key} className="w-full mt-12">
+      <Tabs defaultValue={ACHIEVEMENTS.at(0)?.key} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {/* TODO: Replace MONTHS with actual data */}
           {MONTHS.map((month, index) => (
@@ -53,7 +53,7 @@ export default function RewardsTable() {
             </TabsTrigger>
           ))}
         </TabsList>
-        {REWARDS.map(({ key, achievements, totalRewards }) => (
+        {ACHIEVEMENTS.map(({ key, achievements, totalRewards }) => (
           <TabsContent
             key={key}
             value={key}
@@ -153,7 +153,20 @@ export default function RewardsTable() {
 // NOTE: Mock data
 const MONTHS = ["February", "March", "April", "May", "June", "July"]
 
-const getRandomValue = () => `$${(Math.random() * 10000 + 1000).toFixed(2)}`
+const getRandomValue = ({
+  symbol,
+  round = false,
+  decimals = 2,
+}: {
+  symbol: string
+  round?: boolean
+  decimals?: number
+}) => {
+  const value = Math.random() * 10000 + 1000
+  return `${symbol === "$" ? symbol : ""}${
+    round ? Math.round(value) : value.toFixed(decimals)
+  }${symbol !== "$" ? symbol : ""}`
+}
 const getRandomTrend = () => {
   const value = (Math.random() * 10).toFixed(1)
   const type = Math.random() > 0.5 ? "increase" : "decrease"
@@ -161,26 +174,26 @@ const getRandomTrend = () => {
 }
 const getRandomTotalRewards = () => Math.floor(Math.random() * 10000)
 
-const REWARDS = MONTHS.map((month) => ({
+const ACHIEVEMENTS = MONTHS.map((month) => ({
   key: month,
   achievements: [
     {
-      value: getRandomValue(),
+      value: getRandomValue({ symbol: "$", round: true }),
       title: "TVL across the Superchain",
       trend: getRandomTrend(),
     },
     {
-      value: getRandomValue(),
+      value: getRandomValue({ symbol: "K", round: true }),
       title: "Transactions",
       trend: getRandomTrend(),
     },
     {
-      value: getRandomValue(),
+      value: getRandomValue({ symbol: " ETH", decimals: 3 }),
       title: "Gas consumed",
       trend: getRandomTrend(),
     },
     {
-      value: getRandomValue(),
+      value: getRandomValue({ symbol: "", round: true }),
       title: "Qualified addresses",
       trend: getRandomTrend(),
     },
