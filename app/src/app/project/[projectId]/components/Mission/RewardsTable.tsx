@@ -9,16 +9,29 @@ import { cn } from "@/lib/utils"
 export default function RewardsTable() {
   return (
     <div className="space-y-6">
-      <div className="relative w-full rounded-xl border border-red-300 flex items-center justify-center space-y-6 h-64 flex-col mt-4 overflow-hidden bg-red-100">
-        <div className="text-center space-y-3 z-50">
-          <span className="font-extrabold text-4xl">1,264 OP</span>
-          <p className="text-secondary-foreground">
-            Rewards so far in Retro Funding: Onchain Builders
-          </p>
+      <div className="mt-6 relative w-full h-64 rounded-lg z-10 overflow-hidden">
+        <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF0420] via-[#FF67B5] animate-slow-spin" />
+        <Image
+          className="absolute top-0 left-0 z-0 p-0.5 rounded-lg"
+          src="/assets/images/rewards-banner-frame.png"
+          objectFit="cover"
+          objectPosition="center"
+          layout="fill"
+          alt="Rewards Banner"
+        />
+        <div className="absolute w-full h-full z-50">
+          <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
+            <div className="text-center space-y-3 z-50">
+              <span className="font-extrabold text-4xl">1,264 OP</span>
+              <p className="text-secondary-foreground">
+                Rewards so far in Retro Funding: Onchain Builders
+              </p>
+            </div>
+            <Button variant="primary" className="z-50">
+              Claim your rewards
+            </Button>
+          </div>
         </div>
-        <Button variant="primary" className="z-50">
-          Claim your rewards
-        </Button>
       </div>
       <Tabs defaultValue={REWARDS.at(0)?.key} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
