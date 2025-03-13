@@ -7,45 +7,49 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-import RewardsTable from "./RewardsTable"
+import DevToolingMission from "./DevToolingMission"
+import OnchainBuilderMission from "./OnchainBuilderMission"
 
-export default function Missions() {
+interface MissionProps {
+  type: "on-chain" | "dev-tooling"
+}
+
+export default function Mission({ type }: MissionProps) {
   return (
-    <div className="w-full space-y-6">
-      <h4 className="font-semibold text-xl">Missions</h4>
-      <Accordion type="single" collapsible>
-        <AccordionItem value="retro-funding" className="w-full">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Image
-                src="/assets/icons/sunny-red.svg"
-                width={48}
-                height={48}
-                alt="Project Profile"
-              />
-              <div className="flex flex-col justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold">
-                    Retro Funding: Onchain Builders
-                  </span>
-                  {/* TODO: Replace this with actual state */}
-                  <span className="px-2 py-1 bg-callout text-callout-foreground rounded-full text-xs font-medium">
-                    In Progress
-                  </span>
-                </div>
-                {/* TODO: Replace this with actual date */}
-                <span className="text-secondary-foreground font-normal">
-                  Feb 12 - July 30, 2025
+    <Accordion type="single" collapsible>
+      <AccordionItem value="retro-funding" className="w-full">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Image
+              src="/assets/icons/sunny-red.svg"
+              width={48}
+              height={48}
+              alt="Project Profile"
+            />
+            <div className="flex flex-col justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="font-semibold">
+                  {type === "on-chain" && "Retro Funding: Onchain Builders"}
+                  {type === "dev-tooling" && "Retro Funding: Dev Tooling"}
+                </span>
+                {/* TODO: Replace this with actual state */}
+                <span className="px-2 py-1 bg-callout text-callout-foreground rounded-full text-xs font-medium">
+                  In Progress
                 </span>
               </div>
+              {/* TODO: Replace this with actual date */}
+              <span className="text-secondary-foreground font-normal">
+                Feb 12 - July 30, 2025
+              </span>
             </div>
-            <AccordionTrigger />
           </div>
-          <AccordionContent className="space-y-12">
-            <RewardsTable />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
+          <AccordionTrigger />
+        </div>
+        <AccordionContent>
+          {type === "on-chain" && <OnchainBuilderMission />}
+          {type === "dev-tooling" && <DevToolingMission />}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   )
 }

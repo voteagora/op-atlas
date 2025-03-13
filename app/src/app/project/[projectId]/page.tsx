@@ -72,7 +72,17 @@ export default async function Page({ params }: PageProps) {
             mirror: publicProject.mirror,
           }}
         />
-        <Mission />
+        <div className="w-full space-y-6">
+          <h4 className="font-semibold text-xl">Missions</h4>
+          <ul className="space-y-12">
+            <li>
+              <Mission type="on-chain" />
+            </li>
+            <li>
+              <Mission type="dev-tooling" />
+            </li>
+          </ul>
+        </div>
         <IncreaseYourImpact />
         <Performance />
         <Contributors />
