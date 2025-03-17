@@ -81,32 +81,3 @@ export default function Grants({ funding }: GrantsProps) {
     </div>
   )
 }
-
-// TODO: Replace this with actual data
-// const GRANTS = [
-//   {
-//     type: "retro-grant",
-//     title: "Retro Funding Mission: Onchain Builders",
-//     date: "Feb 12 - July 30, 2025",
-//     amount: 1_580,
-//   },
-//   {
-//     type: "op-grant",
-//     title: "Optimism Grant: Token House Mission",
-//     date: "Oct 2024",
-//     amount: 34_000,
-//   },
-//   {
-//     type: "retro-grant",
-//     title: "Retro Funding 4: Onchain Builders",
-//     date: "May 2024",
-//     amount: 426_708,
-//   },
-//   {
-//     type: "retro-grant",
-//     title: "Retro Funding 3",
-//     date: "Oct 2023",
-//     amount: 100_000,
-//   },
-// ]
-//
