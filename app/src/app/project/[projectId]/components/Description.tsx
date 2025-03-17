@@ -3,19 +3,19 @@ import Image, { type ImageProps } from "next/image"
 import Link from "next/link"
 
 interface DescriptionProps {
-  name: string
+  name?: string
   tags: string[]
   author: { avatarUrl?: string | null; name?: string | null }
   deployedOn: {
     name: string
     image: ImageProps["src"]
   }[]
-  description: string | null
+  description?: string | null
   socials: {
-    website: string[]
-    farcaster: string[]
-    twitter: string | null
-    mirror: string | null
+    website?: string[]
+    farcaster?: string[]
+    twitter?: string | null
+    mirror?: string | null
   }
 }
 
@@ -79,7 +79,7 @@ export default function Description({
         </div>
         <div>{description}</div>
         <div className="flex items-center space-x-2 flex-wrap">
-          {socials.website.map((website, i) => (
+          {socials.website?.map((website, i) => (
             <SocialsBadgeLink
               key={i}
               icon={<LinkIcon className="w-3.5 h-3.5" />}
@@ -91,7 +91,7 @@ export default function Description({
               }
             />
           ))}
-          {socials.farcaster.map((farcaster, i) => (
+          {socials.farcaster?.map((farcaster, i) => (
             <SocialsBadgeLink
               key={i}
               icon={

@@ -45,12 +45,12 @@ export default async function Page({ params }: PageProps) {
         name: publicProject.organization.organization.name,
       }
     : {
-        avatarUrl: publicProject.team.at(0)?.user.imageUrl,
-        name: publicProject.team.at(0)?.user.name,
+        avatarUrl: publicProject.team?.at(0)?.user.imageUrl,
+        name: publicProject.team?.at(0)?.user.name,
       }
 
   return (
-    <div className="w-full h-full mt-6">
+    <div className="w-full h-full mt-6 pb-12">
       <div className="mx-auto w-full max-w-7xl px-8 space-y-12">
         <EnrolledInRetroFundingBanner />
         <Header
@@ -85,12 +85,12 @@ export default async function Page({ params }: PageProps) {
         </div>
         <IncreaseYourImpact />
         <Performance />
-        <Contributors />
-        <Repos />
-        <Links />
-        <Contracts />
-        <PricingAndInvestment />
-        <Grants />
+        <Contributors contributors={publicProject.contributors} />
+        <Repos repos={publicProject.repos} />
+        <Links links={publicProject.links} />
+        <Contracts contracts={publicProject.contracts} />
+        <PricingAndInvestment pricingModel={publicProject.pricingModel} />
+        <Grants funding={publicProject.funding} />
       </div>
     </div>
   )

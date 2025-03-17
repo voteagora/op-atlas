@@ -1,8 +1,8 @@
 import Image from "next/image"
 
 interface HeaderProps {
-  thumbnail: string | null
-  banner: string | null
+  thumbnail?: string | null
+  banner?: string | null
 }
 
 export default function Header({ thumbnail, banner }: HeaderProps) {

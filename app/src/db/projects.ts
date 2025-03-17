@@ -1,6 +1,6 @@
 "use server"
 
-import { KYCUser, Prisma, Project, PublishedContract } from "@prisma/client"
+import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
 
@@ -1854,29 +1854,74 @@ export async function deleteProjectKycTeam({
 }
 
 export async function getPublicProject({ projectId }: { projectId: string }) {
-  return await prisma.project.findFirst({
-    where: {
-      id: projectId,
-    },
-    include: {
-      organization: {
-        select: {
-          organization: {
-            select: {
-              name: true,
-              avatarUrl: true,
+  const project = await prisma.project
+    .findFirst({
+      where: {
+        id: projectId,
+      },
+      include: {
+        links: true,
+        contracts: true,
+        repos: true,
+        funding: true,
+        organization: {
+          select: {
+            organization: {
+              select: {
+                name: true,
+                avatarUrl: true,
+                team: {
+                  select: {
+                    user: true,
+                  },
+                },
+              },
             },
           },
         },
-      },
-      team: {
-        orderBy: {
-          createdAt: "asc",
+        team: {
+          orderBy: {
+            createdAt: "asc",
+          },
+          select: {
+            user: true,
+          },
         },
-        select: {
-          user: true,
-        },
       },
-    },
-  })
+    })
+    .then((project) => {
+      project?.repos.map((r) => {
+        const tags = []
+
+        if (r.openSource) {
+          tags.push({ name: "Open Source", icon: "/assets/icons/oss.svg" })
+        }
+        if (r.npmPackage) {
+          tags.push({ name: "NPM", icon: "/assets/icons/npm-fill.svg" })
+        }
+        if (r.crate) {
+          tags.push({ name: "Crate", icon: "/assets/icons/crate.svg" })
+        }
+
+        return {
+          ...r,
+          tags,
+        }
+      })
+
+      return project
+    })
+
+  const users = project?.team.map((t) => t.user)
+  const organizationUsers = project?.organization?.organization.team.map(
+    (t) => t.user,
+  )
+  const deduppedUsers = users
+    ? users.filter((u) => !organizationUsers?.find((ou) => ou.id === u.id))
+    : []
+
+  return {
+    ...project,
+    contributors: deduppedUsers,
+  }
 }
