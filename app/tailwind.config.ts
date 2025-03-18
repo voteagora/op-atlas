@@ -59,14 +59,14 @@ const config = {
           muted: "hsl(var(--text-muted))",
           destructive: "#FF0420",
         },
-        foreground: "hsl(var(--foreground))",
+        foreground: "var(--foreground)",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          foreground: "var(--secondary-foreground)",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -94,10 +94,13 @@ const config = {
         },
         optimismRed: "hsl(var(--destructive))",
         callout: {
+          DEFAULT: "#D6E4FF",
           foreground: "#3374DB",
         },
-        calloutAlternative: {
-          foreground: "#D6E4FF",
+        contrast: {
+          DEFAULT: "#05060B",
+          white: "#FFFFFF",
+          foreground: "#FBFCFE",
         },
       },
       borderRadius: {
@@ -114,10 +117,15 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "slow-spin": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "slow-spin": "slow-spin 2s linear infinite",
       },
     },
   },
