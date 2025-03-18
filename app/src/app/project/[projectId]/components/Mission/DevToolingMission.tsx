@@ -63,7 +63,7 @@ export default function DevToolingMission() {
             {achievements.map(({ value, title, trend }, index) => (
               <div
                 key={index}
-                className="flex flex-col justify-between p-6 bg-background rounded-lg border"
+                className="flex flex-col justify-between p-6 bg-background rounded-xl border"
               >
                 <div className="w-full flex items-center justify-between space-x-1">
                   <span className="font-semibold">{value}</span>
@@ -111,17 +111,18 @@ export default function DevToolingMission() {
               </div>
               <ul className="grid grid-cols-2 gap-2 w-1/2 pl-8">
                 {TOP_PROJECTS.map(({ name, image }, index) => (
-                  <li
+                  <Link
+                    href={"#"}
                     key={`${name} - ${index}`}
-                    className="space-x-2 flex items-center"
+                    className="space-x-2 flex items-center hover:text-opacity-90 text-secondary-foreground transition-all duration-150"
                   >
                     <Image src={image} width={24} height={24} alt={name} />
                     <span className="text-secondary-foreground">{name}</span>
-                  </li>
+                  </Link>
                 ))}
               </ul>
             </div>
-            <div className="rounded-lg p-6 flex items-center justify-between w-full bg-background border col-span-2 divide-x-2">
+            <div className="rounded-xl p-6 flex items-center justify-between w-full bg-background border col-span-2 divide-x-[1px]">
               <div className="space-x-2 flex h-12">
                 <Image
                   src="/assets/chain-logos/optimism-letters.svg"
@@ -138,7 +139,7 @@ export default function DevToolingMission() {
                   </span>
                 </div>
               </div>
-              <p className="w-1/2 pl-6 text-secondary-foreground text-sm">
+              <p className="w-1/2 pl-6 text-secondary-foreground text-base font-normal">
                 Rewards are determined by an{" "}
                 <span className="font-semibold">evaluation algorithm</span>{" "}
                 powered by onchain data, and some metrics are more valuable than
@@ -151,7 +152,7 @@ export default function DevToolingMission() {
           </TabsContent>
         ))}
       </Tabs>
-      <ul>
+      <ul className="space-y-[8pt]">
         {/* TODO: Replace this with actual data */}
         {NOTIFICATIONS.map(({ type, message }, index) => (
           <li key={index} className="flex items-center space-x-1 group">

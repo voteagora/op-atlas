@@ -1,6 +1,10 @@
+"use client"
+
 import { Link as LinkIcon } from "lucide-react"
+import { ChevronDownIcon } from "lucide-react"
 import Image, { type ImageProps } from "next/image"
 import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
 
 interface DescriptionProps {
   name?: string
@@ -77,7 +81,9 @@ export default function Description({
             </ul>
           </div>
         </div>
-        <div>{description}</div>
+        <div>
+          <TruncatedText description={description ?? ""} />
+        </div>
         <div className="flex items-center space-x-2 flex-wrap">
           {socials.website?.map((website, i) => (
             <SocialsBadgeLink
@@ -151,6 +157,40 @@ function SocialsBadgeLink({
     <div className="py-1 px-2.5 rounded-full bg-secondary text-sm font-medium flex items-center space-x-1">
       {icon}
       <Link href={href}>{text}</Link>
+    </div>
+  )
+}
+
+const TruncatedText = ({ description }: { description: string }) => {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isTruncated, setIsTruncated] = useState(false)
+  const textRef = useRef<HTMLParagraphElement>(null)
+
+  useEffect(() => {
+    if (textRef.current) {
+      setIsTruncated(
+        textRef.current.scrollHeight > textRef.current.clientHeight,
+      )
+    }
+  }, [description])
+
+  return (
+    <div className="space-y-4">
+      <p
+        ref={textRef}
+        className={`overflow-hidden ${isExpanded ? "" : "line-clamp-3"}`}
+      >
+        {description}
+      </p>
+      {isTruncated && (
+        <button
+          className="text-secondary-foreground flex items-center spce-x-0.5 font-normal"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <span>{isExpanded ? "Read Less" : "Read More"}</span>
+          <ChevronDownIcon size={16} />
+        </button>
+      )}
     </div>
   )
 }

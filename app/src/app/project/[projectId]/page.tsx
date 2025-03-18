@@ -7,7 +7,6 @@ import {
   Contracts,
   Contributors,
   Description,
-  EnrolledInRetroFundingBanner,
   Grants,
   Header,
   IncreaseYourImpact,
@@ -51,15 +50,17 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <div className="w-full h-full mt-6 pb-12">
-      <div className="mx-auto w-full max-w-7xl px-8 space-y-12">
-        <EnrolledInRetroFundingBanner />
-        <Header
-          thumbnail={publicProject.thumbnailUrl}
-          banner={publicProject.bannerUrl}
-        />
+      <div className="mx-auto w-full max-w-[1064px] px-8 space-y-12">
+        <div className="w-full mt-8">
+          <Header
+            thumbnail={publicProject.thumbnailUrl}
+            banner={publicProject.bannerUrl}
+          />
+        </div>
         <Description
           name={publicProject.name}
-          tags={["Project", "Cross Chain"]}
+          // TODO: Replace this with actual tags
+          tags={[]}
           author={author}
           deployedOn={[
             { name: "Optimism", image: "/assets/chain-logos/optimism.svg" },

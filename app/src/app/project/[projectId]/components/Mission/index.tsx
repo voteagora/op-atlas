@@ -28,7 +28,7 @@ export default function Mission({ type }: MissionProps) {
             />
             <div className="flex flex-col justify-between">
               <div className="flex items-center space-x-2">
-                <span className="font-semibold">
+                <span className="font-semibold text-base text-foreground">
                   {type === "on-chain" && "Retro Funding: Onchain Builders"}
                   {type === "dev-tooling" && "Retro Funding: Dev Tooling"}
                 </span>
@@ -38,9 +38,9 @@ export default function Mission({ type }: MissionProps) {
                 </span>
               </div>
               {/* TODO: Replace this with actual date */}
-              <span className="text-secondary-foreground font-normal">
+              <p className="text-secondary-foreground font-normal text-base">
                 Feb 12 - July 30, 2025
-              </span>
+              </p>
             </div>
           </div>
           <AccordionTrigger />

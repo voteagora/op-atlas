@@ -5,13 +5,18 @@ export default function Chart({
 }: {
   data: { date: string; value: number; month: string }[]
 }) {
+  const formattedData = data.map((item) => ({
+    ...item,
+    monthLabel: item.month,
+  }))
+
   return (
     <ResponsiveContainer width="100%" height={140}>
       <AreaChart
         className="w-full"
         width={478}
         height={140}
-        data={data}
+        data={formattedData}
         margin={{ left: 15, right: 15 }}
       >
         <defs>
@@ -21,12 +26,14 @@ export default function Chart({
           </linearGradient>
         </defs>
         <XAxis
-          dataKey="date"
+          dataKey="monthLabel"
           strokeWidth={0}
           fontSize={14}
+          interval={0} // Ensures all labels are shown at equal spacing
           tickFormatter={(value, index) => {
-            const currentMonth = data[index]?.month
-            const prevMonth = index > 0 ? data[index - 1]?.month : null
+            // Only show the first instance of each month
+            const currentMonth = formattedData[index]?.month
+            const prevMonth = index > 0 ? formattedData[index - 1]?.month : null
             return currentMonth !== prevMonth ? currentMonth : ""
           }}
         />
