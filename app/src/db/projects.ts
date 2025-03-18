@@ -1925,3 +1925,20 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
     contributors: deduppedUsers,
   }
 }
+
+export async function updateBanner({
+  projectId,
+  bannerUrl,
+}: {
+  projectId: string
+  bannerUrl: string
+}) {
+  return prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      bannerUrl,
+    },
+  })
+}

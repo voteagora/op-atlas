@@ -84,3 +84,24 @@ export const CONTRIBUTOR_ELIGIBLE_PROJECTS = [
   "0xfad78fad680d407f81e7fd46632b4b4936676d1776a5cbf02694b94698495746",
   "0xffffeb1d3576c1e847701c225975ee1a10259e05366b477e98fea7a47c5e5896",
 ]
+
+export const OSO_METRIC_IDS = {
+  OPTIMISM_transactions_over_30_day_window:
+    "7PEA33NdLXZ97ichlOnybqpjNAFz84fYFp+Gm7OgGw4=",
+  OPTIMISM_gas_fees_over_30_day_window:
+    "UtO9UyVu2lYYPzCjiBlIvXGxY+QNVyi+jPHYzVtBoEs=",
+  OPTIMISM_active_addresses_aggregation_over_30_day_window:
+    "+5rLhj0Pg2P/g3AVc2Y7Rvqb90r8SMl+wW3gxFUlejE=",
+  BASE_transactions_over_30_day_window:
+    "Wqgt+m0mQPV82Bes7nu5J2XoIKU6MQnu+JlSB1TWiSc=",
+  BASE_gas_fees_over_30_day_window:
+    "JY/1aKSI5lLL3czI27HV5ugNIYt67mVsPQa8tj8q8/o=",
+  BASE_active_addresses_aggregation_over_30_day_window:
+    "ed1AmQmH9tYKsKJ+nhRG36RISGd4Tx0nRc834otb03U=",
+  MODE_transactions_over_30_day_window:
+    "e89agWQAyWcF9FIm9qERUqYeCfSpZ1LYkqlNjyRGwlc=",
+  MODE_gas_fees_over_30_day_window:
+    "q/sTO8R0D1zRAifZ8T1CdRSRFC+rL8kzQVDQ/nhzAQk=",
+  MODE_active_addresses_aggregation_over_30_day_window:
+    "VuBSJKIgi9HpJRgBe61mKftpAKJ6zNaZMxN4A1wqNxE=",
+}
