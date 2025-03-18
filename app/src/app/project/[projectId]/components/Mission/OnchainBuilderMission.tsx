@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils"
 export default function RewardsTable() {
   return (
     <div className="space-y-6">
-      <div className="mt-6 relative w-full h-64 rounded-lg z-10 overflow-hidden">
+      <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
         <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF0420] via-[#FF67B5] animate-slow-spin" />
         <Image
-          className="absolute top-0 left-0 z-0 p-0.5 rounded-lg"
+          className="absolute top-0 left-0 z-0 p-0.5 rounded-xl"
           src="/assets/images/rewards-on-chain-banner.png"
           objectFit="cover"
           objectPosition="center"
@@ -24,7 +24,7 @@ export default function RewardsTable() {
           width={256}
           height={256}
           alt="Dev Tooling"
-          className="absolute bottom-0.5 right-0.5"
+          className="absolute bottom-0.5 right-0.5 rounded-br-[11px]"
         />
         <div className="absolute w-full h-full z-50">
           <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
@@ -65,8 +65,8 @@ export default function RewardsTable() {
                 className="flex flex-col justify-between p-6 bg-background rounded-xl border"
               >
                 <div className="w-full flex items-center justify-between space-x-1">
-                  <span className="font-semibold">{value}</span>
-                  <span
+                  <p className="font-semibold text-base">{value}</p>
+                  <div
                     className={cn([
                       "px-2.5 py-1 rounded-full text-xs font-medium flex space-x-1 items-center",
                       {
@@ -91,9 +91,11 @@ export default function RewardsTable() {
                         fill="#B80018"
                       />
                     )}
-                  </span>
+                  </div>
                 </div>
-                <div>{title}</div>
+                <p className="text-base leading-6 text-secondary-foreground">
+                  {title}
+                </p>
               </div>
             ))}
             <div className="rounded-xl p-6 flex items-center justify-between w-full bg-background border col-span-2 divide-x-[1px]">

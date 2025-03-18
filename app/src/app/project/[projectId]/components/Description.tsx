@@ -6,6 +6,8 @@ import Image, { type ImageProps } from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 
+import { cn } from "@/lib/utils"
+
 interface DescriptionProps {
   name?: string
   tags: string[]
@@ -51,7 +53,7 @@ export default function Description({
         </div>
         <div className="divide-x-2 flex items-center space-x-2">
           {author && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 text-secondary-foreground">
               <span>By</span>
               {author.avatarUrl && (
                 <Image
@@ -178,7 +180,10 @@ const TruncatedText = ({ description }: { description: string }) => {
     <div className="space-y-4">
       <p
         ref={textRef}
-        className={`overflow-hidden ${isExpanded ? "" : "line-clamp-3"}`}
+        className={cn([
+          "overflow-hidden text-secondary-foreground",
+          { "line-clamp-3": !isExpanded },
+        ])}
       >
         {description}
       </p>
