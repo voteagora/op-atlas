@@ -115,7 +115,9 @@ export const verifyContract = async ({
   // If the contract is already verified, return
   if (
     existingContracts?.find(
-      (contract) => contract.contractAddress === contractAddress,
+      (contract) =>
+        contract.contractAddress === contractAddress &&
+        contract.chainId === parseInt(chain.toString()),
     )
   ) {
     return {

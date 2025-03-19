@@ -20,7 +20,7 @@ export async function getDeployedContractsServer(
 ): Promise<OsoDeployerContractsReturnType> {
   const variables = {
     where: {
-      rootDeployerAddress: { _eq: deployer },
+      rootDeployerAddress: { _eq: deployer.toLowerCase() },
       factoryAddress: { _eq: "" },
     },
   }
