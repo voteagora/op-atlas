@@ -1,13 +1,9 @@
-import { NextResponse } from "next/server"
-
 import { processPersonaCases, processPersonaInquiries } from "@/lib/actions/kyc"
-import { getPersonaInquiries } from "@/lib/persona"
-import { getPersonaCases } from "@/lib/persona"
+import { getPersonaCases, getPersonaInquiries } from "@/lib/persona"
 
 export const maxDuration = 600
 
 export async function GET() {
-  // 1. Kick off cases pull
   const cases = getPersonaCases()
   const inquiries = getPersonaInquiries()
 
@@ -26,5 +22,5 @@ export async function GET() {
     })(),
   ])
 
-  return NextResponse.json({ message: "Cron job completed" })
+  return Response.json({ status: "Persona cases and inquiries processed" })
 }
