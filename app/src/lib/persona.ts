@@ -99,7 +99,7 @@ class PersonaClient {
   }
 }
 
-export const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
+const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
 
 async function* fetchGenerator<T>(
   client: PersonaClient,
