@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  AlignJustify,
-  ArrowUpRight,
-  ChevronDown,
-  ChevronUp,
-  X,
-} from "lucide-react"
+import { AlignJustify, ArrowUpRight, ChevronDown, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams, usePathname } from "next/navigation"
@@ -24,7 +18,7 @@ import {
 import { Account } from "./Account"
 import { MobileNav } from "./MobileNav"
 
-const dropdownList = [
+export const dropdownList = [
   {
     title: "Optimism",
     href: "https://optimism.io/",
