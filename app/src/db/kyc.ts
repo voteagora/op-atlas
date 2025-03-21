@@ -16,17 +16,7 @@ export async function updateKYCUserStatus(
       ORDER BY name_similarity DESC
       LIMIT 1
     )
-    INSERT INTO "KYCUser" ("email", "firstName", "lastName", "status", "updatedAt", "expiry")
-    VALUES (
-      gen_random_uuid(),
-      ${email.toLowerCase()},
-      ${name.split(" ")[0]}, 
-      ${name.split(" ")[1]},
-      ${status}::"KYCStatus",
-      ${updatedAt},
-      ${updatedAt} + INTERVAL '1 year'
-    )
-    ON CONFLICT (id) DO UPDATE SET
+    UPDATE "KYCUser" SET
       "status" = ${status}::"KYCStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = ${updatedAt} + INTERVAL '1 year'
@@ -55,16 +45,7 @@ export async function updateKYBUserStatus(
       ORDER BY name_similarity DESC
       LIMIT 1
     )
-    INSERT INTO "KYCUser" ("email", "businessName", "status", "updatedAt", "expiry") 
-    VALUES (
-      gen_random_uuid(),
-      ${email.toLowerCase()},
-      ${name},
-      ${status}::"KYCStatus",
-      ${updatedAt},
-      ${updatedAt} + INTERVAL '1 year'
-    )
-    ON CONFLICT (id) DO UPDATE SET
+    UPDATE "KYCUser" SET
       "status" = ${status}::"KYCStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = ${updatedAt} + INTERVAL '1 year'
