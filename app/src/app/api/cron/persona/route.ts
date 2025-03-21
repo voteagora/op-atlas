@@ -5,7 +5,7 @@ import { getPersonaCases, getPersonaInquiries } from "@/lib/persona"
 
 export const maxDuration = 600
 
-export async function GET(_: NextRequest) {
+export async function GET(request: NextRequest) {
   const cases = getPersonaCases()
   const inquiries = getPersonaInquiries()
 
