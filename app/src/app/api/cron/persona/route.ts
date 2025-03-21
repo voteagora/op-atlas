@@ -3,6 +3,10 @@ import { NextRequest } from "next/server"
 import { processPersonaCases, processPersonaInquiries } from "@/lib/actions/kyc"
 import { getPersonaCases, getPersonaInquiries } from "@/lib/persona"
 
+export const maxDuration = 600
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 export async function GET(request: NextRequest) {
   const cases = getPersonaCases()
   const inquiries = getPersonaInquiries()
