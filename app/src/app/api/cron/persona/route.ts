@@ -1,9 +1,11 @@
+import { NextRequest } from "next/server"
+
 import { processPersonaCases, processPersonaInquiries } from "@/lib/actions/kyc"
 import { getPersonaCases, getPersonaInquiries } from "@/lib/persona"
 
 export const maxDuration = 600
 
-export async function GET() {
+export async function GET(_: NextRequest) {
   const cases = getPersonaCases()
   const inquiries = getPersonaInquiries()
 
