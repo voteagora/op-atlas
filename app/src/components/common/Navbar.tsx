@@ -24,25 +24,10 @@ import {
 import { Account } from "./Account"
 import { MobileNav } from "./MobileNav"
 
-export const menuList = [
-  {
-    title: "Voting App",
-    href: "https://round5.optimism.io/",
-  },
-  {
-    title: "About Retro Funding",
-    href: "https://app.optimism.io/retropgf",
-  },
-]
-
 const dropdownList = [
   {
     title: "Optimism",
     href: "https://optimism.io/",
-  },
-  {
-    title: "Retro Funding",
-    href: "https://atlas.optimism.io/missions",
   },
   {
     title: "Forum",
@@ -87,32 +72,15 @@ const Navbar = () => {
                 <AlignJustify className="block sm:hidden" />
               )}
             </button>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
-                <Image
-                  src="/assets/images/logo.svg"
-                  height={24}
-                  width={167}
-                  priority
-                  alt=""
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-56 flex flex-col gap-1"
-                sideOffset={0}
-                side="bottom"
-                align="start"
-              >
-                {dropdownList.map((item, index) => (
-                  <DropdownMenuItem key={index} asChild>
-                    <ExternalLink href={item.href}>
-                      <div>{item.title}</div>
-                      <ArrowUpRight size={14} />
-                    </ExternalLink>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Link href="/missions" className="flex items-center">
+              <Image
+                src="/assets/images/logo.svg"
+                height={24}
+                width={167}
+                priority
+                alt=""
+              />
+            </Link>
             {params.id === undefined || isMissions ? (
               <div className="flex gap-12">
                 <div
@@ -168,7 +136,7 @@ const Navbar = () => {
                     side="bottom"
                     align="start"
                   >
-                    {menuList.map((item, index) => (
+                    {dropdownList.map((item, index) => (
                       <DropdownMenuItem
                         key={index}
                         className="focus:bg-none! focus:opacity-80"
