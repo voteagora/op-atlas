@@ -5,6 +5,10 @@
       "schedule": "* * * * *"
     },
     {
+      "path": "/api/cron/persona",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/tag-contacts",
       "schedule": "59 23 * * *"
     }
