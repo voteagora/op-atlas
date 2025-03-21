@@ -68,7 +68,11 @@ type PersonaResponse<T> = {
 }
 
 class PersonaClient {
-  constructor(private readonly apiKey: string) {}
+  constructor(private readonly apiKey?: string) {
+    if (!apiKey) {
+      console.warn("Persona API key not set")
+    }
+  }
 
   async getCases(nextUrl?: string): Promise<PersonaResponse<PersonaCase>> {
     const url = `${PERSONA_API_URL}${nextUrl || "/api/v1/cases"}`
@@ -95,7 +99,7 @@ class PersonaClient {
   }
 }
 
-export const personaClient = new PersonaClient(process.env.PERSONA_API_KEY!)
+export const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
 
 async function* fetchGenerator<T>(
   client: PersonaClient,
