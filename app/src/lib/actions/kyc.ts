@@ -1,9 +1,15 @@
 "use server"
 
 import { isAfter, parse } from "date-fns"
-import { isAddress } from "viem"
 
+import { updateKYBUserStatus, updateKYCUserStatus } from "@/db/kyc"
 import { getReward, updateClaim } from "@/db/rewards"
+import {
+  caseStatusMap,
+  inquiryStatusMap,
+  PersonaCase,
+  PersonaInquiry,
+} from "@/lib/persona"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -124,5 +130,82 @@ export const processKYC = async (entries: string[]) => {
 
   console.log(
     `Processed KYC details for ${counter} project${counter === 1 ? "" : "s"}`,
+  )
+}
+
+export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
+  await Promise.all(
+    inquiries.map(async (inquiry) => {
+      const {
+        attributes: {
+          "email-address": email,
+          "name-first": firstName,
+          "name-last": lastName,
+          "updated-at": updatedAt,
+          status,
+        },
+      } = inquiry
+
+      const parsedStatus =
+        inquiryStatusMap[status as keyof typeof inquiryStatusMap]
+
+      if (!parsedStatus) {
+        console.warn(`Unknown inquiry status: ${status}`)
+        return
+      }
+
+      if (!email || !firstName || !lastName) {
+        console.warn(`Missing required fields for inquiry ${inquiry.id}`)
+        return
+      }
+
+      await updateKYCUserStatus(
+        `${firstName} ${lastName}`,
+        email,
+        parsedStatus,
+        new Date(updatedAt),
+      )
+    }),
+  )
+}
+
+export const processPersonaCases = async (cases: PersonaCase[]) => {
+  await Promise.all(
+    cases.map(async (c) => {
+      if (Object.keys(c.attributes.fields).length === 0) {
+        console.warn(`No fields found for case ${c.id}`)
+        return
+      }
+
+      const {
+        attributes: {
+          fields: {
+            "form-filler-email-address": { value: email },
+            "business-name": { value: businessName },
+          },
+          "updated-at": updatedAt,
+          status,
+        },
+      } = c
+
+      if (!email || !businessName) {
+        console.warn(`Missing required fields for case ${c.id}`)
+        return
+      }
+
+      const parsedStatus = caseStatusMap[status as keyof typeof caseStatusMap]
+
+      if (!parsedStatus) {
+        console.warn(`Unknown case status: ${status}`)
+        return
+      }
+
+      await updateKYBUserStatus(
+        businessName,
+        email,
+        parsedStatus,
+        new Date(updatedAt),
+      )
+    }),
   )
 }
