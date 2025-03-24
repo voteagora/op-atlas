@@ -10,7 +10,7 @@ export default function DevToolingMission() {
   return (
     <div className="space-y-6">
       <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
-        <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF0420] via-[#FF67B5] animate-slow-spin" />
+        <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF5C6C] via-[#FF67B5] animate-slow-spin" />
         <Image
           className="absolute top-0 left-0 z-0 p-0.5 rounded-xl"
           src="/assets/images/rewards-dev-tooling-banner.png"
@@ -133,10 +133,10 @@ export default function DevToolingMission() {
                   alt="Optimism Logo"
                 />
                 <div className="flex flex-col h-full justify-between py-0.5">
-                  <span className="font-semibold text-foreground">
+                  <span className="font-semibold text-foreground text-base">
                     1,264 OP
                   </span>
-                  <span className="text-secondary-foreground">
+                  <span className="text-secondary-foreground text-base font-normal">
                     Rewards for performance in February
                   </span>
                 </div>

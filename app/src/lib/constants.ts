@@ -85,23 +85,173 @@ export const CONTRIBUTOR_ELIGIBLE_PROJECTS = [
   "0xffffeb1d3576c1e847701c225975ee1a10259e05366b477e98fea7a47c5e5896",
 ]
 
-export const OSO_METRIC_IDS = {
-  OPTIMISM_transactions_over_30_day_window:
-    "7PEA33NdLXZ97ichlOnybqpjNAFz84fYFp+Gm7OgGw4=",
-  OPTIMISM_gas_fees_over_30_day_window:
-    "UtO9UyVu2lYYPzCjiBlIvXGxY+QNVyi+jPHYzVtBoEs=",
-  OPTIMISM_active_addresses_aggregation_over_30_day_window:
-    "+5rLhj0Pg2P/g3AVc2Y7Rvqb90r8SMl+wW3gxFUlejE=",
-  BASE_transactions_over_30_day_window:
-    "Wqgt+m0mQPV82Bes7nu5J2XoIKU6MQnu+JlSB1TWiSc=",
-  BASE_gas_fees_over_30_day_window:
-    "JY/1aKSI5lLL3czI27HV5ugNIYt67mVsPQa8tj8q8/o=",
-  BASE_active_addresses_aggregation_over_30_day_window:
-    "ed1AmQmH9tYKsKJ+nhRG36RISGd4Tx0nRc834otb03U=",
-  MODE_transactions_over_30_day_window:
-    "e89agWQAyWcF9FIm9qERUqYeCfSpZ1LYkqlNjyRGwlc=",
-  MODE_gas_fees_over_30_day_window:
-    "q/sTO8R0D1zRAifZ8T1CdRSRFC+rL8kzQVDQ/nhzAQk=",
-  MODE_active_addresses_aggregation_over_30_day_window:
-    "VuBSJKIgi9HpJRgBe61mKftpAKJ6zNaZMxN4A1wqNxE=",
+export const OSO_METRICS = {
+  UNICHAIN: [
+    {
+      chain: "UNICHAIN_active_addresses_aggregation_daily",
+      address: "0RQFDOuKSFfEwcleGnTGb7lM+vZg9nBzZ9WyzOye1js=",
+    },
+    {
+      chain: "UNICHAIN_active_addresses_aggregation_over_all_time",
+      address: "x7fHZlhnu4ZA9/g/uHLZTiawgtVZy6/pGwRRtpKxeRI=",
+    },
+    {
+      chain: "UNICHAIN_active_addresses_aggregation_monthly",
+      address: "857570NsKPlIlcN92HeSzs+BfTH79K+mT/JH3Jrm3P8=",
+    },
+  ],
+  MINT: [
+    {
+      chain: "MINT_active_addresses_aggregation_over_all_time",
+      address: "MUAnyJoD5dbkvyoDJ1/dNJgXHqI6+xQsMnZtpA87pi4=",
+    },
+    {
+      chain: "MINT_active_addresses_aggregation_monthly",
+      address: "2YKdXet62ZnFP9RTSo3PTjRW+k+ImOWekANVhEtOjYA=",
+    },
+    {
+      chain: "MINT_active_addresses_aggregation_daily",
+      address: "dojiObKfwKwo9H51BLnlSeW4qSlUhjBTkhp9TR1A5vo=",
+    },
+  ],
+  SONEIUM: [
+    {
+      chain: "SONEIUM_active_addresses_aggregation_monthly",
+      address: "DEnD6w18JBQ/9bHfIB5699VdG2p+sv6gw2UEJEgW+Ww=",
+    },
+    {
+      chain: "SONEIUM_active_addresses_aggregation_over_all_time",
+      address: "Xac1zOncNHZjBXAfZkz4ojNLIwMiX65q6+LVse1NPRc=",
+    },
+    {
+      chain: "SONEIUM_active_addresses_aggregation_daily",
+      address: "J/oTg21YADvP5STmtJ62qKv3dVLCBiIebjCw6s2SS0U=",
+    },
+  ],
+  BASE: [
+    {
+      chain: "BASE_active_addresses_aggregation_over_all_time",
+      address: "TNIjbCBQMisLBSe17iXPsLpAQOL5LgahBl/p0dpy5ks=",
+    },
+    {
+      chain: "BASE_active_addresses_aggregation_monthly",
+      address: "q5s5EZJLtv9hMo9EYBzV23JmuCnK/5MqIOn7fnVpYvQ=",
+    },
+    {
+      chain: "BASE_active_addresses_aggregation_daily",
+      address: "G2aj792VVSZhk/oENCPGdapeVEozGum9W0o+Y0A5D9w=",
+    },
+  ],
+  BOB: [
+    {
+      chain: "BOB_active_addresses_aggregation_daily",
+      address: "ooVpyQAjLTc+L/pUepYBtDtiRvd6CqA35bEdRbfMuXU=",
+    },
+    {
+      chain: "BOB_active_addresses_aggregation_monthly",
+      address: "/30Y4UznEkmG2NjAkkgaVdrvh/mpWsq1XcaFj+lo7KY=",
+    },
+    {
+      chain: "BOB_active_addresses_aggregation_over_all_time",
+      address: "r9mttG3A+Yh066AriLGPwkjD9Z80QmfGQiVmmkva1a4=",
+    },
+  ],
+  ZORA: [
+    {
+      chain: "ZORA_active_addresses_aggregation_monthly",
+      address: "gm6EfzIkQw+SpsY+E8Y4cx0rxdYZ5/+OQjjwPxLL17E=",
+    },
+    {
+      chain: "ZORA_active_addresses_aggregation_over_all_time",
+      address: "dz+d4PbQim+RLeHSwmeOWVKQPt1PgSylOZTYxbSied4=",
+    },
+    {
+      chain: "ZORA_active_addresses_aggregation_daily",
+      address: "gqPrgjDFJo0cxqAjtajifVr4f+ODszjovnISfmqT3qA=",
+    },
+  ],
+  WORLDCHAIN: [
+    {
+      chain: "WORLDCHAIN_active_addresses_aggregation_monthly",
+      address: "JN7WKhXYyk9lYoQzKmUwhuIp8hYElAL78ZfIYLBjiFM=",
+    },
+    {
+      chain: "WORLDCHAIN_active_addresses_aggregation_over_all_time",
+      address: "dNyhui57LTPxV6M4qlQABTKMoiB0NvQRbpeM6jcKAww=",
+    },
+    {
+      chain: "WORLDCHAIN_active_addresses_aggregation_daily",
+      address: "jVe/Dpr1TgIxBLbkMoLKmXWTJthxFB0LhHrxWQmt548=",
+    },
+  ],
+  OPTIMISM: [
+    {
+      chain: "OPTIMISM_active_addresses_aggregation_over_180_day_window",
+      address: "JyvtqdWQF8Aw3s4O5UdzYfwKByWzp6jymgRNs3ItacQ=",
+    },
+    {
+      chain: "OPTIMISM_active_addresses_aggregation_monthly",
+      address: "0EMSF0WtbO9g6I6nA9Wew8CmFloZ31gsJlaWFxfLz1E=",
+    },
+    {
+      chain: "OPTIMISM_active_addresses_aggregation_over_30_day_window",
+      address: "+5rLhj0Pg2P/g3AVc2Y7Rvqb90r8SMl+wW3gxFUlejE=",
+    },
+  ],
+  MODE: [
+    {
+      chain: "MODE_active_addresses_aggregation_over_all_time",
+      address: "WeNhWIZMiN8ckEmtLoIoXnObYbe8OqqK8uYmHiFxibs=",
+    },
+    {
+      chain: "MODE_active_addresses_aggregation_daily",
+      address: "j7FEQ7G/ysZGCQDVMolgGA575NBed9nnv7Sos1EBLSc=",
+    },
+    {
+      chain: "MODE_active_addresses_aggregation_monthly",
+      address: "BcOqAFWMH3FNe38q3vDSVquPLU0wzi0fVDdutj3+bZQ=",
+    },
+  ],
+  INK: [
+    {
+      chain: "INK_active_addresses_aggregation_daily",
+      address: "YVlXddV9S4PooUOtWsYX5+w9HjhJ55FWCqqIL8i6oH4=",
+    },
+    {
+      chain: "INK_active_addresses_aggregation_over_all_time",
+      address: "FTvJxlrFHXGBXQ1m9Up60Ittz1RJK4gFMqHKE/KpNf8=",
+    },
+    {
+      chain: "INK_active_addresses_aggregation_monthly",
+      address: "9GFsnI0XkK47YoWhxBONtXqNflo9X4b3i76fFZc+Oi4=",
+    },
+  ],
+  LISK: [
+    {
+      chain: "LISK_active_addresses_aggregation_daily",
+      address: "r/PI23PyEA/ke7QvGlLZKqh5xFsv3LA8yVzIo2cGhc8=",
+    },
+    {
+      chain: "LISK_active_addresses_aggregation_monthly",
+      address: "B1OivFfJx7c4ziIQLhgyRcexhzWXcxkXSTEjXpGMtdQ=",
+    },
+    {
+      chain: "LISK_active_addresses_aggregation_over_all_time",
+      address: "rlkC0djuNaEuoewusaaqOs1anHvZGa5ky0RbyjUj1aw=",
+    },
+  ],
+  SHAPE: [
+    {
+      chain: "SHAPE_active_addresses_aggregation_monthly",
+      address: "hD06gMRGntV0Jbvhyfye6YmvQIkgagBjRFq40f9Ct/I=",
+    },
+    {
+      chain: "SHAPE_active_addresses_aggregation_daily",
+      address: "mfsp8g4ERJkOuBoKG5ZXCsalol+Dw/i771nPJ//dVgc=",
+    },
+    {
+      chain: "SHAPE_active_addresses_aggregation_over_all_time",
+      address: "UAkby7xo4i6uoIRF5gEZ+XuIPzjTx/lyTcbreYofIXg=",
+    },
+  ],
 }

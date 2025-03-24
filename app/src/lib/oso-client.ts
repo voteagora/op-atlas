@@ -53,11 +53,11 @@ class OsoClient {
     return { gqlQuery, gqlSelect }
   }
 
-  async executeQuery<T>(
-    typename: string,
+  async executeQuery<T, K extends string>(
+    typename: K,
     query: Record<string, any>,
     select: ReturnData<T>,
-  ): Promise<Pick<T, keyof T>[]> {
+  ): Promise<{ [key in K]: Pick<T, keyof T>[] }> {
     const { gqlQuery, gqlSelect } = this.buildQuery(query, select.map(String))
 
     const params = Boolean(gqlQuery) ? `(${gqlQuery})` : ""
@@ -90,7 +90,7 @@ class OsoClient {
         throw new Error(`GraphQL Error: ${errorMsg}`)
       }
 
-      return result.data as Pick<T, keyof T>[]
+      return result.data as { [key in K]: Pick<T, keyof T>[] }
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Request Error: ${error.message}`)

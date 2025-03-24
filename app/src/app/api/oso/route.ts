@@ -1,37 +1,23 @@
-// import { NextResponse } from "next/server"
-// import { formatEther } from "viem"
+import { NextResponse } from "next/server"
+import { formatEther } from "viem"
 
-// import { prisma } from "@/db/client"
-// import {
-//   Oso_ArtifactsByProjectV1,
-//   Oso_MetricsV0,
-//   Oso_ProjectsV1,
-//   Oso_TimeseriesMetricsByProjectV0,
-//   QueryOso_ArtifactsByProjectV1Args,
-//   QueryOso_MetricsV0Args,
-//   QueryOso_ProjectsV1Args,
-//   QueryOso_TimeseriesMetricsByProjectV0Args,
-// } from "@/graphql/__generated__/types"
-// import { OSO_METRIC_IDS } from "@/lib/constants"
-// import { default as client } from "@/lib/oso-client"
+import { prisma } from "@/db/client"
+import {
+  Oso_ArtifactsByProjectV1,
+  Oso_MetricsV0,
+  Oso_ProjectsV1,
+  Oso_TimeseriesMetricsByProjectV0,
+  QueryOso_ArtifactsByProjectV1Args,
+  QueryOso_MetricsV0Args,
+  QueryOso_ProjectsV1Args,
+  QueryOso_TimeseriesMetricsByProjectV0Args,
+} from "@/graphql/__generated__/types"
+import { OSO_METRIC_IDS } from "@/lib/constants"
+import { default as client } from "@/lib/oso-client"
 
 export async function POST(req: Request) {
   // const { atlasId } = await req.json()
   // try {
-  //   const projects = await prisma.project.findMany({
-  //     select: { id: true },
-  //   })
-  //   const projectAtlasIds = projects.map(({ id }) => id)
-  //   const osoProjectIdsQuery: QueryOso_ProjectsV1Args = {
-  //     where: { projectId: { _in: projectAtlasIds } },
-  //   }
-  //   const osoProjectIdsSelect: (keyof Oso_ProjectsV1)[] = ["projectId"]
-  //   const projectIds = await client.executeQuery(
-  //     "oso_projectsV1",
-  //     osoProjectIdsQuery,
-  //     osoProjectIdsSelect,
-  //   )
-  //   console.log("Project IDs:", JSON.stringify(projectIds, null, 2))
   // // Example 1: Get a project by Atlas ID
   // const oso_projectsV1Query: QueryOso_ProjectsV1Args = {
   //   limit: 1,
