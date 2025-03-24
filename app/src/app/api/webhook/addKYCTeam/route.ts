@@ -32,11 +32,7 @@ export async function POST(request: NextRequest) {
     // Get the raw request body for signature verification
     const bodyText = await request.text()
 
-    console.log("bodyText", bodyText)
-
     const body = JSON.parse(bodyText) as WebhookPayload
-
-    console.log("body", body)
 
     // Verify the webhook signature
     const signature = request.headers.get("typeform-signature") || ""
@@ -46,6 +42,7 @@ export async function POST(request: NextRequest) {
       !signature ||
       !verifyWebhookSignature(signingSecret, signature, bodyText)
     ) {
+      console.error("Invalid signature. Request body:", bodyText)
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
     }
 
@@ -53,6 +50,7 @@ export async function POST(request: NextRequest) {
     const formEntry = await processTypeformWebhook(body)
 
     if (!formEntry) {
+      console.error("Invalid webhook data. Request body:", bodyText)
       return NextResponse.json(
         { error: "Invalid webhook data" },
         { status: 400 },
@@ -65,6 +63,7 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error("Error processing webhook:", error)
+    console.error("Request body:", await request.text())
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
