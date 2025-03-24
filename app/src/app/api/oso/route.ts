@@ -12,7 +12,7 @@ import {
   QueryOso_ProjectsV1Args,
   QueryOso_TimeseriesMetricsByProjectV0Args,
 } from "@/graphql/__generated__/types"
-import { OSO_METRIC_IDS } from "@/lib/constants"
+import { OSO_METRICS } from "@/lib/constants"
 import { default as client } from "@/lib/oso-client"
 
 export async function POST(req: Request) {
