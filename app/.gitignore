@@ -41,3 +41,6 @@ next-env.d.ts
 
 # graphql types
 src/graphql/
+
+# Sentry Config File
+.env.sentry-build-plugin

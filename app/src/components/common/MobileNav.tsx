@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion"
-import { menuList } from "./Navbar"
+import { dropdownList } from "./Navbar"
 
 export function MobileNav({ onClose }: { onClose: () => void }) {
   return (
@@ -33,7 +33,7 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
             More
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-6 py-6">
-            {menuList.map((item, index) => (
+            {dropdownList.map((item, index) => (
               <ExternalLink
                 key={index}
                 className="flex items-center text-sm font-medium gap-1"

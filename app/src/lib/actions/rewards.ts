@@ -69,19 +69,11 @@ export const addAddressToRewardsClaim = async (
     }
   }
 
-  // Address can't already have an active superfluid stream
-  const streams = await getActiveStreams(address.toLowerCase())
-  if (streams.length > 0) {
-    return {
-      error: "Address already has a stream",
-    }
-  }
-
   // Address can't be used by another claim
   const canClaim = await canClaimToAddress({ address, rewardId })
   if (!canClaim) {
     return {
-      error: "Address already in use by another project",
+      error: "Address already in use for this round",
     }
   }
 
