@@ -1758,6 +1758,9 @@ export async function addKYCTeamMembers({
 
   const existingUsers = await prisma.kYCUser.findMany({
     where: { email: { in: allEmails } },
+    include: {
+      KYCUserTeams: true,
+    },
   })
 
   const existingUserMap = new Map(existingUsers.map((u) => [u.email, u]))
@@ -1765,7 +1768,10 @@ export async function addKYCTeamMembers({
   const newIndividuals = individuals.filter(
     (i) => !existingUserMap.has(i.email),
   )
-  const newBusinesses = businesses.filter((b) => !existingUserMap.has(b.email))
+  const newBusinesses = businesses.filter((b) => {
+    const exitingUser = existingUserMap.get(b.email)
+    return !exitingUser || !exitingUser.businessName
+  })
 
   await prisma.$transaction(async (tx) => {
     const createdIndividuals = await tx.kYCUser.createManyAndReturn({
@@ -1788,7 +1794,9 @@ export async function addKYCTeamMembers({
     })
 
     const allUsers = [
-      ...existingUsers,
+      ...existingUsers.filter((u) =>
+        u.KYCUserTeams.some((t) => t.kycTeamId === kycTeamId),
+      ),
       ...createdIndividuals,
       ...createdBusinesses,
     ]
