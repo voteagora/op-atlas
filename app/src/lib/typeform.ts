@@ -2,10 +2,11 @@ import {
   TypeformItem,
   WebhookPayload,
 } from "@/app/api/webhook/addKYCTeam/route"
+import { addKYCTeamMembers } from "@/db/projects"
 
 interface FormEntry {
   form_id: string | null
-  kyc_team_id: string | null
+  kyc_team_id: string
   l2_address: string | null
   updated_at: string | null
   kyc_people: PersonInfo[]
@@ -30,7 +31,7 @@ const isFormResponseEvent = (eventType: string): boolean =>
 
 const createBaseEntry = (item: TypeformItem): FormEntry => ({
   form_id: item.form_id ?? null,
-  kyc_team_id: item.hidden?.kyc_team_id ?? null,
+  kyc_team_id: item.hidden?.kyc_team_id,
   l2_address: item.hidden?.l2_address ?? null,
   updated_at: item.submitted_at ?? null,
   kyc_people: [],
@@ -211,15 +212,10 @@ export async function processTypeformWebhook(
  * Save the form entry to your database
  * Replace this implementation with your database logic (e.g., Prisma, MongoDB, etc.)
  */
-async function saveFormEntryToDatabase(formEntry: FormEntry): Promise<void> {
-  // Example implementation using Prisma
-  // const prisma = new PrismaClient();
-  // await prisma.formResponse.upsert({
-  //   where: { form_id: formEntry.form_id },
-  //   update: formEntry,
-  //   create: formEntry,
-  // });
-
-  console.log("Saving form entry to database:", formEntry)
-  // Implement your database logic here
+function saveFormEntryToDatabase(formEntry: FormEntry) {
+  return addKYCTeamMembers({
+    kycTeamId: formEntry.kyc_team_id,
+    individuals: formEntry.kyc_people,
+    businesses: formEntry.kyb_people,
+  })
 }
