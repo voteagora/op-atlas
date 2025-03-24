@@ -6,8 +6,8 @@ import { processTypeformWebhook } from "@/lib/typeform"
 export interface TypeformItem {
   form_id?: string
   submitted_at?: string
-  hidden?: {
-    kyc_team_id?: string
+  hidden: {
+    kyc_team_id: string
     l2_address?: string
   }
   answers?: Array<{
