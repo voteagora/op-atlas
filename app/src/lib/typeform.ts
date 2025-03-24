@@ -37,32 +37,44 @@ const createBaseEntry = (item: TypeformItem): FormEntry => ({
   kyb_people: [],
 })
 
-const getKybEmailCount = (answers: TypeformItem["answers"]): number => {
-  const kybField = answers?.find(
-    (answer) =>
-      answer.field?.type === "number" && answer.field?.id === "gJ1tbRvmyWOs",
-  )
-  return kybField?.number || 0
+const getKybEmailCountAndIndex = (
+  answers: TypeformItem["answers"],
+): { count: number; index: number } => {
+  let kybFieldIndex = -1
+  for (let i = 0; i < (answers?.length || 0); i++) {
+    if (
+      answers?.[i]?.field?.type === "number" &&
+      answers[i]?.field?.id === "gJ1tbRvmyWOs"
+    ) {
+      kybFieldIndex = i
+      break
+    }
+  }
+  return { count: answers?.[kybFieldIndex]?.number || 0, index: kybFieldIndex }
 }
 
 const getPersonInfo = (
   answers: TypeformItem["answers"],
   currentIndex: number,
-  foundKybField: boolean,
+  kybEmailIndex: number,
 ): { firstName: string; lastName: string; companyName?: string } => {
   const firstName =
-    currentIndex >= 2 && answers?.[currentIndex - 2]?.field?.type === "text"
+    currentIndex >= 2 &&
+    answers?.[currentIndex - 2]?.field?.type === "short_text"
       ? answers[currentIndex - 2].text?.trim() || ""
       : ""
 
   const lastName =
-    currentIndex >= 2 && answers?.[currentIndex - 1]?.field?.type === "text"
+    currentIndex >= 2 &&
+    answers?.[currentIndex - 1]?.field?.type === "short_text"
       ? answers[currentIndex - 1].text?.trim() || ""
       : ""
 
   const companyName =
-    foundKybField && answers?.[currentIndex + 1]?.field?.type === "text"
-      ? answers[currentIndex + 1].text?.trim()
+    kybEmailIndex < currentIndex
+      ? answers?.[currentIndex + 1]?.field?.type === "short_text"
+        ? answers[currentIndex + 1].text?.trim()
+        : undefined
       : undefined
 
   return { firstName, lastName, companyName }
@@ -72,7 +84,7 @@ const processEmailAnswer = (
   answer: NonNullable<TypeformItem["answers"]>[number],
   answers: TypeformItem["answers"],
   currentIndex: number,
-  foundKybField: boolean,
+  kybEmailIndex: number,
 ): PersonInfo | CompanyInfo | null => {
   if (!answer.field?.type || answer.field.type !== "email" || !answer.email) {
     return null
@@ -86,7 +98,7 @@ const processEmailAnswer = (
   const { firstName, lastName, companyName } = getPersonInfo(
     answers,
     currentIndex,
-    foundKybField,
+    kybEmailIndex,
   )
 
   return companyName
@@ -97,6 +109,7 @@ const processEmailAnswer = (
 const processAnswers = (
   answers: TypeformItem["answers"] = [],
   numberOfKybEmails: number,
+  kybEmailIndex: number,
 ): { kycPeople: PersonInfo[]; kybPeople: CompanyInfo[] } => {
   const result = answers.reduce<{
     kycPeople: PersonInfo[]
@@ -107,7 +120,7 @@ const processAnswers = (
         answer,
         answers,
         index,
-        numberOfKybEmails > 0,
+        kybEmailIndex,
       )
       if (!personInfo) return acc
 
@@ -166,10 +179,12 @@ function parseTypeformWebhook(
     return null
   }
 
-  const numberOfKybEmails = getKybEmailCount(item.answers)
+  const { count: numberOfKybEmails, index: kybEmailIndex } =
+    getKybEmailCountAndIndex(item.answers)
   const { kycPeople, kybPeople } = processAnswers(
     item.answers,
     numberOfKybEmails,
+    kybEmailIndex,
   )
 
   validateResults(kycPeople, kybPeople, numberOfKybEmails)
