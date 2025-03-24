@@ -4,7 +4,8 @@ import {
 } from "@/app/api/webhook/addKYCTeam/route"
 import { addKYCTeamMembers } from "@/db/projects"
 
-interface FormEntry {
+// Types
+type FormEntry = {
   form_id: string | null
   kyc_team_id: string
   l2_address: string | null
@@ -13,98 +14,116 @@ interface FormEntry {
   kyb_people: CompanyInfo[]
 }
 
-interface PersonInfo {
+type PersonInfo = {
   firstName: string
   lastName: string
   email: string
 }
 
-interface CompanyInfo {
-  firstName: string
-  lastName: string
-  email: string
+type CompanyInfo = PersonInfo & {
   companyName: string
 }
 
+type Answer = NonNullable<TypeformItem["answers"]>[number]
+
+// Constants
+const KYB_FIELD_ID = "gJ1tbRvmyWOs" as const
+const FIELD_TYPES = {
+  EMAIL: "email",
+  SHORT_TEXT: "short_text",
+  NUMBER: "number",
+} as const
+
+// Validation
+const isValidEmail = (email: string): boolean => {
+  const trimmedEmail = email.toLowerCase().trim()
+  return trimmedEmail.length > 0
+}
+
+const isValidPersonInfo = (info: {
+  firstName: string
+  lastName: string
+}): boolean => {
+  return info.firstName.length > 0 && info.lastName.length > 0
+}
+
+// Pure functions for data transformation
 const isFormResponseEvent = (eventType: string): boolean =>
   eventType === "form_response"
 
 const createBaseEntry = (item: TypeformItem): FormEntry => ({
   form_id: item.form_id ?? null,
-  kyc_team_id: item.hidden?.kyc_team_id,
+  kyc_team_id: item.hidden?.kyc_team_id ?? "",
   l2_address: item.hidden?.l2_address ?? null,
   updated_at: item.submitted_at ?? null,
   kyc_people: [],
   kyb_people: [],
 })
 
-const getKybEmailCountAndIndex = (
-  answers: TypeformItem["answers"],
-): { count: number; index: number } => {
-  let kybFieldIndex = -1
-  for (let i = 0; i < (answers?.length || 0); i++) {
-    if (
-      answers?.[i]?.field?.type === "number" &&
-      answers[i]?.field?.id === "gJ1tbRvmyWOs"
-    ) {
-      kybFieldIndex = i
-      break
-    }
-  }
-  return { count: answers?.[kybFieldIndex]?.number || 0, index: kybFieldIndex }
-}
+const findKybField = (answers: TypeformItem["answers"]): Answer | undefined =>
+  answers?.find(
+    (answer) =>
+      answer.field?.type === FIELD_TYPES.NUMBER &&
+      answer.field?.id === KYB_FIELD_ID,
+  )
+
+const getKybEmailCount = (answers: TypeformItem["answers"]): number =>
+  findKybField(answers)?.number ?? 0
+
+const getKybFieldIndex = (answers: TypeformItem["answers"]): number =>
+  answers?.findIndex(
+    (answer) =>
+      answer.field?.type === FIELD_TYPES.NUMBER &&
+      answer.field?.id === KYB_FIELD_ID,
+  ) ?? -1
+
+const extractTextFromAnswer = (answer: Answer | undefined): string =>
+  answer?.field?.type === FIELD_TYPES.SHORT_TEXT
+    ? answer.text?.trim() ?? ""
+    : ""
 
 const getPersonInfo = (
   answers: TypeformItem["answers"],
   currentIndex: number,
   kybEmailIndex: number,
 ): { firstName: string; lastName: string; companyName?: string } => {
-  const firstName =
-    currentIndex >= 2 &&
-    answers?.[currentIndex - 2]?.field?.type === "short_text"
-      ? answers[currentIndex - 2].text?.trim() || ""
-      : ""
-
-  const lastName =
-    currentIndex >= 2 &&
-    answers?.[currentIndex - 1]?.field?.type === "short_text"
-      ? answers[currentIndex - 1].text?.trim() || ""
-      : ""
-
+  const firstName = extractTextFromAnswer(answers?.[currentIndex - 2])
+  const lastName = extractTextFromAnswer(answers?.[currentIndex - 1])
   const companyName =
     kybEmailIndex < currentIndex
-      ? answers?.[currentIndex + 1]?.field?.type === "short_text"
-        ? answers[currentIndex + 1].text?.trim()
-        : undefined
+      ? extractTextFromAnswer(answers?.[currentIndex + 1])
       : undefined
 
   return { firstName, lastName, companyName }
 }
 
 const processEmailAnswer = (
-  answer: NonNullable<TypeformItem["answers"]>[number],
+  answer: Answer,
   answers: TypeformItem["answers"],
   currentIndex: number,
   kybEmailIndex: number,
 ): PersonInfo | CompanyInfo | null => {
-  if (!answer.field?.type || answer.field.type !== "email" || !answer.email) {
+  if (
+    !answer.field?.type ||
+    answer.field.type !== FIELD_TYPES.EMAIL ||
+    !answer.email
+  ) {
     return null
   }
 
   const email = answer.email.toLowerCase().trim()
-  if (!email) {
-    throw new Error("Empty email detected in form submission")
+  if (!isValidEmail(email)) {
+    throw new Error("Invalid email detected in form submission")
   }
 
-  const { firstName, lastName, companyName } = getPersonInfo(
-    answers,
-    currentIndex,
-    kybEmailIndex,
-  )
+  const personInfo = getPersonInfo(answers, currentIndex, kybEmailIndex)
+  if (!isValidPersonInfo(personInfo)) {
+    throw new Error("Invalid person information detected in form submission")
+  }
 
-  return companyName
-    ? { firstName, lastName, email, companyName }
-    : { firstName, lastName, email }
+  return personInfo.companyName
+    ? { ...personInfo, email, companyName: personInfo.companyName }
+    : { ...personInfo, email }
 }
 
 const processAnswers = (
@@ -162,9 +181,10 @@ const validateResults = (
   }
 }
 
-function parseTypeformWebhook(
+// Main processing function
+const parseTypeformWebhook = (
   webhookPayload: WebhookPayload,
-): FormEntry | null {
+): FormEntry | null => {
   if (!isFormResponseEvent(webhookPayload.event_type)) {
     console.warn(
       `Ignoring non-form_response event: ${webhookPayload.event_type}`,
@@ -180,8 +200,8 @@ function parseTypeformWebhook(
     return null
   }
 
-  const { count: numberOfKybEmails, index: kybEmailIndex } =
-    getKybEmailCountAndIndex(item.answers)
+  const numberOfKybEmails = getKybEmailCount(item.answers)
+  const kybEmailIndex = getKybFieldIndex(item.answers)
   const { kycPeople, kybPeople } = processAnswers(
     item.answers,
     numberOfKybEmails,
@@ -197,6 +217,16 @@ function parseTypeformWebhook(
   }
 }
 
+// Database operations
+const saveFormEntryToDatabase = async (formEntry: FormEntry): Promise<void> => {
+  await addKYCTeamMembers({
+    kycTeamId: formEntry.kyc_team_id,
+    individuals: formEntry.kyc_people,
+    businesses: formEntry.kyb_people,
+  })
+}
+
+// Public API
 export async function processTypeformWebhook(
   webhookPayload: WebhookPayload,
 ): Promise<FormEntry | null> {
@@ -206,16 +236,4 @@ export async function processTypeformWebhook(
   }
   await saveFormEntryToDatabase(formEntry)
   return formEntry
-}
-
-/**
- * Save the form entry to your database
- * Replace this implementation with your database logic (e.g., Prisma, MongoDB, etc.)
- */
-function saveFormEntryToDatabase(formEntry: FormEntry) {
-  return addKYCTeamMembers({
-    kycTeamId: formEntry.kyc_team_id,
-    individuals: formEntry.kyc_people,
-    businesses: formEntry.kyb_people,
-  })
 }
