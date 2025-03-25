@@ -54,6 +54,7 @@ const verifyWebhookSignature = (
 export const verifyRequest = async (
   request: NextRequest,
   config: VerificationConfig,
+  body: unknown,
 ): Promise<void> => {
   switch (config.type) {
     case "webhook": {
@@ -62,8 +63,7 @@ export const verifyRequest = async (
         throw new AuthenticationError("Missing signature header")
       }
 
-      const clonedRequest = request.clone()
-      const bodyText = await clonedRequest.text()
+      const bodyText = JSON.stringify(body)
       if (!verifyWebhookSignature(config.signingSecret, signature, bodyText)) {
         throw new AuthenticationError("Invalid signature")
       }
@@ -109,9 +109,6 @@ export const createApiKeyVerification = (
 
 /**
  * Generic handler for API routes that require API key authentication
- * @param handler The route handler function
- * @param authenticateApiUser The authentication function
- * @returns A wrapped handler with API key verification and error handling
  */
 export const verifyRequestWithApiKey = <T>(
   handler: (request: NextRequest, body: unknown) => Promise<NextResponse>,
@@ -127,7 +124,7 @@ export const verifyRequestWithApiKey = <T>(
   ): Promise<NextResponse> => {
     // Verify API key first
     const verificationConfig = createApiKeyVerification(authenticateApiUser)
-    await verifyRequest(request, verificationConfig)
+    await verifyRequest(request, verificationConfig, body)
 
     // If verification passes, proceed with the handler
     return handler(request, body)

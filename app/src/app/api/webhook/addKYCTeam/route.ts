@@ -45,7 +45,7 @@ const handleWebhook = async (
   const verificationConfig = createWebhookVerification(
     process.env.TYPEFORM_SIGNING_SECRET || "",
   )
-  await verifyRequest(request, verificationConfig)
+  await verifyRequest(request, verificationConfig, body)
 
   // Process the webhook payload
   const formEntry = await processTypeformWebhook(webhookPayload)
