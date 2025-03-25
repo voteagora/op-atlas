@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server"
 
 import {
   AuthenticationError,
-  createCommonErrorHandler,
   withErrorHandler,
+  createCommonErrorHandler,
 } from "./withErrorHandler"
 
 export type VerificationMethod = "webhook" | "apiKey"
@@ -51,10 +51,10 @@ const verifyWebhookSignature = (
 /**
  * Verify request based on the provided configuration
  */
-export const verifyRequest = async (
+export const verifyRequest = async <TBody>(
   request: NextRequest,
   config: VerificationConfig,
-  body: unknown,
+  body: TBody,
 ): Promise<void> => {
   switch (config.type) {
     case "webhook": {
@@ -110,8 +110,8 @@ export const createApiKeyVerification = (
 /**
  * Generic handler for API routes that require API key authentication
  */
-export const verifyRequestWithApiKey = <T>(
-  handler: (request: NextRequest, body: unknown) => Promise<NextResponse>,
+export const verifyRequestWithApiKey = <TBody>(
+  handler: (request: NextRequest, body: TBody) => Promise<NextResponse>,
   authenticateApiUser: (request: NextRequest) => Promise<{
     authenticated: boolean
     failReason?: string
@@ -120,7 +120,7 @@ export const verifyRequestWithApiKey = <T>(
 ) => {
   const wrappedHandler = async (
     request: NextRequest,
-    body: unknown,
+    body: TBody,
   ): Promise<NextResponse> => {
     // Verify API key first
     const verificationConfig = createApiKeyVerification(authenticateApiUser)
@@ -131,5 +131,8 @@ export const verifyRequestWithApiKey = <T>(
   }
 
   // Wrap with error handler
-  return withErrorHandler(wrappedHandler, createCommonErrorHandler(logBody))
+  return withErrorHandler<TBody>(
+    wrappedHandler,
+    createCommonErrorHandler<TBody>(logBody),
+  )
 }

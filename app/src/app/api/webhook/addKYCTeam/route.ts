@@ -37,10 +37,8 @@ export interface WebhookPayload {
 
 const handleWebhook = async (
   request: NextRequest,
-  body: unknown,
+  body: WebhookPayload,
 ): Promise<NextResponse> => {
-  const webhookPayload = body as WebhookPayload
-
   // Verify the webhook signature
   const verificationConfig = createWebhookVerification(
     process.env.TYPEFORM_SIGNING_SECRET || "",
@@ -48,7 +46,7 @@ const handleWebhook = async (
   await verifyRequest(request, verificationConfig, body)
 
   // Process the webhook payload
-  const formEntry = await processTypeformWebhook(webhookPayload)
+  const formEntry = await processTypeformWebhook(body)
 
   if (!formEntry) {
     throw new ValidationError("Invalid webhook data")
@@ -61,7 +59,10 @@ const handleWebhook = async (
 }
 
 // Create a custom error handler that logs the request body
-const errorHandler = createCommonErrorHandler(true)
+const errorHandler = createCommonErrorHandler<WebhookPayload>(true)
 
 // Export the wrapped handler
-export const POST = withErrorHandler(handleWebhook, errorHandler)
+export const POST = withErrorHandler<WebhookPayload>(
+  handleWebhook,
+  errorHandler,
+)
