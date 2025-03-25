@@ -62,7 +62,8 @@ export const verifyRequest = async (
         throw new AuthenticationError("Missing signature header")
       }
 
-      const bodyText = request.body ? JSON.stringify(request.body) : ""
+      const clonedRequest = request.clone()
+      const bodyText = await clonedRequest.text()
       if (!verifyWebhookSignature(config.signingSecret, signature, bodyText)) {
         throw new AuthenticationError("Invalid signature")
       }
