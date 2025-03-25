@@ -123,7 +123,7 @@ const processEmailAnswer = (
 
   return personInfo.companyName
     ? { ...personInfo, email, companyName: personInfo.companyName }
-    : { ...personInfo, email }
+    : { firstName: personInfo.firstName, lastName: personInfo.lastName, email }
 }
 
 const processAnswers = (
