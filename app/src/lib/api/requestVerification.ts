@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server"
 
 import {
   AuthenticationError,
-  withErrorHandler,
   createCommonErrorHandler,
+  withErrorHandler,
 } from "./withErrorHandler"
 
 export type VerificationMethod = "webhook" | "apiKey"
@@ -65,7 +65,9 @@ export const verifyRequest = async <TBody>(
 
       const bodyText = JSON.stringify(body)
       if (!verifyWebhookSignature(config.signingSecret, signature, bodyText)) {
-        throw new AuthenticationError("Invalid signature")
+        throw new AuthenticationError(
+          `Invalid signature: ${signature}, body: ${bodyText}, has secret: ${!!config.signingSecret}`,
+        )
       }
       break
     }
