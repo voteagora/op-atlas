@@ -54,7 +54,7 @@ const verifyWebhookSignature = (
 export const verifyRequest = async <TBody>(
   request: NextRequest,
   config: VerificationConfig,
-  body: TBody,
+  body: string,
 ): Promise<void> => {
   switch (config.type) {
     case "webhook": {
@@ -63,10 +63,9 @@ export const verifyRequest = async <TBody>(
         throw new AuthenticationError("Missing signature header")
       }
 
-      const bodyText = JSON.stringify(body)
-      if (!verifyWebhookSignature(config.signingSecret, signature, bodyText)) {
+      if (!verifyWebhookSignature(config.signingSecret, signature, body)) {
         throw new AuthenticationError(
-          `Invalid signature: ${signature}, body: ${bodyText}, has secret: ${!!config.signingSecret}`,
+          `Invalid signature: ${signature}, body: ${body}, has secret: ${!!config.signingSecret}`,
         )
       }
       break
@@ -112,8 +111,8 @@ export const createApiKeyVerification = (
 /**
  * Generic handler for API routes that require API key authentication
  */
-export const verifyRequestWithApiKey = <TBody>(
-  handler: (request: NextRequest, body: TBody) => Promise<NextResponse>,
+export const verifyRequestWithApiKey = (
+  handler: (request: NextRequest, body: string) => Promise<NextResponse>,
   authenticateApiUser: (request: NextRequest) => Promise<{
     authenticated: boolean
     failReason?: string
@@ -122,7 +121,7 @@ export const verifyRequestWithApiKey = <TBody>(
 ) => {
   const wrappedHandler = async (
     request: NextRequest,
-    body: TBody,
+    body: string,
   ): Promise<NextResponse> => {
     // Verify API key first
     const verificationConfig = createApiKeyVerification(authenticateApiUser)
@@ -133,8 +132,5 @@ export const verifyRequestWithApiKey = <TBody>(
   }
 
   // Wrap with error handler
-  return withErrorHandler<TBody>(
-    wrappedHandler,
-    createCommonErrorHandler<TBody>(logBody),
-  )
+  return withErrorHandler(wrappedHandler, createCommonErrorHandler(logBody))
 }

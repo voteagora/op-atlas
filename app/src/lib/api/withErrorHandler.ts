@@ -5,15 +5,12 @@ type ErrorResponse = {
   status: number
 }
 
-type ApiHandler<TBody = unknown> = (
-  request: NextRequest,
-  body: TBody,
-) => Promise<NextResponse>
+type ApiHandler = (request: NextRequest, body: string) => Promise<NextResponse>
 
-type ErrorHandler<TBody = unknown> = (
+type ErrorHandler = (
   error: unknown,
   request: NextRequest,
-  body?: TBody,
+  body?: string,
 ) => ErrorResponse
 
 const defaultErrorHandler: ErrorHandler = (error, request, body) => {
@@ -30,14 +27,14 @@ const defaultErrorHandler: ErrorHandler = (error, request, body) => {
 const createErrorResponse = (error: ErrorResponse): NextResponse =>
   NextResponse.json({ error: error.error }, { status: error.status })
 
-export const withErrorHandler = <TBody = unknown>(
-  handler: ApiHandler<TBody>,
-  customErrorHandler?: ErrorHandler<TBody>,
+export const withErrorHandler = (
+  handler: ApiHandler,
+  customErrorHandler?: ErrorHandler,
 ) => {
   return async (request: NextRequest) => {
-    let body: TBody | undefined
+    let body: string | undefined
     try {
-      const body = (await request.json()) as TBody | undefined
+      body = await request.text()
 
       if (!body) {
         throw new ValidationError("Missing request body")
@@ -75,10 +72,10 @@ export class NotFoundError extends Error {
 }
 
 // Common error handler
-export const createCommonErrorHandler = <TBody = unknown>(
+export const createCommonErrorHandler = (
   logBody: boolean = true,
-): ErrorHandler<TBody> => {
-  return (error: unknown, request: NextRequest, body?: TBody) => {
+): ErrorHandler => {
+  return (error: unknown, request: NextRequest, body?: string) => {
     if (error instanceof ValidationError) {
       console.error("Validation error:", error.message)
       return {
