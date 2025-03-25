@@ -7,11 +7,17 @@ type ErrorResponse = {
 
 type ApiHandler = (request: NextRequest, body: unknown) => Promise<NextResponse>
 
-type ErrorHandler = (error: unknown, request: NextRequest) => ErrorResponse
+type ErrorHandler = (
+  error: unknown,
+  request: NextRequest,
+  body?: unknown,
+) => ErrorResponse
 
-const defaultErrorHandler: ErrorHandler = (error, request) => {
+const defaultErrorHandler: ErrorHandler = (error, request, body) => {
   console.error("Error processing request:", error)
-  console.error("Request body:", request.body)
+  if (body !== undefined) {
+    console.error("Request body:", body)
+  }
   return {
     error: "Internal server error",
     status: 500,
@@ -26,14 +32,15 @@ export const withErrorHandler = (
   customErrorHandler?: ErrorHandler,
 ) => {
   return async (request: NextRequest) => {
+    let body: unknown
     try {
       const bodyText = await request.text()
-      const body = bodyText ? JSON.parse(bodyText) : undefined
+      body = bodyText ? JSON.parse(bodyText) : undefined
 
       return await handler(request, body)
     } catch (error) {
       const errorHandler = customErrorHandler || defaultErrorHandler
-      const errorResponse = errorHandler(error, request)
+      const errorResponse = errorHandler(error, request, body)
       return createErrorResponse(errorResponse)
     }
   }
@@ -65,7 +72,7 @@ export class NotFoundError extends Error {
 export const createCommonErrorHandler = (
   logBody: boolean = true,
 ): ErrorHandler => {
-  return (error: unknown, request: NextRequest) => {
+  return (error: unknown, request: NextRequest, body?: unknown) => {
     if (error instanceof ValidationError) {
       return {
         error: error.message,
@@ -89,17 +96,9 @@ export const createCommonErrorHandler = (
 
     if (logBody) {
       console.error("Error processing request:", error)
-      // request.body is a ReadableStream and won't log properly
-      // Need to clone and read the stream to see the actual payload
-      const clonedRequest = request.clone()
-      clonedRequest
-        .json()
-        .then((body) => {
-          console.error("Request body:", body)
-        })
-        .catch((err) => {
-          console.error("Could not parse request body:", err)
-        })
+      if (body !== undefined) {
+        console.error("Request body:", body)
+      }
     }
 
     return {
