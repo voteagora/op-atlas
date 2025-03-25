@@ -80,6 +80,7 @@ export const createCommonErrorHandler = <TBody = unknown>(
 ): ErrorHandler<TBody> => {
   return (error: unknown, request: NextRequest, body?: TBody) => {
     if (error instanceof ValidationError) {
+      console.error("Validation error:", error.message)
       return {
         error: error.message,
         status: 400,
@@ -87,6 +88,7 @@ export const createCommonErrorHandler = <TBody = unknown>(
     }
 
     if (error instanceof AuthenticationError) {
+      console.error("Authentication error:", error.message)
       return {
         error: error.message,
         status: 401,
@@ -94,6 +96,7 @@ export const createCommonErrorHandler = <TBody = unknown>(
     }
 
     if (error instanceof NotFoundError) {
+      console.error("Not found error:", error.message)
       return {
         error: error.message,
         status: 404,
