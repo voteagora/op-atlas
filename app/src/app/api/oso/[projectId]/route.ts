@@ -42,22 +42,22 @@ export async function GET(
     await queryMetrics(osoId, "tvl"),
   ])
 
-  const t = {
-    activeAddresses: {
-      "2025-01-23": 1,
-      "2025-02-19": 1,
-      "2025-02-21": 4,
-    },
-    gasFees: {
-      "2025-01-23": 1.06709064e-10,
-      "2025-02-19": 1.1327449056e-8,
-    },
-    transactions: {
-      "2025-01-23": 4,
-      "2025-02-19": 2,
-    },
-    tvl: { "2025-01-23": 400, "2025-02-19": 299 },
-  }
+  // const t = {
+  //   activeAddresses: {
+  //     "2025-01-23": 1,
+  //     "2025-02-19": 1,
+  //     "2025-02-21": 4,
+  //   },
+  //   gasFees: {
+  //     "2025-01-23": 1.06709064e-10,
+  //     "2025-02-19": 1.1327449056e-8,
+  //   },
+  //   transactions: {
+  //     "2025-01-23": 4,
+  //     "2025-02-19": 2,
+  //   },
+  //   tvl: { "2025-01-23": 400, "2025-02-19": 299 },
+  // }
 
   const groupedMetrics = groupedData({
     activeAddresses,
@@ -66,7 +66,7 @@ export async function GET(
     tvl,
   })
 
-  return NextResponse.json({ groupedMetrics: t })
+  return NextResponse.json({ groupedMetrics })
 }
 
 const queryMetrics = async (osoId: string, key: keyof typeof OSO_METRICS) => {
