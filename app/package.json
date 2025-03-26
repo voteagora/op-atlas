@@ -20,7 +20,8 @@
     "kyc": "tsx src/scripts/kyc.ts",
     "prepare": "husky",
     "studio": "prisma studio",
-    "graphql:generate": "pnpm graphql-codegen"
+    "graphql:generate": "pnpm graphql-codegen",
+    "populate:oso:dev-tooling": "tsx src/scripts/populate-dev-tooling-data.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
