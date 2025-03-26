@@ -129,7 +129,7 @@ const MOCK_REWARDS_TRACHE_3 = [
     projectName: "Project 4",
     wallets: [
       "0x3456789012345678901234567890123456789012",
-      "0x8901234567890123456789012345678901abcdef0",
+      "0x8901234567890123456789012345678901234567",
     ],
     KYCStatusCompleted: false,
     amounts: [
@@ -194,7 +194,7 @@ const MOCK_REWARDS_TRACHE_4 = [
     projectName: "Project 4",
     wallets: [
       "0x3456789012345678901234567890123456789012",
-      "0x8901234567890123456789012345678901abcdef0",
+      "0x8901234567890123456789012345678901234567",
     ],
     KYCStatusCompleted: false,
     amounts: [
@@ -263,7 +263,7 @@ const MOCK_REWARDS_TRACHE_5 = [
     projectName: "Project 4",
     wallets: [
       "0x3456789012345678901234567890123456789012",
-      "0x8901234567890123456789012345678901abcdef0",
+      "0x8901234567890123456789012345678901234567",
     ],
     KYCStatusCompleted: true,
     amounts: [
@@ -336,7 +336,7 @@ const MOCK_REWARDS_TRACHE_6 = [
     projectName: "Project 4",
     wallets: [
       "0x3456789012345678901234567890123456789012",
-      "0x8901234567890123456789012345678901abcdef0",
+      "0x8901234567890123456789012345678901234567",
     ],
     KYCStatusCompleted: true,
     amounts: [
