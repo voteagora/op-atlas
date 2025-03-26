@@ -8,3 +8,7 @@ export const INDEXED_MONTHS = {
   7: "July",
 }
 export const MONTHS = Object.values(INDEXED_MONTHS)
+
+export const TRANSACTIONS_THRESHOLD = 1000
+export const QUALIFIED_ADDRESSES_THRESHOLD = 420
+export const DISTINCT_DAYS_THRESHOLD = 10

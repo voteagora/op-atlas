@@ -1,7 +1,7 @@
 "use client"
 
 import { getMonth, parseISO } from "date-fns"
-import { CheckCircle2, EyeOff, Info, Triangle } from "lucide-react"
+import { CheckIcon, EyeOff, Info, Triangle, XIcon } from "lucide-react"
 import { AlertTriangleIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -11,7 +11,13 @@ import { Button } from "@/components/common/Button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
-import { INDEXED_MONTHS, MONTHS } from "./constants"
+import {
+  DISTINCT_DAYS_THRESHOLD,
+  INDEXED_MONTHS,
+  MONTHS,
+  QUALIFIED_ADDRESSES_THRESHOLD,
+  TRANSACTIONS_THRESHOLD,
+} from "./constants"
 
 export type OnchainBuildersDataType = Record<string, number>
 interface DataProps {
@@ -170,8 +176,26 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
           ))}
         </TabsList>
         {MONTHS.map((month) => {
-          const data = groupedData[month]
-          console.log(">>> data", data)
+          const monthMetrics = groupedData[month]
+          if (
+            monthMetrics.activeAddresses.value <
+              QUALIFIED_ADDRESSES_THRESHOLD ||
+            monthMetrics.transactions.value < TRANSACTIONS_THRESHOLD ||
+            monthMetrics.activeAddresses.value < DISTINCT_DAYS_THRESHOLD
+          ) {
+            return (
+              <NotPassingEligibility
+                key={month}
+                month={month}
+                transactionsCount={monthMetrics.transactions.value}
+                qualifiedAddressesCount={monthMetrics.activeAddresses.value}
+                distinctDaysCount={monthMetrics.activeAddresses.value}
+                hasDefillamaAdapter={
+                  data?.eligibility.hasDefillamaAdapter ?? false
+                }
+              />
+            )
+          }
           return (
             <TabsContent
               key={month}
@@ -179,22 +203,25 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
             >
               <MetricCard
-                value={data.tvl.value}
+                value={monthMetrics.tvl.value}
                 title="TVL across the Superchain"
                 trend={{
-                  value: data.tvl.trend.value.toString(),
-                  type: data.tvl.trend.sign === "inc" ? "increase" : "decrease",
+                  value: monthMetrics.tvl.trend.value.toString(),
+                  type:
+                    monthMetrics.tvl.trend.sign === "inc"
+                      ? "increase"
+                      : "decrease",
                 }}
                 sign={{ value: "$", position: "left" }}
                 index={0}
               />
               <MetricCard
-                value={data.transactions.value}
+                value={monthMetrics.transactions.value}
                 title="Transactions"
                 trend={{
-                  value: data.transactions.trend.value.toString(),
+                  value: monthMetrics.transactions.trend.value.toString(),
                   type:
-                    data.transactions.trend.sign === "inc"
+                    monthMetrics.transactions.trend.sign === "inc"
                       ? "increase"
                       : "decrease",
                 }}
@@ -203,27 +230,29 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               />
               <MetricCard
                 value={
-                  data.gasFees.value &&
-                  normalizeToTwoDecimals(data.gasFees.value)
+                  monthMetrics.gasFees.value &&
+                  normalizeToTwoDecimals(monthMetrics.gasFees.value)
                 }
                 title="Gas consumed"
                 trend={{
                   value: normalizeToTwoDecimals(
-                    data.gasFees.trend.value,
+                    monthMetrics.gasFees.trend.value,
                   ).toString(),
                   type:
-                    data.gasFees.trend.sign === "inc" ? "increase" : "decrease",
+                    monthMetrics.gasFees.trend.sign === "inc"
+                      ? "increase"
+                      : "decrease",
                 }}
                 sign={{ value: " ETH", position: "right" }}
                 index={2}
               />
               <MetricCard
-                value={data.activeAddresses.value}
+                value={monthMetrics.activeAddresses.value}
                 title="Qualified addresses"
                 trend={{
-                  value: data.activeAddresses.trend.value.toString(),
+                  value: monthMetrics.activeAddresses.trend.value.toString(),
                   type:
-                    data.activeAddresses.trend.sign === "inc"
+                    monthMetrics.activeAddresses.trend.sign === "inc"
                       ? "increase"
                       : "decrease",
                 }}
@@ -298,6 +327,80 @@ function AlertContainer({
   )
 }
 
+function NotPassingEligibility({
+  month,
+  transactionsCount,
+  qualifiedAddressesCount,
+  distinctDaysCount,
+  hasDefillamaAdapter,
+}: {
+  month: string
+  transactionsCount: number
+  qualifiedAddressesCount: number
+  distinctDaysCount: number
+  hasDefillamaAdapter: boolean
+}) {
+  return (
+    <TabsContent
+      key={month}
+      value={month}
+      className="w-full grid lg:grid-cols-2 gap-4 grid-cols-1 data-[state=inactive]:hidden"
+    >
+      <NotPassingEligibilityContainer
+        title="At least 1000 transactions"
+        projectValue={transactionsCount}
+        passed={transactionsCount >= 1000}
+      />
+      <NotPassingEligibilityContainer
+        title="At least 420 qualified addresses"
+        projectValue={qualifiedAddressesCount}
+        passed={qualifiedAddressesCount >= 420}
+      />
+      <NotPassingEligibilityContainer
+        title="At least 10 distinct days"
+        projectValue={distinctDaysCount}
+        passed={distinctDaysCount >= 10}
+      />
+      <NotPassingEligibilityContainer
+        title="Defillama adapter"
+        projectValue={hasDefillamaAdapter}
+        passed={hasDefillamaAdapter}
+      />
+    </TabsContent>
+  )
+}
+
+function NotPassingEligibilityContainer({
+  title,
+  passed,
+  projectValue,
+}: {
+  title: string
+  passed: boolean
+  projectValue: number | boolean
+}) {
+  return (
+    <div className="w-full flex items-center space-x-2 p-6 bg-background rounded-xl border">
+      {passed ? (
+        <CheckIcon size={24} className="text-[#0DA529]" />
+      ) : (
+        <XIcon size={24} className="text-[#FF0420]" />
+      )}
+      <div>
+        <p className="font-medium text-base text-foreground">{title}</p>
+        <p className="text-secondary-foreground text-base">
+          This project:{" "}
+          {typeof projectValue === "number"
+            ? projectValue
+            : projectValue
+            ? "Pass"
+            : "Fail"}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function MetricCard({
   value,
   title,
@@ -319,6 +422,7 @@ function MetricCard({
         sign.position === "right" ? sign.value : ""
       }`
     : "- -"
+
   return (
     <div
       key={index}
@@ -366,21 +470,6 @@ function MetricCard({
     </div>
   )
 }
-
-// NOTE: Mock data
-const NOTIFICATIONS = [
-  {
-    type: "success",
-    message:
-      "Your Account Abstraction contracts were found in BundleBear—you’re receiving extra OP.",
-  },
-  {
-    type: "info",
-    message:
-      "Rewards are determined by an evaluation algorithm powered by onchain data",
-  },
-]
-//
 
 const getMonthFromDateString = (dateString: string) => {
   const date = parseISO(dateString)
