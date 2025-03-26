@@ -24,7 +24,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { setProjectFunding, updateProjectDetails } from "@/lib/actions/projects"
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectWithFullDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import {
@@ -43,7 +43,7 @@ import {
 } from "./schema"
 
 function toFormValues(
-  project: ProjectWithDetails,
+  project: ProjectWithFullDetails,
 ): z.infer<typeof FundingFormSchema> {
   const retroFunding: z.infer<typeof FundingFormSchema>["retroFunding"] = []
   const grants: z.infer<typeof FundingFormSchema>["grants"] = []
@@ -169,7 +169,11 @@ function fromFormValues(
   return funding
 }
 
-export const GrantsForm = ({ project }: { project: ProjectWithDetails }) => {
+export const GrantsForm = ({
+  project,
+}: {
+  project: ProjectWithFullDetails
+}) => {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)

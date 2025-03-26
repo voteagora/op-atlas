@@ -16,11 +16,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
+import { useProjectContracts } from "@/hooks/db/useProjectContracts"
+import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { CategoryWithImpact, ProjectWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX, getProjectStatus } from "@/lib/utils"
 
 import { ApplicationFormSchema } from "./ApplicationFormTabs"
-import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 
 const ProjectImpactForm = ({
   project,
@@ -34,10 +35,14 @@ const ProjectImpactForm = ({
   index: number
 }) => {
   const { data: contracts } = useProjectContracts(project.id)
+  const { data: projectDetails } = useProjectDetails(project.id)
 
   const isEligible = useMemo(() => {
-    return getProjectStatus(project, contracts ?? null).progressPercent === 100
-  }, [project, contracts])
+    return (
+      getProjectStatus(projectDetails ?? null, contracts ?? null)
+        .progressPercent === 100
+    )
+  }, [projectDetails, contracts])
 
   const hasApplied = project.applications[0]?.status === "submitted"
   const attestationId = project.applications[0]?.attestationId

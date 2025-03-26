@@ -7,6 +7,7 @@ import { twMerge } from "tailwind-merge"
 import {
   ProjectContracts,
   ProjectWithDetails,
+  ProjectWithFullDetails,
   UserWithAddresses,
 } from "../types"
 
@@ -100,10 +101,12 @@ export type ProjectStatus = {
 }
 
 export function getProjectStatus(
-  project: ProjectWithDetails,
+  project: ProjectWithFullDetails | null,
   contracts: ProjectContracts | null,
 ): ProjectStatus {
   const completedSections: ProjectSection[] = []
+
+  if (!project) return { completedSections, progressPercent: 0 }
 
   const hasDetails = project.name && project.description
   if (hasDetails) {

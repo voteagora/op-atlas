@@ -5,6 +5,7 @@ import {
   CategoryWithImpact,
   OrganizationWithDetails,
   ProjectWithDetails,
+  ProjectWithFullDetails,
 } from "../types"
 
 export const FullProjectMetadataValidator = z.object({
@@ -131,7 +132,7 @@ export type FullProjectMetadata = {
 export type ProjectMetadata = Omit<FullProjectMetadata, "contracts">
 
 export function formatProjectMetadata(
-  project: ProjectWithDetails,
+  project: ProjectWithFullDetails,
 ): ProjectMetadata {
   // Eliminate extraneous data from IPFS snapshots
 
@@ -227,7 +228,7 @@ export function formatProjectMetadata(
 }
 
 export function buildFullProjectMetadata(
-  project: ProjectWithDetails,
+  project: ProjectWithFullDetails,
   contracts: ProjectContract[],
 ): FullProjectMetadata {
   const metadata = formatProjectMetadata(project)

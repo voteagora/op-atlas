@@ -5,6 +5,7 @@ import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
+import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { useIsAdmin } from "@/lib/hooks"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
@@ -32,11 +33,15 @@ const UserProjectCard = ({
   const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
   const { data: contracts } = useProjectContracts(project.id)
+  const { data: projectDetails } = useProjectDetails(project.id)
 
   const progress = useMemo(() => {
-    const { progressPercent } = getProjectStatus(project, contracts ?? null)
+    const { progressPercent } = getProjectStatus(
+      projectDetails ?? null,
+      contracts ?? null,
+    )
     return progressPercent
-  }, [project, contracts])
+  }, [projectDetails, contracts])
 
   const uniqueApplications = useMemo(() => {
     return applications

@@ -9,12 +9,12 @@ import {
   ProjectContracts,
   ProjectContractWithProject,
   ProjectTeam,
+  ProjectWithDetails,
   ProjectWithFullDetails,
   ProjectWithTeam,
   PublishedUserProjectsResult,
   TeamRole,
   UserProjectsWithDetails,
-  UserProjectWithDetails,
   UserWithProjects,
 } from "@/lib/types"
 import { getValidUntil } from "@/lib/utils"
@@ -67,10 +67,7 @@ async function getUserAdminProjectsWithDetailFn({
         COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
         COALESCE(jsonb_agg(
           DISTINCT to_jsonb(fr.*) || jsonb_build_object(
@@ -96,10 +93,7 @@ async function getUserAdminProjectsWithDetailFn({
       LEFT JOIN "UserProjects" up ON p."id" = up."projectId" AND up."deletedAt" IS NULL
       LEFT JOIN "UserProjects" t ON p."id" = t."projectId" AND t."deletedAt" IS NULL
       LEFT JOIN "User" u ON t."userId" = u."id"
-      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
-      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
       LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
-      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
       LEFT JOIN "Application" a ON p."id" = a."projectId" 
         AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
@@ -119,10 +113,7 @@ async function getUserAdminProjectsWithDetailFn({
         COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
         COALESCE(jsonb_agg(
           DISTINCT to_jsonb(fr.*) || jsonb_build_object(
@@ -149,10 +140,7 @@ async function getUserAdminProjectsWithDetailFn({
         AND uo."deletedAt" IS NULL
       LEFT JOIN "UserProjects" t ON p."id" = t."projectId" AND t."deletedAt" IS NULL
       LEFT JOIN "User" u ON t."userId" = u."id"
-      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
-      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
       LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
-      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
       LEFT JOIN "Application" a ON p."id" = a."projectId"
         AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
@@ -221,7 +209,7 @@ export const getRandomProjects = cache(getRandomProjectsFn)
 
 async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<
-    { result: { projects: { project: UserProjectWithDetails }[] } }[]
+    { result: { projects: { project: ProjectWithDetails }[] } }[]
   >`
     WITH project_data AS (
       SELECT 
