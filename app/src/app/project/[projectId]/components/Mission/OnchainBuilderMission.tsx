@@ -1,12 +1,122 @@
+"use client"
+
+import { getMonth, parseISO } from "date-fns"
 import { CheckCircle2, EyeOff, Info, Triangle } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
+import React from "react"
 
 import { Button } from "@/components/common/Button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
-export default function RewardsTable() {
+import { INDEXED_MONTHS, MONTHS } from "./constants"
+
+export type OnchainBuildersDataType = Record<string, number>
+interface DataProps {
+  activeAddresses: OnchainBuildersDataType
+  gasFees: OnchainBuildersDataType
+  transactions: OnchainBuildersDataType
+  tvl: OnchainBuildersDataType
+}
+
+export function OnchainBuilderMission({ data }: { data?: DataProps }) {
+  const groupedData = React.useMemo(() => {
+    if (!data) return {}
+
+    const grouped = {
+      activeAddresses: groupByMonth(data.activeAddresses),
+      gasFees: groupByMonth(data.gasFees),
+      transactions: groupByMonth(data.transactions),
+      tvl: groupByMonth(data.tvl),
+    }
+
+    const sum = (arr?: number[]) => arr?.reduce((acc, val) => acc + val, 0) || 0
+
+    const getTrend = (
+      current: number,
+      previous: number,
+    ): { value: number; sign: "inc" | "dec" | null } => {
+      if (previous === 0) return { value: 0, sign: null }
+
+      const diff = current - previous
+      return {
+        value: Math.abs(diff),
+        sign: diff > 0 ? "inc" : diff < 0 ? "dec" : null,
+      }
+    }
+
+    return MONTHS.reduce(
+      (acc, month, index) => {
+        const prevMonth = MONTHS[index - 1]
+
+        const curr = {
+          activeAddresses: sum(grouped.activeAddresses[month]),
+          gasFees: sum(grouped.gasFees[month]),
+          transactions: sum(grouped.transactions[month]),
+          tvl: sum(grouped.tvl[month]),
+        }
+
+        const prev = {
+          activeAddresses: sum(grouped.activeAddresses[prevMonth]),
+          gasFees: sum(grouped.gasFees[prevMonth]),
+          transactions: sum(grouped.transactions[prevMonth]),
+          tvl: sum(grouped.tvl[prevMonth]),
+        }
+
+        acc[month] = {
+          activeAddresses: {
+            value: curr.activeAddresses,
+            trend: getTrend(curr.activeAddresses, prev.activeAddresses),
+          },
+          gasFees: {
+            value: curr.gasFees,
+            trend: getTrend(curr.gasFees, prev.gasFees),
+          },
+          transactions: {
+            value: curr.transactions,
+            trend: getTrend(curr.transactions, prev.transactions),
+          },
+          tvl: {
+            value: curr.tvl,
+            trend: getTrend(curr.tvl, prev.tvl),
+          },
+        }
+
+        return acc
+      },
+      {} as Record<
+        string,
+        {
+          activeAddresses: {
+            value: number
+            trend: { value: number; sign: "inc" | "dec" | null }
+          }
+          gasFees: {
+            value: number
+            trend: { value: number; sign: "inc" | "dec" | null }
+          }
+          transactions: {
+            value: number
+            trend: { value: number; sign: "inc" | "dec" | null }
+          }
+          tvl: {
+            value: number
+            trend: { value: number; sign: "inc" | "dec" | null }
+          }
+        }
+      >,
+    )
+  }, [data])
+
+  function normalizeToTwoDecimals(num: number): number {
+    if (num === 0) return 0
+
+    const exponent = Math.floor(Math.log10(Math.abs(num)))
+    const normalized = num / Math.pow(10, exponent)
+
+    return Number(normalized.toFixed(2)) // returns 1.07
+  }
+
   return (
     <div className="space-y-6">
       <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
@@ -40,9 +150,8 @@ export default function RewardsTable() {
           </div>
         </div>
       </div>
-      <Tabs defaultValue={ACHIEVEMENTS.at(0)?.key} className="w-full mt-12">
+      <Tabs defaultValue={MONTHS[0]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
-          {/* TODO: Replace MONTHS with actual data */}
           {MONTHS.map((month, index) => (
             <TabsTrigger
               key={index}
@@ -53,80 +162,69 @@ export default function RewardsTable() {
             </TabsTrigger>
           ))}
         </TabsList>
-        {ACHIEVEMENTS.map(({ key, achievements, totalRewards }) => (
-          <TabsContent
-            key={key}
-            value={key}
-            className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
-          >
-            {achievements.map(({ value, title, trend }, index) => (
-              <div
-                key={index}
-                className="flex flex-col justify-between p-6 bg-background rounded-xl border"
-              >
-                <div className="w-full flex items-center justify-between space-x-1">
-                  <p className="font-semibold text-base">{value}</p>
-                  <div
-                    className={cn([
-                      "px-2.5 py-1 rounded-full text-xs font-medium flex space-x-1 items-center",
-                      {
-                        "bg-green-100 text-green-foreground":
-                          trend.type === "increase",
-                        "bg-red-100 text-red-foreground":
-                          trend.type === "decrease",
-                      },
-                    ])}
-                  >
-                    <span>{trend.value}</span>
-                    {trend.type === "increase" ? (
-                      <Triangle
-                        size={12}
-                        className="text-success-foreground"
-                        fill="#006117"
-                      />
-                    ) : (
-                      <Triangle
-                        size={12}
-                        className="rotate-180 text-red-600"
-                        fill="#B80018"
-                      />
-                    )}
-                  </div>
-                </div>
-                <p className="text-base leading-6 text-secondary-foreground">
-                  {title}
-                </p>
-              </div>
-            ))}
-            <div className="rounded-xl p-6 flex items-center justify-between w-full bg-background border col-span-2 divide-x-[1px]">
-              <div className="space-x-2 flex h-12">
-                <Image
-                  src="/assets/chain-logos/optimism-letters.svg"
-                  width={40}
-                  height={40}
-                  alt="Optimism Logo"
-                />
-                <div className="flex flex-col h-full justify-between py-0.5">
-                  <span className="font-semibold text-foreground text-base">
-                    1,264 OP
-                  </span>
-                  <span className="text-secondary-foreground text-base font-normal">
-                    Rewards for performance in February
-                  </span>
-                </div>
-              </div>
-              <p className="w-1/2 pl-6 text-secondary-foreground text-base font-normal">
-                Rewards are determined by an{" "}
-                <span className="font-semibold">evaluation algorithm</span>{" "}
-                powered by onchain data, and some metrics are more valuable than
-                others.{" "}
-                <Link href={"#"} className="underline">
-                  Learn more
-                </Link>
-              </p>
-            </div>
-          </TabsContent>
-        ))}
+        {MONTHS.map((month) => {
+          const data = groupedData[month]
+          console.log(">>> data", data)
+          return (
+            <TabsContent
+              key={month}
+              value={month}
+              className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
+            >
+              <MetricCard
+                value={data.activeAddresses.value}
+                title="TVL across the Superchain"
+                trend={{
+                  value: data.activeAddresses.trend.value.toString(),
+                  type:
+                    data.activeAddresses.trend.sign === "inc"
+                      ? "increase"
+                      : "decrease",
+                }}
+                sign={{ value: "$", position: "left" }}
+                index={0}
+              />
+              <MetricCard
+                value={data.transactions.value}
+                title="Transactions"
+                trend={{
+                  value: data.transactions.trend.value.toString(),
+                  type:
+                    data.transactions.trend.sign === "inc"
+                      ? "increase"
+                      : "decrease",
+                }}
+                sign={{ value: "K", position: "right" }}
+                index={1}
+              />
+              <MetricCard
+                value={
+                  data.gasFees.value &&
+                  normalizeToTwoDecimals(data.gasFees.value)
+                }
+                title="Gas consumed"
+                trend={{
+                  value: normalizeToTwoDecimals(
+                    data.gasFees.trend.value,
+                  ).toString(),
+                  type:
+                    data.gasFees.trend.sign === "inc" ? "increase" : "decrease",
+                }}
+                sign={{ value: " ETH", position: "right" }}
+                index={2}
+              />
+              <MetricCard
+                value={data.tvl.value}
+                title="Qualified addresses"
+                trend={{
+                  value: data.tvl.trend.value.toString(),
+                  type: data.tvl.trend.sign === "inc" ? "increase" : "decrease",
+                }}
+                index={3}
+              />
+            </TabsContent>
+          )
+        })}
       </Tabs>
       <ul className="space-y-[8pt]">
         {/* TODO: Replace this with actual data */}
@@ -152,57 +250,67 @@ export default function RewardsTable() {
   )
 }
 
-// NOTE: Mock data
-const MONTHS = ["February", "March", "April", "May", "June", "July"]
-
-const getRandomValue = ({
-  symbol,
-  round = false,
-  decimals = 2,
+function MetricCard({
+  value,
+  title,
+  trend,
+  index,
+  sign = { value: "", position: "right" },
 }: {
-  symbol: string
-  round?: boolean
-  decimals?: number
-}) => {
-  const value = Math.random() * 10000 + 1000
-  return `${symbol === "$" ? symbol : ""}${
-    round ? Math.round(value) : value.toFixed(decimals)
-  }${symbol !== "$" ? symbol : ""}`
+  value: string | number
+  title: string
+  trend: { value: string; type: "increase" | "decrease" }
+  index: number
+  sign?: {
+    value: string
+    position: "left" | "right"
+  }
+}) {
+  const formattedValue = value
+    ? `${sign.position === "left" ? sign.value : ""}${value}${
+        sign.position === "right" ? sign.value : ""
+      }`
+    : "- -"
+  return (
+    <div
+      key={index}
+      className="flex flex-col justify-between p-6 bg-background rounded-xl border"
+    >
+      <div className="w-full flex items-center justify-between space-x-1">
+        <p className="font-semibold text-base">{formattedValue}</p>
+        {value && trend.value !== "0" ? (
+          <div
+            className={cn([
+              "px-2.5 py-1 rounded-full text-xs font-medium flex space-x-1 items-center",
+              {
+                "bg-green-100 text-green-foreground": trend.type === "increase",
+                "bg-red-100 text-red-foreground": trend.type === "decrease",
+              },
+            ])}
+          >
+            <span>{trend.value}</span>
+            {trend.type === "increase" ? (
+              <Triangle
+                size={12}
+                className="text-success-foreground"
+                fill="#006117"
+              />
+            ) : (
+              <Triangle
+                size={12}
+                className="rotate-180 text-red-600"
+                fill="#B80018"
+              />
+            )}
+          </div>
+        ) : null}
+      </div>
+      <p className="text-base leading-6 text-secondary-foreground">{title}</p>
+    </div>
+  )
 }
-const getRandomTrend = () => {
-  const value = (Math.random() * 10).toFixed(1)
-  const type = Math.random() > 0.5 ? "increase" : "decrease"
-  return { value: `${value}%`, type }
-}
-const getRandomTotalRewards = () => Math.floor(Math.random() * 10000)
 
-const ACHIEVEMENTS = MONTHS.map((month) => ({
-  key: month,
-  achievements: [
-    {
-      value: getRandomValue({ symbol: "$", round: true }),
-      title: "TVL across the Superchain",
-      trend: getRandomTrend(),
-    },
-    {
-      value: getRandomValue({ symbol: "K", round: true }),
-      title: "Transactions",
-      trend: getRandomTrend(),
-    },
-    {
-      value: getRandomValue({ symbol: " ETH", decimals: 3 }),
-      title: "Gas consumed",
-      trend: getRandomTrend(),
-    },
-    {
-      value: getRandomValue({ symbol: "", round: true }),
-      title: "Qualified addresses",
-      trend: getRandomTrend(),
-    },
-  ],
-  totalRewards: `${getRandomTotalRewards()} OP`,
-}))
-
+// NOTE: Mock data
 const NOTIFICATIONS = [
   {
     type: "success",
@@ -216,3 +324,24 @@ const NOTIFICATIONS = [
   },
 ]
 //
+
+const getMonthFromDateString = (dateString: string) => {
+  const date = parseISO(dateString)
+  const month = getMonth(date) + 1 // 0-indexed
+
+  return INDEXED_MONTHS[month as keyof typeof INDEXED_MONTHS]
+}
+
+const groupByMonth = (data: Record<string, number>) => {
+  return Object.entries(data).reduce<Record<string, number[]>>(
+    (acc, [date, value]) => {
+      const month = getMonthFromDateString(date)
+      if (!acc[month]) {
+        acc[month] = []
+      }
+      acc[month].push(value)
+      return acc
+    },
+    {},
+  )
+}

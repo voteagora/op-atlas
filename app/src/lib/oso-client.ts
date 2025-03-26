@@ -5,6 +5,8 @@ interface GraphQLResponse<T = any> {
 
 type ReturnData<T> = (keyof T)[]
 
+const ENUM_VALUES = ["Asc", "Desc"]
+
 class OsoClient {
   private static instance: OsoClient
   private endpoint: string
@@ -29,6 +31,10 @@ class OsoClient {
   buildQuery(query: Record<string, any>, select: string[]) {
     const formatValue = (value: any): string => {
       if (typeof value === "string") {
+        // Don't wrap enums in quotes
+        if (ENUM_VALUES.includes(value)) {
+          return value
+        }
         return `"${value}"` // wrap strings in quotes
       }
       if (typeof value === "number" || typeof value === "boolean") {

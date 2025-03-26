@@ -2,19 +2,14 @@ import { QueryClient } from "@tanstack/react-query"
 import { notFound } from "next/navigation"
 
 import { getPublicProjectAction } from "@/lib/actions/projects"
+import apiFetch from "@/lib/utils/apiFetch"
 
 import {
-  Contracts,
-  Contributors,
   Description,
-  Grants,
   Header,
   IncreaseYourImpact,
-  Links,
   Mission,
   Performance,
-  PricingAndInvestment,
-  Repos,
 } from "./components"
 
 interface PageProps {
@@ -48,6 +43,16 @@ export default async function Page({ params }: PageProps) {
         name: publicProject.team?.at(0)?.user.name,
       }
 
+  const publicProjectMetrics = await queryClient.fetchQuery({
+    queryKey: ["project", "public", "metrics", projectId],
+    queryFn: async () => {
+      const res = await apiFetch(`api/oso/${projectId}`)
+      return await res.json()
+    },
+  })
+
+  console.log(">>> publicProjectMetrics", publicProjectMetrics)
+
   return (
     <div className="w-full h-full mt-6 pb-12">
       <div className="mx-auto w-full max-w-[1064px] px-8 space-y-12">
@@ -77,7 +82,10 @@ export default async function Page({ params }: PageProps) {
           <h4 className="font-semibold text-xl">Missions</h4>
           <ul className="space-y-12">
             <li>
-              <Mission type="on-chain" />
+              <Mission
+                type="on-chain"
+                onchainBuildersMetrics={publicProjectMetrics.groupedMetrics}
+              />
             </li>
             <li>
               <Mission type="dev-tooling" />
@@ -86,12 +94,6 @@ export default async function Page({ params }: PageProps) {
         </div>
         <IncreaseYourImpact />
         <Performance />
-        <Contributors contributors={publicProject.contributors} />
-        <Repos repos={publicProject.repos} />
-        <Links links={publicProject.links} />
-        <Contracts contracts={publicProject.contracts} />
-        <PricingAndInvestment pricingModel={publicProject.pricingModel} />
-        <Grants funding={publicProject.funding} />
       </div>
     </div>
   )

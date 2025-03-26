@@ -7,14 +7,56 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
+import { INDEXED_MONTHS, MONTHS } from "./constants"
 import DevToolingMission from "./DevToolingMission"
-import OnchainBuilderMission from "./OnchainBuilderMission"
+import {
+  OnchainBuilderMission,
+  OnchainBuildersDataType,
+} from "./OnchainBuilderMission"
 
 interface MissionProps {
   type: "on-chain" | "dev-tooling"
+  onchainBuildersMetrics?: {
+    activeAddresses: OnchainBuildersDataType
+    gasFees: OnchainBuildersDataType
+    transactions: OnchainBuildersDataType
+    tvl: OnchainBuildersDataType
+  }
 }
 
-export default function Mission({ type }: MissionProps) {
+export default function Mission({
+  type,
+  onchainBuildersMetrics,
+}: MissionProps) {
+  if (!onchainBuildersMetrics) {
+    return null
+  }
+
+  const firstDate = Object.keys(onchainBuildersMetrics.activeAddresses)[0]
+  const lastDate = Object.keys(onchainBuildersMetrics.activeAddresses).slice(
+    -1,
+  )[0]
+
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const formattedFirstDate = new Date(firstDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+    const formattedFirstDateYear = new Date(firstDate).getFullYear()
+
+    const formattedLastDate = new Date(lastDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+    const formattedLastDateYear = new Date(lastDate).getFullYear()
+
+    return formattedFirstDateYear === formattedLastDateYear
+      ? `${formattedFirstDate.split(",")[0]} - ${formattedLastDate}`
+      : `${formattedFirstDate} - ${formattedLastDate}`
+  }
+
   return (
     <Accordion type="single" collapsible>
       <AccordionItem value="retro-funding" className="w-full">
@@ -37,16 +79,17 @@ export default function Mission({ type }: MissionProps) {
                   In Progress
                 </span>
               </div>
-              {/* TODO: Replace this with actual date */}
               <p className="text-secondary-foreground font-normal text-base">
-                Feb 12 - July 30, 2025
+                {formatDateRange(firstDate, lastDate)}
               </p>
             </div>
           </div>
           <AccordionTrigger />
         </div>
         <AccordionContent>
-          {type === "on-chain" && <OnchainBuilderMission />}
+          {type === "on-chain" && (
+            <OnchainBuilderMission data={onchainBuildersMetrics} />
+          )}
           {type === "dev-tooling" && <DevToolingMission />}
         </AccordionContent>
       </AccordionItem>
