@@ -7,7 +7,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { createProjectSnapshot } from "@/lib/actions/snapshots"
-import { ProjectContracts, ProjectWithDetails } from "@/lib/types"
+import { ProjectContracts, ProjectWithFullDetails } from "@/lib/types"
 import {
   getProjectStatus,
   projectHasUnpublishedChanges,
@@ -22,7 +22,7 @@ export const PublishForm = ({
   project,
   contracts,
 }: {
-  project: ProjectWithDetails
+  project: ProjectWithFullDetails
   contracts: ProjectContracts | null
 }) => {
   const [isPublishing, setIsPublishing] = useState(false)
@@ -45,7 +45,7 @@ export const PublishForm = ({
         completedSections,
       ).length === 5
     )
-  }, [project])
+  }, [project, contracts])
 
   const hasPublishedLatestChanges = useMemo(() => {
     const sortedSnapshots = project.snapshots.slice().sort((a, b) => {

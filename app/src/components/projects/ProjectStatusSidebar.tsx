@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { deleteUserProject } from "@/lib/actions/projects"
 import { useIsAdmin } from "@/lib/hooks"
-import { ProjectContracts, ProjectWithDetails } from "@/lib/types"
+import { ProjectContracts, ProjectWithFullDetails } from "@/lib/types"
 import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
@@ -21,7 +21,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,
   contracts,
 }: {
-  project: ProjectWithDetails | null
+  project: ProjectWithFullDetails | null
   contracts: ProjectContracts | null
 }) {
   const router = useRouter()
@@ -34,7 +34,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
     return project
       ? getProjectStatus(project, contracts)
       : { progressPercent: 0, completedSections: [] }
-  }, [project])
+  }, [project, contracts])
 
   const [dashboardLoading, setDashboardLoading] = useState(false)
 

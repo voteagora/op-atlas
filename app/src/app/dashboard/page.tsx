@@ -18,13 +18,16 @@ export default async function Page() {
     redirect("/")
   }
 
+  const fakeUserId = "f6fac755-b7ec-461c-903d-fd5595458472"
+
   const [user, projects, applications, organizations, adminProjects] =
     await Promise.all([
-      getUserById(session.user.id),
-      getProjects(session.user.id),
-      getApplications(session.user.id),
-      getUserOrganizations(session.user.id),
-      getAdminProjects(session.user.id),
+      getUserById(fakeUserId),
+      // [],
+      getProjects(fakeUserId),
+      getApplications(fakeUserId),
+      getUserOrganizations(fakeUserId),
+      getAdminProjects(fakeUserId),
     ])
 
   if (!user) {
