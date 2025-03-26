@@ -6,7 +6,12 @@ import { Button } from "@/components/common/Button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
-export default function DevToolingMission() {
+interface DevtoolingMissionProps {
+  projectOSOData?: JSON
+}
+export default function DevToolingMission({
+  projectOSOData,
+}: DevtoolingMissionProps) {
   return (
     <div className="space-y-6">
       <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">

@@ -2,7 +2,9 @@
 
 import { getMonth, parseISO } from "date-fns"
 import { CheckCircle2, EyeOff, Info, Triangle } from "lucide-react"
+import { AlertTriangleIcon } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
@@ -17,6 +19,11 @@ interface DataProps {
   gasFees: OnchainBuildersDataType
   transactions: OnchainBuildersDataType
   tvl: OnchainBuildersDataType
+  eligibility: {
+    hasDefillamaAdapter: boolean
+    hasQualifiedAddresses: boolean
+    hasBundleBear: boolean
+  }
 }
 
 export function OnchainBuilderMission({ data }: { data?: DataProps }) {
@@ -172,14 +179,11 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
             >
               <MetricCard
-                value={data.activeAddresses.value}
+                value={data.tvl.value}
                 title="TVL across the Superchain"
                 trend={{
-                  value: data.activeAddresses.trend.value.toString(),
-                  type:
-                    data.activeAddresses.trend.sign === "inc"
-                      ? "increase"
-                      : "decrease",
+                  value: data.tvl.trend.value.toString(),
+                  type: data.tvl.trend.sign === "inc" ? "increase" : "decrease",
                 }}
                 sign={{ value: "$", position: "left" }}
                 index={0}
@@ -214,11 +218,14 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={2}
               />
               <MetricCard
-                value={data.tvl.value}
+                value={data.activeAddresses.value}
                 title="Qualified addresses"
                 trend={{
-                  value: data.tvl.trend.value.toString(),
-                  type: data.tvl.trend.sign === "inc" ? "increase" : "decrease",
+                  value: data.activeAddresses.trend.value.toString(),
+                  type:
+                    data.activeAddresses.trend.sign === "inc"
+                      ? "increase"
+                      : "decrease",
                 }}
                 index={3}
               />
@@ -227,26 +234,67 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         })}
       </Tabs>
       <ul className="space-y-[8pt]">
-        {/* TODO: Replace this with actual data */}
-        {NOTIFICATIONS.map(({ type, message }, index) => (
-          <li key={index} className="flex items-center space-x-1 group">
-            {type === "success" && (
-              <CheckCircle2 size={16} fill="#404454" className="text-white" />
-            )}
-            {type === "info" && (
-              <Info size={16} fill="#404454" className="text-white" />
-            )}
-            <span>{message}</span>
-            <button>
-              <EyeOff
-                size={16}
-                className="group-hover:opacity-100 transition-all duration-300 opacity-0"
-              />
-            </button>
-          </li>
-        ))}
+        {!Boolean(data?.eligibility.hasDefillamaAdapter) && (
+          <AlertContainer type="danger">
+            {/* TODO: Where does this lead? */}
+            For TVL rewards,{" "}
+            <Link className="underline" href={"#"}>
+              provide a link to your DeFiLlama adapter
+            </Link>
+            .
+          </AlertContainer>
+        )}
+        {!Boolean(data?.eligibility.hasBundleBear) && (
+          <AlertContainer type="danger">
+            Qualified addresses may be inaccurate for projects deployed on
+            Worldchain. The team is actively working with World to analyze World
+            address data.
+          </AlertContainer>
+        )}
+        {Boolean(data?.eligibility.hasBundleBear) && (
+          <AlertContainer type="info">
+            {/* TODO: Where does this lead? */}
+            If you are using ERC-4337: Account Abstraction, then{" "}
+            <Link className="underline" href={"#"}>
+              add your contracts to BundleBear
+            </Link>{" "}
+            for extra rewards.
+          </AlertContainer>
+        )}
       </ul>
     </div>
+  )
+}
+
+function AlertContainer({
+  children,
+  type,
+}: {
+  children: React.ReactNode
+  type: "info" | "danger"
+}) {
+  return (
+    <li className="group flex items-start space-x-1 text-secondary-foreground text-sm font-normal">
+      {type === "danger" && (
+        <AlertTriangleIcon
+          size={16}
+          fill="#FF0420"
+          className="text-background mt-0.5"
+        />
+      )}
+      {type === "info" && (
+        <Info size={16} fill="#404454" className="text-background mt-0.5" />
+      )}
+      <p className="!text-secondary-foreground !text-sm !font-normal">
+        {children}
+      </p>
+      <button>
+        <EyeOff
+          size={16}
+          className="group-hover:opacity-100 transition-all duration-300 opacity-0"
+        />
+      </button>
+    </li>
   )
 }
 
@@ -305,7 +353,16 @@ function MetricCard({
           </div>
         ) : null}
       </div>
-      <p className="text-base leading-6 text-secondary-foreground">{title}</p>
+      <p className="text-base leading-6 text-secondary-foreground flex items-center space-x-2">
+        <span>{title}</span>
+        {!Boolean(value) && (
+          <AlertTriangleIcon
+            size={16}
+            fill="#FF0420"
+            className="text-background"
+          />
+        )}
+      </p>
     </div>
   )
 }

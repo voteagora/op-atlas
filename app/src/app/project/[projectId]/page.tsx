@@ -51,7 +51,8 @@ export default async function Page({ params }: PageProps) {
     },
   })
 
-  console.log(">>> publicProjectMetrics", publicProjectMetrics)
+  const { onchainBuildersMetrics, projectOSOData } = publicProjectMetrics
+  console.log(">>> data", onchainBuildersMetrics, projectOSOData)
 
   return (
     <div className="w-full h-full mt-6 pb-12">
@@ -84,11 +85,21 @@ export default async function Page({ params }: PageProps) {
             <li>
               <Mission
                 type="on-chain"
-                onchainBuildersMetrics={publicProjectMetrics.groupedMetrics}
+                onchainBuildersMetrics={{
+                  ...onchainBuildersMetrics,
+                  eligibility: {
+                    hasDefillamaAdapter:
+                      projectOSOData?.hasDefillamaAdapter ?? false,
+                    hasQualifiedAddresses: Boolean(
+                      onchainBuildersMetrics.activeAddresses.length ?? false,
+                    ),
+                    hasBundleBear: projectOSOData?.hasBundleBear ?? false,
+                  },
+                }}
               />
             </li>
             <li>
-              <Mission type="dev-tooling" />
+              <Mission type="dev-tooling" projectOSOData={projectOSOData} />
             </li>
           </ul>
         </div>

@@ -21,7 +21,7 @@
     "prepare": "husky",
     "studio": "prisma studio",
     "graphql:generate": "pnpm graphql-codegen",
-    "populate:oso:dev-tooling": "tsx src/scripts/populate-dev-tooling-data.ts"
+    "populate:oso-data": "tsx src/scripts/populate-oso-data.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

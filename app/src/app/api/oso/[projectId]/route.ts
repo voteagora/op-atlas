@@ -66,7 +66,21 @@ export async function GET(
     tvl,
   })
 
-  return NextResponse.json({ groupedMetrics: t })
+  const projectOSOData = await prisma.projectOSOData.findFirst({
+    where: {
+      projectId,
+    },
+    select: {
+      data: true,
+    },
+  })
+
+  console.log(">>> projectOSOData", projectOSOData?.data)
+
+  return NextResponse.json({
+    onchainBuildersMetrics: groupedMetrics,
+    projectOSOData: projectOSOData?.data,
+  })
 }
 
 const queryMetrics = async (osoId: string, key: keyof typeof OSO_METRICS) => {

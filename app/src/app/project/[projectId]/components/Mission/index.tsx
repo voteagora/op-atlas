@@ -21,12 +21,19 @@ interface MissionProps {
     gasFees: OnchainBuildersDataType
     transactions: OnchainBuildersDataType
     tvl: OnchainBuildersDataType
+    eligibility: {
+      hasDefillamaAdapter: boolean
+      hasQualifiedAddresses: boolean
+      hasBundleBear: boolean
+    }
   }
+  projectOSOData?: JSON
 }
 
 export default function Mission({
   type,
   onchainBuildersMetrics,
+  projectOSOData,
 }: MissionProps) {
   if (!onchainBuildersMetrics) {
     return null
@@ -90,7 +97,9 @@ export default function Mission({
           {type === "on-chain" && (
             <OnchainBuilderMission data={onchainBuildersMetrics} />
           )}
-          {type === "dev-tooling" && <DevToolingMission />}
+          {type === "dev-tooling" && (
+            <DevToolingMission projectOSOData={projectOSOData} />
+          )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>
