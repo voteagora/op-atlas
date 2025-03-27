@@ -227,6 +227,7 @@ async function getUserOrganizationsWithDetailsFn(
           'id', p.id,
           'name', p.name,
           'description', p.description,
+          'thumbnailUrl', p."thumbnailUrl",
           'team', COALESCE(pt.team_data, '[]'),
           'repos', COALESCE((
             SELECT jsonb_agg(to_jsonb(r.*))
