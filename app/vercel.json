@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/persona",
-      "schedule": "0 * * * *"
+      "schedule": "*/15 * * * *"
     },
     {
       "path": "/api/tag-contacts",
