@@ -11,6 +11,7 @@ interface DevtoolingMissionProps {
     gasConsumed?: number
     onchainBuildersInAtlasCount?: number
     topProjects?: { name: string; website: string[]; thumbnailUrl: string }[]
+    opReward?: number | null
   }
 }
 
@@ -26,8 +27,6 @@ export default function DevToolingMission({
 
     return Number(normalized.toFixed(2)) // returns 1.07
   }
-
-  console.log(data.topProjects)
 
   return (
     <div className="space-y-6">
@@ -52,7 +51,9 @@ export default function DevToolingMission({
           <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
             <div className="text-center space-y-3 z-50">
               {/* TODO: Replace this with actual data */}
-              <span className="font-extrabold text-4xl">1,264 OP</span>
+              <span className="font-extrabold text-4xl">
+                {data.opReward ?? 0} OP
+              </span>
               <p className="text-secondary-foreground">
                 Rewards so far in Retro Funding: Onchain Builders
               </p>

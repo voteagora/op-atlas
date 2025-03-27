@@ -31,6 +31,7 @@ interface DataProps {
   gasFees: OnchainBuildersDataType
   transactions: OnchainBuildersDataType
   tvl: OnchainBuildersDataType
+  opReward?: number | null
   eligibility: {
     hasDefillamaAdapter: boolean
     hasQualifiedAddresses: boolean
@@ -183,7 +184,9 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         <div className="absolute w-full h-full z-50">
           <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
             <div className="text-center space-y-3 z-50">
-              <span className="font-extrabold text-4xl">1,264 OP</span>
+              <span className="font-extrabold text-4xl">
+                {data?.opReward ?? 0} OP
+              </span>
               <p className="text-secondary-foreground">
                 Rewards so far in Retro Funding: Onchain Builders
               </p>

@@ -68,7 +68,10 @@ export default async function Page({ params }: PageProps) {
       return {
         // TODO: Fix this type
         isMember: !Boolean(isMember?.error),
-        onchainBuildersMetrics: groupedMetrics as any,
+        onchainBuildersMetrics: {
+          ...groupedMetrics,
+          opReward: Math.round((projectOSOData?.data as any)?.opReward ?? 0),
+        } as any,
         projectOSOData: projectOSOData?.data as any,
       }
     },
@@ -76,8 +79,6 @@ export default async function Page({ params }: PageProps) {
 
   const onchainBuildersMetrics = publicProjectMetrics.onchainBuildersMetrics
   const projectOSOData = publicProjectMetrics.projectOSOData
-
-  console.log(">>> isMember", publicProjectMetrics.isMember)
 
   return (
     <div className="w-full h-full mt-6 pb-12">

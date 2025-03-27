@@ -12,10 +12,6 @@ async function populate() {
       const projectId = data.project_name
       const osoId = data.oso_project_id
 
-      const elibibilityEntry = eligibility.find(
-        (entry) => entry.project_name === projectId,
-      )
-
       // Top Projects
       const topProjectIds = data.onchain_builder_op_atlas_ids
       const topProjects = await prisma.project.findMany({
@@ -50,12 +46,13 @@ async function populate() {
   const eligibilityData = eligibility.map((data) => {
     // Essential
     const projectId = data.project_name
-    const osoId = data.oso_project_id
+    const osoId = data.project_id
 
     // Eligibility Data
     const isEligible = data.is_eligible
     const hasDefillamaAdapter = data.has_defillama_adapter
     const hasBundleBear = data.has_bundle_bear
+    const opReward = data.op_reward
 
     return {
       projectId,
@@ -64,6 +61,7 @@ async function populate() {
         isEligible,
         hasDefillamaAdapter,
         hasBundleBear,
+        opReward,
       },
     }
   })
@@ -75,6 +73,7 @@ async function populate() {
       isEligible?: boolean
       hasDefillamaAdapter?: boolean
       hasBundleBear?: boolean
+      opReward?: number | null
       topProjects?: { name: string; website: string[] }[]
       onchainBuildersInAtlasCount?: number
     }

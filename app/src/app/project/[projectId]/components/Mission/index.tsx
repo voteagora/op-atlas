@@ -7,7 +7,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-import { INDEXED_MONTHS, MONTHS } from "./constants"
 import DevToolingMission from "./DevToolingMission"
 import { OnchainBuilderMission } from "./OnchainBuilderMission"
 import { OnchainBuildersDataType } from "./types"
@@ -20,6 +19,7 @@ interface MissionProps {
     gasFees: OnchainBuildersDataType
     transactions: OnchainBuildersDataType
     tvl: OnchainBuildersDataType
+    opReward?: number | null
     eligibility: {
       hasDefillamaAdapter: boolean
       hasQualifiedAddresses: boolean
@@ -103,6 +103,7 @@ export default function Mission({
               projectName={projectName ?? ""}
               data={{
                 gasConsumed: totalGasFees,
+                opReward: Math.round(onchainBuildersMetrics?.opReward ?? 0),
                 onchainBuildersInAtlasCount:
                   projectOSOData?.onchainBuildersInAtlasCount,
                 topProjects: projectOSOData?.topProjects,
