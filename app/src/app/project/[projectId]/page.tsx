@@ -51,8 +51,12 @@ export default async function Page({ params }: PageProps) {
     },
   })
 
-  const { onchainBuildersMetrics, projectOSOData } = publicProjectMetrics
-  console.log(">>> data", onchainBuildersMetrics, projectOSOData)
+  const onchainBuildersMetrics = publicProjectMetrics.onchainBuildersMetrics
+  const projectOSOData = publicProjectMetrics.projectOSOData
+
+  if (!onchainBuildersMetrics || !projectOSOData) {
+    return notFound()
+  }
 
   return (
     <div className="w-full h-full mt-6 pb-12">
