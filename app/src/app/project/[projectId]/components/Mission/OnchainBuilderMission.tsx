@@ -200,15 +200,21 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
       </div>
       <Tabs defaultValue={MONTHS[0]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
-          {MONTHS.map((month, index) => (
-            <TabsTrigger
-              key={index}
-              value={month}
-              className="rounded-lg py-2 px-4 bg-secondary text-secondary-foreground border border-tertiary min-w-36 w-full data-[state=active]:bg-background data-[state=active]:text-foreground"
-            >
-              {month}
-            </TabsTrigger>
-          ))}
+          {MONTHS.map((month, index) => {
+            const isFutureMonth =
+              index >
+              MONTHS.indexOf(getMonthFromDateString(new Date().toISOString()))
+            return (
+              <TabsTrigger
+                disabled={isFutureMonth}
+                key={index}
+                value={month}
+                className="rounded-lg py-2 px-4 bg-secondary text-secondary-foreground border border-tertiary min-w-36 w-full data-[state=active]:bg-background data-[state=active]:text-foreground"
+              >
+                {month}
+              </TabsTrigger>
+            )
+          })}
         </TabsList>
         {MONTHS.map((month) => {
           const monthMetrics = groupedData[month]
