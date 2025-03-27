@@ -58,14 +58,39 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
       if (previous === 0) return { value: 0, sign: null }
 
       const diff = current - previous
+      const percentageChange = Math.abs((diff / previous) * 100)
+
       return {
-        value: Math.abs(diff),
+        value: parseFloat(percentageChange.toFixed(2)),
         sign: diff > 0 ? "inc" : diff < 0 ? "dec" : null,
       }
     }
 
     return MONTHS.reduce(
       (acc, month, index) => {
+        if (index === 0) {
+          acc[month] = {
+            activeAddresses: {
+              value: sum(grouped.activeAddresses[month]),
+              trend: { value: 0, sign: null },
+            },
+            gasFees: {
+              value: sum(grouped.gasFees[month]),
+              trend: { value: 0, sign: null },
+            },
+            transactions: {
+              value: sum(grouped.transactions[month]),
+              trend: { value: 0, sign: null },
+            },
+            tvl: {
+              value: sum(grouped.tvl[month]),
+              trend: { value: 0, sign: null },
+            },
+          }
+
+          return acc
+        }
+
         const prevMonth = MONTHS[index - 1]
 
         const curr = {
@@ -472,7 +497,7 @@ function MetricCard({
               },
             ])}
           >
-            <span>{trend.value}</span>
+            <span>{trend.value}%</span>
             {trend.type === "increase" ? (
               <Triangle
                 size={12}
