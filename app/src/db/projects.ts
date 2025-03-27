@@ -1744,16 +1744,61 @@ export async function addKYCTeamMembers({
     ...businesses.map((b) => b.email),
   ]
 
-  const existingUsers = await prisma.kYCUser.findMany({
-    where: { email: { in: allEmails } },
-  })
+  const [existingUsers, currentTeam] = await Promise.all([
+    prisma.kYCUser.findMany({
+      where: { email: { in: allEmails } },
+      include: {
+        KYCUserTeams: true,
+      },
+    }),
+    prisma.kYCUserTeams.findMany({
+      where: { kycTeamId },
+    }),
+  ])
 
-  const existingUserMap = new Map(existingUsers.map((u) => [u.email, u]))
+  const existingIndividualUserMap = new Map(
+    existingUsers.filter((u) => !u.businessName).map((u) => [u.email, u]),
+  )
+  const existingBusinessUserMap = new Map(
+    existingUsers.filter((u) => u.businessName).map((u) => [u.email, u]),
+  )
 
   const newIndividuals = individuals.filter(
-    (i) => !existingUserMap.has(i.email),
+    (i) => !existingIndividualUserMap.get(i.email),
   )
-  const newBusinesses = businesses.filter((b) => !existingUserMap.has(b.email))
+  const newBusinesses = businesses.filter(
+    (b) => !existingBusinessUserMap.get(b.email),
+  )
+
+  // We need to remove users that are no longer in the team
+  const toRemove = [
+    // Remove users that are no longer in the team but their email is still used for individuals or businesses
+    ...existingUsers
+      .filter((u) => u.KYCUserTeams.some((t) => t.kycTeamId === kycTeamId))
+      .filter((u) => {
+        const isIndividualMember =
+          !u.businessName && individuals.some((i) => i.email === u.email)
+        const isBusinessMember =
+          !!u.businessName && businesses.some((b) => b.email === u.email)
+        return !isIndividualMember && !isBusinessMember
+      })
+      .map((u) => u.KYCUserTeams.find((t) => t.kycTeamId === kycTeamId)!.id),
+    // Remove users that are no longer in the team & their email is not used for individuals or businesses
+    ...currentTeam
+      .filter((t) => !existingUsers.some((e) => e.id === t.kycUserId))
+      .map((t) => t.id),
+  ]
+
+  // We need to add some existing users & all new users to the team
+  const toAdd = existingUsers
+    .filter((u) => u.KYCUserTeams.every((t) => t.kycTeamId !== kycTeamId))
+    .filter((u) => {
+      const isNewIndividual =
+        !u.businessName && newIndividuals.some((i) => i.email === u.email)
+      const isNewBusiness =
+        !!u.businessName && newBusinesses.some((b) => b.email === u.email)
+      return !isNewIndividual && !isNewBusiness
+    })
 
   await prisma.$transaction(async (tx) => {
     const createdIndividuals = await tx.kYCUser.createManyAndReturn({
@@ -1775,19 +1820,21 @@ export async function addKYCTeamMembers({
       })),
     })
 
-    const allUsers = [
-      ...existingUsers,
-      ...createdIndividuals,
-      ...createdBusinesses,
-    ]
+    const allMembers = [...toAdd, ...createdIndividuals, ...createdBusinesses]
 
-    const uniqueTeamAssignments = Array.from(
-      new Map(
-        allUsers.map((user) => [user.email, { kycTeamId, kycUserId: user.id }]),
-      ).values(),
-    )
-
-    await tx.kYCUserTeams.createMany({ data: uniqueTeamAssignments })
+    await Promise.all([
+      tx.kYCUserTeams.createMany({
+        data: allMembers.map((u) => ({
+          kycTeamId,
+          kycUserId: u.id,
+        })),
+      }),
+      tx.kYCUserTeams.deleteMany({
+        where: {
+          id: { in: toRemove },
+        },
+      }),
+    ])
   })
 }
 
