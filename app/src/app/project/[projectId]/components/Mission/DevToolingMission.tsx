@@ -144,13 +144,13 @@ function MetricCard({
       <div className="w-full flex items-center justify-between space-x-1">
         <p className="font-semibold text-base">{formattedValue}</p>
       </div>
-      <p className="text-base leading-6 text-secondary-foreground flex items-center space-x-2">
+      <p className="text-base leading-6 text-secondary-foreground flex items-start space-x-2">
         <span>{title}</span>
         {!Boolean(value) && (
           <AlertTriangleIcon
             size={16}
             fill="#FF0420"
-            className="text-background"
+            className="text-background mt-1 shrink-0"
           />
         )}
       </p>

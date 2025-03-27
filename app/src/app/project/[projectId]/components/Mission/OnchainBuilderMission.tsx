@@ -376,7 +376,7 @@ function AlertContainer({
         <AlertTriangleIcon
           size={16}
           fill="#FF0420"
-          className="text-background mt-0.5"
+          className="text-background mt-0.5 shrink-0"
         />
       )}
       {type === "info" && (
@@ -529,7 +529,7 @@ function MetricCard({
           <AlertTriangleIcon
             size={16}
             fill="#FF0420"
-            className="text-background"
+            className="text-background shrink-0"
           />
         )}
       </p>
