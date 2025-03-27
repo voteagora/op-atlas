@@ -56,34 +56,35 @@ export default async function Page({ params }: PageProps) {
       const { groupedMetrics, projectOSOData, error } =
         await getPublicProjectOSOData(projectId)
 
-      console.log(">>> data", groupedMetrics, projectOSOData, error)
-
       if (error) {
         return {}
       }
 
+      const isMember = await verifyMembership(
+        params.projectId,
+        session?.user.farcasterId,
+      )
+
       return {
         // TODO: Fix this type
+        isMember: !Boolean(isMember?.error),
         onchainBuildersMetrics: groupedMetrics as any,
         projectOSOData: projectOSOData?.data as any,
       }
     },
   })
 
-  const isMember = await verifyMembership(
-    params.projectId,
-    session?.user.farcasterId,
-  )
-
   const onchainBuildersMetrics = publicProjectMetrics.onchainBuildersMetrics
   const projectOSOData = publicProjectMetrics.projectOSOData
+
+  console.log(">>> isMember", publicProjectMetrics.isMember)
 
   return (
     <div className="w-full h-full mt-6 pb-12">
       <div className="mx-auto w-full max-w-[1064px] px-8 space-y-12">
         <div className="w-full mt-8">
           <Header
-            isMember={Boolean(isMember)}
+            isMember={publicProjectMetrics.isMember}
             thumbnail={publicProject.thumbnailUrl}
             banner={publicProject.bannerUrl}
           />

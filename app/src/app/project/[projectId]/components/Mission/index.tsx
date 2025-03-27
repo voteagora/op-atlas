@@ -35,8 +35,6 @@ export default function Mission({
   onchainBuildersMetrics,
   projectOSOData,
 }: MissionProps) {
-  console.log(">>> onchainBuildersMetrics", onchainBuildersMetrics?.gasFees)
-  console.log(">>> projectOSOData", projectOSOData)
   const formatDateRange = (startDate: string, endDate: string) => {
     const formattedFirstDate = new Date(startDate).toLocaleDateString("en-US", {
       year: "numeric",
