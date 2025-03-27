@@ -235,7 +235,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
             >
               <MetricCard
-                value={monthMetrics.tvl.value}
+                value={formatToK(monthMetrics.tvl.value)}
                 title="TVL across the Superchain"
                 trend={{
                   value: monthMetrics.tvl.trend.value.toString(),
@@ -244,11 +244,14 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                       ? "increase"
                       : "decrease",
                 }}
-                sign={{ value: "$", position: "left" }}
+                sign={{
+                  value: monthMetrics.tvl.value === 0 ? "" : "$",
+                  position: "left",
+                }}
                 index={0}
               />
               <MetricCard
-                value={monthMetrics.transactions.value}
+                value={formatToK(monthMetrics.transactions.value)}
                 title="Transactions"
                 trend={{
                   value: monthMetrics.transactions.trend.value.toString(),
@@ -257,7 +260,6 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                       ? "increase"
                       : "decrease",
                 }}
-                sign={{ value: "K", position: "right" }}
                 index={1}
               />
               <MetricCard
@@ -279,7 +281,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={2}
               />
               <MetricCard
-                value={monthMetrics.activeAddresses.value}
+                value={formatToK(monthMetrics.activeAddresses.value)}
                 title="Qualified addresses"
                 trend={{
                   value: monthMetrics.activeAddresses.trend.value.toString(),
@@ -419,7 +421,9 @@ function NotPassingEligibilityContainer({
         <p className="text-secondary-foreground text-base">
           This project:{" "}
           {typeof projectValue === "number"
-            ? projectValue
+            ? projectValue === 0
+              ? 0
+              : formatToK(projectValue)
             : projectValue
             ? "Pass"
             : "Fail"}
@@ -518,4 +522,9 @@ const groupByMonth = (data: Record<string, number>) => {
     },
     {},
   )
+}
+
+function formatToK(num: number): string {
+  if (num === 0) return "- -"
+  return num > 999 ? `${Math.floor(num / 1000)}K` : `${num}`
 }
