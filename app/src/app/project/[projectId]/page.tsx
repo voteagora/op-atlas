@@ -1,8 +1,10 @@
 import { QueryClient } from "@tanstack/react-query"
 import { notFound } from "next/navigation"
 
+import { getPublicProjectOSOData } from "@/app/api/oso/common"
+import { auth } from "@/auth"
 import { getPublicProjectAction } from "@/lib/actions/projects"
-import apiFetch from "@/lib/utils/apiFetch"
+import { verifyMembership } from "@/lib/actions/utils"
 
 import {
   Description,
@@ -20,6 +22,11 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { projectId } = params
+
+  const session = await auth()
+  if (!session?.user.farcasterId) {
+    return notFound()
+  }
 
   const queryClient = new QueryClient()
   const publicProject = await queryClient.fetchQuery({
@@ -46,23 +53,35 @@ export default async function Page({ params }: PageProps) {
   const publicProjectMetrics = await queryClient.fetchQuery({
     queryKey: ["project", "public", "metrics", projectId],
     queryFn: async () => {
-      const res = await apiFetch(`api/oso/${projectId}`)
-      return await res.json()
+      const { groupedMetrics, projectOSOData, error } =
+        await getPublicProjectOSOData(projectId)
+
+      if (error) {
+        return {}
+      }
+
+      return {
+        // TODO: Fix this type
+        onchainBuildersMetrics: groupedMetrics as any,
+        projectOSOData: projectOSOData?.data as any,
+      }
     },
   })
 
+  const isMember = await verifyMembership(
+    params.projectId,
+    session?.user.farcasterId,
+  )
+
   const onchainBuildersMetrics = publicProjectMetrics.onchainBuildersMetrics
   const projectOSOData = publicProjectMetrics.projectOSOData
-
-  if (!onchainBuildersMetrics || !projectOSOData) {
-    return notFound()
-  }
 
   return (
     <div className="w-full h-full mt-6 pb-12">
       <div className="mx-auto w-full max-w-[1064px] px-8 space-y-12">
         <div className="w-full mt-8">
           <Header
+            isMember={Boolean(isMember)}
             thumbnail={publicProject.thumbnailUrl}
             banner={publicProject.bannerUrl}
           />

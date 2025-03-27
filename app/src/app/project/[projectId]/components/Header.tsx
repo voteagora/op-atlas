@@ -5,16 +5,15 @@ import { useParams } from "next/navigation"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
-import FileUploadInput from "@/components/common/FileUploadInput"
-import { updateBannerAction } from "@/lib/actions/projects"
-import { uploadImage } from "@/lib/utils/images"
+import ExtendedLink from "@/components/common/ExtendedLink"
 
 interface HeaderProps {
+  isMember: boolean
   thumbnail?: string | null
   banner?: string | null
 }
 
-export default function Header({ thumbnail, banner }: HeaderProps) {
+export default function Header({ isMember, thumbnail, banner }: HeaderProps) {
   const params = useParams()
   const [isPending, startTransition] = React.useTransition()
   const [bannerSrc, setBannerSrc] = React.useState<string | null | undefined>(
@@ -24,10 +23,10 @@ export default function Header({ thumbnail, banner }: HeaderProps) {
     <div className="w-full relative">
       {bannerSrc && (
         <>
-          {isPending ? (
+          {isMember && isPending ? (
             <Button
               disabled
-              className="absolute top-6 right-6 z-[100]"
+              className="absolute top-6 right-6 z-10"
               as="button"
               variant="secondary"
               leftIcon={<PencilLineIcon size={16} fill="#000" />}
@@ -35,36 +34,13 @@ export default function Header({ thumbnail, banner }: HeaderProps) {
               Edit
             </Button>
           ) : (
-            <FileUploadInput
+            <ExtendedLink
+              as="button"
+              href={`/projects/${params.projectId}/details`}
+              text="Edit"
+              icon={<PencilLineIcon size={16} fill="#000" />}
               className="absolute top-6 right-6 z-[100]"
-              onChange={async (e) => {
-                if (!e.target.files || e.target.files.length < 1) return
-
-                const file = e.target.files[0]
-                setBannerSrc(URL.createObjectURL(file))
-
-                try {
-                  startTransition(async () => {
-                    const bannerUrl = await uploadImage(file)
-                    await updateBannerAction(
-                      params.projectId as string,
-                      bannerUrl,
-                    )
-                  })
-                } catch (error) {
-                  console.error(error)
-                  setBannerSrc(banner)
-                }
-              }}
-            >
-              <Button
-                as="button"
-                variant="secondary"
-                leftIcon={<PencilLineIcon size={16} fill="#000" />}
-              >
-                Edit
-              </Button>
-            </FileUploadInput>
+            />
           )}
           <div className="flex items-center justify-center w-full h-[280px] rounded-3xl overflow-hidden">
             {isPending && (

@@ -1,11 +1,9 @@
 "use client"
 
-import React from "react"
 import { AlertTriangleIcon, CheckCircle2, EyeOff, Info } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-
-import { Button } from "@/components/common/Button"
+import React from "react"
 
 interface DevtoolingMissionProps {
   projectName: string
@@ -59,9 +57,10 @@ export default function DevToolingMission({
                 Rewards so far in Retro Funding: Onchain Builders
               </p>
             </div>
-            <Button variant="primary" className="z-50">
+            {/* TODO: Bring this back */}
+            {/* <Button variant="primary" className="z-50">
               Claim your rewards
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

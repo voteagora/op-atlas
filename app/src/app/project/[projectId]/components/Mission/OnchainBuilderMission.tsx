@@ -163,9 +163,10 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 Rewards so far in Retro Funding: Onchain Builders
               </p>
             </div>
-            <Button variant="primary" className="z-50">
+            {/* TODO: Bring this back */}
+            {/* <Button variant="primary" className="z-50">
               Claim your rewards
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
