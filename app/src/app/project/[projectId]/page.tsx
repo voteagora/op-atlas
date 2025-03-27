@@ -88,53 +88,55 @@ export default async function Page({ params }: PageProps) {
             banner={publicProject.bannerUrl}
           />
         </div>
-        <Description
-          name={publicProject.name}
-          // TODO: Replace this with actual tags
-          tags={[]}
-          author={author}
-          deployedOn={[
-            { name: "Optimism", image: "/assets/chain-logos/optimism.svg" },
-          ]}
-          description={publicProject.description}
-          socials={{
-            website: publicProject.website,
-            farcaster: publicProject.farcaster,
-            twitter: publicProject.twitter,
-            mirror: publicProject.mirror,
-          }}
-        />
-        <div className="w-full space-y-6">
-          <h4 className="font-semibold text-xl">Missions</h4>
-          <ul className="space-y-12">
-            <li>
-              <Mission
-                type="on-chain"
-                onchainBuildersMetrics={{
-                  ...onchainBuildersMetrics,
-                  eligibility: {
-                    hasDefillamaAdapter:
-                      projectOSOData?.hasDefillamaAdapter ?? false,
-                    hasQualifiedAddresses: Boolean(
-                      onchainBuildersMetrics.activeAddresses.length ?? false,
-                    ),
-                    hasBundleBear: projectOSOData?.hasBundleBear ?? false,
-                  },
-                }}
-              />
-            </li>
-            <li>
-              <Mission
-                projectName={publicProject.name}
-                type="dev-tooling"
-                onchainBuildersMetrics={onchainBuildersMetrics}
-                projectOSOData={projectOSOData}
-              />
-            </li>
-          </ul>
+        <div className="space-y-12 px-12 pt-12">
+          <Description
+            name={publicProject.name}
+            // TODO: Replace this with actual tags
+            tags={[]}
+            author={author}
+            deployedOn={[
+              { name: "Optimism", image: "/assets/chain-logos/optimism.svg" },
+            ]}
+            description={publicProject.description}
+            socials={{
+              website: publicProject.website,
+              farcaster: publicProject.farcaster,
+              twitter: publicProject.twitter,
+              mirror: publicProject.mirror,
+            }}
+          />
+          <div className="w-full space-y-6">
+            <h4 className="font-semibold text-xl">Missions</h4>
+            <ul className="space-y-12">
+              <li>
+                <Mission
+                  type="on-chain"
+                  onchainBuildersMetrics={{
+                    ...onchainBuildersMetrics,
+                    eligibility: {
+                      hasDefillamaAdapter:
+                        projectOSOData?.hasDefillamaAdapter ?? false,
+                      hasQualifiedAddresses: Boolean(
+                        onchainBuildersMetrics.activeAddresses.length ?? false,
+                      ),
+                      hasBundleBear: projectOSOData?.hasBundleBear ?? false,
+                    },
+                  }}
+                />
+              </li>
+              <li>
+                <Mission
+                  projectName={publicProject.name}
+                  type="dev-tooling"
+                  onchainBuildersMetrics={onchainBuildersMetrics}
+                  projectOSOData={projectOSOData}
+                />
+              </li>
+            </ul>
+          </div>
+          <IncreaseYourImpact />
+          <Performance />
         </div>
-        <IncreaseYourImpact />
-        <Performance />
       </div>
     </div>
   )
