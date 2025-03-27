@@ -125,11 +125,7 @@ export default function AddGrantDeliveryAddressForm({
                           : "Fill out the form"
                       }
                       disabled={!Boolean(kycTeam?.grantAddress?.address)}
-                      href={
-                        organizationProject
-                          ? "https://kyb.optimism.io/form"
-                          : "https://kyc.optimism.io/form"
-                      }
+                      href={`https://superchain.typeform.com/to/Pq0c7jYJ#l2_address=${kycTeam?.grantAddress?.address}&kyc_team_id=${kycTeam?.id}`}
                     />
                   </div>
                 </div>
