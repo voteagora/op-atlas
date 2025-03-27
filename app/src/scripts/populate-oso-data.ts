@@ -1,6 +1,7 @@
 import devToolingDataset from "@/data/dev-tooling.json"
 import eligibility from "@/data/eligibility.json"
 import { prisma } from "@/db/client"
+import { chunkArray } from "@/lib/utils"
 
 const BATCH_SIZE = 10
 async function populate() {
@@ -111,15 +112,6 @@ async function populate() {
   console.log("✅ Cleaned up")
 
   console.log("🎉 Done!")
-}
-
-function chunkArray<T>(array: T[], size: number): T[][] {
-  return array.reduce((acc, _, i) => {
-    if (i % size === 0) {
-      acc.push(array.slice(i, i + size))
-    }
-    return acc
-  }, [] as T[][])
 }
 
 populate()

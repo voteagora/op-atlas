@@ -17,7 +17,7 @@ const RoundSelector = ({
   setSelectedRounds: Dispatch<SetStateAction<string[]>>
   totalCount: number
 }) => {
-  const availableRounds = ["4", "5", "6"]
+  const availableRounds = ["4", "5", "6", "7", "8"]
 
   const toggleRound = (round: string) => {
     setSelectedRounds((prev: string[]) =>

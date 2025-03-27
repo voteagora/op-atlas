@@ -10,7 +10,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 1403.13
+    "op_reward": 1403.13,
+    "round_id": "8"
   },
   {
     "project_id": "7o3rQns2QxmMIyr/Lp6EXIqBE9mvqX+1V6tQ8g1t/MM=",
@@ -23,7 +24,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 6578.45
+    "op_reward": 6578.45,
+    "round_id": "8"
   },
   {
     "project_id": "cAaBVZiIeQZu4fS3TLKB2SgqPCHj7MtzVq27nQZkmS8=",
@@ -36,7 +38,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 552.9
+    "op_reward": 552.9,
+    "round_id": "8"
   },
   {
     "project_id": "jxyZJmCIfOjgmygX+xfrjrczCzVNGl6y/3qNAN+b/YI=",
@@ -49,7 +52,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "VC9dxEcF3J+NFOJK8oXbeYtOWMI3kyD/r5G+Z7nu2Bg=",
@@ -62,7 +66,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "5/9fRbVoDF7pHwBdiMbNUbKhidEt/12Ojt9f8cWoZnQ=",
@@ -75,7 +80,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 66666.67
+    "op_reward": 66666.67,
+    "round_id": "8"
   },
   {
     "project_id": "VTFjeAN76kGnqTqKP+SMe2HPaIKY3wKvwo613l6OWN0=",
@@ -88,7 +94,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 6712.75
+    "op_reward": 6712.75,
+    "round_id": "8"
   },
   {
     "project_id": "wzX0MzHFlylzzHVBLRO8ZX30RYXbg4h3K8XwNrRmJos=",
@@ -101,7 +108,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 6388.99
+    "op_reward": 6388.99,
+    "round_id": "8"
   },
   {
     "project_id": "nckCvGKDs0P9bf7kRCdh2afi3oujVYloGf/8XipTY5M=",
@@ -114,7 +122,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 17305.28
+    "op_reward": 17305.28,
+    "round_id": "8"
   },
   {
     "project_id": "gsdS6IBEk8Q9DoxMTexanVBfgLI1UzAPsWaZh21PZBg=",
@@ -127,7 +136,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "vCa+wBp0799NJ8j9L6UgKxKmqiLT95Zk/aQX/hXty7c=",
@@ -140,7 +150,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 1155.97
+    "op_reward": 1155.97,
+    "round_id": "8"
   },
   {
     "project_id": "rnCU69afAeJVsln1gXM1Pt6cMqD09FFS5C8Q38NWifM=",
@@ -153,7 +164,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 6477.23
+    "op_reward": 6477.23,
+    "round_id": "8"
   },
   {
     "project_id": "hxU1nnOFEhGsrGFfD7pziC+gqLyN61d5U1voAgtc0Lg=",
@@ -166,7 +178,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "JTetyUvTgu3P3fKekPJHOjCG1Uuv2TfuDHm9hjADzPM=",
@@ -179,7 +192,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 630.26
+    "op_reward": 630.26,
+    "round_id": "8"
   },
   {
     "project_id": "iMLtNGxl570+RXnqdRC64uLu7ZtFLxImZ5Bj1zIEVls=",
@@ -192,7 +206,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "sf0AvWU1WZLtC4wh/FDYTRU3hyXTux1NqPmabzUABnc=",
@@ -205,7 +220,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "shVzoDEk43o/o3eLSpahwHfj/tn5zrcHqS8SYUzufrA=",
@@ -218,7 +234,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "7Iv5H47guOZI+q3EgByroFWR0Dw7uoImhWPboCDC0FQ=",
@@ -231,7 +248,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 1216.41
+    "op_reward": 1216.41,
+    "round_id": "8"
   },
   {
     "project_id": "xU438Viei8ELWQdDgR6NraNpkl1TUXbnHjaCd5NN0QA=",
@@ -244,7 +262,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 27892.65
+    "op_reward": 27892.65,
+    "round_id": "8"
   },
   {
     "project_id": "g4qi9EqhPO1tGvlPtWynCaP71tw4Gjrzc+UokJDZz2Y=",
@@ -257,7 +276,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 6590.89
+    "op_reward": 6590.89,
+    "round_id": "8"
   },
   {
     "project_id": "f9XY1drAwGvq0ipsMBC3S+hi/BnAOW9s7YSx7LA0qq8=",
@@ -270,7 +290,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "4dqHjI/pEtyPjvZVF5KMQ2gz2K9ah7yeFGwbfXSpRxA=",
@@ -283,7 +304,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 12134.68
+    "op_reward": 12134.68,
+    "round_id": "8"
   },
   {
     "project_id": "7TekQLhtLodQPwAS1BebZwGBDxSc6WD7Uo01XwPDnrs=",
@@ -296,7 +318,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "EGnIDudfUQWj4qmCCyERNT/b3h/3l1STaJjMaUmG6es=",
@@ -309,7 +332,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "qORdAv/JC4no/SKjJY5GbK3FSmUyOyhSl0oXKsJ6B6g=",
@@ -322,7 +346,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 15391.93
+    "op_reward": 15391.93,
+    "round_id": "8"
   },
   {
     "project_id": "mdb4FjuCCmOI5Tc+xwDeXfQd/1Nm2o7JZy8ZHzlxC9o=",
@@ -335,7 +360,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 11402.11
+    "op_reward": 11402.11,
+    "round_id": "8"
   },
   {
     "project_id": "ZYxDUEvRWLmr9Tpf2u0ztP2fVUg0H0NLROMVdJQNDRM=",
@@ -348,7 +374,8 @@
     "is_eligible": false,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "XfpYvFk/xJ0pvTt79xWtRwuMnekQrcIH2Mflz97Lo3E=",
@@ -361,7 +388,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 14847.41
+    "op_reward": 14847.41,
+    "round_id": "8"
   },
   {
     "project_id": "gShBUgODnfUHQo2svXnecUd6kG22drV+Og4nxdq/82k=",
@@ -374,7 +402,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "RxZsvgAlu4U6NJPHoDaURU2dSy/x7ey1UKzAk3pahTE=",
@@ -387,7 +416,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 8477.61
+    "op_reward": 8477.61,
+    "round_id": "8"
   },
   {
     "project_id": "fUkDvtE6aGHLHs9dfhp8rzhhzh7uintrSaO61/OVooU=",
@@ -400,7 +430,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "w5IsGVcdo+bpiRrYuOuxPpNKmmWP+fKCDDRKWF0fuMY=",
@@ -413,7 +444,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 655.71
+    "op_reward": 655.71,
+    "round_id": "8"
   },
   {
     "project_id": "VsbnIqH0Z8ErW7VixsMTGcLVf45E645bcxAVcD/KZT0=",
@@ -426,7 +458,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 48968.63
+    "op_reward": 48968.63,
+    "round_id": "8"
   },
   {
     "project_id": "lNJHwxmG3SQnN5oVhrvAlg0Trq3FhPneMtpZsxsZTf4=",
@@ -439,7 +472,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "a71tbYAPlOpIwh4+Y591PqZ/kYIbS4qRRpQ8WH2w4oM=",
@@ -452,7 +486,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 7140.84
+    "op_reward": 7140.84,
+    "round_id": "8"
   },
   {
     "project_id": "gw1/n9hvDoPA0W0U9NMZ74RsNSQViz+i6ArfdDqPn8E=",
@@ -465,7 +500,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 8006.83
+    "op_reward": 8006.83,
+    "round_id": "8"
   },
   {
     "project_id": "nrBN5UU9cny2/KPrQFVI7k6AOnIRr7gYok3UIwdpq6c=",
@@ -478,7 +514,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 14301.14
+    "op_reward": 14301.14,
+    "round_id": "8"
   },
   {
     "project_id": "fmFqLtFVrR1bA9bONSlNrblHhlZFJg9LXJMS+r2bX6Q=",
@@ -491,7 +528,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 443.0
+    "op_reward": 443.0,
+    "round_id": "8"
   },
   {
     "project_id": "cTfk+RW4AUsig6i213MsTu+SdMtKCv63qOLCX1M091g=",
@@ -504,7 +542,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 20144.91
+    "op_reward": 20144.91,
+    "round_id": "8"
   },
   {
     "project_id": "Hkw3vi9Mx7OBvoKuyZ8MPOA5ZBX3Aj4wukrveVBmkh8=",
@@ -517,7 +556,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 19712.77
+    "op_reward": 19712.77,
+    "round_id": "8"
   },
   {
     "project_id": "usDyvf5/FbrSIBD+zIg7Gl4TGIe3HiKC7H8gXOLfNB0=",
@@ -530,7 +570,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "rxrN8HnLLV8SOP3md3NfXpntywh7F7n5fuRMqFB3Upo=",
@@ -543,7 +584,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 66666.67
+    "op_reward": 66666.67,
+    "round_id": "8"
   },
   {
     "project_id": "R/s1bYEjmNlJ2C9XthjT1evUQ14obvGzmvmaIcTiSNY=",
@@ -556,7 +598,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "+Xyt1tUxrXrbR9UH3h/0BmCBJJpBDBuFyJFBdmt/U44=",
@@ -569,7 +612,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 2575.31
+    "op_reward": 2575.31,
+    "round_id": "8"
   },
   {
     "project_id": "jOnKrCSU5myGHe3ICVGoabpmdtZ+V8gcqRisDpepqCc=",
@@ -582,7 +626,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "sMEYAIHyC7RMbAjCcImJti3PrNJCoQPycDnIfVBvxiI=",
@@ -595,7 +640,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 3205.66
+    "op_reward": 3205.66,
+    "round_id": "8"
   },
   {
     "project_id": "NdwYMf5FYV0V3mi7zOJ4ABpqc2klQTCimnNKCqvZ4z0=",
@@ -608,7 +654,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 1635.07
+    "op_reward": 1635.07,
+    "round_id": "8"
   },
   {
     "project_id": "R1GLGswje04y83WJr2mIPpUxPl+F5hQCZaR19YyXhGA=",
@@ -621,7 +668,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "57FvWwsyNX2cCoYXRlrD084qD9kG/nh1tYNWPswNSs0=",
@@ -634,7 +682,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 2056.45
+    "op_reward": 2056.45,
+    "round_id": "8"
   },
   {
     "project_id": "H0Wcz4f5bYNrMNDSdwJt/pRqNRK2olM1vl2qk15M+4o=",
@@ -647,7 +696,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 994.78
+    "op_reward": 994.78,
+    "round_id": "8"
   },
   {
     "project_id": "WwD15TDI0zlabHrh3/gxft2JBqvbGTyVgE9+M5f6mRI=",
@@ -660,7 +710,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "Rfo5GCgPfxv8mAjJ09WxZZ5ZhlXm5XaUEcDBackrAk8=",
@@ -673,7 +724,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "1Ll7MLXCxNJFxQCuBEdRnRVk164keWjynVtQJF++xGU=",
@@ -686,7 +738,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 24831.13
+    "op_reward": 24831.13,
+    "round_id": "8"
   },
   {
     "project_id": "WCwKOQkL47c1qQ2wVcJ1IcpLMGIXmFHflr4UVQsagVM=",
@@ -699,7 +752,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "sw8ehEEk8y0FK2GSDVnFLz7M9erX6RSQdSAgGDmiwEs=",
@@ -712,7 +766,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 58186.64
+    "op_reward": 58186.64,
+    "round_id": "8"
   },
   {
     "project_id": "8Y5qG9yF+MFlTqxjDUfp0DOCIFutLjdvd6uwdZk+X2c=",
@@ -725,7 +780,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "EiimK/OjLUXPLh91Eh3t7O5IPVEiNNykVTjSu2fbyx0=",
@@ -738,7 +794,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "8KoGcAjv//eKoINV7i7nOfZwp7lSOd8rO+wr18AGDOQ=",
@@ -751,7 +808,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 294.26
+    "op_reward": 294.26,
+    "round_id": "8"
   },
   {
     "project_id": "lGoc+rdKwNdooopWynCp0XdR8HNqPVawSR00mYSfv9g=",
@@ -764,7 +822,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "0L11pj/6WGXOemNtNgE7vay5aRrGaEJ9WPG5YP9Xts4=",
@@ -777,7 +836,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "iHkkzr7r4TtJl1Pe3jRW6Le1xzeaou/GJe/x5F+VKcA=",
@@ -790,7 +850,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": true,
-    "op_reward": 1749.64
+    "op_reward": 1749.64,
+    "round_id": "8"
   },
   {
     "project_id": "514s67lKQTp5eW88EJW1fw6fMnCv2Gi3f1c+c36aHjk=",
@@ -803,7 +864,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "93BBdChzOJAS6sfGob9PLuLiC+NwuB5EJVVW/DHQ2vM=",
@@ -816,7 +878,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "E9yoTCB99+LE9wbUKkODvnBEt275ZlNATXDdKnFLQbQ=",
@@ -829,7 +892,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "GPkPw2+sHiMSo0u65ZfnIeqLYHIGvf+ZI+BtpSZG6KE=",
@@ -842,7 +906,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 247.63
+    "op_reward": 247.63,
+    "round_id": "8"
   },
   {
     "project_id": "D/phNjIkMkuESYi0XbICo299wHOagQbo2WSAyODxDp0=",
@@ -855,7 +920,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 25543.27
+    "op_reward": 25543.27,
+    "round_id": "8"
   },
   {
     "project_id": "VuCrFAWDzI1K7USE+kh9ECxcEa/iG9eVHG6EMS/8iS4=",
@@ -868,7 +934,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 712.02
+    "op_reward": 712.02,
+    "round_id": "8"
   },
   {
     "project_id": "wBCRJMqM8KTnoqC0KsyDhf/hW7HF0wFgU9+ZacWz66E=",
@@ -881,7 +948,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "JvOTLO8yAiBUUs+TrYBBUg3irIPOhVXdYaaGfgHMta0=",
@@ -894,7 +962,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "skDPKeyDWR3XcKKNuFPI/Ef65tIZxbNSiGZcZo376jQ=",
@@ -907,7 +976,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "91qfxPoeZBT6hPZrVLYcaDcgwMNG5MDH77cGiTtBxyQ=",
@@ -920,7 +990,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 1349.65
+    "op_reward": 1349.65,
+    "round_id": "8"
   },
   {
     "project_id": "b0ma4f7o65FUNGRC2R4eb8Fo7DB6imYfqrM3S0JQ4tc=",
@@ -933,7 +1004,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 34683.33
+    "op_reward": 34683.33,
+    "round_id": "8"
   },
   {
     "project_id": "g2gW16kX/8gl4n71esfphgWmt4r2COs4Bc9cGM9025Q=",
@@ -946,7 +1018,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 1247.45
+    "op_reward": 1247.45,
+    "round_id": "8"
   },
   {
     "project_id": "inHPXAwcpnmNnzuMDBO9CsDuph+M4UNF3XwNNhTpafs=",
@@ -959,7 +1032,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 52247.05
+    "op_reward": 52247.05,
+    "round_id": "8"
   },
   {
     "project_id": "AWt4h9zeTVKtlCCptcCdxAqt1P8tHvgZLjpDLlttfmc=",
@@ -972,7 +1046,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "iXR35Xnzm4ioS5d0Eka/UAnUN9CHj4iasG/B8CgiWP8=",
@@ -985,7 +1060,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 2262.23
+    "op_reward": 2262.23,
+    "round_id": "8"
   },
   {
     "project_id": "UAmMTs325Xv+90F/N7ofCj5nky1GREAGoru+OMiHioQ=",
@@ -998,7 +1074,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "ZALEuKWY71Qcj7Tlf8hFHl8XmmlMlST+Cu1ztrue/Xg=",
@@ -1011,7 +1088,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "HgZEmwMqbOcnLVW065exx9nhiBr6eoEA2any9TRsGfc=",
@@ -1024,7 +1102,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 37973.27
+    "op_reward": 37973.27,
+    "round_id": "8"
   },
   {
     "project_id": "db8LWE2icLZuD0o0yjqQoxT4+oXvlmHMVT4O2TqKJCo=",
@@ -1037,7 +1116,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 638.24
+    "op_reward": 638.24,
+    "round_id": "8"
   },
   {
     "project_id": "OVIxgHj4N8zf/sBSYEBssZf0Nyz6mCaIEJa0exm7PoM=",
@@ -1050,7 +1130,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 2392.84
+    "op_reward": 2392.84,
+    "round_id": "8"
   },
   {
     "project_id": "WHFAB3T/+twwBk665nB9w6CsvlhsOEpfPMTT+AfOcmY=",
@@ -1063,7 +1144,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 8197.51
+    "op_reward": 8197.51,
+    "round_id": "8"
   },
   {
     "project_id": "Xrci3TfxGk1fFof+fNzWx6Had1yDlmU1CoHHRvzLMGo=",
@@ -1076,7 +1158,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "1JT70BN2/Rwx6aSj0KsAtMwm544c8iMGSkvndKJTFZ4=",
@@ -1089,7 +1172,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "uAWTL5naoNXYNpp7weim8ypopqmN4+H9fO7/1wOjpeA=",
@@ -1102,7 +1186,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 819.31
+    "op_reward": 819.31,
+    "round_id": "8"
   },
   {
     "project_id": "x9MZObEzydNAk1HPdRO8azvLIkNL0gAIgOIvKthPIbs=",
@@ -1115,7 +1200,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "xIbbe0c5UuvK+FcT9NA6+83THJRxj1w9FnFI1PaYAGo=",
@@ -1128,7 +1214,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 834.88
+    "op_reward": 834.88,
+    "round_id": "8"
   },
   {
     "project_id": "b7muW3E2hHlOFEZs7c+McXNU+W3S2DAxZdpAKlO4xgA=",
@@ -1141,7 +1228,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "gUFAlmQjlPwJ47EfIYcW8OScZ5iHFZBD/TE4Mhx9WQc=",
@@ -1154,7 +1242,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 8843.54
+    "op_reward": 8843.54,
+    "round_id": "8"
   },
   {
     "project_id": "WvG0+xCgbgk6IN8ZUd/VRBFLGPobR5t0TCxeWWyBrYQ=",
@@ -1167,7 +1256,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 5106.87
+    "op_reward": 5106.87,
+    "round_id": "8"
   },
   {
     "project_id": "2d1UftVv4xC+BHialsxoPjC1WJDySvOpnH9o+3sQFYc=",
@@ -1180,7 +1270,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 2915.99
+    "op_reward": 2915.99,
+    "round_id": "8"
   },
   {
     "project_id": "l5D8eaAKqeJb+R8Q94GmrcZiPuwEgmZjQK8GKQiIYDk=",
@@ -1193,7 +1284,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 5388.69
+    "op_reward": 5388.69,
+    "round_id": "8"
   },
   {
     "project_id": "K8y2l5sctus7C4k9W4DfdC+e1OC01pqrvTROnUpMkgk=",
@@ -1206,7 +1298,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "yDPb9jYgbyBsuRoT4r6rLDkPhEU4mogZntNAavzn4bA=",
@@ -1219,7 +1312,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "i7+GWX1oIywd4Pd5yL9aZAFhBIjY40c48Yg4BXFKW9o=",
@@ -1232,7 +1326,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 1247.59
+    "op_reward": 1247.59,
+    "round_id": "8"
   },
   {
     "project_id": "OF1V6dVTQOyDRB5uGdm4yvqv6vkP4TlM22Q/wyrZUZI=",
@@ -1245,7 +1340,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "yHC4i4mkg5sXaXOF4Mih0UyHDYVS7+0+9zuqnDFvClY=",
@@ -1258,7 +1354,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 9798.76
+    "op_reward": 9798.76,
+    "round_id": "8"
   },
   {
     "project_id": "Qh14iOZBPtSPGbuqtJ8wIL11rSdu0gBx6RvzUt9V9sI=",
@@ -1271,7 +1368,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "ZpLND65a7Iy7VJrIjdjCjrQzAFi4JaJpkYeg3DJlrsE=",
@@ -1284,7 +1382,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 63659.58
+    "op_reward": 63659.58,
+    "round_id": "8"
   },
   {
     "project_id": "wXNHytnTdLtuJcPtRtlqIPJ9WtnN6qAM3GH/t0Uiuh4=",
@@ -1297,7 +1396,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 619.93
+    "op_reward": 619.93,
+    "round_id": "8"
   },
   {
     "project_id": "SUaETe9RSmxA6e5SBseHYYZJylEoxPRSMrdjhHoh55I=",
@@ -1310,7 +1410,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "tXGS6SGDHNL8TAhS+fj8+qzF7+FFbx0qJrdfVY2j62I=",
@@ -1323,7 +1424,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "YQs1yyGOSRlEd1a+Rrg179+4RuUlQOCLs+3LHa48xco=",
@@ -1336,7 +1438,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "XLvkdswVcDHS98ET9dfOceXRGZFTzV/dYrPUB8DA2Bc=",
@@ -1349,7 +1452,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 15861.96
+    "op_reward": 15861.96,
+    "round_id": "8"
   },
   {
     "project_id": "zCbuxTOy64SbO/+l0E7LtLS2VMhiw+1o0eedXw2s/ao=",
@@ -1362,7 +1466,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "r3lF/NNRd0zzZXI+9kT2/r0rohb1fra20npNdnPi/ys=",
@@ -1375,7 +1480,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 545.3
+    "op_reward": 545.3,
+    "round_id": "8"
   },
   {
     "project_id": "Jr4krZ4lp1dMiTRDwmF2R9Hw4mF3rsukcBCM4pnF/fc=",
@@ -1384,11 +1490,12 @@
     "transaction_count": 98822653,
     "active_days": 180,
     "active_addresses_count": 26661879,
-    "gas_fees": 6942.5563251773,
+    "gas_fees": 6942.5563251772,
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 66666.67
+    "op_reward": 66666.67,
+    "round_id": "8"
   },
   {
     "project_id": "tnIsq+BWiIkXbY18UI8L609BBs89EO4o+MJ3+hmFsAA=",
@@ -1401,7 +1508,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "+inHxf/47M81HpCJDOPqeN8ZQrT0nC0q1wfs9HzHSTI=",
@@ -1414,7 +1522,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "J0XRgzUEfqUaJG2eQgi+1n49zo66RSLI2qz/I8B6mVI=",
@@ -1427,7 +1536,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 2427.22
+    "op_reward": 2427.22,
+    "round_id": "8"
   },
   {
     "project_id": "HWseNMpaGXySSUevj2VVHOyjIcwPrWDZaV1BEkOzPQg=",
@@ -1440,7 +1550,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 4745.98
+    "op_reward": 4745.98,
+    "round_id": "8"
   },
   {
     "project_id": "xyqCuzyp2siN+L8QgwpvSjTruF2y+tvB++HwqdWDFXY=",
@@ -1453,7 +1564,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 16351.38
+    "op_reward": 16351.38,
+    "round_id": "8"
   },
   {
     "project_id": "AZ2Cqzo/nAUqbj7th1e993Xfpf7qvT2WvHlomSZQ78o=",
@@ -1466,7 +1578,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 332.61
+    "op_reward": 332.61,
+    "round_id": "8"
   },
   {
     "project_id": "qk50KaCd7CHh7oEQjBIVuFDNPzANNpE3yaA2GCpB9Q4=",
@@ -1479,7 +1592,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "gqAHXIAEt3c1wcx3zIvyc+StftbLzXh5j2GSHeePfBo=",
@@ -1492,7 +1606,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "Ze2CblnBaz2Apm6a00KjwAZ7N4K5yxDUpXlK+mDkwJw=",
@@ -1505,7 +1620,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 5522.05
+    "op_reward": 5522.05,
+    "round_id": "8"
   },
   {
     "project_id": "8Cgztczct8fnsJW6D2OQcFRY6nClKNyOC7Le0soED94=",
@@ -1518,7 +1634,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "uYpXuxpTb33CBu9QsVmK2iE/4d47wpn9hHED3hEQRi4=",
@@ -1531,7 +1648,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "zVWBMiOJHTeEPXEgWSl1B+tsS8W9vwfv2QU32ANB8yY=",
@@ -1544,7 +1662,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "0IoaqfH0mkl61jIvWC/JWobbYPP2gn9rTTSuF2/Ydew=",
@@ -1557,7 +1676,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 3692.64
+    "op_reward": 3692.64,
+    "round_id": "8"
   },
   {
     "project_id": "2NhWIeNvC8fOFWoX3/SsLCHtwifSk3TYSEagnfFthIk=",
@@ -1570,7 +1690,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 15499.34
+    "op_reward": 15499.34,
+    "round_id": "8"
   },
   {
     "project_id": "hle+N3YM5tghdfpBxLGwU6k4Bo8wDYIbcCehL36wclE=",
@@ -1583,7 +1704,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "whSzne13utJrOkyjbU5X3xEuZbQPNrNOHTiQKzQFJlU=",
@@ -1596,7 +1718,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "zdNq7Cvjqx03oRiL22rCANVA7/8MBGaoc3InNwm3LCA=",
@@ -1609,7 +1732,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 613.94
+    "op_reward": 613.94,
+    "round_id": "8"
   },
   {
     "project_id": "rb2UtsHsdjrP44lrniVF9ja6m62SEPB0g39/O2m53U4=",
@@ -1622,7 +1746,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "rV6VRIUtgdaeu5+g1y7vloRmK9sbBEl3rFCs1r7OR7A=",
@@ -1635,7 +1760,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 3937.35
+    "op_reward": 3937.35,
+    "round_id": "8"
   },
   {
     "project_id": "MSfDkUunLKtfuMRdZuSxuemESQuIWKFCh1O6ySIEUs8=",
@@ -1648,7 +1774,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": true,
-    "op_reward": 63468.72
+    "op_reward": 63468.72,
+    "round_id": "8"
   },
   {
     "project_id": "c7vW2qABqwjRHtS3aEF1+uZeC9kqrKtd7Bv7sQiSS0s=",
@@ -1661,7 +1788,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "ZcxGuOFKrVdSeP7Ej7qb9S1bs4waWJMHTjpNEOP+tq0=",
@@ -1674,7 +1802,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "imahnjIpbGgSkNyqkOjhlczoUga8ECPoEpirrLs68jQ=",
@@ -1687,7 +1816,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 1625.13
+    "op_reward": 1625.13,
+    "round_id": "8"
   },
   {
     "project_id": "aWuNB+5mklnapGsyBMh4Igpdl8e6JeGAFQW0cp1KN14=",
@@ -1700,7 +1830,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 504.39
+    "op_reward": 504.39,
+    "round_id": "8"
   },
   {
     "project_id": "U+8BPKrK6j10zOy/OaelXzf16agGOaHKyf2N1g0e+BY=",
@@ -1713,7 +1844,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 739.55
+    "op_reward": 739.55,
+    "round_id": "8"
   },
   {
     "project_id": "1TLTRUof21yQ9U4hpzbBFOxsAYwtkoq1KsBpe3xQgtk=",
@@ -1726,7 +1858,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 479.23
+    "op_reward": 479.23,
+    "round_id": "8"
   },
   {
     "project_id": "co0ICqxqrmJ9a1EsZhd2V7DDmDv1pfaIAxANttA9fBw=",
@@ -1739,7 +1872,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "y3k6Rt51vfFOeCM/kbTF+KTmd1rv1z70eWqp2Xtv4rU=",
@@ -1752,7 +1886,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 362.73
+    "op_reward": 362.73,
+    "round_id": "8"
   },
   {
     "project_id": "jB/Odn2EzRAIVyyhY7eTBdOtrWdBQr1Bn9QFSaJc6uQ=",
@@ -1765,7 +1900,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "7EueslOSAcOTAgLquDFENtOlSVcp6+Ti4F4AJDjHiBg=",
@@ -1778,7 +1914,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 31382.19
+    "op_reward": 31382.19,
+    "round_id": "8"
   },
   {
     "project_id": "Vbt0Je/QVMzwz2kXjZhu4hCHrfa5JmL17azwgy9pDRY=",
@@ -1791,7 +1928,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 3642.58
+    "op_reward": 3642.58,
+    "round_id": "8"
   },
   {
     "project_id": "CFKotAGe0czMhAGy94iDJA4xQ48OLiKDZ9SfTsWvutE=",
@@ -1804,7 +1942,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 24540.91
+    "op_reward": 24540.91,
+    "round_id": "8"
   },
   {
     "project_id": "Js09gjzwO4g6aeV2Fb+ZNlHypJc4DlUozk3enNLotIc=",
@@ -1817,7 +1956,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 16984.23
+    "op_reward": 16984.23,
+    "round_id": "8"
   },
   {
     "project_id": "67HtqtpnqpRJPom4vV9xU0P1AqUVZyDM9OLJg67V8Xs=",
@@ -1830,7 +1970,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "BXpAWjeSIrRWSlHT561SHU4JKO3BHpomlfoXzuQvE0o=",
@@ -1843,7 +1984,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 204.18
+    "op_reward": 204.18,
+    "round_id": "8"
   },
   {
     "project_id": "/2hjsm9xH1NvgIs/dHx5VOVM4ml/C6hfQu97wBgdpfo=",
@@ -1856,7 +1998,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "lWJtSU1/x0pxa2x/PDlxUrIjG951wWu6c2WXiUCUKO4=",
@@ -1869,7 +2012,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 25704.76
+    "op_reward": 25704.76,
+    "round_id": "8"
   },
   {
     "project_id": "ParVcJYkCyRk+qO7XPmDbVj5aSgt31G8nCisCdN9fBg=",
@@ -1878,11 +2022,12 @@
     "transaction_count": 1973869,
     "active_days": 180,
     "active_addresses_count": 150205,
-    "gas_fees": 498.5262636588,
+    "gas_fees": 498.5262636589,
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 34063.74
+    "op_reward": 34063.74,
+    "round_id": "8"
   },
   {
     "project_id": "0eM1b8HKnTMw5hgzgPw3l3m4A4wwTQd/0e1rFWNPz8o=",
@@ -1895,7 +2040,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 3686.14
+    "op_reward": 3686.14,
+    "round_id": "8"
   },
   {
     "project_id": "EWGl5CyDKCdw2krkHJwc8V1FoELaCSXGUis9SHr2+fs=",
@@ -1908,7 +2054,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 554.96
+    "op_reward": 554.96,
+    "round_id": "8"
   },
   {
     "project_id": "WTkrSKGFE/NJQ8Aw/49PoV7EkJpIxlRdws/Mq4Do5RE=",
@@ -1921,7 +2068,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "FfXoEN2YNayzuwjlJN2xtQWdP5War/J/3WLgkc8sX6s=",
@@ -1934,7 +2082,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 1283.0
+    "op_reward": 1283.0,
+    "round_id": "8"
   },
   {
     "project_id": "lRCVGOtHuZv3FlsKZQ/VwhC1NERgrSYVPYW8sSVpfLw=",
@@ -1947,7 +2096,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "bDxpkfd5t/ov2xAQJgRxa1+8NHWM85j0W90gc6Nls1c=",
@@ -1960,7 +2110,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 47761.01
+    "op_reward": 47761.01,
+    "round_id": "8"
   },
   {
     "project_id": "P3dU/62sTr3knh18S5WwzzLcKv9x57/A/r/Byn2LtPU=",
@@ -1973,7 +2124,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 14705.73
+    "op_reward": 14705.73,
+    "round_id": "8"
   },
   {
     "project_id": "qpgChJsGqtFnDQQU8CdZ8Ab5N/OjV4xdwEw5irdZl4A=",
@@ -1986,7 +2138,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 15465.23
+    "op_reward": 15465.23,
+    "round_id": "8"
   },
   {
     "project_id": "5JISU2Dd3upAAQxpI6eEKNuI/pWdKGu5Z36klLtZvXc=",
@@ -1999,7 +2152,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 884.17
+    "op_reward": 884.17,
+    "round_id": "8"
   },
   {
     "project_id": "Peg1TbQF7DkRiJx5Kb1lOlbwr9lRiotJWzh5acZ06Z8=",
@@ -2012,7 +2166,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "iNNzyDb1b6aPQ291ha6SmzQdeiZctC/fFM3CohvMmXI=",
@@ -2025,7 +2180,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "LLK6remJzmNWYHJv5LsqViPMz+6FR4LML+t1E9V62WQ=",
@@ -2038,7 +2194,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "NLj2mhenkGEK3NfYV1RiiO/SkcD4s/WjJdxaH90crnI=",
@@ -2051,7 +2208,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "CLooyJmWtPF9yQUB4BsGdmBM/qHmQIddyhAY91j/lkI=",
@@ -2064,7 +2222,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "Lgm8mST2VJg3Qtcvrd3ChAbGOEorxtFzO+k9eyJMgzA=",
@@ -2077,7 +2236,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "zpXh+xI4A77C9Y/ortXA0jU/33Zj+QztUOpW3hJ+w8A=",
@@ -2090,7 +2250,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "FtR3yU/WmvB77sgIAosTTO8ZpYKa4lUQU9iXu5XQjWI=",
@@ -2103,7 +2264,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 737.11
+    "op_reward": 737.11,
+    "round_id": "8"
   },
   {
     "project_id": "JbP9BR4xjNu+yvhnSQkWqjlTW33drd+NLR8HY0uie84=",
@@ -2116,7 +2278,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 1564.44
+    "op_reward": 1564.44,
+    "round_id": "8"
   },
   {
     "project_id": "46oGoJxfh3hgKRcdb1vV4roA6oGVgyRXbycfPk/Q5x8=",
@@ -2129,7 +2292,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 5882.07
+    "op_reward": 5882.07,
+    "round_id": "8"
   },
   {
     "project_id": "eQqgI+0QbOMFFc7BRVNZGqxKr1lvAGNLl3Sr1/VEKuo=",
@@ -2142,7 +2306,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "EJUt2EJYkUW6syL+DvamNodWqwKtan54giN9q3uFecw=",
@@ -2155,7 +2320,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 18629.31
+    "op_reward": 18629.31,
+    "round_id": "8"
   },
   {
     "project_id": "ujotQ1D+YnXHFVrSwoa3pj8b5jOvXNPF0rfALNIG5GI=",
@@ -2168,7 +2334,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "Pbk+QmBSQjMMVayM2NC4roJq1go7oUlvVl0F1Kp33Xk=",
@@ -2181,7 +2348,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "12zkxLUMRU5rtnRi6MToafW1bkyD3yn/ksFVk/OE3+0=",
@@ -2194,7 +2362,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "/Hxq4RTbKkeetoxVgusMQJX3vx6CFQQU8oZccJFAvmg=",
@@ -2207,7 +2376,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 554.12
+    "op_reward": 554.12,
+    "round_id": "8"
   },
   {
     "project_id": "23XIt7EgzQNc2AdcEzTg7GbjT5kKY1lNFfmcGQvrkWA=",
@@ -2220,7 +2390,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 9005.92
+    "op_reward": 9005.92,
+    "round_id": "8"
   },
   {
     "project_id": "umhKsF0TiR5L7wQeq75Nt/yOXWrKLbyuYJBGNtT6Ces=",
@@ -2233,7 +2404,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "tEUQBjhYBdWaLRVt375K9avn6ysFWbvqZz85jmaPR2w=",
@@ -2246,7 +2418,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 12676.59
+    "op_reward": 12676.59,
+    "round_id": "8"
   },
   {
     "project_id": "fN+LFwTxCdNTzXYD1xfU/hGSxIMv9/pSE/AQlo7GzVM=",
@@ -2259,7 +2432,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 16446.53
+    "op_reward": 16446.53,
+    "round_id": "8"
   },
   {
     "project_id": "0MI7/f1TFue+ihXO4T7BeNCz3YWUeQH5klAKwkuswco=",
@@ -2272,7 +2446,8 @@
     "is_eligible": false,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": null
+    "op_reward": null,
+    "round_id": "8"
   },
   {
     "project_id": "X6uKsuT8UV+j3gKV2WzBwPDTYt8fVFQsLDj1m5/Da7A=",
@@ -2285,7 +2460,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 4550.34
+    "op_reward": 4550.34,
+    "round_id": "8"
   },
   {
     "project_id": "D9n+rXQGt9BVQ/3Ta/BbgMaWPiAH0K+6s+mPnoVHH6E=",
@@ -2298,7 +2474,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 328.56
+    "op_reward": 328.56,
+    "round_id": "8"
   },
   {
     "project_id": "hD0YqnPkTkll8Q5jDDldaT6hXIYPwjtTsnR2B5cF6Dw=",
@@ -2311,7 +2488,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "kzVtJyjzFHc1PHeVOLOQBylRu9CEXQs0ViUbfhERY70=",
@@ -2324,7 +2502,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 5912.67
+    "op_reward": 5912.67,
+    "round_id": "8"
   },
   {
     "project_id": "dk1gwy0G/dP9SOcyolL+bfgPQJ0ngqXF6ro9qyQdGwo=",
@@ -2337,7 +2516,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 274.38
+    "op_reward": 274.38,
+    "round_id": "8"
   },
   {
     "project_id": "igtO7r3BNEsM8PUwfeWPGcua331z+/D8tlSWUxIWqB4=",
@@ -2350,7 +2530,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "g1pi0NuLcPtSAjpxGRMTIM2ZRs5y6h3IpcW0PRKvSQo=",
@@ -2363,7 +2544,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 22160.5
+    "op_reward": 22160.5,
+    "round_id": "8"
   },
   {
     "project_id": "x91Urxvh3gomZ6NPe6Ze1RC30INtlzy4nlOwvxwRQnw=",
@@ -2376,7 +2558,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 1561.79
+    "op_reward": 1561.79,
+    "round_id": "8"
   },
   {
     "project_id": "Ev7dKCphBYkf+NNT80NfBdyEIVWwBZc/1xctF4i+V2A=",
@@ -2389,7 +2572,8 @@
     "is_eligible": true,
     "has_defillama_adapter": false,
     "has_bundle_bear": false,
-    "op_reward": 36856.49
+    "op_reward": 36856.49,
+    "round_id": "8"
   },
   {
     "project_id": "xOZNIZHXWrA+JWBmcsHybyHDy0WZy/gOyw1VaqAupG0=",
@@ -2402,7 +2586,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 6287.99
+    "op_reward": 6287.99,
+    "round_id": "8"
   },
   {
     "project_id": "LhmNJDpUL4rqmFhVZn3LA/7JHVuRJ56GF9HoGUUhzt0=",
@@ -2415,7 +2600,8 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 0.0
+    "op_reward": 0.0,
+    "round_id": "8"
   },
   {
     "project_id": "JvriFQ0NlFxB3+GIDPJQShc9f52TRc/cmOcLdzUPgL4=",
@@ -2428,6 +2614,7 @@
     "is_eligible": true,
     "has_defillama_adapter": true,
     "has_bundle_bear": false,
-    "op_reward": 5541.12
+    "op_reward": 5541.12,
+    "round_id": "8"
   }
 ]
