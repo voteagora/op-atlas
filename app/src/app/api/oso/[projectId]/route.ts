@@ -3,9 +3,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/db/client"
 import {
   OrderBy,
-  Oso_MetricsV0,
   Oso_TimeseriesMetricsByProjectV0,
-  QueryOso_MetricsV0Args,
   QueryOso_TimeseriesMetricsByProjectV0Args,
 } from "@/graphql/__generated__/types"
 import { OSO_METRICS } from "@/lib/constants"
@@ -74,8 +72,6 @@ export async function GET(
       data: true,
     },
   })
-
-  console.log(">>> projectOSOData", projectOSOData?.data)
 
   return NextResponse.json({
     onchainBuildersMetrics: groupedMetrics,

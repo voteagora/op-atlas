@@ -1,17 +1,36 @@
-import { CheckCircle2, EyeOff, Info, Triangle } from "lucide-react"
+"use client"
+
+import React from "react"
+import { AlertTriangleIcon, CheckCircle2, EyeOff, Info } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
 import { Button } from "@/components/common/Button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { cn } from "@/lib/utils"
 
 interface DevtoolingMissionProps {
-  projectOSOData?: JSON
+  projectName: string
+  data: {
+    gasConsumed?: number
+    onchainBuildersInAtlasCount?: number
+    topProjects?: { name: string; website: string[]; thumbnailUrl: string }[]
+  }
 }
+
 export default function DevToolingMission({
-  projectOSOData,
+  projectName,
+  data,
 }: DevtoolingMissionProps) {
+  function normalizeToTwoDecimals(num: number): number {
+    if (num === 0) return 0
+
+    const exponent = Math.floor(Math.log10(Math.abs(num)))
+    const normalized = num / Math.pow(10, exponent)
+
+    return Number(normalized.toFixed(2)) // returns 1.07
+  }
+
+  console.log(data.topProjects)
+
   return (
     <div className="space-y-6">
       <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
@@ -46,199 +65,95 @@ export default function DevToolingMission({
           </div>
         </div>
       </div>
-      <Tabs defaultValue={ACHIEVEMENTS.at(0)?.key} className="w-full mt-12">
-        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
-          {/* TODO: Replace MONTHS with actual data */}
-          {MONTHS.map((month, index) => (
-            <TabsTrigger
-              key={index}
-              value={month}
-              className="rounded-lg py-2 px-4 bg-secondary text-secondary-foreground border border-tertiary min-w-36 w-full data-[state=active]:bg-background data-[state=active]:text-foreground"
-            >
-              {month}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        {ACHIEVEMENTS.map(({ key, achievements, totalRewards }) => (
-          <TabsContent
-            key={key}
-            value={key}
-            className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
-          >
-            {achievements.map(({ value, title, trend }, index) => (
-              <div
-                key={index}
-                className="flex flex-col justify-between p-6 bg-background rounded-xl border"
-              >
-                <div className="w-full flex items-center justify-between space-x-1">
-                  <p className="font-semibold text-base">{value}</p>
-                  <div
-                    className={cn([
-                      "px-2.5 py-1 rounded-full text-xs font-medium flex space-x-1 items-center",
-                      {
-                        "bg-green-100 text-green-foreground":
-                          trend.type === "increase",
-                        "bg-red-100 text-red-foreground":
-                          trend.type === "decrease",
-                      },
-                    ])}
-                  >
-                    <span>{trend.value}</span>
-                    {trend.type === "increase" ? (
-                      <Triangle
-                        size={12}
-                        className="text-success-foreground"
-                        fill="#006117"
-                      />
-                    ) : (
-                      <Triangle
-                        size={12}
-                        className="rotate-180 text-red-600"
-                        fill="#B80018"
-                      />
-                    )}
-                  </div>
-                </div>
-                <p className="text-base leading-6 text-secondary-foreground">
-                  {title}
-                </p>
-              </div>
-            ))}
-            <div className="rounded-lg p-6 flex justify-between w-full h-48 bg-background border col-span-2">
-              <div className="flex flex-col justify-between h-full w-1/2">
+      <div className="w-full mt-12">
+        <div className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden">
+          <MetricCard
+            value={normalizeToTwoDecimals(data.gasConsumed ?? 0)}
+            title={`Gas consumed by builders using ${projectName}`}
+            sign={{ value: " ETH", position: "right" }}
+            index={0}
+          />
+          <MetricCard
+            value={data.onchainBuildersInAtlasCount ?? 0}
+            title={`Onchain builders in Atlas using ${projectName}`}
+            index={1}
+          />
+          <div className="w-full col-span-full border rounded-xl p-6 h-[166px]">
+            <div className="flex justify-between items-center h-full">
+              <div className="flex flex-col justify-between h-full w-full">
                 <div>
-                  <h4 className="font-semibold text-base">Top projects</h4>
-                  <p className="text-secondary-foreground">
-                    Top projects in Atlas using {"this project"}
+                  <p className="font-semibold text-base text-foreground">
+                    Top projects
+                  </p>
+                  <p className="text-secondary-foreground font-normal text-base">
+                    Top projects in Atlas using {projectName}
                   </p>
                 </div>
-                <span className="text-sm text-secondary-foreground">
+                <p className="!text-secondary-foreground">
                   Projects enrolled in Retro Funding: Onchain Builders only
-                </span>
+                </p>
               </div>
-              <ul className="grid grid-cols-2 w-1/2 pl-8">
-                {TOP_PROJECTS.map(({ name, image }, index) => (
-                  <Link
-                    href={"#"}
-                    key={`${name} - ${index}`}
-                    className="space-x-2 flex items-center text-secondary-foreground transition-all duration-150 p-2.5 hover:bg-secondary rounded-[6px]"
-                  >
-                    <Image src={image} width={24} height={24} alt={name} />
-                    <span className="text-secondary-foreground">{name}</span>
-                  </Link>
+              <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
+                {data.topProjects?.slice(0, 6).map((project, index) => (
+                  <li key={index} className="space-x-2 flex items-center">
+                    <Image
+                      src={project.thumbnailUrl}
+                      alt={project.name}
+                      width={24}
+                      height={24}
+                    />
+                    <Link href={project.website?.at(0) ?? ""}>
+                      {project.name}
+                    </Link>
+                  </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-xl p-6 flex items-center justify-between w-full bg-background border col-span-2 divide-x-[1px]">
-              <div className="space-x-2 flex h-12">
-                <Image
-                  src="/assets/chain-logos/optimism-letters.svg"
-                  width={40}
-                  height={40}
-                  alt="Optimism Logo"
-                />
-                <div className="flex flex-col h-full justify-between py-0.5">
-                  <span className="font-semibold text-foreground text-base">
-                    1,264 OP
-                  </span>
-                  <span className="text-secondary-foreground text-base font-normal">
-                    Rewards for performance in February
-                  </span>
-                </div>
-              </div>
-              <p className="w-1/2 pl-6 text-secondary-foreground text-base font-normal">
-                Rewards are determined by an{" "}
-                <span className="font-semibold">evaluation algorithm</span>{" "}
-                powered by onchain data, and some metrics are more valuable than
-                others.{" "}
-                <Link href={"#"} className="underline">
-                  Learn more
-                </Link>
-              </p>
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
-      <ul className="space-y-[8pt]">
-        {/* TODO: Replace this with actual data */}
-        {NOTIFICATIONS.map(({ type, message }, index) => (
-          <li key={index} className="flex items-center space-x-1 group">
-            {type === "success" && (
-              <CheckCircle2 size={16} fill="#404454" className="text-white" />
-            )}
-            {type === "info" && (
-              <Info size={16} fill="#404454" className="text-white" />
-            )}
-            <span>{message}</span>
-            <button>
-              <EyeOff
-                size={16}
-                className="group-hover:opacity-100 transition-all duration-300 opacity-0"
-              />
-            </button>
-          </li>
-        ))}
-      </ul>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
 
-// NOTE: Mock data
-const MONTHS = ["February", "March", "April", "May", "June", "July"]
-
-const getRandomValue = ({
-  symbol,
-  round = false,
+function MetricCard({
+  value,
+  title,
+  index,
+  sign = { value: "", position: "right" },
 }: {
-  symbol: string
-  round?: boolean
-}) => {
-  const value = Math.random() * 10000 + 1000
-  return `${round ? Math.round(value) : value.toFixed(2)} ${symbol}`
+  value: string | number
+  title: string
+  index: number
+  sign?: {
+    value: string
+    position: "left" | "right"
+  }
+}) {
+  const formattedValue = value
+    ? `${sign.position === "left" ? sign.value : ""}${value}${
+        sign.position === "right" ? sign.value : ""
+      }`
+    : "- -"
+
+  return (
+    <div
+      key={index}
+      className="flex flex-col justify-between p-6 bg-background rounded-xl border"
+    >
+      <div className="w-full flex items-center justify-between space-x-1">
+        <p className="font-semibold text-base">{formattedValue}</p>
+      </div>
+      <p className="text-base leading-6 text-secondary-foreground flex items-center space-x-2">
+        <span>{title}</span>
+        {!Boolean(value) && (
+          <AlertTriangleIcon
+            size={16}
+            fill="#FF0420"
+            className="text-background"
+          />
+        )}
+      </p>
+    </div>
+  )
 }
-const getRandomTrend = () => {
-  const value = (Math.random() * 10).toFixed(1)
-  const type = Math.random() > 0.5 ? "increase" : "decrease"
-  return { value: `${value}%`, type }
-}
-const getRandomTotalRewards = () => Math.floor(Math.random() * 10000)
-
-const ACHIEVEMENTS = MONTHS.map((month) => ({
-  key: month,
-  achievements: [
-    {
-      value: getRandomValue({ symbol: "ETH" }),
-      title: "Gas consumed by builders using {this project}",
-      trend: getRandomTrend(),
-    },
-    {
-      value: getRandomValue({ symbol: "", round: true }),
-      title: "Onchain builders in Atlas using {this project}",
-      trend: getRandomTrend(),
-    },
-  ],
-  totalRewards: `${getRandomTotalRewards()} OP`,
-}))
-
-const NOTIFICATIONS = [
-  {
-    type: "success",
-    message:
-      "Your Account Abstraction contracts were found in BundleBear—you’re receiving extra OP.",
-  },
-  {
-    type: "info",
-    message:
-      "Rewards are determined by an evaluation algorithm powered by onchain data",
-  },
-]
-
-const TOP_PROJECTS = [
-  { name: "Synthetix", image: "/assets/icons/stargate-logo.svg" },
-  { name: "Synthetix", image: "/assets/icons/stargate-logo.svg" },
-  { name: "Aerodrome Finance", image: "/assets/icons/stargate-logo.svg" },
-  { name: "Aerodrome Finance", image: "/assets/icons/stargate-logo.svg" },
-  { name: "Boost", image: "/assets/icons/stargate-logo.svg" },
-  { name: "Boost", image: "/assets/icons/stargate-logo.svg" },
-]
-//

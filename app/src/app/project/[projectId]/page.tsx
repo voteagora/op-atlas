@@ -99,7 +99,12 @@ export default async function Page({ params }: PageProps) {
               />
             </li>
             <li>
-              <Mission type="dev-tooling" projectOSOData={projectOSOData} />
+              <Mission
+                projectName={publicProject.name}
+                type="dev-tooling"
+                onchainBuildersMetrics={onchainBuildersMetrics}
+                projectOSOData={projectOSOData}
+              />
             </li>
           </ul>
         </div>

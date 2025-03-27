@@ -9,12 +9,11 @@ import {
 
 import { INDEXED_MONTHS, MONTHS } from "./constants"
 import DevToolingMission from "./DevToolingMission"
-import {
-  OnchainBuilderMission,
-  OnchainBuildersDataType,
-} from "./OnchainBuilderMission"
+import { OnchainBuilderMission } from "./OnchainBuilderMission"
+import { OnchainBuildersDataType } from "./types"
 
 interface MissionProps {
+  projectName?: string
   type: "on-chain" | "dev-tooling"
   onchainBuildersMetrics?: {
     activeAddresses: OnchainBuildersDataType
@@ -27,42 +26,40 @@ interface MissionProps {
       hasBundleBear: boolean
     }
   }
-  projectOSOData?: JSON
+  projectOSOData?: any
 }
 
 export default function Mission({
+  projectName,
   type,
   onchainBuildersMetrics,
   projectOSOData,
 }: MissionProps) {
-  if (!onchainBuildersMetrics) {
-    return null
-  }
-
-  const firstDate = Object.keys(onchainBuildersMetrics.activeAddresses)[0]
-  const lastDate = Object.keys(onchainBuildersMetrics.activeAddresses).slice(
-    -1,
-  )[0]
-
+  console.log(">>> onchainBuildersMetrics", onchainBuildersMetrics?.gasFees)
+  console.log(">>> projectOSOData", projectOSOData)
   const formatDateRange = (startDate: string, endDate: string) => {
-    const formattedFirstDate = new Date(firstDate).toLocaleDateString("en-US", {
+    const formattedFirstDate = new Date(startDate).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     })
-    const formattedFirstDateYear = new Date(firstDate).getFullYear()
+    const formattedFirstDateYear = new Date(startDate).getFullYear()
 
-    const formattedLastDate = new Date(lastDate).toLocaleDateString("en-US", {
+    const formattedLastDate = new Date(endDate).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     })
-    const formattedLastDateYear = new Date(lastDate).getFullYear()
+    const formattedLastDateYear = new Date(endDate).getFullYear()
 
     return formattedFirstDateYear === formattedLastDateYear
       ? `${formattedFirstDate.split(",")[0]} - ${formattedLastDate}`
       : `${formattedFirstDate} - ${formattedLastDate}`
   }
+
+  const totalGasFees = Object.values(
+    onchainBuildersMetrics?.gasFees ?? {},
+  ).reduce((acc, curr) => acc + curr, 0)
 
   return (
     <Accordion type="single" collapsible>
@@ -87,7 +84,13 @@ export default function Mission({
                 </span>
               </div>
               <p className="text-secondary-foreground font-normal text-base">
-                {formatDateRange(firstDate, lastDate)}
+                {onchainBuildersMetrics &&
+                  formatDateRange(
+                    Object.keys(onchainBuildersMetrics.activeAddresses)[0],
+                    Object.keys(onchainBuildersMetrics.activeAddresses).slice(
+                      -1,
+                    )[0],
+                  )}
               </p>
             </div>
           </div>
@@ -98,7 +101,15 @@ export default function Mission({
             <OnchainBuilderMission data={onchainBuildersMetrics} />
           )}
           {type === "dev-tooling" && (
-            <DevToolingMission projectOSOData={projectOSOData} />
+            <DevToolingMission
+              projectName={projectName ?? ""}
+              data={{
+                gasConsumed: totalGasFees,
+                onchainBuildersInAtlasCount:
+                  projectOSOData?.onchainBuildersInAtlasCount,
+                topProjects: projectOSOData?.topProjects,
+              }}
+            />
           )}
         </AccordionContent>
       </AccordionItem>

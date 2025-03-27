@@ -24,8 +24,8 @@ import {
   QUALIFIED_ADDRESSES_THRESHOLD,
   TRANSACTIONS_THRESHOLD,
 } from "./constants"
+import { OnchainBuildersDataType } from "./types"
 
-export type OnchainBuildersDataType = Record<string, number>
 interface DataProps {
   activeAddresses: OnchainBuildersDataType
   gasFees: OnchainBuildersDataType
@@ -226,6 +226,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               </TabsContent>
             )
           }
+
           return (
             <TabsContent
               key={month}

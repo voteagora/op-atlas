@@ -27,6 +27,7 @@ async function populate() {
         select: {
           name: true,
           website: true,
+          thumbnailUrl: true,
         },
       })
 
