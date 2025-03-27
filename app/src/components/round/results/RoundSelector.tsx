@@ -53,10 +53,19 @@ const RoundSelector = ({
       .filter((r) => selectedRounds.includes(r.id))
       .map((r) => `${r.label} (${r.year})`)
 
-    if (selectedLabels.length === 1) return selectedLabels[0]
-    if (selectedLabels.length === 2) return selectedLabels.join(" and ")
+    let previewText = ""
 
-    return `${selectedLabels.length} rounds selected`
+    if (selectedLabels.length === 1) {
+      previewText = selectedLabels[0]
+    } else if (selectedLabels.length === 2) {
+      previewText = selectedLabels.join(" and ")
+    } else {
+      return `${selectedLabels.length} rounds selected`
+    }
+
+    return previewText.length > 80
+      ? `${previewText.slice(0, 77)}...`
+      : previewText
   }
 
   return (
