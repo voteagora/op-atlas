@@ -8,6 +8,12 @@ import Link from "next/link"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
@@ -184,16 +190,40 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
             monthMetrics.activeAddresses.value < DISTINCT_DAYS_THRESHOLD
           ) {
             return (
-              <NotPassingEligibility
+              <TabsContent
                 key={month}
-                month={month}
-                transactionsCount={monthMetrics.transactions.value}
-                qualifiedAddressesCount={monthMetrics.activeAddresses.value}
-                distinctDaysCount={monthMetrics.activeAddresses.value}
-                hasDefillamaAdapter={
-                  data?.eligibility.hasDefillamaAdapter ?? false
-                }
-              />
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl"
+              >
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="retro-funding" className="w-full">
+                    <div className="flex flex-col items-center w-full">
+                      <p className="font-semibold text-base text-foreground">
+                        Requirements to earn rewards in February were not met
+                      </p>
+                      <div className="flex items-center space-x-1">
+                        <p className="text-secondary-foreground text-base font-normal">
+                          Measured over the last 180 days
+                        </p>
+                        <AccordionTrigger />
+                      </div>
+                    </div>
+                    <AccordionContent className="pt-6">
+                      <NotPassingEligibility
+                        month={month}
+                        transactionsCount={monthMetrics.transactions.value}
+                        qualifiedAddressesCount={
+                          monthMetrics.activeAddresses.value
+                        }
+                        distinctDaysCount={monthMetrics.activeAddresses.value}
+                        hasDefillamaAdapter={
+                          data?.eligibility.hasDefillamaAdapter ?? false
+                        }
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </TabsContent>
             )
           }
           return (
@@ -341,11 +371,7 @@ function NotPassingEligibility({
   hasDefillamaAdapter: boolean
 }) {
   return (
-    <TabsContent
-      key={month}
-      value={month}
-      className="w-full grid lg:grid-cols-2 gap-4 grid-cols-1 data-[state=inactive]:hidden"
-    >
+    <div className="w-full grid lg:grid-cols-2 gap-4 grid-cols-1 data-[state=inactive]:hidden">
       <NotPassingEligibilityContainer
         title="At least 1000 transactions"
         projectValue={transactionsCount}
@@ -366,7 +392,7 @@ function NotPassingEligibility({
         projectValue={hasDefillamaAdapter}
         passed={hasDefillamaAdapter}
       />
-    </TabsContent>
+    </div>
   )
 }
 
