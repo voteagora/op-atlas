@@ -22,11 +22,6 @@ const ResultsHeader = () => {
           </p>
         </div>
       </div>
-      {status === "unauthenticated" && !session && (
-        <div className="hidden sm:flex items-center mt-6">
-          <Account />
-        </div>
-      )}
     </div>
   )
 }
