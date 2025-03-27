@@ -1,7 +1,5 @@
 "use client"
 import { Search } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
 import { Dispatch, SetStateAction } from "react"
 
 import { Button } from "@/components/common/Button"
@@ -81,11 +79,6 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
         </DropdownMenuContent>
       </DropdownMenu>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" as="dropdown">
-            View results calculation
-          </Button>
-        </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="bottom" className="w-40">
           {resultsCalculationOptions.map((option) => (
             <DropdownItem key={option.label}>
