@@ -56,6 +56,8 @@ export default async function Page({ params }: PageProps) {
       const { groupedMetrics, projectOSOData, error } =
         await getPublicProjectOSOData(projectId)
 
+      console.log(">>> data", groupedMetrics, projectOSOData, error)
+
       if (error) {
         return {}
       }
