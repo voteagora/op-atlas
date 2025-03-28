@@ -160,7 +160,7 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
       }
 
       await updateKYCUserStatus(
-        `${firstName} ${lastName}`,
+        `${firstName.split(" ")[0]} ${lastName}`,
         email,
         parsedStatus,
         new Date(updatedAt),
