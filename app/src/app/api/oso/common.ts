@@ -80,6 +80,22 @@ export async function getPublicProjectOSOData(projectId: string) {
     }
   }
 
+  const onchainBuilder = await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "7",
+    },
+  })
+  const isOnchainBuilder = Boolean(onchainBuilder)
+
+  const devTooling = await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "8",
+    },
+  })
+  const isDevTooling = Boolean(devTooling)
+
   const { osoId } = projectOSO[0]
 
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
@@ -106,6 +122,8 @@ export async function getPublicProjectOSOData(projectId: string) {
   })
 
   return {
+    isOnchainBuilder,
+    isDevTooling,
     groupedMetrics,
     projectOSOData,
   }

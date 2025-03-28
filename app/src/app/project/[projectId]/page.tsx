@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 
 import { getPublicProjectOSOData } from "@/app/api/oso/common"
 import { auth } from "@/auth"
+import ExtendedLink from "@/components/common/ExtendedLink"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 
@@ -53,8 +54,13 @@ export default async function Page({ params }: PageProps) {
   const publicProjectMetrics = await queryClient.fetchQuery({
     queryKey: ["project", "public", "metrics", projectId],
     queryFn: async () => {
-      const { groupedMetrics, projectOSOData, error } =
-        await getPublicProjectOSOData(projectId)
+      const {
+        isOnchainBuilder,
+        isDevTooling,
+        groupedMetrics,
+        projectOSOData,
+        error,
+      } = await getPublicProjectOSOData(projectId)
 
       if (error) {
         return {}
@@ -67,6 +73,8 @@ export default async function Page({ params }: PageProps) {
 
       return {
         // TODO: Fix this type
+        isOnchainBuilder,
+        isDevTooling,
         isMember: !Boolean(isMember?.error),
         onchainBuildersMetrics: {
           ...groupedMetrics,
@@ -77,8 +85,15 @@ export default async function Page({ params }: PageProps) {
     },
   })
 
-  const onchainBuildersMetrics = publicProjectMetrics.onchainBuildersMetrics
-  const projectOSOData = publicProjectMetrics.projectOSOData
+  const {
+    isOnchainBuilder,
+    isDevTooling,
+    onchainBuildersMetrics,
+    projectOSOData,
+  } = publicProjectMetrics
+
+  const notEnrolled = !isOnchainBuilder && !isDevTooling
+  const onOnchainPerformanceData = Boolean(onchainBuildersMetrics)
 
   return (
     <div className="w-full h-full mt-6 pb-12">
@@ -107,37 +122,61 @@ export default async function Page({ params }: PageProps) {
               mirror: publicProject.mirror,
             }}
           />
-          <div className="w-full space-y-6">
-            <h4 className="font-semibold text-xl">Missions</h4>
-            <ul className="space-y-12">
-              <li>
-                <Mission
-                  type="on-chain"
-                  onchainBuildersMetrics={{
-                    ...onchainBuildersMetrics,
-                    eligibility: {
-                      hasDefillamaAdapter:
-                        projectOSOData?.hasDefillamaAdapter ?? false,
-                      hasQualifiedAddresses: Boolean(
-                        onchainBuildersMetrics.activeAddresses.length ?? false,
-                      ),
-                      hasBundleBear: projectOSOData?.hasBundleBear ?? false,
-                    },
-                  }}
-                />
-              </li>
-              <li>
-                <Mission
-                  projectName={publicProject.name}
-                  type="dev-tooling"
-                  onchainBuildersMetrics={onchainBuildersMetrics}
-                  projectOSOData={projectOSOData}
-                />
-              </li>
-            </ul>
-          </div>
-          <IncreaseYourImpact />
-          <Performance />
+          {!notEnrolled && !onOnchainPerformanceData && (
+            <div className="w-full h-[208px] space-y-6 rounded-xl border flex flex-col justify-center items-center p-6">
+              <div className="text-center">
+                <p className="font-semibold text-base text-foreground">
+                  More details about this project are coming soon
+                </p>
+                <p className="font-normal text-base text-secondary-foreground">
+                  In the meantime, explore other projects that have received
+                  Retro Funding
+                </p>
+              </div>
+              <ExtendedLink
+                href="/round/results?rounds=5"
+                as="button"
+                variant="primary"
+                text="View recipients"
+              />
+            </div>
+          )}
+          {notEnrolled && (
+            <>
+              <div className="w-full space-y-6">
+                <h4 className="font-semibold text-xl">Missions</h4>
+                <ul className="space-y-12">
+                  <li>
+                    <Mission
+                      type="on-chain"
+                      onchainBuildersMetrics={{
+                        ...onchainBuildersMetrics,
+                        eligibility: {
+                          hasDefillamaAdapter:
+                            projectOSOData?.hasDefillamaAdapter ?? false,
+                          hasQualifiedAddresses: Boolean(
+                            onchainBuildersMetrics.activeAddresses.length ??
+                              false,
+                          ),
+                          hasBundleBear: projectOSOData?.hasBundleBear ?? false,
+                        },
+                      }}
+                    />
+                  </li>
+                  <li>
+                    <Mission
+                      projectName={publicProject.name}
+                      type="dev-tooling"
+                      onchainBuildersMetrics={onchainBuildersMetrics}
+                      projectOSOData={projectOSOData}
+                    />
+                  </li>
+                </ul>
+              </div>
+              <IncreaseYourImpact />
+            </>
+          )}
+          {onOnchainPerformanceData && <Performance />}
         </div>
       </div>
     </div>
