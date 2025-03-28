@@ -1,9 +1,11 @@
 "use client"
-
-import { AlertTriangleIcon, CheckCircle2, EyeOff, Info } from "lucide-react"
+import { AlertTriangleIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import React from "react"
+
+import { Button } from "@/components/common/Button"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 interface DevtoolingMissionProps {
   projectName: string
@@ -19,6 +21,8 @@ export default function DevToolingMission({
   projectName,
   data,
 }: DevtoolingMissionProps) {
+  const { setOpenDialog } = useAppDialogs()
+
   function normalizeToTwoDecimals(num: number): number {
     if (num === 0) return 0
 
@@ -58,10 +62,13 @@ export default function DevToolingMission({
                 Rewards so far in Retro Funding: Onchain Builders
               </p>
             </div>
-            {/* TODO: Bring this back */}
-            {/* <Button variant="primary" className="z-50">
+            <Button
+              variant="primary"
+              className="z-50"
+              onClick={() => setOpenDialog("claim_rewards")}
+            >
               Claim your rewards
-            </Button> */}
+            </Button>
           </div>
         </div>
       </div>

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 import {
   DISTINCT_DAYS_THRESHOLD,
@@ -41,6 +42,8 @@ interface DataProps {
 }
 
 export function OnchainBuilderMission({ data }: { data?: DataProps }) {
+  const { setOpenDialog } = useAppDialogs()
+
   const groupedData = React.useMemo(() => {
     if (!data) return {}
 
@@ -187,10 +190,13 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 Rewards so far in Retro Funding: Onchain Builders
               </p>
             </div>
-            {/* TODO: Bring this back */}
-            {/* <Button variant="primary" className="z-50">
+            <Button
+              variant="primary"
+              className="z-50"
+              onClick={() => setOpenDialog("claim_rewards")}
+            >
               Claim your rewards
-            </Button> */}
+            </Button>
           </div>
         </div>
       </div>
