@@ -94,19 +94,24 @@ export default function DevToolingMission({
                 </p>
               </div>
               <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
-                {data.topProjects?.slice(0, 6).map((project, index) => (
-                  <li key={index} className="space-x-2 flex items-center">
-                    <Image
-                      src={project.thumbnailUrl}
-                      alt={project.name}
-                      width={24}
-                      height={24}
-                    />
-                    <Link href={project.website?.at(0) ?? ""}>
-                      {project.name}
-                    </Link>
-                  </li>
-                ))}
+                {data.topProjects?.slice(0, 6).map((project, index) => {
+                  const projectLink =
+                    (project.website?.at(0)?.startsWith("http")
+                      ? project.website?.at(0)
+                      : `https://${project.website?.at(0)}`) ?? ""
+
+                  return (
+                    <li key={index} className="space-x-2 flex items-center">
+                      <Image
+                        src={project.thumbnailUrl}
+                        alt={project.name}
+                        width={24}
+                        height={24}
+                      />
+                      <Link href={projectLink}>{project.name}</Link>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           </div>
