@@ -11,7 +11,11 @@ import { cn } from "@/lib/utils"
 interface DescriptionProps {
   name?: string
   tags: string[]
-  author: { avatarUrl?: string | null; name?: string | null }
+  author: {
+    avatarUrl?: string | null
+    name?: string | null
+    farcasterHandle?: string
+  }
   deployedOn: {
     name: string
     image: ImageProps["src"]
@@ -55,16 +59,21 @@ export default function Description({
           {author && (
             <div className="flex items-center space-x-2 text-secondary-foreground">
               <span>By</span>
-              {author.avatarUrl && (
-                <Image
-                  src={author.avatarUrl}
-                  alt={author.name ?? ""}
-                  width={20}
-                  height={20}
-                  className="rounded-full"
-                />
-              )}
-              <span>{author.name}</span>
+              <Link
+                href={`/${author?.farcasterHandle}`}
+                className="flex items-center space-x-2 hover:opacity-80"
+              >
+                {author.avatarUrl && (
+                  <Image
+                    src={author.avatarUrl}
+                    alt={author.name ?? ""}
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                )}
+                <span>{author.name}</span>
+              </Link>
             </div>
           )}
           <div className="pl-2 flex items-center space-x-2">
@@ -110,6 +119,7 @@ export default function Description({
                   alt="Farcaster"
                 />
               }
+              target="_self"
               href={farcaster}
               text={
                 farcaster.startsWith("http")
@@ -150,15 +160,19 @@ function SocialsBadgeLink({
   icon,
   href,
   text,
+  target = "_target",
 }: {
   icon: React.ReactNode
   href: string
   text: string
+  target?: React.HTMLAttributeAnchorTarget
 }) {
   return (
     <div className="py-1 px-2.5 rounded-full bg-secondary text-sm font-medium flex items-center space-x-1">
       {icon}
-      <Link href={href}>{text}</Link>
+      <Link href={href} target={target}>
+        {text}
+      </Link>
     </div>
   )
 }
