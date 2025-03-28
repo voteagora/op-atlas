@@ -25,9 +25,6 @@ export default async function Page({ params }: PageProps) {
   const { projectId } = params
 
   const session = await auth()
-  if (!session?.user.farcasterId) {
-    return notFound()
-  }
 
   const queryClient = new QueryClient()
   const publicProject = await queryClient.fetchQuery({
@@ -68,7 +65,7 @@ export default async function Page({ params }: PageProps) {
 
       const isMember = await verifyMembership(
         params.projectId,
-        session?.user.farcasterId,
+        session?.user.farcasterId ?? "",
       )
 
       return {
