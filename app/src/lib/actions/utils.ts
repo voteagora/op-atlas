@@ -3,7 +3,7 @@ import {
   getUserProjectOrganizations,
   isUserAdminOfOrganization,
 } from "@/db/organizations"
-import { getProject, getProjectTeam, getUserProjects } from "@/db/projects"
+import { getUserProjects } from "@/db/projects"
 
 import { ProjectWithDetails } from "../types"
 

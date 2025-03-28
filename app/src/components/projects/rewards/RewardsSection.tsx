@@ -6,15 +6,17 @@ import React from "react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { getKycTeamAction } from "@/lib/actions/projects"
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
 
 import AddGrantDeliveryAddressForm from "./AddGrantDeliveryAddressForm"
 import RewardAccordion from "./RewardAccordion"
 
 export function RewardsSection({
   project,
+  team,
 }: {
-  project: ProjectWithDetails & { organizationId?: string }
+  project: ProjectWithFullDetails & { organizationId?: string }
+  team: ProjectTeam
 }) {
   const isKycEnabled = useFeatureFlagEnabled("add-grant-delivery-address-form")
 
@@ -37,11 +39,7 @@ export function RewardsSection({
         {rewards.length ? (
           <div className="space-y-4">
             {rewards.map((reward) => (
-              <RewardAccordion
-                team={project.team}
-                reward={reward}
-                key={reward.id}
-              />
+              <RewardAccordion team={team} reward={reward} key={reward.id} />
             ))}
           </div>
         ) : (

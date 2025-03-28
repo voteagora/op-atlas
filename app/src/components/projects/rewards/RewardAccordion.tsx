@@ -13,15 +13,15 @@ import {
 } from "@/components/ui/accordion"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
 
 const RewardAccordion = ({
   reward,
   team,
 }: {
-  reward: ProjectWithDetails["rewards"][0]
-  team: ProjectWithDetails["team"]
+  reward: ProjectWithFullDetails["rewards"][0]
+  team: ProjectTeam
 }) => {
   const [isExpanded, setIsExpanded] = React.useState("")
 

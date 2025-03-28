@@ -10,7 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { deleteUserProject } from "@/lib/actions/projects"
 import { useIsAdmin } from "@/lib/hooks"
-import { ProjectContracts, ProjectWithFullDetails } from "@/lib/types"
+import {
+  ProjectContracts,
+  ProjectTeam,
+  ProjectWithFullDetails,
+} from "@/lib/types"
 import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
 
 import ExternalLink from "../ExternalLink"
@@ -19,14 +23,16 @@ import { DeleteProjectDialog } from "./DeleteProjectDialog"
 
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,
+  team,
   contracts,
 }: {
   project: ProjectWithFullDetails | null
+  team: ProjectTeam
   contracts: ProjectContracts | null
 }) {
   const router = useRouter()
   const pathname = usePathname()
-  const isAdmin = useIsAdmin(project ?? undefined)
+  const isAdmin = useIsAdmin(team)
 
   const [deletingProject, setDeletingProject] = useState(false)
 

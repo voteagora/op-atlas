@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
-import { getProject } from "@/db/projects"
+import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 
 export default async function Page({
@@ -20,8 +20,9 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const [project, membership] = await Promise.all([
+  const [project, team, membership] = await Promise.all([
     getProject({ id: params.projectId }),
+    getConsolidatedProjectTeam({ projectId: params.projectId }),
     verifyMembership(params.projectId, session?.user.farcasterId),
   ])
 
@@ -29,5 +30,5 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  return <RewardsSection project={project} />
+  return <RewardsSection project={project} team={team} />
 }

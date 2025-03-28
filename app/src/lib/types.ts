@@ -19,15 +19,11 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
 
 export type ProjectTeam = {
   id: string
-  name: string
-  team: {
-    id: string
-    role: TeamRole
-    projectId?: string
-    organizationId?: string
-    user: User[]
-  }[]
-}
+  role: TeamRole
+  projectId?: string
+  organizationId?: string
+  user: User
+}[]
 
 export type ProjectContracts = Prisma.ProjectGetPayload<{
   include: {
@@ -38,22 +34,9 @@ export type ProjectContracts = Prisma.ProjectGetPayload<{
 
 export type ProjectWithFullDetails = Prisma.ProjectGetPayload<{
   include: {
-    team: {
-      include: {
-        user: true
-      }
-    }
     organization: {
       include: {
-        organization: {
-          include: {
-            team: {
-              include: {
-                user: true
-              }
-            }
-          }
-        }
+        organization: true
       }
     }
     repos: true
