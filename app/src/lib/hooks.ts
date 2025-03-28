@@ -11,8 +11,6 @@ import { OrganizationWithDetails } from "./types"
 export function useIsAdmin(team: ProjectTeam) {
   const { data: session } = useSession()
 
-  console.log(team)
-
   return (
     team &&
     session &&
