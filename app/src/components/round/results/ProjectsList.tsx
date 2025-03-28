@@ -25,12 +25,6 @@ const ProjectsList = ({
   handleLoadMore,
   isFetchingMore,
 }: Props) => {
-  const getProjectUrl = (projectName: string, roundId: string) => {
-    const formattedName = projectName
-      .replace(/ /g, "-")
-      .replace(/[^a-zA-Z0-9-]/g, "")
-    return `https://retropgfhub.com/explore/RetroPGF${roundId}/${formattedName}`
-  }
   const { track } = useAnalytics()
 
   function formatAmount(amount: number) {

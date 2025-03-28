@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils"
 
 import {
   DISTINCT_DAYS_THRESHOLD,
+  getDaysInMonthByName,
   INDEXED_MONTHS,
   MONTHS,
   QUALIFIED_ADDRESSES_THRESHOLD,
@@ -154,12 +155,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
   }, [data])
 
   function normalizeToTwoDecimals(num: number): number {
-    if (num === 0) return 0
-
-    const exponent = Math.floor(Math.log10(Math.abs(num)))
-    const normalized = num / Math.pow(10, exponent)
-
-    return Number(normalized.toFixed(2)) // returns 1.07
+    return Number((Math.round(num * 100) / 100).toFixed(2))
   }
 
   return (
@@ -262,6 +258,14 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
             )
           }
 
+          const numOfDaysInMonth = getDaysInMonthByName(
+            month,
+            new Date().getFullYear(),
+          )
+          const avgTVL = monthMetrics.tvl.value / numOfDaysInMonth
+          const avgQualifiedAddresses =
+            monthMetrics.activeAddresses.value / numOfDaysInMonth
+
           return (
             <TabsContent
               key={month}
@@ -269,7 +273,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
             >
               <MetricCard
-                value={formatToK(monthMetrics.tvl.value)}
+                value={formatToK(avgTVL)}
                 title="TVL across the Superchain"
                 trend={{
                   value: monthMetrics.tvl.trend.value.toString(),
@@ -297,10 +301,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={1}
               />
               <MetricCard
-                value={
-                  monthMetrics.gasFees.value &&
-                  normalizeToTwoDecimals(monthMetrics.gasFees.value)
-                }
+                value={normalizeToTwoDecimals(monthMetrics.gasFees.value)}
                 title="Gas consumed"
                 trend={{
                   value: normalizeToTwoDecimals(
@@ -315,7 +316,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={2}
               />
               <MetricCard
-                value={formatToK(monthMetrics.activeAddresses.value)}
+                value={formatToK(avgQualifiedAddresses)}
                 title="Qualified addresses"
                 trend={{
                   value: monthMetrics.activeAddresses.trend.value.toString(),
