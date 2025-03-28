@@ -203,9 +203,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
       <Tabs defaultValue={MONTHS[0]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {MONTHS.map((month, index) => {
-            const isFutureMonth =
-              index >
-              MONTHS.indexOf(getMonthFromDateString(new Date().toISOString()))
+            const isFutureMonth = month !== "February"
             return (
               <TabsTrigger
                 disabled={isFutureMonth}

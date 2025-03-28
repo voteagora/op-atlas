@@ -88,8 +88,6 @@ export default async function Page({ params }: PageProps) {
   const enrolledInMission = isOnchainBuilder || isDevTooling
   const onOnchainPerformanceData = Boolean(onchainBuildersMetrics)
 
-  console.log(">>>", isOnchainBuilder, isDevTooling, enrolledInMission)
-
   return (
     <div className="w-full h-full mt-6 pb-12">
       <div className="mx-auto w-full max-w-[1064px] px-8 space-y-12">

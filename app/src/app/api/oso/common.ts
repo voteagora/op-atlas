@@ -80,21 +80,21 @@ export async function getPublicProjectOSOData(projectId: string) {
     }
   }
 
-  const onchainBuilder = await prisma.application.findFirst({
+  const devTooling = await prisma.application.findFirst({
     where: {
       projectId,
       roundId: "7",
     },
   })
-  const isOnchainBuilder = Boolean(onchainBuilder)
+  const isDevTooling = Boolean(devTooling)
 
-  const devTooling = await prisma.application.findFirst({
+  const onchainBuilder = await prisma.application.findFirst({
     where: {
       projectId,
       roundId: "8",
     },
   })
-  const isDevTooling = Boolean(devTooling)
+  const isOnchainBuilder = Boolean(onchainBuilder)
 
   const { osoId } = projectOSO[0]
 
