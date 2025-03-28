@@ -92,8 +92,10 @@ export default async function Page({ params }: PageProps) {
     projectOSOData,
   } = publicProjectMetrics
 
-  const notEnrolled = !isOnchainBuilder && !isDevTooling
+  const enrolledInMission = isOnchainBuilder || isDevTooling
   const onOnchainPerformanceData = Boolean(onchainBuildersMetrics)
+
+  console.log(">>>", isOnchainBuilder, isDevTooling, enrolledInMission)
 
   return (
     <div className="w-full h-full mt-6 pb-12">
@@ -122,7 +124,7 @@ export default async function Page({ params }: PageProps) {
               mirror: publicProject.mirror,
             }}
           />
-          {!notEnrolled && !onOnchainPerformanceData && (
+          {!enrolledInMission && !onOnchainPerformanceData && (
             <div className="w-full h-[208px] space-y-6 rounded-xl border flex flex-col justify-center items-center p-6">
               <div className="text-center">
                 <p className="font-semibold text-base text-foreground">
@@ -141,36 +143,41 @@ export default async function Page({ params }: PageProps) {
               />
             </div>
           )}
-          {notEnrolled && (
+          {enrolledInMission && (
             <>
               <div className="w-full space-y-6">
                 <h4 className="font-semibold text-xl">Missions</h4>
                 <ul className="space-y-12">
-                  <li>
-                    <Mission
-                      type="on-chain"
-                      onchainBuildersMetrics={{
-                        ...onchainBuildersMetrics,
-                        eligibility: {
-                          hasDefillamaAdapter:
-                            projectOSOData?.hasDefillamaAdapter ?? false,
-                          hasQualifiedAddresses: Boolean(
-                            onchainBuildersMetrics.activeAddresses.length ??
-                              false,
-                          ),
-                          hasBundleBear: projectOSOData?.hasBundleBear ?? false,
-                        },
-                      }}
-                    />
-                  </li>
-                  <li>
-                    <Mission
-                      projectName={publicProject.name}
-                      type="dev-tooling"
-                      onchainBuildersMetrics={onchainBuildersMetrics}
-                      projectOSOData={projectOSOData}
-                    />
-                  </li>
+                  {isOnchainBuilder && (
+                    <li>
+                      <Mission
+                        type="on-chain"
+                        onchainBuildersMetrics={{
+                          ...onchainBuildersMetrics,
+                          eligibility: {
+                            hasDefillamaAdapter:
+                              projectOSOData?.hasDefillamaAdapter ?? false,
+                            hasQualifiedAddresses: Boolean(
+                              onchainBuildersMetrics.activeAddresses.length ??
+                                false,
+                            ),
+                            hasBundleBear:
+                              projectOSOData?.hasBundleBear ?? false,
+                          },
+                        }}
+                      />
+                    </li>
+                  )}
+                  {isDevTooling && (
+                    <li>
+                      <Mission
+                        projectName={publicProject.name}
+                        type="dev-tooling"
+                        onchainBuildersMetrics={onchainBuildersMetrics}
+                        projectOSOData={projectOSOData}
+                      />
+                    </li>
+                  )}
                 </ul>
               </div>
               <IncreaseYourImpact />
