@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-import { getProject, getProjectContracts } from "@/db/projects"
+import {
+  getConsolidatedProjectTeam,
+  getProject,
+  getProjectContracts,
+} from "@/db/projects"
 import { createProjectSnapshotOnBehalf } from "@/lib/actions/snapshots"
 import {
   buildFullProjectMetadata,
@@ -63,8 +67,9 @@ export const GET = async (
   try {
     const { projectId } = route.params
 
-    const [project, contracts] = await Promise.all([
+    const [project, team, contracts] = await Promise.all([
       getProject({ id: projectId }),
+      getConsolidatedProjectTeam({ projectId }),
       getProjectContracts({ projectId }),
     ])
 
@@ -74,6 +79,7 @@ export const GET = async (
 
     const metadata = buildFullProjectMetadata(
       project,
+      team,
       contracts?.contracts || [],
     )
 

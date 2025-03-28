@@ -1,13 +1,17 @@
 import Image from "next/image"
 import Link from "next/link"
-import { reverse, uniqBy } from "ramda"
+import { reverse } from "ramda"
 import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { useIsAdmin } from "@/lib/hooks"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import {
+  ApplicationWithDetails,
+  ProjectTeam,
+  ProjectWithDetails,
+} from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 import { projectHasUnpublishedChanges } from "@/lib/utils"
 
@@ -28,8 +32,16 @@ const UserProjectCard = ({
   applications: ApplicationWithDetails[]
   handleActiveRoundHelpClick: () => void
 }) => {
-  const isAdmin = useIsAdmin(project)
-  const projectHasChanges = projectHasUnpublishedChanges(project)
+  const team = [
+    ...project.team,
+    ...(project.organization?.organization?.team ?? []),
+  ] as ProjectTeam
+
+  const isAdmin = useIsAdmin(team)
+  const projectHasChanges = projectHasUnpublishedChanges(
+    project.snapshots,
+    project.lastMetadataUpdate,
+  )
   const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
   const { data: contracts } = useProjectContracts(project.id)

@@ -58,7 +58,10 @@ export const PublishForm = ({
   }, [project])
 
   const hasUnpublishedChanges = useMemo(() => {
-    return projectHasUnpublishedChanges(project)
+    return projectHasUnpublishedChanges(
+      project.snapshots,
+      project.lastMetadataUpdate,
+    )
   }, [project])
 
   const onPublish = async () => {

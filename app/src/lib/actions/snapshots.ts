@@ -8,6 +8,7 @@ import { addOrganizationSnapshot, getOrganization } from "@/db/organizations"
 import {
   addProjectSnapshot,
   addPublishedContracts,
+  getConsolidatedProjectTeam,
   getProject,
   revokePublishedContracts,
   updateAllForProject,
@@ -43,8 +44,9 @@ export const createProjectSnapshot = async (projectId: string) => {
     return isInvalid
   }
 
-  const [project, unpublishedContractChanges] = await Promise.all([
+  const [project, team, unpublishedContractChanges] = await Promise.all([
     getProject({ id: projectId }),
+    getConsolidatedProjectTeam({ projectId }),
     getUnpublishedContractChanges(projectId),
   ])
   if (!project) {
@@ -55,7 +57,7 @@ export const createProjectSnapshot = async (projectId: string) => {
 
   try {
     // Upload metadata to IPFS
-    const metadata = formatProjectMetadata(project)
+    const metadata = formatProjectMetadata(project, team)
     const ipfsHash = await uploadToPinata(project.id, metadata)
 
     // Create attestation
