@@ -3,7 +3,7 @@ import { NextRequest } from "next/server"
 import { processPersonaCases, processPersonaInquiries } from "@/lib/actions/kyc"
 import { getPersonaCases, getPersonaInquiries } from "@/lib/persona"
 
-export const maxDuration = 600
+export const maxDuration = 900
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
