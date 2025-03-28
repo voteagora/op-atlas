@@ -2,10 +2,10 @@
 
 import { Loader2 } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
-import ExternalLink from "@/components/ExternalLink"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { FundingRewardDetails } from "@/lib/types"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
@@ -25,12 +25,6 @@ const ProjectsList = ({
   handleLoadMore,
   isFetchingMore,
 }: Props) => {
-  const getProjectUrl = (projectName: string, roundId: string) => {
-    const formattedName = projectName
-      .replace(/ /g, "-")
-      .replace(/[^a-zA-Z0-9-]/g, "")
-    return `https://retropgfhub.com/explore/RetroPGF${roundId}/${formattedName}`
-  }
   const { track } = useAnalytics()
 
   function formatAmount(amount: number) {
@@ -62,9 +56,9 @@ const ProjectsList = ({
                 width={64}
               />
               <div className="ml-4">
-                <ExternalLink
+                <Link
                   className="hover:underline"
-                  href={getProjectUrl(project.project.name, project.roundId)}
+                  href={`/project/${project?.project?.id}`}
                   onClick={() => {
                     track("Project rewarded", {
                       projectId: project.project.id,
@@ -75,7 +69,7 @@ const ProjectsList = ({
                   <h5 className="text-xs sm:text-base font-semibold text-text-default">
                     {project?.project?.name}
                   </h5>
-                </ExternalLink>
+                </Link>
                 <p className="text-xs sm:text-base font-normal text-secondary-foreground line-clamp-3">
                   {project?.project?.description}
                 </p>

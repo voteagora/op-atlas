@@ -1,7 +1,6 @@
 "use client"
-import { Search } from "lucide-react"
+import { ArrowDownWideNarrowIcon, Search } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { Dispatch, SetStateAction } from "react"
 
 import { Button } from "@/components/common/Button"
@@ -62,7 +61,18 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" as="dropdown">
-            {options.find((option) => option.state === sortByAmount)?.label}
+            <div className="px-2 flex items-center justify-center space-x-1.5">
+              <Image
+                src="/assets/icons/sort-desc.svg"
+                width={16}
+                height={16}
+                alt="Sort Desc"
+                className="shrink-0"
+              />
+              <span>
+                {options.find((option) => option.state === sortByAmount)?.label}
+              </span>
+            </div>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40" align="end" side="bottom">
@@ -81,11 +91,6 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
         </DropdownMenuContent>
       </DropdownMenu>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" as="dropdown">
-            View results calculation
-          </Button>
-        </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="bottom" className="w-40">
           {resultsCalculationOptions.map((option) => (
             <DropdownItem key={option.label}>

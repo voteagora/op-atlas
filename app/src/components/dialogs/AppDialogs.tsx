@@ -5,6 +5,7 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 import { VerifyAddressDialog } from "../projects/contracts/VerifyAddressDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
+import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
@@ -65,6 +66,9 @@ export default function AppDialogs() {
           open
           onOpenChange={onOpenChange("select_kyc_project")}
         />
+      )}
+      {openDialog === "claim_rewards" && (
+        <ClaimRewardsDialog open onOpenChange={onOpenChange("claim_rewards")} />
       )}
     </>
   )

@@ -238,3 +238,19 @@ export const getValidUntil = (value: Date) => {
     day: "numeric",
   })
 }
+
+export const formatNumberWithCommas = (value: string | number) => {
+  if (typeof value === "string") {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  }
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+}
+
+export function chunkArray<T>(array: T[], size: number): T[][] {
+  return array.reduce((acc, _, i) => {
+    if (i % size === 0) {
+      acc.push(array.slice(i, i + size))
+    }
+    return acc
+  }, [] as T[][])
+}
