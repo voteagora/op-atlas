@@ -69,10 +69,7 @@ export default async function Page({ params }: PageProps) {
         isOnchainBuilder,
         isDevTooling,
         isMember: !Boolean(isMember?.error),
-        onchainBuildersMetrics: {
-          ...groupedMetrics,
-          opReward: Math.round((projectOSOData?.data as any)?.opReward ?? 0),
-        } as any,
+        onchainBuildersMetrics: groupedMetrics as any,
         projectOSOData: projectOSOData?.data as any,
       }
     },
@@ -154,6 +151,7 @@ export default async function Page({ params }: PageProps) {
                               projectOSOData?.hasBundleBear ?? false,
                           },
                         }}
+                        projectOSOData={projectOSOData}
                       />
                     </li>
                   )}
@@ -172,7 +170,8 @@ export default async function Page({ params }: PageProps) {
               <IncreaseYourImpact />
             </>
           )}
-          {onOnchainPerformanceData && <Performance />}
+          {/* TODO: Bring this back later */}
+          {/* {onOnchainPerformanceData && <Performance />} */}
         </div>
       </div>
     </div>

@@ -1,19 +1,44 @@
 import devToolingDataset from "@/data/dev-tooling.json"
-import eligibility from "@/data/eligibility.json"
+import onchainBuilders from "@/data/onchain-builders.json"
 import { prisma } from "@/db/client"
 import { chunkArray } from "@/lib/utils"
 
 const BATCH_SIZE = 10
+
 async function populate() {
+  console.log("🧹 Cleaning up previous data...")
+  await prisma.projectOSOData.deleteMany()
+  console.log("✅ Cleaned up previous data")
+
   console.log("📦 Preparing data...")
+
+  const onChainBuildersData = onchainBuilders.map((data) => {
+    const projectId = data.project_name
+    const osoId = data.project_id
+
+    const isEligible = data.is_eligible
+    const hasDefillamaAdapter = data.has_defillama_adapter
+    const hasBundleBear = data.has_bundle_bear
+    const onchainBuilderReward = data.op_reward
+
+    return {
+      projectId,
+      osoId,
+      data: {
+        isEligible,
+        hasDefillamaAdapter,
+        hasBundleBear,
+        onchainBuilderReward,
+      },
+    }
+  })
 
   const devToolingData = await Promise.all(
     devToolingDataset.map(async (data) => {
-      // Essential
       const projectId = data.project_name
       const osoId = data.oso_project_id
+      const devToolingReward = data.op_reward
 
-      // Top Projects
       const topProjectIds = data.onchain_builder_op_atlas_ids
       const topProjects = await prisma.project.findMany({
         where: {
@@ -28,90 +53,77 @@ async function populate() {
         },
       })
 
-      // Onchain Builders
       const onchainBuildersInAtlasCount = data.developer_connection_count
 
-      const result = {
+      return {
         projectId,
         osoId,
         data: {
           topProjects,
           onchainBuildersInAtlasCount,
+          devToolingReward,
         },
       }
-
-      return result
     }),
   )
 
-  const eligibilityData = eligibility.map((data) => {
-    // Essential
-    const projectId = data.project_name
-    const osoId = data.project_id
-
-    // Eligibility Data
-    const isEligible = data.is_eligible
-    const hasDefillamaAdapter = data.has_defillama_adapter
-    const hasBundleBear = data.has_bundle_bear
-    const opReward = data.op_reward
-
-    return {
-      projectId,
-      osoId,
-      data: {
-        isEligible,
-        hasDefillamaAdapter,
-        hasBundleBear,
-        opReward,
-      },
-    }
-  })
-
+  // Merge data
   const mergedData: {
-    projectId: string
-    osoId: string
     data: {
+      topProjects?:
+        | {
+            name: string
+            website: string[]
+            thumbnailUrl: string | null
+          }[]
+        | undefined
+      onchainBuildersInAtlasCount?: number | undefined
+      devToolingReward?: number | undefined
       isEligible?: boolean
       hasDefillamaAdapter?: boolean
       hasBundleBear?: boolean
-      opReward?: number | null
-      topProjects?: { name: string; website: string[] }[]
-      onchainBuildersInAtlasCount?: number
+      onchainBuilderReward?: number | null
     }
-  }[] = devToolingData
-
-  // Merge data
-  eligibilityData.forEach((data) => {
-    const index = mergedData.findIndex(
-      (entry) => entry.projectId === data.projectId,
+    projectId: string
+    osoId: string
+  }[] = onChainBuildersData.map((onChainData) => {
+    const devToolingDataEntry = devToolingData.find(
+      (entry) => entry.projectId === onChainData.projectId,
     )
-    if (index !== -1) {
-      mergedData[index].data = {
-        ...mergedData[index].data,
-        ...data.data,
-      }
-    } else {
-      mergedData.push(data)
+
+    return {
+      ...onChainData,
+      data: {
+        ...onChainData.data,
+        ...(devToolingDataEntry?.data ?? {}),
+      },
     }
   })
+  // Add devToolingData that doesn't exist in onChainBuildersData
+  const devToolingDataWithoutOnChainBuilders = devToolingData.filter(
+    (devToolingDataEntry) =>
+      !mergedData.some(
+        (onChainData) =>
+          onChainData.projectId === devToolingDataEntry.projectId,
+      ),
+  )
+  mergedData.push(...devToolingDataWithoutOnChainBuilders)
+
   console.log("✅ Data prepared")
 
   console.log("🚀 Populating data...")
   const chunks = chunkArray(mergedData, BATCH_SIZE)
-
   for (const chunk of chunks) {
     await prisma.projectOSOData.createMany({
-      data: chunk,
+      data: chunk.map((entry) => ({
+        projectId: entry.projectId,
+        osoId: entry.osoId,
+        data: entry.data,
+      })),
       skipDuplicates: true,
     })
   }
   console.log("✅ Data populated")
-
-  console.log("🧹 Cleaning up...")
-  await prisma.$disconnect()
-  console.log("✅ Cleaned up")
-
-  console.log("🎉 Done!")
 }
 
 populate()

@@ -19,7 +19,6 @@ interface MissionProps {
     gasFees: OnchainBuildersDataType
     transactions: OnchainBuildersDataType
     tvl: OnchainBuildersDataType
-    opReward?: number | null
     eligibility: {
       hasDefillamaAdapter: boolean
       hasQualifiedAddresses: boolean
@@ -96,14 +95,19 @@ export default function Mission({
         </div>
         <AccordionContent>
           {type === "on-chain" && (
-            <OnchainBuilderMission data={onchainBuildersMetrics} />
+            <OnchainBuilderMission
+              data={{
+                ...(onchainBuildersMetrics as any),
+                opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
+              }}
+            />
           )}
           {type === "dev-tooling" && (
             <DevToolingMission
               projectName={projectName ?? ""}
               data={{
                 gasConsumed: totalGasFees,
-                opReward: Math.round(onchainBuildersMetrics?.opReward ?? 0),
+                opReward: Math.round(projectOSOData?.devToolingReward ?? 0),
                 onchainBuildersInAtlasCount:
                   projectOSOData?.onchainBuildersInAtlasCount,
                 topProjects: projectOSOData?.topProjects,

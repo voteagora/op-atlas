@@ -1,6 +1,6 @@
 import { v4 as uuidV4 } from "uuid"
 
-import eligibility from "@/data/eligibility.json"
+import onchainBuilders from "@/data/onchain-builders.json"
 import { prisma } from "@/db/client"
 import { chunkArray } from "@/lib/utils"
 
@@ -8,7 +8,7 @@ const BATCH_SIZE = 10
 
 const populateRecipientsRewards = async () => {
   console.log("📦 Preparing data")
-  const rewards = eligibility
+  const rewards = onchainBuilders
     .map((item) => {
       return {
         id: uuidV4(),
