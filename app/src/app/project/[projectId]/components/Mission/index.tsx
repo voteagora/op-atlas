@@ -27,6 +27,7 @@ interface MissionProps {
     }
   }
   projectOSOData?: any
+  deployedOnWorldchain?: boolean
 }
 
 export default function Mission({
@@ -35,6 +36,7 @@ export default function Mission({
   type,
   onchainBuildersMetrics,
   projectOSOData,
+  deployedOnWorldchain,
 }: MissionProps) {
   const formatDateRange = (startDate: string, endDate: string) => {
     const formattedFirstDate = new Date(startDate).toLocaleDateString("en-US", {
@@ -96,6 +98,7 @@ export default function Mission({
                 ...(onchainBuildersMetrics as any),
                 opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
                 isMember,
+                deployedOnWorldchain,
               }}
             />
           )}

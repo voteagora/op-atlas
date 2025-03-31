@@ -139,8 +139,13 @@ export default async function Page({ params }: PageProps) {
                   {isOnchainBuilder && (
                     <li>
                       <Mission
-                        isMember={publicProjectMetrics.isMember}
                         type="on-chain"
+                        isMember={publicProjectMetrics.isMember}
+                        deployedOnWorldchain={Boolean(
+                          publicProject.deployedOn.find(
+                            (chain) => chain.name === "Worldchain",
+                          ),
+                        )}
                         onchainBuildersMetrics={{
                           ...onchainBuildersMetrics,
                           eligibility: {
@@ -161,9 +166,9 @@ export default async function Page({ params }: PageProps) {
                   {isDevTooling && (
                     <li>
                       <Mission
+                        type="dev-tooling"
                         isMember={publicProjectMetrics.isMember}
                         projectName={publicProject.name}
-                        type="dev-tooling"
                         onchainBuildersMetrics={onchainBuildersMetrics}
                         projectOSOData={projectOSOData}
                       />

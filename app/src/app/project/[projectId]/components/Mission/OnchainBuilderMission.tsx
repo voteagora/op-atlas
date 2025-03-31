@@ -37,6 +37,7 @@ interface DataProps {
   transactions: OnchainBuildersDataType
   tvl: OnchainBuildersDataType
   opReward?: number | null
+  deployedOnWorldchain?: boolean
   eligibility: {
     hasDefillamaAdapter: boolean
     hasQualifiedAddresses: boolean
@@ -354,13 +355,14 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
             .
           </AlertContainer>
         )}
-        {!Boolean(data?.eligibility.hasBundleBear) && (
-          <AlertContainer type="danger">
-            Qualified addresses may be inaccurate for projects deployed on
-            Worldchain. The team is actively working with World to analyze World
-            address data.
-          </AlertContainer>
-        )}
+        {data?.deployedOnWorldchain &&
+          !Boolean(data?.eligibility.hasBundleBear) && (
+            <AlertContainer type="danger">
+              Qualified addresses may be inaccurate for projects deployed on
+              Worldchain. The team is actively working with World to analyze
+              World address data.
+            </AlertContainer>
+          )}
         {Boolean(data?.eligibility.hasBundleBear) && (
           <AlertContainer type="info">
             {/* TODO: Where does this lead? */}
