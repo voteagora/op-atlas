@@ -197,10 +197,12 @@ export default async function Page({ params }: PageProps) {
                     },
                   ])}
                 >
-                  {isOnchainBuilder && (
+                  {publicProjectMetrics.isMember && isOnchainBuilder && (
                     <IncreaseYourImpact type="onchain-builders" />
                   )}
-                  {isDevTooling && <IncreaseYourImpact type="dev-tooling" />}
+                  {publicProjectMetrics.isMember && isDevTooling && (
+                    <IncreaseYourImpact type="dev-tooling" />
+                  )}
                 </div>
               </div>
             </>
