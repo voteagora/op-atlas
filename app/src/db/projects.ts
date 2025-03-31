@@ -1914,8 +1914,12 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
         const chainInfo = CHAIN_INFO[c.chainId]
         return chainInfo
       })
+      // Remove duplicates by chain
+      const uniqueDeployedOn = Array.from(
+        new Map(deployedOn?.map((item) => [item.name, item])).values(),
+      )
 
-      return { ...project, deployedOn }
+      return { ...project, deployedOn: uniqueDeployedOn }
     })
 
   const users = project?.team?.map((t) => t.user)
