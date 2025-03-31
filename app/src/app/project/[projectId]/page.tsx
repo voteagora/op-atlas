@@ -139,6 +139,7 @@ export default async function Page({ params }: PageProps) {
                   {isOnchainBuilder && (
                     <li>
                       <Mission
+                        isMember={publicProjectMetrics.isMember}
                         type="on-chain"
                         onchainBuildersMetrics={{
                           ...onchainBuildersMetrics,
@@ -160,6 +161,7 @@ export default async function Page({ params }: PageProps) {
                   {isDevTooling && (
                     <li>
                       <Mission
+                        isMember={publicProjectMetrics.isMember}
                         projectName={publicProject.name}
                         type="dev-tooling"
                         onchainBuildersMetrics={onchainBuildersMetrics}

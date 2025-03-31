@@ -9,6 +9,7 @@ import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 interface DevtoolingMissionProps {
+  isMember: boolean
   projectName: string
   data: {
     gasConsumed?: number
@@ -24,6 +25,7 @@ interface DevtoolingMissionProps {
 }
 
 export default function DevToolingMission({
+  isMember,
   projectName,
   data,
 }: DevtoolingMissionProps) {
@@ -68,13 +70,15 @@ export default function DevToolingMission({
                 Rewards so far in Retro Funding: Onchain Builders
               </p>
             </div>
-            <Button
-              variant="primary"
-              className="z-50"
-              onClick={() => setOpenDialog("claim_rewards")}
-            >
-              Claim your rewards
-            </Button>
+            {isMember && (
+              <Button
+                variant="primary"
+                className="z-50"
+                onClick={() => setOpenDialog("claim_rewards")}
+              >
+                Claim your rewards
+              </Button>
+            )}
           </div>
         </div>
       </div>

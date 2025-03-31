@@ -31,6 +31,7 @@ import {
 import { OnchainBuildersDataType } from "./types"
 
 interface DataProps {
+  isMember: boolean
   activeAddresses: OnchainBuildersDataType
   gasFees: OnchainBuildersDataType
   transactions: OnchainBuildersDataType
@@ -193,13 +194,15 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 Rewards so far in Retro Funding: Onchain Builders
               </p>
             </div>
-            <Button
-              variant="primary"
-              className="z-50"
-              onClick={() => setOpenDialog("claim_rewards")}
-            >
-              Claim your rewards
-            </Button>
+            {data?.isMember && (
+              <Button
+                variant="primary"
+                className="z-50"
+                onClick={() => setOpenDialog("claim_rewards")}
+              >
+                Claim your rewards
+              </Button>
+            )}
           </div>
         </div>
       </div>

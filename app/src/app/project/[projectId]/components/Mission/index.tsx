@@ -12,6 +12,7 @@ import { OnchainBuilderMission } from "./OnchainBuilderMission"
 import { OnchainBuildersDataType } from "./types"
 
 interface MissionProps {
+  isMember: boolean
   projectName?: string
   type: "on-chain" | "dev-tooling"
   onchainBuildersMetrics?: {
@@ -29,6 +30,7 @@ interface MissionProps {
 }
 
 export default function Mission({
+  isMember,
   projectName,
   type,
   onchainBuildersMetrics,
@@ -93,11 +95,13 @@ export default function Mission({
               data={{
                 ...(onchainBuildersMetrics as any),
                 opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
+                isMember,
               }}
             />
           )}
           {type === "dev-tooling" && (
             <DevToolingMission
+              isMember={isMember}
               projectName={projectName ?? ""}
               data={{
                 gasConsumed: totalGasFees,
