@@ -5,6 +5,7 @@ import { CheckIcon, EyeOff, Info, Triangle, XIcon } from "lucide-react"
 import { AlertTriangleIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
@@ -44,6 +45,7 @@ interface DataProps {
 
 export function OnchainBuilderMission({ data }: { data?: DataProps }) {
   const { setOpenDialog } = useAppDialogs()
+  const { projectId } = useParams()
 
   const groupedData = React.useMemo(() => {
     if (!data) return {}
@@ -339,9 +341,11 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
       <ul className="space-y-[8pt]">
         {!Boolean(data?.eligibility.hasDefillamaAdapter) && (
           <AlertContainer type="danger">
-            {/* TODO: Where does this lead? */}
             For TVL rewards,{" "}
-            <Link className="underline" href={"#"}>
+            <Link
+              className="underline"
+              href={`/projects/${projectId ?? ""}/details`}
+            >
               provide a link to your DeFiLlama adapter
             </Link>
             .
