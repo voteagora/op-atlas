@@ -249,3 +249,45 @@ export function chunkArray<T>(array: T[], size: number): T[][] {
     return acc
   }, [] as T[][])
 }
+
+export function abbreviateNumber(n: number) {
+  if (n === 0) return "- -"
+  if (n < 1e3) return n
+  if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K"
+  if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M"
+  if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + "B"
+  if (n >= 1e12) return +(n / 1e12).toFixed(1) + "T"
+
+  return n
+}
+
+export function formatNumberWithSeparator(
+  value: number | string,
+  {
+    separator = ",",
+    decimals = 0,
+    round = true,
+  }: {
+    separator?: "," | "." | " "
+    decimals?: number
+    round?: boolean
+  } = {},
+): string {
+  let num = typeof value === "string" ? parseFloat(value) : value
+
+  if (round && typeof decimals === "number") {
+    num = parseFloat(num.toFixed(decimals))
+  }
+
+  const [intPart, decimalPart] = num.toString().split(".")
+  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator)
+
+  if (typeof decimals === "number") {
+    const fixedDecimal = (decimalPart || "")
+      .padEnd(decimals, "0")
+      .slice(0, decimals)
+    return decimals > 0 ? `${formattedInt}.${fixedDecimal}` : formattedInt
+  }
+
+  return decimalPart ? `${formattedInt}.${decimalPart}` : formattedInt
+}

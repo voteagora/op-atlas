@@ -8,6 +8,7 @@ import React from "react"
 import { Button } from "@/components/common/Button"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { FundingRewardDetails } from "@/lib/types"
+import { formatNumberWithSeparator } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 interface Props {
@@ -26,13 +27,6 @@ const ProjectsList = ({
   isFetchingMore,
 }: Props) => {
   const { track } = useAnalytics()
-
-  function formatAmount(amount: number) {
-    return amount.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
 
   if (loading) {
     return (
@@ -83,7 +77,7 @@ const ProjectsList = ({
                 height={24}
               />
               <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
-                {formatAmount(Number(project?.amount))}
+                {formatNumberWithSeparator(Number(project?.amount))}
               </span>
             </div>
           </div>

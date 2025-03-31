@@ -5,6 +5,7 @@ import Link from "next/link"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
+import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 interface DevtoolingMissionProps {
@@ -56,7 +57,7 @@ export default function DevToolingMission({
             <div className="text-center space-y-3 z-50">
               {/* TODO: Replace this with actual data */}
               <span className="font-extrabold text-4xl">
-                {data.opReward ?? 0} OP
+                {formatNumberWithSeparator(data.opReward ?? 0)} OP
               </span>
               <p className="text-secondary-foreground">
                 Rewards so far in Retro Funding: Onchain Builders
@@ -81,7 +82,7 @@ export default function DevToolingMission({
             index={0}
           />
           <MetricCard
-            value={data.onchainBuildersInAtlasCount ?? 0}
+            value={abbreviateNumber(data.onchainBuildersInAtlasCount ?? 0)}
             title={`Onchain builders in Atlas using ${projectName}`}
             index={1}
           />
