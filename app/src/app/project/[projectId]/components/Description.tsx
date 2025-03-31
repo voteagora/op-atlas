@@ -16,9 +16,9 @@ interface DescriptionProps {
     name?: string | null
     farcasterHandle?: string
   }
-  deployedOn: {
+  deployedOn?: {
+    logo: string
     name: string
-    image: ImageProps["src"]
   }[]
   description?: string | null
   socials: {
@@ -76,21 +76,23 @@ export default function Description({
               </Link>
             </div>
           )}
-          <div className="pl-2 flex items-center space-x-2">
-            <span>Deployed on</span>
-            <ul className="flex items-center space-x-2">
-              {deployedOn.map((network, i) => (
-                <li key={i}>
-                  <Image
-                    src={network.image}
-                    alt={network.name}
-                    width={20}
-                    height={20}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
+          {Boolean(deployedOn?.length) && (
+            <div className="pl-2 flex items-center space-x-2">
+              <span>Deployed on</span>
+              <ul className="flex items-center space-x-2">
+                {deployedOn!.map((network, i) => (
+                  <li key={i}>
+                    <Image
+                      src={network.logo}
+                      alt={network.name}
+                      width={20}
+                      height={20}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div>
           <TruncatedText description={description ?? ""} />

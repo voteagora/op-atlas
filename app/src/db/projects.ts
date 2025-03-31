@@ -4,6 +4,7 @@ import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
 
+import { CHAIN_INFO } from "@/components/common/chain"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -1909,10 +1910,15 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
         }
       })
 
-      return project
+      const deployedOn = project?.contracts.map((c) => {
+        const chainInfo = CHAIN_INFO[c.chainId]
+        return chainInfo
+      })
+
+      return { ...project, deployedOn }
     })
 
-  const users = project?.team.map((t) => t.user)
+  const users = project?.team?.map((t) => t.user)
   const organizationUsers = project?.organization?.organization.team.map(
     (t) => t.user,
   )

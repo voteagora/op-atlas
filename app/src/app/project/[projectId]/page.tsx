@@ -104,9 +104,7 @@ export default async function Page({ params }: PageProps) {
             // TODO: Replace this with actual tags
             tags={[]}
             author={author}
-            deployedOn={[
-              { name: "Optimism", image: "/assets/chain-logos/optimism.svg" },
-            ]}
+            deployedOn={publicProject.deployedOn}
             description={publicProject.description}
             socials={{
               website: publicProject.website,
