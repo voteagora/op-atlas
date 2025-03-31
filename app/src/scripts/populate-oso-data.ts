@@ -46,11 +46,6 @@ async function populate() {
             in: topProjectIds,
           },
         },
-        select: {
-          name: true,
-          website: true,
-          thumbnailUrl: true,
-        },
       })
 
       const onchainBuildersInAtlasCount = data.developer_connection_count

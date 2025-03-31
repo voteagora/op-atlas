@@ -13,7 +13,12 @@ interface DevtoolingMissionProps {
   data: {
     gasConsumed?: number
     onchainBuildersInAtlasCount?: number
-    topProjects?: { name: string; website: string[]; thumbnailUrl: string }[]
+    topProjects?: {
+      id: string
+      name: string
+      website: string[]
+      thumbnailUrl: string
+    }[]
     opReward?: number | null
   }
 }
@@ -103,11 +108,6 @@ export default function DevToolingMission({
               </div>
               <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
                 {data.topProjects?.slice(0, 6).map((project, index) => {
-                  const projectLink =
-                    (project.website?.at(0)?.startsWith("http")
-                      ? project.website?.at(0)
-                      : `https://${project.website?.at(0)}`) ?? ""
-
                   return (
                     <li key={index} className="space-x-2 flex items-center">
                       <Image
@@ -116,7 +116,9 @@ export default function DevToolingMission({
                         width={24}
                         height={24}
                       />
-                      <Link href={projectLink}>{project.name}</Link>
+                      <Link href={`/project/${project.id}`}>
+                        {project.name}
+                      </Link>
                     </li>
                   )
                 })}
