@@ -49,6 +49,8 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
   const { setOpenDialog } = useAppDialogs()
   const { projectId } = useParams()
 
+  const opReward = data?.opReward ?? 0
+
   const groupedData = React.useMemo(() => {
     if (!data) return {}
 
@@ -168,45 +170,47 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
 
   return (
     <div className="space-y-6">
-      <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
-        <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF5C6C] via-[#FF67B5] animate-slow-spin" />
-        <Image
-          className="absolute top-0 left-0 z-0 p-0.5 rounded-xl"
-          src="/assets/images/rewards-on-chain-banner.png"
-          objectFit="cover"
-          objectPosition="center"
-          layout="fill"
-          alt="Rewards Banner"
-        />
-        <Image
-          src="/assets/images/rewards-on-chain-element.png"
-          width={256}
-          height={256}
-          alt="Dev Tooling"
-          className="absolute bottom-0.5 right-0.5 rounded-br-[11px]"
-        />
-        <div className="absolute w-full h-full z-50">
-          <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
-            <div className="text-center space-y-3 z-50">
-              <span className="font-extrabold text-4xl">
-                {formatNumberWithSeparator(data?.opReward ?? 0)} OP
-              </span>
-              <p className="text-secondary-foreground">
-                Rewards so far in Retro Funding: Onchain Builders
-              </p>
+      {opReward > 0 && (
+        <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
+          <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF5C6C] via-[#FF67B5] animate-slow-spin" />
+          <Image
+            className="absolute top-0 left-0 z-0 p-0.5 rounded-xl"
+            src="/assets/images/rewards-on-chain-banner.png"
+            objectFit="cover"
+            objectPosition="center"
+            layout="fill"
+            alt="Rewards Banner"
+          />
+          <Image
+            src="/assets/images/rewards-on-chain-element.png"
+            width={256}
+            height={256}
+            alt="Dev Tooling"
+            className="absolute bottom-0.5 right-0.5 rounded-br-[11px]"
+          />
+          <div className="absolute w-full h-full z-50">
+            <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
+              <div className="text-center space-y-3 z-50">
+                <span className="font-extrabold text-4xl">
+                  {formatNumberWithSeparator(opReward)} OP
+                </span>
+                <p className="text-secondary-foreground">
+                  Rewards so far in Retro Funding: Onchain Builders
+                </p>
+              </div>
+              {data?.isMember && (
+                <Button
+                  variant="primary"
+                  className="z-50"
+                  onClick={() => setOpenDialog("claim_rewards")}
+                >
+                  Claim your rewards
+                </Button>
+              )}
             </div>
-            {data?.isMember && (
-              <Button
-                variant="primary"
-                className="z-50"
-                onClick={() => setOpenDialog("claim_rewards")}
-              >
-                Claim your rewards
-              </Button>
-            )}
           </div>
         </div>
-      </div>
+      )}
       <Tabs defaultValue={MONTHS[0]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {MONTHS.map((month, index) => {

@@ -16,7 +16,7 @@ async function populate() {
     const projectId = data.project_name
     const osoId = data.project_id
 
-    const isEligible = data.is_eligible
+    const onchainBuilderEligible = data.is_eligible
     const hasDefillamaAdapter = data.has_defillama_adapter
     const hasBundleBear = data.has_bundle_bear
     const onchainBuilderReward = data.op_reward
@@ -25,7 +25,7 @@ async function populate() {
       projectId,
       osoId,
       data: {
-        isEligible,
+        onchainBuilderEligible,
         hasDefillamaAdapter,
         hasBundleBear,
         onchainBuilderReward,
@@ -39,6 +39,7 @@ async function populate() {
       const osoId = data.oso_project_id
       const devToolingReward = data.op_reward
 
+      const devToolingEligible = data.is_eligible
       const topProjectIds = data.onchain_builder_op_atlas_ids
       const topProjects = await prisma.project.findMany({
         where: {
@@ -54,6 +55,7 @@ async function populate() {
         projectId,
         osoId,
         data: {
+          devToolingEligible,
           topProjects,
           onchainBuildersInAtlasCount,
           devToolingReward,
