@@ -320,7 +320,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={2}
               />
               <MetricCard
-                value={formatToK(avgQualifiedAddresses)}
+                value={formatToK(Math.round(avgQualifiedAddresses))}
                 title="Qualified addresses"
                 trend={{
                   value: monthMetrics.activeAddresses.trend.value.toString(),
