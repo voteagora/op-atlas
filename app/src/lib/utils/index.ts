@@ -296,3 +296,51 @@ export function formatNumberWithSeparator(
 
   return decimalPart ? `${formattedInt}.${decimalPart}` : formattedInt
 }
+
+type Trend = { value: number; sign: "inc" | "dec" | null }
+
+type MetricResult = {
+  value: number
+  trend: Trend
+}
+
+type MonthlyMetrics = Record<string, Record<string, MetricResult>>
+
+export function generateMonthlyMetrics(
+  data: Record<string, Record<string, number[]>>,
+  months: string[],
+): MonthlyMetrics {
+  const sum = (arr?: number[]) => arr?.reduce((acc, val) => acc + val, 0) || 0
+
+  const getTrend = (current: number, previous: number): Trend => {
+    if (previous === 0) return { value: 0, sign: null }
+
+    const diff = current - previous
+    const percentageChange = Math.abs((diff / previous) * 100)
+
+    return {
+      value: parseFloat(percentageChange.toFixed(2)),
+      sign: diff > 0 ? "inc" : diff < 0 ? "dec" : null,
+    }
+  }
+
+  const metricKeys = Object.keys(data)
+
+  return months.reduce((acc, month, index) => {
+    const prevMonth = months[index - 1]
+
+    acc[month] = metricKeys.reduce((metricAcc, key) => {
+      const currentValue = sum(data[key]?.[month])
+      const previousValue = index === 0 ? 0 : sum(data[key]?.[prevMonth])
+
+      metricAcc[key] = {
+        value: currentValue,
+        trend: getTrend(currentValue, previousValue),
+      }
+
+      return metricAcc
+    }, {} as Record<string, MetricResult>)
+
+    return acc
+  }, {} as MonthlyMetrics)
+}

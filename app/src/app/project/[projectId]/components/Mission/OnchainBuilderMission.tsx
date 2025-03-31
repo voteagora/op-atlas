@@ -16,8 +16,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { cn } from "@/lib/utils"
-import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
+import {
+  abbreviateNumber,
+  cn,
+  formatNumberWithSeparator,
+  generateMonthlyMetrics,
+} from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import {
@@ -61,107 +65,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
       tvl: groupByMonth(data.tvl),
     }
 
-    const sum = (arr?: number[]) => arr?.reduce((acc, val) => acc + val, 0) || 0
-
-    const getTrend = (
-      current: number,
-      previous: number,
-    ): { value: number; sign: "inc" | "dec" | null } => {
-      if (previous === 0) return { value: 0, sign: null }
-
-      const diff = current - previous
-      const percentageChange = Math.abs((diff / previous) * 100)
-
-      return {
-        value: parseFloat(percentageChange.toFixed(2)),
-        sign: diff > 0 ? "inc" : diff < 0 ? "dec" : null,
-      }
-    }
-
-    return MONTHS.reduce(
-      (acc, month, index) => {
-        if (index === 0) {
-          acc[month] = {
-            activeAddresses: {
-              value: sum(grouped.activeAddresses[month]),
-              trend: { value: 0, sign: null },
-            },
-            gasFees: {
-              value: sum(grouped.gasFees[month]),
-              trend: { value: 0, sign: null },
-            },
-            transactions: {
-              value: sum(grouped.transactions[month]),
-              trend: { value: 0, sign: null },
-            },
-            tvl: {
-              value: sum(grouped.tvl[month]),
-              trend: { value: 0, sign: null },
-            },
-          }
-
-          return acc
-        }
-
-        const prevMonth = MONTHS[index - 1]
-
-        const curr = {
-          activeAddresses: sum(grouped.activeAddresses[month]),
-          gasFees: sum(grouped.gasFees[month]),
-          transactions: sum(grouped.transactions[month]),
-          tvl: sum(grouped.tvl[month]),
-        }
-
-        const prev = {
-          activeAddresses: sum(grouped.activeAddresses[prevMonth]),
-          gasFees: sum(grouped.gasFees[prevMonth]),
-          transactions: sum(grouped.transactions[prevMonth]),
-          tvl: sum(grouped.tvl[prevMonth]),
-        }
-
-        acc[month] = {
-          activeAddresses: {
-            value: curr.activeAddresses,
-            trend: getTrend(curr.activeAddresses, prev.activeAddresses),
-          },
-          gasFees: {
-            value: curr.gasFees,
-            trend: getTrend(curr.gasFees, prev.gasFees),
-          },
-          transactions: {
-            value: curr.transactions,
-            trend: getTrend(curr.transactions, prev.transactions),
-          },
-          tvl: {
-            value: curr.tvl,
-            trend: getTrend(curr.tvl, prev.tvl),
-          },
-        }
-
-        return acc
-      },
-      {} as Record<
-        string,
-        {
-          activeAddresses: {
-            value: number
-            trend: { value: number; sign: "inc" | "dec" | null }
-          }
-          gasFees: {
-            value: number
-            trend: { value: number; sign: "inc" | "dec" | null }
-          }
-          transactions: {
-            value: number
-            trend: { value: number; sign: "inc" | "dec" | null }
-          }
-          tvl: {
-            value: number
-            trend: { value: number; sign: "inc" | "dec" | null }
-          }
-        }
-      >,
-    )
+    return generateMonthlyMetrics(grouped, MONTHS)
   }, [data])
 
   function normalizeToTwoDecimals(num: number): number {
