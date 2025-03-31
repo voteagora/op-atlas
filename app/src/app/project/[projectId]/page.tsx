@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query"
+import { EyeOff } from "lucide-react"
 import { notFound } from "next/navigation"
 
 import { getPublicProjectOSOData } from "@/app/api/oso/common"
@@ -6,6 +7,7 @@ import { auth } from "@/auth"
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { cn } from "@/lib/utils"
 
 import {
   Description,
@@ -167,7 +169,33 @@ export default async function Page({ params }: PageProps) {
                   )}
                 </ul>
               </div>
-              <IncreaseYourImpact />
+              <div className="w-full space-y-6">
+                <div className="flex items-center space-x-2 group">
+                  <h4 className="font-semibold text-xl">
+                    Increase your impact
+                  </h4>
+                  <button>
+                    <EyeOff
+                      size={20}
+                      className="opacity-0 group-hover:opacity-100 transition-all duration-150"
+                    />
+                  </button>
+                </div>
+                <div
+                  className={cn([
+                    "gap-4 grid",
+                    {
+                      "grid-cols-2": isOnchainBuilder && isDevTooling,
+                      "grid-cols-1": isOnchainBuilder || isDevTooling,
+                    },
+                  ])}
+                >
+                  {isOnchainBuilder && (
+                    <IncreaseYourImpact type="onchain-builders" />
+                  )}
+                  {isDevTooling && <IncreaseYourImpact type="dev-tooling" />}
+                </div>
+              </div>
             </>
           )}
           {/* TODO: Bring this back later */}

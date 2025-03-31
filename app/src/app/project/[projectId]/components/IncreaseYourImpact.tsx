@@ -3,43 +3,49 @@ import Image from "next/image"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 
-export default function IncreaseYourImpact() {
+interface IncreaseYourImpactProps {
+  type: "onchain-builders" | "dev-tooling"
+}
+export default function IncreaseYourImpact({ type }: IncreaseYourImpactProps) {
+  const isOnchainBuilder = type === "onchain-builders"
+  const isDevTooling = type === "dev-tooling"
   return (
-    <div className="w-full space-y-6">
-      <div className="flex items-center space-x-2 group">
-        <h4 className="font-semibold text-xl">Increase your impact</h4>
-        <button>
-          <EyeOff
-            size={20}
-            className="opacity-0 group-hover:opacity-100 transition-all duration-150"
-          />
-        </button>
+    <div className="overflow-hidden relative w-full rounded-lg flex flex-col items-center justify-center bg-gradient-to-b from-[#FF4B04] to-[#FF0420] space-y-6 p-12">
+      <Image
+        src="/assets/icons/shining-white.svg"
+        width={24}
+        height={24}
+        alt="Shinning Icon"
+      />
+      <div className="space-y-3 text-center z-50">
+        <h4 className="font-semibold text-xl text-contrast-foreground">
+          {isOnchainBuilder && "Make your application interopable"}
+          {isDevTooling &&
+            "Support developers in building interopable applications"}
+        </h4>
+        <p className="text-contrast-foreground">
+          {isOnchainBuilder &&
+            "Deploy SuperchainERC20 now to enable interoperable assets as soon as Superchain Interop goes live. Tap into the Superchain network effect from day one!"}
+          {isDevTooling && "Prepare your Dev Tooling application for interop."}
+        </p>
       </div>
-      <div className="overflow-hidden relative w-full rounded-lg flex flex-col items-center justify-center bg-gradient-to-b from-[#FF4B04] to-[#FF0420] space-y-6 p-12">
-        <Image
-          src="/assets/icons/shining-white.svg"
-          width={24}
-          height={24}
-          alt="Shinning Icon"
-        />
-        <div className="space-y-3 text-center z-50">
-          <h4 className="font-semibold text-xl text-contrast-foreground">
-            Make your application interopable
-          </h4>
-          <p className="text-contrast-foreground">
-            Deploy SuperchainERC20 now to enable interoperable assets as soon as
-            Superchain Interop goes live. Tap into the Superchain network effect
-            from day one!
-          </p>
-        </div>
-        <div className="z-50">
+      <div className="z-50">
+        {isOnchainBuilder && (
           <ExtendedLink
             as="button"
             variant="ghost"
             text="Get started in the Superchain Dev Console"
-            href="https://google.com"
+            href="https://console.optimism.io/getting-started"
           />
-        </div>
+        )}
+        {isDevTooling && (
+          <ExtendedLink
+            as="button"
+            variant="ghost"
+            text="Read Interop Docs"
+            href="https://docs.optimism.io/stack/interop/explainer"
+          />
+        )}
       </div>
     </div>
   )
