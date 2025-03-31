@@ -1,10 +1,8 @@
 import { ChevronRight } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 
 import { Callout } from "@/components/common/Callout"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { MISSIONS } from "@/lib/MissionsAndRoundData"
 import { ApplicationWithDetails } from "@/lib/types"
 
 export function EnrolledCallout({
@@ -16,12 +14,6 @@ export function EnrolledCallout({
   index: number
   onRewardsClick: () => void
 }) {
-  const router = useRouter()
-
-  const round = MISSIONS.find(
-    (round) => round.number.toString() === application.roundId,
-  )
-
   return (
     <Callout
       type="success"
@@ -35,7 +27,7 @@ export function EnrolledCallout({
             height={20}
           />
           <ExtendedLink
-            href={`/missions/${round?.pageName}`}
+            href={`/project/${application.projectId}`}
             className="text-sm font-medium mr-5 ml-2"
             text={`Enrolled in Retro Funding: ` + application?.round.name}
           />
