@@ -27,7 +27,7 @@ import {
   setProjectOrganization,
   updateProjectDetails,
 } from "@/lib/actions/projects"
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectWithFullDetails } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -94,7 +94,7 @@ export default function ProjectDetailsForm({
   project,
   organizations,
 }: {
-  project?: ProjectWithDetails
+  project?: ProjectWithFullDetails
   organizations: Organization[]
 }) {
   const router = useRouter()

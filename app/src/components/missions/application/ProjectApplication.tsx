@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/accordion"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
+import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { ProjectWithDetails } from "@/lib/types"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
@@ -63,13 +64,14 @@ export const ProjectApplication = ({
   const { isLoading } = useSessionRoundApplications(round?.number)
 
   const { data: contracts } = useProjectContracts(project.id)
+  const { data: projectDetails } = useProjectDetails(project.id)
 
   const { progressPercent, completedSections: completedSectionsCriteria } =
     useMemo(() => {
-      return project
-        ? getProjectStatus(project, contracts ?? null)
+      return projectDetails
+        ? getProjectStatus(projectDetails ?? null, contracts ?? null)
         : { progressPercent: 0, completedSections: [] }
-    }, [project, contracts])
+    }, [projectDetails, contracts])
 
   const roundEligibilityCriteriaChecks = round!.applicationPageEligibility.map(
     () => {
@@ -82,7 +84,9 @@ export const ProjectApplication = ({
 
     if (criterion.type && criterion.type === "hasCodeRepositories") {
       roundEligibilityCriteriaChecks[i] =
-        project.hasCodeRepositories && project.repos.length > 0
+        project.hasCodeRepositories &&
+        !!projectDetails &&
+        projectDetails.repos.length > 0
     }
 
     if (criterion.type && criterion.type === "isOnChainContract") {
@@ -213,7 +217,7 @@ export const ProjectApplication = ({
                 if (criterion.type) {
                   if (criterion.type === "hasJavaScriptAndOrRustPackages") {
                     if (
-                      project.repos.some(
+                      projectDetails?.repos.some(
                         (repo) => repo.npmPackage || repo.crate,
                       )
                     ) {

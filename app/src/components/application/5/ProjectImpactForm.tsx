@@ -17,6 +17,7 @@ import { FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
+import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { CategoryWithImpact, ProjectWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX, getProjectStatus } from "@/lib/utils"
 
@@ -34,10 +35,14 @@ const ProjectImpactForm = ({
   index: number
 }) => {
   const { data: contract } = useProjectContracts(project.id)
+  const { data: projectDetails } = useProjectDetails(project.id)
 
   const isEligible = useMemo(() => {
-    return getProjectStatus(project, contract ?? null).progressPercent === 100
-  }, [project, contract])
+    return (
+      getProjectStatus(projectDetails ?? null, contract ?? null)
+        .progressPercent === 100
+    )
+  }, [projectDetails, contract])
 
   const hasApplied = project.applications[0]?.status === "submitted"
   const attestationId = project.applications[0]?.attestationId

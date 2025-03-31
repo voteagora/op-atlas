@@ -4,7 +4,6 @@ import { User } from "@prisma/client"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { sortBy } from "ramda"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -16,9 +15,8 @@ import {
   setMemberRole,
   updateProjectDetails,
 } from "@/lib/actions/projects"
-import { projectMembers } from "@/lib/actions/utils"
 import { useIsAdmin } from "@/lib/hooks"
-import { ProjectWithDetails, TeamRole } from "@/lib/types"
+import { ProjectTeam, ProjectWithFullDetails, TeamRole } from "@/lib/types"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import AddTeamMemberDialog from "./AddTeamMemberDialog"
@@ -28,14 +26,11 @@ import { TeamMemberCard } from "./TeamMemberCard"
 
 export default function AddTeamDetailsForm({
   project,
+  team,
 }: {
-  project: ProjectWithDetails
+  project: ProjectWithFullDetails
+  team: ProjectTeam
 }) {
-  const team = sortBy(
-    (member) => member.user.name?.toLowerCase() ?? "",
-    projectMembers(project),
-  )
-
   const router = useRouter()
   const { data } = useSession()
 
@@ -45,7 +40,7 @@ export default function AddTeamDetailsForm({
     project.addedTeamMembers,
   )
 
-  const isAdmin = useIsAdmin(project)
+  const isAdmin = useIsAdmin(team)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)

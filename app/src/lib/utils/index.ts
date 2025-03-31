@@ -1,4 +1,4 @@
-import { Organization } from "@prisma/client"
+import { Organization, ProjectSnapshot } from "@prisma/client"
 import { type ClassValue, clsx } from "clsx"
 import { customAlphabet } from "nanoid"
 import { sortBy } from "ramda"
@@ -7,6 +7,7 @@ import { twMerge } from "tailwind-merge"
 import {
   ProjectContracts,
   ProjectWithDetails,
+  ProjectWithFullDetails,
   UserWithAddresses,
 } from "../types"
 
@@ -100,10 +101,12 @@ export type ProjectStatus = {
 }
 
 export function getProjectStatus(
-  project: ProjectWithDetails,
+  project: ProjectWithFullDetails | null,
   contracts: ProjectContracts | null,
 ): ProjectStatus {
   const completedSections: ProjectSection[] = []
+
+  if (!project) return { completedSections, progressPercent: 0 }
 
   const hasDetails = project.name && project.description
   if (hasDetails) {
@@ -136,7 +139,10 @@ export function getProjectStatus(
     completedSections.push(ProjectSection.Grants)
   }
 
-  const hasUnpublishedChanges = projectHasUnpublishedChanges(project)
+  const hasUnpublishedChanges = projectHasUnpublishedChanges(
+    project.snapshots,
+    project.lastMetadataUpdate,
+  )
   if (!hasUnpublishedChanges) {
     completedSections.push(ProjectSection.Publish)
   }
@@ -152,17 +158,16 @@ export function getProjectStatus(
 }
 
 export function projectHasUnpublishedChanges(
-  project: ProjectWithDetails,
+  snapshots: ProjectSnapshot[],
+  lastMetadataUpdate: Date,
 ): boolean {
   const latestSnapshot = sortBy(
     (s) => -new Date(s.createdAt).getTime(),
-    project.snapshots,
+    snapshots,
   )[0]
   if (!latestSnapshot) return true
 
-  return (
-    new Date(latestSnapshot.createdAt) < new Date(project.lastMetadataUpdate)
-  )
+  return new Date(latestSnapshot.createdAt) < new Date(lastMetadataUpdate)
 }
 
 /*

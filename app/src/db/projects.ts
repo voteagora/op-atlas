@@ -10,12 +10,12 @@ import {
   ProjectContracts,
   ProjectContractWithProject,
   ProjectTeam,
+  ProjectWithDetails,
   ProjectWithFullDetails,
   ProjectWithTeam,
   PublishedUserProjectsResult,
   TeamRole,
   UserProjectsWithDetails,
-  UserProjectWithDetails,
   UserWithProjects,
 } from "@/lib/types"
 import { getValidUntil } from "@/lib/utils"
@@ -68,10 +68,7 @@ async function getUserAdminProjectsWithDetailFn({
         COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
         COALESCE(jsonb_agg(
           DISTINCT to_jsonb(fr.*) || jsonb_build_object(
@@ -97,10 +94,7 @@ async function getUserAdminProjectsWithDetailFn({
       LEFT JOIN "UserProjects" up ON p."id" = up."projectId" AND up."deletedAt" IS NULL
       LEFT JOIN "UserProjects" t ON p."id" = t."projectId" AND t."deletedAt" IS NULL
       LEFT JOIN "User" u ON t."userId" = u."id"
-      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
-      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
       LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
-      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
       LEFT JOIN "Application" a ON p."id" = a."projectId" 
         AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
@@ -120,10 +114,7 @@ async function getUserAdminProjectsWithDetailFn({
         COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
           'user', to_jsonb(u.*)
         )) FILTER (WHERE t."id" IS NOT NULL), '[]'::jsonb) as "team",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(s.*)) FILTER (WHERE s."id" IS NOT NULL), '[]'::jsonb) as "snapshots",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(a.*)) FILTER (WHERE a."id" IS NOT NULL), '[]'::jsonb) as "applications",
         COALESCE(jsonb_agg(
           DISTINCT to_jsonb(fr.*) || jsonb_build_object(
@@ -150,10 +141,7 @@ async function getUserAdminProjectsWithDetailFn({
         AND uo."deletedAt" IS NULL
       LEFT JOIN "UserProjects" t ON p."id" = t."projectId" AND t."deletedAt" IS NULL
       LEFT JOIN "User" u ON t."userId" = u."id"
-      LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
-      LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
       LEFT JOIN "ProjectSnapshot" s ON p."id" = s."projectId"
-      LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
       LEFT JOIN "Application" a ON p."id" = a."projectId"
         AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
@@ -222,7 +210,7 @@ export const getRandomProjects = cache(getRandomProjectsFn)
 
 async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<
-    { result: { projects: { project: UserProjectWithDetails }[] } }[]
+    { result: { projects: { project: ProjectWithDetails }[] } }[]
   >`
     WITH project_data AS (
       SELECT 
@@ -435,9 +423,6 @@ async function getProjectFn({
       SELECT 
         p.*,
         po."organizationId",
-        COALESCE(jsonb_agg(DISTINCT to_jsonb(t.*) || jsonb_build_object(
-          'user', to_jsonb(u.*)
-        )) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(r.*)) FILTER (WHERE r."id" IS NOT NULL), '[]'::jsonb) as "repos",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(l.*)) FILTER (WHERE l."id" IS NOT NULL), '[]'::jsonb) as "links",
         COALESCE(jsonb_agg(DISTINCT to_jsonb(f.*)) FILTER (WHERE f."id" IS NOT NULL), '[]'::jsonb) as "funding",
@@ -462,11 +447,7 @@ async function getProjectFn({
         )) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
         CASE 
           WHEN po."id" IS NOT NULL THEN jsonb_build_object(
-            'organization', to_jsonb(o.*) || jsonb_build_object(
-              'team', COALESCE(jsonb_agg(DISTINCT to_jsonb(ot.*) || jsonb_build_object(
-                'user', to_jsonb(ou.*)
-              )) FILTER (WHERE ot."id" IS NOT NULL AND ot."deletedAt" IS NULL), '[]'::jsonb)
-            )
+            'organization', to_jsonb(o.*)
           )
           ELSE NULL
         END as "organization"
@@ -486,16 +467,12 @@ async function getProjectFn({
       LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
       LEFT JOIN "ProjectOrganization" po ON p."id" = po."projectId" AND po."deletedAt" IS NULL
       LEFT JOIN "Organization" o ON po."organizationId" = o."id" AND o."deletedAt" IS NULL
-      LEFT JOIN "UserOrganization" ot ON o."id" = ot."organizationId"
-      LEFT JOIN "User" ou ON ot."userId" = ou."id"
       WHERE p."id" = ${id}
       GROUP BY p."id", po."id", po."organizationId", o."id", o."name"
     )
     SELECT to_jsonb(pd.*) as result
     FROM project_data pd;
   `
-
-  // console.log("result[0]?.result", result[0]?.result)
 
   return result[0]?.result
 }
@@ -530,7 +507,7 @@ async function getConsolidatedProjectTeamFn({
   projectId,
 }: {
   projectId: string
-}): Promise<ProjectTeam | null> {
+}): Promise<ProjectTeam> {
   const result = await prisma.$queryRaw<{ result: ProjectTeam }[]>`
     WITH project_data AS (
       SELECT 
@@ -540,7 +517,7 @@ async function getConsolidatedProjectTeamFn({
             'id', t."id",
             'role', t."role",
             'projectId', t."projectId",
-            'user', ARRAY[to_jsonb(u.*)]
+            'user', to_jsonb(u.*)
           )
         ) FILTER (WHERE t."id" IS NOT NULL AND t."deletedAt" IS NULL), '[]'::jsonb) as "team"
       FROM "Project" p
@@ -557,7 +534,7 @@ async function getConsolidatedProjectTeamFn({
             'id', uo."id",
             'role', uo."role",
             'organizationId', uo."organizationId",
-            'user', ARRAY[to_jsonb(u.*)]
+            'user', to_jsonb(u.*)
           )
         ) FILTER (WHERE uo."id" IS NOT NULL AND uo."deletedAt" IS NULL), '[]'::jsonb) as "team"
       FROM "Organization" o
@@ -576,16 +553,24 @@ async function getConsolidatedProjectTeamFn({
     )
     SELECT result
     FROM (
-      SELECT jsonb_build_object(
-        'id', r.result->>'id',
-        'name', r.result->>'name',
-        'team', r.result->'team'
+      SELECT COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'id', t->>'id',
+            'role', t->>'role',
+            'projectId', t->>'projectId',
+            'organizationId', t->>'organizationId',
+            'user', t->'user'
+          )
+        )
+        FROM jsonb_array_elements(r.result->'team') t),
+        '[]'::jsonb
       ) as result
       FROM result r
     ) final;
   `
 
-  return result[0]?.result
+  return result[0]?.result || []
 }
 
 export const getConsolidatedProjectTeam = cache(getConsolidatedProjectTeamFn)
@@ -1757,16 +1742,61 @@ export async function addKYCTeamMembers({
     ...businesses.map((b) => b.email),
   ]
 
-  const existingUsers = await prisma.kYCUser.findMany({
-    where: { email: { in: allEmails } },
-  })
+  const [existingUsers, currentTeam] = await Promise.all([
+    prisma.kYCUser.findMany({
+      where: { email: { in: allEmails } },
+      include: {
+        KYCUserTeams: true,
+      },
+    }),
+    prisma.kYCUserTeams.findMany({
+      where: { kycTeamId },
+    }),
+  ])
 
-  const existingUserMap = new Map(existingUsers.map((u) => [u.email, u]))
+  const existingIndividualUserMap = new Map(
+    existingUsers.filter((u) => !u.businessName).map((u) => [u.email, u]),
+  )
+  const existingBusinessUserMap = new Map(
+    existingUsers.filter((u) => u.businessName).map((u) => [u.email, u]),
+  )
 
   const newIndividuals = individuals.filter(
-    (i) => !existingUserMap.has(i.email),
+    (i) => !existingIndividualUserMap.get(i.email),
   )
-  const newBusinesses = businesses.filter((b) => !existingUserMap.has(b.email))
+  const newBusinesses = businesses.filter(
+    (b) => !existingBusinessUserMap.get(b.email),
+  )
+
+  // We need to remove users that are no longer in the team
+  const toRemove = [
+    // Remove users that are no longer in the team but their email is still used for individuals or businesses
+    ...existingUsers
+      .filter((u) => u.KYCUserTeams.some((t) => t.kycTeamId === kycTeamId))
+      .filter((u) => {
+        const isIndividualMember =
+          !u.businessName && individuals.some((i) => i.email === u.email)
+        const isBusinessMember =
+          !!u.businessName && businesses.some((b) => b.email === u.email)
+        return !isIndividualMember && !isBusinessMember
+      })
+      .map((u) => u.KYCUserTeams.find((t) => t.kycTeamId === kycTeamId)!.id),
+    // Remove users that are no longer in the team & their email is not used for individuals or businesses
+    ...currentTeam
+      .filter((t) => !existingUsers.some((e) => e.id === t.kycUserId))
+      .map((t) => t.id),
+  ]
+
+  // We need to add some existing users & all new users to the team
+  const toAdd = existingUsers
+    .filter((u) => u.KYCUserTeams.every((t) => t.kycTeamId !== kycTeamId))
+    .filter((u) => {
+      const isNewIndividual =
+        !u.businessName && newIndividuals.some((i) => i.email === u.email)
+      const isNewBusiness =
+        !!u.businessName && newBusinesses.some((b) => b.email === u.email)
+      return !isNewIndividual && !isNewBusiness
+    })
 
   await prisma.$transaction(async (tx) => {
     const createdIndividuals = await tx.kYCUser.createManyAndReturn({
@@ -1788,19 +1818,21 @@ export async function addKYCTeamMembers({
       })),
     })
 
-    const allUsers = [
-      ...existingUsers,
-      ...createdIndividuals,
-      ...createdBusinesses,
-    ]
+    const allMembers = [...toAdd, ...createdIndividuals, ...createdBusinesses]
 
-    const uniqueTeamAssignments = Array.from(
-      new Map(
-        allUsers.map((user) => [user.email, { kycTeamId, kycUserId: user.id }]),
-      ).values(),
-    )
-
-    await tx.kYCUserTeams.createMany({ data: uniqueTeamAssignments })
+    await Promise.all([
+      tx.kYCUserTeams.createMany({
+        data: allMembers.map((u) => ({
+          kycTeamId,
+          kycUserId: u.id,
+        })),
+      }),
+      tx.kYCUserTeams.deleteMany({
+        where: {
+          id: { in: toRemove },
+        },
+      }),
+    ])
   })
 }
 

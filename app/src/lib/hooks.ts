@@ -5,17 +5,17 @@ import { isAddress } from "viem"
 
 import { updateEmail } from "./actions/users"
 import { getAllBadgeholders, getBadgeholder } from "./api/eas/badgeholder"
-import { UserWithAddresses } from "./types"
-import { OrganizationWithDetails, ProjectWithDetails } from "./types"
+import { ProjectTeam, UserWithAddresses } from "./types"
+import { OrganizationWithDetails } from "./types"
 
-export function useIsAdmin(project?: ProjectWithDetails) {
+export function useIsAdmin(team: ProjectTeam) {
   const { data: session } = useSession()
 
   return (
-    project &&
+    team &&
     session &&
-    project.team.find(
-      (member) => member.userId === session.user.id && member.role === "admin",
+    team.find(
+      (member) => member.user.id === session.user.id && member.role === "admin",
     )
   )
 }

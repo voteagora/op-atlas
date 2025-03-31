@@ -4,7 +4,8 @@ import { z } from "zod"
 import {
   CategoryWithImpact,
   OrganizationWithDetails,
-  ProjectWithDetails,
+  ProjectTeam,
+  ProjectWithFullDetails,
 } from "../types"
 
 export const FullProjectMetadataValidator = z.object({
@@ -131,11 +132,13 @@ export type FullProjectMetadata = {
 export type ProjectMetadata = Omit<FullProjectMetadata, "contracts">
 
 export function formatProjectMetadata(
-  project: ProjectWithDetails,
+  project: ProjectWithFullDetails,
+  fullTeam: ProjectTeam,
 ): ProjectMetadata {
   // Eliminate extraneous data from IPFS snapshots
 
-  const team = project.team.map(({ user }) => user.farcasterId)
+  const team = fullTeam.map(({ user }) => user.farcasterId)
+
   const github = project.repos
     .filter((repo) => repo.type === "github")
     .map((repo) => {
@@ -227,10 +230,11 @@ export function formatProjectMetadata(
 }
 
 export function buildFullProjectMetadata(
-  project: ProjectWithDetails,
+  project: ProjectWithFullDetails,
+  team: ProjectTeam,
   contracts: ProjectContract[],
 ): FullProjectMetadata {
-  const metadata = formatProjectMetadata(project)
+  const metadata = formatProjectMetadata(project, team)
   return {
     ...metadata,
     contracts: contracts.map((contract) => ({

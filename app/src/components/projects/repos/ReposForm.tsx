@@ -31,14 +31,14 @@ import {
   setProjectLinks,
   updateGithubRepos,
 } from "@/lib/actions/repos"
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectWithFullDetails } from "@/lib/types"
 
 import { GithubForm } from "./GithubForm"
 import { LinkForm } from "./LinkForm"
 import { ReposFormSchema } from "./schema"
 import VerifyGithubRepoDialog from "./VerifyGithubRepoDialog"
 
-function toFormValues(project: ProjectWithDetails) {
+function toFormValues(project: ProjectWithFullDetails) {
   const [githubs] = partition((repo) => repo.type === "github", project.repos)
 
   return {
@@ -78,7 +78,7 @@ function toFormValues(project: ProjectWithDetails) {
   }
 }
 
-export const ReposForm = ({ project }: { project: ProjectWithDetails }) => {
+export const ReposForm = ({ project }: { project: ProjectWithFullDetails }) => {
   const [verifyingUrl, setVerifyingUrl] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)

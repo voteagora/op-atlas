@@ -6,20 +6,23 @@ import { toast, Toaster } from "sonner"
 
 import MetadataPublishedConfirmationDialog from "@/components/projects/publish/MetadataPublishedConfirmationDialog"
 import { createProjectSnapshot } from "@/lib/actions/snapshots"
-import { ProjectWithDetails } from "@/lib/types"
+import { ProjectWithFullDetails } from "@/lib/types"
 import { projectHasUnpublishedChanges } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 const UnsavedChangesToastClient = ({
   project,
 }: {
-  project: ProjectWithDetails
+  project: ProjectWithFullDetails
 }) => {
   const { track } = useAnalytics()
   const toastOpenRef = useRef(false)
   const [showMetadataPublishedDialogue, setShowMetadataPublishedDialogue] =
     useState(false)
-  const hasUnpublishedChanges = projectHasUnpublishedChanges(project)
+  const hasUnpublishedChanges = projectHasUnpublishedChanges(
+    project.snapshots,
+    project.lastMetadataUpdate,
+  )
   const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
   const onPublish = useCallback(async () => {
