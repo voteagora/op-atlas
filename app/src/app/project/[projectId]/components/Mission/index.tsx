@@ -81,13 +81,7 @@ export default function Mission({
                 </span>
               </div>
               <p className="text-secondary-foreground font-normal text-base">
-                {onchainBuildersMetrics &&
-                  formatDateRange(
-                    Object.keys(onchainBuildersMetrics.activeAddresses)[0],
-                    Object.keys(onchainBuildersMetrics.activeAddresses).slice(
-                      -1,
-                    )[0],
-                  )}
+                Feb 12 - July 30, 2025
               </p>
             </div>
           </div>

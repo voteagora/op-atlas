@@ -20,7 +20,7 @@ export default function ClaimRewardsDialog(props: DialogProps<object>) {
             We’re still working on that
           </h4>
           <p className="text-secondary-foreground text-base font-normal">
-            You’ll be able to claim your rewards after March 31. Thank you for
+            You’ll be able to claim your rewards after April 8th. Thank you for
             your patience!
           </p>
         </div>
