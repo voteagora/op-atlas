@@ -63,8 +63,6 @@ export default function Mission({
     onchainBuildersMetrics?.gasFees ?? {},
   ).reduce((acc, curr) => acc + curr, 0)
 
-  console.log(">>> projectOSOData", projectOSOData)
-
   return (
     <Accordion type="single" collapsible defaultValue="retro-funding">
       <AccordionItem value="retro-funding" className="w-full">
