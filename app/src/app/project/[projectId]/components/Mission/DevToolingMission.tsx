@@ -8,6 +8,7 @@ import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
+import { truncateString } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { MONTHS } from "./constants"
@@ -143,7 +144,10 @@ export default function DevToolingMission({
             >
               <MetricCard
                 value={normalizeToTwoDecimals(data.gasConsumed ?? 0)}
-                title={`Gas consumed by builders using ${projectName}`}
+                title={truncateString(
+                  `Gas consumed by builders using ${projectName}`,
+                  40,
+                )}
                 sign={{ value: " ETH", position: "right" }}
                 index={0}
               />
