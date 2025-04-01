@@ -4,11 +4,10 @@ import { Link as LinkIcon } from "lucide-react"
 import { ChevronDownIcon } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
-import Link from "next/link"
 
 import SocialBadgeLink from "@/components/common/SocialBadgeLink"
-import { cn } from "@/lib/utils"
 import TrackedLink from "@/components/common/TrackedLink"
+import { cn } from "@/lib/utils"
 
 interface DescriptionProps {
   name?: string
