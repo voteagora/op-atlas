@@ -7,6 +7,11 @@ import { useEffect, useRef, useState } from "react"
 
 import SocialBadgeLink from "@/components/common/SocialBadgeLink"
 import TrackedLink from "@/components/common/TrackedLink"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 interface DescriptionProps {
@@ -94,13 +99,18 @@ export default function Description({
               <span className="text-secondary-foreground">Deployed on</span>
               <ul className="flex items-center space-x-2">
                 {deployedOn!.map((network, i) => (
-                  <li key={i}>
-                    <Image
-                      src={network.logo}
-                      alt={network.name}
-                      width={20}
-                      height={20}
-                    />
+                  <li key={i} className="flex items-center">
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Image
+                          src={network.logo}
+                          alt={network.name}
+                          width={20}
+                          height={20}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>{network.name}</TooltipContent>
+                    </Tooltip>
                   </li>
                 ))}
               </ul>
