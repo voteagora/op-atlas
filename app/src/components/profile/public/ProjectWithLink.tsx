@@ -1,16 +1,21 @@
 import Image from "next/image"
 
-import ExtendedLink from "@/components/common/ExtendedLink"
-import OutboundArrowLink from "@/components/common/OutboundArrowLink"
+import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 import { ProjectWithDetailsLite } from "@/lib/types"
 
 function ProjectWithLink({ project }: { project: ProjectWithDetailsLite }) {
   return (
     <div className="flex items-center space-x-2">
       {project.applications.length > 0 ? (
-        <ExtendedLink
+        <TrackedExtendedLink
           text={project.name}
-          href={`https://round${project.applications[0].roundId}.retrolist.app/project/${project.id}`}
+          href={`/project/${project.id}`}
+          eventName="Link Click"
+          eventData={{
+            projectId: project.id,
+            source: "Profile",
+            linkName: "Project",
+          }}
           subtext={
             project.rewards.length
               ? `Rewarded in Retro Funding ${project.rewards
