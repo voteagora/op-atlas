@@ -104,7 +104,9 @@ export default function Mission({
             <OnchainBuilderMission
               data={{
                 ...(onchainBuildersMetrics as any),
-                opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
+                opReward: Math.round(
+                  projectOSOData?.data.onchainBuilderReward ?? 0,
+                ),
                 isMember,
                 deployedOnWorldchain,
               }}
@@ -116,7 +118,9 @@ export default function Mission({
               projectName={projectName ?? ""}
               data={{
                 gasConsumed: totalGasFees,
-                opReward: Math.round(projectOSOData?.devToolingReward ?? 0),
+                opReward: Math.round(
+                  projectOSOData?.data.devToolingReward ?? 0,
+                ),
                 onchainBuildersInAtlasCount:
                   projectOSOData?.onchainBuildersInAtlasCount,
                 topProjects: projectOSOData?.topProjects,

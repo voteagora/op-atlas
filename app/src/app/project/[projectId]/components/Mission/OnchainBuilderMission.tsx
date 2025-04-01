@@ -80,6 +80,8 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
     return Number((Math.round(num * 100) / 100).toFixed(2))
   }
 
+  console.log(">>> opReward", opReward)
+
   return (
     <div className="space-y-3">
       {opReward > 0 && (
