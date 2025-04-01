@@ -3,16 +3,23 @@ import { gql, GraphQLClient } from "graphql-request"
 import { prisma } from "@/db/client"
 import {
   OrderBy,
+  Oso_ProjectsByCollectionV1,
+  Oso_ProjectsV1,
   Oso_TimeseriesMetricsByProjectV0,
+  QueryOso_ProjectsByCollectionV1Args,
+  QueryOso_ProjectsV1Args,
   QueryOso_TimeseriesMetricsByProjectV0Args,
 } from "@/graphql/__generated__/types"
 import { OSO_METRICS } from "@/lib/constants"
 import { parseOsoDeployerContract } from "@/lib/oso"
 import osoGqlClient from "@/lib/oso-client"
+import client from "@/lib/oso-client"
 import {
   OsoDeployerContractsReturnType,
   ParsedOsoDeployerContract,
 } from "@/lib/types"
+
+import { BATCH_SIZE } from "./constants"
 
 export const osoClient = new GraphQLClient(
   "https://www.opensource.observer/api/v1/graphql",
@@ -185,4 +192,74 @@ const groupedData = (
     transactions: groupByDate(data.transactions),
     tvl: groupByDate(data.tvl),
   }
+}
+
+export async function fetchOSOProjects(projectAtlasIds: string[]) {
+  let processed = 0
+  let totalCreated = 0
+
+  for (let i = 0; i < projectAtlasIds.length; i += BATCH_SIZE) {
+    const batchIds = projectAtlasIds.slice(i, i + BATCH_SIZE)
+
+    const projectsQuery: QueryOso_ProjectsV1Args = {
+      where: {
+        projectName: { _in: batchIds },
+        projectSource: { _eq: "OP_ATLAS" },
+      },
+    }
+
+    const projectsSelect: (keyof Oso_ProjectsV1)[] = [
+      "projectId",
+      "projectName",
+    ]
+
+    const osoProjects = await client.executeQuery(
+      "oso_projectsV1",
+      projectsQuery,
+      projectsSelect,
+    )
+
+    const collectionQuery: QueryOso_ProjectsByCollectionV1Args = {
+      where: { projectName: { _in: batchIds } },
+    }
+
+    const collectionSelect: (keyof Oso_ProjectsByCollectionV1)[] = [
+      "collectionName",
+      "projectId",
+      "projectName",
+    ]
+
+    const collections = await client.executeQuery(
+      "oso_projectsByCollectionV1",
+      collectionQuery,
+      collectionSelect,
+    )
+
+    processed += osoProjects.oso_projectsV1.length
+
+    const created = await prisma.projectOSO.createManyAndReturn({
+      data: osoProjects.oso_projectsV1.map((project) => {
+        const funded = collections.oso_projectsByCollectionV1.find(
+          (p) => p.projectName === project.projectName,
+        )
+
+        return {
+          projectId: project.projectName,
+          osoId: project.projectId,
+          ...(funded && {
+            roundId: funded.collectionName.split("-").at(0),
+          }),
+        }
+      }),
+      skipDuplicates: true,
+    })
+
+    totalCreated += created.length
+
+    console.log(
+      `Processed ${Math.min(i + BATCH_SIZE, projectAtlasIds.length)} projects`,
+    )
+  }
+
+  return { processed, totalCreated }
 }
