@@ -17,6 +17,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useHiddenAlerts } from "@/lib/hooks"
 import {
   abbreviateNumber,
   cn,
@@ -53,6 +54,12 @@ interface DataProps {
 export function OnchainBuilderMission({ data }: { data?: DataProps }) {
   const { setOpenDialog } = useAppDialogs()
   const { projectId } = useParams()
+
+  const { hiddenAlerts, hideAlert } = useHiddenAlerts([
+    "defillama-adapter",
+    "deployed-on-worldchain",
+    "bundle-bear-contract",
+  ])
 
   const opReward = data?.opReward ?? 0
 
@@ -252,52 +259,67 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         })}
       </Tabs>
       <ul className="space-y-[8pt]">
-        {!Boolean(data?.eligibility.hasDefillamaAdapter) && (
-          <AlertContainer type="danger">
-            For TVL rewards,{" "}
-            <TrackedLink
-              className="underline"
-              href={`/projects/${projectId ?? ""}/contracts`}
-              eventName="Link Click"
-              eventData={{
-                projectId: projectId ?? "",
-                source: "project_page",
-                linkName: "Provide a link to your DeFiLlama adapter",
-                isContributor: data?.isMember,
-              }}
+        {!Boolean(data?.eligibility.hasDefillamaAdapter) &&
+          !hiddenAlerts.defillamaAdapter && (
+            <AlertContainer
+              type="danger"
+              isMember={data?.isMember}
+              onHideAlert={() => hideAlert("defillama-adapter")}
             >
-              provide a link to your DeFiLlama adapter
-            </TrackedLink>
-            .
-          </AlertContainer>
-        )}
+              For TVL rewards,{" "}
+              <TrackedLink
+                className="underline"
+                href={`/projects/${projectId ?? ""}/contracts`}
+                eventName="Link Click"
+                eventData={{
+                  projectId: projectId ?? "",
+                  source: "project_page",
+                  linkName: "Provide a link to your DeFiLlama adapter",
+                  isContributor: data?.isMember,
+                }}
+              >
+                provide a link to your DeFiLlama adapter
+              </TrackedLink>
+              .
+            </AlertContainer>
+          )}
         {data?.deployedOnWorldchain &&
+          !hiddenAlerts.worldchainAlert &&
           !Boolean(data?.eligibility.hasBundleBear) && (
-            <AlertContainer type="danger">
+            <AlertContainer
+              type="danger"
+              isMember={data?.isMember}
+              onHideAlert={() => hideAlert("deployed-on-worldchain")}
+            >
               Qualified addresses may be inaccurate for projects deployed on
               Worldchain. The team is actively working with World to analyze
               World address data.
             </AlertContainer>
           )}
-        {Boolean(data?.eligibility.hasBundleBear) && (
-          <AlertContainer type="info">
-            If you are using ERC-4337: Account Abstraction, then{" "}
-            <TrackedLink
-              className="underline"
-              href={"https://www.bundlebear.com/"}
-              eventName="Link Click"
-              eventData={{
-                projectId: projectId ?? "",
-                source: "project_page",
-                linkName: "Add your contracts to BundleBear",
-                isContributor: data?.isMember,
-              }}
+        {Boolean(data?.eligibility.hasBundleBear) &&
+          !hiddenAlerts.bundleBearAlert && (
+            <AlertContainer
+              type="info"
+              isMember={data?.isMember}
+              onHideAlert={() => hideAlert("bundle-bear-contract")}
             >
-              add your contracts to BundleBear
-            </TrackedLink>{" "}
-            for extra rewards.
-          </AlertContainer>
-        )}
+              If you are using ERC-4337: Account Abstraction, then{" "}
+              <TrackedLink
+                className="underline"
+                href={"https://www.bundlebear.com/"}
+                eventName="Link Click"
+                eventData={{
+                  projectId: projectId ?? "",
+                  source: "project_page",
+                  linkName: "Add your contracts to BundleBear",
+                  isContributor: data?.isMember,
+                }}
+              >
+                add your contracts to BundleBear
+              </TrackedLink>{" "}
+              for extra rewards.
+            </AlertContainer>
+          )}
       </ul>
     </div>
   )
@@ -306,9 +328,13 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
 function AlertContainer({
   children,
   type,
+  isMember,
+  onHideAlert,
 }: {
   children: React.ReactNode
   type: "info" | "danger"
+  isMember?: boolean
+  onHideAlert: () => void
 }) {
   return (
     <li className="group flex items-start space-x-1 text-secondary-foreground text-sm font-normal">
@@ -325,12 +351,14 @@ function AlertContainer({
       <p className="!text-secondary-foreground !text-sm !font-normal">
         {children}
       </p>
-      <button>
-        <EyeOff
-          size={16}
-          className="group-hover:opacity-100 transition-all duration-300 opacity-0"
-        />
-      </button>
+      {isMember && (
+        <button onClick={onHideAlert}>
+          <EyeOff
+            size={16}
+            className="group-hover:opacity-100 transition-all duration-300 opacity-0"
+          />
+        </button>
+      )}
     </li>
   )
 }
