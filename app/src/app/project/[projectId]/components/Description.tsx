@@ -68,6 +68,7 @@ export default function Description({
                 href={`/${author?.farcasterHandle}`}
                 className="flex items-center space-x-2 hover:opacity-80"
                 eventName="Link Click"
+                target="_blank"
                 eventData={{
                   projectId,
                   source: "project_page",

@@ -7,6 +7,7 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 interface TrackedLinkProps extends LinkProps {
   eventName: string
   eventData?: Record<string, unknown>
+  target?: React.HTMLAttributeAnchorTarget
   children: React.ReactNode
 }
 
@@ -15,6 +16,7 @@ export default function TrackedLink({
   eventData,
   children,
   className,
+  target = "_self",
   ...props
 }: TrackedLinkProps & { className?: string }) {
   const { track } = useAnalytics()
@@ -27,7 +29,12 @@ export default function TrackedLink({
   }
 
   return (
-    <Link {...props} className={className} onClick={handleClick}>
+    <Link
+      {...props}
+      className={className}
+      onClick={handleClick}
+      target={target}
+    >
       {children}
     </Link>
   )
