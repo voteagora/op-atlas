@@ -60,7 +60,7 @@ export default function Description({
             </ul>
           </div>
         </div>
-        <div className="divide-x-2 flex items-center space-x-2">
+        <div className="divide-x-2 flex items-center space-x-2 pt-10">
           {author && (
             <div className="flex items-center space-x-2 text-secondary-foreground">
               <span>By</span>
@@ -90,7 +90,7 @@ export default function Description({
           )}
           {Boolean(deployedOn?.length) && (
             <div className="pl-2 flex items-center space-x-2">
-              <span>Deployed on</span>
+              <span className="text-secondary-foreground">Deployed on</span>
               <ul className="flex items-center space-x-2">
                 {deployedOn!.map((network, i) => (
                   <li key={i}>

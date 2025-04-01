@@ -50,7 +50,7 @@ export default function DevToolingMission({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {opReward > 0 && (
         <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
           <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF5C6C] via-[#FF67B5] animate-slow-spin" />
@@ -116,7 +116,7 @@ export default function DevToolingMission({
               <TabsContent
                 key={month}
                 value={month}
-                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl"
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
               >
                 <Accordion type="single" collapsible>
                   <AccordionItem value="retro-funding" className="w-full">
@@ -140,7 +140,7 @@ export default function DevToolingMission({
             <TabsContent
               key={month}
               value={month}
-              className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden"
+              className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
                 value={normalizeToTwoDecimals(data.gasConsumed ?? 0)}

@@ -56,7 +56,7 @@ export default async function Page({ params }: PageProps) {
   const onOnchainPerformanceData = Boolean(onchainBuildersMetrics)
   return (
     <div className="w-full h-full mt-6 pb-12">
-      <div className="mx-auto w-full max-w-[1064px] px-8 space-y-12">
+      <div className="mx-auto w-full max-w-[1128px] px-8 space-y-12">
         <div className="w-full mt-8">
           <Header
             projectId={projectId}
