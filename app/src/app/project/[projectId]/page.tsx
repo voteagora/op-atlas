@@ -1,4 +1,3 @@
-import { QueryClient } from "@tanstack/react-query"
 import { EyeOff } from "lucide-react"
 import { notFound } from "next/navigation"
 
@@ -26,74 +25,42 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { projectId } = params
 
-  const session = await auth()
-
-  const queryClient = new QueryClient()
-  const publicProject = await queryClient.fetchQuery({
-    queryKey: ["project", "public", projectId],
-    queryFn: async () => {
-      return await getPublicProjectAction({ projectId })
-    },
-  })
-
+  const [session, publicProject, publicProjectMetrics] = await Promise.all([
+    auth(),
+    getPublicProjectAction({ projectId }),
+    getPublicProjectOSOData(projectId),
+  ])
   if (!publicProject) {
     return notFound()
   }
-
   const author = {
     avatarUrl: publicProject.team?.at(0)?.user.imageUrl,
     name: publicProject.team?.at(0)?.user.name,
     farcasterHandle: publicProject.team?.at(0)?.user.username ?? "",
   }
+  const onchainBuildersMetrics = {
+    ...publicProjectMetrics.groupedMetrics,
+    opReward: Math.round(
+      (publicProjectMetrics.projectOSOData?.data as any)?.opReward ?? 0,
+    ),
+  } as any
 
-  const publicProjectMetrics = await queryClient.fetchQuery({
-    queryKey: ["project", "public", "metrics", projectId],
-    queryFn: async () => {
-      const {
-        isOnchainBuilder,
-        isDevTooling,
-        groupedMetrics,
-        projectOSOData,
-        error,
-      } = await getPublicProjectOSOData(projectId)
+  const isMember = await verifyMembership(
+    params.projectId,
+    session?.user.farcasterId ?? "",
+  )
 
-      if (error) {
-        return {}
-      }
-
-      const isMember = await verifyMembership(
-        params.projectId,
-        session?.user.farcasterId ?? "",
-      )
-
-      return {
-        // TODO: Fix this type
-        isOnchainBuilder,
-        isDevTooling,
-        isMember: !Boolean(isMember?.error),
-        onchainBuildersMetrics: groupedMetrics as any,
-        projectOSOData: projectOSOData?.data as any,
-      }
-    },
-  })
-
-  const {
-    isOnchainBuilder,
-    isDevTooling,
-    onchainBuildersMetrics,
-    projectOSOData,
-  } = publicProjectMetrics
-
+  const { isOnchainBuilder, isDevTooling, projectOSOData } =
+    publicProjectMetrics
   const enrolledInMission = isOnchainBuilder || isDevTooling
   const onOnchainPerformanceData = Boolean(onchainBuildersMetrics)
-
   return (
     <div className="w-full h-full mt-6 pb-12">
       <div className="mx-auto w-full max-w-[1064px] px-8 space-y-12">
         <div className="w-full mt-8">
           <Header
             projectId={projectId}
-            isMember={publicProjectMetrics.isMember}
+            isMember={!isMember?.error}
             thumbnail={publicProject.thumbnailUrl}
             banner={publicProject.bannerUrl}
           />
@@ -101,7 +68,7 @@ export default async function Page({ params }: PageProps) {
         <div className="space-y-12 px-12 pt-12">
           <Description
             projectId={projectId}
-            isMember={!!publicProjectMetrics.isMember}
+            isMember={!isMember?.error}
             name={publicProject.name}
             // TODO: Replace this with actual tags
             tags={[]}
@@ -135,7 +102,7 @@ export default async function Page({ params }: PageProps) {
                 eventData={{
                   projectId,
                   source: "project_page",
-                  isContributor: publicProjectMetrics.isMember,
+                  isContributor: !isMember?.error,
                   linkName: "View recipients",
                 }}
               />
@@ -150,7 +117,7 @@ export default async function Page({ params }: PageProps) {
                     <li>
                       <Mission
                         type="on-chain"
-                        isMember={publicProjectMetrics.isMember}
+                        isMember={!isMember?.error}
                         deployedOnWorldchain={Boolean(
                           publicProject.deployedOn.find(
                             (chain) => chain.name === "Worldchain",
@@ -160,13 +127,15 @@ export default async function Page({ params }: PageProps) {
                           ...onchainBuildersMetrics,
                           eligibility: {
                             hasDefillamaAdapter:
-                              projectOSOData?.hasDefillamaAdapter ?? false,
+                              (projectOSOData?.data as any)
+                                ?.hasDefillamaAdapter ?? false,
                             hasQualifiedAddresses: Boolean(
                               onchainBuildersMetrics.activeAddresses.length ??
                                 false,
                             ),
                             hasBundleBear:
-                              projectOSOData?.hasBundleBear ?? false,
+                              (projectOSOData?.data as any)?.hasBundleBear ??
+                              false,
                           },
                         }}
                         projectOSOData={projectOSOData}
@@ -177,7 +146,7 @@ export default async function Page({ params }: PageProps) {
                     <li>
                       <Mission
                         type="dev-tooling"
-                        isMember={publicProjectMetrics.isMember}
+                        isMember={!isMember?.error}
                         projectName={publicProject.name}
                         onchainBuildersMetrics={onchainBuildersMetrics}
                         projectOSOData={projectOSOData}
@@ -186,7 +155,7 @@ export default async function Page({ params }: PageProps) {
                   )}
                 </ul>
               </div>
-              {publicProjectMetrics.isMember && (
+              {!isMember?.error && (
                 <div className="w-full space-y-6">
                   <div className="flex items-center space-x-2 group">
                     <h4 className="font-semibold text-xl">
@@ -212,14 +181,14 @@ export default async function Page({ params }: PageProps) {
                       <IncreaseYourImpact
                         type="onchain-builders"
                         projectId={projectId}
-                        isMember={publicProjectMetrics.isMember}
+                        isMember={!isMember?.error}
                       />
                     )}
                     {isDevTooling && (
                       <IncreaseYourImpact
                         type="dev-tooling"
                         projectId={projectId}
-                        isMember={publicProjectMetrics.isMember}
+                        isMember={!isMember?.error}
                       />
                     )}
                   </div>
