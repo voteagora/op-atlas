@@ -44,3 +44,6 @@ src/graphql/
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# JSON data
+src/data/*.json
