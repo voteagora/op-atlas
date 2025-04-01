@@ -92,6 +92,7 @@ export default async function Page({ params }: PageProps) {
       <div className="mx-auto w-full max-w-[1064px] px-8 space-y-12">
         <div className="w-full mt-8">
           <Header
+            projectId={projectId}
             isMember={publicProjectMetrics.isMember}
             thumbnail={publicProject.thumbnailUrl}
             banner={publicProject.bannerUrl}

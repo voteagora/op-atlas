@@ -1,21 +1,22 @@
-"use client"
 import { PencilLineIcon } from "lucide-react"
 import Image from "next/image"
-import { useParams } from "next/navigation"
 import React from "react"
 
-import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
 
 interface HeaderProps {
+  projectId: string
   isMember?: boolean
   thumbnail?: string | null
   banner?: string | null
 }
 
-export default function Header({ isMember, thumbnail, banner }: HeaderProps) {
-  const params = useParams()
-
+export default function Header({
+  projectId,
+  isMember,
+  thumbnail,
+  banner,
+}: HeaderProps) {
   return (
     <div className="w-full relative">
       {banner && (
@@ -23,7 +24,7 @@ export default function Header({ isMember, thumbnail, banner }: HeaderProps) {
           {isMember && (
             <ExtendedLink
               as="button"
-              href={`/projects/${params.projectId}/details`}
+              href={`/projects/${projectId}/details`}
               text="Edit"
               icon={<PencilLineIcon size={16} fill="#000" />}
               className="absolute top-9 right-6 z-[100]"
