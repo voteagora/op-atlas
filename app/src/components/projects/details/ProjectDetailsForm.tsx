@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
-import { Link as LinkIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -349,9 +348,6 @@ export default function ProjectDetailsForm({
         <div className="flex flex-col gap-6">
           <div className="flex items-center space-x-2">
             <h2>Project details</h2>
-            <Link href={`/project/${project?.id}`}>
-              <LinkIcon size={16} />
-            </Link>
           </div>
 
           <FormField
