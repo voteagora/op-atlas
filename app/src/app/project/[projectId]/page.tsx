@@ -52,6 +52,8 @@ export default async function Page({ params }: PageProps) {
 
   const { isOnchainBuilder, isDevTooling, projectOSOData } =
     publicProjectMetrics
+
+  console.log(">>> projectOSOData", projectOSOData)
   const enrolledInMission = isOnchainBuilder || isDevTooling
   const onOnchainPerformanceData = Boolean(onchainBuildersMetrics)
   return (
@@ -155,45 +157,47 @@ export default async function Page({ params }: PageProps) {
                   )}
                 </ul>
               </div>
-              {!isMember?.error && (
-                <div className="w-full space-y-6">
-                  <div className="flex items-center space-x-2 group">
-                    <h4 className="font-semibold text-xl">
-                      Increase your impact
-                    </h4>
-                    <button>
-                      <EyeOff
-                        size={20}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-150"
-                      />
-                    </button>
+              {((projectOSOData?.data as any)?.devToolingEligible ||
+                (projectOSOData?.data as any)?.onchainBuilderEligible) &&
+                !isMember?.error && (
+                  <div className="w-full space-y-6">
+                    <div className="flex items-center space-x-2 group">
+                      <h4 className="font-semibold text-xl">
+                        Increase your impact
+                      </h4>
+                      <button>
+                        <EyeOff
+                          size={20}
+                          className="opacity-0 group-hover:opacity-100 transition-all duration-150"
+                        />
+                      </button>
+                    </div>
+                    <div
+                      className={cn([
+                        "gap-4 grid",
+                        {
+                          "grid-cols-2": isOnchainBuilder && isDevTooling,
+                          "grid-cols-1": isOnchainBuilder || isDevTooling,
+                        },
+                      ])}
+                    >
+                      {isOnchainBuilder && (
+                        <IncreaseYourImpact
+                          type="onchain-builders"
+                          projectId={projectId}
+                          isMember={!isMember?.error}
+                        />
+                      )}
+                      {isDevTooling && (
+                        <IncreaseYourImpact
+                          type="dev-tooling"
+                          projectId={projectId}
+                          isMember={!isMember?.error}
+                        />
+                      )}
+                    </div>
                   </div>
-                  <div
-                    className={cn([
-                      "gap-4 grid",
-                      {
-                        "grid-cols-2": isOnchainBuilder && isDevTooling,
-                        "grid-cols-1": isOnchainBuilder || isDevTooling,
-                      },
-                    ])}
-                  >
-                    {isOnchainBuilder && (
-                      <IncreaseYourImpact
-                        type="onchain-builders"
-                        projectId={projectId}
-                        isMember={!isMember?.error}
-                      />
-                    )}
-                    {isDevTooling && (
-                      <IncreaseYourImpact
-                        type="dev-tooling"
-                        projectId={projectId}
-                        isMember={!isMember?.error}
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
+                )}
             </>
           )}
           {/* TODO: Bring this back later */}
