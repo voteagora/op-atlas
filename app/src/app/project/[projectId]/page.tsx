@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 
 import { getPublicProjectOSOData } from "@/app/api/oso/common"
 import { auth } from "@/auth"
-import ExtendedLink from "@/components/common/ExtendedLink"
+import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 import { cn } from "@/lib/utils"
@@ -100,6 +100,8 @@ export default async function Page({ params }: PageProps) {
         </div>
         <div className="space-y-12 px-12 pt-12">
           <Description
+            projectId={projectId}
+            isMember={!!publicProjectMetrics.isMember}
             name={publicProject.name}
             // TODO: Replace this with actual tags
             tags={[]}
@@ -124,11 +126,18 @@ export default async function Page({ params }: PageProps) {
                   Retro Funding
                 </p>
               </div>
-              <ExtendedLink
-                href="/round/results?rounds=5"
+              <TrackedExtendedLink
+                href="/round/results?rounds=7%2C8"
                 as="button"
                 variant="primary"
                 text="View recipients"
+                eventName="Link Click"
+                eventData={{
+                  projectId,
+                  source: "project_page",
+                  isContributor: publicProjectMetrics.isMember,
+                  linkName: "View recipients",
+                }}
               />
             </div>
           )}
@@ -200,9 +209,19 @@ export default async function Page({ params }: PageProps) {
                     ])}
                   >
                     {isOnchainBuilder && (
-                      <IncreaseYourImpact type="onchain-builders" />
+                      <IncreaseYourImpact
+                        type="onchain-builders"
+                        projectId={projectId}
+                        isMember={publicProjectMetrics.isMember}
+                      />
                     )}
-                    {isDevTooling && <IncreaseYourImpact type="dev-tooling" />}
+                    {isDevTooling && (
+                      <IncreaseYourImpact
+                        type="dev-tooling"
+                        projectId={projectId}
+                        isMember={publicProjectMetrics.isMember}
+                      />
+                    )}
                   </div>
                 </div>
               )}

@@ -1,12 +1,17 @@
-import { EyeOff } from "lucide-react"
 import Image from "next/image"
 
-import ExtendedLink from "@/components/common/ExtendedLink"
+import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 
 interface IncreaseYourImpactProps {
   type: "onchain-builders" | "dev-tooling"
+  projectId: string
+  isMember: boolean
 }
-export default function IncreaseYourImpact({ type }: IncreaseYourImpactProps) {
+export default function IncreaseYourImpact({
+  type,
+  projectId,
+  isMember,
+}: IncreaseYourImpactProps) {
   const isOnchainBuilder = type === "onchain-builders"
   const isDevTooling = type === "dev-tooling"
   return (
@@ -31,19 +36,33 @@ export default function IncreaseYourImpact({ type }: IncreaseYourImpactProps) {
       </div>
       <div className="z-50">
         {isOnchainBuilder && (
-          <ExtendedLink
+          <TrackedExtendedLink
             as="button"
             variant="ghost"
             text="Get started in the Superchain Dev Console"
             href="https://console.optimism.io/getting-started"
+            eventName="Link Click"
+            eventData={{
+              projectId,
+              source: "project_page",
+              linkName: "Increase Your Impact: Onchain Builders",
+              isContributor: isMember,
+            }}
           />
         )}
         {isDevTooling && (
-          <ExtendedLink
+          <TrackedExtendedLink
             as="button"
             variant="ghost"
             text="Read Interop Docs"
             href="https://docs.optimism.io/stack/interop/explainer"
+            eventName="Link Click"
+            eventData={{
+              projectId,
+              source: "project_page",
+              linkName: "Increase Your Impact: Dev Tooling",
+              isContributor: isMember,
+            }}
           />
         )}
       </div>

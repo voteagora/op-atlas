@@ -2,11 +2,13 @@
 
 import { Link as LinkIcon } from "lucide-react"
 import { ChevronDownIcon } from "lucide-react"
-import Image, { type ImageProps } from "next/image"
-import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 
+import SocialBadgeLink from "@/components/common/SocialBadgeLink"
 import { cn } from "@/lib/utils"
+import TrackedLink from "@/components/common/TrackedLink"
 
 interface DescriptionProps {
   name?: string
@@ -27,6 +29,8 @@ interface DescriptionProps {
     twitter?: string | null
     mirror?: string | null
   }
+  projectId: string
+  isMember: boolean
 }
 
 export default function Description({
@@ -36,6 +40,8 @@ export default function Description({
   deployedOn,
   description,
   socials,
+  projectId,
+  isMember,
 }: DescriptionProps) {
   return (
     <div className="w-full">
@@ -59,9 +65,16 @@ export default function Description({
           {author && (
             <div className="flex items-center space-x-2 text-secondary-foreground">
               <span>By</span>
-              <Link
+              <TrackedLink
                 href={`/${author?.farcasterHandle}`}
                 className="flex items-center space-x-2 hover:opacity-80"
+                eventName="Link Click"
+                eventData={{
+                  projectId,
+                  source: "project_page",
+                  linkName: "Project Author",
+                  isContributor: isMember,
+                }}
               >
                 {author.avatarUrl && (
                   <Image
@@ -73,7 +86,7 @@ export default function Description({
                   />
                 )}
                 <span>{author.name}</span>
-              </Link>
+              </TrackedLink>
             </div>
           )}
           {Boolean(deployedOn?.length) && (
@@ -99,7 +112,7 @@ export default function Description({
         </div>
         <div className="flex items-center space-x-2 flex-wrap">
           {socials.website?.map((website, i) => (
-            <SocialsBadgeLink
+            <SocialBadgeLink
               key={i}
               icon={<LinkIcon className="w-3.5 h-3.5" />}
               href={website}
@@ -108,10 +121,12 @@ export default function Description({
                   ? website.replace(/https?:\/\//, "")
                   : website
               }
+              type="website"
+              source="project_page"
             />
           ))}
           {socials.farcaster?.map((farcaster, i) => (
-            <SocialsBadgeLink
+            <SocialBadgeLink
               key={i}
               icon={
                 <Image
@@ -129,10 +144,12 @@ export default function Description({
                     farcaster.replace(/https?:\/\//, "")
                   : farcaster
               }
+              type="farcaster"
+              source="project_page"
             />
           ))}
           {socials.twitter && (
-            <SocialsBadgeLink
+            <SocialBadgeLink
               icon={
                 <Image
                   src="/assets/icons/x-icon.svg"
@@ -143,38 +160,21 @@ export default function Description({
               }
               href={socials.twitter}
               text={socials.twitter.replace(/https?:\/\//, "")}
+              type="X"
+              source="project_page"
             />
           )}
           {socials.mirror && (
-            <SocialsBadgeLink
+            <SocialBadgeLink
               icon={<LinkIcon className="w-3.5 h-3.5" />}
               href={socials.mirror}
               text={socials.mirror.replace(/https?:\/\//, "")}
+              type="Mirror"
+              source="project_page"
             />
           )}
         </div>
       </div>
-    </div>
-  )
-}
-
-function SocialsBadgeLink({
-  icon,
-  href,
-  text,
-  target = "_target",
-}: {
-  icon: React.ReactNode
-  href: string
-  text: string
-  target?: React.HTMLAttributeAnchorTarget
-}) {
-  return (
-    <div className="py-1 px-2.5 rounded-full bg-secondary text-sm font-medium flex items-center space-x-1">
-      {icon}
-      <Link href={href} target={target}>
-        {text}
-      </Link>
     </div>
   )
 }
