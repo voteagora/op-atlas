@@ -3,16 +3,15 @@ import Image from "next/image"
 
 import { Callout } from "@/components/common/Callout"
 import ExtendedLink from "@/components/common/ExtendedLink"
+import TrackedLink from "@/components/common/TrackedLink"
 import { ApplicationWithDetails } from "@/lib/types"
 
 export function EnrolledCallout({
   application,
   index,
-  onRewardsClick,
 }: {
   application: ApplicationWithDetails
   index: number
-  onRewardsClick: () => void
 }) {
   return (
     <Callout
@@ -42,13 +41,19 @@ export function EnrolledCallout({
             Confirmation
             <ChevronRight width={16} height={16} />
           </ExternalLink> */}
-          <button
+          <TrackedLink
             className="flex items-center text-sm text-success-foreground font-medium"
-            onClick={onRewardsClick}
+            href={`/project/${application.projectId}`}
+            eventName="Link Click"
+            eventData={{
+              source: "Dashboard",
+              linkName: "Rewards",
+              projectId: application.projectId,
+            }}
           >
             Rewards
             <ChevronRight width={16} height={16} />
-          </button>
+          </TrackedLink>
         </div>
       }
     />

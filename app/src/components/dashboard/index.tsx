@@ -3,18 +3,18 @@
 import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react"
+import { ReactNode, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
+import { unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
   ProjectWithDetails,
   UserOrganizationsWithDetails,
   UserWithAddresses,
 } from "@/lib/types"
-import { cn, hasShownNoRewardsDialog, profileProgress } from "@/lib/utils"
+import { cn, profileProgress } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import ApplicationInterruptiveDialogue from "../application/ApplicationInterruptiveDialogue"
@@ -25,15 +25,8 @@ import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstOrganizationProject from "./AddFirstOrganizationProject"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import {
-  ApplicationSubmittedCallout,
-  FundingRoundAnnouncementCallout,
-  NoRewardsCallout,
-  RewardsCallout,
-  UnclaimedRecipientCallout,
-} from "./Callouts"
+import { UnclaimedRecipientCallout } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
-import RewardsMonthlyDialog from "./dialogs/RewardsMonthlyDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import MakeFirstOrganization from "./MakeFirstOrganization"
@@ -43,7 +36,6 @@ import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
 
 const SHOW_APPLICATIONS = false
-const ROUND_ID = "5"
 
 const Dashboard = ({
   className,
@@ -73,8 +65,6 @@ const Dashboard = ({
   const [joinProjectDialogOpen, setJoinProjectDialogOpen] = useState(false)
   const [showNoRewardsDialog, setShowNoRewardsDialog] = useState(false)
   const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
-    useState(false)
-  const [showRewardsMonthlyDialog, setShowRewardsMonthlyDialog] =
     useState(false)
 
   const [showOnBoarding, setShowOnBoarding] = useState(false)
@@ -165,9 +155,6 @@ const Dashboard = ({
         </Button>
       )}
 
-      {showRewardsMonthlyDialog && (
-        <RewardsMonthlyDialog open onOpenChange={setShowRewardsMonthlyDialog} />
-      )}
       {showNoRewardsDialog && (
         <NoRewardsDialog open onOpenChange={setShowNoRewardsDialog} />
       )}
@@ -261,9 +248,6 @@ const Dashboard = ({
               <UserProjectCard
                 key={project.id}
                 project={project}
-                handleActiveRoundHelpClick={() => {
-                  setShowRewardsMonthlyDialog(true)
-                }}
                 applications={applications}
               />
             ))}
@@ -283,9 +267,6 @@ const Dashboard = ({
                     <UserProjectCard
                       key={project.id}
                       project={project.project as unknown as ProjectWithDetails}
-                      handleActiveRoundHelpClick={() => {
-                        setShowRewardsMonthlyDialog(true)
-                      }}
                       applications={applications}
                     />
                   ))}
