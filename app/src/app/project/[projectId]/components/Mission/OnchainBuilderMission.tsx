@@ -9,6 +9,7 @@ import { useParams } from "next/navigation"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
+import TrackedLink from "@/components/common/TrackedLink"
 import {
   Accordion,
   AccordionContent,
@@ -254,12 +255,19 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         {!Boolean(data?.eligibility.hasDefillamaAdapter) && (
           <AlertContainer type="danger">
             For TVL rewards,{" "}
-            <Link
+            <TrackedLink
               className="underline"
-              href={`/projects/${projectId ?? ""}/details`}
+              href={`/projects/${projectId ?? ""}/contracts`}
+              eventName="Link Click"
+              eventData={{
+                projectId: projectId ?? "",
+                source: "project_page",
+                linkName: "Provide a link to your DeFiLlama adapter",
+                isContributor: data?.isMember,
+              }}
             >
               provide a link to your DeFiLlama adapter
-            </Link>
+            </TrackedLink>
             .
           </AlertContainer>
         )}
@@ -273,11 +281,20 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
           )}
         {Boolean(data?.eligibility.hasBundleBear) && (
           <AlertContainer type="info">
-            {/* TODO: Where does this lead? */}
             If you are using ERC-4337: Account Abstraction, then{" "}
-            <Link className="underline" href={"#"}>
+            <TrackedLink
+              className="underline"
+              href={"https://www.bundlebear.com/"}
+              eventName="Link Click"
+              eventData={{
+                projectId: projectId ?? "",
+                source: "project_page",
+                linkName: "Add your contracts to BundleBear",
+                isContributor: data?.isMember,
+              }}
+            >
               add your contracts to BundleBear
-            </Link>{" "}
+            </TrackedLink>{" "}
             for extra rewards.
           </AlertContainer>
         )}

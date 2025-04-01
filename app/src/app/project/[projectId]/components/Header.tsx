@@ -2,7 +2,7 @@ import { PencilLineIcon } from "lucide-react"
 import Image from "next/image"
 import React from "react"
 
-import ExtendedLink from "@/components/common/ExtendedLink"
+import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 
 interface HeaderProps {
   projectId: string
@@ -22,12 +22,19 @@ export default function Header({
       {banner && (
         <>
           {isMember && (
-            <ExtendedLink
+            <TrackedExtendedLink
               as="button"
               href={`/projects/${projectId}/details`}
               text="Edit"
               icon={<PencilLineIcon size={16} fill="#000" />}
               className="absolute top-9 right-6 z-[100]"
+              eventName="Link Click"
+              eventData={{
+                projectId,
+                source: "project_page",
+                linkName: "Edit Project",
+                isContributor: isMember,
+              }}
             />
           )}
           <div className="flex items-center justify-center w-full h-[280px]">

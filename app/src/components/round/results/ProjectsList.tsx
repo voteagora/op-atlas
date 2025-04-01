@@ -2,10 +2,10 @@
 
 import { Loader2 } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
+import TrackedLink from "@/components/common/TrackedLink"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { FundingRewardDetails } from "@/lib/types"
 import { formatNumberWithSeparator } from "@/lib/utils"
@@ -50,7 +50,7 @@ const ProjectsList = ({
                 width={64}
               />
               <div className="ml-4">
-                <Link
+                <TrackedLink
                   className="hover:underline"
                   href={`/project/${project?.project?.id}`}
                   onClick={() => {
@@ -59,11 +59,18 @@ const ProjectsList = ({
                       projectName: project.project.name,
                     })
                   }}
+                  eventName="Link Click"
+                  eventData={{
+                    source: "round_results",
+                    projectId: project.project.id,
+                    projectName: project.project.name,
+                    linkName: "Project Page",
+                  }}
                 >
                   <h5 className="text-xs sm:text-base font-semibold text-text-default">
                     {project?.project?.name}
                   </h5>
-                </Link>
+                </TrackedLink>
                 <p className="text-xs sm:text-base font-normal text-secondary-foreground line-clamp-3">
                   {project?.project?.description}
                 </p>

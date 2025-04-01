@@ -1,10 +1,10 @@
 "use client"
 import { AlertTriangleIcon } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
+import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
@@ -177,9 +177,17 @@ export default function DevToolingMission({
                             width={24}
                             height={24}
                           />
-                          <Link href={`/project/${project.id}`}>
+                          <TrackedLink
+                            href={`/project/${project.id}`}
+                            eventName="Link Click"
+                            eventData={{
+                              projectId: project.id,
+                              source: "project_page",
+                              linkName: "Top Projects",
+                            }}
+                          >
                             {project.name}
-                          </Link>
+                          </TrackedLink>
                         </li>
                       )
                     })}
