@@ -1,9 +1,38 @@
-import devToolingDataset from "@/data/dev-tooling.json"
-import onchainBuilders from "@/data/onchain-builders.json"
+import fs from "fs/promises"
+import path from "path"
+
 import { prisma } from "@/db/client"
 import { chunkArray } from "@/lib/utils"
 
 const BATCH_SIZE = 10
+
+type OnchainBuildersItem = {
+  project_name: string
+  project_id: string
+  is_eligible: boolean
+  has_defillama_adapter: boolean
+  has_bundle_bear: boolean
+  op_reward: number | null
+}
+
+type DevToolingItem = {
+  project_name: string
+  oso_project_id: string
+  is_eligible: boolean
+  op_reward: number
+  onchain_builder_op_atlas_ids: string[]
+  developer_connection_count: number
+}
+
+async function readJsonFile<T>(filePath: string): Promise<T[] | null> {
+  try {
+    const file = await fs.readFile(filePath, "utf-8")
+    return JSON.parse(file) as T[]
+  } catch (err) {
+    console.warn(`⚠️ ${filePath} not found or unreadable, skipping...`)
+    return null
+  }
+}
 
 async function populate() {
   console.log("🧹 Cleaning up previous data...")
@@ -12,78 +41,69 @@ async function populate() {
 
   console.log("📦 Preparing data...")
 
-  const onChainBuildersData = onchainBuilders.map((data) => {
+  const devToolingPath = path.join(process.cwd(), "data", "dev-tooling.json")
+  const onchainBuildersPath = path.join(
+    process.cwd(),
+    "data",
+    "onchain-builders.json",
+  )
+
+  const devToolingDataset = await readJsonFile<DevToolingItem>(devToolingPath)
+  const onchainBuilders = await readJsonFile<OnchainBuildersItem>(
+    onchainBuildersPath,
+  )
+
+  const onChainBuildersData = (onchainBuilders ?? []).map((data) => {
     const projectId = data.project_name
     const osoId = data.project_id
-
-    const onchainBuilderEligible = data.is_eligible
-    const hasDefillamaAdapter = data.has_defillama_adapter
-    const hasBundleBear = data.has_bundle_bear
-    const onchainBuilderReward = data.op_reward
 
     return {
       projectId,
       osoId,
       data: {
-        onchainBuilderEligible,
-        hasDefillamaAdapter,
-        hasBundleBear,
-        onchainBuilderReward,
+        onchainBuilderEligible: data.is_eligible,
+        hasDefillamaAdapter: data.has_defillama_adapter,
+        hasBundleBear: data.has_bundle_bear,
+        onchainBuilderReward: data.op_reward,
       },
     }
   })
 
-  const devToolingData = await Promise.all(
-    devToolingDataset.map(async (data) => {
-      const projectId = data.project_name
-      const osoId = data.oso_project_id
-      const devToolingReward = data.op_reward
+  const devToolingData = devToolingDataset
+    ? await Promise.all(
+        devToolingDataset.map(async (data) => {
+          const projectId = data.project_name
+          const osoId = data.oso_project_id
 
-      const devToolingEligible = data.is_eligible
-      const topProjectIds = data.onchain_builder_op_atlas_ids
-      const topProjects = await prisma.project.findMany({
-        where: {
-          id: {
-            in: topProjectIds,
-          },
-        },
-      })
+          const topProjects = await prisma.project.findMany({
+            where: {
+              id: {
+                in: data.onchain_builder_op_atlas_ids,
+              },
+            },
+            select: {
+              name: true,
+              website: true,
+              thumbnailUrl: true,
+            },
+          })
 
-      const onchainBuildersInAtlasCount = data.developer_connection_count
-
-      return {
-        projectId,
-        osoId,
-        data: {
-          devToolingEligible,
-          topProjects,
-          onchainBuildersInAtlasCount,
-          devToolingReward,
-        },
-      }
-    }),
-  )
+          return {
+            projectId,
+            osoId,
+            data: {
+              devToolingEligible: data.is_eligible,
+              topProjects,
+              onchainBuildersInAtlasCount: data.developer_connection_count,
+              devToolingReward: data.op_reward,
+            },
+          }
+        }),
+      )
+    : []
 
   // Merge data
-  const mergedData: {
-    data: {
-      topProjects?:
-        | {
-            name: string
-            website: string[]
-            thumbnailUrl: string | null
-          }[]
-        | undefined
-      onchainBuildersInAtlasCount?: number | undefined
-      devToolingReward?: number | undefined
-      isEligible?: boolean
-      hasDefillamaAdapter?: boolean
-      hasBundleBear?: boolean
-      onchainBuilderReward?: number | null
-    }
-    projectId: string
-    osoId: string
-  }[] = onChainBuildersData.map((onChainData) => {
+  const mergedData = onChainBuildersData.map((onChainData) => {
     const devToolingDataEntry = devToolingData.find(
       (entry) => entry.projectId === onChainData.projectId,
     )
@@ -96,15 +116,23 @@ async function populate() {
       },
     }
   })
-  // Add devToolingData that doesn't exist in onChainBuildersData
+
   const devToolingDataWithoutOnChainBuilders = devToolingData.filter(
-    (devToolingDataEntry) =>
-      !mergedData.some(
-        (onChainData) =>
-          onChainData.projectId === devToolingDataEntry.projectId,
-      ),
+    (entry) => !mergedData.some((m) => m.projectId === entry.projectId),
   )
-  mergedData.push(...devToolingDataWithoutOnChainBuilders)
+
+  mergedData.push(
+    ...devToolingDataWithoutOnChainBuilders.map((entry) => ({
+      ...entry,
+      data: {
+        ...entry.data,
+        onchainBuilderEligible: false,
+        hasDefillamaAdapter: false,
+        hasBundleBear: false,
+        onchainBuilderReward: null,
+      },
+    })),
+  )
 
   console.log("✅ Data prepared")
 
@@ -120,6 +148,7 @@ async function populate() {
       skipDuplicates: true,
     })
   }
+
   console.log("✅ Data populated")
 }
 
