@@ -1,7 +1,7 @@
 import { gql, GraphQLClient } from "graphql-request"
 
-import { prisma } from "@/db/client"
 import {
+  createOSOProjects,
   getDevToolingProjects,
   getOnchainBuildersProjects,
   getProjectOSOData,
@@ -220,22 +220,10 @@ export async function fetchOSOProjects(projectAtlasIds: string[]) {
 
     processed += osoProjects.oso_projectsV1.length
 
-    const created = await prisma.projectOSO.createManyAndReturn({
-      data: osoProjects.oso_projectsV1.map((project) => {
-        const funded = collections.oso_projectsByCollectionV1.find(
-          (p) => p.projectName === project.projectName,
-        )
-
-        return {
-          projectId: project.projectName,
-          osoId: project.projectId,
-          ...(funded && {
-            roundId: funded.collectionName.split("-").at(0),
-          }),
-        }
-      }),
-      skipDuplicates: true,
-    })
+    const created = await createOSOProjects(
+      osoProjects.oso_projectsV1,
+      collections.oso_projectsByCollectionV1,
+    )
 
     totalCreated += created.length
 

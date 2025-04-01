@@ -22,6 +22,8 @@ import { getValidUntil } from "@/lib/utils"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
+import { Oso_ProjectsByCollectionV1 } from "@/graphql/__generated__/types"
+import { Oso_ProjectsV1 } from "@/graphql/__generated__/types"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -2031,5 +2033,44 @@ export async function getProjectOSOData({ projectId }: { projectId: string }) {
     select: {
       data: true,
     },
+  })
+}
+
+export async function createOSOProjects(
+  osoProjects: Oso_ProjectsV1[],
+  collections: Oso_ProjectsByCollectionV1[],
+) {
+  return await prisma.projectOSO.createManyAndReturn({
+    data: osoProjects.map((project) => {
+      const funded = collections.find(
+        (p) => p.projectName === project.projectName,
+      )
+
+      return {
+        projectId: project.projectName,
+        osoId: project.projectId,
+        ...(funded && {
+          roundId: funded.collectionName.split("-").at(0),
+        }),
+      }
+    }),
+    skipDuplicates: true,
+  })
+}
+
+export async function getOSOMappedProjectIds() {
+  return await prisma.$transaction(async (tx) => {
+    const existingOSO = await tx.projectOSO.findMany({
+      select: { projectId: true },
+    })
+
+    const existingIds = existingOSO.map((r) => r.projectId)
+
+    const projects = await tx.project.findMany({
+      select: { id: true },
+      where: { id: { notIn: existingIds } },
+    })
+
+    return projects.map(({ id }) => id)
   })
 }
