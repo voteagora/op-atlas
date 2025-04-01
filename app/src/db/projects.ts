@@ -1984,3 +1984,52 @@ export async function updateBanner({
     },
   })
 }
+
+export async function getProjectsOSO({ projectId }: { projectId: string }) {
+  return await prisma.projectOSO.findMany({
+    where: {
+      projectId,
+    },
+    select: {
+      osoId: true,
+    },
+    take: 1,
+  })
+}
+
+export async function getDevToolingProjects({
+  projectId,
+}: {
+  projectId: string
+}) {
+  return await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "7",
+    },
+  })
+}
+
+export async function getOnchainBuildersProjects({
+  projectId,
+}: {
+  projectId: string
+}) {
+  return await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "8",
+    },
+  })
+}
+
+export async function getProjectOSOData({ projectId }: { projectId: string }) {
+  return prisma.projectOSOData.findFirst({
+    where: {
+      projectId,
+    },
+    select: {
+      data: true,
+    },
+  })
+}

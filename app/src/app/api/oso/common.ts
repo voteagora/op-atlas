@@ -2,6 +2,12 @@ import { gql, GraphQLClient } from "graphql-request"
 
 import { prisma } from "@/db/client"
 import {
+  getDevToolingProjects,
+  getOnchainBuildersProjects,
+  getProjectOSOData,
+  getProjectsOSO,
+} from "@/db/projects"
+import {
   OrderBy,
   Oso_ProjectsByCollectionV1,
   Oso_ProjectsV1,
@@ -72,35 +78,19 @@ export async function getPublicProjectOSOData(projectId: string) {
     }
   }
 
-  const projectOSO = await prisma.projectOSO.findMany({
-    where: {
-      projectId,
-    },
-    select: {
-      osoId: true,
-    },
-    take: 1,
-  })
+  const projectOSO = await getProjectsOSO({ projectId })
   if (!projectOSO.at(0)) {
     return {
       error: "Project not found",
     }
   }
 
-  const devTooling = await prisma.application.findFirst({
-    where: {
-      projectId,
-      roundId: "7",
-    },
+  const devTooling = await getDevToolingProjects({
+    projectId,
   })
   const isDevTooling = Boolean(devTooling)
 
-  const onchainBuilder = await prisma.application.findFirst({
-    where: {
-      projectId,
-      roundId: "8",
-    },
-  })
+  const onchainBuilder = await getOnchainBuildersProjects({ projectId })
   const isOnchainBuilder = Boolean(onchainBuilder)
 
   const { osoId } = projectOSO[0]
@@ -119,14 +109,7 @@ export async function getPublicProjectOSOData(projectId: string) {
     tvl,
   })
 
-  const projectOSOData = await prisma.projectOSOData.findFirst({
-    where: {
-      projectId,
-    },
-    select: {
-      data: true,
-    },
-  })
+  const projectOSOData = await getProjectOSOData({ projectId })
 
   return {
     isOnchainBuilder,
