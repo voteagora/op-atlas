@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 
 import {
   Accordion,
@@ -75,10 +76,17 @@ export default function Mission({
             />
             <div className="flex flex-col justify-between">
               <div className="flex items-center space-x-2">
-                <span className="font-semibold text-base text-foreground">
+                <Link
+                  href={
+                    type === "on-chain"
+                      ? "https://atlas.optimism.io/missions/retro-funding-onchain-builders"
+                      : "https://atlas.optimism.io/missions/retro-funding-dev-tooling"
+                  }
+                  className="font-semibold text-base text-foreground"
+                >
                   {type === "on-chain" && "Retro Funding: Onchain Builders"}
                   {type === "dev-tooling" && "Retro Funding: Dev Tooling"}
-                </span>
+                </Link>
                 {/* TODO: Replace this with actual state */}
                 <span className="px-2 py-1 bg-callout text-callout-foreground rounded-full text-xs font-medium">
                   In Progress
