@@ -78,7 +78,7 @@ export default function DevToolingMission({
                   {formatNumberWithSeparator(opReward)} OP
                 </span>
                 <p className="text-secondary-foreground">
-                  Rewards so far in Retro Funding: Onchain Builders
+                  Rewards so far in Retro Funding: Dev Tooling
                 </p>
               </div>
               {isMember && (
