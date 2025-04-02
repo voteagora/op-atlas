@@ -122,6 +122,7 @@ export default function Description({
                           alt={network.name}
                           width={20}
                           height={20}
+                          className="rounded-full"
                         />
                       </TooltipTrigger>
                       <TooltipContent>{network.name}</TooltipContent>
