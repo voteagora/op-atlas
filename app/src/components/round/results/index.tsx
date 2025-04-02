@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useCallback, useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 
 import useDebounce from "@/hooks/useDebounce"
 import { findFundingRewards } from "@/lib/actions/results"
@@ -11,7 +12,10 @@ import ResultFilters from "./ResultFilters"
 import ResultsHeader from "./ResultsHeader"
 import RoundSelector from "./RoundSelector"
 
-export function Results({ roundId }: { roundId?: string }) {
+export function Results() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
   const [searchText, setSearchText] = useState("")
   const [sortByAmount, setSortByAmount] = useState<"asc" | "desc">("desc")
   const [projectRewards, setProjectRewards] = useState<FundingRewardDetails[]>(
@@ -22,15 +26,29 @@ export function Results({ roundId }: { roundId?: string }) {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
-  const [selectedRounds, setSelectedRounds] = useState<string[]>(
-    roundId ? [roundId] : ["4", "5", "6"],
-  )
 
   const pageSize = 10
-  const debouncedSearchText = useDebounce<string>(searchText, 300) // 2-second debounce
+  const debouncedSearchText = useDebounce<string>(searchText, 300)
+
+  // Parse selected rounds from URL
+  const selectedRounds = useMemo(() => {
+    const roundsParam = searchParams.get("rounds")
+    return roundsParam ? roundsParam.split(",") : []
+  }, [searchParams])
+
+  const updateSelectedRounds = (rounds: string[]) => {
+    const params = new URLSearchParams(searchParams.toString())
+
+    if (rounds.length > 0) {
+      params.set("rounds", rounds.join(","))
+    } else {
+      params.delete("rounds")
+    }
+
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }
 
   useEffect(() => {
-    // Fetch initial data
     async function fetchData() {
       try {
         setLoading(true)
@@ -52,7 +70,10 @@ export function Results({ roundId }: { roundId?: string }) {
         setLoading(false)
       }
     }
-    fetchData()
+
+    if (selectedRounds.length > 0) {
+      fetchData()
+    }
   }, [debouncedSearchText, selectedRounds, sortByAmount])
 
   const loadMore = useCallback(async () => {
@@ -78,7 +99,7 @@ export function Results({ roundId }: { roundId?: string }) {
     } finally {
       setIsFetchingMore(false)
     }
-  }, [currentPage, selectedRounds, debouncedSearchText, sortByAmount, pageSize])
+  }, [currentPage, selectedRounds, debouncedSearchText, sortByAmount])
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -86,7 +107,7 @@ export function Results({ roundId }: { roundId?: string }) {
         <ResultsHeader />
         <RoundSelector
           selectedRounds={selectedRounds}
-          setSelectedRounds={setSelectedRounds}
+          setSelectedRounds={updateSelectedRounds}
           totalCount={totalCount}
         />
         <ResultFilters

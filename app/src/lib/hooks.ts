@@ -94,3 +94,41 @@ export function useIsBadgeholder(user?: Partial<UserWithAddresses>) {
 
   return { isBadgeholder }
 }
+
+type AlertKey =
+  | "defillama-adapter"
+  | "deployed-on-worldchain"
+  | "bundle-bear-contract"
+  | "increase-your-impact"
+  | "op-reward-threshold"
+
+const alertKeyMap: Record<AlertKey, string> = {
+  "defillama-adapter": "defillamaAdapter",
+  "deployed-on-worldchain": "worldchainAlert",
+  "bundle-bear-contract": "bundleBearAlert",
+  "increase-your-impact": "increaseYourImpact",
+  "op-reward-threshold": "opRewardThreshold",
+}
+
+type HiddenAlertsState = Record<string, boolean>
+
+export function useHiddenAlerts(alertKeys: AlertKey[]) {
+  const initialState = alertKeys.reduce<HiddenAlertsState>((acc, key) => {
+    const stateKey = alertKeyMap[key]
+    acc[stateKey] = localStorage.getItem(key) === "true"
+    return acc
+  }, {})
+
+  const [hiddenAlerts, setHiddenAlerts] = useState(initialState)
+
+  const hideAlert = (storageKey: AlertKey) => {
+    localStorage.setItem(storageKey, "true")
+    const stateKey = alertKeyMap[storageKey]
+    setHiddenAlerts((prev) => ({ ...prev, [stateKey]: true }))
+  }
+
+  return {
+    hiddenAlerts,
+    hideAlert,
+  }
+}

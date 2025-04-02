@@ -346,7 +346,9 @@ export default function ProjectDetailsForm({
         className="flex flex-col gap-12"
       >
         <div className="flex flex-col gap-6">
-          <h2>Project details</h2>
+          <div className="flex items-center space-x-2">
+            <h2>Project details</h2>
+          </div>
 
           <FormField
             control={form.control}

@@ -1,5 +1,6 @@
 "use client"
 
+import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -167,13 +168,20 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
           </>
         )}
       </div>
-
       <div className="flex flex-col w-full ml-2">
         <ExternalLink
-          className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary"
+          className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary flex space-x-1 items-center"
+          href={`/project/${project?.id}`}
+        >
+          <span>View project</span>
+          <ChevronRight size={16} />
+        </ExternalLink>
+        <ExternalLink
+          className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary flex space-x-1 items-center"
           href="https://discord.com/invite/optimism"
         >
-          Get help
+          <span>Get help</span>
+          <ChevronRight size={16} />
         </ExternalLink>
         {project && isAdmin && (
           <Button

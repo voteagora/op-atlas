@@ -18,12 +18,14 @@ import {
   getProjectContracts,
   getProjectKycTeams,
   getProjectTeam,
+  getPublicProject,
   getPublishedProjectContracts,
   getUserAdminProjectsWithDetail,
   getUserApplications,
   getUserProjectsWithDetails,
   removeProjectOrganization,
   removeTeamMember,
+  updateBanner,
   updateMemberRole,
   updateProject,
   updateProjectFunding,
@@ -492,4 +494,34 @@ export const deleteProjectKYCTeamAction = async (data: {
   }
 
   return await deleteProjectKycTeam(data)
+}
+
+export const getPublicProjectAction = async ({
+  projectId,
+}: {
+  projectId: string
+}) => {
+  return await getPublicProject({ projectId })
+}
+
+export const updateBannerAction = async (
+  projectId: string,
+  bannerUrl: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  await updateBanner({ projectId, bannerUrl })
+
+  revalidatePath(`/project/${projectId}`)
 }

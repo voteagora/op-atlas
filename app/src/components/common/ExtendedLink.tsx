@@ -17,9 +17,10 @@ interface ButtonProps extends Omit<ShadcnButtonProps, "variant"> {
   icon?: React.ReactNode
   text?: string
   subtext?: string
-  variant?: "default" | "primary"
+  variant?: "default" | "primary" | "ghost"
   target?: React.HTMLAttributeAnchorTarget
   showOutboundLinkIcon?: boolean
+  onClick?: () => void
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -33,6 +34,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className,
       target = "_blank",
       showOutboundLinkIcon = true,
+      onClick,
       ...props
     },
     ref,
@@ -70,12 +72,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <NextLink href={href} passHref target={target} className="w-fit">
         <ShadcnButton
           ref={ref}
+          onClick={onClick}
           className={cn(
-            "group flex items-center gap-x-1.5 ",
+            "group flex items-center gap-x-1.5 transition-all duration-150",
             {
               "button-secondary text-inherit": variant === "default",
               "bg-optimismRed text-white hover:bg-optimismRed/70":
                 variant === "primary",
+              "bg-transparent border hover:opacity-80 hover:bg-transparent":
+                variant === "ghost",
             },
             className,
           )}
@@ -102,6 +107,7 @@ interface LinkProps extends NextLinkProps {
   text?: string
   subtext?: string
   showOutboundLinkIcon?: boolean
+  onClick?: () => void
 }
 
 const Link = forwardRef<HTMLAnchorElement, LinkProps>(
@@ -114,6 +120,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
       className,
       showUnderline = true,
       showOutboundLinkIcon = true,
+      onClick,
       ...props
     },
     ref,
@@ -125,6 +132,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         ref={ref}
         passHref
         target="_blank"
+        onClick={onClick}
         className={cn(
           "group flex sm:items-center space-x-1.5 text-inherit",
           {

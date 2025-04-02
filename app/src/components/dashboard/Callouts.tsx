@@ -101,7 +101,7 @@ export function GovCandidateCallout() {
     <ExternalLink
       href="https://gov.optimism.io/t/season-7-elections-information/9392#p-42386-for-candidates-1"
       className={cn(
-        "bg-calloutAlternative-foreground flex flex-col gap-y-6 mt-6 w-full max-w-4xl rounded-lg p-6",
+        "bg-callout flex flex-col gap-y-6 mt-6 w-full max-w-4xl rounded-lg p-6",
       )}
     >
       <div className="flex items-center justify-between">

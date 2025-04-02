@@ -1,27 +1,18 @@
 import { ChevronRight } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 
 import { Callout } from "@/components/common/Callout"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { MISSIONS } from "@/lib/MissionsAndRoundData"
+import TrackedLink from "@/components/common/TrackedLink"
 import { ApplicationWithDetails } from "@/lib/types"
 
 export function EnrolledCallout({
   application,
   index,
-  onRewardsClick,
 }: {
   application: ApplicationWithDetails
   index: number
-  onRewardsClick: () => void
 }) {
-  const router = useRouter()
-
-  const round = MISSIONS.find(
-    (round) => round.number.toString() === application.roundId,
-  )
-
   return (
     <Callout
       type="success"
@@ -35,7 +26,7 @@ export function EnrolledCallout({
             height={20}
           />
           <ExtendedLink
-            href={`/missions/${round?.pageName}`}
+            href={`/project/${application.projectId}`}
             className="text-sm font-medium mr-5 ml-2"
             text={`Enrolled in Retro Funding: ` + application?.round.name}
           />
@@ -50,13 +41,19 @@ export function EnrolledCallout({
             Confirmation
             <ChevronRight width={16} height={16} />
           </ExternalLink> */}
-          <button
+          <TrackedLink
             className="flex items-center text-sm text-success-foreground font-medium"
-            onClick={onRewardsClick}
+            href={`/project/${application.projectId}`}
+            eventName="Link Click"
+            eventData={{
+              source: "Dashboard",
+              linkName: "Rewards",
+              projectId: application.projectId,
+            }}
           >
             Rewards
             <ChevronRight width={16} height={16} />
-          </button>
+          </TrackedLink>
         </div>
       }
     />

@@ -27,7 +27,9 @@ export function RewardsSection({
     },
     enabled: isKycEnabled,
   })
-  const rewards = project.rewards
+  const rewards = project.rewards.filter(
+    (reward) => parseInt(reward.roundId) < 7, // Don't show Season 7 yet
+  )
 
   return (
     <div className="flex flex-col gap-12">

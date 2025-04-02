@@ -25,12 +25,10 @@ const UserProjectCard = ({
   className,
   project,
   applications,
-  handleActiveRoundHelpClick,
 }: {
   className?: string
   project: ProjectWithDetails
   applications: ApplicationWithDetails[]
-  handleActiveRoundHelpClick: () => void
 }) => {
   const team = [
     ...project.team,
@@ -188,7 +186,6 @@ const UserProjectCard = ({
               key={application.id}
               application={application}
               index={i}
-              onRewardsClick={handleActiveRoundHelpClick}
             />
           </div>
         ))}

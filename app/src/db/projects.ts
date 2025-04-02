@@ -1,9 +1,12 @@
 "use server"
 
-import { KYCUser, Prisma, Project, PublishedContract } from "@prisma/client"
+import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
 
+import { CHAIN_INFO } from "@/components/common/chain"
+import { Oso_ProjectsByCollectionV1 } from "@/graphql/__generated__/types"
+import { Oso_ProjectsV1 } from "@/graphql/__generated__/types"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -1882,5 +1885,194 @@ export async function deleteProjectKycTeam({
     where: {
       id: kycTeamId,
     },
+  })
+}
+
+export async function getPublicProject({ projectId }: { projectId: string }) {
+  const project = await prisma.project
+    .findFirst({
+      where: {
+        id: projectId,
+      },
+      include: {
+        links: true,
+        contracts: true,
+        repos: true,
+        funding: true,
+        organization: {
+          select: {
+            organization: {
+              select: {
+                name: true,
+                avatarUrl: true,
+                team: {
+                  select: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        team: {
+          orderBy: {
+            createdAt: "asc",
+          },
+          select: {
+            user: true,
+          },
+        },
+      },
+    })
+    .then((project) => {
+      project?.repos.map((r) => {
+        const tags = []
+
+        if (r.openSource) {
+          tags.push({ name: "Open Source", icon: "/assets/icons/oss.svg" })
+        }
+        if (r.npmPackage) {
+          tags.push({ name: "NPM", icon: "/assets/icons/npm-fill.svg" })
+        }
+        if (r.crate) {
+          tags.push({ name: "Crate", icon: "/assets/icons/crate.svg" })
+        }
+
+        return {
+          ...r,
+          tags,
+        }
+      })
+
+      const deployedOn = project?.contracts
+        .map((c) => {
+          const chainInfo = CHAIN_INFO[c.chainId]
+          return chainInfo
+        })
+        .filter((c) => c !== undefined)
+      // Remove duplicates by chain
+      const uniqueDeployedOn = Array.from(
+        new Map(deployedOn?.map((item) => [item.name, item])).values(),
+      )
+
+      return { ...project, deployedOn: uniqueDeployedOn }
+    })
+
+  const users = project?.team?.map((t) => t.user)
+  const organizationUsers = project?.organization?.organization.team.map(
+    (t) => t.user,
+  )
+  const deduppedUsers = users
+    ? users.filter((u) => !organizationUsers?.find((ou) => ou.id === u.id))
+    : []
+
+  return {
+    ...project,
+    contributors: deduppedUsers,
+  }
+}
+
+export async function updateBanner({
+  projectId,
+  bannerUrl,
+}: {
+  projectId: string
+  bannerUrl: string
+}) {
+  return prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      bannerUrl,
+    },
+  })
+}
+
+export async function getProjectsOSO({ projectId }: { projectId: string }) {
+  return await prisma.projectOSO.findMany({
+    where: {
+      projectId,
+    },
+    select: {
+      osoId: true,
+    },
+    take: 1,
+  })
+}
+
+export async function getDevToolingProjects({
+  projectId,
+}: {
+  projectId: string
+}) {
+  return await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "7",
+    },
+  })
+}
+
+export async function getOnchainBuildersProjects({
+  projectId,
+}: {
+  projectId: string
+}) {
+  return await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "8",
+    },
+  })
+}
+
+export async function getProjectOSOData({ projectId }: { projectId: string }) {
+  return prisma.projectOSOData.findFirst({
+    where: {
+      projectId,
+    },
+    select: {
+      data: true,
+    },
+  })
+}
+
+export async function createOSOProjects(
+  osoProjects: Oso_ProjectsV1[],
+  collections: Oso_ProjectsByCollectionV1[],
+) {
+  return await prisma.projectOSO.createManyAndReturn({
+    data: osoProjects.map((project) => {
+      const funded = collections.find(
+        (p) => p.projectName === project.projectName,
+      )
+
+      return {
+        projectId: project.projectName,
+        osoId: project.projectId,
+        ...(funded && {
+          roundId: funded.collectionName.split("-").at(0),
+        }),
+      }
+    }),
+    skipDuplicates: true,
+  })
+}
+
+export async function getOSOMappedProjectIds() {
+  return await prisma.$transaction(async (tx) => {
+    const existingOSO = await tx.projectOSO.findMany({
+      select: { projectId: true },
+    })
+
+    const existingIds = existingOSO.map((r) => r.projectId)
+
+    const projects = await tx.project.findMany({
+      select: { id: true },
+      where: { id: { notIn: existingIds } },
+    })
+
+    return projects.map(({ id }) => id)
   })
 }

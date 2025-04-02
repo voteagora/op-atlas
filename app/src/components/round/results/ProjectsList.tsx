@@ -5,9 +5,10 @@ import Image from "next/image"
 import React from "react"
 
 import { Button } from "@/components/common/Button"
-import ExternalLink from "@/components/ExternalLink"
+import TrackedLink from "@/components/common/TrackedLink"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { FundingRewardDetails } from "@/lib/types"
+import { formatNumberWithSeparator } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 interface Props {
@@ -25,20 +26,7 @@ const ProjectsList = ({
   handleLoadMore,
   isFetchingMore,
 }: Props) => {
-  const getProjectUrl = (projectName: string, roundId: string) => {
-    const formattedName = projectName
-      .replace(/ /g, "-")
-      .replace(/[^a-zA-Z0-9-]/g, "")
-    return `https://retropgfhub.com/explore/RetroPGF${roundId}/${formattedName}`
-  }
   const { track } = useAnalytics()
-
-  function formatAmount(amount: number) {
-    return amount.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  }
 
   if (loading) {
     return (
@@ -62,20 +50,27 @@ const ProjectsList = ({
                 width={64}
               />
               <div className="ml-4">
-                <ExternalLink
+                <TrackedLink
                   className="hover:underline"
-                  href={getProjectUrl(project.project.name, project.roundId)}
+                  href={`/project/${project?.project?.id}`}
                   onClick={() => {
                     track("Project rewarded", {
                       projectId: project.project.id,
                       projectName: project.project.name,
                     })
                   }}
+                  eventName="Link Click"
+                  eventData={{
+                    source: "round_results",
+                    projectId: project.project.id,
+                    projectName: project.project.name,
+                    linkName: "Project Page",
+                  }}
                 >
                   <h5 className="text-xs sm:text-base font-semibold text-text-default">
                     {project?.project?.name}
                   </h5>
-                </ExternalLink>
+                </TrackedLink>
                 <p className="text-xs sm:text-base font-normal text-secondary-foreground line-clamp-3">
                   {project?.project?.description}
                 </p>
@@ -89,7 +84,7 @@ const ProjectsList = ({
                 height={24}
               />
               <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
-                {formatAmount(Number(project?.amount))}
+                {formatNumberWithSeparator(Number(project?.amount))}
               </span>
             </div>
           </div>

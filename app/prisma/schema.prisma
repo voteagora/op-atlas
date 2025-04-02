@@ -92,6 +92,7 @@ model FundingRound {
   recipients      FundingReward[]
   Category        Category[]
   ImpactStatement ImpactStatement[]
+  ProjectOSO      ProjectOSO[]
 }
 
 model FundingReward {
@@ -249,10 +250,12 @@ model Project {
   rewards      FundingReward[]
   links        ProjectLinks[]
   publishedContracts PublishedContract[]
+  ProjectKYCTeam ProjectKYCTeam[]
+  ProjectOSO ProjectOSO[]
+  projectOSOData projectOSOData[]
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
-  ProjectKYCTeam ProjectKYCTeam[]
 }
 
 model Application {
@@ -567,4 +570,29 @@ model OrganizationKYCTeam { // Organization can have many KYCTeam
 	
 	@@index([organizationId])
   @@index([kycTeamId])
+}
+
+model ProjectOSO {
+  id          String  @id @default(uuid())
+  projectId   String
+  osoId       String
+  roundId     String?
+
+  project     Project @relation(fields: [projectId], references: [id])
+  round       FundingRound? @relation(fields: [roundId], references: [id])
+
+  @@index([projectId])
+  @@index([osoId])
+}
+
+model projectOSOData {
+  id          String  @id @default(uuid())
+  projectId   String
+  osoId       String
+  data        Json
+
+  project     Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([osoId])
 }
