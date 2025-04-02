@@ -153,7 +153,7 @@ export default function DevToolingMission({
               />
               <MetricCard
                 value={abbreviateNumber(data.onchainBuildersInAtlasCount ?? 0)}
-                title={`Onchain builders in Atlas using ${projectName}`}
+                title={`Trusted developers engaging with ${projectName}`}
                 index={1}
               />
               <div className="w-full col-span-full border rounded-xl p-6 h-[166px]">
