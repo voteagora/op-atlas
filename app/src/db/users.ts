@@ -628,6 +628,7 @@ export async function addTags(records: EntityRecords) {
   const entityKeys = Object.keys(records) as (keyof typeof records)[]
   const userTagsMap = new Map<string, Set<string>>()
 
+  // Handle base tag assignment from records
   entityKeys.forEach((entity) => {
     records[entity].forEach((user) => {
       const userTag = EXTENDED_TAG_BY_ENTITY[entity]
@@ -639,7 +640,7 @@ export async function addTags(records: EntityRecords) {
     })
   })
 
-  // Add logic based on funding rewards
+  // Fetch project + org data
   const allProjects = await prisma.project.findMany({
     where: { deletedAt: null },
     include: {
@@ -652,6 +653,19 @@ export async function addTags(records: EntityRecords) {
       team: {
         include: {
           user: { include: { emails: true } },
+        },
+      },
+      organization: {
+        include: {
+          organization: {
+            include: {
+              team: {
+                include: {
+                  user: { include: { emails: true } },
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -668,13 +682,20 @@ export async function addTags(records: EntityRecords) {
       app.round.name.includes("8"),
     )
 
-    const adminEmails = project.team
+    const projectAdminEmails = project.team
       .filter((team) => team.role === "admin")
       .flatMap((team) => team.user.emails.map((e) => e.email))
-      .filter(Boolean)
 
-    // Tag logic
-    adminEmails.forEach((email) => {
+    const orgAdminEmails =
+      project.organization?.organization?.team
+        .filter((team) => team.role === "admin")
+        .flatMap((team) => team.user.emails.map((e) => e.email)) ?? []
+
+    const allAdminEmails = Array.from(
+      new Set([...projectAdminEmails, ...orgAdminEmails]),
+    ).filter(Boolean)
+
+    for (const email of allAdminEmails) {
       if (!userTagsMap.has(email)) {
         userTagsMap.set(email, new Set())
       }
@@ -692,7 +713,7 @@ export async function addTags(records: EntityRecords) {
       } else if (appliedRound7) {
         tags.add("Did not receive rewards (dev tooling)")
       }
-    })
+    }
   }
 
   const emailsToUpdate = Array.from(userTagsMap.keys())
