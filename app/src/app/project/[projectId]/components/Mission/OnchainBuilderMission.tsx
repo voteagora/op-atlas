@@ -303,8 +303,8 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
             isMember={data?.isMember}
             onHideAlert={() => hideAlert("op-reward-threshold")}
           >
-            This project didn’t receive any OP in February because it didn’t
-            meet reward thresholds. <Link href={"#"}>See details</Link>.
+            This project didn’t receive OP in February because it didn’t meet
+            reward minimums.
           </AlertContainer>
         )}
         {Boolean(data?.eligibility.hasBundleBear) &&
