@@ -37,7 +37,7 @@ export default function Header({
               }}
             />
           )}
-          <div className="flex items-center justify-center w-full h-[280px] bg-[#FBFCFE]">
+          <div className="flex items-center justify-center w-full h-[280px] bg-[#FBFCFE] overflow-hidden rounded-2xl">
             <Image
               src={banner}
               layout="responsive"

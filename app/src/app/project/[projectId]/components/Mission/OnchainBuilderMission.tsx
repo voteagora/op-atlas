@@ -504,13 +504,6 @@ function MetricCard({
       </div>
       <p className="text-base leading-6 text-secondary-foreground flex items-center space-x-2">
         <span>{title}</span>
-        {!Boolean(value) && (
-          <AlertTriangleIcon
-            size={16}
-            fill="#FF0420"
-            className="text-background shrink-0"
-          />
-        )}
       </p>
     </div>
   )
