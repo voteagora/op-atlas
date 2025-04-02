@@ -639,6 +639,62 @@ export async function addTags(records: EntityRecords) {
     })
   })
 
+  // Add logic based on funding rewards
+  const allProjects = await prisma.project.findMany({
+    where: { deletedAt: null },
+    include: {
+      applications: {
+        include: { round: true },
+      },
+      rewards: {
+        include: { round: true },
+      },
+      team: {
+        include: {
+          user: { include: { emails: true } },
+        },
+      },
+    },
+  })
+
+  for (const project of allProjects) {
+    const round7 = project.rewards.find((r) => r.round.name.includes("7"))
+    const round8 = project.rewards.find((r) => r.round.name.includes("8"))
+
+    const appliedRound7 = project.applications.some((app) =>
+      app.round.name.includes("7"),
+    )
+    const appliedRound8 = project.applications.some((app) =>
+      app.round.name.includes("8"),
+    )
+
+    const adminEmails = project.team
+      .filter((team) => team.role === "admin")
+      .flatMap((team) => team.user.emails.map((e) => e.email))
+      .filter(Boolean)
+
+    // Tag logic
+    adminEmails.forEach((email) => {
+      if (!userTagsMap.has(email)) {
+        userTagsMap.set(email, new Set())
+      }
+
+      const tags = userTagsMap.get(email)!
+
+      if (round8 && round8.amount.toNumber() > 0) {
+        tags.add("Received rewards (onchain builders)")
+      } else if (appliedRound8) {
+        tags.add("Did not receive rewards (onchain builders)")
+      }
+
+      if (round7 && round7.amount.toNumber() > 0) {
+        tags.add("Received rewards (dev tooling)")
+      } else if (appliedRound7) {
+        tags.add("Did not receive rewards (dev tooling)")
+      }
+    })
+  }
+
   const emailsToUpdate = Array.from(userTagsMap.keys())
 
   const usersToUpdate = await prisma.userEmail.findMany({
