@@ -675,11 +675,11 @@ export async function addTags(records: EntityRecords) {
     const round7 = project.rewards.find((r) => r.roundId === "7")
     const round8 = project.rewards.find((r) => r.roundId === "8")
 
-    const appliedRound7 = project.applications.some((app) =>
-      app.round.name.includes("7"),
+    const appliedRound7 = project.applications.some(
+      (app) => app.roundId === "7",
     )
-    const appliedRound8 = project.applications.some((app) =>
-      app.round.name.includes("8"),
+    const appliedRound8 = project.applications.some(
+      (app) => app.roundId === "8",
     )
 
     const projectAdminEmails = project.team
