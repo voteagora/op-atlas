@@ -157,7 +157,7 @@ export default function DevToolingMission({
                 index={1}
               />
               <div className="w-full col-span-full border rounded-xl p-6 h-[166px]">
-                <div className="flex justify-between items-center h-full">
+                <div className="flex justify-between items-start h-full">
                   <div className="flex flex-col justify-between h-full w-full">
                     <div>
                       <p className="font-semibold text-base text-foreground">
@@ -184,6 +184,7 @@ export default function DevToolingMission({
                           <TrackedLink
                             href={`/project/${project.id}`}
                             eventName="Link Click"
+                            target="_blank"
                             eventData={{
                               projectId: project.id,
                               source: "project_page",

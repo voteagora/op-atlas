@@ -259,7 +259,8 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         })}
       </Tabs>
       <ul className="space-y-[8pt]">
-        {!Boolean(data?.eligibility.hasDefillamaAdapter) &&
+        {data?.isMember &&
+          !Boolean(data?.eligibility.hasDefillamaAdapter) &&
           !hiddenAlerts.defillamaAdapter && (
             <AlertContainer
               type="danger"
