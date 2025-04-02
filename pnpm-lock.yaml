@@ -7472,6 +7472,7 @@ packages:
 
   pinata-web3@0.5.3:
     resolution: {integrity: sha512-0OWm7dFel5Dib/BiOWxPnyMPmv1jviijpnohid8A804D6uZgWiPVBsU/2RbP4E3AEvNiWxPBw7+BqRFOuSLJIw==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   pino-abstract-transport@1.2.0:
     resolution: {integrity: sha512-Guhh8EZfPCfH+PMXAb6rKOjGQEoy0xlAIn+irODG5kgfYV+BQ0rGYYWTIel3P5mmyXqkYkPmdIkywsn6QKUR1Q==}
