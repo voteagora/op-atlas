@@ -93,7 +93,8 @@ export default function Mission({
                 </span>
               </div>
               <p className="text-secondary-foreground font-normal text-base">
-                Feb 12 - July 30, 2025
+                {type === "on-chain" && "Feb 17 - Jul 30, 2025"}
+                {type === "dev-tooling" && "Feb 4 - Jul 30, 2025"}
               </p>
             </div>
           </div>
