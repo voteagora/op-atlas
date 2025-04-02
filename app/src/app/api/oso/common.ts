@@ -98,7 +98,10 @@ export async function getPublicProjectOSOData(projectId: string) {
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
     await queryMetrics(osoId, "activeAddresses"),
     await queryMetrics(osoId, "gasFees"),
-    await queryMetrics(osoId, "transactions"),
+    await queryMetrics(osoId, "transactions", {
+      _gte: "2024-10-01",
+      _lte: "2025-07-31",
+    }),
     await queryMetrics(osoId, "tvl"),
   ])
 
@@ -119,7 +122,11 @@ export async function getPublicProjectOSOData(projectId: string) {
   }
 }
 
-const queryMetrics = async (osoId: string, key: keyof typeof OSO_METRICS) => {
+const queryMetrics = async (
+  osoId: string,
+  key: keyof typeof OSO_METRICS,
+  sampleDate = { _gte: "2025-01-01", _lte: "2025-07-31" },
+) => {
   const query: QueryOso_TimeseriesMetricsByProjectV0Args = {
     where: {
       projectId: {
@@ -129,8 +136,8 @@ const queryMetrics = async (osoId: string, key: keyof typeof OSO_METRICS) => {
         _in: OSO_METRICS[key],
       },
       sampleDate: {
-        _gte: "2025-01-01",
-        _lte: "2025-07-31",
+        _gte: sampleDate._gte,
+        _lte: sampleDate._lte,
       },
     },
     order_by: [

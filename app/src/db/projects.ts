@@ -5,6 +5,8 @@ import { cache } from "react"
 import { Address, getAddress } from "viem"
 
 import { CHAIN_INFO } from "@/components/common/chain"
+import { Oso_ProjectsByCollectionV1 } from "@/graphql/__generated__/types"
+import { Oso_ProjectsV1 } from "@/graphql/__generated__/types"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -22,8 +24,6 @@ import { getValidUntil } from "@/lib/utils"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
-import { Oso_ProjectsByCollectionV1 } from "@/graphql/__generated__/types"
-import { Oso_ProjectsV1 } from "@/graphql/__generated__/types"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`

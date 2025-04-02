@@ -100,12 +100,14 @@ type AlertKey =
   | "deployed-on-worldchain"
   | "bundle-bear-contract"
   | "increase-your-impact"
+  | "op-reward-threshold"
 
 const alertKeyMap: Record<AlertKey, string> = {
   "defillama-adapter": "defillamaAdapter",
   "deployed-on-worldchain": "worldchainAlert",
   "bundle-bear-contract": "bundleBearAlert",
   "increase-your-impact": "increaseYourImpact",
+  "op-reward-threshold": "opRewardThreshold",
 }
 
 type HiddenAlertsState = Record<string, boolean>

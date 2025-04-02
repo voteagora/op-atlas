@@ -60,6 +60,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
     "defillama-adapter",
     "deployed-on-worldchain",
     "bundle-bear-contract",
+    "op-reward-threshold",
   ])
 
   const opReward = data?.opReward ?? 0
@@ -296,6 +297,16 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               World address data.
             </AlertContainer>
           )}
+        {!hiddenAlerts.opRewardThreshold && opReward < 200 && (
+          <AlertContainer
+            type="danger"
+            isMember={data?.isMember}
+            onHideAlert={() => hideAlert("op-reward-threshold")}
+          >
+            This project didn’t receive any OP in February because it didn’t
+            meet reward thresholds. <Link href={"#"}>See details</Link>.
+          </AlertContainer>
+        )}
         {Boolean(data?.eligibility.hasBundleBear) &&
           !hiddenAlerts.bundleBearAlert && (
             <AlertContainer
