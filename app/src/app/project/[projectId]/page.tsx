@@ -31,7 +31,7 @@ export default async function Page({ params }: PageProps) {
     getPublicProjectAction({ projectId }),
     getPublicProjectOSOData(projectId),
   ])
-  if (!publicProject) {
+  if (!publicProject || publicProjectMetrics.error) {
     return notFound()
   }
   const author = publicProject.organization
