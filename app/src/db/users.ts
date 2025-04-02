@@ -628,6 +628,7 @@ export async function addTags(records: EntityRecords) {
   const entityKeys = Object.keys(records) as (keyof typeof records)[]
   const userTagsMap = new Map<string, Set<string>>()
 
+  // Handle base tag assignment from records
   entityKeys.forEach((entity) => {
     records[entity].forEach((user) => {
       const userTag = EXTENDED_TAG_BY_ENTITY[entity]
@@ -638,6 +639,82 @@ export async function addTags(records: EntityRecords) {
       }
     })
   })
+
+  // Fetch project + org data
+  const allProjects = await prisma.project.findMany({
+    where: { deletedAt: null },
+    include: {
+      applications: {
+        include: { round: true },
+      },
+      rewards: {
+        include: { round: true },
+      },
+      team: {
+        include: {
+          user: { include: { emails: true } },
+        },
+      },
+      organization: {
+        include: {
+          organization: {
+            include: {
+              team: {
+                include: {
+                  user: { include: { emails: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  for (const project of allProjects) {
+    const round7 = project.rewards.find((r) => r.round.name.includes("7"))
+    const round8 = project.rewards.find((r) => r.round.name.includes("8"))
+
+    const appliedRound7 = project.applications.some((app) =>
+      app.round.name.includes("7"),
+    )
+    const appliedRound8 = project.applications.some((app) =>
+      app.round.name.includes("8"),
+    )
+
+    const projectAdminEmails = project.team
+      .filter((team) => team.role === "admin")
+      .flatMap((team) => team.user.emails.map((e) => e.email))
+
+    const orgAdminEmails =
+      project.organization?.organization?.team
+        .filter((team) => team.role === "admin")
+        .flatMap((team) => team.user.emails.map((e) => e.email)) ?? []
+
+    const allAdminEmails = Array.from(
+      new Set([...projectAdminEmails, ...orgAdminEmails]),
+    ).filter(Boolean)
+
+    for (const email of allAdminEmails) {
+      if (!userTagsMap.has(email)) {
+        userTagsMap.set(email, new Set())
+      }
+
+      const tags = userTagsMap.get(email)!
+
+      if (round8 && round8.amount.toNumber() > 0) {
+        tags.add("Received rewards (onchain builders)")
+      } else if (appliedRound8) {
+        tags.add("Did not receive rewards (onchain builders)")
+      }
+
+      if (round7 && round7.amount.toNumber() > 0) {
+        tags.add("Received rewards (dev tooling)")
+      } else if (appliedRound7) {
+        tags.add("Did not receive rewards (dev tooling)")
+      }
+    }
+  }
 
   const emailsToUpdate = Array.from(userTagsMap.keys())
 
