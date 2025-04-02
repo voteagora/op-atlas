@@ -77,8 +77,7 @@ export default async function Page({ params }: PageProps) {
             projectId={projectId}
             isMember={!isMember?.error}
             name={publicProject.name}
-            // TODO: Replace this with actual tags
-            tags={["Project"]}
+            tags={["Project", publicProject.category ?? ""]}
             author={author}
             deployedOn={publicProject.deployedOn}
             description={publicProject.description}
