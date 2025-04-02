@@ -133,6 +133,9 @@ export default async function Page({ params }: PageProps) {
                         onchainBuildersMetrics={{
                           ...onchainBuildersMetrics,
                           eligibility: {
+                            onchainBuilderEligible: (
+                              projectOSOData?.data as any
+                            )?.onchainBuilderEligible,
                             hasDefillamaAdapter:
                               (projectOSOData?.data as any)
                                 ?.hasDefillamaAdapter ?? false,

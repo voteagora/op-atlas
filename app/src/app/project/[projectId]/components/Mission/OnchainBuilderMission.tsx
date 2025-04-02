@@ -45,6 +45,7 @@ interface DataProps {
   opReward?: number | null
   deployedOnWorldchain?: boolean
   eligibility: {
+    onchainBuilderEligible: boolean
     hasDefillamaAdapter: boolean
     hasQualifiedAddresses: boolean
     hasBundleBear: boolean
@@ -76,8 +77,8 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
     return generateMonthlyMetrics(grouped, MONTHS)
   }, [data])
 
-  function normalizeToTwoDecimals(num: number): number {
-    return Number((Math.round(num * 100) / 100).toFixed(2))
+  function normalizeToNumberOfDecimals(num: number, decimals = 2): number {
+    return Number((Math.round(num * 100) / 100).toFixed(decimals))
   }
 
   return (
@@ -141,12 +142,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         </TabsList>
         {MONTHS.map((month) => {
           const monthMetrics = groupedData[month]
-          if (
-            monthMetrics.activeAddresses.value <
-              QUALIFIED_ADDRESSES_THRESHOLD ||
-            monthMetrics.transactions.value < TRANSACTIONS_THRESHOLD ||
-            monthMetrics.activeAddresses.value < DISTINCT_DAYS_THRESHOLD
-          ) {
+          if (!data?.eligibility.onchainBuilderEligible) {
             return (
               <TabsContent
                 key={month}
@@ -228,10 +224,13 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={1}
               />
               <MetricCard
-                value={normalizeToTwoDecimals(monthMetrics.gasFees.value)}
+                value={normalizeToNumberOfDecimals(
+                  monthMetrics.gasFees.value,
+                  3,
+                )}
                 title="Gas consumed"
                 trend={{
-                  value: normalizeToTwoDecimals(
+                  value: normalizeToNumberOfDecimals(
                     monthMetrics.gasFees.trend.value,
                   ).toString(),
                   type:
