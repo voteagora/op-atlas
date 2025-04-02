@@ -13,6 +13,7 @@ import {
   Header,
   IncreaseYourImpact,
   Mission,
+  MoreDetails,
   Performance,
 } from "./components"
 
@@ -206,6 +207,7 @@ export default async function Page({ params }: PageProps) {
           )}
           {/* TODO: Bring this back later */}
           {/* {onOnchainPerformanceData && <Performance />} */}
+          <MoreDetails />
         </div>
       </div>
     </div>
