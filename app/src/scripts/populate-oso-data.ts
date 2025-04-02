@@ -17,7 +17,7 @@ type OnchainBuildersItem = {
 
 type DevToolingItem = {
   project_name: string
-  oso_project_id: string
+  project_id: string
   is_eligible: boolean
   op_reward: number
   onchain_builder_op_atlas_ids: string[]
@@ -73,7 +73,7 @@ async function populate() {
     ? await Promise.all(
         devToolingDataset.map(async (data) => {
           const projectId = data.project_name
-          const osoId = data.oso_project_id
+          const osoId = data.project_id
 
           const topProjects = await prisma.project.findMany({
             where: {
