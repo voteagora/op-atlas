@@ -79,7 +79,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
   }, [data])
 
   function normalizeToNumberOfDecimals(num: number, decimals = 2): number {
-    return Number((Math.round(num * 100) / 100).toFixed(decimals))
+    return Number(num.toFixed(decimals))
   }
 
   return (
