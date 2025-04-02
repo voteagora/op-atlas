@@ -57,15 +57,15 @@ export default function Description({
               {tags.map((tag, i) => (
                 <li
                   key={i}
-                  className="px-2.5 py-1 rounded-full border text-sm font-medium"
+                  className="px-2.5 py-1 rounded-full border-[1px] border-[#E0E2EB]"
                 >
-                  {tag}
+                  <span className="text-sm font-medium">{tag}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-        <div className="divide-x-2 flex items-center space-x-2 pt-10">
+        <div className="divide-x-2 flex items-center space-x-2">
           {author && (
             <div className="flex items-center space-x-2 text-secondary-foreground">
               <span>By</span>
@@ -120,7 +120,7 @@ export default function Description({
         <div>
           <TruncatedText description={description ?? ""} />
         </div>
-        <div className="flex items-center space-x-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {socials.website?.map((website, i) => (
             <SocialBadgeLink
               key={i}

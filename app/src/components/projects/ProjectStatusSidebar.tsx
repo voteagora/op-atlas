@@ -173,7 +173,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
           className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary flex space-x-1 items-center"
           href={`/project/${project?.id}`}
         >
-          <span>View Project</span>
+          <span>View project</span>
           <ChevronRight size={16} />
         </ExternalLink>
         <ExternalLink
