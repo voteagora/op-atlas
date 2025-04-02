@@ -39,26 +39,6 @@ export default function Mission({
   projectOSOData,
   deployedOnWorldchain,
 }: MissionProps) {
-  const formatDateRange = (startDate: string, endDate: string) => {
-    const formattedFirstDate = new Date(startDate).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-    const formattedFirstDateYear = new Date(startDate).getFullYear()
-
-    const formattedLastDate = new Date(endDate).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-    const formattedLastDateYear = new Date(endDate).getFullYear()
-
-    return formattedFirstDateYear === formattedLastDateYear
-      ? `${formattedFirstDate.split(",")[0]} - ${formattedLastDate}`
-      : `${formattedFirstDate} - ${formattedLastDate}`
-  }
-
   const totalGasFees = Object.values(
     onchainBuildersMetrics?.gasFees ?? {},
   ).reduce((acc, curr) => acc + curr, 0)

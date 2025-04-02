@@ -82,6 +82,7 @@ async function populate() {
               },
             },
             select: {
+              id: true,
               name: true,
               website: true,
               thumbnailUrl: true,
