@@ -88,7 +88,7 @@ export default function Description({
                       alt={author.name ?? ""}
                       width={20}
                       height={20}
-                      className="rounded-full"
+                      className="rounded-full shrink-0"
                     />
                   )}
                   <span>{author.name}</span>
@@ -101,7 +101,7 @@ export default function Description({
                       alt={author.name ?? ""}
                       width={20}
                       height={20}
-                      className="rounded-full"
+                      className="rounded-full shrink-0"
                     />
                   )}
                   <span>{author.name}</span>
@@ -112,7 +112,7 @@ export default function Description({
           {Boolean(deployedOn?.length) && (
             <div className="pl-2 flex items-center space-x-2">
               <span className="text-secondary-foreground">Deployed on</span>
-              <ul className="flex items-center space-x-2">
+              <ul className="flex items-center gap-2 flex-wrap">
                 {deployedOn!.map((network, i) => (
                   <li key={i} className="flex items-center">
                     <Tooltip>
