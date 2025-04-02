@@ -37,7 +37,7 @@ export default function Header({
               }}
             />
           )}
-          <div className="flex items-center justify-center w-full h-[280px]">
+          <div className="flex items-center justify-center w-full h-[280px] bg-[#FBFCFE]">
             <Image
               src={banner}
               layout="responsive"
@@ -51,7 +51,7 @@ export default function Header({
         </>
       )}
       {thumbnail && (
-        <div className="absolute -bottom-10 left-12 w-28 aspect-square rounded-xl overflow-hidden border-2 border-background">
+        <div className="absolute -bottom-10 left-12 w-28 aspect-square rounded-xl overflow-hidden border-2 border-background bg-[#FBFCFE]">
           <Image
             src={thumbnail}
             layout="responsive"
