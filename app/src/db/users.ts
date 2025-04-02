@@ -672,8 +672,8 @@ export async function addTags(records: EntityRecords) {
   })
 
   for (const project of allProjects) {
-    const round7 = project.rewards.find((r) => r.round.name.includes("7"))
-    const round8 = project.rewards.find((r) => r.round.name.includes("8"))
+    const round7 = project.rewards.find((r) => r.roundId === "7")
+    const round8 = project.rewards.find((r) => r.roundId === "8")
 
     const appliedRound7 = project.applications.some((app) =>
       app.round.name.includes("7"),
