@@ -33,11 +33,17 @@ export default async function Page({ params }: PageProps) {
   if (!publicProject) {
     return notFound()
   }
-  const author = {
-    avatarUrl: publicProject.team?.at(0)?.user.imageUrl,
-    name: publicProject.team?.at(0)?.user.name,
-    farcasterHandle: publicProject.team?.at(0)?.user.username ?? "",
-  }
+  const author = publicProject.organization
+    ? {
+        avatarUrl: publicProject.organization.organization.avatarUrl,
+        name: publicProject.organization.organization.name,
+        farcasterHandle: "",
+      }
+    : {
+        avatarUrl: publicProject.team?.at(0)?.user.imageUrl,
+        name: publicProject.team?.at(0)?.user.name,
+        farcasterHandle: publicProject.team?.at(0)?.user.username ?? "",
+      }
   const onchainBuildersMetrics = {
     ...publicProjectMetrics.groupedMetrics,
     opReward: Math.round(

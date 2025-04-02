@@ -69,29 +69,44 @@ export default function Description({
           {author && (
             <div className="flex items-center space-x-2 text-secondary-foreground">
               <span>By</span>
-              <TrackedLink
-                href={`/${author?.farcasterHandle}`}
-                className="flex items-center space-x-2 hover:opacity-80"
-                eventName="Link Click"
-                target="_blank"
-                eventData={{
-                  projectId,
-                  source: "project_page",
-                  linkName: "Project Author",
-                  isContributor: isMember,
-                }}
-              >
-                {author.avatarUrl && (
-                  <Image
-                    src={author.avatarUrl}
-                    alt={author.name ?? ""}
-                    width={20}
-                    height={20}
-                    className="rounded-full"
-                  />
-                )}
-                <span>{author.name}</span>
-              </TrackedLink>
+              {author?.farcasterHandle ? (
+                <TrackedLink
+                  href={`/${author?.farcasterHandle}`}
+                  className="flex items-center space-x-2 hover:opacity-80"
+                  eventName="Link Click"
+                  target="_blank"
+                  eventData={{
+                    projectId,
+                    source: "project_page",
+                    linkName: "Project Author",
+                    isContributor: isMember,
+                  }}
+                >
+                  {author.avatarUrl && (
+                    <Image
+                      src={author.avatarUrl}
+                      alt={author.name ?? ""}
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span>{author.name}</span>
+                </TrackedLink>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  {author.avatarUrl && (
+                    <Image
+                      src={author.avatarUrl}
+                      alt={author.name ?? ""}
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span>{author.name}</span>
+                </div>
+              )}
             </div>
           )}
           {Boolean(deployedOn?.length) && (
