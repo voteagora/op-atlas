@@ -297,16 +297,18 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               World address data.
             </AlertContainer>
           )}
-        {!hiddenAlerts.opRewardThreshold && opReward < 200 && (
-          <AlertContainer
-            type="danger"
-            isMember={data?.isMember}
-            onHideAlert={() => hideAlert("op-reward-threshold")}
-          >
-            This project didn’t receive OP in February because it didn’t meet
-            reward minimums.
-          </AlertContainer>
-        )}
+        {!hiddenAlerts.opRewardThreshold &&
+          opReward < 200 &&
+          data?.eligibility.onchainBuilderEligible && (
+            <AlertContainer
+              type="danger"
+              isMember={data?.isMember}
+              onHideAlert={() => hideAlert("op-reward-threshold")}
+            >
+              This project didn’t receive OP in February because it didn’t meet
+              reward minimums.
+            </AlertContainer>
+          )}
         {Boolean(data?.eligibility.hasBundleBear) &&
           !hiddenAlerts.bundleBearAlert && (
             <AlertContainer
