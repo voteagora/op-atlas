@@ -2038,6 +2038,24 @@ export async function getProjectOSOData({ projectId }: { projectId: string }) {
   })
 }
 
+export async function getProjectOSOByIds({
+  projectIds,
+}: {
+  projectIds: string[]
+}) {
+  return await prisma.projectOSO.findMany({
+    where: {
+      projectId: {
+        in: projectIds,
+      },
+    },
+    select: {
+      projectId: true,
+      osoId: true,
+    },
+  })
+}
+
 export async function createOSOProjects(
   osoProjects: Oso_ProjectsV1[],
   collections: Oso_ProjectsByCollectionV1[],
