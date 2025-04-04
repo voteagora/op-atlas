@@ -62,6 +62,7 @@ export default async function Page({ params }: PageProps) {
 
   const enrolledInMission = isOnchainBuilder || isDevTooling
   const onOnchainPerformanceData = Boolean(onchainBuildersMetrics)
+
   return (
     <div className="w-full h-full mt-6 pb-12">
       <div className="mx-auto w-full max-w-[1128px] px-8 space-y-12">
@@ -208,8 +209,7 @@ export default async function Page({ params }: PageProps) {
                 )}
             </>
           )}
-          {/* TODO: Bring this back later */}
-          {/* {onOnchainPerformanceData && <Performance />} */}
+          <Performance data={onchainBuildersMetrics} />
           <MoreDetails />
         </div>
       </div>

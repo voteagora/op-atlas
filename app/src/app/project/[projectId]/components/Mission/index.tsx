@@ -98,7 +98,7 @@ export default function Mission({
               isMember={isMember}
               projectName={projectName ?? ""}
               data={{
-                gasConsumed: totalGasFees,
+                gasConsumed: projectOSOData?.data.topProjectsGasConsumption,
                 opReward: Math.round(
                   projectOSOData?.data.devToolingReward ?? 0,
                 ),

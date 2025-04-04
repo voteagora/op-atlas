@@ -26,15 +26,15 @@ export default function Chart({
           </linearGradient>
         </defs>
         <XAxis
-          dataKey="monthLabel"
+          dataKey="date"
           strokeWidth={0}
           fontSize={14}
-          interval={0} // Ensures all labels are shown at equal spacing
-          tickFormatter={(value, index) => {
-            // Only show the first instance of each month
-            const currentMonth = formattedData[index]?.month
-            const prevMonth = index > 0 ? formattedData[index - 1]?.month : null
-            return currentMonth !== prevMonth ? currentMonth : ""
+          interval={0}
+          tickFormatter={(value: string) => {
+            const date = new Date(value)
+            return date.getDate() === 1
+              ? date.toLocaleString("en-US", { month: "short" })
+              : ""
           }}
         />
         <Tooltip />

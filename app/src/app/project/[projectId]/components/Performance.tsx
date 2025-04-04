@@ -1,10 +1,85 @@
 "use client"
 
-import React from "react"
+import React, { useMemo } from "react"
 
 import Chart from "@/components/common/Chart"
+import { abbreviateNumber } from "@/lib/utils"
 
-export default function Performance() {
+interface MetricEntry {
+  date: string
+  value: number
+  month: string
+}
+
+interface PerformanceProps {
+  data: {
+    activeAddresses: Record<string, number>
+    gasFees: Record<string, number>
+    transactions: Record<string, number>
+    tvl: Record<string, number>
+    opReward?: number
+  }
+}
+
+export default function Performance({ data }: PerformanceProps) {
+  const hasAnyData = useMemo(
+    () =>
+      [data.activeAddresses, data.gasFees, data.transactions, data.tvl].some(
+        (metric) => metric && Object.keys(metric).length > 0,
+      ),
+    [data],
+  )
+
+  const { start, end } = useMemo(
+    () =>
+      getGlobalDateRange([
+        data.activeAddresses,
+        data.gasFees,
+        data.transactions,
+        data.tvl,
+      ]),
+    [data],
+  )
+
+  const performanceCharts = useMemo(() => {
+    const formatAndFill = (
+      metric: Record<string, number>,
+      options?: { roundLargeValues?: boolean },
+    ) =>
+      fillMetricWithFullRange(metric, start, end).map((item) => ({
+        ...item,
+        value:
+          options?.roundLargeValues && item.value > 1
+            ? Math.round(item.value)
+            : item.value,
+      }))
+
+    return [
+      {
+        value: formatCurrency(getLastValue(data.tvl)),
+        title: "TVL across the Superchain",
+        data: formatAndFill(data.tvl, { roundLargeValues: true }),
+      },
+      {
+        value: formatEth(getLastValue(data.gasFees)),
+        title: "Gas consumed",
+        data: formatAndFill(data.gasFees),
+      },
+      {
+        value: getLastValue(data.transactions).toLocaleString(),
+        title: "Transactions",
+        data: formatAndFill(data.transactions),
+      },
+      {
+        value: getLastValue(data.activeAddresses).toLocaleString(),
+        title: "Unique addresses",
+        data: formatAndFill(data.activeAddresses),
+      },
+    ]
+  }, [data, start, end])
+
+  if (!hasAnyData) return null
+
   return (
     <div className="w-full space-y-6">
       <div className="w-full flex items-center">
@@ -12,7 +87,7 @@ export default function Performance() {
       </div>
       <div className="w-full">
         <div className="grid grid-cols-2 gap-3">
-          {PERFORMANCE_CHARTS.map(({ value, title, data }, index) => (
+          {performanceCharts.map(({ value, title, data }, index) => (
             <div key={index} className="w-full space-y-6 rounded-lg border p-6">
               <div>
                 <h4 className="font-semibold text-foreground">{value}</h4>
@@ -27,55 +102,74 @@ export default function Performance() {
   )
 }
 
-const generateRandomData = () => {
-  const startDate = new Date(2024, 0, 1) // Jan 1, 2024
-  const endDate = new Date(2024, 6, 31) // July 31, 2024
-  const numEntries = Math.floor(Math.random() * (100 - 50 + 1)) + 50 // 50 to 100 entries
-  const data = []
+// Fill missing days between start and end with 0s if they don’t exist
+function fillMetricWithFullRange(
+  original: Record<string, number>,
+  start: Date,
+  end: Date,
+): MetricEntry[] {
+  const filledData: MetricEntry[] = []
 
-  let currentDate = startDate
-
-  while (data.length < numEntries) {
-    const value = Math.floor(Math.random() * (500 - 50 + 1)) + 50 // Value between 50 and 500
-    const month = currentDate.toLocaleString("en-US", { month: "short" })
-
-    data.push({
-      date: currentDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+  for (
+    let current = new Date(start);
+    current <= end;
+    current.setDate(current.getDate() + 1)
+  ) {
+    const dateStr = current.toISOString().split("T")[0]
+    const value = original[dateStr] ?? 0
+    filledData.push({
+      date: dateStr,
       value,
-      month,
+      month: current.toLocaleString("en-US", { month: "short" }),
     })
-
-    // Increment by a random number of days (1 to 10) for irregular spacing
-    currentDate.setDate(
-      currentDate.getDate() + Math.floor(Math.random() * 10) + 1,
-    )
-
-    if (currentDate > endDate) break
   }
 
-  return data
+  return filledData
 }
 
-const PERFORMANCE_CHARTS = [
-  {
-    value: "$24,000",
-    title: "TVL across the Superchain",
-    data: generateRandomData(),
-  },
-  {
-    value: "0.05 ETH",
-    title: "Gas consumed",
-    data: generateRandomData(),
-  },
-  {
-    value: "6K",
-    title: "Transactions",
-    data: generateRandomData(),
-  },
-  {
-    value: "59",
-    title: "Unique addresses",
-    data: generateRandomData(),
-  },
-]
-//
+// Get the global min/max date across all provided metric objects
+function getGlobalDateRange(metrics: Record<string, number>[]): {
+  start: Date
+  end: Date
+} {
+  const allDates = metrics.flatMap((m) => Object.keys(m))
+  const sorted = allDates.sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+  )
+  const start = new Date(sorted[0])
+  const end = new Date(sorted[sorted.length - 1])
+  return { start, end }
+}
+
+function getLastValue(data: Record<string, number>): number {
+  const sorted = Object.entries(data).sort(
+    ([a], [b]) => new Date(a).getTime() - new Date(b).getTime(),
+  )
+  return sorted.at(-1)?.[1] ?? 0
+}
+
+function formatCurrency(value: number): string {
+  if (value === 0) return "$0"
+  return `$${abbreviateNumber(value)}`
+}
+
+function formatEth(value: number): string {
+  if (value === 0) return "0 ETH"
+
+  // Keep full precision temporarily
+  const fixed = value.toFixed(18)
+  const trimmed = fixed.replace(/\.?0+$/, "")
+  const [intPart, decPart = ""] = trimmed.split(".")
+
+  // If no decimal part, just return
+  if (!decPart) return `${intPart} ETH`
+
+  // Handle very small values: < 0.001
+  if (value < 0.001) {
+    return `${intPart}.${decPart} ETH` // keep full meaningful precision
+  }
+
+  // Normal values: show max 3 decimals, round it
+  const rounded = Number(value.toFixed(3)).toString()
+  return `${rounded} ETH`
+}
