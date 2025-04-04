@@ -16,7 +16,7 @@ export default function MoreDetails() {
         as="button"
         text="View recipients"
         variant="primary"
-        href="/round/results?rounds=7%2C8"
+        href="/round/results?rounds=7,8"
       />
     </div>
   )

@@ -101,7 +101,7 @@ export default async function Page({ params }: PageProps) {
                 </p>
               </div>
               <TrackedExtendedLink
-                href="/round/results?rounds=7%2C8"
+                href="/round/results?rounds=7,8"
                 as="button"
                 variant="primary"
                 text="View recipients"
