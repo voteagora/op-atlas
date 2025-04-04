@@ -39,10 +39,6 @@ export default function Mission({
   projectOSOData,
   deployedOnWorldchain,
 }: MissionProps) {
-  const totalGasFees = Object.values(
-    onchainBuildersMetrics?.gasFees ?? {},
-  ).reduce((acc, curr) => acc + curr, 0)
-
   return (
     <Accordion type="single" collapsible defaultValue="retro-funding">
       <AccordionItem value="retro-funding" className="w-full">
@@ -98,7 +94,7 @@ export default function Mission({
               isMember={isMember}
               projectName={projectName ?? ""}
               data={{
-                gasConsumed: totalGasFees,
+                gasConsumed: projectOSOData?.data.topProjectsGasConsumption,
                 opReward: Math.round(
                   projectOSOData?.data.devToolingReward ?? 0,
                 ),
