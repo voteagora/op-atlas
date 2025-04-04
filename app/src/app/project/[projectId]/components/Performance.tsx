@@ -1,9 +1,10 @@
 "use client"
 
-import React from "react"
+import React, { useMemo } from "react"
 
 import Chart from "@/components/common/Chart"
 import { abbreviateNumber } from "@/lib/utils"
+
 interface MetricEntry {
   date: string
   value: number
@@ -21,38 +22,63 @@ interface PerformanceProps {
 }
 
 export default function Performance({ data }: PerformanceProps) {
-  const { start, end } = getGlobalDateRange([
-    data.activeAddresses,
-    data.gasFees,
-    data.transactions,
-    data.tvl,
-  ])
+  const hasAnyData = useMemo(
+    () =>
+      [data.activeAddresses, data.gasFees, data.transactions, data.tvl].some(
+        (metric) => metric && Object.keys(metric).length > 0,
+      ),
+    [data],
+  )
 
-  const PERFORMANCE_CHARTS = [
-    {
-      value: formatCurrency(getLastValue(data.tvl)),
-      title: "TVL across the Superchain",
-      data: fillMetricWithFullRange(data.tvl, start, end).map((item) => ({
+  const { start, end } = useMemo(
+    () =>
+      getGlobalDateRange([
+        data.activeAddresses,
+        data.gasFees,
+        data.transactions,
+        data.tvl,
+      ]),
+    [data],
+  )
+
+  const performanceCharts = useMemo(() => {
+    const formatAndFill = (
+      metric: Record<string, number>,
+      options?: { roundLargeValues?: boolean },
+    ) =>
+      fillMetricWithFullRange(metric, start, end).map((item) => ({
         ...item,
-        value: item.value > 1 ? Math.round(item.value) : item.value,
-      })),
-    },
-    {
-      value: formatEth(getLastValue(data.gasFees)),
-      title: "Gas consumed",
-      data: fillMetricWithFullRange(data.gasFees, start, end),
-    },
-    {
-      value: getLastValue(data.transactions).toLocaleString(),
-      title: "Transactions",
-      data: fillMetricWithFullRange(data.transactions, start, end),
-    },
-    {
-      value: getLastValue(data.activeAddresses).toLocaleString(),
-      title: "Unique addresses",
-      data: fillMetricWithFullRange(data.activeAddresses, start, end),
-    },
-  ]
+        value:
+          options?.roundLargeValues && item.value > 1
+            ? Math.round(item.value)
+            : item.value,
+      }))
+
+    return [
+      {
+        value: formatCurrency(getLastValue(data.tvl)),
+        title: "TVL across the Superchain",
+        data: formatAndFill(data.tvl, { roundLargeValues: true }),
+      },
+      {
+        value: formatEth(getLastValue(data.gasFees)),
+        title: "Gas consumed",
+        data: formatAndFill(data.gasFees),
+      },
+      {
+        value: getLastValue(data.transactions).toLocaleString(),
+        title: "Transactions",
+        data: formatAndFill(data.transactions),
+      },
+      {
+        value: getLastValue(data.activeAddresses).toLocaleString(),
+        title: "Unique addresses",
+        data: formatAndFill(data.activeAddresses),
+      },
+    ]
+  }, [data, start, end])
+
+  if (!hasAnyData) return null
 
   return (
     <div className="w-full space-y-6">
@@ -61,7 +87,7 @@ export default function Performance({ data }: PerformanceProps) {
       </div>
       <div className="w-full">
         <div className="grid grid-cols-2 gap-3">
-          {PERFORMANCE_CHARTS.map(({ value, title, data }, index) => (
+          {performanceCharts.map(({ value, title, data }, index) => (
             <div key={index} className="w-full space-y-6 rounded-lg border p-6">
               <div>
                 <h4 className="font-semibold text-foreground">{value}</h4>
@@ -123,6 +149,7 @@ function getLastValue(data: Record<string, number>): number {
 }
 
 function formatCurrency(value: number): string {
+  if (value === 0) return "$0"
   return `$${abbreviateNumber(value)}`
 }
 

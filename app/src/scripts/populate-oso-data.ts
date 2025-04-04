@@ -83,6 +83,11 @@ async function populate() {
             },
             select: {
               id: true,
+              ProjectOSO: {
+                select: {
+                  osoId: true,
+                },
+              },
               name: true,
               website: true,
               thumbnailUrl: true,
