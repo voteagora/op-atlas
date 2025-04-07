@@ -241,32 +241,6 @@ export function FundingRoundAnnouncementCallout() {
   )
 }
 
-export function UnclaimedRecipientCallout({ rewardId }: { rewardId: string }) {
-  return (
-    <Link
-      href={`/rewards/${rewardId}`}
-      className={cn(
-        "flex items-center rounded-xl px-8 py-6 w-full",
-        "bg-destructive text-white",
-      )}
-    >
-      <Image
-        alt="Info"
-        src="/assets/icons/sunny-white.svg"
-        width={48}
-        height={48}
-      />
-      <div className="ml-4 mr-5 flex-1">
-        <p className="font-medium">
-          Congratulations! Your project received rewards in round 6
-        </p>
-        <div>Claim your rewards.</div>
-      </div>
-      <ArrowRight size={20} />
-    </Link>
-  )
-}
-
 export function ApplicationSubmittedCallout() {
   return (
     <Link

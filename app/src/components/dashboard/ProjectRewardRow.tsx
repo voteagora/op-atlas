@@ -1,11 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import {
-  noRewards,
-  noRewardsPriorToRound,
-  unclaimedReward,
-} from "@/lib/rewards"
+import { noRewardsPriorToRound } from "@/lib/rewards"
 import { ProjectWithDetails } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
 
@@ -52,12 +48,8 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
               {formatNumber(reward.amount)}
             </div>
           </div>
-          <Link href={`/rewards/${reward.id}`}>
-            <Button
-              variant={unclaimedReward(reward) ? "destructive" : "secondary"}
-            >
-              {unclaimedReward(reward) ? "Claim" : "Claimed"}
-            </Button>
+          <Link href={`/projects/${project.id}/rewards`}>
+            <Button variant="secondary">Claim</Button>
           </Link>
         </div>
       ))}

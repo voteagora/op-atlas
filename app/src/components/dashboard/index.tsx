@@ -7,7 +7,6 @@ import { ReactNode, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
   ProjectWithDetails,
@@ -15,7 +14,6 @@ import {
   UserWithAddresses,
 } from "@/lib/types"
 import { cn, profileProgress } from "@/lib/utils"
-import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import ApplicationInterruptiveDialogue from "../application/ApplicationInterruptiveDialogue"
 import ExternalLink from "../ExternalLink"
@@ -25,7 +23,6 @@ import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstOrganizationProject from "./AddFirstOrganizationProject"
 import AddFirstProject from "./AddFirstProject"
 import ApplicationBanner from "./ApplicationBanner"
-import { UnclaimedRecipientCallout } from "./Callouts"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
@@ -34,6 +31,7 @@ import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
+import { unclaimedRewards } from "@/lib/rewards"
 
 const SHOW_APPLICATIONS = false
 
@@ -73,30 +71,11 @@ const Dashboard = ({
     useState(false)
   const [visibleCardsCount, setVisibleCardsCount] = useState(2)
 
-  const { track } = useAnalytics()
-
   const profileInitiallyComplete = useRef(profileProgress(user) === 100)
 
   useEffect(() => {
-    // User has submitted at least one application but didn't receive any rewards
-    if (false) {
-      setShowNoRewardsDialog(true)
-      return
-    }
-
     if (adminProjects.find((project) => unclaimedRewards(project).length)) {
       setShowUnclaimedRewardsDialog(true)
-      const unclaimedReward = projects
-        .map((project) => project.rewards)
-        .flat()
-        .find((reward) => !reward.claim || reward.claim.status !== "claimed")!
-
-      cardComponents.push(
-        <UnclaimedRecipientCallout
-          key="unclaimedRecipient"
-          rewardId={unclaimedReward?.id}
-        />,
-      )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminProjects, projects])
