@@ -116,7 +116,7 @@ export async function getPublicProjectOSOData(projectId: string) {
   const projectOSOData = await getProjectOSOData({ projectId })
 
   const topProjectIds =
-    (projectOSOData?.data as any).topProjects.map((p: any) => p.id) ?? []
+    (projectOSOData?.data as any).topProjects?.map((p: any) => p.id) ?? []
   const topProjects = (
     await getProjectOSOByIds({ projectIds: topProjectIds })
   ).map((p) => p.osoId)
