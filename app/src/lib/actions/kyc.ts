@@ -2,11 +2,7 @@
 
 import { isAfter, parse } from "date-fns"
 
-import {
-  startOverKyc,
-  updateKYBUserStatus,
-  updateKYCUserStatus,
-} from "@/db/kyc"
+import { updateKYBUserStatus, updateKYCUserStatus } from "@/db/kyc"
 import { getReward, updateClaim } from "@/db/rewards"
 import {
   caseStatusMap,
@@ -212,8 +208,4 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
       )
     }),
   )
-}
-
-export const starOverKycAction = async (kycTeamId: string) => {
-  return await startOverKyc(kycTeamId)
 }

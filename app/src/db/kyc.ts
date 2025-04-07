@@ -59,16 +59,3 @@ export async function updateKYBUserStatus(
 
   return result
 }
-
-export async function startOverKyc(kycTeamId: string) {
-  const result = await prisma.kYCTeam.update({
-    where: {
-      id: kycTeamId,
-    },
-    data: {
-      walletAddress: "",
-    },
-  })
-
-  return result
-}

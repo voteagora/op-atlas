@@ -1,6 +1,7 @@
 "use client"
 
 import { KYCUser } from "@prisma/client"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { CheckIcon, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -11,7 +12,8 @@ import { toast } from "sonner"
 import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { starOverKycAction } from "@/lib/actions/kyc"
+import { deleteOrganizationKycTeam } from "@/db/organizations"
+import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
 import { cn } from "@/lib/utils"
 import { shortenAddress } from "@/lib/utils"
 
@@ -32,7 +34,33 @@ export default function AddGrantDeliveryAddressForm({
   }
 }) {
   const params = useParams()
+  const queryClient = useQueryClient()
+
   const organizationProject = params.organizationId as string
+
+  const { mutate: deleteProjectKYCTeam, isPending } = useMutation({
+    mutationFn: async () => {
+      if (!organizationProject) {
+        const projectId = params.projectId as string
+        await deleteProjectKYCTeamAction({
+          kycTeamId: kycTeam?.id ?? "",
+          projectId,
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ["kyc-teams", "project", projectId],
+        })
+      } else {
+        const organizationId = params.organizationId as string
+        await deleteOrganizationKycTeam({
+          organizationId,
+          kycTeamId: kycTeam?.id ?? "",
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ["kyc-teams", "organization", organizationId],
+        })
+      }
+    },
+  })
 
   const teamMembers = kycTeam?.team?.filter(
     (teamMember) => !Boolean(teamMember.businessName),
@@ -50,9 +78,8 @@ export default function AddGrantDeliveryAddressForm({
 
   const openedAccordionValues = React.useMemo(() => {
     const values = new Set<string>()
-    if (kycTeam?.grantAddress?.address) {
-      values.add("item-0")
-    }
+    values.add("item-0")
+
     if (kycTeam?.team?.length) {
       values.add("item-1")
     }
@@ -63,6 +90,12 @@ export default function AddGrantDeliveryAddressForm({
     // Convert to array and return
     return Array.from(values)
   }, [kycTeam, allTeamMembersVerified])
+
+  const onDeleteProjectKYCTeam = () => {
+    if (!kycTeam?.id) return
+
+    deleteProjectKYCTeam()
+  }
 
   return (
     <div className="p-6 border rounded-xl space-y-6 w-full">
@@ -144,11 +177,7 @@ export default function AddGrantDeliveryAddressForm({
                   <Button
                     className="mt-4"
                     variant="secondary"
-                    onClick={() => {
-                      if (!kycTeam?.id) return
-
-                      starOverKycAction(kycTeam.id)
-                    }}
+                    onClick={onDeleteProjectKYCTeam}
                   >
                     Start over
                   </Button>

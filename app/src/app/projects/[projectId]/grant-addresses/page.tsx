@@ -2,9 +2,8 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-import AddGrantDeliveryAddressForm from "@/components/projects/rewards/AddGrantDeliveryAddressForm"
-import { getKycTeam } from "@/db/projects"
-import { verifyMembership } from "@/lib/actions/utils"
+
+import { AddGrantDeliveryAddressContainer } from "./components"
 
 export default async function Page({
   params,
@@ -21,14 +20,6 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const [kycTeam, membership] = await Promise.all([
-    getKycTeam({ projectId: params.projectId }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
-  ])
-
-  if (membership?.error || !kycTeam) {
-    redirect("/dashboard")
-  }
   return (
     <div className="space-y-12">
       <div className="space-y-6">
@@ -43,7 +34,7 @@ export default async function Page({
       </div>
       <div className="space-y-6">
         <h3>Verified addresses</h3>
-        <AddGrantDeliveryAddressForm kycTeam={kycTeam} />
+        <AddGrantDeliveryAddressContainer projectId={params.projectId} />
       </div>
       <div>
         <p className="text-secondary-foreground text-sm font-normal">
