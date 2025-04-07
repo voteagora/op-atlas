@@ -1,21 +1,20 @@
 "use client"
 
-import { Project } from "@prisma/client"
+import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
 import { useGetRandomProjects } from "@/hooks/db/useGetRandomProjects"
 import { updateInteractions } from "@/lib/actions/users"
+import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
 import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
 import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
 import {
-  APPLICATIONS_CLOSED,
   clickSignInWithFarcasterButton,
+  cn
 } from "@/lib/utils"
-import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 
@@ -100,7 +99,7 @@ export const Sidebar = ({
         <p className="text-sm font-normal text-secondary-foreground text-center">
           Explore the projects that have received Retro Funding
         </p>
-        <Link className="w-full" href="/round/results">
+        <Link className="w-full" href={`/round/results?rounds=${FUNDING_ROUNDS.map(round => round.number).join('%2C')}`}>
           <Button
             variant="outline"
             className="text-sm font-medium text-foreground justify-center mt-1 w-full"
