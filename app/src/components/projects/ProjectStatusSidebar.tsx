@@ -156,12 +156,27 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
           <>
             <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
               <Link
-                className={
-                  currentPage === "rewards" ? "font-medium text-foreground" : ""
-                }
+                className={cn([
+                  {
+                    "font-medium text-foreground": currentPage === "rewards",
+                  },
+                ])}
                 href={`/projects/${project.id}/rewards`}
               >
                 Rewards
+              </Link>
+            </div>
+            <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
+              <Link
+                className={cn([
+                  {
+                    "font-medium text-foreground":
+                      currentPage === "grant-addresses",
+                  },
+                ])}
+                href={`/projects/${project.id}/grant-addresses`}
+              >
+                Grant Addresses
               </Link>
             </div>
             <Separator />

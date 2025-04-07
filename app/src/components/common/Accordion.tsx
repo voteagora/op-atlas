@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { cn } from "@/lib/utils"
 
 type Item = {
   title: string | React.ReactNode
@@ -11,8 +12,10 @@ type Item = {
 }
 
 type AccordionProps = {
+  className?: string
   items: Item[]
   type: "single" | "multiple"
+  value?: string[]
   collapsible?: boolean
   triggerLocation?: "top" | "bottom"
 }
@@ -34,8 +37,10 @@ type AccordionProps = {
  * <Accordion items={faqQuestions} type="single" />
  */
 export default function Accordion({
+  className,
   items,
   type,
+  value,
   collapsible = true,
   triggerLocation = "top",
 }: AccordionProps) {
@@ -43,8 +48,8 @@ export default function Accordion({
     <ShadcnAccordion
       type={type as any}
       collapsible={collapsible}
-      className="w-full space-y-1"
-      defaultValue={type === "multiple" ? (["item-0"] as any) : "item-0"}
+      className={cn(["w-full space-y-1", className])}
+      defaultValue={type === "multiple" ? (value as any) : "item-0"}
     >
       {items?.map(({ content, title }, index) => {
         const wrappedTitle =
