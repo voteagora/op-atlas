@@ -1,9 +1,10 @@
 import Link from "next/link"
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 
 import { AddGrantDeliveryAddressContainer } from "./components"
+import posthog from "@/lib/posthog"
 
 export default async function Page({
   params,
@@ -18,6 +19,15 @@ export default async function Page({
 
   if (!session?.user.id) {
     redirect("/dashboard")
+  }
+
+  const isKycEnabled = await posthog.isFeatureEnabled(
+    "add-grant-delivery-address-form",
+    session.user.id,
+  )
+
+  if (!isKycEnabled) {
+    return notFound()
   }
 
   return (
