@@ -31,6 +31,7 @@ import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
+import { unclaimedRewards } from "@/lib/rewards"
 
 const SHOW_APPLICATIONS = false
 
@@ -71,6 +72,13 @@ const Dashboard = ({
   const [visibleCardsCount, setVisibleCardsCount] = useState(2)
 
   const profileInitiallyComplete = useRef(profileProgress(user) === 100)
+
+  useEffect(() => {
+    if (adminProjects.find((project) => unclaimedRewards(project).length)) {
+      setShowUnclaimedRewardsDialog(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminProjects, projects])
 
   useEffect(() => {
     if (profileInitiallyComplete.current) {

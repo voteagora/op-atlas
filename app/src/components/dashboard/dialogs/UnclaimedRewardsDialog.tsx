@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -55,7 +54,7 @@ function UnclaimedRewardsDialog({
               type="button"
               variant="secondary"
             >
-              Claim later
+              Close
             </Button>
           </DialogFooter>
         </div>
