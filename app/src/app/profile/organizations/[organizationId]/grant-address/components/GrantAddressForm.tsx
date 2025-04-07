@@ -42,7 +42,7 @@ export default function GrantAddressForm({
         </p>
       </div>
       <div className="space-y-6">
-        <h3>Your grant delivery addresses</h3>
+        <h3>Verified addresses</h3>
         {isLoading ? (
           <div className="p-6 border rounded-md space-y-6 w-full h-[356px]">
             <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />

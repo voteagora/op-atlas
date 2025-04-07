@@ -21,6 +21,7 @@ import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
 import { DeleteProjectDialog } from "./DeleteProjectDialog"
+import { useFeatureFlagEnabled } from "posthog-js/react"
 
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,
@@ -34,6 +35,8 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   const router = useRouter()
   const pathname = usePathname()
   const isAdmin = useIsAdmin(team)
+
+  const isKycEnabled = useFeatureFlagEnabled("add-grant-delivery-address-form")
 
   const [deletingProject, setDeletingProject] = useState(false)
 
@@ -156,14 +159,31 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
           <>
             <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
               <Link
-                className={
-                  currentPage === "rewards" ? "font-medium text-foreground" : ""
-                }
+                className={cn([
+                  {
+                    "font-medium text-foreground": currentPage === "rewards",
+                  },
+                ])}
                 href={`/projects/${project.id}/rewards`}
               >
                 Rewards
               </Link>
             </div>
+            {isKycEnabled && (
+              <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
+                <Link
+                  className={cn([
+                    {
+                      "font-medium text-foreground":
+                        currentPage === "grant-addresses",
+                    },
+                  ])}
+                  href={`/projects/${project.id}/grant-addresses`}
+                >
+                  Grant Addresses
+                </Link>
+              </div>
+            )}
             <Separator />
           </>
         )}
