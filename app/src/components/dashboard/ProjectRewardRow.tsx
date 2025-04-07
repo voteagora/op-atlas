@@ -52,12 +52,8 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
               {formatNumber(reward.amount)}
             </div>
           </div>
-          <Link href={`/rewards/${reward.id}`}>
-            <Button
-              variant={unclaimedReward(reward) ? "destructive" : "secondary"}
-            >
-              {unclaimedReward(reward) ? "Claim" : "Claimed"}
-            </Button>
+          <Link href={`/project/${project.id}`}>
+            <Button variant="secondary">View performance</Button>
           </Link>
         </div>
       ))}
