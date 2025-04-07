@@ -46,7 +46,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[9999] ${
+        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-100 ${
           params.id || isMissions ? "" : "shadow-sm"
         }`}
       >
