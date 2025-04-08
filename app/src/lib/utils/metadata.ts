@@ -15,6 +15,7 @@ export const FullProjectMetadataValidator = z.object({
   projectCoverImageUrl: z.string().nullable().default(null),
   category: z.string().nullable().default(null),
   osoSlug: z.string().nullable().default(null),
+  defillamaSlug: z.array(z.string()).nullable().default(null),
   socialLinks: z.object({
     website: z.array(z.string()),
     farcaster: z.array(z.string()),
@@ -78,6 +79,7 @@ export type FullProjectMetadata = {
   projectCoverImageUrl: string | null
   category: string | null
   osoSlug: string | null
+  defillamaSlug: string[]
   socialLinks: {
     website: string[]
     farcaster: string[]
@@ -202,6 +204,7 @@ export function formatProjectMetadata(
     projectCoverImageUrl: project.bannerUrl,
     category: project.category,
     osoSlug: project.openSourceObserverSlug,
+    defillamaSlug: project.defiLlamaSlug,
     socialLinks: {
       website: project.website,
       farcaster: project.farcaster,
