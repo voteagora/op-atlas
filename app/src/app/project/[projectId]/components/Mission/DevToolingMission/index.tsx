@@ -11,7 +11,8 @@ import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
 import { truncateString } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { MONTHS } from "./constants"
+import { MONTHS } from "../constants"
+import MetricCard from "./MetricCard"
 
 interface DevtoolingMissionProps {
   isMember: boolean
@@ -73,7 +74,6 @@ export default function DevToolingMission({
           <div className="absolute w-full h-full z-50">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
-                {/* TODO: Replace this with actual data */}
                 <span className="font-extrabold text-4xl">
                   {formatNumberWithSeparator(opReward)} OP
                 </span>
@@ -203,41 +203,6 @@ export default function DevToolingMission({
           )
         })}
       </Tabs>
-    </div>
-  )
-}
-
-function MetricCard({
-  value,
-  title,
-  index,
-  sign = { value: "", position: "right" },
-}: {
-  value: string | number
-  title: string
-  index: number
-  sign?: {
-    value: string
-    position: "left" | "right"
-  }
-}) {
-  const formattedValue = value
-    ? `${sign.position === "left" ? sign.value : ""}${value}${
-        sign.position === "right" ? sign.value : ""
-      }`
-    : "- -"
-
-  return (
-    <div
-      key={index}
-      className="flex flex-col justify-between p-6 bg-background rounded-xl border"
-    >
-      <div className="w-full flex items-center justify-between space-x-1">
-        <p className="font-semibold text-base">{formattedValue}</p>
-      </div>
-      <p className="text-base leading-6 text-secondary-foreground flex items-start space-x-2">
-        <span>{title}</span>
-      </p>
     </div>
   )
 }
