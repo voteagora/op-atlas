@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
+import { cn, truncateString } from "@/lib/utils"
 
 interface DescriptionProps {
   name?: string
@@ -47,12 +47,23 @@ export default function Description({
   projectId,
   isMember,
 }: DescriptionProps) {
+  if (!name) {
+    return null
+  }
+
   return (
     <div className="w-full">
       <div className="gap-x-12 space-y-4">
         <div>
-          <div className="flex items-center space-x-3">
-            <h3 className="font-semibold text-2xl">{name}</h3>
+          <div className="flex items-start space-x-3">
+            <Tooltip>
+              <TooltipTrigger>
+                <h3 className="font-semibold text-2xl text-left">
+                  {truncateString(name, 64, "...")}
+                </h3>
+              </TooltipTrigger>
+              <TooltipContent>{name}</TooltipContent>
+            </Tooltip>
             <ul className="flex space-x-2">
               {tags.map((tag, i) => (
                 <li

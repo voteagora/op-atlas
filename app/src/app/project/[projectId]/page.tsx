@@ -226,38 +226,3 @@ export default async function Page({ params }: PageProps) {
     </div>
   )
 }
-
-function NoMissionNotice({
-  projectId,
-  isMember,
-}: {
-  projectId: string
-  isMember: boolean
-}) {
-  return (
-    <div className="w-full h-[208px] space-y-6 rounded-xl border flex flex-col justify-center items-center p-6">
-      <div className="text-center">
-        <p className="font-semibold text-base text-foreground">
-          More details about this project are coming soon
-        </p>
-        <p className="font-normal text-base text-secondary-foreground">
-          In the meantime, explore other projects that have received Retro
-          Funding
-        </p>
-      </div>
-      <TrackedExtendedLink
-        href="/round/results?rounds=7,8"
-        as="button"
-        variant="primary"
-        text="View recipients"
-        eventName="Link Click"
-        eventData={{
-          projectId,
-          source: "project_page",
-          isContributor: isMember,
-          linkName: "View recipients",
-        }}
-      />
-    </div>
-  )
-}
