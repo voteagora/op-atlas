@@ -130,6 +130,7 @@ export default async function Page({ params }: PageProps) {
                     <li>
                       <Mission
                         type="on-chain"
+                        projectName={publicProject.name}
                         isMember={isMember}
                         deployedOnWorldchain={deployedOnWorldchain}
                         metrics={{
@@ -149,6 +150,9 @@ export default async function Page({ params }: PageProps) {
                           },
                         }}
                         projectOSOData={projectOSOData}
+                        applicationDate={
+                          publicProject.onchainBuildersApplication?.createdAt
+                        }
                       />
                     </li>
                   )}
@@ -175,6 +179,9 @@ export default async function Page({ params }: PageProps) {
                             ),
                           },
                         }}
+                        applicationDate={
+                          publicProject.devToolingApplication?.createdAt
+                        }
                       />
                     </li>
                   )}

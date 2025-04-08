@@ -43,6 +43,7 @@ interface MissionProps {
     onchainBuildersInAtlasCount: number
   } | null
   deployedOnWorldchain?: boolean
+  applicationDate?: Date
 }
 
 const getDateRange = (type: MissionProps["type"]) =>
@@ -91,6 +92,7 @@ export default function Mission({
   metrics,
   projectOSOData,
   deployedOnWorldchain,
+  applicationDate,
 }: MissionProps) {
   const totalGasFees = Object.values(metrics?.gasFees ?? {}).reduce(
     (acc, curr) => acc + curr,
@@ -114,6 +116,10 @@ export default function Mission({
     projectName: projectName ?? "",
   }
 
+  if (!applicationDate) {
+    return null
+  }
+
   return (
     <Accordion type="single" collapsible defaultValue="retro-funding">
       <AccordionItem value="retro-funding" className="w-full">
@@ -124,9 +130,17 @@ export default function Mission({
 
         <AccordionContent>
           {type === "on-chain" ? (
-            <OnchainBuilderMission data={onchainData} />
+            <OnchainBuilderMission
+              projectName={projectName ?? ""}
+              data={onchainData}
+              applicationDate={applicationDate}
+            />
           ) : (
-            <DevToolingMission {...devToolingData} data={onchainData} />
+            <DevToolingMission
+              {...devToolingData}
+              data={onchainData}
+              applicationDate={applicationDate}
+            />
           )}
         </AccordionContent>
       </AccordionItem>

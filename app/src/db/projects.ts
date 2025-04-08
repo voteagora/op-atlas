@@ -1966,8 +1966,23 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
     ? users.filter((u) => !organizationUsers?.find((ou) => ou.id === u.id))
     : []
 
+  const devToolingApplication = await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "7",
+    },
+  })
+  const onchainBuildersApplication = await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "8",
+    },
+  })
+
   return {
     ...project,
+    devToolingApplication,
+    onchainBuildersApplication,
     contributors: deduppedUsers,
   }
 }

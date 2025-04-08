@@ -8,7 +8,7 @@ import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
-import { truncateString } from "@/lib/utils"
+import { getEligibleRetrofundingMonths, truncateString } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { MONTHS } from "../constants"
@@ -29,12 +29,14 @@ interface DevtoolingMissionProps {
     opReward?: number | null
     isEligible?: boolean
   }
+  applicationDate: Date
 }
 
 export default function DevToolingMission({
   isMember,
   projectName,
   data,
+  applicationDate,
 }: DevtoolingMissionProps) {
   const { setOpenDialog } = useAppDialogs()
 
@@ -49,6 +51,8 @@ export default function DevToolingMission({
 
     return Number(normalized.toFixed(2))
   }
+
+  const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
 
   return (
     <div className="space-y-3">
@@ -111,6 +115,22 @@ export default function DevToolingMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
+          if (!eligibleMonths.includes(month)) {
+            return (
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+              >
+                <div className="w-full flex items-center justify-center">
+                  <p className="text-foreground font-semibold text-base">
+                    {projectName} was not enrolled in {month}
+                  </p>
+                </div>
+              </TabsContent>
+            )
+          }
+
           if (!isEligible) {
             return (
               <TabsContent

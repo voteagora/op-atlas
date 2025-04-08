@@ -18,6 +18,7 @@ import {
   abbreviateNumber,
   formatNumberWithSeparator,
   generateMonthlyMetrics,
+  getEligibleRetrofundingMonths,
 } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -43,11 +44,19 @@ interface DataProps {
   }
 }
 
-export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
+export default function OnchainBuilderMission({
+  data,
+  applicationDate,
+  projectName,
+}: {
+  data: DataProps
+  applicationDate: Date
+  projectName: string
+}) {
   const { setOpenDialog } = useAppDialogs()
   const { projectId } = useParams()
 
-  const opReward = data?.opReward ?? 0
+  const opReward = data.opReward ?? 0
 
   const getMonthFromDateString = (dateString: string) => {
     const date = parseISO(dateString)
@@ -88,6 +97,12 @@ export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
     return Number(num.toFixed(decimals))
   }
 
+  const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
+
+  if (!data) {
+    return null
+  }
+
   return (
     <div className="space-y-3">
       {opReward > 0 && (
@@ -118,7 +133,7 @@ export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
                   Rewards so far in Retro Funding: Onchain Builders
                 </p>
               </div>
-              {data?.isMember && (
+              {data.isMember && (
                 <Button
                   variant="primary"
                   className="z-50"
@@ -148,8 +163,24 @@ export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
           })}
         </TabsList>
         {MONTHS.map((month) => {
+          if (!eligibleMonths.includes(month)) {
+            return (
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+              >
+                <div className="w-full flex items-center justify-center">
+                  <p className="text-foreground font-semibold text-base">
+                    {projectName} was not enrolled in {month}
+                  </p>
+                </div>
+              </TabsContent>
+            )
+          }
+
           const monthMetrics = groupedData[month]
-          if (!data?.eligibility?.onchainBuilderEligible) {
+          if (!data.eligibility?.onchainBuilderEligible) {
             return (
               <TabsContent
                 key={month}
@@ -178,7 +209,7 @@ export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
                         }
                         distinctDaysCount={monthMetrics.activeAddresses.value}
                         hasDefillamaAdapter={
-                          data?.eligibility?.hasDefillamaAdapter ?? false
+                          data.eligibility?.hasDefillamaAdapter ?? false
                         }
                       />
                     </AccordionContent>
@@ -265,8 +296,8 @@ export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
         })}
       </Tabs>
       <ul className="space-y-[8pt]">
-        {data?.isMember && !Boolean(data?.eligibility?.hasDefillamaAdapter) && (
-          <AlertContainer type="danger" isMember={data?.isMember}>
+        {data.isMember && !Boolean(data.eligibility?.hasDefillamaAdapter) && (
+          <AlertContainer type="danger" isMember={data.isMember}>
             For TVL rewards,{" "}
             <TrackedLink
               className="underline"
@@ -276,7 +307,7 @@ export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 projectId: projectId ?? "",
                 source: "project_page",
                 linkName: "Provide a link to your DeFiLlama adapter",
-                isContributor: data?.isMember,
+                isContributor: data.isMember,
               }}
             >
               provide a link to your DeFiLlama adapter
@@ -284,22 +315,22 @@ export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
             .
           </AlertContainer>
         )}
-        {data?.deployedOnWorldchain &&
-          !Boolean(data?.eligibility?.hasBundleBear) && (
-            <AlertContainer type="danger" isMember={data?.isMember}>
+        {data.deployedOnWorldchain &&
+          !Boolean(data.eligibility?.hasBundleBear) && (
+            <AlertContainer type="danger" isMember={data.isMember}>
               Qualified addresses may be inaccurate for projects deployed on
               Worldchain. The team is actively working with World to analyze
               World address data.
             </AlertContainer>
           )}
-        {opReward < 200 && data?.eligibility?.onchainBuilderEligible && (
-          <AlertContainer type="danger" isMember={data?.isMember}>
+        {opReward < 200 && data.eligibility?.onchainBuilderEligible && (
+          <AlertContainer type="danger" isMember={data.isMember}>
             This project didn’t receive OP in February because it didn’t meet
             reward minimums.
           </AlertContainer>
         )}
-        {Boolean(data?.eligibility?.hasBundleBear) && (
-          <AlertContainer type="info" isMember={data?.isMember}>
+        {Boolean(data.eligibility?.hasBundleBear) && (
+          <AlertContainer type="info" isMember={data.isMember}>
             If you are using ERC-4337: Account Abstraction, then{" "}
             <TrackedLink
               className="underline"
@@ -309,7 +340,7 @@ export default function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 projectId: projectId ?? "",
                 source: "project_page",
                 linkName: "Add your contracts to BundleBear",
-                isContributor: data?.isMember,
+                isContributor: data.isMember,
               }}
             >
               add your contracts to BundleBear
