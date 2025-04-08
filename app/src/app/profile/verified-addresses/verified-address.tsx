@@ -37,9 +37,10 @@ export const VerifiedAddress = ({
 }) => {
   const { setOpenDialog } = useAppDialogs()
   const { isBadgeholderAddress } = useBadgeholderAddress(address)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5 group">
       <div className="input-container justify-between">
         <div className="flex items-center space-x-1.5 overflow-x-auto">
           {showCheckmark && (
@@ -59,9 +60,9 @@ export const VerifiedAddress = ({
           {isBadgeholderAddress && <Badgeholder />}
           {source === "farcaster" && <Badge text="Farcaster" />}
         </div>
-        <DropdownMenu>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
-            <button className="outline-0 ring-0">
+            <button className={`outline-0 ring-0 transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
               <Ellipsis size={16} />
             </button>
           </DropdownMenuTrigger>
