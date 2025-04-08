@@ -141,7 +141,10 @@ export function Account() {
             />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 flex flex-col gap-1">
+        <DropdownMenuContent
+          align="end"
+          className="w-56 flex flex-col gap-1 z-[9999]"
+        >
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               Dashboard

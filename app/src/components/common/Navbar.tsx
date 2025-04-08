@@ -46,7 +46,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[9999] ${
+        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[200] ${
           params.id || isMissions ? "" : "shadow-sm"
         }`}
       >
@@ -109,7 +109,7 @@ const Navbar = () => {
                       className={`${
                         isProjects ? "mt-1" : "group-hover:mt-1"
                       } focus:outline-none focus:opacity-80`}
-                      href="/round/results?rounds=5"
+                      href="/round/results?rounds=7,8"
                     >
                       Recipients
                     </Link>

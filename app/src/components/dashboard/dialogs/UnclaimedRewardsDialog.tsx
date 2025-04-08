@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -55,7 +54,7 @@ function UnclaimedRewardsDialog({
               type="button"
               variant="secondary"
             >
-              Claim later
+              Close
             </Button>
           </DialogFooter>
         </div>
@@ -93,8 +92,8 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
           {formatNumber(project.rewards[0].amount)}
         </div>
       </div>
-      <Link href={`/rewards/${project.rewards[0].id}`}>
-        <Button variant="destructive">Claim</Button>
+      <Link href={`/project/${project.id}`}>
+        <Button variant="destructive">View performance</Button>
       </Link>
     </div>
   )

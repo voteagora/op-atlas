@@ -79,88 +79,80 @@ const RewardAccordion = ({
             </div>
           </div>
 
-          {reward.claim ? (
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <div className="font-medium text-sm text-foreground">
-                  Wallet address
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <div className="font-medium text-sm text-foreground">
+                Wallet address
+              </div>
+              <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
+                <Image
+                  src="/assets/icons/tickIcon.svg"
+                  width={16}
+                  height={16}
+                  alt="Check"
+                />
+                <div className="text-sm text-foreground">
+                  {reward.claim?.address}
                 </div>
-                <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
-                  <Image
-                    src="/assets/icons/tickIcon.svg"
-                    width={16}
-                    height={16}
-                    alt="Check"
+                <Button
+                  onClick={() => handleCopyAddress(reward.claim?.address ?? "")}
+                  variant="ghost"
+                  className="p-0 h-fit"
+                >
+                  <Copy
+                    className="rotate-90 text-muted cursor-pointer"
+                    size={16}
                   />
-                  <div className="text-sm text-foreground">
-                    {reward.claim.address}
-                  </div>
-                  <Button
-                    onClick={() =>
-                      handleCopyAddress(reward.claim?.address ?? "")
-                    }
-                    variant="ghost"
-                    className="p-0 h-fit"
-                  >
-                    <Copy
-                      className="rotate-90 text-muted cursor-pointer"
-                      size={16}
-                    />
-                  </Button>
-                </div>
+                </Button>
               </div>
-              <div className="flex flex-col gap-2 text-foreground">
-                <div className="font-medium text-sm">Verified individuals</div>
-                {team.map((user) => (
-                  <div
-                    key={user.id}
-                    className="border border-border rounded-lg flex h-10 px-3 py-[10px] gap-2 items-center"
-                  >
-                    <Avatar className="!w-6 !h-6">
-                      <AvatarImage
-                        src={user.user.imageUrl || ""}
-                        alt="team avatar"
-                      />
-                      <AvatarFallback>{user.user.username} </AvatarFallback>
-                    </Avatar>
-                    <div className="text-sm">{user.user.username}</div>
-                  </div>
-                ))}
-              </div>
-
-              {reward.claim.tokenStreamClaimableAt && (
-                <div className="flex flex-col gap-2 w-full">
-                  <div className="font-medium text-sm text-foreground">
-                    Token stream
-                  </div>
-                  <div className="flex items-center gap-x-1.5">
-                    <div className="border border-border rounded-lg w-full flex px-3 py-[10px] gap-2 items-center">
-                      <Image
-                        src="/assets/icons/tickIcon.svg"
-                        width={16}
-                        height={16}
-                        alt="Check"
-                      />
-                      <div className="text-sm text-foreground">
-                        Completed on{" "}
-                        {format(
-                          reward.claim?.tokenStreamClaimableAt,
-                          "MMMM d, yyyy 'at' h:mm a",
-                        )}
-                      </div>
-                    </div>
-                    <Link href="/">
-                      <Button variant="secondary">View</Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
             </div>
-          ) : (
-            <Link href={`/rewards/${reward.id}`}>
-              <Button variant="destructive">Claim</Button>
-            </Link>
-          )}
+            <div className="flex flex-col gap-2 text-foreground">
+              <div className="font-medium text-sm">Verified individuals</div>
+              {team.map((user) => (
+                <div
+                  key={user.id}
+                  className="border border-border rounded-lg flex h-10 px-3 py-[10px] gap-2 items-center"
+                >
+                  <Avatar className="!w-6 !h-6">
+                    <AvatarImage
+                      src={user.user.imageUrl || ""}
+                      alt="team avatar"
+                    />
+                    <AvatarFallback>{user.user.username} </AvatarFallback>
+                  </Avatar>
+                  <div className="text-sm">{user.user.username}</div>
+                </div>
+              ))}
+            </div>
+
+            {reward.claim?.tokenStreamClaimableAt && (
+              <div className="flex flex-col gap-2 w-full">
+                <div className="font-medium text-sm text-foreground">
+                  Token stream
+                </div>
+                <div className="flex items-center gap-x-1.5">
+                  <div className="border border-border rounded-lg w-full flex px-3 py-[10px] gap-2 items-center">
+                    <Image
+                      src="/assets/icons/tickIcon.svg"
+                      width={16}
+                      height={16}
+                      alt="Check"
+                    />
+                    <div className="text-sm text-foreground">
+                      Completed on{" "}
+                      {format(
+                        reward.claim?.tokenStreamClaimableAt,
+                        "MMMM d, yyyy 'at' h:mm a",
+                      )}
+                    </div>
+                  </div>
+                  <Link href="/">
+                    <Button variant="secondary">View</Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

@@ -26,14 +26,7 @@ import {
 } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import {
-  DISTINCT_DAYS_THRESHOLD,
-  getDaysInMonthByName,
-  INDEXED_MONTHS,
-  MONTHS,
-  QUALIFIED_ADDRESSES_THRESHOLD,
-  TRANSACTIONS_THRESHOLD,
-} from "./constants"
+import { getDaysInMonthByName, INDEXED_MONTHS, MONTHS } from "./constants"
 import { OnchainBuildersDataType } from "./types"
 
 interface DataProps {
@@ -55,13 +48,6 @@ interface DataProps {
 export function OnchainBuilderMission({ data }: { data?: DataProps }) {
   const { setOpenDialog } = useAppDialogs()
   const { projectId } = useParams()
-
-  const { hiddenAlerts, hideAlert } = useHiddenAlerts([
-    "defillama-adapter",
-    "deployed-on-worldchain",
-    "bundle-bear-contract",
-    "op-reward-threshold",
-  ])
 
   const opReward = data?.opReward ?? 0
 
@@ -259,80 +245,58 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         })}
       </Tabs>
       <ul className="space-y-[8pt]">
-        {data?.isMember &&
-          !Boolean(data?.eligibility.hasDefillamaAdapter) &&
-          !hiddenAlerts.defillamaAdapter && (
-            <AlertContainer
-              type="danger"
-              isMember={data?.isMember}
-              onHideAlert={() => hideAlert("defillama-adapter")}
+        {data?.isMember && !Boolean(data?.eligibility.hasDefillamaAdapter) && (
+          <AlertContainer type="danger" isMember={data?.isMember}>
+            For TVL rewards,{" "}
+            <TrackedLink
+              className="underline"
+              href={`/projects/${projectId ?? ""}/contracts`}
+              eventName="Link Click"
+              eventData={{
+                projectId: projectId ?? "",
+                source: "project_page",
+                linkName: "Provide a link to your DeFiLlama adapter",
+                isContributor: data?.isMember,
+              }}
             >
-              For TVL rewards,{" "}
-              <TrackedLink
-                className="underline"
-                href={`/projects/${projectId ?? ""}/contracts`}
-                eventName="Link Click"
-                eventData={{
-                  projectId: projectId ?? "",
-                  source: "project_page",
-                  linkName: "Provide a link to your DeFiLlama adapter",
-                  isContributor: data?.isMember,
-                }}
-              >
-                provide a link to your DeFiLlama adapter
-              </TrackedLink>
-              .
-            </AlertContainer>
-          )}
+              provide a link to your DeFiLlama adapter
+            </TrackedLink>
+            .
+          </AlertContainer>
+        )}
         {data?.deployedOnWorldchain &&
-          !hiddenAlerts.worldchainAlert &&
           !Boolean(data?.eligibility.hasBundleBear) && (
-            <AlertContainer
-              type="danger"
-              isMember={data?.isMember}
-              onHideAlert={() => hideAlert("deployed-on-worldchain")}
-            >
+            <AlertContainer type="danger" isMember={data?.isMember}>
               Qualified addresses may be inaccurate for projects deployed on
               Worldchain. The team is actively working with World to analyze
               World address data.
             </AlertContainer>
           )}
-        {!hiddenAlerts.opRewardThreshold &&
-          opReward < 200 &&
-          data?.eligibility.onchainBuilderEligible && (
-            <AlertContainer
-              type="danger"
-              isMember={data?.isMember}
-              onHideAlert={() => hideAlert("op-reward-threshold")}
+        {opReward < 200 && data?.eligibility.onchainBuilderEligible && (
+          <AlertContainer type="danger" isMember={data?.isMember}>
+            This project didn’t receive OP in February because it didn’t meet
+            reward minimums.
+          </AlertContainer>
+        )}
+        {Boolean(data?.eligibility.hasBundleBear) && (
+          <AlertContainer type="info" isMember={data?.isMember}>
+            If you are using ERC-4337: Account Abstraction, then{" "}
+            <TrackedLink
+              className="underline"
+              href={"https://www.bundlebear.com/"}
+              eventName="Link Click"
+              eventData={{
+                projectId: projectId ?? "",
+                source: "project_page",
+                linkName: "Add your contracts to BundleBear",
+                isContributor: data?.isMember,
+              }}
             >
-              This project didn’t receive OP in February because it didn’t meet
-              reward minimums.
-            </AlertContainer>
-          )}
-        {Boolean(data?.eligibility.hasBundleBear) &&
-          !hiddenAlerts.bundleBearAlert && (
-            <AlertContainer
-              type="info"
-              isMember={data?.isMember}
-              onHideAlert={() => hideAlert("bundle-bear-contract")}
-            >
-              If you are using ERC-4337: Account Abstraction, then{" "}
-              <TrackedLink
-                className="underline"
-                href={"https://www.bundlebear.com/"}
-                eventName="Link Click"
-                eventData={{
-                  projectId: projectId ?? "",
-                  source: "project_page",
-                  linkName: "Add your contracts to BundleBear",
-                  isContributor: data?.isMember,
-                }}
-              >
-                add your contracts to BundleBear
-              </TrackedLink>{" "}
-              for extra rewards.
-            </AlertContainer>
-          )}
+              add your contracts to BundleBear
+            </TrackedLink>{" "}
+            for extra rewards.
+          </AlertContainer>
+        )}
       </ul>
     </div>
   )
@@ -342,12 +306,10 @@ function AlertContainer({
   children,
   type,
   isMember,
-  onHideAlert,
 }: {
   children: React.ReactNode
   type: "info" | "danger"
   isMember?: boolean
-  onHideAlert: () => void
 }) {
   return (
     <li className="group flex items-start space-x-1 text-secondary-foreground text-sm font-normal">
@@ -365,12 +327,10 @@ function AlertContainer({
         {children}
       </p>
       {isMember && (
-        <button onClick={onHideAlert}>
-          <EyeOff
-            size={16}
-            className="group-hover:opacity-100 transition-all duration-300 opacity-0"
-          />
-        </button>
+        <EyeOff
+          size={16}
+          className="group-hover:opacity-100 transition-all duration-300 opacity-0"
+        />
       )}
     </li>
   )

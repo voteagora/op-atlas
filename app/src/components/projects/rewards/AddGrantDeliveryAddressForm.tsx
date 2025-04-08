@@ -1,12 +1,19 @@
 "use client"
 
 import { KYCUser } from "@prisma/client"
-import { CheckIcon, ChevronRight, Loader2, SquareCheck } from "lucide-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { CheckIcon, Loader2 } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import React from "react"
+import { toast } from "sonner"
 
 import Accordion from "@/components/common/Accordion"
+import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
+import { deleteOrganizationKycTeam } from "@/db/organizations"
+import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
 import { cn } from "@/lib/utils"
 import { shortenAddress } from "@/lib/utils"
 
@@ -27,7 +34,33 @@ export default function AddGrantDeliveryAddressForm({
   }
 }) {
   const params = useParams()
+  const queryClient = useQueryClient()
+
   const organizationProject = params.organizationId as string
+
+  const { mutate: deleteProjectKYCTeam, isPending } = useMutation({
+    mutationFn: async () => {
+      if (!organizationProject) {
+        const projectId = params.projectId as string
+        await deleteProjectKYCTeamAction({
+          kycTeamId: kycTeam?.id ?? "",
+          projectId,
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ["kyc-teams", "project", projectId],
+        })
+      } else {
+        const organizationId = params.organizationId as string
+        await deleteOrganizationKycTeam({
+          organizationId,
+          kycTeamId: kycTeam?.id ?? "",
+        })
+        await queryClient.invalidateQueries({
+          queryKey: ["kyc-teams", "organization", organizationId],
+        })
+      }
+    },
+  })
 
   const teamMembers = kycTeam?.team?.filter(
     (teamMember) => !Boolean(teamMember.businessName),
@@ -39,10 +72,35 @@ export default function AddGrantDeliveryAddressForm({
     Boolean(kycTeam?.team?.length) &&
     kycTeam?.team?.every((teamMember) => teamMember.status === "APPROVED")
 
+  const processCompleted =
+    kycTeam?.grantAddress &&
+    Boolean(Boolean(kycTeam?.team?.length) && allTeamMembersVerified)
+
+  const openedAccordionValues = React.useMemo(() => {
+    const values = new Set<string>()
+    values.add("item-0")
+
+    if (kycTeam?.team?.length) {
+      values.add("item-1")
+    }
+    if (kycTeam?.team?.length && allTeamMembersVerified) {
+      values.add("item-2")
+    }
+
+    // Convert to array and return
+    return Array.from(values)
+  }, [kycTeam, allTeamMembersVerified])
+
+  const onDeleteProjectKYCTeam = () => {
+    if (!kycTeam?.id) return
+
+    deleteProjectKYCTeam()
+  }
+
   return (
-    <div className="p-6 border rounded-md space-y-6 w-full">
+    <div className="p-6 border rounded-xl space-y-6 w-full">
       {!allTeamMembersVerified && (
-        <h4 className="font-semibold">Add an address</h4>
+        <h4 className="font-semibold text-base">Add an address</h4>
       )}
       {allTeamMembersVerified ? (
         <Accordion
@@ -66,6 +124,8 @@ export default function AddGrantDeliveryAddressForm({
         <Accordion
           collapsible
           type="multiple"
+          className="space-y-6"
+          value={openedAccordionValues}
           items={[
             {
               title: (
@@ -80,16 +140,48 @@ export default function AddGrantDeliveryAddressForm({
                   text="Enter your grant delivery address"
                 />
               ),
-              content: kycTeam?.grantAddress ? (
-                <div className="input-container space-x-1.5">
-                  <span className="text-sm text-foreground">
-                    {shortenAddress(kycTeam.grantAddress.address)}
-                  </span>
-                  <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
-                    <CheckIcon size={12} />
-                    <span>Valid until {kycTeam.grantAddress.validUntil}</span>
+              content: kycTeam?.grantAddress?.address ? (
+                <>
+                  <div className="input-container space-x-1.5">
+                    <button
+                      className="flex items-center space-x-1.5"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          kycTeam.grantAddress!.address,
+                        )
+                        toast.success("Address copied to clipboard")
+                      }}
+                    >
+                      <Image
+                        src="/assets/chain-logos/optimism.svg"
+                        width={16}
+                        height={16}
+                        alt="Optimism logo"
+                        className="rounded-full"
+                      />
+                      <span className="text-sm text-foreground ">
+                        {processCompleted
+                          ? shortenAddress(kycTeam.grantAddress!.address)
+                          : kycTeam.grantAddress!.address}
+                      </span>
+                    </button>
+                    {processCompleted && (
+                      <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
+                        <CheckIcon size={12} />
+                        <span>
+                          Valid until {kycTeam.grantAddress!.validUntil}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                </div>
+                  <Button
+                    className="mt-4"
+                    variant="secondary"
+                    onClick={onDeleteProjectKYCTeam}
+                  >
+                    Start over
+                  </Button>
+                </>
               ) : (
                 <DeliveryAddressVerificationForm
                   organizationProject={Boolean(organizationProject)}
@@ -142,6 +234,7 @@ export default function AddGrantDeliveryAddressForm({
                       <Link
                         href="https://kyc.optimism.io"
                         className="underline hover:opacity-80"
+                        target="_blank"
                       >
                         kyc.optimism.io
                       </Link>{" "}
@@ -149,6 +242,7 @@ export default function AddGrantDeliveryAddressForm({
                       <Link
                         href="https://kyb.optimism.io"
                         className="underline hover:opacity-80"
+                        target="_blank"
                       >
                         kyb.optimism.io
                       </Link>
@@ -216,14 +310,18 @@ export default function AddGrantDeliveryAddressForm({
                     <div className="flex space-x-2">
                       <ExtendedLink
                         as="button"
-                        variant="primary"
+                        variant={
+                          Boolean(kycTeam?.team?.length) ? "primary" : "default"
+                        }
                         text="Verify my ID"
                         href="https://kyc.optimism.io/form"
                         disabled={!Boolean(entities?.length)}
                       />
                       <ExtendedLink
                         as="button"
-                        variant="primary"
+                        variant={
+                          Boolean(kycTeam?.team?.length) ? "primary" : "default"
+                        }
                         text="Verify my Business ID"
                         href="https://kyb.optimism.io/form"
                         disabled={!Boolean(entities?.length)}
