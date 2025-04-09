@@ -19,7 +19,19 @@ const RESTRICTED_MOBILE_ROUTES = [
   "/projects",
   "/application",
   "/rewards",
+  "/round/results",
+  "/project/*",
 ]
+
+const isRestrictedRoute = (pathname: string) => {
+  return RESTRICTED_MOBILE_ROUTES.some(route => {
+    if (route.endsWith('/*')) {
+      const baseRoute = route.slice(0, -2)
+      return pathname.startsWith(baseRoute)
+    }
+    return pathname === route
+  })
+}
 
 export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   const { width } = useWindowSize()
@@ -38,8 +50,7 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
       <Navbar />
-      {width < MOBILE_BREAKPOINT &&
-      RESTRICTED_MOBILE_ROUTES.includes(pathname) ? (
+      {width < MOBILE_BREAKPOINT && isRestrictedRoute(pathname) ? (
         <MobileViewportWarning />
       ) : (
         children
