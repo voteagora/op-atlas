@@ -16,25 +16,24 @@ import MetricCard from "./MetricCard"
 
 interface DevtoolingMissionProps {
   projectName: string
-  isMember: boolean
   data: {
     gasConsumed?: number
     onchainBuildersInAtlasCount?: number
     topProjects?: {
-      id: string
-      name: string
-      website: string[]
-      thumbnailUrl: string
+      id?: string
+      name?: string
+      website?: string[]
+      thumbnailUrl?: string
     }[]
     opReward?: number | null
     isEligible?: boolean
+    isMember: boolean
   }
   applicationDate: Date
 }
 
 export default function DevToolingMission({
   projectName,
-  isMember,
   data,
   applicationDate,
 }: DevtoolingMissionProps) {
@@ -86,7 +85,7 @@ export default function DevToolingMission({
                   Rewards so far in Retro Funding: Dev Tooling
                 </p>
               </div>
-              {isMember && (
+              {data.isMember && (
                 <ExtendedLink
                   as="button"
                   variant="primary"
@@ -97,7 +96,7 @@ export default function DevToolingMission({
                   eventData={{
                     projectId,
                     source: "project_page",
-                    isContributor: isMember,
+                    isContributor: data.isMember,
                     linkName: "View recipients",
                   }}
                 />
@@ -203,12 +202,14 @@ export default function DevToolingMission({
                     {data.topProjects?.slice(0, 6).map((project, index) => {
                       return (
                         <li key={index} className="space-x-2 flex items-center">
-                          <Image
-                            src={project.thumbnailUrl}
-                            alt={project.name}
-                            width={24}
-                            height={24}
-                          />
+                          {project.thumbnailUrl && (
+                            <Image
+                              src={project.thumbnailUrl}
+                              alt={project.name ?? ""}
+                              width={24}
+                              height={24}
+                            />
+                          )}
                           <TrackedLink
                             href={`/project/${project.id}`}
                             eventName="Link Click"

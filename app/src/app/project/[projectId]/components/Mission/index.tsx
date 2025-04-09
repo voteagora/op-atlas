@@ -104,6 +104,7 @@ export default function Mission({
     opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
     isMember,
     deployedOnWorldchain,
+    onchainBuilderEligible: projectOSOData?.onchainBuilderEligible,
   }
 
   const devToolingData = {
@@ -137,8 +138,8 @@ export default function Mission({
             />
           ) : (
             <DevToolingMission
-              {...devToolingData}
-              data={onchainData}
+              projectName={projectName ?? ""}
+              data={devToolingData}
               applicationDate={applicationDate}
             />
           )}

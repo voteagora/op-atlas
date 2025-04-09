@@ -395,7 +395,7 @@ export function getEligibleRetrofundingMonths(applicationDate: Date): string[] {
     const yearOffset = Math.floor((startMonth + i) / 12)
     const year = appYear + yearOffset
 
-    eligibleMonths.push(`${monthNames[monthIndex]} ${year}`)
+    eligibleMonths.push(`${monthNames[monthIndex]}`)
   }
 
   return eligibleMonths

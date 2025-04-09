@@ -35,8 +35,8 @@ interface DataProps {
   tvl?: OnchainBuildersDataType
   opReward?: number | null
   deployedOnWorldchain?: boolean
+  onchainBuilderEligible?: boolean
   eligibility?: {
-    onchainBuilderEligible?: boolean
     hasDefillamaAdapter?: boolean
     hasQualifiedAddresses?: boolean
     hasBundleBear?: boolean
@@ -168,24 +168,24 @@ export default function OnchainBuilderMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          if (!eligibleMonths.includes(month)) {
-            return (
-              <TabsContent
-                key={month}
-                value={month}
-                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
-              >
-                <div className="w-full flex items-center justify-center">
-                  <p className="text-foreground font-semibold text-base">
-                    {projectName} was not enrolled in {month}
-                  </p>
-                </div>
-              </TabsContent>
-            )
-          }
+          // if (!eligibleMonths.includes(month)) {
+          //   return (
+          //     <TabsContent
+          //       key={month}
+          //       value={month}
+          //       className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+          //     >
+          //       <div className="w-full flex items-center justify-center">
+          //         <p className="text-foreground font-semibold text-base">
+          //           {projectName} was not enrolled in {month}
+          //         </p>
+          //       </div>
+          //     </TabsContent>
+          //   )
+          // }
 
           const monthMetrics = groupedData[month]
-          if (!data.eligibility?.onchainBuilderEligible) {
+          if (!data.onchainBuilderEligible) {
             return (
               <TabsContent
                 key={month}
@@ -328,7 +328,7 @@ export default function OnchainBuilderMission({
               World address data.
             </AlertContainer>
           )}
-        {opReward < 200 && data.eligibility?.onchainBuilderEligible && (
+        {opReward < 200 && data.onchainBuilderEligible && (
           <AlertContainer type="danger" isMember={data.isMember}>
             This project didn’t receive OP in February because it didn’t meet
             reward minimums.
