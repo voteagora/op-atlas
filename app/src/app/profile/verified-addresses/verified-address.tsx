@@ -1,7 +1,5 @@
-import { CircleHelp, Copy, X } from "lucide-react"
-import { Ellipsis } from "lucide-react"
+import { CircleHelp, Copy, Ellipsis, X } from "lucide-react"
 import Image from "next/image"
-import { useEffect, useState } from "react"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
@@ -37,7 +35,6 @@ export const VerifiedAddress = ({
 }) => {
   const { setOpenDialog } = useAppDialogs()
   const { isBadgeholderAddress } = useBadgeholderAddress(address)
-  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <div className="flex items-center gap-1.5 group">
@@ -60,9 +57,9 @@ export const VerifiedAddress = ({
           {isBadgeholderAddress && <Badgeholder />}
           {source === "farcaster" && <Badge text="Farcaster" />}
         </div>
-        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className={`outline-0 ring-0 transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+            <button className="outline-0 ring-0 transition-opacity opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100">
               <Ellipsis size={16} />
             </button>
           </DropdownMenuTrigger>
