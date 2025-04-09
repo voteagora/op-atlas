@@ -15,10 +15,10 @@ import {
 } from "@/lib/types"
 import { cn, profileProgress } from "@/lib/utils"
 
+import { unclaimedRewards } from "@/lib/rewards"
 import ApplicationInterruptiveDialogue from "../application/ApplicationInterruptiveDialogue"
 import ExternalLink from "../ExternalLink"
 import CreateOrganizationDialog from "../organizations/CreateOrganizationDialog"
-import OrganizationOnboardingDialog from "../organizations/OrganizationOnboardingDialog"
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstOrganizationProject from "./AddFirstOrganizationProject"
 import AddFirstProject from "./AddFirstProject"
@@ -31,7 +31,6 @@ import ProfileDetailCard from "./ProfileDetailCard"
 import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
-import { unclaimedRewards } from "@/lib/rewards"
 
 const SHOW_APPLICATIONS = false
 
@@ -152,16 +151,7 @@ const Dashboard = ({
         />
       )}
 
-      {showOnBoarding && (
-        <OrganizationOnboardingDialog
-          open
-          onOpenChange={setShowOnBoarding}
-          onConfirm={() => {
-            setShowCreateOrganizationDialog(true)
-            setShowOnBoarding(false)
-          }}
-        />
-      )}
+
       {showCreateOrganizationDialog && (
         <CreateOrganizationDialog
           open
@@ -181,27 +171,27 @@ const Dashboard = ({
         {(!projects.length ||
           !!!organizations?.length ||
           !profileInitiallyComplete.current) && (
-          <div className="flex flex-col gap-4">
-            {!isCompleteProfileAccordionDismissed &&
-              !profileInitiallyComplete.current && (
-                <CompleteProfileCallout
-                  user={user}
-                  setIsCompleteProfileAccordionDismissed={
-                    setIsCompleteProfileAccordionDismissed
-                  }
-                />
+            <div className="flex flex-col gap-4">
+              {!isCompleteProfileAccordionDismissed &&
+                !profileInitiallyComplete.current && (
+                  <CompleteProfileCallout
+                    user={user}
+                    setIsCompleteProfileAccordionDismissed={
+                      setIsCompleteProfileAccordionDismissed
+                    }
+                  />
+                )}
+              {!organizations?.length && (
+                <MakeFirstOrganization onClick={() => setShowCreateOrganizationDialog(true)} />
               )}
-            {!organizations?.length && (
-              <MakeFirstOrganization onClick={() => setShowOnBoarding(true)} />
-            )}
 
-            {!projects.length && !organizations?.length && (
-              <Link href="/projects/new">
-                <AddFirstProject />
-              </Link>
-            )}
-          </div>
-        )}
+              {!projects.length && !organizations?.length && (
+                <Link href="/projects/new">
+                  <AddFirstProject />
+                </Link>
+              )}
+            </div>
+          )}
 
         {projects.length > 0 && (
           <div className="flex flex-col gap-4">

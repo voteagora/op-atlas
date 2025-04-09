@@ -1,7 +1,5 @@
 import Image from "next/image"
-import React from "react"
 
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
@@ -39,9 +37,6 @@ const MakeFirstOrganization = ({
             </p>
           </div>
         </div>
-        <Badge className="flex justify-center items-center w-10 h-4 p-2 bg-callout-foreground">
-          New
-        </Badge>
       </div>
     </Button>
   )
