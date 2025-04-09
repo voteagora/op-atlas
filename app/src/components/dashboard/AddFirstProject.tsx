@@ -6,7 +6,7 @@ const AddFirstProject = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "flex flex-row gap-4 items-center border rounded-xl p-8 select-none hover:shadow-sm",
+        "flex gap-4 items-center border rounded-xl p-8 select-none hover:shadow-sm",
         className,
       )}
     >

@@ -57,7 +57,7 @@ export function CompleteProfileCallout({
     >
       <AccordionItem value="item-1">
         <AccordionTrigger className="p-8 justify-between">
-          <div className="flex flex-row gap-4 items-center flex-1">
+          <div className="flex gap-4 items-center flex-1">
             <div className="text-2xl w-12 h-12 flex items-center justify-center">
               {isComplete ? "👏" : "👋"}
             </div>
