@@ -1,7 +1,5 @@
-import { CircleHelp, Copy, X } from "lucide-react"
-import { Ellipsis } from "lucide-react"
+import { CircleHelp, Copy, Ellipsis, X } from "lucide-react"
 import Image from "next/image"
-import { useEffect, useState } from "react"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"

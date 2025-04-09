@@ -23,13 +23,13 @@ const MakeFirstOrganization = ({
       )}
     >
       <div className="flex justify-between items-center w-full">
-        <div className="flex gap-x-4">
-          <div className="flex items-center justify-center border border-dashed border-[#BCBFCD] overflow-hidden rounded-full h-12 w-12 shrink-0">
+        <div className="flex flex-row gap-4 items-center">
+          <div className="flex h-12 w-12 items-center justify-center border border-dashed border-muted overflow-hidden rounded-full shrink-0">
             <Image
               src="/assets/icons/user-icon.svg"
               width={13}
               height={17}
-              alt="Plus"
+              alt="User"
             />
           </div>
           <div className=" flex flex-col justify-start text-start">
