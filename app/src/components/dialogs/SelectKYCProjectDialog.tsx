@@ -10,7 +10,10 @@ import { Button } from "@/components/common/Button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { getAdminProjects, getProjects } from "@/lib/actions/projects"
-import { createProjectKYCTeamsAction } from "@/lib/actions/projects"
+import {
+  createProjectKYCTeamsAction,
+  deleteProjectKYCTeamsAction,
+} from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { DialogProps } from "./types"
@@ -20,10 +23,13 @@ export default function SelectKYCProjectDialog({
   onOpenChange,
 }: DialogProps<object>) {
   const queryClient = useQueryClient()
+
   const session = useSession()
+
   const {
     data: { kycTeamId, alreadySelectedProjectIds },
   } = useAppDialogs()
+
   const {
     data: projects,
     isLoading: projectsLoading,
@@ -32,29 +38,60 @@ export default function SelectKYCProjectDialog({
     queryKey: ["userProjects"],
     queryFn: async () => {
       if (!session.data?.user.id) return []
-      return (await getAdminProjects(session.data.user.id)).filter(
-        (project) =>
-          Boolean(project.organization) &&
-          !alreadySelectedProjectIds?.includes(project.id),
+      return (await getAdminProjects(session.data.user.id)).filter((project) =>
+        Boolean(project.organization),
       )
     },
   })
-  const { mutate: createProjectKYCTeams, isPending } = useMutation({
-    mutationKey: ["createProjectKYCTeams"],
-    mutationFn: async (projectIds: string[]) => {
-      if (!kycTeamId || projectIds.length === 0) return
-      await createProjectKYCTeamsAction({ projectIds, kycTeamId })
-      await queryClient.invalidateQueries({
-        queryKey: ["kycTeamProjects", kycTeamId],
-      })
-      toast.success("Projects added successfully")
-      onOpenChange(false)
-    },
-  })
+
+  const { mutate: createProjectKYCTeams, isPending: createIsPending } =
+    useMutation({
+      mutationKey: ["createProjectKYCTeams"],
+      mutationFn: async (projectIds: string[]) => {
+        if (!kycTeamId || projectIds.length === 0) return
+        await createProjectKYCTeamsAction({ projectIds, kycTeamId })
+        await queryClient.invalidateQueries({
+          queryKey: ["kycTeamProjects", kycTeamId],
+        })
+        toast.success("Projects added successfully")
+        onOpenChange(false)
+      },
+    })
+
+  const { mutate: deleteProjectKYCTeams, isPending: deleteIsPending } =
+    useMutation({
+      mutationKey: ["deleteProjectKYCTeams"],
+      mutationFn: async (projectIds: string[]) => {
+        if (!kycTeamId || projectIds.length === 0) return
+        await deleteProjectKYCTeamsAction({ projectIds, kycTeamId })
+        await queryClient.invalidateQueries({
+          queryKey: ["kycTeamProjects", kycTeamId],
+        })
+        toast.success("Projects removed successfully")
+        onOpenChange(false)
+      },
+    })
 
   const [selectedProjectIds, setSelectedProjectIds] = React.useState<string[]>(
-    [],
+    alreadySelectedProjectIds ?? [],
   )
+
+  const onSubmit = () => {
+    // Project KYC Teams to remove = already selected - selected
+    const projectsToRemove = alreadySelectedProjectIds?.filter(
+      (projectId) => !selectedProjectIds?.includes(projectId),
+    )
+    // Project KYC Teams to add = selected - already selected
+    const projectsToAdd = selectedProjectIds?.filter(
+      (projectId) => !alreadySelectedProjectIds?.includes(projectId),
+    )
+    if (projectsToRemove?.length) {
+      deleteProjectKYCTeams(projectsToRemove)
+    }
+    if (projectsToAdd?.length) {
+      createProjectKYCTeams(projectsToAdd)
+    }
+  }
 
   if (projectsLoading || projectsPending) {
     return (
@@ -86,9 +123,7 @@ export default function SelectKYCProjectDialog({
           </DialogTitle>
         )}
         {projects?.length === 0 ? (
-          <span className="text-sm text-secondary-foreground">
-            No projects left unselected
-          </span>
+          <span className="text-sm text-secondary-foreground">No projects</span>
         ) : (
           <>
             <ul className="space-y-2 w-full">
@@ -99,6 +134,7 @@ export default function SelectKYCProjectDialog({
                 >
                   <Checkbox
                     className="w-5 h-5"
+                    defaultChecked={selectedProjectIds?.includes(project.id)}
                     onCheckedChange={() => {
                       setSelectedProjectIds((prev) =>
                         prev.includes(project.id)
@@ -122,10 +158,8 @@ export default function SelectKYCProjectDialog({
             <div className="w-full space-y-2">
               <Button
                 className="w-full"
-                disabled={isPending}
-                onClick={() => {
-                  createProjectKYCTeams(selectedProjectIds)
-                }}
+                disabled={createIsPending || deleteIsPending}
+                onClick={onSubmit}
               >
                 Submit
               </Button>
