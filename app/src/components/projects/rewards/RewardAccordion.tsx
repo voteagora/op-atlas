@@ -13,7 +13,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
 import { getCutoffDate } from "@/lib/utils"

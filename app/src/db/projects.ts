@@ -1853,6 +1853,23 @@ export async function createProjectKycTeams({
   })
 }
 
+export async function deleteProjectKycTeams({
+  projectIds,
+  kycTeamId,
+}: {
+  projectIds: string[]
+  kycTeamId: string
+}) {
+  return prisma.projectKYCTeam.deleteMany({
+    where: {
+      projectId: {
+        in: projectIds,
+      },
+      kycTeamId,
+    },
+  })
+}
+
 export async function getProjectKycTeams({ kycTeamId }: { kycTeamId: string }) {
   return prisma.projectKYCTeam.findMany({
     where: {
