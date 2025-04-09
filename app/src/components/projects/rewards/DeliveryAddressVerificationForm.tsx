@@ -15,11 +15,13 @@ import {
   FormLabel,
 } from "@/components/ui/form"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import Link from "next/link"
 
 const FormSchema = z.object({
   address: z.string().nonempty(),
   confirmIsOpMainnet: z.boolean().default(false),
   confirmCanMakeContractCalls: z.boolean().default(false),
+  pledgeToChooseDelegate: z.boolean().default(false),
 })
 
 export default function DeliveryAddressVerificationForm({
@@ -35,12 +37,14 @@ export default function DeliveryAddressVerificationForm({
       address: "",
       confirmIsOpMainnet: false,
       confirmCanMakeContractCalls: false,
+      pledgeToChooseDelegate: false,
     },
   })
 
   const submitEnabled =
     form.watch("confirmIsOpMainnet") &&
     form.watch("confirmCanMakeContractCalls") &&
+    form.watch("pledgeToChooseDelegate") &&
     form.watch("address")
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
@@ -106,6 +110,30 @@ export default function DeliveryAddressVerificationForm({
                 </FormControl>
                 <FormLabel className="font-normal text-secondary-foreground">
                   I confirm this address can make contract calls
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="pledgeToChooseDelegate"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-3">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="font-normal text-secondary-foreground">
+                  I pledge to choose a delegate for this wallet in{" "}
+                  <Link
+                    href="https://vote.optimism.io/delegates"
+                    target="_blank"
+                    className="text-primary underline"
+                  >
+                    Optimism Agora
+                  </Link>
                 </FormLabel>
               </FormItem>
             )}
