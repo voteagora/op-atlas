@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button"
 import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
 
+import { REWARDS_NAMES } from "./constants"
+
 const RewardAccordion = ({
   reward,
   team,
@@ -34,51 +36,40 @@ const RewardAccordion = ({
     }
   }
 
+  const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
+
   return (
     <Accordion
       type="single"
       value={isExpanded}
       onValueChange={setIsExpanded}
       collapsible
-      className="w-full border border-default rounded-xl p-8"
+      className="w-full border rounded-xl p-6"
     >
       <AccordionItem value="item-1">
-        <AccordionTrigger className="justify-between p-0">
-          <div className="flex items-center text-base font-semibold gap-1 flex-1">
-            Retro Funding Round {reward.roundId}
+        <div className="flex flex-col space-y-2">
+          <div>
+            <p className="font-medium text-foreground text-sm">
+              {REWARDS_NAMES[rewardRoundId].name}
+            </p>
+            <span className="text-secondary-foreground font-normal text-sm">
+              {REWARDS_NAMES[rewardRoundId].date}
+            </span>
           </div>
-          {!isExpanded && (
-            <div className="flex gap-2">
-              <Image
-                src="/assets/icons/op-icon.svg"
-                height={20}
-                width={20}
-                alt="Optimism"
-              />
-              <div className="text-sm text-secondary-foreground">
-                {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-                {formatNumber(reward.amount)}
-              </div>
+          <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
+            <Image
+              src="/assets/icons/op-icon.svg"
+              height={20}
+              width={20}
+              alt="Optimism"
+            />
+            <div className="text-sm text-secondary-foreground">
+              {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
+              {formatNumber(reward.amount)}
             </div>
-          )}
-        </AccordionTrigger>
+          </div>
+        </div>
         <AccordionContent className="flex flex-col gap-6 pt-6">
-          <div className="flex flex-col gap-2">
-            <div className="font-medium text-sm">Grant amount</div>
-            <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
-              <Image
-                src="/assets/icons/op-icon.svg"
-                height={20}
-                width={20}
-                alt="Optimism"
-              />
-              <div className="text-sm text-secondary-foreground">
-                {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-                {formatNumber(reward.amount)}
-              </div>
-            </div>
-          </div>
-
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <div className="font-medium text-sm text-foreground">
@@ -154,6 +145,9 @@ const RewardAccordion = ({
             )}
           </div>
         </AccordionContent>
+        <AccordionTrigger className="text-secondary-foreground font-medium text-sm mt-6">
+          Show details
+        </AccordionTrigger>
       </AccordionItem>
     </Accordion>
   )

@@ -5,12 +5,10 @@ import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
 import RewardAccordion from "./RewardAccordion"
 
 export function RewardsSection({
-  project,
   team,
   inProgressRewards,
   claimedRewards,
 }: {
-  project: ProjectWithFullDetails & { organizationId?: string }
   team: ProjectTeam
   inProgressRewards: ProjectWithFullDetails["rewards"]
   claimedRewards: ProjectWithFullDetails["rewards"]
@@ -19,9 +17,9 @@ export function RewardsSection({
     <div className="flex flex-col space-y-12">
       <div className="space-y-6">
         <h2 className="text-2xl text-text-default font-semibold">Rewards</h2>
-        <div className="text-secondary-foreground">
+        <p className="text-secondary-foreground text-base font-normal">
           If this project receives any Retro Funding, we&apos;ll record it here.
-        </div>
+        </p>
       </div>
       <div className="flex flex-col space-y-4">
         <h4 className="font-semibold text-text-default text-xl">In progress</h4>
@@ -43,7 +41,7 @@ export function RewardsSection({
         <h4 className="font-semibold text-text-default text-xl">Claimed</h4>
         {claimedRewards.length ? (
           <ul className="space-y-3">
-            {inProgressRewards.map((reward) => (
+            {claimedRewards.map((reward) => (
               <li key={reward.id}>
                 <RewardAccordion team={team} reward={reward} key={reward.id} />
               </li>

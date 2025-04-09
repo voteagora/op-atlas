@@ -42,7 +42,6 @@ export default async function Page({
 
   return (
     <RewardsSection
-      project={project}
       inProgressRewards={inProgressRewards}
       claimedRewards={claimedRewards}
       team={team}
