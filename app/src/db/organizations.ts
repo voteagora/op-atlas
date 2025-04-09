@@ -674,7 +674,7 @@ export async function getOrganizationKYCTeams({
     include: {
       team: {
         include: {
-          team: { include: { user: true } },
+          team: { include: { users: true } },
         },
       },
     },
@@ -702,7 +702,7 @@ export async function getOrganizationKYCTeams({
       address: kycTeam.team.walletAddress,
       createdAt: kycTeam.team.createdAt,
     },
-    team: kycTeam.team.team.map((ut) => ut.user),
+    team: kycTeam.team.team.map((ut) => ut.users),
   }))
 }
 

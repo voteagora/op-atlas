@@ -1698,7 +1698,7 @@ export async function getKycTeam({ projectId }: { projectId: string }) {
         include: {
           team: {
             select: {
-              user: true,
+              users: true,
             },
           },
         },
@@ -1717,7 +1717,7 @@ export async function getKycTeam({ projectId }: { projectId: string }) {
   return {
     id: projectKycTeam.kycTeamId,
     grantAddress: { address, validUntil },
-    team: projectKycTeam.team.team.map((ut) => ut.user),
+    team: projectKycTeam.team.team.map((ut) => ut.users),
   }
 }
 
