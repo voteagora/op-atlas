@@ -16,7 +16,6 @@ export function UserProfileSidebar({
 }: {
   organizations?: Organization[]
 }) {
-  const isKycEnabled = useFeatureFlagEnabled("add-grant-delivery-address-form")
   const pathname = usePathname()
   const router = useRouter()
 
@@ -134,27 +133,25 @@ export function UserProfileSidebar({
                   </span>
                   <span>{organization.name}</span>
                 </Link>
-                {isKycEnabled && (
-                  <Link
-                    href={`/profile/organizations/${organization.id}/grant-address`}
+                <Link
+                  href={`/profile/organizations/${organization.id}/grant-address`}
+                  className={cn([
+                    "text-secondary-foreground font-normal space-x-2 pl-4",
+                    {
+                      "text-foreground font-medium": isGrantAddressActive,
+                    },
+                  ])}
+                >
+                  <span
                     className={cn([
-                      "text-secondary-foreground font-normal space-x-2 pl-4",
-                      {
-                        "text-foreground font-medium": isGrantAddressActive,
-                      },
+                      "opacity-0 text-lg",
+                      { "opacity-100": isGrantAddressActive },
                     ])}
                   >
-                    <span
-                      className={cn([
-                        "opacity-0 text-lg",
-                        { "opacity-100": isGrantAddressActive },
-                      ])}
-                    >
-                      •
-                    </span>
-                    <span>Grant address</span>
-                  </Link>
-                )}
+                    •
+                  </span>
+                  <span>Grant address</span>
+                </Link>
               </li>
             )
           })}
