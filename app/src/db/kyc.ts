@@ -71,7 +71,7 @@ export async function getVerifiedKycTeamsMap(projectId: string) {
         select: {
           team: {
             select: {
-              user: true,
+              users: true
             },
           },
         },
@@ -83,7 +83,7 @@ export async function getVerifiedKycTeamsMap(projectId: string) {
 
   for (const kycTeam of kycTeams) {
     const teamVerified = kycTeam.team.team.every(
-      (teamMember) => teamMember.user.status === "APPROVED",
+      (teamMember) => teamMember.users.status === "APPROVED"
     )
 
     result[kycTeam.id] = teamVerified
