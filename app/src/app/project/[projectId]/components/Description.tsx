@@ -65,14 +65,16 @@ export default function Description({
               <TooltipContent>{name}</TooltipContent>
             </Tooltip>
             <ul className="flex space-x-2">
-              {tags.map((tag, i) => (
-                <li
-                  key={i}
-                  className="px-2.5 py-1 rounded-full border-[1px] border-[#E0E2EB]"
-                >
-                  <span className="text-sm font-medium">{tag}</span>
-                </li>
-              ))}
+              {tags
+                .filter((tag) => tag !== "")
+                .map((tag, i) => (
+                  <li
+                    key={i}
+                    className="px-2.5 py-1 rounded-full border-[1px] border-[#E0E2EB]"
+                  >
+                    <span className="text-sm font-medium">{tag}</span>
+                  </li>
+                ))}
             </ul>
           </div>
         </div>
