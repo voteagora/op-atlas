@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
+import { getVerifiedKycTeamsMap } from "@/db/kyc"
 import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 
@@ -20,10 +21,11 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const [project, team, membership] = await Promise.all([
+  const [project, team, membership, verifiedKycTeams] = await Promise.all([
     getProject({ id: params.projectId }),
     getConsolidatedProjectTeam({ projectId: params.projectId }),
     verifyMembership(params.projectId, session?.user.farcasterId),
+    getVerifiedKycTeamsMap(params.projectId),
   ])
 
   if (membership?.error || !project) {
@@ -45,6 +47,7 @@ export default async function Page({
       inProgressRewards={inProgressRewards}
       claimedRewards={claimedRewards}
       team={team}
+      verifiedKycTeams={verifiedKycTeams}
     />
   )
 }

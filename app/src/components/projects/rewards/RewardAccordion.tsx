@@ -1,3 +1,5 @@
+"use client"
+
 import { format } from "date-fns"
 import { Copy } from "lucide-react"
 import Image from "next/image"
@@ -14,16 +16,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
-import { copyToClipboard, formatNumber } from "@/lib/utils"
+import { getCutoffDate } from "@/lib/utils"
+import { cn, copyToClipboard, formatNumber } from "@/lib/utils"
 
 import { REWARDS_NAMES } from "./constants"
 
 const RewardAccordion = ({
   reward,
   team,
+  isAdmin,
+  teamVerified,
 }: {
   reward: ProjectWithFullDetails["rewards"][0]
   team: ProjectTeam
+  isAdmin?: boolean
+  teamVerified?: boolean
 }) => {
   const [isExpanded, setIsExpanded] = React.useState("")
 
@@ -38,6 +45,11 @@ const RewardAccordion = ({
 
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
 
+  const getReleaseDate = () => {
+    const releaseDate = getCutoffDate()
+    return format(releaseDate, "MMMM d, yyyy")
+  }
+
   return (
     <Accordion
       type="single"
@@ -46,7 +58,7 @@ const RewardAccordion = ({
       collapsible
       className="w-full border rounded-xl p-6"
     >
-      <AccordionItem value="item-1">
+      <AccordionItem value="item-1" className="group">
         <div className="flex flex-col space-y-2">
           <div>
             <p className="font-medium text-foreground text-sm">
@@ -69,13 +81,14 @@ const RewardAccordion = ({
             </div>
           </div>
         </div>
+
         {reward.roundId !== "7" && reward.roundId !== "8" ? (
           <>
             <AccordionContent className="flex flex-col gap-6 pt-6">
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
                   <div className="font-medium text-sm text-foreground">
-                    Wallet address
+                    Grant delivery address
                   </div>
                   <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
                     <Image
@@ -101,27 +114,6 @@ const RewardAccordion = ({
                     </Button>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 text-foreground">
-                  <div className="font-medium text-sm">
-                    Verified individuals
-                  </div>
-                  {team.map((user) => (
-                    <div
-                      key={user.id}
-                      className="border border-border rounded-lg flex h-10 px-3 py-[10px] gap-2 items-center"
-                    >
-                      <Avatar className="!w-6 !h-6">
-                        <AvatarImage
-                          src={user.user.imageUrl || ""}
-                          alt="team avatar"
-                        />
-                        <AvatarFallback>{user.user.username} </AvatarFallback>
-                      </Avatar>
-                      <div className="text-sm">{user.user.username}</div>
-                    </div>
-                  ))}
-                </div>
-
                 {reward.claim?.tokenStreamClaimableAt && (
                   <div className="flex flex-col gap-2 w-full">
                     <div className="font-medium text-sm text-foreground">
@@ -152,11 +144,49 @@ const RewardAccordion = ({
               </div>
             </AccordionContent>
             <AccordionTrigger className="text-secondary-foreground font-medium text-sm mt-6">
-              Show details
+              <span className="group-data-[state=open]:hidden">
+                Show details
+              </span>
+              <span className="group-data-[state=closed]:hidden">
+                Close details
+              </span>
             </AccordionTrigger>
           </>
         ) : (
-          <div>hi</div>
+          <div
+            className={cn("mt-2 px-3 py-2.5 rounded-md", {
+              "text-red-600 bg-red-200": !isAdmin || (isAdmin && !teamVerified),
+              "text-callout-foreground bg-callout": isAdmin && teamVerified,
+            })}
+          >
+            {!isAdmin && (
+              <p>
+                You are not an admin of this project and cannot claim this
+                grant.
+              </p>
+            )}
+            {isAdmin && !teamVerified && (
+              <p>
+                You can’t claim your tokens until you’ve completed KYC for your{" "}
+                <Link
+                  href={`/projects/${reward.projectId}/grant-addresses`}
+                  className="underline"
+                >
+                  grant delivery address
+                </Link>
+                .
+              </p>
+            )}
+            {isAdmin && teamVerified && (
+              <p>
+                Optimism only releases tokens to Superfluid once per month.
+                Yours will be available to claim on or after {getReleaseDate()}.{" "}
+                <Link href={``} className="underline">
+                  Learn more
+                </Link>
+              </p>
+            )}
+          </div>
         )}
       </AccordionItem>
     </Accordion>

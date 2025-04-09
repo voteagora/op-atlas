@@ -1,5 +1,6 @@
 "use client"
 
+import { useIsAdmin } from "@/lib/hooks"
 import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
 
 import RewardAccordion from "./RewardAccordion"
@@ -8,11 +9,15 @@ export function RewardsSection({
   team,
   inProgressRewards,
   claimedRewards,
+  verifiedKycTeams,
 }: {
   team: ProjectTeam
   inProgressRewards: ProjectWithFullDetails["rewards"]
   claimedRewards: ProjectWithFullDetails["rewards"]
+  verifiedKycTeams: Record<string, boolean>
 }) {
+  const isAdmin = useIsAdmin(team)
+
   return (
     <div className="flex flex-col space-y-12">
       <div className="space-y-6">
@@ -27,7 +32,13 @@ export function RewardsSection({
           <ul className="space-y-3">
             {inProgressRewards.map((reward) => (
               <li key={reward.id}>
-                <RewardAccordion team={team} reward={reward} key={reward.id} />
+                <RewardAccordion
+                  isAdmin={Boolean(isAdmin)}
+                  team={team}
+                  reward={reward}
+                  key={reward.id}
+                  teamVerified={verifiedKycTeams[reward.projectId] ?? false}
+                />
               </li>
             ))}
           </ul>
@@ -43,7 +54,12 @@ export function RewardsSection({
           <ul className="space-y-3">
             {claimedRewards.map((reward) => (
               <li key={reward.id}>
-                <RewardAccordion team={team} reward={reward} key={reward.id} />
+                <RewardAccordion
+                  team={team}
+                  reward={reward}
+                  key={reward.id}
+                  teamVerified={verifiedKycTeams[reward.projectId] ?? false}
+                />
               </li>
             ))}
           </ul>
