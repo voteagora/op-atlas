@@ -18,21 +18,21 @@ const MakeFirstOrganization = ({
       onClick={onClick}
       variant="ghost"
       className={cn(
-        "flex gap-x-6 border rounded-xl p-8 items-center justify-start h-fit hover:shadow-sm hover:opacity-100 hover:text-primary",
+        "flex gap-x-6 border rounded-xl p-8 h-fit hover:shadow-sm hover:opacity-100 hover:text-primary",
         className,
       )}
     >
-      <div className="flex justify-between items-center w-full">
-        <div className="flex gap-x-4">
-          <div className="flex items-center justify-center border border-dashed border-[#BCBFCD] overflow-hidden rounded-full h-12 w-12 shrink-0">
+      <div className="flex justify-between w-full">
+        <div className="flex gap-4 items-center">
+          <div className="flex h-12 w-12 items-center justify-center border border-dashed border-muted overflow-hidden rounded-full shrink-0">
             <Image
               src="/assets/icons/user-icon.svg"
               width={13}
               height={17}
-              alt="Plus"
+              alt="User"
             />
           </div>
-          <div className=" flex flex-col justify-start text-start">
+          <div className="flex flex-col text-start">
             <h3 className="text-base font-semibold">Make an organization</h3>
             <p className="text-base font-normal text-secondary-foreground">
               Group your team&apos;s projects in one place.
