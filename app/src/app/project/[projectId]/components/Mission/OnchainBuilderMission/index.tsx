@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useParams } from "next/navigation"
 import React from "react"
 
-import { Button } from "@/components/common/Button"
+import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import {
   Accordion,
@@ -20,7 +20,6 @@ import {
   generateMonthlyMetrics,
   getEligibleRetrofundingMonths,
 } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { getDaysInMonthByName, INDEXED_MONTHS, MONTHS } from "../constants"
 import { OnchainBuildersDataType } from "../types"
@@ -53,7 +52,6 @@ export default function OnchainBuilderMission({
   applicationDate: Date
   projectName: string
 }) {
-  const { setOpenDialog } = useAppDialogs()
   const { projectId } = useParams()
 
   const opReward = data.opReward ?? 0
@@ -134,13 +132,20 @@ export default function OnchainBuilderMission({
                 </p>
               </div>
               {data.isMember && (
-                <Button
+                <ExtendedLink
+                  as="button"
                   variant="primary"
                   className="z-50"
-                  onClick={() => setOpenDialog("claim_rewards")}
-                >
-                  Claim your rewards
-                </Button>
+                  href={`/project/${projectId}/rewards`}
+                  text="Claim your rewards"
+                  eventName="Link Click"
+                  eventData={{
+                    projectId,
+                    source: "project_page",
+                    isContributor: data.isMember,
+                    linkName: "View recipients",
+                  }}
+                />
               )}
             </div>
           </div>

@@ -1,22 +1,22 @@
 "use client"
-import { AlertTriangleIcon } from "lucide-react"
+
 import Image from "next/image"
+import { useParams } from "next/navigation"
 import React from "react"
 
-import { Button } from "@/components/common/Button"
+import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
 import { getEligibleRetrofundingMonths, truncateString } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { MONTHS } from "../constants"
 import MetricCard from "./MetricCard"
 
 interface DevtoolingMissionProps {
-  isMember: boolean
   projectName: string
+  isMember: boolean
   data: {
     gasConsumed?: number
     onchainBuildersInAtlasCount?: number
@@ -33,12 +33,13 @@ interface DevtoolingMissionProps {
 }
 
 export default function DevToolingMission({
-  isMember,
   projectName,
+  isMember,
   data,
   applicationDate,
 }: DevtoolingMissionProps) {
-  const { setOpenDialog } = useAppDialogs()
+  const params = useParams()
+  const projectId = params.projectId as string
 
   const opReward = data.opReward ?? 0
   const isEligible = data.isEligible ?? false
@@ -86,13 +87,20 @@ export default function DevToolingMission({
                 </p>
               </div>
               {isMember && (
-                <Button
+                <ExtendedLink
+                  as="button"
                   variant="primary"
                   className="z-50"
-                  onClick={() => setOpenDialog("claim_rewards")}
-                >
-                  Claim your rewards
-                </Button>
+                  href={`/project/${projectId}/rewards`}
+                  text="Claim your rewards"
+                  eventName="Link Click"
+                  eventData={{
+                    projectId,
+                    source: "project_page",
+                    isContributor: isMember,
+                    linkName: "View recipients",
+                  }}
+                />
               )}
             </div>
           </div>

@@ -30,5 +30,22 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  return <RewardsSection project={project} team={team} />
+  const inProgressRewards = project.rewards.filter(
+    (reward) =>
+      reward.roundId === "7" ||
+      reward.roundId === "8" ||
+      reward.claim?.status === "pending",
+  )
+  const claimedRewards = project.rewards.filter(
+    (reward) => reward.claim?.status === "claimed",
+  )
+
+  return (
+    <RewardsSection
+      project={project}
+      inProgressRewards={inProgressRewards}
+      claimedRewards={claimedRewards}
+      team={team}
+    />
+  )
 }
