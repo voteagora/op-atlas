@@ -21,15 +21,6 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const isKycEnabled = await posthog.isFeatureEnabled(
-    "add-grant-delivery-address-form",
-    session.user.id,
-  )
-
-  if (!isKycEnabled) {
-    return notFound()
-  }
-
   return (
     <div className="space-y-12">
       <div className="space-y-6">

@@ -36,8 +36,6 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   const pathname = usePathname()
   const isAdmin = useIsAdmin(team)
 
-  const isKycEnabled = useFeatureFlagEnabled("add-grant-delivery-address-form")
-
   const [deletingProject, setDeletingProject] = useState(false)
 
   const { progressPercent, completedSections } = useMemo(() => {
@@ -169,21 +167,19 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
                 Rewards
               </Link>
             </div>
-            {isKycEnabled && (
-              <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
-                <Link
-                  className={cn([
-                    {
-                      "font-medium text-foreground":
-                        currentPage === "grant-addresses",
-                    },
-                  ])}
-                  href={`/projects/${project.id}/grant-addresses`}
-                >
-                  Grant Addresses
-                </Link>
-              </div>
-            )}
+            <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
+              <Link
+                className={cn([
+                  {
+                    "font-medium text-foreground":
+                      currentPage === "grant-addresses",
+                  },
+                ])}
+                href={`/projects/${project.id}/grant-addresses`}
+              >
+                Grant Addresses
+              </Link>
+            </div>
             <Separator />
           </>
         )}

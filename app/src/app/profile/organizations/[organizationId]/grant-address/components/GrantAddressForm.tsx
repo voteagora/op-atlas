@@ -10,13 +10,7 @@ import AddGrantDeliveryAddressForm from "@/components/projects/rewards/AddGrantD
 import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
 import { getValidUntil } from "@/lib/utils"
 
-interface GrantAddressFormProps {
-  isKycEnabled: boolean
-}
-
-export default function GrantAddressForm({
-  isKycEnabled,
-}: GrantAddressFormProps) {
+export default function GrantAddressForm() {
   const params = useParams()
   const organizationId = params.organizationId as string
   const { data: organizationKycTeams, isLoading } = useQuery({
@@ -24,7 +18,6 @@ export default function GrantAddressForm({
     queryFn: async () => {
       return await getOrganizationKycTeamsAction({ organizationId })
     },
-    enabled: isKycEnabled,
   })
 
   const [addMoreActive, setAddMoreActive] = React.useState(false)
