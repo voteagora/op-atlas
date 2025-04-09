@@ -31,9 +31,25 @@ export default async function Page({ params }: PageProps) {
     getPublicProjectAction({ projectId }),
     getPublicProjectOSOData(projectId),
   ])
-  if (!publicProject || publicProjectMetrics.error) {
-    return notFound()
+
+  const isMember = !(
+    await verifyMembership(projectId, session?.user.farcasterId ?? "")
+  )?.error
+
+  const { isOnchainBuilder, isDevTooling, projectOSOData, groupedMetrics } =
+    publicProjectMetrics
+
+  const enrolledInMission = isOnchainBuilder || isDevTooling
+
+  const onchainBuildersMetrics = {
+    ...groupedMetrics,
+    opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
   }
+
+  const deployedOnWorldchain = publicProject.deployedOn?.some(
+    (chain) => chain.name === "Worldchain",
+  )
+
   const author = publicProject.organization
     ? {
         avatarUrl: publicProject.organization.organization.avatarUrl,
@@ -41,42 +57,30 @@ export default async function Page({ params }: PageProps) {
         farcasterHandle: "",
       }
     : {
-        avatarUrl: publicProject.team?.at(0)?.user.imageUrl,
-        name: publicProject.team?.at(0)?.user.name,
-        farcasterHandle: publicProject.team?.at(0)?.user.username ?? "",
+        avatarUrl: publicProject.team?.[0]?.user.imageUrl,
+        name: publicProject.team?.[0]?.user.name,
+        farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
       }
-  const onchainBuildersMetrics = {
-    ...publicProjectMetrics.groupedMetrics,
-    opReward: Math.round(
-      (publicProjectMetrics.projectOSOData?.data as any)?.opReward ?? 0,
-    ),
-  } as any
 
-  const isMember = await verifyMembership(
-    params.projectId,
-    session?.user.farcasterId ?? "",
-  )
+  const showIncreaseImpact =
+    projectOSOData?.devToolingEligible || projectOSOData?.onchainBuilderEligible
 
-  const { isOnchainBuilder, isDevTooling, projectOSOData } =
-    publicProjectMetrics
-
-  const enrolledInMission = isOnchainBuilder || isDevTooling
-  const onOnchainPerformanceData = Boolean(onchainBuildersMetrics)
   return (
     <div className="w-full h-full mt-6 pb-12">
       <div className="mx-auto w-full max-w-[1128px] px-8 space-y-12">
         <div className="w-full mt-8">
           <Header
             projectId={projectId}
-            isMember={!isMember?.error}
+            isMember={isMember}
             thumbnail={publicProject.thumbnailUrl}
             banner={publicProject.bannerUrl}
           />
         </div>
+
         <div className="space-y-12 px-12 pt-12">
           <Description
             projectId={projectId}
-            isMember={!isMember?.error}
+            isMember={isMember}
             name={publicProject.name}
             tags={["Project", publicProject.category ?? ""]}
             author={author}
@@ -89,7 +93,8 @@ export default async function Page({ params }: PageProps) {
               mirror: publicProject.mirror,
             }}
           />
-          {!enrolledInMission && !onOnchainPerformanceData && (
+
+          {!enrolledInMission && !onchainBuildersMetrics && (
             <div className="w-full h-[208px] space-y-6 rounded-xl border flex flex-col justify-center items-center p-6">
               <div className="text-center">
                 <p className="font-semibold text-base text-foreground">
@@ -109,12 +114,13 @@ export default async function Page({ params }: PageProps) {
                 eventData={{
                   projectId,
                   source: "project_page",
-                  isContributor: !isMember?.error,
+                  isContributor: isMember,
                   linkName: "View recipients",
                 }}
               />
             </div>
           )}
+
           {enrolledInMission && (
             <>
               <div className="w-full space-y-6">
@@ -124,31 +130,29 @@ export default async function Page({ params }: PageProps) {
                     <li>
                       <Mission
                         type="on-chain"
-                        isMember={!isMember?.error}
-                        deployedOnWorldchain={Boolean(
-                          publicProject.deployedOn.find(
-                            (chain) => chain.name === "Worldchain",
-                          ),
-                        )}
-                        onchainBuildersMetrics={{
-                          ...onchainBuildersMetrics,
+                        projectName={publicProject.name}
+                        isMember={isMember}
+                        deployedOnWorldchain={deployedOnWorldchain}
+                        metrics={{
+                          activeAddresses:
+                            onchainBuildersMetrics.activeAddresses,
+                          gasFees: onchainBuildersMetrics.gasFees,
+                          transactions: onchainBuildersMetrics.transactions,
+                          tvl: onchainBuildersMetrics.tvl,
                           eligibility: {
-                            onchainBuilderEligible: (
-                              projectOSOData?.data as any
-                            )?.onchainBuilderEligible,
-                            hasDefillamaAdapter:
-                              (projectOSOData?.data as any)
-                                ?.hasDefillamaAdapter ?? false,
-                            hasQualifiedAddresses: Boolean(
-                              onchainBuildersMetrics.activeAddresses.length ??
-                                false,
-                            ),
                             hasBundleBear:
-                              (projectOSOData?.data as any)?.hasBundleBear ??
-                              false,
+                              projectOSOData?.hasBundleBear ?? false,
+                            hasDefillamaAdapter:
+                              projectOSOData?.hasDefillamaAdapter ?? false,
+                            hasQualifiedAddresses: Boolean(
+                              onchainBuildersMetrics.activeAddresses?.length,
+                            ),
                           },
                         }}
                         projectOSOData={projectOSOData}
+                        applicationDate={
+                          publicProject.onchainBuildersApplication?.createdAt
+                        }
                       />
                     </li>
                   )}
@@ -156,60 +160,73 @@ export default async function Page({ params }: PageProps) {
                     <li>
                       <Mission
                         type="dev-tooling"
-                        isMember={!isMember?.error}
+                        isMember={isMember}
                         projectName={publicProject.name}
-                        onchainBuildersMetrics={onchainBuildersMetrics}
                         projectOSOData={projectOSOData}
+                        metrics={{
+                          activeAddresses:
+                            onchainBuildersMetrics.activeAddresses,
+                          gasFees: onchainBuildersMetrics.gasFees,
+                          transactions: onchainBuildersMetrics.transactions,
+                          tvl: onchainBuildersMetrics.tvl,
+                          eligibility: {
+                            hasBundleBear:
+                              projectOSOData?.hasBundleBear ?? false,
+                            hasDefillamaAdapter:
+                              projectOSOData?.hasDefillamaAdapter ?? false,
+                            hasQualifiedAddresses: Boolean(
+                              onchainBuildersMetrics.activeAddresses?.length,
+                            ),
+                          },
+                        }}
+                        applicationDate={
+                          publicProject.devToolingApplication?.createdAt
+                        }
                       />
                     </li>
                   )}
                 </ul>
               </div>
-              {((projectOSOData?.data as any)?.devToolingEligible ||
-                (projectOSOData?.data as any)?.onchainBuilderEligible) &&
-                !isMember?.error && (
-                  <div className="w-full space-y-6">
-                    <div className="flex items-center space-x-2 group">
-                      <h4 className="font-semibold text-xl">
-                        Increase your impact
-                      </h4>
-                      <button>
-                        <EyeOff
-                          size={20}
-                          className="opacity-0 group-hover:opacity-100 transition-all duration-150"
-                        />
-                      </button>
-                    </div>
-                    <div
-                      className={cn([
-                        "gap-4 grid",
-                        {
-                          "grid-cols-2": isOnchainBuilder && isDevTooling,
-                          "grid-cols-1": isOnchainBuilder || isDevTooling,
-                        },
-                      ])}
-                    >
-                      {isOnchainBuilder && (
-                        <IncreaseYourImpact
-                          type="onchain-builders"
-                          projectId={projectId}
-                          isMember={!isMember?.error}
-                        />
-                      )}
-                      {isDevTooling && (
-                        <IncreaseYourImpact
-                          type="dev-tooling"
-                          projectId={projectId}
-                          isMember={!isMember?.error}
-                        />
-                      )}
-                    </div>
+              {showIncreaseImpact && isMember && (
+                <div className="w-full space-y-6">
+                  <div className="flex items-center space-x-2 group">
+                    <h4 className="font-semibold text-xl">
+                      Increase your impact
+                    </h4>
+                    <button>
+                      <EyeOff
+                        size={20}
+                        className="opacity-0 group-hover:opacity-100 transition-all duration-150"
+                      />
+                    </button>
                   </div>
-                )}
+                  <div
+                    className={cn("gap-4 grid", {
+                      "grid-cols-2": isOnchainBuilder && isDevTooling,
+                      "grid-cols-1": isOnchainBuilder || isDevTooling,
+                    })}
+                  >
+                    {isOnchainBuilder && (
+                      <IncreaseYourImpact
+                        type="onchain-builders"
+                        projectId={projectId}
+                        isMember={isMember}
+                      />
+                    )}
+                    {isDevTooling && (
+                      <IncreaseYourImpact
+                        type="dev-tooling"
+                        projectId={projectId}
+                        isMember={isMember}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
             </>
           )}
-          {/* TODO: Bring this back later */}
-          {/* {onOnchainPerformanceData && <Performance />} */}
+
+          {/* {onchainBuildersMetrics && <Performance />} */}
           <MoreDetails />
         </div>
       </div>

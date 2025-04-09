@@ -1950,7 +1950,7 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
           return chainInfo
         })
         .filter((c) => c !== undefined)
-      // Remove duplicates by chain
+
       const uniqueDeployedOn = Array.from(
         new Map(deployedOn?.map((item) => [item.name, item])).values(),
       )
@@ -1966,8 +1966,23 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
     ? users.filter((u) => !organizationUsers?.find((ou) => ou.id === u.id))
     : []
 
+  const devToolingApplication = await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "7",
+    },
+  })
+  const onchainBuildersApplication = await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "8",
+    },
+  })
+
   return {
     ...project,
+    devToolingApplication,
+    onchainBuildersApplication,
     contributors: deduppedUsers,
   }
 }
@@ -2028,7 +2043,7 @@ export async function getOnchainBuildersProjects({
 }
 
 export async function getProjectOSOData({ projectId }: { projectId: string }) {
-  return prisma.projectOSOData.findFirst({
+  const result = await prisma.projectOSOData.findFirst({
     where: {
       projectId,
     },
@@ -2036,6 +2051,22 @@ export async function getProjectOSOData({ projectId }: { projectId: string }) {
       data: true,
     },
   })
+
+  return result?.data as {
+    topProjects?: {
+      id?: string
+      name?: string
+      website?: string[]
+      thumbnailUrl?: string
+    }[]
+    hasBundleBear: boolean
+    devToolingReward: number
+    devToolingEligible: boolean
+    hasDefillamaAdapter: boolean
+    onchainBuilderReward: number
+    onchainBuilderEligible: boolean
+    onchainBuildersInAtlasCount: number
+  } | null
 }
 
 export async function createOSOProjects(

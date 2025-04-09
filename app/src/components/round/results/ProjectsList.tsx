@@ -7,8 +7,13 @@ import React from "react"
 import { Button } from "@/components/common/Button"
 import TrackedLink from "@/components/common/TrackedLink"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { FundingRewardDetails } from "@/lib/types"
-import { formatNumberWithSeparator } from "@/lib/utils"
+import { formatNumberWithSeparator, truncateString } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 interface Props {
@@ -42,13 +47,15 @@ const ProjectsList = ({
         <React.Fragment key={project.id}>
           <div className="flex flex-row justify-between py-8 gap-1">
             <div className="flex flex-[2] items-center">
-              <Image
-                className="rounded-md"
-                src={project?.project?.thumbnailUrl ?? ""}
-                alt={project?.project?.name}
-                height={64}
-                width={64}
-              />
+              {project?.project?.thumbnailUrl && (
+                <Image
+                  className="rounded-md"
+                  src={project.project.thumbnailUrl}
+                  alt={project.project.name}
+                  height={64}
+                  width={64}
+                />
+              )}
               <div className="ml-4">
                 <TrackedLink
                   className="hover:underline"
@@ -67,9 +74,14 @@ const ProjectsList = ({
                     linkName: "Project Page",
                   }}
                 >
-                  <h5 className="text-xs sm:text-base font-semibold text-text-default">
-                    {project?.project?.name}
-                  </h5>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <h5 className="text-xs sm:text-base font-semibold text-text-default text-left">
+                        {truncateString(project?.project?.name, 64, "...")}
+                      </h5>
+                    </TooltipTrigger>
+                    <TooltipContent>{project?.project?.name}</TooltipContent>
+                  </Tooltip>
                 </TrackedLink>
                 <p className="text-xs sm:text-base font-normal text-secondary-foreground line-clamp-3">
                   {project?.project?.description}
