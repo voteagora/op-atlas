@@ -1,44 +1,58 @@
 "use client"
-import { AlertTriangleIcon } from "lucide-react"
+
 import Image from "next/image"
+import { useParams } from "next/navigation"
 import React from "react"
 
-import { Button } from "@/components/common/Button"
+import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { formatNumber } from "@/lib/utils"
-import { truncateString } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
+import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
+import { getEligibleRetrofundingMonths, truncateString } from "@/lib/utils"
 
-import { MONTHS } from "./constants"
+import { MONTHS } from "../constants"
+import MetricCard from "./MetricCard"
 
 interface DevtoolingMissionProps {
-  isMember: boolean
   projectName: string
   data: {
     gasConsumed?: number
     onchainBuildersInAtlasCount?: number
     topProjects?: {
-      id: string
-      name: string
-      website: string[]
-      thumbnailUrl: string
+      id?: string
+      name?: string
+      website?: string[]
+      thumbnailUrl?: string
     }[]
     opReward?: number | null
     isEligible?: boolean
+    isMember: boolean
   }
+  applicationDate: Date
 }
 
 export default function DevToolingMission({
-  isMember,
   projectName,
   data,
+  applicationDate,
 }: DevtoolingMissionProps) {
-  const { setOpenDialog } = useAppDialogs()
+  const params = useParams()
+  const projectId = params.projectId as string
 
   const opReward = data.opReward ?? 0
   const isEligible = data.isEligible ?? false
+
+  function normalizeToTwoDecimals(num: number): number {
+    if (num === 0) return 0
+
+    const exponent = Math.floor(Math.log10(Math.abs(num)))
+    const normalized = num / Math.pow(10, exponent)
+
+    return Number(normalized.toFixed(2))
+  }
+
+  const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
 
   return (
     <div className="space-y-3">
@@ -64,22 +78,28 @@ export default function DevToolingMission({
           <div className="absolute w-full h-full z-50">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
-                {/* TODO: Replace this with actual data */}
                 <span className="font-extrabold text-4xl">
-                  {formatNumber(opReward, 0)} OP
+                  {formatNumberWithSeparator(opReward)} OP
                 </span>
                 <p className="text-secondary-foreground">
                   Rewards so far in Retro Funding: Dev Tooling
                 </p>
               </div>
-              {isMember && (
-                <Button
+              {data.isMember && (
+                <ExtendedLink
+                  as="button"
                   variant="primary"
                   className="z-50"
-                  onClick={() => setOpenDialog("claim_rewards")}
-                >
-                  Claim your rewards
-                </Button>
+                  href={`/project/${projectId}/rewards`}
+                  text="Claim your rewards"
+                  eventName="Link Click"
+                  eventData={{
+                    projectId,
+                    source: "project_page",
+                    isContributor: data.isMember,
+                    linkName: "View recipients",
+                  }}
+                />
               )}
             </div>
           </div>
@@ -102,6 +122,22 @@ export default function DevToolingMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
+          if (!eligibleMonths.includes(month)) {
+            return (
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+              >
+                <div className="w-full flex items-center justify-center">
+                  <p className="text-foreground font-semibold text-base">
+                    {projectName} was not enrolled in {month}
+                  </p>
+                </div>
+              </TabsContent>
+            )
+          }
+
           if (!isEligible) {
             return (
               <TabsContent
@@ -134,7 +170,7 @@ export default function DevToolingMission({
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
-                value={formatNumber(data.gasConsumed ?? 0)}
+                value={normalizeToTwoDecimals(data.gasConsumed ?? 0)}
                 title={truncateString(
                   `Gas consumed by builders using ${projectName}`,
                   40,
@@ -143,11 +179,7 @@ export default function DevToolingMission({
                 index={0}
               />
               <MetricCard
-                value={formatNumber(
-                  data.onchainBuildersInAtlasCount ?? 0,
-                  0,
-                  "compact",
-                )}
+                value={abbreviateNumber(data.onchainBuildersInAtlasCount ?? 0)}
                 title={`Trusted developers engaging with ${projectName}`}
                 index={1}
               />
@@ -170,12 +202,14 @@ export default function DevToolingMission({
                     {data.topProjects?.slice(0, 6).map((project, index) => {
                       return (
                         <li key={index} className="space-x-2 flex items-center">
-                          <Image
-                            src={project.thumbnailUrl}
-                            alt={project.name}
-                            width={24}
-                            height={24}
-                          />
+                          {project.thumbnailUrl && (
+                            <Image
+                              src={project.thumbnailUrl}
+                              alt={project.name ?? ""}
+                              width={24}
+                              height={24}
+                            />
+                          )}
                           <TrackedLink
                             href={`/project/${project.id}`}
                             eventName="Link Click"
@@ -198,41 +232,6 @@ export default function DevToolingMission({
           )
         })}
       </Tabs>
-    </div>
-  )
-}
-
-function MetricCard({
-  value,
-  title,
-  index,
-  sign = { value: "", position: "right" },
-}: {
-  value: string | number
-  title: string
-  index: number
-  sign?: {
-    value: string
-    position: "left" | "right"
-  }
-}) {
-  const formattedValue = value
-    ? `${sign.position === "left" ? sign.value : ""}${value}${
-        sign.position === "right" ? sign.value : ""
-      }`
-    : "- -"
-
-  return (
-    <div
-      key={index}
-      className="flex flex-col justify-between p-6 bg-background rounded-xl border"
-    >
-      <div className="w-full flex items-center justify-between space-x-1">
-        <p className="font-semibold text-base">{formattedValue}</p>
-      </div>
-      <p className="text-base leading-6 text-secondary-foreground flex items-start space-x-2">
-        <span>{title}</span>
-      </p>
     </div>
   )
 }

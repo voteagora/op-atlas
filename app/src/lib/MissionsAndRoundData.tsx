@@ -1,7 +1,9 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
+
 // import { VideoCallout } from "@/components/missions/common/callouts/VideoCallout"
+import { getCutoffDate } from "./utils"
 
 export const rewardMeasurementDate = new Date("2025-03-10T21:53:13.300Z")
 
@@ -56,13 +58,7 @@ export const MISSIONS: MissionData[] = [
     startsAt: new Date("2025-02-05T00:00:00.000Z"),
     endsAt: new Date("2025-07-31T00:00:00.000Z"),
     applyBy: (() => {
-      const today = new Date()
-      const nextDeadline = new Date(
-        today.getFullYear(),
-        today.getMonth() + (today.getDate() > 27 ? 1 : 0),
-        27,
-      )
-      return nextDeadline
+      return getCutoffDate()
     })(),
     evaluationMonth: (() => {
       const today = new Date()
@@ -228,13 +224,7 @@ export const MISSIONS: MissionData[] = [
     startsAt: new Date("2025-02-18T00:00:00.000Z"),
     endsAt: new Date("2025-07-31T00:00:00.000Z"),
     applyBy: (() => {
-      const today = new Date()
-      const nextDeadline = new Date(
-        today.getFullYear(),
-        today.getMonth() + (today.getDate() > 27 ? 1 : 0),
-        27,
-      )
-      return nextDeadline
+      return getCutoffDate()
     })(),
     evaluationMonth: (() => {
       const today = new Date()

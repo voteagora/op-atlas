@@ -16,6 +16,6 @@ export async function GET(
 
   return NextResponse.json({
     onchainBuildersMetrics: groupedMetrics,
-    projectOSOData: projectOSOData?.data,
+    projectOSOData: projectOSOData,
   })
 }
