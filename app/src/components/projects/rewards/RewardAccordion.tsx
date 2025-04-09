@@ -180,10 +180,7 @@ const RewardAccordion = ({
             {isAdmin && teamVerified && (
               <p>
                 Optimism only releases tokens to Superfluid once per month.
-                Yours will be available to claim on or after {getReleaseDate()}.{" "}
-                <Link href={``} className="underline">
-                  Learn more
-                </Link>
+                Yours will be available to claim on or after {getReleaseDate()}.
               </p>
             )}
           </div>
