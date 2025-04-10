@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { FundingRewardDetails } from "@/lib/types"
-import { formatNumberWithSeparator, truncateString } from "@/lib/utils"
+import { formatNumber, truncateString } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 interface Props {
