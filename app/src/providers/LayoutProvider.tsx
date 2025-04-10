@@ -20,12 +20,12 @@ const RESTRICTED_MOBILE_ROUTES = [
   "/application",
   "/rewards",
   "/round/results",
-  "/project/*",
+  "/projects/*",
 ]
 
 const isRestrictedRoute = (pathname: string) => {
-  return RESTRICTED_MOBILE_ROUTES.some(route => {
-    if (route.endsWith('/*')) {
+  return RESTRICTED_MOBILE_ROUTES.some((route) => {
+    if (route.endsWith("/*")) {
       const baseRoute = route.slice(0, -2)
       return pathname.startsWith(baseRoute)
     }
