@@ -187,7 +187,7 @@ export default async function Page({ params }: PageProps) {
                   )}
                 </ul>
               </div>
-              {showIncreaseImpact && isMember && (
+              {showIncreaseImpact && (
                 <div className="w-full space-y-6">
                   <div className="flex items-center space-x-2 group">
                     <h4 className="font-semibold text-xl">
