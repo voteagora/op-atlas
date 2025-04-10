@@ -46,15 +46,6 @@ export default function DevToolingMission({
   const opReward = data.opReward ?? 0
   const isEligible = data.isEligible ?? false
 
-  function normalizeToTwoDecimals(num: number): number {
-    if (num === 0) return 0
-
-    const exponent = Math.floor(Math.log10(Math.abs(num)))
-    const normalized = num / Math.pow(10, exponent)
-
-    return Number(normalized.toFixed(2))
-  }
-
   const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
 
   return (
@@ -173,7 +164,7 @@ export default function DevToolingMission({
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
-                value={normalizeToTwoDecimals(data.gasConsumed ?? 0)}
+                value={formatNumber(data.gasConsumed ?? 0)}
                 title={truncateString(
                   `Gas consumed by builders using ${projectName}`,
                   40,
