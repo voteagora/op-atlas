@@ -191,14 +191,8 @@ export default async function Page({ params }: PageProps) {
                 <div className="w-full space-y-6">
                   <div className="flex items-center space-x-2 group">
                     <h4 className="font-semibold text-xl">
-                      Increase your impact
+                      Get ready for Superchain interop
                     </h4>
-                    <button>
-                      <EyeOff
-                        size={20}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-150"
-                      />
-                    </button>
                   </div>
                   <div className="flex gap-4 lg:flex-row flex-col">
                     {isOnchainBuilder && (
