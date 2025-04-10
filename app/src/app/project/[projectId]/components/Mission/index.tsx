@@ -44,6 +44,7 @@ interface MissionProps {
   } | null
   deployedOnWorldchain?: boolean
   applicationDate?: Date
+  opReward: number | null
 }
 
 const getDateRange = (type: MissionProps["type"]) =>
@@ -93,6 +94,7 @@ export default function Mission({
   projectOSOData,
   deployedOnWorldchain,
   applicationDate,
+  opReward,
 }: MissionProps) {
   const totalGasFees = Object.values(metrics?.gasFees ?? {}).reduce(
     (acc, curr) => acc + curr,
@@ -101,7 +103,7 @@ export default function Mission({
 
   const onchainData = {
     ...(metrics ?? {}),
-    opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
+    opReward,
     isMember,
     deployedOnWorldchain,
     onchainBuilderEligible: projectOSOData?.onchainBuilderEligible,
@@ -109,7 +111,7 @@ export default function Mission({
 
   const devToolingData = {
     gasConsumed: totalGasFees,
-    opReward: Math.round(projectOSOData?.devToolingReward ?? 0),
+    opReward,
     onchainBuildersInAtlasCount: projectOSOData?.onchainBuildersInAtlasCount,
     topProjects: projectOSOData?.topProjects,
     isEligible: projectOSOData?.devToolingEligible,
