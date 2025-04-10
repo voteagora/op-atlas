@@ -121,6 +121,7 @@ export async function getPublicProjectOSOData(projectId: string) {
   const projectsGasConsumption = await queryMetrics(
     projectIdsForGasConsumption,
     "gasFees",
+    { _gte: "2025-02-01", _lte: "2025-02-28" },
   )
   const summedProjectsGasConsumption = projectsGasConsumption.reduce(
     (acc: number, curr: MetricValues) => {
