@@ -28,7 +28,7 @@ export default function IncreaseYourImpact({
           {isDevTooling &&
             "Support developers in building interopable applications"}
         </h4>
-        <p className="text-contrast-foreground">
+        <p className="text-contrast-foreground text-base font-normal">
           {isOnchainBuilder &&
             "Deploy SuperchainERC20 now to enable interoperable assets as soon as Superchain Interop goes live. Tap into the Superchain network effect from day one!"}
           {isDevTooling && "Prepare your Dev Tooling application for interop."}
