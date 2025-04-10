@@ -200,12 +200,7 @@ export default async function Page({ params }: PageProps) {
                       />
                     </button>
                   </div>
-                  <div
-                    className={cn("gap-4 grid", {
-                      "grid-cols-2": isOnchainBuilder && isDevTooling,
-                      "grid-cols-1": isOnchainBuilder || isDevTooling,
-                    })}
-                  >
+                  <div className="flex gap-4 lg:flex-row flex-col">
                     {isOnchainBuilder && (
                       <IncreaseYourImpact
                         type="onchain-builders"
