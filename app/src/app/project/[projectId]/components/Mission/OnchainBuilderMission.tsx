@@ -18,12 +18,7 @@ import {
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useHiddenAlerts } from "@/lib/hooks"
-import {
-  abbreviateNumber,
-  cn,
-  formatNumberWithSeparator,
-  generateMonthlyMetrics,
-} from "@/lib/utils"
+import { cn, formatNumber, generateMonthlyMetrics } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import {
@@ -106,7 +101,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
-                  {formatNumberWithSeparator(opReward)} OP
+                  {formatNumber(opReward, 0)} OP
                 </span>
                 <p className="text-secondary-foreground">
                   Rewards so far in Retro Funding: Onchain Builders
@@ -197,7 +192,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
-                value={abbreviateNumber(avgTVL)}
+                value={formatNumber(avgTVL, 0, "compact")}
                 title="TVL across the Superchain"
                 trend={{
                   value: monthMetrics.tvl.trend.value.toString(),
@@ -213,7 +208,11 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={0}
               />
               <MetricCard
-                value={abbreviateNumber(monthMetrics.transactions.value)}
+                value={formatNumber(
+                  monthMetrics.transactions.value,
+                  0,
+                  "compact",
+                )}
                 title="Transactions"
                 trend={{
                   value: monthMetrics.transactions.trend.value.toString(),
@@ -243,7 +242,11 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={2}
               />
               <MetricCard
-                value={abbreviateNumber(Math.round(avgQualifiedAddresses))}
+                value={formatNumber(
+                  Math.round(avgQualifiedAddresses),
+                  0,
+                  "compact",
+                )}
                 title="Qualified addresses"
                 trend={{
                   value: monthMetrics.activeAddresses.trend.value.toString(),
@@ -438,7 +441,7 @@ function NotPassingEligibilityContainer({
           {typeof projectValue === "number"
             ? projectValue === 0
               ? 0
-              : abbreviateNumber(projectValue)
+              : formatNumber(projectValue, 0, "compact")
             : projectValue
             ? "Pass"
             : "Fail"}

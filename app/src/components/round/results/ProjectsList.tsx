@@ -8,7 +8,7 @@ import { Button } from "@/components/common/Button"
 import TrackedLink from "@/components/common/TrackedLink"
 import ArrowLeftIcon from "@/components/icons/arrowLeftIcon"
 import { FundingRewardDetails } from "@/lib/types"
-import { formatNumberWithSeparator } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 interface Props {
@@ -84,7 +84,7 @@ const ProjectsList = ({
                 height={24}
               />
               <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
-                {formatNumberWithSeparator(Number(project?.amount))}
+                {formatNumber(Number(project?.amount), 0)}
               </span>
             </div>
           </div>
