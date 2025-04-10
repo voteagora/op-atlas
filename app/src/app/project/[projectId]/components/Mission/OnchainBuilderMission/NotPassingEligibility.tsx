@@ -1,6 +1,5 @@
+import { formatNumber } from "@/lib/utils"
 import { CheckIcon, XIcon } from "lucide-react"
-
-import { abbreviateNumber } from "@/lib/utils"
 
 export default function NotPassingEligibility({
   month,
@@ -64,7 +63,7 @@ export function NotPassingEligibilityContainer({
           {typeof projectValue === "number"
             ? projectValue === 0
               ? 0
-              : abbreviateNumber(projectValue)
+              : formatNumber(projectValue, 0, "compact")
             : projectValue
             ? "Pass"
             : "Fail"}

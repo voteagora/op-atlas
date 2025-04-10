@@ -8,8 +8,11 @@ import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { abbreviateNumber, formatNumberWithSeparator } from "@/lib/utils"
-import { getEligibleRetrofundingMonths, truncateString } from "@/lib/utils"
+import {
+  formatNumber,
+  getEligibleRetrofundingMonths,
+  truncateString,
+} from "@/lib/utils"
 
 import { MONTHS } from "../constants"
 import MetricCard from "./MetricCard"
@@ -79,7 +82,7 @@ export default function DevToolingMission({
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
-                  {formatNumberWithSeparator(opReward)} OP
+                  {formatNumber(opReward, 0)} OP
                 </span>
                 <p className="text-secondary-foreground">
                   Rewards so far in Retro Funding: Dev Tooling
@@ -179,7 +182,11 @@ export default function DevToolingMission({
                 index={0}
               />
               <MetricCard
-                value={abbreviateNumber(data.onchainBuildersInAtlasCount ?? 0)}
+                value={formatNumber(
+                  data.onchainBuildersInAtlasCount ?? 0,
+                  0,
+                  "compact",
+                )}
                 title={`Trusted developers engaging with ${projectName}`}
                 index={1}
               />
