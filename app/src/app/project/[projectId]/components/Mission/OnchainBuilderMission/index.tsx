@@ -136,7 +136,7 @@ export default function OnchainBuilderMission({
                   as="button"
                   variant="primary"
                   className="z-50"
-                  href={`/project/${projectId}/rewards`}
+                  href={`/projects/${projectId}/rewards`}
                   text="Claim your rewards"
                   eventName="Link Click"
                   eventData={{
