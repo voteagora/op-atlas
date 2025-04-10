@@ -90,10 +90,6 @@ export default function OnchainBuilderMission({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  function normalizeToNumberOfDecimals(num: number, decimals = 2): number {
-    return Number(num.toFixed(decimals))
-  }
-
   const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
 
   if (!data) {
@@ -270,15 +266,14 @@ export default function OnchainBuilderMission({
                 index={1}
               />
               <MetricCard
-                value={normalizeToNumberOfDecimals(
-                  monthMetrics.gasFees.value,
-                  3,
-                )}
+                value={formatNumber(monthMetrics.gasFees.value, 0)}
                 title="Gas consumed"
                 trend={{
-                  value: normalizeToNumberOfDecimals(
+                  value: formatNumber(
                     monthMetrics.gasFees.trend.value,
-                  ).toString(),
+                    0,
+                    "compact",
+                  ),
                   type:
                     monthMetrics.gasFees.trend.sign === "inc"
                       ? "increase"
