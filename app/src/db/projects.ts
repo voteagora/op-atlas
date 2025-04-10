@@ -2095,6 +2095,7 @@ export async function getProjectOSOData({ projectId }: { projectId: string }) {
     onchainBuilderReward: number
     onchainBuilderEligible: boolean
     onchainBuildersInAtlasCount: number
+    onchainBuildersOSOProjectIds: string[]
   } | null
 }
 

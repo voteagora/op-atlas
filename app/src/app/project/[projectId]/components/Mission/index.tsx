@@ -34,13 +34,14 @@ interface MissionProps {
       website?: string[]
       thumbnailUrl?: string
     }[]
-    hasBundleBear: boolean
-    devToolingReward: number
-    devToolingEligible: boolean
-    hasDefillamaAdapter: boolean
-    onchainBuilderReward: number
-    onchainBuilderEligible: boolean
-    onchainBuildersInAtlasCount: number
+    hasBundleBear?: boolean
+    devToolingReward?: number
+    devToolingEligible?: boolean
+    hasDefillamaAdapter?: boolean
+    onchainBuilderReward?: number
+    onchainBuilderEligible?: boolean
+    onchainBuildersInAtlasCount?: number
+    projectsGasConsumption: number
   } | null
   deployedOnWorldchain?: boolean
   applicationDate?: Date
@@ -96,11 +97,6 @@ export default function Mission({
   applicationDate,
   opReward,
 }: MissionProps) {
-  const totalGasFees = Object.values(metrics?.gasFees ?? {}).reduce(
-    (acc, curr) => acc + curr,
-    0,
-  )
-
   const onchainData = {
     ...(metrics ?? {}),
     opReward,
@@ -110,7 +106,7 @@ export default function Mission({
   }
 
   const devToolingData = {
-    gasConsumed: totalGasFees,
+    gasConsumed: projectOSOData?.projectsGasConsumption,
     opReward,
     onchainBuildersInAtlasCount: projectOSOData?.onchainBuildersInAtlasCount,
     topProjects: projectOSOData?.topProjects,

@@ -4,7 +4,6 @@ import {
   createOSOProjects,
   getDevToolingProjects,
   getOnchainBuildersProjects,
-  getProjectOSOByIds,
   getProjectOSOData,
   getProjectsOSO,
 } from "@/db/projects"
@@ -115,8 +114,8 @@ export async function getPublicProjectOSOData(projectId: string) {
 
   const projectOSOData = await getProjectOSOData({ projectId })
 
-  const projectIdsForGasConsumption = (projectOSOData?.data as any)
-    .onchainBuildersOSOProjectIds
+  const projectIdsForGasConsumption =
+    projectOSOData?.onchainBuildersOSOProjectIds ?? []
 
   const projectsGasConsumption = await queryMetrics(
     projectIdsForGasConsumption,
@@ -131,10 +130,8 @@ export async function getPublicProjectOSOData(projectId: string) {
   )
 
   const groupedProjectOSOData = {
-    data: {
-      ...(projectOSOData?.data as any),
-      projectsGasConsumption: summedProjectsGasConsumption,
-    },
+    ...projectOSOData,
+    projectsGasConsumption: summedProjectsGasConsumption,
   }
 
   return {
