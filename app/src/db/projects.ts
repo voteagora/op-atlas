@@ -1916,6 +1916,12 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
         contracts: true,
         repos: true,
         funding: true,
+        rewards: {
+          select: {
+            roundId: true,
+            amount: true,
+          },
+        },
         organization: {
           select: {
             organization: {
@@ -1998,6 +2004,12 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
 
   return {
     ...project,
+    devToolingRewards: project.rewards
+      ?.filter((reward) => reward.roundId === "7")
+      .reduce((acc, reward) => acc + Number(reward.amount), 0),
+    onchainBuildersRewards: project.rewards
+      ?.filter((reward) => reward.roundId === "8")
+      .reduce((acc, reward) => acc + Number(reward.amount), 0),
     devToolingApplication,
     onchainBuildersApplication,
     contributors: deduppedUsers,
