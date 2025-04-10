@@ -133,6 +133,9 @@ export default async function Page({ params }: PageProps) {
                         projectName={publicProject.name}
                         isMember={isMember}
                         deployedOnWorldchain={deployedOnWorldchain}
+                        opReward={Math.round(
+                          publicProject.onchainBuildersRewards ?? 0,
+                        )}
                         metrics={{
                           activeAddresses:
                             onchainBuildersMetrics.activeAddresses,
@@ -163,6 +166,9 @@ export default async function Page({ params }: PageProps) {
                         isMember={isMember}
                         projectName={publicProject.name}
                         projectOSOData={projectOSOData}
+                        opReward={Math.round(
+                          publicProject.devToolingRewards ?? 0,
+                        )}
                         metrics={{
                           activeAddresses:
                             onchainBuildersMetrics.activeAddresses,
