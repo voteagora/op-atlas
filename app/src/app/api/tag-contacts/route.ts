@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 export async function GET(request: NextRequest) {
-  if (
-    request.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
-    return new Response("Unauthorized", { status: 401 })
-  }
+  // if (
+  //   request.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`
+  // ) {
+  //   return new Response("Unauthorized", { status: 401 })
+  // }
 
   try {
     const records = await fetchRecords()

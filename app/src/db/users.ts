@@ -628,42 +628,30 @@ export async function addTags(records: EntityRecords) {
   const entityKeys = Object.keys(records) as (keyof typeof records)[]
   const userTagsMap = new Map<string, Set<string>>()
 
-  // Handle base tag assignment from records
+  // Aggregate base tags from EntityRecords
   entityKeys.forEach((entity) => {
     records[entity].forEach((user) => {
-      const userTag = EXTENDED_TAG_BY_ENTITY[entity]
+      const tag = EXTENDED_TAG_BY_ENTITY[entity]
       if (!userTagsMap.has(user.email)) {
-        userTagsMap.set(user.email, new Set([userTag]))
+        userTagsMap.set(user.email, new Set([tag]))
       } else {
-        userTagsMap.get(user.email)?.add(userTag)
+        userTagsMap.get(user.email)!.add(tag)
       }
     })
   })
 
-  // Fetch project + org data
+  // Enrich with reward/org/project admin metadata
   const allProjects = await prisma.project.findMany({
     where: { deletedAt: null },
     include: {
-      applications: {
-        include: { round: true },
-      },
-      rewards: {
-        include: { round: true },
-      },
-      team: {
-        include: {
-          user: { include: { emails: true } },
-        },
-      },
+      applications: { include: { round: true } },
+      rewards: { include: { round: true } },
+      team: { include: { user: { include: { emails: true } } } },
       organization: {
         include: {
           organization: {
             include: {
-              team: {
-                include: {
-                  user: { include: { emails: true } },
-                },
-              },
+              team: { include: { user: { include: { emails: true } } } },
             },
           },
         },
@@ -671,31 +659,24 @@ export async function addTags(records: EntityRecords) {
     },
   })
 
-  for (const project of allProjects) {
+  allProjects.forEach((project) => {
     const round7 = project.rewards.find((r) => r.roundId === "7")
     const round8 = project.rewards.find((r) => r.roundId === "8")
 
-    const appliedRound7 = project.applications.some(
-      (app) => app.roundId === "7",
-    )
-    const appliedRound8 = project.applications.some(
-      (app) => app.roundId === "8",
-    )
+    const appliedRound7 = project.applications.some((a) => a.roundId === "7")
+    const appliedRound8 = project.applications.some((a) => a.roundId === "8")
 
     const projectAdminEmails = project.team
-      .filter((team) => team.role === "admin")
-      .flatMap((team) => team.user.emails.map((e) => e.email))
-
+      .filter((t) => t.role === "admin")
+      .flatMap((t) => t.user.emails.map((e) => e.email))
     const orgAdminEmails =
       project.organization?.organization?.team
-        .filter((team) => team.role === "admin")
-        .flatMap((team) => team.user.emails.map((e) => e.email)) ?? []
+        .filter((t) => t.role === "admin")
+        .flatMap((t) => t.user.emails.map((e) => e.email)) ?? []
 
-    const allAdminEmails = Array.from(
-      new Set([...projectAdminEmails, ...orgAdminEmails]),
-    ).filter(Boolean)
+    const allAdmins = new Set([...projectAdminEmails, ...orgAdminEmails])
 
-    for (const email of allAdminEmails) {
+    Array.from(allAdmins).forEach((email) => {
       if (!userTagsMap.has(email)) {
         userTagsMap.set(email, new Set())
       }
@@ -713,65 +694,95 @@ export async function addTags(records: EntityRecords) {
       } else if (appliedRound7) {
         tags.add("Did not receive rewards (dev tooling)")
       }
-    }
-  }
+    })
+  })
 
-  const emailsToUpdate = Array.from(userTagsMap.keys())
-
-  const usersToUpdate = await prisma.userEmail.findMany({
+  // Add KYC tags
+  const kycUsers = await prisma.kYCUser.findMany({
     where: {
-      email: {
-        in: emailsToUpdate,
-      },
+      status: { in: ["PENDING", "APPROVED"] },
     },
   })
 
-  const usersToUntagCondition = {
-    AND: [
-      {
-        NOT: {
-          tags: {
-            isEmpty: true,
-          },
-        },
-      },
-      {
-        email: {
-          notIn: emailsToUpdate,
-        },
-      },
-    ],
-  }
+  kycUsers.forEach((kycUser) => {
+    const email = kycUser.email
 
-  const usersToUntag = await prisma.userEmail.findMany({
-    where: usersToUntagCondition,
+    if (!userTagsMap.has(email)) {
+      userTagsMap.set(email, new Set())
+    }
+
+    const tags = userTagsMap.get(email)!
+
+    if (kycUser.status === "APPROVED") {
+      tags.add("KYC Cleared")
+      tags.delete("KYC Started")
+    } else if (kycUser.status === "PENDING") {
+      tags.add("KYC Started")
+    }
   })
 
-  await prisma.$transaction([
-    ...usersToUpdate.map((user) =>
-      prisma.userEmail.update({
-        where: { id: user.id },
-        data: { tags: Array.from(userTagsMap.get(user.email) ?? []) },
-      }),
-    ),
-    prisma.userEmail.updateMany({
-      where: usersToUntagCondition,
-      data: { tags: [] },
-    }),
-  ])
+  // Determine changes
+  const newEmails = Array.from(userTagsMap.keys())
 
-  return [
-    ...usersToUpdate.map((user) => ({
-      id: user.id,
-      email: user.email,
-      tags: Array.from(userTagsMap.get(user.email) ?? []),
-    })),
-    ...usersToUntag.map((user) => ({
-      id: user.id,
-      email: user.email,
-      tags: [],
-    })),
-  ]
+  const existingRecords = await prisma.contactEmailTags.findMany({
+    where: {
+      email: { in: newEmails },
+    },
+  })
+
+  const existingTagMap = new Map<string, string[]>()
+  existingRecords.forEach((record) => {
+    existingTagMap.set(record.email, record.tags)
+  })
+
+  const emailsToUpsert: { email: string; tags: string[] }[] = []
+
+  Array.from(userTagsMap.entries()).forEach(([email, newTagsSet]) => {
+    const newTags = Array.from(newTagsSet).sort()
+    const existingTags = existingTagMap.get(email)?.slice().sort() ?? []
+
+    const areSame =
+      newTags.length === existingTags.length &&
+      newTags.every((tag, i) => tag === existingTags[i])
+
+    if (!areSame) {
+      emailsToUpsert.push({ email, tags: newTags })
+    }
+  })
+
+  // Determine deletions
+  const existingEmails = new Set(existingRecords.map((r) => r.email))
+  const emailsToRemove = Array.from(existingEmails).filter(
+    (email) => !userTagsMap.has(email),
+  )
+
+  // Apply updates in batches
+  const BATCH_SIZE = 100
+  for (let i = 0; i < emailsToUpsert.length; i += BATCH_SIZE) {
+    const batch = emailsToUpsert.slice(i, i + BATCH_SIZE)
+
+    const tx = batch.map(({ email, tags }) =>
+      prisma.contactEmailTags.upsert({
+        where: { email },
+        create: { email, tags },
+        update: { tags },
+      }),
+    )
+
+    await prisma.$transaction(tx)
+    console.log(`Processed batch ${i / BATCH_SIZE + 1}`)
+  }
+
+  if (emailsToRemove.length > 0) {
+    await prisma.contactEmailTags.deleteMany({
+      where: {
+        email: { in: emailsToRemove },
+      },
+    })
+  }
+
+  // Final output for downstream use
+  return emailsToUpsert.map(({ email, tags }) => ({ email, tags }))
 }
 
 export async function makeUserAddressPrimary(address: string, userId: string) {
