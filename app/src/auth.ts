@@ -5,7 +5,7 @@ import DiscordProvider from "next-auth/providers/discord"
 import GitHubProvider from "next-auth/providers/github"
 import { cookies } from "next/headers"
 
-import { addUserAddresses, getUserByAddress, updateUserDiscord, updateUserGithub, upsertUser } from "./db/users"
+import { addUserAddresses, getUserByAddress, getUserByEmail, updateUserDiscord, updateUserGithub, upsertUser } from "./db/users"
 import privy from "./lib/privy"
 import { DISCORD_REDIRECT_COOKIE, GITHUB_REDIRECT_COOKIE } from "./lib/utils"
 
@@ -42,7 +42,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       },
 
       async authorize(credentials) {
-        const { wallet, token } = credentials;
+        const { wallet, token, email } = credentials;
 
 
         try {
@@ -62,123 +62,63 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           console.log(`Token verification failed with error ${error}.`);
         }
 
-        // Impelment db check for email
 
-        let user = await getUserByAddress(wallet as string);
+        if (email) {
+          let user = await getUserByEmail(email as string);
 
+          if (!user) {
+            const newUser = await upsertUser({
+              farcasterId: '6666',
+              name: 'andreitr',
+              username: 'andreitr',
+              imageUrl: undefined,
+              bio: undefined,
+            });
 
-        if (!user) {
-          const newUser = await upsertUser({
-            farcasterId: '6666',
-            name: 'andreitr',
-            username: 'andreitr',
-            imageUrl: undefined,
-            bio: undefined,
-          });
-
-          await addUserAddresses({
-            id: newUser.id,
-            addresses: [wallet as string],
-            source: 'atlas',
-          });
-
-          user = await getUserByAddress(wallet as string);
+            user = newUser;
+          }
+          return {
+            id: user?.id,
+            farcasterId: user?.farcasterId,
+            name: user?.name as string | undefined,
+            image: user?.imageUrl as string | undefined,
+          }
         }
 
-        return {
-          id: user?.id,
-          farcasterId: user?.farcasterId,
-          email: user?.emails[0]?.email,
-          name: user?.name as string | undefined,
-          image: user?.imageUrl as string | undefined,
+
+        if (wallet) {
+
+          let user = await getUserByAddress(wallet as string);
+
+          if (!user) {
+            const newUser = await upsertUser({
+              farcasterId: '6666',
+              name: 'andreitr',
+              username: 'andreitr',
+              imageUrl: undefined,
+              bio: undefined,
+            });
+
+            await addUserAddresses({
+              id: newUser.id,
+              addresses: [wallet as string],
+              source: 'atlas',
+            });
+
+            user = newUser;
+          }
+          return {
+            id: user?.id,
+            farcasterId: user?.farcasterId,
+            name: user?.name as string | undefined,
+            image: user?.imageUrl as string | undefined,
+          }
         }
+
+        return null;
+
       },
     }),
-
-    // CredentialsProvider({
-    //   name: "Sign in with Farcaster",
-    //   credentials: {
-    //     message: {
-    //       label: "Message",
-    //       type: "text",
-    //       placeholder: "0x0",
-    //     },
-    //     signature: {
-    //       label: "Signature",
-    //       type: "text",
-    //       placeholder: "0x0",
-    //     },
-    //     // In a production app with a server, these should be fetched from
-    //     // your Farcaster data indexer rather than have them accepted as part
-    //     // of credentials.
-    //     username: {
-    //       label: "Username",
-    //       type: "text",
-    //       placeholder: "0x0",
-    //     },
-    //     name: {
-    //       label: "Name",
-    //       type: "text",
-    //       placeholder: "0x0",
-    //     },
-    //     bio: {
-    //       label: "Bio",
-    //       type: "text",
-    //       placeholder: "0x0",
-    //     },
-    //     pfp: {
-    //       label: "Pfp",
-    //       type: "text",
-    //       placeholder: "0x0",
-    //     },
-    //     nonce: {
-    //       label: "Nonce",
-    //       type: "text",
-    //       placeholder: "0x0",
-    //     },
-    //   },
-
-    //   async authorize(credentials) {
-    //     const appClient = createAppClient({
-    //       ethereum: viemConnector(),
-    //     })
-
-    //     const farcasterDomain =
-    //       process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-    //         ? process.env.NEXT_PUBLIC_APP_DOMAIN
-    //         : process.env.NEXT_PUBLIC_VERCEL_URL
-
-    //     const verifyResponse = await appClient.verifySignInMessage({
-    //       message: credentials?.message as string,
-    //       signature: credentials?.signature as `0x${string}`,
-    //       domain: farcasterDomain!,
-    //       nonce: (credentials?.nonce as string) ?? "",
-    //     })
-
-    //     const { success, fid } = verifyResponse
-
-    //     if (!success) {
-    //       return null
-    //     }
-
-    //     // Create or update the user in our database
-    //     const { id, emails, farcasterId } = await upsertUser({
-    //       farcasterId: fid.toString(),
-    //       name: credentials?.name as string | undefined,
-    //       username: credentials?.username as string | undefined,
-    //       imageUrl: credentials?.pfp as string | undefined,
-    //       bio: credentials?.bio as string | undefined,
-    //     })
-
-    //     return {
-    //       id,
-    //       farcasterId,
-    //       email: emails[0]?.email,
-    //       name: credentials?.name as string | undefined,
-    //       image: credentials?.pfp as string | undefined,
-    //     }
-    //   },
-    // }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {

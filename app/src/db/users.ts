@@ -9,11 +9,8 @@ import {
 } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 
-import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "@/lib/constants"
-import { EXTENDED_TAG_BY_ENTITY } from "@/lib/constants"
-import { ExtendedAggregatedType } from "@/lib/types"
-import { UserAddressSource } from "@/lib/types"
-import { mergeResultsByEmail } from "@/lib/utils/tags"
+import { CONTRIBUTOR_ELIGIBLE_PROJECTS, EXTENDED_TAG_BY_ENTITY } from "@/lib/constants"
+import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
 
@@ -44,30 +41,51 @@ export async function getUserById(userId: string) {
   })
 }
 
-
-export async function getUserByAddress(address: string) {
-  return prisma.user.findFirst({
+export async function getUserByAddress(address: string): Promise<User | null> {
+  const userAddress = await prisma.userAddress.findFirst({
     where: {
-      addresses: {
-        some: {
-          address,
-        },
-      },
+      address,
     },
     include: {
-      addresses: {
-        orderBy: {
-          primary: "desc",
+      user: {
+        include: {
+          addresses: {
+            orderBy: {
+              primary: "desc",
+            },
+          },
+          interaction: true,
+          emails: true,
         },
       },
-      interaction: true,
-      emails: true,
     },
   })
+
+  return userAddress?.user || null
 }
 
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const userEmail = await prisma.userEmail.findFirst({
+    where: {
+      email,
+    },
+    include: {
+      user: {
+        include: {
+          addresses: {
+            orderBy: {
+              primary: "desc",
+            },
+          },
+          interaction: true,
+          emails: true,
+        },
+      },
+    },
+  })
 
-
+  return userEmail?.user || null
+}
 
 export async function getUserByFarcasterId(farcasterId: string) {
   return prisma.user.findUnique({
@@ -832,3 +850,4 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
     },
   })
 }
+

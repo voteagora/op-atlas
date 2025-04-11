@@ -11,6 +11,8 @@ import { useCallback, useEffect } from "react";
 
 export function AccountPrivy() {
     const { ready, authenticated, login, logout, user, getAccessToken } = usePrivy();
+    const { data: session, status, } = useSession();
+
 
     const router = useRouter()
 
@@ -26,6 +28,7 @@ export function AccountPrivy() {
     useEffect(() => {
         if (user) {
 
+
             getAccessToken().then((token) => {
                 console.log("we have the token", token);
                 signIn('credentials', {
@@ -38,7 +41,7 @@ export function AccountPrivy() {
     }, [user]);
 
 
-    if (authenticated) {
+    if (session) {
         return <div className="cursor-pointer text-white bg-[#FF0420] rounded-md px-4 py-2" onClick={logOut}>Logout</div>
     } else {
         return <div className="cursor-pointer text-white bg-[#FF0420] rounded-md px-4 py-2" onClick={() => login()}>Login</div>
