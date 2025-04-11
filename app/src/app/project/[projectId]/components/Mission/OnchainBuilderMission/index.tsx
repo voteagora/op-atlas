@@ -15,8 +15,7 @@ import {
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  abbreviateNumber,
-  formatNumberWithSeparator,
+  formatNumber,
   generateMonthlyMetrics,
   getEligibleRetrofundingMonths,
 } from "@/lib/utils"
@@ -91,10 +90,6 @@ export default function OnchainBuilderMission({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  function normalizeToNumberOfDecimals(num: number, decimals = 2): number {
-    return Number(num.toFixed(decimals))
-  }
-
   const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
 
   if (!data) {
@@ -125,7 +120,7 @@ export default function OnchainBuilderMission({
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
-                  {formatNumberWithSeparator(opReward)} OP
+                  {formatNumber(opReward, 0)} OP
                 </span>
                 <p className="text-secondary-foreground">
                   Rewards so far in Retro Funding: Onchain Builders
@@ -239,7 +234,7 @@ export default function OnchainBuilderMission({
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
-                value={abbreviateNumber(avgTVL)}
+                value={formatNumber(avgTVL, 0, "compact")}
                 title="TVL across the Superchain"
                 trend={{
                   value: monthMetrics.tvl.trend.value.toString(),
@@ -255,7 +250,11 @@ export default function OnchainBuilderMission({
                 index={0}
               />
               <MetricCard
-                value={abbreviateNumber(monthMetrics.transactions.value)}
+                value={formatNumber(
+                  monthMetrics.transactions.value,
+                  0,
+                  "compact",
+                )}
                 title="Transactions"
                 trend={{
                   value: monthMetrics.transactions.trend.value.toString(),
@@ -267,15 +266,14 @@ export default function OnchainBuilderMission({
                 index={1}
               />
               <MetricCard
-                value={normalizeToNumberOfDecimals(
-                  monthMetrics.gasFees.value,
-                  3,
-                )}
+                value={formatNumber(monthMetrics.gasFees.value, 0)}
                 title="Gas consumed"
                 trend={{
-                  value: normalizeToNumberOfDecimals(
+                  value: formatNumber(
                     monthMetrics.gasFees.trend.value,
-                  ).toString(),
+                    0,
+                    "compact",
+                  ),
                   type:
                     monthMetrics.gasFees.trend.sign === "inc"
                       ? "increase"
@@ -285,7 +283,11 @@ export default function OnchainBuilderMission({
                 index={2}
               />
               <MetricCard
-                value={abbreviateNumber(Math.round(avgQualifiedAddresses))}
+                value={formatNumber(
+                  Math.round(avgQualifiedAddresses),
+                  0,
+                  "compact",
+                )}
                 title="Qualified addresses"
                 trend={{
                   value: monthMetrics.activeAddresses.trend.value.toString(),

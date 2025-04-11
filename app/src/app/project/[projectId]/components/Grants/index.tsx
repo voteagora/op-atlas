@@ -1,7 +1,7 @@
 import { ProjectFunding } from "@prisma/client"
 import Image from "next/image"
 
-import { formatNumberWithCommas } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
 
 import TotalBanner from "./TotalBanner"
 
@@ -56,9 +56,7 @@ export default function Grants({ funding }: GrantsProps) {
                   </span>
                 </p>
               </div>
-              <span className="font-medium">
-                {formatNumberWithCommas(amount)} OP
-              </span>
+              <span className="font-medium">{formatNumber(amount, 0)} OP</span>
             </li>
           )
         })}
@@ -67,10 +65,11 @@ export default function Grants({ funding }: GrantsProps) {
           <div className="w-full flex items-center justify-between space-x-2 pt-4 text-foreground font-medium px-6">
             <span>Total</span>
             <span>
-              {formatNumberWithCommas(
+              {formatNumber(
                 funding
                   .map((grant) => Number(grant.amount))
                   .reduce((x, y) => x + y, 0),
+                0,
               )}{" "}
               OP
             </span>
