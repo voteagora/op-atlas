@@ -220,8 +220,7 @@ export default async function Page({ params }: PageProps) {
               )}
             </>
           )}
-
-          {/* {onchainBuildersMetrics && <Performance />} */}
+          <Performance data={onchainBuildersMetrics} />
           <MoreDetails />
         </div>
       </div>

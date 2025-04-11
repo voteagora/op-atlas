@@ -4,6 +4,7 @@ import {
   createOSOProjects,
   getDevToolingProjects,
   getOnchainBuildersProjects,
+  getProjectOSOByIds,
   getProjectOSOData,
   getProjectsOSO,
 } from "@/db/projects"
