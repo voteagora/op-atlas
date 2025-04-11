@@ -6,8 +6,7 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
     if (!appId) {
-        console.error("Please define PRIVY_APP_ID")
-        return <>{children}</>
+        throw new Error('Missing NEXT_PUBLIC_PRIVY_APP_ID environment variable');
     }
 
     return (
@@ -18,7 +17,7 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
                 appearance: {
                     theme: 'light',
                     accentColor: '#FF0420',
-                    logo: "https://atlas.optimism.io/assets/images/logo.svg",
+                    logo: "/assets/images/welcome-privy.png",
                 },
             }}
         >

@@ -1,13 +1,13 @@
 import { createAppClient, viemConnector } from "@farcaster/auth-client"
 import { deleteCookie, getCookie } from "cookies-next"
-import { cookies } from "next/headers"
 import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import DiscordProvider from "next-auth/providers/discord"
 import GitHubProvider from "next-auth/providers/github"
+import { cookies } from "next/headers"
 
-import { updateUserGithub, upsertUser } from "./db/users"
-import { updateUserDiscord } from "./db/users"
+import { PrivyClient } from "@privy-io/server-auth"
+import { getUserByAddress, updateUserDiscord, updateUserGithub, upsertUser, addUserAddresses } from "./db/users"
 import { DISCORD_REDIRECT_COOKIE, GITHUB_REDIRECT_COOKIE } from "./lib/utils"
 
 if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
@@ -33,6 +33,64 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
+
+    CredentialsProvider({
+      name: "prviy",
+      credentials: {
+        email: { label: "address", type: "text", placeholder: "test@test.com" },
+        wallet: { label: "wallet", type: "text", placeholder: "0x0" },
+        token: { label: "token", type: "text", placeholder: "xxx" },
+      },
+
+      async authorize(credentials) {
+        const { wallet, token } = credentials;
+
+        if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID || !process.env.PRIVY_APP_SECRET) {
+          throw new Error("Missing Privy environment variables");
+        }
+
+        // Move this into privy.ts
+        const privy = new PrivyClient(process.env.NEXT_PUBLIC_PRIVY_APP_ID,
+          process.env.PRIVY_APP_SECRET,
+        );
+        const verified = await privy.verifyAuthToken(token as string);
+
+        let user = await getUserByAddress(wallet as string);
+
+        if (!user) {
+
+          const newUser = await upsertUser({
+            farcasterId: '6666',
+            name: 'andreitr',
+            username: 'andreitr',
+            imageUrl: undefined,
+            bio: undefined,
+          });
+
+          await addUserAddresses({
+            id: newUser.id,
+            addresses: [wallet as string],
+            source: 'atlas',
+          });
+
+          // Get the full user object with addresses
+          user = await getUserByAddress(wallet as string);
+        }
+
+        if (!user) {
+          return null;
+        }
+
+        return {
+          id: user?.id,
+          farcasterId: user?.farcasterId,
+          email: user?.emails[0]?.email,
+          name: user?.name as string | undefined,
+          image: user?.imageUrl as string | undefined,
+        }
+      },
+    }),
+
     CredentialsProvider({
       name: "Sign in with Farcaster",
       credentials: {
@@ -75,6 +133,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           placeholder: "0x0",
         },
       },
+
       async authorize(credentials) {
         const appClient = createAppClient({
           ethereum: viemConnector(),

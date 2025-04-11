@@ -41,6 +41,11 @@ const nextConfig = {
         hostname: "i.imgur.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "s3.amazonaws.com",
+        pathname: "/**",
+      },
     ],
   },
 }

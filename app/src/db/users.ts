@@ -44,6 +44,31 @@ export async function getUserById(userId: string) {
   })
 }
 
+
+export async function getUserByAddress(address: string) {
+  return prisma.user.findFirst({
+    where: {
+      addresses: {
+        some: {
+          address,
+        },
+      },
+    },
+    include: {
+      addresses: {
+        orderBy: {
+          primary: "desc",
+        },
+      },
+      interaction: true,
+      emails: true,
+    },
+  })
+}
+
+
+
+
 export async function getUserByFarcasterId(farcasterId: string) {
   return prisma.user.findUnique({
     where: {
@@ -58,10 +83,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -165,23 +190,23 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-        prisma.userEmail.delete({
-          where: {
-            id: currentEmail.id,
-          },
-        }),
-      ]
+      prisma.userEmail.delete({
+        where: {
+          id: currentEmail.id,
+        },
+      }),
+    ]
     : []
 
   const createEmail = email
     ? [
-        prisma.userEmail.create({
-          data: {
-            email,
-            userId: id,
-          },
-        }),
-      ]
+      prisma.userEmail.create({
+        data: {
+          email,
+          userId: id,
+        },
+      }),
+    ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])
