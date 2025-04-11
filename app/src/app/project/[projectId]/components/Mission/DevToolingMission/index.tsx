@@ -165,10 +165,7 @@ export default function DevToolingMission({
             >
               <MetricCard
                 value={formatNumber(data.gasConsumed ?? 0)}
-                title={truncateString(
-                  `Gas consumed by builders using ${projectName}`,
-                  40,
-                )}
+                title={`Gas consumed by builders using ${projectName}`}
                 sign={{ value: " ETH", position: "right" }}
                 index={0}
               />
