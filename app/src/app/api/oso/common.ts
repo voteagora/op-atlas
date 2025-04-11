@@ -115,14 +115,15 @@ export async function getPublicProjectOSOData(projectId: string) {
 
   const projectOSOData = await getProjectOSOData({ projectId })
 
-  const topProjectIds =
-    (projectOSOData?.data as any).topProjects.map((p: any) => p.id) ?? []
-  const topProjects = (
-    await getProjectOSOByIds({ projectIds: topProjectIds })
-  ).map((p) => p.osoId)
+  const projectIdsForGasConsumption =
+    projectOSOData?.onchainBuildersOSOProjectIds ?? []
 
-  const topProjectsGasConsumption = await queryMetrics(topProjects, "gasFees")
-  const summedTopProjectsGasConsumption = topProjectsGasConsumption.reduce(
+  const projectsGasConsumption = await queryMetrics(
+    projectIdsForGasConsumption,
+    "gasFees",
+    { _gte: "2025-02-01", _lte: "2025-02-28" },
+  )
+  const summedProjectsGasConsumption = projectsGasConsumption.reduce(
     (acc: number, curr: MetricValues) => {
       return acc + curr.amount
     },
@@ -130,10 +131,8 @@ export async function getPublicProjectOSOData(projectId: string) {
   )
 
   const groupedProjectOSOData = {
-    data: {
-      ...(projectOSOData?.data as any),
-      topProjectsGasConsumption: summedTopProjectsGasConsumption,
-    },
+    ...projectOSOData,
+    projectsGasConsumption: summedProjectsGasConsumption,
   }
 
   return {

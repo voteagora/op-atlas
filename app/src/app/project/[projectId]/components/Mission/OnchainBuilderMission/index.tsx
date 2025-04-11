@@ -1,14 +1,11 @@
 "use client"
 
 import { getMonth, parseISO } from "date-fns"
-import { CheckIcon, EyeOff, Info, Triangle, XIcon } from "lucide-react"
-import { AlertTriangleIcon } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { useParams } from "next/navigation"
 import React from "react"
 
-import { Button } from "@/components/common/Button"
+import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import {
   Accordion,
@@ -17,55 +14,86 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useHiddenAlerts } from "@/lib/hooks"
 import {
-  abbreviateNumber,
-  cn,
-  formatNumberWithSeparator,
+  formatNumber,
   generateMonthlyMetrics,
+  getEligibleRetrofundingMonths,
 } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { getDaysInMonthByName, INDEXED_MONTHS, MONTHS } from "./constants"
-import { OnchainBuildersDataType } from "./types"
+import { getDaysInMonthByName, INDEXED_MONTHS, MONTHS } from "../constants"
+import { OnchainBuildersDataType } from "../types"
+import AlertContainer from "./AlertContainer"
+import MetricCard from "./MetricCard"
+import NotPassingEligibility from "./NotPassingEligibility"
 
 interface DataProps {
-  isMember: boolean
-  activeAddresses: OnchainBuildersDataType
-  gasFees: OnchainBuildersDataType
-  transactions: OnchainBuildersDataType
-  tvl: OnchainBuildersDataType
+  isMember?: boolean
+  activeAddresses?: OnchainBuildersDataType
+  gasFees?: OnchainBuildersDataType
+  transactions?: OnchainBuildersDataType
+  tvl?: OnchainBuildersDataType
   opReward?: number | null
   deployedOnWorldchain?: boolean
-  eligibility: {
-    onchainBuilderEligible: boolean
-    hasDefillamaAdapter: boolean
-    hasQualifiedAddresses: boolean
-    hasBundleBear: boolean
+  onchainBuilderEligible?: boolean
+  eligibility?: {
+    hasDefillamaAdapter?: boolean
+    hasQualifiedAddresses?: boolean
+    hasBundleBear?: boolean
   }
 }
 
-export function OnchainBuilderMission({ data }: { data?: DataProps }) {
-  const { setOpenDialog } = useAppDialogs()
+export default function OnchainBuilderMission({
+  data,
+  applicationDate,
+  projectName,
+}: {
+  data: DataProps
+  applicationDate: Date
+  projectName: string
+}) {
   const { projectId } = useParams()
 
-  const opReward = data?.opReward ?? 0
+  const opReward = data.opReward ?? 0
+
+  const getMonthFromDateString = (dateString: string) => {
+    const date = parseISO(dateString)
+    const month = getMonth(date) + 1 // 0-indexed
+
+    return INDEXED_MONTHS[month as keyof typeof INDEXED_MONTHS]
+  }
+
+  const groupByMonth = (data: Record<string, number>) => {
+    return Object.entries(data).reduce<Record<string, number[]>>(
+      (acc, [date, value]) => {
+        const month = getMonthFromDateString(date)
+        if (!acc[month]) {
+          acc[month] = []
+        }
+        acc[month].push(value)
+        return acc
+      },
+      {},
+    )
+  }
 
   const groupedData = React.useMemo(() => {
     if (!data) return {}
 
     const grouped = {
-      activeAddresses: groupByMonth(data.activeAddresses),
-      gasFees: groupByMonth(data.gasFees),
-      transactions: groupByMonth(data.transactions),
-      tvl: groupByMonth(data.tvl),
+      activeAddresses: groupByMonth(data.activeAddresses ?? {}),
+      gasFees: groupByMonth(data.gasFees ?? {}),
+      transactions: groupByMonth(data.transactions ?? {}),
+      tvl: groupByMonth(data.tvl ?? {}),
     }
 
     return generateMonthlyMetrics(grouped, MONTHS)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
-  function normalizeToNumberOfDecimals(num: number, decimals = 2): number {
-    return Number(num.toFixed(decimals))
+  const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
+
+  if (!data) {
+    return null
   }
 
   return (
@@ -92,20 +120,27 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
-                  {formatNumberWithSeparator(opReward)} OP
+                  {formatNumber(opReward, 0)} OP
                 </span>
                 <p className="text-secondary-foreground">
                   Rewards so far in Retro Funding: Onchain Builders
                 </p>
               </div>
-              {data?.isMember && (
-                <Button
+              {data.isMember && (
+                <ExtendedLink
+                  as="button"
                   variant="primary"
                   className="z-50"
-                  onClick={() => setOpenDialog("claim_rewards")}
-                >
-                  Claim your rewards
-                </Button>
+                  href={`/projects/${projectId}/rewards`}
+                  text="Claim your rewards"
+                  eventName="Link Click"
+                  eventData={{
+                    projectId,
+                    source: "project_page",
+                    isContributor: data.isMember,
+                    linkName: "View recipients",
+                  }}
+                />
               )}
             </div>
           </div>
@@ -128,8 +163,24 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
           })}
         </TabsList>
         {MONTHS.map((month) => {
+          // if (!eligibleMonths.includes(month)) {
+          //   return (
+          //     <TabsContent
+          //       key={month}
+          //       value={month}
+          //       className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+          //     >
+          //       <div className="w-full flex items-center justify-center">
+          //         <p className="text-foreground font-semibold text-base">
+          //           {projectName} was not enrolled in {month}
+          //         </p>
+          //       </div>
+          //     </TabsContent>
+          //   )
+          // }
+
           const monthMetrics = groupedData[month]
-          if (!data?.eligibility.onchainBuilderEligible) {
+          if (!data.onchainBuilderEligible) {
             return (
               <TabsContent
                 key={month}
@@ -158,7 +209,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                         }
                         distinctDaysCount={monthMetrics.activeAddresses.value}
                         hasDefillamaAdapter={
-                          data?.eligibility.hasDefillamaAdapter ?? false
+                          data.eligibility?.hasDefillamaAdapter ?? false
                         }
                       />
                     </AccordionContent>
@@ -183,7 +234,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
-                value={abbreviateNumber(avgTVL)}
+                value={formatNumber(avgTVL, 0, "compact")}
                 title="TVL across the Superchain"
                 trend={{
                   value: monthMetrics.tvl.trend.value.toString(),
@@ -199,7 +250,11 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={0}
               />
               <MetricCard
-                value={abbreviateNumber(monthMetrics.transactions.value)}
+                value={formatNumber(
+                  monthMetrics.transactions.value,
+                  0,
+                  "compact",
+                )}
                 title="Transactions"
                 trend={{
                   value: monthMetrics.transactions.trend.value.toString(),
@@ -211,15 +266,14 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={1}
               />
               <MetricCard
-                value={normalizeToNumberOfDecimals(
-                  monthMetrics.gasFees.value,
-                  3,
-                )}
+                value={formatNumber(monthMetrics.gasFees.value, 0)}
                 title="Gas consumed"
                 trend={{
-                  value: normalizeToNumberOfDecimals(
+                  value: formatNumber(
                     monthMetrics.gasFees.trend.value,
-                  ).toString(),
+                    0,
+                    "compact",
+                  ),
                   type:
                     monthMetrics.gasFees.trend.sign === "inc"
                       ? "increase"
@@ -229,7 +283,11 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 index={2}
               />
               <MetricCard
-                value={abbreviateNumber(Math.round(avgQualifiedAddresses))}
+                value={formatNumber(
+                  Math.round(avgQualifiedAddresses),
+                  0,
+                  "compact",
+                )}
                 title="Qualified addresses"
                 trend={{
                   value: monthMetrics.activeAddresses.trend.value.toString(),
@@ -245,8 +303,8 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         })}
       </Tabs>
       <ul className="space-y-[8pt]">
-        {data?.isMember && !Boolean(data?.eligibility.hasDefillamaAdapter) && (
-          <AlertContainer type="danger" isMember={data?.isMember}>
+        {data.isMember && !Boolean(data.eligibility?.hasDefillamaAdapter) && (
+          <AlertContainer type="danger" isMember={data.isMember}>
             For TVL rewards,{" "}
             <TrackedLink
               className="underline"
@@ -256,7 +314,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 projectId: projectId ?? "",
                 source: "project_page",
                 linkName: "Provide a link to your DeFiLlama adapter",
-                isContributor: data?.isMember,
+                isContributor: data.isMember,
               }}
             >
               provide a link to your DeFiLlama adapter
@@ -264,22 +322,22 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
             .
           </AlertContainer>
         )}
-        {data?.deployedOnWorldchain &&
-          !Boolean(data?.eligibility.hasBundleBear) && (
-            <AlertContainer type="danger" isMember={data?.isMember}>
+        {data.deployedOnWorldchain &&
+          !Boolean(data.eligibility?.hasBundleBear) && (
+            <AlertContainer type="danger" isMember={data.isMember}>
               Qualified addresses may be inaccurate for projects deployed on
               Worldchain. The team is actively working with World to analyze
               World address data.
             </AlertContainer>
           )}
-        {opReward < 200 && data?.eligibility.onchainBuilderEligible && (
-          <AlertContainer type="danger" isMember={data?.isMember}>
+        {opReward < 200 && data.onchainBuilderEligible && (
+          <AlertContainer type="danger" isMember={data.isMember}>
             This project didn’t receive OP in February because it didn’t meet
             reward minimums.
           </AlertContainer>
         )}
-        {Boolean(data?.eligibility.hasBundleBear) && (
-          <AlertContainer type="info" isMember={data?.isMember}>
+        {Boolean(data.eligibility?.hasBundleBear) && (
+          <AlertContainer type="info" isMember={data.isMember}>
             If you are using ERC-4337: Account Abstraction, then{" "}
             <TrackedLink
               className="underline"
@@ -289,7 +347,7 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
                 projectId: projectId ?? "",
                 source: "project_page",
                 linkName: "Add your contracts to BundleBear",
-                isContributor: data?.isMember,
+                isContributor: data.isMember,
               }}
             >
               add your contracts to BundleBear
@@ -299,195 +357,5 @@ export function OnchainBuilderMission({ data }: { data?: DataProps }) {
         )}
       </ul>
     </div>
-  )
-}
-
-function AlertContainer({
-  children,
-  type,
-  isMember,
-}: {
-  children: React.ReactNode
-  type: "info" | "danger"
-  isMember?: boolean
-}) {
-  return (
-    <li className="group flex items-start space-x-1 text-secondary-foreground text-sm font-normal">
-      {type === "danger" && (
-        <AlertTriangleIcon
-          size={16}
-          fill="#FF0420"
-          className="text-background mt-0.5 shrink-0"
-        />
-      )}
-      {type === "info" && (
-        <Info size={16} fill="#404454" className="text-background mt-0.5" />
-      )}
-      <p className="!text-secondary-foreground !text-sm !font-normal">
-        {children}
-      </p>
-      {isMember && (
-        <EyeOff
-          size={16}
-          className="group-hover:opacity-100 transition-all duration-300 opacity-0"
-        />
-      )}
-    </li>
-  )
-}
-
-function NotPassingEligibility({
-  month,
-  transactionsCount,
-  qualifiedAddressesCount,
-  distinctDaysCount,
-  hasDefillamaAdapter,
-}: {
-  month: string
-  transactionsCount: number
-  qualifiedAddressesCount: number
-  distinctDaysCount: number
-  hasDefillamaAdapter: boolean
-}) {
-  return (
-    <div className="w-full grid lg:grid-cols-2 gap-4 grid-cols-1 data-[state=inactive]:hidden">
-      <NotPassingEligibilityContainer
-        title="At least 1000 transactions"
-        projectValue={transactionsCount}
-        passed={transactionsCount >= 1000}
-      />
-      <NotPassingEligibilityContainer
-        title="At least 420 qualified addresses"
-        projectValue={qualifiedAddressesCount}
-        passed={qualifiedAddressesCount >= 420}
-      />
-      <NotPassingEligibilityContainer
-        title="At least 10 distinct days"
-        projectValue={distinctDaysCount}
-        passed={distinctDaysCount >= 10}
-      />
-      <NotPassingEligibilityContainer
-        title="Defillama adapter"
-        projectValue={hasDefillamaAdapter}
-        passed={hasDefillamaAdapter}
-      />
-    </div>
-  )
-}
-
-function NotPassingEligibilityContainer({
-  title,
-  passed,
-  projectValue,
-}: {
-  title: string
-  passed: boolean
-  projectValue: number | boolean
-}) {
-  return (
-    <div className="w-full flex items-center space-x-2 p-6 bg-background rounded-xl border">
-      {passed ? (
-        <CheckIcon size={24} className="text-[#0DA529]" />
-      ) : (
-        <XIcon size={24} className="text-[#FF0420]" />
-      )}
-      <div>
-        <p className="font-medium text-base text-foreground">{title}</p>
-        <p className="text-secondary-foreground text-base">
-          This project:{" "}
-          {typeof projectValue === "number"
-            ? projectValue === 0
-              ? 0
-              : abbreviateNumber(projectValue)
-            : projectValue
-            ? "Pass"
-            : "Fail"}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-function MetricCard({
-  value,
-  title,
-  trend,
-  index,
-  sign = { value: "", position: "right" },
-}: {
-  value: string | number
-  title: string
-  trend: { value: string; type: "increase" | "decrease" }
-  index: number
-  sign?: {
-    value: string
-    position: "left" | "right"
-  }
-}) {
-  const formattedValue = value
-    ? `${sign.position === "left" ? sign.value : ""}${value}${
-        sign.position === "right" ? sign.value : ""
-      }`
-    : "- -"
-
-  return (
-    <div
-      key={index}
-      className="flex flex-col justify-between p-6 bg-background rounded-xl border"
-    >
-      <div className="w-full flex items-center justify-between space-x-1">
-        <p className="font-semibold text-base">{formattedValue}</p>
-        {value && trend.value !== "0" ? (
-          <div
-            className={cn([
-              "px-2.5 py-1 rounded-full text-xs font-medium flex space-x-1 items-center",
-              {
-                "bg-green-100 text-green-foreground": trend.type === "increase",
-                "bg-red-100 text-red-foreground": trend.type === "decrease",
-              },
-            ])}
-          >
-            <span>{trend.value}%</span>
-            {trend.type === "increase" ? (
-              <Triangle
-                size={12}
-                className="text-success-foreground"
-                fill="#006117"
-              />
-            ) : (
-              <Triangle
-                size={12}
-                className="rotate-180 text-red-600"
-                fill="#B80018"
-              />
-            )}
-          </div>
-        ) : null}
-      </div>
-      <p className="text-base leading-6 text-secondary-foreground flex items-center space-x-2">
-        <span>{title}</span>
-      </p>
-    </div>
-  )
-}
-
-const getMonthFromDateString = (dateString: string) => {
-  const date = parseISO(dateString)
-  const month = getMonth(date) + 1 // 0-indexed
-
-  return INDEXED_MONTHS[month as keyof typeof INDEXED_MONTHS]
-}
-
-const groupByMonth = (data: Record<string, number>) => {
-  return Object.entries(data).reduce<Record<string, number[]>>(
-    (acc, [date, value]) => {
-      const month = getMonthFromDateString(date)
-      if (!acc[month]) {
-        acc[month] = []
-      }
-      acc[month].push(value)
-      return acc
-    },
-    {},
   )
 }

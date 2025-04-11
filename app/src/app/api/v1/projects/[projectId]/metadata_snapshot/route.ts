@@ -42,6 +42,7 @@ export const POST = async (
           name: null,
           description: null,
         })),
+        defillamaSlug: parsedMetadata.defillamaSlug ?? [],
       },
       projectId,
       z.string().parse(farcasterId),

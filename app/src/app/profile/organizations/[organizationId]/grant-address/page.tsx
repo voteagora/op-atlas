@@ -13,14 +13,5 @@ export default async function Page() {
     redirect("/")
   }
 
-  const isKycEnabled = await posthog.isFeatureEnabled(
-    "add-grant-delivery-address-form",
-    session.user.id,
-  )
-
-  if (!isKycEnabled) {
-    return notFound()
-  }
-
-  return <GrantAddressForm isKycEnabled={isKycEnabled} />
+  return <GrantAddressForm />
 }

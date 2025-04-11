@@ -1853,6 +1853,23 @@ export async function createProjectKycTeams({
   })
 }
 
+export async function deleteProjectKycTeams({
+  projectIds,
+  kycTeamId,
+}: {
+  projectIds: string[]
+  kycTeamId: string
+}) {
+  return prisma.projectKYCTeam.deleteMany({
+    where: {
+      projectId: {
+        in: projectIds,
+      },
+      kycTeamId,
+    },
+  })
+}
+
 export async function getProjectKycTeams({ kycTeamId }: { kycTeamId: string }) {
   return prisma.projectKYCTeam.findMany({
     where: {
@@ -1899,6 +1916,12 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
         contracts: true,
         repos: true,
         funding: true,
+        rewards: {
+          select: {
+            roundId: true,
+            amount: true,
+          },
+        },
         organization: {
           select: {
             organization: {
@@ -1950,7 +1973,7 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
           return chainInfo
         })
         .filter((c) => c !== undefined)
-      // Remove duplicates by chain
+
       const uniqueDeployedOn = Array.from(
         new Map(deployedOn?.map((item) => [item.name, item])).values(),
       )
@@ -1966,8 +1989,29 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
     ? users.filter((u) => !organizationUsers?.find((ou) => ou.id === u.id))
     : []
 
+  const devToolingApplication = await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "7",
+    },
+  })
+  const onchainBuildersApplication = await prisma.application.findFirst({
+    where: {
+      projectId,
+      roundId: "8",
+    },
+  })
+
   return {
     ...project,
+    devToolingRewards: project.rewards
+      ?.filter((reward) => reward.roundId === "7")
+      .reduce((acc, reward) => acc + Number(reward.amount), 0),
+    onchainBuildersRewards: project.rewards
+      ?.filter((reward) => reward.roundId === "8")
+      .reduce((acc, reward) => acc + Number(reward.amount), 0),
+    devToolingApplication,
+    onchainBuildersApplication,
     contributors: deduppedUsers,
   }
 }
@@ -2028,12 +2072,47 @@ export async function getOnchainBuildersProjects({
 }
 
 export async function getProjectOSOData({ projectId }: { projectId: string }) {
-  return prisma.projectOSOData.findFirst({
+  const result = await prisma.projectOSOData.findFirst({
     where: {
       projectId,
     },
     select: {
       data: true,
+    },
+  })
+
+  return result?.data as {
+    topProjects?: {
+      id?: string
+      name?: string
+      website?: string[]
+      thumbnailUrl?: string
+    }[]
+    hasBundleBear: boolean
+    devToolingReward: number
+    devToolingEligible: boolean
+    hasDefillamaAdapter: boolean
+    onchainBuilderReward: number
+    onchainBuilderEligible: boolean
+    onchainBuildersInAtlasCount: number
+    onchainBuildersOSOProjectIds: string[]
+  } | null
+}
+
+export async function getProjectOSOByIds({
+  projectIds,
+}: {
+  projectIds: string[]
+}) {
+  return await prisma.projectOSO.findMany({
+    where: {
+      projectId: {
+        in: projectIds,
+      },
+    },
+    select: {
+      projectId: true,
+      osoId: true,
     },
   })
 }

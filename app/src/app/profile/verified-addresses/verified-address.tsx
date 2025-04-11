@@ -1,7 +1,5 @@
-import { CircleHelp, Copy, X } from "lucide-react"
-import { Ellipsis } from "lucide-react"
+import { CircleHelp, Copy, Ellipsis, X } from "lucide-react"
 import Image from "next/image"
-import { useEffect, useState } from "react"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
@@ -39,7 +37,7 @@ export const VerifiedAddress = ({
   const { isBadgeholderAddress } = useBadgeholderAddress(address)
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5 group">
       <div className="input-container justify-between">
         <div className="flex items-center space-x-1.5 overflow-x-auto">
           {showCheckmark && (
@@ -61,7 +59,7 @@ export const VerifiedAddress = ({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="outline-0 ring-0">
+            <button className="outline-0 ring-0 transition-opacity opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100">
               <Ellipsis size={16} />
             </button>
           </DropdownMenuTrigger>

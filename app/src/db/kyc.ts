@@ -59,3 +59,35 @@ export async function updateKYBUserStatus(
 
   return result
 }
+
+export async function getVerifiedKycTeamsMap(projectId: string) {
+  const kycTeams = await prisma.projectKYCTeam.findMany({
+    where: {
+      projectId,
+    },
+    select: {
+      id: true,
+      team: {
+        select: {
+          team: {
+            select: {
+              users: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  const result: Record<string, boolean> = {}
+
+  for (const kycTeam of kycTeams) {
+    const teamVerified = kycTeam.team.team.every(
+      (teamMember) => teamMember.users.status === "APPROVED",
+    )
+
+    result[kycTeam.id] = teamVerified
+  }
+
+  return result
+}
