@@ -1,20 +1,20 @@
 "use client"
 
-import { signIn, signOut, useSession } from "next-auth/react";
 import { usePrivy } from "@privy-io/react-auth";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AccountPrivy() {
     const { login: privyLogin, logout: privyLogout, user: privyUser, getAccessToken } = usePrivy();
@@ -33,7 +33,7 @@ export function AccountPrivy() {
         ]).then(() => {
             router.push("/")
         }).catch((err) => {
-            toast.error("Unable to sign in at this time.")
+            toast.error(`Error logging out. ${err}`)
         })
     }, [router])
 
@@ -45,6 +45,7 @@ export function AccountPrivy() {
                 signIn('credentials', {
                     wallet: privyUser?.wallet?.address,
                     email: privyUser?.email?.address,
+                    farcaster: JSON.stringify(privyUser?.farcaster),
                     token: token,
                     redirect: false,
                 }).then((res) => {

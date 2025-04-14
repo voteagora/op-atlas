@@ -1,5 +1,5 @@
 import CredentialsProvider from "next-auth/providers/credentials";
-import { addUserAddresses, getUserByAddress, getUserByEmail, updateUserEmail, upsertUser } from "../db/users";
+import { addUserAddresses, getUserByAddress, getUserByEmail, getUserByFarcasterId, updateUserEmail, upsertUser } from "../db/users";
 import privy from "../lib/privy";
 
 interface UserResponse {
@@ -28,6 +28,7 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
             farcasterId: '6666',
         });
 
+        // Should we set email to be verified?
         await updateUserEmail({
             id: newUser.id,
             email: email,
@@ -57,7 +58,6 @@ const loginWithWallet = async (wallet: string): Promise<UserResponse | null> => 
             addresses: [wallet],
             source: 'privy',
         });
-
         return userResponse(newUser);
     } catch (error) {
         console.error('Failed to create user or add address:', error);
@@ -65,16 +65,48 @@ const loginWithWallet = async (wallet: string): Promise<UserResponse | null> => 
     }
 };
 
+const loginWithFarcaster = async (farcaster: string): Promise<UserResponse | null> => {
+    try {
+        const { fid, pfp, displayName, username, bio } = JSON.parse(farcaster) || {};
+
+        if (!fid) {
+            console.error('Farcaster ID is required');
+            return null;
+        }
+
+        const farcasterId = fid.toString();
+        const user = await getUserByFarcasterId(farcasterId);
+
+        if (user) {
+            return userResponse(user);
+        }
+
+        const newUser = await upsertUser({
+            farcasterId,
+            name: displayName || null,
+            username: username || null,
+            imageUrl: pfp || null,
+            bio: bio || null,
+        });
+
+        return userResponse(newUser);
+    } catch (error) {
+        console.error('Failed to create user or add address:', error);
+        return null;
+    }
+}
+
 export const PrivyCredentialsProvider = CredentialsProvider({
     name: "prviy",
     credentials: {
-        email: { label: "address", type: "text", placeholder: "test@test.com" },
-        wallet: { label: "wallet", type: "text", placeholder: "0x0" },
-        token: { label: "token", type: "text", placeholder: "xxx" },
+        email: { label: "address", type: "text" },
+        wallet: { label: "wallet", type: "text" },
+        token: { label: "token", type: "text" },
+        farcaster: { label: "farcaster", type: "string" },
     },
 
     async authorize(credentials) {
-        const { wallet, token, email } = credentials;
+        const { wallet, token, email, farcaster } = credentials;
 
         try {
             const verified = await privy.verifyAuthToken(token as string);
@@ -92,14 +124,19 @@ export const PrivyCredentialsProvider = CredentialsProvider({
             console.log(`Token verification failed with error ${error}.`);
         }
 
-        if (email) {
-            return loginWithEmail(email as string);
+        if (farcaster) {
+            return loginWithFarcaster(farcaster as string);
         }
 
         if (wallet) {
             return loginWithWallet(wallet as string);
         }
 
+        if (email) {
+            return loginWithEmail(email as string);
+        }
+
+
         return null;
     },
-}); 
+});
