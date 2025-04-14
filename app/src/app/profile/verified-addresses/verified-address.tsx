@@ -56,6 +56,7 @@ export const VerifiedAddress = ({
           {primary && <Badge text="Primary address" className="shrink-0" />}
           {isBadgeholderAddress && <Badgeholder />}
           {source === "farcaster" && <Badge text="Farcaster" />}
+          {source === "privy" && <Badge text="Privy" />}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
