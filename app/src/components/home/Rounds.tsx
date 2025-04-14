@@ -63,16 +63,6 @@ export function Rounds({ user }: { user?: UserWithAddresses | null }) {
                 idea that that positive impact to the collective should be
                 rewarded proportionally with profit to the individual.
               </p>
-
-              <p className="mt-6 text-base font-normal text-text-secondary">
-                Want to go deeper?{" "}
-                <ExternalLink
-                  href="https://app.optimism.io/retropgf"
-                  className="text-base font-normal text-text-secondary underline"
-                >
-                  Learn more
-                </ExternalLink>
-              </p>
             </div>
           </div>
           <Sidebar
