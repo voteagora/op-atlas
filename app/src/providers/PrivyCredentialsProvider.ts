@@ -92,6 +92,7 @@ const loginWithFarcaster = async (farcaster: string): Promise<UserResponse | nul
             return userResponse(user);
         }
 
+        // We have a new user
         const newUser = await upsertUser({
             farcasterId,
             name: displayName || null,
