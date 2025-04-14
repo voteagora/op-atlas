@@ -642,18 +642,20 @@ export async function createOrganizationKycTeam({
         walletAddress,
       },
     })
-    return prisma.organizationKYCTeam.create({
+    await prisma.organizationKYCTeam.create({
       data: {
         organizationId,
         kycTeamId: kycTeam.id,
       },
     })
+
+    return { error: null }
   } catch (error: any) {
     if (error.message.includes("Unique constraint failed")) {
-      throw new Error("KYC team with this Wallet Address already exists")
+      return { error: "KYC team with this Wallet Address already exists" }
     }
 
-    throw new Error(error.message)
+    return { error: error.message }
   }
 }
 

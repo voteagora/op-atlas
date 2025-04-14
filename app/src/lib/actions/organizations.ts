@@ -225,9 +225,14 @@ export const createOrganizationKycTeamAction = async ({
     return isInvalid
   }
 
-  await createOrganizationKycTeam({ walletAddress, organizationId })
+  const createdOrganizationKycTeam = await createOrganizationKycTeam({
+    walletAddress,
+    organizationId,
+  })
 
   revalidatePath("/organizations", "layout")
+
+  return createdOrganizationKycTeam
 }
 
 export const getOrganizationKycTeamsAction = async ({
