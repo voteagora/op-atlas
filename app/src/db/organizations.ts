@@ -637,15 +637,64 @@ export async function createOrganizationKycTeam({
   organizationId: string
 }) {
   try {
-    const kycTeam = await prisma.kYCTeam.create({
-      data: {
-        walletAddress,
+    const [orgProjects, kycTeam] = await Promise.all([
+      prisma.projectOrganization.findMany({
+        where: {
+          AND: [
+            {
+              organization: {
+                id: {
+                  equals: organizationId,
+                },
+              },
+            },
+            {
+              project: {
+                ProjectKYCTeam: {
+                  none: {},
+                },
+              },
+            },
+          ],
+        },
+        select: {
+          projectId: true,
+        },
+      }),
+      prisma.kYCTeam.create({
+        data: {
+          walletAddress,
+        },
+      }),
+    ])
+
+    const [projectKycTeams, organizationKYCTeam] = await Promise.all([
+      prisma.projectKYCTeam.createManyAndReturn({
+        data: orgProjects.map((project) => ({
+          projectId: project.projectId,
+          kycTeamId: kycTeam.id,
+        })),
+      }),
+      prisma.organizationKYCTeam.create({
+        data: {
+          organizationId,
+          kycTeamId: kycTeam.id,
+        },
+      }),
+    ])
+
+    await prisma.kYCTeam.update({
+      where: {
+        id: kycTeam.id,
       },
     })
     await prisma.organizationKYCTeam.create({
       data: {
-        organizationId,
-        kycTeamId: kycTeam.id,
+        ProjectKYCTeam: {
+          connect: projectKycTeams.map((project) => ({
+            id: project.id,
+          })),
+        },
       },
     })
 

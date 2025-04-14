@@ -140,7 +140,6 @@ export function AddGrantDeliveryAddressDialog({
               and continue to the next step.
             </p>
           </div>
-
           <div className="flex flex-col self-stretch gap-1">
             <div className="text-sm font-medium">Chain</div>
             <Input
@@ -150,7 +149,6 @@ export function AddGrantDeliveryAddressDialog({
               leftIcon="/assets/chain-logos/optimism.svg"
             />
           </div>
-
           <div className="flex flex-col self-stretch gap-1">
             <div className="text-sm font-medium">Message to sign</div>
             <Textarea disabled value={messageToSign} className="resize-none" />
@@ -158,7 +156,6 @@ export function AddGrantDeliveryAddressDialog({
               Copy
             </Button>
           </div>
-
           <div className="flex flex-col self-stretch gap-1">
             <div>Signature hash</div>
             <Controller
@@ -174,7 +171,6 @@ export function AddGrantDeliveryAddressDialog({
               </p>
             )}
           </div>
-
           <Button
             className="self-stretch"
             variant="destructive"
