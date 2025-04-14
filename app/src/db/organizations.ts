@@ -687,8 +687,6 @@ export async function createOrganizationKycTeam({
       where: {
         id: kycTeam.id,
       },
-    })
-    await prisma.organizationKYCTeam.create({
       data: {
         ProjectKYCTeam: {
           connect: projectKycTeams.map((project) => ({
