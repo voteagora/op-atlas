@@ -38,7 +38,7 @@ export default function AddGrantDeliveryAddressForm({
 
   const organizationProject = params.organizationId as string
 
-  const { mutate: deleteProjectKYCTeam, isPending } = useMutation({
+  const { mutate: deleteProjectKYCTeam } = useMutation({
     mutationFn: async () => {
       if (!organizationProject) {
         const projectId = params.projectId as string
@@ -315,7 +315,6 @@ export default function AddGrantDeliveryAddressForm({
                         }
                         text="Verify my ID"
                         href="https://kyc.optimism.io/form"
-                        disabled={!Boolean(entities?.length)}
                       />
                       <ExtendedLink
                         as="button"
@@ -324,7 +323,6 @@ export default function AddGrantDeliveryAddressForm({
                         }
                         text="Verify my Business ID"
                         href="https://kyb.optimism.io/form"
-                        disabled={!Boolean(entities?.length)}
                       />
                     </div>
                   </div>
