@@ -2095,7 +2095,26 @@ export async function getProjectOSOData({ projectId }: { projectId: string }) {
     onchainBuilderReward: number
     onchainBuilderEligible: boolean
     onchainBuildersInAtlasCount: number
+    onchainBuildersOSOProjectIds: string[]
   } | null
+}
+
+export async function getProjectOSOByIds({
+  projectIds,
+}: {
+  projectIds: string[]
+}) {
+  return await prisma.projectOSO.findMany({
+    where: {
+      projectId: {
+        in: projectIds,
+      },
+    },
+    select: {
+      projectId: true,
+      osoId: true,
+    },
+  })
 }
 
 export async function createOSOProjects(

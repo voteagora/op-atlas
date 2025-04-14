@@ -96,13 +96,13 @@ export async function getPublicProjectOSOData(projectId: string) {
   const { osoId } = projectOSO[0]
 
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
-    await queryMetrics(osoId, "activeAddresses"),
-    await queryMetrics(osoId, "gasFees"),
-    await queryMetrics(osoId, "transactions", {
+    await queryMetrics([osoId], "activeAddresses"),
+    await queryMetrics([osoId], "gasFees"),
+    await queryMetrics([osoId], "transactions", {
       _gte: "2024-10-01",
       _lte: "2025-07-31",
     }),
-    await queryMetrics(osoId, "tvl"),
+    await queryMetrics([osoId], "tvl"),
   ])
 
   const groupedMetrics = groupedData({
@@ -114,23 +114,43 @@ export async function getPublicProjectOSOData(projectId: string) {
 
   const projectOSOData = await getProjectOSOData({ projectId })
 
+  const projectIdsForGasConsumption =
+    projectOSOData?.onchainBuildersOSOProjectIds ?? []
+
+  const projectsGasConsumption = await queryMetrics(
+    projectIdsForGasConsumption,
+    "gasFees",
+    { _gte: "2025-02-01", _lte: "2025-02-28" },
+  )
+  const summedProjectsGasConsumption = projectsGasConsumption.reduce(
+    (acc: number, curr: MetricValues) => {
+      return acc + curr.amount
+    },
+    0,
+  )
+
+  const groupedProjectOSOData = {
+    ...projectOSOData,
+    projectsGasConsumption: summedProjectsGasConsumption,
+  }
+
   return {
     isOnchainBuilder,
     isDevTooling,
     groupedMetrics,
-    projectOSOData,
+    projectOSOData: groupedProjectOSOData,
   }
 }
 
 const queryMetrics = async (
-  osoId: string,
+  osoId: string[],
   key: keyof typeof OSO_METRICS,
   sampleDate = { _gte: "2025-01-01", _lte: "2025-07-31" },
 ) => {
   const query: QueryOso_TimeseriesMetricsByProjectV0Args = {
     where: {
       projectId: {
-        _eq: osoId,
+        _in: osoId,
       },
       metricId: {
         _in: OSO_METRICS[key],
