@@ -2,6 +2,20 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { addUserAddresses, getUserByAddress, getUserByEmail, updateUserEmail, upsertUser } from "../db/users";
 import privy from "../lib/privy";
 
+interface UserResponse {
+    id: string;
+    farcasterId: string;
+    name?: string;
+    image?: string;
+}
+
+const userResponse = (user: any): UserResponse => ({
+    id: user.id,
+    farcasterId: user.farcasterId,
+    name: user?.name as string | undefined,
+    image: user?.imageUrl as string | undefined,
+});
+
 export const PrivyCredentialsProvider = CredentialsProvider({
     name: "prviy",
     credentials: {
@@ -31,7 +45,6 @@ export const PrivyCredentialsProvider = CredentialsProvider({
 
         // Email registration flow
         if (email) {
-
             let user = await getUserByEmail(email as string);
 
             if (!user) {
@@ -49,55 +62,42 @@ export const PrivyCredentialsProvider = CredentialsProvider({
                         email: email as string,
                     });
 
-                    return {
-                        id: newUser.id,
-                        farcasterId: newUser.farcasterId,
-                        name: newUser?.name as string | undefined,
-                        image: newUser?.imageUrl as string | undefined,
-                    }
-
+                    return userResponse(newUser);
                 } catch (error) {
                     console.error('Failed to create user or update email:', error);
                     return null;
                 }
             } else {
-                return {
-                    id: user.id,
-                    farcasterId: user.farcasterId,
-                    name: user?.name as string | undefined,
-                    image: user?.imageUrl as string | undefined,
-                }
+                return userResponse(user);
             }
-
-
         }
 
         if (wallet) {
             let user = await getUserByAddress(wallet as string);
 
             if (!user) {
-                const newUser = await upsertUser({
-                    farcasterId: '6666',
-                    name: 'andreitr',
-                    username: 'andreitr',
-                    imageUrl: undefined,
-                    bio: undefined,
-                });
+                try {
+                    const newUser = await upsertUser({
+                        farcasterId: '6666',
+                        name: 'andreitr',
+                        username: 'andreitr',
+                        imageUrl: undefined,
+                        bio: undefined,
+                    });
 
-                await addUserAddresses({
-                    id: newUser.id,
-                    addresses: [wallet as string],
-                    source: 'atlas',
-                });
+                    await addUserAddresses({
+                        id: newUser.id,
+                        addresses: [wallet as string],
+                        source: 'atlas',
+                    });
 
-                user = newUser;
+                    return userResponse(newUser);
+                } catch (error) {
+                    console.error('Failed to create user or add address:', error);
+                    return null;
+                }
             }
-            return {
-                id: user?.id,
-                farcasterId: user?.farcasterId,
-                name: user?.name as string | undefined,
-                image: user?.imageUrl as string | undefined,
-            }
+            return userResponse(user);
         }
 
         return null;
