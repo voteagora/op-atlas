@@ -19,8 +19,8 @@ export default function Header({
 }: HeaderProps) {
   return (
     <div className="w-full relative">
-      {banner && (
-        <>
+      {banner ? (
+        <div className="relative">
           {isMember && (
             <TrackedExtendedLink
               as="button"
@@ -37,6 +37,7 @@ export default function Header({
               }}
             />
           )}
+
           <div className="flex items-center justify-center w-full h-[280px] bg-[#FBFCFE] overflow-hidden rounded-2xl">
             <Image
               src={banner}
@@ -48,7 +49,9 @@ export default function Header({
               className="w-full h-full object-cover object-center rounded-2xl"
             />
           </div>
-        </>
+        </div>
+      ) : (
+        <div className="w-full h-[80px]" />
       )}
       {thumbnail && (
         <div className="absolute -bottom-10 left-12 w-28 aspect-square rounded-xl overflow-hidden border-2 border-background bg-[#FBFCFE]">
