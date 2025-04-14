@@ -637,46 +637,52 @@ export async function createOrganizationKycTeam({
   organizationId: string
 }) {
   try {
-    const orgProjects = await prisma.projectOrganization.findMany({
-      where: {
-        AND: [
-          {
-            organization: {
-              id: {
-                equals: organizationId,
+    const [orgProjects, kycTeam] = await Promise.all([
+      prisma.projectOrganization.findMany({
+        where: {
+          AND: [
+            {
+              organization: {
+                id: {
+                  equals: organizationId,
+                },
               },
             },
-          },
-          {
-            project: {
-              ProjectKYCTeam: {
-                none: {},
+            {
+              project: {
+                ProjectKYCTeam: {
+                  none: {},
+                },
               },
             },
-          },
-        ],
-      },
-      select: {
-        projectId: true,
-      },
-    })
-    const kycTeam = await prisma.kYCTeam.create({
-      data: {
-        walletAddress,
-      },
-    })
-    const projectKycTeams = await prisma.projectKYCTeam.createManyAndReturn({
-      data: orgProjects.map((project) => ({
-        projectId: project.projectId,
-        kycTeamId: kycTeam.id,
-      })),
-    })
-    const organizationKYCTeam = prisma.organizationKYCTeam.create({
-      data: {
-        organizationId,
-        kycTeamId: kycTeam.id,
-      },
-    })
+          ],
+        },
+        select: {
+          projectId: true,
+        },
+      }),
+      prisma.kYCTeam.create({
+        data: {
+          walletAddress,
+        },
+      }),
+    ])
+
+    const [projectKycTeams, organizationKYCTeam] = await Promise.all([
+      prisma.projectKYCTeam.createManyAndReturn({
+        data: orgProjects.map((project) => ({
+          projectId: project.projectId,
+          kycTeamId: kycTeam.id,
+        })),
+      }),
+      prisma.organizationKYCTeam.create({
+        data: {
+          organizationId,
+          kycTeamId: kycTeam.id,
+        },
+      }),
+    ])
+
     await prisma.kYCTeam.update({
       where: {
         id: kycTeam.id,
