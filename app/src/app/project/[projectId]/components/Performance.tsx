@@ -3,7 +3,7 @@
 import React, { useMemo } from "react"
 
 import Chart from "@/components/common/Chart"
-import { abbreviateNumber } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
 
 interface MetricEntry {
   date: string
@@ -61,17 +61,17 @@ export default function Performance({ data }: PerformanceProps) {
         data: formatAndFill(data.tvl, { roundLargeValues: true }),
       },
       {
-        value: formatEth(getLastValue(data.gasFees)),
+        value: `${formatNumber(getLastValue(data.gasFees), 0, "compact")} ETH`,
         title: "Gas consumed",
         data: formatAndFill(data.gasFees),
       },
       {
-        value: getLastValue(data.transactions).toLocaleString(),
+        value: formatNumber(getLastValue(data.transactions), 0, "compact"),
         title: "Transactions",
         data: formatAndFill(data.transactions),
       },
       {
-        value: getLastValue(data.activeAddresses).toLocaleString(),
+        value: formatNumber(getLastValue(data.activeAddresses), 0, "compact"),
         title: "Unique addresses",
         data: formatAndFill(data.activeAddresses),
       },
@@ -150,7 +150,7 @@ function getLastValue(data: Record<string, number>): number {
 
 function formatCurrency(value: number): string {
   if (value === 0) return "$0"
-  return `$${abbreviateNumber(value)}`
+  return `$${formatNumber(value, 0, "compact")}`
 }
 
 function formatEth(value: number): string {

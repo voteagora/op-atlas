@@ -46,6 +46,8 @@ export default async function Page({ params }: PageProps) {
     opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
   }
 
+  console.log(">>> onchainBuildersMetrics", onchainBuildersMetrics)
+
   const deployedOnWorldchain = publicProject.deployedOn?.some(
     (chain) => chain.name === "Worldchain",
   )
@@ -220,7 +222,15 @@ export default async function Page({ params }: PageProps) {
               )}
             </>
           )}
-          <Performance data={onchainBuildersMetrics} />
+          <Performance
+            data={{
+              activeAddresses: onchainBuildersMetrics.activeAddresses ?? {},
+              gasFees: onchainBuildersMetrics.gasFees ?? {},
+              transactions: onchainBuildersMetrics.transactions ?? {},
+              tvl: onchainBuildersMetrics.tvl ?? {},
+              opReward: onchainBuildersMetrics.opReward,
+            }}
+          />
           <MoreDetails />
         </div>
       </div>

@@ -163,61 +163,45 @@ export default function OnchainBuilderMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          // if (!eligibleMonths.includes(month)) {
+          const monthMetrics = groupedData[month]
+          // if (!data.onchainBuilderEligible) {
           //   return (
           //     <TabsContent
           //       key={month}
           //       value={month}
           //       className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
           //     >
-          //       <div className="w-full flex items-center justify-center">
-          //         <p className="text-foreground font-semibold text-base">
-          //           {projectName} was not enrolled in {month}
-          //         </p>
-          //       </div>
+          //       <Accordion type="single" collapsible>
+          //         <AccordionItem value="retro-funding" className="w-full">
+          //           <div className="flex flex-col items-center w-full">
+          //             <p className="font-semibold text-base text-foreground">
+          //               Requirements to earn rewards in February were not met
+          //             </p>
+          //             <div className="flex items-center space-x-1">
+          //               <p className="text-secondary-foreground text-base font-normal">
+          //                 Measured over the last 180 days
+          //               </p>
+          //               <AccordionTrigger />
+          //             </div>
+          //           </div>
+          //           <AccordionContent className="pt-6">
+          //             <NotPassingEligibility
+          //               month={month}
+          //               transactionsCount={monthMetrics.transactions.value}
+          //               qualifiedAddressesCount={
+          //                 monthMetrics.activeAddresses.value
+          //               }
+          //               distinctDaysCount={monthMetrics.activeAddresses.value}
+          //               hasDefillamaAdapter={
+          //                 data.eligibility?.hasDefillamaAdapter ?? false
+          //               }
+          //             />
+          //           </AccordionContent>
+          //         </AccordionItem>
+          //       </Accordion>
           //     </TabsContent>
           //   )
           // }
-
-          const monthMetrics = groupedData[month]
-          if (!data.onchainBuilderEligible) {
-            return (
-              <TabsContent
-                key={month}
-                value={month}
-                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
-              >
-                <Accordion type="single" collapsible>
-                  <AccordionItem value="retro-funding" className="w-full">
-                    <div className="flex flex-col items-center w-full">
-                      <p className="font-semibold text-base text-foreground">
-                        Requirements to earn rewards in February were not met
-                      </p>
-                      <div className="flex items-center space-x-1">
-                        <p className="text-secondary-foreground text-base font-normal">
-                          Measured over the last 180 days
-                        </p>
-                        <AccordionTrigger />
-                      </div>
-                    </div>
-                    <AccordionContent className="pt-6">
-                      <NotPassingEligibility
-                        month={month}
-                        transactionsCount={monthMetrics.transactions.value}
-                        qualifiedAddressesCount={
-                          monthMetrics.activeAddresses.value
-                        }
-                        distinctDaysCount={monthMetrics.activeAddresses.value}
-                        hasDefillamaAdapter={
-                          data.eligibility?.hasDefillamaAdapter ?? false
-                        }
-                      />
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </TabsContent>
-            )
-          }
 
           const numOfDaysInMonth = getDaysInMonthByName(
             month,
