@@ -1,6 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { addUserAddresses, getUserByAddress, getUserByEmail, getUserByFarcasterId, updateUserEmail, upsertUser } from "../db/users";
 import privy from "../lib/privy";
+import { getUserConnectedAddresses } from "@/lib/neynar";
 
 interface UserResponse {
     id: string;
@@ -42,7 +43,9 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
 };
 
 const loginWithWallet = async (wallet: string): Promise<UserResponse | null> => {
-    const user = await getUserByAddress(wallet);
+
+    const normalizedAddress = wallet.toLowerCase();
+    const user = await getUserByAddress(normalizedAddress);
 
     if (user) {
         return userResponse(user);
@@ -55,7 +58,7 @@ const loginWithWallet = async (wallet: string): Promise<UserResponse | null> => 
 
         await addUserAddresses({
             id: newUser.id,
-            addresses: [wallet],
+            addresses: [normalizedAddress],
             source: 'privy',
         });
         return userResponse(newUser);
@@ -75,9 +78,17 @@ const loginWithFarcaster = async (farcaster: string): Promise<UserResponse | nul
         }
 
         const farcasterId = fid.toString();
-        const user = await getUserByFarcasterId(farcasterId);
 
+        // Check for direct fid match first
+        const user = await getUserByFarcasterId(farcasterId);
         if (user) {
+            return userResponse(user);
+        }
+
+        // Check for connected addresses
+        const connectedAddresses = await getUserConnectedAddresses(farcasterId);
+        if (connectedAddresses) {
+            const user = await getUserByAddress(connectedAddresses[0]);
             return userResponse(user);
         }
 
@@ -102,13 +113,15 @@ export const PrivyCredentialsProvider = CredentialsProvider({
         email: { label: "address", type: "text" },
         wallet: { label: "wallet", type: "text" },
         token: { label: "token", type: "text" },
-        farcaster: { label: "farcaster", type: "string" },
+        farcaster: { label: "farcaster", type: "text" },
     },
 
     async authorize(credentials) {
         const { wallet, token, email, farcaster } = credentials;
 
         try {
+
+
             const verified = await privy.verifyAuthToken(token as string);
 
             // TODO: Implement further token validation
@@ -124,15 +137,15 @@ export const PrivyCredentialsProvider = CredentialsProvider({
             console.log(`Token verification failed with error ${error}.`);
         }
 
-        if (farcaster) {
+        if (farcaster && farcaster !== 'undefined') {
             return loginWithFarcaster(farcaster as string);
         }
 
-        if (wallet) {
+        if (wallet && wallet !== 'undefined') {
             return loginWithWallet(wallet as string);
         }
 
-        if (email) {
+        if (email && email !== 'undefined') {
             return loginWithEmail(email as string);
         }
 

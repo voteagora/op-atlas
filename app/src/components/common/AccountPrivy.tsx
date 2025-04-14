@@ -27,6 +27,7 @@ export function AccountPrivy() {
 
     const logOut = useCallback(() => {
 
+
         Promise.all([
             privyLogout(),
             signOut()
@@ -41,11 +42,13 @@ export function AccountPrivy() {
     useEffect(() => {
         if (privyUser) {
 
+            console.log("privyUser", privyUser);
+
             getAccessToken().then((token) => {
                 signIn('credentials', {
                     wallet: privyUser?.wallet?.address,
                     email: privyUser?.email?.address,
-                    farcaster: JSON.stringify(privyUser?.farcaster),
+                    farcaster: privyUser?.farcaster ? JSON.stringify(privyUser.farcaster) : undefined,
                     token: token,
                     redirect: false,
                 }).then((res) => {
