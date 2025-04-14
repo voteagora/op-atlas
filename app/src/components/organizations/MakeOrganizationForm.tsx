@@ -94,6 +94,8 @@ export default function MakeOrganizationForm({
     },
   })
 
+  const formValues = form.watch();
+
   const { fields: websiteFields, append: addWebsiteField } = useFieldArray({
     control: form.control,
     name: "website",
@@ -176,6 +178,16 @@ export default function MakeOrganizationForm({
     setIsShowingRemove(null)
   }
 
+  // CHANGE: Add helper functions to check if the last field has a value
+  const shouldShowWebsiteAdd = () => {
+    const websites = formValues.website;
+    return websites[websites.length - 1]?.value.trim() !== '';
+  };
+
+  const shouldShowFarcasterAdd = () => {
+    const farcasters = formValues.farcaster;
+    return farcasters[farcasters.length - 1]?.value.trim() !== '';
+  };
   const onSubmit = () => async (values: z.infer<typeof formSchema>) => {
     setIsSaving(true)
 
@@ -485,14 +497,17 @@ export default function MakeOrganizationForm({
                 )}
               />
             ))}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => addWebsiteField({ value: "" })}
-              leftIcon={<Plus size={16} />}
-            >
-              Add
-            </Button>
+            {/* Only show Add button when the last website field has a value */}
+            {shouldShowWebsiteAdd() && (
+              <Button
+                 type="button"
+                 variant="secondary"
+                 onClick={() => addWebsiteField({ value: "" })}
+                 leftIcon={<Plus size={16} />}
+               >
+                 Add
+              </Button>
+             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -514,14 +529,17 @@ export default function MakeOrganizationForm({
                 )}
               />
             ))}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => addFarcasterField({ value: "" })}
-              leftIcon={<Plus size={16} />}
-            >
-              Add
-            </Button>
+            {/* Only show Add button when the last Farcaster field has a value */}
+            {shouldShowFarcasterAdd() && (
+              <Button
+                 type="button"
+                 variant="secondary"
+                 onClick={() => addFarcasterField({ value: "" })}
+                 leftIcon={<Plus size={16} />}
+               >
+                 Add
+              </Button>
+             )}
           </div>
 
           <FormField
