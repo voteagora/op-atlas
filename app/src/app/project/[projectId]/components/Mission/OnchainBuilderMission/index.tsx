@@ -163,21 +163,21 @@ export default function OnchainBuilderMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          // if (!eligibleMonths.includes(month)) {
-          //   return (
-          //     <TabsContent
-          //       key={month}
-          //       value={month}
-          //       className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
-          //     >
-          //       <div className="w-full flex items-center justify-center">
-          //         <p className="text-foreground font-semibold text-base">
-          //           {projectName} was not enrolled in {month}
-          //         </p>
-          //       </div>
-          //     </TabsContent>
-          //   )
-          // }
+          if (!eligibleMonths.includes(month)) {
+            return (
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+              >
+                <div className="w-full flex items-center justify-center">
+                  <p className="text-foreground font-semibold text-base">
+                    {projectName} was not enrolled in {month}
+                  </p>
+                </div>
+              </TabsContent>
+            )
+          }
 
           const monthMetrics = groupedData[month]
           if (!data.onchainBuilderEligible) {
