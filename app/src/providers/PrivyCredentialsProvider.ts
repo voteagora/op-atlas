@@ -16,6 +16,55 @@ const userResponse = (user: any): UserResponse => ({
     image: user?.imageUrl as string | undefined,
 });
 
+const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
+    const user = await getUserByEmail(email);
+
+    if (user) {
+        return userResponse(user);
+    }
+
+    try {
+        const newUser = await upsertUser({
+            farcasterId: '6666',
+        });
+
+        await updateUserEmail({
+            id: newUser.id,
+            email: email,
+        });
+
+        return userResponse(newUser);
+    } catch (error) {
+        console.error('Failed to create user or update email:', error);
+        return null;
+    }
+};
+
+const loginWithWallet = async (wallet: string): Promise<UserResponse | null> => {
+    const user = await getUserByAddress(wallet);
+
+    if (user) {
+        return userResponse(user);
+    }
+
+    try {
+        const newUser = await upsertUser({
+            farcasterId: '5555',
+        });
+
+        await addUserAddresses({
+            id: newUser.id,
+            addresses: [wallet],
+            source: 'privy',
+        });
+
+        return userResponse(newUser);
+    } catch (error) {
+        console.error('Failed to create user or add address:', error);
+        return null;
+    }
+};
+
 export const PrivyCredentialsProvider = CredentialsProvider({
     name: "prviy",
     credentials: {
@@ -43,61 +92,12 @@ export const PrivyCredentialsProvider = CredentialsProvider({
             console.log(`Token verification failed with error ${error}.`);
         }
 
-        // Email registration flow
         if (email) {
-            let user = await getUserByEmail(email as string);
-
-            if (!user) {
-                try {
-                    const newUser = await upsertUser({
-                        farcasterId: '6666',
-                        name: undefined,
-                        username: undefined,
-                        imageUrl: undefined,
-                        bio: undefined,
-                    });
-
-                    await updateUserEmail({
-                        id: newUser.id,
-                        email: email as string,
-                    });
-
-                    return userResponse(newUser);
-                } catch (error) {
-                    console.error('Failed to create user or update email:', error);
-                    return null;
-                }
-            } else {
-                return userResponse(user);
-            }
+            return loginWithEmail(email as string);
         }
 
         if (wallet) {
-            let user = await getUserByAddress(wallet as string);
-
-            if (!user) {
-                try {
-                    const newUser = await upsertUser({
-                        farcasterId: '6666',
-                        name: 'andreitr',
-                        username: 'andreitr',
-                        imageUrl: undefined,
-                        bio: undefined,
-                    });
-
-                    await addUserAddresses({
-                        id: newUser.id,
-                        addresses: [wallet as string],
-                        source: 'atlas',
-                    });
-
-                    return userResponse(newUser);
-                } catch (error) {
-                    console.error('Failed to create user or add address:', error);
-                    return null;
-                }
-            }
-            return userResponse(user);
+            return loginWithWallet(wallet as string);
         }
 
         return null;
