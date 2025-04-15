@@ -862,3 +862,23 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
   })
 }
 
+export async function updateUser({
+  id,
+  ...user
+}: {
+  id: string
+  farcasterId?: string
+  name?: string | null
+  username?: string | null
+  imageUrl?: string | null
+  bio?: string | null
+}) {
+  return prisma.user.update({
+    where: { id },
+    data: user,
+    include: {
+      emails: true,
+    },
+  })
+}
+
