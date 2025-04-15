@@ -66,7 +66,7 @@ export async function getVerifiedKycTeamsMap(projectId: string) {
       projectId,
     },
     select: {
-      id: true,
+      projectId: true,
       team: {
         select: {
           team: {
@@ -86,7 +86,7 @@ export async function getVerifiedKycTeamsMap(projectId: string) {
       (teamMember) => teamMember.users.status === "APPROVED",
     )
 
-    result[kycTeam.id] = teamVerified
+    result[kycTeam.projectId] = teamVerified
   }
 
   return result

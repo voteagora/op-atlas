@@ -1,19 +1,13 @@
 "use client"
 
-import { Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
 
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
-import { useUserApplications } from "@/hooks/db/useUserApplications"
-import { useSessionProjects } from "@/hooks/db/useUserProjects"
 import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
 import {
-  ApplicationWithDetails,
-  ProjectWithDetails,
-  UserWithAddresses,
+  UserWithAddresses
 } from "@/lib/types"
 
-import { Account } from "../common/Account"
 import { FeedbackButton } from "../common/FeedbackButton"
 import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
@@ -73,7 +67,7 @@ export function Rounds({ user }: { user?: UserWithAddresses | null }) {
         </div>
       </div>
       {data?.user && (
-        <div className="fixed bottom-4 left-4">
+        <div className="fixed bottom-4 left-4 z-50">
           <FeedbackButton />
         </div>
       )}
