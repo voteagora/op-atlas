@@ -445,19 +445,7 @@ export const getKycTeamAction = async (projectId: string) => {
     throw new Error(isInvalid.error)
   }
 
-  const kycTeam = await getKycTeamForProject({ projectId })
-
-  //const address = projectKycTeam.kycTeam.walletAddress
-  // const createdAt = projectKycTeam.kycTeam.createdAt
-  // const validUntil = getValidUntil(createdAt)
-
-  // return {
-  //   id: projectKycTeam.kycTeamId,
-  //   grantAddress: { address, validUntil },
-  //   team: projectKycTeam.kycTeam.team.map((ut) => ut.users),
-  // }
-
-  return kycTeam
+  return getKycTeamForProject({ projectId })
 }
 
 export const createProjectKYCTeamsAction = async ({
