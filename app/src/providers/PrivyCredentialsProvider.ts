@@ -1,16 +1,15 @@
+import { getUserConnectedAddresses } from "@/lib/neynar"
 import CredentialsProvider from "next-auth/providers/credentials"
 import {
   addUserAddresses,
   getUserByAddress,
   getUserByEmail,
   getUserByFarcasterId,
-  updateUserEmail,
   updateUser,
+  updateUserEmail,
   upsertUser,
 } from "../db/users"
 import privy from "../lib/privy"
-import { getUserConnectedAddresses } from "@/lib/neynar"
-import { prisma } from "../db/client"
 
 interface UserResponse {
   id: string
@@ -45,6 +44,7 @@ export const PrivyCredentialsProvider = CredentialsProvider({
       // sessionId	string	Unique identifier for the user's session.
     } catch (error) {
       console.log(`Token verification failed with error ${error}.`)
+      return null
     }
 
     if (farcaster && farcaster !== "undefined") {
@@ -67,7 +67,7 @@ const userResponse = (user: any): UserResponse => ({
   farcasterId: user?.farcasterId as string | undefined,
   name: user?.name as string | undefined,
   image: user?.imageUrl as string | undefined,
-  email: user?.email as string | undefined,
+  email: user?.emails[0].email as string | undefined,
 })
 
 const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
@@ -81,10 +81,7 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
       verified: true,
     })
 
-    return {
-      ...userResponse(user),
-      email: email.toLowerCase(),
-    }
+    return userResponse(user)
   }
 
   try {
@@ -98,10 +95,7 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
       verified: true,
     })
 
-    return {
-      ...userResponse(newUser),
-      email: email.toLowerCase(),
-    }
+    return userResponse(newUser)
   } catch (error) {
     console.error("Failed to create user or update email:", error)
     return null

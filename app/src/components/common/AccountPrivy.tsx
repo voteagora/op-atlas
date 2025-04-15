@@ -14,6 +14,7 @@ import { hasShownWelcomeBadgeholderDialog, isFirstTimeUser, saveHasShownWelcomeB
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { usePrivy } from "@privy-io/react-auth"
+import { Loader2 } from "lucide-react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -37,6 +38,7 @@ export function AccountPrivy() {
   const router = useRouter()
   const { setOpenDialog } = useAppDialogs()
   const { track } = useAnalytics()
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const isSessionReady = () => status === AUTH_STATUS.AUTHENTICATED
@@ -45,12 +47,16 @@ export function AccountPrivy() {
   const isMissionsPath = pathName.includes("/missions")
 
   const logOut = useCallback(() => {
+
+    setIsLoading(true);
+
     Promise.all([privyLogout(), signOut()])
       .then(() => {
         router.push("/")
       })
       .catch((err) => {
         toast.error(`Error logging out. ${err}`)
+        setIsLoading(false);
       })
   }, [router])
 
@@ -88,7 +94,7 @@ export function AccountPrivy() {
             .catch(() => {
               privyLogout().then(() => {
                 toast.error("Unable to login at this time. Try again later.")
-              });
+              })
             })
         })
         .catch(() => {
@@ -124,24 +130,28 @@ export function AccountPrivy() {
     */
   }
 
-
-
   if (session) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
-            <Avatar className="!w-6 !h-6">
-              <AvatarImage src={session.user?.image || ""} alt="avatar" />
-              <AvatarFallback>{session.user?.name}</AvatarFallback>
-            </Avatar>{" "}
-            {session.user?.name}
-            <Image
-              src="/assets/icons/arrowDownIcon.svg"
-              width={10}
-              height={6}
-              alt=""
-            />
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            ) : (
+              <>
+                <Avatar className="!w-6 !h-6">
+                  <AvatarImage src={session.user?.image || ""} alt="avatar" />
+                  <AvatarFallback>{session.user?.name}</AvatarFallback>
+                </Avatar>{" "}
+                {session.user?.name}
+                <Image
+                  src="/assets/icons/arrowDownIcon.svg"
+                  width={10}
+                  height={6}
+                  alt=""
+                />
+              </>
+            )}
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent
