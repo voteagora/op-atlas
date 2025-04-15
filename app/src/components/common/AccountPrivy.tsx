@@ -1,13 +1,5 @@
 "use client"
 
-import { usePrivy } from "@privy-io/react-auth"
-import { signIn, signOut, useSession } from "next-auth/react"
-import Image from "next/image"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useCallback, useEffect } from "react"
-import { toast } from "sonner"
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -15,19 +7,42 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getUserById } from "@/db/users"
+import { AUTH_STATUS } from "@/lib/constants"
+import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
+import { hasShownWelcomeBadgeholderDialog, isFirstTimeUser, saveHasShownWelcomeBadgeholderDialog, saveLogInDate } from "@/lib/utils"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
+import { useAppDialogs } from "@/providers/DialogProvider"
+import { usePrivy } from "@privy-io/react-auth"
+import { signIn, signOut, useSession } from "next-auth/react"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
+
 
 export function AccountPrivy() {
+
   const {
     login: privyLogin,
     logout: privyLogout,
     user: privyUser,
     getAccessToken,
   } = usePrivy()
+
   const { data: session, status } = useSession()
-
-  const sessionIsReady = () => status === "authenticated"
-
+  const { isBadgeholder } = useIsBadgeholder()
+  const previousAuthStatus = usePrevious(status)
   const router = useRouter()
+  const { setOpenDialog } = useAppDialogs()
+  const { track } = useAnalytics()
+
+
+  const isSessionReady = () => status === AUTH_STATUS.AUTHENTICATED
+
+  const pathName = usePathname()
+  const isMissionsPath = pathName.includes("/missions")
 
   const logOut = useCallback(() => {
     Promise.all([privyLogout(), signOut()])
@@ -39,10 +54,19 @@ export function AccountPrivy() {
       })
   }, [router])
 
+  async function checkBadgeholderStatus(id: string) {
+    const user = await getUserById(id)
+    if (!user || !isBadgeholder) return
+
+    if (!hasShownWelcomeBadgeholderDialog()) {
+      setOpenDialog("welcome_badgeholder")
+      saveHasShownWelcomeBadgeholderDialog()
+    }
+  }
+
+  // Handle Privy login
   useEffect(() => {
     if (privyUser) {
-      console.log("privyUser", privyUser)
-
       getAccessToken()
         .then((token) => {
           signIn("credentials", {
@@ -56,21 +80,52 @@ export function AccountPrivy() {
           })
             .then((res) => {
               if (res?.url) {
-                if (res?.url && sessionIsReady()) {
+                if (res?.url && isSessionReady()) {
                   router.push(res.url)
                 }
               }
             })
-            .catch((err) => {
-              logOut()
-              toast.error("Unable to login at this time. Try again later.")
+            .catch(() => {
+              privyLogout().then(() => {
+                toast.error("Unable to login at this time. Try again later.")
+              });
             })
         })
-        .catch((err) => {
+        .catch(() => {
           toast.error("Unable to create Privy session. Try again later.")
-        })
+        });
     }
-  }, [privyUser])
+  }, [privyUser]);
+
+  // Handle Login logic 
+  useEffect(() => {
+    if (status === AUTH_STATUS.AUTHENTICATED && previousAuthStatus === AUTH_STATUS.UNAUTHENTICATED) {
+      track("Successful Sign In", { userId: session?.user?.id })
+      saveLogInDate()
+
+      if (!isMissionsPath) {
+        router.push("/dashboard")
+      }
+
+      if (!isFirstTimeUser()) {
+
+        if (!session.user.email) {
+          setOpenDialog("email")
+        } else {
+          checkBadgeholderStatus(session?.user?.id)
+        }
+      }
+    }
+  }, [status, previousAuthStatus, session])
+
+  {
+    /* 
+        The Farcaster AuthKitContext does not persist state across page reloads, so we must store and read 
+        auth data from our own next-auth context.
+    */
+  }
+
+
 
   if (session) {
     return (
@@ -130,10 +185,10 @@ export function AccountPrivy() {
   } else {
     return (
       <div
-        className="cursor-pointer text-white bg-[#FF0420] rounded-md px-4 py-2"
+        className="cursor-pointer text-white bg-brand-primary rounded-md px-4 py-2"
         onClick={privyLogin}
       >
-        Login
+        Sign in
       </div>
     )
   }

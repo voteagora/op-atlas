@@ -35,6 +35,9 @@ const config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         info: "#0E4CAF",
+        brand: {
+          primary: "#FF0420",
+        },
         background: "hsl(var(--background))",
         backgroundaccent: "hsl(var(--background-accent))",
         backgroundSecondary: "hsl(var(--background-secondary))",
