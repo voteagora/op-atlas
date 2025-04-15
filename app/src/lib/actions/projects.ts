@@ -11,7 +11,6 @@ import {
   createProjectKycTeams,
   CreateProjectParams,
   deleteProject,
-  deleteProjectKycTeam,
   deleteProjectKycTeams,
   getAllApplicationsForRound,
   getAllPublishedUserProjects,
@@ -42,6 +41,7 @@ import {
   verifyMembership,
   verifyOrganizationMembership,
 } from "./utils"
+import { deleteKycTeam } from "@/db/kyc"
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
@@ -510,7 +510,10 @@ export const getProjectsForKycTeamAction = async (kycTeamId: string) => {
   return await getProjectsForKycTeam({ kycTeamId })
 }
 
-export const deleteProjectKYCTeamAction = async (data: {
+export const deleteProjectKYCTeamAction = async ({
+  projectId,
+  kycTeamId,
+}: {
   projectId: string
   kycTeamId: string
 }) => {
@@ -520,7 +523,14 @@ export const deleteProjectKYCTeamAction = async (data: {
     throw new Error("Unauthorized")
   }
 
-  return await deleteProjectKycTeam(data)
+  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  return await deleteKycTeam({
+    kycTeamId,
+  })
 }
 
 export const getPublicProjectAction = async ({

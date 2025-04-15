@@ -9,14 +9,15 @@ import { useParams } from "next/navigation"
 
 import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
-import { deleteOrganizationKycTeam } from "@/db/organizations"
 import {
   deleteProjectKYCTeamAction,
   getProjectsForKycTeamAction,
 } from "@/lib/actions/projects"
+import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
 import { getValidUntil, shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { KYCTeamWithTeam } from "@/lib/types"
+
 interface CompletedGrantDeliveryFormProps {
   kycTeam?: KYCTeamWithTeam
   teamMembers?: KYCUser[]
@@ -55,7 +56,7 @@ export default function CompletedGrantDeliveryForm({
         })
       } else {
         const organizationId = params.organizationId as string
-        await deleteOrganizationKycTeam({
+        await deleteOrganizationKYCTeam({
           organizationId,
           kycTeamId: kycTeam?.id ?? "",
         })

@@ -11,7 +11,6 @@ import { toast } from "sonner"
 import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { deleteOrganizationKycTeam } from "@/db/organizations"
 import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
 import { cn, getValidUntil } from "@/lib/utils"
 import { shortenAddress } from "@/lib/utils"
@@ -19,6 +18,7 @@ import { shortenAddress } from "@/lib/utils"
 import CompletedGrantDeliveryForm from "./CompletedGrantDeliveryForm"
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
 import { KYCTeamWithTeam } from "@/lib/types"
+import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
 
 export default function AddGrantDeliveryAddressForm({
   kycTeam,
@@ -43,7 +43,7 @@ export default function AddGrantDeliveryAddressForm({
         })
       } else {
         const organizationId = params.organizationId as string
-        await deleteOrganizationKycTeam({
+        await deleteOrganizationKYCTeam({
           organizationId,
           kycTeamId: kycTeam?.id ?? "",
         })

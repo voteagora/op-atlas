@@ -1708,6 +1708,9 @@ export async function getKycTeamForProject({
   const projectKycTeam = await prisma.project.findFirst({
     where: {
       id: projectId,
+      kycTeam: {
+        deletedAt: null,
+      },
     },
     include: {
       kycTeam: {
@@ -1756,7 +1759,7 @@ export async function addKYCTeamMembers({
       },
     }),
     prisma.kYCUserTeams.findMany({
-      where: { kycTeamId },
+      where: { kycTeamId, team: { deletedAt: null } },
     }),
   ])
 
@@ -1897,33 +1900,6 @@ export async function getProjectsForKycTeam({
     where: {
       kycTeamId,
     },
-  })
-}
-
-export async function deleteProjectKycTeam({
-  projectId,
-  kycTeamId,
-}: {
-  projectId: string
-  kycTeamId: string
-}) {
-  return await prisma.$transaction(async (tx) => {
-    await tx.kYCTeam.update({
-      where: {
-        id: kycTeamId,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    })
-    await tx.project.update({
-      where: {
-        id: projectId,
-      },
-      data: {
-        kycTeamId: null,
-      },
-    })
   })
 }
 

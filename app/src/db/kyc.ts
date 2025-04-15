@@ -81,3 +81,14 @@ export async function getProjectKycTeam(projectId: string) {
 
   return project?.kycTeam ?? undefined
 }
+
+export async function deleteKycTeam({ kycTeamId }: { kycTeamId: string }) {
+  await prisma.kYCTeam.update({
+    where: {
+      id: kycTeamId,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  })
+}

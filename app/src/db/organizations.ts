@@ -697,7 +697,7 @@ export async function getOrganizationKYCTeams({
   organizationId: string
 }) {
   return prisma.organizationKYCTeam.findMany({
-    where: { organizationId },
+    where: { organizationId, team: { deletedAt: null } },
     include: {
       team: {
         include: {
@@ -705,32 +705,6 @@ export async function getOrganizationKYCTeams({
           projects: true,
         },
       },
-    },
-  })
-}
-
-export async function deleteOrganizationKycTeam({
-  organizationId,
-  kycTeamId,
-}: {
-  organizationId: string
-  kycTeamId: string
-}) {
-  await prisma.kYCUserTeams.deleteMany({
-    where: {
-      kycTeamId,
-    },
-  })
-
-  await prisma.organizationKYCTeam.deleteMany({
-    where: {
-      kycTeamId,
-    },
-  })
-
-  await prisma.kYCTeam.delete({
-    where: {
-      id: kycTeamId,
     },
   })
 }
