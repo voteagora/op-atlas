@@ -1,5 +1,7 @@
-import { getUserConnectedAddresses } from "@/lib/neynar"
 import CredentialsProvider from "next-auth/providers/credentials"
+
+import { getUserConnectedAddresses } from "@/lib/neynar"
+
 import {
   addUserAddresses,
   getUserByAddress,
@@ -67,7 +69,7 @@ const userResponse = (user: any): UserResponse => ({
   farcasterId: user?.farcasterId as string | undefined,
   name: user?.name as string | undefined,
   image: user?.imageUrl as string | undefined,
-  email: user?.emails[0].email as string | undefined,
+  email: Array.isArray(user?.emails) && user.emails.length > 0 ? user.emails[0].email : undefined,
 })
 
 const loginWithEmail = async (email: string): Promise<UserResponse | null> => {

@@ -1,5 +1,14 @@
 "use client"
 
+import { usePrivy } from "@privy-io/react-auth"
+import { Loader2 } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { signIn, signOut, useSession } from "next-auth/react"
+import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -10,21 +19,16 @@ import {
 import { getUserById } from "@/db/users"
 import { AUTH_STATUS } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
-import { hasShownWelcomeBadgeholderDialog, isFirstTimeUser, saveHasShownWelcomeBadgeholderDialog, saveLogInDate } from "@/lib/utils"
+import {
+  hasShownWelcomeBadgeholderDialog,
+  isFirstTimeUser,
+  saveHasShownWelcomeBadgeholderDialog,
+  saveLogInDate,
+} from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { usePrivy } from "@privy-io/react-auth"
-import { Loader2 } from "lucide-react"
-import { signIn, signOut, useSession } from "next-auth/react"
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
-import { toast } from "sonner"
-
 
 export const Account = () => {
-
   const {
     login: privyLogin,
     logout: privyLogout,
@@ -38,27 +42,25 @@ export const Account = () => {
   const router = useRouter()
   const { setOpenDialog } = useAppDialogs()
   const { track } = useAnalytics()
-  const [isLoading, setIsLoading] = useState(false);
-
-
-  const isSessionReady = () => status === AUTH_STATUS.AUTHENTICATED
+  const [isLoading, setIsLoading] = useState(false)
 
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
 
   const logOut = useCallback(() => {
+    setIsLoading(true)
 
-    setIsLoading(true);
-
-    Promise.all([privyLogout(), signOut()])
+    Promise.all([privyLogout(), signOut({ redirect: false })])
       .then(() => {
-        router.push("/")
+        setTimeout(() => {
+          router.push("/")
+        }, 10000)
       })
       .catch((err) => {
         toast.error(`Error logging out. ${err}`)
-        setIsLoading(false);
+        setIsLoading(false)
       })
-  }, [router])
+  }, [router, privyLogout, status])
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -72,6 +74,7 @@ export const Account = () => {
 
   // Handle Privy login
   useEffect(() => {
+
     if (privyUser) {
       getAccessToken()
         .then((token) => {
@@ -86,7 +89,7 @@ export const Account = () => {
           })
             .then((res) => {
               if (res?.url) {
-                if (res?.url && isSessionReady()) {
+                if (res?.url && status === AUTH_STATUS.AUTHENTICATED) {
                   router.push(res.url)
                 }
               }
@@ -99,13 +102,16 @@ export const Account = () => {
         })
         .catch(() => {
           toast.error("Unable to create Privy session. Try again later.")
-        });
+        })
     }
-  }, [privyUser]);
+  }, [privyUser, getAccessToken, privyLogout, router, status])
 
-  // Handle Login logic 
+  // Handle Login logic
   useEffect(() => {
-    if (status === AUTH_STATUS.AUTHENTICATED && previousAuthStatus === AUTH_STATUS.UNAUTHENTICATED) {
+    if (
+      status === AUTH_STATUS.AUTHENTICATED &&
+      previousAuthStatus === AUTH_STATUS.UNAUTHENTICATED
+    ) {
       track("Successful Sign In", { userId: session?.user?.id })
       saveLogInDate()
 
@@ -121,7 +127,7 @@ export const Account = () => {
         }
       }
     }
-  }, [status, previousAuthStatus, session])
+  }, [status, previousAuthStatus, session, track, isMissionsPath, router, setOpenDialog, checkBadgeholderStatus])
 
   {
     /* 
@@ -131,7 +137,7 @@ export const Account = () => {
   }
 
   if (status === AUTH_STATUS.LOADING) {
-    return null;
+    return null
   }
 
   if (session) {
@@ -197,12 +203,13 @@ export const Account = () => {
     )
   } else {
     return (
-      <div
+      <button
+        type="button"
         className="cursor-pointer text-white bg-brand-primary rounded-md px-4 py-2"
         onClick={privyLogin}
       >
         Sign in
-      </div>
+      </button>
     )
   }
 }
