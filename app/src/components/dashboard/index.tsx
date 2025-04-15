@@ -7,6 +7,7 @@ import { ReactNode, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
   ProjectWithDetails,
@@ -15,7 +16,6 @@ import {
 } from "@/lib/types"
 import { cn, profileProgress } from "@/lib/utils"
 
-import { unclaimedRewards } from "@/lib/rewards"
 import ApplicationInterruptiveDialogue from "../application/ApplicationInterruptiveDialogue"
 import ExternalLink from "../ExternalLink"
 import CreateOrganizationDialog from "../organizations/CreateOrganizationDialog"
@@ -64,7 +64,6 @@ const Dashboard = ({
   const [showUnclaimedRewardsDialog, setShowUnclaimedRewardsDialog] =
     useState(false)
 
-  const [showOnBoarding, setShowOnBoarding] = useState(false)
   const [showApplicationDialogue, setShowApplicationDialogue] = useState(false)
   const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] =
     useState(false)
@@ -91,11 +90,6 @@ const Dashboard = ({
       profileInitiallyComplete.current = false
     }
   }, [user])
-
-  // TODO: hide rewards section if all rewards are claimed
-  const showRewardsSection = Boolean(
-    adminProjects?.find((project) => project.applications.length),
-  )
 
   const handleShowMore = () => {
     setVisibleCardsCount((prevCount) =>
@@ -151,7 +145,6 @@ const Dashboard = ({
         />
       )}
 
-
       {showCreateOrganizationDialog && (
         <CreateOrganizationDialog
           open
@@ -171,27 +164,29 @@ const Dashboard = ({
         {(!projects.length ||
           !!!organizations?.length ||
           !profileInitiallyComplete.current) && (
-            <div className="flex flex-col gap-4">
-              {!isCompleteProfileAccordionDismissed &&
-                !profileInitiallyComplete.current && (
-                  <CompleteProfileCallout
-                    user={user}
-                    setIsCompleteProfileAccordionDismissed={
-                      setIsCompleteProfileAccordionDismissed
-                    }
-                  />
-                )}
-              {!organizations?.length && (
-                <MakeFirstOrganization onClick={() => setShowCreateOrganizationDialog(true)} />
+          <div className="flex flex-col gap-4">
+            {!isCompleteProfileAccordionDismissed &&
+              !profileInitiallyComplete.current && (
+                <CompleteProfileCallout
+                  user={user}
+                  setIsCompleteProfileAccordionDismissed={
+                    setIsCompleteProfileAccordionDismissed
+                  }
+                />
               )}
+            {!organizations?.length && (
+              <MakeFirstOrganization
+                onClick={() => setShowCreateOrganizationDialog(true)}
+              />
+            )}
 
-              {!projects.length && !organizations?.length && (
-                <Link href="/projects/new">
-                  <AddFirstProject />
-                </Link>
-              )}
-            </div>
-          )}
+            {!projects.length && !organizations?.length && (
+              <Link href="/projects/new">
+                <AddFirstProject />
+              </Link>
+            )}
+          </div>
+        )}
 
         {projects.length > 0 && (
           <div className="flex flex-col gap-4">
@@ -250,16 +245,6 @@ const Dashboard = ({
             </div>
           )
         })}
-
-        {showRewardsSection && (
-          <div className="flex flex-col gap-6">
-            <h3>Your Retro Funding rewards</h3>
-            {adminProjects.map((project) => (
-              <ProjectRewardRow key={project.id} project={project} />
-            ))}
-          </div>
-        )}
-
         {SHOW_APPLICATIONS && (
           <div className="flex flex-col gap-y-6">
             <h3>Your Retro Funding applications</h3>

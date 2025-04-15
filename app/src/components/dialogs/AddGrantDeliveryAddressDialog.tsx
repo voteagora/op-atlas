@@ -67,52 +67,55 @@ export function AddGrantDeliveryAddressDialog({
   const onSubmit = useCallback(
     async (data: { signature: string }) => {
       startTransition(async () => {
-        try {
-          if (!grantDeliveryData.address) return
+        if (!grantDeliveryData.address) return
 
-          if (!isAddress(grantDeliveryData.address))
-            throw new Error("Invalid address")
-          if (!data.signature.startsWith("0x"))
-            throw new Error("Invalid signature")
+        if (!isAddress(grantDeliveryData.address))
+          throw new Error("Invalid address")
+        if (!data.signature.startsWith("0x"))
+          throw new Error("Invalid signature")
 
-          if (grantDeliveryData.organizationProject) {
-            const organizationId = params.organizationId as string
-            if (!organizationId) return
+        if (grantDeliveryData.organizationProject) {
+          const organizationId = params.organizationId as string
+          if (!organizationId) return
 
+          const createdOrganizationKycTeam =
             await createOrganizationKycTeamAction({
               walletAddress: grantDeliveryData.address,
               organizationId,
             })
 
-            queryClient.invalidateQueries({
-              queryKey: ["kyc-teams", "organization", organizationId],
-            })
-          } else {
-            const projectId = params.projectId as string
-            if (!projectId) return
-
-            await createProjectKycTeamAction({
-              walletAddress: grantDeliveryData.address,
-              projectId,
-            })
-
-            queryClient.invalidateQueries({
-              queryKey: ["kycTeamProjects", grantDeliveryData.kycTeamId],
-            })
-            queryClient.invalidateQueries({
-              queryKey: ["kyc-teams", "project", projectId],
-            })
+          if (createdOrganizationKycTeam.error) {
+            toast.error(createdOrganizationKycTeam.error)
+            return
           }
 
-          toast.success("Grant delivery address verified")
-          handleClose(false)
-        } catch (err) {
-          toast.error(
-            err instanceof Error
-              ? err.message
-              : "An error occurred, please try again",
-          )
+          queryClient.invalidateQueries({
+            queryKey: ["kyc-teams", "organization", organizationId],
+          })
+        } else {
+          const projectId = params.projectId as string
+          if (!projectId) return
+
+          const createdProjectKycTeam = await createProjectKycTeamAction({
+            walletAddress: grantDeliveryData.address,
+            projectId,
+          })
+
+          if (createdProjectKycTeam.error) {
+            toast.error(createdProjectKycTeam.error)
+            return
+          }
+
+          queryClient.invalidateQueries({
+            queryKey: ["kycTeamProjects", grantDeliveryData.kycTeamId],
+          })
+          queryClient.invalidateQueries({
+            queryKey: ["kyc-teams", "project", projectId],
+          })
         }
+
+        toast.success("Grant delivery address verified")
+        handleClose(false)
       })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,7 +140,6 @@ export function AddGrantDeliveryAddressDialog({
               and continue to the next step.
             </p>
           </div>
-
           <div className="flex flex-col self-stretch gap-1">
             <div className="text-sm font-medium">Chain</div>
             <Input
@@ -147,7 +149,6 @@ export function AddGrantDeliveryAddressDialog({
               leftIcon="/assets/chain-logos/optimism.svg"
             />
           </div>
-
           <div className="flex flex-col self-stretch gap-1">
             <div className="text-sm font-medium">Message to sign</div>
             <Textarea disabled value={messageToSign} className="resize-none" />
@@ -155,7 +156,6 @@ export function AddGrantDeliveryAddressDialog({
               Copy
             </Button>
           </div>
-
           <div className="flex flex-col self-stretch gap-1">
             <div>Signature hash</div>
             <Controller
@@ -171,7 +171,6 @@ export function AddGrantDeliveryAddressDialog({
               </p>
             )}
           </div>
-
           <Button
             className="self-stretch"
             variant="destructive"
