@@ -91,7 +91,7 @@ export const AUTH_STATUS = {
   LOADING: "loading",
 } as const
 
-export type AuthStatus = typeof AUTH_STATUS[keyof typeof AUTH_STATUS]
+export type AuthStatus = (typeof AUTH_STATUS)[keyof typeof AUTH_STATUS]
 
 export const OSO_METRICS = {
   activeAddresses: [

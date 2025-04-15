@@ -6,7 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -33,8 +33,11 @@ export const Account = () => {
     login: privyLogin,
     logout: privyLogout,
     user: privyUser,
+    authenticated: privyAuthenticated,
     getAccessToken,
   } = usePrivy()
+
+  const isPrivyAuthInProgress = useRef(false)
 
   const { data: session, status } = useSession()
   const { isBadgeholder } = useIsBadgeholder()
@@ -42,25 +45,15 @@ export const Account = () => {
   const router = useRouter()
   const { setOpenDialog } = useAppDialogs()
   const { track } = useAnalytics()
-  const [isLoading, setIsLoading] = useState(false)
 
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
 
   const logOut = useCallback(() => {
-    setIsLoading(true)
-
-    Promise.all([privyLogout(), signOut({ redirect: false })])
-      .then(() => {
-        setTimeout(() => {
-          router.push("/")
-        }, 10000)
-      })
-      .catch((err) => {
-        toast.error(`Error logging out. ${err}`)
-        setIsLoading(false)
-      })
-  }, [router, privyLogout, status])
+    Promise.all([privyLogout(), signOut({ redirect: false })]).catch((err) => {
+      toast.error(`Error logging out. ${err}`)
+    })
+  }, [privyLogout])
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -72,10 +65,35 @@ export const Account = () => {
     }
   }
 
+  // Handle log ou
+  useEffect(() => {
+    if (
+      !privyAuthenticated &&
+      status === AUTH_STATUS.UNAUTHENTICATED &&
+      isPrivyAuthInProgress.current
+    ) {
+      console.log("*****************************************")
+      console.log("LOGOUT AND DONE")
+      console.log("*****************************************")
+
+      isPrivyAuthInProgress.current = false
+      router.push("/")
+    }
+  }, [status, router, privyAuthenticated])
+
   // Handle Privy login
   useEffect(() => {
+    if (
+      privyUser &&
+      !isPrivyAuthInProgress.current &&
+      status === AUTH_STATUS.UNAUTHENTICATED
+    ) {
+      console.log("*****************************************")
+      console.log("CREATING NEXT AUTH SESSION")
+      console.log("*****************************************")
 
-    if (privyUser) {
+      isPrivyAuthInProgress.current = true
+
       getAccessToken()
         .then((token) => {
           signIn("credentials", {
@@ -89,9 +107,7 @@ export const Account = () => {
           })
             .then((res) => {
               if (res?.url) {
-                if (res?.url && status === AUTH_STATUS.AUTHENTICATED) {
-                  router.push(res.url)
-                }
+                router.push(res.url)
               }
             })
             .catch(() => {
@@ -110,8 +126,13 @@ export const Account = () => {
   useEffect(() => {
     if (
       status === AUTH_STATUS.AUTHENTICATED &&
-      previousAuthStatus === AUTH_STATUS.UNAUTHENTICATED
+      previousAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
+      isPrivyAuthInProgress.current
     ) {
+      console.log("*****************************************")
+      console.log("SUCCESSFUL SIGN IN")
+      console.log("*****************************************")
+
       track("Successful Sign In", { userId: session?.user?.id })
       saveLogInDate()
 
@@ -127,7 +148,16 @@ export const Account = () => {
         }
       }
     }
-  }, [status, previousAuthStatus, session, track, isMissionsPath, router, setOpenDialog, checkBadgeholderStatus])
+  }, [
+    status,
+    previousAuthStatus,
+    session,
+    track,
+    isMissionsPath,
+    router,
+    setOpenDialog,
+    checkBadgeholderStatus,
+  ])
 
   {
     /* 
@@ -145,23 +175,17 @@ export const Account = () => {
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
-            {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            ) : (
-              <>
-                <Avatar className="!w-6 !h-6">
-                  <AvatarImage src={session.user?.image || ""} alt="avatar" />
-                  <AvatarFallback>{session.user?.name}</AvatarFallback>
-                </Avatar>{" "}
-                {session.user?.name}
-                <Image
-                  src="/assets/icons/arrowDownIcon.svg"
-                  width={10}
-                  height={6}
-                  alt=""
-                />
-              </>
-            )}
+            <Avatar className="!w-6 !h-6">
+              <AvatarImage src={session.user?.image || ""} alt="avatar" />
+              <AvatarFallback>{session.user?.name}</AvatarFallback>
+            </Avatar>{" "}
+            {session.user?.name}
+            <Image
+              src="/assets/icons/arrowDownIcon.svg"
+              width={10}
+              height={6}
+              alt=""
+            />
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent
