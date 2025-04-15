@@ -197,9 +197,11 @@ export async function upsertUser({
 export async function updateUserEmail({
   id,
   email,
+  verified,
 }: {
   id: string
   email?: string | null
+  verified?: boolean
 }) {
   const currentEmail = await prisma.userEmail.findFirst({
     where: {
@@ -222,6 +224,7 @@ export async function updateUserEmail({
         data: {
           email,
           userId: id,
+          verified: verified ?? false,
         },
       }),
     ]

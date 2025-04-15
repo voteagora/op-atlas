@@ -65,9 +65,17 @@ const userResponse = (user: any): UserResponse => ({
 });
 
 const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
-    const user = await getUserByEmail(email);
 
+    // User with this email already exists
+    const user = await getUserByEmail(email.toLowerCase());
     if (user) {
+        // Mark user's email as 
+        await updateUserEmail({
+            id: user.id,
+            email: email.toLowerCase(),
+            verified: true,
+        });
+
         return userResponse(user);
     }
 
@@ -76,10 +84,10 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
             farcasterId: '6666',
         });
 
-        // Should we set email to be verified?
         await updateUserEmail({
             id: newUser.id,
-            email: email,
+            email: email.toLowerCase(),
+            verified: true,
         });
 
         return userResponse(newUser);
