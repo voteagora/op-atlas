@@ -15,9 +15,9 @@ import {
   deleteProjectKycTeams,
   getAllApplicationsForRound,
   getAllPublishedUserProjects,
-  getKycTeam,
+  getKycTeamForProject,
   getProjectContracts,
-  getProjectKycTeams,
+  getProjectsForKycTeam,
   getProjectTeam,
   getPublicProject,
   getPublishedProjectContracts,
@@ -445,7 +445,19 @@ export const getKycTeamAction = async (projectId: string) => {
     throw new Error(isInvalid.error)
   }
 
-  return await getKycTeam({ projectId })
+  const kycTeam = await getKycTeamForProject({ projectId })
+
+  //const address = projectKycTeam.kycTeam.walletAddress
+  // const createdAt = projectKycTeam.kycTeam.createdAt
+  // const validUntil = getValidUntil(createdAt)
+
+  // return {
+  //   id: projectKycTeam.kycTeamId,
+  //   grantAddress: { address, validUntil },
+  //   team: projectKycTeam.kycTeam.team.map((ut) => ut.users),
+  // }
+
+  return kycTeam
 }
 
 export const createProjectKYCTeamsAction = async ({
@@ -500,14 +512,14 @@ export const deleteProjectKYCTeamsAction = async ({
   return await deleteProjectKycTeams({ projectIds, kycTeamId })
 }
 
-export const getProjectKYCTeamsAction = async (kycTeamId: string) => {
+export const getProjectsForKycTeamAction = async (kycTeamId: string) => {
   const session = await auth()
 
   if (!session?.user?.id) {
     throw new Error("Unauthorized")
   }
 
-  return await getProjectKycTeams({ kycTeamId })
+  return await getProjectsForKycTeam({ kycTeamId })
 }
 
 export const deleteProjectKYCTeamAction = async (data: {

@@ -650,9 +650,7 @@ export async function createOrganizationKycTeam({
             },
             {
               project: {
-                ProjectKYCTeam: {
-                  none: {},
-                },
+                kycTeamId: null,
               },
             },
           ],
@@ -668,10 +666,10 @@ export async function createOrganizationKycTeam({
       }),
     ])
 
-    const [projectKycTeams, organizationKYCTeam] = await Promise.all([
-      prisma.projectKYCTeam.createManyAndReturn({
+    await Promise.all([
+      prisma.project.updateMany({
         data: orgProjects.map((project) => ({
-          projectId: project.projectId,
+          id: project.projectId,
           kycTeamId: kycTeam.id,
         })),
       }),
@@ -682,19 +680,6 @@ export async function createOrganizationKycTeam({
         },
       }),
     ])
-
-    await prisma.kYCTeam.update({
-      where: {
-        id: kycTeam.id,
-      },
-      data: {
-        ProjectKYCTeam: {
-          connect: projectKycTeams.map((project) => ({
-            id: project.id,
-          })),
-        },
-      },
-    })
 
     return { error: null }
   } catch (error: any) {
@@ -710,49 +695,18 @@ export async function getOrganizationKYCTeams({
   organizationId,
 }: {
   organizationId: string
-}): Promise<
-  {
-    id: string
-    projectId: string | null
-    grantAddress: { address: string; createdAt: Date }
-    team: KYCUser[]
-  }[]
-> {
-  const organizationKycTeams = await prisma.organizationKYCTeam.findMany({
+}) {
+  return prisma.organizationKYCTeam.findMany({
     where: { organizationId },
     include: {
       team: {
         include: {
           team: { include: { users: true } },
+          projects: true,
         },
       },
     },
   })
-
-  const kycTeamIds = organizationKycTeams.map((kycTeam) => kycTeam.kycTeamId)
-
-  if (kycTeamIds.length === 0) {
-    return [] // No teams found
-  }
-
-  const projectKycTeams = await prisma.projectKYCTeam.findMany({
-    where: { kycTeamId: { in: kycTeamIds } },
-    select: { kycTeamId: true, projectId: true },
-  })
-
-  const projectMapping = new Map(
-    projectKycTeams.map((p) => [p.kycTeamId, p.projectId]),
-  )
-
-  return organizationKycTeams.map((kycTeam) => ({
-    id: kycTeam.kycTeamId,
-    projectId: projectMapping.get(kycTeam.kycTeamId) || null,
-    grantAddress: {
-      address: kycTeam.team.walletAddress,
-      createdAt: kycTeam.team.createdAt,
-    },
-    team: kycTeam.team.team.map((ut) => ut.users),
-  }))
 }
 
 export async function deleteOrganizationKycTeam({
