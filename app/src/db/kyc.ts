@@ -83,12 +83,12 @@ export async function getProjectKycTeam(projectId: string) {
 }
 
 export async function deleteKycTeam({ kycTeamId }: { kycTeamId: string }) {
-  await prisma.kYCTeam.update({
+  // Hard delete the kyc team
+  // TODO: Check for active streams & soft delete the team if there are any
+
+  await prisma.kYCTeam.delete({
     where: {
       id: kycTeamId,
-    },
-    data: {
-      deletedAt: new Date(),
     },
   })
 }
