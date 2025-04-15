@@ -668,10 +668,12 @@ export async function createOrganizationKycTeam({
 
     await Promise.all([
       prisma.project.updateMany({
-        data: orgProjects.map((project) => ({
-          id: project.projectId,
+        where: {
+          id: { in: orgProjects.map((project) => project.projectId) },
+        },
+        data: {
           kycTeamId: kycTeam.id,
-        })),
+        },
       }),
       prisma.organizationKYCTeam.create({
         data: {
