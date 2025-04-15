@@ -108,7 +108,6 @@ export function AccountPrivy() {
       }
 
       if (!isFirstTimeUser()) {
-
         if (!session.user.email) {
           setOpenDialog("email")
         } else {

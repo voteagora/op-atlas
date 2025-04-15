@@ -17,6 +17,7 @@ interface UserResponse {
   farcasterId?: string
   name?: string
   image?: string
+  email?: string
 }
 
 export const PrivyCredentialsProvider = CredentialsProvider({
@@ -66,6 +67,7 @@ const userResponse = (user: any): UserResponse => ({
   farcasterId: user?.farcasterId as string | undefined,
   name: user?.name as string | undefined,
   image: user?.imageUrl as string | undefined,
+  email: user?.email as string | undefined,
 })
 
 const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
@@ -79,7 +81,10 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
       verified: true,
     })
 
-    return userResponse(user)
+    return {
+      ...userResponse(user),
+      email: email.toLowerCase(),
+    }
   }
 
   try {
@@ -93,7 +98,10 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
       verified: true,
     })
 
-    return userResponse(newUser)
+    return {
+      ...userResponse(newUser),
+      email: email.toLowerCase(),
+    }
   } catch (error) {
     console.error("Failed to create user or update email:", error)
     return null
