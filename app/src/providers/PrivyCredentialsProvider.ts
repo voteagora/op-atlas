@@ -10,6 +10,7 @@ import {
   updateUser,
   updateUserEmail,
   upsertUser,
+  getUserById,
 } from "../db/users"
 import privy from "../lib/privy"
 
@@ -76,7 +77,7 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
   // User with this email already exists
   const user = await getUserByEmail(email.toLowerCase())
   if (user) {
-    // Mark user's email as
+    // Mark user's email as verified
     await updateUserEmail({
       id: user.id,
       email: email.toLowerCase(),
@@ -88,14 +89,15 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
 
   try {
     const newUser = await upsertUser({})
-
     await updateUserEmail({
       id: newUser.id,
       email: email.toLowerCase(),
       verified: true,
     })
 
-    return userResponse(newUser)
+    // Refetch the user to get updated email data
+    const updatedUser = await getUserById(newUser.id)
+    return userResponse(updatedUser)
   } catch (error) {
     console.error("Failed to create user or update email:", error)
     return null
