@@ -139,7 +139,7 @@ const verifyNpm = async (owner: string, slug: string, rootFiles: any[]) => {
       verifyOwnerAndSlug(
         owner,
         slug,
-        pkg.repository?.url.split("/").filter(Boolean),
+        pkg.repository?.url?.split("/").filter(Boolean),
       ),
   )
 }
@@ -169,12 +169,12 @@ export const verifyGithubRepo = async (
     }
   }
 
-  // const isValid = isValidFundingFile(funding, projectId)
-  // if (!isValid) {
-  //   return {
-  //     error: "Invalid funding file",
-  //   }
-  // }
+  const isValid = isValidFundingFile(funding, projectId)
+  if (!isValid) {
+    return {
+      error: "Invalid funding file",
+    }
+  }
 
   const repoFiles = await getContents(owner, slug)
 
