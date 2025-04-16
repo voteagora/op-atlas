@@ -4,7 +4,6 @@ import {
   createOSOProjects,
   getDevToolingProjects,
   getOnchainBuildersProjects,
-  getProjectOSOByIds,
   getProjectOSOData,
   getProjectsOSO,
 } from "@/db/projects"
@@ -17,8 +16,11 @@ import {
   QueryOso_ProjectsV1Args,
   QueryOso_TimeseriesMetricsByProjectV0Args,
 } from "@/graphql/__generated__/types"
-import { OSO_METRICS } from "@/lib/constants"
-import { parseOsoDeployerContract } from "@/lib/oso"
+import {
+  OSO_METRICS,
+  OSO_QUERY_DATES,
+  parseOsoDeployerContract,
+} from "@/lib/oso"
 import osoGqlClient from "@/lib/oso-client"
 import client from "@/lib/oso-client"
 import {
@@ -100,8 +102,8 @@ export async function getPublicProjectOSOData(projectId: string) {
     await queryMetrics([osoId], "activeAddresses"),
     await queryMetrics([osoId], "gasFees"),
     await queryMetrics([osoId], "transactions", {
-      _gte: "2024-10-01",
-      _lte: "2025-07-31",
+      _gte: OSO_QUERY_DATES.transactions.start,
+      _lte: OSO_QUERY_DATES.transactions.end,
     }),
     await queryMetrics([osoId], "tvl"),
   ])
@@ -121,7 +123,7 @@ export async function getPublicProjectOSOData(projectId: string) {
   const projectsGasConsumption = await queryMetrics(
     projectIdsForGasConsumption,
     "gasFees",
-    { _gte: "2025-02-01", _lte: "2025-02-28" },
+    { _gte: OSO_QUERY_DATES.gasFees.start, _lte: OSO_QUERY_DATES.gasFees.end },
   )
   const summedProjectsGasConsumption = projectsGasConsumption.reduce(
     (acc: number, curr: MetricValues) => {
@@ -146,7 +148,10 @@ export async function getPublicProjectOSOData(projectId: string) {
 const queryMetrics = async (
   osoId: string[],
   key: keyof typeof OSO_METRICS,
-  sampleDate = { _gte: "2025-01-01", _lte: "2025-07-31" },
+  sampleDate = {
+    _gte: OSO_QUERY_DATES.DEFAULT.start,
+    _lte: OSO_QUERY_DATES.DEFAULT.end,
+  },
 ) => {
   const query: QueryOso_TimeseriesMetricsByProjectV0Args = {
     where: {

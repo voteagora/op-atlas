@@ -1,12 +1,16 @@
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts"
 
+import { OSO_QUERY_DATES } from "@/lib/oso"
+
 export default function Chart({
   data,
 }: {
   data: { date: string; value: number; month: string }[]
 }) {
   const formattedData = data
-    .filter((item) => new Date(item.date) >= new Date("2025-01-01"))
+    .filter(
+      (item) => new Date(item.date) >= new Date(OSO_QUERY_DATES.DEFAULT.start),
+    )
     .map((item) => ({
       ...item,
       monthLabel: item.month,
