@@ -1,5 +1,4 @@
 import Image from "next/image"
-import { useSession } from "next-auth/react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { isAddress } from "viem"
@@ -25,11 +24,9 @@ export function AddVerifiedAddressDialog({
   const [error, setError] = useState<string>()
   const [address, setAddress] = useState<string>()
 
-  const { data: session } = useSession()
-
   const messageToSign = useMemo(() => {
-    return `I verify that I am ${session?.user.farcasterId} on Farcaster and I'm an optimist.`
-  }, [session?.user.farcasterId])
+    return `I verify that I am the owner of ${address} and I'm an optimist.`
+  }, [address])
 
   const onCopy = () => {
     navigator.clipboard.writeText(messageToSign)

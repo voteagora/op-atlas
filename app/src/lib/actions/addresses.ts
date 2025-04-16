@@ -8,13 +8,14 @@ import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
 import { getUserConnectedAddresses } from "../neynar"
 import verifyMessage from "../utils/serverVerifyMessage"
 
-const getMessage = (farcasterId: string) =>
-  `I verify that I am ${farcasterId} on Farcaster and I'm an optimist.`
+const getMessage = (address: string) =>
+  `I verify that I am the owner of ${address} and I'm an optimist.`
 
 export const verifyUserAddress = async (
   address: `0x${string}`,
   signature: `0x${string}`,
 ) => {
+  const normalizedAddress = address.toLowerCase()
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -30,13 +31,7 @@ export const verifyUserAddress = async (
     }
   }
 
-  if (!user.farcasterId) {
-    return {
-      error: "No Farcaster ID found",
-    }
-  }
-
-  if (user.addresses.some(({ address: existing }) => existing === address)) {
+  if (user.addresses.some(({ address: existing }) => existing.toLowerCase() === normalizedAddress)) {
     return {
       error: "Address already verified",
     }
@@ -45,7 +40,7 @@ export const verifyUserAddress = async (
   // Verify signature
   const isValidSignature = await verifyMessage({
     address,
-    message: getMessage(user.farcasterId),
+    message: getMessage(address),
     signature: signature as `0x${string}`,
   })
 
@@ -57,7 +52,7 @@ export const verifyUserAddress = async (
 
   await addUserAddresses({
     id: user.id,
-    addresses: [address],
+    addresses: [normalizedAddress],
     source: "atlas",
   })
 
