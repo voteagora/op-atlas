@@ -87,11 +87,12 @@ model FundingRound {
   startDate   DateTime
   endDate     DateTime
 
-  applications    Application[]
-  recipients      FundingReward[]
-  Category        Category[]
-  ImpactStatement ImpactStatement[]
-  ProjectOSO      ProjectOSO[]
+  applications     Application[]
+  recipients       FundingReward[]
+  Category         Category[]
+  ImpactStatement  ImpactStatement[]
+  ProjectOSO       ProjectOSO[]
+  recurringRewards RecurringReward[]
 }
 
 model FundingReward {
@@ -253,6 +254,8 @@ model Project {
   publishedContracts PublishedContract[]
   ProjectOSO ProjectOSO[]
   projectOSOData projectOSOData[]
+
+  recurringRewards RecurringReward[]
 
   kycTeam   KYCTeam? @relation(fields: [kycTeamId], references: [id])
 
@@ -530,6 +533,8 @@ model KYCTeam {
   id             String       @id @default(uuid())
   walletAddress  String       @unique
 
+  rewardStreamId String?
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   deletedAt      DateTime?
@@ -537,6 +542,8 @@ model KYCTeam {
 	team                       KYCUserTeams[]
   projects                   Project[]
   OrganizationKYCTeams       OrganizationKYCTeam[]
+
+  rewardStream   RewardStream? @relation(fields: [rewardStreamId], references: [id])
 	
   @@index([walletAddress])
 }
@@ -595,4 +602,63 @@ model projectOSOData {
 
   @@index([projectId])
   @@index([osoId])
+}
+
+model RecurringReward {
+  id           String       @id @default(uuid())
+  roundId      String
+  tranche      Int
+  projectId    String
+  amount       String    // In OP with 18 decimals
+  
+  createdAt    DateTime     @default(now())    
+  updatedAt    DateTime     @default(now())    
+  deletedAt    DateTime?
+  
+  round        FundingRound @relation(fields: [roundId], references: [id])
+  project      Project @relation(fields: [projectId], references: [id])
+  
+  @@unique([roundId, tranche, projectId])
+  @@index([projectId])
+  @@index([roundId])
+  @@index([tranche])
+}
+
+enum StreamStatus {
+	NOT_STARTED
+	ACTIVE
+	CLOSED
+}
+
+model SuperfluidStream {
+  id           String    @id // Superfluid Id
+	sender       String
+	receiver     String
+	flowRate     String
+	status       StreamStatus @default(NOT_STARTED)
+	
+	createdAt    DateTime     @default(now())    
+  updatedAt    DateTime     @default(now())    
+  deletedAt    DateTime? 
+	
+	internalStreamId  String
+	
+	rewardStream      RewardStream @relation(fields: [internalStreamId], references: [id])
+  
+  @@unique([sender, receiver])
+}
+
+// To keep track of the streams when user changes their wallet
+// This is used to reconcile the streams when a user changes their wallet address
+// This is the id that's passed to Superfluid to create the stream
+model RewardStream {
+		id         String         @id @default(uuid())
+    projects   String[]       // Immutable list of projectIds redundantly stored for reconciliation & validation
+		
+		createdAt    DateTime     @default(now())    
+    updatedAt    DateTime     @default(now())    
+    deletedAt    DateTime?  
+		
+		teams      KYCTeam[]
+		streams    SuperfluidStream[]
 }
