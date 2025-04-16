@@ -104,10 +104,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -174,12 +174,22 @@ export async function upsertUser({
   farcasterId,
   ...user
 }: {
-  farcasterId: string
+  farcasterId?: string | null
   name?: string | null
   username?: string | null
   imageUrl?: string | null
   bio?: string | null
 }) {
+  // If farcasterId is not provided, create a new user without it
+  if (!farcasterId) {
+    return prisma.user.create({
+      data: user as Prisma.UserCreateInput,
+      include: {
+        emails: true,
+      },
+    })
+  }
+
   return prisma.user.upsert({
     where: {
       farcasterId,
@@ -213,24 +223,24 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-        prisma.userEmail.delete({
-          where: {
-            id: currentEmail.id,
-          },
-        }),
-      ]
+      prisma.userEmail.delete({
+        where: {
+          id: currentEmail.id,
+        },
+      }),
+    ]
     : []
 
   const createEmail = email
     ? [
-        prisma.userEmail.create({
-          data: {
-            email,
-            userId: id,
-            verified: verified ?? false,
-          },
-        }),
-      ]
+      prisma.userEmail.create({
+        data: {
+          email,
+          userId: id,
+          verified: verified ?? false,
+        },
+      }),
+    ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])

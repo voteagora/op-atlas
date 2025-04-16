@@ -30,6 +30,12 @@ export const verifyUserAddress = async (
     }
   }
 
+  if (!user.farcasterId) {
+    return {
+      error: "No Farcaster ID found",
+    }
+  }
+
   if (user.addresses.some(({ address: existing }) => existing === address)) {
     return {
       error: "Address already verified",
@@ -107,7 +113,7 @@ export const syncFarcasterAddresses = async () => {
     }
   }
 
-  const farcasterAddresses = await getUserConnectedAddresses(user.farcasterId)
+  const farcasterAddresses = await getUserConnectedAddresses(user?.farcasterId)
 
   // No action needed if the response is empty
   if (!farcasterAddresses || farcasterAddresses.length === 0) {

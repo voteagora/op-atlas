@@ -87,9 +87,7 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
   }
 
   try {
-    const newUser = await upsertUser({
-      farcasterId: "6666",
-    })
+    const newUser = await upsertUser({})
 
     await updateUserEmail({
       id: newUser.id,
@@ -115,9 +113,7 @@ const loginWithWallet = async (
   }
 
   try {
-    const newUser = await upsertUser({
-      farcasterId: "5555",
-    })
+    const newUser = await upsertUser({})
 
     await addUserAddresses({
       id: newUser.id,

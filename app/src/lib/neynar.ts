@@ -26,7 +26,11 @@ async function getFarcasterUser(fid: string): Promise<FarcasterUser | null> {
   return data.users[0] ?? null
 }
 
-export async function getUserConnectedAddresses(farcasterId: string) {
+export async function getUserConnectedAddresses(farcasterId: string | null) {
+  if (!farcasterId) {
+    return null
+  }
+
   const user = await getFarcasterUser(farcasterId)
   return user
     ? [user.custody_address, ...user.verified_addresses.eth_addresses]
