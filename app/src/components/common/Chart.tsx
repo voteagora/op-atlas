@@ -1,6 +1,6 @@
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts"
 
-import { OSO_QUERY_DATES } from "@/lib/oso"
+import { EOM_DAYS_OFFSET, OSO_QUERY_DATES } from "@/lib/oso"
 
 export default function Chart({
   data,
@@ -16,37 +16,37 @@ export default function Chart({
       monthLabel: item.month,
     }))
 
-  function getNextMonthPhantomEntry(obj?: {
-    date: string
-    value: number
-    month: string
-    monthLabel: string
-  }) {
-    if (!obj) return null
+  function appendPhantomPointIfNearMonthEnd(data: typeof formattedData) {
+    if (!data.length) return data
 
-    const currentDate = new Date(obj.date)
-    const nextMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      1,
-    )
+    const last = data[data.length - 1]
+    const lastDate = new Date(last.date)
 
-    const nextMonthShort = nextMonth.toLocaleString("en-US", { month: "short" })
+    const year = lastDate.getFullYear()
+    const month = lastDate.getMonth()
+    const lastDayOfMonth = new Date(year, month + 1, 0).getDate()
 
-    return {
-      ...obj,
-      date: nextMonth.toISOString().split("T")[0],
-      month: nextMonthShort,
-      monthLabel: nextMonthShort,
+    const dayOfLastDate = lastDate.getDate()
+
+    const daysToEndOfMonth = lastDayOfMonth - dayOfLastDate
+
+    if (daysToEndOfMonth <= EOM_DAYS_OFFSET) {
+      const phantomDate = new Date(year, month + 1, 1).toISOString()
+
+      return [
+        ...data,
+        {
+          ...last,
+          date: phantomDate,
+          monthLabel: "",
+        },
+      ]
     }
+
+    return data
   }
 
-  const lastDate = formattedData.at(-1)
-  const phantomEntry = getNextMonthPhantomEntry(lastDate)
-
-  if (phantomEntry) {
-    formattedData.push(phantomEntry)
-  }
+  const extendedData = appendPhantomPointIfNearMonthEnd(formattedData)
 
   return (
     <ResponsiveContainer width="100%" height={140}>
@@ -54,7 +54,8 @@ export default function Chart({
         className="w-full"
         width={478}
         height={140}
-        data={formattedData}
+        data={extendedData}
+        margin={{ right: 25 }}
       >
         <defs>
           <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
@@ -63,11 +64,11 @@ export default function Chart({
           </linearGradient>
         </defs>
         <XAxis
-          dx={15}
           dataKey="date"
           strokeWidth={0}
           fontSize={14}
           interval={0}
+          dx={10}
           tickFormatter={(value: string) => {
             const date = new Date(value)
             return date.getDate() === 1
@@ -83,6 +84,7 @@ export default function Chart({
           strokeWidth={2}
           fillOpacity={1}
           fill="url(#colorUv)"
+          className="scale-x-105"
         />
       </AreaChart>
     </ResponsiveContainer>
