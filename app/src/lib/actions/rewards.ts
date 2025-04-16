@@ -1,12 +1,13 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { isAddress } from "viem"
+import { isAddress, keccak256, parseUnits, formatUnits } from "viem"
 
 import { auth } from "@/auth"
 import {
   canClaimToAddress,
   deleteClaim,
+  getKYCTeamsWithRewardsForRound,
   getReward,
   startClaim,
   updateClaim,
@@ -162,4 +163,49 @@ export const resetRewardsClaim = async (rewardId: string) => {
     error: null,
     claim,
   }
+}
+
+type RewardStream = {
+  id: string
+  projectIds: string[]
+  projectNames: string[]
+  wallets: string[]
+  KYCStatusCompleted: boolean
+  amounts: string[]
+}
+
+function sumBigNumbers(numbers: string[]): string {
+  const total = numbers.reduce((acc, curr) => {
+    const parsed = parseUnits(curr, 18)
+    return acc + parsed
+  }, BigInt(0))
+  return formatUnits(total, 18)
+}
+
+export const getRewardStreamsForRound = async (
+  roundId: string,
+): Promise<RewardStream[]> => {
+  const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
+
+  const rewardStreams = kycTeams.map((kycTeam) => {
+    const projectIds = kycTeam.projects.map((project) => project.id)
+    return {
+      id: keccak256(Buffer.from(projectIds.join(""))),
+      projectIds,
+      projectNames: kycTeam.projects.map((project) => project.name),
+      wallets: [kycTeam.walletAddress],
+      KYCStatusCompleted: kycTeam.team.every(
+        (team) => team.users.status === "APPROVED",
+      ),
+      amounts: kycTeam.projects
+        .map((project) =>
+          project.recurringRewards
+            .sort((a, b) => a.tranche - b.tranche) // Sort by tranche asc
+            .map((reward) => reward.amount),
+        )
+        .reduce((acc, curr) => [...acc, sumBigNumbers(curr)], []),
+    }
+  })
+
+  return rewardStreams
 }

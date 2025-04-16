@@ -236,3 +236,41 @@ export async function deleteClaim(rewardId: string) {
 }
 
 export const getClaimByRewardId = cache(getClaimByRewardIdFn)
+
+export async function getKYCTeamsWithRewardsForRound(roundId: string) {
+  return prisma.kYCTeam.findMany({
+    where: {
+      deletedAt: null,
+      projects: {
+        some: {
+          recurringRewards: {
+            some: {
+              roundId,
+            },
+          },
+        },
+      },
+    },
+    include: {
+      team: {
+        include: {
+          users: true,
+        },
+      },
+      projects: {
+        select: {
+          id: true,
+          name: true,
+          recurringRewards: {
+            select: {
+              id: true,
+              amount: true,
+              tranche: true,
+              roundId: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
