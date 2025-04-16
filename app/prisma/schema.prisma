@@ -37,7 +37,7 @@ model User {
 
 model UserEmail {
   id        String @id @default(uuid())
-  email     String
+  email     String @unique
   userId    String
   verified  Boolean @default(false)
   createdAt DateTime @default(now())
@@ -63,7 +63,7 @@ model UserInteraction {
 }
 
 model UserAddress {
-  address String
+  address String @unique
   userId  String
   source  String
 
