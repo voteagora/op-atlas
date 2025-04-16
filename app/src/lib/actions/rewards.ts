@@ -188,22 +188,29 @@ export const getRewardStreamsForRound = async (
   const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
 
   const rewardStreams = kycTeams.map((kycTeam) => {
-    const projectIds = kycTeam.projects.map((project) => project.id)
+    const projectsWithRewards = kycTeam.projects.filter(
+      (project) => project.recurringRewards.length > 0,
+    )
+    const projectIds = projectsWithRewards.map((project) => project.id)
+
     return {
       id: keccak256(Buffer.from(projectIds.join(""))),
       projectIds,
-      projectNames: kycTeam.projects.map((project) => project.name),
+      projectNames: projectsWithRewards.map((project) => project.name),
       wallets: [kycTeam.walletAddress],
       KYCStatusCompleted: kycTeam.team.every(
         (team) => team.users.status === "APPROVED",
       ),
-      amounts: kycTeam.projects
+      amounts: projectsWithRewards
         .map((project) =>
           project.recurringRewards
             .sort((a, b) => a.tranche - b.tranche) // Sort by tranche asc
             .map((reward) => reward.amount),
         )
-        .reduce((acc, curr) => [...acc, sumBigNumbers(curr)], []),
+        .sort((a, b) => b.length - a.length) // Sort descending so longest array is first
+        .reduce((acc, curr) =>
+          curr.map((amount, index) => sumBigNumbers([acc[index], amount])),
+        ),
     }
   })
 

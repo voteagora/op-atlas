@@ -262,6 +262,9 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
           id: true,
           name: true,
           recurringRewards: {
+            where: {
+              roundId,
+            },
             select: {
               id: true,
               amount: true,
