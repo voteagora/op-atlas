@@ -47,3 +47,5 @@ src/graphql/
 
 # JSON data
 src/data/*.json
+
+/data
