@@ -69,6 +69,7 @@ export default function Chart({
           fontSize={14}
           interval={0}
           dx={10}
+          dy={2.5}
           tickFormatter={(value: string) => {
             const date = new Date(value)
             return date.getDate() === 1
