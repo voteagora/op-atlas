@@ -1,12 +1,11 @@
 "use client"
 
 import { usePrivy } from "@privy-io/react-auth"
-import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { toast } from "sonner"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -33,27 +32,35 @@ export const Account = () => {
     login: privyLogin,
     logout: privyLogout,
     user: privyUser,
-    authenticated: privyAuthenticated,
     getAccessToken,
   } = usePrivy()
 
-  const isPrivyAuthInProgress = useRef(false)
+  // Manually track login and logout states to validate them against Privy/NextAuth auth statues
+  const isLoginInProgress = useRef(false)
+  const isLogoutInProgress = useRef(false)
 
-  const { data: session, status } = useSession()
+  const { data: session, status: authStatus } = useSession()
+  const prevAuthStatus = usePrevious(authStatus)
+
   const { isBadgeholder } = useIsBadgeholder()
-  const previousAuthStatus = usePrevious(status)
   const router = useRouter()
+
   const { setOpenDialog } = useAppDialogs()
   const { track } = useAnalytics()
 
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
 
-  const logOut = useCallback(() => {
+  const onLogout = () => {
+    // Update the states
+    isLogoutInProgress.current = true
+    isLoginInProgress.current = false
+
+    // Init Privy and NextAuth logout
     Promise.all([privyLogout(), signOut({ redirect: false })]).catch((err) => {
       toast.error(`Error logging out. ${err}`)
     })
-  }, [privyLogout])
+  }
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -65,34 +72,29 @@ export const Account = () => {
     }
   }
 
-  // Handle log ou
+  // Log out flow
   useEffect(() => {
     if (
-      !privyAuthenticated &&
-      status === AUTH_STATUS.UNAUTHENTICATED &&
-      isPrivyAuthInProgress.current
+      !privyUser &&
+      authStatus === AUTH_STATUS.UNAUTHENTICATED &&
+      isLogoutInProgress.current
     ) {
-      console.log("*****************************************")
-      console.log("LOGOUT AND DONE")
-      console.log("*****************************************")
-
-      isPrivyAuthInProgress.current = false
+      // Reset state flags
+      isLoginInProgress.current = false
+      isLogoutInProgress.current = false
       router.push("/")
     }
-  }, [status, router, privyAuthenticated])
+  }, [authStatus, router, privyUser])
 
-  // Handle Privy login
+  // Login flow
   useEffect(() => {
     if (
       privyUser &&
-      !isPrivyAuthInProgress.current &&
-      status === AUTH_STATUS.UNAUTHENTICATED
+      !isLoginInProgress.current &&
+      !isLogoutInProgress.current &&
+      authStatus === AUTH_STATUS.UNAUTHENTICATED
     ) {
-      console.log("*****************************************")
-      console.log("CREATING NEXT AUTH SESSION")
-      console.log("*****************************************")
-
-      isPrivyAuthInProgress.current = true
+      isLoginInProgress.current = true
 
       getAccessToken()
         .then((token) => {
@@ -107,33 +109,27 @@ export const Account = () => {
           })
             .then((res) => {
               if (res?.url) {
-                router.push(res.url)
+                // Q from Andrei: Why is this needed? Are we using server side redirects in auth flow? 
+                // router.push(res.url)
               }
             })
             .catch(() => {
-              privyLogout().then(() => {
-                toast.error("Unable to login at this time. Try again later.")
-              })
+              toast.error("Unable to login at this time. Try again later.")
             })
         })
         .catch(() => {
           toast.error("Unable to create Privy session. Try again later.")
         })
     }
-  }, [privyUser, getAccessToken, privyLogout, router, status])
+  }, [privyUser, getAccessToken, router, authStatus])
 
-  // Handle Login logic
+  // Login success flow
   useEffect(() => {
     if (
-      status === AUTH_STATUS.AUTHENTICATED &&
-      previousAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
-      isPrivyAuthInProgress.current
+      authStatus === AUTH_STATUS.AUTHENTICATED &&
+      prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
+      isLoginInProgress.current
     ) {
-      console.log("*****************************************")
-      console.log("SUCCESSFUL SIGN IN")
-      console.log("*****************************************")
-
-      track("Successful Sign In", { userId: session?.user?.id })
       saveLogInDate()
 
       if (!isMissionsPath) {
@@ -141,7 +137,7 @@ export const Account = () => {
       }
 
       if (!isFirstTimeUser()) {
-        if (!session.user.email) {
+        if (!session?.user?.email) {
           setOpenDialog("email")
         } else {
           checkBadgeholderStatus(session?.user?.id)
@@ -149,8 +145,8 @@ export const Account = () => {
       }
     }
   }, [
-    status,
-    previousAuthStatus,
+    authStatus,
+    prevAuthStatus,
     session,
     track,
     isMissionsPath,
@@ -164,10 +160,6 @@ export const Account = () => {
         The Farcaster AuthKitContext does not persist state across page reloads, so we must store and read 
         auth data from our own next-auth context.
     */
-  }
-
-  if (status === AUTH_STATUS.LOADING) {
-    return null
   }
 
   if (session) {
@@ -219,7 +211,7 @@ export const Account = () => {
             </DropdownMenuItem>
           </Link>
           <hr className="w-full border-[0.5px] border-border" />
-          <DropdownMenuItem className="cursor-pointer" onClick={logOut}>
+          <DropdownMenuItem className="cursor-pointer" onClick={onLogout}>
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -232,7 +224,9 @@ export const Account = () => {
         className="cursor-pointer text-white bg-brand-primary rounded-md px-4 py-2"
         onClick={privyLogin}
       >
-        Sign in
+        {!isLogoutInProgress.current && isLoginInProgress.current
+          ? "Signing in..."
+          : "Sign in"}
       </button>
     )
   }
