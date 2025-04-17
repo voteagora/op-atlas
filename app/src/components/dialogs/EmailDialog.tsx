@@ -47,8 +47,8 @@ function EmailDialog({ open, onOpenChange }: DialogProps<object>) {
       onOpenChange(false)
       setError(undefined)
     } catch (error) {
-      if (String(error).includes("Unique constraint")) {
-        setError("This email address is registered with another account")
+      if (error instanceof Error && error.message.includes("Unique constraint failed")) {
+        setError("This address is registered with another account")
       } else {
         setError("Something went wrong, please try again")
       }

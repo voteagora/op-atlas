@@ -60,7 +60,9 @@ export function AddVerifiedAddressDialog({
       onOpenChange(false)
       toast.success("Address verified")
     } catch (error: unknown) {
-      if (error instanceof Error) {
+      if (error instanceof Error && error.message.includes("Unique constraint failed")) {
+        setError("This address is already verified")
+      } else if (error instanceof Error) {
         setError(error.message)
       } else {
         setError("An error occurred, please try again")
