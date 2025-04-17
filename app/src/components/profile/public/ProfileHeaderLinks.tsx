@@ -19,7 +19,7 @@ export default function ProfileHeaderLinks({
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
-  const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
+  const { user: farcasterUsers } = useFarcasterUserData(user?.farcasterId, !!user?.farcasterId)
   const { user: githubUserData } = useGithubUserData(user.github || "")
 
   const onDiscordBadgeClick = () => {
