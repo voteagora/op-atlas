@@ -10,7 +10,7 @@ export async function updateKYCUserStatus(
 ) {
   const result = await prisma.$queryRaw<KYCUser[]>`
     WITH closest_match AS (
-      SELECT id, similarity("firstName" || ' ' || "lastName", ${name}) as name_similarity
+      SELECT id, difference(lower(unaccent("firstName") || ' ' || unaccent("lastName")), lower(unaccent(${name}))) as name_similarity
       FROM "KYCUser" 
       WHERE "email" = ${email.toLowerCase()}
       ORDER BY name_similarity DESC
@@ -23,7 +23,7 @@ export async function updateKYCUserStatus(
     WHERE EXISTS (
       SELECT 1 FROM closest_match 
       WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 0.7
+      AND closest_match.name_similarity > 2
     )
     RETURNING *;
   `
@@ -39,7 +39,7 @@ export async function updateKYBUserStatus(
 ) {
   const result = await prisma.$queryRaw<KYCUser[]>`
     WITH closest_match AS (
-      SELECT id, similarity("businessName", ${name}) as name_similarity
+      SELECT id, difference(lower(unaccent("businessName")), lower(unaccent(${name}))) as name_similarity
       FROM "KYCUser" 
       WHERE "email" = ${email.toLowerCase()}
       ORDER BY name_similarity DESC
@@ -52,7 +52,7 @@ export async function updateKYBUserStatus(
     WHERE EXISTS (
       SELECT 1 FROM closest_match 
       WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 0.8
+      AND closest_match.name_similarity > 3
     )
     RETURNING *;
   `
