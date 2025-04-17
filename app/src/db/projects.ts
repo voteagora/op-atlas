@@ -2126,7 +2126,6 @@ export async function getProjectOSOByIds({
     },
   })
 }
-
 export async function createOSOProjects(
   osoProjects: Oso_ProjectsV1[],
   collections: Oso_ProjectsByCollectionV1[],

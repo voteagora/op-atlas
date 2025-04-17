@@ -220,8 +220,15 @@ export default async function Page({ params }: PageProps) {
               )}
             </>
           )}
-
-          {/* {onchainBuildersMetrics && <Performance />} */}
+          <Performance
+            data={{
+              activeAddresses: onchainBuildersMetrics.activeAddresses ?? {},
+              gasFees: onchainBuildersMetrics.gasFees ?? {},
+              transactions: onchainBuildersMetrics.transactions ?? {},
+              tvl: onchainBuildersMetrics.tvl ?? {},
+              opReward: onchainBuildersMetrics.opReward,
+            }}
+          />
           <MoreDetails />
         </div>
       </div>
