@@ -13,6 +13,7 @@ import {
   getUserById,
 } from "../db/users"
 import privy from "../lib/privy"
+import { getAddress } from "viem"
 
 interface UserResponse {
   id: string
@@ -107,8 +108,8 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
 const loginWithWallet = async (
   wallet: string,
 ): Promise<UserResponse | null> => {
-  const normalizedAddress = wallet.toLowerCase()
-  const user = await getUserByAddress(normalizedAddress)
+  const checksumAddress = getAddress(wallet)
+  const user = await getUserByAddress(checksumAddress)
 
   if (user) {
     return userResponse(user)
@@ -119,7 +120,7 @@ const loginWithWallet = async (
 
     await addUserAddresses({
       id: newUser.id,
-      addresses: [normalizedAddress],
+      addresses: [checksumAddress],
       source: "privy",
     })
     return userResponse(newUser)
@@ -153,7 +154,7 @@ const loginWithFarcaster = async (
 
     if (connectedAddresses && connectedAddresses.length > 0) {
       for (const address of connectedAddresses) {
-        const user = await getUserByAddress(address.toLowerCase())
+        const user = await getUserByAddress(getAddress(address))
         if (user) {
           // Update the existing user with Farcaster information
           const updatedUser = await updateUser({
@@ -167,8 +168,8 @@ const loginWithFarcaster = async (
 
           // Add the missing addresses to the user
           const missingAddresses = connectedAddresses
-            .filter((addr) => addr.toLowerCase() !== address.toLowerCase())
-            .map((addr) => addr.toLowerCase())
+            .filter((addr) => getAddress(addr) !== getAddress(address))
+            .map((addr) => getAddress(addr))
 
           if (missingAddresses.length > 0) {
             await addUserAddresses({

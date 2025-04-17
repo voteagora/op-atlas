@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getAddress } from "viem"
 
 import { auth } from "@/auth"
 import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
@@ -15,7 +16,7 @@ export const verifyUserAddress = async (
   address: `0x${string}`,
   signature: `0x${string}`,
 ) => {
-  const normalizedAddress = address.toLowerCase()
+  const checksumAddress = getAddress(address)
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -31,7 +32,7 @@ export const verifyUserAddress = async (
     }
   }
 
-  if (user.addresses.some(({ address: existing }) => existing.toLowerCase() === normalizedAddress)) {
+  if (user.addresses.some(({ address: existing }) => getAddress(existing) === checksumAddress)) {
     return {
       error: "Address already verified",
     }
@@ -39,8 +40,8 @@ export const verifyUserAddress = async (
 
   // Verify signature
   const isValidSignature = await verifyMessage({
-    address,
-    message: getMessage(address),
+    address: checksumAddress,
+    message: getMessage(checksumAddress),
     signature: signature as `0x${string}`,
   })
 
@@ -52,7 +53,7 @@ export const verifyUserAddress = async (
 
   await addUserAddresses({
     id: user.id,
-    addresses: [normalizedAddress],
+    addresses: [checksumAddress],
     source: "atlas",
   })
 
@@ -78,7 +79,7 @@ export const deleteUserAddress = async (address: string) => {
 
   await removeUserAddress({
     id: session.user.id,
-    address,
+    address: getAddress(address),
   })
 
   const updated = await getUserById(session.user.id)
@@ -119,10 +120,10 @@ export const syncFarcasterAddresses = async () => {
   }
 
   // Filter out already linked addresses
-  const existingAddresses = user.addresses.map(({ address }) => address)
-  const newAddresses = farcasterAddresses.filter(
-    (address) => !existingAddresses.includes(address),
-  )
+  const existingAddresses = user.addresses.map(({ address }) => getAddress(address))
+  const newAddresses = farcasterAddresses
+    .map((addr) => getAddress(addr)) // Checksum farcaster addresses first
+    .filter((addr) => !existingAddresses.includes(addr))
 
   await addUserAddresses({
     id: user.id,
