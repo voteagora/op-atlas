@@ -7,6 +7,7 @@ import { z } from "zod"
 import { auth, signIn } from "@/auth"
 import {
   getUserByFarcasterId,
+  getUserById,
   searchUsersByUsername,
   updateUserDiscord,
   updateUserEmail,
@@ -41,7 +42,7 @@ export const updateEmail = async (email: string) => {
     }
   }
 
-  const user = await getUserByFarcasterId(session.user.farcasterId)
+  const user = await getUserById(session.user.id)
   if (!user) {
     return {
       error: "Unauthorized",
@@ -56,7 +57,8 @@ export const updateEmail = async (email: string) => {
     }
   }
 
-  const { email: parsedEmail } = data
+  let { email: parsedEmail } = data
+  parsedEmail = parsedEmail.toLowerCase()
 
   const currentEmail = user.emails[0]?.email
   if (currentEmail) {
@@ -75,12 +77,14 @@ export const updateEmail = async (email: string) => {
     email: parsedEmail,
   })
 
+  // TODO: This is an antipattern, the paths should be invalidated separately
+  // from the query logic
   revalidatePath("/dashboard")
   revalidatePath("/profile/details")
   revalidatePath("/rewards/[rewardId]/page", "page")
 
   console.info(
-    `Email updated for user farcasterId ${session.user.farcasterId}: ${parsedEmail}`,
+    `Email updated for user ${session.user.id}: ${parsedEmail}`,
   )
 
   return {
