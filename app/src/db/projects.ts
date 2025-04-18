@@ -24,6 +24,7 @@ import { getValidUntil } from "@/lib/utils"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
+import { ProjectOSOData } from "@/app/api/oso/types"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -2026,59 +2027,61 @@ export async function getPublicProject({ projectId }: { projectId: string }) {
   }
 }
 
-export async function updateBanner({
-  projectId,
-  bannerUrl,
-}: {
-  projectId: string
-  bannerUrl: string
-}) {
-  return prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      bannerUrl,
-    },
-  })
-}
-
-export async function getProjectsOSO({ projectId }: { projectId: string }) {
-  return await prisma.projectOSO.findMany({
+export async function getProjectsOSO(projectId: string) {
+  return await prisma.projectOSO.findFirst({
     where: {
       projectId,
     },
     select: {
       osoId: true,
     },
-    take: 1,
   })
 }
 
-export async function getDevToolingProjects({
-  projectId,
-}: {
-  projectId: string
-}) {
-  return await prisma.application.findFirst({
+export async function getDevToolingApplication(projectId: string) {
+  const application = await prisma.application.findFirst({
     where: {
       projectId,
       roundId: "7",
     },
+    select: {
+      createdAt: true,
+    },
   })
+
+  if (!application) {
+    return {
+      applied: false,
+    }
+  }
+
+  return {
+    applied: true,
+    appliedAt: application.createdAt,
+  }
 }
 
-export async function getOnchainBuildersProjects({
-  projectId,
-}: {
-  projectId: string
-}) {
-  return await prisma.application.findFirst({
+export async function getOnchainBuilderApplication(projectId: string) {
+  const application = await prisma.application.findFirst({
     where: {
       projectId,
       roundId: "8",
     },
+    select: {
+      createdAt: true,
+    },
   })
+
+  if (!application) {
+    return {
+      applied: false,
+    }
+  }
+
+  return {
+    applied: true,
+    appliedAt: application.createdAt,
+  }
 }
 
 export async function getProjectOSOData({ projectId }: { projectId: string }) {
@@ -2091,24 +2094,21 @@ export async function getProjectOSOData({ projectId }: { projectId: string }) {
     },
   })
 
-  return result?.data as {
-    topProjects?: {
-      id?: string
-      name?: string
-      website?: string[]
-      thumbnailUrl?: string
-    }[]
-    hasBundleBear: boolean
-    devToolingReward: number
-    devToolingEligible: boolean
-    hasDefillamaAdapter: boolean
-    onchainBuilderReward: number
-    onchainBuilderEligible: boolean
-    onchainBuildersInAtlasCount: number
-    onchainBuildersOSOProjectIds: string[]
-  } | null
+  return result?.data as ProjectOSOData
 }
 
+export async function getTrustedDevelopersCountFromOSO(osoId: string) {
+  const result = await prisma.projectOSOData.findFirst({
+    where: {
+      projectId: osoId,
+    },
+    select: {
+      data: true,
+    },
+  })
+
+  return (result?.data as ProjectOSOData)?.onchainBuildersInAtlasCount ?? 0
+}
 export async function getProjectOSOByIds({
   projectIds,
 }: {

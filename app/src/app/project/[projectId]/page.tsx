@@ -1,12 +1,8 @@
-import { EyeOff } from "lucide-react"
-import { notFound } from "next/navigation"
-
-import { getPublicProjectOSOData } from "@/app/api/oso/common"
+import { getProjectMetrics } from "@/app/api/oso/common"
 import { auth } from "@/auth"
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
-import { cn } from "@/lib/utils"
 
 import {
   Description,
@@ -26,25 +22,22 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { projectId } = params
 
-  const [session, publicProject, publicProjectMetrics] = await Promise.all([
+  const [session, publicProject, projectMetrics] = await Promise.all([
     auth(),
     getPublicProjectAction({ projectId }),
-    getPublicProjectOSOData(projectId),
+    getProjectMetrics(projectId),
   ])
 
   const isMember = !(
     await verifyMembership(projectId, session?.user.farcasterId ?? "")
   )?.error
 
-  const { isOnchainBuilder, isDevTooling, projectOSOData, groupedMetrics } =
-    publicProjectMetrics
+  const { eligibility, onchainBuilderMetrics, devToolingMetrics } =
+    projectMetrics
 
-  const enrolledInMission = isOnchainBuilder || isDevTooling
-
-  const onchainBuildersMetrics = {
-    ...groupedMetrics,
-    opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
-  }
+  const enrolledInMission =
+    eligibility?.onchainBuilderApplication.applied ||
+    eligibility?.devToolingApplication.applied
 
   const deployedOnWorldchain = publicProject.deployedOn?.some(
     (chain) => chain.name === "Worldchain",
@@ -63,7 +56,7 @@ export default async function Page({ params }: PageProps) {
       }
 
   const showIncreaseImpact =
-    projectOSOData?.devToolingEligible || projectOSOData?.onchainBuilderEligible
+    eligibility?.devToolingEligibility || eligibility?.onchainBuilderEligibility
 
   return (
     <div className="w-full h-full mt-6 pb-12">
@@ -94,7 +87,7 @@ export default async function Page({ params }: PageProps) {
             }}
           />
 
-          {!enrolledInMission && !onchainBuildersMetrics && (
+          {!enrolledInMission && !onchainBuilderMetrics && (
             <div className="w-full h-[208px] space-y-6 rounded-xl border flex flex-col justify-center items-center p-6">
               <div className="text-center">
                 <p className="font-semibold text-base text-foreground">
@@ -126,7 +119,7 @@ export default async function Page({ params }: PageProps) {
               <div className="w-full space-y-6">
                 <h4 className="font-semibold text-xl">Missions</h4>
                 <ul className="space-y-12">
-                  {isOnchainBuilder && (
+                  {eligibility?.onchainBuilderApplication.applied && (
                     <li>
                       <Mission
                         type="on-chain"
@@ -138,17 +131,16 @@ export default async function Page({ params }: PageProps) {
                         )}
                         metrics={{
                           activeAddresses:
-                            onchainBuildersMetrics.activeAddresses,
-                          gasFees: onchainBuildersMetrics.gasFees,
-                          transactions: onchainBuildersMetrics.transactions,
-                          tvl: onchainBuildersMetrics.tvl,
+                            onchainBuilderMetrics.activeAddresses,
+                          gasFees: onchainBuilderMetrics.gasFees,
+                          transactions: onchainBuilderMetrics.transactions,
+                          tvl: onchainBuilderMetrics.tvl,
                           eligibility: {
-                            hasBundleBear:
-                              projectOSOData?.hasBundleBear ?? false,
+                            hasBundleBear: eligibility.hasBundleBear ?? false,
                             hasDefillamaAdapter:
-                              projectOSOData?.hasDefillamaAdapter ?? false,
+                              eligibility.hasDefillamaAdapter,
                             hasQualifiedAddresses: Boolean(
-                              onchainBuildersMetrics.activeAddresses?.length,
+                              onchainBuilderMetrics.activeAddresses?.length,
                             ),
                           },
                         }}
@@ -159,7 +151,7 @@ export default async function Page({ params }: PageProps) {
                       />
                     </li>
                   )}
-                  {isDevTooling && (
+                  {eligibility?.devToolingApplication.applied && (
                     <li>
                       <Mission
                         type="dev-tooling"
@@ -171,17 +163,16 @@ export default async function Page({ params }: PageProps) {
                         )}
                         metrics={{
                           activeAddresses:
-                            onchainBuildersMetrics.activeAddresses,
-                          gasFees: onchainBuildersMetrics.gasFees,
-                          transactions: onchainBuildersMetrics.transactions,
-                          tvl: onchainBuildersMetrics.tvl,
+                            onchainBuilderMetrics.activeAddresses,
+                          gasFees: onchainBuilderMetrics.gasFees,
+                          transactions: onchainBuilderMetrics.transactions,
+                          tvl: onchainBuilderMetrics.tvl,
                           eligibility: {
-                            hasBundleBear:
-                              projectOSOData?.hasBundleBear ?? false,
+                            hasBundleBear: eligibility.hasBundleBear,
                             hasDefillamaAdapter:
-                              projectOSOData?.hasDefillamaAdapter ?? false,
+                              eligibility.hasDefillamaAdapter,
                             hasQualifiedAddresses: Boolean(
-                              onchainBuildersMetrics.activeAddresses?.length,
+                              onchainBuilderMetrics.activeAddresses?.length,
                             ),
                           },
                         }}
@@ -201,14 +192,14 @@ export default async function Page({ params }: PageProps) {
                     </h4>
                   </div>
                   <div className="flex gap-4 lg:flex-row flex-col">
-                    {isOnchainBuilder && (
+                    {eligibility?.onchainBuilderApplication.applied && (
                       <IncreaseYourImpact
                         type="onchain-builders"
                         projectId={projectId}
                         isMember={isMember}
                       />
                     )}
-                    {isDevTooling && (
+                    {eligibility?.devToolingApplication.applied && (
                       <IncreaseYourImpact
                         type="dev-tooling"
                         projectId={projectId}

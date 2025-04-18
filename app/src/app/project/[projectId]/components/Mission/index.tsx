@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { match } from "ts-pattern"
 
 import {
   Accordion,
@@ -10,43 +11,7 @@ import {
 
 import DevToolingMission from "./DevToolingMission"
 import OnchainBuilderMission from "./OnchainBuilderMission"
-import { OnchainBuildersDataType } from "./types"
-
-interface MissionProps {
-  isMember: boolean
-  projectName?: string
-  type: "on-chain" | "dev-tooling"
-  metrics?: {
-    activeAddresses?: OnchainBuildersDataType
-    gasFees?: OnchainBuildersDataType
-    transactions?: OnchainBuildersDataType
-    tvl?: OnchainBuildersDataType
-    eligibility: {
-      hasDefillamaAdapter: boolean
-      hasQualifiedAddresses: boolean
-      hasBundleBear: boolean
-    }
-  }
-  projectOSOData?: {
-    topProjects?: {
-      id?: string
-      name?: string
-      website?: string[]
-      thumbnailUrl?: string
-    }[]
-    hasBundleBear?: boolean
-    devToolingReward?: number
-    devToolingEligible?: boolean
-    hasDefillamaAdapter?: boolean
-    onchainBuilderReward?: number
-    onchainBuilderEligible?: boolean
-    onchainBuildersInAtlasCount?: number
-    projectsGasConsumption: number
-  } | null
-  deployedOnWorldchain?: boolean
-  applicationDate?: Date
-  opReward: number | null
-}
+import { MissionProps } from "./types"
 
 const getDateRange = (type: MissionProps["type"]) =>
   type === "on-chain" ? "Feb 17 - Jul 30, 2025" : "Feb 4 - Jul 30, 2025"
@@ -87,37 +52,28 @@ function MissionHeader({ type }: { type: MissionProps["type"] }) {
   )
 }
 
-export default function Mission({
-  isMember,
-  projectName,
-  type,
-  metrics,
-  projectOSOData,
-  deployedOnWorldchain,
-  applicationDate,
-  opReward,
-}: MissionProps) {
-  const onchainData = {
-    ...(metrics ?? {}),
-    opReward,
-    isMember,
-    deployedOnWorldchain,
-    onchainBuilderEligible: projectOSOData?.onchainBuilderEligible,
-  }
+export default function Mission(props: MissionProps) {
+  // const onchainData = {
+  //   ...(metrics ?? {}),
+  //   opReward,
+  //   isMember,
+  //   deployedOnWorldchain,
+  //   onchainBuilderEligible: projectOSOData?.onchainBuilderEligible,
+  // }
 
-  const devToolingData = {
-    gasConsumed: projectOSOData?.projectsGasConsumption,
-    opReward,
-    onchainBuildersInAtlasCount: projectOSOData?.onchainBuildersInAtlasCount,
-    topProjects: projectOSOData?.topProjects,
-    isEligible: projectOSOData?.devToolingEligible,
-    isMember,
-    projectName: projectName ?? "",
-  }
+  // const devToolingData = {
+  //   gasConsumed: projectOSOData?.projectsGasConsumption,
+  //   opReward,
+  //   onchainBuildersInAtlasCount: projectOSOData?.onchainBuildersInAtlasCount,
+  //   topProjects: projectOSOData?.topProjects,
+  //   isEligible: projectOSOData?.devToolingEligible,
+  //   isMember,
+  //   projectName: projectName ?? "",
+  // }
 
-  if (!applicationDate) {
-    return null
-  }
+  // if (!applicationDate) {
+  //   return null
+  // }
 
   return (
     <Accordion type="single" collapsible defaultValue="retro-funding">
@@ -128,19 +84,25 @@ export default function Mission({
         </div>
 
         <AccordionContent>
-          {type === "on-chain" ? (
-            <OnchainBuilderMission
-              projectName={projectName ?? ""}
-              data={onchainData}
-              applicationDate={applicationDate}
-            />
-          ) : (
-            <DevToolingMission
-              projectName={projectName ?? ""}
-              data={devToolingData}
-              applicationDate={applicationDate}
-            />
-          )}
+          {match(props.type)
+            .with("on-chain", () => {
+              const { projectName } = props
+              return (
+                <OnchainBuilderMission
+                  projectName={projectName ?? ""}
+                  data={onchainData}
+                  applicationDate={applicationDate}
+                />
+              )
+            })
+            .with("dev-tooling", () => (
+              <DevToolingMission
+                projectName={projectName ?? ""}
+                data={devToolingData}
+                applicationDate={applicationDate}
+              />
+            ))
+            .run()}
         </AccordionContent>
       </AccordionItem>
     </Accordion>

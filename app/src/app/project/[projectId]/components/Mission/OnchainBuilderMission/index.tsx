@@ -20,7 +20,8 @@ import {
   getEligibleRetrofundingMonths,
 } from "@/lib/utils"
 
-import { getDaysInMonthByName, INDEXED_MONTHS, MONTHS } from "../constants"
+import { getDaysInMonthByName } from "../constants"
+import { INDEXED_MONTHS, MONTHS } from "@/app/api/oso/constants"
 import { OnchainBuildersDataType } from "../types"
 import AlertContainer from "./AlertContainer"
 import MetricCard from "./MetricCard"
