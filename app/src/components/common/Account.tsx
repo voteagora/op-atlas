@@ -1,11 +1,11 @@
 "use client"
 
-import { usePrivy } from "@privy-io/react-auth"
+import { User as PrivyUser, useLogin, useLogout, usePrivy } from "@privy-io/react-auth"
+import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { signIn, signOut, useSession } from "next-auth/react"
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import { toast } from "sonner"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -28,16 +28,15 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 export const Account = () => {
-  const {
-    login: privyLogin,
-    logout: privyLogout,
-    user: privyUser,
-    getAccessToken,
-  } = usePrivy()
+  const { getAccessToken } = usePrivy()
+  const { login: privyLogin } = useLogin({
+    onComplete: (params) => onPrivyLogin(params.user)
+  });
 
-  // Manually track login and logout states to validate them against Privy/NextAuth auth statues
-  const isLoginInProgress = useRef(false)
-  const isLogoutInProgress = useRef(false)
+  const { logout: privyLogout } = useLogout({
+    onSuccess: () => signOut({ redirect: false })
+  });
+
 
   const { data: session, status: authStatus } = useSession()
   const prevAuthStatus = usePrevious(authStatus)
@@ -51,16 +50,6 @@ export const Account = () => {
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
 
-  const onLogout = () => {
-    // Update the states
-    isLogoutInProgress.current = true
-    isLoginInProgress.current = false
-
-    // Init Privy and NextAuth logout
-    Promise.all([privyLogout(), signOut({ redirect: false })]).catch((err) => {
-      toast.error(`Error logging out. ${err}`)
-    })
-  }
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -72,64 +61,35 @@ export const Account = () => {
     }
   }
 
-  // Log out flow
-  useEffect(() => {
-    if (
-      !privyUser &&
-      authStatus === AUTH_STATUS.UNAUTHENTICATED &&
-      isLogoutInProgress.current
-    ) {
-      // Reset state flags
-      isLoginInProgress.current = false
-      isLogoutInProgress.current = false
-      router.push("/")
-    }
-  }, [authStatus, router, privyUser])
 
-  // Login flow
-  useEffect(() => {
-    if (
-      privyUser &&
-      !isLoginInProgress.current &&
-      !isLogoutInProgress.current &&
-      authStatus === AUTH_STATUS.UNAUTHENTICATED
-    ) {
-      isLoginInProgress.current = true
+  const onPrivyLogin = (user: PrivyUser) => {
 
-      getAccessToken()
-        .then((token) => {
-          signIn("credentials", {
-            wallet: privyUser?.wallet?.address,
-            email: privyUser?.email?.address,
-            farcaster: privyUser?.farcaster
-              ? JSON.stringify(privyUser.farcaster)
-              : undefined,
-            token: token,
-            redirect: false,
-          })
-            .then((res) => {
-              if (res?.url) {
-                // Q from Andrei: Why is this needed? Are we using server side redirects in auth flow? 
-                // router.push(res.url)
-              }
-            })
-            .catch(() => {
-              toast.error("Unable to login at this time. Try again later.")
-            })
+    getAccessToken()
+      .then((token) => {
+        signIn("credentials", {
+          wallet: user?.wallet?.address,
+          email: user?.email?.address,
+          farcaster: user?.farcaster
+            ? JSON.stringify(user.farcaster)
+            : undefined,
+          token: token,
+          redirect: false,
+        }).catch(() => {
+          toast.error("Unable to login at this time. Try again later.")
         })
-        .catch(() => {
-          toast.error("Unable to create Privy session. Try again later.")
-        })
-    }
-  }, [privyUser, getAccessToken, router, authStatus])
+      })
+      .catch(() => {
+        toast.error("Unable to create Privy session. Try again later.")
+      })
+  }
 
-  // Login success flow
+
   useEffect(() => {
     if (
       authStatus === AUTH_STATUS.AUTHENTICATED &&
-      prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
-      isLoginInProgress.current
+      prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED
     ) {
+
       saveLogInDate()
 
       if (!isMissionsPath) {
@@ -142,6 +102,14 @@ export const Account = () => {
         } else {
           checkBadgeholderStatus(session?.user?.id)
         }
+      }
+      track("Successful Sign In", { userId: session.user.id });
+    } else if (
+      authStatus === AUTH_STATUS.UNAUTHENTICATED &&
+      prevAuthStatus === AUTH_STATUS.AUTHENTICATED
+    ) {
+      if (pathName !== '/') {
+        router.push("/")
       }
     }
   }, [
@@ -211,7 +179,7 @@ export const Account = () => {
             </DropdownMenuItem>
           </Link>
           <hr className="w-full border-[0.5px] border-border" />
-          <DropdownMenuItem className="cursor-pointer" onClick={onLogout}>
+          <DropdownMenuItem className="cursor-pointer" onClick={privyLogout}>
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -224,9 +192,7 @@ export const Account = () => {
         className="cursor-pointer text-white bg-brand-primary rounded-md px-4 py-2"
         onClick={privyLogin}
       >
-        {!isLogoutInProgress.current && isLoginInProgress.current
-          ? "Signing in..."
-          : "Sign in"}
+        {"Sign in"}
       </button>
     )
   }
