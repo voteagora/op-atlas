@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
-import { getDeployedContractsServerParsed } from "@/app/api/oso/common"
+import { getDeployedContractsServerParsed } from "@/lib/oso"
 import { auth } from "@/auth"
 import {
   addProjectContract,

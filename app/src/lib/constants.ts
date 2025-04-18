@@ -187,4 +187,6 @@ export const OSO_METRICS = {
     "waUx+j75/SloH+se3JVW3oDt2Z8AgvO/QwcxMwoOKkI=",
     "yDQTF2Jvodg/6XgVmx5t3QdDy4BGMqyi/JMa2U4jQMA=",
   ],
+  onchainBuilderReward: ["R6eoyOPpiinCi8etN5D/qzAGcOxs8caCXTBrPCUarw4="],
+  devToolingReward: ["0dWueJWVz1tnXyCQv+vPE9IqED5s1uD3ag2VEA4CDAw="],
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { getDeployedContractsServer } from "@/app/api/oso/common"
+import { getDeployedContractsServer } from "@/lib/oso"
 
 export async function GET(
   request: Request,

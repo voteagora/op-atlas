@@ -337,14 +337,12 @@ export function getEligibleRetrofundingMonths(applicationDate: Date): string[] {
   // Decide the starting month
   const appDay = applicationDate.getDate()
   const appMonth = applicationDate.getMonth()
-  const appYear = applicationDate.getFullYear()
 
   const startMonth = appDay <= 27 ? appMonth : appMonth + 1
 
   for (let i = 0; i < 5; i++) {
     const monthIndex = (startMonth + i) % 12
     const yearOffset = Math.floor((startMonth + i) / 12)
-    const year = appYear + yearOffset
 
     eligibleMonths.push(`${monthNames[monthIndex]}`)
   }
