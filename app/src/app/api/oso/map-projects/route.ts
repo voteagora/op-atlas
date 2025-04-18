@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { getOSOMappedProjectIds } from "@/db/projects"
 
-import { mapOSOProjects } from "../common"
+import { mapOSOProjects } from "@/lib/oso"
 
 export async function GET(req: Request) {
   try {

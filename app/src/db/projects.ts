@@ -24,7 +24,7 @@ import { getValidUntil } from "@/lib/utils"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
-import { ProjectOSOData } from "@/app/api/oso/types"
+import { ProjectOSOData } from "@/lib/oso/types"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
