@@ -1,6 +1,5 @@
 "use client"
 
-import { getMonth, parseISO } from "date-fns"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import React from "react"
@@ -14,88 +13,26 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  formatNumber,
-  generateMonthlyMetrics,
-  getEligibleRetrofundingMonths,
-} from "@/lib/utils"
+import { formatNumber, getEligibleRetrofundingMonths } from "@/lib/utils"
 
-import { getDaysInMonthByName } from "../constants"
-import { INDEXED_MONTHS, MONTHS } from "@/app/api/oso/constants"
-import { OnchainBuildersDataType } from "../types"
+import { MONTHS } from "@/lib/oso/constants"
 import AlertContainer from "./AlertContainer"
 import MetricCard from "./MetricCard"
 import NotPassingEligibility from "./NotPassingEligibility"
-
-interface DataProps {
-  isMember?: boolean
-  activeAddresses?: OnchainBuildersDataType
-  gasFees?: OnchainBuildersDataType
-  transactions?: OnchainBuildersDataType
-  tvl?: OnchainBuildersDataType
-  opReward?: number | null
-  deployedOnWorldchain?: boolean
-  onchainBuilderEligible?: boolean
-  eligibility?: {
-    hasDefillamaAdapter?: boolean
-    hasQualifiedAddresses?: boolean
-    hasBundleBear?: boolean
-  }
-}
+import { OnchainBuilderMissionProps } from "@/lib/oso/types"
 
 export default function OnchainBuilderMission({
   data,
-  applicationDate,
-  projectName,
 }: {
-  data: DataProps
-  applicationDate: Date
-  projectName: string
+  data: OnchainBuilderMissionProps
 }) {
   const { projectId } = useParams()
+  const { projectName, applicationDate, onchainBuilderMetrics } = data
+  const opReward = Object.values(
+    onchainBuilderMetrics.onchainBuilderReward,
+  ).reduce((acc, curr) => acc + curr, 0)
 
-  const opReward = data.opReward ?? 0
-
-  const getMonthFromDateString = (dateString: string) => {
-    const date = parseISO(dateString)
-    const month = getMonth(date) + 1 // 0-indexed
-
-    return INDEXED_MONTHS[month as keyof typeof INDEXED_MONTHS]
-  }
-
-  const groupByMonth = (data: Record<string, number>) => {
-    return Object.entries(data).reduce<Record<string, number[]>>(
-      (acc, [date, value]) => {
-        const month = getMonthFromDateString(date)
-        if (!acc[month]) {
-          acc[month] = []
-        }
-        acc[month].push(value)
-        return acc
-      },
-      {},
-    )
-  }
-
-  const groupedData = React.useMemo(() => {
-    if (!data) return {}
-
-    const grouped = {
-      activeAddresses: groupByMonth(data.activeAddresses ?? {}),
-      gasFees: groupByMonth(data.gasFees ?? {}),
-      transactions: groupByMonth(data.transactions ?? {}),
-      tvl: groupByMonth(data.tvl ?? {}),
-    }
-
-    return generateMonthlyMetrics(grouped, MONTHS)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data])
-
-  const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
-
-  if (!data) {
-    return null
-  }
+  const eligibleMonths = getEligibleRetrofundingMonths(data.applicationDate)
 
   return (
     <div className="space-y-3">
@@ -180,8 +117,7 @@ export default function OnchainBuilderMission({
             )
           }
 
-          const monthMetrics = groupedData[month]
-          if (!data.onchainBuilderEligible) {
+          if (!data.eligibility.onchainBuilderEligibility) {
             return (
               <TabsContent
                 key={month}
@@ -204,11 +140,15 @@ export default function OnchainBuilderMission({
                     <AccordionContent className="pt-6">
                       <NotPassingEligibility
                         month={month}
-                        transactionsCount={monthMetrics.transactions.value}
-                        qualifiedAddressesCount={
-                          monthMetrics.activeAddresses.value
+                        transactionsCount={
+                          onchainBuilderMetrics.transactions[month]?.value
                         }
-                        distinctDaysCount={monthMetrics.activeAddresses.value}
+                        qualifiedAddressesCount={
+                          onchainBuilderMetrics.activeAddresses[month]?.value
+                        }
+                        distinctDaysCount={
+                          onchainBuilderMetrics.activeAddresses[month]?.value
+                        }
                         hasDefillamaAdapter={
                           data.eligibility?.hasDefillamaAdapter ?? false
                         }
@@ -220,14 +160,6 @@ export default function OnchainBuilderMission({
             )
           }
 
-          const numOfDaysInMonth = getDaysInMonthByName(
-            month,
-            new Date().getFullYear(),
-          )
-          const avgTVL = monthMetrics.tvl.value / numOfDaysInMonth
-          const avgQualifiedAddresses =
-            monthMetrics.activeAddresses.value / numOfDaysInMonth
-
           return (
             <TabsContent
               key={month}
@@ -235,48 +167,61 @@ export default function OnchainBuilderMission({
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
-                value={formatNumber(avgTVL, 0, "compact")}
+                value={formatNumber(
+                  onchainBuilderMetrics.tvl[month]?.value,
+                  0,
+                  "compact",
+                )}
                 title="TVL across the Superchain"
                 trend={{
-                  value: monthMetrics.tvl.trend.value.toString(),
+                  value:
+                    onchainBuilderMetrics.tvl[month]?.trend.value.toString(),
                   type:
-                    monthMetrics.tvl.trend.sign === "inc"
+                    onchainBuilderMetrics.tvl[month]?.trend.sign === "inc"
                       ? "increase"
                       : "decrease",
                 }}
                 sign={{
-                  value: monthMetrics.tvl.value === 0 ? "" : "$",
+                  value:
+                    onchainBuilderMetrics.tvl[month]?.value === 0 ? "" : "$",
                   position: "left",
                 }}
                 index={0}
               />
               <MetricCard
                 value={formatNumber(
-                  monthMetrics.transactions.value,
+                  onchainBuilderMetrics.transactions[month]?.value,
                   0,
                   "compact",
                 )}
                 title="Transactions"
                 trend={{
-                  value: monthMetrics.transactions.trend.value.toString(),
+                  value:
+                    onchainBuilderMetrics.transactions[
+                      month
+                    ]?.trend.value.toString(),
                   type:
-                    monthMetrics.transactions.trend.sign === "inc"
+                    onchainBuilderMetrics.transactions[month]?.trend.sign ===
+                    "inc"
                       ? "increase"
                       : "decrease",
                 }}
                 index={1}
               />
               <MetricCard
-                value={formatNumber(monthMetrics.gasFees.value, 0)}
+                value={formatNumber(
+                  onchainBuilderMetrics.gasFees[month]?.value,
+                  0,
+                )}
                 title="Gas consumed"
                 trend={{
                   value: formatNumber(
-                    monthMetrics.gasFees.trend.value,
+                    onchainBuilderMetrics.gasFees[month]?.trend.value,
                     0,
                     "compact",
                   ),
                   type:
-                    monthMetrics.gasFees.trend.sign === "inc"
+                    onchainBuilderMetrics.gasFees[month]?.trend.sign === "inc"
                       ? "increase"
                       : "decrease",
                 }}
@@ -285,15 +230,21 @@ export default function OnchainBuilderMission({
               />
               <MetricCard
                 value={formatNumber(
-                  Math.round(avgQualifiedAddresses),
+                  Math.round(
+                    onchainBuilderMetrics.activeAddresses[month]?.value,
+                  ),
                   0,
                   "compact",
                 )}
                 title="Qualified addresses"
                 trend={{
-                  value: monthMetrics.activeAddresses.trend.value.toString(),
+                  value:
+                    onchainBuilderMetrics.activeAddresses[
+                      month
+                    ]?.trend.value.toString(),
                   type:
-                    monthMetrics.activeAddresses.trend.sign === "inc"
+                    onchainBuilderMetrics.activeAddresses[month]?.trend.sign ===
+                    "inc"
                       ? "increase"
                       : "decrease",
                 }}
@@ -323,37 +274,17 @@ export default function OnchainBuilderMission({
             .
           </AlertContainer>
         )}
-        {data.deployedOnWorldchain &&
-          !Boolean(data.eligibility?.hasBundleBear) && (
-            <AlertContainer type="danger" isMember={data.isMember}>
-              Qualified addresses may be inaccurate for projects deployed on
-              Worldchain. The team is actively working with World to analyze
-              World address data.
-            </AlertContainer>
-          )}
-        {opReward < 200 && data.onchainBuilderEligible && (
+        {data.eligibility.deployedOnWorldchain && (
+          <AlertContainer type="danger" isMember={data.isMember}>
+            Qualified addresses may be inaccurate for projects deployed on
+            Worldchain. The team is actively working with World to analyze World
+            address data.
+          </AlertContainer>
+        )}
+        {!data.eligibility.onchainBuilderEligibility && (
           <AlertContainer type="danger" isMember={data.isMember}>
             This project didn’t receive OP in February because it didn’t meet
             reward minimums.
-          </AlertContainer>
-        )}
-        {Boolean(data.eligibility?.hasBundleBear) && (
-          <AlertContainer type="info" isMember={data.isMember}>
-            If you are using ERC-4337: Account Abstraction, then{" "}
-            <TrackedLink
-              className="underline"
-              href={"https://www.bundlebear.com/"}
-              eventName="Link Click"
-              eventData={{
-                projectId: projectId ?? "",
-                source: "project_page",
-                linkName: "Add your contracts to BundleBear",
-                isContributor: data.isMember,
-              }}
-            >
-              add your contracts to BundleBear
-            </TrackedLink>{" "}
-            for extra rewards.
           </AlertContainer>
         )}
       </ul>

@@ -1,4 +1,4 @@
-import { getProjectMetrics } from "@/app/api/oso/common"
+import { getProjectMetrics } from "@/lib/oso"
 import { auth } from "@/auth"
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 import { getPublicProjectAction } from "@/lib/actions/projects"
@@ -38,6 +38,10 @@ export default async function Page({ params }: PageProps) {
   const enrolledInMission =
     eligibility?.onchainBuilderApplication.applied ||
     eligibility?.devToolingApplication.applied
+
+  const hasQualifiedAddresses = Object.values(
+    onchainBuilderMetrics?.activeAddresses ?? {},
+  ).some((address) => address.value > 0)
 
   const deployedOnWorldchain = publicProject.deployedOn?.some(
     (chain) => chain.name === "Worldchain",
@@ -123,6 +127,22 @@ export default async function Page({ params }: PageProps) {
                     <li>
                       <Mission
                         type="on-chain"
+                        applicationDate={
+                          eligibility?.onchainBuilderApplication.appliedAt!
+                        }
+                        onchainBuilderMetrics={onchainBuilderMetrics}
+                        eligibility={{
+                          hasDefillamaAdapter: eligibility.hasDefillamaAdapter,
+                          hasQualifiedAddresses,
+                          deployedOnWorldchain,
+                          onchainBuilderEligibility:
+                            eligibility.onchainBuilderEligibility,
+                        }}
+                        isMember={isMember}
+                        projectName={publicProject.name ?? ""}
+                      />
+                      {/* <Mission
+                        type="on-chain"
                         projectName={publicProject.name}
                         isMember={isMember}
                         deployedOnWorldchain={deployedOnWorldchain}
@@ -148,10 +168,10 @@ export default async function Page({ params }: PageProps) {
                         applicationDate={
                           publicProject.onchainBuildersApplication?.createdAt
                         }
-                      />
+                      /> */}
                     </li>
                   )}
-                  {eligibility?.devToolingApplication.applied && (
+                  {/* {eligibility?.devToolingApplication.applied && (
                     <li>
                       <Mission
                         type="dev-tooling"
@@ -181,7 +201,7 @@ export default async function Page({ params }: PageProps) {
                         }
                       />
                     </li>
-                  )}
+                  )} */}
                 </ul>
               </div>
               {showIncreaseImpact && (

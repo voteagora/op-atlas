@@ -1,4 +1,4 @@
-import { INDEXED_MONTHS } from "@/app/api/oso/constants"
+import { INDEXED_MONTHS } from "@/lib/oso/constants"
 
 export const TRANSACTIONS_THRESHOLD = 1000
 export const QUALIFIED_ADDRESSES_THRESHOLD = 420

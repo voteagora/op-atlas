@@ -14,7 +14,7 @@ import {
   truncateString,
 } from "@/lib/utils"
 
-import { MONTHS } from "../constants"
+import { MONTHS } from "@/lib/oso/constants"
 import MetricCard from "./MetricCard"
 
 interface DevtoolingMissionProps {

@@ -4,7 +4,6 @@ export interface BaseMetrics {
   eligibility: {
     hasDefillamaAdapter: boolean
     hasQualifiedAddresses: boolean
-    hasBundleBear: boolean
   }
 }
 

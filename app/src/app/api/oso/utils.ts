@@ -1,51 +1,18 @@
-import { MetricValues } from "./types"
-import { INDEXED_MONTHS } from "./constants"
+import { MetricValues } from "@/lib/oso/types"
+import { INDEXED_MONTHS } from "@/lib/oso/constants"
+import { Trend } from "@/lib/oso/types"
 
-export const formatActiveAddresses = (data: MetricValues[]) => {
-  return groupByMonth(data)
-}
+const calculateTrend = (current: number, previous: number): Trend => {
+  if (previous === 0) return { value: 0, sign: null }
 
-export const formatGasFees = (data: MetricValues[]) => {
-  return groupByMonth(data)
-}
+  const diff = current - previous
+  const percentageChange = Math.abs((diff / previous) * 100)
 
-export const formatTransactions = (data: MetricValues[]) => {
-  return groupByMonth(data)
+  return {
+    value: parseFloat(percentageChange.toFixed(2)),
+    sign: diff > 0 ? "inc" : diff < 0 ? "dec" : null,
+  }
 }
-
-export const formatTvl = (data: MetricValues[]) => {
-  return groupByMonth(data)
-}
-
-export const formatOnchainBuilderReward = (data: MetricValues[]) => {
-  return groupByMonth(data)
-}
-
-export const formatDevToolingReward = (data: MetricValues[]) => {
-  return groupByMonth(data)
-}
-
-export const formatOnchainBuilderEligibility = (data: MetricValues[]) => {
-  const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return sum >= 200
-}
-
-export const formatDevToolingEligibility = (data: MetricValues[]) => {
-  const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return sum >= 200
-}
-
-// TODO: Use this for Performance Metrics
-const groupByDate = (metrics: MetricValues[]) => {
-  return metrics.reduce<Record<string, number>>((acc, metric) => {
-    if (!acc[metric.sampleDate]) {
-      acc[metric.sampleDate] = 0
-    }
-    acc[metric.sampleDate] += metric.amount
-    return acc
-  }, {})
-}
-// End Performance Metrics
 
 const groupByMonth = (metrics: MetricValues[]) => {
   return metrics.reduce<Record<string, number>>((acc, metric) => {
@@ -58,4 +25,21 @@ const groupByMonth = (metrics: MetricValues[]) => {
     acc[month] += metric.amount
     return acc
   }, {})
+}
+
+export const formatOnchainBuilderReward = (data: MetricValues[]) => {
+  const monthlyData = groupByMonth(data)
+  const months = Object.keys(monthlyData)
+  const result: Record<string, { value: number; trend: Trend }> = {}
+
+  months.forEach((month, index) => {
+    const currentValue = monthlyData[month]
+    const previousValue = index > 0 ? monthlyData[months[index - 1]] : 0
+    result[month] = {
+      value: currentValue,
+      trend: calculateTrend(currentValue, previousValue),
+    }
+  })
+
+  return result
 }
