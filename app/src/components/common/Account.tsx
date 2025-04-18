@@ -30,7 +30,9 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 export const Account = () => {
   const { getAccessToken } = usePrivy()
   const { login: privyLogin } = useLogin({
-    onComplete: (params) => onPrivyLogin(params.user)
+    onComplete: (params) => {
+      onPrivyLogin(params.user)
+    }
   });
 
   const { logout: privyLogout } = useLogout({
