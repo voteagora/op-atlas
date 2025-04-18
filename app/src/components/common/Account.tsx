@@ -37,7 +37,6 @@ export const Account = () => {
     onSuccess: () => signOut({ redirect: false })
   });
 
-
   const { data: session, status: authStatus } = useSession()
   const prevAuthStatus = usePrevious(authStatus)
 
@@ -50,6 +49,8 @@ export const Account = () => {
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
 
+  const didLogIn = prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED && authStatus === AUTH_STATUS.AUTHENTICATED;
+  const didLogOut = prevAuthStatus === AUTH_STATUS.AUTHENTICATED && authStatus === AUTH_STATUS.UNAUTHENTICATED;
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -85,12 +86,10 @@ export const Account = () => {
 
 
   useEffect(() => {
-    if (
-      authStatus === AUTH_STATUS.AUTHENTICATED &&
-      prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED
-    ) {
+    if (didLogIn) {
 
       saveLogInDate()
+      track("Successful Sign In", { userId: session.user.id });
 
       if (!isMissionsPath) {
         router.push("/dashboard")
@@ -103,11 +102,8 @@ export const Account = () => {
           checkBadgeholderStatus(session?.user?.id)
         }
       }
-      track("Successful Sign In", { userId: session.user.id });
-    } else if (
-      authStatus === AUTH_STATUS.UNAUTHENTICATED &&
-      prevAuthStatus === AUTH_STATUS.AUTHENTICATED
-    ) {
+
+    } else if (didLogOut) {
       if (pathName !== '/') {
         router.push("/")
       }

@@ -2,18 +2,18 @@ import CredentialsProvider from "next-auth/providers/credentials"
 
 import { getUserConnectedAddresses } from "@/lib/neynar"
 
+import { getAddress } from "viem"
 import {
   addUserAddresses,
   getUserByAddress,
   getUserByEmail,
   getUserByFarcasterId,
+  getUserById,
   updateUser,
   updateUserEmail,
   upsertUser,
-  getUserById,
 } from "../db/users"
 import privy from "../lib/privy"
-import { getAddress } from "viem"
 
 interface UserResponse {
   id: string
@@ -38,7 +38,7 @@ export const PrivyCredentialsProvider = CredentialsProvider({
     try {
       const verified = await privy.verifyAuthToken(token as string)
 
-      // TODO: Implement further token validation
+      // TODO: Check whether futher token validation is needed
 
       // appId	string	Your Privy app ID.
       // userId	string	The authenticated user's Privy DID. Use this to identify the requesting user.
@@ -46,6 +46,7 @@ export const PrivyCredentialsProvider = CredentialsProvider({
       // issuedAt	string	Timestamp for when the access token was signed by Privy.
       // expiration	string	Timestamp for when the access token will expire.
       // sessionId	string	Unique identifier for the user's session.
+
     } catch (error) {
       console.log(`Token verification failed with error ${error}.`)
       return null
