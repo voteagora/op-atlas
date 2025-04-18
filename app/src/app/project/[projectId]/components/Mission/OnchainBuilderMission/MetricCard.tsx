@@ -31,7 +31,8 @@ export default function MetricCard({
     >
       <div className="w-full flex items-center justify-between space-x-1">
         <p className="font-semibold text-base">{formattedValue}</p>
-        {value && trend?.value !== "0" ? (
+        {/* TODO: Add trend back in later */}
+        {/* {value && trend?.value !== "0" ? (
           <div
             className={cn([
               "px-2.5 py-1 rounded-full text-xs font-medium flex space-x-1 items-center",
@@ -57,7 +58,7 @@ export default function MetricCard({
               />
             )}
           </div>
-        ) : null}
+        ) : null} */}
       </div>
       <p className="text-base leading-6 text-secondary-foreground flex items-center space-x-2">
         <span>{title}</span>
