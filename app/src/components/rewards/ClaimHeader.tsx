@@ -1,7 +1,6 @@
 import { Copy, Pencil } from "lucide-react"
-import Image from "next/image"
 import { useSession } from "next-auth/react"
-import { useMemo } from "react"
+import Image from "next/image"
 import { toast } from "sonner"
 
 import { RewardWithProject } from "@/lib/types"
@@ -78,10 +77,10 @@ const ClaimHeader = ({
           {reward.roundId === "4"
             ? "Retro Funding Round 4: Onchain Builders"
             : reward.roundId === "5"
-            ? "Retro Funding Round 5: OP Stack"
-            : reward.roundId === "6"
-            ? "Retro Funding Round 6: Governance"
-            : "Retro Funding Round 1,2 or 3"}
+              ? "Retro Funding Round 5: OP Stack"
+              : reward.roundId === "6"
+                ? "Retro Funding Round 6: Governance"
+                : "Retro Funding Round 1,2 or 3"}
         </span>
         . Project admins with a verified email address can claim this OP grant.
       </p>
@@ -147,7 +146,7 @@ const ClaimHeader = ({
                   <Avatar className="h-6 w-6 rounded-full">
                     <AvatarImage
                       src={user.imageUrl ?? undefined}
-                      alt={user.username ?? user.farcasterId}
+                      alt={user.username ?? user?.farcasterId ?? ""}
                     />
                     <AvatarFallback>{user.name?.[0]}</AvatarFallback>
                   </Avatar>

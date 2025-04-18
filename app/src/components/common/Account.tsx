@@ -1,13 +1,14 @@
 "use client"
 
-import { SignInButton, StatusAPIResponse } from "@farcaster/auth-kit"
+import { User as PrivyUser, useLogin, useLogout, usePrivy } from "@privy-io/react-auth"
+import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { signIn, signOut, useSession } from "next-auth/react"
-import { useCallback, useEffect, useState } from "react"
+import { useEffect } from "react"
 import { toast } from "sonner"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getUserById } from "@/db/users"
-import { useIsBadgeholder } from "@/lib/hooks"
-import { usePrevious } from "@/lib/hooks"
+import { AUTH_STATUS } from "@/lib/constants"
+import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {
   hasShownWelcomeBadgeholderDialog,
   isFirstTimeUser,
@@ -26,44 +27,32 @@ import {
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+export const Account = () => {
+  const { getAccessToken } = usePrivy()
+  const { login: privyLogin } = useLogin({
+    onComplete: (params) => {
+      onPrivyLogin(params.user)
+    }
+  });
 
-export function Account() {
-  const { data: session, status } = useSession()
+  const { logout: privyLogout } = useLogout({
+    onSuccess: () => signOut({ redirect: false })
+  });
+
+  const { data: session, status: authStatus } = useSession()
+  const prevAuthStatus = usePrevious(authStatus)
+
   const { isBadgeholder } = useIsBadgeholder()
-  const previousAuthStatus = usePrevious(status)
-  const [error, setError] = useState(false)
   const router = useRouter()
+
   const { setOpenDialog } = useAppDialogs()
   const { track } = useAnalytics()
 
-  const logOut = useCallback(() => {
-    signOut()
-    router.push("/")
-  }, [router])
+  const pathName = usePathname()
+  const isMissionsPath = pathName.includes("/missions")
 
-  const handleSuccess = useCallback(
-    async (res: StatusAPIResponse) => {
-      const signInResponse = await signIn("credentials", {
-        message: res.message,
-        signature: res.signature,
-        username: res.username,
-        name: res.displayName,
-        bio: res.bio,
-        pfp: res.pfpUrl,
-        nonce: res.nonce,
-        redirect: false,
-      })
-
-      if (!signInResponse || signInResponse.error) {
-        // Don't let farcaster sign in in this case
-        logOut()
-        setError(true)
-        return
-      }
-    },
-    [logOut],
-  )
+  const didLogIn = prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED && authStatus === AUTH_STATUS.AUTHENTICATED;
+  const didLogOut = prevAuthStatus === AUTH_STATUS.AUTHENTICATED && authStatus === AUTH_STATUS.UNAUTHENTICATED;
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -75,47 +64,62 @@ export function Account() {
     }
   }
 
-  const pathName = usePathname()
-  const isMissions = pathName.includes("/missions")
 
-  useEffect(() => {
-    // only run this useEffect when the user logs in
-    if (
-      !(status === "authenticated" && previousAuthStatus === "unauthenticated")
-    )
-      return
+  const onPrivyLogin = (user: PrivyUser) => {
 
-    track("Successful Sign In", { userId: session.user.farcasterId })
-
-    if (isFirstTimeUser()) {
-      if (!isMissions) {
-        router.push("/dashboard")
-      }
-      saveLogInDate()
-    } else {
-      saveLogInDate()
-      if (!isMissions) {
-        router.push("/dashboard")
-      }
-
-      if (!session.user.email) {
-        setOpenDialog("email")
-      } else {
-        checkBadgeholderStatus(session.user.id)
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, router, setOpenDialog, session, previousAuthStatus, track])
-
-  useEffect(() => {
-    if (error) {
-      toast.error("Unable to sign in at this time.")
-    }
-  }, [error])
-
-  if (status === "loading") {
-    return null
+    getAccessToken()
+      .then((token) => {
+        signIn("credentials", {
+          wallet: user?.wallet?.address,
+          email: user?.email?.address,
+          farcaster: user?.farcaster
+            ? JSON.stringify(user.farcaster)
+            : undefined,
+          token: token,
+          redirect: false,
+        }).catch(() => {
+          toast.error("Unable to login at this time. Try again later.")
+        })
+      })
+      .catch(() => {
+        toast.error("Unable to create Privy session. Try again later.")
+      })
   }
+
+
+  useEffect(() => {
+    if (didLogIn) {
+
+      saveLogInDate()
+      track("Successful Sign In", { userId: session.user.id });
+
+      if (!isMissionsPath) {
+        router.push("/dashboard")
+      }
+
+      if (!isFirstTimeUser()) {
+        if (!session?.user?.email) {
+          setOpenDialog("email")
+        } else {
+          checkBadgeholderStatus(session?.user?.id)
+        }
+      }
+
+    } else if (didLogOut) {
+      if (pathName !== '/') {
+        router.push("/")
+      }
+    }
+  }, [
+    authStatus,
+    prevAuthStatus,
+    session,
+    track,
+    isMissionsPath,
+    router,
+    setOpenDialog,
+    checkBadgeholderStatus,
+  ])
 
   {
     /* 
@@ -123,7 +127,8 @@ export function Account() {
         auth data from our own next-auth context.
     */
   }
-  if (session)
+
+  if (session) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
@@ -172,18 +177,21 @@ export function Account() {
             </DropdownMenuItem>
           </Link>
           <hr className="w-full border-[0.5px] border-border" />
-          <DropdownMenuItem className="cursor-pointer" onClick={logOut}>
+          <DropdownMenuItem className="cursor-pointer" onClick={privyLogout}>
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )
-
-  return (
-    <SignInButton
-      onSuccess={handleSuccess}
-      onError={() => setError(true)}
-      onSignOut={logOut}
-    />
-  )
+  } else {
+    return (
+      <button
+        type="button"
+        className="cursor-pointer text-white bg-brand-primary rounded-md px-4 py-2"
+        onClick={privyLogin}
+      >
+        {"Sign in"}
+      </button>
+    )
+  }
 }

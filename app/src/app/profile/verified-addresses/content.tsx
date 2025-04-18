@@ -116,9 +116,11 @@ export function VerifiedAddressesContent({
           Verify {hasAddress && "another "}address
         </Button>
 
-        <Button onClick={onSyncFarcaster} variant="secondary">
-          Import from Farcaster
-        </Button>
+        {user?.farcasterId && (
+          <Button onClick={onSyncFarcaster} variant="secondary">
+            Import from Farcaster
+          </Button>
+        )}
       </div>
     </div>
   )

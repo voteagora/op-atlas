@@ -12,6 +12,8 @@ import { AnalyticsProvider } from "./AnalyticsProvider"
 import { DialogProvider } from "./DialogProvider"
 import { LayoutWrapper } from "./LayoutProvider"
 import { PostHogProvider } from "./PosthogProvider"
+import PrivyProvider from "./PrivyAuthProvider"
+import PrivyAuthProvider from "./PrivyAuthProvider"
 
 if (
   process.env.NEXT_PUBLIC_VERCEL_ENV === "production" &&
@@ -38,17 +40,19 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <AuthKitProvider config={farcasterConfig}>
-        <QueryClientProvider client={queryClient}>
-          <AnalyticsProvider>
-            <DialogProvider>
-              <TooltipProvider>
-                <LayoutWrapper>
-                  <PostHogProvider>{children}</PostHogProvider>
-                </LayoutWrapper>
-              </TooltipProvider>
-            </DialogProvider>
-          </AnalyticsProvider>
-        </QueryClientProvider>
+        <PrivyAuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <AnalyticsProvider>
+              <DialogProvider>
+                <TooltipProvider>
+                  <LayoutWrapper>
+                    <PostHogProvider>{children}</PostHogProvider>
+                  </LayoutWrapper>
+                </TooltipProvider>
+              </DialogProvider>
+            </AnalyticsProvider>
+          </QueryClientProvider>
+        </PrivyAuthProvider>
       </AuthKitProvider>
     </SessionProvider>
   )

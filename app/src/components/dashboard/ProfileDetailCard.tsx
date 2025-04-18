@@ -1,8 +1,7 @@
-import { User } from "@prisma/client"
 import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import React, { memo } from "react"
+import { memo } from "react"
 
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
@@ -18,6 +17,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
+import { usePrivy } from "@privy-io/react-auth"
+import { useLinkAccount } from "@privy-io/react-auth"
 
 const ProfileDetailCard = ({
   className,
@@ -29,6 +30,19 @@ const ProfileDetailCard = ({
   const { setOpenDialog } = useAppDialogs()
   const { isBadgeholder } = useIsBadgeholder(user)
 
+  const { user: privyUser, unlinkEmail } = usePrivy()
+  const { linkEmail, linkTwitter } = useLinkAccount({
+    onSuccess: ({ user, linkMethod, linkedAccount }) => {
+      if (linkMethod === "email") {
+        console.log("Email linked successfully")
+        console.log(user)
+        console.log(linkedAccount)
+      }
+    },
+    onError: () => {
+      console.log("Failed to link email");
+    },
+  })
   const initials = (user?.name ?? "")
     .split(" ")
     .map((n) => n[0])
@@ -67,11 +81,11 @@ const ProfileDetailCard = ({
             Email
             <Button
               variant="link"
-              onClick={() => setOpenDialog("email")}
+              onClick={() => privyUser?.email ? unlinkEmail(privyUser?.email.address) : linkEmail()}
               className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
             >
-              {user.emails.length > 0
-                ? user.emails[0]?.email
+              {privyUser?.email
+                ? `Unlink ${privyUser?.email.address}`
                 : "Add your email"}
             </Button>
           </p>

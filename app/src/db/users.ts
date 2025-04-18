@@ -9,11 +9,11 @@ import {
 } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 
-import { CONTRIBUTOR_ELIGIBLE_PROJECTS } from "@/lib/constants"
-import { EXTENDED_TAG_BY_ENTITY } from "@/lib/constants"
-import { ExtendedAggregatedType } from "@/lib/types"
-import { UserAddressSource } from "@/lib/types"
-import { mergeResultsByEmail } from "@/lib/utils/tags"
+import {
+  CONTRIBUTOR_ELIGIBLE_PROJECTS,
+  EXTENDED_TAG_BY_ENTITY,
+} from "@/lib/constants"
+import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
 
@@ -44,6 +44,52 @@ export async function getUserById(userId: string) {
   })
 }
 
+export async function getUserByAddress(address: string): Promise<User | null> {
+  const userAddress = await prisma.userAddress.findFirst({
+    where: {
+      address,
+    },
+    include: {
+      user: {
+        include: {
+          addresses: {
+            orderBy: {
+              primary: "desc",
+            },
+          },
+          interaction: true,
+          emails: true,
+        },
+      },
+    },
+  })
+
+  return userAddress?.user || null
+}
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const userEmail = await prisma.userEmail.findFirst({
+    where: {
+      email,
+    },
+    include: {
+      user: {
+        include: {
+          addresses: {
+            orderBy: {
+              primary: "desc",
+            },
+          },
+          interaction: true,
+          emails: true,
+        },
+      },
+    },
+  })
+
+  return userEmail?.user || null
+}
+
 export async function getUserByFarcasterId(farcasterId: string) {
   return prisma.user.findUnique({
     where: {
@@ -58,10 +104,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -128,12 +174,22 @@ export async function upsertUser({
   farcasterId,
   ...user
 }: {
-  farcasterId: string
+  farcasterId?: string | null
   name?: string | null
   username?: string | null
   imageUrl?: string | null
   bio?: string | null
 }) {
+  // If farcasterId is not provided, create a new user without it
+  if (!farcasterId) {
+    return prisma.user.create({
+      data: user as Prisma.UserCreateInput,
+      include: {
+        emails: true,
+      },
+    })
+  }
+
   return prisma.user.upsert({
     where: {
       farcasterId,
@@ -154,9 +210,11 @@ export async function upsertUser({
 export async function updateUserEmail({
   id,
   email,
+  verified,
 }: {
   id: string
   email?: string | null
+  verified?: boolean
 }) {
   const currentEmail = await prisma.userEmail.findFirst({
     where: {
@@ -165,23 +223,24 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-        prisma.userEmail.delete({
-          where: {
-            id: currentEmail.id,
-          },
-        }),
-      ]
+      prisma.userEmail.delete({
+        where: {
+          id: currentEmail.id,
+        },
+      }),
+    ]
     : []
 
   const createEmail = email
     ? [
-        prisma.userEmail.create({
-          data: {
-            email,
-            userId: id,
-          },
-        }),
-      ]
+      prisma.userEmail.create({
+        data: {
+          email,
+          userId: id,
+          verified: verified ?? false,
+        },
+      }),
+    ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])
@@ -815,6 +874,26 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
     },
     data: {
       primary: true,
+    },
+  })
+}
+
+export async function updateUser({
+  id,
+  ...user
+}: {
+  id: string
+  farcasterId?: string
+  name?: string | null
+  username?: string | null
+  imageUrl?: string | null
+  bio?: string | null
+}) {
+  return prisma.user.update({
+    where: { id },
+    data: user,
+    include: {
+      emails: true,
     },
   })
 }
