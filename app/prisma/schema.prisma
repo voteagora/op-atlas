@@ -543,6 +543,7 @@ model KYCTeam {
 	team                       KYCUserTeams[]
   projects                   Project[]
   OrganizationKYCTeams       OrganizationKYCTeam[]
+  superfludStream            SuperfluidStream[]
 
   rewardStream   RewardStream? @relation(fields: [rewardStreamId], references: [id])
 	
@@ -639,6 +640,7 @@ model SuperfluidStream {
 	internalStreamId  String?
 	
 	rewardStream     RewardStream? @relation(fields: [internalStreamId], references: [id])
+  kycTeam          KYCTeam? @relation(fields: [receiver], references: [walletAddress])
   
   @@unique([sender, receiver])
   @@index([sender])

@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-import { upsertUser } from "@/db/users"
-import { createNewProjectOnBehalf } from "@/lib/actions/projects"
-import { authenticateApiUser } from "@/serverAuth"
 import { getRewardStreamsForRound } from "@/lib/actions/rewards"
+import { authenticateApiUser } from "@/serverAuth"
 
 const ROUNDS = {
   "onchain-builders": 8,

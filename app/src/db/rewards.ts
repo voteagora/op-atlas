@@ -277,6 +277,12 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
           },
         },
       },
+      rewardStream: {
+        include: {
+          teams: true,
+        },
+      },
+      superfludStream: true,
     },
   })
 }
@@ -300,13 +306,7 @@ export async function createOrUpdateSuperfluidStream(
       sender: stream.sender.id,
       receiver: stream.receiver.id,
       deposit: stream.deposit,
-      ...(rewardStreamId && {
-        rewardStream: {
-          connect: {
-            id: rewardStreamId,
-          },
-        },
-      }),
+      internalStreamId: rewardStreamId,
     },
   })
 }
