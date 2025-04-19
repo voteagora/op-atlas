@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
     (async () => {
       const streams = await getActiveStreamsForRound(7)
       for await (const stream of streams) {
-        // This drops the batch from memory after processing
         await processSuperfluidStream(stream, "7")
       }
     })(),
