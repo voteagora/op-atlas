@@ -122,6 +122,16 @@ export type ProjectContractWithProject = Prisma.ProjectContractGetPayload<{
   }
 }>
 
+export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
+  include: {
+    team: {
+      select: {
+        users: true
+      }
+    }
+  }
+}>
+
 export type RewardWithClaim = Prisma.FundingRewardGetPayload<{
   include: { claim: true }
 }>

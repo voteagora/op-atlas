@@ -22,6 +22,7 @@ import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"
+import { deleteKycTeam } from "@/db/kyc"
 
 export const getUserOrganizations = async (userId: string) => {
   const user = await getUserOrganizationsWithDetails(userId)
@@ -255,4 +256,30 @@ export const getOrganizationKycTeamsAction = async ({
   }
 
   return getOrganizationKYCTeams({ organizationId })
+}
+
+export const deleteOrganizationKYCTeam = async ({
+  organizationId,
+  kycTeamId,
+}: {
+  organizationId: string
+  kycTeamId: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyOrganizationAdmin(
+    organizationId,
+    session.user.id,
+  )
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  return await deleteKycTeam({
+    kycTeamId,
+  })
 }

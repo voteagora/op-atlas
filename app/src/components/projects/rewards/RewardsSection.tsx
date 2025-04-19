@@ -1,7 +1,11 @@
 "use client"
 
 import { useIsAdmin } from "@/lib/hooks"
-import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
+import {
+  KYCTeamWithTeam,
+  ProjectTeam,
+  ProjectWithFullDetails,
+} from "@/lib/types"
 
 import RewardAccordion from "./RewardAccordion"
 
@@ -9,14 +13,18 @@ export function RewardsSection({
   team,
   inProgressRewards,
   claimedRewards,
-  verifiedKycTeams,
+  kycTeam,
 }: {
   team: ProjectTeam
   inProgressRewards: ProjectWithFullDetails["rewards"]
   claimedRewards: ProjectWithFullDetails["rewards"]
-  verifiedKycTeams: Record<string, boolean>
+  kycTeam?: KYCTeamWithTeam
 }) {
   const isAdmin = useIsAdmin(team)
+
+  const isVerified = kycTeam?.team.every(
+    (teamMember) => teamMember.users.status === "APPROVED",
+  )
 
   return (
     <div className="flex flex-col space-y-12">
@@ -37,7 +45,7 @@ export function RewardsSection({
                   team={team}
                   reward={reward}
                   key={reward.id}
-                  teamVerified={verifiedKycTeams[reward.projectId] ?? false}
+                  teamVerified={isVerified}
                 />
               </li>
             ))}
@@ -58,7 +66,7 @@ export function RewardsSection({
                   team={team}
                   reward={reward}
                   key={reward.id}
-                  teamVerified={verifiedKycTeams[reward.projectId] ?? false}
+                  teamVerified={isVerified}
                 />
               </li>
             ))}

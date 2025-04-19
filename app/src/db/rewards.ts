@@ -1,7 +1,10 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
+import { keccak256 } from "ethers/crypto"
 import { cache } from "react"
+
+import { SuperfluidStream } from "@/lib/superfluid"
 
 import { prisma } from "./client"
 
@@ -236,3 +239,110 @@ export async function deleteClaim(rewardId: string) {
 }
 
 export const getClaimByRewardId = cache(getClaimByRewardIdFn)
+
+export async function getKYCTeamsWithRewardsForRound(roundId: string) {
+  return prisma.kYCTeam.findMany({
+    where: {
+      deletedAt: null,
+      projects: {
+        some: {
+          recurringRewards: {
+            some: {
+              roundId,
+            },
+          },
+        },
+      },
+    },
+    include: {
+      team: {
+        include: {
+          users: true,
+        },
+      },
+      projects: {
+        select: {
+          id: true,
+          name: true,
+          recurringRewards: {
+            where: {
+              roundId,
+            },
+            select: {
+              id: true,
+              amount: true,
+              tranche: true,
+              roundId: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function createOrUpdateSuperfluidStream(
+  stream: SuperfluidStream,
+  rewardStreamId?: string,
+) {
+  return prisma.superfluidStream.upsert({
+    where: {
+      id: stream.id,
+    },
+    update: {
+      flowRate: stream.currentFlowRate,
+      deposit: stream.deposit,
+      updatedAt: new Date(),
+    },
+    create: {
+      id: stream.id,
+      flowRate: stream.currentFlowRate,
+      sender: stream.sender.id,
+      receiver: stream.receiver.id,
+      deposit: stream.deposit,
+      ...(rewardStreamId && {
+        rewardStream: {
+          connect: {
+            id: rewardStreamId,
+          },
+        },
+      }),
+    },
+  })
+}
+
+export async function createRewardStream(
+  stream: SuperfluidStream,
+  roundId: string,
+) {
+  const projects = await prisma.project.findMany({
+    where: {
+      kycTeam: {
+        walletAddress: stream.sender.id,
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  if (projects.length === 0) {
+    return null
+  }
+
+  const rewardId = keccak256(
+    Buffer.from(projects.map((project) => project.id).join("")),
+  )
+
+  return prisma.rewardStream.upsert({
+    where: {
+      id: rewardId,
+    },
+    update: {},
+    create: {
+      id: rewardId,
+      projects: projects.map((project) => project.id),
+      roundId,
+    },
+  })
+}

@@ -15,6 +15,10 @@
     {
       "path": "/api/oso/map-projects",
       "schedule": "59 23 * * *"
+    },
+    {
+      "path": "/api/cron/superfluid",
+      "schedule": "0 * * * *"
     }
   ]
 }
