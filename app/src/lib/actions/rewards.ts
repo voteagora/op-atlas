@@ -1,11 +1,13 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { isAddress, keccak256, parseUnits, formatUnits } from "viem"
+import { formatUnits, isAddress, keccak256, parseUnits } from "viem"
 
 import { auth } from "@/auth"
 import {
   canClaimToAddress,
+  createOrUpdateSuperfluidStream,
+  createRewardStream,
   deleteClaim,
   getKYCTeamsWithRewardsForRound,
   getReward,
@@ -13,7 +15,7 @@ import {
   updateClaim,
 } from "@/db/rewards"
 
-import { getActiveStreams } from "../superfluid"
+import { getActiveStreams, SuperfluidStream } from "../superfluid"
 import { verifyAdminStatus } from "./utils"
 
 // TODO: Can filter by sender once we have it
@@ -215,4 +217,14 @@ export const getRewardStreamsForRound = async (
   })
 
   return rewardStreams
+}
+
+export const processSuperfluidStream = async (
+  stream: SuperfluidStream,
+  roundId: string,
+) => {
+  // Create RewardStream
+  const rewardStream = await createRewardStream(stream, roundId)
+  // Create SuperfluidStream
+  await createOrUpdateSuperfluidStream(stream, rewardStream?.id)
 }
