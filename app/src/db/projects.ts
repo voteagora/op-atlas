@@ -1916,7 +1916,7 @@ export async function deleteProjectKycTeam({
   })
 }
 
-export async function getPublicProject(projectId: string) {
+export const getPublicProject = cache(async (projectId: string) => {
   const rawProject = await prisma.project.findFirst({
     where: { id: projectId },
     include: {
@@ -2006,7 +2006,7 @@ export async function getPublicProject(projectId: string) {
     devToolingRewards,
     onchainBuildersRewards,
   }
-}
+})
 
 export async function getProjectsOSO(projectId: string) {
   return await prisma.projectOSO.findFirst({
@@ -2063,19 +2063,6 @@ export async function getOnchainBuilderApplication(projectId: string) {
     applied: true,
     appliedAt: application.createdAt,
   }
-}
-
-export async function getProjectOSOData({ projectId }: { projectId: string }) {
-  const result = await prisma.projectOSOData.findFirst({
-    where: {
-      projectId,
-    },
-    select: {
-      data: true,
-    },
-  })
-
-  return result?.data as ProjectOSOData
 }
 
 export async function getTrustedDevelopersCountFromOSO(osoId: string) {

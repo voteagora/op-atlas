@@ -1,12 +1,12 @@
 "server-only"
 
+import { cache } from "react"
 import { gql, GraphQLClient } from "graphql-request"
 
 import {
   createOSOProjects,
   getDevToolingApplication,
   getOnchainBuilderApplication,
-  getProjectOSOData,
   getProjectsOSO,
   getTopProjectsFromOSO,
   getTrustedDevelopersCountFromOSO,
@@ -51,119 +51,50 @@ export const osoClient = new GraphQLClient(
   },
 )
 
-export async function getDeployedContractsServer(
-  deployer: string,
-): Promise<OsoDeployerContractsReturnType> {
-  const variables = {
-    where: {
-      rootDeployerAddress: { _eq: deployer.toLowerCase() },
-      factoryAddress: { _eq: "" },
-    },
-  }
-
-  const query = gql`
-    query ContractQuery($where: Oso_ContractsV0BoolExp) {
-      oso_contractsV0(where: $where) {
-        contractAddress
-        contractNamespace
-        rootDeployerAddress
-        factoryAddress
-      }
+export const getDeployedContractsServer = cache(
+  async function getDeployedContractsServer(
+    deployer: string,
+  ): Promise<OsoDeployerContractsReturnType> {
+    const variables = {
+      where: {
+        rootDeployerAddress: { _eq: deployer.toLowerCase() },
+        factoryAddress: { _eq: "" },
+      },
     }
-  `
-  const req: OsoDeployerContractsReturnType = await osoClient.request(
-    query,
-    variables,
-  )
 
-  return req
-}
+    const query = gql`
+      query ContractQuery($where: Oso_ContractsV0BoolExp) {
+        oso_contractsV0(where: $where) {
+          contractAddress
+          contractNamespace
+          rootDeployerAddress
+          factoryAddress
+        }
+      }
+    `
+    const req: OsoDeployerContractsReturnType = await osoClient.request(
+      query,
+      variables,
+    )
 
-export async function getDeployedContractsServerParsed(
-  deployer: string,
-): Promise<ParsedOsoDeployerContract[]> {
-  const contracts = await getDeployedContractsServer(deployer)
-  return parseOsoDeployerContract(contracts)
-}
+    return req
+  },
+)
 
-// TODO: Remove Old OSO Logic Later
-// export async function getPublicProjectOSOData(projectId: string) {
-//   if (!projectId) {
-//     return {
-//       error: "Project not found",
-//     }
-//   }
+export const getDeployedContractsServerParsed = cache(
+  async function getDeployedContractsServerParsed(
+    deployer: string,
+  ): Promise<ParsedOsoDeployerContract[]> {
+    const contracts = await getDeployedContractsServer(deployer)
+    return parseOsoDeployerContract(contracts)
+  },
+)
 
-//   const projectOSO = await getProjectsOSO({ projectId })
-//   if (!projectOSO) {
-//     return {
-//       error: "Project not found",
-//     }
-//   }
-
-//   const devTooling = await getDevToolingProjects({
-//     projectId,
-//   })
-//   const isDevTooling = Boolean(devTooling)
-
-//   const onchainBuilder = await getOnchainBuildersProjects({ projectId })
-//   const isOnchainBuilder = Boolean(onchainBuilder)
-
-//   const { osoId } = projectOSO
-
-//   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
-//     await queryMetrics([osoId], "activeAddresses"),
-//     await queryMetrics([osoId], "gasFees"),
-//     await queryMetrics([osoId], "transactions", {
-//       _gte: "2024-10-01",
-//       _lte: "2025-07-31",
-//     }),
-//     await queryMetrics([osoId], "tvl"),
-//   ])
-
-//   const groupedMetrics = groupedData({
-//     activeAddresses,
-//     gasFees,
-//     transactions,
-//     tvl,
-//   })
-
-//   const projectOSOData = await getProjectOSOData({ projectId })
-
-//   const projectIdsForGasConsumption =
-//     projectOSOData?.onchainBuildersOSOProjectIds ?? []
-
-//   const projectsGasConsumption = await queryMetrics(
-//     projectIdsForGasConsumption,
-//     "gasFees",
-//     { _gte: "2025-02-01", _lte: "2025-02-28" },
-//   )
-//   const summedProjectsGasConsumption = projectsGasConsumption.reduce(
-//     (acc: number, curr: MetricValues) => {
-//       return acc + curr.amount
-//     },
-//     0,
-//   )
-
-//   const groupedProjectOSOData = {
-//     ...projectOSOData,
-//     projectsGasConsumption: summedProjectsGasConsumption,
-//   }
-
-//   return {
-//     isOnchainBuilder,
-//     isDevTooling,
-//     groupedMetrics,
-//     projectOSOData: groupedProjectOSOData,
-//   }
-// }
-////////////////////////////////////////////////////
-
-const queryMetrics = async (
+const queryMetrics = cache(async function queryMetrics(
   osoId: string[],
   key: keyof typeof OSO_METRICS,
   sampleDate = { _gte: "2025-01-01", _lte: "2025-07-31" },
-) => {
+) {
   const query: QueryOso_TimeseriesMetricsByProjectV0Args = {
     where: {
       projectId: {
@@ -193,9 +124,11 @@ const queryMetrics = async (
     select,
   )
   return result.oso_timeseriesMetricsByProjectV0
-}
+})
 
-export async function mapOSOProjects(projectAtlasIds: string[]) {
+export const mapOSOProjects = cache(async function mapOSOProjects(
+  projectAtlasIds: string[],
+) {
   let mapped = 0
   let totalCreated = 0
 
@@ -251,9 +184,11 @@ export async function mapOSOProjects(projectAtlasIds: string[]) {
   }
 
   return { mapped, totalCreated }
-}
+})
 
-export async function getProjectMetrics(projectId: string) {
+export const getProjectMetrics = cache(async function getProjectMetrics(
+  projectId: string,
+) {
   if (!projectId) {
     return {
       error: "Project not found",
@@ -298,10 +233,12 @@ export async function getProjectMetrics(projectId: string) {
     onchainBuilderMetrics,
     devToolingMetrics,
   }
-}
+})
 
 // Onchain Builders Metrics
-async function getOnchainBuilderMetrics(osoId: string) {
+const getOnchainBuilderMetrics = cache(async function getOnchainBuilderMetrics(
+  osoId: string,
+) {
   const [activeAddresses, gasFees, transactions, tvl, onchainBuilderReward] =
     await Promise.all([
       getActiveAddresses(osoId),
@@ -318,39 +255,44 @@ async function getOnchainBuilderMetrics(osoId: string) {
     tvl,
     onchainBuilderReward,
   }
-}
+})
 
-async function getActiveAddresses(osoId: string) {
+const getActiveAddresses = async function getActiveAddresses(osoId: string) {
   const data = await queryMetrics([osoId], "activeAddresses")
   return formatActiveAddresses(data)
 }
 
-async function getGasFees(osoId: string) {
+const getGasFees = async function getGasFees(osoId: string) {
   const data = await queryMetrics([osoId], "gasFees")
   return formatGasFees(data)
 }
 
-async function getTransactions(osoId: string) {
+const getTransactions = async function getTransactions(osoId: string) {
   const data = await queryMetrics([osoId], "transactions")
   return formatTransactions(data)
 }
 
-async function getTvl(osoId: string) {
+const getTvl = async function getTvl(osoId: string) {
   const data = await queryMetrics([osoId], "tvl")
   return formatTvl(data)
 }
 
-async function getOnchainBuilderReward(osoId: string) {
+const getOnchainBuilderReward = async function getOnchainBuilderReward(
+  osoId: string,
+) {
   const data = await queryMetrics([osoId], "onchainBuilderReward")
   return formatOnchainBuilderReward(data)
 }
 
-async function getOnchainBuilderEligibility(osoId: string) {
-  const data = await queryMetrics([osoId], "onchainBuilderReward")
-  return formatOnchainBuilderEligibility(data)
-}
+const getOnchainBuilderEligibility =
+  async function getOnchainBuilderEligibility(osoId: string) {
+    const data = await queryMetrics([osoId], "onchainBuilderReward")
+    return formatOnchainBuilderEligibility(data)
+  }
 
-async function getHasDefillamaAdapter(osoId: string) {
+const getHasDefillamaAdapter = cache(async function getHasDefillamaAdapter(
+  osoId: string,
+) {
   const query: QueryOso_ArtifactsByProjectV1Args = {
     where: {
       projectId: { _eq: osoId },
@@ -370,11 +312,12 @@ async function getHasDefillamaAdapter(osoId: string) {
   )
 
   return data.oso_artifactsByProjectV1.length > 0
-}
-// End Onchain Builders Metrics
+})
 
 // Dev Tooling Metrics
-async function getDevToolingMetrics(osoId: string) {
+const getDevToolingMetrics = cache(async function getDevToolingMetrics(
+  osoId: string,
+) {
   const [
     gasConsumption,
     trustedDevelopersCount,
@@ -393,39 +336,42 @@ async function getDevToolingMetrics(osoId: string) {
     topProjects,
     devToolingReward,
   }
-}
+})
 
-async function getGasConsumption(osoId: string) {
+const getGasConsumption = async function getGasConsumption(osoId: string) {
   const data = await queryMetrics([osoId], "gasFees")
   return formatGasFees(data)
 }
 
-async function getTrustedDevelopersCount(osoId: string) {
-  // TODO: Replace thiw with OSO API call once available
-  const count = await getTrustedDevelopersCountFromOSO(osoId)
-  //
+const getTrustedDevelopersCount = cache(
+  async function getTrustedDevelopersCount(osoId: string) {
+    // TODO: Replace thiw with OSO API call once available
+    const count = await getTrustedDevelopersCountFromOSO(osoId)
+    //
 
-  return count
-}
+    return count
+  },
+)
 
-async function getTopProjects(osoId: string) {
+const getTopProjects = cache(async function getTopProjects(osoId: string) {
   // TODO: Replace this with OSO API call once available
   const topProjects = await getTopProjectsFromOSO(osoId)
   //
 
   return topProjects
-}
+})
 
-async function getDevToolingReward(osoId: string) {
+const getDevToolingReward = async function getDevToolingReward(osoId: string) {
   const data = await queryMetrics([osoId], "devToolingReward")
   return formatDevToolingReward(data)
 }
 
-async function getDevToolingEligibility(osoId: string) {
+const getDevToolingEligibility = async function getDevToolingEligibility(
+  osoId: string,
+) {
   const data = await queryMetrics([osoId], "devToolingReward")
   return formatDevToolingEligibility(data)
 }
-// End Dev Tooling Metrics
 
 const supportedMappings = {
   OP: 10,
