@@ -132,76 +132,29 @@ export default async function Page({ params }: PageProps) {
                         }
                         onchainBuilderMetrics={onchainBuilderMetrics}
                         eligibility={{
-                          hasDefillamaAdapter: eligibility.hasDefillamaAdapter,
+                          ...eligibility,
                           hasQualifiedAddresses,
                           deployedOnWorldchain,
-                          onchainBuilderEligibility:
-                            eligibility.onchainBuilderEligibility,
                         }}
                         isMember={isMember}
                         projectName={publicProject.name ?? ""}
                       />
-                      {/* <Mission
-                        type="on-chain"
-                        projectName={publicProject.name}
-                        isMember={isMember}
-                        deployedOnWorldchain={deployedOnWorldchain}
-                        opReward={Math.round(
-                          publicProject.onchainBuildersRewards ?? 0,
-                        )}
-                        metrics={{
-                          activeAddresses:
-                            onchainBuilderMetrics.activeAddresses,
-                          gasFees: onchainBuilderMetrics.gasFees,
-                          transactions: onchainBuilderMetrics.transactions,
-                          tvl: onchainBuilderMetrics.tvl,
-                          eligibility: {
-                            hasBundleBear: eligibility.hasBundleBear ?? false,
-                            hasDefillamaAdapter:
-                              eligibility.hasDefillamaAdapter,
-                            hasQualifiedAddresses: Boolean(
-                              onchainBuilderMetrics.activeAddresses?.length,
-                            ),
-                          },
-                        }}
-                        projectOSOData={projectOSOData}
-                        applicationDate={
-                          publicProject.onchainBuildersApplication?.createdAt
-                        }
-                      /> */}
                     </li>
                   )}
-                  {/* {eligibility?.devToolingApplication.applied && (
+                  {eligibility?.devToolingApplication.applied && (
                     <li>
                       <Mission
                         type="dev-tooling"
-                        isMember={isMember}
-                        projectName={publicProject.name}
-                        projectOSOData={projectOSOData}
-                        opReward={Math.round(
-                          publicProject.devToolingRewards ?? 0,
-                        )}
-                        metrics={{
-                          activeAddresses:
-                            onchainBuilderMetrics.activeAddresses,
-                          gasFees: onchainBuilderMetrics.gasFees,
-                          transactions: onchainBuilderMetrics.transactions,
-                          tvl: onchainBuilderMetrics.tvl,
-                          eligibility: {
-                            hasBundleBear: eligibility.hasBundleBear,
-                            hasDefillamaAdapter:
-                              eligibility.hasDefillamaAdapter,
-                            hasQualifiedAddresses: Boolean(
-                              onchainBuilderMetrics.activeAddresses?.length,
-                            ),
-                          },
-                        }}
                         applicationDate={
-                          publicProject.devToolingApplication?.createdAt
+                          eligibility?.devToolingApplication.appliedAt!
                         }
+                        devToolingMetrics={devToolingMetrics}
+                        eligibility={eligibility}
+                        isMember={isMember}
+                        projectName={publicProject.name ?? ""}
                       />
                     </li>
-                  )} */}
+                  )}
                 </ul>
               </div>
               {showIncreaseImpact && (

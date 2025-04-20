@@ -8,6 +8,7 @@ import {
   getOnchainBuilderApplication,
   getProjectOSOData,
   getProjectsOSO,
+  getTopProjectsFromOSO,
   getTrustedDevelopersCountFromOSO,
 } from "@/db/projects"
 import {
@@ -374,16 +375,22 @@ async function getHasDefillamaAdapter(osoId: string) {
 
 // Dev Tooling Metrics
 async function getDevToolingMetrics(osoId: string) {
-  const [gasConsumption, trustedDevelopersCount, devToolingReward] =
-    await Promise.all([
-      getGasConsumption(osoId),
-      getTrustedDevelopersCount(osoId),
-      getDevToolingReward(osoId),
-    ])
+  const [
+    gasConsumption,
+    trustedDevelopersCount,
+    topProjects,
+    devToolingReward,
+  ] = await Promise.all([
+    getGasConsumption(osoId),
+    getTrustedDevelopersCount(osoId),
+    getTopProjects(osoId),
+    getDevToolingReward(osoId),
+  ])
 
   return {
     gasConsumption,
     trustedDevelopersCount,
+    topProjects,
     devToolingReward,
   }
 }
@@ -399,6 +406,14 @@ async function getTrustedDevelopersCount(osoId: string) {
   //
 
   return count
+}
+
+async function getTopProjects(osoId: string) {
+  // TODO: Replace this with OSO API call once available
+  const topProjects = await getTopProjectsFromOSO(osoId)
+  //
+
+  return topProjects
 }
 
 async function getDevToolingReward(osoId: string) {

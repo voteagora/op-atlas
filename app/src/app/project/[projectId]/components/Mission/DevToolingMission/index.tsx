@@ -8,49 +8,36 @@ import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  formatNumber,
-  getEligibleRetrofundingMonths,
-  truncateString,
-} from "@/lib/utils"
+import { formatNumber, getEligibleRetrofundingMonths } from "@/lib/utils"
+import { DevToolingMissionProps } from "@/lib/oso/types"
 
 import { MONTHS } from "@/lib/oso/constants"
 import MetricCard from "./MetricCard"
 
-interface DevtoolingMissionProps {
-  projectName: string
-  data: {
-    gasConsumed?: number
-    onchainBuildersInAtlasCount?: number
-    topProjects?: {
-      id?: string
-      name?: string
-      website?: string[]
-      thumbnailUrl?: string
-    }[]
-    opReward?: number | null
-    isEligible?: boolean
-    isMember: boolean
-  }
-  applicationDate: Date
-}
-
 export default function DevToolingMission({
-  projectName,
   data,
-  applicationDate,
-}: DevtoolingMissionProps) {
+}: {
+  data: DevToolingMissionProps
+}) {
   const params = useParams()
-  const projectId = params.projectId as string
 
-  const opReward = data.opReward ?? 0
-  const isEligible = data.isEligible ?? false
+  const projectId = params.projectId as string
+  const {
+    devToolingMetrics,
+    projectName,
+    applicationDate,
+    eligibility: { devToolingEligibility },
+  } = data
+
+  const opRewardSum = Object.values(
+    devToolingMetrics?.devToolingReward ?? {},
+  ).reduce((acc, curr) => acc + curr, 0)
 
   const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
 
   return (
     <div className="space-y-3">
-      {opReward > 0 && (
+      {opRewardSum > 0 && (
         <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
           <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF5C6C] via-[#FF67B5] animate-slow-spin" />
           <Image
@@ -73,7 +60,7 @@ export default function DevToolingMission({
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
-                  {formatNumber(opReward, 0)} OP
+                  {formatNumber(opRewardSum, 0)} OP
                 </span>
                 <p className="text-secondary-foreground">
                   Rewards so far in Retro Funding: Dev Tooling
@@ -102,7 +89,7 @@ export default function DevToolingMission({
       <Tabs defaultValue={MONTHS[0]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {MONTHS.map((month, index) => {
-            const isFutureMonth = month !== "February"
+            const isFutureMonth = month !== "February" && month !== "March"
             return (
               <TabsTrigger
                 disabled={isFutureMonth}
@@ -132,7 +119,7 @@ export default function DevToolingMission({
             )
           }
 
-          if (!isEligible) {
+          if (!devToolingEligibility) {
             return (
               <TabsContent
                 key={month}
@@ -164,14 +151,16 @@ export default function DevToolingMission({
               className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
-                value={formatNumber(data.gasConsumed ?? 0)}
+                value={formatNumber(
+                  devToolingMetrics?.gasConsumption[month]?.value ?? 0,
+                )}
                 title={`Gas consumed by builders using ${projectName}`}
                 sign={{ value: " ETH", position: "right" }}
                 index={0}
               />
               <MetricCard
                 value={formatNumber(
-                  data.onchainBuildersInAtlasCount ?? 0,
+                  devToolingMetrics?.trustedDevelopersCount ?? 0,
                   0,
                   "compact",
                 )}
@@ -194,32 +183,37 @@ export default function DevToolingMission({
                     </p>
                   </div>
                   <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
-                    {data.topProjects?.slice(0, 6).map((project, index) => {
-                      return (
-                        <li key={index} className="space-x-2 flex items-center">
-                          {project.thumbnailUrl && (
-                            <Image
-                              src={project.thumbnailUrl}
-                              alt={project.name ?? ""}
-                              width={24}
-                              height={24}
-                            />
-                          )}
-                          <TrackedLink
-                            href={`/project/${project.id}`}
-                            eventName="Link Click"
-                            target="_blank"
-                            eventData={{
-                              projectId: project.id,
-                              source: "project_page",
-                              linkName: "Top Projects",
-                            }}
+                    {devToolingMetrics?.topProjects
+                      ?.slice(0, 6)
+                      .map((project, index) => {
+                        return (
+                          <li
+                            key={index}
+                            className="space-x-2 flex items-center"
                           >
-                            {project.name}
-                          </TrackedLink>
-                        </li>
-                      )
-                    })}
+                            {project.thumbnailUrl && (
+                              <Image
+                                src={project.thumbnailUrl}
+                                alt={project.name ?? ""}
+                                width={24}
+                                height={24}
+                              />
+                            )}
+                            <TrackedLink
+                              href={`/project/${project.id}`}
+                              eventName="Link Click"
+                              target="_blank"
+                              eventData={{
+                                projectId: project.id,
+                                source: "project_page",
+                                linkName: "Top Projects",
+                              }}
+                            >
+                              {project.name}
+                            </TrackedLink>
+                          </li>
+                        )
+                      })}
                   </ul>
                 </div>
               </div>

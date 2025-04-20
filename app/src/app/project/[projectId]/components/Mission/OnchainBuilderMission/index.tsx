@@ -28,7 +28,7 @@ export default function OnchainBuilderMission({
 }) {
   const { projectId } = useParams()
   const { projectName, applicationDate, onchainBuilderMetrics } = data
-  const opReward = Object.values(
+  const opRewardSum = Object.values(
     onchainBuilderMetrics.onchainBuilderReward,
   ).reduce((acc, curr) => acc + curr, 0)
 
@@ -36,7 +36,7 @@ export default function OnchainBuilderMission({
 
   return (
     <div className="space-y-3">
-      {opReward > 0 && (
+      {opRewardSum > 0 && (
         <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
           <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF5C6C] via-[#FF67B5] animate-slow-spin" />
           <Image
@@ -58,7 +58,7 @@ export default function OnchainBuilderMission({
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
-                  {formatNumber(opReward, 0)} OP
+                  {formatNumber(opRewardSum, 0)} OP
                 </span>
                 <p className="text-secondary-foreground">
                   Rewards so far in Retro Funding: Onchain Builders
@@ -87,7 +87,7 @@ export default function OnchainBuilderMission({
       <Tabs defaultValue={MONTHS[0]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {MONTHS.map((month, index) => {
-            const isFutureMonth = month !== "February"
+            const isFutureMonth = month !== "February" && month !== "March"
             return (
               <TabsTrigger
                 disabled={isFutureMonth}

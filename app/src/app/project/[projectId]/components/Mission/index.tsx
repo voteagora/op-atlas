@@ -1,6 +1,5 @@
 import Image from "next/image"
 import Link from "next/link"
-import { match } from "ts-pattern"
 
 import {
   Accordion,
@@ -68,24 +67,6 @@ function MissionContainer({
 }
 
 export default function Mission(props: MissionProps) {
-  // const onchainData = {
-  //   ...(metrics ?? {}),
-  //   opReward,
-  //   isMember,
-  //   deployedOnWorldchain,
-  //   onchainBuilderEligible: projectOSOData?.onchainBuilderEligible,
-  // }
-
-  // const devToolingData = {
-  //   gasConsumed: projectOSOData?.projectsGasConsumption,
-  //   opReward,
-  //   onchainBuildersInAtlasCount: projectOSOData?.onchainBuildersInAtlasCount,
-  //   topProjects: projectOSOData?.topProjects,
-  //   isEligible: projectOSOData?.devToolingEligible,
-  //   isMember,
-  //   projectName: projectName ?? "",
-  // }
-
   if (!props.applicationDate) {
     return null
   }
@@ -97,4 +78,10 @@ export default function Mission(props: MissionProps) {
       </MissionContainer>
     )
   }
+
+  return (
+    <MissionContainer type={props.type}>
+      <DevToolingMission data={props} />
+    </MissionContainer>
+  )
 }

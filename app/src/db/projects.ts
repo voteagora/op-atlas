@@ -2100,7 +2100,7 @@ export async function getProjectOSOData({ projectId }: { projectId: string }) {
 export async function getTrustedDevelopersCountFromOSO(osoId: string) {
   const result = await prisma.projectOSOData.findFirst({
     where: {
-      projectId: osoId,
+      osoId,
     },
     select: {
       data: true,
@@ -2109,6 +2109,17 @@ export async function getTrustedDevelopersCountFromOSO(osoId: string) {
 
   return (result?.data as ProjectOSOData)?.onchainBuildersInAtlasCount ?? 0
 }
+
+export async function getTopProjectsFromOSO(osoId: string) {
+  const result = await prisma.projectOSOData.findFirst({
+    where: {
+      osoId,
+    },
+  })
+
+  return (result?.data as ProjectOSOData)?.topProjects ?? []
+}
+
 export async function getProjectOSOByIds({
   projectIds,
 }: {

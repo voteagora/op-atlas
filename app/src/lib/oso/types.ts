@@ -48,26 +48,26 @@ export interface OnchainBuilderMissionProps extends BaseMissionProps {
 
 export interface DevToolingMissionProps extends BaseMissionProps {
   type: "dev-tooling"
-  metrics: {
-    gasConsumption?: number
-    trustedDevelopersCount?: number
-    eligibility: {
-      hasDefillamaAdapter: boolean
-      hasQualifiedAddresses: boolean
-    }
-  }
-  projectOSOData?: {
-    topProjects?: {
+  devToolingMetrics: {
+    gasConsumption: Record<
+      string,
+      {
+        value: number
+        trend: Trend
+      }
+    >
+    trustedDevelopersCount: number
+    devToolingReward: Record<string, number>
+    topProjects: {
       id?: string
       name?: string
       website?: string[]
       thumbnailUrl?: string
     }[]
-    devToolingReward?: number
-    devToolingEligible?: boolean
-    onchainBuildersInAtlasCount?: number
-    projectsGasConsumption: number
-  } | null
+  }
+  eligibility: {
+    devToolingEligibility: boolean
+  }
 }
 
 export type MissionProps = OnchainBuilderMissionProps | DevToolingMissionProps
