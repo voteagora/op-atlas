@@ -11,8 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { formatNumber } from "@/lib/utils"
 import { DevToolingMissionProps } from "@/lib/oso/types"
 
-import { MONTHS, RETROFUNDING_OP_REWARD_MINIMUM } from "@/lib/oso/constants"
+import { MONTHS } from "@/lib/oso/constants"
 import MetricCard from "./MetricCard"
+import { getIsProjectEligibleByReward } from "@/lib/oso/utils"
 
 export default function DevToolingMission({
   data,
@@ -97,8 +98,9 @@ export default function DevToolingMission({
         </TabsList>
         {MONTHS.map((month) => {
           if (
-            devToolingMetrics?.devToolingReward[month] <
-            RETROFUNDING_OP_REWARD_MINIMUM
+            !getIsProjectEligibleByReward(
+              devToolingMetrics?.devToolingReward[month] ?? 0,
+            )
           ) {
             return (
               <TabsContent

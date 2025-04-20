@@ -103,12 +103,12 @@ export const formatDevToolingReward = (data: MetricValues[]) => {
 
 export const formatOnchainBuilderEligibility = (data: MetricValues[]) => {
   const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return sum >= RETROFUNDING_OP_REWARD_MINIMUM
+  return getIsProjectEligibleByReward(sum)
 }
 
 export const formatDevToolingEligibility = (data: MetricValues[]) => {
   const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return sum >= RETROFUNDING_OP_REWARD_MINIMUM
+  return getIsProjectEligibleByReward(sum)
 }
 
 // TODO: Use this for Performance Metrics
@@ -134,4 +134,8 @@ const groupByMonth = (metrics: MetricValues[]) => {
     acc[month] += metric.amount
     return acc
   }, {})
+}
+
+export const getIsProjectEligibleByReward = (reward: number) => {
+  return reward >= RETROFUNDING_OP_REWARD_MINIMUM
 }
