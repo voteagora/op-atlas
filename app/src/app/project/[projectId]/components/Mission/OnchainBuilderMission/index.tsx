@@ -27,12 +27,13 @@ export default function OnchainBuilderMission({
   data: OnchainBuilderMissionProps
 }) {
   const { projectId } = useParams()
-  const { projectName, applicationDate, onchainBuilderMetrics } = data
+  const { projectName, applicationDate, onchainBuilderMetrics, eligibility } =
+    data
   const opRewardSum = Object.values(
     onchainBuilderMetrics.onchainBuilderReward,
   ).reduce((acc, curr) => acc + curr, 0)
 
-  const eligibleMonths = getEligibleRetrofundingMonths(data.applicationDate)
+  const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
 
   return (
     <div className="space-y-3">
@@ -117,7 +118,7 @@ export default function OnchainBuilderMission({
             )
           }
 
-          if (!data.eligibility.onchainBuilderEligibility) {
+          if (!eligibility.onchainBuilderEligibility) {
             return (
               <TabsContent
                 key={month}
@@ -150,7 +151,7 @@ export default function OnchainBuilderMission({
                           onchainBuilderMetrics.activeAddresses[month]?.value
                         }
                         hasDefillamaAdapter={
-                          data.eligibility?.hasDefillamaAdapter ?? false
+                          eligibility?.hasDefillamaAdapter ?? false
                         }
                       />
                     </AccordionContent>
@@ -255,7 +256,7 @@ export default function OnchainBuilderMission({
         })}
       </Tabs>
       <ul className="space-y-[8pt]">
-        {data.isMember && !Boolean(data.eligibility?.hasDefillamaAdapter) && (
+        {data.isMember && !Boolean(eligibility?.hasDefillamaAdapter) && (
           <AlertContainer type="danger" isMember={data.isMember}>
             For TVL rewards,{" "}
             <TrackedLink
@@ -274,14 +275,14 @@ export default function OnchainBuilderMission({
             .
           </AlertContainer>
         )}
-        {data.eligibility.deployedOnWorldchain && (
+        {eligibility.deployedOnWorldchain && (
           <AlertContainer type="danger" isMember={data.isMember}>
             Qualified addresses may be inaccurate for projects deployed on
             Worldchain. The team is actively working with World to analyze World
             address data.
           </AlertContainer>
         )}
-        {!data.eligibility.onchainBuilderEligibility && (
+        {!eligibility.onchainBuilderEligibility && (
           <AlertContainer type="danger" isMember={data.isMember}>
             This project didn’t receive OP in February because it didn’t meet
             reward minimums.

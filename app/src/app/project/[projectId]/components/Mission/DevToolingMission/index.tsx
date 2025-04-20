@@ -22,12 +22,7 @@ export default function DevToolingMission({
   const params = useParams()
 
   const projectId = params.projectId as string
-  const {
-    devToolingMetrics,
-    projectName,
-    applicationDate,
-    eligibility: { devToolingEligibility },
-  } = data
+  const { devToolingMetrics, projectName, applicationDate, eligibility } = data
 
   const opRewardSum = Object.values(
     devToolingMetrics?.devToolingReward ?? {},
@@ -119,7 +114,7 @@ export default function DevToolingMission({
             )
           }
 
-          if (!devToolingEligibility) {
+          if (!eligibility.devToolingEligibility) {
             return (
               <TabsContent
                 key={month}
