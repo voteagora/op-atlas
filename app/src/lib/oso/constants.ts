@@ -8,3 +8,4 @@ export const INDEXED_MONTHS = {
   7: "July",
 }
 export const MONTHS = Object.values(INDEXED_MONTHS)
+export const RETROFUNDING_OP_REWARD_MINIMUM = 200

@@ -13,9 +13,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { formatNumber, getEligibleRetrofundingMonths } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
 
-import { MONTHS } from "@/lib/oso/constants"
+import { MONTHS, RETROFUNDING_OP_REWARD_MINIMUM } from "@/lib/oso/constants"
 import AlertContainer from "./AlertContainer"
 import MetricCard from "./MetricCard"
 import NotPassingEligibility from "./NotPassingEligibility"
@@ -32,8 +32,6 @@ export default function OnchainBuilderMission({
   const opRewardSum = Object.values(
     onchainBuilderMetrics.onchainBuilderReward,
   ).reduce((acc, curr) => acc + curr, 0)
-
-  const eligibleMonths = getEligibleRetrofundingMonths(applicationDate)
 
   return (
     <div className="space-y-3">
@@ -102,7 +100,10 @@ export default function OnchainBuilderMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          if (!eligibleMonths.includes(month)) {
+          if (
+            onchainBuilderMetrics.onchainBuilderReward[month] <
+            RETROFUNDING_OP_REWARD_MINIMUM
+          ) {
             return (
               <TabsContent
                 key={month}

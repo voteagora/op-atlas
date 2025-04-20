@@ -1,5 +1,5 @@
 import { MetricValues } from "./types"
-import { INDEXED_MONTHS } from "./constants"
+import { INDEXED_MONTHS, RETROFUNDING_OP_REWARD_MINIMUM } from "./constants"
 import { Trend } from "./types"
 
 const calculateTrend = (current: number, previous: number): Trend => {
@@ -103,12 +103,12 @@ export const formatDevToolingReward = (data: MetricValues[]) => {
 
 export const formatOnchainBuilderEligibility = (data: MetricValues[]) => {
   const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return sum >= 200
+  return sum >= RETROFUNDING_OP_REWARD_MINIMUM
 }
 
 export const formatDevToolingEligibility = (data: MetricValues[]) => {
   const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return sum >= 200
+  return sum >= RETROFUNDING_OP_REWARD_MINIMUM
 }
 
 // TODO: Use this for Performance Metrics

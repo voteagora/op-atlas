@@ -59,7 +59,6 @@ function MissionContainer({
           </div>
           <AccordionTrigger />
         </div>
-
         <AccordionContent>{children}</AccordionContent>
       </AccordionItem>
     </Accordion>
