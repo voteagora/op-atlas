@@ -1916,114 +1916,95 @@ export async function deleteProjectKycTeam({
   })
 }
 
-export async function getPublicProject({ projectId }: { projectId: string }) {
-  const project = await prisma.project
-    .findFirst({
-      where: {
-        id: projectId,
+export async function getPublicProject(projectId: string) {
+  const rawProject = await prisma.project.findFirst({
+    where: { id: projectId },
+    include: {
+      links: true,
+      contracts: true,
+      repos: true,
+      funding: true,
+      rewards: {
+        select: { roundId: true, amount: true },
       },
-      include: {
-        links: true,
-        contracts: true,
-        repos: true,
-        funding: true,
-        rewards: {
-          select: {
-            roundId: true,
-            amount: true,
-          },
-        },
-        organization: {
-          select: {
-            organization: {
-              select: {
-                name: true,
-                avatarUrl: true,
-                team: {
-                  select: {
-                    user: true,
-                  },
-                },
+      organization: {
+        select: {
+          organization: {
+            select: {
+              name: true,
+              avatarUrl: true,
+              team: {
+                select: { user: true },
               },
             },
           },
         },
-        team: {
-          orderBy: {
-            createdAt: "asc",
-          },
-          select: {
-            user: true,
-          },
-        },
       },
-    })
-    .then((project) => {
-      project?.repos.map((r) => {
-        const tags = []
+      team: {
+        orderBy: { createdAt: "asc" },
+        select: { user: true },
+      },
+    },
+  })
 
-        if (r.openSource) {
-          tags.push({ name: "Open Source", icon: "/assets/icons/oss.svg" })
-        }
-        if (r.npmPackage) {
-          tags.push({ name: "NPM", icon: "/assets/icons/npm-fill.svg" })
-        }
-        if (r.crate) {
-          tags.push({ name: "Crate", icon: "/assets/icons/crate.svg" })
-        }
+  if (!rawProject) return null
 
-        return {
-          ...r,
-          tags,
-        }
-      })
+  // Attach tags to repos
+  const reposWithTags = rawProject.repos.map((repo) => {
+    const tags = []
+    if (repo.openSource)
+      tags.push({ name: "Open Source", icon: "/assets/icons/oss.svg" })
+    if (repo.npmPackage)
+      tags.push({ name: "NPM", icon: "/assets/icons/npm-fill.svg" })
+    if (repo.crate)
+      tags.push({ name: "Crate", icon: "/assets/icons/crate.svg" })
+    return { ...repo, tags }
+  })
 
-      const deployedOn = project?.contracts
-        .map((c) => {
-          const chainInfo = CHAIN_INFO[c.chainId]
-          return chainInfo
-        })
-        .filter((c) => c !== undefined)
+  // Get unique chains deployed on
+  const deployedOn = rawProject.contracts
+    .map((c) => CHAIN_INFO[c.chainId])
+    .filter(Boolean)
 
-      const uniqueDeployedOn = Array.from(
-        new Map(deployedOn?.map((item) => [item.name, item])).values(),
-      )
-
-      return { ...project, deployedOn: uniqueDeployedOn }
-    })
-
-  const users = project?.team?.map((t) => t.user)
-  const organizationUsers = project?.organization?.organization.team.map(
-    (t) => t.user,
+  const uniqueDeployedOn = Array.from(
+    new Map(deployedOn.map((c) => [c.name, c])).values(),
   )
-  const deduppedUsers = users
-    ? users.filter((u) => !organizationUsers?.find((ou) => ou.id === u.id))
-    : []
 
-  const devToolingApplication = await prisma.application.findFirst({
-    where: {
-      projectId,
-      roundId: "7",
-    },
-  })
-  const onchainBuildersApplication = await prisma.application.findFirst({
-    where: {
-      projectId,
-      roundId: "8",
-    },
-  })
+  // Dedupe users
+  const teamUsers = rawProject.team.map((t) => t.user)
+  const orgUsers =
+    rawProject.organization?.organization?.team.map((t) => t.user) || []
+
+  const contributors = teamUsers.filter(
+    (u) => !orgUsers.find((ou) => ou.id === u.id),
+  )
+
+  // Applications
+  const [devToolingApplication, onchainBuildersApplication] = await Promise.all(
+    [
+      prisma.application.findFirst({ where: { projectId, roundId: "7" } }),
+      prisma.application.findFirst({ where: { projectId, roundId: "8" } }),
+    ],
+  )
+
+  // Calculate rewards
+  const devToolingRewards = rawProject.rewards
+    .filter((r) => r.roundId === "7")
+    .reduce((sum, r) => sum + Number(r.amount), 0)
+
+  const onchainBuildersRewards = rawProject.rewards
+    .filter((r) => r.roundId === "8")
+    .reduce((sum, r) => sum + Number(r.amount), 0)
 
   return {
-    ...project,
-    devToolingRewards: project.rewards
-      ?.filter((reward) => reward.roundId === "7")
-      .reduce((acc, reward) => acc + Number(reward.amount), 0),
-    onchainBuildersRewards: project.rewards
-      ?.filter((reward) => reward.roundId === "8")
-      .reduce((acc, reward) => acc + Number(reward.amount), 0),
+    ...rawProject,
+    repos: reposWithTags,
+    deployedOn: uniqueDeployedOn,
+    contributors,
     devToolingApplication,
     onchainBuildersApplication,
-    contributors: deduppedUsers,
+    devToolingRewards,
+    onchainBuildersRewards,
   }
 }
 

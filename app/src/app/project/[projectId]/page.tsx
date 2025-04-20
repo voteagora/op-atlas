@@ -12,6 +12,7 @@ import {
   MoreDetails,
   Performance,
 } from "./components"
+import { notFound } from "next/navigation"
 
 interface PageProps {
   params: {
@@ -27,6 +28,10 @@ export default async function Page({ params }: PageProps) {
     getPublicProjectAction({ projectId }),
     getProjectMetrics(projectId),
   ])
+
+  if (!publicProject) {
+    return notFound()
+  }
 
   const isMember = !(
     await verifyMembership(projectId, session?.user.farcasterId ?? "")

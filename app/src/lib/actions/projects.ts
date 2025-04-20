@@ -527,5 +527,5 @@ export const getPublicProjectAction = async ({
 }: {
   projectId: string
 }) => {
-  return await getPublicProject({ projectId })
+  return await getPublicProject(projectId)
 }
