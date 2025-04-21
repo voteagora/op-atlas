@@ -30,7 +30,7 @@ import {
   ParsedOsoDeployerContract,
 } from "@/lib/types"
 
-import { BATCH_SIZE } from "./constants"
+import { BATCH_SIZE, supportedMappings } from "./constants"
 import {
   formatActiveAddresses,
   formatDevToolingEligibility,
@@ -371,24 +371,6 @@ const getDevToolingEligibility = async function getDevToolingEligibility(
 ) {
   const data = await queryMetrics([osoId], "devToolingReward")
   return formatDevToolingEligibility(data)
-}
-
-const supportedMappings = {
-  OP: 10,
-  BASE: 8453,
-  MODE: 34443,
-  WORLDCHAIN: 480,
-  POLYNOMIAL: 8008,
-  BOB: 60808,
-  INK: 57073,
-  LISK: 1135,
-  METALL2: 1750,
-  MINT: 185,
-  RACE: 6805,
-  SHAPE: 360,
-  SONEIUM: 1868,
-  SWELL: 1923,
-  ZORA: 7777777,
 }
 
 export async function getDeployedContracts(
