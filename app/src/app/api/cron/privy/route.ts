@@ -81,6 +81,7 @@ export async function GET() {
 
                     // Link Farcaster addresses if available
                     if (user.farcasterId) {
+
                         const farcasterAddresses = user.addresses && user.addresses.length > 0
                             ? user.addresses.filter((addr: any) => addr.source === 'farcaster')
                             : [];

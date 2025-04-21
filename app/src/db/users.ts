@@ -102,6 +102,18 @@ export async function getUserByFarcasterId(farcasterId: string) {
   })
 }
 
+export async function getUserByPrivyDid(privyDid: string): Promise<User | null> {
+  return await prisma.user.findFirst({
+    where: {
+      privyDid: privyDid as string,
+    },
+    include: {
+      addresses: true,
+      emails: true,
+    }
+  })
+}
+
 export async function getUserByUsername(username: string): Promise<
   | (User & {
     addresses: UserAddress[]
@@ -179,6 +191,7 @@ export async function upsertUser({
   username?: string | null
   imageUrl?: string | null
   bio?: string | null
+  privyDid?: string | null
 }) {
   // If farcasterId is not provided, create a new user without it
   if (!farcasterId) {
@@ -888,6 +901,7 @@ export async function updateUser({
   username?: string | null
   imageUrl?: string | null
   bio?: string | null
+  privyDid?: string | null
 }) {
   return prisma.user.update({
     where: { id },

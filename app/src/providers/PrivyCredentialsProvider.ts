@@ -9,11 +9,13 @@ import {
   getUserByEmail,
   getUserByFarcasterId,
   getUserById,
+  getUserByPrivyDid,
   updateUser,
   updateUserEmail,
   upsertUser,
 } from "../db/users"
 import privy from "../lib/privy"
+import { User } from "@prisma/client"
 
 interface UserResponse {
   id: string
@@ -21,11 +23,13 @@ interface UserResponse {
   name?: string
   image?: string
   email?: string
+  privyDid?: string
 }
 
 export const PrivyCredentialsProvider = CredentialsProvider({
   name: "prviy",
   credentials: {
+    privyDid: { label: "privyDid", type: "text" },
     email: { label: "address", type: "text" },
     wallet: { label: "wallet", type: "text" },
     token: { label: "token", type: "text" },
@@ -33,7 +37,7 @@ export const PrivyCredentialsProvider = CredentialsProvider({
   },
 
   async authorize(credentials) {
-    const { wallet, token, email, farcaster } = credentials
+    const { wallet, token, email, farcaster, privyDid } = credentials
 
     try {
       const verified = await privy.verifyAuthToken(token as string)
@@ -52,16 +56,27 @@ export const PrivyCredentialsProvider = CredentialsProvider({
       return null
     }
 
+    if (!privyDid) {
+      console.log("privyDid is required for authentication")
+      return null
+    }
+
+    // Check if a user with this privyDid already exists
+    const existingUser = await getUserByPrivyDid(privyDid as string)
+    if (existingUser) {
+      return userResponse(existingUser)
+    }
+
     if (farcaster && farcaster !== "undefined") {
-      return loginWithFarcaster(farcaster as string)
+      return loginWithFarcaster(farcaster as string, privyDid as string)
     }
 
     if (wallet && wallet !== "undefined") {
-      return loginWithWallet(wallet as string)
+      return loginWithWallet(wallet as string, privyDid as string)
     }
 
     if (email && email !== "undefined") {
-      return loginWithEmail(email as string)
+      return loginWithEmail(email as string, privyDid as string)
     }
     return null
   },
@@ -75,11 +90,24 @@ const userResponse = (user: any): UserResponse => ({
   email: Array.isArray(user?.emails) && user.emails.length > 0 ? user.emails[0].email : undefined,
 })
 
-const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
-  // User with this email already exists
+const loginWithEmail = async (email: string, privyDid: string): Promise<UserResponse | null> => {
+
   const user = await getUserByEmail(email.toLowerCase())
   if (user) {
-    // Mark user's email as verified
+    // Update the existing user with privyDid if not set
+    if (!privyDid) {
+      await updateUser({
+        id: user.id,
+        privyDid,
+      })
+
+      // Get updated user data with privyDid
+      const updatedUser = await getUserById(user.id)
+      if (updatedUser) {
+        return userResponse(updatedUser)
+      }
+    }
+
     await updateUserEmail({
       id: user.id,
       email: email.toLowerCase(),
@@ -90,7 +118,9 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
   }
 
   try {
-    const newUser = await upsertUser({})
+    const newUser = await upsertUser({
+      privyDid
+    })
     await updateUserEmail({
       id: newUser.id,
       email: email.toLowerCase(),
@@ -108,16 +138,33 @@ const loginWithEmail = async (email: string): Promise<UserResponse | null> => {
 
 const loginWithWallet = async (
   wallet: string,
+  privyDid: string
 ): Promise<UserResponse | null> => {
   const checksumAddress = getAddress(wallet)
   const user = await getUserByAddress(checksumAddress)
 
   if (user) {
+    // Update the existing user with privyDid if not set
+    if (!(user as any).privyDid) {
+      await updateUser({
+        id: user.id,
+        privyDid,
+      })
+
+      // Get updated user data with privyDid
+      const updatedUser = await getUserById(user.id)
+      if (updatedUser) {
+        return userResponse(updatedUser)
+      }
+    }
+
     return userResponse(user)
   }
 
   try {
-    const newUser = await upsertUser({})
+    const newUser = await upsertUser({
+      privyDid
+    })
 
     await addUserAddresses({
       id: newUser.id,
@@ -133,6 +180,7 @@ const loginWithWallet = async (
 
 const loginWithFarcaster = async (
   farcaster: string,
+  privyDid: string
 ): Promise<UserResponse | null> => {
   try {
     const { fid, pfp, displayName, username, bio } = JSON.parse(farcaster)
@@ -147,6 +195,25 @@ const loginWithFarcaster = async (
     // Check for direct fid match first
     const user = await getUserByFarcasterId(farcasterId)
     if (user) {
+      // Update the existing user with privyDid if not set
+      if (!(user as any).privyDid) {
+        await updateUser({
+          id: user.id,
+          farcasterId,
+          privyDid,
+          name: displayName || user.name,
+          username: username || user.username,
+          imageUrl: pfp || user.imageUrl,
+          bio: bio || user.bio,
+        })
+
+        // Get updated user data with privyDid
+        const updatedUser = await getUserById(user.id)
+        if (updatedUser) {
+          return userResponse(updatedUser)
+        }
+      }
+
       return userResponse(user)
     }
 
@@ -161,6 +228,7 @@ const loginWithFarcaster = async (
           const updatedUser = await updateUser({
             id: user.id,
             farcasterId,
+            privyDid,
             name: displayName || null,
             username: username || null,
             imageUrl: pfp || null,
@@ -188,6 +256,7 @@ const loginWithFarcaster = async (
     // We have a brand new user
     const newUser = await upsertUser({
       farcasterId,
+      privyDid,
       name: displayName || null,
       username: username || null,
       imageUrl: pfp || null,
@@ -199,4 +268,9 @@ const loginWithFarcaster = async (
     console.error("Failed to create user or add address:", error)
     return null
   }
+}
+
+
+const syncPrivyUser = async (user: User) => {
+
 }

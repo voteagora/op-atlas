@@ -70,6 +70,7 @@ export const Account = () => {
     getAccessToken()
       .then((token) => {
         signIn("credentials", {
+          privyDid: user?.id,
           wallet: user?.wallet?.address,
           email: user?.email?.address,
           farcaster: user?.farcaster
