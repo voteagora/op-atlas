@@ -125,11 +125,18 @@ export const syncFarcasterAddresses = async () => {
     .map((addr) => getAddress(addr)) // Checksum farcaster addresses first
     .filter((addr) => !existingAddresses.includes(addr))
 
-  await addUserAddresses({
-    id: user.id,
-    addresses: newAddresses,
-    source: "farcaster",
-  })
+  // Process each address individually to avoid collision with existing addresses for the user
+  for (const address of newAddresses) {
+    try {
+      await addUserAddresses({
+        id: user.id,
+        addresses: [address],
+        source: "farcaster",
+      })
+    } catch (error) {
+      console.error(`Failed to add Farcaster address ${address}: ${error}`)
+    }
+  }
 
   const updated = await getUserById(user.id)
 

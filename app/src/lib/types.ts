@@ -3,6 +3,25 @@ import { AggregatedType } from "eas-indexer/src/types"
 
 export type TeamRole = "member" | "admin"
 
+export type PrivyUser = {
+  id: string
+  farcaster?: {
+    fid: string
+    pfp: string
+    displayName: string
+    username: string
+    ownerAddress: string
+    bio: string
+  }
+  wallet?: {
+    address: string
+    chainType: string
+  }
+  email?: {
+    address: string
+  }
+}
+
 export type ProjectWithDetails = Prisma.ProjectGetPayload<{
   include: {
     team: { include: { user: true } }

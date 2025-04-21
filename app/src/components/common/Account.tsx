@@ -67,16 +67,13 @@ export const Account = () => {
 
   const onPrivyLogin = (user: PrivyUser) => {
 
+    console.log(user);
+
     getAccessToken()
       .then((token) => {
         signIn("credentials", {
-          privyDid: user?.id,
-          wallet: user?.wallet?.address,
-          email: user?.email?.address,
-          farcaster: user?.farcaster
-            ? JSON.stringify(user.farcaster)
-            : undefined,
-          token: token,
+          privy: JSON.stringify(user),
+          privyAccessToken: token,
           redirect: false,
         }).catch(() => {
           toast.error("Unable to login at this time. Try again later.")
