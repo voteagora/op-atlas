@@ -18,6 +18,7 @@ model User {
   github              String?
   notDeveloper        Boolean @default(false)
   govForumProfileUrl  String?
+  privyDid            String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
