@@ -1,6 +1,7 @@
 import { MetricValues } from "./types"
 import { INDEXED_MONTHS, RETROFUNDING_OP_REWARD_MINIMUM } from "./constants"
 import { Trend } from "./types"
+import { CHAIN_INFO } from "@/components/common/chain"
 
 const calculateTrend = (current: number, previous: number): Trend => {
   if (previous === 0) return { value: 0, sign: null }
@@ -138,4 +139,58 @@ const groupByMonth = (metrics: MetricValues[]) => {
 
 export const getIsProjectEligibleByReward = (reward: number) => {
   return reward >= RETROFUNDING_OP_REWARD_MINIMUM
+}
+
+export const getProjectRewards = (
+  rewards: { roundId: string; amount: any }[],
+) => {
+  const devToolingRewards = rewards
+    .filter((r) => r.roundId === "7")
+    .reduce((sum, r) => sum + Number(r.amount), 0)
+
+  const onchainBuildersRewards = rewards
+    .filter((r) => r.roundId === "8")
+    .reduce((sum, r) => sum + Number(r.amount), 0)
+
+  return {
+    devToolingRewards,
+    onchainBuildersRewards,
+  }
+}
+
+export const getProjectDeployedChains = (contracts: { chainId: number }[]) => {
+  const deployedOn = contracts.map((c) => CHAIN_INFO[c.chainId]).filter(Boolean)
+
+  return Array.from(new Map(deployedOn.map((c) => [c.name, c])).values())
+}
+
+export const getProjectContributors = (
+  team: { user: any }[],
+  organization: {
+    organization?: {
+      name: string
+      avatarUrl: string | null
+      team: { user: any }[]
+    } | null
+  } | null,
+) => {
+  const teamUsers = team.map((t) => t.user)
+  const orgUsers = organization?.organization?.team?.map((t) => t.user) || []
+
+  return teamUsers.filter((u) => !orgUsers.find((ou) => ou.id === u.id))
+}
+
+export const getReposWithTags = (
+  repos: { openSource?: boolean; npmPackage?: boolean; crate?: boolean }[],
+) => {
+  return repos.map((repo) => {
+    const tags = []
+    if (repo.openSource)
+      tags.push({ name: "Open Source", icon: "/assets/icons/oss.svg" })
+    if (repo.npmPackage)
+      tags.push({ name: "NPM", icon: "/assets/icons/npm-fill.svg" })
+    if (repo.crate)
+      tags.push({ name: "Crate", icon: "/assets/icons/crate.svg" })
+    return { ...repo, tags }
+  })
 }

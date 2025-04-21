@@ -31,6 +31,7 @@ import {
   updateProjectFunding,
   updateProjectOrganization,
   UpdateProjectParams,
+  getProjectApplications,
 } from "@/db/projects"
 
 import { createEntityAttestation } from "../eas"
@@ -41,6 +42,12 @@ import {
   verifyMembership,
   verifyOrganizationMembership,
 } from "./utils"
+import {
+  getProjectRewards,
+  getProjectDeployedChains,
+  getProjectContributors,
+  getReposWithTags,
+} from "@/lib/oso/utils"
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
@@ -527,5 +534,29 @@ export const getPublicProjectAction = async ({
 }: {
   projectId: string
 }) => {
-  return await getPublicProject(projectId)
+  const rawProject = await getPublicProject(projectId)
+  if (!rawProject) return null
+
+  const [devToolingApplication, onchainBuildersApplication] =
+    await getProjectApplications(projectId)
+  const { devToolingRewards, onchainBuildersRewards } = getProjectRewards(
+    rawProject.rewards,
+  )
+  const deployedOn = getProjectDeployedChains(rawProject.contracts)
+  const contributors = getProjectContributors(
+    rawProject.team,
+    rawProject.organization,
+  )
+  const reposWithTags = getReposWithTags(rawProject.repos)
+
+  return {
+    ...rawProject,
+    repos: reposWithTags,
+    deployedOn,
+    contributors,
+    devToolingApplication,
+    onchainBuildersApplication,
+    devToolingRewards,
+    onchainBuildersRewards,
+  }
 }
