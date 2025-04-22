@@ -17,13 +17,11 @@ export const EditEmail = () => {
 
   const { updateEmail } = useUpdateAccount({
     onSuccess: async ({ user: updatedPrivyUser, updateMethod }) => {
-      if (updateMethod === "email" && updatedPrivyUser) {
-        toast.promise(syncPrivyUser(updatedPrivyUser), {
-          loading: "Updating email...",
-          success: "Email updated successfully",
-          error: "Failed to update email",
-        })
-      }
+      toast.promise(syncPrivyUser(updatedPrivyUser), {
+        loading: "Updating email...",
+        success: "Email updated successfully",
+        error: "Failed to update email",
+      })
     },
   })
 

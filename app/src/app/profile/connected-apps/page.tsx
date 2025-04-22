@@ -5,6 +5,7 @@ import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
 import { getUserById } from "@/db/users"
+import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 
 export default async function Page() {
   const session = await auth()
@@ -22,6 +23,7 @@ export default async function Page() {
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
+      <FarcasterConnection />
       <DiscordConnection user={user} />
       <GithubConnection user={user} />
       <GovForumConnection user={user} />

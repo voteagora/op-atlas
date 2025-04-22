@@ -923,7 +923,7 @@ export async function updateUser({
   ...user
 }: {
   id: string
-  farcasterId?: string
+  farcasterId?: string | null
   name?: string | null
   username?: string | null
   imageUrl?: string | null
@@ -963,6 +963,18 @@ export const syncPrivyUser = async (
       })
     } catch (error) {
       console.error("Failed to update farcaster:", error)
+    }
+  } else {
+    // If farcaster was previously linked but now removed, clear farcaster data
+    if (existingUser.farcasterId) {
+      try {
+        await updateUser({
+          id: existingUser.id,
+          farcasterId: null,
+        })
+      } catch (error) {
+        console.error("Failed to remove farcaster data:", error)
+      }
     }
   }
 
