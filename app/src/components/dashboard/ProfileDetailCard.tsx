@@ -9,7 +9,11 @@ import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import { syncPrivyUser } from "@/db/users"
-import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
+import {
+  useLinkAccount,
+  usePrivy,
+  useUpdateAccount,
+} from "@privy-io/react-auth"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -27,10 +31,21 @@ const ProfileDetailCard = ({
   className?: string
   user: UserWithAddresses
 }) => {
-
   const { isBadgeholder } = useIsBadgeholder(user)
 
-  const { user: privyUser, unlinkEmail } = usePrivy()
+  const { user: privyUser } = usePrivy()
+
+  const { updateEmail } = useUpdateAccount({
+    onSuccess: async ({ user: updatedPrivyUser, updateMethod }) => {
+      if (updateMethod === "email" && updatedPrivyUser) {
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Updating email...",
+          success: "Email updated successfully",
+          error: "Failed to update email",
+        })
+      }
+    },
+  })
 
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
@@ -39,36 +54,16 @@ const ProfileDetailCard = ({
           loading: "Linking email...",
           success: "Email linked successfully",
           error: "Failed to link email",
-        });
+        })
       }
     },
-    onError: () => {
-      toast.error("Failed to update account information");
-    },
   })
-
-  const onEmailClick = () => {
-    if (privyUser?.email) {
-      toast.promise(unlinkEmail(privyUser.email.address), {
-        loading: "Unlinking email...",
-        success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser);
-          return "Email unlinked successfully";
-        },
-        error: "Failed to unlink email",
-      });
-    } else {
-      linkEmail();
-    }
-  }
 
   const initials = (user?.name ?? "")
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .toUpperCase();
-
-
+    .toUpperCase()
 
   return (
     <div className={cn("flex gap-x-4", className)}>
@@ -102,7 +97,9 @@ const ProfileDetailCard = ({
             Email
             <Button
               variant="link"
-              onClick={onEmailClick}
+              onClick={() => {
+                privyUser?.email?.address ? updateEmail() : linkEmail()
+              }}
               className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
             >
               {privyUser?.email

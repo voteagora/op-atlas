@@ -317,10 +317,10 @@ export function formatApplicationMetadata({
     subcategory: projectDescriptionOptions,
     impactStatement: impactStatement
       ? Object.entries(impactStatement).map(([id, answer]) => ({
-        question:
-          category?.impactStatements.find((i) => i.id === id)?.question ?? "",
-        answer,
-      }))
+          question:
+            category?.impactStatements.find((i) => i.id === id)?.question ?? "",
+          answer,
+        }))
       : [],
   }
 

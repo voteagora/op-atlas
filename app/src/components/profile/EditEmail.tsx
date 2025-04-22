@@ -1,79 +1,76 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import { useUpdateEmail } from "@/lib/hooks"
-import { UserWithEmails } from "@/lib/types"
-import { useAppDialogs } from "@/providers/DialogProvider"
+import { syncPrivyUser } from "@/db/users"
+import {
+  useLinkAccount,
+  usePrivy,
+  useUpdateAccount,
+} from "@privy-io/react-auth"
+import { Mail } from "lucide-react"
 
-import { Input } from "../ui/input"
+export const EditEmail = () => {
+  const { user: privyUser, unlinkEmail } = usePrivy()
 
-export function EditEmail({ user }: { user: UserWithEmails }) {
-  const [email, setEmail] = useState(user.emails[0]?.email)
-  const [isEditing, setIsEditing] = useState(false)
-  const [updatePending, startUpdateTransition] = useTransition()
-  const updateEmail = useUpdateEmail()
-  const { setOpenDialog } = useAppDialogs()
+  const { updateEmail } = useUpdateAccount({
+    onSuccess: async ({ user: updatedPrivyUser, updateMethod }) => {
+      if (updateMethod === "email" && updatedPrivyUser) {
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Updating email...",
+          success: "Email updated successfully",
+          error: "Failed to update email",
+        })
+      }
+    },
+  })
 
-  const onEditEmail = async () => {
-    if (!email) return
-    if (user.emails[0]?.email === email) {
-      setIsEditing(false)
-      return
+  const { linkEmail } = useLinkAccount({
+    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
+      if (linkMethod === "email" && updatedPrivyUser) {
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Adding email...",
+          success: "Email added successfully",
+          error: "Failed to add email",
+        })
+      }
+    },
+  })
+
+  const handleUnlinkEmail = () => {
+    if (privyUser?.email) {
+      toast.promise(unlinkEmail(privyUser.email.address), {
+        loading: "Deleting email...",
+        success: (updatedPrivyUser) => {
+          syncPrivyUser(updatedPrivyUser)
+          return "Email deleted successfully"
+        },
+        error: "Failed to delete email",
+      })
     }
-
-    startUpdateTransition(async () => {
-      await updateEmail(email)
-    })
-    setIsEditing(false)
-    toast.success("Email updated")
   }
 
-  useEffect(() => {
-    setEmail(user.emails[0]?.email)
-  }, [user.emails])
-
   return (
-    <div className="flex flex-col gap-6">
-      <h4 className="text-h4">Email</h4>
-      <div>
-        Please add an email for important messages. This is required to apply
-        for and receive Retro Funding. It should be a personal email where we
-        can reliably reach you. Don&apos;t worry, we&apos;ll keep it private.
-      </div>
-
-      {user.emails.length > 0 ? (
-        <div className="space-y-2">
-          <span className="text-sm font-medium">Email</span>
-          <div className="flex space-x-1.5 items-center">
-            <Input
-              value={email ?? ""}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter email address"
-              readOnly={!isEditing}
-            />
-            {isEditing ? (
-              <Button
-                disabled={email === "" || updatePending}
-                onClick={onEditEmail}
-                variant={
-                  user.emails[0]?.email === email ? "secondary" : "primary"
-                }
-              >
-                {user.emails[0]?.email === email ? "Cancel" : "Save"}
-              </Button>
-            ) : (
-              <Button onClick={() => setIsEditing(true)} variant="secondary">
-                Edit
-              </Button>
-            )}
-          </div>
+    <div className="flex space-x-1.5">
+      {privyUser?.email && privyUser?.email?.address && (
+        <div className="input-container">
+          <Mail size={16} fill="#0F111A" color="#fff" />
+          <span>{privyUser?.email?.address}</span>
         </div>
-      ) : (
-        <Button className="w-fit" onClick={() => setOpenDialog("email")}>
-          Add email
+      )}
+      <Button
+        variant={privyUser?.email?.address ? "secondary" : "primary"}
+        onClick={() => {
+          privyUser?.email?.address ? updateEmail() : linkEmail()
+        }}
+      >
+        {privyUser?.email?.address ? "Update email" : "Add email"}
+      </Button>
+
+      {privyUser?.email?.address && (
+        <Button variant="secondary" onClick={handleUnlinkEmail}>
+          Delete email
         </Button>
       )}
     </div>

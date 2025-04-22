@@ -1,11 +1,6 @@
 import CredentialsProvider from "next-auth/providers/credentials"
 
-
-import {
-  getUserByPrivyDid,
-  syncPrivyUser,
-  upsertUser
-} from "../db/users"
+import { getUserByPrivyDid, syncPrivyUser, upsertUser } from "../db/users"
 import privy from "../lib/privy"
 import { User as PrivyUser } from "@privy-io/react-auth"
 interface UserResponse {
@@ -22,7 +17,6 @@ export const PrivyCredentialsProvider = CredentialsProvider({
   credentials: {
     privy: { label: "privy", type: "text" },
     privyAccessToken: { label: "privyAccessToken", type: "text" },
-
   },
 
   async authorize(credentials) {
@@ -39,14 +33,12 @@ export const PrivyCredentialsProvider = CredentialsProvider({
       // issuedAt	string	Timestamp for when the access token was signed by Privy.
       // expiration	string	Timestamp for when the access token will expire.
       // sessionId	string	Unique identifier for the user's session.
-
     } catch (error) {
       console.log(`Token verification failed with error ${error}.`)
       return null
     }
 
-    const privyUser = JSON.parse(privyUserObject as string) as PrivyUser;
-
+    const privyUser = JSON.parse(privyUserObject as string) as PrivyUser
 
     if (!privyUser.id) {
       console.log("privy id is required for authentication")
@@ -56,9 +48,11 @@ export const PrivyCredentialsProvider = CredentialsProvider({
     // Check if a user with this privyDid already exists
     const existingUser = await getUserByPrivyDid(privyUser.id)
 
-    const user = existingUser || await upsertUser({
-      privyDid: privyUser.id,
-    })
+    const user =
+      existingUser ||
+      (await upsertUser({
+        privyDid: privyUser.id,
+      }))
 
     const refreshedUser = await syncPrivyUser(privyUser)
     return userResponse(refreshedUser)
@@ -70,7 +64,8 @@ const userResponse = (user: any): UserResponse => ({
   farcasterId: user?.farcasterId as string | undefined,
   name: user?.name as string | undefined,
   image: user?.imageUrl as string | undefined,
-  email: Array.isArray(user?.emails) && user.emails.length > 0 ? user.emails[0].email : undefined,
+  email:
+    Array.isArray(user?.emails) && user.emails.length > 0
+      ? user.emails[0].email
+      : undefined,
 })
-
-

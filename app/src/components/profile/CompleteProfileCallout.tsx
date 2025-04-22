@@ -1,5 +1,5 @@
 import { User } from "@prisma/client"
-import { ArrowUpRight, Check, Mail, Plus, X } from "lucide-react"
+import { ArrowUpRight, Check, Plus, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -15,7 +15,7 @@ import {
   UserWithAddresses,
   UserWithEmails,
 } from "@/lib/types"
-import { cn, profileProgress, shortenAddress } from "@/lib/utils"
+import { cn, profileProgress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { Badge } from "../common/Badge"
@@ -25,6 +25,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion"
+import { EditEmail } from "./EditEmail"
 
 export function CompleteProfileCallout({
   user,
@@ -138,7 +139,6 @@ function ProfileSteps({ user }: { user: UserWithAddresses }) {
 }
 
 function AddYourEmailStep({ user }: { user: UserWithEmails }) {
-  const { setOpenDialog } = useAppDialogs()
   return (
     <div className="flex justify-between pb-4 gap-6">
       <div className="flex gap-4">
@@ -158,20 +158,7 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
               Please add email for important messages.
             </div>
           </div>
-          <div className="flex space-x-1.5 items-center">
-            {user.emails.length > 0 && (
-              <div className="input-container">
-                <Mail size={16} fill="#0F111A" color="#fff" />
-                <span>{user.emails[0].email}</span>
-              </div>
-            )}
-            <Button
-              onClick={() => setOpenDialog("email")}
-              variant={user.emails.length > 0 ? "secondary" : "primary"}
-            >
-              {user.emails.length > 0 ? "Edit" : "Add email"}
-            </Button>
-          </div>
+          <EditEmail />
         </div>
       </div>
     </div>

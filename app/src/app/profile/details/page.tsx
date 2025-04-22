@@ -28,7 +28,15 @@ export default async function Page() {
       <div className="text-foreground text-2xl font-semibold">
         Profile details
       </div>
-      <EditEmail user={user} />
+      <div className="flex flex-col gap-6">
+        <h4 className="text-h4">Email</h4>
+        <div>
+          Please add an email for important messages. This is required to apply
+          for and receive Retro Funding. It should be a personal email where we
+          can reliably reach you. Don&apos;t worry, we&apos;ll keep it private.
+        </div>
+        <EditEmail />
+      </div>
       <div className="flex flex-col gap-6">
         <div className="text-foreground text-xl font-semibold">
           Your details

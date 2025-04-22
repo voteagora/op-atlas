@@ -1,8 +1,7 @@
-import { Prisma, User } from "@prisma/client";
-import { AggregatedType } from "eas-indexer/src/types";
+import { Prisma, User } from "@prisma/client"
+import { AggregatedType } from "eas-indexer/src/types"
 
 export type TeamRole = "member" | "admin"
-
 
 export type ProjectWithDetails = Prisma.ProjectGetPayload<{
   include: {

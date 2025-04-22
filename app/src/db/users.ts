@@ -30,7 +30,6 @@ export type EntityRecords = Record<
 
 import { User as PrivyUser } from "@privy-io/react-auth"
 
-
 export async function getUserById(userId: string) {
   return prisma.user.findUnique({
     where: {
@@ -48,11 +47,14 @@ export async function getUserById(userId: string) {
   })
 }
 
-export async function getUserByPrivyDid(privyDid: string): Promise<(User & {
-  addresses: UserAddress[];
-  interaction: UserInteraction | null;
-  emails: UserEmail[];
-}) | null> {
+export async function getUserByPrivyDid(privyDid: string): Promise<
+  | (User & {
+      addresses: UserAddress[]
+      interaction: UserInteraction | null
+      emails: UserEmail[]
+    })
+  | null
+> {
   return prisma.user.findFirst({
     where: {
       privyDid: privyDid as string,
@@ -129,10 +131,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-    addresses: UserAddress[]
-    interaction: UserInteraction | null
-    emails: UserEmail[]
-  })
+      addresses: UserAddress[]
+      interaction: UserInteraction | null
+      emails: UserEmail[]
+    })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -237,14 +239,13 @@ export async function deleteUserEmails(uid: string) {
   try {
     await prisma.userEmail.deleteMany({
       where: {
-        userId: uid
-      }
+        userId: uid,
+      },
     })
   } catch (error) {
     console.error("Failed to delete emails:", error)
   }
 }
-
 
 export async function updateUserEmail({
   id,
@@ -262,24 +263,24 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-      prisma.userEmail.delete({
-        where: {
-          id: currentEmail.id,
-        },
-      }),
-    ]
+        prisma.userEmail.delete({
+          where: {
+            id: currentEmail.id,
+          },
+        }),
+      ]
     : []
 
   const createEmail = email
     ? [
-      prisma.userEmail.create({
-        data: {
-          email,
-          userId: id,
-          verified: verified ?? false,
-        },
-      }),
-    ]
+        prisma.userEmail.create({
+          data: {
+            email,
+            userId: id,
+            verified: verified ?? false,
+          },
+        }),
+      ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])
@@ -938,18 +939,19 @@ export async function updateUser({
   })
 }
 
-export const syncPrivyUser = async (privyUser: PrivyUser): Promise<User | null> => {
-
+export const syncPrivyUser = async (
+  privyUser: PrivyUser,
+): Promise<User | null> => {
   const existingUser = await getUserByPrivyDid(privyUser.id)
 
   if (!existingUser) {
     console.error("User not found")
     return null
   }
-  const existingAddresses = existingUser?.addresses?.map(addr => getAddress(addr.address)) || []
+  const existingAddresses =
+    existingUser?.addresses?.map((addr) => getAddress(addr.address)) || []
 
   if (privyUser?.farcaster && privyUser.farcaster.fid) {
-
     try {
       // Link farcaster to user
       await updateUser({
@@ -966,7 +968,6 @@ export const syncPrivyUser = async (privyUser: PrivyUser): Promise<User | null> 
     }
   }
 
-
   // Add wallet address to user if it doesn't already exist
   if (privyUser.wallet?.address && privyUser.wallet.chainType === "ethereum") {
     const walletAddress = getAddress(privyUser.wallet.address)
@@ -982,7 +983,6 @@ export const syncPrivyUser = async (privyUser: PrivyUser): Promise<User | null> 
       }
     }
   }
-
 
   if (privyUser?.email && privyUser.email.address) {
     try {

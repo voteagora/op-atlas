@@ -1,6 +1,11 @@
 "use client"
 
-import { User as PrivyUser, useLogin, useLogout, usePrivy } from "@privy-io/react-auth"
+import {
+  User as PrivyUser,
+  useLogin,
+  useLogout,
+  usePrivy,
+} from "@privy-io/react-auth"
 import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -32,12 +37,12 @@ export const Account = () => {
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
       onPrivyLogin(params.user)
-    }
-  });
+    },
+  })
 
   const { logout: privyLogout } = useLogout({
-    onSuccess: () => signOut({ redirect: false })
-  });
+    onSuccess: () => signOut({ redirect: false }),
+  })
 
   const { data: session, status: authStatus } = useSession()
   const prevAuthStatus = usePrevious(authStatus)
@@ -51,8 +56,12 @@ export const Account = () => {
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
 
-  const didLogIn = prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED && authStatus === AUTH_STATUS.AUTHENTICATED;
-  const didLogOut = prevAuthStatus === AUTH_STATUS.AUTHENTICATED && authStatus === AUTH_STATUS.UNAUTHENTICATED;
+  const didLogIn =
+    prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
+    authStatus === AUTH_STATUS.AUTHENTICATED
+  const didLogOut =
+    prevAuthStatus === AUTH_STATUS.AUTHENTICATED &&
+    authStatus === AUTH_STATUS.UNAUTHENTICATED
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -64,10 +73,8 @@ export const Account = () => {
     }
   }
 
-
   const onPrivyLogin = (user: PrivyUser) => {
-
-    console.log(user);
+    console.log(user)
 
     getAccessToken()
       .then((token) => {
@@ -84,12 +91,10 @@ export const Account = () => {
       })
   }
 
-
   useEffect(() => {
     if (didLogIn) {
-
       saveLogInDate()
-      track("Successful Sign In", { userId: session.user.id });
+      track("Successful Sign In", { userId: session.user.id })
 
       if (!isMissionsPath) {
         router.push("/dashboard")
@@ -102,9 +107,8 @@ export const Account = () => {
           checkBadgeholderStatus(session?.user?.id)
         }
       }
-
     } else if (didLogOut) {
-      if (pathName !== '/') {
+      if (pathName !== "/") {
         router.push("/")
       }
     }

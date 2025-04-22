@@ -83,9 +83,7 @@ export const updateEmail = async (email: string) => {
   revalidatePath("/profile/details")
   revalidatePath("/rewards/[rewardId]/page", "page")
 
-  console.info(
-    `Email updated for user ${session.user.id}: ${parsedEmail}`,
-  )
+  console.info(`Email updated for user ${session.user.id}: ${parsedEmail}`)
 
   return {
     error: null,

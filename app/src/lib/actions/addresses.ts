@@ -32,7 +32,11 @@ export const verifyUserAddress = async (
     }
   }
 
-  if (user.addresses.some(({ address: existing }) => getAddress(existing) === checksumAddress)) {
+  if (
+    user.addresses.some(
+      ({ address: existing }) => getAddress(existing) === checksumAddress,
+    )
+  ) {
     return {
       error: "Address already verified",
     }
@@ -120,7 +124,9 @@ export const syncFarcasterAddresses = async () => {
   }
 
   // Filter out already linked addresses
-  const existingAddresses = user.addresses.map(({ address }) => getAddress(address))
+  const existingAddresses = user.addresses.map(({ address }) =>
+    getAddress(address),
+  )
   const newAddresses = farcasterAddresses
     .map((addr) => getAddress(addr)) // Checksum farcaster addresses first
     .filter((addr) => !existingAddresses.includes(addr))

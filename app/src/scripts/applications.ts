@@ -110,14 +110,16 @@ async function generateApplicationData() {
     ).map(async (application) => {
       // get farcasterId for each team member
       const projectTeam = await getFarcasterProfiles(
-        application.project.team.map((member) => member.user.farcasterId).filter(Boolean) as string[],
+        application.project.team
+          .map((member) => member.user.farcasterId)
+          .filter(Boolean) as string[],
       )
 
       // TODO: This will miss any user that does not have a farcasterId
       const organizationTeam = await getFarcasterProfiles(
-        application.project.organization?.organization.team
+        (application.project.organization?.organization.team
           .map((member) => member.user.farcasterId)
-          .filter(Boolean) as string[] ?? [],
+          .filter(Boolean) as string[]) ?? [],
       )
 
       // assemeble the team
