@@ -271,12 +271,6 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
             where: {
               roundId,
             },
-            select: {
-              id: true,
-              amount: true,
-              tranche: true,
-              roundId: true,
-            },
           },
           kycTeam: true,
         },

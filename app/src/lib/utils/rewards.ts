@@ -1,5 +1,8 @@
 import { formatUnits, keccak256, parseUnits } from "viem"
 
+import { KYCStreamTeam } from "../types"
+import { isKycTeamVerified } from "./kyc"
+
 export function generateRewardStreamId(projectIds: string[]) {
   return keccak256(Buffer.from(projectIds.sort().join("")))
 }
@@ -48,25 +51,7 @@ function calculateRewardAmounts(projectsWithRewards: ProjectWithRewards[]) {
     .map(([_, amounts]) => (amounts.length > 0 ? sumBigNumbers(amounts) : "0"))
 }
 
-type StreamTeam = {
-  deletedAt: Date | null
-  projects: Array<{
-    id: string
-    name: string
-    recurringRewards: Array<{
-      tranche: number
-      amount: string
-    }>
-  }>
-  walletAddress: string
-  team: Array<{
-    users: {
-      status: string
-    }
-  }>
-}
-
-export function processStream(teams: StreamTeam[], streamId?: string) {
+export function processStream(teams: KYCStreamTeam[], streamId?: string) {
   // Order teams by deletedAt: deletedAt is null for the current team -- current team comes last
   const orderedTeams = teams.sort((a, b) => {
     if (a.deletedAt === null && b.deletedAt === null)
@@ -92,9 +77,7 @@ export function processStream(teams: StreamTeam[], streamId?: string) {
     projectIds: projectsWithRewards.map((project) => project.id),
     projectNames: projectsWithRewards.map((project) => project.name),
     wallets: orderedTeams.map((team) => team.walletAddress),
-    KYCStatusCompleted: currentTeam.team.every(
-      (team) => team.users.status === "APPROVED",
-    ),
+    KYCStatusCompleted: isKycTeamVerified(currentTeam),
     amounts: calculateRewardAmounts(projectsWithRewards),
   }
 }

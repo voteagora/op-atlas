@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { formatUnits, isAddress, parseUnits } from "viem"
+import { isAddress } from "viem"
 
 import { auth } from "@/auth"
 import {
@@ -17,7 +17,7 @@ import {
 } from "@/db/rewards"
 
 import { getActiveStreams, SuperfluidStream } from "../superfluid"
-import { generateRewardStreamId, processStream } from "../utils/rewards"
+import { processStream } from "../utils/rewards"
 import { verifyAdminStatus } from "./utils"
 
 // TODO: Can filter by sender once we have it

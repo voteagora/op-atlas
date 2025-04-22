@@ -11,14 +11,15 @@ import { toast } from "sonner"
 import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
+import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
 import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
+import { KYCTeamWithTeam } from "@/lib/types"
 import { cn, getValidUntil } from "@/lib/utils"
 import { shortenAddress } from "@/lib/utils"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
 
 import CompletedGrantDeliveryForm from "./CompletedGrantDeliveryForm"
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
-import { KYCTeamWithTeam } from "@/lib/types"
-import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
 
 export default function AddGrantDeliveryAddressForm({
   kycTeam,
@@ -60,9 +61,7 @@ export default function AddGrantDeliveryAddressForm({
   const entities = kycTeam?.team
     ?.filter((teamMember) => Boolean(teamMember.users.businessName))
     .map((teamMember) => teamMember.users)
-  const allTeamMembersVerified =
-    Boolean(kycTeam?.team?.length) &&
-    kycTeam?.team?.every((teamMember) => teamMember.users.status === "APPROVED")
+  const allTeamMembersVerified = isKycTeamVerified(kycTeam)
 
   const processCompleted =
     kycTeam?.walletAddress &&

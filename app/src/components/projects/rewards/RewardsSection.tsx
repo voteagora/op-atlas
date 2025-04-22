@@ -6,6 +6,7 @@ import {
   ProjectTeam,
   ProjectWithFullDetails,
 } from "@/lib/types"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
 
 import RewardAccordion from "./RewardAccordion"
 
@@ -22,9 +23,7 @@ export function RewardsSection({
 }) {
   const isAdmin = useIsAdmin(team)
 
-  const isVerified = kycTeam?.team.every(
-    (teamMember) => teamMember.users.status === "APPROVED",
-  )
+  const isVerified = isKycTeamVerified(kycTeam)
 
   return (
     <div className="flex flex-col space-y-12">
