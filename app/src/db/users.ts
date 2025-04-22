@@ -15,6 +15,7 @@ import {
 } from "@/lib/constants"
 import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
 
+import { getAddress } from "viem"
 import { prisma } from "./client"
 
 export type Entity = keyof ExtendedAggregatedType
@@ -27,10 +28,34 @@ export type EntityRecords = Record<
   EntityObject[]
 >
 
+import { User as PrivyUser } from "@privy-io/react-auth"
+
+
 export async function getUserById(userId: string) {
   return prisma.user.findUnique({
     where: {
       id: userId,
+    },
+    include: {
+      addresses: {
+        orderBy: {
+          primary: "desc",
+        },
+      },
+      interaction: true,
+      emails: true,
+    },
+  })
+}
+
+export async function getUserByPrivyDid(privyDid: string): Promise<(User & {
+  addresses: UserAddress[];
+  interaction: UserInteraction | null;
+  emails: UserEmail[];
+}) | null> {
+  return prisma.user.findFirst({
+    where: {
+      privyDid: privyDid as string,
     },
     include: {
       addresses: {
@@ -99,18 +124,6 @@ export async function getUserByFarcasterId(farcasterId: string) {
       addresses: true,
       emails: true,
     },
-  })
-}
-
-export async function getUserByPrivyDid(privyDid: string): Promise<User | null> {
-  return await prisma.user.findFirst({
-    where: {
-      privyDid: privyDid as string,
-    },
-    include: {
-      addresses: true,
-      emails: true,
-    }
   })
 }
 
@@ -219,6 +232,19 @@ export async function upsertUser({
     },
   })
 }
+
+export async function deleteUserEmails(uid: string) {
+  try {
+    await prisma.userEmail.deleteMany({
+      where: {
+        userId: uid
+      }
+    })
+  } catch (error) {
+    console.error("Failed to delete emails:", error)
+  }
+}
+
 
 export async function updateUserEmail({
   id,
@@ -910,4 +936,68 @@ export async function updateUser({
       emails: true,
     },
   })
+}
+
+export const syncPrivyUser = async (privyUser: PrivyUser): Promise<User | null> => {
+
+  const existingUser = await getUserByPrivyDid(privyUser.id)
+
+  if (!existingUser) {
+    console.error("User not found")
+    return null
+  }
+  const existingAddresses = existingUser?.addresses?.map(addr => getAddress(addr.address)) || []
+
+  if (privyUser?.farcaster && privyUser.farcaster.fid) {
+
+    try {
+      // Link farcaster to user
+      await updateUser({
+        id: existingUser.id,
+        farcasterId: privyUser.farcaster.fid.toString(),
+        privyDid: privyUser.id,
+        name: privyUser.farcaster.displayName || null,
+        username: privyUser.farcaster.username || null,
+        imageUrl: privyUser.farcaster.pfp || null,
+        bio: privyUser.farcaster.bio || null,
+      })
+    } catch (error) {
+      console.error("Failed to update farcaster:", error)
+    }
+  }
+
+
+  // Add wallet address to user if it doesn't already exist
+  if (privyUser.wallet?.address && privyUser.wallet.chainType === "ethereum") {
+    const walletAddress = getAddress(privyUser.wallet.address)
+    if (!existingAddresses.includes(walletAddress)) {
+      try {
+        await addUserAddresses({
+          id: existingUser.id,
+          addresses: [getAddress(privyUser.wallet.address)],
+          source: "privy",
+        })
+      } catch (error) {
+        console.error("Failed to create user or add address:", error)
+      }
+    }
+  }
+
+
+  if (privyUser?.email && privyUser.email.address) {
+    try {
+      await updateUserEmail({
+        id: existingUser.id,
+        email: privyUser.email.address.toLowerCase(),
+        verified: true,
+      })
+    } catch (error) {
+      console.error("Failed to update email:", error)
+    }
+  } else {
+    // Delete all emails associated with the user
+    deleteUserEmails(existingUser.id)
+  }
+
+  return await getUserById(existingUser.id)
 }

@@ -19,6 +19,7 @@ import {
 } from "../ui/dropdown-menu"
 import { usePrivy } from "@privy-io/react-auth"
 import { useLinkAccount } from "@privy-io/react-auth"
+import { syncPrivyUser } from "@/db/users"
 
 const ProfileDetailCard = ({
   className,
@@ -30,11 +31,18 @@ const ProfileDetailCard = ({
   const { setOpenDialog } = useAppDialogs()
   const { isBadgeholder } = useIsBadgeholder(user)
 
-  const { user: privyUser, unlinkEmail } = usePrivy()
-  const { linkEmail, linkTwitter } = useLinkAccount({
-    onSuccess: ({ user, linkMethod, linkedAccount }) => {
-      if (linkMethod === "email") {
+  const { user: privyUser, unlinkEmail, unlinkFarcaster } = usePrivy()
+
+  const { linkEmail } = useLinkAccount({
+    onSuccess: async ({ user: updatedPrivyUser, linkMethod, linkedAccount }) => {
+      if (linkMethod === "email" && updatedPrivyUser) {
         console.log("Email linked successfully")
+        console.log(updatedPrivyUser);
+
+        syncPrivyUser(updatedPrivyUser);
+      }
+      if (linkMethod === "farcaster") {
+        console.log("Farcaster linked successfully")
         console.log(user)
         console.log(linkedAccount)
       }
@@ -43,6 +51,7 @@ const ProfileDetailCard = ({
       console.log("Failed to link email");
     },
   })
+
   const initials = (user?.name ?? "")
     .split(" ")
     .map((n) => n[0])
@@ -81,7 +90,11 @@ const ProfileDetailCard = ({
             Email
             <Button
               variant="link"
-              onClick={() => privyUser?.email ? unlinkEmail(privyUser?.email.address) : linkEmail()}
+              onClick={() => privyUser?.email ? unlinkEmail(privyUser?.email.address).then((updatedPrivyUser) => {
+                console.log("SHOULD UNLINK EMAIL");
+                console.log(updatedPrivyUser);
+                syncPrivyUser(updatedPrivyUser)
+              }) : linkEmail()}
               className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
             >
               {privyUser?.email
