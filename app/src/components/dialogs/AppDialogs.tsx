@@ -2,7 +2,7 @@
 
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { VerifyAddressDialog } from "../projects/contracts/VerifyAddressDialog"
+import { DeleteKYCTeamDialog } from "../projects/rewards/DeleteKYCTeamDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
@@ -69,6 +69,12 @@ export default function AppDialogs() {
       )}
       {openDialog === "claim_rewards" && (
         <ClaimRewardsDialog open onOpenChange={onOpenChange("claim_rewards")} />
+      )}
+      {openDialog === "delete_kyc_team" && (
+        <DeleteKYCTeamDialog
+          open
+          onOpenChange={onOpenChange("delete_kyc_team")}
+        />
       )}
     </>
   )

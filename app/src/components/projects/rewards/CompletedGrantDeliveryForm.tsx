@@ -1,7 +1,7 @@
 "use client"
 
 import { KYCUser } from "@prisma/client"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { CheckIcon, ChevronRight, SquareCheck } from "lucide-react"
 import { User } from "lucide-react"
 import Image from "next/image"
@@ -9,30 +9,23 @@ import { useParams } from "next/navigation"
 
 import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
-import {
-  deleteProjectKYCTeamAction,
-  getProjectsForKycTeamAction,
-} from "@/lib/actions/projects"
-import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
+import { getProjectsForKycTeamAction } from "@/lib/actions/projects"
+import { KYCTeamWithTeam } from "@/lib/types"
 import { getValidUntil, shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { KYCTeamWithTeam } from "@/lib/types"
 
 interface CompletedGrantDeliveryFormProps {
   kycTeam?: KYCTeamWithTeam
   teamMembers?: KYCUser[]
   entities?: KYCUser[]
-  organizationProject?: boolean
 }
 
 export default function CompletedGrantDeliveryForm({
   kycTeam,
-  organizationProject,
   teamMembers,
   entities,
 }: CompletedGrantDeliveryFormProps) {
-  const params = useParams()
-  const queryClient = useQueryClient()
+  const { organizationId, projectId } = useParams()
   const { setData, setOpenDialog } = useAppDialogs()
   const { data: kycTeamProjects } = useQuery({
     queryKey: ["kycTeamProjects", kycTeam?.id],
@@ -40,30 +33,6 @@ export default function CompletedGrantDeliveryForm({
       if (!kycTeam?.id) return []
 
       return getProjectsForKycTeamAction(kycTeam.id)
-    },
-  })
-
-  const { mutate: deleteProjectKYCTeam, isPending } = useMutation({
-    mutationFn: async () => {
-      if (!organizationProject) {
-        const projectId = params.projectId as string
-        await deleteProjectKYCTeamAction({
-          kycTeamId: kycTeam?.id ?? "",
-          projectId,
-        })
-        await queryClient.invalidateQueries({
-          queryKey: ["kyc-teams", "project", projectId],
-        })
-      } else {
-        const organizationId = params.organizationId as string
-        await deleteOrganizationKYCTeam({
-          organizationId,
-          kycTeamId: kycTeam?.id ?? "",
-        })
-        await queryClient.invalidateQueries({
-          queryKey: ["kyc-teams", "organization", organizationId],
-        })
-      }
     },
   })
 
@@ -75,10 +44,13 @@ export default function CompletedGrantDeliveryForm({
     setOpenDialog("select_kyc_project")
   }
 
-  const onDeleteProjectKYCTeam = () => {
-    if (!kycTeam?.id) return
-
-    deleteProjectKYCTeam()
+  const openDeleteKYCTeamDialog = () => {
+    setData({
+      kycTeamId: kycTeam?.id,
+      projectId: projectId as string,
+      organizationId: organizationId as string,
+    })
+    setOpenDialog("delete_kyc_team")
   }
 
   if (!kycTeam?.walletAddress) return null
@@ -94,12 +66,10 @@ export default function CompletedGrantDeliveryForm({
           <span>Valid until {getValidUntil(kycTeam.createdAt)}</span>
         </div>
       </div>
-      {organizationProject && (
+      {organizationId && (
         <div className="space-y-2">
           <div className="w-full flex justify-between items-center">
-            <span className="font-medium text-sm">
-              {organizationProject ? "Projects" : "Project"}
-            </span>
+            <span className="font-medium text-sm">Projects</span>
             <button
               className="flex items-center space-x-1"
               onClick={openSelectKYCProjectDialog}
@@ -181,11 +151,7 @@ export default function CompletedGrantDeliveryForm({
                     </ul>
                   </div>
                 )}
-                <Button
-                  variant="secondary"
-                  disabled={isPending}
-                  onClick={onDeleteProjectKYCTeam}
-                >
+                <Button variant="secondary" onClick={openDeleteKYCTeamDialog}>
                   Delete
                 </Button>
               </div>

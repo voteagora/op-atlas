@@ -26,26 +26,22 @@ export default function AddGrantDeliveryAddressForm({
 }: {
   kycTeam?: KYCTeamWithTeam
 }) {
-  const params = useParams()
+  const { organizationId, projectId } = useParams()
   const queryClient = useQueryClient()
-
-  const organizationProject = params.organizationId as string
 
   const { mutate: deleteProjectKYCTeam } = useMutation({
     mutationFn: async () => {
-      if (!organizationProject) {
-        const projectId = params.projectId as string
+      if (!organizationId) {
         await deleteProjectKYCTeamAction({
           kycTeamId: kycTeam?.id ?? "",
-          projectId,
+          projectId: projectId as string,
         })
         await queryClient.invalidateQueries({
           queryKey: ["kyc-teams", "project", projectId],
         })
       } else {
-        const organizationId = params.organizationId as string
         await deleteOrganizationKYCTeam({
-          organizationId,
+          organizationId: organizationId as string,
           kycTeamId: kycTeam?.id ?? "",
         })
         await queryClient.invalidateQueries({
@@ -103,7 +99,6 @@ export default function AddGrantDeliveryAddressForm({
               content: kycTeam?.walletAddress && (
                 <CompletedGrantDeliveryForm
                   kycTeam={kycTeam}
-                  organizationProject={Boolean(organizationProject)}
                   teamMembers={teamMembers}
                   entities={entities}
                 />
@@ -172,9 +167,7 @@ export default function AddGrantDeliveryAddressForm({
                   </Button>
                 </>
               ) : (
-                <DeliveryAddressVerificationForm
-                  organizationProject={Boolean(organizationProject)}
-                />
+                <DeliveryAddressVerificationForm />
               ),
             },
             {

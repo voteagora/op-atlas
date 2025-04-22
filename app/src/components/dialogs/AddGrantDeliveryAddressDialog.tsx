@@ -16,7 +16,6 @@ import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { verifyUserAddress } from "@/lib/actions/addresses"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { createProjectKycTeamAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -29,7 +28,7 @@ export function AddGrantDeliveryAddressDialog({
   open,
   onOpenChange,
 }: DialogProps<object>) {
-  const params = useParams()
+  const { organizationId, projectId } = useParams()
   const queryClient = useQueryClient()
   const { data: session } = useSession()
   const { data: grantDeliveryData } = useAppDialogs()
@@ -74,14 +73,13 @@ export function AddGrantDeliveryAddressDialog({
         if (!data.signature.startsWith("0x"))
           throw new Error("Invalid signature")
 
-        if (grantDeliveryData.organizationProject) {
-          const organizationId = params.organizationId as string
+        if (organizationId) {
           if (!organizationId) return
 
           const createdOrganizationKycTeam =
             await createOrganizationKycTeamAction({
               walletAddress: grantDeliveryData.address,
-              organizationId,
+              organizationId: organizationId as string,
             })
 
           if (createdOrganizationKycTeam.error) {
@@ -93,12 +91,11 @@ export function AddGrantDeliveryAddressDialog({
             queryKey: ["kyc-teams", "organization", organizationId],
           })
         } else {
-          const projectId = params.projectId as string
           if (!projectId) return
 
           const createdProjectKycTeam = await createProjectKycTeamAction({
             walletAddress: grantDeliveryData.address,
-            projectId,
+            projectId: projectId as string,
           })
 
           if (createdProjectKycTeam.error) {
