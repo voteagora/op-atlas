@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { formatUnits, isAddress, keccak256, parseUnits } from "viem"
+import { formatUnits, isAddress, parseUnits } from "viem"
 
 import { auth } from "@/auth"
 import {
@@ -11,11 +11,13 @@ import {
   deleteClaim,
   getKYCTeamsWithRewardsForRound,
   getReward,
+  getRewardStreamsWithRewardsForRound,
   startClaim,
   updateClaim,
 } from "@/db/rewards"
 
 import { getActiveStreams, SuperfluidStream } from "../superfluid"
+import { generateRewardStreamId, processStream } from "../utils/rewards"
 import { verifyAdminStatus } from "./utils"
 
 // TODO: Can filter by sender once we have it
@@ -176,47 +178,20 @@ type RewardStream = {
   amounts: string[]
 }
 
-function sumBigNumbers(numbers: string[]): string {
-  const total = numbers.reduce((acc, curr) => {
-    const parsed = parseUnits(curr, 18)
-    return acc + parsed
-  }, BigInt(0))
-  return formatUnits(total, 18)
-}
-
 export const getRewardStreamsForRound = async (
   roundId: string,
 ): Promise<RewardStream[]> => {
-  const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
+  const existingStreams = (async () => {
+    const streams = await getRewardStreamsWithRewardsForRound(roundId)
+    return streams.map((stream) => processStream(stream.teams, stream.id))
+  })()
 
-  const rewardStreams = kycTeams.map((kycTeam) => {
-    const projectsWithRewards = kycTeam.projects.filter(
-      (project) => project.recurringRewards.length > 0,
-    )
-    const projectIds = projectsWithRewards.map((project) => project.id)
+  const newStreams = (async () => {
+    const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
+    return kycTeams.map((kycTeam) => processStream([kycTeam]))
+  })()
 
-    return {
-      id: keccak256(Buffer.from(projectIds.join(""))),
-      projectIds,
-      projectNames: projectsWithRewards.map((project) => project.name),
-      wallets: [kycTeam.walletAddress],
-      KYCStatusCompleted: kycTeam.team.every(
-        (team) => team.users.status === "APPROVED",
-      ),
-      amounts: projectsWithRewards
-        .map((project) =>
-          project.recurringRewards
-            .sort((a, b) => a.tranche - b.tranche) // Sort by tranche asc
-            .map((reward) => reward.amount),
-        )
-        .sort((a, b) => b.length - a.length) // Sort descending so longest array is first
-        .reduce((acc, curr) =>
-          curr.map((amount, index) => sumBigNumbers([acc[index], amount])),
-        ),
-    }
-  })
-
-  return rewardStreams
+  return [...(await existingStreams), ...(await newStreams)]
 }
 
 export const processSuperfluidStream = async (

@@ -1,10 +1,10 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
-import { keccak256 } from "ethers/crypto"
 import { cache } from "react"
 
 import { SuperfluidStream } from "@/lib/superfluid"
+import { generateRewardStreamId } from "@/lib/utils/rewards"
 
 import { prisma } from "./client"
 
@@ -253,6 +253,9 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
           },
         },
       },
+      rewardStream: {
+        is: null,
+      },
     },
     include: {
       team: {
@@ -275,14 +278,35 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
               roundId: true,
             },
           },
+          kycTeam: true,
         },
       },
-      rewardStream: {
+    },
+  })
+}
+
+export async function getRewardStreamsWithRewardsForRound(roundId: string) {
+  // IMPORTANT: Must include soft deleted kyc teams and projects
+
+  return prisma.rewardStream.findMany({
+    where: {
+      roundId,
+    },
+    include: {
+      teams: {
         include: {
-          teams: true,
+          team: {
+            include: {
+              users: true,
+            },
+          },
+          projects: {
+            include: {
+              recurringRewards: true,
+            },
+          },
         },
       },
-      superfludStream: true,
     },
   })
 }
@@ -330,9 +354,7 @@ export async function createRewardStream(
     return null
   }
 
-  const rewardId = keccak256(
-    Buffer.from(projects.map((project) => project.id).join("")),
-  )
+  const rewardId = generateRewardStreamId(projects.map((project) => project.id))
 
   return prisma.rewardStream.upsert({
     where: {
