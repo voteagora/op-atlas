@@ -30,21 +30,15 @@ const ProfileDetailCard = ({
 
   const { isBadgeholder } = useIsBadgeholder(user)
 
-  const { user: privyUser, unlinkEmail, unlinkFarcaster } = usePrivy()
+  const { user: privyUser, unlinkEmail } = usePrivy()
 
-  const { linkEmail, linkFarcaster } = useLinkAccount({
+  const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "email" && updatedPrivyUser) {
         toast.promise(syncPrivyUser(updatedPrivyUser), {
           loading: "Linking email...",
           success: "Email linked successfully",
           error: "Failed to link email",
-        });
-      } else if (linkMethod === "farcaster" && updatedPrivyUser) {
-        toast.promise(syncPrivyUser(updatedPrivyUser), {
-          loading: "Linking Farcaster...",
-          success: "Farcaster linked successfully",
-          error: "Failed to link Farcaster",
         });
       }
     },
