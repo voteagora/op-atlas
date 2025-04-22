@@ -25,6 +25,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion"
+import { AddAddress } from "./AddAddress"
 import { EditEmail } from "./EditEmail"
 
 export function CompleteProfileCallout({
@@ -284,7 +285,11 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
             </div>
           </div>
 
-          {user.addresses.length > 1 && (
+          {user.addresses.length === 0 && (
+            <AddAddress>Add address</AddAddress>
+          )}
+
+          {user.addresses.length >= 1 && (
             <div className="flex flex-col gap-2">
               <div className="text-sm text-foreground font-medium">
                 Your verified addresses
@@ -301,19 +306,9 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                     onCopy={onCopy}
                   />
                 ))}
-                <button
-                  className="h-10 w-10 flex items-center justify-center bg-backgroundSecondary rounded-sm"
-                  onClick={() => setOpenDialog("verify_address")}
-                >
-                  <Plus className="stroke-foreground" size={16} />
-                </button>
+                <AddAddress>Add another address</AddAddress>
               </div>
             </div>
-          )}
-          {user.addresses.length < 2 && (
-            <Button onClick={() => setOpenDialog("verify_address")}>
-              Verify Address
-            </Button>
           )}
         </div>
       </div>

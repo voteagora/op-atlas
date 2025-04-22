@@ -49,10 +49,10 @@ export async function getUserById(userId: string) {
 
 export async function getUserByPrivyDid(privyDid: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   return prisma.user.findFirst({
@@ -131,10 +131,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -263,24 +263,24 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-        prisma.userEmail.delete({
-          where: {
-            id: currentEmail.id,
-          },
-        }),
-      ]
+      prisma.userEmail.delete({
+        where: {
+          id: currentEmail.id,
+        },
+      }),
+    ]
     : []
 
   const createEmail = email
     ? [
-        prisma.userEmail.create({
-          data: {
-            email,
-            userId: id,
-            verified: verified ?? false,
-          },
-        }),
-      ]
+      prisma.userEmail.create({
+        data: {
+          email,
+          userId: id,
+          verified: verified ?? false,
+        },
+      }),
+    ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])
@@ -948,8 +948,6 @@ export const syncPrivyUser = async (
     console.error("User not found")
     return null
   }
-  const existingAddresses =
-    existingUser?.addresses?.map((addr) => getAddress(addr.address)) || []
 
   if (privyUser?.farcaster && privyUser.farcaster.fid) {
     try {
@@ -968,19 +966,42 @@ export const syncPrivyUser = async (
     }
   }
 
-  // Add wallet address to user if it doesn't already exist
-  if (privyUser.wallet?.address && privyUser.wallet.chainType === "ethereum") {
-    const walletAddress = getAddress(privyUser.wallet.address)
-    if (!existingAddresses.includes(walletAddress)) {
+  // Check for linked privy wallet accounts 
+  const existingAddresses = existingUser?.addresses?.filter(addr => addr.source === "privy").map((addr) => getAddress(addr.address)) || []
+
+  // Get all currently linked addresses
+  const linkedAddresses = privyUser.linkedAccounts && privyUser.linkedAccounts.length > 0
+    ? privyUser.linkedAccounts
+      .filter(account => account.type === "wallet" && account.chainType === "ethereum")
+      .map(wallet => (wallet as any).address ? getAddress((wallet as any).address as `0x${string}`) : null)
+      .filter(Boolean) as `0x${string}`[]
+    : [];
+
+  // Remove addresses that exist in existingAddresses but not in linkedWallets
+  for (const existingAddress of existingAddresses) {
+    if (!linkedAddresses.includes(existingAddress)) {
       try {
-        await addUserAddresses({
+        await removeUserAddress({
           id: existingUser.id,
-          addresses: [getAddress(privyUser.wallet.address)],
-          source: "privy",
-        })
+          address: existingAddress,
+        });
       } catch (error) {
-        console.error("Failed to create user or add address:", error)
+        console.error("Failed to remove wallet address:", error);
       }
+    }
+  }
+
+  // Add addresses that exist in linkedWallets but not in existingAddresses
+  const addressesToAdd = linkedAddresses.filter(addr => !existingAddresses.includes(addr));
+  if (addressesToAdd.length > 0) {
+    try {
+      await addUserAddresses({
+        id: existingUser.id,
+        addresses: addressesToAdd,
+        source: "privy",
+      });
+    } catch (error) {
+      console.error("Failed to add linked wallet addresses:", error);
     }
   }
 

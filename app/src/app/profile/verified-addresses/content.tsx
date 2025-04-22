@@ -9,8 +9,10 @@ import {
   syncFarcasterAddresses,
 } from "@/lib/actions/addresses"
 import { UserAddressSource, UserWithAddresses } from "@/lib/types"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
+import { AddAddress } from "@/components/profile/AddAddress"
+import { syncPrivyUser } from "@/db/users"
+import { usePrivy } from "@privy-io/react-auth"
 import { VerifiedAddress } from "./verified-address"
 
 export function VerifiedAddressesContent({
@@ -18,8 +20,8 @@ export function VerifiedAddressesContent({
 }: {
   user: UserWithAddresses
 }) {
-  const { setOpenDialog } = useAppDialogs()
 
+  const { unlinkWallet } = usePrivy()
   const [loading, setLoading] = useState(false)
 
   const onCopy = (address: string) => {
@@ -60,6 +62,18 @@ export function VerifiedAddressesContent({
         setLoading(false)
         return "Error syncing Farcaster addresses"
       },
+    })
+  }
+
+
+  const handleWalletUnlink = (address: string) => {
+    toast.promise(unlinkWallet(address), {
+      loading: "Deleting wallet address...",
+      success: (updatedPrivyUser) => {
+        syncPrivyUser(updatedPrivyUser)
+        return "Wallet address deleted successfully"
+      },
+      error: "Failed to delete wallet address",
     })
   }
 
@@ -106,15 +120,16 @@ export function VerifiedAddressesContent({
               source={source as UserAddressSource}
               primary={primary}
               onCopy={onCopy}
-              onRemove={onRemove}
+              onRemove={() => source === "privy" ? handleWalletUnlink(address) : onRemove(address)}
             />
           ))}
         </div>
       )}
       <div className="flex items-center gap-2">
-        <Button onClick={() => setOpenDialog("verify_address")}>
+        <AddAddress>
           Verify {hasAddress && "another "}address
-        </Button>
+        </AddAddress>
+
 
         {user?.farcasterId && (
           <Button onClick={onSyncFarcaster} variant="secondary">

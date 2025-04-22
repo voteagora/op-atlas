@@ -12,6 +12,7 @@ import {
 import { Mail } from "lucide-react"
 
 export const EditEmail = () => {
+
   const { user: privyUser, unlinkEmail } = usePrivy()
 
   const { updateEmail } = useUpdateAccount({
