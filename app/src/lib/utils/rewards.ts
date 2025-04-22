@@ -20,17 +20,22 @@ function sumBigNumbers(numbers: string[]): string {
 }
 
 function calculateRewardAmounts(projectsWithRewards: ProjectWithRewards[]) {
-  // TODO: Make sure we're summing rewards for the same tranche
-  return projectsWithRewards
-    .map((project) =>
-      project.recurringRewards
-        .sort((a, b) => a.tranche - b.tranche) // Sort by tranche asc
-        .map((reward) => reward.amount),
-    )
-    .sort((a, b) => b.length - a.length) // Sort descending so longest array is first
-    .reduce((acc, curr) =>
-      curr.map((amount, index) => sumBigNumbers([acc[index], amount])),
-    )
+  // Group rewards by tranche
+  const rewardsByTranche = new Map<number, string[]>()
+
+  projectsWithRewards.forEach((project) => {
+    project.recurringRewards.forEach((reward) => {
+      if (!rewardsByTranche.has(reward.tranche)) {
+        rewardsByTranche.set(reward.tranche, [])
+      }
+      rewardsByTranche.get(reward.tranche)?.push(reward.amount)
+    })
+  })
+
+  // Sum amounts for each tranche
+  return Array.from(rewardsByTranche.entries())
+    .sort(([trancheA], [trancheB]) => trancheA - trancheB) // Sort by tranche ascending
+    .map(([_, amounts]) => sumBigNumbers(amounts))
 }
 
 type StreamTeam = {
