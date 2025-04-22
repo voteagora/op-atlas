@@ -2,12 +2,14 @@ import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo } from "react"
+import { toast } from "sonner"
 
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
+import { syncPrivyUser } from "@/db/users"
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -17,9 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
-import { usePrivy } from "@privy-io/react-auth"
-import { useLinkAccount } from "@privy-io/react-auth"
-import { syncPrivyUser } from "@/db/users"
 
 const ProfileDetailCard = ({
   className,
@@ -28,35 +27,54 @@ const ProfileDetailCard = ({
   className?: string
   user: UserWithAddresses
 }) => {
-  const { setOpenDialog } = useAppDialogs()
+
   const { isBadgeholder } = useIsBadgeholder(user)
 
   const { user: privyUser, unlinkEmail, unlinkFarcaster } = usePrivy()
 
-  const { linkEmail } = useLinkAccount({
-    onSuccess: async ({ user: updatedPrivyUser, linkMethod, linkedAccount }) => {
+  const { linkEmail, linkFarcaster } = useLinkAccount({
+    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "email" && updatedPrivyUser) {
-        console.log("Email linked successfully")
-        console.log(updatedPrivyUser);
-
-        syncPrivyUser(updatedPrivyUser);
-      }
-      if (linkMethod === "farcaster") {
-        console.log("Farcaster linked successfully")
-        console.log(user)
-        console.log(linkedAccount)
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Linking email...",
+          success: "Email linked successfully",
+          error: "Failed to link email",
+        });
+      } else if (linkMethod === "farcaster" && updatedPrivyUser) {
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Linking Farcaster...",
+          success: "Farcaster linked successfully",
+          error: "Failed to link Farcaster",
+        });
       }
     },
     onError: () => {
-      console.log("Failed to link email");
+      toast.error("Failed to update account information");
     },
   })
+
+  const onEmailClick = () => {
+    if (privyUser?.email) {
+      toast.promise(unlinkEmail(privyUser.email.address), {
+        loading: "Unlinking email...",
+        success: (updatedPrivyUser) => {
+          syncPrivyUser(updatedPrivyUser);
+          return "Email unlinked successfully";
+        },
+        error: "Failed to unlink email",
+      });
+    } else {
+      linkEmail();
+    }
+  }
 
   const initials = (user?.name ?? "")
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
+    .toUpperCase();
+
+
 
   return (
     <div className={cn("flex gap-x-4", className)}>
@@ -90,15 +108,11 @@ const ProfileDetailCard = ({
             Email
             <Button
               variant="link"
-              onClick={() => privyUser?.email ? unlinkEmail(privyUser?.email.address).then((updatedPrivyUser) => {
-                console.log("SHOULD UNLINK EMAIL");
-                console.log(updatedPrivyUser);
-                syncPrivyUser(updatedPrivyUser)
-              }) : linkEmail()}
+              onClick={onEmailClick}
               className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
             >
               {privyUser?.email
-                ? `Unlink ${privyUser?.email.address}`
+                ? `${privyUser?.email.address}`
                 : "Add your email"}
             </Button>
           </p>
