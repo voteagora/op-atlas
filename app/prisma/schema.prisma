@@ -650,7 +650,7 @@ model SuperfluidStream {
 // To keep track of the streams when user changes their wallet
 // This is used to reconcile the streams when a user changes their wallet address
 // This is the id that's passed to Superfluid to create the stream
-model RewardStream {
+model RewardStream { // This is used to track the ids for the streams
 		id         String         @id
     projects   String[]       // Immutable list of projectIds redundantly stored for reconciliation & validation
     roundId    String        
@@ -660,4 +660,6 @@ model RewardStream {
 		teams      KYCTeam[]
 		streams    SuperfluidStream[]
     round      FundingRound @relation(fields: [roundId], references: [id])
+
+    @@index([roundId])
 }
