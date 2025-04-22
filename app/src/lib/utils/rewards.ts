@@ -23,19 +23,29 @@ function calculateRewardAmounts(projectsWithRewards: ProjectWithRewards[]) {
   // Group rewards by tranche
   const rewardsByTranche = new Map<number, string[]>()
 
+  // Find the maximum tranche number
+  const maxTranche = Math.max(
+    ...projectsWithRewards.flatMap((project) =>
+      project.recurringRewards.map((reward) => reward.tranche),
+    ),
+  )
+
+  // Initialize all tranches up to maxTranche
+  for (let i = 1; i <= maxTranche; i++) {
+    rewardsByTranche.set(i, [])
+  }
+
+  // Add actual rewards
   projectsWithRewards.forEach((project) => {
     project.recurringRewards.forEach((reward) => {
-      if (!rewardsByTranche.has(reward.tranche)) {
-        rewardsByTranche.set(reward.tranche, [])
-      }
       rewardsByTranche.get(reward.tranche)?.push(reward.amount)
     })
   })
 
-  // Sum amounts for each tranche
+  // Sum amounts for each tranche, using null for empty tranches
   return Array.from(rewardsByTranche.entries())
     .sort(([trancheA], [trancheB]) => trancheA - trancheB) // Sort by tranche ascending
-    .map(([_, amounts]) => sumBigNumbers(amounts))
+    .map(([_, amounts]) => (amounts.length > 0 ? sumBigNumbers(amounts) : "0"))
 }
 
 type StreamTeam = {
