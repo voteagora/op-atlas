@@ -1,14 +1,13 @@
 import { User } from "@prisma/client"
-import { ArrowUpRight, Check, Plus, X } from "lucide-react"
+import { ArrowUpRight, Check, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
 import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { syncFarcasterAddresses } from "@/lib/actions/addresses"
 import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
 import {
   UserAddressSource,
@@ -37,13 +36,6 @@ export function CompleteProfileCallout({
 }) {
   const progress = profileProgress(user)
   const isComplete = progress === 100
-
-  // Attempt to sync Farcaster accounts one time
-  useEffect(() => {
-    if (user.addresses.length === 0) {
-      syncFarcasterAddresses()
-    }
-  }, [user])
 
   const onDismiss = () => {
     document.cookie =
