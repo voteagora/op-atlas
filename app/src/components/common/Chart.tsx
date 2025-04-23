@@ -93,8 +93,8 @@ export default function Chart({ data }: { data: Record<string, number> }) {
     const today = new Date()
     const year = today.getFullYear()
     const month = today.getMonth()
-    return Array.from({ length: 30 }, (_, i) => {
-      const date = new Date(year, month, i + 1)
+    return Array.from({ length: month + 1 }, (_, i) => {
+      const date = new Date(year, i, 1)
       return {
         date,
         value: 0,
