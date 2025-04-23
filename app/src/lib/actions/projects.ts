@@ -536,27 +536,5 @@ export const getPublicProjectAction = async ({
   const rawProject = await getPublicProject(projectId)
   if (!rawProject) return null
 
-  // const [devToolingApplication, onchainBuildersApplication] =
-  //   await getProjectApplications(projectId)
-
-  const { devToolingRewards, onchainBuildersRewards } = getProjectRewards(
-    rawProject.rewards,
-  )
-  const deployedOn = getProjectDeployedChains(rawProject.contracts)
-  const contributors = getProjectContributors(
-    rawProject.team,
-    rawProject.organization,
-  )
-  const reposWithTags = getReposWithTags(rawProject.repos)
-
-  return {
-    ...rawProject,
-    repos: reposWithTags,
-    deployedOn,
-    contributors,
-    // devToolingApplication,
-    // onchainBuildersApplication,
-    devToolingRewards,
-    onchainBuildersRewards,
-  }
+  return rawProject
 }

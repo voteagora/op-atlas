@@ -1,4 +1,4 @@
-import { MetricValues, OnchainBuilderMetrics } from "./types"
+import { MetricValues } from "./types"
 import { INDEXED_MONTHS, RETROFUNDING_OP_REWARD_MINIMUM } from "./constants"
 import { Trend } from "./types"
 import { CHAIN_INFO } from "@/components/common/chain"

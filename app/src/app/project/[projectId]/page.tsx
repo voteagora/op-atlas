@@ -13,6 +13,7 @@ import {
   Performance,
 } from "./components"
 import { notFound } from "next/navigation"
+import { getProjectDeployedChains } from "@/lib/oso/utils"
 
 interface PageProps {
   params: {
@@ -52,7 +53,9 @@ export default async function Page({ params }: PageProps) {
     onchainBuilderMetrics?.activeAddresses ?? {},
   ).some((address) => address.value > 0)
 
-  const deployedOnWorldchain = publicProject.deployedOn?.some(
+  const deployedOn = getProjectDeployedChains(publicProject.contracts)
+
+  const deployedOnWorldchain = deployedOn.some(
     (chain) => chain.name === "Worldchain",
   )
 
@@ -90,7 +93,7 @@ export default async function Page({ params }: PageProps) {
             name={publicProject.name}
             tags={["Project", publicProject.category ?? ""]}
             author={author}
-            deployedOn={publicProject.deployedOn}
+            deployedOn={deployedOn}
             description={publicProject.description}
             socials={{
               website: publicProject.website,
