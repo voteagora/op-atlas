@@ -1,12 +1,7 @@
 "use client"
 
 import { useIsAdmin } from "@/lib/hooks"
-import {
-  KYCTeamWithTeam,
-  ProjectTeam,
-  ProjectWithFullDetails,
-} from "@/lib/types"
-import { isKycTeamVerified } from "@/lib/utils/kyc"
+import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
 
 import RewardAccordion from "./RewardAccordion"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
@@ -15,17 +10,13 @@ import RecurringRewardAccordion from "./RecurringRewardAccordion"
 export function RewardsSection({
   team,
   project,
-  kycTeam,
   recurringRewards,
 }: {
   team: ProjectTeam
   project: ProjectWithFullDetails
-  kycTeam?: KYCTeamWithTeam
   recurringRewards: RecurringRewardsByRound[]
 }) {
   const isAdmin = useIsAdmin(team)
-
-  const isVerified = isKycTeamVerified(kycTeam)
 
   const inProgressRewards = project.rewards.filter(
     (reward) =>

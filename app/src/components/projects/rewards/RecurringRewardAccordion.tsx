@@ -22,6 +22,8 @@ import { formatEther } from "viem"
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import { isKycTeamVerified } from "@/lib/utils/kyc"
 import GrantDeliveryAddress from "./GrantDeliveryAddress"
+import { useAppDialogs } from "@/providers/DialogProvider"
+import { KYCTeamWithTeam } from "@/lib/types"
 
 const SUPERFLUID_STREAM_URL = "https://app.superfluid.org/stream/optimism/"
 
@@ -50,11 +52,14 @@ const RewardAccordion = ({
   })
 
   const linkToStream =
+    teamVerified &&
     sortedStreams[0]?.id &&
     !sortedStreams[0]?.deletedAt &&
     `${SUPERFLUID_STREAM_URL}${sortedStreams[0]?.id}`
 
-  const stoppedStreams = sortedStreams.filter((stream) => stream.deletedAt)
+  const stoppedStreams = teamVerified
+    ? sortedStreams.filter((stream) => stream.deletedAt)
+    : sortedStreams
 
   // States
   // 1. KYC not verified
@@ -124,6 +129,10 @@ const RewardAccordion = ({
                 ))}
               </div>
             )}
+
+            {teamVerified && reward.kycTeam && linkToStream && (
+              <IsSomethingWrong kycTeam={reward.kycTeam} />
+            )}
           </div>
         </AccordionContent>
 
@@ -147,12 +156,18 @@ const StreamStoppedSection = ({
 }) => {
   const linkToStream = `${SUPERFLUID_STREAM_URL}${stream.id}`
 
+  const stopedText = stream.deletedAt
+    ? `The stream stopped on ${format(
+        new Date(stream.deletedAt),
+        "MMMM d, yyyy",
+      )}. Partial rewards
+        were sent to`
+    : "This stream will be stopped with the next update job. Receiver address:  "
+
   return (
     <div className="border border-border rounded-lg px-3 py-2.5">
       <span className="text-secondary-foreground font-normal text-sm">
-        The stream stopped on{" "}
-        {format(new Date(stream.deletedAt!), "MMMM d, yyyy")}. Partial rewards
-        were sent to{" "}
+        {stopedText}
         <Link href={linkToStream} target="_blank">
           {stream.receiver}
         </Link>
@@ -201,6 +216,35 @@ const ScheduleClaimCallout = () => {
         Optimism only releases tokens to Superfluid once per month. Yours will
         be available to claim on or after {getReleaseDate()}.
       </span>
+    </div>
+  )
+}
+
+const IsSomethingWrong = ({ kycTeam }: { kycTeam: KYCTeamWithTeam }) => {
+  const { setData, setOpenDialog } = useAppDialogs()
+  const { projectId, organizationId } = useParams()
+
+  const openDeleteKYCTeamDialog = () => {
+    setData({
+      kycTeamId: kycTeam?.id,
+      projectId: projectId as string,
+      organizationId: organizationId as string,
+      rewardStreamId: kycTeam?.rewardStream?.id,
+    })
+    setOpenDialog("delete_kyc_team")
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-secondary-foreground">
+        Is something wrong?
+      </span>
+      <button
+        className="underline text-sm text-secondary-foreground"
+        onClick={openDeleteKYCTeamDialog}
+      >
+        Stop this stream
+      </button>
     </div>
   )
 }

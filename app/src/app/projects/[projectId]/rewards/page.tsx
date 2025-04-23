@@ -2,7 +2,6 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
-import { getProjectKycTeam } from "@/db/kyc"
 import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 import { getProjectRecurringRewards } from "@/db/rewards"
@@ -23,14 +22,12 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const [project, team, membership, kycTeam, recurringRewards] =
-    await Promise.all([
-      getProject({ id: params.projectId }),
-      getConsolidatedProjectTeam({ projectId: params.projectId }),
-      verifyMembership(params.projectId, session?.user.farcasterId),
-      getProjectKycTeam(params.projectId),
-      getProjectRecurringRewards(params.projectId),
-    ])
+  const [project, team, membership, recurringRewards] = await Promise.all([
+    getProject({ id: params.projectId }),
+    getConsolidatedProjectTeam({ projectId: params.projectId }),
+    verifyMembership(params.projectId, session?.user.farcasterId),
+    getProjectRecurringRewards(params.projectId),
+  ])
 
   if (membership?.error || !project) {
     redirect("/dashboard")
@@ -40,7 +37,6 @@ export default async function Page({
     <RewardsSection
       team={team}
       project={project}
-      kycTeam={kycTeam}
       recurringRewards={formatRecurringRewards(recurringRewards)}
     />
   )

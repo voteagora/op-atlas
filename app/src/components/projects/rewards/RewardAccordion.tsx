@@ -14,9 +14,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
-import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
+import { ProjectWithFullDetails } from "@/lib/types"
 import { getCutoffDate } from "@/lib/utils"
-import { cn, copyToClipboard, formatNumber } from "@/lib/utils"
+import { copyToClipboard, formatNumber } from "@/lib/utils"
 
 import { REWARDS_NAMES } from "./constants"
 

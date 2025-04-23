@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { deleteKYCTeamAction } from "@/lib/actions/kyc"
+import { useRouter } from "next/navigation"
 
 export function DeleteKYCTeamDialog({
   open,
@@ -18,6 +19,8 @@ export function DeleteKYCTeamDialog({
   const {
     data: { projectId, organizationId, kycTeamId, rewardStreamId },
   } = useAppDialogs()
+
+  const router = useRouter()
 
   const queryClient = useQueryClient()
 
@@ -38,6 +41,7 @@ export function DeleteKYCTeamDialog({
         }),
       ])
       onOpenChange(false)
+      router.push(`/projects/${projectId}/grant-addresses`)
     },
   })
 
