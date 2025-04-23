@@ -1,13 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { toast } from "sonner"
 
-import { Button } from "@/components/common/Button"
-import {
-  deleteUserAddress,
-  syncFarcasterAddresses,
-} from "@/lib/actions/addresses"
 import { UserAddressSource, UserWithAddresses } from "@/lib/types"
 
 import { AddAddress } from "@/components/profile/AddAddress"
@@ -22,49 +16,11 @@ export function VerifiedAddressesContent({
 }) {
 
   const { unlinkWallet } = usePrivy()
-  const [loading, setLoading] = useState(false)
 
   const onCopy = (address: string) => {
     navigator.clipboard.writeText(address)
     toast.success("Address copied")
   }
-
-  const onSyncFarcaster = async () => {
-    if (loading) {
-      return
-    }
-
-    setLoading(true)
-
-    const promise: Promise<UserWithAddresses | null> = new Promise(
-      async (resolve, reject) => {
-        try {
-          const result = await syncFarcasterAddresses()
-          if (result.error !== null) {
-            throw result.error
-          }
-
-          resolve(result.user)
-        } catch (error: unknown) {
-          console.error("Error syncing Farcaster addresses", error)
-          reject(error)
-        }
-      },
-    )
-
-    toast.promise(promise, {
-      loading: "Syncing Farcaster addresses",
-      success: () => {
-        setLoading(false)
-        return "Farcaster addresses synced"
-      },
-      error: () => {
-        setLoading(false)
-        return "Error syncing Farcaster addresses"
-      },
-    })
-  }
-
 
   const handleWalletUnlink = (address: string) => {
     toast.promise(unlinkWallet(address), {
@@ -75,26 +31,6 @@ export function VerifiedAddressesContent({
       },
       error: "Failed to delete wallet address",
     })
-  }
-
-  const onRemove = async (address: string) => {
-    if (loading) {
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const result = await deleteUserAddress(address)
-      if (result.error !== null) {
-        throw result.error
-      }
-      toast.success("Address removed")
-    } catch (error: unknown) {
-      toast.error("Error removing address, please try again")
-    } finally {
-      setLoading(false)
-    }
   }
 
   const hasAddress = Boolean(user.addresses.length)
@@ -120,7 +56,7 @@ export function VerifiedAddressesContent({
               source={source as UserAddressSource}
               primary={primary}
               onCopy={onCopy}
-              onRemove={() => source === "privy" ? handleWalletUnlink(address) : onRemove(address)}
+              onRemove={handleWalletUnlink}
             />
           ))}
         </div>
@@ -129,13 +65,6 @@ export function VerifiedAddressesContent({
         <AddAddress>
           Verify {hasAddress && "another "}address
         </AddAddress>
-
-
-        {user?.farcasterId && (
-          <Button onClick={onSyncFarcaster} variant="secondary">
-            Import from Farcaster
-          </Button>
-        )}
       </div>
     </div>
   )

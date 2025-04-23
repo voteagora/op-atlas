@@ -28,6 +28,7 @@ export type EntityRecords = Record<
   EntityObject[]
 >
 
+import { getUserConnectedAddresses } from "@/lib/neynar"
 import { User as PrivyUser } from "@privy-io/react-auth"
 
 export async function getUserById(userId: string) {
@@ -942,6 +943,7 @@ export async function updateUser({
 export const syncPrivyUser = async (
   privyUser: PrivyUser,
 ): Promise<User | null> => {
+
   const existingUser = await getUserByPrivyDid(privyUser.id)
 
   if (!existingUser) {
@@ -949,21 +951,31 @@ export const syncPrivyUser = async (
     return null
   }
 
+  const addressesInDB = existingUser?.addresses?.map((addr) => getAddress(addr.address)) || []
+  const addressesInPrivy = privyUser.linkedAccounts && privyUser.linkedAccounts.length > 0
+    ? privyUser.linkedAccounts
+      .filter(account => account.type === "wallet" && account.chainType === "ethereum")
+      .map(wallet => (wallet as any).address ? getAddress((wallet as any).address as `0x${string}`) : null)
+      .filter(Boolean) as `0x${string}`[]
+    : [];
+
   if (privyUser?.farcaster && privyUser.farcaster.fid) {
-    try {
-      // Link farcaster to user
-      await updateUser({
-        id: existingUser.id,
-        farcasterId: privyUser.farcaster.fid.toString(),
-        privyDid: privyUser.id,
-        name: privyUser.farcaster.displayName || null,
-        username: privyUser.farcaster.username || null,
-        imageUrl: privyUser.farcaster.pfp || null,
-        bio: privyUser.farcaster.bio || null,
-      })
-    } catch (error) {
-      console.error("Failed to update farcaster:", error)
-    }
+
+
+
+    // Link farcaster to user
+    await updateUser({
+      id: existingUser.id,
+      farcasterId: privyUser.farcaster.fid.toString(),
+      privyDid: privyUser.id,
+      name: privyUser.farcaster.displayName || null,
+      username: privyUser.farcaster.username || null,
+      imageUrl: privyUser.farcaster.pfp || null,
+      bio: privyUser.farcaster.bio || null,
+    })
+
+    console.log("Farcaster linked to user")
+
   } else {
     // If farcaster was previously linked but now removed, clear farcaster data
     if (existingUser.farcasterId) {
@@ -978,24 +990,14 @@ export const syncPrivyUser = async (
     }
   }
 
-  // Check for linked privy wallet accounts 
-  const existingAddresses = existingUser?.addresses?.filter(addr => addr.source === "privy").map((addr) => getAddress(addr.address)) || []
 
-  // Get all currently linked addresses
-  const linkedAddresses = privyUser.linkedAccounts && privyUser.linkedAccounts.length > 0
-    ? privyUser.linkedAccounts
-      .filter(account => account.type === "wallet" && account.chainType === "ethereum")
-      .map(wallet => (wallet as any).address ? getAddress((wallet as any).address as `0x${string}`) : null)
-      .filter(Boolean) as `0x${string}`[]
-    : [];
-
-  // Remove addresses that exist in existingAddresses but not in linkedWallets
-  for (const existingAddress of existingAddresses) {
-    if (!linkedAddresses.includes(existingAddress)) {
+  // Remove addresses that exist in DB but not in Privy
+  for (const addr of addressesInDB) {
+    if (!addressesInPrivy.includes(addr)) {
       try {
         await removeUserAddress({
           id: existingUser.id,
-          address: existingAddress,
+          address: addr,
         });
       } catch (error) {
         console.error("Failed to remove wallet address:", error);
@@ -1003,8 +1005,8 @@ export const syncPrivyUser = async (
     }
   }
 
-  // Add addresses that exist in linkedWallets but not in existingAddresses
-  const addressesToAdd = linkedAddresses.filter(addr => !existingAddresses.includes(addr));
+  // Add addresses that exist in Privy but not in DB
+  const addressesToAdd = addressesInPrivy.filter(addr => !addressesInDB.includes(addr));
   if (addressesToAdd.length > 0) {
     try {
       await addUserAddresses({
@@ -1017,6 +1019,7 @@ export const syncPrivyUser = async (
     }
   }
 
+  // Update email
   if (privyUser?.email && privyUser.email.address) {
     try {
       await updateUserEmail({
@@ -1032,5 +1035,7 @@ export const syncPrivyUser = async (
     deleteUserEmails(existingUser.id)
   }
 
+
   return await getUserById(existingUser.id)
+
 }

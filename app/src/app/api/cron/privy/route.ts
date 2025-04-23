@@ -1,4 +1,5 @@
 import { prisma } from "@/db/client"
+import { getUserConnectedAddresses } from "@/lib/neynar"
 import { NextResponse } from "next/server"
 
 // Set a generous time limit for processing
@@ -58,7 +59,7 @@ export async function GET() {
         try {
           const linkedAccounts: LinkedAccount[] = []
 
-          // Link email if available
+          // Link email
           if (user.emails && user.emails.length > 0) {
             const email = user.emails[0]?.email
             if (email) {
@@ -69,56 +70,33 @@ export async function GET() {
             }
           }
 
-          // Link wallet addresses if available
+          // Link wallets
           if (user.addresses && user.addresses.length > 0) {
             user.addresses.forEach((address: any) => {
-              if (address.address && address.source !== "farcaster") {
-                linkedAccounts.push({
-                  type: "wallet",
-                  chain_type: "ethereum",
-                  address: address.address,
-                })
-              }
+              linkedAccounts.push({
+                type: "wallet",
+                chain_type: "ethereum",
+                address: address.address,
+              })
             })
           }
 
-          // Link Farcaster addresses if available
+          // Link Farcaster 
           if (user.farcasterId) {
-            const farcasterAddresses =
-              user.addresses && user.addresses.length > 0
-                ? user.addresses.filter(
-                    (addr: any) => addr.source === "farcaster",
-                  )
-                : []
 
-            if (farcasterAddresses.length > 0) {
-              try {
-                // Convert farcasterId to a number
-                const fidNumber = parseInt(user.farcasterId, 10)
-                if (isNaN(fidNumber)) {
-                  console.warn(
-                    `Invalid farcasterId for user ${user.id}: ${user.farcasterId}`,
-                  )
-                } else {
-                  // Use the first farcaster address as the owner_address
-                  linkedAccounts.push({
-                    type: "farcaster",
-                    fid: fidNumber,
-                    owner_address: farcasterAddresses[0].address,
-                  })
-                }
-              } catch (e) {
-                console.warn(
-                  `Error parsing farcasterId for user ${user.id}: ${e}`,
-                )
-              }
-            } else {
-              // Fallback to just using farcasterId without an address
-              console.warn(
-                `User ${user.id} has farcasterId but no Farcaster addresses`,
-              )
+
+            const farcasterAddresses = await getUserConnectedAddresses(user.farcasterId)
+
+            if (farcasterAddresses && farcasterAddresses.length > 0) {
+
+              linkedAccounts.push({
+                type: "farcaster",
+                fid: Number(user.farcasterId),
+                owner_address: farcasterAddresses[0],
+              })
             }
           }
+
 
           // Skip if no linked accounts can be created
           if (linkedAccounts.length === 0) {
@@ -151,12 +129,15 @@ export async function GET() {
 
           const privyUser = await privyResponse.json()
 
+
           // Update user in our database with privyDid using raw SQL
           await prisma.$executeRaw`
-                        UPDATE "User"
-                        SET "privyDid" = ${privyUser.id}, "updatedAt" = NOW()
-                        WHERE "id" = ${user.id}
-                    `
+          UPDATE "User"
+          SET "privyDid" = ${privyUser.id}, "updatedAt" = NOW()
+          WHERE "id" = ${user.id}
+          `
+          console.log("Privy user created", privyUser.id)
+
 
           return {
             userId: user.id,
