@@ -4,19 +4,20 @@ import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
 import { Button } from "../common/Button";
 import { toast } from "sonner";
 import { syncPrivyUser } from "@/db/users";
-
+import Image from "next/image";
 export function FarcasterConnection() {
 
     const { user: privyUser, unlinkFarcaster } = usePrivy()
 
     const { linkFarcaster } = useLinkAccount({
-        onSuccess: async ({ user: updatedPrivyUser }) => {
-
-            toast.promise(syncPrivyUser(updatedPrivyUser), {
-                loading: "Linking farcaster...",
-                success: "Farcaster linked successfully",
-                error: "Failed to link farcaster",
-            })
+        onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
+            if (linkMethod === "farcaster") {
+                toast.promise(syncPrivyUser(updatedPrivyUser), {
+                    loading: "Linking farcaster...",
+                    success: "Farcaster linked successfully",
+                    error: "Failed to link farcaster",
+                })
+            }
         },
     })
 
@@ -34,13 +35,44 @@ export function FarcasterConnection() {
     }
 
     return (
-        <div>
-            <h3>Farcaster</h3>
+        <div className="flex flex-col space-y-4">
+
+            <div className="flex items-center space-x-1.5">
+                <Image
+                    src="/assets/icons/farcaster-icon.svg"
+                    alt="Farcaster"
+                    height={20}
+                    width={20}
+                />
+                <h3 className="font-semibold text-foreground">Farcaster</h3>
+            </div>
+
+            {privyUser?.farcaster?.username && (
+                <div className="flex flex-col gap-2">
+                    <p className="font-medium text-sm text-foreground">
+                        Your Farcaster username
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                        <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
+                            <Image
+                                src="/assets/icons/circle-check-green.svg"
+                                height={16.67}
+                                width={16.67}
+                                alt="Verified"
+                            />
+                            <p className="text-sm">@{privyUser?.farcaster?.username}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
             {privyUser?.farcaster?.fid ?
                 <Button variant="secondary" onClick={handleUnlinkFarcaster}>Disconnect</Button>
                 :
                 <Button variant="primary" onClick={linkFarcaster}>Connect</Button>
             }
+
         </div>
     )
 }

@@ -25,7 +25,7 @@ import {
   AccordionTrigger,
 } from "../ui/accordion"
 import { AddAddress } from "./AddAddress"
-import { EditEmail } from "./EditEmail"
+import { EditEmail } from "./EmailConnection"
 
 export function CompleteProfileCallout({
   user,

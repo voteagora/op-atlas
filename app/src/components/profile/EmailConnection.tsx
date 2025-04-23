@@ -17,17 +17,19 @@ export const EditEmail = () => {
 
   const { updateEmail } = useUpdateAccount({
     onSuccess: async ({ user: updatedPrivyUser, updateMethod }) => {
-      toast.promise(syncPrivyUser(updatedPrivyUser), {
-        loading: "Updating email...",
-        success: "Email updated successfully",
-        error: "Failed to update email",
-      })
+      if (updateMethod === "email") {
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Updating email...",
+          success: "Email updated successfully",
+          error: "Failed to update email",
+        })
+      }
     },
   })
 
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      if (linkMethod === "email" && updatedPrivyUser) {
+      if (linkMethod === "email") {
         toast.promise(syncPrivyUser(updatedPrivyUser), {
           loading: "Adding email...",
           success: "Email added successfully",

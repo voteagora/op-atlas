@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { EditEmail } from "@/components/profile/EditEmail"
+import { EditEmail } from "@/components/profile/EmailConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { getUserById } from "@/db/users"

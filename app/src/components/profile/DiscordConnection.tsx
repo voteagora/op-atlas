@@ -8,24 +8,25 @@ import { Button } from "@/components/common/Button"
 import { syncPrivyUser } from "@/db/users"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 
-export function DiscordConnection({ user }: { user: User }) {
+export function DiscordConnection() {
 
   const { user: privyUser, unlinkDiscord } = usePrivy()
 
   const { linkDiscord } = useLinkAccount({
-    onSuccess: async ({ user: updatedPrivyUser }) => {
-
-      toast.promise(syncPrivyUser(updatedPrivyUser), {
-        loading: "Linking discord...",
-        success: "Discord linked successfully",
-        error: "Failed to link discord",
-      })
+    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
+      if (linkMethod === "discord") {
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Linking discord...",
+          success: "Discord linked successfully",
+          error: "Failed to link discord",
+        })
+      }
     }
   })
 
   const handleUnlinkDiscord = () => {
-    if (privyUser?.discord?.username) {
-      toast.promise(unlinkDiscord(privyUser.discord.username), {
+    if (privyUser?.discord?.subject) {
+      toast.promise(unlinkDiscord(privyUser.discord.subject), {
         loading: "Unlinking discord...",
         success: (updatedPrivyUser) => {
           syncPrivyUser(updatedPrivyUser)
@@ -52,7 +53,7 @@ export function DiscordConnection({ user }: { user: User }) {
           Connect your account so anyone can find you on Discord.
         </p>
       </div>
-      {user.discord && (
+      {privyUser?.discord?.username && (
         <div className="flex flex-col gap-2">
           <p className="font-medium text-sm text-foreground">
             Your Discord username
@@ -66,7 +67,7 @@ export function DiscordConnection({ user }: { user: User }) {
                 alt="Verified"
               />
 
-              <p className="text-sm">{user.discord}</p>
+              <p className="text-sm">{privyUser?.discord?.username}</p>
             </div>
           </div>
         </div>
@@ -76,7 +77,7 @@ export function DiscordConnection({ user }: { user: User }) {
         {privyUser?.discord?.username ?
           <Button variant="secondary" onClick={handleUnlinkDiscord}>Disconnect</Button>
           :
-          <Button variant="primary" onClick={linkDiscord}>Connect XX</Button>
+          <Button variant="primary" onClick={linkDiscord}>Connect</Button>
         }
       </div>
     </div>

@@ -6,7 +6,6 @@ import { z } from "zod"
 
 import { auth, signIn } from "@/auth"
 import {
-  getUserByFarcasterId,
   getUserById,
   searchUsersByUsername,
   updateUserDiscord,
@@ -14,7 +13,7 @@ import {
   updateUserGithub,
   updateUserGovForumProfileUrl,
   updateUserHasGithub,
-  updateUserInteraction,
+  updateUserInteraction
 } from "@/db/users"
 import { addContactToList, updateContactEmail } from "@/lib/api/mailchimp"
 

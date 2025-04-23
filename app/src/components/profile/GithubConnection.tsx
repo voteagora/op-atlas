@@ -1,7 +1,6 @@
 "use client"
 
 import { User } from "@prisma/client"
-import { setCookie } from "cookies-next"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -9,15 +8,43 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
 import {
-  connectGithub,
-  removeGithub,
-  setUserIsNotDeveloper,
+  setUserIsNotDeveloper
 } from "@/lib/actions/users"
-import { cn, GITHUB_REDIRECT_COOKIE } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
+import { syncPrivyUser } from "@/db/users"
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { Checkbox } from "../ui/checkbox"
 
 export function GithubConnection({ user }: { user: User }) {
+
+
+  const { user: privyUser, unlinkGithub } = usePrivy()
+  const { linkGithub } = useLinkAccount({
+    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
+      if (linkMethod === "github") {
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Linking github...",
+          success: "Github linked successfully",
+          error: "Failed to link github",
+        })
+      }
+    },
+  })
+
+  const handleUnlinkGithub = () => {
+    if (privyUser?.github?.subject) {
+      toast.promise(unlinkGithub(privyUser.github.subject), {
+        loading: "Unlinking github...",
+        success: (updatedPrivyUser) => {
+          syncPrivyUser(updatedPrivyUser)
+          return "Github unlinked successfully"
+        },
+        error: "Failed to unlink github",
+      })
+    }
+  }
+
   const pathname = usePathname()
 
   const [userNotDeveloper, setUserNotDeveloper] = useState(user.notDeveloper)
@@ -39,25 +66,6 @@ export function GithubConnection({ user }: { user: User }) {
     })
   }
 
-  const authorizeGithub = async () => {
-    // Set a cookie so that we know to redirect back to this page
-    setCookie(GITHUB_REDIRECT_COOKIE, pathname)
-    return connectGithub()
-  }
-
-  const disconnectGitHub = async () => {
-    startTransition(async () => {
-      try {
-        const result = await removeGithub()
-        if (result.error !== null) {
-          throw result.error
-        }
-      } catch (error) {
-        console.error("Error disconnecting GitHub", error)
-        toast.error("Error disconnecting GitHub")
-      }
-    })
-  }
 
   return (
     <div className="flex flex-col space-y-4">
@@ -77,7 +85,7 @@ export function GithubConnection({ user }: { user: User }) {
         </p>
       </div>
 
-      {user.github && (
+      {privyUser?.github?.username && (
         <div className="flex flex-col gap-2">
           <p className="font-medium text-sm text-foreground">
             Your GitHub username
@@ -90,28 +98,19 @@ export function GithubConnection({ user }: { user: User }) {
                 width={16.67}
                 alt="Verified"
               />
-
-              <p className="text-sm">{user.github}</p>
+              <p className="text-sm">{privyUser?.github?.username}</p>
             </div>
 
-            <Button
-              variant="secondary"
-              onClick={disconnectGitHub}
-              disabled={isPending}
-            >
-              Disconnect
-            </Button>
           </div>
         </div>
       )}
 
       <div className="flex gap-2">
-        <Button
-          disabled={userNotDeveloper || !!user.github}
-          onClick={authorizeGithub}
-        >
-          Connect
-        </Button>
+        {privyUser?.github?.username ?
+          <Button variant="secondary" onClick={handleUnlinkGithub}>Disconnect</Button>
+          :
+          <Button variant="primary" onClick={linkGithub}>Connect</Button>
+        }
 
         <div
           className={cn(

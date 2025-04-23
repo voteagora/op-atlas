@@ -24,7 +24,7 @@ export default async function Page() {
     <div className="flex flex-col gap-12 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
       <FarcasterConnection />
-      <DiscordConnection user={user} />
+      <DiscordConnection />
       <GithubConnection user={user} />
       <GovForumConnection user={user} />
     </div>
