@@ -33,3 +33,5 @@ export const OSO_QUERY_DATES = {
   transactions: { start: "2024-10-01", end: "2025-07-31" },
   gasFees: { start: "2025-02-01", end: "2025-02-28" },
 }
+
+export const CHARTS_TRAILING_DAYS = 3

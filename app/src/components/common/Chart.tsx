@@ -1,3 +1,4 @@
+import { CHARTS_TRAILING_DAYS } from "@/lib/oso/constants"
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts"
 
 type ChartEntry = {
@@ -93,7 +94,7 @@ export default function Chart({ data }: { data: Record<string, number> }) {
     const daysRemaining = daysInMonth - last.date.getDate()
 
     // Only add next month's phantom entry if we're within 3 days of the end of the month
-    if (daysRemaining <= 3) {
+    if (daysRemaining <= CHARTS_TRAILING_DAYS) {
       const nextMonth = new Date(
         last.date.getFullYear(),
         last.date.getMonth() + 1,

@@ -30,7 +30,7 @@ import {
   ParsedOsoDeployerContract,
 } from "@/lib/types"
 
-import { BATCH_SIZE, supportedMappings } from "./constants"
+import { BATCH_SIZE, OSO_QUERY_DATES, supportedMappings } from "./constants"
 import {
   formatActiveAddresses,
   formatDevToolingEligibility,
@@ -94,7 +94,10 @@ export const getDeployedContractsServerParsed = cache(
 const queryMetrics = cache(async function queryMetrics(
   osoId: string[],
   key: keyof typeof OSO_METRICS,
-  sampleDate = { _gte: "2025-01-01", _lte: "2025-07-31" },
+  sampleDate = {
+    _gte: OSO_QUERY_DATES.DEFAULT.start,
+    _lte: OSO_QUERY_DATES.DEFAULT.end,
+  },
 ) {
   const query: QueryOso_TimeseriesMetricsByProjectV0Args = {
     where: {
