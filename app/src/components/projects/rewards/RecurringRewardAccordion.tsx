@@ -4,7 +4,6 @@ import { format } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
 import React from "react"
-import { toast } from "sonner"
 
 import {
   Accordion,
@@ -12,8 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { getCutoffDate } from "@/lib/utils"
-import { copyToClipboard, formatNumber } from "@/lib/utils"
+import { formatNumber } from "@/lib/utils"
 
 import { REWARDS_NAMES } from "./constants"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
@@ -24,6 +22,11 @@ import { isKycTeamVerified } from "@/lib/utils/kyc"
 import GrantDeliveryAddress from "./GrantDeliveryAddress"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { KYCTeamWithTeam } from "@/lib/types"
+import {
+  CantClaimCallout,
+  ScheduleClaimCallout,
+  YouAreNotAdminCallout,
+} from "@/components/ui/callouts"
 
 const SUPERFLUID_STREAM_URL = "https://app.superfluid.org/stream/optimism/"
 
@@ -60,15 +63,6 @@ const RewardAccordion = ({
   const stoppedStreams = teamVerified
     ? sortedStreams.filter((stream) => stream.deletedAt)
     : sortedStreams
-
-  // States
-  // 1. KYC not verified
-  // 1.a Has KYCTeam
-  // 1.b Has soft deleted KYCTeam
-  // 1.c Does not have KYCTeam
-  // 2. KYC verified
-  // 2.a Has Superfluid stream
-  // 2.b Does not have Superfluid stream
 
   return (
     <Accordion
@@ -172,49 +166,6 @@ const StreamStoppedSection = ({
           {stream.receiver}
         </Link>
         .
-      </span>
-    </div>
-  )
-}
-
-const YouAreNotAdminCallout = () => {
-  return (
-    <div className="mt-2 px-3 py-2.5 rounded-md  text-red-600 bg-red-200">
-      <span className="text-sm">
-        You are not an admin of this project and cannot claim this grant.
-      </span>
-    </div>
-  )
-}
-
-const CantClaimCallout = ({ projectId }: { projectId: string }) => {
-  return (
-    <div className="mt-2 px-3 py-2.5 rounded-md text-red-600 bg-red-200">
-      <span className="text-sm">
-        You can’t claim your tokens until you’ve completed KYC for your{" "}
-        <Link
-          href={`/projects/${projectId}/grant-addresses`}
-          className="underline"
-        >
-          grant delivery address
-        </Link>
-        .
-      </span>
-    </div>
-  )
-}
-
-const ScheduleClaimCallout = () => {
-  const getReleaseDate = () => {
-    const releaseDate = getCutoffDate()
-    return format(releaseDate, "MMMM d, yyyy")
-  }
-
-  return (
-    <div className="mt-2 px-3 py-2.5 rounded-md text-callout-foreground bg-callout">
-      <span className="text-sm">
-        Optimism only releases tokens to Superfluid once per month. Yours will
-        be available to claim on or after {getReleaseDate()}.
       </span>
     </div>
   )

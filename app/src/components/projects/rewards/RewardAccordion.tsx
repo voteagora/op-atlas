@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { ProjectWithFullDetails } from "@/lib/types"
-import { getCutoffDate } from "@/lib/utils"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
 
 import { REWARDS_NAMES } from "./constants"
@@ -37,11 +36,6 @@ const RewardAccordion = ({
   }
 
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
-
-  const getReleaseDate = () => {
-    const releaseDate = getCutoffDate()
-    return format(releaseDate, "MMMM d, yyyy")
-  }
 
   return (
     <Accordion
