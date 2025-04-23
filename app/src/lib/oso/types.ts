@@ -29,13 +29,24 @@ export interface BaseMissionProps {
   applicationDate: Date
 }
 
+export type OnchainBuilderMetrics = {
+  activeAddresses: Record<string, { value: number; trend: Trend }>
+  gasFees: Record<string, { value: number; trend: Trend }>
+  transactions: Record<string, { value: number; trend: Trend }>
+  tvl: Record<string, { value: number; trend: Trend }>
+  onchainBuilderReward: Record<string, number>
+}
+
+export type PerformanceMetrics = {
+  activeAddresses: Record<string, number>
+  gasFees: Record<string, number>
+  transactions: Record<string, number>
+  tvl: Record<string, number>
+}
+
 export interface OnchainBuilderMissionProps extends BaseMissionProps {
   type: "on-chain"
-  onchainBuilderMetrics: {
-    activeAddresses: Record<string, { value: number; trend: Trend }>
-    gasFees: Record<string, { value: number; trend: Trend }>
-    transactions: Record<string, { value: number; trend: Trend }>
-    tvl: Record<string, { value: number; trend: Trend }>
+  onchainBuilderMetrics: OnchainBuilderMetrics & {
     onchainBuilderReward: Record<string, number>
   }
   eligibility: {

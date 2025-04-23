@@ -1920,6 +1920,13 @@ export const getPublicProject = cache(async (projectId: string) => {
   return prisma.project.findFirst({
     where: { id: projectId },
     include: {
+      applications: {
+        where: {
+          roundId: {
+            in: ["7", "8"],
+          },
+        },
+      },
       links: true,
       contracts: true,
       repos: true,
@@ -1946,13 +1953,6 @@ export const getPublicProject = cache(async (projectId: string) => {
       },
     },
   })
-})
-
-export const getProjectApplications = cache(async (projectId: string) => {
-  return Promise.all([
-    prisma.application.findFirst({ where: { projectId, roundId: "7" } }),
-    prisma.application.findFirst({ where: { projectId, roundId: "8" } }),
-  ])
 })
 
 export async function getProjectsOSO(projectId: string) {

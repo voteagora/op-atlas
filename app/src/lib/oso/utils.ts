@@ -1,7 +1,11 @@
-import { MetricValues } from "./types"
+import { MetricValues, OnchainBuilderMetrics } from "./types"
 import { INDEXED_MONTHS, RETROFUNDING_OP_REWARD_MINIMUM } from "./constants"
 import { Trend } from "./types"
 import { CHAIN_INFO } from "@/components/common/chain"
+
+export const formatPerformanceMetrics = (metrics: MetricValues[]) => {
+  return groupByDate(metrics)
+}
 
 const calculateTrend = (current: number, previous: number): Trend => {
   if (previous === 0) return { value: 0, sign: null }

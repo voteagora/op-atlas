@@ -37,8 +37,12 @@ export default async function Page({ params }: PageProps) {
     await verifyMembership(projectId, session?.user.farcasterId ?? "")
   )?.error
 
-  const { eligibility, onchainBuilderMetrics, devToolingMetrics } =
-    projectMetrics
+  const {
+    eligibility,
+    onchainBuilderMetrics,
+    devToolingMetrics,
+    performanceMetrics,
+  } = projectMetrics
 
   const enrolledInMission =
     eligibility?.onchainBuilderApplication.applied ||
@@ -190,7 +194,7 @@ export default async function Page({ params }: PageProps) {
             </>
           )}
 
-          {/* {onchainBuildersMetrics && <Performance />} */}
+          {performanceMetrics && <Performance metrics={performanceMetrics} />}
           <MoreDetails />
         </div>
       </div>

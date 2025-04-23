@@ -31,7 +31,6 @@ import {
   updateProjectFunding,
   updateProjectOrganization,
   UpdateProjectParams,
-  getProjectApplications,
 } from "@/db/projects"
 
 import { createEntityAttestation } from "../eas"
@@ -537,8 +536,9 @@ export const getPublicProjectAction = async ({
   const rawProject = await getPublicProject(projectId)
   if (!rawProject) return null
 
-  const [devToolingApplication, onchainBuildersApplication] =
-    await getProjectApplications(projectId)
+  // const [devToolingApplication, onchainBuildersApplication] =
+  //   await getProjectApplications(projectId)
+
   const { devToolingRewards, onchainBuildersRewards } = getProjectRewards(
     rawProject.rewards,
   )
@@ -554,8 +554,8 @@ export const getPublicProjectAction = async ({
     repos: reposWithTags,
     deployedOn,
     contributors,
-    devToolingApplication,
-    onchainBuildersApplication,
+    // devToolingApplication,
+    // onchainBuildersApplication,
     devToolingRewards,
     onchainBuildersRewards,
   }

@@ -27,3 +27,9 @@ export const supportedMappings = {
   SWELL: 1923,
   ZORA: 7777777,
 }
+
+export const OSO_QUERY_DATES = {
+  DEFAULT: { start: "2025-01-01", end: "2025-07-31" },
+  transactions: { start: "2024-10-01", end: "2025-07-31" },
+  gasFees: { start: "2025-02-01", end: "2025-02-28" },
+}

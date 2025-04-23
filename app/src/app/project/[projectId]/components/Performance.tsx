@@ -3,8 +3,45 @@
 import React from "react"
 
 import Chart from "@/components/common/Chart"
+import { PerformanceMetrics } from "@/lib/oso/types"
 
-export default function Performance() {
+export default function Performance({
+  metrics,
+}: {
+  metrics: PerformanceMetrics
+}) {
+  const PERFORMANCE_CHARTS = [
+    {
+      value: Object.values(metrics.activeAddresses).reduce(
+        (acc, curr) => acc + curr,
+        0,
+      ),
+      title: "Unique addresses",
+      data: metrics.activeAddresses,
+    },
+    {
+      value: Object.values(metrics.gasFees).reduce(
+        (acc, curr) => acc + curr,
+        0,
+      ),
+      title: "Gas consumed",
+      data: metrics.gasFees,
+    },
+    {
+      value: Object.values(metrics.transactions).reduce(
+        (acc, curr) => acc + curr,
+        0,
+      ),
+      title: "Transactions",
+      data: metrics.transactions,
+    },
+    {
+      value: Object.values(metrics.tvl).reduce((acc, curr) => acc + curr, 0),
+      title: "TVL across the Superchain",
+      data: metrics.tvl,
+    },
+  ]
+
   return (
     <div className="w-full space-y-6">
       <div className="w-full flex items-center">
@@ -56,26 +93,26 @@ const generateRandomData = () => {
   return data
 }
 
-const PERFORMANCE_CHARTS = [
-  {
-    value: "$24,000",
-    title: "TVL across the Superchain",
-    data: generateRandomData(),
-  },
-  {
-    value: "0.05 ETH",
-    title: "Gas consumed",
-    data: generateRandomData(),
-  },
-  {
-    value: "6K",
-    title: "Transactions",
-    data: generateRandomData(),
-  },
-  {
-    value: "59",
-    title: "Unique addresses",
-    data: generateRandomData(),
-  },
-]
+// const PERFORMANCE_CHARTS = [
+//   {
+//     value: "$24,000",
+//     title: "TVL across the Superchain",
+//     data: generateRandomData(),
+//   },
+//   {
+//     value: "0.05 ETH",
+//     title: "Gas consumed",
+//     data: generateRandomData(),
+//   },
+//   {
+//     value: "6K",
+//     title: "Transactions",
+//     data: generateRandomData(),
+//   },
+//   {
+//     value: "59",
+//     title: "Unique addresses",
+//     data: generateRandomData(),
+//   },
+// ]
 //
