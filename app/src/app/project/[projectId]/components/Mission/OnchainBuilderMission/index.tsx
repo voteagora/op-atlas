@@ -28,8 +28,7 @@ export default function OnchainBuilderMission({
   data: OnchainBuilderMissionProps
 }) {
   const { projectId } = useParams()
-  const { projectName, applicationDate, onchainBuilderMetrics, eligibility } =
-    data
+  const { projectName, onchainBuilderMetrics, eligibility } = data
   const opRewardSum = Object.values(
     onchainBuilderMetrics.onchainBuilderReward,
   ).reduce((acc, curr) => acc + curr, 0)
@@ -172,7 +171,7 @@ export default function OnchainBuilderMission({
             >
               <MetricCard
                 value={formatNumber(
-                  onchainBuilderMetrics.tvl[month]?.value,
+                  onchainBuilderMetrics.tvl[month]?.value ?? 0,
                   0,
                   "compact",
                 )}

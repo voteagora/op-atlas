@@ -131,7 +131,8 @@ const groupByDate = (metrics: MetricValues[]) => {
 const groupByMonth = (metrics: MetricValues[]) => {
   return metrics.reduce<Record<string, number>>((acc, metric) => {
     const monthIndex = new Date(metric.sampleDate).getMonth() + 1 // +1 because INDEXED_MONTHS is 1-based
-    const month = INDEXED_MONTHS[monthIndex as keyof typeof INDEXED_MONTHS]
+    const month =
+      INDEXED_MONTHS[monthIndex as keyof typeof INDEXED_MONTHS] || "January"
 
     if (!acc[month]) {
       acc[month] = 0

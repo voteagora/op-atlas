@@ -254,42 +254,6 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
   }
 })
 
-// export const getPerformanceMetrics = async (projectId: string) => {
-//   if (!projectId) {
-//     return {
-//       error: "Project not found",
-//     }
-//   }
-
-//   const projectOSO = await getProjectsOSO(projectId)
-//   if (!projectOSO) {
-//     return {
-//       error: "Project not found",
-//     }
-//   }
-
-//   const { osoId } = projectOSO
-
-//   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
-//     queryMetrics([osoId], "activeAddresses"),
-//     queryMetrics([osoId], "gasFees"),
-//     queryMetrics([osoId], "transactions"),
-//     queryMetrics([osoId], "tvl"),
-//   ])
-
-//   const activeAddressesPerformance = formatPerformanceMetrics(activeAddresses)
-//   const gasFeesPerformance = formatPerformanceMetrics(gasFees)
-//   const transactionsPerformance = formatPerformanceMetrics(transactions)
-//   const tvlPerformance = formatPerformanceMetrics(tvl)
-
-//   return {
-//     activeAddressesPerformance,
-//     gasFeesPerformance,
-//     transactionsPerformance,
-//     tvlPerformance,
-//   }
-// }
-
 // Onchain Builders Metrics
 const getOnchainBuilderMetrics = cache(async function getOnchainBuilderMetrics(
   osoId: string,

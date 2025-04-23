@@ -56,35 +56,57 @@ export default function Chart({ data }: { data: Record<string, number> }) {
       const currentDate = new Date(data[i].date)
       const nextDate = data[i + 1]?.date
 
-      let expectedDate = new Date(currentDate)
-      expectedDate.setDate(expectedDate.getDate() + 1)
+      // Only fill if next date is within 3 days of end of month
+      if (nextDate) {
+        const daysInMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0,
+        ).getDate()
+        const daysRemaining = daysInMonth - currentDate.getDate()
 
-      while (nextDate && expectedDate < nextDate) {
-        result.push({
-          date: new Date(expectedDate),
-          value: 0,
-          monthLabel: expectedDate.toLocaleString("default", {
-            month: "short",
-          }),
-          isPhantom: true,
-        })
-        expectedDate.setDate(expectedDate.getDate() + 1)
+        if (daysRemaining <= 3) {
+          let expectedDate = new Date(currentDate)
+          expectedDate.setDate(expectedDate.getDate() + 1)
+
+          while (nextDate && expectedDate < nextDate) {
+            result.push({
+              date: new Date(expectedDate),
+              value: 0,
+              monthLabel: expectedDate.toLocaleString("default", {
+                month: "short",
+              }),
+              isPhantom: true,
+            })
+            expectedDate.setDate(expectedDate.getDate() + 1)
+          }
+        }
       }
     }
 
     const last = result[result.length - 1]
-    const nextMonth = new Date(
+    const daysInMonth = new Date(
       last.date.getFullYear(),
       last.date.getMonth() + 1,
-      1,
-    )
+      0,
+    ).getDate()
+    const daysRemaining = daysInMonth - last.date.getDate()
 
-    result.push({
-      date: nextMonth,
-      value: 0,
-      monthLabel: nextMonth.toLocaleString("default", { month: "short" }),
-      isPhantom: true,
-    })
+    // Only add next month's phantom entry if we're within 3 days of the end of the month
+    if (daysRemaining <= 3) {
+      const nextMonth = new Date(
+        last.date.getFullYear(),
+        last.date.getMonth() + 1,
+        1,
+      )
+
+      result.push({
+        date: nextMonth,
+        value: 0,
+        monthLabel: nextMonth.toLocaleString("default", { month: "short" }),
+        isPhantom: true,
+      })
+    }
 
     return result
   }
