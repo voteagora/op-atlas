@@ -22,12 +22,10 @@ import { REWARDS_NAMES } from "./constants"
 
 const RewardAccordion = ({
   reward,
-  team,
   isAdmin,
   teamVerified,
 }: {
   reward: ProjectWithFullDetails["rewards"][0]
-  team: ProjectTeam
   isAdmin?: boolean
   teamVerified?: boolean
 }) => {

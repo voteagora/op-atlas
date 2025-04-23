@@ -1,7 +1,12 @@
 import { formatUnits, keccak256, parseUnits } from "viem"
 
-import { KYCStreamTeam } from "../types"
+import {
+  KYCStreamTeam,
+  KYCTeamWithTeam,
+  RecurringRewardWithProject,
+} from "../types"
 import { isKycTeamVerified } from "./kyc"
+import { KYCTeam, SuperfluidStream } from "@prisma/client"
 
 export function generateRewardStreamId(projectIds: string[]) {
   return keccak256(Buffer.from(projectIds.sort().join("")))
@@ -80,4 +85,46 @@ export function processStream(teams: KYCStreamTeam[], streamId?: string) {
     KYCStatusCompleted: isKycTeamVerified(currentTeam),
     amounts: calculateRewardAmounts(projectsWithRewards),
   }
+}
+
+export type RecurringRewardsByRound = {
+  roundId: string
+  rewards: RecurringRewardWithProject[]
+  kycTeam?: KYCTeamWithTeam
+  streams: SuperfluidStream[]
+}
+
+export function formatRecurringRewards(
+  recurringRewards?: RecurringRewardWithProject[],
+): RecurringRewardsByRound[] {
+  if (!recurringRewards) return []
+
+  // Group by round
+  const recurringRewardsByRound = recurringRewards.reduce((acc, reward) => {
+    if (!acc[reward.roundId]) {
+      acc[reward.roundId] = []
+    }
+    acc[reward.roundId].push(reward)
+    return acc
+  }, {} as Record<string, RecurringRewardWithProject[]>)
+
+  return Object.entries(recurringRewardsByRound).map(([round, rewards]) => {
+    const project = rewards[0].project
+    const kycTeam = project.kycTeam
+    const streams = kycTeam?.superfludStream.sort((a, b) => {
+      // latest stream comes first
+      return a.createdAt.getTime() - b.createdAt.getTime()
+    })
+
+    return {
+      roundId: round,
+      rewards: rewards.map((reward) => {
+        return {
+          ...reward,
+        }
+      }),
+      kycTeam: kycTeam ?? undefined,
+      streams: streams ?? [],
+    }
+  })
 }

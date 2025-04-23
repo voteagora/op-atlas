@@ -5,25 +5,42 @@ import {
   KYCTeamWithTeam,
   ProjectTeam,
   ProjectWithFullDetails,
+  RecurringRewardWithProject,
 } from "@/lib/types"
 import { isKycTeamVerified } from "@/lib/utils/kyc"
 
 import RewardAccordion from "./RewardAccordion"
+import {
+  formatRecurringRewards,
+  RecurringRewardsByRound,
+} from "@/lib/utils/rewards"
+import RecurringRewardAccordion from "./RecurringRewardAccordion"
 
 export function RewardsSection({
   team,
-  inProgressRewards,
-  claimedRewards,
+  project,
   kycTeam,
+  recurringRewards,
 }: {
   team: ProjectTeam
-  inProgressRewards: ProjectWithFullDetails["rewards"]
-  claimedRewards: ProjectWithFullDetails["rewards"]
+  project: ProjectWithFullDetails
   kycTeam?: KYCTeamWithTeam
+  recurringRewards: RecurringRewardsByRound[]
 }) {
   const isAdmin = useIsAdmin(team)
 
   const isVerified = isKycTeamVerified(kycTeam)
+
+  const inProgressRewards = project.rewards.filter(
+    (reward) =>
+      reward.roundId === "7" ||
+      reward.roundId === "8" ||
+      reward.claim?.status === "pending",
+  )
+
+  const claimedRewards = project.rewards.filter(
+    (reward) => reward.claim?.status === "claimed",
+  )
 
   return (
     <div className="flex flex-col space-y-12">
@@ -37,11 +54,21 @@ export function RewardsSection({
         <h4 className="font-semibold text-text-default text-xl">In progress</h4>
         {inProgressRewards.length ? (
           <ul className="space-y-3">
+            {recurringRewards.map((reward) => {
+              return (
+                <li key={reward.roundId}>
+                  <RecurringRewardAccordion
+                    reward={reward}
+                    isAdmin={Boolean(isAdmin)}
+                  />
+                </li>
+              )
+            })}
+
             {inProgressRewards.map((reward) => (
               <li key={reward.id}>
                 <RewardAccordion
                   isAdmin={Boolean(isAdmin)}
-                  team={team}
                   reward={reward}
                   key={reward.id}
                   teamVerified={isVerified}
@@ -62,7 +89,6 @@ export function RewardsSection({
             {claimedRewards.map((reward) => (
               <li key={reward.id}>
                 <RewardAccordion
-                  team={team}
                   reward={reward}
                   key={reward.id}
                   teamVerified={isVerified}

@@ -364,3 +364,28 @@ export async function createRewardStream(
     },
   })
 }
+
+export async function getProjectRecurringRewards(projectId: string) {
+  return prisma.recurringReward.findMany({
+    where: {
+      projectId,
+    },
+    include: {
+      project: {
+        include: {
+          kycTeam: {
+            include: {
+              superfludStream: true,
+              team: {
+                select: {
+                  users: true,
+                },
+              },
+              rewardStream: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}

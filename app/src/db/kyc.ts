@@ -74,6 +74,7 @@ export async function getProjectKycTeam(projectId: string) {
               users: true,
             },
           },
+          rewardStream: true,
         },
       },
     },

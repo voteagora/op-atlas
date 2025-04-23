@@ -5,6 +5,8 @@ import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
 import { getProjectKycTeam } from "@/db/kyc"
 import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { getProjectRecurringRewards } from "@/db/rewards"
+import { formatRecurringRewards } from "@/lib/utils/rewards"
 
 export default async function Page({
   params,
@@ -21,33 +23,25 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  const [project, team, membership, kycTeam] = await Promise.all([
-    getProject({ id: params.projectId }),
-    getConsolidatedProjectTeam({ projectId: params.projectId }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
-    getProjectKycTeam(params.projectId),
-  ])
+  const [project, team, membership, kycTeam, recurringRewards] =
+    await Promise.all([
+      getProject({ id: params.projectId }),
+      getConsolidatedProjectTeam({ projectId: params.projectId }),
+      verifyMembership(params.projectId, session?.user.farcasterId),
+      getProjectKycTeam(params.projectId),
+      getProjectRecurringRewards(params.projectId),
+    ])
 
   if (membership?.error || !project) {
     redirect("/dashboard")
   }
 
-  const inProgressRewards = project.rewards.filter(
-    (reward) =>
-      reward.roundId === "7" ||
-      reward.roundId === "8" ||
-      reward.claim?.status === "pending",
-  )
-  const claimedRewards = project.rewards.filter(
-    (reward) => reward.claim?.status === "claimed",
-  )
-
   return (
     <RewardsSection
-      inProgressRewards={inProgressRewards}
-      claimedRewards={claimedRewards}
       team={team}
+      project={project}
       kycTeam={kycTeam}
+      recurringRewards={formatRecurringRewards(recurringRewards)}
     />
   )
 }

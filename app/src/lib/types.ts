@@ -155,6 +155,26 @@ export type RewardWithClaim = Prisma.FundingRewardGetPayload<{
   include: { claim: true }
 }>
 
+export type RecurringRewardWithProject = Prisma.RecurringRewardGetPayload<{
+  include: {
+    project: {
+      include: {
+        kycTeam: {
+          include: {
+            superfludStream: true
+            team: {
+              select: {
+                users: true
+              }
+            }
+            rewardStream: true
+          }
+        }
+      }
+    }
+  }
+}>
+
 export type UserWithProjects = Prisma.UserGetPayload<{
   select: {
     projects: {
