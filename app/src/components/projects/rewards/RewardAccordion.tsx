@@ -22,12 +22,8 @@ import { REWARDS_NAMES } from "./constants"
 
 const RewardAccordion = ({
   reward,
-  isAdmin,
-  teamVerified,
 }: {
   reward: ProjectWithFullDetails["rewards"][0]
-  isAdmin?: boolean
-  teamVerified?: boolean
 }) => {
   const [isExpanded, setIsExpanded] = React.useState("")
 
@@ -79,15 +75,41 @@ const RewardAccordion = ({
           </div>
         </div>
 
-        {reward.roundId !== "7" && reward.roundId !== "8" ? (
-          <>
-            <AccordionContent className="flex flex-col gap-6 pt-6">
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-2">
-                  <div className="font-medium text-sm text-foreground">
-                    Grant delivery address
-                  </div>
-                  <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
+        <AccordionContent className="flex flex-col gap-6 pt-6">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <div className="font-medium text-sm text-foreground">
+                Grant delivery address
+              </div>
+              <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
+                <Image
+                  src="/assets/icons/tickIcon.svg"
+                  width={16}
+                  height={16}
+                  alt="Check"
+                />
+                <div className="text-sm text-foreground">
+                  {reward.claim?.address}
+                </div>
+                <Button
+                  onClick={() => handleCopyAddress(reward.claim?.address ?? "")}
+                  variant="ghost"
+                  className="p-0 h-fit"
+                >
+                  <Copy
+                    className="rotate-90 text-muted cursor-pointer"
+                    size={16}
+                  />
+                </Button>
+              </div>
+            </div>
+            {reward.claim?.tokenStreamClaimableAt && (
+              <div className="flex flex-col gap-2 w-full">
+                <div className="font-medium text-sm text-foreground">
+                  Token stream
+                </div>
+                <div className="flex items-center gap-x-1.5">
+                  <div className="border border-border rounded-lg w-full flex px-3 py-[10px] gap-2 items-center">
                     <Image
                       src="/assets/icons/tickIcon.svg"
                       width={16}
@@ -95,93 +117,27 @@ const RewardAccordion = ({
                       alt="Check"
                     />
                     <div className="text-sm text-foreground">
-                      {reward.claim?.address}
+                      Completed on{" "}
+                      {format(
+                        reward.claim?.tokenStreamClaimableAt,
+                        "MMMM d, yyyy 'at' h:mm a",
+                      )}
                     </div>
-                    <Button
-                      onClick={() =>
-                        handleCopyAddress(reward.claim?.address ?? "")
-                      }
-                      variant="ghost"
-                      className="p-0 h-fit"
-                    >
-                      <Copy
-                        className="rotate-90 text-muted cursor-pointer"
-                        size={16}
-                      />
-                    </Button>
                   </div>
+                  <Link href="/">
+                    <Button variant="secondary">View</Button>
+                  </Link>
                 </div>
-                {reward.claim?.tokenStreamClaimableAt && (
-                  <div className="flex flex-col gap-2 w-full">
-                    <div className="font-medium text-sm text-foreground">
-                      Token stream
-                    </div>
-                    <div className="flex items-center gap-x-1.5">
-                      <div className="border border-border rounded-lg w-full flex px-3 py-[10px] gap-2 items-center">
-                        <Image
-                          src="/assets/icons/tickIcon.svg"
-                          width={16}
-                          height={16}
-                          alt="Check"
-                        />
-                        <div className="text-sm text-foreground">
-                          Completed on{" "}
-                          {format(
-                            reward.claim?.tokenStreamClaimableAt,
-                            "MMMM d, yyyy 'at' h:mm a",
-                          )}
-                        </div>
-                      </div>
-                      <Link href="/">
-                        <Button variant="secondary">View</Button>
-                      </Link>
-                    </div>
-                  </div>
-                )}
               </div>
-            </AccordionContent>
-            <AccordionTrigger className="text-secondary-foreground font-medium text-sm mt-6">
-              <span className="group-data-[state=open]:hidden">
-                Show details
-              </span>
-              <span className="group-data-[state=closed]:hidden">
-                Close details
-              </span>
-            </AccordionTrigger>
-          </>
-        ) : (
-          <div
-            className={cn("mt-2 px-3 py-2.5 rounded-md", {
-              "text-red-600 bg-red-200": !isAdmin || (isAdmin && !teamVerified),
-              "text-callout-foreground bg-callout": isAdmin && teamVerified,
-            })}
-          >
-            {!isAdmin && (
-              <p>
-                You are not an admin of this project and cannot claim this
-                grant.
-              </p>
-            )}
-            {isAdmin && !teamVerified && (
-              <p>
-                You can’t claim your tokens until you’ve completed KYC for your{" "}
-                <Link
-                  href={`/projects/${reward.projectId}/grant-addresses`}
-                  className="underline"
-                >
-                  grant delivery address
-                </Link>
-                .
-              </p>
-            )}
-            {isAdmin && teamVerified && (
-              <p>
-                Optimism only releases tokens to Superfluid once per month.
-                Yours will be available to claim on or after {getReleaseDate()}.
-              </p>
             )}
           </div>
-        )}
+        </AccordionContent>
+        <AccordionTrigger className="text-secondary-foreground font-medium text-sm mt-6">
+          <span className="group-data-[state=open]:hidden">Show details</span>
+          <span className="group-data-[state=closed]:hidden">
+            Close details
+          </span>
+        </AccordionTrigger>
       </AccordionItem>
     </Accordion>
   )

@@ -111,10 +111,6 @@ export function formatRecurringRewards(
   return Object.entries(recurringRewardsByRound).map(([round, rewards]) => {
     const project = rewards[0].project
     const kycTeam = project.kycTeam
-    const streams = kycTeam?.superfludStream.sort((a, b) => {
-      // latest stream comes first
-      return a.createdAt.getTime() - b.createdAt.getTime()
-    })
 
     return {
       roundId: round,
@@ -124,7 +120,7 @@ export function formatRecurringRewards(
         }
       }),
       kycTeam: kycTeam ?? undefined,
-      streams: streams ?? [],
+      streams: kycTeam?.superfludStream ?? [],
     }
   })
 }

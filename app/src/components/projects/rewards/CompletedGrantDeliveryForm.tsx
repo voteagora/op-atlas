@@ -11,8 +11,8 @@ import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
 import { getProjectsForKycTeamAction } from "@/lib/actions/projects"
 import { KYCTeamWithTeam } from "@/lib/types"
-import { getValidUntil, shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import GrantDeliveryAddress from "./GrantDeliveryAddress"
 
 interface CompletedGrantDeliveryFormProps {
   kycTeam?: KYCTeamWithTeam
@@ -58,15 +58,7 @@ export default function CompletedGrantDeliveryForm({
 
   return (
     <div className="space-y-6">
-      <div className="input-container space-x-1.5">
-        <span className="text-sm text-foreground">
-          {shortenAddress(kycTeam.walletAddress)}
-        </span>
-        <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
-          <CheckIcon size={12} />
-          <span>Valid until {getValidUntil(kycTeam.createdAt)}</span>
-        </div>
-      </div>
+      <GrantDeliveryAddress kycTeam={kycTeam} />
       {organizationId && (
         <div className="space-y-2">
           <div className="w-full flex justify-between items-center">

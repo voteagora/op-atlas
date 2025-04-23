@@ -5,15 +5,11 @@ import {
   KYCTeamWithTeam,
   ProjectTeam,
   ProjectWithFullDetails,
-  RecurringRewardWithProject,
 } from "@/lib/types"
 import { isKycTeamVerified } from "@/lib/utils/kyc"
 
 import RewardAccordion from "./RewardAccordion"
-import {
-  formatRecurringRewards,
-  RecurringRewardsByRound,
-} from "@/lib/utils/rewards"
+import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 import RecurringRewardAccordion from "./RecurringRewardAccordion"
 
 export function RewardsSection({
@@ -67,12 +63,7 @@ export function RewardsSection({
 
             {inProgressRewards.map((reward) => (
               <li key={reward.id}>
-                <RewardAccordion
-                  isAdmin={Boolean(isAdmin)}
-                  reward={reward}
-                  key={reward.id}
-                  teamVerified={isVerified}
-                />
+                <RewardAccordion reward={reward} key={reward.id} />
               </li>
             ))}
           </ul>
@@ -88,11 +79,7 @@ export function RewardsSection({
           <ul className="space-y-3">
             {claimedRewards.map((reward) => (
               <li key={reward.id}>
-                <RewardAccordion
-                  reward={reward}
-                  key={reward.id}
-                  teamVerified={isVerified}
-                />
+                <RewardAccordion reward={reward} />
               </li>
             ))}
           </ul>

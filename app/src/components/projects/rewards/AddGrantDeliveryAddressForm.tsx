@@ -90,21 +90,10 @@ export default function AddGrantDeliveryAddressForm({
         <h4 className="font-semibold text-base">Add an address</h4>
       )}
       {allTeamMembersVerified ? (
-        <Accordion
-          collapsible={false}
-          type="single"
-          items={[
-            {
-              title: <AccordionTitleContainer text="Grant delivery address" />,
-              content: kycTeam?.walletAddress && (
-                <CompletedGrantDeliveryForm
-                  kycTeam={kycTeam}
-                  teamMembers={teamMembers}
-                  entities={entities}
-                />
-              ),
-            },
-          ]}
+        <CompletedGrantDeliveryForm
+          kycTeam={kycTeam}
+          teamMembers={teamMembers}
+          entities={entities}
         />
       ) : (
         <Accordion
