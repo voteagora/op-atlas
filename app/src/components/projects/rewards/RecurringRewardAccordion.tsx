@@ -6,7 +6,12 @@ import Link from "next/link"
 import React from "react"
 import { toast } from "sonner"
 
-import { Accordion, AccordionItem } from "@/components/ui/accordion"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { getCutoffDate } from "@/lib/utils"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
 
@@ -30,15 +35,6 @@ const RewardAccordion = ({
   const { projectId } = useParams()
 
   const [isExpanded, setIsExpanded] = React.useState("")
-
-  const handleCopyAddress = async (address: string) => {
-    try {
-      await copyToClipboard(address)
-      toast("Copied to clipboard")
-    } catch (error) {
-      toast.error("Error copying URL")
-    }
-  }
 
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
 
@@ -78,7 +74,7 @@ const RewardAccordion = ({
       className="w-full border rounded-xl p-6"
     >
       <AccordionItem value="item-1" className="group">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-col space-y-2">
             <div>
               <p className="font-medium text-foreground text-sm">
@@ -107,25 +103,36 @@ const RewardAccordion = ({
               )}
             </div>
           </div>
-          {reward.kycTeam && linkToStream && (
-            <GrantDeliveryAddress kycTeam={reward.kycTeam} />
-          )}
 
           {!isAdmin && <YouAreNotAdminCallout />}
           {isAdmin && !teamVerified && (
             <CantClaimCallout projectId={projectId as string} />
           )}
           {isAdmin && teamVerified && !linkToStream && <ScheduleClaimCallout />}
-
-          {stoppedStreams.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <div className="font-medium text-sm text-foreground">Notes</div>
-              {stoppedStreams.map((stream) => (
-                <StreamStoppedSection key={stream.id} stream={stream} />
-              ))}
-            </div>
-          )}
         </div>
+        <AccordionContent>
+          <div className="flex flex-col gap-4 pt-4">
+            {reward.kycTeam && linkToStream && (
+              <GrantDeliveryAddress kycTeam={reward.kycTeam} />
+            )}
+
+            {stoppedStreams.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <div className="font-medium text-sm text-foreground">Notes</div>
+                {stoppedStreams.map((stream) => (
+                  <StreamStoppedSection key={stream.id} stream={stream} />
+                ))}
+              </div>
+            )}
+          </div>
+        </AccordionContent>
+
+        <AccordionTrigger className="text-secondary-foreground font-medium text-sm mt-6">
+          <span className="group-data-[state=open]:hidden">Show details</span>
+          <span className="group-data-[state=closed]:hidden">
+            Close details
+          </span>
+        </AccordionTrigger>
       </AccordionItem>
     </Accordion>
   )
@@ -144,7 +151,7 @@ const StreamStoppedSection = ({
     <div className="border border-border rounded-lg px-3 py-2.5">
       <span className="text-secondary-foreground font-normal text-sm">
         The stream stopped on{" "}
-        {format(new Date(stream.deletedAt!), "MMMM d, yyyy")}. Partial tokens
+        {format(new Date(stream.deletedAt!), "MMMM d, yyyy")}. Partial rewards
         were sent to{" "}
         <Link href={linkToStream} target="_blank">
           {stream.receiver}
@@ -157,7 +164,7 @@ const StreamStoppedSection = ({
 
 const YouAreNotAdminCallout = () => {
   return (
-    <div className="mt-2 px-3 py-2.5 rounded-md text-callout-foreground bg-callout">
+    <div className="mt-2 px-3 py-2.5 rounded-md  text-red-600 bg-red-200">
       <span className="text-sm">
         You are not an admin of this project and cannot claim this grant.
       </span>

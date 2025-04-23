@@ -38,7 +38,7 @@ export async function getStreams({
 }) {
   const where = {
     sender,
-    ...(receiver && { receiver }),
+    ...(receiver && { receiver: receiver.toLowerCase() }),
   }
 
   const query = gql`
