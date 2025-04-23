@@ -6,7 +6,7 @@ import {
   RecurringRewardWithProject,
 } from "../types"
 import { isKycTeamVerified } from "./kyc"
-import { KYCTeam, SuperfluidStream } from "@prisma/client"
+import { SuperfluidStream } from "@prisma/client"
 
 export function generateRewardStreamId(projectIds: string[]) {
   return keccak256(Buffer.from(projectIds.sort().join("")))
@@ -59,10 +59,10 @@ function calculateRewardAmounts(projectsWithRewards: ProjectWithRewards[]) {
 export function processStream(teams: KYCStreamTeam[], streamId?: string) {
   // Order teams by deletedAt: deletedAt is null for the current team -- current team comes last
   const orderedTeams = teams.sort((a, b) => {
-    if (a.deletedAt === null && b.deletedAt === null)
+    if (!a.deletedAt && !b.deletedAt)
       throw new Error("Multiple active addresses detected")
-    if (a.deletedAt === null) return 1
-    if (b.deletedAt === null) return -1
+    if (!a.deletedAt) return 1
+    if (!b.deletedAt) return -1
     return a.deletedAt.getTime() - b.deletedAt.getTime()
   })
 
