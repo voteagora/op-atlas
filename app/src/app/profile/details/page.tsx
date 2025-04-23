@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { EditEmail } from "@/components/profile/EmailConnection"
+import { EmailConnection } from "@/components/profile/EmailConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { getUserById } from "@/db/users"
@@ -35,7 +35,7 @@ export default async function Page() {
           for and receive Retro Funding. It should be a personal email where we
           can reliably reach you. Don&apos;t worry, we&apos;ll keep it private.
         </div>
-        <EditEmail />
+        <EmailConnection />
       </div>
       <div className="flex flex-col gap-6">
         <div className="text-foreground text-xl font-semibold">
