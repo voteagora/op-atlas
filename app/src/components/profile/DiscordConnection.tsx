@@ -1,38 +1,39 @@
 "use client"
 
 import { User } from "@prisma/client"
-import { setCookie } from "cookies-next"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
-import React from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import { connectDiscord, removeDiscord } from "@/lib/actions/users"
-import { DISCORD_REDIRECT_COOKIE } from "@/lib/utils"
+import { syncPrivyUser } from "@/db/users"
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 
 export function DiscordConnection({ user }: { user: User }) {
-  const [isPending, startTransition] = React.useTransition()
-  const pathname = usePathname()
 
-  const authorizeDiscord = async () => {
-    setCookie(DISCORD_REDIRECT_COOKIE, pathname)
+  const { user: privyUser, unlinkDiscord } = usePrivy()
 
-    return connectDiscord()
-  }
+  const { linkDiscord } = useLinkAccount({
+    onSuccess: async ({ user: updatedPrivyUser }) => {
 
-  const disconnectDiscord = async () => {
-    startTransition(async () => {
-      try {
-        const result = await removeDiscord()
-        if (result.error !== null) {
-          throw result.error
-        }
-      } catch (error) {
-        console.error("Error disconnecting Discord", error)
-        toast.error("Error disconnecting Discord")
-      }
-    })
+      toast.promise(syncPrivyUser(updatedPrivyUser), {
+        loading: "Linking discord...",
+        success: "Discord linked successfully",
+        error: "Failed to link discord",
+      })
+    }
+  })
+
+  const handleUnlinkDiscord = () => {
+    if (privyUser?.discord?.username) {
+      toast.promise(unlinkDiscord(privyUser.discord.username), {
+        loading: "Unlinking discord...",
+        success: (updatedPrivyUser) => {
+          syncPrivyUser(updatedPrivyUser)
+          return "Discord unlinked successfully"
+        },
+        error: "Failed to unlink discord",
+      })
+    }
   }
 
   return (
@@ -67,22 +68,16 @@ export function DiscordConnection({ user }: { user: User }) {
 
               <p className="text-sm">{user.discord}</p>
             </div>
-
-            <Button
-              variant="secondary"
-              onClick={disconnectDiscord}
-              disabled={isPending}
-            >
-              Disconnect
-            </Button>
           </div>
         </div>
       )}
 
       <div className="flex gap-2">
-        <Button disabled={!!user.discord} onClick={authorizeDiscord}>
-          Connect
-        </Button>
+        {privyUser?.discord?.username ?
+          <Button variant="secondary" onClick={handleUnlinkDiscord}>Disconnect</Button>
+          :
+          <Button variant="primary" onClick={linkDiscord}>Connect XX</Button>
+        }
       </div>
     </div>
   )

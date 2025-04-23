@@ -930,6 +930,8 @@ export async function updateUser({
   imageUrl?: string | null
   bio?: string | null
   privyDid?: string | null
+  discord?: string | null
+  github?: string | null
 }) {
   return prisma.user.update({
     where: { id },
@@ -1035,6 +1037,13 @@ export const syncPrivyUser = async (
     deleteUserEmails(existingUser.id)
   }
 
+
+  // Simplified Discord update
+  await updateUser({
+    id: existingUser.id,
+    discord: privyUser?.discord?.username || null,
+    github: privyUser?.github?.username || null,
+  })
 
   return await getUserById(existingUser.id)
 
