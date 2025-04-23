@@ -281,7 +281,7 @@ const getOnchainBuilderMetrics = cache(async function getOnchainBuilderMetrics(
 
 const getActiveAddresses = async function getActiveAddresses(osoId: string) {
   const data = await queryMetrics([osoId], "activeAddresses")
-  return formatActiveAddresses(data)
+  return formatActiveAddresses(data, true)
 }
 
 const getGasFees = async function getGasFees(osoId: string) {

@@ -24,14 +24,26 @@ const getDaysInMonth = (month: string, year: number): number => {
   return new Date(year, monthIndex, 0).getDate()
 }
 
-export const formatActiveAddresses = (data: MetricValues[]) => {
+export const formatActiveAddresses = (
+  data: MetricValues[],
+  isOnchainBuilder: boolean = false,
+) => {
   const monthlyData = groupByMonth(data)
   const months = Object.keys(monthlyData)
   const result: Record<string, { value: number; trend: Trend }> = {}
+  const currentYear = new Date().getFullYear()
 
   months.forEach((month, index) => {
-    const currentValue = monthlyData[month]
-    const previousValue = index > 0 ? monthlyData[months[index - 1]] : 0
+    const currentValue = isOnchainBuilder
+      ? monthlyData[month] / getDaysInMonth(month, currentYear)
+      : monthlyData[month]
+    const previousValue =
+      index > 0
+        ? isOnchainBuilder
+          ? monthlyData[months[index - 1]] /
+            getDaysInMonth(months[index - 1], currentYear)
+          : monthlyData[months[index - 1]]
+        : 0
     result[month] = {
       value: currentValue,
       trend: calculateTrend(currentValue, previousValue),
