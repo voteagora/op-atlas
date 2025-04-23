@@ -69,38 +69,19 @@ export function GithubConnection({ user }: { user: User }) {
 
   return (
     <div className="flex flex-col space-y-4">
-      <div>
-        <div className="flex items-center space-x-1.5">
-          <Image
-            src="/assets/icons/githubIcon.svg"
-            alt="Github"
-            height={20}
-            width={20}
-          />
-          <h3 className="font-semibold text-foreground">Github</h3>
-        </div>
-        <p className="text-secondary-foreground">
-          Connect your GitHub account to show your code contributions to the
-          Optimism Collective.
-        </p>
-      </div>
 
       {privyUser?.github?.username && (
         <div className="flex flex-col gap-2">
-          <p className="font-medium text-sm text-foreground">
-            Your GitHub username
-          </p>
           <div className="flex items-center gap-1.5">
             <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
               <Image
-                src="/assets/icons/circle-check-green.svg"
-                height={16.67}
-                width={16.67}
-                alt="Verified"
+                src="/assets/icons/githubIcon.svg"
+                height={14}
+                width={14}
+                alt="Github"
               />
               <p className="text-sm">{privyUser?.github?.username}</p>
             </div>
-
           </div>
         </div>
       )}

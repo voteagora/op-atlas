@@ -11,7 +11,7 @@ import {
 } from "@privy-io/react-auth"
 import { Mail } from "lucide-react"
 
-export const EditEmail = () => {
+export const EmailConnection = () => {
 
   const { user: privyUser, unlinkEmail } = usePrivy()
 

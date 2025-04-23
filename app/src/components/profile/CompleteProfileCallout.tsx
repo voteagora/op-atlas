@@ -25,7 +25,9 @@ import {
   AccordionTrigger,
 } from "../ui/accordion"
 import { AddAddress } from "./AddAddress"
-import { EditEmail } from "./EmailConnection"
+import { EmailConnection } from "./EmailConnection"
+import { GithubConnection } from "./GithubConnection"
+import { usePrivy } from "@privy-io/react-auth"
 
 export function CompleteProfileCallout({
   user,
@@ -151,7 +153,7 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
               Please add email for important messages.
             </div>
           </div>
-          <EditEmail />
+          <EmailConnection />
         </div>
       </div>
     </div>
@@ -160,34 +162,14 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
 
 function ConnectYourGithubStep({ user }: { user: User }) {
   const [isDeveloper, setIsDeveloper] = useState(!user.notDeveloper)
-  const [loading, setLoading] = useState(false)
 
-  const toggleIsDeveloper = async (isDeveloper: boolean) => {
-    if (loading) {
-      return
-    }
+  const { user: privyUser } = usePrivy()
 
-    setLoading(true)
-
-    try {
-      setIsDeveloper(isDeveloper)
-      const result = await setUserIsNotDeveloper(!isDeveloper)
-      if (result.error !== null) {
-        throw result.error
-      }
-      toast.success("Developer status updated")
-    } catch (error) {
-      console.error("Error toggling developer status", error)
-      toast.error("Error updating developer status")
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
-        {!isDeveloper || user.github ? <GreenCheck /> : <StepNumber num={2} />}
+        {!isDeveloper || privyUser?.github?.subject ? <GreenCheck /> : <StepNumber num={2} />}
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col gap-[2px]">
             <div className="font-medium flex items-center gap-2">
@@ -197,35 +179,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
               Show your code contributions to the Optimism Collective.
             </div>
           </div>
-          {user.github && (
-            <div className="flex items-center self-start p-3 border border-border rounded-md gap-1">
-              <Image
-                src="/assets/icons/githubIcon.svg"
-                height={14}
-                width={14}
-                alt="Github"
-              />
-              <div className="text-secondary-foreground">{user.github}</div>
-            </div>
-          )}
-          <div className="flex space-x-1.5 items-center">
-            <div
-              className={cn("input-container", !isDeveloper && "bg-secondary")}
-            >
-              <input
-                type="checkbox"
-                checked={!isDeveloper}
-                onChange={(e) => toggleIsDeveloper(!e.target.checked)}
-              />
-              I&apos;m not a developer
-            </div>
-
-            {!user.github && (
-              <Button onClick={() => connectGithub()} disabled={!isDeveloper}>
-                Connect Github
-              </Button>
-            )}
-          </div>
+          <GithubConnection user={user} />
         </div>
       </div>
     </div>
@@ -298,8 +252,8 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                     onCopy={onCopy}
                   />
                 ))}
-                <AddAddress>Add another address</AddAddress>
               </div>
+              <AddAddress>Add another address</AddAddress>
             </div>
           )}
         </div>

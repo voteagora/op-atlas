@@ -1,10 +1,10 @@
 "use client"
 
-import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
-import { Button } from "../common/Button";
-import { toast } from "sonner";
 import { syncPrivyUser } from "@/db/users";
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
+import { toast } from "sonner";
+import { Button } from "../common/Button";
 export function FarcasterConnection() {
 
     const { user: privyUser, unlinkFarcaster } = usePrivy()

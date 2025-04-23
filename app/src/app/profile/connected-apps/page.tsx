@@ -6,7 +6,7 @@ import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
 import { getUserById } from "@/db/users"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
-
+import Image from "next/image"
 export default async function Page() {
   const session = await auth()
 
@@ -25,7 +25,25 @@ export default async function Page() {
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
       <FarcasterConnection />
       <DiscordConnection />
-      <GithubConnection user={user} />
+      <div>
+        <div>
+          <div className="flex items-center space-x-1.5">
+            <Image
+              src="/assets/icons/githubIcon.svg"
+              alt="Github"
+              height={20}
+              width={20}
+            />
+            <h3 className="font-semibold text-foreground">Github</h3>
+          </div>
+          <p className="text-secondary-foreground">
+            Connect your GitHub account to show your code contributions to the
+            Optimism Collective.
+          </p>
+        </div>
+
+        <GithubConnection user={user} />
+      </div>
       <GovForumConnection user={user} />
     </div>
   )
