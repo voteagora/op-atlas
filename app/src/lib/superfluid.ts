@@ -74,12 +74,12 @@ export async function getActiveStreams(receiver: string) {
   return streams.filter((stream) => parseFloat(stream.currentFlowRate) > 0)
 }
 
-export async function getActiveStreamsForRound(round: number) {
+export async function getStreamsForRound(round: number) {
   if (!(round in Object.keys(GRANT_SENDER_MAP))) {
     return []
   }
   const { streams } = await getStreams({
     sender: GRANT_SENDER_MAP[round as keyof typeof GRANT_SENDER_MAP],
   })
-  return streams.filter((stream) => parseFloat(stream.currentFlowRate) > 0)
+  return streams
 }
