@@ -129,6 +129,7 @@ export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
+    rewardStream: true
   }
 }>
 
@@ -139,6 +140,7 @@ export type KYCStreamTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
+    rewardStream: true
     projects: {
       select: {
         id: true

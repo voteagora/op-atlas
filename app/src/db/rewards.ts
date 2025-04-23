@@ -263,6 +263,7 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
           users: true,
         },
       },
+      rewardStream: true,
       projects: {
         select: {
           id: true,
@@ -294,6 +295,7 @@ export async function getRewardStreamsWithRewardsForRound(roundId: string) {
               users: true,
             },
           },
+          rewardStream: true,
           projects: {
             include: {
               recurringRewards: true,

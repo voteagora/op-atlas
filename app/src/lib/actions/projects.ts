@@ -513,9 +513,11 @@ export const getProjectsForKycTeamAction = async (kycTeamId: string) => {
 export const deleteProjectKYCTeamAction = async ({
   projectId,
   kycTeamId,
+  rewardStreamId,
 }: {
   projectId: string
   kycTeamId: string
+  rewardStreamId?: string
 }) => {
   const session = await auth()
 
@@ -530,6 +532,7 @@ export const deleteProjectKYCTeamAction = async ({
 
   return await deleteKycTeam({
     kycTeamId,
+    rewardStreamId,
   })
 }
 

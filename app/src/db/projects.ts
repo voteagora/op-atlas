@@ -1720,6 +1720,7 @@ export async function getKycTeamForProject({
               users: true,
             },
           },
+          rewardStream: true,
         },
       },
     },

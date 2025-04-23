@@ -705,6 +705,7 @@ export async function getOrganizationKYCTeams({
         include: {
           team: { include: { users: true } },
           projects: true,
+          rewardStream: true,
         },
       },
     },

@@ -49,6 +49,7 @@ export default function CompletedGrantDeliveryForm({
       kycTeamId: kycTeam?.id,
       projectId: projectId as string,
       organizationId: organizationId as string,
+      rewardStreamId: kycTeam?.rewardStream?.id,
     })
     setOpenDialog("delete_kyc_team")
   }

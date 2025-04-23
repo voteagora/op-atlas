@@ -1,42 +1,42 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
 
 import { DialogProps } from "@/components/dialogs/types"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
-import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import { deleteKYCTeamAction } from "@/lib/actions/kyc"
 
 export function DeleteKYCTeamDialog({
   open,
   onOpenChange,
 }: DialogProps<object>) {
   const {
-    data: { projectId, organizationId, kycTeamId },
+    data: { projectId, organizationId, kycTeamId, rewardStreamId },
   } = useAppDialogs()
 
   const queryClient = useQueryClient()
 
   const { mutate: deleteProjectKYCTeam, isPending } = useMutation({
     mutationFn: async () => {
-      if (!organizationId) {
-        await deleteProjectKYCTeamAction({
-          kycTeamId: kycTeamId ?? "",
-          projectId: projectId ?? "",
-        })
-        await queryClient.invalidateQueries({
+      await deleteKYCTeamAction({
+        kycTeamId: kycTeamId ?? "",
+        projectId: projectId ?? "",
+        organizationId: organizationId ?? "",
+        rewardStreamId: rewardStreamId ?? "",
+      })
+      await Promise.all([
+        queryClient.invalidateQueries({
           queryKey: ["kyc-teams", "project", projectId],
-        })
-      } else {
-        await deleteOrganizationKYCTeam({
-          organizationId: organizationId ?? "",
-          kycTeamId: kycTeamId ?? "",
-        })
-        await queryClient.invalidateQueries({
+        }),
+        queryClient.invalidateQueries({
           queryKey: ["kyc-teams", "organization", organizationId],
-        })
-      }
+        }),
+      ])
       onOpenChange(false)
     },
   })
@@ -46,10 +46,17 @@ export function DeleteKYCTeamDialog({
       <DialogContent>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-0.5 text-center items-center">
-            <h3>
-              Are you sure you want to delete this wallet and start the
-              verification process over?
-            </h3>
+            <DialogTitle className="text-center text-xl font-semibold text-text-default">
+              {rewardStreamId
+                ? "Are you sure?"
+                : "Are you sure you want to delete this wallet and start the verification process over?"}
+            </DialogTitle>
+            {rewardStreamId && (
+              <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">
+                If you stop this stream, your grant delivery address will be
+                permanently invalidated and cannot be used again.
+              </DialogDescription>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -62,7 +69,9 @@ export function DeleteKYCTeamDialog({
                 deleteProjectKYCTeam()
               }}
             >
-              Yes, delete this wallet
+              {rewardStreamId
+                ? "Stop stream and invalidate address"
+                : "Yes, delete this wallet"}
             </Button>
             <Button
               type="button"
