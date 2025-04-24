@@ -8,8 +8,8 @@ const SUBGRAPH_URL = "https://optimism-mainnet.subgraph.x.superfluid.dev"
 const GRANT_SENDER = "0xC68f72d6b90cA1cf8DfC7fde6c4d452b309d86BB"
 
 const GRANT_SENDER_MAP = {
-  7: "0x4d7d96e3A9D523e5e7919bF73dADFB2c2dD136F6",
-  8: "0xAfaD5c5B5AEe7E42ad538d0F0e21CC025BC2920D",
+  7: "0xA2928CC2D210bC42d8ffe5Ad8b1314E872F5fb54",
+  8: "0x823557699A455F3c2C6f964017880f3f3a6583Ac",
 }
 
 const client = new GraphQLClient(SUBGRAPH_URL)
