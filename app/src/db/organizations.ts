@@ -637,7 +637,7 @@ export async function createOrganizationKycTeam({
   organizationId: string
 }) {
   try {
-    const [orgProjects, kycTeam] = await Promise.all([
+    const [orgProjects, orgProjectWithDeletedKycTeam] = await Promise.all([
       prisma.projectOrganization.findMany({
         where: {
           AND: [
@@ -659,29 +659,84 @@ export async function createOrganizationKycTeam({
           projectId: true,
         },
       }),
-      prisma.kYCTeam.create({
-        data: {
-          walletAddress,
+      prisma.projectOrganization.findMany({
+        where: {
+          organizationId,
+          project: {
+            kycTeam: {
+              deletedAt: {
+                not: null,
+              },
+            },
+          },
+        },
+        select: {
+          project: {
+            select: {
+              id: true,
+              kycTeam: {
+                select: {
+                  id: true,
+                  rewardStreamId: true,
+                },
+              },
+            },
+          },
         },
       }),
     ])
 
-    await Promise.all([
-      prisma.project.updateMany({
+    // This means that user has recently stopped one of their streams
+    // and needs to create a new kyc team for the same stream
+    // and connect all projects to the same kyc team
+    if (orgProjectWithDeletedKycTeam.length > 0) {
+      const kycTeam = await prisma.kYCTeam.create({
+        data: {
+          walletAddress,
+          ...(orgProjectWithDeletedKycTeam[0].project.kycTeam
+            ?.rewardStreamId && {
+            rewardStreamId:
+              orgProjectWithDeletedKycTeam[0].project.kycTeam.rewardStreamId,
+          }),
+        },
+      })
+
+      await prisma.project.updateMany({
         where: {
-          id: { in: orgProjects.map((project) => project.projectId) },
+          id: {
+            in: orgProjectWithDeletedKycTeam.map(
+              (project) => project.project.id,
+            ),
+          },
         },
         data: {
           kycTeamId: kycTeam.id,
         },
-      }),
-      prisma.organizationKYCTeam.create({
+      })
+    } else {
+      const kycTeam = await prisma.kYCTeam.create({
         data: {
-          organizationId,
-          kycTeamId: kycTeam.id,
+          walletAddress,
         },
-      }),
-    ])
+      })
+
+      await Promise.all([
+        prisma.project.updateMany({
+          where: {
+            id: { in: orgProjects.map((project) => project.projectId) },
+          },
+          data: {
+            kycTeamId: kycTeam.id,
+          },
+        }),
+        prisma.organizationKYCTeam.create({
+          data: {
+            organizationId,
+            kycTeamId: kycTeam.id,
+          },
+        }),
+      ])
+    }
 
     return { error: null }
   } catch (error: any) {

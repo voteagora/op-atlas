@@ -74,8 +74,6 @@ export function AddGrantDeliveryAddressDialog({
           throw new Error("Invalid signature")
 
         if (organizationId) {
-          if (!organizationId) return
-
           const createdOrganizationKycTeam =
             await createOrganizationKycTeamAction({
               walletAddress: grantDeliveryData.address,

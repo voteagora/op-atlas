@@ -120,7 +120,7 @@ export function formatRecurringRewards(
         }
       }),
       kycTeam: kycTeam ?? undefined,
-      streams: kycTeam?.superfludStream ?? [],
+      streams: kycTeam?.rewardStream?.streams ?? [],
     }
   })
 }
