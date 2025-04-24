@@ -87,11 +87,13 @@ model FundingRound {
   startDate   DateTime
   endDate     DateTime
 
-  applications    Application[]
-  recipients      FundingReward[]
-  Category        Category[]
-  ImpactStatement ImpactStatement[]
-  ProjectOSO      ProjectOSO[]
+  applications     Application[]
+  recipients       FundingReward[]
+  Category         Category[]
+  ImpactStatement  ImpactStatement[]
+  ProjectOSO       ProjectOSO[]
+  recurringRewards RecurringReward[]
+  rewardStream     RewardStream[]
 }
 
 model FundingReward {
@@ -235,6 +237,8 @@ model Project {
   isOnChainContract      Boolean  @default(true)
   lastMetadataUpdate     DateTime @default(now())
 
+  kycTeamId String?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -249,9 +253,12 @@ model Project {
   rewards      FundingReward[]
   links        ProjectLinks[]
   publishedContracts PublishedContract[]
-  ProjectKYCTeam ProjectKYCTeam[]
   ProjectOSO ProjectOSO[]
   projectOSOData projectOSOData[]
+
+  recurringRewards RecurringReward[]
+
+  kycTeam   KYCTeam? @relation(fields: [kycTeamId], references: [id])
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
@@ -526,13 +533,19 @@ model KYCUser {
 model KYCTeam {
   id             String       @id @default(uuid())
   walletAddress  String       @unique
-  
+
+  rewardStreamId String?
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
   
 	team                       KYCUserTeams[]
-  ProjectKYCTeam             ProjectKYCTeam[]
+  projects                   Project[]
   OrganizationKYCTeams       OrganizationKYCTeam[]
+  superfludStream            SuperfluidStream[]
+
+  rewardStream   RewardStream? @relation(fields: [rewardStreamId], references: [id])
 	
   @@index([walletAddress])
 }
@@ -549,21 +562,6 @@ model KYCUserTeams {
 	team        KYCTeam   @relation(fields: [kycTeamId], references: [id], onDelete: Cascade) 
 	
 	@@index([kycUserId])
-	@@index([kycTeamId])
-}
-
-model ProjectKYCTeam { // Project can only have 1 KYCTeam
-	id          String    @id @default(uuid())
-	projectId   String
-	kycTeamId   String
-	
-	createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-	
-	project     Project   @relation(fields: [projectId], references: [id])
-	team        KYCTeam   @relation(fields: [kycTeamId], references: [id], onDelete: Cascade) 
-	
 	@@index([kycTeamId])
 }
 
@@ -606,4 +604,63 @@ model projectOSOData {
 
   @@index([projectId])
   @@index([osoId])
+}
+
+model RecurringReward {
+  id           String       @id @default(uuid())
+  roundId      String
+  tranche      Int
+  projectId    String
+  amount       String    // In OP with 18 decimals
+  
+  createdAt    DateTime     @default(now())    
+  updatedAt    DateTime     @default(now())    
+  deletedAt    DateTime?
+  
+  round        FundingRound @relation(fields: [roundId], references: [id])
+  project      Project @relation(fields: [projectId], references: [id])
+  
+  @@unique([roundId, tranche, projectId])
+  @@index([projectId])
+  @@index([roundId])
+  @@index([tranche])
+}
+
+model SuperfluidStream {
+  id           String    @id // Superfluid Id
+	sender       String
+	receiver     String
+	flowRate     String
+  deposit      String
+	
+	createdAt    DateTime     @default(now())    
+  updatedAt    DateTime     @default(now())    
+  deletedAt    DateTime? 
+	
+	internalStreamId  String?
+	
+	rewardStream     RewardStream? @relation(fields: [internalStreamId], references: [id])
+  kycTeam          KYCTeam? @relation(fields: [receiver], references: [walletAddress])
+  
+  @@unique([sender, receiver])
+  @@index([sender])
+  @@index([receiver])
+  @@index([internalStreamId])
+}
+
+// To keep track of the streams when user changes their wallet
+// This is used to reconcile the streams when a user changes their wallet address
+// This is the id that's passed to Superfluid to create the stream
+model RewardStream { // This is used to track the ids for the streams
+		id         String         @id
+    projects   String[]       // Immutable list of projectIds redundantly stored for reconciliation & validation
+    roundId    String        
+		
+		createdAt    DateTime     @default(now())    
+		
+		teams      KYCTeam[]
+		streams    SuperfluidStream[]
+    round      FundingRound @relation(fields: [roundId], references: [id])
+
+    @@index([roundId])
 }

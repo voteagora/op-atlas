@@ -60,36 +60,51 @@ export async function updateKYBUserStatus(
   return result
 }
 
-export async function getVerifiedKycTeamsMap(projectId: string) {
-  const kycTeams = await prisma.projectKYCTeam.findMany({
+export async function getProjectKycTeam(projectId: string) {
+  const project = await prisma.project.findUnique({
     where: {
-      projectId,
+      id: projectId,
     },
     select: {
-      projectId: true,
-      team: {
-        select: {
+      kycTeamId: true,
+      kycTeam: {
+        include: {
           team: {
-            select: {
+            include: {
               users: true,
             },
           },
+          rewardStream: true,
         },
       },
     },
   })
 
-  const result: Record<string, boolean> = {}
+  return project?.kycTeam ?? undefined
+}
 
-  for (const kycTeam of kycTeams) {
-    const teamVerified =
-      kycTeam.team.team.length > 0 &&
-      kycTeam.team.team.every(
-        (teamMember) => teamMember.users.status === "APPROVED",
-      )
-
-    result[kycTeam.projectId] = teamVerified
+export async function deleteKycTeam({
+  kycTeamId,
+  rewardStreamId,
+}: {
+  kycTeamId: string
+  rewardStreamId?: string
+}) {
+  // Soft delete if there's an active stream
+  if (rewardStreamId) {
+    await prisma.kYCTeam.update({
+      where: {
+        id: kycTeamId,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    })
+  } else {
+    await prisma.kYCTeam.delete({
+      where: {
+        id: kycTeamId,
+      },
+    })
   }
-
-  return result
 }

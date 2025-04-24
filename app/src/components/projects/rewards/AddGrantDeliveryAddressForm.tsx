@@ -1,7 +1,6 @@
 "use client"
 
-import { KYCUser } from "@prisma/client"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { CheckIcon, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -12,10 +11,12 @@ import { toast } from "sonner"
 import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { deleteOrganizationKycTeam } from "@/db/organizations"
+import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
 import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
-import { cn } from "@/lib/utils"
+import { KYCTeamWithTeam } from "@/lib/types"
+import { cn, getValidUntil } from "@/lib/utils"
 import { shortenAddress } from "@/lib/utils"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
 
 import CompletedGrantDeliveryForm from "./CompletedGrantDeliveryForm"
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
@@ -23,36 +24,24 @@ import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
 export default function AddGrantDeliveryAddressForm({
   kycTeam,
 }: {
-  kycTeam?: {
-    id?: string
-    grantAddress?: {
-      address: string
-      validUntil: string
-    }
-    projectId?: string
-    team?: KYCUser[]
-  }
+  kycTeam?: KYCTeamWithTeam
 }) {
-  const params = useParams()
+  const { organizationId, projectId } = useParams()
   const queryClient = useQueryClient()
-
-  const organizationProject = params.organizationId as string
 
   const { mutate: deleteProjectKYCTeam } = useMutation({
     mutationFn: async () => {
-      if (!organizationProject) {
-        const projectId = params.projectId as string
+      if (!organizationId) {
         await deleteProjectKYCTeamAction({
           kycTeamId: kycTeam?.id ?? "",
-          projectId,
+          projectId: projectId as string,
         })
         await queryClient.invalidateQueries({
           queryKey: ["kyc-teams", "project", projectId],
         })
       } else {
-        const organizationId = params.organizationId as string
-        await deleteOrganizationKycTeam({
-          organizationId,
+        await deleteOrganizationKYCTeam({
+          organizationId: organizationId as string,
           kycTeamId: kycTeam?.id ?? "",
         })
         await queryClient.invalidateQueries({
@@ -62,18 +51,16 @@ export default function AddGrantDeliveryAddressForm({
     },
   })
 
-  const teamMembers = kycTeam?.team?.filter(
-    (teamMember) => !Boolean(teamMember.businessName),
-  )
-  const entities = kycTeam?.team?.filter((teamMember) =>
-    Boolean(teamMember.businessName),
-  )
-  const allTeamMembersVerified =
-    Boolean(kycTeam?.team?.length) &&
-    kycTeam?.team?.every((teamMember) => teamMember.status === "APPROVED")
+  const teamMembers = kycTeam?.team
+    ?.filter((teamMember) => !Boolean(teamMember.users.businessName))
+    .map((teamMember) => teamMember.users)
+  const entities = kycTeam?.team
+    ?.filter((teamMember) => Boolean(teamMember.users.businessName))
+    .map((teamMember) => teamMember.users)
+  const allTeamMembersVerified = isKycTeamVerified(kycTeam)
 
   const processCompleted =
-    kycTeam?.grantAddress &&
+    kycTeam?.walletAddress &&
     Boolean(Boolean(kycTeam?.team?.length) && allTeamMembersVerified)
 
   const openedAccordionValues = React.useMemo(() => {
@@ -103,22 +90,10 @@ export default function AddGrantDeliveryAddressForm({
         <h4 className="font-semibold text-base">Add an address</h4>
       )}
       {allTeamMembersVerified ? (
-        <Accordion
-          collapsible={false}
-          type="single"
-          items={[
-            {
-              title: <AccordionTitleContainer text="Grant delivery address" />,
-              content: kycTeam?.grantAddress && (
-                <CompletedGrantDeliveryForm
-                  kycTeam={kycTeam}
-                  organizationProject={Boolean(organizationProject)}
-                  teamMembers={teamMembers}
-                  entities={entities}
-                />
-              ),
-            },
-          ]}
+        <CompletedGrantDeliveryForm
+          kycTeam={kycTeam}
+          teamMembers={teamMembers}
+          entities={entities}
         />
       ) : (
         <Accordion
@@ -131,7 +106,7 @@ export default function AddGrantDeliveryAddressForm({
               title: (
                 <AccordionTitleContainer
                   i={
-                    kycTeam?.grantAddress?.address ? (
+                    kycTeam?.walletAddress ? (
                       <CheckIcon size={14} className="text-green-600" />
                     ) : (
                       1
@@ -140,15 +115,13 @@ export default function AddGrantDeliveryAddressForm({
                   text="Enter your grant delivery address"
                 />
               ),
-              content: kycTeam?.grantAddress?.address ? (
+              content: kycTeam?.walletAddress ? (
                 <>
                   <div className="input-container space-x-1.5">
                     <button
                       className="flex items-center space-x-1.5"
                       onClick={() => {
-                        navigator.clipboard.writeText(
-                          kycTeam.grantAddress!.address,
-                        )
+                        navigator.clipboard.writeText(kycTeam.walletAddress)
                         toast.success("Address copied to clipboard")
                       }}
                     >
@@ -161,15 +134,15 @@ export default function AddGrantDeliveryAddressForm({
                       />
                       <span className="text-sm text-foreground ">
                         {processCompleted
-                          ? shortenAddress(kycTeam.grantAddress!.address)
-                          : kycTeam.grantAddress!.address}
+                          ? shortenAddress(kycTeam.walletAddress)
+                          : kycTeam.walletAddress}
                       </span>
                     </button>
                     {processCompleted && (
                       <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
                         <CheckIcon size={12} />
                         <span>
-                          Valid until {kycTeam.grantAddress!.validUntil}
+                          Valid until {getValidUntil(kycTeam.createdAt)}
                         </span>
                       </div>
                     )}
@@ -183,9 +156,7 @@ export default function AddGrantDeliveryAddressForm({
                   </Button>
                 </>
               ) : (
-                <DeliveryAddressVerificationForm
-                  organizationProject={Boolean(organizationProject)}
-                />
+                <DeliveryAddressVerificationForm />
               ),
             },
             {
@@ -216,8 +187,8 @@ export default function AddGrantDeliveryAddressForm({
                           ? "Resubmit the form"
                           : "Fill out the form"
                       }
-                      disabled={!Boolean(kycTeam?.grantAddress?.address)}
-                      href={`https://superchain.typeform.com/to/Pq0c7jYJ#l2_address=${kycTeam?.grantAddress?.address}&kyc_team_id=${kycTeam?.id}`}
+                      disabled={!Boolean(kycTeam?.walletAddress)}
+                      href={`https://superchain.typeform.com/to/Pq0c7jYJ#l2_address=${kycTeam?.walletAddress}&kyc_team_id=${kycTeam?.id}`}
                     />
                   </div>
                 </div>
@@ -301,7 +272,7 @@ export default function AddGrantDeliveryAddressForm({
                       Is something missing or incorrect? You’ll need to{" "}
                       <Link
                         className="underline hover:opacity-80 transition-colors duration-300"
-                        href={`https://superchain.typeform.com/to/Pq0c7jYJ#l2_address=${kycTeam?.grantAddress?.address}&kyc_team_id=${kycTeam?.id}`}
+                        href={`https://superchain.typeform.com/to/Pq0c7jYJ#l2_address=${kycTeam?.walletAddress}&kyc_team_id=${kycTeam?.id}`}
                       >
                         cancel and start over
                       </Link>

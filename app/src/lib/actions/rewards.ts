@@ -6,13 +6,18 @@ import { isAddress } from "viem"
 import { auth } from "@/auth"
 import {
   canClaimToAddress,
+  createOrUpdateSuperfluidStream,
+  createRewardStream,
   deleteClaim,
+  getKYCTeamsWithRewardsForRound,
   getReward,
+  getRewardStreamsWithRewardsForRound,
   startClaim,
   updateClaim,
 } from "@/db/rewards"
 
-import { getActiveStreams } from "../superfluid"
+import { getActiveStreams, SuperfluidStream } from "../superfluid"
+import { processStream } from "../utils/rewards"
 import { verifyAdminStatus } from "./utils"
 
 // TODO: Can filter by sender once we have it
@@ -162,4 +167,39 @@ export const resetRewardsClaim = async (rewardId: string) => {
     error: null,
     claim,
   }
+}
+
+type RewardStream = {
+  id: string
+  projectIds: string[]
+  projectNames: string[]
+  wallets: string[]
+  KYCStatusCompleted: boolean
+  amounts: string[]
+}
+
+export const getRewardStreamsForRound = async (
+  roundId: string,
+): Promise<RewardStream[]> => {
+  const existingStreams = (async () => {
+    const streams = await getRewardStreamsWithRewardsForRound(roundId)
+    return streams.map((stream) => processStream(stream.teams, stream.id))
+  })()
+
+  const newStreams = (async () => {
+    const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
+    return kycTeams.map((kycTeam) => processStream([kycTeam]))
+  })()
+
+  return [...(await existingStreams), ...(await newStreams)]
+}
+
+export const processSuperfluidStream = async (
+  stream: SuperfluidStream,
+  roundId: string,
+) => {
+  // Create RewardStream
+  const rewardStream = await createRewardStream(stream, roundId)
+  // Create SuperfluidStream
+  await createOrUpdateSuperfluidStream(stream, rewardStream?.id)
 }

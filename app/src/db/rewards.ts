@@ -3,6 +3,9 @@
 import { Prisma } from "@prisma/client"
 import { cache } from "react"
 
+import { SuperfluidStream } from "@/lib/superfluid"
+import { generateRewardStreamId } from "@/lib/utils/rewards"
+
 import { prisma } from "./client"
 
 async function getFundingRewardsByRoundIdsAndSearchFn({
@@ -236,3 +239,153 @@ export async function deleteClaim(rewardId: string) {
 }
 
 export const getClaimByRewardId = cache(getClaimByRewardIdFn)
+
+export async function getKYCTeamsWithRewardsForRound(roundId: string) {
+  return prisma.kYCTeam.findMany({
+    where: {
+      deletedAt: null,
+      projects: {
+        some: {
+          recurringRewards: {
+            some: {
+              roundId,
+            },
+          },
+        },
+      },
+      rewardStream: {
+        is: null,
+      },
+    },
+    include: {
+      team: {
+        include: {
+          users: true,
+        },
+      },
+      rewardStream: true,
+      projects: {
+        select: {
+          id: true,
+          name: true,
+          recurringRewards: {
+            where: {
+              roundId,
+            },
+          },
+          kycTeam: true,
+        },
+      },
+    },
+  })
+}
+
+export async function getRewardStreamsWithRewardsForRound(roundId: string) {
+  // IMPORTANT: Must include soft deleted kyc teams and projects
+
+  return prisma.rewardStream.findMany({
+    where: {
+      roundId,
+    },
+    include: {
+      teams: {
+        include: {
+          team: {
+            include: {
+              users: true,
+            },
+          },
+          rewardStream: true,
+          projects: {
+            include: {
+              recurringRewards: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function createOrUpdateSuperfluidStream(
+  stream: SuperfluidStream,
+  rewardStreamId?: string,
+) {
+  return prisma.superfluidStream.upsert({
+    where: {
+      id: stream.id,
+    },
+    update: {
+      flowRate: stream.currentFlowRate,
+      deposit: stream.deposit,
+      updatedAt: new Date(),
+    },
+    create: {
+      id: stream.id,
+      flowRate: stream.currentFlowRate,
+      sender: stream.sender.id,
+      receiver: stream.receiver.id,
+      deposit: stream.deposit,
+      internalStreamId: rewardStreamId,
+    },
+  })
+}
+
+export async function createRewardStream(
+  stream: SuperfluidStream,
+  roundId: string,
+) {
+  const projects = await prisma.project.findMany({
+    where: {
+      kycTeam: {
+        walletAddress: stream.sender.id,
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  if (projects.length === 0) {
+    return null
+  }
+
+  const rewardId = generateRewardStreamId(projects.map((project) => project.id))
+
+  return prisma.rewardStream.upsert({
+    where: {
+      id: rewardId,
+    },
+    update: {},
+    create: {
+      id: rewardId,
+      projects: projects.map((project) => project.id),
+      roundId,
+    },
+  })
+}
+
+export async function getProjectRecurringRewards(projectId: string) {
+  return prisma.recurringReward.findMany({
+    where: {
+      projectId,
+    },
+    include: {
+      project: {
+        include: {
+          kycTeam: {
+            include: {
+              superfludStream: true,
+              team: {
+                select: {
+                  users: true,
+                },
+              },
+              rewardStream: true,
+            },
+          },
+        },
+      },
+    },
+  })
+}

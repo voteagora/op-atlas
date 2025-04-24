@@ -122,8 +122,57 @@ export type ProjectContractWithProject = Prisma.ProjectContractGetPayload<{
   }
 }>
 
+export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
+  include: {
+    team: {
+      select: {
+        users: true
+      }
+    }
+    rewardStream: true
+  }
+}>
+
+export type KYCStreamTeam = Prisma.KYCTeamGetPayload<{
+  include: {
+    team: {
+      include: {
+        users: true
+      }
+    }
+    rewardStream: true
+    projects: {
+      select: {
+        id: true
+        name: true
+        recurringRewards: true
+      }
+    }
+  }
+}>
+
 export type RewardWithClaim = Prisma.FundingRewardGetPayload<{
   include: { claim: true }
+}>
+
+export type RecurringRewardWithProject = Prisma.RecurringRewardGetPayload<{
+  include: {
+    project: {
+      include: {
+        kycTeam: {
+          include: {
+            superfludStream: true
+            team: {
+              select: {
+                users: true
+              }
+            }
+            rewardStream: true
+          }
+        }
+      }
+    }
+  }
 }>
 
 export type UserWithProjects = Prisma.UserGetPayload<{
