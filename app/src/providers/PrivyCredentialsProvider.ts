@@ -1,9 +1,9 @@
 import CredentialsProvider from "next-auth/providers/credentials"
 
-import { getUserByPrivyDid, upsertUser } from "../db/users"
-import { syncPrivyUser } from "../db/privy"
-import privy from "../lib/privy"
 import { User as PrivyUser } from "@privy-io/react-auth"
+import { syncPrivyUser } from "../db/privy"
+import { getUserByPrivyDid, upsertUser } from "../db/users"
+import privy from "../lib/privy"
 interface UserResponse {
   id: string
   farcasterId?: string

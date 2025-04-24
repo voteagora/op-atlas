@@ -2,6 +2,7 @@ import { User as PrivyUser } from "@privy-io/react-auth"
 import { User } from "@prisma/client"
 import { getAddress } from "viem"
 import { addUserAddresses, deleteUserEmails, getUserByPrivyDid, removeUserAddress, updateUser, updateUserEmail, getUserById } from "./users"
+import { addContactToList, removeContactFromList } from "@/lib/api/mailchimp"
 
 export const syncPrivyUser = async (
     privyUser: PrivyUser,
@@ -86,11 +87,23 @@ export const syncPrivyUser = async (
                 email: privyUser.email.address.toLowerCase(),
                 verified: true,
             })
+
+            await addContactToList({ email: privyUser.email.address.toLowerCase() })
+
         } catch (error) {
             console.error("Failed to update email:", error)
         }
     } else {
-        // Delete all emails associated with the user
+
+        // Check if user has an email record before attempting to remove from list
+        if (existingUser?.emails.length > 0) {
+            try {
+                await removeContactFromList({ email: existingUser.emails[0].email });
+            } catch (error) {
+                console.error("Failed to remove contact from mailing list:", error);
+            }
+        }
+
         deleteUserEmails(existingUser.id)
     }
 

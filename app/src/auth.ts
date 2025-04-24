@@ -30,10 +30,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         token.id = user?.id
       }
 
-      if (trigger === "update" && session?.email) {
-        token.email = session.email
-      }
-
       return token
     },
     async session({ session, token, trigger }) {
@@ -42,9 +38,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       // @ts-ignore
       session.user.farcasterId = token.farcasterId
 
-      if (trigger == "update" && token?.email) {
-        session.user.email = token.email
-      }
       return session
     },
   },

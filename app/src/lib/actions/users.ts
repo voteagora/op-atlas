@@ -2,83 +2,16 @@
 
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
-import { z } from "zod"
 
 import { auth } from "@/auth"
 import {
-  getUserById,
   searchUsersByUsername,
   updateUser,
-  updateUserEmail,
   updateUserGovForumProfileUrl,
   updateUserInteraction
 } from "@/db/users"
-import { addContactToList, updateContactEmail } from "@/lib/api/mailchimp"
 
-const UpdateEmailSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "This field has to be filled." })
-    .email("This is not a valid email."),
-})
 
-export const updateEmail = async (email: string) => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const user = await getUserById(session.user.id)
-  if (!user) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const { data, success, error } = UpdateEmailSchema.safeParse({ email })
-  if (!success) {
-    return {
-      error,
-      user: null,
-    }
-  }
-
-  let { email: parsedEmail } = data
-  parsedEmail = parsedEmail.toLowerCase()
-
-  const currentEmail = user.emails[0]?.email
-  if (currentEmail) {
-    await updateContactEmail({
-      currentEmail,
-      newEmail: parsedEmail,
-    })
-  } else {
-    await addContactToList({
-      email: parsedEmail,
-    })
-  }
-
-  const [_, updated] = await updateUserEmail({
-    id: user.id,
-    email: parsedEmail,
-  })
-
-  // TODO: This is an antipattern, the paths should be invalidated separately
-  // from the query logic
-  revalidatePath("/dashboard")
-  revalidatePath("/profile/details")
-  revalidatePath("/rewards/[rewardId]/page", "page")
-
-  console.info(`Email updated for user ${session.user.id}: ${parsedEmail}`)
-
-  return {
-    error: null,
-    user: updated,
-  }
-}
 
 
 export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
