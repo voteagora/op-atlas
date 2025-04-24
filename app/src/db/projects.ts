@@ -1741,6 +1741,15 @@ export async function getKycTeamForProject({
       },
     },
     include: {
+      organization: {
+        select: {
+          organization: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
       kycTeam: {
         include: {
           team: {
@@ -1754,7 +1763,7 @@ export async function getKycTeamForProject({
     },
   })
 
-  return projectKycTeam?.kycTeam ?? undefined
+  return projectKycTeam ?? undefined
 }
 
 export async function addKYCTeamMembers({

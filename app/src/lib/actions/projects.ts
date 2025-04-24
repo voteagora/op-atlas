@@ -363,6 +363,23 @@ export const removeMemberFromProject = async (
   revalidatePath("/projects", "layout")
 }
 
+export const getKycTeamAction = async (projectId: string) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  const project = await getKycTeamForProject({ projectId })
+
+  return project?.kycTeam ?? undefined
+}
+
 export const setMemberRole = async (
   projectId: string,
   userId: string,
@@ -431,21 +448,6 @@ export const createProjectKycTeamAction = async ({
   }
 
   return createProjectKycTeam({ projectId, walletAddress })
-}
-
-export const getKycTeamAction = async (projectId: string) => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized")
-  }
-
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  if (isInvalid?.error) {
-    throw new Error(isInvalid.error)
-  }
-
-  return getKycTeamForProject({ projectId })
 }
 
 export const createProjectKYCTeamsAction = async ({
