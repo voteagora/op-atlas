@@ -167,7 +167,11 @@ export type RecurringRewardWithProject = Prisma.RecurringRewardGetPayload<{
                 users: true
               }
             }
-            rewardStream: true
+            rewardStream: {
+              include: {
+                streams: true
+              }
+            }
           }
         }
       }

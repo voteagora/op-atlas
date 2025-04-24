@@ -381,7 +381,11 @@ export async function getProjectRecurringRewards(projectId: string) {
                   users: true,
                 },
               },
-              rewardStream: true,
+              rewardStream: {
+                include: {
+                  streams: true,
+                },
+              },
             },
           },
         },
