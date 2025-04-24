@@ -66,6 +66,8 @@ function UnclaimedRewardsDialog({
 export default memo(UnclaimedRewardsDialog)
 
 export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
+  const rewardRound = project.rewards[0].roundId
+
   return (
     <div className="border border-border bg-background rounded-xl p-8 flex items-center gap-4 max-w-full">
       {project.thumbnailUrl && (
@@ -92,9 +94,15 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
           {formatNumber(project.rewards[0].amount)}
         </div>
       </div>
-      <Link href={`/project/${project.id}`}>
-        <Button variant="destructive">View performance</Button>
-      </Link>
+      {parseInt(rewardRound) > 6 ? (
+        <Link href={`/project/${project.id}`}>
+          <Button variant="destructive">View performance</Button>
+        </Link>
+      ) : (
+        <Link href={`/projects/${project.id}/rewards`}>
+          <Button variant="destructive">Claim rewards</Button>
+        </Link>
+      )}
     </div>
   )
 }
