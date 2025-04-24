@@ -41,7 +41,12 @@ export function DeleteKYCTeamDialog({
         }),
       ])
       onOpenChange(false)
-      router.push(`/projects/${projectId}/grant-addresses`)
+      if (organizationId) {
+        router.push(`/profile/organizations/${organizationId}/grant-addresses`)
+      }
+      if (projectId) {
+        router.push(`/projects/${projectId}/grant-addresses`)
+      }
     },
   })
 
