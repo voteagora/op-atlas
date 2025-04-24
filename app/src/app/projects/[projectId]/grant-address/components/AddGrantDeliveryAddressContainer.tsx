@@ -1,8 +1,9 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
+
 import AddGrantDeliveryAddressForm from "@/components/projects/rewards/AddGrantDeliveryAddressForm"
 import { getKycTeamAction } from "@/lib/actions/projects"
-import { useQuery } from "@tanstack/react-query"
 
 export default function AddGrantDeliveryAddressContainer({
   projectId,
