@@ -12,7 +12,7 @@ import {
 } from "@/lib/actions/users"
 import { cn } from "@/lib/utils"
 
-import { syncPrivyUser } from "@/db/users"
+import { syncPrivyUser } from "@/db/privy"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { Checkbox } from "../ui/checkbox"
 

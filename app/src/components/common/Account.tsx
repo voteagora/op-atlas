@@ -21,7 +21,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getUserById, syncPrivyUser } from "@/db/users"
+import { getUserById } from "@/db/users"
+import { syncPrivyUser } from "@/db/privy"
 import { AUTH_STATUS } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {

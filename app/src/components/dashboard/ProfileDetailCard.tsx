@@ -7,8 +7,8 @@ import { toast } from "sonner"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { syncPrivyUser } from "@/db/privy"
 
-import { syncPrivyUser } from "@/db/users"
 import {
   useLinkAccount,
   usePrivy

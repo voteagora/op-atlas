@@ -3,7 +3,7 @@
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import { syncPrivyUser } from "@/db/users"
+import { syncPrivyUser } from "@/db/privy"
 import {
   useLinkAccount,
   usePrivy,

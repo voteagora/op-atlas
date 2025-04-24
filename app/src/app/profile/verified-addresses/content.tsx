@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { UserAddressSource, UserWithAddresses } from "@/lib/types"
 
 import { AddAddress } from "@/components/profile/AddAddress"
-import { syncPrivyUser } from "@/db/users"
+import { syncPrivyUser } from "@/db/privy"
 import { usePrivy } from "@privy-io/react-auth"
 import { VerifiedAddress } from "./verified-address"
 

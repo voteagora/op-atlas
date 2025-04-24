@@ -1,11 +1,10 @@
 "use client"
 
-import { User } from "@prisma/client"
 import Image from "next/image"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import { syncPrivyUser } from "@/db/users"
+import { syncPrivyUser } from "@/db/privy"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 
 export function DiscordConnection() {

@@ -1,4 +1,4 @@
-import { syncPrivyUser } from "@/db/users"
+import { syncPrivyUser } from "@/db/privy"
 import { useLinkAccount } from "@privy-io/react-auth"
 import { toast } from "sonner"
 import { Button } from "../common/Button"

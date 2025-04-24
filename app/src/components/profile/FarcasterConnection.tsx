@@ -1,6 +1,6 @@
 "use client"
 
-import { syncPrivyUser } from "@/db/users";
+import { syncPrivyUser } from "@/db/privy";
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
 import { toast } from "sonner";
