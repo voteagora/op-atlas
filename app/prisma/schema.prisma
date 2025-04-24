@@ -645,6 +645,7 @@ model SuperfluidStream {
   @@unique([sender, receiver])
   @@index([sender])
   @@index([receiver])
+  @@index([internalStreamId])
 }
 
 // To keep track of the streams when user changes their wallet
