@@ -14,7 +14,6 @@ import { UserAddressSource } from "@/lib/types"
 import { shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { makeUserAddressPrimaryAction } from "./actions"
 
 export const VerifiedAddress = ({
   address,
@@ -22,6 +21,7 @@ export const VerifiedAddress = ({
   primary,
   onCopy,
   onRemove,
+  onSetPrimary,
   showCheckmark = true,
   shouldShortenAddress = false,
 }: {
@@ -30,6 +30,7 @@ export const VerifiedAddress = ({
   primary: boolean
   onCopy: (address: string) => void
   onRemove?: (address: string) => void
+  onSetPrimary: (address: string) => void
   showCheckmark?: boolean
   shouldShortenAddress?: boolean
 }) => {
@@ -69,7 +70,7 @@ export const VerifiedAddress = ({
               <DropdownMenuItem>
                 <button
                   className="w-full flex justify-start"
-                  onClick={async () => makeUserAddressPrimaryAction(address)}
+                  onClick={() => onSetPrimary(address)}
                 >
                   Set as primary address
                 </button>

@@ -12,8 +12,8 @@ import {
   UserWithEmails,
 } from "@/lib/types"
 import { profileProgress } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
+import { makeUserAddressPrimaryAction } from "@/app/profile/verified-addresses/actions"
 import { usePrivy } from "@privy-io/react-auth"
 import { Badge } from "../common/Badge"
 import {
@@ -22,9 +22,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion"
-import { AddAddress } from "./AddAddress"
+import { AddressConnection } from "./AddressConnection"
 import { EmailConnection } from "./EmailConnection"
 import { GithubConnection } from "./GithubConnection"
+import { useQueryClient } from "@tanstack/react-query"
 
 export function CompleteProfileCallout({
   user,
@@ -184,7 +185,18 @@ function ConnectYourGithubStep({ user }: { user: User }) {
 }
 
 function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
-  const { setOpenDialog } = useAppDialogs()
+
+  const queryClient = useQueryClient()
+
+  const onSetPrimary = (address: string) => {
+    toast.promise(makeUserAddressPrimaryAction(address).then(() => {
+      queryClient.invalidateQueries({ queryKey: ["user", user?.id] })
+    }), {
+      loading: "Setting primary address...",
+      success: "Primary address set",
+      error: "Failed to set primary address",
+    })
+  }
 
   const onCopy = (address: string) => {
     navigator.clipboard.writeText(address)
@@ -229,7 +241,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
           </div>
 
           {user.addresses.length === 0 && (
-            <AddAddress>Add address</AddAddress>
+            <AddressConnection user={user}>Add address</AddressConnection>
           )}
 
           {user.addresses.length >= 1 && (
@@ -247,10 +259,11 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                     showCheckmark={false}
                     source={source as UserAddressSource}
                     onCopy={onCopy}
+                    onSetPrimary={onSetPrimary}
                   />
                 ))}
               </div>
-              <AddAddress>Add another address</AddAddress>
+              <AddressConnection user={user}>Add another address</AddressConnection>
             </div>
           )}
         </div>

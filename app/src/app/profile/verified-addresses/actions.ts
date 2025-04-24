@@ -12,6 +12,4 @@ export async function makeUserAddressPrimaryAction(address: string) {
   }
 
   await makeUserAddressPrimary(address, session.user.id)
-
-  revalidatePath("/profile/verified-addresses")
 }

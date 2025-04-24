@@ -4,14 +4,13 @@ import Link from "next/link"
 import { memo } from "react"
 import { toast } from "sonner"
 
+import { syncPrivyUser } from "@/db/privy"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { syncPrivyUser } from "@/db/privy"
 
 import {
-  useLinkAccount,
-  usePrivy
+  useLinkAccount
 } from "@privy-io/react-auth"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
@@ -32,7 +31,7 @@ const ProfileDetailCard = ({
 }) => {
   const { isBadgeholder } = useIsBadgeholder(user)
 
-  const { user: privyUser } = usePrivy()
+
 
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
