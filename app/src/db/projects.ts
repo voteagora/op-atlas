@@ -1675,19 +1675,46 @@ export async function createProjectKycTeam({
   walletAddress: string
 }) {
   try {
-    const kycTeam = await prisma.kYCTeam.create({
-      data: {
-        walletAddress,
-      },
-    })
+    await prisma.$transaction(async (tx) => {
+      // Check if project already has a kyc team
+      const project = await tx.project.findUnique({
+        where: {
+          id: projectId,
+          kycTeam: {
+            rewardStreamId: {
+              not: null,
+            },
+          },
+        },
+        select: {
+          kycTeam: {
+            select: {
+              id: true,
+              rewardStreamId: true,
+            },
+          },
+        },
+      })
 
-    await prisma.project.update({
-      where: {
-        id: projectId,
-      },
-      data: {
-        kycTeamId: kycTeam.id,
-      },
+      const kycTeam = await tx.kYCTeam.create({
+        data: {
+          walletAddress,
+          ...(project?.kycTeam?.rewardStreamId && {
+            rewardStreamId: project.kycTeam.rewardStreamId,
+          }),
+        },
+      })
+
+      await tx.project.update({
+        where: {
+          id: projectId,
+        },
+        data: {
+          kycTeamId: kycTeam.id,
+        },
+      })
+
+      return kycTeam
     })
 
     return { error: null }

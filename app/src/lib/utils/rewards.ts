@@ -112,8 +112,6 @@ export function formatRecurringRewards(
     const project = rewards[0].project
     const kycTeam = project.kycTeam
 
-    console.log(kycTeam)
-
     return {
       roundId: round,
       rewards: rewards.map((reward) => {
