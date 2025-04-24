@@ -11,38 +11,6 @@ export default function Performance({
 }: {
   metrics: PerformanceMetrics
 }) {
-  const PERFORMANCE_CHARTS = [
-    {
-      value: Object.values(metrics.tvl).reduce((acc, curr) => acc + curr, 0),
-      title: "TVL across the Superchain",
-      data: metrics.tvl,
-    },
-    {
-      value: Object.values(metrics.transactions).reduce(
-        (acc, curr) => acc + curr,
-        0,
-      ),
-      title: "Transactions",
-      data: metrics.transactions,
-    },
-    {
-      value: Object.values(metrics.gasFees).reduce(
-        (acc, curr) => acc + curr,
-        0,
-      ),
-      title: "Gas consumed",
-      data: metrics.gasFees,
-    },
-    {
-      value: Object.values(metrics.activeAddresses).reduce(
-        (acc, curr) => acc + curr,
-        0,
-      ),
-      title: "Unique addresses",
-      data: metrics.activeAddresses,
-    },
-  ]
-
   return (
     <div className="w-full space-y-6">
       <div className="w-full flex items-center">

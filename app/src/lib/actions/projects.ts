@@ -41,13 +41,6 @@ import {
   verifyOrganizationMembership,
 } from "./utils"
 
-import {
-  getProjectRewards,
-  getProjectDeployedChains,
-  getProjectContributors,
-  getReposWithTags,
-} from "@/lib/oso/utils"
-
 import { deleteKycTeam } from "@/db/kyc"
 
 export const getProjects = async (userId: string) => {
