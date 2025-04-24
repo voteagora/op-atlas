@@ -15,12 +15,11 @@ export const GET = async (
   req: NextRequest,
   { params }: { params: { season: string; round: string } },
 ) => {
-  console.log("params", params.round)
-  // const authResponse = await authenticateApiUser(req)
+  const authResponse = await authenticateApiUser(req)
 
-  // if (!authResponse.authenticated) {
-  //   return new Response(authResponse.failReason, { status: 401 })
-  // }
+  if (!authResponse.authenticated) {
+    return new Response(authResponse.failReason, { status: 401 })
+  }
 
   const validatedRound = roundSchema.parse(params.round)
   const rewards = await getRewardStreamsForRound(
