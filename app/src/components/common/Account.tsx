@@ -2,6 +2,7 @@
 
 import {
   User as PrivyUser,
+  useLinkAccount,
   useLogin,
   useLogout,
   usePrivy,
@@ -20,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getUserById } from "@/db/users"
+import { getUserById, syncPrivyUser } from "@/db/users"
 import { AUTH_STATUS } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {
@@ -33,10 +34,23 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 export const Account = () => {
-  const { getAccessToken } = usePrivy()
+  const { user: privyUser, getAccessToken } = usePrivy()
+
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
       onPrivyLogin(params.user)
+    },
+  })
+
+  const { linkEmail } = useLinkAccount({
+    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
+      if (linkMethod === "email") {
+        toast.promise(syncPrivyUser(updatedPrivyUser), {
+          loading: "Adding email...",
+          success: "Email added successfully",
+          error: "Failed to add email",
+        })
+      }
     },
   })
 
@@ -74,7 +88,6 @@ export const Account = () => {
   }
 
   const onPrivyLogin = (user: PrivyUser) => {
-    console.log(user)
 
     getAccessToken()
       .then((token) => {
@@ -101,8 +114,8 @@ export const Account = () => {
       }
 
       if (!isFirstTimeUser()) {
-        if (!session?.user?.email) {
-          setOpenDialog("email")
+        if (!privyUser?.email?.address) {
+          linkEmail();
         } else {
           checkBadgeholderStatus(session?.user?.id)
         }

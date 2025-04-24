@@ -1,22 +1,20 @@
 import { User } from "@prisma/client"
 import { ArrowUpRight, Check, X } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
-import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
 import {
   UserAddressSource,
   UserWithAddresses,
   UserWithEmails,
 } from "@/lib/types"
-import { cn, profileProgress } from "@/lib/utils"
+import { profileProgress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
+import { usePrivy } from "@privy-io/react-auth"
 import { Badge } from "../common/Badge"
 import {
   Accordion,
@@ -27,7 +25,6 @@ import {
 import { AddAddress } from "./AddAddress"
 import { EmailConnection } from "./EmailConnection"
 import { GithubConnection } from "./GithubConnection"
-import { usePrivy } from "@privy-io/react-auth"
 
 export function CompleteProfileCallout({
   user,

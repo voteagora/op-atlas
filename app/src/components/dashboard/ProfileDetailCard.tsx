@@ -11,8 +11,7 @@ import { cn } from "@/lib/utils"
 import { syncPrivyUser } from "@/db/users"
 import {
   useLinkAccount,
-  usePrivy,
-  useUpdateAccount,
+  usePrivy
 } from "@privy-io/react-auth"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
@@ -35,18 +34,6 @@ const ProfileDetailCard = ({
 
   const { user: privyUser } = usePrivy()
 
-  const { updateEmail } = useUpdateAccount({
-    onSuccess: async ({ user: updatedPrivyUser, updateMethod }) => {
-      if (updateMethod === "email" && updatedPrivyUser) {
-        toast.promise(syncPrivyUser(updatedPrivyUser), {
-          loading: "Updating email...",
-          success: "Email updated successfully",
-          error: "Failed to update email",
-        })
-      }
-    },
-  })
-
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "email" && updatedPrivyUser) {
@@ -58,6 +45,25 @@ const ProfileDetailCard = ({
       }
     },
   })
+
+
+  const renderEmail = () => {
+    if (privyUser?.email?.address) {
+      return <div>Email <span className="font-medium text-secondary-foreground">
+        {privyUser?.email?.address}
+      </span>
+      </div>
+    } else {
+
+      return <Button
+        variant="link"
+        onClick={linkEmail}
+        className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
+      >
+        Add your email
+      </Button>
+    }
+  }
 
   const initials = (user?.name ?? "")
     .split(" ")
@@ -94,18 +100,7 @@ const ProfileDetailCard = ({
             </span>
           </p>
           <p className="text-sm text-muted-foreground">
-            Email
-            <Button
-              variant="link"
-              onClick={() => {
-                privyUser?.email?.address ? updateEmail() : linkEmail()
-              }}
-              className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
-            >
-              {privyUser?.email
-                ? `${privyUser?.email.address}`
-                : "Add your email"}
-            </Button>
+            {renderEmail()}
           </p>
         </div>
       </div>
