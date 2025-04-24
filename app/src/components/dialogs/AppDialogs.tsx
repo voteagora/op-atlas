@@ -4,7 +4,6 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
-import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
 
@@ -27,12 +26,6 @@ export default function AppDialogs() {
       )}
       {openDialog === "get_started" && (
         <GetStartedDialog open onOpenChange={onOpenChange("get_started")} />
-      )}
-      {openDialog === "verify_address" && (
-        <AddVerifiedAddressDialog
-          open
-          onOpenChange={onOpenChange("verify_address")}
-        />
       )}
       {openDialog === "verify_grant_delivery_address" && (
         <AddGrantDeliveryAddressDialog
