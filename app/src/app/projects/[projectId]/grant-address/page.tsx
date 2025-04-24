@@ -6,6 +6,7 @@ import { auth } from "@/auth"
 import { AddGrantDeliveryAddressContainer } from "./components"
 import { getKycTeamForProject } from "@/db/projects"
 import { Button } from "@/components/common/Button"
+import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
 
 export default async function Page({
   params,
@@ -46,9 +47,11 @@ export default async function Page({
             Go to organization settings
           </Link>
         </Button>
+      ) : project?.organization?.organization?.id && kycTeam ? (
+        <GrantDeliveryAddress kycTeam={kycTeam} />
       ) : (
         <div className="space-y-6">
-          <AddGrantDeliveryAddressContainer kycTeam={kycTeam} />
+          <AddGrantDeliveryAddressContainer projectId={params.projectId} />
           <div>
             <p className="text-secondary-foreground text-sm font-normal">
               Need help? Contact{" "}
