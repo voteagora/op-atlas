@@ -135,7 +135,7 @@ const Dashboard = ({
         <UnclaimedRewardsDialog
           open
           onOpenChange={setShowUnclaimedRewardsDialog}
-          projects={projects}
+          projects={adminProjects}
         />
       )}
       {showApplicationDialogue && (
