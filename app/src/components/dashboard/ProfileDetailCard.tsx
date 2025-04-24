@@ -48,9 +48,9 @@ const ProfileDetailCard = ({
 
 
   const renderEmail = () => {
-    if (privyUser?.email?.address) {
+    if (user.emails.length > 0) {
       return <div>Email <span className="font-medium text-secondary-foreground">
-        {privyUser?.email?.address}
+        {user.emails[0].email}
       </span>
       </div>
     } else {
