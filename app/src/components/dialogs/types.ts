@@ -9,6 +9,7 @@ export type DialogType =
   | "not_recognized_address"
   | "select_kyc_project"
   | "claim_rewards"
+  | "delete_kyc_team"
 export type DialogProps<T> = {
   open: boolean
   onOpenChange: (open: boolean) => void

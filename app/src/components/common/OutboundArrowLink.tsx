@@ -3,8 +3,6 @@ import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 
-import { Button } from "../ui/button"
-
 function OutboundArrowLink({
   text,
   target,
@@ -33,7 +31,7 @@ function OutboundArrowLink({
           width={10}
           height={10}
           alt="External link"
-          className="ml-0.5"
+          className="ml-1"
         />
       </span>
       {subtext && <span className="text-md text-gray-500">{subtext}</span>}

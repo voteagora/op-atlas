@@ -1,7 +1,7 @@
 "use client"
 
 import { KYCUser } from "@prisma/client"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { CheckIcon, ChevronRight, SquareCheck } from "lucide-react"
 import { User } from "lucide-react"
 import Image from "next/image"
@@ -9,103 +9,60 @@ import { useParams } from "next/navigation"
 
 import Accordion from "@/components/common/Accordion"
 import { Button } from "@/components/common/Button"
-import { deleteOrganizationKycTeam } from "@/db/organizations"
-import {
-  deleteProjectKYCTeamAction,
-  getProjectKYCTeamsAction,
-} from "@/lib/actions/projects"
-import { shortenAddress } from "@/lib/utils"
+import { getProjectsForKycTeamAction } from "@/lib/actions/projects"
+import { KYCTeamWithTeam } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import GrantDeliveryAddress from "./GrantDeliveryAddress"
 
 interface CompletedGrantDeliveryFormProps {
-  kycTeam?: {
-    id?: string
-    grantAddress?: {
-      address: string
-      validUntil: string
-    }
-  }
+  kycTeam?: KYCTeamWithTeam
   teamMembers?: KYCUser[]
   entities?: KYCUser[]
-  organizationProject?: boolean
 }
 
 export default function CompletedGrantDeliveryForm({
   kycTeam,
-  organizationProject,
   teamMembers,
   entities,
 }: CompletedGrantDeliveryFormProps) {
-  const params = useParams()
-  const queryClient = useQueryClient()
+  const { organizationId, projectId } = useParams()
   const { setData, setOpenDialog } = useAppDialogs()
   const { data: kycTeamProjects } = useQuery({
     queryKey: ["kycTeamProjects", kycTeam?.id],
     queryFn: async () => {
       if (!kycTeam?.id) return []
 
-      return getProjectKYCTeamsAction(kycTeam.id)
-    },
-  })
-  const { mutate: deleteProjectKYCTeam, isPending } = useMutation({
-    mutationFn: async () => {
-      if (!organizationProject) {
-        const projectId = params.projectId as string
-        await deleteProjectKYCTeamAction({
-          kycTeamId: kycTeam?.id ?? "",
-          projectId,
-        })
-        await queryClient.invalidateQueries({
-          queryKey: ["kyc-teams", "project", projectId],
-        })
-      } else {
-        const organizationId = params.organizationId as string
-        await deleteOrganizationKycTeam({
-          organizationId,
-          kycTeamId: kycTeam?.id ?? "",
-        })
-        await queryClient.invalidateQueries({
-          queryKey: ["kyc-teams", "organization", organizationId],
-        })
-      }
+      return getProjectsForKycTeamAction(kycTeam.id)
     },
   })
 
   const openSelectKYCProjectDialog = () => {
     setData({
       kycTeamId: kycTeam?.id,
-      alreadySelectedProjectIds: kycTeamProjects?.map(
-        (team) => team.project.id,
-      ),
+      alreadySelectedProjectIds: kycTeamProjects?.map((project) => project.id),
     })
     setOpenDialog("select_kyc_project")
   }
 
-  const onDeleteProjectKYCTeam = () => {
-    if (!kycTeam?.id) return
-
-    deleteProjectKYCTeam()
+  const openDeleteKYCTeamDialog = () => {
+    setData({
+      kycTeamId: kycTeam?.id,
+      projectId: projectId as string,
+      organizationId: organizationId as string,
+      rewardStreamId: kycTeam?.rewardStream?.id,
+    })
+    setOpenDialog("delete_kyc_team")
   }
 
-  if (!kycTeam?.grantAddress) return null
+  if (!kycTeam?.walletAddress) return null
 
   return (
     <div className="space-y-6">
-      <div className="input-container space-x-1.5">
-        <span className="text-sm text-foreground">
-          {shortenAddress(kycTeam.grantAddress.address)}
-        </span>
-        <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
-          <CheckIcon size={12} />
-          <span>Valid until {kycTeam.grantAddress.validUntil}</span>
-        </div>
-      </div>
-      {organizationProject && (
+      <GrantDeliveryAddress kycTeam={kycTeam} />
+      {organizationId && (
         <div className="space-y-2">
           <div className="w-full flex justify-between items-center">
-            <span className="font-medium text-sm">
-              {organizationProject ? "Projects" : "Project"}
-            </span>
+            <span className="font-medium text-sm">Projects</span>
             <button
               className="flex items-center space-x-1"
               onClick={openSelectKYCProjectDialog}
@@ -117,22 +74,20 @@ export default function CompletedGrantDeliveryForm({
           </div>
           {Boolean(kycTeamProjects?.length) ? (
             <ul className="space-y-2 w-full">
-              {kycTeamProjects?.map((team) => (
+              {kycTeamProjects?.map((project) => (
                 <li
-                  key={team.id}
+                  key={project.id}
                   className="input-container space-x-2 text-sm text"
                 >
-                  {team.project.thumbnailUrl && (
+                  {project.thumbnailUrl && (
                     <Image
-                      src={team.project.thumbnailUrl}
+                      src={project.thumbnailUrl}
                       width={24}
                       height={24}
-                      alt={team.project.name}
+                      alt={project.name}
                     />
                   )}
-                  <span className="text-sm font-normal">
-                    {team.project.name}
-                  </span>
+                  <span className="text-sm font-normal">{project.name}</span>
                 </li>
               ))}
             </ul>
@@ -189,11 +144,7 @@ export default function CompletedGrantDeliveryForm({
                     </ul>
                   </div>
                 )}
-                <Button
-                  variant="secondary"
-                  disabled={isPending}
-                  onClick={onDeleteProjectKYCTeam}
-                >
+                <Button variant="secondary" onClick={openDeleteKYCTeamDialog}>
                   Delete
                 </Button>
               </div>

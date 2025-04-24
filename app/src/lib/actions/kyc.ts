@@ -2,7 +2,11 @@
 
 import { isAfter, parse } from "date-fns"
 
-import { updateKYBUserStatus, updateKYCUserStatus } from "@/db/kyc"
+import {
+  deleteKycTeam,
+  updateKYBUserStatus,
+  updateKYCUserStatus,
+} from "@/db/kyc"
 import { getReward, updateClaim } from "@/db/rewards"
 import {
   caseStatusMap,
@@ -10,6 +14,8 @@ import {
   PersonaCase,
   PersonaInquiry,
 } from "@/lib/persona"
+import { auth } from "@/auth"
+import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -208,4 +214,47 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
       )
     }),
   )
+}
+
+export const deleteKYCTeamAction = async ({
+  projectId,
+  organizationId,
+  kycTeamId,
+  rewardStreamId,
+}: {
+  projectId?: string
+  organizationId?: string
+  kycTeamId: string
+  rewardStreamId?: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  if (projectId) {
+    const isInvalid = await verifyAdminStatus(
+      projectId,
+      session.user.farcasterId,
+    )
+    if (isInvalid?.error) {
+      throw new Error(isInvalid.error)
+    }
+  } else if (organizationId) {
+    const isInvalid = await verifyOrganizationAdmin(
+      organizationId,
+      session.user.id,
+    )
+    if (isInvalid?.error) {
+      throw new Error(isInvalid.error)
+    }
+  } else {
+    throw new Error("No project or organization provided")
+  }
+
+  return await deleteKycTeam({
+    kycTeamId,
+    rewardStreamId,
+  })
 }

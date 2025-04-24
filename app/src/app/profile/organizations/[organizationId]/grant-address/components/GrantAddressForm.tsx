@@ -8,7 +8,6 @@ import React from "react"
 import { Button } from "@/components/common/Button"
 import AddGrantDeliveryAddressForm from "@/components/projects/rewards/AddGrantDeliveryAddressForm"
 import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
-import { getValidUntil } from "@/lib/utils"
 
 export default function GrantAddressForm() {
   const params = useParams()
@@ -49,17 +48,7 @@ export default function GrantAddressForm() {
           organizationKycTeams?.map((organizationKycTeam) => (
             <AddGrantDeliveryAddressForm
               key={organizationKycTeam.id}
-              kycTeam={{
-                id: organizationKycTeam.id,
-                grantAddress: {
-                  address: organizationKycTeam.grantAddress.address,
-                  validUntil: getValidUntil(
-                    organizationKycTeam.grantAddress.createdAt,
-                  ),
-                },
-                projectId: organizationKycTeam.projectId ?? "",
-                team: organizationKycTeam.team,
-              }}
+              kycTeam={organizationKycTeam.team}
             />
           ))
         )}

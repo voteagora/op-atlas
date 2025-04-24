@@ -4,6 +4,7 @@ import { v4 as uuidV4 } from "uuid"
 
 import { prisma } from "@/db/client"
 import { chunkArray } from "@/lib/utils"
+import { parseUnits } from "viem"
 
 const BATCH_SIZE = 10
 
@@ -43,8 +44,12 @@ const populateRecipientsRewards = async () => {
   console.log("🚀 Inserting data")
   const batches = chunkArray(rewards, BATCH_SIZE)
   for (const batch of batches) {
-    await prisma.fundingReward.createMany({
-      data: batch,
+    await prisma.recurringReward.createMany({
+      data: batch.map((item) => ({
+        ...item,
+        tranche: 1,
+        amount: parseUnits(item.amount.toString(), 18).toString(),
+      })),
       skipDuplicates: true,
     })
   }

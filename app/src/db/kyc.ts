@@ -10,7 +10,7 @@ export async function updateKYCUserStatus(
 ) {
   const result = await prisma.$queryRaw<KYCUser[]>`
     WITH closest_match AS (
-      SELECT id, similarity("firstName" || ' ' || "lastName", ${name}) as name_similarity
+      SELECT id, difference(lower(unaccent("firstName") || ' ' || unaccent("lastName")), lower(unaccent(${name}))) as name_similarity
       FROM "KYCUser" 
       WHERE "email" = ${email.toLowerCase()}
       ORDER BY name_similarity DESC
@@ -23,7 +23,7 @@ export async function updateKYCUserStatus(
     WHERE EXISTS (
       SELECT 1 FROM closest_match 
       WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 0.7
+      AND closest_match.name_similarity > 2
     )
     RETURNING *;
   `
@@ -39,7 +39,7 @@ export async function updateKYBUserStatus(
 ) {
   const result = await prisma.$queryRaw<KYCUser[]>`
     WITH closest_match AS (
-      SELECT id, similarity("businessName", ${name}) as name_similarity
+      SELECT id, difference(lower(unaccent("businessName")), lower(unaccent(${name}))) as name_similarity
       FROM "KYCUser" 
       WHERE "email" = ${email.toLowerCase()}
       ORDER BY name_similarity DESC
@@ -52,7 +52,7 @@ export async function updateKYBUserStatus(
     WHERE EXISTS (
       SELECT 1 FROM closest_match 
       WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 0.8
+      AND closest_match.name_similarity > 3
     )
     RETURNING *;
   `
@@ -60,34 +60,51 @@ export async function updateKYBUserStatus(
   return result
 }
 
-export async function getVerifiedKycTeamsMap(projectId: string) {
-  const kycTeams = await prisma.projectKYCTeam.findMany({
+export async function getProjectKycTeam(projectId: string) {
+  const project = await prisma.project.findUnique({
     where: {
-      projectId,
+      id: projectId,
     },
     select: {
-      projectId: true,
-      team: {
-        select: {
+      kycTeamId: true,
+      kycTeam: {
+        include: {
           team: {
-            select: {
+            include: {
               users: true,
             },
           },
+          rewardStream: true,
         },
       },
     },
   })
 
-  const result: Record<string, boolean> = {}
+  return project?.kycTeam ?? undefined
+}
 
-  for (const kycTeam of kycTeams) {
-    const teamVerified = kycTeam.team.team.every(
-      (teamMember) => teamMember.users.status === "APPROVED",
-    )
-
-    result[kycTeam.projectId] = teamVerified
+export async function deleteKycTeam({
+  kycTeamId,
+  rewardStreamId,
+}: {
+  kycTeamId: string
+  rewardStreamId?: string
+}) {
+  // Soft delete if there's an active stream
+  if (rewardStreamId) {
+    await prisma.kYCTeam.update({
+      where: {
+        id: kycTeamId,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    })
+  } else {
+    await prisma.kYCTeam.delete({
+      where: {
+        id: kycTeamId,
+      },
+    })
   }
-
-  return result
 }
