@@ -11,7 +11,7 @@ import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { toast } from "sonner"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -34,6 +34,7 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 export const Account = () => {
+
   const { user: privyUser, getAccessToken } = usePrivy()
 
   const { login: privyLogin } = useLogin({
@@ -42,6 +43,9 @@ export const Account = () => {
     },
   })
 
+  const isLoggingIn = useRef(false)
+
+  // Connect email when a new user logs in
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "email") {
@@ -88,7 +92,7 @@ export const Account = () => {
   }
 
   const onPrivyLogin = (user: PrivyUser) => {
-
+    isLoggingIn.current = true
     getAccessToken()
       .then((token) => {
         signIn("credentials", {
@@ -106,6 +110,7 @@ export const Account = () => {
 
   useEffect(() => {
     if (didLogIn) {
+      isLoggingIn.current = false
       saveLogInDate()
       track("Successful Sign In", { userId: session.user.id })
 
@@ -120,6 +125,7 @@ export const Account = () => {
           checkBadgeholderStatus(session?.user?.id)
         }
       }
+
     } else if (didLogOut) {
       if (pathName !== "/") {
         router.push("/")
@@ -205,7 +211,7 @@ export const Account = () => {
         className="cursor-pointer text-white bg-brand-primary rounded-md px-4 py-2"
         onClick={privyLogin}
       >
-        {"Sign in"}
+        {isLoggingIn.current ? "Signing in..." : "Sign in"}
       </button>
     )
   }
