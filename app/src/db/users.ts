@@ -284,61 +284,6 @@ export async function updateUserEmail({
   return prisma.$transaction([...deleteEmails, ...createEmail])
 }
 
-export async function updateUserHasGithub({
-  id,
-  notDeveloper = false,
-}: {
-  id: string
-  notDeveloper?: boolean
-}) {
-  return prisma.user.update({
-    where: {
-      id,
-    },
-    data: {
-      notDeveloper,
-    },
-  })
-}
-
-export async function updateUserDiscord({
-  id,
-  discord,
-}: {
-  id: string
-  discord?: string | null
-}) {
-  return prisma.user.update({
-    where: {
-      id,
-    },
-    data: {
-      discord,
-    },
-  })
-}
-
-export async function updateUserGithub({
-  id,
-  github,
-}: {
-  id: string
-  github?: string | null
-}) {
-  const updates: Partial<User> = {
-    github,
-  }
-  if (github) {
-    updates.notDeveloper = false
-  }
-
-  return prisma.user.update({
-    where: {
-      id,
-    },
-    data: updates,
-  })
-}
 
 export async function updateUserGovForumProfileUrl({
   id,
@@ -929,6 +874,7 @@ export async function updateUser({
   privyDid?: string | null
   discord?: string | null
   github?: string | null
+  notDeveloper?: boolean
 }) {
   return prisma.user.update({
     where: { id },
