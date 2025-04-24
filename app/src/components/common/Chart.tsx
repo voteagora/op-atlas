@@ -1,4 +1,4 @@
-import { CHARTS_TRAILING_DAYS } from "@/lib/oso/constants"
+import { formatNumber } from "@/lib/utils"
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts"
 
 type ChartEntry = {
@@ -20,98 +20,6 @@ export default function Chart({ data }: { data: Record<string, number> }) {
     })
     .sort((a, b) => a.date.getTime() - b.date.getTime())
 
-  const insertMonthlyPhantoms = (data: ChartEntry[]) => {
-    const seenMonths = new Set<string>()
-    const result: ChartEntry[] = []
-
-    for (let entry of data) {
-      const key = `${entry.date.getFullYear()}-${entry.date.getMonth()}`
-      if (!seenMonths.has(key)) {
-        seenMonths.add(key)
-        const phantomDate = new Date(
-          entry.date.getFullYear(),
-          entry.date.getMonth(),
-          1,
-        )
-        result.push({
-          date: phantomDate,
-          value: 0,
-          monthLabel: phantomDate.toLocaleString("default", { month: "short" }),
-          isPhantom: true,
-        })
-      }
-      result.push(entry)
-    }
-
-    return result
-  }
-
-  const fillMissingDates = (data: ChartEntry[]): ChartEntry[] => {
-    if (data.length === 0) return []
-
-    const result: ChartEntry[] = []
-
-    for (let i = 0; i < data.length; i++) {
-      result.push(data[i])
-
-      const currentDate = new Date(data[i].date)
-      const nextDate = data[i + 1]?.date
-
-      // Only fill if next date is within 3 days of end of month
-      if (nextDate) {
-        const daysInMonth = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth() + 1,
-          0,
-        ).getDate()
-        const daysRemaining = daysInMonth - currentDate.getDate()
-
-        if (daysRemaining <= 3) {
-          let expectedDate = new Date(currentDate)
-          expectedDate.setDate(expectedDate.getDate() + 1)
-
-          while (nextDate && expectedDate < nextDate) {
-            result.push({
-              date: new Date(expectedDate),
-              value: 0,
-              monthLabel: expectedDate.toLocaleString("default", {
-                month: "short",
-              }),
-              isPhantom: true,
-            })
-            expectedDate.setDate(expectedDate.getDate() + 1)
-          }
-        }
-      }
-    }
-
-    const last = result[result.length - 1]
-    const daysInMonth = new Date(
-      last.date.getFullYear(),
-      last.date.getMonth() + 1,
-      0,
-    ).getDate()
-    const daysRemaining = daysInMonth - last.date.getDate()
-
-    // Only add next month's phantom entry if we're within 3 days of the end of the month
-    if (daysRemaining <= CHARTS_TRAILING_DAYS) {
-      const nextMonth = new Date(
-        last.date.getFullYear(),
-        last.date.getMonth() + 1,
-        1,
-      )
-
-      result.push({
-        date: nextMonth,
-        value: 0,
-        monthLabel: nextMonth.toLocaleString("default", { month: "short" }),
-        isPhantom: true,
-      })
-    }
-
-    return result
-  }
-
   const generateEmptyChart = (): ChartEntry[] => {
     const today = new Date()
     const year = today.getFullYear()
@@ -127,10 +35,8 @@ export default function Chart({ data }: { data: Record<string, number> }) {
     })
   }
 
-  const withPhantomMonthlyStart = insertMonthlyPhantoms(formattedData)
-  const filledChartData = fillMissingDates(withPhantomMonthlyStart)
   const chartData =
-    filledChartData.length > 0 ? filledChartData : generateEmptyChart()
+    formattedData.length > 0 ? formattedData : generateEmptyChart()
 
   const getOrdinalSuffix = (day: number) => {
     if (day > 3 && day < 21) return "th"
@@ -179,6 +85,7 @@ export default function Chart({ data }: { data: Record<string, number> }) {
             const month = date.toLocaleString("default", { month: "short" })
             return `${day}${getOrdinalSuffix(day)} of ${month}`
           }}
+          formatter={(value: number) => formatNumber(value, 3, "compact")}
         />
 
         <Area
