@@ -22,7 +22,7 @@ export function RewardsSection({
     (reward) =>
       reward.roundId !== "7" &&
       reward.roundId !== "8" &&
-      reward.claim?.status === "pending",
+      reward.claim?.status !== "claimed",
   )
 
   const claimedRewards = project.rewards.filter(

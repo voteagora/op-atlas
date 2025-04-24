@@ -71,32 +71,36 @@ const RewardAccordion = ({
 
         <AccordionContent className="flex flex-col gap-6 pt-6">
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <div className="font-medium text-sm text-foreground">
-                Grant delivery address
-              </div>
-              <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
-                <Image
-                  src="/assets/icons/tickIcon.svg"
-                  width={16}
-                  height={16}
-                  alt="Check"
-                />
-                <div className="text-sm text-foreground">
-                  {reward.claim?.address}
+            {reward.claim?.address && (
+              <div className="flex flex-col gap-2">
+                <div className="font-medium text-sm text-foreground">
+                  Grant delivery address
                 </div>
-                <Button
-                  onClick={() => handleCopyAddress(reward.claim?.address ?? "")}
-                  variant="ghost"
-                  className="p-0 h-fit"
-                >
-                  <Copy
-                    className="rotate-90 text-muted cursor-pointer"
-                    size={16}
+                <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
+                  <Image
+                    src="/assets/icons/tickIcon.svg"
+                    width={16}
+                    height={16}
+                    alt="Check"
                   />
-                </Button>
+                  <div className="text-sm text-foreground">
+                    {reward.claim?.address}
+                  </div>
+                  <Button
+                    onClick={() =>
+                      handleCopyAddress(reward.claim?.address ?? "")
+                    }
+                    variant="ghost"
+                    className="p-0 h-fit"
+                  >
+                    <Copy
+                      className="rotate-90 text-muted cursor-pointer"
+                      size={16}
+                    />
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
             {reward.claim?.tokenStreamClaimableAt && (
               <div className="flex flex-col gap-2 w-full">
                 <div className="font-medium text-sm text-foreground">
