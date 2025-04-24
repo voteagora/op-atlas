@@ -433,21 +433,6 @@ export const createProjectKycTeamAction = async ({
   return createProjectKycTeam({ projectId, walletAddress })
 }
 
-export const getKycTeamAction = async (projectId: string) => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized")
-  }
-
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  if (isInvalid?.error) {
-    throw new Error(isInvalid.error)
-  }
-
-  return getKycTeamForProject({ projectId })
-}
-
 export const createProjectKYCTeamsAction = async ({
   projectIds,
   kycTeamId,
