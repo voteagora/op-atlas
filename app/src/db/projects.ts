@@ -1736,9 +1736,6 @@ export async function getKycTeamForProject({
   const projectKycTeam = await prisma.project.findFirst({
     where: {
       id: projectId,
-      kycTeam: {
-        deletedAt: null,
-      },
     },
     include: {
       organization: {
@@ -1751,6 +1748,9 @@ export async function getKycTeamForProject({
         },
       },
       kycTeam: {
+        where: {
+          deletedAt: null,
+        },
         include: {
           team: {
             select: {
