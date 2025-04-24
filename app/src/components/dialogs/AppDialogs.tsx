@@ -2,12 +2,12 @@
 
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { VerifyAddressDialog } from "../projects/contracts/VerifyAddressDialog"
+
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
-import EmailDialog from "./EmailDialog"
+
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
@@ -22,9 +22,6 @@ export default function AppDialogs() {
 
   return (
     <>
-      {openDialog === "email" && (
-        <EmailDialog open onOpenChange={onOpenChange("email")} />
-      )}
       {openDialog === "edit_profile" && (
         <EditProfileDialog open onOpenChange={onOpenChange("edit_profile")} />
       )}

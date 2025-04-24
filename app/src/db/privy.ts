@@ -1,8 +1,10 @@
-import { User as PrivyUser } from "@privy-io/react-auth"
-import { User } from "@prisma/client"
-import { getAddress } from "viem"
-import { addUserAddresses, deleteUserEmails, getUserByPrivyDid, removeUserAddress, updateUser, updateUserEmail, getUserById } from "./users"
+"use server"
+
 import { addContactToList, removeContactFromList } from "@/lib/api/mailchimp"
+import { User } from "@prisma/client"
+import { User as PrivyUser } from "@privy-io/react-auth"
+import { getAddress } from "viem"
+import { addUserAddresses, deleteUserEmails, getUserById, getUserByPrivyDid, removeUserAddress, updateUser, updateUserEmail } from "./users"
 
 export const syncPrivyUser = async (
     privyUser: PrivyUser,
