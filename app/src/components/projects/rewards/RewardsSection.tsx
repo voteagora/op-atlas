@@ -20,8 +20,8 @@ export function RewardsSection({
 
   const inProgressRewards = project.rewards.filter(
     (reward) =>
-      reward.roundId === "7" ||
-      reward.roundId === "8" ||
+      reward.roundId !== "7" &&
+      reward.roundId !== "8" &&
       reward.claim?.status === "pending",
   )
 
@@ -39,7 +39,7 @@ export function RewardsSection({
       </div>
       <div className="flex flex-col space-y-4">
         <h4 className="font-semibold text-text-default text-xl">In progress</h4>
-        {inProgressRewards.length ? (
+        {inProgressRewards.length || recurringRewards.length ? (
           <ul className="space-y-3">
             {recurringRewards.map((reward) => {
               return (
@@ -66,6 +66,9 @@ export function RewardsSection({
       </div>
       <div className="flex flex-col space-y-4">
         <h4 className="font-semibold text-text-default text-xl">Claimed</h4>
+
+        {/* TODO: Merge in claimed recurring rewards */}
+
         {claimedRewards.length ? (
           <ul className="space-y-3">
             {claimedRewards.map((reward) => (
