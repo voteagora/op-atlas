@@ -8,7 +8,6 @@ import { AddressConnection } from "@/components/profile/AddressConnection"
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/useUser"
 import { usePrivy } from "@privy-io/react-auth"
-import { useQueryClient } from "@tanstack/react-query"
 import { Session } from "next-auth"
 import { makeUserAddressPrimaryAction } from "./actions"
 import { VerifiedAddress } from "./verified-address"
@@ -26,9 +25,7 @@ export function VerifiedAddressesContent({
 }) {
 
   const { user: privyUser, unlinkWallet } = usePrivy()
-  const { user } = useUser({ id: session.user.id, enabled: !!session.user })
-
-  const queryClient = useQueryClient()
+  const { user, invalidate: invalidateUser } = useUser({ id: session.user.id, enabled: !!session.user })
 
 
   const privyWallets = privyUser?.linkedAccounts?.filter(
@@ -49,7 +46,7 @@ export function VerifiedAddressesContent({
 
   const handleSetPrimary = (address: string) => {
     toast.promise(makeUserAddressPrimaryAction(address).then(() => {
-      queryClient.invalidateQueries({ queryKey: ["user", user?.id] })
+      invalidateUser()
     }), {
       loading: "Setting primary address...",
       success: "Primary address set",
@@ -62,7 +59,7 @@ export function VerifiedAddressesContent({
       loading: "Deleting wallet address...",
       success: (updatedPrivyUser) => {
         syncPrivyUser(updatedPrivyUser).then(() => {
-          queryClient.invalidateQueries({ queryKey: ["user", user?.id] })
+          invalidateUser()
         })
         return "Wallet address deleted successfully"
       },

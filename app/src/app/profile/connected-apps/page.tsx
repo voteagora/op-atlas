@@ -40,7 +40,7 @@ export default async function Page() {
           <div className="text-secondary-foreground mb-4">
             Connect your farcaster account to import your username, bio and avatar.
           </div>
-          <FarcasterConnection />
+          <FarcasterConnection session={session} />
         </div>
 
         {/* Discord */}

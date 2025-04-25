@@ -21,8 +21,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getUserById } from "@/db/users"
 import { syncPrivyUser } from "@/db/privy"
+import { getUserById } from "@/db/users"
+import { useUser } from "@/hooks/useUser"
 import { AUTH_STATUS } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {
@@ -64,6 +65,8 @@ export const Account = () => {
   })
 
   const { data: session, status: authStatus } = useSession()
+  const { user } = useUser({ id: session?.user?.id || "", enabled: !!session?.user })
+
   const prevAuthStatus = usePrevious(authStatus)
 
   const { isBadgeholder } = useIsBadgeholder()
@@ -81,6 +84,8 @@ export const Account = () => {
   const didLogOut =
     prevAuthStatus === AUTH_STATUS.AUTHENTICATED &&
     authStatus === AUTH_STATUS.UNAUTHENTICATED
+
+
 
   async function checkBadgeholderStatus(id: string) {
     const user = await getUserById(id)
@@ -156,10 +161,10 @@ export const Account = () => {
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
             <Avatar className="!w-6 !h-6">
-              <AvatarImage src={session.user?.image || ""} alt="avatar" />
-              <AvatarFallback>{session.user?.name}</AvatarFallback>
+              <AvatarImage src={user?.imageUrl || ""} alt="avatar" />
+              <AvatarFallback>{user?.username}</AvatarFallback>
             </Avatar>{" "}
-            {session.user?.name}
+            {user?.username}
             <Image
               src="/assets/icons/arrowDownIcon.svg"
               width={10}

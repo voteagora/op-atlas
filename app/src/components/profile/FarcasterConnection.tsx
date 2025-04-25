@@ -1,19 +1,24 @@
 "use client"
 
 import { syncPrivyUser } from "@/db/privy";
+import { useUser } from "@/hooks/useUser";
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
+import { Session } from "next-auth";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "../common/Button";
 
-export const FarcasterConnection = () => {
+export const FarcasterConnection = ({ session }: { session: Session }) => {
 
     const { user: privyUser, unlinkFarcaster } = usePrivy()
+    const { user, invalidate: invalidateUser } = useUser({ id: session.user.id, enabled: !!session.user })
+
+    const username = user?.farcasterId ? user.username : privyUser?.farcaster?.username;
 
     const { linkFarcaster } = useLinkAccount({
         onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
             if (linkMethod === "farcaster") {
-                toast.promise(syncPrivyUser(updatedPrivyUser), {
+                toast.promise(syncPrivyUser(updatedPrivyUser).then(() => invalidateUser()), {
                     loading: "Linking farcaster...",
                     success: "Farcaster linked successfully",
                     error: "Failed to link farcaster",
@@ -27,7 +32,7 @@ export const FarcasterConnection = () => {
             toast.promise(unlinkFarcaster(privyUser.farcaster.fid), {
                 loading: "Unlinking farcaster...",
                 success: (updatedPrivyUser) => {
-                    syncPrivyUser(updatedPrivyUser)
+                    syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
                     return "Farcaster unlinked successfully"
                 },
                 error: "Failed to unlink farcaster",
@@ -47,7 +52,7 @@ export const FarcasterConnection = () => {
                                 width={16.67}
                                 alt="Verified"
                             />
-                            <p className="text-sm">@{privyUser?.farcaster?.username}</p>
+                            <p className="text-sm">@{username}</p>
                         </div>
                     </div>
                 </div>

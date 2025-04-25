@@ -120,7 +120,5 @@ export const syncPrivyUser = async (
         github: privyUser?.github?.username || null,
     })
 
-
     return await getUserById(existingUser.id)
-
 }

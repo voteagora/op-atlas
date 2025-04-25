@@ -8,22 +8,17 @@ import { Button } from "@/components/common/Button"
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/useUser"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
-import { useQueryClient } from "@tanstack/react-query"
 export const DiscordConnection = ({ session }: { session: Session }) => {
 
   const { user: privyUser, unlinkDiscord } = usePrivy()
-
-  const { user } = useUser({ id: session.user.id, enabled: !!session.user })
-  const queryClient = useQueryClient()
-
+  const { user, invalidate: invalidateUser } = useUser({ id: session.user.id, enabled: !!session.user })
 
   const username = user?.discord || privyUser?.discord?.username;
-
 
   const { linkDiscord } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "discord") {
-        toast.promise(syncPrivyUser(updatedPrivyUser), {
+        toast.promise(syncPrivyUser(updatedPrivyUser).then(() => invalidateUser()), {
           loading: "Linking discord...",
           success: "Discord linked successfully",
           error: "Failed to link discord",
@@ -37,7 +32,7 @@ export const DiscordConnection = ({ session }: { session: Session }) => {
       toast.promise(unlinkDiscord(privyUser.discord.subject), {
         loading: "Unlinking discord...",
         success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser)
+          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
           return "Discord unlinked successfully"
         },
         error: "Failed to unlink discord",
