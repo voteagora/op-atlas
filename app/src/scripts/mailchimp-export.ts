@@ -9,20 +9,25 @@ type SUBSCRIBED_MEMBER = {
   email_address: string
 }
 
-const LIST_ID = process.env.MAILCHIMP_LIST_ID
-
 async function exportEmailsToMailchimp() {
   const userEmails = await prisma.userEmail.findMany({
-    // Do we need this?
-    // where: {
-    //   verified: true,
-    // },
     select: {
       id: true,
       email: true,
       user: {
         select: {
           name: true,
+          projects: {
+            where: {
+              deletedAt: null,
+              project: {
+                deletedAt: null,
+              },
+            },
+            select: {
+              projectId: true,
+            },
+          },
         },
       },
     },
@@ -32,6 +37,7 @@ async function exportEmailsToMailchimp() {
     .map((userEmail) => {
       const userFullName = userEmail.user.name
       const [FNAME, LNAME] = userFullName ? userFullName.split(" ") : ["", ""]
+      const projectIds = userEmail.user.projects.map((p) => p.projectId)
 
       const data: BaseMailchimp.lists.BatchListMembersBodyMembersObject = {
         email_address: userEmail.email,
@@ -41,6 +47,7 @@ async function exportEmailsToMailchimp() {
           EMAIL: userEmail.email,
           FNAME,
           LNAME,
+          PROJECTS: projectIds.join(","),
         },
       }
 
