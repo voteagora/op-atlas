@@ -26,7 +26,7 @@ export default async function Page() {
           for and receive Retro Funding. It should be a personal email where we
           can reliably reach you. Don&apos;t worry, we&apos;ll keep it private.
         </div>
-        <EmailConnection />
+        <EmailConnection userId={session.user.id} />
       </div>
       <div className="flex flex-col gap-6">
         <div className="text-foreground text-xl font-semibold">

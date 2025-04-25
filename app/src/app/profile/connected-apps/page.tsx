@@ -15,12 +15,6 @@ export default async function Page() {
     redirect("/")
   }
 
-  const user = await getUserById(session.user.id)
-
-  if (!user) {
-    redirect("/")
-  }
-
   return (
     <div className="flex flex-col gap-6 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
@@ -40,7 +34,7 @@ export default async function Page() {
           <div className="text-secondary-foreground mb-4">
             Connect your farcaster account to import your username, bio and avatar.
           </div>
-          <FarcasterConnection session={session} />
+          <FarcasterConnection userId={session.user.id} />
         </div>
 
         {/* Discord */}
@@ -57,7 +51,7 @@ export default async function Page() {
           <div className="text-secondary-foreground mb-4">
             Connect your account so anyone can find you on Discord.
           </div>
-          <DiscordConnection session={session} />
+          <DiscordConnection userId={session.user.id} />
         </div>
 
         {/* Github */}
@@ -78,9 +72,10 @@ export default async function Page() {
             </p>
           </div>
 
-          <GithubConnection user={user} />
+          <GithubConnection userId={session.user.id} />
         </div>
-        <GovForumConnection user={user} />
+        {/* TODO: Add GovForumConnection */}
+        {/* <GovForumConnection user={user} /> */}
       </div>
     </div>
   )

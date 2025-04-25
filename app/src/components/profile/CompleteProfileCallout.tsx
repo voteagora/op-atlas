@@ -151,7 +151,7 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
               Please add email for important messages.
             </div>
           </div>
-          <EmailConnection />
+          <EmailConnection userId={user.id} />
         </div>
       </div>
     </div>
@@ -177,7 +177,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
               Show your code contributions to the Optimism Collective.
             </div>
           </div>
-          <GithubConnection user={user} />
+          <GithubConnection userId={user.id} />
         </div>
       </div>
     </div>

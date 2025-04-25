@@ -11,14 +11,13 @@ import {
   useUpdateAccount,
 } from "@privy-io/react-auth"
 import { Mail } from "lucide-react"
-import { useSession } from "next-auth/react"
 import { useRef } from "react"
 
-export const EmailConnection = () => {
+export const EmailConnection = ({ userId }: { userId: string }) => {
 
   const { user: privyUser, unlinkEmail } = usePrivy()
-  const { data: session } = useSession()
-  const { invalidate: invalidateUser, user } = useUser({ id: session?.user?.id || "", enabled: !!session?.user })
+
+  const { invalidate: invalidateUser, user } = useUser({ id: userId, enabled: true })
   const isLinking = useRef(false);
 
   const email = user?.emails[0]?.email;

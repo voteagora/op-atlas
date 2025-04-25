@@ -32,9 +32,6 @@ export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
     await updateUser({ id: session.user.id, github: null })
   }
 
-  revalidatePath("/dashboard")
-  revalidatePath("/profile/connected-apps")
-
   return {
     error: null,
     user: updated,

@@ -1,6 +1,5 @@
 "use client"
 
-import { User } from "@prisma/client"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useTransition } from "react"
@@ -13,21 +12,31 @@ import {
 import { cn } from "@/lib/utils"
 
 import { syncPrivyUser } from "@/db/privy"
+import { useUser } from "@/hooks/useUser"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { Checkbox } from "../ui/checkbox"
 
-export function GithubConnection({ user }: { user: User }) {
+export const GithubConnection = ({ userId }: { userId: string }) => {
 
 
   const { user: privyUser, unlinkGithub } = usePrivy()
+  const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
+
+  const pathname = usePathname()
+
+  const [userNotDeveloper, setUserNotDeveloper] = useState(user?.notDeveloper)
+  const [isPending, startTransition] = useTransition()
+
   const { linkGithub } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "github") {
-        toast.promise(syncPrivyUser(updatedPrivyUser), {
-          loading: "Linking github...",
-          success: "Github linked successfully",
-          error: "Failed to link github",
-        })
+        toast.promise(syncPrivyUser(updatedPrivyUser)
+          .then(() => invalidateUser()),
+          {
+            loading: "Linking github...",
+            success: "Github linked successfully",
+            error: "Failed to link github",
+          })
       }
     },
   })
@@ -38,6 +47,7 @@ export function GithubConnection({ user }: { user: User }) {
         loading: "Unlinking github...",
         success: (updatedPrivyUser) => {
           syncPrivyUser(updatedPrivyUser)
+            .then(() => invalidateUser())
           return "Github unlinked successfully"
         },
         error: "Failed to unlink github",
@@ -45,15 +55,11 @@ export function GithubConnection({ user }: { user: User }) {
     }
   }
 
-  const pathname = usePathname()
-
-  const [userNotDeveloper, setUserNotDeveloper] = useState(user.notDeveloper)
-  const [isPending, startTransition] = useTransition()
 
   const toggleIsDeveloper = async () => {
     startTransition(async () => {
       try {
-        const isNotDeveloper = !user.notDeveloper
+        const isNotDeveloper = !user?.notDeveloper
         setUserNotDeveloper(isNotDeveloper)
         const result = await setUserIsNotDeveloper(isNotDeveloper)
         if (result.error !== null) {

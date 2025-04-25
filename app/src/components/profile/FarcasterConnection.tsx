@@ -3,33 +3,32 @@
 import { syncPrivyUser } from "@/db/privy";
 import { useUser } from "@/hooks/useUser";
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
-import { Session } from "next-auth";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "../common/Button";
 
-export const FarcasterConnection = ({ session }: { session: Session }) => {
+export const FarcasterConnection = ({ userId }: { userId: string }) => {
 
-    const { user: privyUser, unlinkFarcaster } = usePrivy()
-    const { user, invalidate: invalidateUser } = useUser({ id: session.user.id, enabled: !!session.user })
-
-    const username = user?.farcasterId ? user.username : privyUser?.farcaster?.username;
+    const { unlinkFarcaster } = usePrivy()
+    const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
 
     const { linkFarcaster } = useLinkAccount({
         onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
             if (linkMethod === "farcaster") {
-                toast.promise(syncPrivyUser(updatedPrivyUser).then(() => invalidateUser()), {
-                    loading: "Linking farcaster...",
-                    success: "Farcaster linked successfully",
-                    error: "Failed to link farcaster",
-                })
+                toast.promise(syncPrivyUser(updatedPrivyUser)
+                    .then(() => invalidateUser()),
+                    {
+                        loading: "Linking farcaster...",
+                        success: "Farcaster linked successfully",
+                        error: "Failed to link farcaster",
+                    })
             }
         },
     })
 
     const handleUnlinkFarcaster = () => {
-        if (privyUser?.farcaster?.fid) {
-            toast.promise(unlinkFarcaster(privyUser.farcaster.fid), {
+        if (user?.farcasterId) {
+            toast.promise(unlinkFarcaster(Number(user.farcasterId)), {
                 loading: "Unlinking farcaster...",
                 success: (updatedPrivyUser) => {
                     syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
@@ -42,7 +41,7 @@ export const FarcasterConnection = ({ session }: { session: Session }) => {
 
     return (
         <div className="flex flex-row gap-2">
-            {privyUser?.farcaster?.username && (
+            {user?.farcasterId && (
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1.5">
                         <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
@@ -52,14 +51,13 @@ export const FarcasterConnection = ({ session }: { session: Session }) => {
                                 width={16.67}
                                 alt="Verified"
                             />
-                            <p className="text-sm">@{username}</p>
+                            <p className="text-sm">@{user.username}</p>
                         </div>
                     </div>
                 </div>
             )}
 
-
-            {privyUser?.farcaster?.fid ?
+            {user?.farcasterId ?
                 <Button variant="secondary" onClick={handleUnlinkFarcaster}>Disconnect</Button>
                 :
                 <Button variant="primary" onClick={linkFarcaster}>Connect</Button>
