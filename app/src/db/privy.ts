@@ -82,33 +82,30 @@ export const syncPrivyUser = async (
         }
     }
 
-    // Update email
+
+
     if (privyUser?.email && privyUser.email.address) {
 
-        if (existingUser.emails.length > 0 && privyUser.email.address.toLowerCase() !== existingUser.emails[0].email.toLowerCase()) {
-            try {
-                await updateUserEmail({
-                    id: existingUser.id,
-                    email: privyUser.email.address.toLowerCase(),
-                    verified: true,
-                })
+        try {
+            await updateUserEmail({
+                id: existingUser.id,
+                email: privyUser.email.address.toLowerCase(),
+                verified: true,
+            })
 
-                await addContactToList({ email: privyUser.email.address.toLowerCase() })
+            // await addContactToList({ email: privyUser.email.address.toLowerCase() })
 
-            } catch (error) {
-                console.error("Failed to update email:", error)
-            }
+        } catch (error) {
+            console.error("Failed to update email:", error)
         }
+
     } else {
 
-        // Check if user has an email record before attempting to remove from list
-        if (existingUser?.emails.length > 0) {
-            try {
-                await removeContactFromList({ email: existingUser.emails[0].email });
-            } catch (error) {
-                console.error("Failed to remove contact from mailing list:", error);
-            }
-        }
+        // try {
+        //     await removeContactFromList({ email: existingUser.emails[0].email });
+        // } catch (error) {
+        //     console.error("Failed to remove contact from mailing list:", error);
+        // }
 
         deleteUserEmails(existingUser.id)
     }

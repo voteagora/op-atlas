@@ -1,7 +1,7 @@
 import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { memo } from "react"
+import { memo, useRef } from "react"
 import { toast } from "sonner"
 
 import { syncPrivyUser } from "@/db/privy"
@@ -10,8 +10,9 @@ import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import {
-  useLinkAccount
+  useLinkAccount,
 } from "@privy-io/react-auth"
+import { useUser } from "@/hooks/useUser"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -29,34 +30,48 @@ const ProfileDetailCard = ({
   className?: string
   user: UserWithAddresses
 }) => {
+
   const { isBadgeholder } = useIsBadgeholder(user)
+  const { user: loadedUser, invalidate: invalidateUser } = useUser({ id: user.id, enabled: true })
 
+  const username = loadedUser?.username || user.username;
+  const imageUrl = loadedUser?.imageUrl || user.imageUrl;
+  const name = loadedUser?.name || user.name;
+  const bio = loadedUser?.bio || user.bio;
+  const email = loadedUser?.emails[0]?.email || user.emails[0]?.email;
 
+  const isLinking = useRef(false);
 
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      if (linkMethod === "email" && updatedPrivyUser) {
-        toast.promise(syncPrivyUser(updatedPrivyUser), {
-          loading: "Linking email...",
-          success: "Email linked successfully",
-          error: "Failed to link email",
-        })
+      if (linkMethod === "email" && isLinking.current) {
+        toast.promise(syncPrivyUser(updatedPrivyUser)
+          .then(() => invalidateUser())
+          .then(() => isLinking.current = false),
+          {
+            loading: "Linking email...",
+            success: "Email linked successfully",
+            error: "Failed to link email",
+          })
       }
     },
   })
 
 
   const renderEmail = () => {
-    if (user.emails.length > 0) {
+    if (email) {
       return <div>Email <span className="font-medium text-secondary-foreground">
-        {user.emails[0].email}
+        {email}
       </span>
       </div>
     } else {
 
       return <Button
         variant="link"
-        onClick={linkEmail}
+        onClick={() => {
+          isLinking.current = true;
+          linkEmail();
+        }}
         className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
       >
         Add your email

@@ -18,8 +18,8 @@ export const AddressConnection = ({ children, user }: Props) => {
     const { invalidate: invalidateUser } = useUser({ id: user.id, enabled: false })
 
     const { linkWallet } = useLinkAccount({
-        onSuccess: async ({ user: updatedPrivyUser }) => {
-            if (updatedPrivyUser) {
+        onSuccess: async ({ user: updatedPrivyUser, linkedAccount }) => {
+            if (linkedAccount.type === "wallet") {
                 toast.promise(
                     syncPrivyUser(updatedPrivyUser)
                         .then(() => invalidateUser())

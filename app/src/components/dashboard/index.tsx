@@ -28,7 +28,6 @@ import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
-import { ProjectRewardRow } from "./ProjectRewardRow"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
 
@@ -164,29 +163,29 @@ const Dashboard = ({
         {(!projects.length ||
           !!!organizations?.length ||
           !profileInitiallyComplete.current) && (
-          <div className="flex flex-col gap-4">
-            {!isCompleteProfileAccordionDismissed &&
-              !profileInitiallyComplete.current && (
-                <CompleteProfileCallout
-                  user={user}
-                  setIsCompleteProfileAccordionDismissed={
-                    setIsCompleteProfileAccordionDismissed
-                  }
+            <div className="flex flex-col gap-4">
+              {!isCompleteProfileAccordionDismissed &&
+                !profileInitiallyComplete.current && (
+                  <CompleteProfileCallout
+                    user={user}
+                    setIsCompleteProfileAccordionDismissed={
+                      setIsCompleteProfileAccordionDismissed
+                    }
+                  />
+                )}
+              {!organizations?.length && (
+                <MakeFirstOrganization
+                  onClick={() => setShowCreateOrganizationDialog(true)}
                 />
               )}
-            {!organizations?.length && (
-              <MakeFirstOrganization
-                onClick={() => setShowCreateOrganizationDialog(true)}
-              />
-            )}
 
-            {!projects.length && !organizations?.length && (
-              <Link href="/projects/new">
-                <AddFirstProject />
-              </Link>
-            )}
-          </div>
-        )}
+              {!projects.length && !organizations?.length && (
+                <Link href="/projects/new">
+                  <AddFirstProject />
+                </Link>
+              )}
+            </div>
+          )}
 
         {projects.length > 0 && (
           <div className="flex flex-col gap-4">

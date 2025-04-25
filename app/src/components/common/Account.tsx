@@ -22,7 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { syncPrivyUser } from "@/db/privy"
-import { getUserById } from "@/db/users"
 import { useUser } from "@/hooks/useUser"
 import { AUTH_STATUS } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
@@ -39,19 +38,26 @@ export const Account = () => {
 
   const { user: privyUser, getAccessToken } = usePrivy()
 
+  const isLinking = useRef(false);
+  const isLoggingIn = useRef(false)
+
+  const { data: session, status: authStatus } = useSession()
+  const { user, invalidate: invalidateUser } = useUser({ id: session?.user?.id || "", enabled: !!session?.user })
+
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
       onPrivyLogin(params.user)
     },
   })
 
-  const isLoggingIn = useRef(false)
 
   // Connect email when a new user logs in
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      if (linkMethod === "email") {
-        toast.promise(syncPrivyUser(updatedPrivyUser), {
+      if (linkMethod === "email" && isLinking.current) {
+        toast.promise(syncPrivyUser(updatedPrivyUser)
+          .then(() => invalidateUser())
+          .then(() => isLinking.current = false), {
           loading: "Adding email...",
           success: "Email added successfully",
           error: "Failed to add email",
@@ -64,8 +70,6 @@ export const Account = () => {
     onSuccess: () => signOut({ redirect: false }),
   })
 
-  const { data: session, status: authStatus } = useSession()
-  const { user } = useUser({ id: session?.user?.id || "", enabled: !!session?.user })
 
   const prevAuthStatus = usePrevious(authStatus)
 
@@ -87,8 +91,8 @@ export const Account = () => {
 
 
 
-  async function checkBadgeholderStatus(id: string) {
-    const user = await getUserById(id)
+  async function checkBadgeholderStatus() {
+
     if (!user || !isBadgeholder) return
 
     if (!hasShownWelcomeBadgeholderDialog()) {
@@ -127,8 +131,9 @@ export const Account = () => {
       if (!isFirstTimeUser()) {
         if (!privyUser?.email?.address) {
           linkEmail();
+          isLinking.current = true;
         } else {
-          checkBadgeholderStatus(session?.user?.id)
+          checkBadgeholderStatus()
         }
       }
 
