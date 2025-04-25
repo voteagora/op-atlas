@@ -5,7 +5,8 @@ import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "../common/Button";
-export function FarcasterConnection() {
+
+export const FarcasterConnection = () => {
 
     const { user: privyUser, unlinkFarcaster } = usePrivy()
 
@@ -35,23 +36,9 @@ export function FarcasterConnection() {
     }
 
     return (
-        <div className="flex flex-col space-y-4">
-
-            <div className="flex items-center space-x-1.5">
-                <Image
-                    src="/assets/icons/farcaster-icon.svg"
-                    alt="Farcaster"
-                    height={20}
-                    width={20}
-                />
-                <h3 className="font-semibold text-foreground">Farcaster</h3>
-            </div>
-
+        <div className="flex flex-row gap-2">
             {privyUser?.farcaster?.username && (
                 <div className="flex flex-col gap-2">
-                    <p className="font-medium text-sm text-foreground">
-                        Your Farcaster username
-                    </p>
                     <div className="flex items-center gap-1.5">
                         <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
                             <Image
@@ -72,7 +59,7 @@ export function FarcasterConnection() {
                 :
                 <Button variant="primary" onClick={linkFarcaster}>Connect</Button>
             }
-
         </div>
+
     )
 }

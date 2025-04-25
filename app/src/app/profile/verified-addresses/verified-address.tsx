@@ -34,8 +34,10 @@ export const VerifiedAddress = ({
   showCheckmark?: boolean
   shouldShortenAddress?: boolean
 }) => {
+
   const { setOpenDialog } = useAppDialogs()
   const { isBadgeholderAddress } = useBadgeholderAddress(address)
+
 
   return (
     <div className="flex items-center gap-1.5 group">

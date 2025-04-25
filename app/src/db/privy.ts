@@ -10,6 +10,7 @@ export const syncPrivyUser = async (
     privyUser: PrivyUser,
 ): Promise<User | null> => {
 
+
     const existingUser = await getUserByPrivyDid(privyUser.id)
 
     if (!existingUser) {
@@ -25,7 +26,8 @@ export const syncPrivyUser = async (
             .filter(Boolean) as `0x${string}`[]
         : [];
 
-    if (privyUser?.farcaster && privyUser.farcaster.fid) {
+
+    if (privyUser?.farcaster && privyUser.farcaster.fid && privyUser.farcaster.fid.toString() !== existingUser.farcasterId) {
 
         // Link farcaster to user
         await updateUser({
@@ -51,7 +53,6 @@ export const syncPrivyUser = async (
             }
         }
     }
-
 
     // Remove addresses that exist in DB but not in Privy
     for (const addr of addressesInDB) {
@@ -83,17 +84,20 @@ export const syncPrivyUser = async (
 
     // Update email
     if (privyUser?.email && privyUser.email.address) {
-        try {
-            await updateUserEmail({
-                id: existingUser.id,
-                email: privyUser.email.address.toLowerCase(),
-                verified: true,
-            })
 
-            await addContactToList({ email: privyUser.email.address.toLowerCase() })
+        if (existingUser.emails.length > 0 && privyUser.email.address.toLowerCase() !== existingUser.emails[0].email.toLowerCase()) {
+            try {
+                await updateUserEmail({
+                    id: existingUser.id,
+                    email: privyUser.email.address.toLowerCase(),
+                    verified: true,
+                })
 
-        } catch (error) {
-            console.error("Failed to update email:", error)
+                await addContactToList({ email: privyUser.email.address.toLowerCase() })
+
+            } catch (error) {
+                console.error("Failed to update email:", error)
+            }
         }
     } else {
 
@@ -109,12 +113,14 @@ export const syncPrivyUser = async (
         deleteUserEmails(existingUser.id)
     }
 
-
-    // Simplified Discord update
+    // Update Discord and Github
     await updateUser({
         id: existingUser.id,
         discord: privyUser?.discord?.username || null,
         github: privyUser?.github?.username || null,
     })
+
+
     return await getUserById(existingUser.id)
+
 }

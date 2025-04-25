@@ -1,15 +1,24 @@
 "use client"
 
+import { Session } from "next-auth"
 import Image from "next/image"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
 import { syncPrivyUser } from "@/db/privy"
+import { useUser } from "@/hooks/useUser"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
-
-export function DiscordConnection() {
+import { useQueryClient } from "@tanstack/react-query"
+export const DiscordConnection = ({ session }: { session: Session }) => {
 
   const { user: privyUser, unlinkDiscord } = usePrivy()
+
+  const { user } = useUser({ id: session.user.id, enabled: !!session.user })
+  const queryClient = useQueryClient()
+
+
+  const username = user?.discord || privyUser?.discord?.username;
+
 
   const { linkDiscord } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
@@ -37,27 +46,10 @@ export function DiscordConnection() {
   }
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div>
-        <div className="flex items-center space-x-1.5">
-          <Image
-            src="/assets/icons/discordIcon.svg"
-            alt="Discord"
-            height={20}
-            width={20}
-          />
-          <h3 className="font-semibold text-foreground">Discord</h3>
-        </div>
-        <p className="text-secondary-foreground">
-          Connect your account so anyone can find you on Discord.
-        </p>
-      </div>
-      {privyUser?.discord?.username && (
+    <div className="flex flex-row gap-2">
+      {username && (
         <div className="flex flex-col gap-2">
-          <p className="font-medium text-sm text-foreground">
-            Your Discord username
-          </p>
-          <div className="flex items-center gap-1.5">
+          <div>
             <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
               <Image
                 src="/assets/icons/circle-check-green.svg"
@@ -65,20 +57,18 @@ export function DiscordConnection() {
                 width={16.67}
                 alt="Verified"
               />
-
-              <p className="text-sm">{privyUser?.discord?.username}</p>
+              <p className="text-sm">@{username}</p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex gap-2">
-        {privyUser?.discord?.username ?
-          <Button variant="secondary" onClick={handleUnlinkDiscord}>Disconnect</Button>
-          :
-          <Button variant="primary" onClick={linkDiscord}>Connect</Button>
-        }
-      </div>
+
+      {username ?
+        <Button variant="secondary" onClick={handleUnlinkDiscord}>Disconnect</Button>
+        :
+        <Button variant="primary" onClick={linkDiscord}>Connect</Button>
+      }
     </div>
   )
 }

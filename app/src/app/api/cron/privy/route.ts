@@ -23,6 +23,11 @@ interface FarcasterLinkedAccount {
   owner_address: string
 }
 
+interface DiscordLinkedAccount {
+  type: "discord"
+  address: string
+}
+
 type LinkedAccount =
   | EmailLinkedAccount
   | WalletLinkedAccount
@@ -81,10 +86,12 @@ export async function GET() {
             })
           }
 
+          // Link Discord
+          if (user.discord) {
+          }
+
           // Link Farcaster 
           if (user.farcasterId) {
-
-
             const farcasterAddresses = await getUserConnectedAddresses(user.farcasterId)
 
             if (farcasterAddresses && farcasterAddresses.length > 0) {
@@ -106,6 +113,9 @@ export async function GET() {
               reason: "No linked accounts available",
             }
           }
+
+
+
 
           // Create user in Privy using the API
           const privyResponse = await fetch("https://api.privy.io/v1/users", {

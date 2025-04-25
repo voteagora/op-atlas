@@ -8,7 +8,6 @@ export const useUser = ({ id, enabled }: { id: string, enabled: boolean }) => {
         queryKey: ["user", id],
         queryFn: async () => await getUserById(id) as UserWithAddresses,
         enabled,
-        staleTime: 1000 * 60 * 5,
     })
 
     return { user: data, isLoading, isSuccess, isError }

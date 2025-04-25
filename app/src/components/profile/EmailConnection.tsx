@@ -66,12 +66,12 @@ export const EmailConnection = () => {
           privyUser?.email?.address ? updateEmail() : linkEmail()
         }}
       >
-        {privyUser?.email?.address ? "Update email" : "Add email"}
+        {privyUser?.email?.address ? "Update" : "Add email"}
       </Button>
 
       {privyUser?.email?.address && (
         <Button variant="secondary" onClick={handleUnlinkEmail}>
-          Delete email
+          Delete
         </Button>
       )}
     </div>
