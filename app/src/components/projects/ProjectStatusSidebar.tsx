@@ -177,7 +177,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
                 ])}
                 href={`/projects/${project.id}/grant-address`}
               >
-                Grant Addresses
+                Grant Address
               </Link>
             </div>
             <Separator />

@@ -1,6 +1,7 @@
-import { getCutoffDate } from "@/lib/utils"
-import Link from "next/link"
 import { format } from "date-fns"
+import Link from "next/link"
+
+import { getCutoffDate } from "@/lib/utils"
 
 export const YouAreNotAdminCallout = () => {
   return (
@@ -18,7 +19,7 @@ export const CantClaimCallout = ({ projectId }: { projectId: string }) => {
       <span className="text-sm">
         You can’t claim your tokens until you’ve completed KYC for your{" "}
         <Link
-          href={`/projects/${projectId}/grant-addresses`}
+          href={`/projects/${projectId}/grant-address`}
           className="underline"
         >
           grant delivery address
