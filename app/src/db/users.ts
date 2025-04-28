@@ -285,19 +285,6 @@ export async function updateUserEmail({
 }
 
 
-export async function updateUserGovForumProfileUrl({
-  id,
-  govForumProfileUrl,
-}: {
-  id: string
-  govForumProfileUrl?: string | null
-}) {
-  return prisma.user.update({
-    where: { id },
-    data: { govForumProfileUrl },
-  })
-}
-
 export async function addUserAddresses({
   id,
   addresses,
@@ -875,6 +862,7 @@ export async function updateUser({
   discord?: string | null
   github?: string | null
   notDeveloper?: boolean
+  govForumProfileUrl?: string | null
 }) {
   return prisma.user.update({
     where: { id },

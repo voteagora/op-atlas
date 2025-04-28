@@ -14,7 +14,7 @@ export const FarcasterConnection = ({ userId }: { userId: string }) => {
     const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
     const { user: privyUser } = usePrivy()
 
-    const isIntermediateState = user?.farcasterId !== privyUser?.farcaster?.fid?.toString();
+    const isIntermediateState = Number(user?.farcasterId || 0) !== privyUser?.farcaster?.fid;
     const username = user?.farcasterId ? user.username : privyUser?.farcaster?.username;
 
     const { linkFarcaster } = useLinkAccount({

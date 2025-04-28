@@ -16,7 +16,9 @@ export const useHandlePrivyErrors = () => {
                 return toast.error('Failed to link account. Please refresh the page and try again.')
 
             case 'exited_update_flow':
+            case 'exited_link_flow':
                 return
+
 
             default:
                 toast.error(`Privy Error: ${error}`)

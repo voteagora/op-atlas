@@ -27,32 +27,31 @@ export const syncPrivyUser = async (
         : [];
 
 
-    if (privyUser?.farcaster && privyUser.farcaster.fid && privyUser.farcaster.fid.toString() !== existingUser.farcasterId) {
-
-        // Link farcaster to user
+    // Link farcaster to user
+    if (privyUser?.farcaster && privyUser?.farcaster?.fid !== Number(existingUser.farcasterId)) {
         await updateUser({
             id: existingUser.id,
-            farcasterId: privyUser.farcaster.fid.toString(),
+            farcasterId: String(privyUser.farcaster.fid),
             privyDid: privyUser.id,
             name: privyUser.farcaster.displayName || null,
             username: privyUser.farcaster.username || null,
             imageUrl: privyUser.farcaster.pfp || null,
             bio: privyUser.farcaster.bio || null,
         })
+    }
 
-    } else {
-        // If farcaster was previously linked but now removed, clear farcaster data
-        if (existingUser.farcasterId) {
-            try {
-                await updateUser({
-                    id: existingUser.id,
-                    farcasterId: null,
-                })
-            } catch (error) {
-                console.error("Failed to remove farcaster data:", error)
-            }
+    // If farcaster was previously linked but now removed from privy, clear farcaster data
+    if (!privyUser?.farcaster && existingUser.farcasterId) {
+        try {
+            await updateUser({
+                id: existingUser.id,
+                farcasterId: null,
+            })
+        } catch (error) {
+            console.error("Failed to remove farcaster data:", error)
         }
     }
+
 
     // Remove addresses that exist in DB but not in Privy
     for (const addr of addressesInDB) {

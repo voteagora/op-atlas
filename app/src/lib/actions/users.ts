@@ -1,13 +1,11 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
-import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
 import {
   searchUsersByUsername,
   updateUser,
-  updateUserGovForumProfileUrl,
   updateUserInteraction
 } from "@/db/users"
 
@@ -54,12 +52,10 @@ export const updateGovForumProfileUrl = async (govForumProfileUrl: string) => {
     }
   }
 
-  const updated = await updateUserGovForumProfileUrl({
+  const updated = await updateUser({
     id: session.user.id,
     govForumProfileUrl,
   })
-
-  revalidatePath("/profile/details")
 
   return {
     error: null,
