@@ -28,10 +28,6 @@ export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
     notDeveloper: isNotDeveloper,
   })
 
-  if (isNotDeveloper && !!updated.github) {
-    await updateUser({ id: session.user.id, github: null })
-  }
-
   return {
     error: null,
     user: updated,

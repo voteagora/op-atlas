@@ -15,6 +15,12 @@ export default async function Page() {
     redirect("/")
   }
 
+  const user = await getUserById(session.user.id)
+
+  if (!user) {
+    redirect("/")
+  }
+
   return (
     <div className="flex flex-col gap-6 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
@@ -72,8 +78,8 @@ export default async function Page() {
         </div>
 
 
-        {/* TODO: Add GovForumConnection */}
-        {/* <GovForumConnection user={user} /> */}
+
+        <GovForumConnection user={user} />
       </div>
     </div>
   )

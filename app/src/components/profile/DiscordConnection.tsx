@@ -16,8 +16,7 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
   const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
 
   const username = user?.discord || privyUser?.discord?.username;
-  const isIntermediateState = user?.discord?.toLowerCase() !== privyUser?.discord?.username?.toLowerCase();
-
+  const isSyncing = user?.discord?.toLowerCase() !== privyUser?.discord?.username?.toLowerCase();
 
   const onError = useHandlePrivyErrors()
   const { linkDiscord } = useLinkAccount({
@@ -56,7 +55,7 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
           <div>
             <div className={cn(
               "flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10",
-              isIntermediateState && "opacity-50"
+              isSyncing && "opacity-50"
             )}>
               <Image
                 src="/assets/icons/circle-check-green.svg"
@@ -74,7 +73,7 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
         <Button
           variant="secondary"
           onClick={handleUnlinkDiscord}
-          className={cn(isIntermediateState && "opacity-50")}
+          className={cn(isSyncing && "opacity-50")}
         >Disconnect</Button>
         :
         <Button variant="primary" onClick={linkDiscord}>Connect</Button>

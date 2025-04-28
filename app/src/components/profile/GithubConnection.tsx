@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
@@ -18,16 +17,13 @@ import { Checkbox } from "../ui/checkbox"
 
 export const GithubConnection = ({ userId }: { userId: string }) => {
 
-
   const { user: privyUser, unlinkGithub } = usePrivy()
   const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
+
   const onError = useHandlePrivyErrors()
 
-  const [userNotDeveloper, setUserNotDeveloper] = useState(user?.notDeveloper)
-  const [isPending, startTransition] = useTransition()
-
   const username = user?.github || privyUser?.github?.username;
-  const isIntermediateState = user?.github?.toLowerCase() !== privyUser?.github?.username?.toLowerCase();
+  const isSyncing = user?.github?.toLowerCase() !== privyUser?.github?.username?.toLowerCase();
 
   const { linkGithub } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
@@ -59,19 +55,25 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
   }
 
 
-  const toggleIsDeveloper = async () => {
-    startTransition(async () => {
-      try {
-        const isNotDeveloper = !user?.notDeveloper
-        setUserNotDeveloper(isNotDeveloper)
-        const result = await setUserIsNotDeveloper(isNotDeveloper)
-        if (result.error !== null) {
-          throw result.error
-        }
-      } catch (error) {
-        toast.error("Error updating developer status")
+  const toggleIsDeveloper = () => {
+
+    const desiredState = !user?.notDeveloper
+
+    toast.promise(
+      setUserIsNotDeveloper(desiredState),
+      {
+        loading: "Updating developer status...",
+        success: () => {
+          if (desiredState && privyUser?.github?.subject) {
+            handleUnlinkGithub()
+          } else {
+            invalidateUser()
+          }
+          return "Developer status updated successfully"
+        },
+        error: "Failed to update developer status"
       }
-    })
+    )
   }
 
 
@@ -83,7 +85,7 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
           <div className="flex items-center gap-1.5">
             <div className={cn(
               "flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10",
-              isIntermediateState && "opacity-50"
+              isSyncing && "opacity-50"
             )}>
               <Image
                 src="/assets/icons/githubIcon.svg"
@@ -100,23 +102,25 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
       <div className="flex gap-2">
         {username ?
           <Button variant="secondary" onClick={handleUnlinkGithub}
-            className={cn(isIntermediateState && "opacity-50")}
+            className={cn(isSyncing && "opacity-50")}
           >Disconnect</Button>
           :
-          <Button variant="primary" onClick={linkGithub}>Connect</Button>
+          <>
+            {!user?.notDeveloper &&
+              <Button variant="primary" onClick={linkGithub}>Connect</Button>
+            }
+          </>
         }
 
         <div
           className={cn(
             "input-container text-sm",
-            userNotDeveloper && "bg-secondary",
+            user?.notDeveloper && "bg-secondary",
           )}
         >
           <Checkbox
-            checked={userNotDeveloper}
+            checked={user?.notDeveloper}
             onCheckedChange={toggleIsDeveloper}
-            className=""
-            disabled={isPending}
           />
           I&apos;m not a developer
         </div>
