@@ -19,6 +19,12 @@ export function GovForumConnection({ userId }: { userId: string }) {
 
   const [govForumProfileUrl, setGovForumProfileUrl] = useState(user?.govForumProfileUrl || "")
 
+  useEffect(() => {
+    if (user?.govForumProfileUrl) {
+      setGovForumProfileUrl(user.govForumProfileUrl)
+    }
+  }, [user])
+
   const [isEditing, setIsEditing] = useState(false)
 
 
@@ -57,8 +63,8 @@ export function GovForumConnection({ userId }: { userId: string }) {
   }
 
 
+  // TODO: This is annoying, we should not need to check if the profile is complete here.
   useEffect(() => {
-
     const isProfileComplete = () => {
       return (
         user?.govForumProfileUrl &&
