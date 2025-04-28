@@ -7,12 +7,13 @@ import { Button } from "@/components/common/Button"
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/useUser"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 
 export const DiscordConnection = ({ userId }: { userId: string }) => {
 
   const { user: privyUser, unlinkDiscord } = usePrivy()
   const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
-
+  const onError = useHandlePrivyErrors()
   const { linkDiscord } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "discord") {
@@ -24,7 +25,8 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
             error: "Failed to link discord",
           })
       }
-    }
+    },
+    onError
   })
 
   const handleUnlinkDiscord = () => {

@@ -9,10 +9,11 @@ import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
+import { useUser } from "@/hooks/useUser"
 import {
   useLinkAccount,
 } from "@privy-io/react-auth"
-import { useUser } from "@/hooks/useUser"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -38,9 +39,12 @@ const ProfileDetailCard = ({
   const imageUrl = loadedUser?.imageUrl || user.imageUrl;
   const name = loadedUser?.name || user.name;
   const bio = loadedUser?.bio || user.bio;
+
   const email = loadedUser?.emails[0]?.email || user.emails[0]?.email;
 
   const isLinking = useRef(false);
+
+  const onError = useHandlePrivyErrors()
 
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
@@ -55,6 +59,7 @@ const ProfileDetailCard = ({
           })
       }
     },
+    onError
   })
 
 

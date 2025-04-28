@@ -1,6 +1,7 @@
 "use client"
 
 import { syncPrivyUser } from "@/db/privy"
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 import { useUser } from "@/hooks/useUser"
 import { UserWithAddresses } from "@/lib/types"
 import { useLinkAccount } from "@privy-io/react-auth"
@@ -15,10 +16,12 @@ interface Props {
 
 export const AddressConnection = ({ children, user }: Props) => {
 
+
     const { invalidate: invalidateUser } = useUser({ id: user.id, enabled: false })
+    const onError = useHandlePrivyErrors()
 
     const { linkWallet } = useLinkAccount({
-        onSuccess: async ({ user: updatedPrivyUser, linkedAccount }) => {
+        onSuccess: ({ user: updatedPrivyUser, linkedAccount }) => {
             if (linkedAccount.type === "wallet") {
                 toast.promise(
                     syncPrivyUser(updatedPrivyUser)
@@ -30,13 +33,12 @@ export const AddressConnection = ({ children, user }: Props) => {
                     }
                 )
             }
-        }
+        },
+        onError
     })
 
     return (
-        <Button variant="primary" onClick={() => {
-            linkWallet()
-        }}>
+        <Button variant="primary" onClick={() => linkWallet()}>
             {children}
         </Button>
     )

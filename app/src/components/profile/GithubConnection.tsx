@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/useUser"
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { Checkbox } from "../ui/checkbox"
 
@@ -21,7 +22,7 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
 
   const { user: privyUser, unlinkGithub } = usePrivy()
   const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
-
+  const onError = useHandlePrivyErrors()
   const pathname = usePathname()
 
   const [userNotDeveloper, setUserNotDeveloper] = useState(user?.notDeveloper)
@@ -39,6 +40,7 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
           })
       }
     },
+    onError
   })
 
   const handleUnlinkGithub = () => {

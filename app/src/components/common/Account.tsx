@@ -7,13 +7,13 @@ import {
   useLogout,
   usePrivy,
 } from "@privy-io/react-auth"
+import { Loader2 } from "lucide-react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -42,7 +42,7 @@ export const Account = () => {
   const isLinking = useRef(false);
   const isLoggingIn = useRef(false)
 
-  const { data: session, status: authStatus } = useSession()
+  const { data: session, status: authStatus, } = useSession()
   const { user, invalidate: invalidateUser } = useUser({ id: session?.user?.id || "", enabled: !!session?.user })
 
   const { login: privyLogin } = useLogin({
@@ -50,7 +50,6 @@ export const Account = () => {
       onPrivyLogin(params.user)
     },
   })
-
 
   // Connect email when a new user logs in
   const { linkEmail } = useLinkAccount({
@@ -68,9 +67,11 @@ export const Account = () => {
   })
 
   const { logout: privyLogout } = useLogout({
-    onSuccess: () => signOut({ redirect: false }),
+    onSuccess: () => {
+      isLoggingIn.current = false
+      signOut()
+    },
   })
-
 
   const prevAuthStatus = usePrevious(authStatus)
 
@@ -86,14 +87,8 @@ export const Account = () => {
   const didLogIn =
     prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
     authStatus === AUTH_STATUS.AUTHENTICATED
-  const didLogOut =
-    prevAuthStatus === AUTH_STATUS.AUTHENTICATED &&
-    authStatus === AUTH_STATUS.UNAUTHENTICATED
-
-
 
   async function checkBadgeholderStatus() {
-
     if (!user || !isBadgeholder) return
 
     if (!hasShownWelcomeBadgeholderDialog()) {
@@ -119,6 +114,7 @@ export const Account = () => {
       })
   }
 
+
   useEffect(() => {
     if (didLogIn) {
       isLoggingIn.current = false
@@ -138,11 +134,7 @@ export const Account = () => {
         }
       }
 
-    } else if (didLogOut) {
-      if (pathName !== "/") {
-        isLoggingIn.current = false
-        router.push("/")
-      }
+
     }
   }, [
     authStatus,
@@ -211,7 +203,12 @@ export const Account = () => {
             </DropdownMenuItem>
           </Link>
           <hr className="w-full border-[0.5px] border-border" />
-          <DropdownMenuItem className="cursor-pointer" onClick={privyLogout}>
+          <DropdownMenuItem className="cursor-pointer" onClick={() => {
+
+
+            privyLogout()
+
+          }}>
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>

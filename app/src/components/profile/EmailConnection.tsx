@@ -12,11 +12,13 @@ import {
 } from "@privy-io/react-auth"
 import { Mail } from "lucide-react"
 import { useRef } from "react"
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 
 export const EmailConnection = ({ userId }: { userId: string }) => {
 
   const { user: privyUser, unlinkEmail } = usePrivy()
 
+  const onError = useHandlePrivyErrors()
   const { invalidate: invalidateUser, user } = useUser({ id: userId, enabled: true })
   const isLinking = useRef(false);
 
@@ -33,6 +35,7 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
         })
       }
     },
+    onError
   })
 
   const { linkEmail } = useLinkAccount({
@@ -48,6 +51,7 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
           })
       }
     },
+    onError
   })
 
   const handleUnlinkEmail = () => {
