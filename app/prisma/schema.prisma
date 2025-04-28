@@ -259,6 +259,9 @@ model Project {
   recurringRewards RecurringReward[]
 
   kycTeam   KYCTeam? @relation(fields: [kycTeamId], references: [id])
+  ProjectOSOMetrics ProjectOSOMetrics[]
+  ProjectOSORelatedProjects ProjectOSORelatedProjects[]
+  ProjectOSOAtlasRelatedProjects ProjectOSOAtlasRelatedProjects[]
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
@@ -663,4 +666,59 @@ model RewardStream { // This is used to track the ids for the streams
     round      FundingRound @relation(fields: [roundId], references: [id])
 
     @@index([roundId])
+}
+
+enum ProjectOSOMetric {
+  GAS_FEES
+  ACTIVE_ADDRESSES_COUNT
+  TRANSACTIONS_COUNT
+  HAS_DEFILLAMA_ADAPTER
+  HAS_BUNDLE_BEAR
+  IS_ONCHAIN_BUILDER_ELIGIBLE
+  IS_DEV_TOOLING_ELIGIBLE
+  STAR_COUNT
+  FORK_COUNT
+  NUM_PACKAGES_IN_DEPS_DEV
+  PACKAGE_CONNECTION_COUNT
+  DEVELOPER_CONNECTION_COUNT
+}
+
+model ProjectOSOMetrics {
+  id        String @id @default(uuid())
+  projectId String
+  metric    ProjectOSOMetric
+  tranche   Int
+  value     String
+
+  project   Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([metric])
+  @@index([tranche])
+}
+
+model ProjectOSORelatedProjects {
+  id        String @id @default(uuid())
+  projectId String
+  tranche   Int
+  osoId     String
+
+  project                        Project @relation(fields: [projectId], references: [id])
+  ProjectOSOAtlasRelatedProjects ProjectOSOAtlasRelatedProjects[]
+
+  @@index([projectId])
+  @@index([osoId])
+}
+
+model ProjectOSOAtlasRelatedProjects {
+  id                String @id @default(uuid())
+  projectId         String
+  tranche           Int
+  relatedProjectId  String
+
+  project           Project @relation(fields: [projectId], references: [id])
+  relatedProject    ProjectOSORelatedProjects @relation(fields: [relatedProjectId], references: [id])
+
+  @@index([projectId])
+  @@index([relatedProjectId])
 }
