@@ -1,19 +1,14 @@
 import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { memo, useRef } from "react"
-import { toast } from "sonner"
+import { memo } from "react"
 
-import { syncPrivyUser } from "@/db/privy"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
+import { usePrivyEmail } from "@/hooks/usePrivyLinkEmail"
 import { useUser } from "@/hooks/useUser"
-import {
-  useLinkAccount,
-} from "@privy-io/react-auth"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -33,35 +28,16 @@ const ProfileDetailCard = ({
 }) => {
 
   const { isBadgeholder } = useIsBadgeholder(user)
-  const { user: loadedUser, invalidate: invalidateUser } = useUser({ id: user.id, enabled: true })
+  const { user: loadedUser } = useUser({ id: user.id, enabled: true })
 
   const username = loadedUser?.username || user.username;
   const imageUrl = loadedUser?.imageUrl || user.imageUrl;
   const name = loadedUser?.name || user.name;
   const bio = loadedUser?.bio || user.bio;
 
-  const email = loadedUser?.emails[0]?.email || user.emails[0]?.email;
+  const email = loadedUser ? loadedUser?.emails[0]?.email : user.emails[0]?.email;
 
-  const isLinking = useRef(false);
-
-  const onError = useHandlePrivyErrors()
-
-  const { linkEmail } = useLinkAccount({
-    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      if (linkMethod === "email" && isLinking.current) {
-        toast.promise(syncPrivyUser(updatedPrivyUser)
-          .then(() => invalidateUser())
-          .then(() => isLinking.current = false),
-          {
-            loading: "Linking email...",
-            success: "Email linked successfully",
-            error: "Failed to link email",
-          })
-      }
-    },
-    onError
-  })
-
+  const { linkEmail } = usePrivyEmail(user.id)
 
   const renderEmail = () => {
     if (email) {
@@ -74,8 +50,7 @@ const ProfileDetailCard = ({
       return <Button
         variant="link"
         onClick={() => {
-          isLinking.current = true;
-          linkEmail();
+          linkEmail()
         }}
         className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
       >

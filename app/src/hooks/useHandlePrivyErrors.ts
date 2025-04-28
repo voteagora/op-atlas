@@ -6,7 +6,7 @@ export const useHandlePrivyErrors = () => {
     return (error: string) => {
         switch (error) {
             case 'must_be_authenticated':
-                return toast.error('Session expired. Please sign in again.')
+                toast.error('Session expired. Please sign in again.')
                 return signOut()
 
             case 'failed_to_update_account':
@@ -14,6 +14,9 @@ export const useHandlePrivyErrors = () => {
 
             case 'failed_to_link_account':
                 return toast.error('Failed to link account. Please refresh the page and try again.')
+
+            case 'exited_update_flow':
+                return
 
             default:
                 toast.error(`Privy Error: ${error}`)

@@ -1,72 +1,17 @@
 "use client"
 
-import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import { syncPrivyUser } from "@/db/privy"
+import { usePrivyEmail } from "@/hooks/usePrivyLinkEmail"
 import { useUser } from "@/hooks/useUser"
-import {
-  useLinkAccount,
-  usePrivy,
-  useUpdateAccount,
-} from "@privy-io/react-auth"
 import { Mail } from "lucide-react"
-import { useRef } from "react"
-import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 
 export const EmailConnection = ({ userId }: { userId: string }) => {
+  const { user } = useUser({ id: userId, enabled: true })
 
-  const { user: privyUser, unlinkEmail } = usePrivy()
-
-  const onError = useHandlePrivyErrors()
-  const { invalidate: invalidateUser, user } = useUser({ id: userId, enabled: true })
-  const isLinking = useRef(false);
+  const { linkEmail, updateEmail, unlinkEmail } = usePrivyEmail(userId)
 
   const email = user?.emails[0]?.email;
-
-  const { updateEmail } = useUpdateAccount({
-    onSuccess: async ({ user: updatedPrivyUser, updateMethod }) => {
-      if (updateMethod === "email") {
-        toast.promise(syncPrivyUser(updatedPrivyUser)
-          .then(() => invalidateUser()), {
-          loading: "Updating email...",
-          success: "Email updated successfully",
-          error: "Failed to update email",
-        })
-      }
-    },
-    onError
-  })
-
-  const { linkEmail } = useLinkAccount({
-    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      if (linkMethod === "email" && isLinking.current) {
-        toast.promise(syncPrivyUser(updatedPrivyUser)
-          .then(() => invalidateUser())
-          .then(() => isLinking.current = false),
-          {
-            loading: "Adding email...",
-            success: "Email added successfully",
-            error: "Failed to add email",
-          })
-      }
-    },
-    onError
-  })
-
-  const handleUnlinkEmail = () => {
-    if (privyUser?.email) {
-      toast.promise(unlinkEmail(privyUser.email.address), {
-        loading: "Deleting email...",
-        success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser)
-            .then(() => invalidateUser())
-          return "Email deleted successfully"
-        },
-        error: "Failed to delete email",
-      })
-    }
-  }
 
   return (
     <div className="flex space-x-1.5">
@@ -82,7 +27,6 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
           if (email) {
             updateEmail()
           } else {
-            isLinking.current = true;
             linkEmail()
           }
         }}
@@ -91,7 +35,7 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
       </Button>
 
       {email && (
-        <Button variant="secondary" onClick={handleUnlinkEmail}>
+        <Button variant="secondary" onClick={unlinkEmail}>
           Delete
         </Button>
       )}
