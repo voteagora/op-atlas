@@ -42,10 +42,10 @@ export function DeleteKYCTeamDialog({
       ])
       onOpenChange(false)
       if (organizationId) {
-        router.push(`/profile/organizations/${organizationId}/grant-addresses`)
+        router.push(`/profile/organizations/${organizationId}/grant-address`)
       }
       if (projectId) {
-        router.push(`/projects/${projectId}/grant-addresses`)
+        router.push(`/projects/${projectId}/grant-address`)
       }
     },
   })
