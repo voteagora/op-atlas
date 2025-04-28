@@ -1,18 +1,24 @@
 "use client"
 
+import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
 import { syncPrivyUser } from "@/db/privy"
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 import { useUser } from "@/hooks/useUser"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
-import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 
 export const DiscordConnection = ({ userId }: { userId: string }) => {
 
   const { user: privyUser, unlinkDiscord } = usePrivy()
   const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
+
+  const username = user?.discord || privyUser?.discord?.username;
+  const isIntermediateState = user?.discord?.toLowerCase() !== privyUser?.discord?.username?.toLowerCase();
+
+
   const onError = useHandlePrivyErrors()
   const { linkDiscord } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
@@ -45,25 +51,31 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
 
   return (
     <div className="flex flex-row gap-2">
-      {user?.discord && (
+      {username && (
         <div className="flex flex-col gap-2">
           <div>
-            <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
+            <div className={cn(
+              "flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10",
+              isIntermediateState && "opacity-50"
+            )}>
               <Image
                 src="/assets/icons/circle-check-green.svg"
                 height={16.67}
                 width={16.67}
                 alt="Verified"
               />
-              <p className="text-sm">@{user.discord}</p>
+              <p className="text-sm">@{username}</p>
             </div>
           </div>
         </div>
       )}
 
-
-      {user?.discord ?
-        <Button variant="secondary" onClick={handleUnlinkDiscord}>Disconnect</Button>
+      {username ?
+        <Button
+          variant="secondary"
+          onClick={handleUnlinkDiscord}
+          className={cn(isIntermediateState && "opacity-50")}
+        >Disconnect</Button>
         :
         <Button variant="primary" onClick={linkDiscord}>Connect</Button>
       }

@@ -54,26 +54,24 @@ export default async function Page() {
           <DiscordConnection userId={session.user.id} />
         </div>
 
-        {/* Github */}
-        <div>
-          <div>
-            <div className="flex items-center space-x-1.5">
-              <Image
-                src="/assets/icons/githubIcon.svg"
-                alt="Github"
-                height={20}
-                width={20}
-              />
-              <h3 className="font-semibold text-foreground">Github</h3>
-            </div>
-            <p className="text-secondary-foreground">
-              Connect your GitHub account to show your code contributions to the
-              Optimism Collective.
-            </p>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center space-x-1.5">
+            <Image
+              src="/assets/icons/githubIcon.svg"
+              alt="Github"
+              height={20}
+              width={20}
+            />
+            <h3 className="font-semibold text-foreground">Github</h3>
           </div>
-
+          <div className="text-secondary-foreground mb-4">
+            Connect your GitHub account to show your code contributions to the
+            Optimism Collective.
+          </div>
           <GithubConnection userId={session.user.id} />
         </div>
+
+
         {/* TODO: Add GovForumConnection */}
         {/* <GovForumConnection user={user} /> */}
       </div>

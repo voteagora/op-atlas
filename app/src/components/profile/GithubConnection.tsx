@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image"
-import { usePathname } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
@@ -12,8 +11,8 @@ import {
 import { cn } from "@/lib/utils"
 
 import { syncPrivyUser } from "@/db/privy"
-import { useUser } from "@/hooks/useUser"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
+import { useUser } from "@/hooks/useUser"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { Checkbox } from "../ui/checkbox"
 
@@ -23,10 +22,12 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
   const { user: privyUser, unlinkGithub } = usePrivy()
   const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
   const onError = useHandlePrivyErrors()
-  const pathname = usePathname()
 
   const [userNotDeveloper, setUserNotDeveloper] = useState(user?.notDeveloper)
   const [isPending, startTransition] = useTransition()
+
+  const username = user?.github || privyUser?.github?.username;
+  const isIntermediateState = user?.github?.toLowerCase() !== privyUser?.github?.username?.toLowerCase();
 
   const { linkGithub } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
@@ -68,7 +69,6 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
           throw result.error
         }
       } catch (error) {
-        console.error("Error toggling developer status", error)
         toast.error("Error updating developer status")
       }
     })
@@ -78,25 +78,30 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
   return (
     <div className="flex flex-col space-y-4">
 
-      {privyUser?.github?.username && (
+      {username && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-1.5">
-            <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
+            <div className={cn(
+              "flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10",
+              isIntermediateState && "opacity-50"
+            )}>
               <Image
                 src="/assets/icons/githubIcon.svg"
                 height={14}
                 width={14}
                 alt="Github"
               />
-              <p className="text-sm">{privyUser?.github?.username}</p>
+              <p className="text-sm">{username}</p>
             </div>
           </div>
         </div>
       )}
 
       <div className="flex gap-2">
-        {privyUser?.github?.username ?
-          <Button variant="secondary" onClick={handleUnlinkGithub}>Disconnect</Button>
+        {username ?
+          <Button variant="secondary" onClick={handleUnlinkGithub}
+            className={cn(isIntermediateState && "opacity-50")}
+          >Disconnect</Button>
           :
           <Button variant="primary" onClick={linkGithub}>Connect</Button>
         }
