@@ -20,6 +20,6 @@ export default async function Page() {
       so ENS and attestations can be displayed. Required for Badgeholders.
     </div>
 
-    <VerifiedAddressesContent session={session} />
+    <VerifiedAddressesContent userId={session.user.id} />
   </div>
 }

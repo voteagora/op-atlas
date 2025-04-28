@@ -16,7 +16,6 @@ interface Props {
 
 export const AddressConnection = ({ children, user }: Props) => {
 
-
     const { invalidate: invalidateUser } = useUser({ id: user.id, enabled: false })
     const onError = useHandlePrivyErrors()
 
