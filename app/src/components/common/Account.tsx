@@ -13,6 +13,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -139,6 +140,7 @@ export const Account = () => {
 
     } else if (didLogOut) {
       if (pathName !== "/") {
+        isLoggingIn.current = false
         router.push("/")
       }
     }
@@ -219,10 +221,14 @@ export const Account = () => {
     return (
       <button
         type="button"
-        className="cursor-pointer text-white bg-brand-primary rounded-md px-4 py-2"
+        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${isLoggingIn.current ? 'bg-gray-300' : 'bg-brand-primary'}`}
         onClick={privyLogin}
       >
-        {isLoggingIn.current ? "Signing in..." : "Sign in"}
+        {isLoggingIn.current ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          "Sign in"
+        )}
       </button>
     )
   }
