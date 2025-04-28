@@ -145,7 +145,7 @@ export const ApplicationSubmitted = ({
           return (
             <div
               key={"Application" + index}
-              className="flex justify-between items-center gap-y-6 p-6 bg-background border rounded-3xl"
+              className="flex justify-between items-center gap-y-6 p-6 bg-background border rounded-xl"
             >
               <div className="flex items-center gap-4">
                 {application.thumbnailUrl && (
