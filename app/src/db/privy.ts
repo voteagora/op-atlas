@@ -81,32 +81,34 @@ export const syncPrivyUser = async (
         }
     }
 
+    const privyEmail = privyUser?.email ? privyUser?.email?.address?.toLowerCase() : null
+    const dbEmail = existingUser?.emails[0]?.email ? existingUser.emails[0].email.toLowerCase() : null
 
 
-    if (privyUser?.email && privyUser.email.address) {
-
+    //  Add new or update existing email
+    if (privyEmail && privyEmail !== dbEmail) {
+        await updateUserEmail({
+            id: existingUser.id,
+            email: privyEmail,
+            verified: true,
+        })
         try {
-            await updateUserEmail({
-                id: existingUser.id,
-                email: privyUser.email.address.toLowerCase(),
-                verified: true,
-            })
-
-            // await addContactToList({ email: privyUser.email.address.toLowerCase() })
-
+            // TODO: Andrei - verify that emails are properly added to mailing list
+            await addContactToList({ email: privyEmail })
         } catch (error) {
             console.error("Failed to update email:", error)
         }
+    }
 
-    } else {
-
-        // try {
-        //     await removeContactFromList({ email: existingUser.emails[0].email });
-        // } catch (error) {
-        //     console.error("Failed to remove contact from mailing list:", error);
-        // }
-
-        deleteUserEmails(existingUser.id)
+    // Remove existing email if it doesn't exist in Privy
+    if (!privyEmail && dbEmail) {
+        await deleteUserEmails(existingUser.id)
+        try {
+            // TODO: Andrei - verify that emails are properly removed from mailing list
+            await removeContactFromList({ email: dbEmail })
+        } catch (error) {
+            console.error("Failed to remove contact from mailing list:", error)
+        }
     }
 
     // Update Discord and Github
