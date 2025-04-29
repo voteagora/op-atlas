@@ -22,6 +22,7 @@ import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"
+import { getUserById } from "@/db/users"
 
 export const getUserOrganizations = async (userId: string) => {
   const user = await getUserOrganizationsWithDetails(userId)
@@ -37,15 +38,23 @@ export const createNewOrganization = async ({
 }) => {
   const session = await auth()
 
-  if (!session?.user?.id || !session.user.farcasterId) {
+  if (!session?.user?.id) {
     return {
       error: "Unauthorized",
     }
   }
 
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected to create an organization.",
+    }
+  }
+
   // Create entity attestation
   const organizationId = await createEntityAttestation({
-    farcasterId: parseInt(session.user.farcasterId),
+    farcasterId: parseInt(user?.farcasterId),
     type: "organization",
   })
 
@@ -71,7 +80,7 @@ export const updateOrganizationDetails = async ({
 }) => {
   const session = await auth()
 
-  if (!session?.user?.id || !session.user.farcasterId) {
+  if (!session?.user?.id) {
     return {
       error: "Unauthorized",
     }
@@ -251,3 +260,7 @@ export const getOrganizationKycTeamsAction = async ({
 
   return getOrganizationKYCTeams({ organizationId })
 }
+function getUser(arg0: { id: string }) {
+  throw new Error("Function not implemented.")
+}
+

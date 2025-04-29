@@ -77,7 +77,10 @@ export const FarcasterConnection = ({ userId }: { userId: string }) => {
                 :
                 <Button
                     variant="primary"
-                    onClick={linkFarcaster}
+                    onClick={(event) => {
+                        event.preventDefault()
+                        linkFarcaster()
+                    }}
                 >
                     Connect
                 </Button>
