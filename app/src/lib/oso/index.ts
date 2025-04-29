@@ -7,6 +7,7 @@ import {
   createOSOProjects,
   getDevToolingApplication,
   getOnchainBuilderApplication,
+  getProjectOSORelatedProjects,
   getProjectsOSO,
   getTopProjectsFromOSO,
   getTrustedDevelopersCountFromOSO,
@@ -30,7 +31,13 @@ import {
   ParsedOsoDeployerContract,
 } from "@/lib/types"
 
-import { BATCH_SIZE, OSO_QUERY_DATES, supportedMappings } from "./constants"
+import {
+  BATCH_SIZE,
+  OSO_QUERY_DATES,
+  OSO_QUERY_TRANCHE_CUTOFF_DATES,
+  supportedMappings,
+  TRANCHE_MONTHS_MAP,
+} from "./constants"
 import {
   formatActiveAddresses,
   formatDevToolingEligibility,
@@ -41,6 +48,7 @@ import {
   formatOnchainBuilderReward,
   formatTransactions,
   formatTvl,
+  formatGasConsumption,
 } from "./utils"
 
 export const osoClient = new GraphQLClient(
@@ -221,7 +229,7 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getOnchainBuilderApplication(projectId),
     getDevToolingEligibility(osoId),
     getOnchainBuilderEligibility(osoId),
-    getDevToolingMetrics(osoId),
+    getDevToolingMetrics(projectId),
     getOnchainBuilderMetrics(osoId),
     getHasDefillamaAdapter(osoId),
   ])
@@ -338,7 +346,7 @@ const getHasDefillamaAdapter = cache(async function getHasDefillamaAdapter(
 
 // Dev Tooling Metrics
 const getDevToolingMetrics = cache(async function getDevToolingMetrics(
-  osoId: string,
+  projectId: string,
 ) {
   const [
     gasConsumption,
@@ -346,10 +354,10 @@ const getDevToolingMetrics = cache(async function getDevToolingMetrics(
     topProjects,
     devToolingReward,
   ] = await Promise.all([
-    getGasConsumption(osoId),
-    getTrustedDevelopersCount(osoId),
-    getTopProjects(osoId),
-    getDevToolingReward(osoId),
+    getGasConsumption(projectId),
+    getTrustedDevelopersCount(projectId),
+    getTopProjects(projectId),
+    getDevToolingReward(projectId),
   ])
 
   return {
@@ -360,9 +368,36 @@ const getDevToolingMetrics = cache(async function getDevToolingMetrics(
   }
 })
 
-const getGasConsumption = async function getGasConsumption(osoId: string) {
-  const data = await queryMetrics([osoId], "gasFees")
-  return formatGasFees(data)
+const getGasConsumption = async function getGasConsumption(projectId: string) {
+  const relatedProjects = await getProjectOSORelatedProjects(projectId)
+  const februaryProjects = relatedProjects.filter((p) => p.tranche === 1)
+  const marchProjects = relatedProjects.filter((p) => p.tranche === 2)
+
+  const februaryData = await queryMetrics(
+    februaryProjects.map((p) => p.osoId),
+    "gasFees",
+    {
+      _gte: OSO_QUERY_TRANCHE_CUTOFF_DATES[1].start,
+      _lte: OSO_QUERY_TRANCHE_CUTOFF_DATES[1].end,
+    },
+  )
+  const marchData = await queryMetrics(
+    marchProjects.map((p) => p.osoId),
+    "gasFees",
+    {
+      _gte: OSO_QUERY_TRANCHE_CUTOFF_DATES[2].start,
+      _lte: OSO_QUERY_TRANCHE_CUTOFF_DATES[2].end,
+    },
+  )
+
+  const trancheData = {
+    [TRANCHE_MONTHS_MAP[1]]: februaryData,
+    [TRANCHE_MONTHS_MAP[2]]: marchData,
+  }
+
+  const output = formatGasConsumption(trancheData)
+
+  return output
 }
 
 const getTrustedDevelopersCount = cache(

@@ -2107,3 +2107,13 @@ export async function getOSOMappedProjectIds() {
     return projects.map(({ id }) => id)
   })
 }
+
+export async function getProjectOSORelatedProjects(projectId: string) {
+  return await prisma.projectOSORelatedProjects.findMany({
+    where: { projectId },
+    select: {
+      osoId: true,
+      tranche: true,
+    },
+  })
+}

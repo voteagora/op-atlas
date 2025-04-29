@@ -8,7 +8,7 @@ export const formatPerformanceMetrics = (metrics: MetricValues[]) => {
 }
 
 const calculateTrend = (current: number, previous: number): Trend => {
-  if (previous === 0) return { value: 0, sign: null }
+  if (previous === 0 || current === 0) return { value: 0, sign: null }
 
   const diff = current - previous
   const percentageChange = Math.abs((diff / previous) * 100)
@@ -210,4 +210,31 @@ export const getReposWithTags = (
       tags.push({ name: "Crate", icon: "/assets/icons/crate.svg" })
     return { ...repo, tags }
   })
+}
+
+export const formatGasConsumption = (data: Record<string, MetricValues[]>) => {
+  const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(data)
+
+  months.forEach((month, index) => {
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, metric) => sum + metric.amount,
+      0,
+    )
+    const previousValue =
+      index > 0
+        ? data[months[index - 1]].reduce(
+            (sum, metric) => sum + metric.amount,
+            0,
+          )
+        : 0
+
+    result[month] = {
+      value: currentValue,
+      trend: calculateTrend(currentValue, previousValue),
+    }
+  })
+
+  return result
 }
