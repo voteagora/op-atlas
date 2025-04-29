@@ -11,6 +11,7 @@ import {
   getProjectGasFees,
   getProjectOSORelatedProjects,
   getProjectsOSO,
+  getProjectTransactions,
   getTopProjectsFromOSO,
   getTrustedDevelopersCountFromOSO,
 } from "@/db/projects"
@@ -319,9 +320,19 @@ const getGasFees = async function getGasFees(projectId: string) {
   return output
 }
 
-const getTransactions = async function getTransactions(osoId: string) {
-  const data = await queryMetrics([osoId], "transactions")
-  return formatTransactions(data)
+const getTransactions = async function getTransactions(projectId: string) {
+  const transactions = await getProjectTransactions(projectId)
+  const februaryData = transactions.filter((p) => p.tranche === 1)
+  const marchData = transactions.filter((p) => p.tranche === 2)
+
+  const trancheData = {
+    [TRANCHE_MONTHS_MAP[1]]: februaryData,
+    [TRANCHE_MONTHS_MAP[2]]: marchData,
+  }
+
+  const output = formatTransactions(trancheData)
+
+  return output
 }
 
 const getTvl = async function getTvl(osoId: string) {

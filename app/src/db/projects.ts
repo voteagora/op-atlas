@@ -2173,3 +2173,16 @@ export async function getProjectGasFees(projectId: string) {
     },
   })
 }
+
+export async function getProjectTransactions(projectId: string) {
+  return await prisma.projectOSOMetrics.findMany({
+    where: {
+      projectId,
+      metric: "TRANSACTION_COUNT",
+    },
+    select: {
+      value: true,
+      tranche: true,
+    },
+  })
+}

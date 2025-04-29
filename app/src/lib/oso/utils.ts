@@ -82,14 +82,26 @@ export const formatGasFees = (
   return result
 }
 
-export const formatTransactions = (data: MetricValues[]) => {
-  const monthlyData = groupByMonth(data)
-  const months = Object.keys(monthlyData)
+export const formatTransactions = (
+  data: Record<string, { tranche: number; value: string }[]>,
+) => {
   const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(data)
 
   months.forEach((month, index) => {
-    const currentValue = monthlyData[month]
-    const previousValue = index > 0 ? monthlyData[months[index - 1]] : 0
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
+    const previousValue =
+      index > 0
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
+        : 0
+
     result[month] = {
       value: currentValue,
       trend: calculateTrend(currentValue, previousValue),
