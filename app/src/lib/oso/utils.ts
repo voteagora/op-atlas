@@ -25,25 +25,25 @@ const getDaysInMonth = (month: string, year: number): number => {
 }
 
 export const formatActiveAddresses = (
-  data: MetricValues[],
-  isOnchainBuilder: boolean = false,
+  data: Record<string, { tranche: number; value: string }[]>,
 ) => {
-  const monthlyData = groupByMonth(data)
-  const months = Object.keys(monthlyData)
   const result: Record<string, { value: number; trend: Trend }> = {}
-  const currentYear = new Date().getFullYear()
+  const months = Object.keys(data)
 
   months.forEach((month, index) => {
-    const currentValue = isOnchainBuilder
-      ? monthlyData[month] / getDaysInMonth(month, currentYear)
-      : monthlyData[month]
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
     const previousValue =
       index > 0
-        ? isOnchainBuilder
-          ? monthlyData[months[index - 1]] /
-            getDaysInMonth(months[index - 1], currentYear)
-          : monthlyData[months[index - 1]]
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
         : 0
+
     result[month] = {
       value: currentValue,
       trend: calculateTrend(currentValue, previousValue),
@@ -53,14 +53,26 @@ export const formatActiveAddresses = (
   return result
 }
 
-export const formatGasFees = (data: MetricValues[]) => {
-  const monthlyData = groupByMonth(data)
-  const months = Object.keys(monthlyData)
+export const formatGasFees = (
+  data: Record<string, { tranche: number; value: string }[]>,
+) => {
   const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(data)
 
   months.forEach((month, index) => {
-    const currentValue = monthlyData[month]
-    const previousValue = index > 0 ? monthlyData[months[index - 1]] : 0
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
+    const previousValue =
+      index > 0
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
+        : 0
+
     result[month] = {
       value: currentValue,
       trend: calculateTrend(currentValue, previousValue),

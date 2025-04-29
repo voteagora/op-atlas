@@ -7,6 +7,8 @@ import {
   createOSOProjects,
   getDevToolingApplication,
   getOnchainBuilderApplication,
+  getProjectActiveAddressesCount,
+  getProjectGasFees,
   getProjectOSORelatedProjects,
   getProjectsOSO,
   getTopProjectsFromOSO,
@@ -230,7 +232,7 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getDevToolingEligibility(osoId),
     getOnchainBuilderEligibility(osoId),
     getDevToolingMetrics(projectId),
-    getOnchainBuilderMetrics(osoId),
+    getOnchainBuilderMetrics(projectId),
     getHasDefillamaAdapter(osoId),
   ])
 
@@ -267,15 +269,15 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
 
 // Onchain Builders Metrics
 const getOnchainBuilderMetrics = cache(async function getOnchainBuilderMetrics(
-  osoId: string,
+  projectId: string,
 ) {
   const [activeAddresses, gasFees, transactions, tvl, onchainBuilderReward] =
     await Promise.all([
-      getActiveAddresses(osoId),
-      getGasFees(osoId),
-      getTransactions(osoId),
-      getTvl(osoId),
-      getOnchainBuilderReward(osoId),
+      getActiveAddresses(projectId),
+      getGasFees(projectId),
+      getTransactions(projectId),
+      getTvl(projectId),
+      getOnchainBuilderReward(projectId),
     ])
 
   return {
@@ -287,14 +289,34 @@ const getOnchainBuilderMetrics = cache(async function getOnchainBuilderMetrics(
   }
 })
 
-const getActiveAddresses = async function getActiveAddresses(osoId: string) {
-  const data = await queryMetrics([osoId], "activeAddresses")
-  return formatActiveAddresses(data, true)
-}
+const getActiveAddresses = cache(async (projectId: string) => {
+  const activeAddressesCount = await getProjectActiveAddressesCount(projectId)
+  const februaryData = activeAddressesCount.filter((p) => p.tranche === 1)
+  const marchData = activeAddressesCount.filter((p) => p.tranche === 2)
 
-const getGasFees = async function getGasFees(osoId: string) {
-  const data = await queryMetrics([osoId], "gasFees")
-  return formatGasFees(data)
+  const trancheData = {
+    [TRANCHE_MONTHS_MAP[1]]: februaryData,
+    [TRANCHE_MONTHS_MAP[2]]: marchData,
+  }
+
+  const output = formatActiveAddresses(trancheData)
+
+  return output
+})
+
+const getGasFees = async function getGasFees(projectId: string) {
+  const gasFees = await getProjectGasFees(projectId)
+  const februaryData = gasFees.filter((p) => p.tranche === 1)
+  const marchData = gasFees.filter((p) => p.tranche === 2)
+
+  const trancheData = {
+    [TRANCHE_MONTHS_MAP[1]]: februaryData,
+    [TRANCHE_MONTHS_MAP[2]]: marchData,
+  }
+
+  const output = formatGasFees(trancheData)
+
+  return output
 }
 
 const getTransactions = async function getTransactions(osoId: string) {
