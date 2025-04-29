@@ -281,8 +281,6 @@ const getOnchainBuilderMetrics = cache(async function getOnchainBuilderMetrics(
       getOnchainBuilderReward(projectId),
     ])
 
-  console.log(">>>", onchainBuilderReward)
-
   return {
     activeAddresses,
     gasFees,
