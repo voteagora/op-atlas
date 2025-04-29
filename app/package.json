@@ -25,7 +25,8 @@
     "populate:oso-data": "tsx src/scripts/populate-oso-data.ts",
     "populate:onchain-builders-rewards": "tsx src/scripts/populate-onchain-builders-rewards.ts",
     "populate:dev-tooling-rewards": "tsx src/scripts/populate-dev-tooling-rewards.ts",
-    "cleanup:funding-rewards": "tsx src/scripts/cleanup-funding-rewards.ts"
+    "cleanup:funding-rewards": "tsx src/scripts/cleanup-funding-rewards.ts",
+    "process:oso-data": "tsx src/scripts/process-oso-data.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
