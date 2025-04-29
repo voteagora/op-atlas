@@ -7,7 +7,6 @@ import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
 import Image from "next/image"
 export default async function Page() {
-
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -31,7 +30,8 @@ export default async function Page() {
             <h3 className="font-semibold text-foreground">Farcaster</h3>
           </div>
           <div className="text-secondary-foreground mb-4">
-            Connect your farcaster account to import your username, bio and avatar.
+            Connect your farcaster account to import your username, bio and
+            avatar.
           </div>
           <FarcasterConnection userId={session.user.id} />
         </div>
@@ -80,7 +80,9 @@ export default async function Page() {
               height={20}
               width={20}
             />
-            <h3 className="font-semibold text-foreground">Collective Governance Forum</h3>
+            <h3 className="font-semibold text-foreground">
+              Collective Governance Forum
+            </h3>
           </div>
           <div className="text-secondary-foreground mb-4">
             Link your profile so anyone can find you on{" "}

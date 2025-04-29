@@ -90,12 +90,13 @@ export async function GET() {
           if (user.discord) {
           }
 
-          // Link Farcaster 
+          // Link Farcaster
           if (user.farcasterId) {
-            const farcasterAddresses = await getUserConnectedAddresses(user.farcasterId)
+            const farcasterAddresses = await getUserConnectedAddresses(
+              user.farcasterId,
+            )
 
             if (farcasterAddresses && farcasterAddresses.length > 0) {
-
               linkedAccounts.push({
                 type: "farcaster",
                 fid: Number(user.farcasterId),
@@ -103,7 +104,6 @@ export async function GET() {
               })
             }
           }
-
 
           // Skip if no linked accounts can be created
           if (linkedAccounts.length === 0) {
@@ -113,9 +113,6 @@ export async function GET() {
               reason: "No linked accounts available",
             }
           }
-
-
-
 
           // Create user in Privy using the API
           const privyResponse = await fetch("https://api.privy.io/v1/users", {
@@ -139,7 +136,6 @@ export async function GET() {
 
           const privyUser = await privyResponse.json()
 
-
           // Update user in our database with privyDid using raw SQL
           await prisma.$executeRaw`
           UPDATE "User"
@@ -147,7 +143,6 @@ export async function GET() {
           WHERE "id" = ${user.id}
           `
           console.log("Privy user created", privyUser.id)
-
 
           return {
             userId: user.id,
