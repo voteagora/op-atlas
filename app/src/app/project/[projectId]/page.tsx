@@ -16,6 +16,7 @@ import {
   MoreDetails,
   Performance,
 } from "./components"
+import { getUserById } from "@/db/users"
 
 interface PageProps {
   params: {
@@ -32,8 +33,10 @@ export default async function Page({ params }: PageProps) {
     getPublicProjectOSOData(projectId),
   ])
 
+  const user = await getUserById(session?.user?.id ?? "")
+
   const isMember = !(
-    await verifyMembership(projectId, session?.user.farcasterId ?? "")
+    await verifyMembership(projectId, user?.farcasterId ?? "")
   )?.error
 
   const { isOnchainBuilder, isDevTooling, projectOSOData, groupedMetrics } =
@@ -52,15 +55,15 @@ export default async function Page({ params }: PageProps) {
 
   const author = publicProject.organization
     ? {
-        avatarUrl: publicProject.organization.organization.avatarUrl,
-        name: publicProject.organization.organization.name,
-        farcasterHandle: "",
-      }
+      avatarUrl: publicProject.organization.organization.avatarUrl,
+      name: publicProject.organization.organization.name,
+      farcasterHandle: "",
+    }
     : {
-        avatarUrl: publicProject.team?.[0]?.user.imageUrl,
-        name: publicProject.team?.[0]?.user.name,
-        farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
-      }
+      avatarUrl: publicProject.team?.[0]?.user.imageUrl,
+      name: publicProject.team?.[0]?.user.name,
+      farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
+    }
 
   const showIncreaseImpact =
     projectOSOData?.devToolingEligible || projectOSOData?.onchainBuilderEligible

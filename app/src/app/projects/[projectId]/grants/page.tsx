@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { GrantsForm } from "@/components/projects/grants/GrantsForm"
 import { getProject } from "@/db/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { getUserById } from "@/db/users"
 
 export default async function Page({
   params,
@@ -16,9 +17,15 @@ export default async function Page({
     redirect("/dashboard")
   }
 
+  const user = await getUserById(session?.user.id)
+
+  if (!user?.farcasterId) {
+    redirect("/dashboard")
+  }
+
   const [project, membership] = await Promise.all([
     getProject({ id: params.projectId }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
+    verifyMembership(params.projectId, user?.farcasterId),
   ])
 
   if (membership?.error || !project) {

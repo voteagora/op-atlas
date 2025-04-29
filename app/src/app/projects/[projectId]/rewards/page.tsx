@@ -5,6 +5,7 @@ import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
 import { getVerifiedKycTeamsMap } from "@/db/kyc"
 import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { getUserById } from "@/db/users"
 
 export default async function Page({
   params,
@@ -17,14 +18,16 @@ export default async function Page({
     redirect("/login")
   }
 
-  if (!session?.user.id) {
+  const user = await getUserById(session?.user.id)
+
+  if (!user || !user?.farcasterId) {
     redirect("/dashboard")
   }
 
   const [project, team, membership, verifiedKycTeams] = await Promise.all([
     getProject({ id: params.projectId }),
     getConsolidatedProjectTeam({ projectId: params.projectId }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
+    verifyMembership(params.projectId, user?.farcasterId),
     getVerifiedKycTeamsMap(params.projectId),
   ])
 

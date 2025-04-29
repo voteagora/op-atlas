@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import TeamForm from "@/components/projects/teams/TeamForm"
 import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { getUserById } from "@/db/users"
 
 export default async function Page({
   params,
@@ -15,10 +16,17 @@ export default async function Page({
   if (!session?.user.id) {
     redirect("/dashboard")
   }
+
+  const user = await getUserById(session?.user.id)
+
+  if (!user?.farcasterId) {
+    redirect("/dashboard")
+  }
+
   const [project, team, membership] = await Promise.all([
     getProject({ id: params.projectId }),
     getConsolidatedProjectTeam({ projectId: params.projectId }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
+    verifyMembership(params.projectId, user?.farcasterId),
   ])
 
   if (membership?.error || !project) {

@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { PublishForm } from "@/components/projects/publish/PublishForm"
 import { getProject, getProjectContracts } from "@/db/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { getUserById } from "@/db/users"
 
 export const maxDuration = 120
 
@@ -18,10 +19,16 @@ export default async function Page({
     redirect("/dashboard")
   }
 
+  const user = await getUserById(session?.user.id)
+
+  if (!user?.farcasterId) {
+    redirect("/dashboard")
+  }
+
   const [project, contracts, membership] = await Promise.all([
     getProject({ id: params.projectId }),
     getProjectContracts({ projectId: params.projectId }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
+    verifyMembership(params.projectId, user?.farcasterId),
   ])
 
   if (membership?.error || !project) {
