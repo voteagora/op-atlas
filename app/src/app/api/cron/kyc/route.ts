@@ -1,14 +1,17 @@
+import { NextRequest } from "next/server"
+
 import { processKYC } from "@/lib/actions/kyc"
+import { withCronObservability } from "@/lib/cron"
 
 // We process these inline, so use a generous time limit
 export const maxDuration = 300
+export const dynamic = "force-dynamic"
+export const revalidate = 0
 
-/**
- * Endpoint called by a cron job, to be used for any recurring task
- */
-export async function GET() {
+const MONITOR_SLUG = "cron-kyc"
+
+async function handleKYCCron(request: NextRequest) {
   // Triggers a fetch and import of PGF KYC data
-
   const response = await fetch(
     "https://raw.githubusercontent.com/akathm/hippos/master/rpgf_status.csv",
     {
@@ -23,3 +26,8 @@ export async function GET() {
 
   return Response.json({ status: "ok" })
 }
+
+export const GET = withCronObservability(handleKYCCron, {
+  monitorSlug: MONITOR_SLUG,
+  requireAuth: true,
+})

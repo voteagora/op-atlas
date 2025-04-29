@@ -1,13 +1,16 @@
 import { NextRequest } from "next/server"
 
 import { processPersonaCases, processPersonaInquiries } from "@/lib/actions/kyc"
+import { withCronObservability } from "@/lib/cron"
 import { getPersonaCases, getPersonaInquiries } from "@/lib/persona"
 
 export const maxDuration = 900
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-export async function GET(request: NextRequest) {
+const MONITOR_SLUG = "cron-persona"
+
+async function handlePersonaCron(request: NextRequest) {
   const cases = getPersonaCases()
   const inquiries = getPersonaInquiries()
 
@@ -28,3 +31,8 @@ export async function GET(request: NextRequest) {
 
   return Response.json({ status: "Persona cases and inquiries processed" })
 }
+
+export const GET = withCronObservability(handlePersonaCron, {
+  monitorSlug: MONITOR_SLUG,
+  requireAuth: true,
+})

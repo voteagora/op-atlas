@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron",
+      "path": "/api/cron/kyc",
       "schedule": "* * * * *"
     },
     {
@@ -9,11 +9,11 @@
       "schedule": "0 * * * *"
     },
     {
-      "path": "/api/tag-contacts",
-      "schedule": "59 23 * * *"
+      "path": "/api/cron/tag-contacts",
+      "schedule": "0 * * * *"
     },
     {
-      "path": "/api/oso/map-projects",
+      "path": "/api/cron/oso-map-projects",
       "schedule": "59 23 * * *"
     },
     {
