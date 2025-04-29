@@ -282,3 +282,13 @@ export const formatOnchainBuilderEligibility = (
     return acc
   }, {})
 }
+
+export const formatHasDefillamaAdapter = (
+  data: { tranche: number; value: string }[],
+) => {
+  return data.reduce<Record<string, boolean>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] =
+      d.value === "true"
+    return acc
+  }, {})
+}

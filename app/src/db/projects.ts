@@ -2170,3 +2170,10 @@ export async function getProjectTransactions(projectId: string) {
     },
   })
 }
+
+export async function getDefillamaAdapter(projectId: string) {
+  return await prisma.projectOSOMetrics.findMany({
+    where: { projectId, metric: "HAS_DEFILLAMA_ADAPTER" },
+    select: { value: true, tranche: true },
+  })
+}

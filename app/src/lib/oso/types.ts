@@ -49,7 +49,7 @@ export interface OnchainBuilderMissionProps extends BaseMissionProps {
     onchainBuilderReward: Record<string, number>
   }
   eligibility: {
-    hasDefillamaAdapter: boolean
+    hasDefillamaAdapter: Record<string, boolean>
     hasQualifiedAddresses: boolean
     deployedOnWorldchain: boolean
     onchainBuilderEligibility: Record<string, boolean>

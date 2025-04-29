@@ -5,6 +5,7 @@ import { gql, GraphQLClient } from "graphql-request"
 
 import {
   createOSOProjects,
+  getDefillamaAdapter,
   getDevToolingEligibility,
   getOnchainBuilderEligibility,
   getProjectActiveAddressesCount,
@@ -52,6 +53,7 @@ import {
   formatTvl,
   formatGasConsumption,
   formatOnchainBuilderEligibility,
+  formatHasDefillamaAdapter,
 } from "./utils"
 
 export const osoClient = new GraphQLClient(
@@ -343,26 +345,17 @@ const getOnchainBuilderReward = async function getOnchainBuilderReward(
   return formatOnchainBuilderReward(data)
 }
 
-const getHasDefillamaAdapter = cache(async (osoId: string) => {
-  const query: QueryOso_ArtifactsByProjectV1Args = {
-    where: {
-      projectId: { _eq: osoId },
-      artifactSource: { _eq: "DEFILLAMA" },
-    },
+const getHasDefillamaAdapter = cache(async (projectId: string) => {
+  const hasDefillamaAdapter = await getDefillamaAdapter(projectId)
+  const februaryData = hasDefillamaAdapter.filter((p) => p.tranche === 1)
+  const marchData = hasDefillamaAdapter.filter((p) => p.tranche === 2)
+
+  const output = {
+    [TRANCHE_MONTHS_MAP[1]]: formatHasDefillamaAdapter(februaryData),
+    [TRANCHE_MONTHS_MAP[2]]: formatHasDefillamaAdapter(marchData),
   }
 
-  const select: (keyof Oso_ArtifactsByProjectV1)[] = [
-    "artifactId",
-    "artifactSource",
-  ]
-
-  const data = await osoGqlClient.executeQuery(
-    "oso_artifactsByProjectV1",
-    query,
-    select,
-  )
-
-  return data.oso_artifactsByProjectV1.length > 0
+  return output
 })
 
 // Dev Tooling Metrics
