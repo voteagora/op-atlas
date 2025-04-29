@@ -52,6 +52,7 @@ import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
 import { useUser } from "@/hooks/useUser"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
+import { useSession } from "next-auth/react"
 
 const CategoryEnum = z.enum([
   "CeFi",
@@ -92,21 +93,21 @@ function fromStringObjectArr(objs: { value: string }[]) {
 }
 
 export default function ProjectDetailsForm({
-  userId,
   project,
   organizations,
 }: {
-  userId: string
   project?: ProjectWithFullDetails
   organizations: Organization[]
 }) {
   const router = useRouter()
   const { track } = useAnalytics()
 
+  const { data: currentUser } = useSession();
+
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  const { user } = useUser({ id: userId, enabled: true })
+  const { user } = useUser({ id: currentUser?.user?.id, enabled: true })
 
   const searchParams = useSearchParams()
 

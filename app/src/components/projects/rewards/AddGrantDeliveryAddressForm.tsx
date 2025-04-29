@@ -1,7 +1,7 @@
 "use client"
 
 import { KYCUser } from "@prisma/client"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { CheckIcon, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -14,8 +14,7 @@ import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { deleteOrganizationKycTeam } from "@/db/organizations"
 import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
-import { cn } from "@/lib/utils"
-import { shortenAddress } from "@/lib/utils"
+import { cn, shortenAddress } from "@/lib/utils"
 
 import CompletedGrantDeliveryForm from "./CompletedGrantDeliveryForm"
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"

@@ -22,6 +22,7 @@ import FileUploadInput from "../common/FileUploadInput"
 import { DialogProps } from "../dialogs/types"
 import { PhotoCropModal } from "../projects/details/PhotoCropModal"
 import AddTeamMemberDialog from "../projects/teams/AddTeamMemberDialog"
+import { useUser } from "@/hooks/useUser"
 
 function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
   const { data: currentUser } = useSession()
@@ -33,7 +34,8 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
   const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  const user = currentUser?.user
+  const { user: loadedUser } = useUser({ id: currentUser?.user?.id })
+  const user = loadedUser || currentUser?.user;
 
   const avatarUrl = useMemo(() => {
     if (!newAvatarImg) return ""
