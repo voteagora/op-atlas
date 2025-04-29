@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/kyc",
-      "schedule": "* * * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/persona",
