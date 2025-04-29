@@ -235,8 +235,6 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getHasDefillamaAdapter(projectId),
   ])
 
-  console.log(">>> hasDefillamaAdapter", hasDefillamaAdapter)
-
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
     queryMetrics([osoId], "activeAddresses"),
     queryMetrics([osoId], "gasFees"),
