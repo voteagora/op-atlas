@@ -402,11 +402,23 @@ const getGasConsumption = async function getGasConsumption(projectId: string) {
 
 const getTrustedDevelopersCount = cache(
   async function getTrustedDevelopersCount(osoId: string) {
-    // TODO: Replace thiw with OSO API call once available
-    const count = await getTrustedDevelopersCountFromOSO(osoId)
-    //
+    // // TODO: Replace thiw with OSO API call once available
+    // const count = await getTrustedDevelopersCountFromOSO(osoId)
+    // //
 
-    return count
+    // return count
+
+    const trustedDevelopers = await getTrustedDevelopersCountFromOSO(osoId)
+
+    const februaryCount = trustedDevelopers.filter(
+      (t) => t.tranche === 1,
+    ).length
+    const marchCount = trustedDevelopers.filter((t) => t.tranche === 2).length
+
+    return {
+      [TRANCHE_MONTHS_MAP[1]]: februaryCount,
+      [TRANCHE_MONTHS_MAP[2]]: marchCount,
+    }
   },
 )
 

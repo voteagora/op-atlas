@@ -158,7 +158,7 @@ export default function DevToolingMission({
               />
               <MetricCard
                 value={formatNumber(
-                  devToolingMetrics?.trustedDevelopersCount ?? 0,
+                  devToolingMetrics?.trustedDevelopersCount[month] ?? 0,
                   0,
                   "compact",
                 )}

@@ -67,7 +67,7 @@ export interface DevToolingMissionProps extends BaseMissionProps {
         trend: Trend
       }
     >
-    trustedDevelopersCount: number
+    trustedDevelopersCount: Record<string, number>
     devToolingReward: Record<string, number>
     topProjects: {
       id?: string

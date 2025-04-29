@@ -2028,17 +2028,16 @@ export async function getOnchainBuilderApplication(projectId: string) {
   }
 }
 
-export async function getTrustedDevelopersCountFromOSO(osoId: string) {
-  const result = await prisma.projectOSOData.findFirst({
-    where: {
-      osoId,
-    },
+export async function getTrustedDevelopersCountFromOSO(projectId: string) {
+  const result = await prisma.projectOSOMetrics.findMany({
+    where: { projectId, metric: "TRUSTED_DEVELOPER_USERNAME" },
     select: {
-      data: true,
+      value: true,
+      tranche: true,
     },
   })
 
-  return (result?.data as ProjectOSOData)?.onchainBuildersInAtlasCount ?? 0
+  return result
 }
 
 export async function getTopProjectsFromOSO(osoId: string) {
