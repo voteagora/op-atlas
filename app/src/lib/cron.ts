@@ -5,7 +5,6 @@ type CronHandler = (request: NextRequest) => Promise<Response>
 
 interface CronOptions {
   monitorSlug: string
-  maxDuration?: number
   requireAuth?: boolean
 }
 
