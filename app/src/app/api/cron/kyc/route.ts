@@ -29,5 +29,5 @@ async function handleKYCCron(request: NextRequest) {
 
 export const GET = withCronObservability(handleKYCCron, {
   monitorSlug: MONITOR_SLUG,
-  requireAuth: false,
+  requireAuth: true,
 })

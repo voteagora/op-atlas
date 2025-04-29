@@ -20,5 +20,5 @@ async function handleTagContactsCron(request: NextRequest) {
 
 export const GET = withCronObservability(handleTagContactsCron, {
   monitorSlug: MONITOR_SLUG,
-  requireAuth: false,
+  requireAuth: true,
 })
