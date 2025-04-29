@@ -402,12 +402,6 @@ const getGasConsumption = async function getGasConsumption(projectId: string) {
 
 const getTrustedDevelopersCount = cache(
   async function getTrustedDevelopersCount(osoId: string) {
-    // // TODO: Replace thiw with OSO API call once available
-    // const count = await getTrustedDevelopersCountFromOSO(osoId)
-    // //
-
-    // return count
-
     const trustedDevelopers = await getTrustedDevelopersCountFromOSO(osoId)
 
     const februaryCount = trustedDevelopers.filter(
@@ -423,11 +417,15 @@ const getTrustedDevelopersCount = cache(
 )
 
 const getTopProjects = cache(async function getTopProjects(osoId: string) {
-  // TODO: Replace this with OSO API call once available
   const topProjects = await getTopProjectsFromOSO(osoId)
-  //
 
-  return topProjects
+  const februaryProjects = topProjects.filter((p) => p.tranche === 1)
+  const marchProjects = topProjects.filter((p) => p.tranche === 2)
+
+  return {
+    [TRANCHE_MONTHS_MAP[1]]: februaryProjects.slice(0, 6),
+    [TRANCHE_MONTHS_MAP[2]]: marchProjects.slice(0, 6),
+  }
 })
 
 const getDevToolingReward = async function getDevToolingReward(osoId: string) {

@@ -2040,14 +2040,44 @@ export async function getTrustedDevelopersCountFromOSO(projectId: string) {
   return result
 }
 
-export async function getTopProjectsFromOSO(osoId: string) {
-  const result = await prisma.projectOSOData.findFirst({
+export async function getTopProjectsFromOSO(projectId: string) {
+  const projectOsoRelatedProjects =
+    await prisma.projectOSORelatedProjects.findMany({
+      where: {
+        projectId,
+      },
+      select: {
+        osoId: true,
+        tranche: true,
+      },
+    })
+
+  const projectOso = await prisma.projectOSO.findMany({
     where: {
-      osoId,
+      osoId: {
+        in: projectOsoRelatedProjects.map((p) => p.osoId),
+      },
+    },
+    select: {
+      osoId: true,
+      project: {
+        select: {
+          id: true,
+          name: true,
+          thumbnailUrl: true,
+          website: true,
+        },
+      },
     },
   })
 
-  return (result?.data as ProjectOSOData)?.topProjects ?? []
+  const result = projectOso.map((p) => ({
+    ...p.project,
+    tranche: projectOsoRelatedProjects.find((r) => r.osoId === p.osoId)
+      ?.tranche,
+  }))
+
+  return result
 }
 
 export async function getProjectOSOByIds({
@@ -2112,6 +2142,7 @@ export async function getProjectOSORelatedProjects(projectId: string) {
     where: { projectId },
     select: {
       osoId: true,
+      projectId: true,
       tranche: true,
     },
   })

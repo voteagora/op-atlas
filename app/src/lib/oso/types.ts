@@ -69,12 +69,15 @@ export interface DevToolingMissionProps extends BaseMissionProps {
     >
     trustedDevelopersCount: Record<string, number>
     devToolingReward: Record<string, number>
-    topProjects: {
-      id?: string
-      name?: string
-      website?: string[]
-      thumbnailUrl?: string
-    }[]
+    topProjects: Record<
+      string,
+      {
+        id?: string
+        name?: string
+        website?: string[]
+        thumbnailUrl?: string
+      }[]
+    >
   }
   eligibility: {
     devToolingEligibility: boolean

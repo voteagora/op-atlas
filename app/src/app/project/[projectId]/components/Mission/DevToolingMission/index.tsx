@@ -180,39 +180,41 @@ export default function DevToolingMission({
                       Projects enrolled in Retro Funding: Onchain Builders only
                     </p>
                   </div>
-                  <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
-                    {devToolingMetrics?.topProjects
-                      ?.slice(0, 6)
-                      .map((project, index) => {
-                        return (
-                          <li
-                            key={index}
-                            className="space-x-2 flex items-center"
-                          >
-                            {project.thumbnailUrl && (
-                              <Image
-                                src={project.thumbnailUrl}
-                                alt={project.name ?? ""}
-                                width={24}
-                                height={24}
-                              />
-                            )}
-                            <TrackedLink
-                              href={`/project/${project.id}`}
-                              eventName="Link Click"
-                              target="_blank"
-                              eventData={{
-                                projectId: project.id,
-                                source: "project_page",
-                                linkName: "Top Projects",
-                              }}
+                  <div className="w-full flex items-center justify-end h-full">
+                    <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
+                      {devToolingMetrics?.topProjects[month]?.map(
+                        (project, index) => {
+                          return (
+                            <li
+                              key={index}
+                              className="space-x-2 flex items-center"
                             >
-                              {project.name}
-                            </TrackedLink>
-                          </li>
-                        )
-                      })}
-                  </ul>
+                              {project.thumbnailUrl && (
+                                <Image
+                                  src={project.thumbnailUrl}
+                                  alt={project.name ?? ""}
+                                  width={24}
+                                  height={24}
+                                />
+                              )}
+                              <TrackedLink
+                                href={`/project/${project.id}`}
+                                eventName="Link Click"
+                                target="_blank"
+                                eventData={{
+                                  projectId: project.id,
+                                  source: "project_page",
+                                  linkName: "Top Projects",
+                                }}
+                              >
+                                {project.name}
+                              </TrackedLink>
+                            </li>
+                          )
+                        },
+                      )}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </TabsContent>
