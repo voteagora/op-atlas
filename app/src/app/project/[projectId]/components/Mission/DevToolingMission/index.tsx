@@ -13,7 +13,6 @@ import { DevToolingMissionProps } from "@/lib/oso/types"
 
 import { MONTHS } from "@/lib/oso/constants"
 import MetricCard from "./MetricCard"
-import { getIsProjectEligibleByReward } from "@/lib/oso/utils"
 
 export default function DevToolingMission({
   data,
@@ -23,7 +22,7 @@ export default function DevToolingMission({
   const params = useParams()
 
   const projectId = params.projectId as string
-  const { devToolingMetrics, projectName, applicationDate, eligibility } = data
+  const { devToolingMetrics, projectName, eligibility } = data
 
   const opRewardSum = Object.values(
     devToolingMetrics?.devToolingReward ?? {},
@@ -97,25 +96,21 @@ export default function DevToolingMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          // if (
-          //   !getIsProjectEligibleByReward(
-          //     devToolingMetrics?.devToolingReward[month] ?? 0,
-          //   )
-          // ) {
-          //   return (
-          //     <TabsContent
-          //       key={month}
-          //       value={month}
-          //       className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
-          //     >
-          //       <div className="w-full flex items-center justify-center">
-          //         <p className="text-foreground font-semibold text-base">
-          //           {projectName} was not enrolled in {month}
-          //         </p>
-          //       </div>
-          //     </TabsContent>
-          //   )
-          // }
+          if (!eligibility.devToolingEligibility[month]) {
+            return (
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+              >
+                <div className="w-full flex items-center justify-center">
+                  <p className="text-foreground font-semibold text-base">
+                    {projectName} was not enrolled in {month}
+                  </p>
+                </div>
+              </TabsContent>
+            )
+          }
 
           if (!eligibility.devToolingEligibility) {
             return (

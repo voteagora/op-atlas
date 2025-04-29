@@ -1982,50 +1982,34 @@ export async function getProjectsOSO(projectId: string) {
   })
 }
 
-export async function getDevToolingApplication(projectId: string) {
-  const application = await prisma.application.findFirst({
+export async function getDevToolingEligibility(projectId: string) {
+  const eligibility = await prisma.projectOSOMetrics.findMany({
     where: {
       projectId,
-      roundId: "7",
+      metric: "IS_DEV_TOOLING_ELIGIBLE",
     },
     select: {
-      createdAt: true,
+      value: true,
+      tranche: true,
     },
   })
 
-  if (!application) {
-    return {
-      applied: false,
-    }
-  }
-
-  return {
-    applied: true,
-    appliedAt: application.createdAt,
-  }
+  return eligibility
 }
 
-export async function getOnchainBuilderApplication(projectId: string) {
-  const application = await prisma.application.findFirst({
+export async function getOnchainBuilderEligibility(projectId: string) {
+  const eligibility = await prisma.projectOSOMetrics.findMany({
     where: {
       projectId,
-      roundId: "8",
+      metric: "IS_ONCHAIN_BUILDER_ELIGIBLE",
     },
     select: {
-      createdAt: true,
+      value: true,
+      tranche: true,
     },
   })
 
-  if (!application) {
-    return {
-      applied: false,
-    }
-  }
-
-  return {
-    applied: true,
-    appliedAt: application.createdAt,
-  }
+  return eligibility
 }
 
 export async function getTrustedDevelopersCountFromOSO(projectId: string) {

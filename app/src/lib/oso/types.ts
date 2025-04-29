@@ -26,7 +26,6 @@ export type OnchainBuildersDataType = Record<string, number>
 export interface BaseMissionProps {
   isMember: boolean
   projectName: string
-  applicationDate: Date
 }
 
 export type OnchainBuilderMetrics = {
@@ -53,7 +52,7 @@ export interface OnchainBuilderMissionProps extends BaseMissionProps {
     hasDefillamaAdapter: boolean
     hasQualifiedAddresses: boolean
     deployedOnWorldchain: boolean
-    onchainBuilderEligibility: boolean
+    onchainBuilderEligibility: Record<string, boolean>
   }
 }
 
@@ -80,7 +79,7 @@ export interface DevToolingMissionProps extends BaseMissionProps {
     >
   }
   eligibility: {
-    devToolingEligibility: boolean
+    devToolingEligibility: Record<string, boolean>
   }
 }
 

@@ -20,7 +20,6 @@ import AlertContainer from "./AlertContainer"
 import MetricCard from "./MetricCard"
 import NotPassingEligibility from "./NotPassingEligibility"
 import { OnchainBuilderMissionProps } from "@/lib/oso/types"
-import { getIsProjectEligibleByReward } from "@/lib/oso/utils"
 
 export default function OnchainBuilderMission({
   data,
@@ -100,25 +99,21 @@ export default function OnchainBuilderMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          // if (
-          //   !getIsProjectEligibleByReward(
-          //     onchainBuilderMetrics.onchainBuilderReward[month] ?? 0,
-          //   )
-          // ) {
-          //   return (
-          //     <TabsContent
-          //       key={month}
-          //       value={month}
-          //       className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
-          //     >
-          //       <div className="w-full flex items-center justify-center">
-          //         <p className="text-foreground font-semibold text-base">
-          //           {projectName} was not enrolled in {month}
-          //         </p>
-          //       </div>
-          //     </TabsContent>
-          //   )
-          // }
+          if (!eligibility.onchainBuilderEligibility[month]) {
+            return (
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+              >
+                <div className="w-full flex items-center justify-center">
+                  <p className="text-foreground font-semibold text-base">
+                    {projectName} was not enrolled in {month}
+                  </p>
+                </div>
+              </TabsContent>
+            )
+          }
 
           if (!eligibility.onchainBuilderEligibility) {
             return (

@@ -5,8 +5,8 @@ import { gql, GraphQLClient } from "graphql-request"
 
 import {
   createOSOProjects,
-  getDevToolingApplication,
-  getOnchainBuilderApplication,
+  getDevToolingEligibility,
+  getOnchainBuilderEligibility,
   getProjectActiveAddressesCount,
   getProjectGasFees,
   getProjectOSORelatedProjects,
@@ -47,11 +47,11 @@ import {
   formatDevToolingReward,
   formatGasFees,
   formatPerformanceMetrics,
-  formatOnchainBuilderEligibility,
   formatOnchainBuilderReward,
   formatTransactions,
   formatTvl,
   formatGasConsumption,
+  formatOnchainBuilderEligibility,
 } from "./utils"
 
 export const osoClient = new GraphQLClient(
@@ -220,21 +220,17 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
   const { osoId } = projectOSO
 
   const [
-    devToolingApplication,
-    onchainBuilderApplication,
     devToolingEligibility,
     onchainBuilderEligibility,
     devToolingMetrics,
     onchainBuilderMetrics,
     hasDefillamaAdapter,
   ] = await Promise.all([
-    getDevToolingApplication(projectId),
-    getOnchainBuilderApplication(projectId),
-    getDevToolingEligibility(osoId),
-    getOnchainBuilderEligibility(osoId),
+    getDevToolingEligibility(projectId),
+    getOnchainBuilderEligibility(projectId),
     getDevToolingMetrics(projectId),
     getOnchainBuilderMetrics(projectId),
-    getHasDefillamaAdapter(osoId),
+    getHasDefillamaAdapter(projectId),
   ])
 
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
@@ -251,10 +247,10 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
 
   return {
     eligibility: {
-      devToolingApplication,
-      onchainBuilderApplication,
-      devToolingEligibility,
-      onchainBuilderEligibility,
+      devToolingEligibility: formatDevToolingEligibility(devToolingEligibility),
+      onchainBuilderEligibility: formatOnchainBuilderEligibility(
+        onchainBuilderEligibility,
+      ),
       hasDefillamaAdapter,
     },
     onchainBuilderMetrics,
@@ -346,11 +342,6 @@ const getOnchainBuilderReward = async function getOnchainBuilderReward(
   const data = await queryMetrics([osoId], "onchainBuilderReward")
   return formatOnchainBuilderReward(data)
 }
-
-const getOnchainBuilderEligibility = cache(async (osoId: string) => {
-  const data = await queryMetrics([osoId], "onchainBuilderReward")
-  return formatOnchainBuilderEligibility(data)
-})
 
 const getHasDefillamaAdapter = cache(async (osoId: string) => {
   const query: QueryOso_ArtifactsByProjectV1Args = {
@@ -459,11 +450,6 @@ const getTopProjects = cache(async (osoId: string) => {
 const getDevToolingReward = cache(async (osoId: string) => {
   const data = await queryMetrics([osoId], "devToolingReward")
   return formatDevToolingReward(data)
-})
-
-const getDevToolingEligibility = cache(async (osoId: string) => {
-  const data = await queryMetrics([osoId], "devToolingReward")
-  return formatDevToolingEligibility(data)
 })
 
 export async function getDeployedContracts(

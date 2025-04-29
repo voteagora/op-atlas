@@ -46,8 +46,7 @@ export default async function Page({ params }: PageProps) {
   } = projectMetrics
 
   const enrolledInMission =
-    eligibility?.onchainBuilderApplication.applied ||
-    eligibility?.devToolingApplication.applied
+    eligibility?.onchainBuilderEligibility || eligibility?.devToolingEligibility
 
   const hasQualifiedAddresses = Object.values(
     onchainBuilderMetrics?.activeAddresses ?? {},
@@ -135,13 +134,10 @@ export default async function Page({ params }: PageProps) {
               <div className="w-full space-y-6">
                 <h4 className="font-semibold text-xl">Missions</h4>
                 <ul className="space-y-12">
-                  {eligibility?.onchainBuilderApplication.applied && (
+                  {eligibility?.onchainBuilderEligibility && (
                     <li>
                       <Mission
                         type="on-chain"
-                        applicationDate={
-                          eligibility?.onchainBuilderApplication.appliedAt!
-                        }
                         onchainBuilderMetrics={onchainBuilderMetrics}
                         eligibility={{
                           ...eligibility,
@@ -153,13 +149,10 @@ export default async function Page({ params }: PageProps) {
                       />
                     </li>
                   )}
-                  {eligibility?.devToolingApplication.applied && (
+                  {eligibility?.devToolingEligibility && (
                     <li>
                       <Mission
                         type="dev-tooling"
-                        applicationDate={
-                          eligibility?.devToolingApplication.appliedAt!
-                        }
                         devToolingMetrics={devToolingMetrics}
                         eligibility={eligibility}
                         isMember={isMember}
@@ -177,14 +170,14 @@ export default async function Page({ params }: PageProps) {
                     </h4>
                   </div>
                   <div className="flex gap-4 lg:flex-row flex-col">
-                    {eligibility?.onchainBuilderApplication.applied && (
+                    {eligibility?.onchainBuilderEligibility && (
                       <IncreaseYourImpact
                         type="onchain-builders"
                         projectId={projectId}
                         isMember={isMember}
                       />
                     )}
-                    {eligibility?.devToolingApplication.applied && (
+                    {eligibility?.devToolingEligibility && (
                       <IncreaseYourImpact
                         type="dev-tooling"
                         projectId={projectId}

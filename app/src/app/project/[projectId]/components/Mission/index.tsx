@@ -66,10 +66,6 @@ function MissionContainer({
 }
 
 export default function Mission(props: MissionProps) {
-  if (!props.applicationDate) {
-    return null
-  }
-
   if (props.type === "on-chain") {
     return (
       <MissionContainer type={props.type}>

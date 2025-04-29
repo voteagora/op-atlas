@@ -1,5 +1,9 @@
 import { MetricValues } from "./types"
-import { INDEXED_MONTHS, RETROFUNDING_OP_REWARD_MINIMUM } from "./constants"
+import {
+  INDEXED_MONTHS,
+  RETROFUNDING_OP_REWARD_MINIMUM,
+  TRANCHE_MONTHS_MAP,
+} from "./constants"
 import { Trend } from "./types"
 import { CHAIN_INFO } from "@/components/common/chain"
 
@@ -142,16 +146,6 @@ export const formatDevToolingReward = (data: MetricValues[]) => {
   return groupByMonth(data)
 }
 
-export const formatOnchainBuilderEligibility = (data: MetricValues[]) => {
-  const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return getIsProjectEligibleByReward(sum)
-}
-
-export const formatDevToolingEligibility = (data: MetricValues[]) => {
-  const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return getIsProjectEligibleByReward(sum)
-}
-
 // TODO: Use this for Performance Metrics
 const groupByDate = (metrics: MetricValues[]) => {
   return metrics.reduce<Record<string, number>>((acc, metric) => {
@@ -261,4 +255,30 @@ export const formatGasConsumption = (data: Record<string, MetricValues[]>) => {
   })
 
   return result
+}
+
+export const formatDevToolingEligibility = (
+  data: {
+    tranche: number
+    value: string
+  }[],
+) => {
+  return data.reduce<Record<string, boolean>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] =
+      d.value === "true"
+    return acc
+  }, {})
+}
+
+export const formatOnchainBuilderEligibility = (
+  data: {
+    tranche: number
+    value: string
+  }[],
+) => {
+  return data.reduce<Record<string, boolean>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] =
+      d.value === "true"
+    return acc
+  }, {})
 }
