@@ -42,6 +42,7 @@ import {
   verifyMembership,
   verifyOrganizationMembership,
 } from "./utils"
+import { getUserById } from "@/db/users"
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
@@ -135,15 +136,23 @@ export const createNewProject = async (
 ) => {
   const session = await auth()
 
-  if (!session?.user?.id || !session.user.farcasterId) {
+  if (!session?.user?.id) {
     return {
       error: "Unauthorized",
     }
   }
 
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to create a project.",
+    }
+  }
+
   // Create entity attestation
   const attestationId = await createEntityAttestation({
-    farcasterId: parseInt(session.user.farcasterId),
+    farcasterId: parseInt(user.farcasterId),
     type: "project",
   })
 
@@ -193,7 +202,15 @@ export const updateProjectDetails = async (
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to update a project.",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, user.farcasterId)
 
   if (isInvalid?.error) {
     return isInvalid
@@ -233,8 +250,16 @@ export const setProjectOrganization = async (
     }
   }
 
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to set the organization of a project.",
+    }
+  }
+
   // Only project admins can set the organization
-  const projectAdmin = verifyAdminStatus(projectId, session.user.farcasterId)
+  const projectAdmin = verifyAdminStatus(projectId, user.farcasterId)
 
   // Only organization admins can remove the organization
   const oldOrganizationAdmin = oldOrganizationId
@@ -293,7 +318,15 @@ export const deleteUserProject = async (projectId: string) => {
     }
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to delete a project.",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -320,7 +353,15 @@ export const addMembersToProject = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to add members to a project.",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -344,7 +385,15 @@ export const removeMemberFromProject = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to remove members from a project.",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -376,7 +425,15 @@ export const setMemberRole = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to set the role of a member in a project.",
+    }
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -399,7 +456,15 @@ export const setProjectFunding = async (
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to set the funding of a project.",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -425,7 +490,15 @@ export const createProjectKycTeamAction = async ({
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to create a project KYC team.",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -440,12 +513,20 @@ export const getKycTeamAction = async (projectId: string) => {
     throw new Error("Unauthorized")
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  if (isInvalid?.error) {
-    throw new Error(isInvalid.error)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to get a project KYC team.",
+    }
   }
 
-  return await getKycTeam({ projectId })
+  const isInvalid = await verifyMembership(projectId, user.farcasterId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+
+    return await getKycTeam({ projectId })
+  }
 }
 
 export const createProjectKYCTeamsAction = async ({
@@ -461,11 +542,17 @@ export const createProjectKYCTeamsAction = async ({
     throw new Error("Unauthorized")
   }
 
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to create a project KYC team action.",
+    }
+  }
+
   projectIds.forEach(async (projectId) => {
-    const isInvalid = await verifyMembership(
-      projectId,
-      session.user.farcasterId,
-    )
+    const isInvalid = await verifyMembership(projectId, user.farcasterId as string)
+
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
     }
@@ -487,11 +574,16 @@ export const deleteProjectKYCTeamsAction = async ({
     throw new Error("Unauthorized")
   }
 
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to delete a project KYC team.",
+    }
+  }
+
   projectIds.forEach(async (projectId) => {
-    const isInvalid = await verifyMembership(
-      projectId,
-      session.user.farcasterId,
-    )
+    const isInvalid = await verifyMembership(projectId, user.farcasterId as string)
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
     }
@@ -543,7 +635,15 @@ export const updateBannerAction = async (
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const user = await getUserById(session.user.id)
+
+  if (!user?.farcasterId) {
+    return {
+      error: "Your Farcaster account must be connected in order to update a project banner.",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, user.farcasterId)
   if (isInvalid?.error) {
     return isInvalid
   }

@@ -50,6 +50,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
+import { useUser } from "@/hooks/useUser"
+import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 
 const CategoryEnum = z.enum([
   "CeFi",
@@ -90,9 +92,11 @@ function fromStringObjectArr(objs: { value: string }[]) {
 }
 
 export default function ProjectDetailsForm({
+  userId,
   project,
   organizations,
 }: {
+  userId: string
   project?: ProjectWithFullDetails
   organizations: Organization[]
 }) {
@@ -101,6 +105,8 @@ export default function ProjectDetailsForm({
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  const { user } = useUser({ id: userId, enabled: true })
 
   const searchParams = useSearchParams()
 
@@ -173,6 +179,12 @@ export default function ProjectDetailsForm({
       let thumbnailUrl = project?.thumbnailUrl
       let bannerUrl = project?.bannerUrl
 
+      if (!user?.farcasterId) {
+        toast.error("Your Farcaster account must be connected to create a project.")
+        isSave ? setIsSaving(false) : setIsLoading(false)
+        return
+      }
+
       try {
         if (newAvatarImg) {
           thumbnailUrl = await uploadImage(newAvatarImg)
@@ -234,16 +246,16 @@ export default function ProjectDetailsForm({
         try {
           const [response, res] = project
             ? await Promise.all([
-                updateProjectDetails(project.id, newValues),
-                setProjectOrganization(
-                  project.id,
-                  project.organization?.organization?.id,
-                  values.organization?.id,
-                ),
-              ])
+              updateProjectDetails(project.id, newValues),
+              setProjectOrganization(
+                project.id,
+                project.organization?.organization?.id,
+                values.organization?.id,
+              ),
+            ])
             : await Promise.all([
-                createNewProject(newValues, values.organization?.id),
-              ])
+              createNewProject(newValues, values.organization?.id),
+            ])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
@@ -695,6 +707,17 @@ export default function ProjectDetailsForm({
               </FormItem>
             )}
           />
+
+          {user && !user?.farcasterId &&
+
+            <div className="flex flex-col gap-1.5 text-sm">
+              <div className="font-medium">Farcaster</div>
+              <div className="flex flex-row gap-2 border border-1 rounded-lg p-2 items-center">
+                <FarcasterConnection userId={user.id} />
+                <div>Your Farcaster account must be connected to create a project.</div>
+              </div>
+            </div>
+          }
         </div>
 
         <div className="flex gap-2">

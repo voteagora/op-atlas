@@ -26,6 +26,7 @@ export default async function Page() {
         <ProjectStatusSidebar project={null} team={[]} contracts={null} />
         <div className="card flex-1">
           <ProjectDetailsForm
+            userId={session?.user.id}
             organizations={
               userOrganizations?.organizations.map((org) => org.organization) ??
               []
