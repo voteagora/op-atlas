@@ -1,11 +1,8 @@
 import { User } from "@prisma/client"
 import { ArrowUpRight, Check, X } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
-import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
-import ExtendedLink from "@/components/common/ExtendedLink"
 import {
   UserAddressSource,
   UserWithAddresses,
@@ -13,8 +10,8 @@ import {
 } from "@/lib/types"
 import { profileProgress } from "@/lib/utils"
 
-import { makeUserAddressPrimaryAction } from "@/app/profile/verified-addresses/actions"
-import { usePrivy } from "@privy-io/react-auth"
+import { usePrivyLinkWallet } from "@/hooks/usePrivyLinkWallet"
+import { useUser } from "@/hooks/useUser"
 import { Badge } from "../common/Badge"
 import {
   Accordion,
@@ -25,15 +22,17 @@ import {
 import { AddressConnection } from "./AddressConnection"
 import { EmailConnection } from "./EmailConnection"
 import { GithubConnection } from "./GithubConnection"
-import { useQueryClient } from "@tanstack/react-query"
 
 export function CompleteProfileCallout({
-  user,
+  user: initialUser,
   setIsCompleteProfileAccordionDismissed,
 }: {
   user: UserWithAddresses
   setIsCompleteProfileAccordionDismissed: (dismissed: boolean) => void
 }) {
+  const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
+  const user = loadedUser || initialUser
+
   const progress = profileProgress(user)
   const isComplete = progress === 100
 
@@ -159,15 +158,14 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
 }
 
 function ConnectYourGithubStep({ user }: { user: User }) {
-  const [isDeveloper, setIsDeveloper] = useState(!user.notDeveloper)
-
-  const { user: privyUser } = usePrivy()
-
-
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
-        {!isDeveloper || privyUser?.github?.subject ? <GreenCheck /> : <StepNumber num={2} />}
+        {user.notDeveloper || user.github ? (
+          <GreenCheck />
+        ) : (
+          <StepNumber num={2} />
+        )}
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col gap-[2px]">
             <div className="font-medium flex items-center gap-2">
@@ -185,24 +183,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
 }
 
 function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
-
-  const queryClient = useQueryClient()
-
-  const onSetPrimary = (address: string) => {
-    toast.promise(makeUserAddressPrimaryAction(address).then(() => {
-      queryClient.invalidateQueries({ queryKey: ["user", user?.id] })
-    }), {
-      loading: "Setting primary address...",
-      success: "Primary address set",
-      error: "Failed to set primary address",
-    })
-  }
-
-  const onCopy = (address: string) => {
-    navigator.clipboard.writeText(address)
-    toast.success("Address copied")
-  }
-
+  const { unlinkWallet } = usePrivyLinkWallet(user.id)
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
@@ -241,7 +222,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
           </div>
 
           {user.addresses.length === 0 && (
-            <AddressConnection user={user}>Add address</AddressConnection>
+            <AddressConnection userId={user.id}>Add address</AddressConnection>
           )}
 
           {user.addresses.length >= 1 && (
@@ -249,21 +230,22 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
               <div className="text-sm text-foreground font-medium">
                 Your verified addresses
               </div>
-              <div className="flex items-center flex-wrap gap-1.5">
+              <div className="flex flex-col gap-1.5">
                 {user.addresses.map(({ address, source, primary }) => (
                   <VerifiedAddress
                     key={address}
-                    shouldShortenAddress
                     address={address}
                     primary={primary}
                     showCheckmark={false}
                     source={source as UserAddressSource}
-                    onCopy={onCopy}
-                    onSetPrimary={onSetPrimary}
+                    onRemove={unlinkWallet}
+                    userId={user.id}
                   />
                 ))}
               </div>
-              <AddressConnection user={user}>Add another address</AddressConnection>
+              <AddressConnection userId={user.id}>
+                Add another address
+              </AddressConnection>
             </div>
           )}
         </div>
@@ -290,14 +272,6 @@ function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
               Voters).
             </div>
           </div>
-          <ExtendedLink
-            as="button"
-            href="/profile/verified-addresses"
-            text="Set primary address"
-            variant="primary"
-            disabled={user.addresses.length < 2}
-            target="_self"
-          />
         </div>
       </div>
     </div>

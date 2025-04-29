@@ -9,35 +9,53 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useUser } from "@/hooks/useUser"
 import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
 import { shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
-
+import { toast } from "sonner"
+import { getAddress } from "viem"
+import { makeUserAddressPrimaryAction } from "./actions"
 
 export const VerifiedAddress = ({
   address,
   source,
   primary,
-  onCopy,
   onRemove,
-  onSetPrimary,
   showCheckmark = true,
   shouldShortenAddress = false,
+  userId,
 }: {
   address: string
   source: UserAddressSource
   primary: boolean
-  onCopy: (address: string) => void
   onRemove?: (address: string) => void
-  onSetPrimary: (address: string) => void
   showCheckmark?: boolean
   shouldShortenAddress?: boolean
+  userId: string
 }) => {
-
   const { setOpenDialog } = useAppDialogs()
   const { isBadgeholderAddress } = useBadgeholderAddress(address)
+  const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
 
+  const onCopy = (address: string) => {
+    navigator.clipboard.writeText(address)
+    toast.success("Address copied")
+  }
+
+  const onSetPrimary = (address: string) => {
+    toast.promise(
+      makeUserAddressPrimaryAction(getAddress(address)).then(() => {
+        invalidateUser()
+      }),
+      {
+        loading: "Setting primary address...",
+        success: "Primary address set",
+        error: "Failed to set primary address",
+      },
+    )
+  }
 
   return (
     <div className="flex items-center gap-1.5 group">
