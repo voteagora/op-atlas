@@ -8,7 +8,7 @@ export const maxDuration = 900
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-const MONITOR_SLUG = "cron-persona"
+const MONITOR_SLUG = "cron-persona-xg"
 
 export async function GET(request: NextRequest) {
   const cases = getPersonaCases()
