@@ -347,15 +347,12 @@ const getOnchainBuilderReward = async function getOnchainBuilderReward(
   return formatOnchainBuilderReward(data)
 }
 
-const getOnchainBuilderEligibility =
-  async function getOnchainBuilderEligibility(osoId: string) {
-    const data = await queryMetrics([osoId], "onchainBuilderReward")
-    return formatOnchainBuilderEligibility(data)
-  }
+const getOnchainBuilderEligibility = cache(async (osoId: string) => {
+  const data = await queryMetrics([osoId], "onchainBuilderReward")
+  return formatOnchainBuilderEligibility(data)
+})
 
-const getHasDefillamaAdapter = cache(async function getHasDefillamaAdapter(
-  osoId: string,
-) {
+const getHasDefillamaAdapter = cache(async (osoId: string) => {
   const query: QueryOso_ArtifactsByProjectV1Args = {
     where: {
       projectId: { _eq: osoId },
@@ -378,9 +375,7 @@ const getHasDefillamaAdapter = cache(async function getHasDefillamaAdapter(
 })
 
 // Dev Tooling Metrics
-const getDevToolingMetrics = cache(async function getDevToolingMetrics(
-  projectId: string,
-) {
+const getDevToolingMetrics = cache(async (projectId: string) => {
   const [
     gasConsumption,
     trustedDevelopersCount,
@@ -401,7 +396,7 @@ const getDevToolingMetrics = cache(async function getDevToolingMetrics(
   }
 })
 
-const getGasConsumption = async function getGasConsumption(projectId: string) {
+const getGasConsumption = cache(async (projectId: string) => {
   const relatedProjects = await getProjectOSORelatedProjects(projectId)
   const februaryProjects = relatedProjects.filter((p) => p.tranche === 1)
   const marchProjects = relatedProjects.filter((p) => p.tranche === 2)
@@ -431,7 +426,7 @@ const getGasConsumption = async function getGasConsumption(projectId: string) {
   const output = formatGasConsumption(trancheData)
 
   return output
-}
+})
 
 const getTrustedDevelopersCount = cache(
   async function getTrustedDevelopersCount(osoId: string) {
@@ -449,7 +444,7 @@ const getTrustedDevelopersCount = cache(
   },
 )
 
-const getTopProjects = cache(async function getTopProjects(osoId: string) {
+const getTopProjects = cache(async (osoId: string) => {
   const topProjects = await getTopProjectsFromOSO(osoId)
 
   const februaryProjects = topProjects.filter((p) => p.tranche === 1)
@@ -461,17 +456,15 @@ const getTopProjects = cache(async function getTopProjects(osoId: string) {
   }
 })
 
-const getDevToolingReward = async function getDevToolingReward(osoId: string) {
+const getDevToolingReward = cache(async (osoId: string) => {
   const data = await queryMetrics([osoId], "devToolingReward")
   return formatDevToolingReward(data)
-}
+})
 
-const getDevToolingEligibility = async function getDevToolingEligibility(
-  osoId: string,
-) {
+const getDevToolingEligibility = cache(async (osoId: string) => {
   const data = await queryMetrics([osoId], "devToolingReward")
   return formatDevToolingEligibility(data)
-}
+})
 
 export async function getDeployedContracts(
   deployer: string,
