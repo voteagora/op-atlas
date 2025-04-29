@@ -31,5 +31,5 @@ async function handleSuperfluidCron(request: NextRequest) {
 
 export const GET = withCronObservability(handleSuperfluidCron, {
   monitorSlug: MONITOR_SLUG,
-  requireAuth: true,
+  requireAuth: false,
 })

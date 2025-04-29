@@ -21,5 +21,5 @@ async function handleOSOMapProjectsCron(request: NextRequest) {
 
 export const GET = withCronObservability(handleOSOMapProjectsCron, {
   monitorSlug: MONITOR_SLUG,
-  requireAuth: true,
+  requireAuth: false,
 })
