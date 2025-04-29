@@ -235,6 +235,8 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getHasDefillamaAdapter(projectId),
   ])
 
+  console.log(">>> hasDefillamaAdapter", hasDefillamaAdapter)
+
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
     queryMetrics([osoId], "activeAddresses"),
     queryMetrics([osoId], "gasFees"),
@@ -347,13 +349,8 @@ const getOnchainBuilderReward = async function getOnchainBuilderReward(
 
 const getHasDefillamaAdapter = cache(async (projectId: string) => {
   const hasDefillamaAdapter = await getDefillamaAdapter(projectId)
-  const februaryData = hasDefillamaAdapter.filter((p) => p.tranche === 1)
-  const marchData = hasDefillamaAdapter.filter((p) => p.tranche === 2)
 
-  const output = {
-    [TRANCHE_MONTHS_MAP[1]]: formatHasDefillamaAdapter(februaryData),
-    [TRANCHE_MONTHS_MAP[2]]: formatHasDefillamaAdapter(marchData),
-  }
+  const output = formatHasDefillamaAdapter(hasDefillamaAdapter)
 
   return output
 })
