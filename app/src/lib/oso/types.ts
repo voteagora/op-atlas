@@ -75,7 +75,7 @@ export interface DevToolingMissionProps extends BaseMissionProps {
         id?: string
         name?: string
         website?: string[]
-        thumbnailUrl?: string
+        thumbnailUrl?: string | null
       }[]
     >
   }
