@@ -28,9 +28,10 @@ export default function OnchainBuilderMission({
 }) {
   const { projectId } = useParams()
   const { projectName, onchainBuilderMetrics, eligibility } = data
+
   const opRewardSum = Object.values(
     onchainBuilderMetrics.onchainBuilderReward,
-  ).reduce((acc, curr) => acc + curr, 0)
+  ).reduce((acc, curr) => acc + curr.value, 0)
 
   return (
     <div className="space-y-3">

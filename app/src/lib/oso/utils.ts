@@ -138,12 +138,32 @@ export const formatTvl = (data: MetricValues[]) => {
   return result
 }
 
-export const formatOnchainBuilderReward = (data: MetricValues[]) => {
-  return groupByMonth(data)
+export const formatOnchainBuilderReward = (
+  data: {
+    amount: string
+    tranche: number
+  }[],
+) => {
+  return data.reduce<Record<string, { value: number }>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] = {
+      value: Number(d.amount),
+    }
+    return acc
+  }, {})
 }
 
-export const formatDevToolingReward = (data: MetricValues[]) => {
-  return groupByMonth(data)
+export const formatDevToolingReward = (
+  data: {
+    amount: string
+    tranche: number
+  }[],
+) => {
+  return data.reduce<Record<string, { value: number }>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] = {
+      value: Number(d.amount),
+    }
+    return acc
+  }, {})
 }
 
 // TODO: Use this for Performance Metrics

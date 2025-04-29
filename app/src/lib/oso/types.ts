@@ -33,7 +33,7 @@ export type OnchainBuilderMetrics = {
   gasFees: Record<string, { value: number; trend: Trend }>
   transactions: Record<string, { value: number; trend: Trend }>
   tvl: Record<string, { value: number; trend: Trend }>
-  onchainBuilderReward: Record<string, number>
+  onchainBuilderReward: Record<string, { value: number }>
 }
 
 export type PerformanceMetrics = {
@@ -46,7 +46,7 @@ export type PerformanceMetrics = {
 export interface OnchainBuilderMissionProps extends BaseMissionProps {
   type: "on-chain"
   onchainBuilderMetrics: OnchainBuilderMetrics & {
-    onchainBuilderReward: Record<string, number>
+    onchainBuilderReward: Record<string, { value: number }>
   }
   eligibility: {
     hasDefillamaAdapter: Record<string, boolean>
@@ -67,7 +67,7 @@ export interface DevToolingMissionProps extends BaseMissionProps {
       }
     >
     trustedDevelopersCount: Record<string, number>
-    devToolingReward: Record<string, number>
+    devToolingReward: Record<string, { value: number }>
     topProjects: Record<
       string,
       {

@@ -26,7 +26,7 @@ export default function DevToolingMission({
 
   const opRewardSum = Object.values(
     devToolingMetrics?.devToolingReward ?? {},
-  ).reduce((acc, curr) => acc + curr, 0)
+  ).reduce((acc, curr) => acc + curr.value, 0)
 
   return (
     <div className="space-y-3">

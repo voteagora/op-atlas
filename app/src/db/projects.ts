@@ -2177,3 +2177,17 @@ export async function getDefillamaAdapter(projectId: string) {
     select: { value: true, tranche: true },
   })
 }
+
+export async function getOnchainBuilderRecurringReward(projectId: string) {
+  return await prisma.recurringReward.findMany({
+    where: { projectId, roundId: "8" },
+    select: { amount: true, tranche: true },
+  })
+}
+
+export async function getDevToolingRecurringReward(projectId: string) {
+  return await prisma.recurringReward.findMany({
+    where: { projectId, roundId: "7" },
+    select: { amount: true, tranche: true },
+  })
+}

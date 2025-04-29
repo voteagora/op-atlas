@@ -130,6 +130,41 @@ const processOnchainBuilderData = async (
 
     const projectId = project.op_atlas_id
 
+    // Create RecurringReward entry if op_reward exists
+    if (project.op_reward) {
+      try {
+        await prisma.recurringReward.upsert({
+          where: {
+            roundId_tranche_projectId: {
+              roundId: "8", // Onchain builder round
+              tranche: month,
+              projectId,
+            },
+          },
+          update: {
+            amount: project.op_reward.toString(),
+          },
+          create: {
+            roundId: "8", // Onchain builder round
+            tranche: month,
+            projectId,
+            amount: project.op_reward.toString(),
+          },
+        })
+        console.log(
+          `Processed recurring reward for project ${
+            project.display_name || "unknown"
+          } (${projectId}): ${project.op_reward} OP`,
+        )
+      } catch (error) {
+        console.error(
+          `${RED}Error creating recurring reward for project ${
+            project.display_name || "unknown"
+          } (${projectId}): ${error}${RESET}`,
+        )
+      }
+    }
+
     const metrics = [
       {
         key: "is_eligible",
@@ -194,6 +229,41 @@ const processDevToolingData = async (
     }
 
     const projectId = project.op_atlas_id
+
+    // Create RecurringReward entry if op_reward exists
+    if (project.op_reward) {
+      try {
+        await prisma.recurringReward.upsert({
+          where: {
+            roundId_tranche_projectId: {
+              roundId: "7", // Dev tooling round
+              tranche: month,
+              projectId,
+            },
+          },
+          update: {
+            amount: project.op_reward.toString(),
+          },
+          create: {
+            roundId: "7", // Dev tooling round
+            tranche: month,
+            projectId,
+            amount: project.op_reward.toString(),
+          },
+        })
+        console.log(
+          `Processed recurring reward for project ${
+            project.display_name || "unknown"
+          } (${projectId}): ${project.op_reward} OP`,
+        )
+      } catch (error) {
+        console.error(
+          `${RED}Error creating recurring reward for project ${
+            project.display_name || "unknown"
+          } (${projectId}): ${error}${RESET}`,
+        )
+      }
+    }
 
     // Process metrics
     const metrics = [

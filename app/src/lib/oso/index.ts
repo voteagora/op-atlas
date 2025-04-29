@@ -7,7 +7,9 @@ import {
   createOSOProjects,
   getDefillamaAdapter,
   getDevToolingEligibility,
+  getDevToolingRecurringReward,
   getOnchainBuilderEligibility,
+  getOnchainBuilderRecurringReward,
   getProjectActiveAddressesCount,
   getProjectGasFees,
   getProjectOSORelatedProjects,
@@ -279,6 +281,8 @@ const getOnchainBuilderMetrics = cache(async function getOnchainBuilderMetrics(
       getOnchainBuilderReward(projectId),
     ])
 
+  console.log(">>>", onchainBuilderReward)
+
   return {
     activeAddresses,
     gasFees,
@@ -338,12 +342,21 @@ const getTvl = async function getTvl(osoId: string) {
   return formatTvl(data)
 }
 
-const getOnchainBuilderReward = async function getOnchainBuilderReward(
-  osoId: string,
-) {
-  const data = await queryMetrics([osoId], "onchainBuilderReward")
-  return formatOnchainBuilderReward(data)
-}
+const getOnchainBuilderReward = cache(async (projectId: string) => {
+  const onchainBuilderReward = await getOnchainBuilderRecurringReward(projectId)
+
+  const output = formatOnchainBuilderReward(onchainBuilderReward)
+
+  return output
+})
+
+const getDevToolingReward = cache(async (projectId: string) => {
+  const devToolingReward = await getDevToolingRecurringReward(projectId)
+
+  const output = formatDevToolingReward(devToolingReward)
+
+  return output
+})
 
 const getHasDefillamaAdapter = cache(async (projectId: string) => {
   const hasDefillamaAdapter = await getDefillamaAdapter(projectId)
@@ -433,11 +446,6 @@ const getTopProjects = cache(async (osoId: string) => {
     [TRANCHE_MONTHS_MAP[1]]: februaryProjects.slice(0, 6),
     [TRANCHE_MONTHS_MAP[2]]: marchProjects.slice(0, 6),
   }
-})
-
-const getDevToolingReward = cache(async (osoId: string) => {
-  const data = await queryMetrics([osoId], "devToolingReward")
-  return formatDevToolingReward(data)
 })
 
 export async function getDeployedContracts(
