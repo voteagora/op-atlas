@@ -52,7 +52,7 @@ export async function updateKYBUserStatus(
     WHERE EXISTS (
       SELECT 1 FROM closest_match 
       WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 3
+      AND closest_match.name_similarity > 2
     )
     RETURNING *;
   `
