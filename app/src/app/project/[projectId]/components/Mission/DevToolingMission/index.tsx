@@ -215,6 +215,45 @@ export default function DevToolingMission({
                   </div>
                 </div>
               </div>
+              <div className="w-full rounded-xl border p-6 bg-background col-span-full h-32">
+                <div className="w-full h-full flex justify-between">
+                  <div className="w-full pr-6">
+                    <div className="flex items-center space-x-3">
+                      <Image
+                        src="/assets/icons/op-icon.svg"
+                        alt="Optimism"
+                        width={40}
+                        height={40}
+                      />
+                      <div>
+                        <p className="text-foreground font-semibold text-base">
+                          {formatNumber(
+                            devToolingMetrics?.devToolingReward?.[month]
+                              ?.value ?? 0,
+                            0,
+                          )}
+                        </p>
+                        <p className="text-secondary-foreground text-base font-normal">
+                          Rewards for performance in {month}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full flex">
+                    <div className="h-full w-px bg-tertiary" />
+                    <div className="pl-6">
+                      <p className="text-secondary-foreground text-base font-normal">
+                        Rewards are determined by an{" "}
+                        <span className="font-semibold">
+                          evaluation algorithm
+                        </span>{" "}
+                        powered by onchain data, and some metrics are more
+                        valuable than others.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </TabsContent>
           )
         })}
