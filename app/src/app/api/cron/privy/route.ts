@@ -25,13 +25,21 @@ interface FarcasterLinkedAccount {
 
 interface DiscordLinkedAccount {
   type: "discord"
-  address: string
+  subject: string
+}
+
+interface GithubLinkedAccount {
+  type: "github"
+  subject: string
+  username: string
 }
 
 type LinkedAccount =
   | EmailLinkedAccount
   | WalletLinkedAccount
   | FarcasterLinkedAccount
+  | DiscordLinkedAccount
+  | GithubLinkedAccount
 
 /**
  * Endpoint that selects all users where privyDid is null and creates Privy accounts for them
@@ -86,8 +94,32 @@ export async function GET() {
             })
           }
 
-          // Link Discord
-          if (user.discord) {
+          // Link GitHub
+          if (user.github) {
+            try {
+              // Fetch GitHub user data using the GitHub API
+              const githubResponse = await fetch(`https://api.github.com/users/${user.github}`, {
+                headers: {
+                  'Authorization': `token ${process.env.GITHUB_AUTH_TOKEN}`,
+                  'Accept': 'application/vnd.github.v3+json'
+                }
+              });
+
+              if (!githubResponse.ok) {
+                throw new Error(`GitHub API error: ${githubResponse.statusText}`);
+              }
+
+              const githubUser = await githubResponse.json();
+
+              // Add GitHub account to linked accounts
+              linkedAccounts.push({
+                type: "github",
+                subject: githubUser.node_id,
+                username: githubUser.login
+              });
+            } catch (error) {
+              console.error(`Error fetching GitHub user data for ${user.github}:`, error);
+            }
           }
 
           // Link Farcaster
@@ -114,6 +146,8 @@ export async function GET() {
             }
           }
 
+
+
           // Create user in Privy using the API
           const privyResponse = await fetch("https://api.privy.io/v1/users", {
             method: "POST",
@@ -128,6 +162,7 @@ export async function GET() {
               linked_accounts: linkedAccounts,
             }),
           })
+
 
           if (!privyResponse.ok) {
             const errorData = await privyResponse.json()

@@ -8,6 +8,7 @@ import { useUser } from "./useUser"
 export const usePrivyEmail = (userId: string) => {
 
     const isLinking = useRef(false)
+
     const onError = useHandlePrivyErrors()
     const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
     const { user: privyUser, unlinkEmail } = usePrivy()
@@ -30,9 +31,10 @@ export const usePrivyEmail = (userId: string) => {
 
     const { updateEmail } = useUpdateAccount({
         onSuccess: async ({ user: updatedPrivyUser, updateMethod }) => {
-            if (updateMethod === "email") {
+            if (updateMethod === "email" && isLinking.current) {
                 toast.promise(syncPrivyUser(updatedPrivyUser)
-                    .then(() => invalidateUser()), {
+                    .then(() => invalidateUser())
+                    .then(() => isLinking.current = false), {
                     loading: "Updating email...",
                     success: "Email updated successfully",
                     error: "Failed to update email",
@@ -62,9 +64,14 @@ export const usePrivyEmail = (userId: string) => {
         linkEmail()
     }
 
+    const updateEmailWithState = () => {
+        isLinking.current = true
+        updateEmail()
+    }
+
     return {
         linkEmail: linkEmailWithState,
-        updateEmail,
+        updateEmail: updateEmailWithState,
         unlinkEmail: handleUnlinkEmail
     }
 } 
