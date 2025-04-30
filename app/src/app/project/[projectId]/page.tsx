@@ -190,7 +190,11 @@ export default async function Page({ params }: PageProps) {
             </>
           )}
 
-          {performanceMetrics && <Performance metrics={performanceMetrics} />}
+          {/* Only show performance metrics if the project is eligible for onchain builder and if there is performance metrics */}
+          {performanceMetrics &&
+            Object.values(eligibility?.onchainBuilderEligibility ?? {}).some(
+              Boolean,
+            ) && <Performance metrics={performanceMetrics} />}
           <MoreDetails />
         </div>
       </div>
