@@ -1,6 +1,8 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
+import { useParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -15,7 +17,6 @@ import {
   FormLabel,
 } from "@/components/ui/form"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import Link from "next/link"
 
 const FormSchema = z.object({
   address: z.string().nonempty(),
@@ -24,12 +25,10 @@ const FormSchema = z.object({
   pledgeToChooseDelegate: z.boolean().default(false),
 })
 
-export default function DeliveryAddressVerificationForm({
-  organizationProject,
-}: {
-  organizationProject: boolean
-}) {
+export default function DeliveryAddressVerificationForm() {
   const { setOpenDialog, setData } = useAppDialogs()
+
+  const { organizationId } = useParams()
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -50,7 +49,7 @@ export default function DeliveryAddressVerificationForm({
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     setData({
       address: data.address,
-      organizationProject,
+      organizationId: organizationId as string,
     })
     setOpenDialog("verify_grant_delivery_address")
   }

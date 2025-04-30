@@ -150,7 +150,7 @@ export function UserProfileSidebar({
                   >
                     •
                   </span>
-                  <span>Grant address</span>
+                  <span>Grant addresses</span>
                 </Link>
               </li>
             )

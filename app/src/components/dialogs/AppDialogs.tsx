@@ -2,7 +2,7 @@
 
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-
+import { DeleteKYCTeamDialog } from "../projects/rewards/DeleteKYCTeamDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
@@ -59,6 +59,12 @@ export default function AppDialogs() {
       )}
       {openDialog === "claim_rewards" && (
         <ClaimRewardsDialog open onOpenChange={onOpenChange("claim_rewards")} />
+      )}
+      {openDialog === "delete_kyc_team" && (
+        <DeleteKYCTeamDialog
+          open
+          onOpenChange={onOpenChange("delete_kyc_team")}
+        />
       )}
     </>
   )

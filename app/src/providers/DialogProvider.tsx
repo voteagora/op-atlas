@@ -13,11 +13,11 @@ import { DialogType } from "@/components/dialogs/types"
 
 type DataType = {
   address?: string
-  organizationProject?: boolean
   projectId?: string
   organizationId?: string
   kycTeamId?: string
   alreadySelectedProjectIds?: string[]
+  rewardStreamId?: string
 }
 
 type AppDialog = {
@@ -42,10 +42,10 @@ export function DialogProvider({ children }: PropsWithChildren) {
   const [address, setAddress] = useState<string>("")
   const [data, setData] = useState<DataType>({
     address: "",
-    organizationProject: false,
     projectId: "",
     organizationId: "",
     kycTeamId: "",
+    rewardStreamId: "",
   })
 
   return (

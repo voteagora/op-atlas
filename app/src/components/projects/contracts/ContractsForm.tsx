@@ -3,10 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useCallback, useEffect } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
+import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
@@ -79,7 +80,12 @@ function getDefaultValues(
   }
 }
 
-export function ContractsForm({ project }: { project: ProjectContracts }) {
+interface ContractsFormProps {
+  project: ProjectContracts
+}
+
+export function ContractsForm({ project }: ContractsFormProps) {
+  const router = useRouter()
   const form = useForm<z.infer<typeof DeployersSchema>>({
     resolver: zodResolver(DeployersSchema),
     mode: "onChange",
@@ -88,11 +94,6 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
     defaultValues: getDefaultValues(project),
     criteriaMode: "all",
   })
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-
-  const router = useRouter()
 
   const {
     fields: defillamaSlugFields,
@@ -103,32 +104,42 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
     name: "defillamaSlug",
   })
 
-  const onAddDefillamaSlugField = async () => {
-    const valid = form.getValues("defillamaSlug").every((slug) => slug)
+  const handleRemoveDefillamaSlugField = useCallback(
+    (index: number) => {
+      try {
+        const isOnlyRepo = defillamaSlugFields.length === 1
+
+        if (isOnlyRepo) {
+          form.setValue(`defillamaSlug.${index}.slug`, undefined, {
+            shouldValidate: true,
+            shouldDirty: true,
+          })
+        } else {
+          removeDefillamaSlugField(index)
+        }
+      } catch (error) {
+        console.error("Error removing defillama url", error)
+      }
+    },
+    [defillamaSlugFields.length, removeDefillamaSlugField, form],
+  )
+
+  const handleAddDefillamaSlugField = useCallback(() => {
+    const valid = form.getValues("defillamaSlug").every((slug) => slug.slug)
     if (valid) {
       addDefillamaSlugField({ slug: undefined })
+      form.setValue("defillamaSlug", form.getValues("defillamaSlug"), {
+        shouldValidate: true,
+        shouldDirty: true,
+      })
     }
-  }
+  }, [form, addDefillamaSlugField])
 
-  const onRemoveDefillamaSlugField = async (index: number) => {
-    try {
-      const isOnlyRepo = defillamaSlugFields.length === 1
-      removeDefillamaSlugField(index)
-
-      if (isOnlyRepo) {
-        addDefillamaSlugField({ slug: undefined })
-      }
-    } catch (error) {
-      console.error("Error removing defillama url", error)
-    }
-  }
-
-  const onSubmit =
-    (isSave: boolean) => async (values: z.infer<typeof DeployersSchema>) => {
-      isSave ? setIsSaving(true) : setIsSubmitting(true)
-
-      toast.info("Saving project...")
+  const handleSubmit = useCallback(
+    async (values: z.infer<typeof DeployersSchema>, isSave: boolean) => {
       try {
+        toast.info("Saving project...")
+
         const [result] = await Promise.all([
           updateProjectOSOStatus({
             projectId: project.id,
@@ -147,14 +158,27 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
           throw new Error(result.error)
         }
 
-        !isSave && router.push(`/projects/${project.id}/grants`)
-        setIsSaving(false)
+        if (!isSave) {
+          router.push(`/projects/${project.id}/grants`)
+        } else {
+          const newValues = {
+            ...values,
+            defillamaSlug:
+              values.defillamaSlug.filter((slug) => slug.slug).length > 0
+                ? values.defillamaSlug
+                : [{ slug: undefined }],
+          }
+          form.reset(newValues)
+        }
+
+        form.reset()
         toast.success("Project saved")
       } catch (error) {
         toast.error("There was an error saving the project.")
-        isSave ? setIsSaving(false) : setIsSubmitting(false)
       }
-    }
+    },
+    [project.id, router, form],
+  )
 
   const isOffchain = form.watch("isOffChain")
   const submittedToOso = form.watch("submittedToOSO")
@@ -164,18 +188,17 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
     (deployer) => deployer.contracts.length > 1,
   )
 
-  const canSubmit = (function () {
-    return (
-      isOffchain ||
-      canAddContract ||
-      submittedToOso ||
-      deployers.some((d) => d.contracts.length > 0)
-    )
-  })()
+  const canSubmit =
+    isOffchain ||
+    canAddContract ||
+    submittedToOso ||
+    deployers.some((d) => d.contracts.length > 0)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit(false))}>
+      <form
+        onSubmit={form.handleSubmit((values) => handleSubmit(values, false))}
+      >
         <div className="flex flex-col gap-6">
           <h3 className="text-2xl">Contracts</h3>
           <div className="text-secondary-foreground">
@@ -193,7 +216,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <FormLabel className=" text-sm font-normal text-foreground">
+                  <FormLabel className="text-sm font-normal text-foreground">
                     {"This project isn't onchain"}
                   </FormLabel>
                 </FormItem>
@@ -207,7 +230,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
         <div className="flex flex-col gap-6 mt-10">
           <h3 className="text-text-default">Additional Data</h3>
 
-          <p className="mt-2 text-base font-normal text-secondary-foreground text-sm">
+          <p className="mt-2 font-normal text-secondary-foreground text-sm">
             <p className="text-sm font-medium">DefiLlama adapter</p>
             For Defi projects, include a link to your{" "}
             <ExternalLink className="underline" href={"https://defillama.com/"}>
@@ -220,7 +243,7 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
               key={field.id}
               form={form}
               index={index}
-              onRemove={onRemoveDefillamaSlugField}
+              onRemove={handleRemoveDefillamaSlugField}
             />
           ))}
           <Tooltip>
@@ -231,14 +254,14 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
                 disabled={
                   !form.getValues("defillamaSlug").every((slug) => slug.slug)
                 }
-                onClick={onAddDefillamaSlugField}
+                onClick={handleAddDefillamaSlugField}
                 className="mt-4 w-fit"
               >
                 <Plus size={16} className="mr-2.5" /> Add another DefiLlama
                 adapter
               </Button>
             </TooltipTrigger>
-            {!form.getValues("defillamaSlug").every((slug) => slug) && (
+            {!form.getValues("defillamaSlug").every((slug) => slug.slug) && (
               <TooltipContent>
                 <p className="text-sm">First add one, then you can add more</p>
               </TooltipContent>
@@ -267,20 +290,18 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
             name="submittedToOSO"
             render={({ field }) => (
               <>
-                {
-                  <FormField
-                    control={form.control}
-                    name="osoSlug"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col gap-2">
-                        <FormLabel className="text-foreground">
-                          Your Open Source Observer name
-                        </FormLabel>
-                        <Input placeholder="Add a name" {...field} />
-                      </FormItem>
-                    )}
-                  />
-                }
+                <FormField
+                  control={form.control}
+                  name="osoSlug"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2">
+                      <FormLabel className="text-foreground">
+                        Your Open Source Observer name
+                      </FormLabel>
+                      <Input placeholder="Add a name" {...field} />
+                    </FormItem>
+                  )}
+                />
 
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel className="text-foreground">
@@ -304,20 +325,14 @@ export function ContractsForm({ project }: { project: ProjectContracts }) {
         </div>
         <div className="flex gap-2 mt-10">
           <Button
-            isLoading={isSaving}
-            disabled={!canSubmit || isSubmitting || !form.formState.isDirty}
             type="button"
-            onClick={form.handleSubmit(onSubmit(true))}
+            onClick={form.handleSubmit((values) => handleSubmit(values, true))}
             variant="destructive"
+            disabled={!canSubmit || !form.formState.isDirty}
           >
             Save
           </Button>
-          <Button
-            isLoading={isSubmitting}
-            disabled={!canSubmit || isSubmitting}
-            type="submit"
-            variant="secondary"
-          >
+          <Button type="submit" variant="secondary" disabled={!canSubmit}>
             Next
           </Button>
         </div>

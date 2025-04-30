@@ -22,6 +22,7 @@ import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"
+import { deleteKycTeam } from "@/db/kyc"
 import { getUserById } from "@/db/users"
 
 export const getUserOrganizations = async (userId: string) => {
@@ -234,9 +235,14 @@ export const createOrganizationKycTeamAction = async ({
     return isInvalid
   }
 
-  await createOrganizationKycTeam({ walletAddress, organizationId })
+  const createdOrganizationKycTeam = await createOrganizationKycTeam({
+    walletAddress,
+    organizationId,
+  })
 
   revalidatePath("/organizations", "layout")
+
+  return createdOrganizationKycTeam
 }
 
 export const getOrganizationKycTeamsAction = async ({
@@ -260,7 +266,29 @@ export const getOrganizationKycTeamsAction = async ({
 
   return getOrganizationKYCTeams({ organizationId })
 }
-function getUser(arg0: { id: string }) {
-  throw new Error("Function not implemented.")
-}
 
+export const deleteOrganizationKYCTeam = async ({
+  organizationId,
+  kycTeamId,
+}: {
+  organizationId: string
+  kycTeamId: string
+}) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyOrganizationAdmin(
+    organizationId,
+    session.user.id,
+  )
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  return await deleteKycTeam({
+    kycTeamId,
+  })
+}

@@ -172,12 +172,12 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
                 className={cn([
                   {
                     "font-medium text-foreground":
-                      currentPage === "grant-addresses",
+                      currentPage === "grant-address",
                   },
                 ])}
-                href={`/projects/${project.id}/grant-addresses`}
+                href={`/projects/${project.id}/grant-address`}
               >
-                Grant Addresses
+                Grant Address
               </Link>
             </div>
             <Separator />
