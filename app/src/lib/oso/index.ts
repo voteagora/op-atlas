@@ -64,6 +64,7 @@ import {
   parseRewardsResults,
   formatMetricsData,
 } from "./utils"
+import { Trend } from "./types"
 
 export const osoClient = new GraphQLClient(
   "https://www.opensource.observer/api/v1/graphql",
@@ -217,28 +218,36 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
 ): Promise<{
   error?: string
   eligibility?: {
-    devToolingEligibility: any
-    onchainBuilderEligibility: any
-    hasDefillamaAdapter: any
+    devToolingEligibility: Record<string, boolean>
+    onchainBuilderEligibility: Record<string, boolean>
+    hasDefillamaAdapter: Record<string, boolean>
   }
   onchainBuilderMetrics?: {
-    activeAddresses: any
-    gasFees: any
-    transactions: any
-    tvl: any
-    onchainBuilderReward: any
+    activeAddresses: Record<string, { value: number; trend: Trend }>
+    gasFees: Record<string, { value: number; trend: Trend }>
+    transactions: Record<string, { value: number; trend: Trend }>
+    tvl: Record<string, { value: number; trend: Trend }>
+    onchainBuilderReward: Record<string, { value: number }>
   }
   devToolingMetrics?: {
-    gasConsumption: any
-    trustedDevelopersCount: any
-    topProjects: any
-    devToolingReward: any
+    gasConsumption: Record<string, { value: number; trend: Trend }>
+    trustedDevelopersCount: Record<string, number>
+    topProjects: Record<
+      string,
+      {
+        id?: string
+        name?: string
+        website?: string[]
+        thumbnailUrl?: string | null
+      }[]
+    >
+    devToolingReward: Record<string, { value: number }>
   }
   performanceMetrics?: {
-    activeAddresses: any
-    gasFees: any
-    transactions: any
-    tvl: any
+    activeAddresses: Record<string, { value: number; trend: Trend }>
+    gasFees: Record<string, { value: number; trend: Trend }>
+    transactions: Record<string, { value: number; trend: Trend }>
+    tvl: Record<string, { value: number; trend: Trend }>
   }
 }> {
   if (!projectId) {

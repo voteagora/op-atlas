@@ -37,15 +37,19 @@ export type OnchainBuilderMetrics = {
 }
 
 export type PerformanceMetrics = {
-  activeAddresses: Record<string, number>
-  gasFees: Record<string, number>
-  transactions: Record<string, number>
-  tvl: Record<string, number>
+  activeAddresses: Record<string, { value: number; trend: Trend }>
+  gasFees: Record<string, { value: number; trend: Trend }>
+  transactions: Record<string, { value: number; trend: Trend }>
+  tvl: Record<string, { value: number; trend: Trend }>
 }
 
 export interface OnchainBuilderMissionProps extends BaseMissionProps {
   type: "on-chain"
-  onchainBuilderMetrics: OnchainBuilderMetrics & {
+  onchainBuilderMetrics?: {
+    activeAddresses: Record<string, { value: number; trend: Trend }>
+    gasFees: Record<string, { value: number; trend: Trend }>
+    transactions: Record<string, { value: number; trend: Trend }>
+    tvl: Record<string, { value: number; trend: Trend }>
     onchainBuilderReward: Record<string, { value: number }>
   }
   eligibility: {
@@ -58,14 +62,8 @@ export interface OnchainBuilderMissionProps extends BaseMissionProps {
 
 export interface DevToolingMissionProps extends BaseMissionProps {
   type: "dev-tooling"
-  devToolingMetrics: {
-    gasConsumption: Record<
-      string,
-      {
-        value: number
-        trend: Trend
-      }
-    >
+  devToolingMetrics?: {
+    gasConsumption: Record<string, { value: number; trend: Trend }>
     trustedDevelopersCount: Record<string, number>
     devToolingReward: Record<string, { value: number }>
     topProjects: Record<

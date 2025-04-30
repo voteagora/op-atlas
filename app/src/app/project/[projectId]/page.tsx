@@ -48,6 +48,7 @@ export default async function Page({ params }: PageProps) {
   const enrolledInMission =
     eligibility?.onchainBuilderEligibility || eligibility?.devToolingEligibility
 
+  console.log(">>> ", onchainBuilderMetrics)
   const hasQualifiedAddresses = Object.values(
     onchainBuilderMetrics?.activeAddresses ?? {},
   ).some((address) => address.value > 0)

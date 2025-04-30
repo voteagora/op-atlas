@@ -24,9 +24,12 @@ export default function DevToolingMission({
   const projectId = params.projectId as string
   const { devToolingMetrics, projectName, eligibility } = data
 
-  const opRewardSum = Object.values(
-    devToolingMetrics?.devToolingReward ?? {},
-  ).reduce((acc, curr) => acc + curr.value, 0)
+  const opRewardSum = devToolingMetrics?.devToolingReward
+    ? Object.values(devToolingMetrics.devToolingReward).reduce(
+        (acc, curr) => acc + curr.value,
+        0,
+      )
+    : 0
 
   return (
     <div className="space-y-3">
@@ -96,7 +99,7 @@ export default function DevToolingMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          if (!eligibility.devToolingEligibility[month]) {
+          if (!eligibility.devToolingEligibility?.[month]) {
             return (
               <TabsContent
                 key={month}
@@ -145,7 +148,7 @@ export default function DevToolingMission({
             >
               <MetricCard
                 value={formatNumber(
-                  devToolingMetrics?.gasConsumption[month]?.value ?? 0,
+                  devToolingMetrics?.gasConsumption?.[month]?.value ?? 0,
                 )}
                 title={`Gas consumed by builders using ${projectName}`}
                 sign={{ value: " ETH", position: "right" }}
@@ -153,7 +156,7 @@ export default function DevToolingMission({
               />
               <MetricCard
                 value={formatNumber(
-                  devToolingMetrics?.trustedDevelopersCount[month] ?? 0,
+                  devToolingMetrics?.trustedDevelopersCount?.[month] ?? 0,
                   0,
                   "compact",
                 )}
@@ -177,32 +180,32 @@ export default function DevToolingMission({
                   </div>
                   <div className="w-full py-1.5 h-full">
                     <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
-                      {devToolingMetrics?.topProjects[month]?.map(
+                      {devToolingMetrics?.topProjects?.[month]?.map(
                         (project, index) => {
                           return (
                             <li
                               key={index}
                               className="space-x-2 flex items-center"
                             >
-                              {project.thumbnailUrl && (
+                              {project?.thumbnailUrl && (
                                 <Image
                                   src={project.thumbnailUrl}
-                                  alt={project.name ?? ""}
+                                  alt={project?.name ?? ""}
                                   width={24}
                                   height={24}
                                 />
                               )}
                               <TrackedLink
-                                href={`/project/${project.id}`}
+                                href={`/project/${project?.id}`}
                                 eventName="Link Click"
                                 target="_blank"
                                 eventData={{
-                                  projectId: project.id,
+                                  projectId: project?.id,
                                   source: "project_page",
                                   linkName: "Top Projects",
                                 }}
                               >
-                                {project.name}
+                                {project?.name}
                               </TrackedLink>
                             </li>
                           )

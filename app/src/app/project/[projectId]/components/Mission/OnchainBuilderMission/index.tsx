@@ -1,8 +1,8 @@
 "use client"
 
+import React from "react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
-import React from "react"
 
 import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
@@ -13,13 +13,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { MONTHS } from "@/lib/oso/constants"
+import { OnchainBuilderMissionProps } from "@/lib/oso/types"
 import { formatNumber } from "@/lib/utils"
 
-import { MONTHS } from "@/lib/oso/constants"
 import AlertContainer from "./AlertContainer"
 import MetricCard from "./MetricCard"
 import NotPassingEligibility from "./NotPassingEligibility"
-import { OnchainBuilderMissionProps } from "@/lib/oso/types"
 
 export default function OnchainBuilderMission({
   data,
@@ -29,9 +29,12 @@ export default function OnchainBuilderMission({
   const { projectId } = useParams()
   const { projectName, onchainBuilderMetrics, eligibility } = data
 
-  const opRewardSum = Object.values(
-    onchainBuilderMetrics.onchainBuilderReward,
-  ).reduce((acc, curr) => acc + curr.value, 0)
+  const opRewardSum = onchainBuilderMetrics?.onchainBuilderReward
+    ? Object.values(onchainBuilderMetrics.onchainBuilderReward).reduce(
+        (acc, curr) => acc + curr.value,
+        0,
+      )
+    : 0
 
   return (
     <div className="space-y-3">
@@ -127,7 +130,7 @@ export default function OnchainBuilderMission({
                   <AccordionItem value="retro-funding" className="w-full">
                     <div className="flex flex-col items-center w-full">
                       <p className="font-semibold text-base text-foreground">
-                        Requirements to earn rewards in February were not met
+                        Requirements to earn rewards in {month} were not met
                       </p>
                       <div className="flex items-center space-x-1">
                         <p className="text-secondary-foreground text-base font-normal">
@@ -140,16 +143,19 @@ export default function OnchainBuilderMission({
                       <NotPassingEligibility
                         month={month}
                         transactionsCount={
-                          onchainBuilderMetrics.transactions[month]?.value
+                          onchainBuilderMetrics?.transactions?.[month]?.value ??
+                          0
                         }
                         qualifiedAddressesCount={
-                          onchainBuilderMetrics.activeAddresses[month]?.value
+                          onchainBuilderMetrics?.activeAddresses?.[month]
+                            ?.value ?? 0
                         }
                         distinctDaysCount={
-                          onchainBuilderMetrics.activeAddresses[month]?.value
+                          onchainBuilderMetrics?.activeAddresses?.[month]
+                            ?.value ?? 0
                         }
                         hasDefillamaAdapter={
-                          eligibility?.hasDefillamaAdapter[month]
+                          eligibility?.hasDefillamaAdapter?.[month] ?? false
                         }
                       />
                     </AccordionContent>
@@ -168,41 +174,45 @@ export default function OnchainBuilderMission({
               >
                 <MetricCard
                   value={formatNumber(
-                    onchainBuilderMetrics.tvl[month]?.value ?? 0,
+                    onchainBuilderMetrics?.tvl?.[month]?.value ?? 0,
                     0,
                     "compact",
                   )}
                   title="TVL across the Superchain"
                   trend={{
                     value:
-                      onchainBuilderMetrics.tvl[month]?.trend.value.toString(),
+                      onchainBuilderMetrics?.tvl?.[
+                        month
+                      ]?.trend.value.toString() ?? "0",
                     type:
-                      onchainBuilderMetrics.tvl[month]?.trend.sign === "inc"
+                      onchainBuilderMetrics?.tvl?.[month]?.trend.sign === "inc"
                         ? "increase"
                         : "decrease",
                   }}
                   sign={{
                     value:
-                      onchainBuilderMetrics.tvl[month]?.value === 0 ? "" : "$",
+                      onchainBuilderMetrics?.tvl?.[month]?.value === 0
+                        ? ""
+                        : "$",
                     position: "left",
                   }}
                   index={0}
                 />
                 <MetricCard
                   value={formatNumber(
-                    onchainBuilderMetrics.transactions[month]?.value,
+                    onchainBuilderMetrics?.transactions?.[month]?.value ?? 0,
                     0,
                     "compact",
                   )}
                   title="Transactions"
                   trend={{
                     value:
-                      onchainBuilderMetrics.transactions[
+                      onchainBuilderMetrics?.transactions?.[
                         month
-                      ]?.trend.value.toString(),
+                      ]?.trend.value.toString() ?? "0",
                     type:
-                      onchainBuilderMetrics.transactions[month]?.trend.sign ===
-                      "inc"
+                      onchainBuilderMetrics?.transactions?.[month]?.trend
+                        .sign === "inc"
                         ? "increase"
                         : "decrease",
                   }}
@@ -210,18 +220,19 @@ export default function OnchainBuilderMission({
                 />
                 <MetricCard
                   value={formatNumber(
-                    onchainBuilderMetrics.gasFees[month]?.value,
+                    onchainBuilderMetrics?.gasFees?.[month]?.value ?? 0,
                     0,
                   )}
                   title="Gas consumed"
                   trend={{
                     value: formatNumber(
-                      onchainBuilderMetrics.gasFees[month]?.trend.value,
+                      onchainBuilderMetrics?.gasFees?.[month]?.trend.value ?? 0,
                       0,
                       "compact",
                     ),
                     type:
-                      onchainBuilderMetrics.gasFees[month]?.trend.sign === "inc"
+                      onchainBuilderMetrics?.gasFees?.[month]?.trend.sign ===
+                      "inc"
                         ? "increase"
                         : "decrease",
                   }}
@@ -231,7 +242,8 @@ export default function OnchainBuilderMission({
                 <MetricCard
                   value={formatNumber(
                     Math.round(
-                      onchainBuilderMetrics.activeAddresses[month]?.value,
+                      onchainBuilderMetrics?.activeAddresses?.[month]?.value ??
+                        0,
                     ),
                     0,
                     "compact",
@@ -239,11 +251,11 @@ export default function OnchainBuilderMission({
                   title="Qualified addresses"
                   trend={{
                     value:
-                      onchainBuilderMetrics.activeAddresses[
+                      onchainBuilderMetrics?.activeAddresses?.[
                         month
-                      ]?.trend.value.toString(),
+                      ]?.trend.value.toString() ?? "0",
                     type:
-                      onchainBuilderMetrics.activeAddresses[month]?.trend
+                      onchainBuilderMetrics?.activeAddresses?.[month]?.trend
                         .sign === "inc"
                         ? "increase"
                         : "decrease",
@@ -280,8 +292,8 @@ export default function OnchainBuilderMission({
                 )}
                 {!eligibility.onchainBuilderEligibility && (
                   <AlertContainer type="danger" isMember={data.isMember}>
-                    This project didn’t receive OP in February because it didn’t
-                    meet reward minimums.
+                    This project didn&apos;t receive OP in {month} because it
+                    didn&apos;t meet reward minimums.
                   </AlertContainer>
                 )}
               </ul>

@@ -8,7 +8,21 @@ import { Trend } from "./types"
 import { CHAIN_INFO } from "@/components/common/chain"
 
 export const formatPerformanceMetrics = (metrics: MetricValues[]) => {
-  return groupByDate(metrics)
+  const groupedData = groupByDate(metrics)
+  const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(groupedData)
+
+  months.forEach((month, index) => {
+    const currentValue = groupedData[month]
+    const previousValue = index > 0 ? groupedData[months[index - 1]] : 0
+
+    result[month] = {
+      value: currentValue,
+      trend: calculateTrend(currentValue, previousValue),
+    }
+  })
+
+  return result
 }
 
 const calculateTrend = (current: number, previous: number): Trend => {
