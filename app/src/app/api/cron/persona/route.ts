@@ -23,5 +23,5 @@ async function handlePersonaCron(request: NextRequest) {
 
 export const GET = withCronObservability(handlePersonaCron, {
   monitorSlug: MONITOR_SLUG,
-  requireAuth: false,
+  requireAuth: true,
 })
