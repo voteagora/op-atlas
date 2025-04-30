@@ -669,6 +669,7 @@ model RewardStream { // This is used to track the ids for the streams
 }
 
 enum ProjectOSOMetric {
+  TVL
   GAS_FEES
   ACTIVE_ADDRESSES_COUNT
   TRANSACTION_COUNT
@@ -696,6 +697,8 @@ model ProjectOSOMetrics {
   @@index([projectId])
   @@index([metric])
   @@index([tranche])
+
+  @@unique([projectId, metric, tranche])
 }
 
 model ProjectOSORelatedProjects {
@@ -709,6 +712,8 @@ model ProjectOSORelatedProjects {
 
   @@index([projectId])
   @@index([osoId])
+
+  @@unique([projectId, tranche, osoId])
 }
 
 model ProjectOSOAtlasRelatedProjects {
@@ -722,4 +727,6 @@ model ProjectOSOAtlasRelatedProjects {
 
   @@index([projectId])
   @@index([relatedProjectId])
+
+  @@unique([projectId, tranche, relatedProjectId])
 }

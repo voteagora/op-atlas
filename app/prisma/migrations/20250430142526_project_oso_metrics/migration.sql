@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "ProjectOSOMetric" AS ENUM ('GAS_FEES', 'ACTIVE_ADDRESSES_COUNT', 'TRANSACTION_COUNT', 'HAS_DEFILLAMA_ADAPTER', 'HAS_BUNDLE_BEAR', 'IS_ONCHAIN_BUILDER_ELIGIBLE', 'IS_DEV_TOOLING_ELIGIBLE', 'STAR_COUNT', 'FORK_COUNT', 'NUM_PACKAGES_IN_DEPS_DEV', 'PACKAGE_CONNECTION_COUNT', 'DEVELOPER_CONNECTION_COUNT', 'TRUSTED_DEVELOPER_USERNAME');
+CREATE TYPE "ProjectOSOMetric" AS ENUM ('TVL', 'GAS_FEES', 'ACTIVE_ADDRESSES_COUNT', 'TRANSACTION_COUNT', 'HAS_DEFILLAMA_ADAPTER', 'HAS_BUNDLE_BEAR', 'IS_ONCHAIN_BUILDER_ELIGIBLE', 'IS_DEV_TOOLING_ELIGIBLE', 'STAR_COUNT', 'FORK_COUNT', 'NUM_PACKAGES_IN_DEPS_DEV', 'PACKAGE_CONNECTION_COUNT', 'DEVELOPER_CONNECTION_COUNT', 'TRUSTED_DEVELOPER_USERNAME');
 
 -- CreateTable
 CREATE TABLE "ProjectOSOMetrics" (
@@ -42,16 +42,25 @@ CREATE INDEX "ProjectOSOMetrics_metric_idx" ON "ProjectOSOMetrics"("metric");
 CREATE INDEX "ProjectOSOMetrics_tranche_idx" ON "ProjectOSOMetrics"("tranche");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ProjectOSOMetrics_projectId_metric_tranche_key" ON "ProjectOSOMetrics"("projectId", "metric", "tranche");
+
+-- CreateIndex
 CREATE INDEX "ProjectOSORelatedProjects_projectId_idx" ON "ProjectOSORelatedProjects"("projectId");
 
 -- CreateIndex
 CREATE INDEX "ProjectOSORelatedProjects_osoId_idx" ON "ProjectOSORelatedProjects"("osoId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ProjectOSORelatedProjects_projectId_tranche_osoId_key" ON "ProjectOSORelatedProjects"("projectId", "tranche", "osoId");
+
+-- CreateIndex
 CREATE INDEX "ProjectOSOAtlasRelatedProjects_projectId_idx" ON "ProjectOSOAtlasRelatedProjects"("projectId");
 
 -- CreateIndex
 CREATE INDEX "ProjectOSOAtlasRelatedProjects_relatedProjectId_idx" ON "ProjectOSOAtlasRelatedProjects"("relatedProjectId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ProjectOSOAtlasRelatedProjects_projectId_tranche_relatedPro_key" ON "ProjectOSOAtlasRelatedProjects"("projectId", "tranche", "relatedProjectId");
 
 -- AddForeignKey
 ALTER TABLE "ProjectOSOMetrics" ADD CONSTRAINT "ProjectOSOMetrics_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

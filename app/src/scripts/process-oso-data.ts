@@ -45,6 +45,7 @@ interface ProcessOsoDataArgs {
   files: string[]
   month: number
   mission: Mission
+  reset?: boolean
 }
 
 interface ParsedArgs {
@@ -70,10 +71,10 @@ const parseArgs = (args: string[]): ParsedArgs => {
 
 const showHelp = () => {
   console.log(
-    "Usage: pnpm process:oso-data --files=<paths> --month=<number> --mission=<type>",
+    "Usage: pnpm process:oso-data --files=<paths> --month=<number> --mission=<type> [--reset]",
   )
   console.log(
-    "Example: pnpm process:oso-data --files=path1.json,path2.json --month=3 --mission=onchain_builder",
+    "Example: pnpm process:oso-data --files=path1.json,path2.json --month=3 --mission=onchain_builder --reset",
   )
   console.log("\nOptions:")
   console.log(
@@ -81,6 +82,9 @@ const showHelp = () => {
   )
   console.log("  --month    Month number (1 or 2)")
   console.log("  --mission  Mission type (onchain_builder or dev_tooling)")
+  console.log(
+    "  --reset    Optional flag to clear existing data before processing",
+  )
   process.exit(0)
 }
 
@@ -183,30 +187,41 @@ const processOnchainBuilderData = async (
       { key: "has_bundle_bear", metric: ProjectOSOMetric.HAS_BUNDLE_BEAR },
     ]
 
-    const data = metrics.map(({ key, metric }) => ({
-      projectId,
-      metric,
-      value: project[key as keyof OnchainBuilderProject]?.toString() || "",
-      tranche: month,
-    }))
-
-    try {
-      await prisma.projectOSOMetrics.createMany({
-        data,
-        skipDuplicates: true,
-      })
-      console.log(
-        `Processed metrics for project ${
-          project.display_name || "unknown"
-        } (${projectId})`,
-      )
-    } catch (error) {
-      console.error(
-        `${RED}Error processing metrics for project ${
-          project.display_name || "unknown"
-        } (${projectId}): ${error}${RESET}`,
-      )
+    for (const { key, metric } of metrics) {
+      const value =
+        project[key as keyof OnchainBuilderProject]?.toString() || ""
+      try {
+        await prisma.projectOSOMetrics.upsert({
+          where: {
+            projectId_metric_tranche: {
+              projectId,
+              metric,
+              tranche: month,
+            },
+          },
+          update: {
+            value,
+          },
+          create: {
+            projectId,
+            metric,
+            value,
+            tranche: month,
+          },
+        })
+      } catch (error) {
+        console.error(
+          `${RED}Error processing metric ${metric} for project ${
+            project.display_name || "unknown"
+          } (${projectId}): ${error}${RESET}`,
+        )
+      }
     }
+    console.log(
+      `Processed metrics for project ${
+        project.display_name || "unknown"
+      } (${projectId})`,
+    )
   }
 }
 
@@ -265,7 +280,7 @@ const processDevToolingData = async (
       }
     }
 
-    // Process metrics
+    // Process metrics in batches
     const metrics = [
       { key: "is_eligible", metric: ProjectOSOMetric.IS_DEV_TOOLING_ELIGIBLE },
       { key: "star_count", metric: ProjectOSOMetric.STAR_COUNT },
@@ -284,88 +299,120 @@ const processDevToolingData = async (
       },
     ]
 
-    const metricData = metrics.map(({ key, metric }) => ({
-      projectId,
-      metric,
-      value: project[key as keyof DevToolingProject]?.toString() || "",
-      tranche: month,
-    }))
+    // Batch process regular metrics
+    const metricPromises = metrics.map(({ key, metric }) =>
+      prisma.projectOSOMetrics.upsert({
+        where: {
+          projectId_metric_tranche: {
+            projectId,
+            metric,
+            tranche: month,
+          },
+        },
+        update: {
+          value: project[key as keyof DevToolingProject]?.toString() || "",
+        },
+        create: {
+          projectId,
+          metric,
+          value: project[key as keyof DevToolingProject]?.toString() || "",
+          tranche: month,
+        },
+      }),
+    )
 
-    // Add trusted developer usernames as metrics
-    const trustedDevMetrics =
-      project.trusted_developer_usernames?.map((username) => ({
-        projectId,
-        metric: ProjectOSOMetric.TRUSTED_DEVELOPER_USERNAME,
-        value: username,
-        tranche: month,
-      })) || []
+    // Batch process trusted developer usernames
+    const trustedDevPromises = (project.trusted_developer_usernames || []).map(
+      (username) =>
+        prisma.projectOSOMetrics.upsert({
+          where: {
+            projectId_metric_tranche: {
+              projectId,
+              metric: ProjectOSOMetric.TRUSTED_DEVELOPER_USERNAME,
+              tranche: month,
+            },
+          },
+          update: {
+            value: username,
+          },
+          create: {
+            projectId,
+            metric: ProjectOSOMetric.TRUSTED_DEVELOPER_USERNAME,
+            value: username,
+            tranche: month,
+          },
+        }),
+    )
 
     try {
-      // Create metrics
-      await prisma.projectOSOMetrics.createMany({
-        data: [...metricData, ...trustedDevMetrics],
-        skipDuplicates: true,
-      })
-
-      // Create related projects
-      if (project.onchain_builder_oso_project_ids?.length) {
-        await prisma.projectOSORelatedProjects.createMany({
-          data: project.onchain_builder_oso_project_ids.map((osoId) => ({
-            projectId,
-            tranche: month,
-            osoId,
-          })),
-          skipDuplicates: true,
-        })
-      }
-
-      // Create related atlas projects
-      if (project.onchain_builder_op_atlas_ids?.length) {
-        // First create the related projects entries
-        const relatedProjects =
-          await prisma.projectOSORelatedProjects.createMany({
-            data: project.onchain_builder_op_atlas_ids.map((relatedId) => ({
-              projectId,
-              tranche: month,
-              osoId: relatedId, // Using the atlas ID as osoId for now
-            })),
-            skipDuplicates: true,
-          })
-
-        // Then create the atlas related projects entries
-        if (relatedProjects.count > 0) {
-          const relatedProjectRecords =
-            await prisma.projectOSORelatedProjects.findMany({
-              where: {
-                projectId,
-                tranche: month,
-                osoId: { in: project.onchain_builder_op_atlas_ids },
-              },
-            })
-
-          await prisma.projectOSOAtlasRelatedProjects.createMany({
-            data: relatedProjectRecords.map((record) => ({
-              projectId,
-              tranche: month,
-              relatedProjectId: record.id,
-            })),
-            skipDuplicates: true,
-          })
-        }
-      }
-
-      console.log(
-        `Processed metrics and relations for project ${
-          project.display_name || "unknown"
-        } (${projectId})`,
-      )
+      // Execute all metric operations in parallel
+      await Promise.all([...metricPromises, ...trustedDevPromises])
     } catch (error) {
       console.error(
-        `${RED}Error processing project ${
+        `${RED}Error processing metrics for project ${
           project.display_name || "unknown"
         } (${projectId}): ${error}${RESET}`,
       )
     }
+
+    // Process related projects in batches
+    if (project.onchain_builder_oso_project_ids?.length) {
+      try {
+        // First create all related projects
+        const relatedProjects = await Promise.all(
+          project.onchain_builder_oso_project_ids.map((osoId) =>
+            prisma.projectOSORelatedProjects.upsert({
+              where: {
+                projectId_tranche_osoId: {
+                  projectId,
+                  tranche: month,
+                  osoId,
+                },
+              },
+              update: {},
+              create: {
+                projectId,
+                tranche: month,
+                osoId,
+              },
+            }),
+          ),
+        )
+
+        // Then create all atlas related projects in parallel
+        await Promise.all(
+          relatedProjects.map((relatedProject) =>
+            prisma.projectOSOAtlasRelatedProjects.upsert({
+              where: {
+                projectId_tranche_relatedProjectId: {
+                  projectId,
+                  tranche: month,
+                  relatedProjectId: relatedProject.id,
+                },
+              },
+              update: {},
+              create: {
+                projectId,
+                tranche: month,
+                relatedProjectId: relatedProject.id,
+              },
+            }),
+          ),
+        )
+      } catch (error) {
+        console.error(
+          `${RED}Error processing related projects for project ${
+            project.display_name || "unknown"
+          } (${projectId}): ${error}${RESET}`,
+        )
+      }
+    }
+
+    console.log(
+      `Processed metrics and relations for project ${
+        project.display_name || "unknown"
+      } (${projectId})`,
+    )
   }
 }
 
@@ -373,12 +420,28 @@ const processOsoData = async ({
   files,
   month,
   mission,
+  reset = false,
 }: ProcessOsoDataArgs) => {
   console.log("Processing OSO data with:", {
     files,
     month,
     mission,
+    reset,
   })
+
+  if (reset) {
+    console.log("Clearing existing data...")
+    await prisma.projectOSOAtlasRelatedProjects.deleteMany({
+      where: { tranche: month },
+    })
+    await prisma.projectOSORelatedProjects.deleteMany({
+      where: { tranche: month },
+    })
+    await prisma.projectOSOMetrics.deleteMany({
+      where: { tranche: month },
+    })
+    console.log("Existing data cleared")
+  }
 
   // Read and process the first file
   const firstFile = files[0]
@@ -415,6 +478,7 @@ if (missingArgs.length > 0) {
 const files = resolvePaths(parsedArgs.files.split(","))
 const month = parseInt(parsedArgs.month, 10)
 const mission = parsedArgs.mission as Mission
+const reset = parsedArgs.reset === "true"
 
 if (isNaN(month) || month < 1 || month > 2) {
   console.error(`${RED}Month must be either 1 or 2${RESET}`)
@@ -429,4 +493,4 @@ if (!Object.values(Mission).includes(mission)) {
 }
 
 // Execute the main function
-processOsoData({ files, month, mission }).catch(console.error)
+processOsoData({ files, month, mission, reset }).catch(console.error)
