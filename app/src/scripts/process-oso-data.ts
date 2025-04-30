@@ -244,6 +244,11 @@ const processDevToolingData = async (
     }
 
     const projectId = project.op_atlas_id
+    console.log(
+      `\nProcessing project: ${
+        project.display_name || "unknown"
+      } (${projectId})`,
+    )
 
     // Create RecurringReward entry if op_reward exists
     if (project.op_reward) {
@@ -356,61 +361,35 @@ const processDevToolingData = async (
     }
 
     // Process related projects in batches
-    if (project.onchain_builder_oso_project_ids?.length) {
+    if (project.onchain_builder_op_atlas_ids?.length) {
+      console.log(
+        `Found ${project.onchain_builder_op_atlas_ids.length} related projects:`,
+        project.onchain_builder_op_atlas_ids,
+      )
       try {
-        // First create all related projects
-        const relatedProjects = await Promise.all(
-          project.onchain_builder_oso_project_ids.map((osoId) =>
-            prisma.projectOSORelatedProjects.upsert({
-              where: {
-                projectId_tranche_osoId: {
-                  projectId,
-                  tranche: month,
-                  osoId,
-                },
-              },
-              update: {},
-              create: {
+        // First delete any existing related projects for this project and tranche
+        await prisma.projectOSOAtlasRelatedProjects.deleteMany({
+          where: {
+            projectId,
+            tranche: month,
+          },
+        })
+
+        // Then create new entries
+        await Promise.all(
+          project.onchain_builder_op_atlas_ids.map((relatedProjectId) =>
+            prisma.projectOSOAtlasRelatedProjects.create({
+              data: {
                 projectId,
                 tranche: month,
-                osoId,
+                relatedProjectId,
               },
             }),
           ),
         )
 
-        // Then create all atlas related projects in parallel
-        // We need to find the corresponding op_atlas_id for each oso_id
-        const atlasProjects = await prisma.projectOSO.findMany({
-          where: {
-            osoId: {
-              in: project.onchain_builder_oso_project_ids,
-            },
-          },
-          select: {
-            projectId: true,
-            osoId: true,
-          },
-        })
-
-        await Promise.all(
-          atlasProjects.map((atlasProject) =>
-            prisma.projectOSOAtlasRelatedProjects.upsert({
-              where: {
-                projectId_tranche_relatedProjectId: {
-                  projectId,
-                  tranche: month,
-                  relatedProjectId: atlasProject.projectId,
-                },
-              },
-              update: {},
-              create: {
-                projectId,
-                tranche: month,
-                relatedProjectId: atlasProject.projectId,
-              },
-            }),
-          ),
+        console.log(
+          `Successfully processed ${project.onchain_builder_op_atlas_ids.length} related projects`,
         )
       } catch (error) {
         console.error(
@@ -419,6 +398,8 @@ const processDevToolingData = async (
           } (${projectId}): ${error}${RESET}`,
         )
       }
+    } else {
+      console.log("No related projects found")
     }
 
     console.log(
@@ -444,26 +425,35 @@ const processOsoData = async ({
 
   if (reset) {
     console.log("Clearing existing data...")
-    await prisma.projectOSOAtlasRelatedProjects.deleteMany({
-      where: { tranche: month },
-    })
-    await prisma.projectOSORelatedProjects.deleteMany({
-      where: { tranche: month },
-    })
-    await prisma.projectOSOMetrics.deleteMany({
-      where: { tranche: month },
+    // Use a transaction to ensure all deletes succeed or none do
+    await prisma.$transaction(async (tx) => {
+      // First delete all related projects
+      await tx.projectOSOAtlasRelatedProjects.deleteMany({
+        where: { tranche: month },
+      })
+      await tx.projectOSORelatedProjects.deleteMany({
+        where: { tranche: month },
+      })
+      // Then delete all metrics
+      await tx.projectOSOMetrics.deleteMany({
+        where: { tranche: month },
+      })
+      // Finally delete all recurring rewards
+      await tx.recurringReward.deleteMany({
+        where: { tranche: month },
+      })
     })
     console.log("Existing data cleared")
   }
 
   // Read and process the first file
   const firstFile = files[0]
+  const data = readJsonFile<DevToolingProject>(firstFile)
+  console.log(`Found ${data.length} projects in file`)
 
   if (mission === Mission.ONCHAIN_BUILDER) {
-    const data = readJsonFile<OnchainBuilderProject>(firstFile)
     await processOnchainBuilderData(data, month)
   } else {
-    const data = readJsonFile<DevToolingProject>(firstFile)
     await processDevToolingData(data, month)
   }
 }

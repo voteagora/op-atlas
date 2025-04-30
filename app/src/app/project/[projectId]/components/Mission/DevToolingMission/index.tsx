@@ -175,7 +175,7 @@ export default function DevToolingMission({
                       Projects enrolled in Retro Funding: Onchain Builders only
                     </p>
                   </div>
-                  <div className="w-full flex items-center justify-end h-full">
+                  <div className="w-full py-1.5 h-full">
                     <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
                       {devToolingMetrics?.topProjects[month]?.map(
                         (project, index) => {

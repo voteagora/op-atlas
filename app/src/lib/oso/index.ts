@@ -446,8 +446,18 @@ const getTopProjects = cache(async (osoId: string) => {
   const marchProjects = topProjects.filter((p) => p.tranche === 2)
 
   return {
-    [TRANCHE_MONTHS_MAP[1]]: februaryProjects.slice(0, 6),
-    [TRANCHE_MONTHS_MAP[2]]: marchProjects.slice(0, 6),
+    [TRANCHE_MONTHS_MAP[1]]: februaryProjects.slice(0, 6).map((p) => ({
+      id: p.targetProject.id,
+      name: p.targetProject.name,
+      thumbnailUrl: p.targetProject.thumbnailUrl,
+      website: p.targetProject.website,
+    })),
+    [TRANCHE_MONTHS_MAP[2]]: marchProjects.slice(0, 6).map((p) => ({
+      id: p.targetProject.id,
+      name: p.targetProject.name,
+      thumbnailUrl: p.targetProject.thumbnailUrl,
+      website: p.targetProject.website,
+    })),
   }
 })
 
