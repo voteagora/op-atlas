@@ -67,11 +67,26 @@ function MissionContainer({
 
 export default function Mission(props: MissionProps) {
   if (props.type === "on-chain") {
+    if (
+      Object.values(props.eligibility.onchainBuilderEligibility).every(
+        (eligibility) => eligibility === false,
+      )
+    ) {
+      return null
+    }
     return (
       <MissionContainer type={props.type}>
         <OnchainBuilderMission data={props} />
       </MissionContainer>
     )
+  }
+
+  if (
+    Object.values(props.eligibility.devToolingEligibility).every(
+      (eligibility) => eligibility === false,
+    )
+  ) {
+    return null
   }
 
   return (
