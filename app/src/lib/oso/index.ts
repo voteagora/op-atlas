@@ -421,15 +421,20 @@ const getGasConsumption = cache(async (projectId: string) => {
 const getTrustedDevelopersCount = cache(
   async function getTrustedDevelopersCount(osoId: string) {
     const trustedDevelopers = await getTrustedDevelopersCountFromOSO(osoId)
+    const februaryData = trustedDevelopers.filter((p) => p.tranche === 1)
+    const marchData = trustedDevelopers.filter((p) => p.tranche === 2)
 
-    const februaryCount = trustedDevelopers.filter(
-      (t) => t.tranche === 1,
-    ).length
-    const marchCount = trustedDevelopers.filter((t) => t.tranche === 2).length
+    const februaryCountSum = februaryData.reduce((acc, curr) => {
+      return acc + Number(curr.value)
+    }, 0)
+
+    const marchCountSum = marchData.reduce((acc, curr) => {
+      return acc + Number(curr.value)
+    }, 0)
 
     return {
-      [TRANCHE_MONTHS_MAP[1]]: februaryCount,
-      [TRANCHE_MONTHS_MAP[2]]: marchCount,
+      [TRANCHE_MONTHS_MAP[1]]: februaryCountSum,
+      [TRANCHE_MONTHS_MAP[2]]: marchCountSum,
     }
   },
 )

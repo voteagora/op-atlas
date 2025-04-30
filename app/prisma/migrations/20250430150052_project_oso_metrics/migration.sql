@@ -72,4 +72,4 @@ ALTER TABLE "ProjectOSORelatedProjects" ADD CONSTRAINT "ProjectOSORelatedProject
 ALTER TABLE "ProjectOSOAtlasRelatedProjects" ADD CONSTRAINT "ProjectOSOAtlasRelatedProjects_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProjectOSOAtlasRelatedProjects" ADD CONSTRAINT "ProjectOSOAtlasRelatedProjects_relatedProjectId_fkey" FOREIGN KEY ("relatedProjectId") REFERENCES "ProjectOSORelatedProjects"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ProjectOSOAtlasRelatedProjects" ADD CONSTRAINT "ProjectOSOAtlasRelatedProjects_relatedProjectId_fkey" FOREIGN KEY ("relatedProjectId") REFERENCES "Project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

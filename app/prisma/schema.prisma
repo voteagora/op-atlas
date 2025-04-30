@@ -261,7 +261,9 @@ model Project {
   kycTeam   KYCTeam? @relation(fields: [kycTeamId], references: [id])
   ProjectOSOMetrics ProjectOSOMetrics[]
   ProjectOSORelatedProjects ProjectOSORelatedProjects[]
-  ProjectOSOAtlasRelatedProjects ProjectOSOAtlasRelatedProjects[]
+  
+  sourceProjects ProjectOSOAtlasRelatedProjects[] @relation("sourceProject")
+  targetProjects ProjectOSOAtlasRelatedProjects[] @relation("targetProject")
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
@@ -708,7 +710,6 @@ model ProjectOSORelatedProjects {
   osoId     String
 
   project                        Project @relation(fields: [projectId], references: [id])
-  ProjectOSOAtlasRelatedProjects ProjectOSOAtlasRelatedProjects[]
 
   @@index([projectId])
   @@index([osoId])
@@ -722,8 +723,8 @@ model ProjectOSOAtlasRelatedProjects {
   tranche           Int
   relatedProjectId  String
 
-  project           Project @relation(fields: [projectId], references: [id])
-  relatedProject    ProjectOSORelatedProjects @relation(fields: [relatedProjectId], references: [id])
+  sourceProject     Project @relation("sourceProject", fields: [projectId], references: [id])
+  targetProject     Project @relation("targetProject", fields: [relatedProjectId], references: [id])
 
   @@index([projectId])
   @@index([relatedProjectId])

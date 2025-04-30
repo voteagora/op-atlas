@@ -380,21 +380,34 @@ const processDevToolingData = async (
         )
 
         // Then create all atlas related projects in parallel
+        // We need to find the corresponding op_atlas_id for each oso_id
+        const atlasProjects = await prisma.projectOSO.findMany({
+          where: {
+            osoId: {
+              in: project.onchain_builder_oso_project_ids,
+            },
+          },
+          select: {
+            projectId: true,
+            osoId: true,
+          },
+        })
+
         await Promise.all(
-          relatedProjects.map((relatedProject) =>
+          atlasProjects.map((atlasProject) =>
             prisma.projectOSOAtlasRelatedProjects.upsert({
               where: {
                 projectId_tranche_relatedProjectId: {
                   projectId,
                   tranche: month,
-                  relatedProjectId: relatedProject.id,
+                  relatedProjectId: atlasProject.projectId,
                 },
               },
               update: {},
               create: {
                 projectId,
                 tranche: month,
-                relatedProjectId: relatedProject.id,
+                relatedProjectId: atlasProject.projectId,
               },
             }),
           ),

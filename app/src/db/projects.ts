@@ -2014,7 +2014,7 @@ export async function getOnchainBuilderEligibility(projectId: string) {
 
 export async function getTrustedDevelopersCountFromOSO(projectId: string) {
   const result = await prisma.projectOSOMetrics.findMany({
-    where: { projectId, metric: "TRUSTED_DEVELOPER_USERNAME" },
+    where: { projectId, metric: "DEVELOPER_CONNECTION_COUNT" },
     select: {
       value: true,
       tranche: true,
