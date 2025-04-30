@@ -29,7 +29,7 @@ interface DiscordLinkedAccount {
 }
 
 interface GithubLinkedAccount {
-  type: "github"
+  type: "github_oauth"
   subject: string
   username: string
 }
@@ -113,7 +113,7 @@ export async function GET() {
 
               // Add GitHub account to linked accounts
               linkedAccounts.push({
-                type: "github",
+                type: "github_oauth",
                 subject: githubUser.node_id,
                 username: githubUser.login
               });
