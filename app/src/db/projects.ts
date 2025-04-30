@@ -2025,44 +2025,6 @@ export async function getTrustedDevelopersCountFromOSO(projectId: string) {
 }
 
 export async function getTopProjectsFromOSO(projectId: string) {
-  // const projectOsoRelatedProjects =
-  //   await prisma.projectOSORelatedProjects.findMany({
-  //     where: {
-  //       projectId,
-  //     },
-  //     select: {
-  //       osoId: true,
-  //       tranche: true,
-  //     },
-  //   })
-
-  // const projectOso = await prisma.projectOSO.findMany({
-  //   where: {
-  //     osoId: {
-  //       in: projectOsoRelatedProjects.map((p) => p.osoId),
-  //     },
-  //   },
-  //   select: {
-  //     osoId: true,
-  //     project: {
-  //       select: {
-  //         id: true,
-  //         name: true,
-  //         thumbnailUrl: true,
-  //         website: true,
-  //       },
-  //     },
-  //   },
-  // })
-
-  // const result = projectOso.map((p) => ({
-  //   ...p.project,
-  //   tranche: projectOsoRelatedProjects.find((r) => r.osoId === p.osoId)
-  //     ?.tranche,
-  // }))
-
-  // return result
-
   const projectOSOAtlasRelatedProjects =
     await prisma.projectOSOAtlasRelatedProjects.findMany({
       where: {
