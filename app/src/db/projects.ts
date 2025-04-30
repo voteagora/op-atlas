@@ -1982,34 +1982,120 @@ export async function getProjectsOSO(projectId: string) {
   })
 }
 
-export async function getDevToolingEligibility(projectId: string) {
-  const eligibility = await prisma.projectOSOMetrics.findMany({
-    where: {
-      projectId,
-      metric: "IS_DEV_TOOLING_ELIGIBLE",
-    },
-    select: {
-      value: true,
-      tranche: true,
-    },
-  })
+// Combined OSO data query
+export async function getProjectOSOData(projectId: string) {
+  const [metrics, rewards] = await Promise.all([
+    prisma.projectOSOMetrics.findMany({
+      where: {
+        projectId,
+        OR: [
+          // Eligibility metrics
+          {
+            metric: {
+              in: [
+                "IS_DEV_TOOLING_ELIGIBLE",
+                "IS_ONCHAIN_BUILDER_ELIGIBLE",
+                "HAS_DEFILLAMA_ADAPTER",
+              ],
+            },
+          },
+          // Performance metrics
+          {
+            metric: {
+              in: ["ACTIVE_ADDRESSES_COUNT", "GAS_FEES", "TRANSACTION_COUNT"],
+            },
+          },
+        ],
+      },
+      select: {
+        metric: true,
+        value: true,
+        tranche: true,
+      },
+    }),
+    prisma.recurringReward.findMany({
+      where: {
+        projectId,
+        roundId: {
+          in: ["7", "8"],
+        },
+      },
+      select: {
+        roundId: true,
+        amount: true,
+        tranche: true,
+      },
+    }),
+  ])
 
-  return eligibility
+  return {
+    metrics,
+    rewards,
+  }
+}
+
+// Updated eligibility queries
+export async function getProjectEligibility(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter(
+    (e) => e.metric.startsWith("IS_") || e.metric === "HAS_DEFILLAMA_ADAPTER",
+  )
+}
+
+export async function getDevToolingEligibility(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((e) => e.metric === "IS_DEV_TOOLING_ELIGIBLE")
 }
 
 export async function getOnchainBuilderEligibility(projectId: string) {
-  const eligibility = await prisma.projectOSOMetrics.findMany({
-    where: {
-      projectId,
-      metric: "IS_ONCHAIN_BUILDER_ELIGIBLE",
-    },
-    select: {
-      value: true,
-      tranche: true,
-    },
-  })
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((e) => e.metric === "IS_ONCHAIN_BUILDER_ELIGIBLE")
+}
 
-  return eligibility
+export async function getDefillamaAdapter(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((e) => e.metric === "HAS_DEFILLAMA_ADAPTER")
+}
+
+// Updated metrics queries
+export async function getProjectMetrics(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((m) =>
+    ["ACTIVE_ADDRESSES_COUNT", "GAS_FEES", "TRANSACTION_COUNT"].includes(
+      m.metric,
+    ),
+  )
+}
+
+export async function getProjectActiveAddressesCount(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((m) => m.metric === "ACTIVE_ADDRESSES_COUNT")
+}
+
+export async function getProjectGasFees(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((m) => m.metric === "GAS_FEES")
+}
+
+export async function getProjectTransactions(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((m) => m.metric === "TRANSACTION_COUNT")
+}
+
+// Updated rewards queries
+export async function getProjectRewards(projectId: string) {
+  const { rewards } = await getProjectOSOData(projectId)
+  return rewards
+}
+
+export async function getOnchainBuilderRecurringReward(projectId: string) {
+  const { rewards } = await getProjectOSOData(projectId)
+  return rewards.filter((r) => r.roundId === "8")
+}
+
+export async function getDevToolingRecurringReward(projectId: string) {
+  const { rewards } = await getProjectOSOData(projectId)
+  return rewards.filter((r) => r.roundId === "7")
 }
 
 export async function getTrustedDevelopersCountFromOSO(projectId: string) {
@@ -2111,65 +2197,5 @@ export async function getProjectOSORelatedProjects(projectId: string) {
       projectId: true,
       tranche: true,
     },
-  })
-}
-
-export async function getProjectActiveAddressesCount(projectId: string) {
-  return await prisma.projectOSOMetrics.findMany({
-    where: {
-      projectId,
-      metric: "ACTIVE_ADDRESSES_COUNT",
-    },
-    select: {
-      value: true,
-      tranche: true,
-    },
-  })
-}
-
-export async function getProjectGasFees(projectId: string) {
-  return await prisma.projectOSOMetrics.findMany({
-    where: {
-      projectId,
-      metric: "GAS_FEES",
-    },
-    select: {
-      value: true,
-      tranche: true,
-    },
-  })
-}
-
-export async function getProjectTransactions(projectId: string) {
-  return await prisma.projectOSOMetrics.findMany({
-    where: {
-      projectId,
-      metric: "TRANSACTION_COUNT",
-    },
-    select: {
-      value: true,
-      tranche: true,
-    },
-  })
-}
-
-export async function getDefillamaAdapter(projectId: string) {
-  return await prisma.projectOSOMetrics.findMany({
-    where: { projectId, metric: "HAS_DEFILLAMA_ADAPTER" },
-    select: { value: true, tranche: true },
-  })
-}
-
-export async function getOnchainBuilderRecurringReward(projectId: string) {
-  return await prisma.recurringReward.findMany({
-    where: { projectId, roundId: "8" },
-    select: { amount: true, tranche: true },
-  })
-}
-
-export async function getDevToolingRecurringReward(projectId: string) {
-  return await prisma.recurringReward.findMany({
-    where: { projectId, roundId: "7" },
-    select: { amount: true, tranche: true },
   })
 }

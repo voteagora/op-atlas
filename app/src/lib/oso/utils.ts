@@ -312,3 +312,43 @@ export const formatHasDefillamaAdapter = (
     return acc
   }, {})
 }
+
+// Helper functions to parse combined query results
+export function parseEligibilityResults(
+  results: { metric: string; value: string; tranche: number }[],
+  metric: string,
+) {
+  return results.filter((r) => r.metric === metric)
+}
+
+export function parseMetricsResults(
+  results: { metric: string; value: string; tranche: number }[],
+  metric: string,
+) {
+  return results.filter((r) => r.metric === metric)
+}
+
+export function parseRewardsResults(
+  results: { roundId: string; amount: string; tranche: number }[],
+  roundId: string,
+) {
+  return results.filter((r) => r.roundId === roundId)
+}
+
+// Helper function to format metrics data
+export function formatMetricsData(
+  results: { metric: string; value: string; tranche: number }[],
+): Record<string, { tranche: number; value: string }[]> {
+  return results.reduce((acc, result) => {
+    const month =
+      TRANCHE_MONTHS_MAP[result.tranche as keyof typeof TRANCHE_MONTHS_MAP]
+    if (!acc[month]) {
+      acc[month] = []
+    }
+    acc[month].push({
+      tranche: result.tranche,
+      value: result.value,
+    })
+    return acc
+  }, {} as Record<string, { tranche: number; value: string }[]>)
+}

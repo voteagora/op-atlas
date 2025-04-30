@@ -17,6 +17,9 @@ import {
   getProjectTransactions,
   getTopProjectsFromOSO,
   getTrustedDevelopersCountFromOSO,
+  getProjectEligibility,
+  getProjectMetrics as getProjectMetricsFromDB,
+  getProjectRewards,
 } from "@/db/projects"
 import {
   OrderBy,
@@ -56,6 +59,10 @@ import {
   formatGasConsumption,
   formatOnchainBuilderEligibility,
   formatHasDefillamaAdapter,
+  parseEligibilityResults,
+  parseMetricsResults,
+  parseRewardsResults,
+  formatMetricsData,
 } from "./utils"
 
 export const osoClient = new GraphQLClient(
@@ -207,7 +214,33 @@ export const mapOSOProjects = cache(async function mapOSOProjects(
 
 export const getProjectMetrics = cache(async function getProjectMetrics(
   projectId: string,
-) {
+): Promise<{
+  error?: string
+  eligibility?: {
+    devToolingEligibility: any
+    onchainBuilderEligibility: any
+    hasDefillamaAdapter: any
+  }
+  onchainBuilderMetrics?: {
+    activeAddresses: any
+    gasFees: any
+    transactions: any
+    tvl: any
+    onchainBuilderReward: any
+  }
+  devToolingMetrics?: {
+    gasConsumption: any
+    trustedDevelopersCount: any
+    topProjects: any
+    devToolingReward: any
+  }
+  performanceMetrics?: {
+    activeAddresses: any
+    gasFees: any
+    transactions: any
+    tvl: any
+  }
+}> {
   if (!projectId) {
     return {
       error: "Project not found",
@@ -224,17 +257,19 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
   const { osoId } = projectOSO
 
   const [
-    devToolingEligibility,
-    onchainBuilderEligibility,
-    devToolingMetrics,
-    onchainBuilderMetrics,
-    hasDefillamaAdapter,
+    eligibilityResults,
+    metricsResults,
+    rewardsResults,
+    gasConsumption,
+    trustedDevelopersCount,
+    topProjects,
   ] = await Promise.all([
-    getDevToolingEligibility(projectId),
-    getOnchainBuilderEligibility(projectId),
-    getDevToolingMetrics(projectId),
-    getOnchainBuilderMetrics(projectId),
-    getHasDefillamaAdapter(projectId),
+    getProjectEligibility(projectId),
+    getProjectMetricsFromDB(projectId),
+    getProjectRewards(projectId),
+    getGasConsumption(projectId),
+    getTrustedDevelopersCount(projectId),
+    getTopProjects(projectId),
   ])
 
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
@@ -251,14 +286,46 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
 
   return {
     eligibility: {
-      devToolingEligibility: formatDevToolingEligibility(devToolingEligibility),
-      onchainBuilderEligibility: formatOnchainBuilderEligibility(
-        onchainBuilderEligibility,
+      devToolingEligibility: formatDevToolingEligibility(
+        parseEligibilityResults(eligibilityResults, "IS_DEV_TOOLING_ELIGIBLE"),
       ),
-      hasDefillamaAdapter,
+      onchainBuilderEligibility: formatOnchainBuilderEligibility(
+        parseEligibilityResults(
+          eligibilityResults,
+          "IS_ONCHAIN_BUILDER_ELIGIBLE",
+        ),
+      ),
+      hasDefillamaAdapter: formatHasDefillamaAdapter(
+        parseEligibilityResults(eligibilityResults, "HAS_DEFILLAMA_ADAPTER"),
+      ),
     },
-    onchainBuilderMetrics,
-    devToolingMetrics,
+    onchainBuilderMetrics: {
+      activeAddresses: formatActiveAddresses(
+        formatMetricsData(
+          parseMetricsResults(metricsResults, "ACTIVE_ADDRESSES_COUNT"),
+        ),
+      ),
+      gasFees: formatGasFees(
+        formatMetricsData(parseMetricsResults(metricsResults, "GAS_FEES")),
+      ),
+      transactions: formatTransactions(
+        formatMetricsData(
+          parseMetricsResults(metricsResults, "TRANSACTION_COUNT"),
+        ),
+      ),
+      tvl: tvlPerformance,
+      onchainBuilderReward: formatOnchainBuilderReward(
+        parseRewardsResults(rewardsResults, "8"),
+      ),
+    },
+    devToolingMetrics: {
+      gasConsumption,
+      trustedDevelopersCount,
+      topProjects,
+      devToolingReward: formatDevToolingReward(
+        parseRewardsResults(rewardsResults, "7"),
+      ),
+    },
     performanceMetrics: {
       activeAddresses: activeAddressesPerformance,
       gasFees: gasFeesPerformance,
@@ -352,14 +419,6 @@ const getDevToolingReward = cache(async (projectId: string) => {
   const devToolingReward = await getDevToolingRecurringReward(projectId)
 
   const output = formatDevToolingReward(devToolingReward)
-
-  return output
-})
-
-const getHasDefillamaAdapter = cache(async (projectId: string) => {
-  const hasDefillamaAdapter = await getDefillamaAdapter(projectId)
-
-  const output = formatHasDefillamaAdapter(hasDefillamaAdapter)
 
   return output
 })
