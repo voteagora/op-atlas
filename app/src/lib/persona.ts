@@ -143,5 +143,11 @@ async function processPaginatedData<T>(
   fetchPage: () => AsyncGenerator<T[]>,
   processBatch: (items: T[]) => Promise<void>,
 ) {
-  return Promise.all(await Array.fromAsync(fetchPage(), processBatch))
+  const processingPromises: Promise<void>[] = []
+
+  for await (const batch of fetchPage()) {
+    processingPromises.push(processBatch([...batch]))
+  }
+
+  return Promise.all(processingPromises)
 }
