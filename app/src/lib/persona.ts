@@ -1,3 +1,5 @@
+import { processPersonaCases, processPersonaInquiries } from "./actions/kyc"
+
 const PERSONA_API_URL = "https://app.withpersona.com"
 
 export const inquiryStatusMap = {
@@ -123,10 +125,23 @@ async function* fetchGenerator<T>(
   } while (currentUrl)
 }
 
-export const getPersonaCases = () => {
-  return fetchGenerator<PersonaCase>(personaClient, "getCases")
+export const getAndProcessPersonaCases = () => {
+  return processPaginatedData(
+    () => fetchGenerator<PersonaCase>(personaClient, "getCases"),
+    processPersonaCases,
+  )
 }
 
-export const getPersonaInquiries = () => {
-  return fetchGenerator<PersonaInquiry>(personaClient, "getInquiries")
+export const getAndProcessPersonaInquiries = () => {
+  return processPaginatedData(
+    () => fetchGenerator<PersonaInquiry>(personaClient, "getInquiries"),
+    processPersonaInquiries,
+  )
+}
+
+async function processPaginatedData<T>(
+  fetchPage: () => AsyncGenerator<T[]>,
+  processBatch: (items: T[]) => Promise<void>,
+) {
+  return Promise.all(await Array.fromAsync(fetchPage(), processBatch))
 }
