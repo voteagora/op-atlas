@@ -129,8 +129,8 @@ export const formatTransactions = (
   return result
 }
 
-export const formatTvl = (data: MetricValues[]) => {
-  const monthlyData = groupByMonth(data)
+export const formatTvl = (data: Record<string, number>) => {
+  const monthlyData = data
   const months = Object.keys(monthlyData)
   const result: Record<string, { value: number; trend: Trend }> = {}
   const currentYear = new Date().getFullYear()

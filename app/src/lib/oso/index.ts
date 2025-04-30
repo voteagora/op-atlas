@@ -272,6 +272,7 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     gasConsumption,
     trustedDevelopersCount,
     topProjects,
+    tvlResults,
   ] = await Promise.all([
     getProjectEligibility(projectId),
     getProjectMetricsFromDB(projectId),
@@ -279,6 +280,7 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getGasConsumption(projectId),
     getTrustedDevelopersCount(projectId),
     getTopProjects(projectId),
+    getTvl(osoId),
   ])
 
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
@@ -322,7 +324,7 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
           parseMetricsResults(metricsResults, "TRANSACTION_COUNT"),
         ),
       ),
-      tvl: tvlPerformance,
+      tvl: tvlResults,
       onchainBuilderReward: formatOnchainBuilderReward(
         parseRewardsResults(rewardsResults, "8"),
       ),
@@ -412,8 +414,27 @@ const getTransactions = async function getTransactions(projectId: string) {
 }
 
 const getTvl = async function getTvl(osoId: string) {
-  const data = await queryMetrics([osoId], "tvl")
-  return formatTvl(data)
+  const februaryData = await queryMetrics([osoId], "tvl", {
+    _gte: OSO_QUERY_TRANCHE_CUTOFF_DATES[1].start,
+    _lte: OSO_QUERY_TRANCHE_CUTOFF_DATES[1].end,
+  })
+  const marchData = await queryMetrics([osoId], "tvl", {
+    _gte: OSO_QUERY_TRANCHE_CUTOFF_DATES[2].start,
+    _lte: OSO_QUERY_TRANCHE_CUTOFF_DATES[2].end,
+  })
+
+  const tranchedData = {
+    [TRANCHE_MONTHS_MAP[1]]: februaryData.reduce((acc, curr) => {
+      return acc + Number(curr.amount)
+    }, 0),
+    [TRANCHE_MONTHS_MAP[2]]: marchData.reduce((acc, curr) => {
+      return acc + Number(curr.amount)
+    }, 0),
+  }
+
+  const output = formatTvl(tranchedData)
+
+  return output
 }
 
 const getOnchainBuilderReward = cache(async (projectId: string) => {
