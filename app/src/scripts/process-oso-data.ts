@@ -504,6 +504,70 @@ const processOsoData = async ({
   } else {
     await processDevToolingData(data, month)
   }
+
+  // After processing the data, update funding rewards with the sum of recurring rewards
+  console.log("\n🔄 Updating funding rewards with recurring rewards...")
+
+  // Get all recurring rewards for the current round
+  const recurringRewards = await prisma.recurringReward.findMany({
+    where: {
+      roundId: mission === Mission.ONCHAIN_BUILDER ? "8" : "7", // Onchain builder or Dev tooling round
+      deletedAt: null, // Only active rewards
+    },
+    select: {
+      projectId: true,
+      roundId: true,
+      amount: true,
+    },
+  })
+
+  // Group recurring rewards by project and round
+  const recurringRewardsByProject = recurringRewards.reduce((acc, reward) => {
+    const key = `${reward.projectId}-${reward.roundId}`
+    if (!acc[key]) {
+      acc[key] = BigInt(0)
+    }
+    // Convert to BigInt by moving decimal point to the right
+    const [whole, decimal] = reward.amount.split(".")
+    const decimalPart = (decimal || "00").padEnd(2, "0") // Ensure we have 2 decimal places
+    const amountStr = whole + decimalPart // Combine without decimal point
+    acc[key] += BigInt(amountStr)
+    return acc
+  }, {} as Record<string, bigint>)
+
+  // Get all funding rewards for the current round
+  const fundingRewards = await prisma.fundingReward.findMany({
+    where: {
+      roundId: mission === Mission.ONCHAIN_BUILDER ? "8" : "7",
+    },
+    select: {
+      id: true,
+      projectId: true,
+      roundId: true,
+      amount: true,
+    },
+  })
+
+  // Update funding rewards with the sum of recurring rewards
+  for (const reward of fundingRewards) {
+    const key = `${reward.projectId}-${reward.roundId}`
+    if (recurringRewardsByProject[key]) {
+      // Convert back to Decimal by dividing by 100 (since we moved decimal 2 places)
+      const amount = recurringRewardsByProject[key].toString()
+      const decimalAmount = amount.slice(0, -2) + "." + amount.slice(-2)
+
+      await prisma.fundingReward.update({
+        where: {
+          id: reward.id,
+        },
+        data: {
+          amount: decimalAmount,
+        },
+      })
+    }
+  }
+
+  console.log("✅ Funding rewards updated with recurring rewards")
 }
 
 // Parse command line arguments
