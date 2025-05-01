@@ -409,10 +409,15 @@ const processDevToolingData = async (
     }
 
     // Process related projects in batches
-    if (project.onchain_builder_op_atlas_ids?.length) {
+    const relatedProjectIds =
+      month === 1
+        ? (project as any).onchain_builder_project_names || [] // Handle month 1 edge case
+        : project.onchain_builder_op_atlas_ids || []
+
+    if (relatedProjectIds.length) {
       console.log(
-        `Found ${project.onchain_builder_op_atlas_ids.length} related projects:`,
-        project.onchain_builder_op_atlas_ids,
+        `Found ${relatedProjectIds.length} related projects:`,
+        relatedProjectIds,
       )
       try {
         // First delete any existing related projects for this project and tranche
@@ -425,7 +430,7 @@ const processDevToolingData = async (
 
         // Then create new entries
         await Promise.all(
-          project.onchain_builder_op_atlas_ids.map((relatedProjectId) =>
+          relatedProjectIds.map((relatedProjectId: string) =>
             prisma.projectOSOAtlasRelatedProjects.create({
               data: {
                 projectId,
@@ -437,7 +442,7 @@ const processDevToolingData = async (
         )
 
         console.log(
-          `Successfully processed ${project.onchain_builder_op_atlas_ids.length} related projects`,
+          `Successfully processed ${relatedProjectIds.length} related projects`,
         )
       } catch (error) {
         console.error(
