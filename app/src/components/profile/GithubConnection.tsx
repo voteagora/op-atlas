@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 
 import { syncPrivyUser } from "@/db/privy"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
-import { useUser } from "@/hooks/useUser"
+import { useUser } from "@/hooks/db/useUser"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { Checkbox } from "../ui/checkbox"
 

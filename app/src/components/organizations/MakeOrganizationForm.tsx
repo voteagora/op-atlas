@@ -40,7 +40,7 @@ import {
 } from "../ui/form"
 import { TeamMemberRow } from "./TeamMemberRow"
 import { FarcasterConnection } from "../profile/FarcasterConnection"
-import { useUser } from "@/hooks/useUser"
+import { useUser } from "@/hooks/db/useUser"
 
 const StringValue = z.object({ value: z.string() }) // use a intermediate object to represent String arrays because useFieldArray only works on object arrays
 

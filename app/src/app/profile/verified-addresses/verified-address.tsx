@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useUser } from "@/hooks/useUser"
+import { useUser } from "@/hooks/db/useUser"
 import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
 import { shortenAddress } from "@/lib/utils"

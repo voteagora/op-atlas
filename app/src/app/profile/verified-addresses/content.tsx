@@ -3,8 +3,8 @@
 import { UserAddressSource } from "@/lib/types"
 
 import { AddressConnection } from "@/components/profile/AddressConnection"
-import { usePrivyLinkWallet } from "@/hooks/usePrivyLinkWallet"
-import { useUser } from "@/hooks/useUser"
+import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
+import { useUser } from "@/hooks/db/useUser"
 import { usePrivy } from "@privy-io/react-auth"
 import { VerifiedAddress } from "./verified-address"
 

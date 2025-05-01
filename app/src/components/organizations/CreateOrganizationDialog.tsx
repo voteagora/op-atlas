@@ -22,7 +22,7 @@ import FileUploadInput from "../common/FileUploadInput"
 import { DialogProps } from "../dialogs/types"
 import { PhotoCropModal } from "../projects/details/PhotoCropModal"
 import AddTeamMemberDialog from "../projects/teams/AddTeamMemberDialog"
-import { useUser } from "@/hooks/useUser"
+import { useUser } from "@/hooks/db/useUser"
 
 function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
   const { data: currentUser } = useSession()

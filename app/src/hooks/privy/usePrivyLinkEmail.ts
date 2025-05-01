@@ -2,8 +2,10 @@ import { toast } from "sonner"
 import { useLinkAccount, usePrivy, useUpdateAccount } from "@privy-io/react-auth"
 import { useRef } from "react"
 import { syncPrivyUser } from "@/db/privy"
-import { useHandlePrivyErrors } from "./useHandlePrivyErrors"
-import { useUser } from "./useUser"
+import { useUser } from "../db/useUser"
+import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
+
+
 
 export const usePrivyEmail = (userId: string) => {
 

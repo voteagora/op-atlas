@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { createProjectKycTeamAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { useUser } from "@/hooks/useUser"
+import { useUser } from "@/hooks/db/useUser"
 
 const formSchema = z.object({
   signature: z.string().min(1, "Signature is required"),

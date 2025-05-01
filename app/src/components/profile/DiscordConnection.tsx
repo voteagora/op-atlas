@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/common/Button"
 import { syncPrivyUser } from "@/db/privy"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
-import { useUser } from "@/hooks/useUser"
+import { useUser } from "@/hooks/db/useUser"
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 
 export const DiscordConnection = ({ userId }: { userId: string }) => {

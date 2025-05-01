@@ -7,8 +7,8 @@ import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { usePrivyEmail } from "@/hooks/usePrivyLinkEmail"
-import { useUser } from "@/hooks/useUser"
+
+import { useUser } from "@/hooks/db/useUser"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
+import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 
 const ProfileDetailCard = ({
   className,
@@ -30,12 +31,9 @@ const ProfileDetailCard = ({
   const { isBadgeholder } = useIsBadgeholder(user)
   const { user: loadedUser } = useUser({ id: user.id, enabled: true })
 
-  const username = loadedUser?.username || user.username;
-  const imageUrl = loadedUser?.imageUrl || user.imageUrl;
-  const name = loadedUser?.name || user.name;
-  const bio = loadedUser?.bio || user.bio;
 
   const email = loadedUser ? loadedUser?.emails[0]?.email : user.emails[0]?.email;
+  const name = loadedUser ? loadedUser?.name : user.name;
 
   const { linkEmail } = usePrivyEmail(user.id)
 
@@ -59,22 +57,21 @@ const ProfileDetailCard = ({
     }
   }
 
-  const initials = (user?.name ?? "")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-
   return (
     <div className={cn("flex gap-x-4", className)}>
       <Avatar className="w-20 h-20 my-0.5">
         <AvatarImage src={user?.imageUrl ?? ""} />
-        <AvatarFallback>{initials}</AvatarFallback>
+        <AvatarFallback>
+          <Image
+            src="/assets/icons/user-icon.svg"
+            alt="user" width={18} height={18}
+            className="text-foreground" />
+        </AvatarFallback>
       </Avatar>
 
       <div className="flex flex-col">
-        <h2 className="flex items-center gap-x-2">
-          {user.name ?? ""}{" "}
+        <div className="text-2xl font-semibold flex items-center gap-x-2">
+          {name || ""}
           {isBadgeholder && (
             <Image
               src="/assets/icons/badgeholder-sunny.png"
@@ -83,7 +80,8 @@ const ProfileDetailCard = ({
               alt="Badgeholder checkmark"
             />
           )}
-        </h2>
+        </div>
+
         {user.bio && <p>{user.bio}</p>}
 
         <div className="mt-2 mr-4 flex items-center gap-x-4">

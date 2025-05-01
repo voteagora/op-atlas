@@ -9,7 +9,7 @@ import { updateGovForumProfileUrl } from "@/lib/actions/users"
 
 import { cn } from "@/lib/utils"
 
-import { useUser } from "@/hooks/useUser"
+import { useUser } from "@/hooks/db/useUser"
 import { Input } from "../ui/input"
 
 

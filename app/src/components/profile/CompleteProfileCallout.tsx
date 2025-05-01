@@ -10,8 +10,8 @@ import {
 } from "@/lib/types"
 import { profileProgress } from "@/lib/utils"
 
-import { usePrivyLinkWallet } from "@/hooks/usePrivyLinkWallet"
-import { useUser } from "@/hooks/useUser"
+import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
+import { useUser } from "@/hooks/db/useUser"
 import { Badge } from "../common/Badge"
 import {
   Accordion,

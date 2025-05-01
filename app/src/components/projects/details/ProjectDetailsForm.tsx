@@ -50,7 +50,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
-import { useUser } from "@/hooks/useUser"
+import { useUser } from "@/hooks/db/useUser"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { useSession } from "next-auth/react"
 
