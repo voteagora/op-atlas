@@ -641,27 +641,41 @@ export async function addTags(records: EntityRecords) {
   })
 
   // Enrich with reward/org/project admin metadata
-  const allProjects = await prisma.project.findMany({
-    where: { deletedAt: null },
-    include: {
-      applications: { include: { round: true } },
-      rewards: { include: { round: true } },
-      team: { include: { user: { include: { emails: true } } } },
-      organization: {
-        include: {
-          organization: {
-            include: {
-              team: { include: { user: { include: { emails: true } } } },
+  const [allProjects, latestTranche] = await Promise.all([
+    prisma.project.findMany({
+      where: { deletedAt: null },
+      include: {
+        applications: { include: { round: true } },
+        recurringRewards: true,
+        team: { include: { user: { include: { emails: true } } } },
+        organization: {
+          include: {
+            organization: {
+              include: {
+                team: { include: { user: { include: { emails: true } } } },
+              },
             },
           },
         },
       },
-    },
-  })
+    }),
+    prisma.recurringReward.findFirst({
+      orderBy: {
+        tranche: "desc",
+      },
+      select: {
+        tranche: true,
+      },
+    }),
+  ])
 
   allProjects.forEach((project) => {
-    const round7 = project.rewards.find((r) => r.roundId === "7")
-    const round8 = project.rewards.find((r) => r.roundId === "8")
+    const round7 = project.recurringRewards.find(
+      (r) => (r.roundId === "7" && r.tranche == latestTranche?.tranche) ?? 1,
+    )
+    const round8 = project.recurringRewards.find(
+      (r) => (r.roundId === "8" && r.tranche == latestTranche?.tranche) ?? 1,
+    )
 
     const appliedRound7 = project.applications.some((a) => a.roundId === "7")
     const appliedRound8 = project.applications.some((a) => a.roundId === "8")
@@ -683,13 +697,13 @@ export async function addTags(records: EntityRecords) {
 
       const tags = userTagsMap.get(email)!
 
-      if (round8 && round8.amount.toNumber() > 0) {
+      if (round8) {
         tags.add("Received rewards (onchain builders)")
       } else if (appliedRound8) {
         tags.add("Did not receive rewards (onchain builders)")
       }
 
-      if (round7 && round7.amount.toNumber() > 0) {
+      if (round7) {
         tags.add("Received rewards (dev tooling)")
       } else if (appliedRound7) {
         tags.add("Did not receive rewards (dev tooling)")
