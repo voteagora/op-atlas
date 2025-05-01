@@ -15,12 +15,20 @@ interface OnchainBuilderProject {
   round_id?: string
   is_eligible?: boolean
   op_reward?: number
-  transaction_count?: number
-  active_days?: number
-  active_addresses_count?: number
-  gas_fees?: number
   has_defillama_adapter?: boolean
   has_bundle_bear?: boolean
+  eligibility_metrics?: {
+    active_days?: number
+    gas_fees?: number
+    transaction_count?: number
+    active_addresses_count?: number
+  }
+  monthly_metrics?: {
+    contract_invocations?: number
+    defillama_tvl?: number | null
+    active_addresses_aggregation?: number
+    gas_fees?: number
+  }
 }
 
 interface DevToolingProject {
@@ -38,7 +46,7 @@ interface DevToolingProject {
   onchain_builder_oso_project_ids?: string[]
   onchain_builder_op_atlas_ids?: string[]
   trusted_developer_usernames?: string[]
-  onchain_builder_op_atlas_names?: string[]
+  downstream_gas?: number
 }
 
 interface ProcessOsoDataArgs {
@@ -173,23 +181,42 @@ const processOnchainBuilderData = async (
       {
         key: "is_eligible",
         metric: ProjectOSOMetric.IS_ONCHAIN_BUILDER_ELIGIBLE,
+        value: project.is_eligible?.toString() || "",
       },
-      { key: "transaction_count", metric: ProjectOSOMetric.TRANSACTION_COUNT },
+      {
+        key: "transaction_count",
+        metric: ProjectOSOMetric.TRANSACTION_COUNT,
+        value: project.eligibility_metrics?.transaction_count?.toString() || "",
+      },
       {
         key: "active_addresses_count",
         metric: ProjectOSOMetric.ACTIVE_ADDRESSES_COUNT,
+        value:
+          project.eligibility_metrics?.active_addresses_count?.toString() || "",
       },
-      { key: "gas_fees", metric: ProjectOSOMetric.GAS_FEES },
+      {
+        key: "gas_fees",
+        metric: ProjectOSOMetric.GAS_FEES,
+        value: project.eligibility_metrics?.gas_fees?.toString() || "",
+      },
       {
         key: "has_defillama_adapter",
         metric: ProjectOSOMetric.HAS_DEFILLAMA_ADAPTER,
+        value: project.has_defillama_adapter?.toString() || "",
       },
-      { key: "has_bundle_bear", metric: ProjectOSOMetric.HAS_BUNDLE_BEAR },
+      {
+        key: "has_bundle_bear",
+        metric: ProjectOSOMetric.HAS_BUNDLE_BEAR,
+        value: project.has_bundle_bear?.toString() || "",
+      },
+      {
+        key: "defillama_tvl",
+        metric: ProjectOSOMetric.TVL,
+        value: project.monthly_metrics?.defillama_tvl?.toString() || "",
+      },
     ]
 
-    for (const { key, metric } of metrics) {
-      const value =
-        project[key as keyof OnchainBuilderProject]?.toString() || ""
+    for (const { metric, value } of metrics) {
       try {
         await prisma.projectOSOMetrics.upsert({
           where: {
@@ -287,25 +314,45 @@ const processDevToolingData = async (
 
     // Process metrics in batches
     const metrics = [
-      { key: "is_eligible", metric: ProjectOSOMetric.IS_DEV_TOOLING_ELIGIBLE },
-      { key: "star_count", metric: ProjectOSOMetric.STAR_COUNT },
-      { key: "fork_count", metric: ProjectOSOMetric.FORK_COUNT },
+      {
+        key: "is_eligible",
+        metric: ProjectOSOMetric.IS_DEV_TOOLING_ELIGIBLE,
+        value: project.is_eligible?.toString() || "",
+      },
+      {
+        key: "star_count",
+        metric: ProjectOSOMetric.STAR_COUNT,
+        value: project.star_count?.toString() || "",
+      },
+      {
+        key: "fork_count",
+        metric: ProjectOSOMetric.FORK_COUNT,
+        value: project.fork_count?.toString() || "",
+      },
       {
         key: "num_packages_in_deps_dev",
         metric: ProjectOSOMetric.NUM_PACKAGES_IN_DEPS_DEV,
+        value: project.num_packages_in_deps_dev?.toString() || "",
       },
       {
         key: "package_connection_count",
         metric: ProjectOSOMetric.PACKAGE_CONNECTION_COUNT,
+        value: project.package_connection_count?.toString() || "",
       },
       {
         key: "developer_connection_count",
         metric: ProjectOSOMetric.DEVELOPER_CONNECTION_COUNT,
+        value: project.developer_connection_count?.toString() || "",
+      },
+      {
+        key: "downstream_gas",
+        metric: ProjectOSOMetric.DOWNSTREAM_GAS,
+        value: project.downstream_gas?.toString() || "",
       },
     ]
 
     // Batch process regular metrics
-    const metricPromises = metrics.map(({ key, metric }) =>
+    const metricPromises = metrics.map(({ metric, value }) =>
       prisma.projectOSOMetrics.upsert({
         where: {
           projectId_metric_tranche: {
@@ -315,12 +362,12 @@ const processDevToolingData = async (
           },
         },
         update: {
-          value: project[key as keyof DevToolingProject]?.toString() || "",
+          value,
         },
         create: {
           projectId,
           metric,
-          value: project[key as keyof DevToolingProject]?.toString() || "",
+          value,
           tranche: month,
         },
       }),
