@@ -156,7 +156,7 @@ export async function GET() {
                 `${process.env.PRIVY_APP_ID}:${process.env.PRIVY_APP_SECRET}`,
               ).toString("base64")}`,
               "Content-Type": "application/json",
-              "privy-app-id": process.env.PRIVY_APP_ID || "",
+              "privy-app-id": process.env.PRIVY_APP_ID!,
             },
             body: JSON.stringify({
               linked_accounts: linkedAccounts,
@@ -170,6 +170,8 @@ export async function GET() {
           }
 
           const privyUser = await privyResponse.json()
+
+          console.log("Privy user created", privyUser)
 
           // Update user in our database with privyDid using raw SQL
           await prisma.$executeRaw`
@@ -195,27 +197,9 @@ export async function GET() {
       }),
     )
 
-    const succeeded = results.filter(
-      (r) => r.status === "fulfilled" && r.value.status === "success",
-    ).length
-    const failed = results.filter(
-      (r) =>
-        r.status === "rejected" ||
-        (r.status === "fulfilled" && r.value.status === "error"),
-    ).length
-    const skipped = results.filter(
-      (r) => r.status === "fulfilled" && r.value.status === "skipped",
-    ).length
-
     return NextResponse.json({
       status: "success",
       count: users.length,
-      processed: {
-        total: users.length,
-        succeeded,
-        failed,
-        skipped,
-      },
       results,
     })
   } catch (error) {

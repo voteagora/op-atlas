@@ -20,7 +20,9 @@ export const usePrivyLinkWallet = (userId: string) => {
         })
         return "Wallet address removed successfully"
       },
-      error: "Failed to remove wallet address",
+      error: (error) => {
+        return error.message;
+      },
     })
   }
 

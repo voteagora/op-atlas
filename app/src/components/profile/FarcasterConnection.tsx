@@ -39,7 +39,9 @@ export const FarcasterConnection = ({ userId }: { userId: string }) => {
                     syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
                     return "Farcaster unlinked successfully"
                 },
-                error: "Failed to unlink farcaster",
+                error: (error) => {
+                    return error.message;
+                },
             })
         }
     }

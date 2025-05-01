@@ -49,7 +49,9 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
             .then(() => invalidateUser())
           return "Github unlinked successfully"
         },
-        error: "Failed to unlink github",
+        error: (error) => {
+          return error.message;
+        },
       })
     }
   }

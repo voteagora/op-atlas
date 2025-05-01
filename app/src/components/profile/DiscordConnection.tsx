@@ -43,7 +43,9 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
             .then(() => invalidateUser())
           return "Discord unlinked successfully"
         },
-        error: "Failed to unlink discord",
+        error: (error) => {
+          return error.message;
+        },
       })
     }
   }

@@ -54,7 +54,9 @@ export const usePrivyEmail = (userId: string) => {
                         .then(() => "User invalidates")
                     return "Email deleted successfully"
                 },
-                error: "Failed to delete email",
+                error: (error) => {
+                    return error.message;
+                },
             })
         }
     }
