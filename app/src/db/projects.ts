@@ -2199,3 +2199,10 @@ export async function getProjectOSORelatedProjects(projectId: string) {
     },
   })
 }
+
+export async function getProjectTvl(projectId: string) {
+  return await prisma.projectOSOMetrics.findMany({
+    where: { projectId, metric: "TVL" },
+    select: { value: true, tranche: true },
+  })
+}

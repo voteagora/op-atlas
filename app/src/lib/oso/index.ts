@@ -20,6 +20,7 @@ import {
   getProjectEligibility,
   getProjectMetrics as getProjectMetricsFromDB,
   getProjectRewards,
+  getProjectTvl,
 } from "@/db/projects"
 import {
   OrderBy,
@@ -280,7 +281,7 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getGasConsumption(projectId),
     getTrustedDevelopersCount(projectId),
     getTopProjects(projectId),
-    getTvl(osoId),
+    getTvl(projectId),
   ])
 
   const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
@@ -413,26 +414,17 @@ const getTransactions = async function getTransactions(projectId: string) {
   return output
 }
 
-const getTvl = async function getTvl(osoId: string) {
-  const februaryData = await queryMetrics([osoId], "tvl", {
-    _gte: OSO_QUERY_TRANCHE_CUTOFF_DATES[1].start,
-    _lte: OSO_QUERY_TRANCHE_CUTOFF_DATES[1].end,
-  })
-  const marchData = await queryMetrics([osoId], "tvl", {
-    _gte: OSO_QUERY_TRANCHE_CUTOFF_DATES[2].start,
-    _lte: OSO_QUERY_TRANCHE_CUTOFF_DATES[2].end,
-  })
+const getTvl = async function getTvl(projectId: string) {
+  const tvl = await getProjectTvl(projectId)
+  const februaryData = tvl.filter((p) => p.tranche === 1)
+  const marchData = tvl.filter((p) => p.tranche === 2)
 
-  const tranchedData = {
-    [TRANCHE_MONTHS_MAP[1]]: februaryData.reduce((acc, curr) => {
-      return acc + Number(curr.amount)
-    }, 0),
-    [TRANCHE_MONTHS_MAP[2]]: marchData.reduce((acc, curr) => {
-      return acc + Number(curr.amount)
-    }, 0),
+  const trancheData = {
+    [TRANCHE_MONTHS_MAP[1]]: februaryData,
+    [TRANCHE_MONTHS_MAP[2]]: marchData,
   }
 
-  const output = formatTvl(tranchedData)
+  const output = formatTvl(trancheData)
 
   return output
 }

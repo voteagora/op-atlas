@@ -129,20 +129,26 @@ export const formatTransactions = (
   return result
 }
 
-export const formatTvl = (data: Record<string, number>) => {
-  const monthlyData = data
-  const months = Object.keys(monthlyData)
+export const formatTvl = (
+  data: Record<string, { tranche: number; value: string }[]>,
+) => {
   const result: Record<string, { value: number; trend: Trend }> = {}
-  const currentYear = new Date().getFullYear()
+  const months = Object.keys(data)
 
   months.forEach((month, index) => {
-    const daysInMonth = getDaysInMonth(month, currentYear)
-    const currentValue = monthlyData[month] / daysInMonth
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
     const previousValue =
       index > 0
-        ? monthlyData[months[index - 1]] /
-          getDaysInMonth(months[index - 1], currentYear)
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
         : 0
+
     result[month] = {
       value: currentValue,
       trend: calculateTrend(currentValue, previousValue),
