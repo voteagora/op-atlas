@@ -68,9 +68,6 @@ export default async function Page({ params }: PageProps) {
         farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
       }
 
-  const showIncreaseImpact =
-    eligibility?.devToolingEligibility || eligibility?.onchainBuilderEligibility
-
   const enrolledInDevTooling =
     publicProject.applications?.filter(
       (application) => application.roundId === "7",
@@ -176,7 +173,7 @@ export default async function Page({ params }: PageProps) {
                   )}
                 </ul>
               </div>
-              {showIncreaseImpact && (
+              {enrolledInMission && (
                 <div className="w-full space-y-6">
                   <div className="flex items-center space-x-2 group">
                     <h4 className="font-semibold text-xl">
@@ -184,14 +181,14 @@ export default async function Page({ params }: PageProps) {
                     </h4>
                   </div>
                   <div className="flex gap-4 lg:flex-row flex-col">
-                    {eligibility?.onchainBuilderEligibility && (
+                    {enrolledInOnchainBuilders && (
                       <IncreaseYourImpact
                         type="onchain-builders"
                         projectId={projectId}
                         isMember={isMember}
                       />
                     )}
-                    {eligibility?.devToolingEligibility && (
+                    {enrolledInDevTooling && (
                       <IncreaseYourImpact
                         type="dev-tooling"
                         projectId={projectId}
