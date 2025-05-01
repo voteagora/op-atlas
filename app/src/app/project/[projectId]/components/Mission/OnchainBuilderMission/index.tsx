@@ -248,7 +248,7 @@ export default function OnchainBuilderMission({
                     0,
                     "compact",
                   )}
-                  title="Qualified addresses"
+                  title="Daily Unique addresses"
                   trend={{
                     value:
                       onchainBuilderMetrics?.activeAddresses?.[
