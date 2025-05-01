@@ -186,18 +186,24 @@ const processOnchainBuilderData = async (
       {
         key: "transaction_count",
         metric: ProjectOSOMetric.TRANSACTION_COUNT,
-        value: project.eligibility_metrics?.transaction_count?.toString() || "",
+        value: project.monthly_metrics?.contract_invocations?.toString() || "",
       },
       {
         key: "active_addresses_count",
         metric: ProjectOSOMetric.ACTIVE_ADDRESSES_COUNT,
         value:
-          project.eligibility_metrics?.active_addresses_count?.toString() || "",
+          project.monthly_metrics?.active_addresses_aggregation?.toString() ||
+          "",
       },
       {
         key: "gas_fees",
         metric: ProjectOSOMetric.GAS_FEES,
-        value: project.eligibility_metrics?.gas_fees?.toString() || "",
+        value: project.monthly_metrics?.gas_fees?.toString() || "",
+      },
+      {
+        key: "defillama_tvl",
+        metric: ProjectOSOMetric.TVL,
+        value: project.monthly_metrics?.defillama_tvl?.toString() || "",
       },
       {
         key: "has_defillama_adapter",
@@ -208,11 +214,6 @@ const processOnchainBuilderData = async (
         key: "has_bundle_bear",
         metric: ProjectOSOMetric.HAS_BUNDLE_BEAR,
         value: project.has_bundle_bear?.toString() || "",
-      },
-      {
-        key: "defillama_tvl",
-        metric: ProjectOSOMetric.TVL,
-        value: project.monthly_metrics?.defillama_tvl?.toString() || "",
       },
     ]
 
