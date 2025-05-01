@@ -8,10 +8,10 @@ import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { formatNumber } from "@/lib/utils"
-import { DevToolingMissionProps } from "@/lib/oso/types"
-
 import { MONTHS } from "@/lib/oso/constants"
+import { DevToolingMissionProps } from "@/lib/oso/types"
+import { formatNumber } from "@/lib/utils"
+
 import MetricCard from "./MetricCard"
 
 export default function DevToolingMission({
@@ -99,7 +99,7 @@ export default function DevToolingMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          if (!eligibility.devToolingEligibility?.[month]) {
+          if (!eligibility?.devToolingEnrolment[month]) {
             return (
               <TabsContent
                 key={month}
@@ -115,7 +115,7 @@ export default function DevToolingMission({
             )
           }
 
-          if (!eligibility.devToolingEligibility) {
+          if (!eligibility?.devToolingEligibility?.[month]) {
             return (
               <TabsContent
                 key={month}

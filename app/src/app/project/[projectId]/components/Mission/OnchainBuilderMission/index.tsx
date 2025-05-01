@@ -1,8 +1,8 @@
 "use client"
 
-import React from "react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
+import React from "react"
 
 import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
@@ -103,7 +103,7 @@ export default function OnchainBuilderMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          if (!eligibility.onchainBuilderEligibility[month]) {
+          if (!eligibility?.onchainBuilderEnrolment[month]) {
             return (
               <TabsContent
                 key={month}
@@ -119,7 +119,7 @@ export default function OnchainBuilderMission({
             )
           }
 
-          if (!eligibility.onchainBuilderEligibility) {
+          if (!eligibility?.onchainBuilderEligibility[month]) {
             return (
               <TabsContent
                 key={month}

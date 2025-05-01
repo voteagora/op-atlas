@@ -325,6 +325,19 @@ export const formatOnchainBuilderEligibility = (
   }, {})
 }
 
+export const formatEnrollement = (
+  data: {
+    tranche: number
+    value: string
+  }[],
+): Record<string, boolean> => {
+  return Object.keys(TRANCHE_MONTHS_MAP).reduce((acc, month) => {
+    acc[TRANCHE_MONTHS_MAP[Number(month) as keyof typeof TRANCHE_MONTHS_MAP]] =
+      !!data.find((d) => d.tranche === Number(month))
+    return acc
+  }, {} as Record<string, boolean>)
+}
+
 export const formatHasDefillamaAdapter = (
   data: { tranche: number; value: string }[],
 ) => {

@@ -1,8 +1,11 @@
-import { getProjectMetrics } from "@/lib/oso"
+import { notFound } from "next/navigation"
+
 import { auth } from "@/auth"
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { getProjectMetrics } from "@/lib/oso"
+import { getProjectDeployedChains } from "@/lib/oso/utils"
 
 import {
   Description,
@@ -12,8 +15,6 @@ import {
   MoreDetails,
   Performance,
 } from "./components"
-import { notFound } from "next/navigation"
-import { getProjectDeployedChains } from "@/lib/oso/utils"
 
 interface PageProps {
   params: {
@@ -45,9 +46,6 @@ export default async function Page({ params }: PageProps) {
     performanceMetrics,
   } = projectMetrics
 
-  const enrolledInMission =
-    eligibility?.onchainBuilderEligibility || eligibility?.devToolingEligibility
-
   const hasQualifiedAddresses = Object.values(
     onchainBuilderMetrics?.activeAddresses ?? {},
   ).some((address) => address.value > 0)
@@ -72,6 +70,18 @@ export default async function Page({ params }: PageProps) {
 
   const showIncreaseImpact =
     eligibility?.devToolingEligibility || eligibility?.onchainBuilderEligibility
+
+  const enrolledInDevTooling =
+    publicProject.applications?.filter(
+      (application) => application.roundId === "7",
+    ).length > 0
+
+  const enrolledInOnchainBuilders =
+    publicProject.applications?.filter(
+      (application) => application.roundId === "8",
+    ).length > 0
+
+  const enrolledInMission = enrolledInDevTooling || enrolledInOnchainBuilders
 
   return (
     <div className="w-full h-full mt-6 pb-12">
@@ -134,22 +144,26 @@ export default async function Page({ params }: PageProps) {
               <div className="w-full space-y-6">
                 <h4 className="font-semibold text-xl">Missions</h4>
                 <ul className="space-y-12">
-                  {eligibility?.onchainBuilderEligibility && (
+                  {enrolledInOnchainBuilders && (
                     <li>
                       <Mission
                         type="on-chain"
                         onchainBuilderMetrics={onchainBuilderMetrics}
-                        eligibility={{
-                          ...eligibility,
-                          hasQualifiedAddresses,
-                          deployedOnWorldchain,
-                        }}
+                        eligibility={
+                          eligibility
+                            ? {
+                                ...eligibility,
+                                hasQualifiedAddresses,
+                                deployedOnWorldchain,
+                              }
+                            : undefined
+                        }
                         isMember={isMember}
                         projectName={publicProject.name ?? ""}
                       />
                     </li>
                   )}
-                  {eligibility?.devToolingEligibility && (
+                  {enrolledInDevTooling && (
                     <li>
                       <Mission
                         type="dev-tooling"

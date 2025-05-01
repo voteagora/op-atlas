@@ -1,7 +1,7 @@
 "server-only"
 
-import { cache } from "react"
 import { gql, GraphQLClient } from "graphql-request"
+import { cache } from "react"
 
 import {
   createOSOProjects,
@@ -11,17 +11,17 @@ import {
   getOnchainBuilderEligibility,
   getOnchainBuilderRecurringReward,
   getProjectActiveAddressesCount,
+  getProjectEligibility,
+  getProjectGasConsumption,
   getProjectGasFees,
+  getProjectMetrics as getProjectMetricsFromDB,
   getProjectOSORelatedProjects,
+  getProjectRewards,
   getProjectsOSO,
   getProjectTransactions,
+  getProjectTvl,
   getTopProjectsFromOSO,
   getTrustedDevelopersCountFromOSO,
-  getProjectEligibility,
-  getProjectMetrics as getProjectMetricsFromDB,
-  getProjectRewards,
-  getProjectTvl,
-  getProjectGasConsumption,
 } from "@/db/projects"
 import {
   OrderBy,
@@ -49,24 +49,26 @@ import {
   supportedMappings,
   TRANCHE_MONTHS_MAP,
 } from "./constants"
+import { Trend } from "./types"
 import {
   formatActiveAddresses,
   formatDevToolingEligibility,
   formatDevToolingReward,
+  formatEnrollement,
+  formatGasConsumption,
   formatGasFees,
-  formatPerformanceMetrics,
+  formatHasDefillamaAdapter,
+  formatMetricsData,
+  formatOnchainBuilderEligibility,
   formatOnchainBuilderReward,
+  formatPerformanceMetrics,
   formatTransactions,
   formatTvl,
-  formatGasConsumption,
-  formatOnchainBuilderEligibility,
-  formatHasDefillamaAdapter,
   parseEligibilityResults,
   parseMetricsResults,
   parseRewardsResults,
-  formatMetricsData,
 } from "./utils"
-import { Trend } from "./types"
+import { Application } from "@prisma/client"
 
 export const osoClient = new GraphQLClient(
   "https://www.opensource.observer/api/v1/graphql",
@@ -223,6 +225,8 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     devToolingEligibility: Record<string, boolean>
     onchainBuilderEligibility: Record<string, boolean>
     hasDefillamaAdapter: Record<string, boolean>
+    devToolingEnrolment: Record<string, boolean>
+    onchainBuilderEnrolment: Record<string, boolean>
   }
   onchainBuilderMetrics?: {
     activeAddresses: Record<string, { value: number; trend: Trend }>
@@ -310,6 +314,15 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
       ),
       hasDefillamaAdapter: formatHasDefillamaAdapter(
         parseEligibilityResults(eligibilityResults, "HAS_DEFILLAMA_ADAPTER"),
+      ),
+      devToolingEnrolment: formatEnrollement(
+        parseEligibilityResults(eligibilityResults, "IS_DEV_TOOLING_ELIGIBLE"),
+      ),
+      onchainBuilderEnrolment: formatEnrollement(
+        parseEligibilityResults(
+          eligibilityResults,
+          "IS_ONCHAIN_BUILDER_ELIGIBLE",
+        ),
       ),
     },
     onchainBuilderMetrics: {

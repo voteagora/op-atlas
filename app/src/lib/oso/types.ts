@@ -52,11 +52,12 @@ export interface OnchainBuilderMissionProps extends BaseMissionProps {
     tvl: Record<string, { value: number; trend: Trend }>
     onchainBuilderReward: Record<string, { value: number }>
   }
-  eligibility: {
+  eligibility?: {
     hasDefillamaAdapter: Record<string, boolean>
     hasQualifiedAddresses: boolean
     deployedOnWorldchain: boolean
     onchainBuilderEligibility: Record<string, boolean>
+    onchainBuilderEnrolment: Record<string, boolean>
   }
 }
 
@@ -76,8 +77,9 @@ export interface DevToolingMissionProps extends BaseMissionProps {
       }[]
     >
   }
-  eligibility: {
+  eligibility?: {
     devToolingEligibility: Record<string, boolean>
+    devToolingEnrolment: Record<string, boolean>
   }
 }
 
