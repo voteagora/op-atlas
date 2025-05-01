@@ -157,16 +157,14 @@ async function exportEmailsToMailchimp() {
             .map((p) => p.id)
             .filter(Boolean)
             .join(","),
-          DEVTOOLING_REWARDED_NAMES: devToolingRewardedData.names,
-          DEVTOOLING_REWARDED_LINKS: devToolingRewardedData.links,
-          DEVTOOLING_NOT_REWARDED_NAMES: devToolingNotRewardedData.names,
-          DEVTOOLING_NOT_REWARDED_LINKS: devToolingNotRewardedData.links,
-          ONCHAIN_BUILDERS_REWARDED_NAMES: onchainBuildersRewardedData.names,
-          ONCHAIN_BUILDERS_REWARDED_LINKS: onchainBuildersRewardedData.links,
-          ONCHAIN_BUILDERS_NOT_REWARDED_NAMES:
-            onchainBuildersNotRewardedData.names,
-          ONCHAIN_BUILDERS_NOT_REWARDED_LINKS:
-            onchainBuildersNotRewardedData.links,
+          RFDR_N: devToolingRewardedData.names,
+          RFDR_L: devToolingRewardedData.links,
+          RFDNR_N: devToolingNotRewardedData.names,
+          RFDNR_L: devToolingNotRewardedData.links,
+          RFOR_N: onchainBuildersRewardedData.names,
+          RFOR_L: onchainBuildersRewardedData.links,
+          RFONR_N: onchainBuildersNotRewardedData.names,
+          RFONR_L: onchainBuildersNotRewardedData.links,
         },
       }
 
@@ -197,10 +195,10 @@ async function exportEmailsToMailchimp() {
     `\nTotal users with metadata: ${
       batchMembers.filter(
         (m) =>
-          m.merge_fields?.DEVTOOLING_REWARDED_NAMES ||
-          m.merge_fields?.DEVTOOLING_NOT_REWARDED_NAMES ||
-          m.merge_fields?.ONCHAIN_BUILDERS_REWARDED_NAMES ||
-          m.merge_fields?.ONCHAIN_BUILDERS_NOT_REWARDED_NAMES,
+          m.merge_fields?.RFDR_N ||
+          m.merge_fields?.RFDNR_N ||
+          m.merge_fields?.RFOR_N ||
+          m.merge_fields?.RFONR_N,
       ).length
     }`,
   )
@@ -209,10 +207,10 @@ async function exportEmailsToMailchimp() {
   const metadataOutput = batchMembers
     .filter(
       (m) =>
-        m.merge_fields?.DEVTOOLING_REWARDED_NAMES ||
-        m.merge_fields?.DEVTOOLING_NOT_REWARDED_NAMES ||
-        m.merge_fields?.ONCHAIN_BUILDERS_REWARDED_NAMES ||
-        m.merge_fields?.ONCHAIN_BUILDERS_NOT_REWARDED_NAMES,
+        m.merge_fields?.RFDR_N ||
+        m.merge_fields?.RFDNR_N ||
+        m.merge_fields?.RFOR_N ||
+        m.merge_fields?.RFONR_N,
     )
     .map((m) => {
       // Filter out any undefined merge_fields
@@ -241,20 +239,20 @@ async function exportEmailsToMailchimp() {
         email: m.email_address || "",
         name: `${mergeFields.FNAME || ""} ${mergeFields.LNAME || ""}`.trim(),
         devToolingRewarded: cleanProjectList(
-          mergeFields.DEVTOOLING_REWARDED_NAMES,
-          mergeFields.DEVTOOLING_REWARDED_LINKS,
+          mergeFields.RFDR_N,
+          mergeFields.RFDR_L,
         ),
         devToolingNotRewarded: cleanProjectList(
-          mergeFields.DEVTOOLING_NOT_REWARDED_NAMES,
-          mergeFields.DEVTOOLING_NOT_REWARDED_LINKS,
+          mergeFields.RFDNR_N,
+          mergeFields.RFDNR_L,
         ),
         onchainBuildersRewarded: cleanProjectList(
-          mergeFields.ONCHAIN_BUILDERS_REWARDED_NAMES,
-          mergeFields.ONCHAIN_BUILDERS_REWARDED_LINKS,
+          mergeFields.RFOR_N,
+          mergeFields.RFOR_L,
         ),
         onchainBuildersNotRewarded: cleanProjectList(
-          mergeFields.ONCHAIN_BUILDERS_NOT_REWARDED_NAMES,
-          mergeFields.ONCHAIN_BUILDERS_NOT_REWARDED_LINKS,
+          mergeFields.RFONR_N,
+          mergeFields.RFONR_L,
         ),
       }
     })
