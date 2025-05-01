@@ -513,10 +513,12 @@ const processOsoData = async ({
   // After processing the data, update funding rewards with the sum of recurring rewards
   console.log("\n🔄 Updating funding rewards with recurring rewards...")
 
+  const roundId = mission === Mission.ONCHAIN_BUILDER ? "8" : "7" // Onchain builder or Dev tooling round
+
   // Get all recurring rewards for the current round
   const recurringRewards = await prisma.recurringReward.findMany({
     where: {
-      roundId: mission === Mission.ONCHAIN_BUILDER ? "8" : "7", // Onchain builder or Dev tooling round
+      roundId,
       deletedAt: null, // Only active rewards
     },
     select: {
@@ -543,7 +545,7 @@ const processOsoData = async ({
   // Get all funding rewards for the current round
   const fundingRewards = await prisma.fundingReward.findMany({
     where: {
-      roundId: mission === Mission.ONCHAIN_BUILDER ? "8" : "7",
+      roundId,
     },
     select: {
       id: true,
@@ -553,14 +555,25 @@ const processOsoData = async ({
     },
   })
 
-  // Update funding rewards with the sum of recurring rewards
-  for (const reward of fundingRewards) {
-    const key = `${reward.projectId}-${reward.roundId}`
-    if (recurringRewardsByProject[key]) {
-      // Convert back to Decimal by dividing by 100 (since we moved decimal 2 places)
-      const amount = recurringRewardsByProject[key].toString()
-      const decimalAmount = amount.slice(0, -2) + "." + amount.slice(-2)
+  // Create a map of existing funding rewards for quick lookup
+  const existingFundingRewards = new Map(
+    fundingRewards.map((reward) => [
+      `${reward.projectId}-${reward.roundId}`,
+      reward,
+    ]),
+  )
 
+  // Update existing funding rewards and create new ones if needed
+  for (const [key, totalAmount] of Object.entries(recurringRewardsByProject)) {
+    const [projectId, roundId] = key.split("-")
+
+    // Convert back to Decimal by dividing by 100 (since we moved decimal 2 places)
+    const amount = totalAmount.toString()
+    const decimalAmount = amount.slice(0, -2) + "." + amount.slice(-2)
+
+    if (existingFundingRewards.has(key)) {
+      // Update existing funding reward
+      const reward = existingFundingRewards.get(key)!
       await prisma.fundingReward.update({
         where: {
           id: reward.id,
@@ -569,6 +582,19 @@ const processOsoData = async ({
           amount: decimalAmount,
         },
       })
+    } else {
+      // Create new funding reward
+      await prisma.fundingReward.create({
+        data: {
+          id: crypto.randomUUID(),
+          projectId,
+          roundId,
+          amount: decimalAmount,
+        },
+      })
+      console.log(
+        `Created new funding reward for project ${projectId} in round ${roundId}`,
+      )
     }
   }
 
