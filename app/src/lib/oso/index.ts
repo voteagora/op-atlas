@@ -21,6 +21,7 @@ import {
   getProjectMetrics as getProjectMetricsFromDB,
   getProjectRewards,
   getProjectTvl,
+  getProjectGasConsumption,
 } from "@/db/projects"
 import {
   OrderBy,
@@ -468,26 +469,9 @@ const getDevToolingMetrics = cache(async (projectId: string) => {
 })
 
 const getGasConsumption = cache(async (projectId: string) => {
-  const relatedProjects = await getProjectOSORelatedProjects(projectId)
-  const februaryProjects = relatedProjects.filter((p) => p.tranche === 1)
-  const marchProjects = relatedProjects.filter((p) => p.tranche === 2)
-
-  const februaryData = await queryMetrics(
-    februaryProjects.map((p) => p.osoId),
-    "gasFees",
-    {
-      _gte: OSO_QUERY_TRANCHE_CUTOFF_DATES[1].start,
-      _lte: OSO_QUERY_TRANCHE_CUTOFF_DATES[1].end,
-    },
-  )
-  const marchData = await queryMetrics(
-    marchProjects.map((p) => p.osoId),
-    "gasFees",
-    {
-      _gte: OSO_QUERY_TRANCHE_CUTOFF_DATES[2].start,
-      _lte: OSO_QUERY_TRANCHE_CUTOFF_DATES[2].end,
-    },
-  )
+  const gasConsumption = await getProjectGasConsumption(projectId)
+  const februaryData = gasConsumption.filter((p) => p.tranche === 1)
+  const marchData = gasConsumption.filter((p) => p.tranche === 2)
 
   const trancheData = {
     [TRANCHE_MONTHS_MAP[1]]: februaryData,

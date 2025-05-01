@@ -270,20 +270,22 @@ export const getReposWithTags = (
   })
 }
 
-export const formatGasConsumption = (data: Record<string, MetricValues[]>) => {
+export const formatGasConsumption = (
+  data: Record<string, { tranche: number; value: string }[]>,
+) => {
   const result: Record<string, { value: number; trend: Trend }> = {}
   const months = Object.keys(data)
 
   months.forEach((month, index) => {
     const currentMonthData = data[month]
     const currentValue = currentMonthData.reduce(
-      (sum, metric) => sum + metric.amount,
+      (sum, item) => sum + Number(item.value),
       0,
     )
     const previousValue =
       index > 0
         ? data[months[index - 1]].reduce(
-            (sum, metric) => sum + metric.amount,
+            (sum, item) => sum + Number(item.value),
             0,
           )
         : 0

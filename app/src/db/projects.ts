@@ -2206,3 +2206,10 @@ export async function getProjectTvl(projectId: string) {
     select: { value: true, tranche: true },
   })
 }
+
+export async function getProjectGasConsumption(projectId: string) {
+  return await prisma.projectOSOMetrics.findMany({
+    where: { projectId, metric: "DOWNSTREAM_GAS" },
+    select: { value: true, tranche: true },
+  })
+}
