@@ -210,15 +210,6 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                 </ul>
               </div>
             </div>
-            <div className="text-xs text-secondary-foreground">
-              You can also verify addresses directly to your Farcaster account,
-              and{" "}
-              <Link href="/profile/verified-addresses" className="underline">
-                import them to your profile
-              </Link>
-              . To do so, open Warpcast and choose Settings. Then choose
-              Verified addresses and proceed.
-            </div>
           </div>
 
           {user.addresses.length === 0 && (

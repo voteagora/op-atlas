@@ -8,7 +8,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "../common/Button";
 
-export const FarcasterConnection = ({ userId }: { userId: string }) => {
+export const FarcasterConnection = ({ userId, children }: { userId: string; children: React.ReactNode }) => {
 
     const { unlinkFarcaster } = usePrivy()
     const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
@@ -84,7 +84,7 @@ export const FarcasterConnection = ({ userId }: { userId: string }) => {
                         linkFarcaster()
                     }}
                 >
-                    Connect
+                    {children}
                 </Button>
             }
         </div>

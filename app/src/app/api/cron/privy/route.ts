@@ -146,8 +146,6 @@ export async function GET() {
             }
           }
 
-
-
           // Create user in Privy using the API
           const privyResponse = await fetch("https://api.privy.io/v1/users", {
             method: "POST",
@@ -163,7 +161,6 @@ export async function GET() {
             }),
           })
 
-
           if (!privyResponse.ok) {
             const errorData = await privyResponse.json()
             throw new Error(`Privy API error: ${JSON.stringify(errorData)}`)
@@ -171,15 +168,12 @@ export async function GET() {
 
           const privyUser = await privyResponse.json()
 
-          console.log("Privy user created", privyUser)
 
-          // Update user in our database with privyDid using raw SQL
           await prisma.$executeRaw`
           UPDATE "User"
           SET "privyDid" = ${privyUser.id}, "updatedAt" = NOW()
           WHERE "id" = ${user.id}
           `
-          console.log("Privy user created", privyUser.id)
 
           return {
             userId: user.id,

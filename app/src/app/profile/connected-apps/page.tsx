@@ -33,7 +33,9 @@ export default async function Page() {
             Connect your farcaster account to import your username, bio and
             avatar.
           </div>
-          <FarcasterConnection userId={session.user.id} />
+          <FarcasterConnection userId={session.user.id}>
+            Connect
+          </FarcasterConnection>
         </div>
 
         {/* Discord */}

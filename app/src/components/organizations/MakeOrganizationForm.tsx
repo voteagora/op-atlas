@@ -511,14 +511,14 @@ export default function MakeOrganizationForm({
             {/* Only show Add button when the last website field has a value */}
             {shouldShowWebsiteAdd() && (
               <Button
-                 type="button"
-                 variant="secondary"
-                 onClick={() => addWebsiteField({ value: "" })}
-                 leftIcon={<Plus size={16} />}
-               >
-                 Add
+                type="button"
+                variant="secondary"
+                onClick={() => addWebsiteField({ value: "" })}
+                leftIcon={<Plus size={16} />}
+              >
+                Add
               </Button>
-             )}
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -543,14 +543,14 @@ export default function MakeOrganizationForm({
             {/* Only show Add button when the last Farcaster field has a value */}
             {shouldShowFarcasterAdd() && (
               <Button
-                 type="button"
-                 variant="secondary"
-                 onClick={() => addFarcasterField({ value: "" })}
-                 leftIcon={<Plus size={16} />}
-               >
-                 Add
+                type="button"
+                variant="secondary"
+                onClick={() => addFarcasterField({ value: "" })}
+                leftIcon={<Plus size={16} />}
+              >
+                Add
               </Button>
-             )}
+            )}
           </div>
 
           <FormField
@@ -586,7 +586,7 @@ export default function MakeOrganizationForm({
             <div className="flex flex-col gap-1.5 text-sm">
               <div className="font-medium">Farcaster</div>
               <div className="flex flex-row gap-2 border border-1 rounded-lg p-2 items-center">
-                <FarcasterConnection userId={user.id} />
+                <FarcasterConnection userId={user.id} >Connect</FarcasterConnection>
                 <div>Your Farcaster account must be connected to create an organization.</div>
               </div>
             </div>

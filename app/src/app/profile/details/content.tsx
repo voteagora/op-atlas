@@ -1,22 +1,37 @@
 "use client"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
+import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { useUser } from "@/hooks/useUser"
 import { Session } from "next-auth"
 
 export const ProfileDetailsContent = ({ session }: { session: Session }) => {
+
   const { user } = useUser({ id: session?.user?.id, enabled: !!session?.user })
 
   const username = user?.username || session?.user?.name
   const imageUrl = user?.imageUrl || session?.user?.image
   const bio = user?.bio || ""
 
+  if (!user?.farcasterId) {
+
+    return <div className="flex flex-col gap-4">
+      <div>
+        Most of your profile information comes from your Farcaster account.
+      </div>
+
+      <FarcasterConnection userId={session.user.id}>
+        Import from Farcaster
+      </FarcasterConnection>
+    </div>
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <div className="text-foreground font-medium text-sm">
-        Details from Farcaster
+        Photo, display name, username and bio.
       </div>
       <div className="border border-border rounded-xl p-10">
         <div className="flex flex-col gap-6">

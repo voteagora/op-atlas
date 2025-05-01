@@ -29,13 +29,6 @@ export default async function Page() {
         <EmailConnection userId={session.user.id} />
       </div>
       <div className="flex flex-col gap-6">
-        <div className="text-foreground text-xl font-semibold">
-          Your details
-        </div>
-        <div>
-          Most of your profile information comes from your Farcaster account. To
-          edit your those details please visit Warpcast.
-        </div>
 
         <ProfileDetailsContent session={session} />
       </div>

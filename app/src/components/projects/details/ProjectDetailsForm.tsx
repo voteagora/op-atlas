@@ -714,7 +714,7 @@ export default function ProjectDetailsForm({
             <div className="flex flex-col gap-1.5 text-sm">
               <div className="font-medium">Farcaster</div>
               <div className="flex flex-row gap-2 border border-1 rounded-lg p-2 items-center">
-                <FarcasterConnection userId={user.id} />
+                <FarcasterConnection userId={user.id} >Connect</FarcasterConnection>
                 <div>Your Farcaster account must be connected to create a project.</div>
               </div>
             </div>
