@@ -284,6 +284,7 @@ async function exportEmailsToMailchimp() {
 
       const res = await mailchimp.lists.batchListMembers(LIST_ID, {
         members: batch,
+        update_existing: true,
       })
 
       const newMembers = (res as any).new_members
