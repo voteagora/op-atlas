@@ -1,14 +1,32 @@
 import { MetricValues } from "./types"
-import { INDEXED_MONTHS, RETROFUNDING_OP_REWARD_MINIMUM } from "./constants"
+import {
+  INDEXED_MONTHS,
+  RETROFUNDING_OP_REWARD_MINIMUM,
+  TRANCHE_MONTHS_MAP,
+} from "./constants"
 import { Trend } from "./types"
 import { CHAIN_INFO } from "@/components/common/chain"
 
 export const formatPerformanceMetrics = (metrics: MetricValues[]) => {
-  return groupByDate(metrics)
+  const groupedData = groupByDate(metrics)
+  const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(groupedData)
+
+  months.forEach((month, index) => {
+    const currentValue = groupedData[month]
+    const previousValue = index > 0 ? groupedData[months[index - 1]] : 0
+
+    result[month] = {
+      value: currentValue,
+      trend: calculateTrend(currentValue, previousValue),
+    }
+  })
+
+  return result
 }
 
 const calculateTrend = (current: number, previous: number): Trend => {
-  if (previous === 0) return { value: 0, sign: null }
+  if (previous === 0 || current === 0) return { value: 0, sign: null }
 
   const diff = current - previous
   const percentageChange = Math.abs((diff / previous) * 100)
@@ -25,25 +43,25 @@ const getDaysInMonth = (month: string, year: number): number => {
 }
 
 export const formatActiveAddresses = (
-  data: MetricValues[],
-  isOnchainBuilder: boolean = false,
+  data: Record<string, { tranche: number; value: string }[]>,
 ) => {
-  const monthlyData = groupByMonth(data)
-  const months = Object.keys(monthlyData)
   const result: Record<string, { value: number; trend: Trend }> = {}
-  const currentYear = new Date().getFullYear()
+  const months = Object.keys(data)
 
   months.forEach((month, index) => {
-    const currentValue = isOnchainBuilder
-      ? monthlyData[month] / getDaysInMonth(month, currentYear)
-      : monthlyData[month]
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
     const previousValue =
       index > 0
-        ? isOnchainBuilder
-          ? monthlyData[months[index - 1]] /
-            getDaysInMonth(months[index - 1], currentYear)
-          : monthlyData[months[index - 1]]
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
         : 0
+
     result[month] = {
       value: currentValue,
       trend: calculateTrend(currentValue, previousValue),
@@ -53,54 +71,26 @@ export const formatActiveAddresses = (
   return result
 }
 
-export const formatGasFees = (data: MetricValues[]) => {
-  const monthlyData = groupByMonth(data)
-  const months = Object.keys(monthlyData)
+export const formatGasFees = (
+  data: Record<string, { tranche: number; value: string }[]>,
+) => {
   const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(data)
 
   months.forEach((month, index) => {
-    const currentValue = monthlyData[month]
-    const previousValue = index > 0 ? monthlyData[months[index - 1]] : 0
-    result[month] = {
-      value: currentValue,
-      trend: calculateTrend(currentValue, previousValue),
-    }
-  })
-
-  return result
-}
-
-export const formatTransactions = (data: MetricValues[]) => {
-  const monthlyData = groupByMonth(data)
-  const months = Object.keys(monthlyData)
-  const result: Record<string, { value: number; trend: Trend }> = {}
-
-  months.forEach((month, index) => {
-    const currentValue = monthlyData[month]
-    const previousValue = index > 0 ? monthlyData[months[index - 1]] : 0
-    result[month] = {
-      value: currentValue,
-      trend: calculateTrend(currentValue, previousValue),
-    }
-  })
-
-  return result
-}
-
-export const formatTvl = (data: MetricValues[]) => {
-  const monthlyData = groupByMonth(data)
-  const months = Object.keys(monthlyData)
-  const result: Record<string, { value: number; trend: Trend }> = {}
-  const currentYear = new Date().getFullYear()
-
-  months.forEach((month, index) => {
-    const daysInMonth = getDaysInMonth(month, currentYear)
-    const currentValue = monthlyData[month] / daysInMonth
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
     const previousValue =
       index > 0
-        ? monthlyData[months[index - 1]] /
-          getDaysInMonth(months[index - 1], currentYear)
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
         : 0
+
     result[month] = {
       value: currentValue,
       trend: calculateTrend(currentValue, previousValue),
@@ -110,22 +100,90 @@ export const formatTvl = (data: MetricValues[]) => {
   return result
 }
 
-export const formatOnchainBuilderReward = (data: MetricValues[]) => {
-  return groupByMonth(data)
+export const formatTransactions = (
+  data: Record<string, { tranche: number; value: string }[]>,
+) => {
+  const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(data)
+
+  months.forEach((month, index) => {
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
+    const previousValue =
+      index > 0
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
+        : 0
+
+    result[month] = {
+      value: currentValue,
+      trend: calculateTrend(currentValue, previousValue),
+    }
+  })
+
+  return result
 }
 
-export const formatDevToolingReward = (data: MetricValues[]) => {
-  return groupByMonth(data)
+export const formatTvl = (
+  data: Record<string, { tranche: number; value: string }[]>,
+) => {
+  const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(data)
+
+  months.forEach((month, index) => {
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
+    const previousValue =
+      index > 0
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
+        : 0
+
+    result[month] = {
+      value: currentValue,
+      trend: calculateTrend(currentValue, previousValue),
+    }
+  })
+
+  return result
 }
 
-export const formatOnchainBuilderEligibility = (data: MetricValues[]) => {
-  const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return getIsProjectEligibleByReward(sum)
+export const formatOnchainBuilderReward = (
+  data: {
+    amount: string
+    tranche: number
+  }[],
+) => {
+  return data.reduce<Record<string, { value: number }>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] = {
+      value: Number(d.amount),
+    }
+    return acc
+  }, {})
 }
 
-export const formatDevToolingEligibility = (data: MetricValues[]) => {
-  const sum = data.reduce((acc, metric) => acc + metric.amount, 0)
-  return getIsProjectEligibleByReward(sum)
+export const formatDevToolingReward = (
+  data: {
+    amount: string
+    tranche: number
+  }[],
+) => {
+  return data.reduce<Record<string, { value: number }>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] = {
+      value: Number(d.amount),
+    }
+    return acc
+  }, {})
 }
 
 // TODO: Use this for Performance Metrics
@@ -210,4 +268,109 @@ export const getReposWithTags = (
       tags.push({ name: "Crate", icon: "/assets/icons/crate.svg" })
     return { ...repo, tags }
   })
+}
+
+export const formatGasConsumption = (
+  data: Record<string, { tranche: number; value: string }[]>,
+) => {
+  const result: Record<string, { value: number; trend: Trend }> = {}
+  const months = Object.keys(data)
+
+  months.forEach((month, index) => {
+    const currentMonthData = data[month]
+    const currentValue = currentMonthData.reduce(
+      (sum, item) => sum + Number(item.value),
+      0,
+    )
+    const previousValue =
+      index > 0
+        ? data[months[index - 1]].reduce(
+            (sum, item) => sum + Number(item.value),
+            0,
+          )
+        : 0
+
+    result[month] = {
+      value: currentValue,
+      trend: calculateTrend(currentValue, previousValue),
+    }
+  })
+
+  return result
+}
+
+export const formatDevToolingEligibility = (
+  data: {
+    tranche: number
+    value: string
+  }[],
+) => {
+  return data.reduce<Record<string, boolean>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] =
+      d.value === "true"
+    return acc
+  }, {})
+}
+
+export const formatOnchainBuilderEligibility = (
+  data: {
+    tranche: number
+    value: string
+  }[],
+) => {
+  return data.reduce<Record<string, boolean>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] =
+      d.value === "true"
+    return acc
+  }, {})
+}
+
+export const formatHasDefillamaAdapter = (
+  data: { tranche: number; value: string }[],
+) => {
+  return data.reduce<Record<string, boolean>>((acc, d) => {
+    acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] =
+      d.value === "true"
+    return acc
+  }, {})
+}
+
+// Helper functions to parse combined query results
+export function parseEligibilityResults(
+  results: { metric: string; value: string; tranche: number }[],
+  metric: string,
+) {
+  return results.filter((r) => r.metric === metric)
+}
+
+export function parseMetricsResults(
+  results: { metric: string; value: string; tranche: number }[],
+  metric: string,
+) {
+  return results.filter((r) => r.metric === metric)
+}
+
+export function parseRewardsResults(
+  results: { roundId: string; amount: string; tranche: number }[],
+  roundId: string,
+) {
+  return results.filter((r) => r.roundId === roundId)
+}
+
+// Helper function to format metrics data
+export function formatMetricsData(
+  results: { metric: string; value: string; tranche: number }[],
+): Record<string, { tranche: number; value: string }[]> {
+  return results.reduce((acc, result) => {
+    const month =
+      TRANCHE_MONTHS_MAP[result.tranche as keyof typeof TRANCHE_MONTHS_MAP]
+    if (!acc[month]) {
+      acc[month] = []
+    }
+    acc[month].push({
+      tranche: result.tranche,
+      value: result.value,
+    })
+    return acc
+  }, {} as Record<string, { tranche: number; value: string }[]>)
 }

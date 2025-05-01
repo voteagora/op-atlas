@@ -8,9 +8,14 @@ type ChartEntry = {
   isPhantom?: boolean
 }
 
-export default function Chart({ data }: { data: Record<string, number> }) {
+type ChartData = Record<
+  string,
+  { value: number; trend: { value: number; sign: "inc" | "dec" | null } }
+>
+
+export default function Chart({ data }: { data: ChartData }) {
   const formattedData: ChartEntry[] = Object.entries(data)
-    .map(([dateStr, value]) => {
+    .map(([dateStr, { value }]) => {
       const date = new Date(dateStr)
       return {
         date,

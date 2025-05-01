@@ -24,9 +24,9 @@ export default function Performance({
                 $
                 {formatNumber(
                   Object.values(metrics.tvl).reduce(
-                    (acc, curr) => acc + curr,
+                    (acc, curr) => acc + curr.value,
                     0,
-                  ),
+                  ) / 30,
                   0,
                   "compact",
                 )}
@@ -42,7 +42,7 @@ export default function Performance({
               <h4 className="font-semibold text-foreground">
                 {formatNumber(
                   Object.values(metrics.transactions).reduce(
-                    (acc, curr) => acc + curr,
+                    (acc, curr) => acc + curr.value,
                     0,
                   ),
                   0,
@@ -58,7 +58,7 @@ export default function Performance({
               <h4 className="font-semibold text-foreground">
                 {formatNumber(
                   Object.values(metrics.gasFees).reduce(
-                    (acc, curr) => acc + curr,
+                    (acc, curr) => acc + curr.value,
                     0,
                   ),
                   0,
@@ -75,9 +75,9 @@ export default function Performance({
               <h4 className="font-semibold text-foreground">
                 {formatNumber(
                   Object.values(metrics.activeAddresses).reduce(
-                    (acc, curr) => acc + curr,
+                    (acc, curr) => acc + curr.value,
                     0,
-                  ),
+                  ) / 30,
                   0,
                   "compact",
                 )}

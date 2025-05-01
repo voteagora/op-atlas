@@ -13,7 +13,6 @@ import { DevToolingMissionProps } from "@/lib/oso/types"
 
 import { MONTHS } from "@/lib/oso/constants"
 import MetricCard from "./MetricCard"
-import { getIsProjectEligibleByReward } from "@/lib/oso/utils"
 
 export default function DevToolingMission({
   data,
@@ -23,11 +22,14 @@ export default function DevToolingMission({
   const params = useParams()
 
   const projectId = params.projectId as string
-  const { devToolingMetrics, projectName, applicationDate, eligibility } = data
+  const { devToolingMetrics, projectName, eligibility } = data
 
-  const opRewardSum = Object.values(
-    devToolingMetrics?.devToolingReward ?? {},
-  ).reduce((acc, curr) => acc + curr, 0)
+  const opRewardSum = devToolingMetrics?.devToolingReward
+    ? Object.values(devToolingMetrics.devToolingReward).reduce(
+        (acc, curr) => acc + curr.value,
+        0,
+      )
+    : 0
 
   return (
     <div className="space-y-3">
@@ -80,7 +82,7 @@ export default function DevToolingMission({
           </div>
         </div>
       )}
-      <Tabs defaultValue={MONTHS[0]} className="w-full mt-12">
+      <Tabs defaultValue={MONTHS[1]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {MONTHS.map((month, index) => {
             const isFutureMonth = month !== "February" && month !== "March"
@@ -97,11 +99,7 @@ export default function DevToolingMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          if (
-            !getIsProjectEligibleByReward(
-              devToolingMetrics?.devToolingReward[month] ?? 0,
-            )
-          ) {
+          if (!eligibility.devToolingEligibility?.[month]) {
             return (
               <TabsContent
                 key={month}
@@ -150,7 +148,7 @@ export default function DevToolingMission({
             >
               <MetricCard
                 value={formatNumber(
-                  devToolingMetrics?.gasConsumption[month]?.value ?? 0,
+                  devToolingMetrics?.gasConsumption?.[month]?.value ?? 0,
                 )}
                 title={`Gas consumed by builders using ${projectName}`}
                 sign={{ value: " ETH", position: "right" }}
@@ -158,7 +156,7 @@ export default function DevToolingMission({
               />
               <MetricCard
                 value={formatNumber(
-                  devToolingMetrics?.trustedDevelopersCount ?? 0,
+                  devToolingMetrics?.trustedDevelopersCount?.[month] ?? 0,
                   0,
                   "compact",
                 )}
@@ -180,39 +178,80 @@ export default function DevToolingMission({
                       Projects enrolled in Retro Funding: Onchain Builders only
                     </p>
                   </div>
-                  <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
-                    {devToolingMetrics?.topProjects
-                      ?.slice(0, 6)
-                      .map((project, index) => {
-                        return (
-                          <li
-                            key={index}
-                            className="space-x-2 flex items-center"
-                          >
-                            {project.thumbnailUrl && (
-                              <Image
-                                src={project.thumbnailUrl}
-                                alt={project.name ?? ""}
-                                width={24}
-                                height={24}
-                              />
-                            )}
-                            <TrackedLink
-                              href={`/project/${project.id}`}
-                              eventName="Link Click"
-                              target="_blank"
-                              eventData={{
-                                projectId: project.id,
-                                source: "project_page",
-                                linkName: "Top Projects",
-                              }}
+                  <div className="w-full py-1.5 h-full">
+                    <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
+                      {devToolingMetrics?.topProjects?.[month]?.map(
+                        (project, index) => {
+                          return (
+                            <li
+                              key={index}
+                              className="space-x-2 flex items-center"
                             >
-                              {project.name}
-                            </TrackedLink>
-                          </li>
-                        )
-                      })}
-                  </ul>
+                              {project?.thumbnailUrl && (
+                                <Image
+                                  src={project.thumbnailUrl}
+                                  alt={project?.name ?? ""}
+                                  width={24}
+                                  height={24}
+                                />
+                              )}
+                              <TrackedLink
+                                href={`/project/${project?.id}`}
+                                eventName="Link Click"
+                                target="_blank"
+                                eventData={{
+                                  projectId: project?.id,
+                                  source: "project_page",
+                                  linkName: "Top Projects",
+                                }}
+                              >
+                                {project?.name}
+                              </TrackedLink>
+                            </li>
+                          )
+                        },
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div className="w-full rounded-xl border p-6 bg-background col-span-full h-32">
+                <div className="w-full h-full flex justify-between">
+                  <div className="w-full pr-6">
+                    <div className="flex items-center space-x-3">
+                      <Image
+                        src="/assets/icons/op-icon.svg"
+                        alt="Optimism"
+                        width={40}
+                        height={40}
+                      />
+                      <div>
+                        <p className="text-foreground font-semibold text-base">
+                          {formatNumber(
+                            devToolingMetrics?.devToolingReward?.[month]
+                              ?.value ?? 0,
+                            0,
+                          )}
+                        </p>
+                        <p className="text-secondary-foreground text-base font-normal">
+                          Rewards for performance in {month}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full flex">
+                    <div className="h-full w-px bg-tertiary" />
+                    <div className="pl-6">
+                      <p className="text-secondary-foreground text-base font-normal">
+                        Rewards are determined by an{" "}
+                        <span className="font-semibold">
+                          evaluation algorithm
+                        </span>{" "}
+                        powered by onchain data, and some metrics are more
+                        valuable than others.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </TabsContent>

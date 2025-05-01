@@ -1,8 +1,8 @@
 "use client"
 
+import React from "react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
-import React from "react"
 
 import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
@@ -13,14 +13,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { MONTHS } from "@/lib/oso/constants"
+import { OnchainBuilderMissionProps } from "@/lib/oso/types"
 import { formatNumber } from "@/lib/utils"
 
-import { MONTHS } from "@/lib/oso/constants"
 import AlertContainer from "./AlertContainer"
 import MetricCard from "./MetricCard"
 import NotPassingEligibility from "./NotPassingEligibility"
-import { OnchainBuilderMissionProps } from "@/lib/oso/types"
-import { getIsProjectEligibleByReward } from "@/lib/oso/utils"
 
 export default function OnchainBuilderMission({
   data,
@@ -29,9 +28,13 @@ export default function OnchainBuilderMission({
 }) {
   const { projectId } = useParams()
   const { projectName, onchainBuilderMetrics, eligibility } = data
-  const opRewardSum = Object.values(
-    onchainBuilderMetrics.onchainBuilderReward,
-  ).reduce((acc, curr) => acc + curr, 0)
+
+  const opRewardSum = onchainBuilderMetrics?.onchainBuilderReward
+    ? Object.values(onchainBuilderMetrics.onchainBuilderReward).reduce(
+        (acc, curr) => acc + curr.value,
+        0,
+      )
+    : 0
 
   return (
     <div className="space-y-3">
@@ -83,7 +86,7 @@ export default function OnchainBuilderMission({
           </div>
         </div>
       )}
-      <Tabs defaultValue={MONTHS[0]} className="w-full mt-12">
+      <Tabs defaultValue={MONTHS[1]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {MONTHS.map((month, index) => {
             const isFutureMonth = month !== "February" && month !== "March"
@@ -100,11 +103,7 @@ export default function OnchainBuilderMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          if (
-            !getIsProjectEligibleByReward(
-              onchainBuilderMetrics.onchainBuilderReward[month] ?? 0,
-            )
-          ) {
+          if (!eligibility.onchainBuilderEligibility[month]) {
             return (
               <TabsContent
                 key={month}
@@ -131,7 +130,7 @@ export default function OnchainBuilderMission({
                   <AccordionItem value="retro-funding" className="w-full">
                     <div className="flex flex-col items-center w-full">
                       <p className="font-semibold text-base text-foreground">
-                        Requirements to earn rewards in February were not met
+                        Requirements to earn rewards in {month} were not met
                       </p>
                       <div className="flex items-center space-x-1">
                         <p className="text-secondary-foreground text-base font-normal">
@@ -144,16 +143,19 @@ export default function OnchainBuilderMission({
                       <NotPassingEligibility
                         month={month}
                         transactionsCount={
-                          onchainBuilderMetrics.transactions[month]?.value
+                          onchainBuilderMetrics?.transactions?.[month]?.value ??
+                          0
                         }
                         qualifiedAddressesCount={
-                          onchainBuilderMetrics.activeAddresses[month]?.value
+                          onchainBuilderMetrics?.activeAddresses?.[month]
+                            ?.value ?? 0
                         }
                         distinctDaysCount={
-                          onchainBuilderMetrics.activeAddresses[month]?.value
+                          onchainBuilderMetrics?.activeAddresses?.[month]
+                            ?.value ?? 0
                         }
                         hasDefillamaAdapter={
-                          eligibility?.hasDefillamaAdapter ?? false
+                          eligibility?.hasDefillamaAdapter?.[month] ?? false
                         }
                       />
                     </AccordionContent>
@@ -164,133 +166,181 @@ export default function OnchainBuilderMission({
           }
 
           return (
-            <TabsContent
-              key={month}
-              value={month}
-              className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
-            >
-              <MetricCard
-                value={formatNumber(
-                  onchainBuilderMetrics.tvl[month]?.value ?? 0,
-                  0,
-                  "compact",
-                )}
-                title="TVL across the Superchain"
-                trend={{
-                  value:
-                    onchainBuilderMetrics.tvl[month]?.trend.value.toString(),
-                  type:
-                    onchainBuilderMetrics.tvl[month]?.trend.sign === "inc"
-                      ? "increase"
-                      : "decrease",
-                }}
-                sign={{
-                  value:
-                    onchainBuilderMetrics.tvl[month]?.value === 0 ? "" : "$",
-                  position: "left",
-                }}
-                index={0}
-              />
-              <MetricCard
-                value={formatNumber(
-                  onchainBuilderMetrics.transactions[month]?.value,
-                  0,
-                  "compact",
-                )}
-                title="Transactions"
-                trend={{
-                  value:
-                    onchainBuilderMetrics.transactions[
-                      month
-                    ]?.trend.value.toString(),
-                  type:
-                    onchainBuilderMetrics.transactions[month]?.trend.sign ===
-                    "inc"
-                      ? "increase"
-                      : "decrease",
-                }}
-                index={1}
-              />
-              <MetricCard
-                value={formatNumber(
-                  onchainBuilderMetrics.gasFees[month]?.value,
-                  0,
-                )}
-                title="Gas consumed"
-                trend={{
-                  value: formatNumber(
-                    onchainBuilderMetrics.gasFees[month]?.trend.value,
+            <>
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
+              >
+                <MetricCard
+                  value={formatNumber(
+                    (onchainBuilderMetrics?.tvl?.[month]?.value ?? 0) / 30,
                     0,
                     "compact",
-                  ),
-                  type:
-                    onchainBuilderMetrics.gasFees[month]?.trend.sign === "inc"
-                      ? "increase"
-                      : "decrease",
-                }}
-                sign={{ value: " ETH", position: "right" }}
-                index={2}
-              />
-              <MetricCard
-                value={formatNumber(
-                  Math.round(
-                    onchainBuilderMetrics.activeAddresses[month]?.value,
-                  ),
-                  0,
-                  "compact",
+                  )}
+                  title="TVL across the Superchain"
+                  trend={{
+                    value:
+                      onchainBuilderMetrics?.tvl?.[
+                        month
+                      ]?.trend.value.toString() ?? "0",
+                    type:
+                      onchainBuilderMetrics?.tvl?.[month]?.trend.sign === "inc"
+                        ? "increase"
+                        : "decrease",
+                  }}
+                  sign={{
+                    value:
+                      onchainBuilderMetrics?.tvl?.[month]?.value === 0
+                        ? ""
+                        : "$",
+                    position: "left",
+                  }}
+                  index={0}
+                />
+                <MetricCard
+                  value={formatNumber(
+                    onchainBuilderMetrics?.transactions?.[month]?.value ?? 0,
+                    0,
+                    "compact",
+                  )}
+                  title="Transactions"
+                  trend={{
+                    value:
+                      onchainBuilderMetrics?.transactions?.[
+                        month
+                      ]?.trend.value.toString() ?? "0",
+                    type:
+                      onchainBuilderMetrics?.transactions?.[month]?.trend
+                        .sign === "inc"
+                        ? "increase"
+                        : "decrease",
+                  }}
+                  index={1}
+                />
+                <MetricCard
+                  value={formatNumber(
+                    onchainBuilderMetrics?.gasFees?.[month]?.value ?? 0,
+                    0,
+                  )}
+                  title="Gas consumed"
+                  trend={{
+                    value: formatNumber(
+                      onchainBuilderMetrics?.gasFees?.[month]?.trend.value ?? 0,
+                      0,
+                      "compact",
+                    ),
+                    type:
+                      onchainBuilderMetrics?.gasFees?.[month]?.trend.sign ===
+                      "inc"
+                        ? "increase"
+                        : "decrease",
+                  }}
+                  sign={{ value: " ETH", position: "right" }}
+                  index={2}
+                />
+                <MetricCard
+                  value={formatNumber(
+                    Math.round(
+                      (onchainBuilderMetrics?.activeAddresses?.[month]?.value ??
+                        0) / 30,
+                    ),
+                    0,
+                    "compact",
+                  )}
+                  title="Daily Unique addresses"
+                  trend={{
+                    value:
+                      onchainBuilderMetrics?.activeAddresses?.[
+                        month
+                      ]?.trend.value.toString() ?? "0",
+                    type:
+                      onchainBuilderMetrics?.activeAddresses?.[month]?.trend
+                        .sign === "inc"
+                        ? "increase"
+                        : "decrease",
+                  }}
+                  index={3}
+                />
+                <div className="w-full rounded-xl border p-6 bg-background col-span-full h-32">
+                  <div className="w-full h-full flex justify-between">
+                    <div className="w-full pr-6">
+                      <div className="flex items-center space-x-3">
+                        <Image
+                          src="/assets/icons/op-icon.svg"
+                          alt="Optimism"
+                          width={40}
+                          height={40}
+                        />
+                        <div>
+                          <p className="text-foreground font-semibold text-base">
+                            {formatNumber(
+                              onchainBuilderMetrics?.onchainBuilderReward?.[
+                                month
+                              ]?.value ?? 0,
+                              0,
+                            )}
+                          </p>
+                          <p className="text-secondary-foreground text-base font-normal">
+                            Rewards for performance in {month}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full flex">
+                      <div className="h-full w-px bg-tertiary" />
+                      <div className="pl-6">
+                        <p className="text-secondary-foreground text-base font-normal">
+                          Rewards are determined by an{" "}
+                          <span className="font-semibold">
+                            evaluation algorithm
+                          </span>{" "}
+                          powered by onchain data, and some metrics are more
+                          valuable than others.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+              <ul className="space-y-[8pt]">
+                {data.isMember && !eligibility?.hasDefillamaAdapter[month] && (
+                  <AlertContainer type="danger" isMember={data.isMember}>
+                    For TVL rewards,{" "}
+                    <TrackedLink
+                      className="underline"
+                      href={`/projects/${projectId ?? ""}/contracts`}
+                      eventName="Link Click"
+                      eventData={{
+                        projectId: projectId ?? "",
+                        source: "project_page",
+                        linkName: "Provide a link to your DeFiLlama adapter",
+                        isContributor: data.isMember,
+                      }}
+                    >
+                      provide a link to your DeFiLlama adapter
+                    </TrackedLink>
+                    .
+                  </AlertContainer>
                 )}
-                title="Qualified addresses"
-                trend={{
-                  value:
-                    onchainBuilderMetrics.activeAddresses[
-                      month
-                    ]?.trend.value.toString(),
-                  type:
-                    onchainBuilderMetrics.activeAddresses[month]?.trend.sign ===
-                    "inc"
-                      ? "increase"
-                      : "decrease",
-                }}
-                index={3}
-              />
-            </TabsContent>
+                {eligibility.deployedOnWorldchain && (
+                  <AlertContainer type="danger" isMember={data.isMember}>
+                    Qualified addresses may be inaccurate for projects deployed
+                    on Worldchain. The team is actively working with World to
+                    analyze World address data.
+                  </AlertContainer>
+                )}
+                {!eligibility.onchainBuilderEligibility && (
+                  <AlertContainer type="danger" isMember={data.isMember}>
+                    This project didn&apos;t receive OP in {month} because it
+                    didn&apos;t meet reward minimums.
+                  </AlertContainer>
+                )}
+              </ul>
+            </>
           )
         })}
       </Tabs>
-      <ul className="space-y-[8pt]">
-        {data.isMember && !Boolean(eligibility?.hasDefillamaAdapter) && (
-          <AlertContainer type="danger" isMember={data.isMember}>
-            For TVL rewards,{" "}
-            <TrackedLink
-              className="underline"
-              href={`/projects/${projectId ?? ""}/contracts`}
-              eventName="Link Click"
-              eventData={{
-                projectId: projectId ?? "",
-                source: "project_page",
-                linkName: "Provide a link to your DeFiLlama adapter",
-                isContributor: data.isMember,
-              }}
-            >
-              provide a link to your DeFiLlama adapter
-            </TrackedLink>
-            .
-          </AlertContainer>
-        )}
-        {eligibility.deployedOnWorldchain && (
-          <AlertContainer type="danger" isMember={data.isMember}>
-            Qualified addresses may be inaccurate for projects deployed on
-            Worldchain. The team is actively working with World to analyze World
-            address data.
-          </AlertContainer>
-        )}
-        {!eligibility.onchainBuilderEligibility && (
-          <AlertContainer type="danger" isMember={data.isMember}>
-            This project didn’t receive OP in February because it didn’t meet
-            reward minimums.
-          </AlertContainer>
-        )}
-      </ul>
     </div>
   )
 }

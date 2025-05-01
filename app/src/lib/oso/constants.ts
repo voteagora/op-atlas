@@ -28,10 +28,21 @@ export const supportedMappings = {
   ZORA: 7777777,
 }
 
+// TODO: Depricate this
 export const OSO_QUERY_DATES = {
   DEFAULT: { start: "2025-01-01", end: "2025-07-31" },
   transactions: { start: "2024-10-01", end: "2025-07-31" },
   gasFees: { start: "2025-02-01", end: "2025-02-28" },
+}
+
+export const TRANCHE_MONTHS_MAP = {
+  1: "February",
+  2: "March",
+}
+
+export const OSO_QUERY_TRANCHE_CUTOFF_DATES = {
+  1: { start: "2025-02-11", end: "2025-03-11" },
+  2: { start: "2025-03-11", end: "2025-04-11" },
 }
 
 export const CHARTS_TRAILING_DAYS = 3

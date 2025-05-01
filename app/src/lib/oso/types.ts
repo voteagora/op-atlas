@@ -26,7 +26,6 @@ export type OnchainBuildersDataType = Record<string, number>
 export interface BaseMissionProps {
   isMember: boolean
   projectName: string
-  applicationDate: Date
 }
 
 export type OnchainBuilderMetrics = {
@@ -34,50 +33,51 @@ export type OnchainBuilderMetrics = {
   gasFees: Record<string, { value: number; trend: Trend }>
   transactions: Record<string, { value: number; trend: Trend }>
   tvl: Record<string, { value: number; trend: Trend }>
-  onchainBuilderReward: Record<string, number>
+  onchainBuilderReward: Record<string, { value: number }>
 }
 
 export type PerformanceMetrics = {
-  activeAddresses: Record<string, number>
-  gasFees: Record<string, number>
-  transactions: Record<string, number>
-  tvl: Record<string, number>
+  activeAddresses: Record<string, { value: number; trend: Trend }>
+  gasFees: Record<string, { value: number; trend: Trend }>
+  transactions: Record<string, { value: number; trend: Trend }>
+  tvl: Record<string, { value: number; trend: Trend }>
 }
 
 export interface OnchainBuilderMissionProps extends BaseMissionProps {
   type: "on-chain"
-  onchainBuilderMetrics: OnchainBuilderMetrics & {
-    onchainBuilderReward: Record<string, number>
+  onchainBuilderMetrics?: {
+    activeAddresses: Record<string, { value: number; trend: Trend }>
+    gasFees: Record<string, { value: number; trend: Trend }>
+    transactions: Record<string, { value: number; trend: Trend }>
+    tvl: Record<string, { value: number; trend: Trend }>
+    onchainBuilderReward: Record<string, { value: number }>
   }
   eligibility: {
-    hasDefillamaAdapter: boolean
+    hasDefillamaAdapter: Record<string, boolean>
     hasQualifiedAddresses: boolean
     deployedOnWorldchain: boolean
-    onchainBuilderEligibility: boolean
+    onchainBuilderEligibility: Record<string, boolean>
   }
 }
 
 export interface DevToolingMissionProps extends BaseMissionProps {
   type: "dev-tooling"
-  devToolingMetrics: {
-    gasConsumption: Record<
+  devToolingMetrics?: {
+    gasConsumption: Record<string, { value: number; trend: Trend }>
+    trustedDevelopersCount: Record<string, number>
+    devToolingReward: Record<string, { value: number }>
+    topProjects: Record<
       string,
       {
-        value: number
-        trend: Trend
-      }
+        id?: string
+        name?: string
+        website?: string[]
+        thumbnailUrl?: string | null
+      }[]
     >
-    trustedDevelopersCount: number
-    devToolingReward: Record<string, number>
-    topProjects: {
-      id?: string
-      name?: string
-      website?: string[]
-      thumbnailUrl?: string
-    }[]
   }
   eligibility: {
-    devToolingEligibility: boolean
+    devToolingEligibility: Record<string, boolean>
   }
 }
 
