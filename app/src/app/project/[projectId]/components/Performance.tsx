@@ -26,7 +26,7 @@ export default function Performance({
                   Object.values(metrics.tvl).reduce(
                     (acc, curr) => acc + curr.value,
                     0,
-                  ),
+                  ) / 30,
                   0,
                   "compact",
                 )}
@@ -77,7 +77,7 @@ export default function Performance({
                   Object.values(metrics.activeAddresses).reduce(
                     (acc, curr) => acc + curr.value,
                     0,
-                  ),
+                  ) / 30,
                   0,
                   "compact",
                 )}
