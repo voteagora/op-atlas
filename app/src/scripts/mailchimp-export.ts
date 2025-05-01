@@ -145,10 +145,28 @@ async function exportEmailsToMailchimp() {
         onchainBuildersNotRewarded,
       )
 
+      const tags = (() => {
+        const tags = []
+        if (devToolingRewardedData.names) {
+          tags.push("Received rewards (dev tooling)")
+        }
+        if (devToolingNotRewardedData.names) {
+          tags.push("Did not receive rewards (dev tooling)")
+        }
+        if (onchainBuildersRewardedData.names) {
+          tags.push("Received rewards (onchain builders)")
+        }
+        if (onchainBuildersNotRewardedData.names) {
+          tags.push("Did not receive rewards (onchain builders)")
+        }
+        return tags
+      })()
+
       const data: BaseMailchimp.lists.BatchListMembersBodyMembersObject = {
         email_address: userEmail.email || "",
         email_type: "html",
         status: "subscribed",
+        tags,
         merge_fields: {
           EMAIL: userEmail.email || "",
           FNAME: FNAME || "",
