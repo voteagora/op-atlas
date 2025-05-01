@@ -9,6 +9,21 @@ type SUBSCRIBED_MEMBER = {
   email_address: string
 }
 
+async function getLatestTranche(roundId: string) {
+  const latestTranche = await prisma.recurringReward.findFirst({
+    where: {
+      roundId,
+    },
+    orderBy: {
+      tranche: "desc",
+    },
+    select: {
+      tranche: true,
+    },
+  })
+  return latestTranche?.tranche || 0
+}
+
 async function exportEmailsToMailchimp() {
   const userEmails = await prisma.userEmail.findMany({
     select: {
@@ -25,7 +40,24 @@ async function exportEmailsToMailchimp() {
               },
             },
             select: {
-              projectId: true,
+              project: {
+                select: {
+                  id: true,
+                  name: true,
+                  website: true,
+                  recurringRewards: {
+                    where: {
+                      roundId: {
+                        in: ["7", "8"],
+                      },
+                    },
+                    select: {
+                      roundId: true,
+                      tranche: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -33,42 +65,217 @@ async function exportEmailsToMailchimp() {
     },
   })
 
+  const latestDevToolingTranche = await getLatestTranche("7")
+  const latestOnchainBuildersTranche = await getLatestTranche("8")
+
+  console.log("Latest tranches:", {
+    devTooling: latestDevToolingTranche,
+    onchainBuilders: latestOnchainBuildersTranche,
+  })
+
   const batchMembers = userEmails
     .map((userEmail) => {
       const userFullName = userEmail.user.name
       const [FNAME, LNAME] = userFullName ? userFullName.split(" ") : ["", ""]
-      const projectIds = userEmail.user.projects.map((p) => p.projectId)
+
+      const projects = userEmail.user.projects.map((p) => p.project)
+
+      // Split projects into categories based on round IDs
+      const devToolingProjects = projects.filter((p) =>
+        p.recurringRewards.some((r) => r.roundId === "7"),
+      )
+      const onchainBuildersProjects = projects.filter((p) =>
+        p.recurringRewards.some((r) => r.roundId === "8"),
+      )
+
+      // Split each category into rewarded and not rewarded
+      const devToolingRewarded = devToolingProjects.filter((p) =>
+        p.recurringRewards.some(
+          (r) => r.roundId === "7" && r.tranche === latestDevToolingTranche,
+        ),
+      )
+      const devToolingNotRewarded = devToolingProjects.filter(
+        (p) =>
+          !p.recurringRewards.some(
+            (r) => r.roundId === "7" && r.tranche === latestDevToolingTranche,
+          ),
+      )
+
+      const onchainBuildersRewarded = onchainBuildersProjects.filter((p) =>
+        p.recurringRewards.some(
+          (r) =>
+            r.roundId === "8" && r.tranche === latestOnchainBuildersTranche,
+        ),
+      )
+      const onchainBuildersNotRewarded = onchainBuildersProjects.filter(
+        (p) =>
+          !p.recurringRewards.some(
+            (r) =>
+              r.roundId === "8" && r.tranche === latestOnchainBuildersTranche,
+          ),
+      )
+
+      // Format project names and links as HTML
+      const formatProjectHtml = (project: { id: string; name: string }) => {
+        return `<a href="https://atlas.optimism.io/project/${project.id}">${project.name}</a>`
+      }
+
+      // Helper function to clean up project lists
+      const cleanProjectList = (projects: { id: string; name: string }[]) => {
+        if (!projects.length) return { names: "", links: "" }
+
+        const names = projects
+          .map((p) => p.name)
+          .filter(Boolean)
+          .join(", ")
+        const links = projects
+          .map((p) => formatProjectHtml(p))
+          .filter(Boolean)
+          .join(", ")
+
+        return { names, links }
+      }
+
+      const devToolingRewardedData = cleanProjectList(devToolingRewarded)
+      const devToolingNotRewardedData = cleanProjectList(devToolingNotRewarded)
+      const onchainBuildersRewardedData = cleanProjectList(
+        onchainBuildersRewarded,
+      )
+      const onchainBuildersNotRewardedData = cleanProjectList(
+        onchainBuildersNotRewarded,
+      )
 
       const data: BaseMailchimp.lists.BatchListMembersBodyMembersObject = {
-        email_address: userEmail.email,
+        email_address: userEmail.email || "",
         email_type: "html",
         status: "subscribed",
         merge_fields: {
-          EMAIL: userEmail.email,
-          FNAME,
-          LNAME,
-          PROJECTS: projectIds.join(","),
+          EMAIL: userEmail.email || "",
+          FNAME: FNAME || "",
+          LNAME: LNAME || "",
+          PROJECTS: projects
+            .map((p) => p.id)
+            .filter(Boolean)
+            .join(","),
+          DEVTOOLING_REWARDED_NAMES: devToolingRewardedData.names,
+          DEVTOOLING_REWARDED_LINKS: devToolingRewardedData.links,
+          DEVTOOLING_NOT_REWARDED_NAMES: devToolingNotRewardedData.names,
+          DEVTOOLING_NOT_REWARDED_LINKS: devToolingNotRewardedData.links,
+          ONCHAIN_BUILDERS_REWARDED_NAMES: onchainBuildersRewardedData.names,
+          ONCHAIN_BUILDERS_REWARDED_LINKS: onchainBuildersRewardedData.links,
+          ONCHAIN_BUILDERS_NOT_REWARDED_NAMES:
+            onchainBuildersNotRewardedData.names,
+          ONCHAIN_BUILDERS_NOT_REWARDED_LINKS:
+            onchainBuildersNotRewardedData.links,
         },
       }
 
-      return data
+      // Only include in batch if there's actual project data
+      if (
+        devToolingRewardedData.names ||
+        devToolingNotRewardedData.names ||
+        onchainBuildersRewardedData.names ||
+        onchainBuildersNotRewardedData.names
+      ) {
+        return data
+      }
+      return null
     })
+    .filter(
+      (
+        member,
+      ): member is BaseMailchimp.lists.BatchListMembersBodyMembersObject =>
+        member !== null,
+    )
     .filter(
       (member, index, self) =>
         index ===
         self.findIndex((t) => t.email_address === member.email_address),
     )
 
+  console.log(
+    `\nTotal users with metadata: ${
+      batchMembers.filter(
+        (m) =>
+          m.merge_fields?.DEVTOOLING_REWARDED_NAMES ||
+          m.merge_fields?.DEVTOOLING_NOT_REWARDED_NAMES ||
+          m.merge_fields?.ONCHAIN_BUILDERS_REWARDED_NAMES ||
+          m.merge_fields?.ONCHAIN_BUILDERS_NOT_REWARDED_NAMES,
+      ).length
+    }`,
+  )
+
+  // Create JSON output of all metadata
+  const metadataOutput = batchMembers
+    .filter(
+      (m) =>
+        m.merge_fields?.DEVTOOLING_REWARDED_NAMES ||
+        m.merge_fields?.DEVTOOLING_NOT_REWARDED_NAMES ||
+        m.merge_fields?.ONCHAIN_BUILDERS_REWARDED_NAMES ||
+        m.merge_fields?.ONCHAIN_BUILDERS_NOT_REWARDED_NAMES,
+    )
+    .map((m) => {
+      // Filter out any undefined merge_fields
+      const mergeFields = m.merge_fields || {}
+
+      // Helper function to clean up project lists
+      const cleanProjectList = (
+        names: string | undefined,
+        links: string | undefined,
+      ) => {
+        if (!names && !links) return { names: "", links: "" }
+
+        const nameList = (names || "").split(", ").filter(Boolean)
+        const linkList = (links || "").split(", ").filter(Boolean)
+
+        // If we have mismatched lengths, use the shorter one
+        const length = Math.min(nameList.length, linkList.length)
+
+        return {
+          names: nameList.slice(0, length).join(", "),
+          links: linkList.slice(0, length).join(", "),
+        }
+      }
+
+      return {
+        email: m.email_address || "",
+        name: `${mergeFields.FNAME || ""} ${mergeFields.LNAME || ""}`.trim(),
+        devToolingRewarded: cleanProjectList(
+          mergeFields.DEVTOOLING_REWARDED_NAMES,
+          mergeFields.DEVTOOLING_REWARDED_LINKS,
+        ),
+        devToolingNotRewarded: cleanProjectList(
+          mergeFields.DEVTOOLING_NOT_REWARDED_NAMES,
+          mergeFields.DEVTOOLING_NOT_REWARDED_LINKS,
+        ),
+        onchainBuildersRewarded: cleanProjectList(
+          mergeFields.ONCHAIN_BUILDERS_REWARDED_NAMES,
+          mergeFields.ONCHAIN_BUILDERS_REWARDED_LINKS,
+        ),
+        onchainBuildersNotRewarded: cleanProjectList(
+          mergeFields.ONCHAIN_BUILDERS_NOT_REWARDED_NAMES,
+          mergeFields.ONCHAIN_BUILDERS_NOT_REWARDED_LINKS,
+        ),
+      }
+    })
+    // Filter out any entries where all project lists are empty
+    .filter(
+      (entry) =>
+        entry.devToolingRewarded.names ||
+        entry.devToolingNotRewarded.names ||
+        entry.onchainBuildersRewarded.names ||
+        entry.onchainBuildersNotRewarded.names,
+    )
+
+  console.log(
+    "\nMetadata JSON Output:",
+    JSON.stringify(metadataOutput, null, 2),
+  )
+
   // We should consider this being dynamic via DB
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
   if (!LIST_ID) {
     throw new Error("MAILCHIMP_LIST_ID is not defined")
-  }
-
-  console.log(`Exporting ${batchMembers.length} emails to Mailchimp...`)
-
-  if (!LIST_ID) {
-    throw new Error("MAILCHIMP_LIST_ID is not set")
   }
 
   try {
