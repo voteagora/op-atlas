@@ -16,6 +16,9 @@ export const useHandlePrivyErrors = () => {
             case 'failed_to_link_account':
                 return toast.error('Failed to link account. Please refresh the page and try again.')
 
+            case 'linked_to_another_user':
+                return toast.error('Account already linked to another user.')
+
             case 'exited_update_flow':
             case 'exited_link_flow':
                 return
