@@ -505,11 +505,11 @@ const processOsoData = async ({
   const data = readJsonFile<DevToolingProject>(firstFile)
   console.log(`Found ${data.length} projects in file`)
 
-  // if (mission === Mission.ONCHAIN_BUILDER) {
-  //   await processOnchainBuilderData(data, month)
-  // } else {
-  //   await processDevToolingData(data, month)
-  // }
+  if (mission === Mission.ONCHAIN_BUILDER) {
+    await processOnchainBuilderData(data, month)
+  } else {
+    await processDevToolingData(data, month)
+  }
 
   // After processing the data, update funding rewards with the sum of recurring rewards
   console.log("\n🔄 Updating funding rewards with recurring rewards...")
