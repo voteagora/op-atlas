@@ -1,12 +1,11 @@
-import { EyeOff } from "lucide-react"
 import { notFound } from "next/navigation"
 
-import { getPublicProjectOSOData } from "@/app/api/oso/common"
 import { auth } from "@/auth"
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
-import { cn } from "@/lib/utils"
+import { getProjectMetrics } from "@/lib/oso"
+import { getProjectDeployedChains } from "@/lib/oso/utils"
 
 import {
   Description,
@@ -26,27 +25,34 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { projectId } = params
 
-  const [session, publicProject, publicProjectMetrics] = await Promise.all([
+  const [session, publicProject, projectMetrics] = await Promise.all([
     auth(),
     getPublicProjectAction({ projectId }),
-    getPublicProjectOSOData(projectId),
+    getProjectMetrics(projectId),
   ])
+
+  if (!publicProject) {
+    return notFound()
+  }
 
   const isMember = !(
     await verifyMembership(projectId, session?.user.farcasterId ?? "")
   )?.error
 
-  const { isOnchainBuilder, isDevTooling, projectOSOData, groupedMetrics } =
-    publicProjectMetrics
+  const {
+    eligibility,
+    onchainBuilderMetrics,
+    devToolingMetrics,
+    performanceMetrics,
+  } = projectMetrics
 
-  const enrolledInMission = isOnchainBuilder || isDevTooling
+  const hasQualifiedAddresses = Object.values(
+    onchainBuilderMetrics?.activeAddresses ?? {},
+  ).some((address) => address.value > 0)
 
-  const onchainBuildersMetrics = {
-    ...groupedMetrics,
-    opReward: Math.round(projectOSOData?.onchainBuilderReward ?? 0),
-  }
+  const deployedOn = getProjectDeployedChains(publicProject.contracts)
 
-  const deployedOnWorldchain = publicProject.deployedOn?.some(
+  const deployedOnWorldchain = deployedOn.some(
     (chain) => chain.name === "Worldchain",
   )
 
@@ -62,8 +68,17 @@ export default async function Page({ params }: PageProps) {
         farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
       }
 
-  const showIncreaseImpact =
-    projectOSOData?.devToolingEligible || projectOSOData?.onchainBuilderEligible
+  const enrolledInDevTooling =
+    publicProject.applications?.filter(
+      (application) => application.roundId === "7",
+    ).length > 0
+
+  const enrolledInOnchainBuilders =
+    publicProject.applications?.filter(
+      (application) => application.roundId === "8",
+    ).length > 0
+
+  const enrolledInMission = enrolledInDevTooling || enrolledInOnchainBuilders
 
   return (
     <div className="w-full h-full mt-6 pb-12">
@@ -84,7 +99,7 @@ export default async function Page({ params }: PageProps) {
             name={publicProject.name}
             tags={["Project", publicProject.category ?? ""]}
             author={author}
-            deployedOn={publicProject.deployedOn}
+            deployedOn={deployedOn}
             description={publicProject.description}
             socials={{
               website: publicProject.website,
@@ -94,7 +109,7 @@ export default async function Page({ params }: PageProps) {
             }}
           />
 
-          {!enrolledInMission && !onchainBuildersMetrics && (
+          {!enrolledInMission && !onchainBuilderMetrics && (
             <div className="w-full h-[208px] space-y-6 rounded-xl border flex flex-col justify-center items-center p-6">
               <div className="text-center">
                 <p className="font-semibold text-base text-foreground">
@@ -126,74 +141,39 @@ export default async function Page({ params }: PageProps) {
               <div className="w-full space-y-6">
                 <h4 className="font-semibold text-xl">Missions</h4>
                 <ul className="space-y-12">
-                  {isOnchainBuilder && (
+                  {enrolledInOnchainBuilders && (
                     <li>
                       <Mission
                         type="on-chain"
-                        projectName={publicProject.name}
-                        isMember={isMember}
-                        deployedOnWorldchain={deployedOnWorldchain}
-                        opReward={Math.round(
-                          publicProject.onchainBuildersRewards ?? 0,
-                        )}
-                        metrics={{
-                          activeAddresses:
-                            onchainBuildersMetrics.activeAddresses,
-                          gasFees: onchainBuildersMetrics.gasFees,
-                          transactions: onchainBuildersMetrics.transactions,
-                          tvl: onchainBuildersMetrics.tvl,
-                          eligibility: {
-                            hasBundleBear:
-                              projectOSOData?.hasBundleBear ?? false,
-                            hasDefillamaAdapter:
-                              projectOSOData?.hasDefillamaAdapter ?? false,
-                            hasQualifiedAddresses: Boolean(
-                              onchainBuildersMetrics.activeAddresses?.length,
-                            ),
-                          },
-                        }}
-                        projectOSOData={projectOSOData}
-                        applicationDate={
-                          publicProject.onchainBuildersApplication?.createdAt
+                        onchainBuilderMetrics={onchainBuilderMetrics}
+                        eligibility={
+                          eligibility
+                            ? {
+                                ...eligibility,
+                                hasQualifiedAddresses,
+                                deployedOnWorldchain,
+                              }
+                            : undefined
                         }
+                        isMember={isMember}
+                        projectName={publicProject.name ?? ""}
                       />
                     </li>
                   )}
-                  {isDevTooling && (
+                  {enrolledInDevTooling && (
                     <li>
                       <Mission
                         type="dev-tooling"
+                        devToolingMetrics={devToolingMetrics}
+                        eligibility={eligibility}
                         isMember={isMember}
-                        projectName={publicProject.name}
-                        projectOSOData={projectOSOData}
-                        opReward={Math.round(
-                          publicProject.devToolingRewards ?? 0,
-                        )}
-                        metrics={{
-                          activeAddresses:
-                            onchainBuildersMetrics.activeAddresses,
-                          gasFees: onchainBuildersMetrics.gasFees,
-                          transactions: onchainBuildersMetrics.transactions,
-                          tvl: onchainBuildersMetrics.tvl,
-                          eligibility: {
-                            hasBundleBear:
-                              projectOSOData?.hasBundleBear ?? false,
-                            hasDefillamaAdapter:
-                              projectOSOData?.hasDefillamaAdapter ?? false,
-                            hasQualifiedAddresses: Boolean(
-                              onchainBuildersMetrics.activeAddresses?.length,
-                            ),
-                          },
-                        }}
-                        applicationDate={
-                          publicProject.devToolingApplication?.createdAt
-                        }
+                        projectName={publicProject.name ?? ""}
                       />
                     </li>
                   )}
                 </ul>
               </div>
-              {showIncreaseImpact && (
+              {enrolledInMission && (
                 <div className="w-full space-y-6">
                   <div className="flex items-center space-x-2 group">
                     <h4 className="font-semibold text-xl">
@@ -201,14 +181,14 @@ export default async function Page({ params }: PageProps) {
                     </h4>
                   </div>
                   <div className="flex gap-4 lg:flex-row flex-col">
-                    {isOnchainBuilder && (
+                    {enrolledInOnchainBuilders && (
                       <IncreaseYourImpact
                         type="onchain-builders"
                         projectId={projectId}
                         isMember={isMember}
                       />
                     )}
-                    {isDevTooling && (
+                    {enrolledInDevTooling && (
                       <IncreaseYourImpact
                         type="dev-tooling"
                         projectId={projectId}
@@ -221,7 +201,11 @@ export default async function Page({ params }: PageProps) {
             </>
           )}
 
-          {/* {onchainBuildersMetrics && <Performance />} */}
+          {/* Only show performance metrics if the project is eligible for onchain builder and if there is performance metrics */}
+          {performanceMetrics &&
+            Object.values(eligibility?.onchainBuilderEligibility ?? {}).some(
+              Boolean,
+            ) && <Performance metrics={performanceMetrics} />}
           <MoreDetails />
         </div>
       </div>

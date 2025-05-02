@@ -217,6 +217,9 @@ importers:
       ts-md5:
         specifier: ^1.3.1
         version: 1.3.1
+      ts-pattern:
+        specifier: ^5.7.0
+        version: 5.7.0
       usehooks-ts:
         specifier: ^3.1.0
         version: 3.1.0(react@18.3.1)
@@ -8615,6 +8618,9 @@ packages:
   ts-md5@1.3.1:
     resolution: {integrity: sha512-DiwiXfwvcTeZ5wCE0z+2A9EseZsztaiZtGrtSaY5JOD7ekPnR/GoIVD5gXZAlK9Na9Kvpo9Waz5rW64WKAWApg==}
     engines: {node: '>=12'}
+
+  ts-pattern@5.7.0:
+    resolution: {integrity: sha512-0/FvIG4g3kNkYgbNwBBW5pZBkfpeYQnH+2AA3xmjkCAit/DSDPKmgwC3fKof4oYUq6gupClVOJlFl+939VRBMg==}
 
   ts-toolbelt@9.6.0:
     resolution: {integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==}
@@ -19324,6 +19330,8 @@ snapshots:
   ts-log@2.2.7: {}
 
   ts-md5@1.3.1: {}
+
+  ts-pattern@5.7.0: {}
 
   ts-toolbelt@9.6.0: {}
 

@@ -25,7 +25,6 @@ import {
   getUserProjectsWithDetails,
   removeProjectOrganization,
   removeTeamMember,
-  updateBanner,
   updateMemberRole,
   updateProject,
   updateProjectFunding,
@@ -41,6 +40,7 @@ import {
   verifyMembership,
   verifyOrganizationMembership,
 } from "./utils"
+
 import { deleteKycTeam } from "@/db/kyc"
 
 export const getProjects = async (userId: string) => {
@@ -543,27 +543,8 @@ export const getPublicProjectAction = async ({
 }: {
   projectId: string
 }) => {
-  return await getPublicProject({ projectId })
-}
+  const rawProject = await getPublicProject(projectId)
+  if (!rawProject) return null
 
-export const updateBannerAction = async (
-  projectId: string,
-  bannerUrl: string,
-) => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  await updateBanner({ projectId, bannerUrl })
-
-  revalidatePath(`/project/${projectId}`)
+  return rawProject
 }
