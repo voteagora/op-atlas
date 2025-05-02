@@ -78,7 +78,7 @@ export default function OnchainBuilderMission({
                     projectId,
                     source: "project_page",
                     isContributor: data.isMember,
-                    linkName: "View recipients",
+                    linkName: "Claim your rewards",
                   }}
                 />
               )}

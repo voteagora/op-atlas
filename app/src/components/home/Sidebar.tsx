@@ -11,10 +11,7 @@ import { updateInteractions } from "@/lib/actions/users"
 import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
 import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
 import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
-import {
-  clickSignInWithFarcasterButton,
-  cn
-} from "@/lib/utils"
+import { clickSignInWithFarcasterButton, cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 
@@ -99,7 +96,7 @@ export const Sidebar = ({
         <p className="text-sm font-normal text-secondary-foreground text-center">
           Explore the projects that have received Retro Funding
         </p>
-        <Link className="w-full" href={`/round/results?rounds=${FUNDING_ROUNDS.map(round => round.number).join('%2C')}`}>
+        <Link className="w-full" href={`href="/round/results?rounds=7,8"`}>
           <Button
             variant="outline"
             className="text-sm font-medium text-foreground justify-center mt-1 w-full"
