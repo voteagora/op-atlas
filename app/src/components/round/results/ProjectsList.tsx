@@ -45,61 +45,61 @@ const ProjectsList = ({
     <div>
       {projectRewards?.map((project) => (
         <React.Fragment key={project.id}>
-          <div className="flex flex-row justify-between py-8 gap-1">
-            <div className="flex flex-[2] items-center">
-              {project?.project?.thumbnailUrl && (
-                <Image
-                  className="rounded-md"
-                  src={project.project.thumbnailUrl}
-                  alt={project.project.name}
-                  height={64}
-                  width={64}
-                />
-              )}
-              <div className="ml-4">
-                <TrackedLink
-                  className="hover:underline"
-                  href={`/project/${project?.project?.id}`}
-                  onClick={() => {
-                    track("Project rewarded", {
-                      projectId: project.project.id,
-                      projectName: project.project.name,
-                    })
-                  }}
-                  eventName="Link Click"
-                  eventData={{
-                    source: "round_results",
-                    projectId: project.project.id,
-                    projectName: project.project.name,
-                    linkName: "Project Page",
-                  }}
-                >
+          <TrackedLink
+            className="block transition-colors group"
+            href={`/project/${project?.project?.id}`}
+            onClick={() => {
+              track("Project rewarded", {
+                projectId: project.project.id,
+                projectName: project.project.name,
+              })
+            }}
+            eventName="Link Click"
+            eventData={{
+              source: "round_results",
+              projectId: project.project.id,
+              projectName: project.project.name,
+              linkName: "Project Page",
+            }}
+          >
+            <div className="flex flex-row justify-between py-8 gap-1">
+              <div className="flex flex-[2] items-center">
+                {project?.project?.thumbnailUrl && (
+                  <Image
+                    className="rounded-md"
+                    src={project.project.thumbnailUrl}
+                    alt={project.project.name}
+                    height={64}
+                    width={64}
+                  />
+                )}
+                <div className="ml-4">
                   <Tooltip>
                     <TooltipTrigger>
-                      <h5 className="text-xs sm:text-base font-semibold text-text-default text-left">
+                      <h5 className="text-xs sm:text-base font-semibold text-text-default text-left group-hover:underline">
                         {truncateString(project?.project?.name, 64, "...")}
                       </h5>
                     </TooltipTrigger>
                     <TooltipContent>{project?.project?.name}</TooltipContent>
                   </Tooltip>
-                </TrackedLink>
-                <p className="text-xs sm:text-base font-normal text-secondary-foreground line-clamp-3">
-                  {project?.project?.description}
-                </p>
+                  <p className="text-xs sm:text-base font-normal text-secondary-foreground line-clamp-3">
+                    {project?.project?.description}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-[1] items-center justify-end">
+                <Image
+                  src="/assets/images/optimism-small.png"
+                  alt="Optimism"
+                  width={24}
+                  height={24}
+                />
+                <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
+                  {formatNumber(Number(project?.amount), 0)}
+                </span>
               </div>
             </div>
-            <div className="flex flex-[1] items-center justify-end">
-              <Image
-                src="/assets/images/optimism-small.png"
-                alt="Optimism"
-                width={24}
-                height={24}
-              />
-              <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
-                {formatNumber(Number(project?.amount), 0)}
-              </span>
-            </div>
-          </div>
+          </TrackedLink>
           <hr />
         </React.Fragment>
       ))}
