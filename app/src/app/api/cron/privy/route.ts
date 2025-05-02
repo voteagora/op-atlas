@@ -98,32 +98,40 @@ export async function GET() {
         // Link GitHub
         if (user.github) {
           try {
-            const githubResponse = await fetch(`https://api.github.com/users/${user.github}`, {
-              headers: {
-                'Authorization': `token ${process.env.GITHUB_AUTH_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-              }
-            });
+            const githubResponse = await fetch(
+              `https://api.github.com/users/${user.github}`,
+              {
+                headers: {
+                  Authorization: `token ${process.env.GITHUB_AUTH_TOKEN}`,
+                  Accept: "application/vnd.github.v3+json",
+                },
+              },
+            )
 
             if (!githubResponse.ok) {
-              throw new Error(`GitHub API error: ${githubResponse.statusText}`);
+              throw new Error(`GitHub API error: ${githubResponse.statusText}`)
             }
 
-            const githubUser = await githubResponse.json();
+            const githubUser = await githubResponse.json()
 
             linkedAccounts.push({
               type: "github_oauth",
               subject: githubUser.node_id,
-              username: githubUser.login
-            });
+              username: githubUser.login,
+            })
           } catch (error) {
-            console.error(`Error fetching GitHub user data for ${user.github}:`, error);
+            console.error(
+              `Error fetching GitHub user data for ${user.github}:`,
+              error,
+            )
           }
         }
 
         // Link Farcaster
         if (user.farcasterId) {
-          const farcasterAddresses = await getUserConnectedAddresses(user.farcasterId)
+          const farcasterAddresses = await getUserConnectedAddresses(
+            user.farcasterId,
+          )
 
           if (farcasterAddresses && farcasterAddresses.length > 0) {
             linkedAccounts.push({

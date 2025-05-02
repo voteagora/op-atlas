@@ -4,9 +4,7 @@ import { useSession } from "next-auth/react"
 
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
-import {
-  UserWithAddresses
-} from "@/lib/types"
+import { UserWithAddresses } from "@/lib/types"
 
 import { FeedbackButton } from "../common/FeedbackButton"
 import ExternalLink from "../ExternalLink"

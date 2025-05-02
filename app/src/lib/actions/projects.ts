@@ -146,7 +146,8 @@ export const createNewProject = async (
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to create a project.",
+      error:
+        "Your Farcaster account must be connected in order to create a project.",
     }
   }
 
@@ -206,7 +207,8 @@ export const updateProjectDetails = async (
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to update a project.",
+      error:
+        "Your Farcaster account must be connected in order to update a project.",
     }
   }
 
@@ -254,7 +256,8 @@ export const setProjectOrganization = async (
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to set the organization of a project.",
+      error:
+        "Your Farcaster account must be connected in order to set the organization of a project.",
     }
   }
 
@@ -322,7 +325,8 @@ export const deleteUserProject = async (projectId: string) => {
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to delete a project.",
+      error:
+        "Your Farcaster account must be connected in order to delete a project.",
     }
   }
 
@@ -357,7 +361,8 @@ export const addMembersToProject = async (
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to add members to a project.",
+      error:
+        "Your Farcaster account must be connected in order to add members to a project.",
     }
   }
 
@@ -389,7 +394,8 @@ export const removeMemberFromProject = async (
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to remove members from a project.",
+      error:
+        "Your Farcaster account must be connected in order to remove members from a project.",
     }
   }
 
@@ -446,7 +452,8 @@ export const setMemberRole = async (
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to set the role of a member in a project.",
+      error:
+        "Your Farcaster account must be connected in order to set the role of a member in a project.",
     }
   }
 
@@ -477,7 +484,8 @@ export const setProjectFunding = async (
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to set the funding of a project.",
+      error:
+        "Your Farcaster account must be connected in order to set the funding of a project.",
     }
   }
 
@@ -511,7 +519,8 @@ export const createProjectKycTeamAction = async ({
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to create a project KYC team.",
+      error:
+        "Your Farcaster account must be connected in order to create a project KYC team.",
     }
   }
 
@@ -540,12 +549,16 @@ export const createProjectKYCTeamsAction = async ({
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to create a project KYC team action.",
+      error:
+        "Your Farcaster account must be connected in order to create a project KYC team action.",
     }
   }
 
   projectIds.forEach(async (projectId) => {
-    const isInvalid = await verifyMembership(projectId, user.farcasterId as string)
+    const isInvalid = await verifyMembership(
+      projectId,
+      user.farcasterId as string,
+    )
 
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
@@ -572,12 +585,16 @@ export const deleteProjectKYCTeamsAction = async ({
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to delete a project KYC team.",
+      error:
+        "Your Farcaster account must be connected in order to delete a project KYC team.",
     }
   }
 
   projectIds.forEach(async (projectId) => {
-    const isInvalid = await verifyMembership(projectId, user.farcasterId as string)
+    const isInvalid = await verifyMembership(
+      projectId,
+      user.farcasterId as string,
+    )
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
     }
@@ -646,7 +663,8 @@ export const updateBannerAction = async (
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected in order to update a project banner.",
+      error:
+        "Your Farcaster account must be connected in order to update a project banner.",
     }
   }
 

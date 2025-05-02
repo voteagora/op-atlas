@@ -8,25 +8,24 @@ import { useUser } from "@/hooks/db/useUser"
 import { Session } from "next-auth"
 
 export const ProfileDetailsContent = ({ session }: { session: Session }) => {
-
   const { user } = useUser({ id: session?.user?.id, enabled: !!session?.user })
-
 
   const username = user?.username || session?.user?.name
   const imageUrl = user?.imageUrl || session?.user?.image
   const bio = user?.bio || ""
 
   if (!user?.farcasterId) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div>
+          Most of your profile information comes from your Farcaster account.
+        </div>
 
-    return <div className="flex flex-col gap-4">
-      <div>
-        Most of your profile information comes from your Farcaster account.
+        <FarcasterConnection userId={session.user.id}>
+          Import from Farcaster
+        </FarcasterConnection>
       </div>
-
-      <FarcasterConnection userId={session.user.id}>
-        Import from Farcaster
-      </FarcasterConnection>
-    </div>
+    )
   }
 
   return (

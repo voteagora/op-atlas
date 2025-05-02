@@ -29,7 +29,6 @@ export default async function Page() {
         <EmailConnection userId={session.user.id} />
       </div>
       <div className="flex flex-col gap-6">
-
         <ProfileDetailsContent session={session} />
       </div>
     </div>

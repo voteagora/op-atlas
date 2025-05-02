@@ -49,7 +49,8 @@ export const createNewOrganization = async ({
 
   if (!user?.farcasterId) {
     return {
-      error: "Your Farcaster account must be connected to create an organization.",
+      error:
+        "Your Farcaster account must be connected to create an organization.",
     }
   }
 

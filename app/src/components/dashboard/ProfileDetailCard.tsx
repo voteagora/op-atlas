@@ -1,3 +1,5 @@
+"use client"
+
 import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -6,7 +8,6 @@ import { memo } from "react"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
-
 
 import { useUser } from "@/hooks/db/useUser"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
@@ -19,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
+import { useUsername } from "@/hooks/useUsername"
 
 const ProfileDetailCard = ({
   className,
@@ -27,33 +29,37 @@ const ProfileDetailCard = ({
   className?: string
   user: UserWithAddresses
 }) => {
-
   const { isBadgeholder } = useIsBadgeholder(user)
   const { user: loadedUser } = useUser({ id: user.id, enabled: true })
 
-
-  const email = loadedUser ? loadedUser?.emails[0]?.email : user.emails[0]?.email;
-  const name = loadedUser ? loadedUser?.name : user.name;
-
+  const username = useUsername(loadedUser)
   const { linkEmail } = usePrivyEmail(user.id)
+
+  const email = loadedUser
+    ? loadedUser?.emails[0]?.email
+    : user.emails[0]?.email
+  const name = loadedUser ? loadedUser?.name : user.name
 
   const renderEmail = () => {
     if (email) {
-      return <div>Email <span className="font-medium text-secondary-foreground">
-        {email}
-      </span>
-      </div>
+      return (
+        <div>
+          Email{" "}
+          <span className="font-medium text-secondary-foreground">{email}</span>
+        </div>
+      )
     } else {
-
-      return <Button
-        variant="link"
-        onClick={() => {
-          linkEmail()
-        }}
-        className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
-      >
-        Add your email
-      </Button>
+      return (
+        <Button
+          variant="link"
+          onClick={() => {
+            linkEmail()
+          }}
+          className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
+        >
+          Add your email
+        </Button>
+      )
     }
   }
 
@@ -64,8 +70,11 @@ const ProfileDetailCard = ({
         <AvatarFallback>
           <Image
             src="/assets/icons/user-icon.svg"
-            alt="user" width={18} height={18}
-            className="text-foreground" />
+            alt="user"
+            width={18}
+            height={18}
+            className="text-foreground"
+          />
         </AvatarFallback>
       </Avatar>
 
@@ -88,12 +97,10 @@ const ProfileDetailCard = ({
           <p className="text-sm text-muted-foreground">
             Username{" "}
             <span className="font-medium text-secondary-foreground">
-              @{user.username}
+              {username}
             </span>
           </p>
-          <p className="text-sm text-muted-foreground">
-            {renderEmail()}
-          </p>
+          <p className="text-sm text-muted-foreground">{renderEmail()}</p>
         </div>
       </div>
 

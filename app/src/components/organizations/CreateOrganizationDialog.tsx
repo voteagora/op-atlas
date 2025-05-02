@@ -35,7 +35,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
   const [isSaving, setIsSaving] = useState(false)
 
   const { user: loadedUser } = useUser({ id: currentUser?.user?.id })
-  const user = loadedUser || currentUser?.user;
+  const user = loadedUser || currentUser?.user
 
   const avatarUrl = useMemo(() => {
     if (!newAvatarImg) return ""
@@ -58,9 +58,10 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
 
     let avatarUrl
 
-
     if (!user?.farcasterId) {
-      toast.error("Your Farcaster account must be connected to create an organization. Please connect your Farcaster account to continue.")
+      toast.error(
+        "Your Farcaster account must be connected to create an organization. Please connect your Farcaster account to continue.",
+      )
       setIsSaving(false)
       return
     }

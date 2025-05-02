@@ -98,7 +98,7 @@ export default function MakeOrganizationForm({
     },
   })
 
-  const formValues = form.watch();
+  const formValues = form.watch()
 
   const { fields: websiteFields, append: addWebsiteField } = useFieldArray({
     control: form.control,
@@ -184,23 +184,24 @@ export default function MakeOrganizationForm({
 
   // CHANGE: Add helper functions to check if the last field has a value
   const shouldShowWebsiteAdd = () => {
-    const websites = formValues.website;
-    return websites[websites.length - 1]?.value.trim() !== '';
-  };
+    const websites = formValues.website
+    return websites[websites.length - 1]?.value.trim() !== ""
+  }
 
   const shouldShowFarcasterAdd = () => {
-    const farcasters = formValues.farcaster;
-    return farcasters[farcasters.length - 1]?.value.trim() !== '';
-  };
+    const farcasters = formValues.farcaster
+    return farcasters[farcasters.length - 1]?.value.trim() !== ""
+  }
   const onSubmit = () => async (values: z.infer<typeof formSchema>) => {
     setIsSaving(true)
 
     if (!loadedUser?.farcasterId) {
-      toast.error("Your Farcaster account must be connected to create an organization.")
+      toast.error(
+        "Your Farcaster account must be connected to create an organization.",
+      )
       setIsSaving(false)
       return
     }
-
 
     let avatarUrl = organization?.avatarUrl
     let coverUrl = organization?.coverUrl
@@ -252,16 +253,16 @@ export default function MakeOrganizationForm({
         try {
           const response = organization
             ? await updateOrganizationDetails({
-              id: organization.id,
-              organization: newValues,
-            })
+                id: organization.id,
+                organization: newValues,
+              })
             : await createNewOrganization({
-              organization: newValues,
-              teamMembers: team.map(({ user, role }) => ({
-                userId: user.id,
-                role,
-              })),
-            })
+                organization: newValues,
+                teamMembers: team.map(({ user, role }) => ({
+                  userId: user.id,
+                  role,
+                })),
+              })
 
           if (response?.error !== null || !response) {
             throw new Error(response?.error ?? "Failed to save project")
@@ -581,16 +582,20 @@ export default function MakeOrganizationForm({
             )}
           />
 
-          {loadedUser && !loadedUser?.farcasterId &&
-
+          {loadedUser && !loadedUser?.farcasterId && (
             <div className="flex flex-col gap-1.5 text-sm">
               <div className="font-medium">Farcaster</div>
               <div className="flex flex-row gap-2 border border-1 rounded-lg p-2 items-center">
-                <FarcasterConnection userId={user.id} >Connect</FarcasterConnection>
-                <div>Your Farcaster account must be connected to create an organization.</div>
+                <FarcasterConnection userId={user.id}>
+                  Connect
+                </FarcasterConnection>
+                <div>
+                  Your Farcaster account must be connected to create an
+                  organization.
+                </div>
               </div>
             </div>
-          }
+          )}
         </div>
 
         <div className="flex gap-2">
@@ -603,7 +608,6 @@ export default function MakeOrganizationForm({
             Save
           </Button>
         </div>
-
       </form>
 
       <AddTeamMemberDialog

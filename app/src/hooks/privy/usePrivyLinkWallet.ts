@@ -21,7 +21,7 @@ export const usePrivyLinkWallet = (userId: string) => {
         return "Wallet address removed successfully"
       },
       error: (error) => {
-        return error.message;
+        return error.message
       },
     })
   }

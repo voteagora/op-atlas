@@ -102,7 +102,7 @@ export default function ProjectDetailsForm({
   const router = useRouter()
   const { track } = useAnalytics()
 
-  const { data: currentUser } = useSession();
+  const { data: currentUser } = useSession()
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -181,7 +181,9 @@ export default function ProjectDetailsForm({
       let bannerUrl = project?.bannerUrl
 
       if (!user?.farcasterId) {
-        toast.error("Your Farcaster account must be connected to create a project.")
+        toast.error(
+          "Your Farcaster account must be connected to create a project.",
+        )
         isSave ? setIsSaving(false) : setIsLoading(false)
         return
       }
@@ -247,16 +249,16 @@ export default function ProjectDetailsForm({
         try {
           const [response, res] = project
             ? await Promise.all([
-              updateProjectDetails(project.id, newValues),
-              setProjectOrganization(
-                project.id,
-                project.organization?.organization?.id,
-                values.organization?.id,
-              ),
-            ])
+                updateProjectDetails(project.id, newValues),
+                setProjectOrganization(
+                  project.id,
+                  project.organization?.organization?.id,
+                  values.organization?.id,
+                ),
+              ])
             : await Promise.all([
-              createNewProject(newValues, values.organization?.id),
-            ])
+                createNewProject(newValues, values.organization?.id),
+              ])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
@@ -709,16 +711,19 @@ export default function ProjectDetailsForm({
             )}
           />
 
-          {user && !user?.farcasterId &&
-
+          {user && !user?.farcasterId && (
             <div className="flex flex-col gap-1.5 text-sm">
               <div className="font-medium">Farcaster</div>
               <div className="flex flex-row gap-2 border border-1 rounded-lg p-2 items-center">
-                <FarcasterConnection userId={user.id} >Connect</FarcasterConnection>
-                <div>Your Farcaster account must be connected to create a project.</div>
+                <FarcasterConnection userId={user.id}>
+                  Connect
+                </FarcasterConnection>
+                <div>
+                  Your Farcaster account must be connected to create a project.
+                </div>
               </div>
             </div>
-          }
+          )}
         </div>
 
         <div className="flex gap-2">

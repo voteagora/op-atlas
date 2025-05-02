@@ -12,12 +12,15 @@ import { cn } from "@/lib/utils"
 import { useUser } from "@/hooks/db/useUser"
 import { Input } from "../ui/input"
 
-
 export function GovForumConnection({ userId }: { userId: string }) {
+  const { user, invalidate: invalidateUser } = useUser({
+    id: userId,
+    enabled: true,
+  })
 
-  const { user, invalidate: invalidateUser } = useUser({ id: userId, enabled: true })
-
-  const [govForumProfileUrl, setGovForumProfileUrl] = useState(user?.govForumProfileUrl || "")
+  const [govForumProfileUrl, setGovForumProfileUrl] = useState(
+    user?.govForumProfileUrl || "",
+  )
 
   useEffect(() => {
     if (user?.govForumProfileUrl) {
@@ -26,7 +29,6 @@ export function GovForumConnection({ userId }: { userId: string }) {
   }, [user])
 
   const [isEditing, setIsEditing] = useState(false)
-
 
   const isValidGovForumUrl = (url: string) => {
     const pattern = /^https:\/\/gov\.optimism\.io\/u\/[a-zA-Z0-9-_]+\/summary$/
@@ -52,16 +54,14 @@ export function GovForumConnection({ userId }: { userId: string }) {
     }
 
     toast.promise(
-      updateGovForumProfileUrl(govForumProfileUrl)
-        .then(() => invalidateUser()),
+      updateGovForumProfileUrl(govForumProfileUrl).then(() => invalidateUser()),
       {
         loading: "Updating profile URL...",
         success: "Profile URL updated successfully",
         error: (error) => error.message || "Failed to update profile URL",
-      }
+      },
     )
   }
-
 
   // TODO: This is annoying, we should not need to check if the profile is complete here.
   useEffect(() => {
@@ -87,7 +87,6 @@ export function GovForumConnection({ userId }: { userId: string }) {
 
   return (
     <div className="flex flex-col space-y-4">
-
       <div className="flex gap-x-2">
         <div className="relative flex-1">
           {user?.govForumProfileUrl && (
@@ -109,9 +108,7 @@ export function GovForumConnection({ userId }: { userId: string }) {
           />
         </div>
         {isEditing ? (
-          <Button onClick={handleSave}          >
-            Save
-          </Button>
+          <Button onClick={handleSave}>Save</Button>
         ) : (
           <Button onClick={() => setIsEditing(true)} variant="secondary">
             Edit

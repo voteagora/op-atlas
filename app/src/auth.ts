@@ -16,9 +16,7 @@ declare module "next-auth" {
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
-  providers: [
-    PrivyCredentialsProvider,
-  ],
+  providers: [PrivyCredentialsProvider],
   callbacks: {
     async signIn({ account }) {
       return account?.type === "credentials"

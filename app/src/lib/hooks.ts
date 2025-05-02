@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react"
 import { isAddress } from "viem"
 
 import { getAllBadgeholders, getBadgeholder } from "./api/eas/badgeholder"
-import { OrganizationWithDetails, ProjectTeam, UserWithAddresses } from "./types"
+import {
+  OrganizationWithDetails,
+  ProjectTeam,
+  UserWithAddresses,
+} from "./types"
 
 export function useIsAdmin(team: ProjectTeam) {
   const { data: session } = useSession()
@@ -44,7 +48,6 @@ export function usePrevious<T>(value: T) {
   // Return previous value (happens before update in useEffect above)
   return ref.current
 }
-
 
 export function useBadgeholderAddress(address: string) {
   const { data: isBadgeholderAddress } = useQuery({

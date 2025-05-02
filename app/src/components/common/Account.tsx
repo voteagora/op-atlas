@@ -34,16 +34,21 @@ import {
 } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import { useUsername } from "@/hooks/useUsername"
 
 export const Account = () => {
-
   const { user: privyUser, getAccessToken } = usePrivy()
 
-  const isLinking = useRef(false);
+  const isLinking = useRef(false)
   const isLoggingIn = useRef(false)
 
-  const { data: session, status: authStatus, } = useSession()
-  const { user, invalidate: invalidateUser } = useUser({ id: session?.user?.id || "", enabled: !!session?.user })
+  const { data: session, status: authStatus } = useSession()
+  const { user, invalidate: invalidateUser } = useUser({
+    id: session?.user?.id || "",
+    enabled: !!session?.user,
+  })
+
+  const username = useUsername(user)
 
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
@@ -55,13 +60,16 @@ export const Account = () => {
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "email" && isLinking.current) {
-        toast.promise(syncPrivyUser(updatedPrivyUser)
-          .then(() => invalidateUser())
-          .then(() => isLinking.current = false), {
-          loading: "Adding email...",
-          success: "Email added successfully",
-          error: "Failed to add email",
-        })
+        toast.promise(
+          syncPrivyUser(updatedPrivyUser)
+            .then(() => invalidateUser())
+            .then(() => (isLinking.current = false)),
+          {
+            loading: "Adding email...",
+            success: "Email added successfully",
+            error: "Failed to add email",
+          },
+        )
       }
     },
   })
@@ -114,7 +122,6 @@ export const Account = () => {
       })
   }
 
-
   useEffect(() => {
     if (didLogIn) {
       isLoggingIn.current = false
@@ -127,14 +134,12 @@ export const Account = () => {
 
       if (!isFirstTimeUser()) {
         if (!privyUser?.email?.address) {
-          linkEmail();
-          isLinking.current = true;
+          linkEmail()
+          isLinking.current = true
         } else {
           checkBadgeholderStatus()
         }
       }
-
-
     }
   }, [
     authStatus,
@@ -161,9 +166,8 @@ export const Account = () => {
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
             <Avatar className="!w-6 !h-6">
               <AvatarImage src={user?.imageUrl || ""} alt="avatar" />
-              <AvatarFallback>{user?.username}</AvatarFallback>
             </Avatar>{" "}
-            {user?.username}
+            {username}
             <Image
               src="/assets/icons/arrowDownIcon.svg"
               width={10}
@@ -203,12 +207,12 @@ export const Account = () => {
             </DropdownMenuItem>
           </Link>
           <hr className="w-full border-[0.5px] border-border" />
-          <DropdownMenuItem className="cursor-pointer" onClick={() => {
-
-
-            privyLogout()
-
-          }}>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => {
+              privyLogout()
+            }}
+          >
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -218,7 +222,9 @@ export const Account = () => {
     return (
       <button
         type="button"
-        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${isLoggingIn.current ? 'bg-gray-300' : 'bg-brand-primary'}`}
+        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${
+          isLoggingIn.current ? "bg-gray-300" : "bg-brand-primary"
+        }`}
         onClick={privyLogin}
       >
         {isLoggingIn.current ? (

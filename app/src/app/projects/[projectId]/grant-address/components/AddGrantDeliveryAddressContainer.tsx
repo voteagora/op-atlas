@@ -14,7 +14,7 @@ export default function AddGrantDeliveryAddressContainer({
     queryKey: ["kyc-teams", "project", projectId],
     queryFn: async () => {
       const result = await getKycTeamAction(projectId)
-      if (!result || 'error' in result) {
+      if (!result || "error" in result) {
         return undefined
       }
       return result

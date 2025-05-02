@@ -6,11 +6,8 @@ import { auth } from "@/auth"
 import {
   searchUsersByUsername,
   updateUser,
-  updateUserInteraction
+  updateUserInteraction,
 } from "@/db/users"
-
-
-
 
 export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
   const session = await auth()
