@@ -2,6 +2,7 @@ import { resolve } from "path"
 import { readFileSync } from "fs"
 import { prisma } from "@/db/client"
 import { ProjectOSOMetric } from "@prisma/client"
+import { formatUnits, parseUnits } from "viem"
 
 enum Mission {
   ONCHAIN_BUILDER = "onchain_builder",
@@ -154,13 +155,13 @@ const processOnchainBuilderData = async (
             },
           },
           update: {
-            amount: project.op_reward.toString(),
+            amount: parseUnits(project.op_reward.toString(), 18).toString(),
           },
           create: {
             roundId: "8", // Onchain builder round
             tranche: month,
             projectId,
-            amount: project.op_reward.toString(),
+            amount: parseUnits(project.op_reward.toString(), 18).toString(),
           },
         })
         console.log(
@@ -290,13 +291,13 @@ const processDevToolingData = async (
             },
           },
           update: {
-            amount: project.op_reward.toString(),
+            amount: parseUnits(project.op_reward.toString(), 18).toString(),
           },
           create: {
             roundId: "7", // Dev tooling round
             tranche: month,
             projectId,
-            amount: project.op_reward.toString(),
+            amount: parseUnits(project.op_reward.toString(), 18).toString(),
           },
         })
         console.log(
@@ -504,11 +505,11 @@ const processOsoData = async ({
   const data = readJsonFile<DevToolingProject>(firstFile)
   console.log(`Found ${data.length} projects in file`)
 
-  if (mission === Mission.ONCHAIN_BUILDER) {
-    await processOnchainBuilderData(data, month)
-  } else {
-    await processDevToolingData(data, month)
-  }
+  // if (mission === Mission.ONCHAIN_BUILDER) {
+  //   await processOnchainBuilderData(data, month)
+  // } else {
+  //   await processDevToolingData(data, month)
+  // }
 
   // After processing the data, update funding rewards with the sum of recurring rewards
   console.log("\n🔄 Updating funding rewards with recurring rewards...")
@@ -523,79 +524,40 @@ const processOsoData = async ({
     },
     select: {
       projectId: true,
-      roundId: true,
       amount: true,
     },
   })
 
-  // Group recurring rewards by project and round
-  const recurringRewardsByProject = recurringRewards.reduce((acc, reward) => {
-    const key = `${reward.projectId}-${reward.roundId}`
-    if (!acc[key]) {
-      acc[key] = BigInt(0)
-    }
-    // Convert to BigInt by moving decimal point to the right
-    const [whole, decimal] = reward.amount.split(".")
-    const decimalPart = (decimal || "00").padEnd(2, "0") // Ensure we have 2 decimal places
-    const amountStr = whole + decimalPart // Combine without decimal point
-    acc[key] += BigInt(amountStr)
+  const recurringRewardByProject = recurringRewards.reduce((acc, reward) => {
+    acc[reward.projectId] =
+      (acc[reward.projectId] ?? BigInt(0)) + BigInt(reward.amount)
     return acc
   }, {} as Record<string, bigint>)
 
-  // Get all funding rewards for the current round
-  const fundingRewards = await prisma.fundingReward.findMany({
-    where: {
-      roundId,
-    },
-    select: {
-      id: true,
-      projectId: true,
-      roundId: true,
-      amount: true,
-    },
-  })
-
-  // Create a map of existing funding rewards for quick lookup
-  const existingFundingRewards = new Map(
-    fundingRewards.map((reward) => [
-      `${reward.projectId}-${reward.roundId}`,
-      reward,
-    ]),
-  )
-
-  // Update existing funding rewards and create new ones if needed
-  for (const [key, totalAmount] of Object.entries(recurringRewardsByProject)) {
-    const [projectId, roundId] = key.split("-")
-
-    // Convert back to Decimal by dividing by 100 (since we moved decimal 2 places)
-    const amount = totalAmount.toString()
-    const decimalAmount = amount.slice(0, -2) + "." + amount.slice(-2)
-
-    if (existingFundingRewards.has(key)) {
-      // Update existing funding reward
-      const reward = existingFundingRewards.get(key)!
-      await prisma.fundingReward.update({
-        where: {
-          id: reward.id,
-        },
-        data: {
-          amount: decimalAmount,
-        },
-      })
-    } else {
-      // Create new funding reward
-      await prisma.fundingReward.create({
-        data: {
-          id: crypto.randomUUID(),
-          projectId,
+  for (const [projectId, totalAmount] of Object.entries(
+    recurringRewardByProject,
+  )) {
+    await prisma.fundingReward.upsert({
+      where: {
+        roundId_projectId: {
           roundId,
-          amount: decimalAmount,
+          projectId,
         },
-      })
-      console.log(
-        `Created new funding reward for project ${projectId} in round ${roundId}`,
-      )
-    }
+      },
+      update: {
+        amount: Number(formatUnits(totalAmount, 16)) / 100,
+      },
+      create: {
+        id: crypto.randomUUID(),
+        roundId,
+        projectId,
+        amount: Number(formatUnits(totalAmount, 16)) / 100,
+      },
+    })
+
+    console.log(
+      `Created new funding reward for project ${projectId} in round ${roundId}`,
+    )
   }
 
   console.log("✅ Funding rewards updated with recurring rewards")

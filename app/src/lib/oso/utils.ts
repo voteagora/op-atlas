@@ -6,6 +6,7 @@ import {
 } from "./constants"
 import { Trend } from "./types"
 import { CHAIN_INFO } from "@/components/common/chain"
+import { formatUnits } from "viem"
 
 export const formatPerformanceMetrics = (metrics: MetricValues[]) => {
   const groupedData = groupByDate(metrics)
@@ -166,7 +167,7 @@ export const formatOnchainBuilderReward = (
 ) => {
   return data.reduce<Record<string, { value: number }>>((acc, d) => {
     acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] = {
-      value: Number(d.amount),
+      value: Number(formatUnits(BigInt(d.amount), 16)) / 100,
     }
     return acc
   }, {})
@@ -180,7 +181,7 @@ export const formatDevToolingReward = (
 ) => {
   return data.reduce<Record<string, { value: number }>>((acc, d) => {
     acc[TRANCHE_MONTHS_MAP[d.tranche as keyof typeof TRANCHE_MONTHS_MAP]] = {
-      value: Number(d.amount),
+      value: Number(formatUnits(BigInt(d.amount), 16)) / 100,
     }
     return acc
   }, {})
