@@ -1,6 +1,7 @@
 import { User } from "@prisma/client"
 import { useMemo } from "react"
 import { isAddress } from "viem"
+
 import { useEnsName } from "./useEnsName"
 
 /**

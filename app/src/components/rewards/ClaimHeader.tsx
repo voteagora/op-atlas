@@ -1,6 +1,6 @@
 import { Copy, Pencil } from "lucide-react"
-import { useSession } from "next-auth/react"
 import Image from "next/image"
+import { useSession } from "next-auth/react"
 import { toast } from "sonner"
 
 import { RewardWithProject } from "@/lib/types"

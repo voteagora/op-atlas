@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { getPublicProjectOSOData } from "@/app/api/oso/common"
 import { auth } from "@/auth"
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
+import { getUserById } from "@/db/users"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 import { cn } from "@/lib/utils"
@@ -16,7 +17,6 @@ import {
   MoreDetails,
   Performance,
 } from "./components"
-import { getUserById } from "@/db/users"
 
 interface PageProps {
   params: {

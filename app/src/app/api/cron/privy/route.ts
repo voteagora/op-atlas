@@ -1,6 +1,7 @@
+import { NextResponse } from "next/server"
+
 import { prisma } from "@/db/client"
 import { getUserConnectedAddresses } from "@/lib/neynar"
-import { NextResponse } from "next/server"
 
 // Set a generous time limit for processing
 export const maxDuration = 300

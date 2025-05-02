@@ -6,11 +6,13 @@ import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -21,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useUser } from "@/hooks/db/useUser"
 import {
   createNewProject,
   setProjectOrganization,
@@ -50,9 +53,6 @@ import {
 import { RadioGroup, RadioGroupItem } from "../../ui/radio-group"
 import { CategoryDefinitions } from "./CategoryDefinitions"
 import { PhotoCropModal } from "./PhotoCropModal"
-import { useUser } from "@/hooks/db/useUser"
-import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
-import { useSession } from "next-auth/react"
 
 const CategoryEnum = z.enum([
   "CeFi",

@@ -1,14 +1,14 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
 import { syncPrivyUser } from "@/db/privy"
-import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 import { useUser } from "@/hooks/db/useUser"
-import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
+import { cn } from "@/lib/utils"
 
 export const DiscordConnection = ({ userId }: { userId: string }) => {
   const { user: privyUser, unlinkDiscord } = usePrivy()

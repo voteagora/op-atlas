@@ -2,6 +2,7 @@
 
 import { isAfter, parse } from "date-fns"
 
+import { auth } from "@/auth"
 import {
   deleteKycTeam,
   updateKYBUserStatus,
@@ -14,7 +15,7 @@ import {
   PersonaCase,
   PersonaInquiry,
 } from "@/lib/persona"
-import { auth } from "@/auth"
+
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
 
 const SUPERFLUID_CLAIM_DATES = [

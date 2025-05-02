@@ -1,11 +1,12 @@
 "use client"
 
-import { UserAddressSource } from "@/lib/types"
+import { usePrivy } from "@privy-io/react-auth"
 
 import { AddressConnection } from "@/components/profile/AddressConnection"
-import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { useUser } from "@/hooks/db/useUser"
-import { usePrivy } from "@privy-io/react-auth"
+import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
+import { UserAddressSource } from "@/lib/types"
+
 import { VerifiedAddress } from "./verified-address"
 
 interface AddressData {

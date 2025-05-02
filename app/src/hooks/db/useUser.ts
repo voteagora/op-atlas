@@ -1,6 +1,7 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+
 import { getUserById } from "@/db/users"
 import { UserWithAddresses } from "@/lib/types"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 export const USER_QUERY_KEY = "user"
 

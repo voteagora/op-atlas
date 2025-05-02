@@ -3,10 +3,10 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
 import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
-import { verifyMembership } from "@/lib/actions/utils"
 import { getProjectRecurringRewards } from "@/db/rewards"
-import { formatRecurringRewards } from "@/lib/utils/rewards"
 import { getUserById } from "@/db/users"
+import { verifyMembership } from "@/lib/actions/utils"
+import { formatRecurringRewards } from "@/lib/utils/rewards"
 
 export default async function Page({
   params,

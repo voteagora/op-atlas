@@ -2,11 +2,11 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-
-import { AddGrantDeliveryAddressContainer } from "./components"
-import { getKycTeamForProject } from "@/db/projects"
 import { Button } from "@/components/common/Button"
 import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
+import { getKycTeamForProject } from "@/db/projects"
+
+import { AddGrantDeliveryAddressContainer } from "./components"
 
 export default async function Page({
   params,

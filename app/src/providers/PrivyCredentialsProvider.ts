@@ -1,6 +1,6 @@
+import { User as PrivyUser } from "@privy-io/react-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-import { User as PrivyUser } from "@privy-io/react-auth"
 import { syncPrivyUser } from "../db/privy"
 import { getUserByPrivyDid, upsertUser } from "../db/users"
 import privy from "../lib/privy"

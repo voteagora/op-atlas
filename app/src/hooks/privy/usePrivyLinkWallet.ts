@@ -1,9 +1,11 @@
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
-import { toast } from "sonner"
-import { useUser } from "../db/useUser"
-import { syncPrivyUser } from "@/db/privy"
-import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
 import { useRef } from "react"
+import { toast } from "sonner"
+
+import { syncPrivyUser } from "@/db/privy"
+
+import { useUser } from "../db/useUser"
+import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
 
 export const usePrivyLinkWallet = (userId: string) => {
   const isLinking = useRef(false)

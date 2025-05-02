@@ -14,6 +14,7 @@ import { z } from "zod"
 import { Button } from "@/components/common/Button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useUser } from "@/hooks/db/useUser"
 import {
   addMemberToOrganization,
   createNewOrganization,
@@ -26,6 +27,7 @@ import { OrganizationWithDetails, TeamRole } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
 
 import FileUploadInput from "../common/FileUploadInput"
+import { FarcasterConnection } from "../profile/FarcasterConnection"
 import { PhotoCropModal } from "../projects/details/PhotoCropModal"
 import AddTeamMemberDialog from "../projects/teams/AddTeamMemberDialog"
 import DeleteTeamMemberDialog from "../projects/teams/DeleteTeamMemberDialog"
@@ -39,8 +41,6 @@ import {
   FormMessage,
 } from "../ui/form"
 import { TeamMemberRow } from "./TeamMemberRow"
-import { FarcasterConnection } from "../profile/FarcasterConnection"
-import { useUser } from "@/hooks/db/useUser"
 
 const StringValue = z.object({ value: z.string() }) // use a intermediate object to represent String arrays because useFieldArray only works on object arrays
 

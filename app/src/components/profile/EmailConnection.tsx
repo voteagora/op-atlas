@@ -1,10 +1,11 @@
 "use client"
 
-import { Button } from "@/components/common/Button"
-import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
-import { useUser } from "@/hooks/db/useUser"
-import { Mail } from "lucide-react"
 import { usePrivy } from "@privy-io/react-auth"
+import { Mail } from "lucide-react"
+
+import { Button } from "@/components/common/Button"
+import { useUser } from "@/hooks/db/useUser"
+import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 
 export const EmailConnection = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId, enabled: true })

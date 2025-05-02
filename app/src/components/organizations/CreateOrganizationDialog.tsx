@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { useUser } from "@/hooks/db/useUser"
 import { createNewOrganization } from "@/lib/actions/organizations"
 import { uploadImage } from "@/lib/utils/images"
 
@@ -22,7 +23,6 @@ import FileUploadInput from "../common/FileUploadInput"
 import { DialogProps } from "../dialogs/types"
 import { PhotoCropModal } from "../projects/details/PhotoCropModal"
 import AddTeamMemberDialog from "../projects/teams/AddTeamMemberDialog"
-import { useUser } from "@/hooks/db/useUser"
 
 function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
   const { data: currentUser } = useSession()

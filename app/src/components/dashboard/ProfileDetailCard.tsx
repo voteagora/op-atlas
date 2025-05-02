@@ -5,13 +5,13 @@ import Image from "next/image"
 import Link from "next/link"
 import { memo } from "react"
 
-import { useIsBadgeholder } from "@/lib/hooks"
-import { UserWithAddresses } from "@/lib/types"
-
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { useUsername } from "@/hooks/useUsername"
+import { useIsBadgeholder } from "@/lib/hooks"
+import { UserWithAddresses } from "@/lib/types"
+
 import { Avatar, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -67,9 +67,16 @@ const ProfileDetailCard = ({
           <AvatarImage src={user.imageUrl} />
         </Avatar>
       ) : (
-        <div
+        <button
           onClick={() => linkFarcaster()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              linkFarcaster()
+            }
+          }}
           className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none hover:bg-secondary group relative cursor-pointer"
+          aria-label="Add profile picture"
         >
           <Image
             className="text-foreground group-hover:opacity-0 transition-opacity"
@@ -85,7 +92,7 @@ const ProfileDetailCard = ({
             width={18}
             height={18}
           />
-        </div>
+        </button>
       )}
 
       <div className="flex flex-col">

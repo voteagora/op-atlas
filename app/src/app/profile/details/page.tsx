@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { EmailConnection } from "@/components/profile/EmailConnection"
 import { updateInteractions } from "@/lib/actions/users"
+
 import { ProfileDetailsContent } from "./content"
 
 export default async function Page() {

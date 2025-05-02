@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form } from "@/components/ui/form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getProject, getProjectContracts } from "@/db/projects"
 import { submitApplications } from "@/lib/actions/applications"
 import {
   ApplicationWithDetails,
@@ -22,7 +23,6 @@ import { getProjectStatus } from "@/lib/utils"
 
 import ApplicationDetails from "./ApplicationDetails"
 import ApplicationProjectImpact from "./ApplicationProjectImpact"
-import { getProject, getProjectContracts } from "@/db/projects"
 
 const TERMS = [
   "I understand that Retro Funding grant recipients must complete KYC with the Optimism Foundation.",

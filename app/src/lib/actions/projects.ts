@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
+import { deleteKycTeam } from "@/db/kyc"
 import {
   addTeamMembers,
   createProject,
@@ -32,6 +33,7 @@ import {
   updateProjectOrganization,
   UpdateProjectParams,
 } from "@/db/projects"
+import { getUserById } from "@/db/users"
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
@@ -41,8 +43,6 @@ import {
   verifyMembership,
   verifyOrganizationMembership,
 } from "./utils"
-import { deleteKycTeam } from "@/db/kyc"
-import { getUserById } from "@/db/users"
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })

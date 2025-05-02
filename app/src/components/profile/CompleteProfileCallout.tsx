@@ -3,6 +3,8 @@ import { ArrowUpRight, Check, X } from "lucide-react"
 import Link from "next/link"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
+import { useUser } from "@/hooks/db/useUser"
+import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import {
   UserAddressSource,
   UserWithAddresses,
@@ -10,8 +12,6 @@ import {
 } from "@/lib/types"
 import { profileProgress } from "@/lib/utils"
 
-import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
-import { useUser } from "@/hooks/db/useUser"
 import { Badge } from "../common/Badge"
 import {
   Accordion,

@@ -12,6 +12,7 @@ import { Button } from "@/components/common/Button"
 import { getProjectsForKycTeamAction } from "@/lib/actions/projects"
 import { KYCTeamWithTeam } from "@/lib/types"
 import { useAppDialogs } from "@/providers/DialogProvider"
+
 import GrantDeliveryAddress from "./GrantDeliveryAddress"
 
 interface CompletedGrantDeliveryFormProps {

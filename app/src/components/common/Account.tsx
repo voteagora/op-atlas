@@ -1,17 +1,17 @@
 "use client"
 
 import {
-  User as PrivyUser,
   useLinkAccount,
   useLogin,
   useLogout,
   usePrivy,
+  User as PrivyUser,
 } from "@privy-io/react-auth"
 import { Loader2 } from "lucide-react"
-import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { signIn, signOut, useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
 

@@ -1,5 +1,7 @@
 import { CircleHelp, Copy, Ellipsis, X } from "lucide-react"
 import Image from "next/image"
+import { toast } from "sonner"
+import { getAddress } from "viem"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
@@ -14,8 +16,7 @@ import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
 import { shortenAddress } from "@/lib/utils"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { toast } from "sonner"
-import { getAddress } from "viem"
+
 import { makeUserAddressPrimaryAction } from "./actions"
 
 export const VerifiedAddress = ({

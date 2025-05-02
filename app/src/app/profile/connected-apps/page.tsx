@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
@@ -5,7 +6,6 @@ import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
-import Image from "next/image"
 export default async function Page() {
   const session = await auth()
 

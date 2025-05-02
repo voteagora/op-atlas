@@ -1,9 +1,11 @@
 "use server"
 
-import { addContactToList, removeContactFromList } from "@/lib/api/mailchimp"
 import { User } from "@prisma/client"
 import { User as PrivyUser } from "@privy-io/react-auth"
 import { getAddress } from "viem"
+
+import { addContactToList, removeContactFromList } from "@/lib/api/mailchimp"
+
 import {
   addUserAddresses,
   deleteUserEmails,

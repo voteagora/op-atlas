@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
+import { deleteKycTeam } from "@/db/kyc"
 import {
   addOrganizationMembers,
   createOrganization,
@@ -17,13 +18,12 @@ import {
   updateOrganizationMemberRole,
   UpdateOrganizationParams,
 } from "@/db/organizations"
+import { getUserById } from "@/db/users"
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"
-import { deleteKycTeam } from "@/db/kyc"
-import { getUserById } from "@/db/users"
 
 export const getUserOrganizations = async (userId: string) => {
   const user = await getUserOrganizationsWithDetails(userId)

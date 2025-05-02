@@ -1,3 +1,4 @@
+import { SuperfluidStream } from "@prisma/client"
 import { formatUnits, keccak256, parseUnits } from "viem"
 
 import {
@@ -6,7 +7,6 @@ import {
   RecurringRewardWithProject,
 } from "../types"
 import { isKycTeamVerified } from "./kyc"
-import { SuperfluidStream } from "@prisma/client"
 
 export function generateRewardStreamId(projectIds: string[]) {
   return keccak256(Buffer.from(projectIds.sort().join("")))

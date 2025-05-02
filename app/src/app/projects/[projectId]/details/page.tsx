@@ -4,8 +4,8 @@ import { auth } from "@/auth"
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { getAdminOrganizations } from "@/db/organizations"
 import { getProject } from "@/db/projects"
-import { verifyMembership } from "@/lib/actions/utils"
 import { getUserById } from "@/db/users"
+import { verifyMembership } from "@/lib/actions/utils"
 
 export default async function Page({
   params,

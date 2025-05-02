@@ -1,11 +1,13 @@
-import { toast } from "sonner"
 import {
   useLinkAccount,
   usePrivy,
   useUpdateAccount,
 } from "@privy-io/react-auth"
 import { useRef } from "react"
+import { toast } from "sonner"
+
 import { syncPrivyUser } from "@/db/privy"
+
 import { useUser } from "../db/useUser"
 import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
 

@@ -1,7 +1,9 @@
 "use client"
 
-import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { ReactNode } from "react"
+
+import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
+
 import { Button } from "../common/Button"
 
 interface Props {

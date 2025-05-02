@@ -6,7 +6,6 @@ import { DeleteKYCTeamDialog } from "../projects/rewards/DeleteKYCTeamDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
-
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"

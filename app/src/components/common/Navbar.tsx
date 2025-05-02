@@ -15,8 +15,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
-import { MobileNav } from "./MobileNav"
 import { Account } from "./Account"
+import { MobileNav } from "./MobileNav"
 
 export const dropdownList = [
   {

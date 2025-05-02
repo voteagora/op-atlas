@@ -1,7 +1,7 @@
-import { getEnsName } from "viem/actions"
-import { createPublicClient, http } from "viem"
-import { mainnet } from "viem/chains"
 import { useQuery } from "@tanstack/react-query"
+import { createPublicClient, http } from "viem"
+import { getEnsName } from "viem/actions"
+import { mainnet } from "viem/chains"
 
 const client = createPublicClient({
   chain: mainnet,

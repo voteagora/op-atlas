@@ -5,11 +5,10 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
+import { useUser } from "@/hooks/db/useUser"
 import { updateGovForumProfileUrl } from "@/lib/actions/users"
-
 import { cn } from "@/lib/utils"
 
-import { useUser } from "@/hooks/db/useUser"
 import { Input } from "../ui/input"
 
 export function GovForumConnection({ userId }: { userId: string }) {

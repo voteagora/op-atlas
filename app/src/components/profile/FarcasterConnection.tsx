@@ -1,11 +1,13 @@
 "use client"
 
-import { useUser } from "@/hooks/db/useUser"
-import { cn } from "@/lib/utils"
 import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
-import { Button } from "../common/Button"
+
+import { useUser } from "@/hooks/db/useUser"
 import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
+import { cn } from "@/lib/utils"
+
+import { Button } from "../common/Button"
 
 export const FarcasterConnection = ({
   userId,

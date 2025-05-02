@@ -16,10 +16,10 @@ import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { useUser } from "@/hooks/db/useUser"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { createProjectKycTeamAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { useUser } from "@/hooks/db/useUser"
 
 const formSchema = z.object({
   signature: z.string().min(1, "Signature is required"),

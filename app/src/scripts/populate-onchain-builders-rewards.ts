@@ -1,10 +1,10 @@
 import fs from "fs/promises"
 import path from "path"
 import { v4 as uuidV4 } from "uuid"
+import { parseUnits } from "viem"
 
 import { prisma } from "@/db/client"
 import { chunkArray } from "@/lib/utils"
-import { parseUnits } from "viem"
 
 const BATCH_SIZE = 10
 

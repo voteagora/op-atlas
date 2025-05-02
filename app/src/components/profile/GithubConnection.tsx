@@ -1,16 +1,16 @@
 "use client"
 
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
+import { syncPrivyUser } from "@/db/privy"
+import { useUser } from "@/hooks/db/useUser"
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 import { setUserIsNotDeveloper } from "@/lib/actions/users"
 import { cn } from "@/lib/utils"
 
-import { syncPrivyUser } from "@/db/privy"
-import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
-import { useUser } from "@/hooks/db/useUser"
-import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { Checkbox } from "../ui/checkbox"
 
 export const GithubConnection = ({ userId }: { userId: string }) => {
