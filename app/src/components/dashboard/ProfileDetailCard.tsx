@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, Cross, Ellipsis } from "lucide-react"
+import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo } from "react"
@@ -9,6 +9,7 @@ import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 
 import { useUser } from "@/hooks/db/useUser"
+import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { useUsername } from "@/hooks/useUsername"
 import { Avatar, AvatarImage } from "../ui/avatar"
@@ -21,19 +22,20 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 
-const ProfileDetailCard = ({ user }: { user: UserWithAddresses }) => {
+const ProfileDetailCard = ({
+  user: initialUser,
+}: {
+  user: UserWithAddresses
+}) => {
+  const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
+  const user = loadedUser || initialUser
+
   const { isBadgeholder } = useIsBadgeholder(user)
-  const { user: loadedUser } = useUser({ id: user.id, enabled: true })
+  const { linkEmail } = usePrivyEmail(user.id)
+  const { linkFarcaster } = usePrivyFarcaster(user.id)
 
   const username = useUsername(loadedUser)
-  const avatar = user.imageUrl
-
-  const { linkEmail } = usePrivyEmail(user.id)
-
-  const email = loadedUser
-    ? loadedUser?.emails[0]?.email
-    : user.emails[0]?.email
-  const name = loadedUser ? loadedUser?.name : user.name
+  const email = user.emails?.[0]?.email
 
   const renderEmail = () => {
     if (email) {
@@ -60,12 +62,15 @@ const ProfileDetailCard = ({ user }: { user: UserWithAddresses }) => {
 
   return (
     <div className="flex gap-x-4">
-      {avatar ? (
+      {user.imageUrl ? (
         <Avatar className="w-20 h-20 my-0.5">
-          <AvatarImage src={avatar} />
+          <AvatarImage src={user.imageUrl} />
         </Avatar>
       ) : (
-        <div className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-white hover:bg-secondary group relative cursor-pointer">
+        <div
+          onClick={() => linkFarcaster()}
+          className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none hover:bg-secondary group relative cursor-pointer"
+        >
           <Image
             className="text-foreground group-hover:opacity-0 transition-opacity"
             src="/assets/icons/user-icon.svg"
@@ -85,7 +90,7 @@ const ProfileDetailCard = ({ user }: { user: UserWithAddresses }) => {
 
       <div className="flex flex-col">
         <div className="text-2xl font-semibold flex items-center gap-x-2">
-          {name || ""}
+          {username || ""}
           {isBadgeholder && (
             <Image
               src="/assets/icons/badgeholder-sunny.png"
@@ -99,12 +104,13 @@ const ProfileDetailCard = ({ user }: { user: UserWithAddresses }) => {
         {user.bio && <p>{user.bio}</p>}
 
         <div className="mt-2 mr-4 flex items-center gap-x-4">
-          <p className="text-sm text-muted-foreground">
-            Username{" "}
-            <span className="font-medium text-secondary-foreground">
-              {username}
-            </span>
-          </p>
+          {user.username && (
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-secondary-foreground">
+                Username: @{user.username}
+              </span>
+            </p>
+          )}
           <p className="text-sm text-muted-foreground">{renderEmail()}</p>
         </div>
       </div>

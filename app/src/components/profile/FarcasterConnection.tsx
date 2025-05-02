@@ -1,12 +1,11 @@
 "use client"
 
-import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { cn } from "@/lib/utils"
-import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
+import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
-import { toast } from "sonner"
 import { Button } from "../common/Button"
+import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 
 export const FarcasterConnection = ({
   userId,
@@ -15,48 +14,18 @@ export const FarcasterConnection = ({
   userId: string
   children: React.ReactNode
 }) => {
-  const { unlinkFarcaster } = usePrivy()
-  const { user, invalidate: invalidateUser } = useUser({
+  const { user } = useUser({
     id: userId,
     enabled: true,
   })
   const { user: privyUser } = usePrivy()
+  const { linkFarcaster, unlinkFarcaster } = usePrivyFarcaster(userId)
 
   const isIntermediateState =
     Number(user?.farcasterId || 0) !== privyUser?.farcaster?.fid
   const username = user?.farcasterId
     ? user.username
     : privyUser?.farcaster?.username
-
-  const { linkFarcaster } = useLinkAccount({
-    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      if (linkMethod === "farcaster") {
-        toast.promise(
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser()),
-          {
-            loading: "Linking farcaster...",
-            success: "Farcaster linked successfully",
-            error: "Failed to link farcaster",
-          },
-        )
-      }
-    },
-  })
-
-  const handleUnlinkFarcaster = () => {
-    if (user?.farcasterId) {
-      toast.promise(unlinkFarcaster(Number(user.farcasterId)), {
-        loading: "Unlinking farcaster...",
-        success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
-          return "Farcaster unlinked successfully"
-        },
-        error: (error) => {
-          return error.message
-        },
-      })
-    }
-  }
 
   return (
     <div className="flex flex-row gap-2">
@@ -84,7 +53,7 @@ export const FarcasterConnection = ({
       {username ? (
         <Button
           variant="secondary"
-          onClick={handleUnlinkFarcaster}
+          onClick={unlinkFarcaster}
           className={cn(isIntermediateState && "opacity-50")}
         >
           Disconnect
