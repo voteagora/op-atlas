@@ -203,6 +203,36 @@ export type UserWithAddresses = Prisma.UserGetPayload<{
   }
 }>
 
+export type PublicProject = Prisma.ProjectGetPayload<{
+  include: {
+    applications: true
+    links: true
+    contracts: true
+    repos: true
+    funding: true
+    rewards: {
+      select: { roundId: true; amount: true }
+    }
+    organization: {
+      select: {
+        organization: {
+          select: {
+            name: true
+            avatarUrl: true
+            team: {
+              select: { user: true }
+            }
+          }
+        }
+      }
+    }
+    team: {
+      orderBy: { createdAt: "asc" }
+      select: { user: true }
+    }
+  }
+}>
+
 export type UserAddressSource = "farcaster" | "atlas"
 
 export type UserWithEmails = Prisma.UserGetPayload<{
