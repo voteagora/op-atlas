@@ -67,129 +67,125 @@ export async function GET() {
       })
     }
 
-    const results = await Promise.allSettled(
-      users.map(async (user: any) => {
-        try {
-          const linkedAccounts: LinkedAccount[] = []
+    const results = []
 
-          // Link email
-          if (user.emails && user.emails.length > 0) {
-            const email = user.emails[0]?.email
-            if (email) {
-              linkedAccounts.push({
-                type: "email",
-                address: email,
-              })
-            }
-          }
+    for (const user of users) {
+      try {
+        const linkedAccounts: LinkedAccount[] = []
 
-          // Link wallets
-          if (user.addresses && user.addresses.length > 0) {
-            user.addresses.forEach((address: any) => {
-              linkedAccounts.push({
-                type: "wallet",
-                chain_type: "ethereum",
-                address: address.address,
-              })
+        // Link email
+        if (user.emails && user.emails.length > 0) {
+          const email = user.emails[0]?.email
+          if (email) {
+            linkedAccounts.push({
+              type: "email",
+              address: email,
             })
           }
+        }
 
-          // Link GitHub
-          if (user.github) {
-            try {
-              // Fetch GitHub user data using the GitHub API
-              const githubResponse = await fetch(`https://api.github.com/users/${user.github}`, {
-                headers: {
-                  'Authorization': `token ${process.env.GITHUB_AUTH_TOKEN}`,
-                  'Accept': 'application/vnd.github.v3+json'
-                }
-              });
-
-              if (!githubResponse.ok) {
-                throw new Error(`GitHub API error: ${githubResponse.statusText}`);
-              }
-
-              const githubUser = await githubResponse.json();
-
-              // Add GitHub account to linked accounts
-              linkedAccounts.push({
-                type: "github_oauth",
-                subject: githubUser.node_id,
-                username: githubUser.login
-              });
-            } catch (error) {
-              console.error(`Error fetching GitHub user data for ${user.github}:`, error);
-            }
-          }
-
-          // Link Farcaster
-          if (user.farcasterId) {
-            const farcasterAddresses = await getUserConnectedAddresses(
-              user.farcasterId,
-            )
-
-            if (farcasterAddresses && farcasterAddresses.length > 0) {
-              linkedAccounts.push({
-                type: "farcaster",
-                fid: Number(user.farcasterId),
-                owner_address: farcasterAddresses[0],
-              })
-            }
-          }
-
-          // Skip if no linked accounts can be created
-          if (linkedAccounts.length === 0) {
-            return {
-              userId: user.id,
-              status: "skipped",
-              reason: "No linked accounts available",
-            }
-          }
-
-          // Create user in Privy using the API
-          const privyResponse = await fetch("https://api.privy.io/v1/users", {
-            method: "POST",
-            headers: {
-              Authorization: `Basic ${Buffer.from(
-                `${process.env.PRIVY_APP_ID}:${process.env.PRIVY_APP_SECRET}`,
-              ).toString("base64")}`,
-              "Content-Type": "application/json",
-              "privy-app-id": process.env.PRIVY_APP_ID!,
-            },
-            body: JSON.stringify({
-              linked_accounts: linkedAccounts,
-            }),
+        // Link wallets
+        if (user.addresses && user.addresses.length > 0) {
+          user.addresses.forEach((address: any) => {
+            linkedAccounts.push({
+              type: "wallet",
+              chain_type: "ethereum",
+              address: address.address,
+            })
           })
+        }
 
-          if (!privyResponse.ok) {
-            const errorData = await privyResponse.json()
-            throw new Error(`Privy API error: ${JSON.stringify(errorData)}`)
+        // Link GitHub
+        if (user.github) {
+          try {
+            const githubResponse = await fetch(`https://api.github.com/users/${user.github}`, {
+              headers: {
+                'Authorization': `token ${process.env.GITHUB_AUTH_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+              }
+            });
+
+            if (!githubResponse.ok) {
+              throw new Error(`GitHub API error: ${githubResponse.statusText}`);
+            }
+
+            const githubUser = await githubResponse.json();
+
+            linkedAccounts.push({
+              type: "github_oauth",
+              subject: githubUser.node_id,
+              username: githubUser.login
+            });
+          } catch (error) {
+            console.error(`Error fetching GitHub user data for ${user.github}:`, error);
           }
+        }
 
-          const privyUser = await privyResponse.json()
+        // Link Farcaster
+        if (user.farcasterId) {
+          const farcasterAddresses = await getUserConnectedAddresses(user.farcasterId)
 
+          if (farcasterAddresses && farcasterAddresses.length > 0) {
+            linkedAccounts.push({
+              type: "farcaster",
+              fid: Number(user.farcasterId),
+              owner_address: farcasterAddresses[0],
+            })
+          }
+        }
 
-          await prisma.$executeRaw`
+        // Skip if no linked accounts can be created
+        if (linkedAccounts.length === 0) {
+          results.push({
+            userId: user.id,
+            status: "skipped",
+            reason: "No linked accounts available",
+          })
+          continue
+        }
+
+        // Create user in Privy using the API
+        const privyResponse = await fetch("https://api.privy.io/v1/users", {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${Buffer.from(
+              `${process.env.PRIVY_APP_ID}:${process.env.PRIVY_APP_SECRET}`,
+            ).toString("base64")}`,
+            "Content-Type": "application/json",
+            "privy-app-id": process.env.PRIVY_APP_ID!,
+          },
+          body: JSON.stringify({
+            linked_accounts: linkedAccounts,
+          }),
+        })
+
+        if (!privyResponse.ok) {
+          const errorData = await privyResponse.json()
+          throw new Error(`Privy API error: ${JSON.stringify(errorData)}`)
+        }
+
+        const privyUser = await privyResponse.json()
+
+        await prisma.$executeRaw`
           UPDATE "User"
           SET "privyDid" = ${privyUser.id}, "updatedAt" = NOW()
           WHERE "id" = ${user.id}
-          `
+        `
 
-          return {
-            userId: user.id,
-            status: "success",
-            privyDid: privyUser.id,
-          }
-        } catch (error) {
-          console.error(`Error creating Privy user for user ${user.id}:`, error)
-          return {
-            userId: user.id,
-            status: "error",
-            error: String(error),
-          }
-        }
-      }),
-    )
+        results.push({
+          userId: user.id,
+          status: "success",
+          privyDid: privyUser.id,
+        })
+      } catch (error) {
+        console.error(`Error creating Privy user for user ${user.id}:`, error)
+        results.push({
+          userId: user.id,
+          status: "error",
+          error: String(error),
+        })
+      }
+    }
 
     return NextResponse.json({
       status: "success",
