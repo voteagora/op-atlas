@@ -41,7 +41,7 @@ export async function updateKYBUserStatus(
     WITH closest_match AS (
       SELECT id, difference(lower(unaccent("businessName")), lower(unaccent(${name}))) as name_similarity
       FROM "KYCUser" 
-      WHERE "email" = ${email.toLowerCase()}
+      WHERE "email" = ${email.toLowerCase()} AND "businessName" IS NOT NULL
       ORDER BY name_similarity DESC
       LIMIT 1
     )
