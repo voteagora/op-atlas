@@ -298,7 +298,11 @@ export async function getRewardStreamsWithRewardsForRound(roundId: string) {
           rewardStream: true,
           projects: {
             include: {
-              recurringRewards: true,
+              recurringRewards: {
+                where: {
+                  tranche: 1,
+                },
+              },
             },
           },
         },
