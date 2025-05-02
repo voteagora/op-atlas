@@ -174,7 +174,7 @@ export default function OnchainBuilderMission({
               >
                 <MetricCard
                   value={formatNumber(
-                    (onchainBuilderMetrics?.tvl?.[month]?.value ?? 0) / 30,
+                    onchainBuilderMetrics?.tvl?.[month]?.value ?? 0,
                     0,
                     "compact",
                   )}
@@ -242,8 +242,8 @@ export default function OnchainBuilderMission({
                 <MetricCard
                   value={formatNumber(
                     Math.round(
-                      (onchainBuilderMetrics?.activeAddresses?.[month]?.value ??
-                        0) / 30,
+                      onchainBuilderMetrics?.activeAddresses?.[month]?.value ??
+                        0,
                     ),
                     0,
                     "compact",
