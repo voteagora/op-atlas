@@ -15,7 +15,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
+import { useUsername } from "@/hooks/useUsername"
 import { AUTH_STATUS } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {
@@ -34,7 +35,6 @@ import {
 } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { useUsername } from "@/hooks/useUsername"
 
 export const Account = () => {
   const { user: privyUser, getAccessToken } = usePrivy()

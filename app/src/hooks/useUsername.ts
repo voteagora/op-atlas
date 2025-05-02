@@ -25,7 +25,7 @@ export const useUsername = (
     if (!user) return null
     if (user.username) return user.username
     if (validAddress) {
-      return ensName ?? `${validAddress.slice(0, 6)}…`
+      return ensName ?? `${validAddress.slice(0, 6)}`
     }
     if (user.emails?.[0]?.email) {
       const localPart = user.emails[0].email.split("@")[0]

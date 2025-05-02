@@ -1,16 +1,17 @@
 "use client"
 
-import { ArrowUpRight, Ellipsis } from "lucide-react"
+import { ArrowUpRight, Cross, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo } from "react"
 
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
-import { cn } from "@/lib/utils"
 
 import { useUser } from "@/hooks/db/useUser"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
+import { useUsername } from "@/hooks/useUsername"
+import { Avatar, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
@@ -19,20 +20,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
-import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
-import { useUsername } from "@/hooks/useUsername"
 
-const ProfileDetailCard = ({
-  className,
-  user,
-}: {
-  className?: string
-  user: UserWithAddresses
-}) => {
+const ProfileDetailCard = ({ user }: { user: UserWithAddresses }) => {
   const { isBadgeholder } = useIsBadgeholder(user)
   const { user: loadedUser } = useUser({ id: user.id, enabled: true })
 
   const username = useUsername(loadedUser)
+  const avatar = user.imageUrl
+
   const { linkEmail } = usePrivyEmail(user.id)
 
   const email = loadedUser
@@ -64,19 +59,29 @@ const ProfileDetailCard = ({
   }
 
   return (
-    <div className={cn("flex gap-x-4", className)}>
-      <Avatar className="w-20 h-20 my-0.5">
-        <AvatarImage src={user?.imageUrl ?? ""} />
-        <AvatarFallback>
+    <div className="flex gap-x-4">
+      {avatar ? (
+        <Avatar className="w-20 h-20 my-0.5">
+          <AvatarImage src={avatar} />
+        </Avatar>
+      ) : (
+        <div className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-white hover:bg-secondary group relative cursor-pointer">
           <Image
+            className="text-foreground group-hover:opacity-0 transition-opacity"
             src="/assets/icons/user-icon.svg"
             alt="user"
             width={18}
             height={18}
-            className="text-foreground"
           />
-        </AvatarFallback>
-      </Avatar>
+          <Image
+            className="absolute w-6 h-6 text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+            src="/assets/icons/add-line.svg"
+            alt="add"
+            width={18}
+            height={18}
+          />
+        </div>
+      )}
 
       <div className="flex flex-col">
         <div className="text-2xl font-semibold flex items-center gap-x-2">
