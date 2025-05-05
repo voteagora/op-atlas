@@ -9,12 +9,14 @@ import { addContactToList, removeContactFromList } from "@/lib/api/mailchimp"
 import {
   addUserAddresses,
   deleteUserEmails,
+
   getUserById,
   getUserByPrivyDid,
   removeUserAddress,
   updateUser,
   updateUserEmail,
 } from "./users"
+import { generateTemporaryUsername } from "@/lib/utils/username"
 
 export const syncPrivyUser = async (
   privyUser: PrivyUser,
@@ -31,16 +33,16 @@ export const syncPrivyUser = async (
   const addressesInPrivy =
     privyUser.linkedAccounts && privyUser.linkedAccounts.length > 0
       ? (privyUser.linkedAccounts
-          .filter(
-            (account) =>
-              account.type === "wallet" && account.chainType === "ethereum",
-          )
-          .map((wallet) =>
-            (wallet as any).address
-              ? getAddress((wallet as any).address as `0x${string}`)
-              : null,
-          )
-          .filter(Boolean) as `0x${string}`[])
+        .filter(
+          (account) =>
+            account.type === "wallet" && account.chainType === "ethereum",
+        )
+        .map((wallet) =>
+          (wallet as any).address
+            ? getAddress((wallet as any).address as `0x${string}`)
+            : null,
+        )
+        .filter(Boolean) as `0x${string}`[])
       : []
 
   // Link farcaster to user
@@ -65,6 +67,11 @@ export const syncPrivyUser = async (
       await updateUser({
         id: existingUser.id,
         farcasterId: null,
+        name: null,
+        // Reset username to a temporary one
+        username: generateTemporaryUsername(existingUser.privyDid!),
+        imageUrl: null,
+        bio: null,
       })
     } catch (error) {
       console.error("Failed to remove farcaster data:", error)

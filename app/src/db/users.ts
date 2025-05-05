@@ -17,6 +17,7 @@ import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
 import { createHash } from "crypto"
+import { generateTemporaryUsername } from "@/lib/utils/username"
 
 export type Entity = keyof ExtendedAggregatedType
 export type EntityObject = {
@@ -873,16 +874,10 @@ export async function updateUser({
 }
 
 export async function createUser(privyDid: string) {
-
-  const suffix = createHash('sha256')
-    .update(privyDid)
-    .digest('hex')
-    .slice(0, 8);
-
   return prisma.user.create({
     data: {
       privyDid,
-      username: `optimist-${suffix}`,
+      username: generateTemporaryUsername(privyDid),
     }
   })
 }
