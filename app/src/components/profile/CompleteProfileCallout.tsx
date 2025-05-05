@@ -22,6 +22,7 @@ import {
 import { AddressConnection } from "./AddressConnection"
 import { EmailConnection } from "./EmailConnection"
 import { GithubConnection } from "./GithubConnection"
+import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 
 export function CompleteProfileCallout({
   user: initialUser,
@@ -187,7 +188,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
-        {user.addresses.length > 1 ? <GreenCheck /> : <StepNumber num={3} />}
+        {user.addresses.length >= 1 ? <GreenCheck /> : <StepNumber num={3} />}
         <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-[2px]">
@@ -261,6 +262,19 @@ function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
               Choose one of your verified address to receive attestations from
               Optimism (including the voting badge for Citizens and Guest
               Voters).
+              <div className="flex flex-col gap-1.5 mt-4">
+
+                {user.addresses.map(({ address, source, primary }) => (
+                  <PrimaryAddress
+                    key={address}
+                    address={address}
+                    primary={primary}
+                    showCheckmark={false}
+                    source={source as UserAddressSource}
+                    userId={user.id}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
