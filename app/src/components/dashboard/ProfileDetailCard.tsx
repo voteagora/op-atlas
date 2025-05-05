@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, Ellipsis } from "lucide-react"
+import { ArrowLeftIcon, ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo } from "react"
@@ -21,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
+import { ArrowDropRight } from "../icons/ArrowDropRight"
 
 const ProfileDetailCard = ({
   user: initialUser,
@@ -52,10 +53,26 @@ const ProfileDetailCard = ({
           onClick={() => {
             linkEmail()
           }}
-          className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
         >
           Add your email
         </Button>
+      )
+    }
+  }
+
+  const renderUsername = () => {
+
+    if (user.username && user.farcasterId) {
+      return (
+        <span className="text-secondary-foreground">
+          Username: <span className="font-medium">{user.username}</span>
+        </span>
+      )
+    } else {
+      return (
+        <Link href="/profile/details" className="hover:underline flex items-center gap-x-0.5">
+          Add profile details <ArrowDropRight fill="#6B7280" className="text-muted-foreground" />
+        </Link>
       )
     }
   }
@@ -110,15 +127,9 @@ const ProfileDetailCard = ({
 
         {user.bio && <p>{user.bio}</p>}
 
-        <div className="mt-2 mr-4 flex items-center gap-x-4">
-          {user.username && (
-            <p className="text-sm text-muted-foreground">
-              <span className="text-secondary-foreground">
-                Username: <span className="font-medium">{user.username}</span>
-              </span>
-            </p>
-          )}
-          <p className="text-sm text-muted-foreground">{renderEmail()}</p>
+        <div className="mt-2 mr-4 flex items-center gap-x-4 text-sm text-muted-foreground">
+          <div>{renderUsername()}</div>
+          <div>{renderEmail()}</div>
         </div>
       </div>
 
