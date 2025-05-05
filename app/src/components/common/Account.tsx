@@ -1,17 +1,17 @@
 "use client"
 
 import {
+  User as PrivyUser,
   useLinkAccount,
   useLogin,
   useLogout,
   usePrivy,
-  User as PrivyUser,
 } from "@privy-io/react-auth"
 import { Loader2 } from "lucide-react"
+import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { signIn, signOut, useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
 
@@ -164,9 +164,24 @@ export const Account = () => {
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
-            <Avatar className="!w-6 !h-6">
-              <AvatarImage src={user?.imageUrl || ""} alt="avatar" />
-            </Avatar>{" "}
+
+            {user?.imageUrl ?
+              (
+                <Avatar className="w-6 h-6">
+                  <AvatarImage src={user?.imageUrl} alt="avatar" />
+                </Avatar>
+              ) : (
+                <div className="w-6 h-6 bg-secondary rounded-full flex items-center justify-center border border-muted">
+                  <Image
+                    src="/assets/icons/user-icon.svg"
+                    alt="user"
+                    width={8}
+                    height={8}
+                  />
+                </div>
+              )
+            }
+
             {username}
             <Image
               src="/assets/icons/arrowDownIcon.svg"
@@ -222,9 +237,8 @@ export const Account = () => {
     return (
       <button
         type="button"
-        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${
-          isLoggingIn.current ? "bg-gray-300" : "bg-brand-primary"
-        }`}
+        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${isLoggingIn.current ? "bg-gray-300" : "bg-brand-primary"
+          }`}
         onClick={privyLogin}
       >
         {isLoggingIn.current ? (
