@@ -243,8 +243,8 @@ export function ContractsForm({ project }: ContractsFormProps) {
                 https://defillama.com/protocol/aave-v3
               </Link>{" "}
               ) rather than the parent URL. If your project spans multiple
-              "child" protocols (aave-v1, aave-v2, aave-v3), list each one
-              separately. This ensures all your adapters are recognized
+              &quot;child&quot; protocols (aave-v1, aave-v2, aave-v3), list each
+              one separately. This ensures all your adapters are recognized
               correctly.
             </p>
           </div>
