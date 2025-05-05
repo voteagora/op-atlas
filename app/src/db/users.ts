@@ -45,17 +45,6 @@ export async function getUserById(userId: string) {
       emails: true,
     },
   })
-
-  // If no session or if requesting user is not the target user,
-  // return user data without emails
-  if (!session?.user?.id || session.user.id !== userId) {
-    if (user) {
-      const { emails, interaction, ...userWithoutEmailsAndInteraction } = user
-      return userWithoutEmailsAndInteraction
-    }
-    return null
-  }
-
   return user
 }
 
