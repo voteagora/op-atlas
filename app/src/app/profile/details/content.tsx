@@ -7,6 +7,7 @@ import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { useUser } from "@/hooks/db/useUser"
+import { FarcasterIcon } from "@/components/icons/farcaster"
 
 export const ProfileDetailsContent = ({ session }: { session: Session }) => {
   const { user } = useUser({ id: session?.user?.id, enabled: !!session?.user })
@@ -23,6 +24,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
         </div>
 
         <FarcasterConnection userId={session.user.id}>
+          <FarcasterIcon fill="#FFFFFF" className="w-[20px] h-[20px]" />
           Import from Farcaster
         </FarcasterConnection>
       </div>
