@@ -22,6 +22,8 @@ const PublicUserProfile = ({
   organizations: Organization[]
   projects: ProjectWithDetailsLite[]
 }) => {
+
+
   return (
     <div
       className={cn(

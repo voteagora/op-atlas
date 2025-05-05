@@ -15,9 +15,9 @@ import {
 } from "@/lib/constants"
 import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
 
-import { prisma } from "./client"
-import { createHash } from "crypto"
+import { auth } from "@/auth"
 import { generateTemporaryUsername } from "@/lib/utils/username"
+import { prisma } from "./client"
 
 export type Entity = keyof ExtendedAggregatedType
 export type EntityObject = {
@@ -30,7 +30,8 @@ export type EntityRecords = Record<
 >
 
 export async function getUserById(userId: string) {
-  return prisma.user.findUnique({
+  const session = await auth()
+  const user = await prisma.user.findUnique({
     where: {
       id: userId,
     },
@@ -44,6 +45,18 @@ export async function getUserById(userId: string) {
       emails: true,
     },
   })
+
+  // If no session or if requesting user is not the target user,
+  // return user data without emails
+  if (!session?.user?.id || session.user.id !== userId) {
+    if (user) {
+      const { emails, interaction, ...userWithoutEmailsAndInteraction } = user
+      return userWithoutEmailsAndInteraction
+    }
+    return null
+  }
+
+  return user
 }
 
 export async function getUserByPrivyDid(privyDid: string): Promise<
