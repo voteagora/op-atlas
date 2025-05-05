@@ -113,8 +113,8 @@ const ProfileDetailCard = ({
         <div className="mt-2 mr-4 flex items-center gap-x-4">
           {user.username && (
             <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-secondary-foreground">
-                Username: @{user.username}
+              <span className="text-secondary-foreground">
+                Username: <span className="font-medium">{user.username}</span>
               </span>
             </p>
           )}

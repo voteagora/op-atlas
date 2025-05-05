@@ -2,7 +2,7 @@ import { User as PrivyUser } from "@privy-io/react-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
 import { syncPrivyUser } from "../db/privy"
-import { getUserByPrivyDid, upsertUser } from "../db/users"
+import { createUser, getUserByPrivyDid } from "../db/users"
 import privy from "../lib/privy"
 interface UserResponse {
   id: string
@@ -49,11 +49,9 @@ export const PrivyCredentialsProvider = CredentialsProvider({
     // Check if a user with this privyDid already exists
     const existingUser = await getUserByPrivyDid(privyUser.id)
 
-    const user =
-      existingUser ||
-      (await upsertUser({
-        privyDid: privyUser.id,
-      }))
+    if (!existingUser) {
+      await createUser(privyUser.id)
+    }
 
     const refreshedUser = await syncPrivyUser(privyUser)
     return userResponse(refreshedUser)

@@ -16,6 +16,7 @@ import {
 import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
 
 import { prisma } from "./client"
+import { createHash } from "crypto"
 
 export type Entity = keyof ExtendedAggregatedType
 export type EntityObject = {
@@ -46,10 +47,10 @@ export async function getUserById(userId: string) {
 
 export async function getUserByPrivyDid(privyDid: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   return prisma.user.findFirst({
@@ -128,10 +129,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -260,24 +261,24 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-        prisma.userEmail.delete({
-          where: {
-            id: currentEmail.id,
-          },
-        }),
-      ]
+      prisma.userEmail.delete({
+        where: {
+          id: currentEmail.id,
+        },
+      }),
+    ]
     : []
 
   const createEmail = email
     ? [
-        prisma.userEmail.create({
-          data: {
-            email,
-            userId: id,
-            verified: verified ?? false,
-          },
-        }),
-      ]
+      prisma.userEmail.create({
+        data: {
+          email,
+          userId: id,
+          verified: verified ?? false,
+        },
+      }),
+    ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])
@@ -868,5 +869,20 @@ export async function updateUser({
     include: {
       emails: true,
     },
+  })
+}
+
+export async function createUser(privyDid: string) {
+
+  const suffix = createHash('sha256')
+    .update(privyDid)
+    .digest('hex')
+    .slice(0, 8);
+
+  return prisma.user.create({
+    data: {
+      privyDid,
+      username: `optimist-${suffix}`,
+    }
   })
 }
