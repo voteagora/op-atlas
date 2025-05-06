@@ -18,8 +18,7 @@ export const useUsername = (
   },
 ) => {
   const address = user?.addresses?.[0]?.address
-  const validAddress =
-    address && isAddress(address) ? (address as `0x${string}`) : undefined
+  const validAddress = address && isAddress(address) ? (address as `0x${string}`) : undefined
   const { data: ensName } = useEnsName(validAddress)
 
   const username = useMemo<string | null>(() => {
@@ -32,6 +31,13 @@ export const useUsername = (
       const localPart = user.emails[0].email.split("@")[0]
       return localPart.length > 20 ? `${localPart.slice(0, 20)}…` : localPart
     }
+
+
+    if (user.username) {
+      return user.username
+    }
+
+
     return null
   }, [user, ensName, validAddress])
 
