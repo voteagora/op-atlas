@@ -208,6 +208,49 @@ export async function searchUsersByUsername({
   })
 }
 
+export async function searchByAddress({
+  address,
+}: {
+  address: string
+}) {
+  return prisma.user.findMany({
+    where: {
+      addresses: {
+        some: {
+          address: {
+            contains: address,
+          },
+        },
+      },
+    },
+  })
+}
+
+export async function searchByEmail({
+  email,
+}: {
+  email: string
+}) {
+
+  // Only search if it's a valid email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    return []
+  }
+
+  return prisma.user.findMany({
+    where: {
+      emails: {
+        some: {
+          email: {
+            contains: email,
+          },
+        },
+      },
+    },
+  })
+}
+
 export async function upsertUser({
   farcasterId,
   ...user

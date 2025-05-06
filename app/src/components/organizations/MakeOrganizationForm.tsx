@@ -253,16 +253,16 @@ export default function MakeOrganizationForm({
         try {
           const response = organization
             ? await updateOrganizationDetails({
-                id: organization.id,
-                organization: newValues,
-              })
+              id: organization.id,
+              organization: newValues,
+            })
             : await createNewOrganization({
-                organization: newValues,
-                teamMembers: team.map(({ user, role }) => ({
-                  userId: user.id,
-                  role,
-                })),
-              })
+              organization: newValues,
+              teamMembers: team.map(({ user, role }) => ({
+                userId: user.id,
+                role,
+              })),
+            })
 
           if (response?.error !== null || !response) {
             throw new Error(response?.error ?? "Failed to save project")
@@ -616,7 +616,7 @@ export default function MakeOrganizationForm({
         team={team.map((member) => member.user)}
         addMembers={handleAddMembers}
         title="Add team members"
-        subtitle="You can add team members by their Farcaster username. They must have an Optimist profile."
+        subtitle="You can add team members by their email, wallet address, or Farcaster username. They must have an Optimist profile."
       />
       <DeleteTeamMemberDialog
         open={!!isShowingRemove}

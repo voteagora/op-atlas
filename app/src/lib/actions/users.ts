@@ -1,13 +1,33 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
+import { createPublicClient, http } from "viem"
+import { getEnsAddress } from "viem/actions"
+import { mainnet } from "viem/chains"
 
 import { auth } from "@/auth"
 import {
   searchUsersByUsername,
+  searchByAddress,
+  searchByEmail,
   updateUser,
   updateUserInteraction,
 } from "@/db/users"
+
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
+
+async function resolveEnsName(name: string): Promise<string | null> {
+  try {
+    const address = await getEnsAddress(client, { name })
+    return address
+  } catch (error) {
+    console.error("Error resolving ENS name:", error)
+    return null
+  }
+}
 
 export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
   const session = await auth()
@@ -61,10 +81,10 @@ export const updateGovForumProfileUrl = async (govForumProfileUrl: string) => {
 }
 
 /**
- * Searches users by Farcaster username.
- * The query must be at least three characters long.
+ * Searches users by Farcaster username, address, email, or ENS name.
+ * The query must be at least one character long.
  */
-export const searchUsers = async (username: string) => {
+export const searchUsers = async (query: string) => {
   // Require authentication.
   const session = await auth()
   if (!session?.user?.id) {
@@ -73,17 +93,36 @@ export const searchUsers = async (username: string) => {
     }
   }
 
-  if (username.length < 1) {
+  if (query.length < 1) {
     return {
       error: null,
       users: [],
     }
   }
 
-  const users = await searchUsersByUsername({ username })
+  // Check if the query is an ENS name (ends with .eth)
+  let searchQuery = query
+  if (query.toLowerCase().endsWith('.eth')) {
+    const resolvedAddress = await resolveEnsName(query)
+    if (resolvedAddress) {
+      searchQuery = resolvedAddress
+    }
+  }
+
+  const [usernameResults, addressResults, emailResults] = await Promise.all([
+    searchUsersByUsername({ username: searchQuery }),
+    searchByAddress({ address: searchQuery }),
+    searchByEmail({ email: searchQuery })
+  ])
+
+  // Combine results and remove duplicates based on user ID
+  const uniqueUsers = Array.from(
+    new Map([...usernameResults, ...addressResults, ...emailResults].map(user => [user.id, user])).values()
+  )
+
   return {
     error: null,
-    users,
+    users: uniqueUsers,
   }
 }
 

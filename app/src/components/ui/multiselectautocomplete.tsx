@@ -3,10 +3,12 @@
 import clsx from "clsx"
 import { X } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
+import Image from "next/image"
 
 import { Badge } from "./badge"
 import { Command, CommandGroup, CommandItem, CommandList } from "./command"
 import { Input } from "./input"
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 
 export type IMultiSelectOptions = {
   value: string | number
@@ -40,6 +42,23 @@ export function MultiSelect({
 }: MultiSelectAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [, setOpen] = useState(false)
+
+  const renderUserAvatar = (image: string | null | undefined, label: string) => {
+    return image ? (
+      <Avatar className="h-6 w-6 mr-2">
+        <AvatarImage src={image} alt={label} />
+      </Avatar>
+    ) : (
+      <div className="h-6 w-6 mr-2 bg-secondary rounded-full flex items-center justify-center border border-muted">
+        <Image
+          src="/assets/icons/user-icon.svg"
+          alt="user"
+          width={8}
+          height={8}
+        />
+      </div>
+    )
+  }
 
   const handleUnselect = useCallback(
     (item: IMultiSelectOptions) => {
@@ -97,15 +116,7 @@ export function MultiSelect({
                             e.stopPropagation()
                           }}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={option.image ?? ""}
-                            alt={option.label}
-                            width={24}
-                            height={24}
-                            className="rounded-full h-6 w-6 object-center object-cover mr-2"
-                          />
-
+                          {renderUserAvatar(option.image, option.label)}
                           {option.label}
                         </CommandItem>
                       )
@@ -131,14 +142,7 @@ export function MultiSelect({
                 className="py-2 px-3 rounded-md shrink-0"
                 variant="secondary"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.image ?? ""}
-                  alt={item.label}
-                  width={24}
-                  height={24}
-                  className="rounded-full h-6 w-6 object-center object-cover shrink-0"
-                />
+                {renderUserAvatar(item.image, item.label)}
                 <p className="ml-1 text-sm text-secondary-foreground">
                   {item.label}
                 </p>
