@@ -1,4 +1,4 @@
-export const Farcaster = ({
+const Farcaster = ({
     className,
     fill,
 }: {
@@ -24,4 +24,4 @@ export const Farcaster = ({
 };
 
 
-
+export default Farcaster;

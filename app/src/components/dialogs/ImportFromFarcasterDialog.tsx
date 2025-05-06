@@ -16,7 +16,7 @@ import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 import Image from "next/image"
 
 import { DialogProps } from "./types"
-import { Farcaster } from "@/components/icons/Farcaster"
+import Farcaster from "@/components/icons/Farcaster"
 
 
 function ImportFromFarcasterDialog({ open, onOpenChange }: DialogProps<object>) {

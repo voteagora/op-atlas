@@ -3,7 +3,7 @@
 import { Session } from "next-auth"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { Farcaster } from "@/components/icons/Farcaster"
+import Farcaster from "@/components/icons/Farcaster"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
