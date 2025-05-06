@@ -31,6 +31,7 @@ export type EntityRecords = Record<
 
 export async function getUserById(userId: string) {
   const session = await auth()
+
   const user = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -45,6 +46,15 @@ export async function getUserById(userId: string) {
       emails: true,
     },
   })
+
+  // Obfuscate email addresses if user is not logged in or requesting different user's data
+  // This is mostly to prevent unintentional exposure of email addresses
+  if ((!session?.user || session.user.id !== userId) && user?.emails) {
+    user.emails = user.emails.map(email => ({
+      ...email,
+      email: email.email.replace(/^(.{3}).*@.*(.{3})$/, '$1***@***$2')
+    }))
+  }
   return user
 }
 
