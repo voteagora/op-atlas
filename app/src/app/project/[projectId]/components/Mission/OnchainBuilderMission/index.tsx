@@ -227,7 +227,7 @@ export default function OnchainBuilderMission({
                   trend={{
                     value: formatNumber(
                       onchainBuilderMetrics?.gasFees?.[month]?.trend.value ?? 0,
-                      0,
+                      2,
                       "compact",
                     ),
                     type:
