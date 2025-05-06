@@ -17,6 +17,7 @@ import {
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { DialogProps } from "./types"
+import { useParams } from "next/navigation"
 
 export default function SelectKYCProjectDialog({
   open,
@@ -25,6 +26,8 @@ export default function SelectKYCProjectDialog({
   const queryClient = useQueryClient()
 
   const session = useSession()
+
+  const { organizationId } = useParams()
 
   const {
     data: { kycTeamId, alreadySelectedProjectIds },
@@ -38,8 +41,8 @@ export default function SelectKYCProjectDialog({
     queryKey: ["userProjects"],
     queryFn: async () => {
       if (!session.data?.user.id) return []
-      return (await getAdminProjects(session.data.user.id)).filter((project) =>
-        Boolean(project.organization),
+      return (await getAdminProjects(session.data.user.id)).filter(
+        (project) => project.organization?.organization?.id === organizationId,
       )
     },
   })
