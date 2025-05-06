@@ -15,17 +15,19 @@ export default async function Page({
 }) {
   const session = await auth()
 
-  if (!session?.user.id) {
-    redirect("/login")
-  }
+  // if (!session?.user.id) {
+  //   redirect("/login")
+  // }
 
-  if (!session?.user.id) {
-    redirect("/dashboard")
-  }
+  // if (!session?.user.id) {
+  //   redirect("/dashboard")
+  // }
 
   const project = await getKycTeamForProject({ projectId: params.projectId })
 
   const kycTeam = project?.kycTeam ?? undefined
+
+  console.log(project?.organization)
 
   return (
     <div className="space-y-12">
@@ -39,16 +41,17 @@ export default async function Page({
           KYC (identity verification) is required for each address.
         </p>
       </div>
-      {project?.organization?.organization?.id && !kycTeam ? (
-        <Button>
-          <Link
-            href={`/profile/organizations/${project.organization.organization.id}/grant-address`}
-          >
-            Go to organization settings
-          </Link>
-        </Button>
-      ) : project?.organization?.organization?.id && kycTeam ? (
-        <GrantDeliveryAddress kycTeam={kycTeam} />
+      {project?.organization?.organization?.id ? (
+        <>
+          <GrantDeliveryAddress kycTeam={kycTeam} />
+          <Button>
+            <Link
+              href={`/profile/organizations/${project.organization.organization.id}/grant-address`}
+            >
+              Go to organization settings
+            </Link>
+          </Button>
+        </>
       ) : (
         <div className="space-y-6">
           <AddGrantDeliveryAddressContainer projectId={params.projectId} />

@@ -1,13 +1,20 @@
 import { KYCTeamWithTeam } from "@/lib/types"
 import { shortenAddress } from "@/lib/utils"
 import { getValidUntil } from "@/lib/utils"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
 import { CheckIcon } from "lucide-react"
 
 export default function GrantDeliveryAddress({
   kycTeam,
 }: {
-  kycTeam: KYCTeamWithTeam
+  kycTeam?: KYCTeamWithTeam
 }) {
+  const isCompleted = isKycTeamVerified(kycTeam)
+
+  if (!isCompleted || !kycTeam) {
+    return null
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <div className="font-medium text-sm text-foreground">
