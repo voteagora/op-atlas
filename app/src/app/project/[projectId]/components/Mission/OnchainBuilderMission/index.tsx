@@ -221,13 +221,13 @@ export default function OnchainBuilderMission({
                 <MetricCard
                   value={formatNumber(
                     onchainBuilderMetrics?.gasFees?.[month]?.value ?? 0,
-                    0,
+                    2,
                   )}
                   title="Gas consumed"
                   trend={{
                     value: formatNumber(
                       onchainBuilderMetrics?.gasFees?.[month]?.trend.value ?? 0,
-                      2,
+                      0,
                       "compact",
                     ),
                     type:
