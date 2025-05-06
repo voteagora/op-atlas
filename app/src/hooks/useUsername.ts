@@ -27,10 +27,6 @@ export const useUsername = (
     if (validAddress) {
       return ensName ?? `${validAddress.slice(0, 6)}`
     }
-    if (user.emails?.[0]?.email) {
-      const localPart = user.emails[0].email.split("@")[0]
-      return localPart.length > 20 ? `${localPart.slice(0, 20)}…` : localPart
-    }
 
     if (user.username) {
       return user.username
