@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 
-import { fetchOSOProjects } from "@/app/api/oso/common"
+import { mapOSOProjects } from "@/lib/oso"
 import { getOSOMappedProjectIds } from "@/db/projects"
 import { withCronObservability } from "@/lib/cron"
 
@@ -11,11 +11,12 @@ const MONITOR_SLUG = "cron-oso-map-projects"
 
 async function handleOSOMapProjectsCron(request: NextRequest) {
   const projectAtlasIds = await getOSOMappedProjectIds()
-  const { processed } = await fetchOSOProjects(projectAtlasIds)
+
+  const { mapped } = await mapOSOProjects(projectAtlasIds)
 
   return Response.json({
     status: 200,
-    body: { message: "Success", count: processed },
+    body: { message: "Success", count: mapped },
   })
 }
 

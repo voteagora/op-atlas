@@ -3,7 +3,7 @@
 import { Session } from "next-auth"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { FarcasterIcon } from "@/components/icons/Farcaster"
+import { Farcaster } from "@/components/icons/Farcaster"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
@@ -24,7 +24,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
         </div>
 
         <FarcasterConnection userId={session.user.id}>
-          <FarcasterIcon fill="#FFFFFF" className="w-[20px] h-[20px]" />
+          <Farcaster fill="#FFFFFF" className="w-[20px] h-[20px]" />
           Import from Farcaster
         </FarcasterConnection>
       </div>

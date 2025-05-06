@@ -3,11 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect } from "react"
-import React from "react"
+import { useCallback } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
+
+import Link from "next/link"
 
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
@@ -52,31 +53,31 @@ function getDefaultValues(
     deployers:
       projectContractsByDeployer.length > 0
         ? projectContractsByDeployer.map((deployer) => ({
-            address: deployer.address,
-            contracts: deployer.contracts.map((contract) => ({
-              address: contract.address,
-              chainId: contract.chainId.toString(),
-              excluded: false,
-            })),
-            signature: projectContracts.contracts[0]?.verificationProof ?? "",
-            verificationChainId:
-              projectContracts.contracts[0]?.verificationChainId?.toString() ??
-              "",
-          }))
+          address: deployer.address,
+          contracts: deployer.contracts.map((contract) => ({
+            address: contract.address,
+            chainId: contract.chainId.toString(),
+            excluded: false,
+          })),
+          signature: projectContracts.contracts[0]?.verificationProof ?? "",
+          verificationChainId:
+            projectContracts.contracts[0]?.verificationChainId?.toString() ??
+            "",
+        }))
         : [
-            {
-              address: "",
-              contracts: [],
-              signature: "",
-              verificationChainId: "",
-            },
-          ],
+          {
+            address: "",
+            contracts: [],
+            signature: "",
+            verificationChainId: "",
+          },
+        ],
     defillamaSlug:
       projectContracts.defiLlamaSlug.length === 0
         ? [{ slug: undefined }]
         : projectContracts.defiLlamaSlug.map((slug) => ({
-            slug: reverseFormatDefillamaSlug(slug),
-          })),
+          slug: reverseFormatDefillamaSlug(slug),
+        })),
   }
 }
 
@@ -230,14 +231,23 @@ export function ContractsForm({ project }: ContractsFormProps) {
         <div className="flex flex-col gap-6 mt-10">
           <h3 className="text-text-default">Additional Data</h3>
 
-          <p className="mt-2 font-normal text-secondary-foreground text-sm">
-            <p className="text-sm font-medium">DefiLlama adapter</p>
-            For Defi projects, include a link to your{" "}
-            <ExternalLink className="underline" href={"https://defillama.com/"}>
-              DefiLlama adapter
-            </ExternalLink>
-            .
-          </p>
+          <div className="mt-2 font-normal text-secondary-foreground text-sm">
+            <h3 className="text-sm font-medium">DefiLlama adapter</h3>
+            <p className="text-sm font-normal">
+              For DeFi projects, please link directly to each specific DefiLlama
+              protocol page (e.g.{" "}
+              <Link
+                href="https://defillama.com/protocol/aave-v3"
+                className="underline"
+              >
+                https://defillama.com/protocol/aave-v3
+              </Link>{" "}
+              ) rather than the parent URL. If your project spans multiple
+              &quot;child&quot; protocols (aave-v1, aave-v2, aave-v3), list each
+              one separately. This ensures all your adapters are recognized
+              correctly.
+            </p>
+          </div>
           {defillamaSlugFields.map((field, index) => (
             <DefiLlamaFormFiled
               key={field.id}

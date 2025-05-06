@@ -24,6 +24,7 @@ import { getValidUntil } from "@/lib/utils"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
+import { ProjectOSOData } from "@/lib/oso/types"
 
 async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -1940,198 +1941,204 @@ export async function getProjectsForKycTeam({
   })
 }
 
-export async function getPublicProject({ projectId }: { projectId: string }) {
-  const project = await prisma.project
-    .findFirst({
-      where: {
-        id: projectId,
-      },
-      include: {
-        links: true,
-        contracts: true,
-        repos: true,
-        funding: true,
-        rewards: {
-          select: {
-            roundId: true,
-            amount: true,
+export const getPublicProject = cache(async (projectId: string) => {
+  return prisma.project.findFirst({
+    where: { id: projectId },
+    include: {
+      applications: {
+        where: {
+          roundId: {
+            in: ["7", "8"],
           },
         },
-        organization: {
-          select: {
-            organization: {
-              select: {
-                name: true,
-                avatarUrl: true,
-                team: {
-                  select: {
-                    user: true,
-                  },
-                },
+      },
+      links: true,
+      contracts: true,
+      repos: true,
+      funding: true,
+      rewards: {
+        select: { roundId: true, amount: true },
+      },
+      organization: {
+        select: {
+          organization: {
+            select: {
+              name: true,
+              avatarUrl: true,
+              team: {
+                select: { user: true },
               },
             },
           },
         },
-        team: {
-          orderBy: {
-            createdAt: "asc",
-          },
-          select: {
-            user: true,
-          },
-        },
       },
-    })
-    .then((project) => {
-      project?.repos.map((r) => {
-        const tags = []
-
-        if (r.openSource) {
-          tags.push({ name: "Open Source", icon: "/assets/icons/oss.svg" })
-        }
-        if (r.npmPackage) {
-          tags.push({ name: "NPM", icon: "/assets/icons/npm-fill.svg" })
-        }
-        if (r.crate) {
-          tags.push({ name: "Crate", icon: "/assets/icons/crate.svg" })
-        }
-
-        return {
-          ...r,
-          tags,
-        }
-      })
-
-      const deployedOn = project?.contracts
-        .map((c) => {
-          const chainInfo = CHAIN_INFO[c.chainId]
-          return chainInfo
-        })
-        .filter((c) => c !== undefined)
-
-      const uniqueDeployedOn = Array.from(
-        new Map(deployedOn?.map((item) => [item.name, item])).values(),
-      )
-
-      return { ...project, deployedOn: uniqueDeployedOn }
-    })
-
-  const users = project?.team?.map((t) => t.user)
-  const organizationUsers = project?.organization?.organization.team.map(
-    (t) => t.user,
-  )
-  const deduppedUsers = users
-    ? users.filter((u) => !organizationUsers?.find((ou) => ou.id === u.id))
-    : []
-
-  const devToolingApplication = await prisma.application.findFirst({
-    where: {
-      projectId,
-      roundId: "7",
+      team: {
+        orderBy: { createdAt: "asc" },
+        select: { user: true },
+      },
     },
   })
-  const onchainBuildersApplication = await prisma.application.findFirst({
-    where: {
-      projectId,
-      roundId: "8",
-    },
-  })
+})
 
-  return {
-    ...project,
-    devToolingRewards: project.rewards
-      ?.filter((reward) => reward.roundId === "7")
-      .reduce((acc, reward) => acc + Number(reward.amount), 0),
-    onchainBuildersRewards: project.rewards
-      ?.filter((reward) => reward.roundId === "8")
-      .reduce((acc, reward) => acc + Number(reward.amount), 0),
-    devToolingApplication,
-    onchainBuildersApplication,
-    contributors: deduppedUsers,
-  }
-}
-
-export async function updateBanner({
-  projectId,
-  bannerUrl,
-}: {
-  projectId: string
-  bannerUrl: string
-}) {
-  return prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      bannerUrl,
-    },
-  })
-}
-
-export async function getProjectsOSO({ projectId }: { projectId: string }) {
-  return await prisma.projectOSO.findMany({
+export async function getProjectsOSO(projectId: string) {
+  return await prisma.projectOSO.findFirst({
     where: {
       projectId,
     },
     select: {
       osoId: true,
     },
-    take: 1,
   })
 }
 
-export async function getDevToolingProjects({
-  projectId,
-}: {
-  projectId: string
-}) {
-  return await prisma.application.findFirst({
-    where: {
-      projectId,
-      roundId: "7",
-    },
-  })
+// Combined OSO data query
+export async function getProjectOSOData(projectId: string) {
+  const [metrics, rewards] = await Promise.all([
+    prisma.projectOSOMetrics.findMany({
+      where: {
+        projectId,
+        OR: [
+          // Eligibility metrics
+          {
+            metric: {
+              in: [
+                "IS_DEV_TOOLING_ELIGIBLE",
+                "IS_ONCHAIN_BUILDER_ELIGIBLE",
+                "HAS_DEFILLAMA_ADAPTER",
+              ],
+            },
+          },
+          // Performance metrics
+          {
+            metric: {
+              in: ["ACTIVE_ADDRESSES_COUNT", "GAS_FEES", "TRANSACTION_COUNT"],
+            },
+          },
+        ],
+      },
+      select: {
+        metric: true,
+        value: true,
+        tranche: true,
+      },
+    }),
+    prisma.recurringReward.findMany({
+      where: {
+        projectId,
+        roundId: {
+          in: ["7", "8"],
+        },
+      },
+      select: {
+        roundId: true,
+        amount: true,
+        tranche: true,
+      },
+    }),
+  ])
+
+  return {
+    metrics,
+    rewards,
+  }
 }
 
-export async function getOnchainBuildersProjects({
-  projectId,
-}: {
-  projectId: string
-}) {
-  return await prisma.application.findFirst({
-    where: {
-      projectId,
-      roundId: "8",
-    },
-  })
+// Updated eligibility queries
+export async function getProjectEligibility(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter(
+    (e) => e.metric.startsWith("IS_") || e.metric === "HAS_DEFILLAMA_ADAPTER",
+  )
 }
 
-export async function getProjectOSOData({ projectId }: { projectId: string }) {
-  const result = await prisma.projectOSOData.findFirst({
-    where: {
-      projectId,
-    },
+export async function getDevToolingEligibility(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((e) => e.metric === "IS_DEV_TOOLING_ELIGIBLE")
+}
+
+export async function getOnchainBuilderEligibility(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((e) => e.metric === "IS_ONCHAIN_BUILDER_ELIGIBLE")
+}
+
+export async function getDefillamaAdapter(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((e) => e.metric === "HAS_DEFILLAMA_ADAPTER")
+}
+
+// Updated metrics queries
+export async function getProjectMetrics(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((m) =>
+    ["ACTIVE_ADDRESSES_COUNT", "GAS_FEES", "TRANSACTION_COUNT"].includes(
+      m.metric,
+    ),
+  )
+}
+
+export async function getProjectActiveAddressesCount(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((m) => m.metric === "ACTIVE_ADDRESSES_COUNT")
+}
+
+export async function getProjectGasFees(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((m) => m.metric === "GAS_FEES")
+}
+
+export async function getProjectTransactions(projectId: string) {
+  const { metrics } = await getProjectOSOData(projectId)
+  return metrics.filter((m) => m.metric === "TRANSACTION_COUNT")
+}
+
+// Updated rewards queries
+export async function getProjectRewards(projectId: string) {
+  const { rewards } = await getProjectOSOData(projectId)
+  return rewards
+}
+
+export async function getOnchainBuilderRecurringReward(projectId: string) {
+  const { rewards } = await getProjectOSOData(projectId)
+  return rewards.filter((r) => r.roundId === "8")
+}
+
+export async function getDevToolingRecurringReward(projectId: string) {
+  const { rewards } = await getProjectOSOData(projectId)
+  return rewards.filter((r) => r.roundId === "7")
+}
+
+export async function getTrustedDevelopersCountFromOSO(projectId: string) {
+  const result = await prisma.projectOSOMetrics.findMany({
+    where: { projectId, metric: "DEVELOPER_CONNECTION_COUNT" },
     select: {
-      data: true,
+      value: true,
+      tranche: true,
     },
   })
 
-  return result?.data as {
-    topProjects?: {
-      id?: string
-      name?: string
-      website?: string[]
-      thumbnailUrl?: string
-    }[]
-    hasBundleBear: boolean
-    devToolingReward: number
-    devToolingEligible: boolean
-    hasDefillamaAdapter: boolean
-    onchainBuilderReward: number
-    onchainBuilderEligible: boolean
-    onchainBuildersInAtlasCount: number
-    onchainBuildersOSOProjectIds: string[]
-  } | null
+  return result
+}
+
+export async function getTopProjectsFromOSO(projectId: string) {
+  const projectOSOAtlasRelatedProjects =
+    await prisma.projectOSOAtlasRelatedProjects.findMany({
+      where: {
+        projectId,
+      },
+      select: {
+        tranche: true,
+        targetProject: {
+          select: {
+            id: true,
+            name: true,
+            thumbnailUrl: true,
+            website: true,
+          },
+        },
+      },
+    })
+
+  return projectOSOAtlasRelatedProjects
 }
 
 export async function getProjectOSOByIds({
@@ -2188,5 +2195,30 @@ export async function getOSOMappedProjectIds() {
     })
 
     return projects.map(({ id }) => id)
+  })
+}
+
+export async function getProjectOSORelatedProjects(projectId: string) {
+  return await prisma.projectOSORelatedProjects.findMany({
+    where: { projectId },
+    select: {
+      osoId: true,
+      projectId: true,
+      tranche: true,
+    },
+  })
+}
+
+export async function getProjectTvl(projectId: string) {
+  return await prisma.projectOSOMetrics.findMany({
+    where: { projectId, metric: "TVL" },
+    select: { value: true, tranche: true },
+  })
+}
+
+export async function getProjectGasConsumption(projectId: string) {
+  return await prisma.projectOSOMetrics.findMany({
+    where: { projectId, metric: "DOWNSTREAM_GAS" },
+    select: { value: true, tranche: true },
   })
 }

@@ -26,7 +26,6 @@ import {
   getUserProjectsWithDetails,
   removeProjectOrganization,
   removeTeamMember,
-  updateBanner,
   updateMemberRole,
   updateProject,
   updateProjectFunding,
@@ -43,6 +42,7 @@ import {
   verifyMembership,
   verifyOrganizationMembership,
 } from "./utils"
+
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
@@ -644,36 +644,8 @@ export const getPublicProjectAction = async ({
 }: {
   projectId: string
 }) => {
-  return await getPublicProject({ projectId })
-}
+  const rawProject = await getPublicProject(projectId)
+  if (!rawProject) return null
 
-export const updateBannerAction = async (
-  projectId: string,
-  bannerUrl: string,
-) => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to update a project banner.",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, user.farcasterId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  await updateBanner({ projectId, bannerUrl })
-
-  revalidatePath(`/project/${projectId}`)
+  return rawProject
 }

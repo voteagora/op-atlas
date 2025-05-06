@@ -8,15 +8,16 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
-    DialogTitle,
+    DialogTitle
 } from "@/components/ui/dialog"
 import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 
-import { DialogProps } from "./types"
-import { FarcasterIcon } from "../icons/Farcaster"
 import Image from "next/image"
+
+import { DialogProps } from "./types"
+import { Farcaster } from "@/components/icons/Farcaster"
+
 
 function ImportFromFarcasterDialog({ open, onOpenChange }: DialogProps<object>) {
 
@@ -47,7 +48,7 @@ function ImportFromFarcasterDialog({ open, onOpenChange }: DialogProps<object>) 
                                 />
                             </div>
                             <div className="w-[80px] h-[80px] rounded-full bg-[#855DCD] flex items-center justify-center absolute left-[70px]">
-                                <FarcasterIcon className="h-7 w-7" fill="#FFFFFF" />
+                                <Farcaster className="h-7 w-7" fill="#FFFFFF" />
                             </div>
                         </div>
                     </div>
