@@ -32,11 +32,9 @@ export const useUsername = (
       return localPart.length > 20 ? `${localPart.slice(0, 20)}…` : localPart
     }
 
-
     if (user.username) {
       return user.username
     }
-
 
     return null
   }, [user, ensName, validAddress])
