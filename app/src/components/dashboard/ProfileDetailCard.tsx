@@ -1,17 +1,18 @@
 "use client"
 
-import { ArrowLeftIcon, ArrowUpRight, Ellipsis } from "lucide-react"
+import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { memo } from "react"
+import { memo, useState } from "react"
 
 import { useUser } from "@/hooks/db/useUser"
-import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { useUsername } from "@/hooks/useUsername"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 
+import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
+import { ArrowDropRight } from "../icons/ArrowDropRight"
 import { Avatar, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -21,7 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
-import { ArrowDropRight } from "../icons/ArrowDropRight"
 
 const ProfileDetailCard = ({
   user: initialUser,
@@ -30,10 +30,10 @@ const ProfileDetailCard = ({
 }) => {
   const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
   const user = loadedUser || initialUser
+  const [showImportDialog, setShowImportDialog] = useState(false)
 
   const { isBadgeholder } = useIsBadgeholder(user)
   const { linkEmail } = usePrivyEmail(user.id)
-  const { linkFarcaster } = usePrivyFarcaster(user.id)
 
   const username = useUsername(loadedUser)
   const email = user.emails?.[0]?.email
@@ -61,7 +61,6 @@ const ProfileDetailCard = ({
   }
 
   const renderUsername = () => {
-
     if (user.username && user.farcasterId) {
       return (
         <span className="text-secondary-foreground">
@@ -85,11 +84,11 @@ const ProfileDetailCard = ({
         </Avatar>
       ) : (
         <button
-          onClick={() => linkFarcaster()}
+          onClick={() => setShowImportDialog(true)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault()
-              linkFarcaster()
+              setShowImportDialog(true)
             }
           }}
           className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none hover:bg-secondary group relative cursor-pointer"
@@ -164,6 +163,11 @@ const ProfileDetailCard = ({
           </Link>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ImportFromFarcasterDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+      />
     </div>
   )
 }

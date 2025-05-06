@@ -8,6 +8,7 @@ import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
+import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
 import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
 import { DialogType } from "./types"
@@ -63,6 +64,12 @@ export default function AppDialogs() {
         <DeleteKYCTeamDialog
           open
           onOpenChange={onOpenChange("delete_kyc_team")}
+        />
+      )}
+      {openDialog === "import_from_farcaster" && (
+        <ImportFromFarcasterDialog
+          open
+          onOpenChange={onOpenChange("import_from_farcaster")}
         />
       )}
     </>
