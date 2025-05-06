@@ -217,9 +217,7 @@ export const mapOSOProjects = cache(async function mapOSOProjects(
   return { mapped, totalCreated }
 })
 
-export const getProjectMetrics = cache(async function getProjectMetrics(
-  projectId: string,
-): Promise<{
+export type ProjectMetrics = {
   error?: string
   eligibility?: {
     devToolingEligibility: Record<string, boolean>
@@ -255,7 +253,11 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     transactions: Record<string, { value: number; trend: Trend }>
     tvl: Record<string, { value: number; trend: Trend }>
   }
-}> {
+}
+
+export const getProjectMetrics = cache(async function getProjectMetrics(
+  projectId: string,
+): Promise<ProjectMetrics> {
   if (!projectId) {
     return {
       error: "Project not found",
