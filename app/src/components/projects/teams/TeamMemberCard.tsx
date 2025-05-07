@@ -2,7 +2,7 @@ import { User } from "@prisma/client"
 import Image from "next/image"
 import { memo, useState } from "react"
 
-import { SmallUserAvatar } from "@/components/common/SmallUserAvatar"
+import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -46,7 +46,7 @@ export const TeamMemberCard = memo(function TeamMemberCard({
       onMouseLeave={() => setMouseEntered(false)}
     >
       <div className="py-2 px-3 rounded-md border border-input flex items-center gap-2 w-full h-10">
-        <SmallUserAvatar imageUrl={user?.imageUrl} />
+        <UserAvatarSmall imageUrl={user?.imageUrl} />
         <p className="text-sm text-foreground">
           {username} {isCurrentUser && "(You)"}
         </p>

@@ -1,11 +1,11 @@
-import Image from "next/image"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import Image from "next/image"
 
-interface SmallUserAvatarProps {
+interface UserAvatarSmallProps {
     imageUrl?: string | null
 }
 
-export function SmallUserAvatar({ imageUrl }: SmallUserAvatarProps) {
+export function UserAvatarSmall({ imageUrl }: UserAvatarSmallProps) {
     return imageUrl ? (
         <Avatar className="w-6 h-6">
             <AvatarImage src={imageUrl} alt="avatar" />

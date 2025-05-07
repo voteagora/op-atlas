@@ -196,23 +196,16 @@ export const updateProjectDetails = async (
   details: UpdateProjectParams,
 ) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const user = await getUserById(session.user.id)
 
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to update a project.",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
 
   if (isInvalid?.error) {
     return isInvalid
@@ -237,8 +230,9 @@ export const setProjectOrganization = async (
   organizationId?: string,
 ) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
@@ -252,21 +246,14 @@ export const setProjectOrganization = async (
     }
   }
 
-  const user = await getUserById(session.user.id)
 
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to set the organization of a project.",
-    }
-  }
 
   // Only project admins can set the organization
-  const projectAdmin = verifyAdminStatus(projectId, user.farcasterId)
+  const projectAdmin = verifyAdminStatus(projectId, userId)
 
   // Only organization admins can remove the organization
   const oldOrganizationAdmin = oldOrganizationId
-    ? verifyOrganizationMembership(oldOrganizationId, session.user.id)
+    ? verifyOrganizationMembership(oldOrganizationId, userId)
     : null
 
   const isInvalid = (
@@ -287,7 +274,7 @@ export const setProjectOrganization = async (
     // Only organization admins can set the organization
     const isOrganizationAdmin = await verifyOrganizationMembership(
       organizationId,
-      session.user.id,
+      userId,
     )
 
     if (isOrganizationAdmin?.error) {
@@ -314,23 +301,14 @@ export const setProjectOrganization = async (
 
 export const deleteUserProject = async (projectId: string) => {
   const session = await auth()
-
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to delete a project.",
-    }
-  }
-
-  const isInvalid = await verifyAdminStatus(projectId, user.farcasterId)
+  const isInvalid = await verifyAdminStatus(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -350,23 +328,15 @@ export const addMembersToProject = async (
   userIds: string[],
 ) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to add members to a project.",
-    }
-  }
-
-  const isInvalid = await verifyAdminStatus(projectId, user.farcasterId)
+  const isInvalid = await verifyAdminStatus(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -383,6 +353,7 @@ export const removeMemberFromProject = async (
 ) => {
   const session = await auth()
 
+
   // Can't remove yourself (?)
   if (!session?.user?.id || session.user.id === userId) {
     return {
@@ -390,16 +361,7 @@ export const removeMemberFromProject = async (
     }
   }
 
-  const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to remove members from a project.",
-    }
-  }
-
-  const isInvalid = await verifyAdminStatus(projectId, user.farcasterId)
+  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -420,12 +382,13 @@ export const removeMemberFromProject = async (
 
 export const getKycTeamAction = async (projectId: string) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     throw new Error("Unauthorized")
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     throw new Error(isInvalid.error)
   }
@@ -442,22 +405,14 @@ export const setMemberRole = async (
 ) => {
   const session = await auth()
 
+
   if (!session?.user?.id) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to set the role of a member in a project.",
-    }
-  }
-
-  const isInvalid = await verifyAdminStatus(projectId, user.farcasterId)
+  const isInvalid = await verifyAdminStatus(projectId, session.user.id)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -473,23 +428,15 @@ export const setProjectFunding = async (
   funding: Prisma.ProjectFundingCreateManyInput[],
 ) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to set the funding of a project.",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -508,23 +455,16 @@ export const createProjectKycTeamAction = async ({
   walletAddress: string
 }) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const user = await getUserById(session.user.id)
 
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to create a project KYC team.",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -540,24 +480,17 @@ export const createProjectKYCTeamsAction = async ({
   kycTeamId: string
 }) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     throw new Error("Unauthorized")
   }
 
-  const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to create a project KYC team action.",
-    }
-  }
 
   projectIds.forEach(async (projectId) => {
     const isInvalid = await verifyMembership(
       projectId,
-      user.farcasterId as string,
+      userId,
     )
 
     if (isInvalid?.error) {
@@ -576,24 +509,18 @@ export const deleteProjectKYCTeamsAction = async ({
   kycTeamId: string
 }) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     throw new Error("Unauthorized")
   }
 
-  const user = await getUserById(session.user.id)
 
-  if (!user?.farcasterId) {
-    return {
-      error:
-        "Your Farcaster account must be connected in order to delete a project KYC team.",
-    }
-  }
 
   projectIds.forEach(async (projectId) => {
     const isInvalid = await verifyMembership(
       projectId,
-      user.farcasterId as string,
+      userId,
     )
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
@@ -623,12 +550,13 @@ export const deleteProjectKYCTeamAction = async ({
   rewardStreamId?: string
 }) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     throw new Error("Unauthorized")
   }
 
-  const isInvalid = await verifyAdminStatus(projectId, session.user.farcasterId)
+  const isInvalid = await verifyAdminStatus(projectId, userId)
   if (isInvalid?.error) {
     throw new Error(isInvalid.error)
   }

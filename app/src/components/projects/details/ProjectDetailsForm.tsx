@@ -3,16 +3,15 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
+import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -180,14 +179,6 @@ export default function ProjectDetailsForm({
       let thumbnailUrl = project?.thumbnailUrl
       let bannerUrl = project?.bannerUrl
 
-      if (!user?.farcasterId) {
-        toast.error(
-          "Your Farcaster account must be connected to create a project.",
-        )
-        isSave ? setIsSaving(false) : setIsLoading(false)
-        return
-      }
-
       try {
         if (newAvatarImg) {
           thumbnailUrl = await uploadImage(newAvatarImg)
@@ -249,16 +240,16 @@ export default function ProjectDetailsForm({
         try {
           const [response, res] = project
             ? await Promise.all([
-                updateProjectDetails(project.id, newValues),
-                setProjectOrganization(
-                  project.id,
-                  project.organization?.organization?.id,
-                  values.organization?.id,
-                ),
-              ])
+              updateProjectDetails(project.id, newValues),
+              setProjectOrganization(
+                project.id,
+                project.organization?.organization?.id,
+                values.organization?.id,
+              ),
+            ])
             : await Promise.all([
-                createNewProject(newValues, values.organization?.id),
-              ])
+              createNewProject(newValues, values.organization?.id),
+            ])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
@@ -710,20 +701,6 @@ export default function ProjectDetailsForm({
               </FormItem>
             )}
           />
-
-          {user && !user?.farcasterId && (
-            <div className="flex flex-col gap-1.5 text-sm">
-              <div className="font-medium">Farcaster</div>
-              <div className="flex flex-row gap-2 border border-1 rounded-lg p-2 items-center">
-                <FarcasterConnection userId={user.id}>
-                  Connect
-                </FarcasterConnection>
-                <div>
-                  Your Farcaster account must be connected to create a project.
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex gap-2">

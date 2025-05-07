@@ -47,14 +47,14 @@ export async function getUserById(userId: string) {
     },
   })
 
-  // Obfuscate email addresses if user is not logged in or requesting different user's data
-  // This is mostly to prevent unintentional exposure of email addresses
-  if ((!session?.user || session.user.id !== userId) && user?.emails) {
-    user.emails = user.emails.map(email => ({
-      ...email,
-      email: email.email.replace(/^(.{3}).*@.*(.{3})$/, '$1***@***$2')
-    }))
+  // If user is not logged in or requesting different user's data, remove sensitive information
+  if (!session?.user || session.user.id !== userId && user) {
+    if (user) {
+      const { emails, interaction, privyDid, createdAt, deletedAt, updatedAt, notDeveloper, ...safeUser } = user
+      return safeUser
+    }
   }
+
   return user
 }
 
