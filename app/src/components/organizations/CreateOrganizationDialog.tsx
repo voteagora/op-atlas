@@ -58,14 +58,6 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
 
     let avatarUrl
 
-    if (!user?.farcasterId) {
-      toast.error(
-        "Your Farcaster account must be connected to create an organization. Please connect your Farcaster account to continue.",
-      )
-      setIsSaving(false)
-      return
-    }
-
     try {
       if (newAvatarImg) {
         avatarUrl = await uploadImage(newAvatarImg)

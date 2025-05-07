@@ -14,7 +14,6 @@ import { z } from "zod"
 import { Button } from "@/components/common/Button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { useUser } from "@/hooks/db/useUser"
 import {
   addMemberToOrganization,
   createNewOrganization,
@@ -27,7 +26,6 @@ import { OrganizationWithDetails, TeamRole } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
 
 import FileUploadInput from "../common/FileUploadInput"
-import { FarcasterConnection } from "../profile/FarcasterConnection"
 import { PhotoCropModal } from "../projects/details/PhotoCropModal"
 import AddTeamMemberDialog from "../projects/teams/AddTeamMemberDialog"
 import DeleteTeamMemberDialog from "../projects/teams/DeleteTeamMemberDialog"
@@ -71,8 +69,6 @@ export default function MakeOrganizationForm({
 }) {
   const router = useRouter()
   const isAdmin = useIsOrganizationAdmin(organization)
-
-  const { user: loadedUser } = useUser({ id: user.id, enabled: true })
 
   const [team, setTeam] = useState<{ user: User; role: TeamRole }[]>(
     organization?.team.map(({ user, role }) => ({
@@ -194,14 +190,6 @@ export default function MakeOrganizationForm({
   }
   const onSubmit = () => async (values: z.infer<typeof formSchema>) => {
     setIsSaving(true)
-
-    if (!loadedUser?.farcasterId) {
-      toast.error(
-        "Your Farcaster account must be connected to create an organization.",
-      )
-      setIsSaving(false)
-      return
-    }
 
     let avatarUrl = organization?.avatarUrl
     let coverUrl = organization?.coverUrl
@@ -581,21 +569,6 @@ export default function MakeOrganizationForm({
               </FormItem>
             )}
           />
-
-          {loadedUser && !loadedUser?.farcasterId && (
-            <div className="flex flex-col gap-1.5 text-sm">
-              <div className="font-medium">Farcaster</div>
-              <div className="flex flex-row gap-2 border border-1 rounded-lg p-2 items-center">
-                <FarcasterConnection userId={user.id}>
-                  Connect
-                </FarcasterConnection>
-                <div>
-                  Your Farcaster account must be connected to create an
-                  organization.
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex gap-2">

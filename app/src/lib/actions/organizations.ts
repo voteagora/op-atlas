@@ -23,6 +23,7 @@ import { getUserById } from "@/db/users"
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
+import { getUserPriorityAddress } from "./users"
 import { verifyOrganizationAdmin } from "./utils"
 
 export const getUserOrganizations = async (userId: string) => {
@@ -38,25 +39,30 @@ export const createNewOrganization = async ({
   teamMembers: CreateTeamMemberParams[]
 }) => {
   const session = await auth()
-
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
+  const user = await getUserById(userId)
+  if (!user) {
     return {
-      error:
-        "Your Farcaster account must be connected to create an organization.",
+      error: "User not found",
+    }
+  }
+
+  const walletAddress = await getUserPriorityAddress(user)
+  if (!walletAddress) {
+    return {
+      error: "Failed to get or create wallet",
     }
   }
 
   // Create entity attestation
   const organizationId = await createEntityAttestation({
-    farcasterId: parseInt(user?.farcasterId),
+    address: walletAddress,
     type: "organization",
   })
 

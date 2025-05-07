@@ -1,6 +1,6 @@
 "use server"
 
-import { Prisma } from "@prisma/client"
+import { Prisma, User } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -184,19 +184,32 @@ export const createNewProject = async (
 export const createNewProjectOnBehalf = async (
   details: CreateProjectParams,
   userId: string,
-  farcasterId: string,
 ) => {
-  // Create project attestation
-  // const attestationId = await createEntityAttestation({
-  //   farcasterId: parseInt(farcasterId),
-  //   type: "project",
-  // })
+  const user = await getUserById(userId)
+  if (!user) {
+    return {
+      error: "User not found",
+    }
+  }
 
-  // return createProject({
-  //   userId: userId,
-  //   projectId: attestationId,
-  //   project: details,
-  // })
+  const walletAddress = await getUserPriorityAddress(user)
+  if (!walletAddress) {
+    return {
+      error: "Failed to get or create wallet",
+    }
+  }
+
+  // Create project attestation
+  const attestationId = await createEntityAttestation({
+    address: walletAddress,
+    type: "project",
+  })
+
+  return createProject({
+    userId: user.id,
+    projectId: attestationId,
+    project: details,
+  })
 }
 
 export const updateProjectDetails = async (
