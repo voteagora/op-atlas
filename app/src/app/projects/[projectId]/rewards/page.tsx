@@ -4,7 +4,6 @@ import { auth } from "@/auth"
 import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
 import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
 import { getProjectRecurringRewards } from "@/db/rewards"
-import { getUserById } from "@/db/users"
 import { verifyMembership } from "@/lib/actions/utils"
 import { formatRecurringRewards } from "@/lib/utils/rewards"
 
@@ -14,21 +13,16 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const session = await auth()
+  const userId = session?.user.id
 
-  if (!session?.user.id) {
+  if (!userId) {
     redirect("/login")
-  }
-
-  const user = await getUserById(session?.user.id)
-
-  if (!user || !user?.farcasterId) {
-    redirect("/dashboard")
   }
 
   const [project, team, membership, recurringRewards] = await Promise.all([
     getProject({ id: params.projectId }),
     getConsolidatedProjectTeam({ projectId: params.projectId }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
+    verifyMembership(params.projectId, userId),
     getProjectRecurringRewards(params.projectId),
   ])
 

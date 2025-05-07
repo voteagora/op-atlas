@@ -14,14 +14,12 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const session = await auth()
+  const userId = session?.user.id
 
-  if (!session?.user.id) {
+  if (!userId) {
     redirect("/login")
   }
 
-  if (!session?.user.id) {
-    redirect("/dashboard")
-  }
 
   const project = await getKycTeamForProject({ projectId: params.projectId })
 

@@ -3,7 +3,6 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { GrantsForm } from "@/components/projects/grants/GrantsForm"
 import { getProject } from "@/db/projects"
-import { getUserById } from "@/db/users"
 import { verifyMembership } from "@/lib/actions/utils"
 
 export default async function Page({
@@ -13,19 +12,15 @@ export default async function Page({
 }) {
   const session = await auth()
 
-  if (!session?.user.id) {
-    redirect("/dashboard")
-  }
+  const userId = session?.user.id
 
-  const user = await getUserById(session?.user.id)
-
-  if (!user?.farcasterId) {
+  if (!userId) {
     redirect("/dashboard")
   }
 
   const [project, membership] = await Promise.all([
     getProject({ id: params.projectId }),
-    verifyMembership(params.projectId, user?.farcasterId),
+    verifyMembership(params.projectId, userId),
   ])
 
   if (membership?.error || !project) {

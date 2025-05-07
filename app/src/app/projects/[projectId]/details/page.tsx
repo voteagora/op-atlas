@@ -13,20 +13,16 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const session = await auth()
+  const userId = session?.user.id
 
-  if (!session?.user.id) {
-    redirect("/dashboard")
-  }
-
-  const user = await getUserById(session?.user.id)
-  if (!user?.farcasterId) {
+  if (!userId) {
     redirect("/dashboard")
   }
 
   const [project, userOrganizations, membership] = await Promise.all([
     getProject({ id: params.projectId }),
-    getAdminOrganizations(session?.user.id),
-    verifyMembership(params.projectId, user?.farcasterId),
+    getAdminOrganizations(userId),
+    verifyMembership(params.projectId, userId),
   ])
 
   if (membership?.error || !project) {
