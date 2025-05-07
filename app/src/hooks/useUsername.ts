@@ -25,7 +25,7 @@ export const useUsername = (
     if (!user) return null
     if (user.name) return user.name
     if (validAddress) {
-      return ensName ?? `${validAddress.slice(0, 6)}`
+      return ensName ?? `0x${validAddress.slice(2, 5)}...${validAddress.slice(-3)}`
     }
 
     if (user.username) {

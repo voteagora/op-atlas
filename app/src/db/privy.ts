@@ -5,18 +5,18 @@ import { User as PrivyUser } from "@privy-io/react-auth"
 import { getAddress } from "viem"
 
 import { addContactToList, removeContactFromList } from "@/lib/api/mailchimp"
+import privy from "@/lib/privy"
 
+import { generateTemporaryUsername } from "@/lib/utils/username"
 import {
   addUserAddresses,
   deleteUserEmails,
-
   getUserById,
   getUserByPrivyDid,
   removeUserAddress,
   updateUser,
   updateUserEmail,
 } from "./users"
-import { generateTemporaryUsername } from "@/lib/utils/username"
 
 export const syncPrivyUser = async (
   privyUser: PrivyUser,
@@ -101,7 +101,7 @@ export const syncPrivyUser = async (
       await addUserAddresses({
         id: existingUser.id,
         addresses: addressesToAdd,
-        source: "privy",
+        source: "atlas",
       })
     } catch (error) {
       console.error("Failed to add linked wallet addresses:", error)
@@ -150,3 +150,37 @@ export const syncPrivyUser = async (
 
   return await getUserById(existingUser.id)
 }
+
+
+export const createEmbeddedWallet = async (user: User): Promise<string | null> => {
+
+  try {
+    // Note: once the embedded wallet is created, it will be permanently 
+    // linked to the user's Privy account
+    const response = await privy.createWallets({
+      userId: user.privyDid!,
+      createEthereumWallet: true,
+      numberOfEthereumWalletsToCreate: 1
+    })
+
+    // Get embedded wallet address
+    const wallet = response.linkedAccounts?.find(
+      (account) => account.type === "wallet" && 'address' in account
+    )
+    if (wallet) {
+      await addUserAddresses({
+        id: user.id,
+        addresses: [wallet.address],
+        source: "privy",
+      })
+    }
+
+    return wallet?.address || null
+
+  } catch (error) {
+    console.error("Failed to create Privy wallet:", error)
+    return null
+  }
+}
+
+

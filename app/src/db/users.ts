@@ -48,10 +48,17 @@ export async function getUserById(userId: string) {
   })
 
   // If user is not logged in or requesting different user's data, remove sensitive information
+  // but return the same object structure for consistency
   if (!session?.user || session.user.id !== userId && user) {
     if (user) {
-      const { emails, interaction, privyDid, createdAt, deletedAt, updatedAt, notDeveloper, ...safeUser } = user
-      return safeUser
+      user.emails = []
+      user.interaction = null
+      user.privyDid = null
+      user.createdAt = new Date(0)
+      user.deletedAt = new Date(0)
+      user.updatedAt = new Date(0)
+      user.notDeveloper = false
+      return user
     }
   }
 

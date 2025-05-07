@@ -37,6 +37,7 @@ import { getUserById } from "@/db/users"
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
+import { getUserPriorityAddress } from "./users"
 import {
   verifyAdminStatus,
   verifyMembership,
@@ -135,25 +136,32 @@ export const createNewProject = async (
   organizationId?: string,
 ) => {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
   const user = await getUserById(session.user.id)
-
-  if (!user?.farcasterId) {
+  if (!user) {
     return {
-      error:
-        "Your Farcaster account must be connected in order to create a project.",
+      error: "User not found",
+    }
+  }
+
+
+  const walletAddress = await getUserPriorityAddress(user)
+  if (!walletAddress) {
+    return {
+      error: "Failed to get or create wallet",
     }
   }
 
   // Create entity attestation
   const attestationId = await createEntityAttestation({
-    farcasterId: parseInt(user.farcasterId),
+    address: walletAddress,
     type: "project",
   })
 
@@ -179,16 +187,16 @@ export const createNewProjectOnBehalf = async (
   farcasterId: string,
 ) => {
   // Create project attestation
-  const attestationId = await createEntityAttestation({
-    farcasterId: parseInt(farcasterId),
-    type: "project",
-  })
+  // const attestationId = await createEntityAttestation({
+  //   farcasterId: parseInt(farcasterId),
+  //   type: "project",
+  // })
 
-  return createProject({
-    userId: userId,
-    projectId: attestationId,
-    project: details,
-  })
+  // return createProject({
+  //   userId: userId,
+  //   projectId: attestationId,
+  //   project: details,
+  // })
 }
 
 export const updateProjectDetails = async (

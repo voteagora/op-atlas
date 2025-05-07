@@ -1,6 +1,6 @@
 "use server"
 
-import { Prisma } from "@prisma/client"
+import { Prisma, User } from "@prisma/client"
 import { createPublicClient, http } from "viem"
 import { getEnsAddress } from "viem/actions"
 import { mainnet } from "viem/chains"
@@ -12,7 +12,11 @@ import {
   searchByEmail,
   updateUser,
   updateUserInteraction,
+  getUserById,
 } from "@/db/users"
+import { getUserConnectedAddresses } from "@/lib/neynar"
+import { createEmbeddedWallet } from "@/db/privy"
+import { UserWithAddresses } from "@/lib/types"
 
 const client = createPublicClient({
   chain: mainnet,
@@ -146,3 +150,22 @@ export const updateInteractions = async (
     userInteraction,
   }
 }
+
+export const getUserPriorityAddress = async (user: UserWithAddresses) => {
+
+
+  if (user.addresses.length > 0) {
+    // First priority: primary address
+    const primaryAddress = user.addresses.find((addr: { primary: boolean }) => addr.primary)
+
+    if (primaryAddress) {
+      return primaryAddress.address
+    }
+    // Second priority: first address
+    return user.addresses[0].address
+  }
+
+  // Third priority: create embedded wallet
+  return await createEmbeddedWallet(user)
+}
+
