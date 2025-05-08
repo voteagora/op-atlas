@@ -28,7 +28,7 @@ import {
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
 
-const SUPERFLUID_STREAM_URL = "https://app.superfluid.org/stream/optimism/"
+const SUPERFLUID_STREAM_URL = "https://app.superfluid.org/vesting/optimism/"
 
 const RewardAccordion = ({
   reward,
