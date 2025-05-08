@@ -1699,7 +1699,7 @@ export async function createProjectKycTeam({
 
       const kycTeam = await tx.kYCTeam.create({
         data: {
-          walletAddress,
+          walletAddress: walletAddress.toLowerCase(),
           ...(project?.kycTeam?.rewardStreamId && {
             rewardStreamId: project.kycTeam.rewardStreamId,
           }),
