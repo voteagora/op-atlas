@@ -1,6 +1,6 @@
 "use server"
 
-import { Prisma, User } from "@prisma/client"
+import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -37,7 +37,6 @@ import { getUserById } from "@/db/users"
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
-import { getUserPriorityAddress } from "./users"
 import {
   verifyAdminStatus,
   verifyMembership,
@@ -152,16 +151,10 @@ export const createNewProject = async (
   }
 
 
-  const walletAddress = await getUserPriorityAddress(user)
-  if (!walletAddress) {
-    return {
-      error: "Failed to get or create wallet",
-    }
-  }
 
   // Create entity attestation
   const attestationId = await createEntityAttestation({
-    address: walletAddress,
+    farcasterId: user?.farcasterId ? parseInt(user.farcasterId, 10) : 0,
     type: "project",
   })
 
@@ -192,16 +185,10 @@ export const createNewProjectOnBehalf = async (
     }
   }
 
-  const walletAddress = await getUserPriorityAddress(user)
-  if (!walletAddress) {
-    return {
-      error: "Failed to get or create wallet",
-    }
-  }
 
   // Create project attestation
   const attestationId = await createEntityAttestation({
-    address: walletAddress,
+    farcasterId: user?.farcasterId ? parseInt(user.farcasterId, 10) : 0,
     type: "project",
   })
 

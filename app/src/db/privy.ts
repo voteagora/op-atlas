@@ -152,35 +152,4 @@ export const syncPrivyUser = async (
 }
 
 
-export const createEmbeddedWallet = async (user: User): Promise<string | null> => {
-
-  try {
-    // Note: once the embedded wallet is created, it will be permanently 
-    // linked to the user's Privy account
-    const response = await privy.createWallets({
-      userId: user.privyDid!,
-      createEthereumWallet: true,
-      numberOfEthereumWalletsToCreate: 1
-    })
-
-    // Get embedded wallet address
-    const wallet = response.linkedAccounts?.find(
-      (account) => account.type === "wallet" && 'address' in account
-    )
-    if (wallet) {
-      await addUserAddresses({
-        id: user.id,
-        addresses: [wallet.address],
-        source: "privy",
-      })
-    }
-
-    return wallet?.address || null
-
-  } catch (error) {
-    console.error("Failed to create Privy wallet:", error)
-    return null
-  }
-}
-
 

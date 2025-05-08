@@ -23,7 +23,6 @@ import { getUserById } from "@/db/users"
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
-import { getUserPriorityAddress } from "./users"
 import { verifyOrganizationAdmin } from "./utils"
 
 export const getUserOrganizations = async (userId: string) => {
@@ -53,16 +52,9 @@ export const createNewOrganization = async ({
     }
   }
 
-  const walletAddress = await getUserPriorityAddress(user)
-  if (!walletAddress) {
-    return {
-      error: "Failed to get or create wallet",
-    }
-  }
-
   // Create entity attestation
   const organizationId = await createEntityAttestation({
-    address: walletAddress,
+    farcasterId: user?.farcasterId ? parseInt(user.farcasterId, 10) : 0,
     type: "organization",
   })
 

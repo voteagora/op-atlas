@@ -115,14 +115,14 @@ async function revokeMultiAttestations(
 }
 
 export async function createEntityAttestation({
-  address,
+  farcasterId,
   type,
 }: {
-  address: string
+  farcasterId: number
   type: "project" | "organization"
 }) {
   const data = entitySchema.encodeData([
-    { name: "address", value: address, type: "string" },
+    { name: "farcasterID", value: farcasterId, type: "uint256" },
     { name: "type", value: type, type: "string" },
   ])
 
@@ -407,7 +407,8 @@ export async function processAttestationsInBatches<T>(
         throw new Error(`Failed after ${maxRetries} retries: ${error}`)
       }
       console.warn(
-        `Retry ${retryCount + 1}/${maxRetries} for batch of ${batch.length
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+          batch.length
         } items`,
       )
       await new Promise((resolve) =>
