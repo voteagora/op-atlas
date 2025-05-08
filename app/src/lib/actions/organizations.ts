@@ -54,7 +54,7 @@ export const createNewOrganization = async ({
 
   // Create entity attestation
   const organizationId = await createEntityAttestation({
-    farcasterId: user?.farcasterId ? parseInt(user.farcasterId, 10) : 0,
+    farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
     type: "organization",
   })
 

@@ -154,7 +154,7 @@ export const createNewProject = async (
 
   // Create entity attestation
   const attestationId = await createEntityAttestation({
-    farcasterId: user?.farcasterId ? parseInt(user.farcasterId, 10) : 0,
+    farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
     type: "project",
   })
 
@@ -188,7 +188,7 @@ export const createNewProjectOnBehalf = async (
 
   // Create project attestation
   const attestationId = await createEntityAttestation({
-    farcasterId: user?.farcasterId ? parseInt(user.farcasterId, 10) : 0,
+    farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
     type: "project",
   })
 

@@ -3,12 +3,11 @@
 import clsx from "clsx"
 import { X } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
-import Image from "next/image"
 
+import { UserAvatarSmall } from "../common/UserAvatarSmall"
 import { Badge } from "./badge"
 import { Command, CommandGroup, CommandItem, CommandList } from "./command"
 import { Input } from "./input"
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
 
 export type IMultiSelectOptions = {
   value: string | number
@@ -43,22 +42,6 @@ export function MultiSelect({
   const inputRef = useRef<HTMLInputElement>(null)
   const [, setOpen] = useState(false)
 
-  const renderUserAvatar = (image: string | null | undefined, label: string) => {
-    return image ? (
-      <Avatar className="h-6 w-6 mr-2">
-        <AvatarImage src={image} alt={label} />
-      </Avatar>
-    ) : (
-      <div className="h-6 w-6 mr-2 bg-secondary rounded-full flex items-center justify-center border border-muted">
-        <Image
-          src="/assets/icons/user-icon.svg"
-          alt="user"
-          width={8}
-          height={8}
-        />
-      </div>
-    )
-  }
 
   const handleUnselect = useCallback(
     (item: IMultiSelectOptions) => {
@@ -116,8 +99,10 @@ export function MultiSelect({
                             e.stopPropagation()
                           }}
                         >
-                          {renderUserAvatar(option.image, option.label)}
-                          {option.label}
+                          <div className="flex flex-row items-center gap-2">
+                            <UserAvatarSmall imageUrl={option.image} />
+                            {option.label}
+                          </div>
                         </CommandItem>
                       )
                     })
@@ -139,13 +124,16 @@ export function MultiSelect({
             return (
               <Badge
                 key={item.value}
-                className="py-2 px-3 rounded-md shrink-0"
+                className="py-2 px-3 rounded-md shrink-0 flex flex-row items-center gap-2"
                 variant="secondary"
               >
-                {renderUserAvatar(item.image, item.label)}
-                <p className="ml-1 text-sm text-secondary-foreground">
-                  {item.label}
-                </p>
+
+                <div className="flex flex-row items-center gap-2">
+                  <UserAvatarSmall imageUrl={item.image} />
+                  <p className="text-sm text-secondary-foreground">
+                    {item.label}
+                  </p>
+                </div>
                 <button
                   className="ring-offset-background rounded-full outline-none ml-2"
                   onMouseDown={(e) => {
@@ -163,7 +151,8 @@ export function MultiSelect({
             )
           })}
         </div>
-      ) : null}
-    </div>
+      ) : null
+      }
+    </div >
   )
 }
