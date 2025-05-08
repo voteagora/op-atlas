@@ -353,16 +353,30 @@ export async function createRewardStream(
 
   const rewardId = generateRewardStreamId(projects.map((project) => project.id))
 
-  return prisma.rewardStream.upsert({
-    where: {
-      id: rewardId,
-    },
-    update: {},
-    create: {
-      id: rewardId,
-      projects: projects.map((project) => project.id),
-      roundId,
-    },
+  return prisma.$transaction(async (tx) => {
+    const rewardStream = await tx.rewardStream.upsert({
+      where: {
+        id: rewardId,
+      },
+      update: {},
+      create: {
+        id: rewardId,
+        projects: projects.map((project) => project.id),
+        roundId,
+      },
+    })
+
+    // Update the KYCTeam with the rewardStreamId
+    await tx.kYCTeam.update({
+      where: {
+        walletAddress: stream.receiver.toLowerCase(),
+      },
+      data: {
+        rewardStreamId: rewardStream.id,
+      },
+    })
+
+    return rewardStream
   })
 }
 
