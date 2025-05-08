@@ -16,7 +16,11 @@ import {
   updateClaim,
 } from "@/db/rewards"
 
-import { getActiveStreams, SuperfluidStream } from "../superfluid"
+import {
+  getActiveStreams,
+  SuperfluidStream,
+  SuperfluidVestingSchedule,
+} from "../superfluid"
 import { processStream } from "../utils/rewards"
 import { verifyAdminStatus } from "./utils"
 
@@ -195,7 +199,7 @@ export const getRewardStreamsForRound = async (
 }
 
 export const processSuperfluidStream = async (
-  stream: SuperfluidStream,
+  stream: SuperfluidVestingSchedule,
   roundId: string,
 ) => {
   // Create RewardStream
