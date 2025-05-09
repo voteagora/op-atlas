@@ -35,6 +35,9 @@ const config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         info: "#0E4CAF",
+        brand: {
+          primary: "#FF0420",
+        },
         background: "hsl(var(--background))",
         backgroundaccent: "hsl(var(--background-accent))",
         backgroundSecondary: "hsl(var(--background-secondary))",
@@ -57,6 +60,7 @@ const config = {
           secondary: "hsl(var(--text-secondary))",
           default: "hsl(var(--text-default))",
           muted: "hsl(var(--text-muted))",
+          foreground: "hsl(var(--text-foreground))",
           destructive: "#FF0420",
         },
         foreground: "var(--foreground)",

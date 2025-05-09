@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 
 import { auth } from "@/auth"
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
+import { getUserById } from "@/db/users"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 import { getProjectMetrics } from "@/lib/oso"
@@ -35,9 +36,10 @@ export default async function Page({ params }: PageProps) {
     return notFound()
   }
 
-  const isMember = !(
-    await verifyMembership(projectId, session?.user.farcasterId ?? "")
-  )?.error
+  const user = await getUserById(session?.user?.id ?? "")
+
+  const isMember = !(await verifyMembership(projectId, user?.farcasterId ?? ""))
+    ?.error
 
   const {
     eligibility,
@@ -58,15 +60,15 @@ export default async function Page({ params }: PageProps) {
 
   const author = publicProject.organization
     ? {
-        avatarUrl: publicProject.organization.organization.avatarUrl,
-        name: publicProject.organization.organization.name,
-        farcasterHandle: "",
-      }
+      avatarUrl: publicProject.organization.organization.avatarUrl,
+      name: publicProject.organization.organization.name,
+      farcasterHandle: "",
+    }
     : {
-        avatarUrl: publicProject.team?.[0]?.user.imageUrl,
-        name: publicProject.team?.[0]?.user.name,
-        farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
-      }
+      avatarUrl: publicProject.team?.[0]?.user.imageUrl,
+      name: publicProject.team?.[0]?.user.name,
+      farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
+    }
 
   const enrolledInDevTooling =
     publicProject.applications?.filter(
@@ -149,10 +151,10 @@ export default async function Page({ params }: PageProps) {
                         eligibility={
                           eligibility
                             ? {
-                                ...eligibility,
-                                hasQualifiedAddresses,
-                                deployedOnWorldchain,
-                              }
+                              ...eligibility,
+                              hasQualifiedAddresses,
+                              deployedOnWorldchain,
+                            }
                             : undefined
                         }
                         isMember={isMember}

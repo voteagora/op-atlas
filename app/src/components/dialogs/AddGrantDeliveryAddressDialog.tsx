@@ -16,6 +16,7 @@ import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { useUser } from "@/hooks/db/useUser"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { createProjectKycTeamAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -33,6 +34,8 @@ export function AddGrantDeliveryAddressDialog({
   const { data: session } = useSession()
   const { data: grantDeliveryData } = useAppDialogs()
 
+  const { user } = useUser({ id: session?.user?.id, enabled: true })
+
   const [isPending, startTransition] = useTransition()
   const {
     control,
@@ -46,7 +49,7 @@ export function AddGrantDeliveryAddressDialog({
     },
   })
 
-  const messageToSign = `I verify that I am ${session?.user.farcasterId} on Farcaster and I'm an optimist.`
+  const messageToSign = `I verify that I am ${user?.farcasterId} on Farcaster and I'm an optimist.`
 
   const handleClose = useCallback(
     (isOpen: boolean) => {

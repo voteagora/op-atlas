@@ -11,14 +11,15 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const session = await auth()
+  const userId = session?.user.id
 
-  if (!session?.user.id) {
+  if (!userId) {
     redirect("/dashboard")
   }
 
   const [project, membership] = await Promise.all([
     getProject({ id: params.projectId }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
+    verifyMembership(params.projectId, userId),
   ])
 
   if (membership?.error || !project) {

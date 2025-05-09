@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useFeatureFlagEnabled } from "posthog-js/react"
 import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
 
@@ -21,7 +22,6 @@ import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
 import { DeleteProjectDialog } from "./DeleteProjectDialog"
-import { useFeatureFlagEnabled } from "posthog-js/react"
 
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,

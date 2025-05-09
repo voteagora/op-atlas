@@ -94,7 +94,7 @@ export default function MakeOrganizationForm({
     },
   })
 
-  const formValues = form.watch();
+  const formValues = form.watch()
 
   const { fields: websiteFields, append: addWebsiteField } = useFieldArray({
     control: form.control,
@@ -180,14 +180,14 @@ export default function MakeOrganizationForm({
 
   // CHANGE: Add helper functions to check if the last field has a value
   const shouldShowWebsiteAdd = () => {
-    const websites = formValues.website;
-    return websites[websites.length - 1]?.value.trim() !== '';
-  };
+    const websites = formValues.website
+    return websites[websites.length - 1]?.value.trim() !== ""
+  }
 
   const shouldShowFarcasterAdd = () => {
-    const farcasters = formValues.farcaster;
-    return farcasters[farcasters.length - 1]?.value.trim() !== '';
-  };
+    const farcasters = formValues.farcaster
+    return farcasters[farcasters.length - 1]?.value.trim() !== ""
+  }
   const onSubmit = () => async (values: z.infer<typeof formSchema>) => {
     setIsSaving(true)
 
@@ -241,16 +241,16 @@ export default function MakeOrganizationForm({
         try {
           const response = organization
             ? await updateOrganizationDetails({
-                id: organization.id,
-                organization: newValues,
-              })
+              id: organization.id,
+              organization: newValues,
+            })
             : await createNewOrganization({
-                organization: newValues,
-                teamMembers: team.map(({ user, role }) => ({
-                  userId: user.id,
-                  role,
-                })),
-              })
+              organization: newValues,
+              teamMembers: team.map(({ user, role }) => ({
+                userId: user.id,
+                role,
+              })),
+            })
 
           if (response?.error !== null || !response) {
             throw new Error(response?.error ?? "Failed to save project")
@@ -500,14 +500,14 @@ export default function MakeOrganizationForm({
             {/* Only show Add button when the last website field has a value */}
             {shouldShowWebsiteAdd() && (
               <Button
-                 type="button"
-                 variant="secondary"
-                 onClick={() => addWebsiteField({ value: "" })}
-                 leftIcon={<Plus size={16} />}
-               >
-                 Add
+                type="button"
+                variant="secondary"
+                onClick={() => addWebsiteField({ value: "" })}
+                leftIcon={<Plus size={16} />}
+              >
+                Add
               </Button>
-             )}
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -532,14 +532,14 @@ export default function MakeOrganizationForm({
             {/* Only show Add button when the last Farcaster field has a value */}
             {shouldShowFarcasterAdd() && (
               <Button
-                 type="button"
-                 variant="secondary"
-                 onClick={() => addFarcasterField({ value: "" })}
-                 leftIcon={<Plus size={16} />}
-               >
-                 Add
+                type="button"
+                variant="secondary"
+                onClick={() => addFarcasterField({ value: "" })}
+                leftIcon={<Plus size={16} />}
+              >
+                Add
               </Button>
-             )}
+            )}
           </div>
 
           <FormField
@@ -589,7 +589,7 @@ export default function MakeOrganizationForm({
         team={team.map((member) => member.user)}
         addMembers={handleAddMembers}
         title="Add team members"
-        subtitle="You can add team members by their Farcaster username. They must have an Optimist profile."
+        subtitle="You can add team members by their email, wallet address, or Farcaster username. They must have an Optimist profile."
       />
       <DeleteTeamMemberDialog
         open={!!isShowingRemove}

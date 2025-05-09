@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Application } from "@prisma/client"
 import { format } from "date-fns"
-import React, { useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -14,7 +14,6 @@ import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
-import EmailSignupDialog from "./dialogs/EmailSignupDialog"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTabs } from "./MissionApplicationTabs"
 
@@ -118,14 +117,6 @@ export function MissionApplication() {
   }
   return (
     <div className="mt-16 bg-background flex flex-col px-16 w-full max-w-5xl rounded-3xl z-10">
-      {showDialog && (
-        <EmailSignupDialog
-          open
-          onOpenChange={setShowDialog}
-          form={form}
-          onSubmit={submitApplication}
-        />
-      )}{" "}
       <MissionApplicationBreadcrumbs />
       <div className="flex flex-col mt-10 gap-2">
         <h2 className="text-4xl">

@@ -4,9 +4,7 @@ import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
 
-import { CHAIN_INFO } from "@/components/common/chain"
-import { Oso_ProjectsByCollectionV1 } from "@/graphql/__generated__/types"
-import { Oso_ProjectsV1 } from "@/graphql/__generated__/types"
+import { Oso_ProjectsByCollectionV1, Oso_ProjectsV1 } from "@/graphql/__generated__/types"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -20,13 +18,11 @@ import {
   UserProjectsWithDetails,
   UserWithProjects,
 } from "@/lib/types"
-import { getValidUntil } from "@/lib/utils"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
-import { ProjectOSOData } from "@/lib/oso/types"
 
-async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
+async function getUserProjectsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
     SELECT jsonb_build_object(
       'id', u.id,
@@ -48,7 +44,7 @@ async function getUserProjectsFn({ farcasterId }: { farcasterId: string }) {
       )
     ) as result
     FROM "User" u
-    WHERE u."farcasterId" = ${farcasterId}
+    WHERE u."id" = ${userId}
     LIMIT 1;
   `
 
@@ -785,36 +781,36 @@ export async function createProject({
           },
           ...(organizationId
             ? await prisma.userOrganization
-                .findMany({
-                  where: { organizationId, deletedAt: null },
-                  select: { userId: true },
-                })
-                .then((members) =>
-                  members
-                    .filter((member) => member.userId !== userId)
-                    .map((member) => ({
-                      role: "member",
+              .findMany({
+                where: { organizationId, deletedAt: null },
+                select: { userId: true },
+              })
+              .then((members) =>
+                members
+                  .filter((member) => member.userId !== userId)
+                  .map((member) => ({
+                    role: "member",
 
-                      user: {
-                        connect: {
-                          id: member.userId,
-                        },
+                    user: {
+                      connect: {
+                        id: member.userId,
                       },
-                    })),
-                )
+                    },
+                  })),
+              )
             : []),
         ],
       },
       organization: organizationId
         ? {
-            create: {
-              organization: {
-                connect: {
-                  id: organizationId,
-                },
+          create: {
+            organization: {
+              connect: {
+                id: organizationId,
               },
             },
-          }
+          },
+        }
         : undefined,
     },
   })
@@ -1509,20 +1505,20 @@ export async function createApplication({
       },
       category: categoryId
         ? {
-            connect: {
-              id: categoryId,
-            },
-          }
+          connect: {
+            id: categoryId,
+          },
+        }
         : undefined,
       impactStatementAnswer: {
         createMany: {
           data: impactStatement
             ? Object.entries(impactStatement).map(
-                ([impactStatementId, answer]) => ({
-                  impactStatementId,
-                  answer,
-                }),
-              )
+              ([impactStatementId, answer]) => ({
+                impactStatementId,
+                answer,
+              }),
+            )
             : [],
         },
       },

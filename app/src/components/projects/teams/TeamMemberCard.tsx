@@ -2,7 +2,7 @@ import { User } from "@prisma/client"
 import Image from "next/image"
 import { memo, useState } from "react"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useUser } from "@/hooks/db/useUser"
+import { useUsername } from "@/hooks/useUsername"
 import { TeamRole } from "@/lib/types"
 
 export const TeamMemberCard = memo(function TeamMemberCard({
@@ -35,18 +37,18 @@ export const TeamMemberCard = memo(function TeamMemberCard({
   const [showingMenu, setShowingMenu] = useState(false)
   const [mouseEntered, setMouseEntered] = useState(false)
 
+  const { user: loadedUser } = useUser({ id: user.id })
+  const username = useUsername(loadedUser)
+
   return (
     <div
       onMouseEnter={() => setMouseEntered(true)}
       onMouseLeave={() => setMouseEntered(false)}
     >
       <div className="py-2 px-3 rounded-md border border-input flex items-center gap-2 w-full h-10">
-        <Avatar className="!w-6 !h-6">
-          <AvatarImage src={user.imageUrl || ""} alt="team avatar" />
-          <AvatarFallback>{user.username} </AvatarFallback>
-        </Avatar>
+        <UserAvatarSmall imageUrl={user?.imageUrl} />
         <p className="text-sm text-foreground">
-          {user.username} {isCurrentUser && "(You)"}
+          {username} {isCurrentUser && "(You)"}
         </p>
         {/* this badge will be shown when according to project organization for now I am just showing dummy */}
         {organizationName && (

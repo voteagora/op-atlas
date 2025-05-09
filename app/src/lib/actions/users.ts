@@ -1,134 +1,31 @@
 "use server"
 
 import { Prisma } from "@prisma/client"
-import { revalidatePath } from "next/cache"
-import { z } from "zod"
+import { createPublicClient, http } from "viem"
+import { getEnsAddress } from "viem/actions"
+import { mainnet } from "viem/chains"
 
-import { auth, signIn } from "@/auth"
+import { auth } from "@/auth"
 import {
-  getUserByFarcasterId,
+  searchByAddress,
+  searchByEmail,
   searchUsersByUsername,
-  updateUserDiscord,
-  updateUserEmail,
-  updateUserGithub,
-  updateUserGovForumProfileUrl,
-  updateUserHasGithub,
-  updateUserInteraction,
+  updateUser,
+  updateUserInteraction
 } from "@/db/users"
-import { addContactToList, updateContactEmail } from "@/lib/api/mailchimp"
 
-const UpdateEmailSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "This field has to be filled." })
-    .email("This is not a valid email."),
+const client = createPublicClient({
+  chain: mainnet,
+  transport: http(),
 })
 
-export const connectDiscord = async () => {
-  await signIn("discord")
-}
-
-export const connectGithub = async () => {
-  await signIn("github")
-}
-
-export const updateEmail = async (email: string) => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const user = await getUserByFarcasterId(session.user.farcasterId)
-  if (!user) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const { data, success, error } = UpdateEmailSchema.safeParse({ email })
-  if (!success) {
-    return {
-      error,
-      user: null,
-    }
-  }
-
-  const { email: parsedEmail } = data
-
-  const currentEmail = user.emails[0]?.email
-  if (currentEmail) {
-    await updateContactEmail({
-      currentEmail,
-      newEmail: parsedEmail,
-    })
-  } else {
-    await addContactToList({
-      email: parsedEmail,
-    })
-  }
-
-  const [_, updated] = await updateUserEmail({
-    id: user.id,
-    email: parsedEmail,
-  })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/profile/details")
-  revalidatePath("/rewards/[rewardId]/page", "page")
-
-  console.info(
-    `Email updated for user farcasterId ${session.user.farcasterId}: ${parsedEmail}`,
-  )
-
-  return {
-    error: null,
-    user: updated,
-  }
-}
-
-export const removeDiscord = async () => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const updated = await updateUserDiscord({
-    id: session.user.id,
-    discord: null,
-  })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/profile/connected-apps")
-
-  return {
-    error: null,
-    user: updated,
-  }
-}
-
-export const removeGithub = async () => {
-  const session = await auth()
-
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const updated = await updateUserGithub({ id: session.user.id, github: null })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/profile/connected-apps")
-
-  return {
-    error: null,
-    user: updated,
+async function resolveEnsName(name: string): Promise<string | null> {
+  try {
+    const address = await getEnsAddress(client, { name })
+    return address
+  } catch (error) {
+    console.error("Error resolving ENS name:", error)
+    return null
   }
 }
 
@@ -141,17 +38,10 @@ export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) => {
     }
   }
 
-  let updated = await updateUserHasGithub({
+  let updated = await updateUser({
     id: session.user.id,
     notDeveloper: isNotDeveloper,
   })
-
-  if (isNotDeveloper && !!updated.github) {
-    await updateUserGithub({ id: session.user.id, github: null })
-  }
-
-  revalidatePath("/dashboard")
-  revalidatePath("/profile/connected-apps")
 
   return {
     error: null,
@@ -179,12 +69,10 @@ export const updateGovForumProfileUrl = async (govForumProfileUrl: string) => {
     }
   }
 
-  const updated = await updateUserGovForumProfileUrl({
+  const updated = await updateUser({
     id: session.user.id,
     govForumProfileUrl,
   })
-
-  revalidatePath("/profile/details")
 
   return {
     error: null,
@@ -193,10 +81,10 @@ export const updateGovForumProfileUrl = async (govForumProfileUrl: string) => {
 }
 
 /**
- * Searches users by Farcaster username.
- * The query must be at least three characters long.
+ * Searches users by Farcaster username, address, email, or ENS name.
+ * The query must be at least one character long.
  */
-export const searchUsers = async (username: string) => {
+export const searchUsers = async (query: string) => {
   // Require authentication.
   const session = await auth()
   if (!session?.user?.id) {
@@ -205,17 +93,36 @@ export const searchUsers = async (username: string) => {
     }
   }
 
-  if (username.length < 1) {
+  if (query.length < 1) {
     return {
       error: null,
       users: [],
     }
   }
 
-  const users = await searchUsersByUsername({ username })
+  // Check if the query is an ENS name (ends with .eth)
+  let searchQuery = query
+  if (query.toLowerCase().endsWith('.eth')) {
+    const resolvedAddress = await resolveEnsName(query)
+    if (resolvedAddress) {
+      searchQuery = resolvedAddress
+    }
+  }
+
+  const [usernameResults, addressResults, emailResults] = await Promise.all([
+    searchUsersByUsername({ username: searchQuery }),
+    searchByAddress({ address: searchQuery }),
+    searchByEmail({ email: searchQuery })
+  ])
+
+  // Combine results and remove duplicates based on user ID
+  const uniqueUsers = Array.from(
+    new Map([...usernameResults, ...addressResults, ...emailResults].map(user => [user.id, user])).values()
+  )
+
   return {
     error: null,
-    users,
+    users: uniqueUsers,
   }
 }
 

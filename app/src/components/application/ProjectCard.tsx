@@ -2,13 +2,13 @@ import Image from "next/image"
 import { memo, useMemo, useState } from "react"
 
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
+import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { ProjectWithDetails } from "@/lib/types"
 import { cn, getProjectStatus } from "@/lib/utils"
 
 import { Badge } from "../common/Badge"
 import { Checkbox } from "../ui/checkbox"
 import IneligibleDialog from "./IneligibleDialog"
-import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 
 export const ProjectCard = memo(function ProjectCard({
   className,

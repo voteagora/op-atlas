@@ -92,7 +92,7 @@ async function getAdminOrganizationsFn(userId: string) {
 export const getAdminOrganizations = cache(getAdminOrganizationsFn)
 
 async function getUserProjectOrganizationsFn(
-  farcasterId: string,
+  userId: string,
   projectId: string,
 ) {
   const result = await prisma.$queryRaw<
@@ -145,7 +145,7 @@ async function getUserProjectOrganizationsFn(
           FROM "UserOrganization" uo
           JOIN "User" u ON u.id = uo."userId"
           JOIN "ProjectOrganization" po ON uo."organizationId" = po."organizationId"
-          WHERE u."farcasterId" = ${farcasterId}
+          WHERE u."id" = ${userId}
             AND uo."deletedAt" IS NULL
             AND po."projectId" = ${projectId}
         ),

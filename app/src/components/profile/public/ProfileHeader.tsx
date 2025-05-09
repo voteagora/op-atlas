@@ -1,9 +1,10 @@
-import React, { memo } from "react"
+import { memo } from "react"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
+import { useUsername } from "@/hooks/useUsername"
 import ProfileHeaderLinks from "./ProfileHeaderLinks"
 
 const ProfileHeader = ({
@@ -13,22 +14,20 @@ const ProfileHeader = ({
   className?: string
   user: UserWithAddresses
 }) => {
-  const initials = (user?.name ?? "")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
+
+  const username = useUsername(user)
 
   return (
-    <div className={cn("flex gap-x-4", className)}>
+    <div className={cn("flex gap-x-4 border-b border-border pb-6 w-full", className)}>
       <div className="flex flex-col space-y-6">
-        <Avatar className="w-28 h-28">
-          <AvatarImage src={user?.imageUrl ?? ""} />
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
+        {user.imageUrl && (
+          <Avatar className="w-20 h-20 my-0.5">
+            <AvatarImage src={user.imageUrl} />
+          </Avatar>
+        )}
         <div className="space-y-3">
           <div>
-            <h2 className="flex items-center gap-x-2">{user.name ?? ""} </h2>
+            <h2 className="flex items-center gap-x-2">{username} </h2>
             <span>{user.bio}</span>
           </div>
           <ProfileHeaderLinks user={user} />

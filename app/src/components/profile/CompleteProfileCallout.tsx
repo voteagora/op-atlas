@@ -1,22 +1,16 @@
 import { User } from "@prisma/client"
-import { ArrowUpRight, Check, Mail, Plus, X } from "lucide-react"
-import Image from "next/image"
+import { ArrowUpRight, Check, X } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
 
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
-import { Button } from "@/components/common/Button"
-import ExtendedLink from "@/components/common/ExtendedLink"
-import { syncFarcasterAddresses } from "@/lib/actions/addresses"
-import { connectGithub, setUserIsNotDeveloper } from "@/lib/actions/users"
+import { useUser } from "@/hooks/db/useUser"
+import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import {
   UserAddressSource,
   UserWithAddresses,
   UserWithEmails,
 } from "@/lib/types"
-import { cn, profileProgress, shortenAddress } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
+import { profileProgress } from "@/lib/utils"
 
 import { Badge } from "../common/Badge"
 import {
@@ -25,23 +19,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion"
+import { AddressConnection } from "./AddressConnection"
+import { EmailConnection } from "./EmailConnection"
+import { GithubConnection } from "./GithubConnection"
+import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 
 export function CompleteProfileCallout({
-  user,
+  user: initialUser,
   setIsCompleteProfileAccordionDismissed,
 }: {
   user: UserWithAddresses
   setIsCompleteProfileAccordionDismissed: (dismissed: boolean) => void
 }) {
+  const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
+  const user = loadedUser || initialUser
+
   const progress = profileProgress(user)
   const isComplete = progress === 100
-
-  // Attempt to sync Farcaster accounts one time
-  useEffect(() => {
-    if (user.addresses.length === 0) {
-      syncFarcasterAddresses()
-    }
-  }, [user])
 
   const onDismiss = () => {
     document.cookie =
@@ -138,7 +132,6 @@ function ProfileSteps({ user }: { user: UserWithAddresses }) {
 }
 
 function AddYourEmailStep({ user }: { user: UserWithEmails }) {
-  const { setOpenDialog } = useAppDialogs()
   return (
     <div className="flex justify-between pb-4 gap-6">
       <div className="flex gap-4">
@@ -158,20 +151,7 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
               Please add email for important messages.
             </div>
           </div>
-          <div className="flex space-x-1.5 items-center">
-            {user.emails.length > 0 && (
-              <div className="input-container">
-                <Mail size={16} fill="#0F111A" color="#fff" />
-                <span>{user.emails[0].email}</span>
-              </div>
-            )}
-            <Button
-              onClick={() => setOpenDialog("email")}
-              variant={user.emails.length > 0 ? "secondary" : "primary"}
-            >
-              {user.emails.length > 0 ? "Edit" : "Add email"}
-            </Button>
-          </div>
+          <EmailConnection userId={user.id} />
         </div>
       </div>
     </div>
@@ -179,35 +159,14 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
 }
 
 function ConnectYourGithubStep({ user }: { user: User }) {
-  const [isDeveloper, setIsDeveloper] = useState(!user.notDeveloper)
-  const [loading, setLoading] = useState(false)
-
-  const toggleIsDeveloper = async (isDeveloper: boolean) => {
-    if (loading) {
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      setIsDeveloper(isDeveloper)
-      const result = await setUserIsNotDeveloper(!isDeveloper)
-      if (result.error !== null) {
-        throw result.error
-      }
-      toast.success("Developer status updated")
-    } catch (error) {
-      console.error("Error toggling developer status", error)
-      toast.error("Error updating developer status")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
-        {!isDeveloper || user.github ? <GreenCheck /> : <StepNumber num={2} />}
+        {user.notDeveloper || user.github ? (
+          <GreenCheck />
+        ) : (
+          <StepNumber num={2} />
+        )}
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col gap-[2px]">
             <div className="font-medium flex items-center gap-2">
@@ -217,35 +176,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
               Show your code contributions to the Optimism Collective.
             </div>
           </div>
-          {user.github && (
-            <div className="flex items-center self-start p-3 border border-border rounded-md gap-1">
-              <Image
-                src="/assets/icons/githubIcon.svg"
-                height={14}
-                width={14}
-                alt="Github"
-              />
-              <div className="text-secondary-foreground">{user.github}</div>
-            </div>
-          )}
-          <div className="flex space-x-1.5 items-center">
-            <div
-              className={cn("input-container", !isDeveloper && "bg-secondary")}
-            >
-              <input
-                type="checkbox"
-                checked={!isDeveloper}
-                onChange={(e) => toggleIsDeveloper(!e.target.checked)}
-              />
-              I&apos;m not a developer
-            </div>
-
-            {!user.github && (
-              <Button onClick={() => connectGithub()} disabled={!isDeveloper}>
-                Connect Github
-              </Button>
-            )}
-          </div>
+          <GithubConnection userId={user.id} />
         </div>
       </div>
     </div>
@@ -253,17 +184,11 @@ function ConnectYourGithubStep({ user }: { user: User }) {
 }
 
 function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
-  const { setOpenDialog } = useAppDialogs()
-
-  const onCopy = (address: string) => {
-    navigator.clipboard.writeText(address)
-    toast.success("Address copied")
-  }
-
+  const { unlinkWallet } = usePrivyLinkWallet(user.id)
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
-        {user.addresses.length > 1 ? <GreenCheck /> : <StepNumber num={3} />}
+        {user.addresses.length >= 1 ? <GreenCheck /> : <StepNumber num={3} />}
         <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-[2px]">
@@ -286,47 +211,34 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                 </ul>
               </div>
             </div>
-            <div className="text-xs text-secondary-foreground">
-              You can also verify addresses directly to your Farcaster account,
-              and{" "}
-              <Link href="/profile/verified-addresses" className="underline">
-                import them to your profile
-              </Link>
-              . To do so, open Warpcast and choose Settings. Then choose
-              Verified addresses and proceed.
-            </div>
           </div>
 
-          {user.addresses.length > 1 && (
+          {user.addresses.length === 0 && (
+            <AddressConnection userId={user.id}>Add address</AddressConnection>
+          )}
+
+          {user.addresses.length >= 1 && (
             <div className="flex flex-col gap-2">
               <div className="text-sm text-foreground font-medium">
                 Your verified addresses
               </div>
-              <div className="flex items-center flex-wrap gap-1.5">
+              <div className="flex flex-col gap-1.5">
                 {user.addresses.map(({ address, source, primary }) => (
                   <VerifiedAddress
                     key={address}
-                    shouldShortenAddress
                     address={address}
                     primary={primary}
                     showCheckmark={false}
                     source={source as UserAddressSource}
-                    onCopy={onCopy}
+                    onRemove={unlinkWallet}
+                    userId={user.id}
                   />
                 ))}
-                <button
-                  className="h-10 w-10 flex items-center justify-center bg-backgroundSecondary rounded-sm"
-                  onClick={() => setOpenDialog("verify_address")}
-                >
-                  <Plus className="stroke-foreground" size={16} />
-                </button>
               </div>
+              <AddressConnection userId={user.id}>
+                Add another address
+              </AddressConnection>
             </div>
-          )}
-          {user.addresses.length < 2 && (
-            <Button onClick={() => setOpenDialog("verify_address")}>
-              Verify Address
-            </Button>
           )}
         </div>
       </div>
@@ -350,16 +262,21 @@ function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
               Choose one of your verified address to receive attestations from
               Optimism (including the voting badge for Citizens and Guest
               Voters).
+              <div className="flex flex-col gap-1.5 mt-4">
+
+                {user.addresses.map(({ address, source, primary }) => (
+                  <PrimaryAddress
+                    key={address}
+                    address={address}
+                    primary={primary}
+                    showCheckmark={false}
+                    source={source as UserAddressSource}
+                    userId={user.id}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-          <ExtendedLink
-            as="button"
-            href="/profile/verified-addresses"
-            text="Set primary address"
-            variant="primary"
-            disabled={user.addresses.length < 2}
-            target="_self"
-          />
         </div>
       </div>
     </div>

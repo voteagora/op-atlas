@@ -3,30 +3,30 @@
 import { format } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import React from "react"
+import { formatEther } from "viem"
 
+import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { formatNumber } from "@/lib/utils"
-
-import { REWARDS_NAMES } from "./constants"
-import { RecurringRewardsByRound } from "@/lib/utils/rewards"
-import { useParams } from "next/navigation"
-import { formatEther } from "viem"
-import OutboundArrowLink from "@/components/common/OutboundArrowLink"
-import { isKycTeamVerified } from "@/lib/utils/kyc"
-import GrantDeliveryAddress from "./GrantDeliveryAddress"
-import { useAppDialogs } from "@/providers/DialogProvider"
-import { KYCTeamWithTeam } from "@/lib/types"
 import {
   CantClaimCallout,
   ScheduleClaimCallout,
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
+import { KYCTeamWithTeam } from "@/lib/types"
+import { formatNumber } from "@/lib/utils"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
+import { RecurringRewardsByRound } from "@/lib/utils/rewards"
+import { useAppDialogs } from "@/providers/DialogProvider"
+
+import { REWARDS_NAMES } from "./constants"
+import GrantDeliveryAddress from "./GrantDeliveryAddress"
 
 const SUPERFLUID_STREAM_URL = "https://app.superfluid.org/vesting/optimism/"
 

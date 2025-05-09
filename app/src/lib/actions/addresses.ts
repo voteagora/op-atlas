@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getAddress } from "viem"
 
 import { auth } from "@/auth"
 import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
@@ -8,13 +9,14 @@ import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
 import { getUserConnectedAddresses } from "../neynar"
 import verifyMessage from "../utils/serverVerifyMessage"
 
-const getMessage = (farcasterId: string) =>
-  `I verify that I am ${farcasterId} on Farcaster and I'm an optimist.`
+const getMessage = (address: string) =>
+  `I verify that I am the owner of ${address} and I'm an optimist.`
 
 export const verifyUserAddress = async (
   address: `0x${string}`,
   signature: `0x${string}`,
 ) => {
+  const checksumAddress = getAddress(address)
   const session = await auth()
 
   if (!session?.user?.id) {
@@ -30,7 +32,11 @@ export const verifyUserAddress = async (
     }
   }
 
-  if (user.addresses.some(({ address: existing }) => existing === address)) {
+  if (
+    user.addresses.some(
+      ({ address: existing }) => getAddress(existing) === checksumAddress,
+    )
+  ) {
     return {
       error: "Address already verified",
     }
@@ -38,8 +44,8 @@ export const verifyUserAddress = async (
 
   // Verify signature
   const isValidSignature = await verifyMessage({
-    address,
-    message: getMessage(user.farcasterId),
+    address: checksumAddress,
+    message: getMessage(checksumAddress),
     signature: signature as `0x${string}`,
   })
 
@@ -51,7 +57,7 @@ export const verifyUserAddress = async (
 
   await addUserAddresses({
     id: user.id,
-    addresses: [address],
+    addresses: [checksumAddress],
     source: "atlas",
   })
 
@@ -77,7 +83,7 @@ export const deleteUserAddress = async (address: string) => {
 
   await removeUserAddress({
     id: session.user.id,
-    address,
+    address: getAddress(address),
   })
 
   const updated = await getUserById(session.user.id)
@@ -107,7 +113,7 @@ export const syncFarcasterAddresses = async () => {
     }
   }
 
-  const farcasterAddresses = await getUserConnectedAddresses(user.farcasterId)
+  const farcasterAddresses = await getUserConnectedAddresses(user?.farcasterId)
 
   // No action needed if the response is empty
   if (!farcasterAddresses || farcasterAddresses.length === 0) {
@@ -118,16 +124,25 @@ export const syncFarcasterAddresses = async () => {
   }
 
   // Filter out already linked addresses
-  const existingAddresses = user.addresses.map(({ address }) => address)
-  const newAddresses = farcasterAddresses.filter(
-    (address) => !existingAddresses.includes(address),
+  const existingAddresses = user.addresses.map(({ address }) =>
+    getAddress(address),
   )
+  const newAddresses = farcasterAddresses
+    .map((addr) => getAddress(addr)) // Checksum farcaster addresses first
+    .filter((addr) => !existingAddresses.includes(addr))
 
-  await addUserAddresses({
-    id: user.id,
-    addresses: newAddresses,
-    source: "farcaster",
-  })
+  // Process each address individually to avoid collision with existing addresses for the user
+  for (const address of newAddresses) {
+    try {
+      await addUserAddresses({
+        id: user.id,
+        addresses: [address],
+        source: "farcaster",
+      })
+    } catch (error) {
+      console.error(`Failed to add Farcaster address ${address}: ${error}`)
+    }
+  }
 
   const updated = await getUserById(user.id)
 

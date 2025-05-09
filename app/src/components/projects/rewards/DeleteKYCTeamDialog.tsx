@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 
 import { DialogProps } from "@/components/dialogs/types"
 import { Button } from "@/components/ui/button"
@@ -8,9 +9,8 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { useAppDialogs } from "@/providers/DialogProvider"
 import { deleteKYCTeamAction } from "@/lib/actions/kyc"
-import { useRouter } from "next/navigation"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 export function DeleteKYCTeamDialog({
   open,

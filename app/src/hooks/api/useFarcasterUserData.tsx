@@ -34,12 +34,17 @@ const fetchData = async (fid: string): Promise<FarcasterUsers> => {
   return json
 }
 
-export const useFarcasterUserData = (fid: string) => {
+export const useFarcasterUserData = (
+  fid: string | null,
+  enabled: boolean = true,
+) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["farcaster-user"],
     queryFn: async (): Promise<FarcasterUsers> => {
+      if (!fid) throw new Error("Fid is required")
       return fetchData(fid)
     },
+    enabled,
   })
 
   return { user: data, isLoading, error }

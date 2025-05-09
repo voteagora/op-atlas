@@ -84,8 +84,8 @@ const AddTeamMemberDialog = ({
       .map((user) => ({
         label: `@${user.username}`,
         value: user.id,
-        farcasterId: user.farcasterId,
-        image: user.imageUrl,
+        farcasterId: user?.farcasterId,
+        image: user?.imageUrl,
       }))
   }, [searchResults, selectedUsers, team])
 
@@ -145,7 +145,7 @@ const AddTeamMemberDialog = ({
           </DialogTitle>
           <DialogDescription className="text-center text-base text-secondary-foreground font-normal mt-1">
             {subtitle ??
-              "You can add contributors by their Farcaster username. They must have an Optimist profile."}
+              "Search within OP Atlas by email, wallet address, or Farcaster username."}
           </DialogDescription>
         </DialogHeader>
 
@@ -153,7 +153,7 @@ const AddTeamMemberDialog = ({
           parentClassName="z-10"
           selectedOptions={selectedUsers}
           setSelectedOptions={setSelectedUsers}
-          placeholder="@username"
+          placeholder="Email, wallet, or @username"
           options={options}
           inputValue={searchText}
           onSelect={handleSelect}

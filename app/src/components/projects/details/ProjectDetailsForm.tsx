@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
+import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useUser } from "@/hooks/db/useUser"
 import {
   createNewProject,
   setProjectOrganization,
@@ -99,8 +101,12 @@ export default function ProjectDetailsForm({
   const router = useRouter()
   const { track } = useAnalytics()
 
+  const { data: currentUser } = useSession()
+
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  const { user } = useUser({ id: currentUser?.user?.id, enabled: true })
 
   const searchParams = useSearchParams()
 
@@ -234,16 +240,16 @@ export default function ProjectDetailsForm({
         try {
           const [response, res] = project
             ? await Promise.all([
-                updateProjectDetails(project.id, newValues),
-                setProjectOrganization(
-                  project.id,
-                  project.organization?.organization?.id,
-                  values.organization?.id,
-                ),
-              ])
+              updateProjectDetails(project.id, newValues),
+              setProjectOrganization(
+                project.id,
+                project.organization?.organization?.id,
+                values.organization?.id,
+              ),
+            ])
             : await Promise.all([
-                createNewProject(newValues, values.organization?.id),
-              ])
+              createNewProject(newValues, values.organization?.id),
+            ])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")

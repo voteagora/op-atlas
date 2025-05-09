@@ -3,11 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
-import React from "react"
+
 import Link from "next/link"
 
 import ExternalLink from "@/components/ExternalLink"
@@ -53,31 +53,31 @@ function getDefaultValues(
     deployers:
       projectContractsByDeployer.length > 0
         ? projectContractsByDeployer.map((deployer) => ({
-            address: deployer.address,
-            contracts: deployer.contracts.map((contract) => ({
-              address: contract.address,
-              chainId: contract.chainId.toString(),
-              excluded: false,
-            })),
-            signature: projectContracts.contracts[0]?.verificationProof ?? "",
-            verificationChainId:
-              projectContracts.contracts[0]?.verificationChainId?.toString() ??
-              "",
-          }))
+          address: deployer.address,
+          contracts: deployer.contracts.map((contract) => ({
+            address: contract.address,
+            chainId: contract.chainId.toString(),
+            excluded: false,
+          })),
+          signature: projectContracts.contracts[0]?.verificationProof ?? "",
+          verificationChainId:
+            projectContracts.contracts[0]?.verificationChainId?.toString() ??
+            "",
+        }))
         : [
-            {
-              address: "",
-              contracts: [],
-              signature: "",
-              verificationChainId: "",
-            },
-          ],
+          {
+            address: "",
+            contracts: [],
+            signature: "",
+            verificationChainId: "",
+          },
+        ],
     defillamaSlug:
       projectContracts.defiLlamaSlug.length === 0
         ? [{ slug: undefined }]
         : projectContracts.defiLlamaSlug.map((slug) => ({
-            slug: reverseFormatDefillamaSlug(slug),
-          })),
+          slug: reverseFormatDefillamaSlug(slug),
+        })),
   }
 }
 

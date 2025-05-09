@@ -1,5 +1,5 @@
-import { processStream } from "./rewards"
 import { KYCStreamTeam } from "../types"
+import { processStream } from "./rewards"
 
 describe("processStream", () => {
   const createMockTeam = (

@@ -5,7 +5,7 @@ import { UserWithAddresses } from "@/lib/types"
 
 function ProfileRoles({ user }: { user: UserWithAddresses }) {
   const { raw: attestations } = useAttestations(
-    user.addresses.map((a) => a.address),
+    user?.addresses?.map((a) => a.address),
   )
 
   if (!attestations || attestations.length === 0) return null

@@ -47,11 +47,11 @@ export const projectMembers = (project: ProjectWithDetails) => {
 
 export const verifyMembership = async (
   projectId: string,
-  farcasterId: string,
+  userId: string,
 ) => {
   const [projects, userProjectOrganizations] = await Promise.all([
-    getUserProjects({ farcasterId }),
-    getUserProjectOrganizations(farcasterId, projectId),
+    getUserProjects({ userId }),
+    getUserProjectOrganizations(userId, projectId),
   ])
   const projectMembership = projects?.projects.find(
     ({ project }) => project.id === projectId,
@@ -72,18 +72,18 @@ export const verifyMembership = async (
 
 export const verifyAdminStatus = async (
   projectId: string,
-  farcasterId: string,
+  userId: string,
 ) => {
-  const [userProjects, userProjectOrganizations] = await Promise.all([
-    getUserProjects({ farcasterId }),
-    getUserProjectOrganizations(farcasterId, projectId),
+  const [projects, userProjectOrganizations] = await Promise.all([
+    getUserProjects({ userId }),
+    getUserProjectOrganizations(userId, projectId),
   ])
-  const projectMembership = userProjects?.projects.find(
-    ({ project }) => project.id === projectId,
+  const projectMembership = projects?.projects.find(
+    (item) => item.project.id === projectId,
   )
 
   const organizationMembership = userProjectOrganizations?.organizations.find(
-    ({ organization }) => organization.projects.length > 0,
+    (item) => item.organization.projects.length > 0,
   )
 
   if (

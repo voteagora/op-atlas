@@ -1,129 +1,130 @@
 "use client"
 
-import { User } from "@prisma/client"
-import { setCookie } from "cookies-next"
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import {
-  connectGithub,
-  removeGithub,
-  setUserIsNotDeveloper,
-} from "@/lib/actions/users"
-import { cn, GITHUB_REDIRECT_COOKIE } from "@/lib/utils"
+import { syncPrivyUser } from "@/db/privy"
+import { useUser } from "@/hooks/db/useUser"
+import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
+import { setUserIsNotDeveloper } from "@/lib/actions/users"
+import { cn } from "@/lib/utils"
 
 import { Checkbox } from "../ui/checkbox"
 
-export function GithubConnection({ user }: { user: User }) {
-  const pathname = usePathname()
+export const GithubConnection = ({ userId }: { userId: string }) => {
+  const { user: privyUser, unlinkGithub } = usePrivy()
+  const { user, invalidate: invalidateUser } = useUser({
+    id: userId,
+    enabled: true,
+  })
 
-  const [userNotDeveloper, setUserNotDeveloper] = useState(user.notDeveloper)
-  const [isPending, startTransition] = useTransition()
+  const onError = useHandlePrivyErrors()
 
-  const toggleIsDeveloper = async () => {
-    startTransition(async () => {
-      try {
-        const isNotDeveloper = !user.notDeveloper
-        setUserNotDeveloper(isNotDeveloper)
-        const result = await setUserIsNotDeveloper(isNotDeveloper)
-        if (result.error !== null) {
-          throw result.error
-        }
-      } catch (error) {
-        console.error("Error toggling developer status", error)
-        toast.error("Error updating developer status")
+  const username = user?.github || privyUser?.github?.username
+  const isSyncing =
+    user?.github?.toLowerCase() !== privyUser?.github?.username?.toLowerCase()
+
+  const { linkGithub } = useLinkAccount({
+    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
+      if (linkMethod === "github") {
+        toast.promise(
+          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser()),
+          {
+            loading: "Linking github...",
+            success: "Github linked successfully",
+            error: "Failed to link github",
+          },
+        )
       }
-    })
+    },
+    onError,
+  })
+
+  const handleUnlinkGithub = () => {
+    if (privyUser?.github?.subject) {
+      toast.promise(unlinkGithub(privyUser.github.subject), {
+        loading: "Unlinking github...",
+        success: (updatedPrivyUser) => {
+          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
+          return "Github unlinked successfully"
+        },
+        error: (error) => {
+          return error.message
+        },
+      })
+    }
   }
 
-  const authorizeGithub = async () => {
-    // Set a cookie so that we know to redirect back to this page
-    setCookie(GITHUB_REDIRECT_COOKIE, pathname)
-    return connectGithub()
-  }
+  const toggleIsDeveloper = () => {
+    const desiredState = !user?.notDeveloper
 
-  const disconnectGitHub = async () => {
-    startTransition(async () => {
-      try {
-        const result = await removeGithub()
-        if (result.error !== null) {
-          throw result.error
+    toast.promise(setUserIsNotDeveloper(desiredState), {
+      loading: "Updating developer status...",
+      success: () => {
+        if (desiredState && privyUser?.github?.subject) {
+          handleUnlinkGithub()
+        } else {
+          invalidateUser()
         }
-      } catch (error) {
-        console.error("Error disconnecting GitHub", error)
-        toast.error("Error disconnecting GitHub")
-      }
+        return "Developer status updated successfully"
+      },
+      error: "Failed to update developer status",
     })
   }
 
   return (
     <div className="flex flex-col space-y-4">
-      <div>
-        <div className="flex items-center space-x-1.5">
-          <Image
-            src="/assets/icons/githubIcon.svg"
-            alt="Github"
-            height={20}
-            width={20}
-          />
-          <h3 className="font-semibold text-foreground">Github</h3>
-        </div>
-        <p className="text-secondary-foreground">
-          Connect your GitHub account to show your code contributions to the
-          Optimism Collective.
-        </p>
-      </div>
-
-      {user.github && (
+      {username && (
         <div className="flex flex-col gap-2">
-          <p className="font-medium text-sm text-foreground">
-            Your GitHub username
-          </p>
           <div className="flex items-center gap-1.5">
-            <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
-              <Image
-                src="/assets/icons/circle-check-green.svg"
-                height={16.67}
-                width={16.67}
-                alt="Verified"
-              />
-
-              <p className="text-sm">{user.github}</p>
-            </div>
-
-            <Button
-              variant="secondary"
-              onClick={disconnectGitHub}
-              disabled={isPending}
+            <div
+              className={cn(
+                "flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10",
+                isSyncing && "opacity-50",
+              )}
             >
-              Disconnect
-            </Button>
+              <Image
+                src="/assets/icons/githubIcon.svg"
+                height={14}
+                width={14}
+                alt="Github"
+              />
+              <p className="text-sm">{username}</p>
+            </div>
           </div>
         </div>
       )}
 
       <div className="flex gap-2">
-        <Button
-          disabled={userNotDeveloper || !!user.github}
-          onClick={authorizeGithub}
-        >
-          Connect
-        </Button>
+        {username ? (
+          <Button
+            variant="secondary"
+            onClick={handleUnlinkGithub}
+            className={cn(isSyncing && "opacity-50")}
+          >
+            Disconnect
+          </Button>
+        ) : (
+          <>
+            {!user?.notDeveloper && (
+              <Button variant="primary" onClick={linkGithub}>
+                Connect
+              </Button>
+            )}
+          </>
+        )}
 
         <div
           className={cn(
             "input-container text-sm",
-            userNotDeveloper && "bg-secondary",
+            user?.notDeveloper && "bg-secondary",
           )}
         >
           <Checkbox
-            checked={userNotDeveloper}
+            checked={user?.notDeveloper}
             onCheckedChange={toggleIsDeveloper}
-            className=""
-            disabled={isPending}
           />
           I&apos;m not a developer
         </div>

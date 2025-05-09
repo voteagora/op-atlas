@@ -10,6 +10,8 @@ export type DialogType =
   | "select_kyc_project"
   | "claim_rewards"
   | "delete_kyc_team"
+  | "import_from_farcaster"
+
 export type DialogProps<T> = {
   open: boolean
   onOpenChange: (open: boolean) => void
