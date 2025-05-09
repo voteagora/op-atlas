@@ -3,7 +3,7 @@
 import { Prisma } from "@prisma/client"
 import { cache } from "react"
 
-import { SuperfluidStream } from "@/lib/superfluid"
+import { SuperfluidVestingSchedule } from "@/lib/superfluid"
 import { generateRewardStreamId } from "@/lib/utils/rewards"
 
 import { prisma } from "./client"
@@ -308,7 +308,7 @@ export async function getRewardStreamsWithRewardsForRound(roundId: string) {
 }
 
 export async function createOrUpdateSuperfluidStream(
-  stream: SuperfluidStream,
+  stream: SuperfluidVestingSchedule,
   rewardStreamId?: string,
 ) {
   return prisma.superfluidStream.upsert({
@@ -316,29 +316,30 @@ export async function createOrUpdateSuperfluidStream(
       id: stream.id,
     },
     update: {
-      flowRate: stream.currentFlowRate,
-      deposit: stream.deposit,
+      flowRate: stream.flowRate,
+      deposit: stream.totalAmount,
+      internalStreamId: rewardStreamId,
       updatedAt: new Date(),
     },
     create: {
       id: stream.id,
-      flowRate: stream.currentFlowRate,
-      sender: stream.sender.id,
-      receiver: stream.receiver.id,
-      deposit: stream.deposit,
+      flowRate: stream.flowRate,
+      sender: stream.sender,
+      receiver: stream.receiver.toLowerCase(),
+      deposit: stream.totalAmount,
       internalStreamId: rewardStreamId,
     },
   })
 }
 
 export async function createRewardStream(
-  stream: SuperfluidStream,
+  stream: SuperfluidVestingSchedule,
   roundId: string,
 ) {
   const projects = await prisma.project.findMany({
     where: {
       kycTeam: {
-        walletAddress: stream.sender.id,
+        walletAddress: stream.receiver.toLowerCase(),
       },
     },
     select: {
@@ -352,16 +353,30 @@ export async function createRewardStream(
 
   const rewardId = generateRewardStreamId(projects.map((project) => project.id))
 
-  return prisma.rewardStream.upsert({
-    where: {
-      id: rewardId,
-    },
-    update: {},
-    create: {
-      id: rewardId,
-      projects: projects.map((project) => project.id),
-      roundId,
-    },
+  return prisma.$transaction(async (tx) => {
+    const rewardStream = await tx.rewardStream.upsert({
+      where: {
+        id: rewardId,
+      },
+      update: {},
+      create: {
+        id: rewardId,
+        projects: projects.map((project) => project.id),
+        roundId,
+      },
+    })
+
+    // Update the KYCTeam with the rewardStreamId
+    await tx.kYCTeam.update({
+      where: {
+        walletAddress: stream.receiver.toLowerCase(),
+      },
+      data: {
+        rewardStreamId: rewardStream.id,
+      },
+    })
+
+    return rewardStream
   })
 }
 

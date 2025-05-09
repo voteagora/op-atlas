@@ -692,7 +692,7 @@ export async function createOrganizationKycTeam({
     if (orgProjectWithDeletedKycTeam.length > 0) {
       const kycTeam = await prisma.kYCTeam.create({
         data: {
-          walletAddress,
+          walletAddress: walletAddress.toLowerCase(),
           ...(orgProjectWithDeletedKycTeam[0].project.kycTeam
             ?.rewardStreamId && {
             rewardStreamId:
@@ -716,7 +716,7 @@ export async function createOrganizationKycTeam({
     } else {
       const kycTeam = await prisma.kYCTeam.create({
         data: {
-          walletAddress,
+          walletAddress: walletAddress.toLowerCase(),
         },
       })
 
