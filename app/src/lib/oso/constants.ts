@@ -11,7 +11,7 @@ export const MONTHS = Object.values(INDEXED_MONTHS)
 export const RETROFUNDING_OP_REWARD_MINIMUM = 200
 
 export const supportedMappings = {
-  OP: 10,
+  OPTIMISM: 10,
   BASE: 8453,
   MODE: 34443,
   WORLDCHAIN: 480,
