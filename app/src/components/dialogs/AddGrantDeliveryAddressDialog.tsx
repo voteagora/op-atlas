@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
 import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { useCallback, useTransition } from "react"
+import { useCallback, useEffect, useState, useTransition } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { isAddress } from "viem"
@@ -20,6 +20,7 @@ import { useUser } from "@/hooks/db/useUser"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { createProjectKycTeamAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import { useUsername } from "@/hooks/useUsername"
 
 const formSchema = z.object({
   signature: z.string().min(1, "Signature is required"),
@@ -35,6 +36,8 @@ export function AddGrantDeliveryAddressDialog({
   const { data: grantDeliveryData } = useAppDialogs()
 
   const { user } = useUser({ id: session?.user?.id, enabled: true })
+  const username = useUsername(user)
+
 
   const [isPending, startTransition] = useTransition()
   const {
@@ -49,7 +52,12 @@ export function AddGrantDeliveryAddressDialog({
     },
   })
 
-  const messageToSign = `I verify that I am ${user?.farcasterId} on Farcaster and I'm an optimist.`
+  const [messageToSign, setMessageToSign] = useState(`I verify that I am ${username} on Atlas and I'm an optimist.`)
+
+  useEffect(() => {
+    setMessageToSign(`I verify that I am ${username} on Atlas and I'm an optimist.`)
+  }, [username])
+
 
   const handleClose = useCallback(
     (isOpen: boolean) => {

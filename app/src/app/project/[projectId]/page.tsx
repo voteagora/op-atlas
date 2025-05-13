@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
@@ -32,13 +32,18 @@ export default async function Page({ params }: PageProps) {
     getProjectMetrics(projectId),
   ])
 
+
   if (!publicProject) {
     return notFound()
   }
 
-  const user = await getUserById(session?.user?.id ?? "")
 
-  const isMember = !(await verifyMembership(projectId, user?.farcasterId ?? ""))
+  const userId = session?.user?.id
+  if (!userId) {
+    redirect("/")
+  }
+
+  const isMember = !(await verifyMembership(projectId, userId))
     ?.error
 
   const {

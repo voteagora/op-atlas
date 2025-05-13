@@ -13,18 +13,19 @@ import {
 
 export default async function Page() {
   const session = await auth()
+  const userId = session?.user?.id
 
-  if (!session?.user?.id) {
+  if (!userId) {
     redirect("/")
   }
 
   const [user, projects, applications, organizations, adminProjects] =
     await Promise.all([
-      getUserById(session.user.id),
-      getProjects(session.user.id),
-      getApplications(session.user.id),
-      getUserOrganizations(session.user.id),
-      getAdminProjects(session.user.id),
+      getUserById(userId),
+      getProjects(userId),
+      getApplications(userId),
+      getUserOrganizations(userId),
+      getAdminProjects(userId),
     ])
 
   if (!user) {
