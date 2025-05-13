@@ -67,8 +67,8 @@ const createProjectApplication = async (
   roundName?: string,
 ) => {
   const session = await auth()
-
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       applications: [],
       error: "Unauthorized",
@@ -77,7 +77,7 @@ const createProjectApplication = async (
 
   const isInvalid = await verifyAdminStatus(
     applicationData.projectId,
-    farcasterId,
+    userId,
   )
   if (isInvalid?.error) {
     return isInvalid

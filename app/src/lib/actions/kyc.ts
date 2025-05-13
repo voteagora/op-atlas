@@ -230,14 +230,15 @@ export const deleteKYCTeamAction = async ({
 }) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     throw new Error("Unauthorized")
   }
 
   if (projectId) {
     const isInvalid = await verifyAdminStatus(
       projectId,
-      session.user.farcasterId,
+      userId,
     )
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
