@@ -196,7 +196,7 @@ export function profileProgress(user: UserWithAddresses): number {
     progress += step
   }
 
-  if (user.addresses.length > 1) {
+  if (user.addresses.length >= 1) {
     progress += step
   }
 
