@@ -1,14 +1,14 @@
 "use client"
 
 import { format } from "date-fns"
+import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { MissionData } from "@/lib/MissionsAndRoundData"
-import { clickSignInWithFarcasterButton } from "@/lib/utils"
 
+import { useLogin } from "@privy-io/react-auth"
 import { Button } from "../../ui/button"
 import { GreenBadge } from "../common/badges/GreenBadge"
 
@@ -24,6 +24,8 @@ export const ApplicationStatusCard = ({
   userAppliedProjects: { icon: string | null; name: string }[] | undefined
 }) => {
   const router = useRouter()
+
+  const { login: privyLogin } = useLogin()
 
   const { data } = useSession()
 
@@ -75,14 +77,8 @@ export const ApplicationStatusCard = ({
         <Button
           variant={"destructive"}
           className="w-full flex gap-2"
-          onClick={clickSignInWithFarcasterButton}
+          onClick={privyLogin}
         >
-          <Image
-            width={16}
-            height={16}
-            src={"/assets/icons/farcaster-icon-white.svg"}
-            alt=""
-          />
           Sign in or sign up
         </Button>
       </div>
