@@ -5,7 +5,6 @@ import { User as PrivyUser } from "@privy-io/react-auth"
 import { getAddress } from "viem"
 
 import { addContactToList, removeContactFromList } from "@/lib/api/mailchimp"
-import privy from "@/lib/privy"
 
 import { generateTemporaryUsername } from "@/lib/utils/username"
 import {
