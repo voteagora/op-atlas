@@ -1,5 +1,7 @@
 import { CircleHelp, Copy, Ellipsis, X } from "lucide-react"
 import Image from "next/image"
+import { toast } from "sonner"
+import { getAddress } from "viem"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
@@ -9,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useUser } from "@/hooks/db/useUser"
 import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
 import { shortenAddress } from "@/lib/utils"
@@ -20,21 +23,40 @@ export const VerifiedAddress = ({
   address,
   source,
   primary,
-  onCopy,
   onRemove,
   showCheckmark = true,
   shouldShortenAddress = false,
+  userId,
 }: {
   address: string
   source: UserAddressSource
   primary: boolean
-  onCopy: (address: string) => void
   onRemove?: (address: string) => void
   showCheckmark?: boolean
   shouldShortenAddress?: boolean
+  userId: string
 }) => {
   const { setOpenDialog } = useAppDialogs()
   const { isBadgeholderAddress } = useBadgeholderAddress(address)
+  const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
+
+  const onCopy = (address: string) => {
+    navigator.clipboard.writeText(address)
+    toast.success("Address copied")
+  }
+
+  const onSetPrimary = (address: string) => {
+    toast.promise(
+      makeUserAddressPrimaryAction(getAddress(address)).then(() => {
+        invalidateUser()
+      }),
+      {
+        loading: "Setting primary address...",
+        success: "Primary address set",
+        error: "Failed to set primary address",
+      },
+    )
+  }
 
   return (
     <div className="flex items-center gap-1.5 group">
@@ -56,6 +78,7 @@ export const VerifiedAddress = ({
           {primary && <Badge text="Primary address" className="shrink-0" />}
           {isBadgeholderAddress && <Badgeholder />}
           {source === "farcaster" && <Badge text="Farcaster" />}
+          {source === "privy" && <Badge text="Privy" />}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -68,7 +91,7 @@ export const VerifiedAddress = ({
               <DropdownMenuItem>
                 <button
                   className="w-full flex justify-start"
-                  onClick={async () => makeUserAddressPrimaryAction(address)}
+                  onClick={() => onSetPrimary(address)}
                 >
                   Set as primary address
                 </button>

@@ -2,6 +2,7 @@
 
 import { isAfter, parse } from "date-fns"
 
+import { auth } from "@/auth"
 import {
   deleteKycTeam,
   updateKYBUserStatus,
@@ -14,7 +15,7 @@ import {
   PersonaCase,
   PersonaInquiry,
 } from "@/lib/persona"
-import { auth } from "@/auth"
+
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
 
 const SUPERFLUID_CLAIM_DATES = [
@@ -229,14 +230,15 @@ export const deleteKYCTeamAction = async ({
 }) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     throw new Error("Unauthorized")
   }
 
   if (projectId) {
     const isInvalid = await verifyAdminStatus(
       projectId,
-      session.user.farcasterId,
+      userId,
     )
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)

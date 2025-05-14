@@ -1,13 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
 
-import {
-  getApplicationsForRound,
-  getProjects,
-  getUserApplicationsForRound,
-} from "@/lib/actions/projects"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import { getProjects } from "@/lib/actions/projects"
+import { ProjectWithDetails } from "@/lib/types"
 
 export function useUserProjects(userId: string | undefined): {
   data: ProjectWithDetails[] | undefined

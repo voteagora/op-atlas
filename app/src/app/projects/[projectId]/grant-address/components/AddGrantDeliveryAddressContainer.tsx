@@ -13,7 +13,11 @@ export default function AddGrantDeliveryAddressContainer({
   const { data: kycTeam } = useQuery({
     queryKey: ["kyc-teams", "project", projectId],
     queryFn: async () => {
-      return getKycTeamAction(projectId)
+      const result = await getKycTeamAction(projectId)
+      if (!result || "error" in result) {
+        return undefined
+      }
+      return result
     },
   })
   return <AddGrantDeliveryAddressForm kycTeam={kycTeam} />

@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
+import { deleteKycTeam } from "@/db/kyc"
 import {
   addOrganizationMembers,
   createOrganization,
@@ -17,12 +18,12 @@ import {
   updateOrganizationMemberRole,
   UpdateOrganizationParams,
 } from "@/db/organizations"
+import { getUserById } from "@/db/users"
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"
-import { deleteKycTeam } from "@/db/kyc"
 
 export const getUserOrganizations = async (userId: string) => {
   const user = await getUserOrganizationsWithDetails(userId)
@@ -37,16 +38,23 @@ export const createNewOrganization = async ({
   teamMembers: CreateTeamMemberParams[]
 }) => {
   const session = await auth()
-
-  if (!session?.user?.id || !session.user.farcasterId) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
+  const user = await getUserById(userId)
+  if (!user) {
+    return {
+      error: "User not found",
+    }
+  }
+
   // Create entity attestation
   const organizationId = await createEntityAttestation({
-    farcasterId: parseInt(session.user.farcasterId),
+    farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
     type: "organization",
   })
 
@@ -72,7 +80,7 @@ export const updateOrganizationDetails = async ({
 }) => {
   const session = await auth()
 
-  if (!session?.user?.id || !session.user.farcasterId) {
+  if (!session?.user?.id) {
     return {
       error: "Unauthorized",
     }

@@ -139,7 +139,7 @@ export function formatProjectMetadata(
 ): ProjectMetadata {
   // Eliminate extraneous data from IPFS snapshots
 
-  const team = fullTeam.map(({ user }) => user.farcasterId)
+  const team = fullTeam.map(({ user }) => user.id)
 
   const github = project.repos
     .filter((repo) => repo.type === "github")
@@ -269,7 +269,7 @@ export function formatOrganizationMetadata(
 ): OrganizationMetadata {
   // Eliminate extraneous data from IPFS snapshots
 
-  const team = organization.team.map(({ user }) => user.farcasterId)
+  const team = organization.team.map(({ user }) => user.id)
 
   const metadata = {
     name: organization.name,

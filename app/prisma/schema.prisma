@@ -11,13 +11,14 @@ model User {
   id                  String  @id @default(uuid())
   name                String?
   username            String?
-  farcasterId         String  @unique
+  farcasterId         String? @unique
   imageUrl            String?
   bio                 String?
   discord             String?
   github              String?
   notDeveloper        Boolean @default(false)
   govForumProfileUrl  String?
+  privyDid            String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -37,7 +38,7 @@ model User {
 
 model UserEmail {
   id        String @id @default(uuid())
-  email     String
+  email     String @unique
   userId    String
   verified  Boolean @default(false)
   createdAt DateTime @default(now())
@@ -63,7 +64,7 @@ model UserInteraction {
 }
 
 model UserAddress {
-  address String
+  address String @unique
   userId  String
   source  String
 

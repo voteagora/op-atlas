@@ -20,8 +20,12 @@ export const POST = async (req: NextRequest) => {
   try {
     const { name, farcasterId } = payloadValidator.parse(await req.json())
 
-    const { id } = await upsertUser({ farcasterId })
-    const project = await createNewProjectOnBehalf({ name }, id, farcasterId)
+    const { id: userId } = await upsertUser({ farcasterId })
+    const project = await createNewProjectOnBehalf({ name }, userId)
+
+    if (!project || 'error' in project) {
+      return new Response("Failed to create project", { status: 500 })
+    }
 
     return NextResponse.json({ attestationId: project.id })
   } catch (e) {

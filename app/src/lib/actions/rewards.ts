@@ -51,7 +51,8 @@ export const addAddressToRewardsClaim = async (
 ) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
@@ -66,7 +67,7 @@ export const addAddressToRewardsClaim = async (
 
   const isInvalid = await verifyAdminStatus(
     reward.project.id,
-    session.user.farcasterId,
+    userId,
   )
   if (isInvalid?.error) {
     return isInvalid
@@ -103,8 +104,8 @@ export const addAddressToRewardsClaim = async (
 
 export const completeRewardsClaim = async (rewardId: string) => {
   const session = await auth()
-
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
@@ -119,7 +120,7 @@ export const completeRewardsClaim = async (rewardId: string) => {
 
   const isInvalid = await verifyAdminStatus(
     reward.project.id,
-    session.user.farcasterId,
+    userId,
   )
   if (isInvalid?.error) {
     return isInvalid
@@ -139,8 +140,8 @@ export const completeRewardsClaim = async (rewardId: string) => {
 
 export const resetRewardsClaim = async (rewardId: string) => {
   const session = await auth()
-
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
@@ -155,7 +156,7 @@ export const resetRewardsClaim = async (rewardId: string) => {
 
   const isInvalid = await verifyAdminStatus(
     reward.project.id,
-    session.user.farcasterId,
+    userId,
   )
   if (isInvalid?.error) {
     return isInvalid

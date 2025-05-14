@@ -1,15 +1,19 @@
-import { User } from "@prisma/client"
+"use client"
+
 import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import React, { memo } from "react"
+import { memo, useState } from "react"
 
+import { useUser } from "@/hooks/db/useUser"
+import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
+import { useUsername } from "@/hooks/useUsername"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
-import { cn } from "@/lib/utils"
-import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
+import { ArrowDropRight } from "../icons/ArrowDropRight"
+import { Avatar, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
@@ -20,31 +24,96 @@ import {
 } from "../ui/dropdown-menu"
 
 const ProfileDetailCard = ({
-  className,
-  user,
+  user: initialUser,
 }: {
-  className?: string
   user: UserWithAddresses
 }) => {
-  const { setOpenDialog } = useAppDialogs()
-  const { isBadgeholder } = useIsBadgeholder(user)
+  const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
+  const user = loadedUser || initialUser
+  const [showImportDialog, setShowImportDialog] = useState(false)
 
-  const initials = (user?.name ?? "")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
+  const { isBadgeholder } = useIsBadgeholder(user)
+  const { linkEmail } = usePrivyEmail(user.id)
+
+  const username = useUsername(loadedUser)
+  const email = user.emails?.[0]?.email
+
+  const renderEmail = () => {
+    if (email) {
+      return (
+        <div>
+          Email{" "}
+          <span className="font-medium text-secondary-foreground">{email}</span>
+        </div>
+      )
+    } else {
+      return (
+        <Button
+          variant="link"
+          onClick={() => {
+            linkEmail()
+          }}
+        >
+          Add your email
+        </Button>
+      )
+    }
+  }
+
+  const renderUsername = () => {
+    if (user.username && user.farcasterId) {
+      return (
+        <span className="text-secondary-foreground">
+          Username: <span className="font-medium">{user.username}</span>
+        </span>
+      )
+    } else {
+      return (
+        <Link href="/profile/details" className="hover:underline flex items-center gap-x-0.5">
+          Add profile details <ArrowDropRight fill="#6B7280" className="text-muted-foreground" />
+        </Link>
+      )
+    }
+  }
 
   return (
-    <div className={cn("flex gap-x-4", className)}>
-      <Avatar className="w-20 h-20 my-0.5">
-        <AvatarImage src={user?.imageUrl ?? ""} />
-        <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
+    <div className="flex gap-x-4">
+      {user.imageUrl ? (
+        <Avatar className="w-20 h-20 my-0.5">
+          <AvatarImage src={user.imageUrl} />
+        </Avatar>
+      ) : (
+        <button
+          onClick={() => setShowImportDialog(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              setShowImportDialog(true)
+            }
+          }}
+          className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none hover:bg-secondary group relative cursor-pointer"
+          aria-label="Add profile picture"
+        >
+          <Image
+            className="text-foreground group-hover:opacity-0 transition-opacity"
+            src="/assets/icons/user-icon.svg"
+            alt="user"
+            width={18}
+            height={18}
+          />
+          <Image
+            className="absolute w-6 h-6 text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+            src="/assets/icons/add-line.svg"
+            alt="add"
+            width={18}
+            height={18}
+          />
+        </button>
+      )}
 
       <div className="flex flex-col">
-        <h2 className="flex items-center gap-x-2">
-          {user.name ?? ""}{" "}
+        <div className="text-2xl font-semibold flex items-center gap-x-2">
+          {username || ""}
           {isBadgeholder && (
             <Image
               src="/assets/icons/badgeholder-sunny.png"
@@ -53,28 +122,13 @@ const ProfileDetailCard = ({
               alt="Badgeholder checkmark"
             />
           )}
-        </h2>
+        </div>
+
         {user.bio && <p>{user.bio}</p>}
 
-        <div className="mt-2 mr-4 flex items-center gap-x-4">
-          <p className="text-sm text-muted-foreground">
-            Username{" "}
-            <span className="font-medium text-secondary-foreground">
-              @{user.username}
-            </span>
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Email
-            <Button
-              variant="link"
-              onClick={() => setOpenDialog("email")}
-              className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
-            >
-              {user.emails.length > 0
-                ? user.emails[0]?.email
-                : "Add your email"}
-            </Button>
-          </p>
+        <div className="mt-2 mr-4 flex items-center gap-x-4 text-sm text-muted-foreground">
+          <div>{renderUsername()}</div>
+          <div>{renderEmail()}</div>
         </div>
       </div>
 
@@ -109,6 +163,11 @@ const ProfileDetailCard = ({
           </Link>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ImportFromFarcasterDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+      />
     </div>
   )
 }

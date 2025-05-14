@@ -1,7 +1,6 @@
 import { Copy, Pencil } from "lucide-react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
-import { useMemo } from "react"
 import { toast } from "sonner"
 
 import { RewardWithProject } from "@/lib/types"
@@ -147,7 +146,7 @@ const ClaimHeader = ({
                   <Avatar className="h-6 w-6 rounded-full">
                     <AvatarImage
                       src={user.imageUrl ?? undefined}
-                      alt={user.username ?? user.farcasterId}
+                      alt={user.username ?? user?.farcasterId ?? ""}
                     />
                     <AvatarFallback>{user.name?.[0]}</AvatarFallback>
                   </Avatar>

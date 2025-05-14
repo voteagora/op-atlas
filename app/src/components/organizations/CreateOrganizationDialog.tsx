@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { useUser } from "@/hooks/db/useUser"
 import { createNewOrganization } from "@/lib/actions/organizations"
 import { uploadImage } from "@/lib/utils/images"
 
@@ -33,7 +34,8 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
   const [isShowingAdd, setIsShowingAdd] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  const user = currentUser?.user
+  const { user: loadedUser } = useUser({ id: currentUser?.user?.id })
+  const user = loadedUser || currentUser?.user
 
   const avatarUrl = useMemo(() => {
     if (!newAvatarImg) return ""
@@ -209,7 +211,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
         team={[]}
         addMembers={handleAddMembers}
         title="Add team members"
-        subtitle="You can add team members by their Farcaster username. They must have an Optimist profile."
+        subtitle="You can add team members by their email, wallet address, or Farcaster username. They must have an Optimist profile."
         onSkip={() => {
           onSubmit()
         }}

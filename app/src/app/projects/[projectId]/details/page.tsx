@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { getAdminOrganizations } from "@/db/organizations"
 import { getProject } from "@/db/projects"
+import { getUserById } from "@/db/users"
 import { verifyMembership } from "@/lib/actions/utils"
 
 export default async function Page({
@@ -12,15 +13,16 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const session = await auth()
+  const userId = session?.user.id
 
-  if (!session?.user.id) {
+  if (!userId) {
     redirect("/dashboard")
   }
 
   const [project, userOrganizations, membership] = await Promise.all([
     getProject({ id: params.projectId }),
-    getAdminOrganizations(session?.user.id),
-    verifyMembership(params.projectId, session?.user.farcasterId),
+    getAdminOrganizations(userId),
+    verifyMembership(params.projectId, userId),
   ])
 
   if (membership?.error || !project) {

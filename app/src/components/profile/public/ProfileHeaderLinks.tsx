@@ -13,13 +13,13 @@ export default function ProfileHeaderLinks({
 }: {
   user: UserWithAddresses
 }) {
-  const { delegate } = useDelegateData(user.addresses.map((a) => a.address))
+  const { delegate } = useDelegateData(user?.addresses?.map((a) => a.address))
 
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
-  const { user: farcasterUsers } = useFarcasterUserData(user.farcasterId)
+  const { user: farcasterUsers } = useFarcasterUserData(user?.farcasterId, !!user?.farcasterId)
   const { user: githubUserData } = useGithubUserData(user.github || "")
 
   const onDiscordBadgeClick = () => {
@@ -32,26 +32,28 @@ export default function ProfileHeaderLinks({
   return (
     <div className="flex flex-wrap gap-2">
       {/* Farcaster */}
-      <BubbleLink
-        href={`https://warpcast.com/${user.username}`}
-        icon="/assets/icons/farcaster-icon.svg"
-        text={
-          <div className="flex gap-1">
-            <span className="text-sm text-black">@{user.username}</span>
-            {farcasterUsers?.users[0]?.follower_count && (
-              <>
-                <span className="text-sm text-gray-500 font-light">
-                  {formatNumber(farcasterUsers?.users[0]?.follower_count)}
-                </span>
-                <span className="text-sm text-gray-500 font-light">
-                  Followers
-                </span>
-              </>
-            )}
-          </div>
-        }
-        tooltipText="Farcaster"
-      />
+      {user.farcasterId &&
+        <BubbleLink
+          href={`https://warpcast.com/${user.username}`}
+          icon="/assets/icons/farcaster-icon.svg"
+          text={
+            <div className="flex gap-1">
+              <span className="text-sm text-black">@{user.username}</span>
+              {farcasterUsers?.users[0]?.follower_count && (
+                <>
+                  <span className="text-sm text-gray-500 font-light">
+                    {formatNumber(farcasterUsers?.users[0]?.follower_count)}
+                  </span>
+                  <span className="text-sm text-gray-500 font-light">
+                    Followers
+                  </span>
+                </>
+              )}
+            </div>
+          }
+          tooltipText="Farcaster"
+        />
+      }
 
       {/* X */}
 

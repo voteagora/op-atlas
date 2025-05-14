@@ -4,12 +4,11 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { DeleteKYCTeamDialog } from "../projects/rewards/DeleteKYCTeamDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
-import { AddVerifiedAddressDialog } from "./AddVerifiedAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
-import EmailDialog from "./EmailDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
+import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
 import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
 import { DialogType } from "./types"
@@ -22,20 +21,11 @@ export default function AppDialogs() {
 
   return (
     <>
-      {openDialog === "email" && (
-        <EmailDialog open onOpenChange={onOpenChange("email")} />
-      )}
       {openDialog === "edit_profile" && (
         <EditProfileDialog open onOpenChange={onOpenChange("edit_profile")} />
       )}
       {openDialog === "get_started" && (
         <GetStartedDialog open onOpenChange={onOpenChange("get_started")} />
-      )}
-      {openDialog === "verify_address" && (
-        <AddVerifiedAddressDialog
-          open
-          onOpenChange={onOpenChange("verify_address")}
-        />
       )}
       {openDialog === "verify_grant_delivery_address" && (
         <AddGrantDeliveryAddressDialog
@@ -74,6 +64,12 @@ export default function AppDialogs() {
         <DeleteKYCTeamDialog
           open
           onOpenChange={onOpenChange("delete_kyc_team")}
+        />
+      )}
+      {openDialog === "import_from_farcaster" && (
+        <ImportFromFarcasterDialog
+          open
+          onOpenChange={onOpenChange("import_from_farcaster")}
         />
       )}
     </>

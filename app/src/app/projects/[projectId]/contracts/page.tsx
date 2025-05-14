@@ -11,8 +11,9 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const session = await auth()
+  const userId = session?.user.id
 
-  if (!session?.user.id) {
+  if (!userId) {
     redirect("/dashboard")
   }
 
@@ -20,7 +21,7 @@ export default async function Page({
     getProjectContracts({
       projectId: params.projectId,
     }),
-    verifyMembership(params.projectId, session?.user.farcasterId),
+    verifyMembership(params.projectId, userId),
   ])
 
   if (membership?.error || !projectContracts) {

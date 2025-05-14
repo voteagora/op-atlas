@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react"
 import React from "react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
 
 interface ContributorsProps {
   contributors?: User[]
@@ -31,17 +32,7 @@ export default function Contributors({ contributors }: ContributorsProps) {
       <div className="pl-6 w-full grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
         {loadedContributors.map((contributor) => (
           <div key={contributor.name} className="flex items-center space-x-4">
-            <Avatar className="w-6 h-6">
-              {contributor.imageUrl && (
-                <AvatarImage
-                  src={contributor.imageUrl}
-                  alt={contributor.name ?? ""}
-                />
-              )}
-              <AvatarFallback className="p-1">
-                <UserIcon size={24} />
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatarSmall imageUrl={contributor.imageUrl} />
             <span className="font-normal text-foreground">
               {contributor.name}
             </span>

@@ -2,11 +2,11 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-
-import { AddGrantDeliveryAddressContainer } from "./components"
-import { getKycTeamForProject } from "@/db/projects"
 import { Button } from "@/components/common/Button"
 import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
+import { getKycTeamForProject } from "@/db/projects"
+
+import { AddGrantDeliveryAddressContainer } from "./components"
 
 export default async function Page({
   params,
@@ -14,14 +14,12 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const session = await auth()
+  const userId = session?.user.id
 
-  if (!session?.user.id) {
+  if (!userId) {
     redirect("/login")
   }
 
-  if (!session?.user.id) {
-    redirect("/dashboard")
-  }
 
   const project = await getKycTeamForProject({ projectId: params.projectId })
 

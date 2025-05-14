@@ -1,5 +1,6 @@
-import { formatNumber } from "@/lib/utils"
 import { CheckIcon, XIcon } from "lucide-react"
+
+import { formatNumber } from "@/lib/utils"
 
 export default function NotPassingEligibility({
   month,

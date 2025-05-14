@@ -92,13 +92,14 @@ export const verifyContract = async ({
   description?: string
 }) => {
   const session = await auth()
-  if (!session) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Not authenticated",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -247,13 +248,14 @@ export const updateContractDetails = async ({
   description?: string
 }) => {
   const session = await auth()
-  if (!session) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Not authenticated",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -281,13 +283,14 @@ export const updateContractDetails = async ({
 
 async function verifyAuthenticatedMember(projectId: string) {
   const session = await auth()
-  if (!session) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Not authenticated",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -396,13 +399,14 @@ export const updateProjectOSOStatus = async ({
   isSubmittedToOso: boolean
 }) => {
   const session = await auth()
-  if (!session) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Not authenticated",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }

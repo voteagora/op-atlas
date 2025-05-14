@@ -2,10 +2,10 @@
 
 import { useIsAdmin } from "@/lib/hooks"
 import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
-
-import RewardAccordion from "./RewardAccordion"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
+
 import RecurringRewardAccordion from "./RecurringRewardAccordion"
+import RewardAccordion from "./RewardAccordion"
 
 export function RewardsSection({
   team,

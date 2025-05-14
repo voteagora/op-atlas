@@ -203,7 +203,7 @@ export type UserWithAddresses = Prisma.UserGetPayload<{
   }
 }>
 
-export type UserAddressSource = "farcaster" | "atlas"
+export type UserAddressSource = "farcaster" | "atlas" | "privy"
 
 export type UserWithEmails = Prisma.UserGetPayload<{
   include: {

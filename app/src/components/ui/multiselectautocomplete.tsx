@@ -4,6 +4,7 @@ import clsx from "clsx"
 import { X } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 
+import { UserAvatarSmall } from "../common/UserAvatarSmall"
 import { Badge } from "./badge"
 import { Command, CommandGroup, CommandItem, CommandList } from "./command"
 import { Input } from "./input"
@@ -40,6 +41,7 @@ export function MultiSelect({
 }: MultiSelectAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [, setOpen] = useState(false)
+
 
   const handleUnselect = useCallback(
     (item: IMultiSelectOptions) => {
@@ -97,16 +99,10 @@ export function MultiSelect({
                             e.stopPropagation()
                           }}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={option.image ?? ""}
-                            alt={option.label}
-                            width={24}
-                            height={24}
-                            className="rounded-full h-6 w-6 object-center object-cover mr-2"
-                          />
-
-                          {option.label}
+                          <div className="flex flex-row items-center gap-2">
+                            <UserAvatarSmall imageUrl={option.image} />
+                            {option.label}
+                          </div>
                         </CommandItem>
                       )
                     })
@@ -128,20 +124,16 @@ export function MultiSelect({
             return (
               <Badge
                 key={item.value}
-                className="py-2 px-3 rounded-md shrink-0"
+                className="py-2 px-3 rounded-md shrink-0 flex flex-row items-center gap-2"
                 variant="secondary"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.image ?? ""}
-                  alt={item.label}
-                  width={24}
-                  height={24}
-                  className="rounded-full h-6 w-6 object-center object-cover shrink-0"
-                />
-                <p className="ml-1 text-sm text-secondary-foreground">
-                  {item.label}
-                </p>
+
+                <div className="flex flex-row items-center gap-2">
+                  <UserAvatarSmall imageUrl={item.image} />
+                  <p className="text-sm text-secondary-foreground">
+                    {item.label}
+                  </p>
+                </div>
                 <button
                   className="ring-offset-background rounded-full outline-none ml-2"
                   onMouseDown={(e) => {
@@ -159,7 +151,8 @@ export function MultiSelect({
             )
           })}
         </div>
-      ) : null}
-    </div>
+      ) : null
+      }
+    </div >
   )
 }

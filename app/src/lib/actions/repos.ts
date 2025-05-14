@@ -266,13 +266,14 @@ export const updateGithubRepo = async (
 ) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -313,14 +314,14 @@ export const updateGithubRepos = async (
   }[],
 ) => {
   const session = await auth()
-
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -367,13 +368,14 @@ export const updateGithubRepos = async (
 export const removeGithubRepo = async (projectId: string, url: string) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -402,13 +404,14 @@ export const removeGithubRepo = async (projectId: string, url: string) => {
 export const updatePackageRepos = async (projectId: string, urls: string[]) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -448,13 +451,14 @@ export const setProjectLinks = async (
 ) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }

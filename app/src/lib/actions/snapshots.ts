@@ -14,6 +14,7 @@ import {
   updateAllForProject,
 } from "@/db/projects"
 
+import { getUserById } from "@/db/users"
 import {
   createFullProjectSnapshotAttestations,
   createOrganizationMetadataAttestation,
@@ -33,13 +34,14 @@ import { verifyMembership } from "./utils"
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
+  const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -227,7 +229,8 @@ export const createProjectSnapshotOnBehalf = async (
 export const createOrganizationSnapshot = async (organizationId: string) => {
   const session = await auth()
 
-  if (!session?.user?.id) {
+  const userId = session?.user?.id
+  if (!userId) {
     return {
       error: "Unauthorized",
     }
@@ -240,6 +243,13 @@ export const createOrganizationSnapshot = async (organizationId: string) => {
     }
   }
 
+  const user = await getUserById(userId)
+  if (!user) {
+    return {
+      error: "User not found",
+    }
+  }
+
   try {
     // Upload metadata to IPFS
     const metadata = formatOrganizationMetadata(organization)
@@ -247,7 +257,7 @@ export const createOrganizationSnapshot = async (organizationId: string) => {
 
     // Create attestation
     const attestationId = await createOrganizationMetadataAttestation({
-      farcasterId: parseInt(session.user.farcasterId),
+      farcasterId: user.farcasterId ? parseInt(user.farcasterId) : 0,
       organizationId: organization.id,
       name: organization.name,
       projectIds: organization.projects.map((p) => p.projectId),

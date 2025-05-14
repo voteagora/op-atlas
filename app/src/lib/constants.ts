@@ -85,6 +85,14 @@ export const CONTRIBUTOR_ELIGIBLE_PROJECTS = [
   "0xffffeb1d3576c1e847701c225975ee1a10259e05366b477e98fea7a47c5e5896",
 ]
 
+export const AUTH_STATUS = {
+  AUTHENTICATED: "authenticated",
+  UNAUTHENTICATED: "unauthenticated",
+  LOADING: "loading",
+} as const
+
+export type AuthStatus = (typeof AUTH_STATUS)[keyof typeof AUTH_STATUS]
+
 export const OSO_METRICS = {
   activeAddresses: [
     "QdEMc/9T7A9uHmGyebYqTgZtK8RMA4lUDE5vBZP8yYQ=",

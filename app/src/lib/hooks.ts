@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { isAddress } from "viem"
 
-import { updateEmail } from "./actions/users"
 import { getAllBadgeholders, getBadgeholder } from "./api/eas/badgeholder"
-import { ProjectTeam, UserWithAddresses } from "./types"
-import { OrganizationWithDetails } from "./types"
+import {
+  OrganizationWithDetails,
+  ProjectTeam,
+  UserWithAddresses,
+} from "./types"
 
 export function useIsAdmin(team: ProjectTeam) {
   const { data: session } = useSession()
@@ -45,20 +47,6 @@ export function usePrevious<T>(value: T) {
 
   // Return previous value (happens before update in useEffect above)
   return ref.current
-}
-
-export function useUpdateEmail() {
-  const { update } = useSession()
-
-  return useCallback(
-    async (newEmail: string) => {
-      // update email in db
-      await updateEmail(newEmail)
-      // update email in session details
-      update({ email: newEmail })
-    },
-    [update],
-  )
 }
 
 export function useBadgeholderAddress(address: string) {
