@@ -18,6 +18,8 @@ import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
 import { auth } from "@/auth"
 import { generateTemporaryUsername } from "@/lib/utils/username"
 import { prisma } from "./client"
+import { isAddress } from "viem"
+import { getAddress } from "viem"
 
 export type Entity = keyof ExtendedAggregatedType
 export type EntityObject = {
@@ -220,12 +222,13 @@ export async function searchByAddress({
 }: {
   address: string
 }) {
+
   return prisma.user.findMany({
     where: {
       addresses: {
         some: {
           address: {
-            contains: address,
+            contains: isAddress(address) ? getAddress(address) as string : address,
           },
         },
       },
@@ -372,6 +375,7 @@ export async function removeUserAddress({
   id: string
   address: string
 }) {
+
   return prisma.userAddress.delete({
     where: {
       address_userId: {
