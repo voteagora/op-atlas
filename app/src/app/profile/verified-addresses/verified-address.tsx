@@ -106,7 +106,7 @@ export const VerifiedAddress = ({
                 <Copy size={16} />
               </button>
             </DropdownMenuItem>
-            {source !== "farcaster" && onRemove && (
+            {onRemove && (
               <DropdownMenuItem>
                 <button
                   className="flex space-x-1.5 justify-between w-full items-center"
