@@ -30,6 +30,7 @@ const PublicUserProfile = ({
         <div className="lg:col-span-1">
           <div className="sticky">
             <ProfileHeader user={user} />
+            <ProfileOrganizations organizations={organizations} />
           </div>
         </div>
 
@@ -37,7 +38,6 @@ const PublicUserProfile = ({
         <div className="lg:col-span-2 space-y-12 mt-12 lg:mt-0 border border-red-500">
           <ProfileRoles user={user} />
           <ProfileGithubProximity user={user} />
-          <ProfileOrganizations organizations={organizations} />
           <ProfileProjects projects={projects} />
         </div>
       </div>

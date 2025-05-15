@@ -17,7 +17,7 @@ const ProfileHeader = ({
   const username = useUsername(user)
 
   return (
-    <div className={cn("flex gap-x-4 border-b border-border pb-6 w-full", className)}>
+    <div className={cn("flex gap-x-4 pb-6 w-full", className)}>
       <div className="flex flex-col space-y-6">
         {user.imageUrl && (
           <Avatar className="w-20 h-20 my-0.5">
