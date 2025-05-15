@@ -1,4 +1,3 @@
-import { memo } from "react"
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { UserWithAddresses } from "@/lib/types"
@@ -25,11 +24,9 @@ const ProfileHeader = ({
             <AvatarImage src={user.imageUrl} />
           </Avatar>
         )}
-        <div className="space-y-3">
-          <div>
-            <h2 className="flex items-center gap-x-2">{username} </h2>
-            <span>{user.bio}</span>
-          </div>
+        <div className="flex flex-col gap-6">
+          <div className="text-3xl font-semibold">{username} </div>
+          <div className="text-sm text-muted-foreground">{user.bio}</div>
           <ProfileHeaderLinks user={user} />
         </div>
       </div>
@@ -37,4 +34,4 @@ const ProfileHeader = ({
   )
 }
 
-export default memo(ProfileHeader)
+export default ProfileHeader;

@@ -7,13 +7,16 @@ import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
+import Image from "next/image"
 
 export default function ProfileHeaderLinks({
   user,
 }: {
   user: UserWithAddresses
 }) {
-  const { delegate } = useDelegateData(user?.addresses?.map((a) => a.address))
+  // const { delegate } = useDelegateData(user?.addresses?.map((a) => a.address))
+  // TODO: remove this once we have a delegate for the user
+  const { delegate } = useDelegateData(['0x7fc80fad32ec41fd5cfcc14eee9c31953b6b4a8b'])
 
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -30,10 +33,10 @@ export default function ProfileHeaderLinks({
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col gap-2">
       {/* Farcaster */}
       {user.farcasterId &&
-        <BubbleLink
+        <SocialLink
           href={`https://warpcast.com/${user.username}`}
           icon="/assets/icons/farcaster-icon.svg"
           text={
@@ -51,7 +54,6 @@ export default function ProfileHeaderLinks({
               )}
             </div>
           }
-          tooltipText="Farcaster"
         />
       }
 
@@ -59,7 +61,7 @@ export default function ProfileHeaderLinks({
 
       {/* Github */}
       {user.github && (
-        <BubbleLink
+        <SocialLink
           href={`https://github.com/${user.github}`}
           icon="/assets/icons/github-icon.svg"
           text={
@@ -77,28 +79,26 @@ export default function ProfileHeaderLinks({
               )}
             </div>
           }
-          tooltipText="Github"
         />
       )}
 
       {/* Discord */}
       {user.discord && (
-        <Badge
-          as="button"
-          leftIcon="/assets/icons/discordIcon.svg"
+        <SocialLink
+          href={`https://discord.com/users/${user.discord}`}
+          icon="/assets/icons/discordIcon.svg"
           text={
             <div className="flex gap-1">
               <span className="text-sm text-black">@{user.discord}</span>
             </div>
           }
-          tooltipText="Click to copy Discord Username"
-          onClick={onDiscordBadgeClick}
+
         />
       )}
 
       {/* Agora */}
       {delegate && Number(delegate.votingPower.total) > 0 && (
-        <BubbleLink
+        <SocialLink
           href={`https://vote.optimism.io/delegates/${delegate.address}`}
           icon="/assets/icons/agora-icon.svg"
           text={
@@ -114,15 +114,14 @@ export default function ProfileHeaderLinks({
               </span>
             </span>
           }
-          tooltipText="Optimism Agora"
         />
       )}
 
-      {/* Discord */}
+
 
       {/* Gov Forum */}
       {user.govForumProfileUrl && (
-        <BubbleLink
+        <SocialLink
           href={user.govForumProfileUrl}
           icon="/assets/icons/op-icon-black.svg"
           text={
@@ -130,9 +129,25 @@ export default function ProfileHeaderLinks({
               @{user.govForumProfileUrl.split("/u/")[1].split("/summary")[0]}
             </span>
           }
-          tooltipText="Optimism Collective Governance Forum"
+
         />
       )}
     </div>
+  )
+}
+
+
+function SocialLink({ href, icon, text, tooltipText }: { href: string, icon: string, text: React.ReactNode, tooltipText?: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex flex-row gap-2"
+      title={tooltipText}
+    >
+      <Image src={icon} width={14} height={13} alt={tooltipText || "Social link"} />
+      <div className="text-sm text-secondary-foreground">{text}</div>
+    </a>
   )
 }
