@@ -1,10 +1,13 @@
-
-import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import { useUsername } from "@/hooks/useUsername"
 import ProfileHeaderLinks from "./ProfileHeaderLinks"
+import { useSession } from "next-auth/react"
+import { Farcaster } from "@/components/icons/socials"
+import Link from "next/link"
+import { PencilFill } from "@/components/icons/reminx"
 
 const ProfileHeader = ({
   className,
@@ -14,14 +17,27 @@ const ProfileHeader = ({
   user: UserWithAddresses
 }) => {
 
+  const { data: session } = useSession()
   const username = useUsername(user)
+
+  const isSelf = session?.user?.id === user.id
 
   return (
     <div className={cn("flex gap-x-4 pb-6 w-full", className)}>
       <div className="flex flex-col space-y-6">
         {user.imageUrl && (
-          <Avatar className="w-20 h-20 my-0.5">
-            <AvatarImage src={user.imageUrl} />
+          <Avatar className="relative w-20 h-20 my-0.5">
+            <AvatarImage src={user.imageUrl} className="object-cover" />
+            {isSelf && (
+              <Link href="/profile/details">
+
+                <AvatarBadge className="absolute w-[40px] h-[40px] top-[20px] right-0 bg-white hover:bg-border border border-muted/50 hover:border-muted rounded-full">
+                  <PencilFill className="w-[18px] h-[18px]" fill="#0F111A" />
+                </AvatarBadge>
+              </Link>
+            )}
+
+
           </Avatar>
         )}
         <div className="flex flex-col gap-6">

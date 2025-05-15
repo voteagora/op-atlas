@@ -1,4 +1,3 @@
-
 import { Agora, Discord, Farcaster, Github, Optimism } from "@/components/icons/socials"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"

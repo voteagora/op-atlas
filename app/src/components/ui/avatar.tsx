@@ -12,7 +12,7 @@ const Avatar = React.forwardRef<
   <AvatarPrimitive.Root
     ref={ref}
     className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
+      "relative flex h-10 w-10 shrink-0 rounded-full",
       className,
     )}
     {...props}
@@ -27,7 +27,7 @@ const AvatarImage = React.forwardRef<
   <AvatarPrimitive.Image
     ref={ref}
     className={cn(
-      "aspect-square object-cover object-center h-full w-full",
+      "aspect-square object-cover object-center h-full w-full rounded-full",
       className,
     )}
     {...props}
@@ -50,4 +50,20 @@ const AvatarFallback = React.forwardRef<
 ))
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
-export { Avatar, AvatarFallback, AvatarImage }
+
+const AvatarBadge = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLProps<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center",
+      className
+    )}
+    {...props}
+  />
+));
+AvatarBadge.displayName = "AvatarBadge";
+
+export { Avatar, AvatarFallback, AvatarImage, AvatarBadge };
