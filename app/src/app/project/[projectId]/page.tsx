@@ -32,19 +32,14 @@ export default async function Page({ params }: PageProps) {
     getProjectMetrics(projectId),
   ])
 
-
   if (!publicProject) {
     return notFound()
   }
 
-
   const userId = session?.user?.id
-  if (!userId) {
-    redirect("/")
-  }
 
-  const isMember = !(await verifyMembership(projectId, userId))
-    ?.error
+  const isMember =
+    !!userId && !(await verifyMembership(projectId, userId))?.error
 
   const {
     eligibility,
@@ -65,15 +60,15 @@ export default async function Page({ params }: PageProps) {
 
   const author = publicProject.organization
     ? {
-      avatarUrl: publicProject.organization.organization.avatarUrl,
-      name: publicProject.organization.organization.name,
-      farcasterHandle: "",
-    }
+        avatarUrl: publicProject.organization.organization.avatarUrl,
+        name: publicProject.organization.organization.name,
+        farcasterHandle: "",
+      }
     : {
-      avatarUrl: publicProject.team?.[0]?.user.imageUrl,
-      name: publicProject.team?.[0]?.user.name,
-      farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
-    }
+        avatarUrl: publicProject.team?.[0]?.user.imageUrl,
+        name: publicProject.team?.[0]?.user.name,
+        farcasterHandle: publicProject.team?.[0]?.user.username ?? "",
+      }
 
   const enrolledInDevTooling =
     publicProject.applications?.filter(
@@ -156,10 +151,10 @@ export default async function Page({ params }: PageProps) {
                         eligibility={
                           eligibility
                             ? {
-                              ...eligibility,
-                              hasQualifiedAddresses,
-                              deployedOnWorldchain,
-                            }
+                                ...eligibility,
+                                hasQualifiedAddresses,
+                                deployedOnWorldchain,
+                              }
                             : undefined
                         }
                         isMember={isMember}
