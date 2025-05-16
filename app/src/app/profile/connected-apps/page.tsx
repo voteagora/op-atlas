@@ -6,6 +6,7 @@ import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
+import { WorldIdVerification } from "@/components/WorldIdVerification"
 export default async function Page() {
   const session = await auth()
 
@@ -17,7 +18,30 @@ export default async function Page() {
     <div className="flex flex-col gap-6 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
 
+
+
       <div className="flex flex-col gap-12">
+        {/* World */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center space-x-1.5">
+            <Image
+              src="/assets/icons/farcaster-icon.svg"
+              alt="Farcaster"
+              height={20}
+              width={20}
+            />
+            <h3 className="font-semibold text-foreground">World ID</h3>
+          </div>
+          <div className="text-secondary-foreground mb-4">
+            Connect your farcaster account to import your username, bio and
+            avatar.
+          </div>
+          <WorldIdVerification userId={session.user.id}>
+            Verify with World ID
+          </WorldIdVerification>
+        </div>
+
+
         {/* Farcaster */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
