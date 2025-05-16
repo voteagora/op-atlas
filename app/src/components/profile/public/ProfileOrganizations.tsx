@@ -1,7 +1,7 @@
 import { Organization } from "@prisma/client"
 import Image from "next/image"
 
-import ExtendedLink from "@/components/common/ExtendedLink"
+import ProfileSidebarLink from "./ProfileSidebarLink"
 
 function ProfileOrganizations({
   organizations,
@@ -14,10 +14,9 @@ function ProfileOrganizations({
   }
 
   return (
-
-    <div className="flex flex-col space-y-4 border-t border-border pt-4">
+    <div className="flex flex-col border-t border-border pt-4">
       {organizations.map((organization) => (
-        <ExtendedLink
+        <ProfileSidebarLink
           href={`/${organization.id}`}
           key={organization.id}
           text={organization.name}

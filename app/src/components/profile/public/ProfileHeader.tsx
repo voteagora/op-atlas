@@ -2,12 +2,11 @@ import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { useUsername } from "@/hooks/useUsername"
-import ProfileHeaderLinks from "./ProfileHeaderLinks"
-import { useSession } from "next-auth/react"
-import { Farcaster } from "@/components/icons/socials"
-import Link from "next/link"
 import { PencilFill } from "@/components/icons/reminx"
+import { useUsername } from "@/hooks/useUsername"
+import { useSession } from "next-auth/react"
+import Link from "next/link"
+import ProfileHeaderLinks from "./ProfileHeaderLinks"
 
 const ProfileHeader = ({
   className,
@@ -30,8 +29,7 @@ const ProfileHeader = ({
             <AvatarImage src={user.imageUrl} className="object-cover" />
             {isSelf && (
               <Link href="/profile/details">
-
-                <AvatarBadge className="absolute w-[40px] h-[40px] top-[20px] right-0 bg-white hover:bg-border border border-muted/50 hover:border-muted rounded-full">
+                <AvatarBadge className="absolute w-[40px] h-[40px] top-[20px] right-0 bg-white hover:bg-secondary border border-muted/50 hover:border-muted rounded-full">
                   <PencilFill className="w-[18px] h-[18px]" fill="#0F111A" />
                 </AvatarBadge>
               </Link>

@@ -4,6 +4,8 @@ import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
+import ProfileSidebarLink from "./ProfileSidebarLink"
+
 
 export default function ProfileHeaderLinks({
   user,
@@ -19,10 +21,10 @@ export default function ProfileHeaderLinks({
   const { user: githubUserData } = useGithubUserData(user.github || "")
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {/* Farcaster */}
       {user.farcasterId &&
-        <SocialLink
+        <ProfileSidebarLink
           href={`https://warpcast.com/${user.username}`}
           icon={<Farcaster className="w-[16px] h-[16px]" />}
           text={
@@ -45,7 +47,7 @@ export default function ProfileHeaderLinks({
 
       {/* Github */}
       {user.github && (
-        <SocialLink
+        <ProfileSidebarLink
           href={`https://github.com/${user.github}`}
           icon={<Github className="w-[16px] h-[16px]" />}
           text={
@@ -68,7 +70,7 @@ export default function ProfileHeaderLinks({
 
       {/* Discord */}
       {user.discord && (
-        <SocialLink
+        <ProfileSidebarLink
           href={`https://discord.com/users/${user.discord}`}
           icon={<Discord className="w-[15px] h-[15px]" />}
           text={
@@ -82,7 +84,7 @@ export default function ProfileHeaderLinks({
 
       {/* Agora */}
       {delegate && Number(delegate.votingPower.total) > 0 && (
-        <SocialLink
+        <ProfileSidebarLink
           href={`https://vote.optimism.io/delegates/${delegate.address}`}
           icon={<Agora className="w-[15px] h-[15px]" />}
           text={
@@ -105,7 +107,7 @@ export default function ProfileHeaderLinks({
 
       {/* Gov Forum */}
       {user.govForumProfileUrl && (
-        <SocialLink
+        <ProfileSidebarLink
           href={user.govForumProfileUrl}
           icon={
             <Optimism className="w-[16px] h-[16px]" fill="#FF0000" />
@@ -119,20 +121,5 @@ export default function ProfileHeaderLinks({
         />
       )}
     </div>
-  )
-}
-
-
-function SocialLink({ href, icon, text }: { href: string, icon: React.ReactNode, text: React.ReactNode }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex flex-row gap-2 items-center"
-    >
-      {icon}
-      <div className="text-sm text-secondary-foreground">{text}</div>
-    </a>
   )
 }
