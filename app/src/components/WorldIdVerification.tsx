@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { IDKitWidget } from '@worldcoin/idkit';
 import { Button } from '@/components/common/Button';
 import { useWorldIdVerification } from '@/hooks/useWorldIdVerification';
-import { toast } from 'sonner';
+import { IDKitWidget } from '@worldcoin/idkit';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface WorldIdVerificationProps {
     userId: string;
