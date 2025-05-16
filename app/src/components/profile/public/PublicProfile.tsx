@@ -3,7 +3,6 @@
 import { Organization } from "@prisma/client"
 
 import { ProjectWithDetailsLite, UserWithAddresses } from "@/lib/types"
-import { cn } from "@/lib/utils"
 
 import ProfileGithubProximity from "./ProfileGithubProximity"
 import ProfileHeader from "./ProfileHeader"
@@ -12,7 +11,7 @@ import ProfileProjects from "./ProfileProjects"
 import ProfileRoles from "./ProfileRoles"
 
 const PublicUserProfile = ({
-  className,
+
   user,
   organizations,
   projects,
@@ -25,24 +24,22 @@ const PublicUserProfile = ({
 
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-y-6 mt-6 w-full overflow-x-hidden",
-        className,
-      )}
-    >
-      <div className="flex flex-col w-full items-start lg:max-w-3xl lg:mx-auto my-18 lg:px-0 px-6 space-y-12">
-        <ProfileHeader user={user} />
-        {/* Roles */}
-        <ProfileRoles user={user} />
+    <div className={"w-full overflow-x-hidden pb-12"}>
+      <div className="w-full lg:max-w-6xl lg:mx-auto pt-12 pb-12 lg:px-0 px-6 lg:grid lg:grid-cols-3 lg:gap-x-12">
 
-        {/* OP Stack proximity */}
-        <ProfileGithubProximity user={user} />
+        <div className="lg:col-span-1">
+          <div className="sticky top-0">
+            <ProfileHeader user={user} />
+            <ProfileOrganizations organizations={organizations} />
+          </div>
+        </div>
 
-        {/* Organizations */}
-        <ProfileOrganizations organizations={organizations} />
-        {/* Projects */}
-        <ProfileProjects projects={projects} />
+
+        <div className="lg:col-span-2 space-y-12 mt-12 lg:mt-0">
+          <ProfileRoles user={user} />
+          <ProfileGithubProximity user={user} />
+          <ProfileProjects projects={projects} />
+        </div>
       </div>
     </div>
   )

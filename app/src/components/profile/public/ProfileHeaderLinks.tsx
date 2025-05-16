@@ -1,12 +1,11 @@
-import { toast } from "sonner"
-
-import { Badge } from "@/components/common/Badge"
-import BubbleLink from "@/components/common/BubbleLink"
+import { Agora, Discord, Farcaster, Github, Optimism } from "@/components/icons/socials"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
+import ProfileSidebarLink from "./ProfileSidebarLink"
+
 
 export default function ProfileHeaderLinks({
   user,
@@ -14,7 +13,6 @@ export default function ProfileHeaderLinks({
   user: UserWithAddresses
 }) {
   const { delegate } = useDelegateData(user?.addresses?.map((a) => a.address))
-
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
@@ -22,20 +20,13 @@ export default function ProfileHeaderLinks({
   const { user: farcasterUsers } = useFarcasterUserData(user?.farcasterId, !!user?.farcasterId)
   const { user: githubUserData } = useGithubUserData(user.github || "")
 
-  const onDiscordBadgeClick = () => {
-    if (!user.discord) return
-
-    navigator.clipboard.writeText(user.discord)
-    toast.success("Discord username copied")
-  }
-
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col">
       {/* Farcaster */}
       {user.farcasterId &&
-        <BubbleLink
+        <ProfileSidebarLink
           href={`https://warpcast.com/${user.username}`}
-          icon="/assets/icons/farcaster-icon.svg"
+          icon={<Farcaster className="w-[16px] h-[16px]" />}
           text={
             <div className="flex gap-1">
               <span className="text-sm text-black">@{user.username}</span>
@@ -51,17 +42,14 @@ export default function ProfileHeaderLinks({
               )}
             </div>
           }
-          tooltipText="Farcaster"
         />
       }
 
-      {/* X */}
-
       {/* Github */}
       {user.github && (
-        <BubbleLink
+        <ProfileSidebarLink
           href={`https://github.com/${user.github}`}
-          icon="/assets/icons/github-icon.svg"
+          icon={<Github className="w-[16px] h-[16px]" />}
           text={
             <div className="flex gap-1">
               <span className="text-sm text-black">@{user.github}</span>
@@ -77,30 +65,28 @@ export default function ProfileHeaderLinks({
               )}
             </div>
           }
-          tooltipText="Github"
         />
       )}
 
       {/* Discord */}
       {user.discord && (
-        <Badge
-          as="button"
-          leftIcon="/assets/icons/discordIcon.svg"
+        <ProfileSidebarLink
+          href={`https://discord.com/users/${user.discord}`}
+          icon={<Discord className="w-[15px] h-[15px]" />}
           text={
             <div className="flex gap-1">
               <span className="text-sm text-black">@{user.discord}</span>
             </div>
           }
-          tooltipText="Click to copy Discord Username"
-          onClick={onDiscordBadgeClick}
+
         />
       )}
 
       {/* Agora */}
       {delegate && Number(delegate.votingPower.total) > 0 && (
-        <BubbleLink
+        <ProfileSidebarLink
           href={`https://vote.optimism.io/delegates/${delegate.address}`}
-          icon="/assets/icons/agora-icon.svg"
+          icon={<Agora className="w-[15px] h-[15px]" />}
           text={
             <span>
               <span className="text-sm text-black">
@@ -114,23 +100,24 @@ export default function ProfileHeaderLinks({
               </span>
             </span>
           }
-          tooltipText="Optimism Agora"
         />
       )}
 
-      {/* Discord */}
+
 
       {/* Gov Forum */}
       {user.govForumProfileUrl && (
-        <BubbleLink
+        <ProfileSidebarLink
           href={user.govForumProfileUrl}
-          icon="/assets/icons/op-icon-black.svg"
+          icon={
+            <Optimism className="w-[16px] h-[16px]" fill="#FF0000" />
+          }
           text={
             <span className="text-sm text-black">
               @{user.govForumProfileUrl.split("/u/")[1].split("/summary")[0]}
             </span>
           }
-          tooltipText="Optimism Collective Governance Forum"
+
         />
       )}
     </div>
