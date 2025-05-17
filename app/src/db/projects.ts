@@ -4,7 +4,10 @@ import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
 
-import { Oso_ProjectsByCollectionV1, Oso_ProjectsV1 } from "@/graphql/__generated__/types"
+import {
+  Oso_ProjectsByCollectionV1,
+  Oso_ProjectsV1,
+} from "@/graphql/__generated__/types"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -451,8 +454,6 @@ async function getProjectFn({
           ELSE NULL
         END as "organization"
       FROM "Project" p
-      LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
-      LEFT JOIN "User" u ON t."userId" = u."id"
       LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
       LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
       LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
@@ -781,36 +782,36 @@ export async function createProject({
           },
           ...(organizationId
             ? await prisma.userOrganization
-              .findMany({
-                where: { organizationId, deletedAt: null },
-                select: { userId: true },
-              })
-              .then((members) =>
-                members
-                  .filter((member) => member.userId !== userId)
-                  .map((member) => ({
-                    role: "member",
+                .findMany({
+                  where: { organizationId, deletedAt: null },
+                  select: { userId: true },
+                })
+                .then((members) =>
+                  members
+                    .filter((member) => member.userId !== userId)
+                    .map((member) => ({
+                      role: "member",
 
-                    user: {
-                      connect: {
-                        id: member.userId,
+                      user: {
+                        connect: {
+                          id: member.userId,
+                        },
                       },
-                    },
-                  })),
-              )
+                    })),
+                )
             : []),
         ],
       },
       organization: organizationId
         ? {
-          create: {
-            organization: {
-              connect: {
-                id: organizationId,
+            create: {
+              organization: {
+                connect: {
+                  id: organizationId,
+                },
               },
             },
-          },
-        }
+          }
         : undefined,
     },
   })
@@ -1505,20 +1506,20 @@ export async function createApplication({
       },
       category: categoryId
         ? {
-          connect: {
-            id: categoryId,
-          },
-        }
+            connect: {
+              id: categoryId,
+            },
+          }
         : undefined,
       impactStatementAnswer: {
         createMany: {
           data: impactStatement
             ? Object.entries(impactStatement).map(
-              ([impactStatementId, answer]) => ({
-                impactStatementId,
-                answer,
-              }),
-            )
+                ([impactStatementId, answer]) => ({
+                  impactStatementId,
+                  answer,
+                }),
+              )
             : [],
         },
       },
