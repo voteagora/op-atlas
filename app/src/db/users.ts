@@ -31,6 +31,8 @@ export type EntityRecords = Record<
   EntityObject[]
 >
 
+
+
 export async function getUserById(userId: string) {
   const session = await auth()
 
@@ -66,6 +68,8 @@ export async function getUserById(userId: string) {
 
   return user
 }
+
+
 
 export async function getUserByPrivyDid(privyDid: string): Promise<
   | (User & {
@@ -1042,4 +1046,23 @@ export async function upsertUserWorldId({
       verified,
     },
   })
+}
+
+export async function getUserPOH(userId: string) {
+  const result = await prisma.$queryRaw<Array<{
+    id: string
+    createdAt: Date
+    source: string
+    sourceId: string | null
+  }>>`
+    SELECT 
+      id,
+      "createdAt",
+      source,
+      "sourceId"
+    FROM "UserPOF"
+    WHERE "userId" = ${userId}
+  `
+
+  return result
 }

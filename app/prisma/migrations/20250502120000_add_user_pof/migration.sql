@@ -1,4 +1,3 @@
--- CreateTable
 CREATE TABLE "UserPOF" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
