@@ -1960,6 +1960,7 @@ export const getPublicProject = cache(async (projectId: string) => {
         select: {
           organization: {
             select: {
+              id: true,
               name: true,
               avatarUrl: true,
               team: {
