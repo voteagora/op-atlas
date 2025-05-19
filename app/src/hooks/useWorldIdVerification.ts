@@ -15,7 +15,7 @@ export function useWorldIdVerification(): UseWorldIdVerificationResult {
         setError(null);
 
         try {
-            const response = await fetch('/api/world-id/verify', {
+            const response = await fetch('/api/world/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
