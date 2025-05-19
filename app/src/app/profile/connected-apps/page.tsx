@@ -32,21 +32,7 @@ export default async function Page() {
           <div className="text-secondary-foreground mb-4">
             Verify that you are a human by connecting your World ID or Gitcoin Passport.
           </div>
-          <div className="flex flex-row gap-2 items-center">
-            <ProofOfHumanity userId={session.user.id} />
-            <WorldConnection userId={session.user.id}>
-              <div className="flex flex-row gap-2 items-center">
-                <World fill="#FFFFFF" className="w-5 h-5" />
-                <div>Verify with World ID</div>
-              </div>
-            </WorldConnection>
-            <PassportConnection userId={session.user.id}>
-              <div className="flex flex-row gap-2 items-center">
-                <Passport fill="#FFFFFF" className="w-5 h-5" />
-                <div>Verify with Passport</div>
-              </div>
-            </PassportConnection>
-          </div>
+          <ProofOfHumanity userId={session.user.id} />
         </div>
 
 

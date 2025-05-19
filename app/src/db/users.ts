@@ -20,6 +20,7 @@ import { generateTemporaryUsername } from "@/lib/utils/username"
 import { prisma } from "./client"
 import { isAddress } from "viem"
 import { getAddress } from "viem"
+import { UserPOF } from "../lib/types"
 
 export type Entity = keyof ExtendedAggregatedType
 export type EntityObject = {
@@ -966,18 +967,16 @@ export async function createUser(privyDid: string) {
   })
 }
 
-export async function getUserPOH(userId: string) {
-  const result = await prisma.$queryRaw<Array<{
-    id: string
-    createdAt: Date
-    source: string
-    sourceId: string | null
-  }>>`
+export async function getUserPOH(userId: string): Promise<UserPOF[]> {
+  const result = await prisma.$queryRaw<UserPOF[]>`
     SELECT 
       id,
-      "createdAt",
+      "userId",
       source,
-      "sourceId"
+      "sourceId",
+      "sourceMeta",
+      "createdAt",
+      "updatedAt"
     FROM "UserPOF"
     WHERE "userId" = ${userId}
   `

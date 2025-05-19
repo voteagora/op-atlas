@@ -366,3 +366,13 @@ export type ExtendedAggregatedType = AggregatedType & {
   contributors: { address: string; email?: string }[]
   github_repo_builders: { address: string; email?: string }[]
 }
+
+export type UserPOF = {
+  id: number
+  userId: string
+  source: 'world' | 'passport'
+  sourceId: string | null
+  sourceMeta: Record<string, any> | null
+  createdAt: Date
+  updatedAt: Date
+}

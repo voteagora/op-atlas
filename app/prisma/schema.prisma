@@ -736,7 +736,7 @@ model ProjectOSOAtlasRelatedProjects {
 }
 
 model UserPOF {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   userId    String
   source    String   // 'world' or 'passport'
   sourceId  String?
