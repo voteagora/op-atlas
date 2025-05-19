@@ -21,6 +21,7 @@ interface DescriptionProps {
     avatarUrl?: string | null
     name?: string | null
     farcasterHandle?: string
+    id?: string
   }
   deployedOn?: {
     logo: string
@@ -50,6 +51,8 @@ export default function Description({
   if (!name) {
     return null
   }
+
+  const hasProfileLink = !!(author?.farcasterHandle || author?.id)
 
   return (
     <div className="w-full">
@@ -82,9 +85,9 @@ export default function Description({
           {author && (
             <div className="flex items-center space-x-2 text-secondary-foreground">
               <span>By</span>
-              {author?.farcasterHandle ? (
+              {hasProfileLink ? (
                 <TrackedLink
-                  href={`/${author?.farcasterHandle}`}
+                  href={`/${author?.farcasterHandle || author?.id}`}
                   className="flex items-center space-x-2 hover:opacity-80"
                   eventName="Link Click"
                   target="_blank"
