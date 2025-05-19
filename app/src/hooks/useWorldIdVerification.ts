@@ -20,11 +20,7 @@ export function useWorldIdVerification(): UseWorldIdVerificationResult {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    proof,
-                    action: 'verify-humanity',
-                    signal: 'user_value',
-                }),
+                body: JSON.stringify(proof),
             });
 
             const data = await response.json();
@@ -33,7 +29,7 @@ export function useWorldIdVerification(): UseWorldIdVerificationResult {
                 throw new Error(data.error || 'Failed to verify proof');
             }
 
-            return data.success;
+            return data;
         } catch (err) {
             setError(err instanceof Error ? err : new Error('Unknown error occurred'));
             return false;
