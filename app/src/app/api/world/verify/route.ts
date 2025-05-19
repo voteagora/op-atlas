@@ -1,8 +1,21 @@
-import { verifyCloudProof, IVerifyResponse } from '@worldcoin/idkit';
+import { auth } from '@/auth';
+import { IVerifyResponse, verifyCloudProof } from '@worldcoin/idkit';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
+
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    if (!userId) {
+        return NextResponse.json(
+            { error: 'Unauthorized' },
+            { status: 401 }
+        );
+    }
+
     try {
+
         const { proof, action } = await request.json();
 
         // TODO: Verify that the ation is valid
@@ -19,23 +32,16 @@ export async function POST(request: Request) {
 
         const verifyRes = (await verifyCloudProof(proof, app_id as `app_${string}`, action)) as IVerifyResponse
 
-        console.log('--------------------------------');
-        console.log('verifyRes', verifyRes);
-        console.log('--------------------------------');
-
         if (verifyRes.success) {
-
             return NextResponse.json(
                 { status: 200, message: 'Proof verified' },
             );
         } else {
-
             // TODO: Handle errors from the World ID /verify endpoint. 
             return NextResponse.json(
                 { status: 400, message: 'Proof not verified' },
             );
         }
-
 
     } catch (error) {
         console.error('Error verifying World ID proof:', error);
