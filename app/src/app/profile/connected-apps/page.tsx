@@ -1,4 +1,3 @@
-import Image from "next/image"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
@@ -7,7 +6,7 @@ import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
-import { WorldIdVerification } from "@/components/WorldIdVerification"
+import { WorldConnection } from "@/components/WorldIdVerification"
 export default async function Page() {
   const session = await auth()
 
@@ -22,6 +21,7 @@ export default async function Page() {
 
 
       <div className="flex flex-col gap-12">
+
         {/* World */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
@@ -32,9 +32,9 @@ export default async function Page() {
             Connect your farcaster account to import your username, bio and
             avatar.
           </div>
-          <WorldIdVerification userId={session.user.id}>
+          <WorldConnection userId={session.user.id}>
             Verify with World ID
-          </WorldIdVerification>
+          </WorldConnection>
         </div>
 
 

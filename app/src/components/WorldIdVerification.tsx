@@ -7,12 +7,12 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-interface WorldIdVerificationProps {
+interface Props {
     userId: string;
     children?: React.ReactNode;
 }
 
-export function WorldIdVerification({ userId, children }: WorldIdVerificationProps) {
+export function WorldConnection({ userId, children }: Props) {
     const [isClient, setIsClient] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
     const { isVerifying, error, verifyProof } = useWorldIdVerification();
