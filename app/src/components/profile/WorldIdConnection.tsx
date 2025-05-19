@@ -64,7 +64,7 @@ export function WorldConnection({ userId, children }: Props) {
                     onSuccess={handleSuccess}
                 >
                     {({ open }: { open: () => void }) => (
-                        <Button onClick={open} variant="primary">Verify with World ID</Button>
+                        <Button onClick={open} variant="primary">{children}</Button>
                     )}
                 </IDKitWidget>
             )}

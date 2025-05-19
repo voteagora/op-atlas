@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-import { Discord, Farcaster, Github, Optimism, World } from "@/components/icons/socials"
+import { Discord, Farcaster, Github, Optimism, Passport, World } from "@/components/icons/socials"
 import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
-import { WorldConnection } from "@/components/WorldIdVerification"
+import { PassportConnection } from "@/components/profile/PassportConnection"
+import { WorldConnection } from "@/components/profile/WorldIdConnection"
+
 export default async function Page() {
   const session = await auth()
 
@@ -19,22 +21,31 @@ export default async function Page() {
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
 
 
-
       <div className="flex flex-col gap-12">
 
-        {/* World */}
-        <div className="flex flex-col gap-1">
+        {/* Proof of humanity */}
+        <div className="flex flex-col gap-1 border border-1 border-border rounded-lg p-4">
           <div className="flex items-center space-x-1.5">
-            <World className="w-10 h-10" />
-            <h3 className="font-semibold text-foreground">World ID</h3>
+            <h3 className="font-semibold text-foreground">Proof of Humanity</h3>
           </div>
           <div className="text-secondary-foreground mb-4">
-            Connect your farcaster account to import your username, bio and
-            avatar.
+            Verify that you are a human by connecting your World ID or Gitcoin Passport.
           </div>
-          <WorldConnection userId={session.user.id}>
-            Verify with World ID
-          </WorldConnection>
+          <div className="flex flex-row gap-2 items-center">
+
+            <WorldConnection userId={session.user.id}>
+              <div className="flex flex-row gap-2 items-center">
+                <World fill="#FFFFFF" className="w-5 h-5" />
+                <div>Verify with World ID</div>
+              </div>
+            </WorldConnection>
+            <PassportConnection userId={session.user.id}>
+              <div className="flex flex-row gap-2 items-center">
+                <Passport fill="#FFFFFF" className="w-5 h-5" />
+                <div>Verify with Passport</div>
+              </div>
+            </PassportConnection>
+          </div>
         </div>
 
 
