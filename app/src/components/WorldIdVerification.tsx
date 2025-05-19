@@ -60,19 +60,11 @@ export function WorldIdVerification({ userId, children }: WorldIdVerificationPro
             {!isVerified && (
                 <IDKitWidget
                     app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID!}
-                    action="verify-humanity"
-                    signal="user_value"
+                    action="atals-humanity-verification"
                     onSuccess={handleSuccess}
                 >
-                    {({ open }) => (
-                        <Button
-                            onClick={open}
-                            className="w-full"
-                            disabled={isVerifying}
-                            variant="primary"
-                        >
-                            {children || (isVerifying ? 'Verifying...' : 'Verify with World ID')}
-                        </Button>
+                    {({ open }: { open: () => void }) => (
+                        <Button onClick={open} variant="primary">Verify with World ID</Button>
                     )}
                 </IDKitWidget>
             )}
