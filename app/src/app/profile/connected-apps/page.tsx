@@ -8,6 +8,7 @@ import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
 import { PassportConnection } from "@/components/profile/PassportConnection"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
+import { ProofOfHumanity } from "@/components/profile/ProofOfHumanity"
 
 export default async function Page() {
   const session = await auth()
@@ -32,7 +33,7 @@ export default async function Page() {
             Verify that you are a human by connecting your World ID or Gitcoin Passport.
           </div>
           <div className="flex flex-row gap-2 items-center">
-
+            <ProofOfHumanity userId={session.user.id} />
             <WorldConnection userId={session.user.id}>
               <div className="flex flex-row gap-2 items-center">
                 <World fill="#FFFFFF" className="w-5 h-5" />
