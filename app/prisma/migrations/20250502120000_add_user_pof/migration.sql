@@ -1,5 +1,5 @@
 CREATE TABLE "UserPOF" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "userId" TEXT NOT NULL,
     "source" TEXT NOT NULL CHECK ("source" IN ('world', 'passport')),
     "sourceId" TEXT,
