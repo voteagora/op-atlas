@@ -219,17 +219,10 @@ export default function OnchainBuilderMission({
                   index={1}
                 />
                 <MetricCard
-                  value={
-                    // If there is some Gas consumed, but less than 1, we show '< 1'
-                    onchainBuilderMetrics?.gasFees?.[month]?.value &&
-                    onchainBuilderMetrics?.gasFees?.[month]?.value > 0 &&
-                    onchainBuilderMetrics?.gasFees?.[month]?.value < 1
-                      ? "< 1"
-                      : formatNumber(
-                          onchainBuilderMetrics?.gasFees?.[month]?.value ?? 0,
-                          2,
-                        )
-                  }
+                  value={formatNumber(
+                    onchainBuilderMetrics?.gasFees?.[month]?.value ?? 0,
+                    2,
+                  )}
                   title="Gas consumed"
                   trend={{
                     value: formatNumber(
