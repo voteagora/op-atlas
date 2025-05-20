@@ -23,6 +23,8 @@ export const PassportConnection = ({
         enabled: Boolean(verifiedAddress),
     })
 
+    console.log(data)
+
     return (
         <Button
             variant="primary"

@@ -1,13 +1,12 @@
 "use client"
 
 import { useUserPOH } from "@/hooks/db/useUserPOH"
-import { Passport } from "../icons/socials"
-import { WorldConnection } from "./WorldIdConnection"
-import { World } from "../icons/socials"
-import PassportConnection from "./PassportConnection"
-import CircleWithCheckmark from "@/components/common/CircleWithGreenCheckmark"
 import Image from "next/image"
+import { Passport, World } from "../icons/socials"
+import PassportConnection from "./PassportConnection"
+import { WorldConnection } from "./WorldIdConnection"
 export function ProofOfHumanity({ userId }: { userId: string }) {
+
     const { data: userPOH } = useUserPOH({ id: userId })
 
     const hasWorld = userPOH?.some((poh) => poh.source === 'world')
