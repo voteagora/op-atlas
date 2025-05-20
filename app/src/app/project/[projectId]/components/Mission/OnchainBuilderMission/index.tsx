@@ -323,13 +323,6 @@ export default function OnchainBuilderMission({
                     .
                   </AlertContainer>
                 )}
-                {eligibility.deployedOnWorldchain && (
-                  <AlertContainer type="danger" isMember={data.isMember}>
-                    Qualified addresses may be inaccurate for projects deployed
-                    on Worldchain. The team is actively working with World to
-                    analyze World address data.
-                  </AlertContainer>
-                )}
                 {!eligibility.onchainBuilderEligibility && (
                   <AlertContainer type="danger" isMember={data.isMember}>
                     This project didn&apos;t receive OP in {month} because it
