@@ -11,7 +11,8 @@ export function ProofOfHumanity({ userId }: { userId: string }) {
     const { data: userPOH } = useUserPOH({ id: userId })
 
     const hasWorld = userPOH?.some((poh) => poh.source === 'world')
-    const hasPassport = userPOH?.some((poh) => poh.source === 'passport')
+    const hasPassport = false
+    // const hasPassport = userPOH?.some((poh) => poh.source === 'passport')
 
     return (
         <div className="flex flex-col gap-4">
