@@ -103,67 +103,67 @@ export default function OnchainBuilderMission({
           })}
         </TabsList>
         {MONTHS.map((month) => {
-          // if (!eligibility?.onchainBuilderEnrolment[month]) {
-          //   return (
-          //     <TabsContent
-          //       key={month}
-          //       value={month}
-          //       className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
-          //     >
-          //       <div className="w-full flex items-center justify-center">
-          //         <p className="text-foreground font-semibold text-base">
-          //           {projectName} was not enrolled in {month}
-          //         </p>
-          //       </div>
-          //     </TabsContent>
-          //   )
-          // }
+          if (!eligibility?.onchainBuilderEnrolment[month]) {
+            return (
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+              >
+                <div className="w-full flex items-center justify-center">
+                  <p className="text-foreground font-semibold text-base">
+                    {projectName} was not enrolled in {month}
+                  </p>
+                </div>
+              </TabsContent>
+            )
+          }
 
-          // if (!eligibility?.onchainBuilderEligibility[month]) {
-          //   return (
-          //     <TabsContent
-          //       key={month}
-          //       value={month}
-          //       className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
-          //     >
-          //       <Accordion type="single" collapsible>
-          //         <AccordionItem value="retro-funding" className="w-full">
-          //           <div className="flex flex-col items-center w-full">
-          //             <p className="font-semibold text-base text-foreground">
-          //               Requirements to earn rewards in {month} were not met
-          //             </p>
-          //             <div className="flex items-center space-x-1">
-          //               <p className="text-secondary-foreground text-base font-normal">
-          //                 Measured over the last 180 days
-          //               </p>
-          //               <AccordionTrigger />
-          //             </div>
-          //           </div>
-          //           <AccordionContent className="pt-6">
-          //             <NotPassingEligibility
-          //               month={month}
-          //               transactionsCount={
-          //                 onchainBuilderMetrics?.transactions?.[month]?.value ??
-          //                 0
-          //               }
-          //               qualifiedAddressesCount={
-          //                 onchainBuilderMetrics?.activeAddresses?.[month]
-          //                   ?.value ?? 0
-          //               }
-          //               distinctDaysCount={
-          //                 onchainBuilderMetrics?.activeAddresses?.[month]
-          //                   ?.value ?? 0
-          //               }
-          //               hasDefillamaAdapter={
-          //                 eligibility?.hasDefillamaAdapter?.[month] ?? false
-          //               }
-          //             />
-          //           </AccordionContent>
-          //         </AccordionItem>
-          //       </Accordion>
-          //     </TabsContent>
-          //   )
-          // }
+          if (!eligibility?.onchainBuilderEligibility[month]) {
+            return (
+              <TabsContent
+                key={month}
+                value={month}
+                className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
+              >
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="retro-funding" className="w-full">
+                    <div className="flex flex-col items-center w-full">
+                      <p className="font-semibold text-base text-foreground">
+                        Requirements to earn rewards in {month} were not met
+                      </p>
+                      <div className="flex items-center space-x-1">
+                        <p className="text-secondary-foreground text-base font-normal">
+                          Measured over the last 180 days
+                        </p>
+                        <AccordionTrigger />
+                      </div>
+                    </div>
+                    <AccordionContent className="pt-6">
+                      <NotPassingEligibility
+                        month={month}
+                        transactionsCount={
+                          onchainBuilderMetrics?.transactions?.[month]?.value ??
+                          0
+                        }
+                        qualifiedAddressesCount={
+                          onchainBuilderMetrics?.activeAddresses?.[month]
+                            ?.value ?? 0
+                        }
+                        distinctDaysCount={
+                          onchainBuilderMetrics?.activeAddresses?.[month]
+                            ?.value ?? 0
+                        }
+                        hasDefillamaAdapter={
+                          eligibility?.hasDefillamaAdapter?.[month] ?? false
+                        }
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </TabsContent>
+            )
+          }
 
           return (
             <>
