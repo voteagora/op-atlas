@@ -21,6 +21,8 @@ export const polynomial = {
   id: 8008,
 } as Chain
 
+// Block explorer is defined just for chains using Etherscan or Routescan.
+// Blockscout doesn't support the /verifiedSignatures (or similar) page we use.
 export const CHAIN_INFO: {
   [chainId: string]: { logo: string; name: string; blockExplorer?: string }
 } = {
