@@ -11,7 +11,9 @@ import {
   searchByEmail,
   searchUsersByUsername,
   updateUser,
-  updateUserInteraction
+  updateUserInteraction,
+  getUserById,
+  upsertUserPOH
 } from "@/db/users"
 
 const client = createPublicClient({
@@ -146,3 +148,81 @@ export const updateInteractions = async (
     userInteraction,
   }
 }
+
+export const refreshUserPassport = async () => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const user = await getUserById(userId)
+
+  if (!user) {
+    return {
+      error: "User not found",
+    }
+  }
+
+  const primaryAddress = user.addresses.find(addr => addr.primary)
+
+  if (!primaryAddress) {
+    return {
+      error: "Primary address is required",
+    }
+  }
+
+  const apiKey = process.env.PASSPORT_API_KEY
+  const scorerId = process.env.PASSPORT_SCORER_ID
+
+  if (!apiKey || !scorerId) {
+    return {
+      error: "Passport API configuration is missing",
+    }
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.passport.xyz/v2/stamps/${scorerId}/score/${primaryAddress.address}`,
+      {
+        headers: {
+          'X-API-KEY': apiKey,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      return {
+        error: `Passport API error: ${error}`,
+      }
+    }
+
+    const data = await response.json()
+
+    // Store the Passport verification data
+    await upsertUserPOH({
+      userId,
+      verification: {
+        source: 'passport',
+        sourceId: primaryAddress.address,
+        expiresAt: new Date(data.expiration_timestamp),
+        sourceMeta: data,
+      },
+    })
+
+    return {
+      error: null,
+      data,
+    }
+  } catch (error) {
+    console.error('Error fetching Passport score:', error)
+    return {
+      error: "Internal server error",
+    }
+  }
+}
+

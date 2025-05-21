@@ -379,13 +379,9 @@ export type UserPOF = {
 }
 
 export interface PassportScore {
-  score: number
+  score: string
+  passing_score: boolean
   last_score_timestamp: string
-  status: string
-  evidence: {
-    type: string
-    success: boolean
-    rawScore: number
-    threshold: number
-  }[]
+  expiration_timestamp: string
+  threshold: string
 }

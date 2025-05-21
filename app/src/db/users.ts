@@ -967,19 +967,76 @@ export async function createUser(privyDid: string) {
   })
 }
 
+export async function upsertUserPOH({
+  userId,
+  verification,
+}: {
+  userId: string
+  verification: {
+    source: 'world' | 'passport'
+    sourceId?: string
+    sourceMeta?: any
+    expiresAt?: Date
+  }
+}) {
+
+  // Check if a verification of that source already exists
+  const existingVerification = await prisma.userPOF.findFirst({
+    where: {
+      userId,
+      source: verification.source,
+    },
+  })
+
+  let safeMeta: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput = Prisma.DbNull;
+
+  if (verification.sourceMeta !== undefined) {
+    if (typeof verification.sourceMeta === "string") {
+      try {
+        safeMeta = JSON.parse(verification.sourceMeta);
+      } catch {
+        safeMeta = verification.sourceMeta;
+      }
+    } else {
+      safeMeta = verification.sourceMeta;
+    }
+  }
+
+  // Delete existing record
+  if (existingVerification) {
+    await prisma.userPOF.delete({
+      where: {
+        id: existingVerification.id,
+      }
+    })
+  }
+
+  // Create new record
+  return prisma.userPOF.create({
+    data: {
+      userId,
+      source: verification.source,
+      sourceId: verification.sourceId,
+      sourceMeta: safeMeta,
+      expiresAt: verification.expiresAt,
+    } as Prisma.UserPOFUncheckedCreateInput,
+  })
+}
+
 export async function getUserPOH(userId: string): Promise<UserPOF[]> {
+
   const result = await prisma.$queryRaw<UserPOF[]>`
     SELECT 
       id,
       "userId",
-      source,
+      "source",
       "sourceId",
       "sourceMeta",
       "createdAt",
-      "updatedAt"
+      "updatedAt",
+      "expiresAt"
     FROM "UserPOF"
     WHERE "userId" = ${userId}
   `
-
   return result
 }
