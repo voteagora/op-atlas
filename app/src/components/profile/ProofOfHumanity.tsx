@@ -11,8 +11,7 @@ export function ProofOfHumanity({ userId }: { userId: string }) {
     const { data: userPOH } = useUserPOH({ id: userId })
 
     const hasWorld = userPOH?.some((poh) => poh.source === 'world')
-    const hasPassport = false
-    // const hasPassport = userPOH?.some((poh) => poh.source === 'passport')
+    const hasPassport = userPOH?.some((poh) => poh.source === 'passport')
 
     return (
         <div className="flex flex-col gap-4">
@@ -28,6 +27,7 @@ export function ProofOfHumanity({ userId }: { userId: string }) {
                         <span>Verified with World ID</span>
                     </div>
                 )}
+
                 {hasPassport && (
                     <div className="flex items-center gap-2">
                         <Image
@@ -37,6 +37,7 @@ export function ProofOfHumanity({ userId }: { userId: string }) {
                             alt="Verified"
                         />
                         <span>Verified with Passport</span>
+
                     </div>
                 )}
             </div>
@@ -50,14 +51,12 @@ export function ProofOfHumanity({ userId }: { userId: string }) {
                         </div>
                     </WorldConnection>
                 )}
-                {!hasPassport && (
-                    <PassportConnection userId={userId}>
-                        <div className="flex flex-row gap-2 items-center">
-                            <Passport fill="#FFFFFF" className="w-5 h-5" />
-                            <div>Verify with Passport</div>
-                        </div>
-                    </PassportConnection>
-                )}
+                <PassportConnection userId={userId}>
+                    <div className="flex flex-row gap-2 items-center">
+                        <Passport fill="#FFFFFF" className="w-5 h-5" />
+                        <div>Verify with Passport</div>
+                    </div>
+                </PassportConnection>
             </div>
         </div>
     )
