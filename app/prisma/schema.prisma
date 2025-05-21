@@ -738,9 +738,10 @@ model ProjectOSOAtlasRelatedProjects {
 model UserPOF {
   id        Int      @id @default(autoincrement())
   userId    String
-  source    String   // 'world' or 'passport'
+  source    String
   sourceId  String?
   sourceMeta Json?
+  expiresAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
