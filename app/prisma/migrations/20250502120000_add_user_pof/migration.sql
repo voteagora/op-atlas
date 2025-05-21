@@ -4,6 +4,7 @@ CREATE TABLE "UserPOF" (
     "source" TEXT NOT NULL CHECK ("source" IN ('world', 'passport')),
     "sourceId" TEXT,
     "sourceMeta" JSONB,
+    "expiresAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

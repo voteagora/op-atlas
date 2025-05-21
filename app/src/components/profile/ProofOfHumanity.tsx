@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Passport, World } from "../icons/socials"
 import PassportConnection from "./PassportConnection"
 import { WorldConnection } from "./WorldIdConnection"
+
 export function ProofOfHumanity({ userId }: { userId: string }) {
 
     const { data: userPOH } = useUserPOH({ id: userId })

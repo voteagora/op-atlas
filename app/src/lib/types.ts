@@ -375,6 +375,7 @@ export type UserPOF = {
   sourceMeta: Record<string, any> | null
   createdAt: Date
   updatedAt: Date
+  expiresAt: Date | null
 }
 
 export interface PassportScore {
