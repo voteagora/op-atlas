@@ -21,10 +21,11 @@ export const polynomial = {
   id: 8008,
 } as Chain
 
-export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
-  {
-    [arenaZ.id.toString()]: {
-      logo: "/assets/chain-logos/arenaZ.png",
+export const CHAIN_INFO: {
+  [chainId: string]: { logo: string; name: string; blockExplorer?: string }
+} = {
+  [arenaZ.id.toString()]: {
+    logo: "/assets/chain-logos/arenaZ.png",
       name: "ArenaZ",
     },
     [bob.id.toString()]: {
@@ -34,10 +35,12 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [base.id.toString()]: {
       logo: "/assets/chain-logos/base.png",
       name: "Base",
+      blockExplorer: base.blockExplorers.default.url,
     },
     [ethernity.id.toString()]: {
       logo: "/assets/chain-logos/ethernity.jpg",
       name: "Ethernity",
+      blockExplorer: ethernity.blockExplorers.default.url,
     },
     [ink.id.toString()]: {
       logo: "/assets/chain-logos/ink.jpg",
@@ -58,10 +61,12 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [mode.id.toString()]: {
       logo: "/assets/chain-logos/mode.png",
       name: "Mode",
+      blockExplorer: mode.blockExplorers.default.url,
     },
     [optimism.id.toString()]: {
       logo: "/assets/chain-logos/optimism.svg",
       name: "OP Mainnet",
+      blockExplorer: optimism.blockExplorers.default.url,
     },
     [polynomial.id.toString()]: {
       logo: "/assets/chain-logos/polynomial.png",
@@ -90,10 +95,12 @@ export const CHAIN_INFO: { [chainId: string]: { logo: string; name: string } } =
     [unichain.id.toString()]: {
       logo: "/assets/chain-logos/unichain.jpg",
       name: "Unichain",
+      blockExplorer: unichain.blockExplorers.default.url,
     },
     [worldchain.id.toString()]: {
       logo: "/assets/chain-logos/worldchain.png",
       name: "Worldchain",
+      blockExplorer: worldchain.blockExplorers.default.url,
     },
     [zora.id.toString()]: {
       logo: "/assets/chain-logos/zora.png",
