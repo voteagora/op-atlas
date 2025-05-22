@@ -2,9 +2,9 @@
 
 import { useUserPOH } from "@/hooks/db/useUserPOH"
 import Image from "next/image"
-import { Passport, World } from "../icons/socials"
-import PassportConnection from "./PassportConnection"
-import { WorldConnection } from "./WorldIdConnection"
+import { Passport, World } from "@/components/icons/socials"
+import PassportConnection from "@/components/profile/PassportConnection"
+import { WorldConnection } from "@/components/profile/WorldIdConnection"
 
 export function ProofOfHumanity({ userId }: { userId: string }) {
 

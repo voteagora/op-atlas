@@ -1,14 +1,11 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-import { Discord, Farcaster, Github, Optimism, Passport, World } from "@/components/icons/socials"
+import { Discord, Farcaster, Github, Optimism } from "@/components/icons/socials"
 import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
-import { PassportConnection } from "@/components/profile/PassportConnection"
-import { WorldConnection } from "@/components/profile/WorldIdConnection"
-import { ProofOfHumanity } from "@/components/profile/ProofOfHumanity"
 
 export default async function Page() {
   const session = await auth()
@@ -23,17 +20,6 @@ export default async function Page() {
 
 
       <div className="flex flex-col gap-12">
-
-        {/* Proof of humanity */}
-        <div className="flex flex-col gap-1 border border-1 border-border rounded-lg p-4">
-          <div className="flex items-center space-x-1.5">
-            <h3 className="font-semibold text-foreground">Proof of Humanity</h3>
-          </div>
-          <div className="text-secondary-foreground mb-4">
-            Verify that you are a human by connecting your World ID or Gitcoin Passport.
-          </div>
-          <ProofOfHumanity userId={session.user.id} />
-        </div>
 
 
         {/* Farcaster */}

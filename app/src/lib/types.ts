@@ -367,7 +367,7 @@ export type ExtendedAggregatedType = AggregatedType & {
   github_repo_builders: { address: string; email?: string }[]
 }
 
-export type UserPOF = {
+export type UserPOH = {
   id: number
   userId: string
   source: 'world' | 'passport'

@@ -30,15 +30,16 @@ export const PassportConnection = ({
     }
 
     return (
-        <Button
-            variant="primary"
+        <div
+
+            className="inline-block cursor-pointer underline hover:no-underline"
             onClick={(event) => {
                 event.preventDefault()
                 onRefresh()
             }}
         >
             {children}
-        </Button>
+        </div>
     )
 }
 
