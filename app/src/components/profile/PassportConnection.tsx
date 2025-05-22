@@ -1,9 +1,6 @@
 "use client"
 
-import { Button } from '@/components/common/Button';
-import { useUserPOH } from '@/hooks/db/useUserPOH';
-import { refreshUserPassport } from '@/lib/actions/users';
-import { toast } from 'sonner';
+import { useRefreshPassport } from '@/hooks/useRefreshPassport';
 
 interface Props {
     userId: string;
@@ -14,28 +11,14 @@ export const PassportConnection = ({
     userId,
     children,
 }: Props) => {
-
-    const { invalidate } = useUserPOH({ enabled: false, id: userId })
-
-    const onRefresh = async () => {
-
-        toast.promise(
-            refreshUserPassport().then(() => invalidate()),
-            {
-                loading: "Refreshing passport score...",
-                success: "Passport score refreshed successfully",
-                error: "Failed to refresh passport score",
-            },
-        )
-    }
+    const { refresh } = useRefreshPassport(userId);
 
     return (
         <div
-
             className="inline-block cursor-pointer underline hover:no-underline"
             onClick={(event) => {
                 event.preventDefault()
-                onRefresh()
+                refresh()
             }}
         >
             {children}
