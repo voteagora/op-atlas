@@ -1,10 +1,10 @@
 "use client"
 
 import { Check, Close } from "@/components/icons/reminx"
-import PassportConnection from "@/components/profile/PassportConnection"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPOH } from "@/hooks/db/useUserPOH"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
+import { useRefreshPassport } from "@/hooks/useRefreshPassport"
 import { UserPOH } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
 import { UserAddress } from "@prisma/client"
@@ -14,6 +14,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const { user } = useUser({ id: userId })
     const { data: pohData } = useUserPOH({ id: userId })
     const { linkEmail } = usePrivyEmail(userId)
+    const { refreshPassport } = useRefreshPassport(userId)
 
 
     const emailCondition = Boolean(user?.emails?.length)
@@ -28,6 +29,9 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const passportCondition = Boolean(passport && passport.sourceMeta?.score > passport.sourceMeta?.threshold)
 
     const worldCondition = Boolean(pohData?.some((poh: UserPOH) => poh.source === "world"))
+
+
+
 
 
     return (
@@ -48,11 +52,11 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 
             <div>
                 {passportCondition ? (
-                    <ConditionRow isMet={passportCondition}>Passport verified! Your score is {passport?.sourceMeta?.score} for {truncateAddress(passport?.sourceId as string)} | <PassportConnection userId={userId}>Refresh</PassportConnection></ConditionRow>
+                    <ConditionRow isMet={passportCondition}>Passport verified! Your score is {passport?.sourceMeta?.score} for {truncateAddress(passport?.sourceId as string)} | <div className="inline-block cursor-pointer underline hover:no-underline" onClick={() => refreshPassport()}>Refresh</div></ConditionRow>
                 ) : (
                     <div>
                         {addrCondition && govAddress ? (
-                            <ConditionRow isMet={false}>Verify your Gitcoin Passport: {truncateAddress(govAddress.address as string)} | <PassportConnection userId={userId}>Verify</PassportConnection></ConditionRow>
+                            <ConditionRow isMet={false}>Verify your Gitcoin Passport: {truncateAddress(govAddress.address as string)} | <div className="inline-block cursor-pointer underline hover:no-underline" onClick={() => refreshPassport()}>Verify</div></ConditionRow>
                         ) : (
                             <ConditionRow isMet={false}>Verify governance address to add a verified address.</ConditionRow>
                         )}
