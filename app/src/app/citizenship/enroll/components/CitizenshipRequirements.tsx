@@ -24,8 +24,6 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const email = user?.emails?.[0];
 
 
-    // Address
-
     const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
 
     const gitCondition = Boolean(user?.github !== null || user?.notDeveloper === true)
