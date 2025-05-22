@@ -4,6 +4,7 @@ import { Check, Close } from "@/components/icons/reminx"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPOH } from "@/hooks/db/useUserPOH"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
+import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { useRefreshPassport } from "@/hooks/useRefreshPassport"
 import { UserPOH } from "@/lib/types"
@@ -20,13 +21,12 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const { linkEmail, updateEmail } = usePrivyEmail(userId)
     const { refreshPassport } = useRefreshPassport(userId)
     const { linkWallet } = usePrivyLinkWallet(userId)
+    const { linkGithub, unlinkGithub, toggleIsDeveloper } = usePrivyLinkGithub(userId)
 
     const email = user?.emails?.[0];
 
 
     const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
-
-    const gitCondition = Boolean(user?.github !== null || user?.notDeveloper === true)
     const worldCondition = Boolean(pohData?.some((poh: UserPOH) => poh.source === "world"))
 
     const renderEmail = () => {
@@ -50,6 +50,22 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
         } else {
             // If a user does not have a connected address
             return <ConditionRow isMet={false}>You've added a governance address in Atlas | <div className={LINK_STYLE} onClick={() => linkWallet()}>Add your address</div></ConditionRow>
+        }
+    }
+
+    const renderGithub = () => {
+
+        // Github connected
+        if (user?.github) {
+            return <ConditionRow isMet={true}>You've connected your GitHub account in Atlas: <span className="font-semibold">@{user?.github}</span> | <div className={LINK_STYLE} onClick={() => unlinkGithub()}>Disconnect</div></ConditionRow>
+        } else {
+
+            // User not a developer
+            if (user?.notDeveloper) {
+                return <ConditionRow isMet={true}>You've identified yourself as not a developer in Atlas | <div className={LINK_STYLE} onClick={() => linkGithub()}>Connect GitHub</div> | <div className={LINK_STYLE} onClick={() => toggleIsDeveloper()}>I'm a developer</div></ConditionRow>
+            } else {
+                return <ConditionRow isMet={false}>You've connected your GitHub account in Atlas | <div className={LINK_STYLE} onClick={() => linkGithub()}>Connect GitHub</div> | <div className={LINK_STYLE} onClick={() => toggleIsDeveloper()}>I'm not a developer</div></ConditionRow>
+            }
         }
     }
 
@@ -90,7 +106,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
             <div className="font-semibold">Atlas Profile</div>
 
             <div>
-                <ConditionRow isMet={gitCondition}>If you're a developer, you've connected your GitHub account in Atlas.</ConditionRow>
+                {renderGithub()}
                 {renderEmail()}
                 {renderAddress()}
             </div>
