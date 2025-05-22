@@ -40,7 +40,7 @@ yarn-error.log*
 next-env.d.ts
 
 # graphql types
-# src/graphql/
+src/graphql/
 
 # Sentry Config File
 .env.sentry-build-plugin

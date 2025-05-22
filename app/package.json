@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "pnpm graphql:generate && npx prisma generate && next dev",
-    "build": "npx prisma generate && next build && prisma migrate deploy",
+    "build": "pnpm graphql:generate && npx prisma generate && next build && prisma migrate deploy",
     "start": "next start",
     "test": "jest",
     "format": "prettier --write .",
