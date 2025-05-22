@@ -1,6 +1,7 @@
 "use client"
 
 import { Check, Close } from "@/components/icons/reminx"
+import { WorldConnection } from "@/components/profile/WorldIdConnection"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPOH } from "@/hooks/db/useUserPOH"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
@@ -24,7 +25,6 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const { linkGithub, unlinkGithub, toggleIsDeveloper } = usePrivyLinkGithub(userId)
 
     const email = user?.emails?.[0];
-
 
     const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
     const worldCondition = Boolean(pohData?.some((poh: UserPOH) => poh.source === "world"))
@@ -99,6 +99,14 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     }
 
 
+    const renderWorld = () => {
+        if (worldCondition) {
+            return <ConditionRow isMet={false}>Connect your World ID. Connect with Worldchain</ConditionRow>
+        } else {
+            return <ConditionRow isMet={true}>You've connected your World ID. <WorldConnection userId={userId} className={LINK_STYLE}>Connect with Worldchain</WorldConnection></ConditionRow>
+        }
+    }
+
     return (
         <div className="flex flex-col gap-6">
             <div className="font-semibold text-xl">Requirements</div>
@@ -117,7 +125,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 
             <div>
                 {renderPassport()}
-                <ConditionRow isMet={worldCondition}>Connect your World ID. Connect with Worldchain</ConditionRow>
+                {renderWorld()}
             </div>
         </div>
     )
