@@ -2,11 +2,10 @@ import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { CitizenshipEligibility } from "@/app/citizenship/enroll/components/CitizenshipEligibility"
+import { CitizenshipRegistrationSidebar } from "@/app/citizenship/enroll/components/CitizenshipRegistrationSidebar"
 import { CitizenshipRequirements } from "@/app/citizenship/enroll/components/CitizenshipRequirements"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
-import { Button } from "@/components/common/Button"
-import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { getUserById } from "@/db/users"
 import Link from "next/link"
@@ -34,6 +33,9 @@ export default async function Page() {
 
     const user = await getUserById(userId)
 
+    if (!user) {
+        redirect("/")
+    }
 
     return <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
         <div className="w-full mt-20 lg:max-w-6xl lg:mx-auto lg:px-0 lg:grid lg:grid-cols-3 lg:gap-x-16">
@@ -69,7 +71,6 @@ export default async function Page() {
                                     <li>Approve the <span className="font-semibold">Collective Intent</span>, as well as <span className="font-semibold">Retroactive Public Goods Funding mission budgets</span></li>
                                 </ul>
                             </div>
-
                             <CitizenshipEligibility />
                             <CitizenshipRequirements userId={userId} />
                         </div>
@@ -80,13 +81,7 @@ export default async function Page() {
             </div>
 
             <div className="lg:col-span-1 mt-12 lg:mt-0">
-                <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
-                    <UserAvatarLarge imageUrl={user?.imageUrl} />
-                    <div className="text-sm font-semibold text-secondary-foreground">You are eligible to become a Citizen</div>
-                    <Button className="w-full">
-                        Register
-                    </Button>
-                </div>
+                <CitizenshipRegistrationSidebar user={user} />
             </div>
         </div>
     </main>
