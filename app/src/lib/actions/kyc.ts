@@ -236,10 +236,7 @@ export const deleteKYCTeamAction = async ({
   }
 
   if (projectId) {
-    const isInvalid = await verifyAdminStatus(
-      projectId,
-      userId,
-    )
+    const isInvalid = await verifyAdminStatus(projectId, userId)
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
     }

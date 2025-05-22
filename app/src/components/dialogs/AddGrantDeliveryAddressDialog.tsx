@@ -38,7 +38,6 @@ export function AddGrantDeliveryAddressDialog({
   const { user } = useUser({ id: session?.user?.id, enabled: true })
   const username = useUsername(user)
 
-
   const [isPending, startTransition] = useTransition()
   const {
     control,
@@ -52,12 +51,15 @@ export function AddGrantDeliveryAddressDialog({
     },
   })
 
-  const [messageToSign, setMessageToSign] = useState(`I verify that I am ${username} on Atlas and I'm an optimist.`)
+  const [messageToSign, setMessageToSign] = useState(
+    `I verify that I am ${username} on Atlas and I'm an optimist.`,
+  )
 
   useEffect(() => {
-    setMessageToSign(`I verify that I am ${username} on Atlas and I'm an optimist.`)
+    setMessageToSign(
+      `I verify that I am ${username} on Atlas and I'm an optimist.`,
+    )
   }, [username])
-
 
   const handleClose = useCallback(
     (isOpen: boolean) => {

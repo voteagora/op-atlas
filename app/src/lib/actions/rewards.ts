@@ -65,10 +65,7 @@ export const addAddressToRewardsClaim = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(
-    reward.project.id,
-    userId,
-  )
+  const isInvalid = await verifyAdminStatus(reward.project.id, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -118,10 +115,7 @@ export const completeRewardsClaim = async (rewardId: string) => {
     }
   }
 
-  const isInvalid = await verifyAdminStatus(
-    reward.project.id,
-    userId,
-  )
+  const isInvalid = await verifyAdminStatus(reward.project.id, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -154,10 +148,7 @@ export const resetRewardsClaim = async (rewardId: string) => {
     }
   }
 
-  const isInvalid = await verifyAdminStatus(
-    reward.project.id,
-    userId,
-  )
+  const isInvalid = await verifyAdminStatus(reward.project.id, userId)
   if (isInvalid?.error) {
     return isInvalid
   }

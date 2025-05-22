@@ -58,4 +58,3 @@ const populateRecipientsRewards = async () => {
 }
 
 populateRecipientsRewards()
-

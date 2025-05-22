@@ -37,7 +37,6 @@ export const TeamMemberRow = memo(function TeamMemberRow({
   const { user: loadedUser } = useUser({ id: user.id })
   const username = useUsername(loadedUser || user)
 
-
   return (
     <div
       onMouseEnter={() => setMouseEntered(true)}

@@ -1,7 +1,12 @@
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
-import { Discord, Farcaster, Github, Optimism } from "@/components/icons/socials"
+import {
+  Discord,
+  Farcaster,
+  Github,
+  Optimism,
+} from "@/components/icons/socials"
 import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { GithubConnection } from "@/components/profile/GithubConnection"
@@ -18,10 +23,7 @@ export default async function Page() {
     <div className="flex flex-col gap-6 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
 
-
       <div className="flex flex-col gap-12">
-
-
         {/* Farcaster */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">

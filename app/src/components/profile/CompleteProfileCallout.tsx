@@ -263,7 +263,6 @@ function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
               Optimism (including the voting badge for Citizens and Guest
               Voters).
               <div className="flex flex-col gap-1.5 mt-4">
-
                 {user.addresses.map(({ address, source, primary }) => (
                   <PrimaryAddress
                     key={address}

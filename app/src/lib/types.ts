@@ -370,7 +370,7 @@ export type ExtendedAggregatedType = AggregatedType & {
 export type UserPOH = {
   id: number
   userId: string
-  source: 'world' | 'passport'
+  source: "world" | "passport"
   sourceId: string | null
   sourceMeta: Record<string, any> | null
   createdAt: Date

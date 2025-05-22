@@ -165,7 +165,6 @@ export const Account = () => {
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
-
             <UserAvatarSmall imageUrl={user?.imageUrl} />
 
             {username}
@@ -223,8 +222,9 @@ export const Account = () => {
     return (
       <button
         type="button"
-        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${isLoggingIn.current ? "bg-gray-300" : "bg-brand-primary"
-          }`}
+        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${
+          isLoggingIn.current ? "bg-gray-300" : "bg-brand-primary"
+        }`}
         onClick={privyLogin}
       >
         {isLoggingIn.current ? (

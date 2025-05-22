@@ -32,8 +32,6 @@ export type EntityRecords = Record<
   EntityObject[]
 >
 
-
-
 export async function getUserById(userId: string) {
   const session = await auth()
 
@@ -54,7 +52,7 @@ export async function getUserById(userId: string) {
 
   // If user is not logged in or requesting different user's data, remove sensitive information
   // but return the same object structure for consistency
-  if (!session?.user || session.user.id !== userId && user) {
+  if (!session?.user || (session.user.id !== userId && user)) {
     if (user) {
       user.emails = []
       user.interaction = null
@@ -70,14 +68,12 @@ export async function getUserById(userId: string) {
   return user
 }
 
-
-
 export async function getUserByPrivyDid(privyDid: string): Promise<
   | (User & {
-    addresses: UserAddress[]
-    interaction: UserInteraction | null
-    emails: UserEmail[]
-  })
+      addresses: UserAddress[]
+      interaction: UserInteraction | null
+      emails: UserEmail[]
+    })
   | null
 > {
   return prisma.user.findFirst({
@@ -156,10 +152,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-    addresses: UserAddress[]
-    interaction: UserInteraction | null
-    emails: UserEmail[]
-  })
+      addresses: UserAddress[]
+      interaction: UserInteraction | null
+      emails: UserEmail[]
+    })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -222,18 +218,15 @@ export async function searchUsersByUsername({
   })
 }
 
-export async function searchByAddress({
-  address,
-}: {
-  address: string
-}) {
-
+export async function searchByAddress({ address }: { address: string }) {
   return prisma.user.findMany({
     where: {
       addresses: {
         some: {
           address: {
-            contains: isAddress(address) ? getAddress(address) as string : address,
+            contains: isAddress(address)
+              ? (getAddress(address) as string)
+              : address,
           },
         },
       },
@@ -241,12 +234,7 @@ export async function searchByAddress({
   })
 }
 
-export async function searchByEmail({
-  email,
-}: {
-  email: string
-}) {
-
+export async function searchByEmail({ email }: { email: string }) {
   // Only search if it's a valid email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email)) {
@@ -332,24 +320,24 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-      prisma.userEmail.delete({
-        where: {
-          id: currentEmail.id,
-        },
-      }),
-    ]
+        prisma.userEmail.delete({
+          where: {
+            id: currentEmail.id,
+          },
+        }),
+      ]
     : []
 
   const createEmail = email
     ? [
-      prisma.userEmail.create({
-        data: {
-          email,
-          userId: id,
-          verified: verified ?? false,
-        },
-      }),
-    ]
+        prisma.userEmail.create({
+          data: {
+            email,
+            userId: id,
+            verified: verified ?? false,
+          },
+        }),
+      ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])
@@ -380,7 +368,6 @@ export async function removeUserAddress({
   id: string
   address: string
 }) {
-
   return prisma.userAddress.delete({
     where: {
       address_userId: {
@@ -963,7 +950,7 @@ export async function createUser(privyDid: string) {
     data: {
       privyDid,
       username: generateTemporaryUsername(privyDid),
-    }
+    },
   })
 }
 
@@ -973,13 +960,12 @@ export async function upsertUserPOH({
 }: {
   userId: string
   verification: {
-    source: 'world' | 'passport'
+    source: "world" | "passport"
     sourceId?: string
     sourceMeta?: any
     expiresAt?: Date
   }
 }) {
-
   // Check if a verification of that source already exists
   const existingVerification = await prisma.userPOF.findFirst({
     where: {
@@ -988,17 +974,18 @@ export async function upsertUserPOH({
     },
   })
 
-  let safeMeta: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput = Prisma.DbNull;
+  let safeMeta: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput =
+    Prisma.DbNull
 
   if (verification.sourceMeta !== undefined) {
     if (typeof verification.sourceMeta === "string") {
       try {
-        safeMeta = JSON.parse(verification.sourceMeta);
+        safeMeta = JSON.parse(verification.sourceMeta)
       } catch {
-        safeMeta = verification.sourceMeta;
+        safeMeta = verification.sourceMeta
       }
     } else {
-      safeMeta = verification.sourceMeta;
+      safeMeta = verification.sourceMeta
     }
   }
 
@@ -1007,7 +994,7 @@ export async function upsertUserPOH({
     await prisma.userPOF.delete({
       where: {
         id: existingVerification.id,
-      }
+      },
     })
   }
 
@@ -1024,7 +1011,6 @@ export async function upsertUserPOH({
 }
 
 export async function getUserPOH(userId: string): Promise<UserPOH[]> {
-
   const result = await prisma.$queryRaw<UserPOH[]>`
     SELECT 
       id,

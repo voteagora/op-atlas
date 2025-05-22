@@ -24,8 +24,11 @@ export const FarcasterConnection = ({
   const { user: privyUser } = usePrivy()
   const { linkFarcaster, unlinkFarcaster } = usePrivyFarcaster(userId)
 
-  const isIntermediateState = Number(user?.farcasterId || 0) !== privyUser?.farcaster?.fid
-  const username = user?.farcasterId ? user.username : privyUser?.farcaster?.username
+  const isIntermediateState =
+    Number(user?.farcasterId || 0) !== privyUser?.farcaster?.fid
+  const username = user?.farcasterId
+    ? user.username
+    : privyUser?.farcaster?.username
 
   return (
     <div className="flex flex-row gap-2">
