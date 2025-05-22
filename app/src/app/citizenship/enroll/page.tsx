@@ -1,13 +1,15 @@
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
+import { CitizenshipEligibility } from "@/app/citizenship/enroll/components/CitizenshipEligibility"
+import { CitizenshipRequirements } from "@/app/citizenship/enroll/components/CitizenshipRequirements"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { Button } from "@/components/common/Button"
+import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { getUserById } from "@/db/users"
 import Link from "next/link"
-import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 
 
 
@@ -57,26 +59,19 @@ export default async function Page() {
                             <div className="text-sm text-secondary-foreground">[Start Date] - [End Date]</div>
                         </div>
                         <div className="border-b border-border-secondary w-full"></div>
-                        <div className="text-secondary-foreground">
+                        <div className="flex flex-col gap-y-12 text-secondary-foreground">
                             <div className="flex flex-col gap-y-6">
-                                <div></div>
+                                <div>The Citizens' House votes on decisions that shape the direction of the Collective.</div>
                                 <div>Season 8 Citizens will:</div>
                                 <ul className="list-disc list-inside">
-                                    <li>Elect the <span className="font-semibold">Developer Advisory Board</span>, tasked with reviewing <span className="font-semibold">Protocol Upgrades</span></li>
-                                    <li>Have the opportunity to <span className="font-semibold">veto Protocol Upgrades</span></li>
-                                    <li>Approve the <span className="font-semibold">Collective Intent</span>, as well as <span className="font-semibold">Retro Funding Missions</span> and their <span className="font-semibold">budgets</span></li>
+                                    <li>Elect the Developer <span className="font-semibold">Advisory Board</span>, tasked with reviewing <span className="font-semibold">Protocol Upgrades</span></li>
+                                    <li>Have the opportunity to <span className="font-semibold">override Protocol Upgrades</span></li>
+                                    <li>Approve the <span className="font-semibold">Collective Intent</span>, as well as <span className="font-semibold">Retroactive Public Goods Funding mission budgets</span></li>
                                 </ul>
                             </div>
-                            <div className="font-semibold mt-12">Eligibility</div>
-                            <div className="text-sm mt-4">Onchain activity</div>
-                            <div className="text-sm mt-4">One of your verified addresses must meet these criteria. Verify more addresses</div>
 
-                            <div className="font-semibold mt-12">Requirements</div>
-                            <ul className="list-disc list-inside mt-6">
-                                <li>The organization contributed to ≥2% of the total revenue contributed by Superchain members in the last Season</li>
-                                <li>You've added email in Atlas. <Link href="/profile/details" className="underline">Add your email</Link></li>
-                                <li>You've added a governance address in Atlas. <Link href="/profile/verified-addresses" className="underline">Add an address</Link></li>
-                            </ul>
+                            <CitizenshipEligibility />
+                            <CitizenshipRequirements userId={userId} />
                         </div>
                         <div className="border-b border-border-secondary w-full"></div>
                         <div>Learn more about citizenship in <Link href="https://community.optimism.io/citizens-house/citizen-house-overview" target="_blank" className="underline">Gov Docs: Citizens House</Link></div>
