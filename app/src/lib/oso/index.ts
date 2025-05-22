@@ -125,35 +125,40 @@ const queryMetrics = cache(async function queryMetrics(
     _lte: OSO_QUERY_DATES.DEFAULT.end,
   },
 ) {
-  const query: QueryOso_TimeseriesMetricsByProjectV0Args = {
-    where: {
-      projectId: {
-        _in: osoId,
+  try {
+    const query: QueryOso_TimeseriesMetricsByProjectV0Args = {
+      where: {
+        projectId: {
+          _in: osoId,
+        },
+        metricId: {
+          _in: OSO_METRICS[key],
+        },
+        sampleDate: {
+          _gte: sampleDate._gte,
+          _lte: sampleDate._lte,
+        },
       },
-      metricId: {
-        _in: OSO_METRICS[key],
-      },
-      sampleDate: {
-        _gte: sampleDate._gte,
-        _lte: sampleDate._lte,
-      },
-    },
-    order_by: [
-      {
-        sampleDate: OrderBy.Asc,
-      },
-    ],
+      order_by: [
+        {
+          sampleDate: OrderBy.Asc,
+        },
+      ],
+    }
+    const select: (keyof Oso_TimeseriesMetricsByProjectV0)[] = [
+      "sampleDate",
+      "amount",
+    ]
+    const result = await osoGqlClient.executeQuery(
+      "oso_timeseriesMetricsByProjectV0",
+      query,
+      select,
+    )
+    return result.oso_timeseriesMetricsByProjectV0
+  } catch (error) {
+    console.error(error)
+    return []
   }
-  const select: (keyof Oso_TimeseriesMetricsByProjectV0)[] = [
-    "sampleDate",
-    "amount",
-  ]
-  const result = await osoGqlClient.executeQuery(
-    "oso_timeseriesMetricsByProjectV0",
-    query,
-    select,
-  )
-  return result.oso_timeseriesMetricsByProjectV0
 })
 
 export const mapOSOProjects = cache(async function mapOSOProjects(
