@@ -110,9 +110,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     return (
         <div className="flex flex-col gap-6">
             <div className="font-semibold text-xl">Requirements</div>
-
             <div className="font-semibold">Atlas Profile</div>
-
             <div>
                 {renderGithub()}
                 {renderEmail()}
@@ -122,7 +120,6 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
                 <div className="font-semibold">Proof of personhood</div>
                 <div>Complete at least one of these options.</div>
             </div>
-
             <div>
                 {renderPassport()}
                 {renderWorld()}
@@ -134,7 +131,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 const ConditionRow = ({ children, isMet }: { children: React.ReactNode; isMet: boolean }) => {
     return (
         <div className="flex items-center gap-3">
-            {isMet ? <Check className="w-[20px] h-[20px]" fill={"#0DA529"} /> : <Close className="w-[20px] h-[20px]" fill={"#BCBFCD"} />}
+            {isMet ? <Check className="w-[20px] h-[20px]" fill="#0DA529" /> : <Close className="w-[20px] h-[20px]" fill="#BCBFCD" />}
             <span>{children}</span>
         </div>
     )
