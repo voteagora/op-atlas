@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { getUserPOH } from "@/db/users"
-import { UserPOF } from "@/lib/types"
+import { UserPOH } from "@/lib/types"
 
 export const USER_POH_QUERY_KEY = "userPOH"
 
@@ -32,5 +32,5 @@ export const useUserPOH = ({
         return queryClient.invalidateQueries({ queryKey: [USER_POH_QUERY_KEY, id] })
     }
 
-    return { data: data as UserPOF[], isLoading, isSuccess, isError, invalidate }
+    return { data: data as UserPOH[], isLoading, isSuccess, isError, invalidate }
 } 
