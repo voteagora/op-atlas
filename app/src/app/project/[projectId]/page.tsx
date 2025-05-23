@@ -63,6 +63,7 @@ export default async function Page({ params }: PageProps) {
         avatarUrl: publicProject.organization.organization.avatarUrl,
         name: publicProject.organization.organization.name,
         farcasterHandle: "",
+        id: publicProject.organization.organization.id,
       }
     : {
         avatarUrl: publicProject.team?.[0]?.user.imageUrl,

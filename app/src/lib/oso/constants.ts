@@ -38,11 +38,7 @@ export const OSO_QUERY_DATES = {
 export const TRANCHE_MONTHS_MAP = {
   1: "February",
   2: "March",
-}
-
-export const OSO_QUERY_TRANCHE_CUTOFF_DATES = {
-  1: { start: "2025-02-11", end: "2025-03-11" },
-  2: { start: "2025-03-11", end: "2025-04-11" },
+  3: "April",
 }
 
 export const CHARTS_TRAILING_DAYS = 3

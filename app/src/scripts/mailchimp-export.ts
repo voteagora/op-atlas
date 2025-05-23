@@ -26,6 +26,25 @@ async function getLatestTranche(roundId: string) {
 
 async function exportEmailsToMailchimp() {
   const userEmails = await prisma.userEmail.findMany({
+    where: {
+      user: {
+        projects: {
+          some: {
+            deletedAt: null,
+            project: {
+              deletedAt: null,
+              applications: {
+                some: {
+                  createdAt: {
+                    lte: new Date("2025-03-25"),
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     select: {
       id: true,
       email: true,
@@ -150,13 +169,19 @@ async function exportEmailsToMailchimp() {
         if (devToolingRewardedData.names) {
           tags.push("Received rewards (dev tooling)")
         }
-        if (devToolingNotRewardedData.names) {
-          tags.push("Did not receive rewards (dev tooling)")
-        }
         if (onchainBuildersRewardedData.names) {
           tags.push("Received rewards (onchain builders)")
-        }
-        if (onchainBuildersNotRewardedData.names) {
+        } else if (
+          !onchainBuildersRewardedData.names &&
+          !devToolingRewardedData.names &&
+          devToolingNotRewardedData.names
+        ) {
+          tags.push("Did not receive rewards (dev tooling)")
+        } else if (
+          !onchainBuildersRewardedData.names &&
+          !devToolingRewardedData.names &&
+          onchainBuildersNotRewardedData.names
+        ) {
           tags.push("Did not receive rewards (onchain builders)")
         }
         return tags
@@ -297,6 +322,8 @@ async function exportEmailsToMailchimp() {
   try {
     for (let i = 0; i < batchMembers.length; i += BATCH_SIZE) {
       const batch = batchMembers.slice(i, i + BATCH_SIZE)
+
+      console.log("batch", batch)
 
       const res = await mailchimp.lists.batchListMembers(LIST_ID, {
         members: batch,

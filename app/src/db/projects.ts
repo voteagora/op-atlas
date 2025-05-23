@@ -454,8 +454,6 @@ async function getProjectFn({
           ELSE NULL
         END as "organization"
       FROM "Project" p
-      LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
-      LEFT JOIN "User" u ON t."userId" = u."id"
       LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
       LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
       LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
@@ -1962,6 +1960,7 @@ export const getPublicProject = cache(async (projectId: string) => {
         select: {
           organization: {
             select: {
+              id: true,
               name: true,
               avatarUrl: true,
               team: {

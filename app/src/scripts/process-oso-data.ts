@@ -588,8 +588,8 @@ const month = parseInt(parsedArgs.month, 10)
 const mission = parsedArgs.mission as Mission
 const reset = parsedArgs.reset === "true"
 
-if (isNaN(month) || month < 1 || month > 2) {
-  console.error(`${RED}Month must be either 1 or 2${RESET}`)
+if (isNaN(month) || month < 1) {
+  console.error(`${RED}Month must be greater than 0${RESET}`)
   process.exit(1)
 }
 

@@ -52,7 +52,7 @@ export const MISSIONS: MissionData[] = [
     ogDescription:
       "Retro Funding: Dev Tooling is distributing up to 8M OP in H1 2025. If you built tooling on Optimism, sign up to check if you qualify for grants.",
     status: "ongoing",
-    resultsLink: "/round/results/6",
+    resultsLink: "/round/results?rounds=7",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/dev-tooling.png",
     startsAt: new Date("2025-02-05T00:00:00.000Z"),
@@ -218,7 +218,7 @@ export const MISSIONS: MissionData[] = [
     ogDescription:
       "Retro Funding: Onchain Builders is allocating up to 8M OP in H1 2025. If you've built on Optimism, sign up to see if you qualify for grants.",
     status: "ongoing",
-    resultsLink: "/round/results/6",
+    resultsLink: "/round/results?rounds=8",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/onchain-builders.png",
     startsAt: new Date("2025-02-18T00:00:00.000Z"),
@@ -426,7 +426,7 @@ export const FUNDING_ROUNDS: FundingRoundData[] = [
     details:
       "Improving the capture resistance and resource allocation of Optimism Governance is the primary objective of this category. By incentivizing contributions that enhance governance tools, mechanisms, and processes, Retro Funding aims to foster a more robust and resilient governance framework within the ecosystem.",
     status: "past",
-    resultsLink: "/round/results/6",
+    resultsLink: "/round/results?rounds=6",
     accentColor: "#F0FFF1",
     iconUrl: "/assets/images/round-6.svg",
     startsAt: new Date("2024-09-26T21:53:13.300Z"),
@@ -441,7 +441,7 @@ export const FUNDING_ROUNDS: FundingRoundData[] = [
     details:
       "Round 5 will reward OP Stack contributions. This includes direct contributions to the OP Stack, as well as its key dependencies. The round will reward impact which has been generated between October 2023 - July 2024. Impact will be rewarded within the following three categories: Ethereum Core Contributions, OP Stack Research & Development, and OP Stack Tooling. ",
     status: "past",
-    resultsLink: "/round/results/5",
+    resultsLink: "/round/results?rounds=5",
     accentColor: "#FFF0F1",
     iconUrl: "/assets/images/round-5-transparent.svg",
     startsAt: new Date("2024-08-14T21:53:13.300Z"),
@@ -457,7 +457,7 @@ export const FUNDING_ROUNDS: FundingRoundData[] = [
       "This category will reward onchain builders who contribute to the success of Optimism. This round seeks to expand the...",
     status: "past",
     link: "/projects/new",
-    resultsLink: "/round/results/4",
+    resultsLink: "/round/results?rounds=4",
     accentColor: "#F0F4FF",
     iconUrl: "/assets/images/round-4.svg",
     startsAt: new Date("2024-05-14T21:53:13.300Z"),

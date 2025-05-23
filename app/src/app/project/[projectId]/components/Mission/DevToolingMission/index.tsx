@@ -82,10 +82,11 @@ export default function DevToolingMission({
           </div>
         </div>
       )}
-      <Tabs defaultValue={MONTHS[1]} className="w-full mt-12">
+      <Tabs defaultValue={MONTHS[2]} className="w-full mt-12">
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {MONTHS.map((month, index) => {
-            const isFutureMonth = month !== "February" && month !== "March"
+            const isFutureMonth =
+              month !== "February" && month !== "March" && month !== "April"
             return (
               <TabsTrigger
                 disabled={isFutureMonth}
