@@ -15,6 +15,7 @@ import {
   ProjectTeam,
   ProjectWithDetails,
   ProjectWithFullDetails,
+  ProjectWithReward,
   ProjectWithTeam,
   PublishedUserProjectsResult,
   TeamRole,
@@ -209,6 +210,34 @@ const getRandomProjectsFn = () => {
 }
 
 export const getRandomProjects = cache(getRandomProjectsFn)
+
+const getWeightedRandomGrantRecipientsFn = (): Promise<ProjectWithReward[]> => {
+  return prisma.$queryRaw<ProjectWithReward[]>`
+    SELECT 
+        p.id,
+        p.name,
+        p.description,
+        p."thumbnailUrl",
+        COALESCE(
+          jsonb_agg(
+            jsonb_build_object(
+              'id', fr.id,
+              'amount', fr.amount
+            )
+          ) FILTER (WHERE fr.id IS NOT NULL),
+          '[]'::jsonb
+        ) as rewards
+    FROM "Project" p
+    LEFT JOIN "FundingReward" fr ON p.id = fr."projectId"
+    GROUP BY p.id, p.name, p.description, p."thumbnailUrl", fr.amount
+    ORDER BY -log(RANDOM()) / SUM(fr.amount) OVER (PARTITION BY p.id)
+    LIMIT 4;
+  `
+}
+
+export const getWeightedRandomGrantRecipients = cache(
+  getWeightedRandomGrantRecipientsFn,
+)
 
 async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<

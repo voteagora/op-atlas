@@ -23,7 +23,7 @@ export const HomeHeader = () => {
           height={228} // 240px in design
         />
       </div>
-      <div className="text-sm text-center text-white bg-gradient-to-r from-brand-primary from-30% via-orange-500 via-85% to-text-destructive rounded-lg p-3">
+      <div className="text-sm text-center text-white bg-gradient-to-r from-brand-primary from-350% via-orange-500 via-75% to-text-destructive rounded-lg p-3">
         Optimism has rewarded <strong>500+</strong> builders with{" "}
         <strong>60,815,042 OP</strong> since 2022
       </div>
