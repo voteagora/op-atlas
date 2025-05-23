@@ -240,16 +240,16 @@ export default function ProjectDetailsForm({
         try {
           const [response, res] = project
             ? await Promise.all([
-              updateProjectDetails(project.id, newValues),
-              setProjectOrganization(
-                project.id,
-                project.organization?.organization?.id,
-                values.organization?.id,
-              ),
-            ])
+                updateProjectDetails(project.id, newValues),
+                setProjectOrganization(
+                  project.id,
+                  project.organization?.organization?.id,
+                  values.organization?.id,
+                ),
+              ])
             : await Promise.all([
-              createNewProject(newValues, values.organization?.id),
-            ])
+                createNewProject(newValues, values.organization?.id),
+              ])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")

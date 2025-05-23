@@ -20,7 +20,6 @@ export default async function Page({
     redirect("/login")
   }
 
-
   const project = await getKycTeamForProject({ projectId: params.projectId })
 
   const kycTeam = project?.kycTeam ?? undefined

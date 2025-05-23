@@ -23,7 +23,7 @@ export const POST = async (req: NextRequest) => {
     const { id: userId } = await upsertUser({ farcasterId })
     const project = await createNewProjectOnBehalf({ name }, userId)
 
-    if (!project || 'error' in project) {
+    if (!project || "error" in project) {
       return new Response("Failed to create project", { status: 500 })
     }
 

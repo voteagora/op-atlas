@@ -45,10 +45,7 @@ export const projectMembers = (project: ProjectWithDetails) => {
   ]
 }
 
-export const verifyMembership = async (
-  projectId: string,
-  userId: string,
-) => {
+export const verifyMembership = async (projectId: string, userId: string) => {
   const [projects, userProjectOrganizations] = await Promise.all([
     getUserProjects({ userId }),
     getUserProjectOrganizations(userId, projectId),
@@ -70,10 +67,7 @@ export const verifyMembership = async (
   return null
 }
 
-export const verifyAdminStatus = async (
-  projectId: string,
-  userId: string,
-) => {
+export const verifyAdminStatus = async (projectId: string, userId: string) => {
   const [projects, userProjectOrganizations] = await Promise.all([
     getUserProjects({ userId }),
     getUserProjectOrganizations(userId, projectId),

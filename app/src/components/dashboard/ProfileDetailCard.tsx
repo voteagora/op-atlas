@@ -69,8 +69,12 @@ const ProfileDetailCard = ({
       )
     } else {
       return (
-        <Link href="/profile/details" className="hover:underline flex items-center gap-x-0.5">
-          Add profile details <ArrowDropRight fill="#6B7280" className="text-muted-foreground" />
+        <Link
+          href="/profile/details"
+          className="hover:underline flex items-center gap-x-0.5"
+        >
+          Add profile details{" "}
+          <ArrowDropRight fill="#6B7280" className="text-muted-foreground" />
         </Link>
       )
     }

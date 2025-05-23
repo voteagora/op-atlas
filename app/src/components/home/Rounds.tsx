@@ -7,7 +7,6 @@ import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
 import { UserWithAddresses } from "@/lib/types"
 
 import { FeedbackButton } from "../common/FeedbackButton"
-import ExternalLink from "../ExternalLink"
 import { FundingRounds } from "./FundingRounds"
 import { Sidebar } from "./Sidebar"
 

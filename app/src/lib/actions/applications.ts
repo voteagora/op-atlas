@@ -75,10 +75,7 @@ const createProjectApplication = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(
-    applicationData.projectId,
-    userId,
-  )
+  const isInvalid = await verifyAdminStatus(applicationData.projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }

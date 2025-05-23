@@ -1,11 +1,17 @@
-import Image from "next/image"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
+import {
+  Discord,
+  Farcaster,
+  Github,
+  Optimism,
+} from "@/components/icons/socials"
 import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
+
 export default async function Page() {
   const session = await auth()
 
@@ -21,12 +27,7 @@ export default async function Page() {
         {/* Farcaster */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
-            <Image
-              src="/assets/icons/farcaster-icon.svg"
-              alt="Farcaster"
-              height={20}
-              width={20}
-            />
+            <Farcaster className="w-5 h-5" />
             <h3 className="font-semibold text-foreground">Farcaster</h3>
           </div>
           <div className="text-secondary-foreground mb-4">
@@ -41,12 +42,7 @@ export default async function Page() {
         {/* Discord */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
-            <Image
-              src="/assets/icons/discordIcon.svg"
-              alt="Discord"
-              height={20}
-              width={20}
-            />
+            <Discord className="w-5 h-5" />
             <h3 className="font-semibold text-foreground">Discord</h3>
           </div>
           <div className="text-secondary-foreground mb-4">
@@ -58,12 +54,7 @@ export default async function Page() {
         {/* Github */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
-            <Image
-              src="/assets/icons/githubIcon.svg"
-              alt="Github"
-              height={20}
-              width={20}
-            />
+            <Github className="w-5 h-5" />
             <h3 className="font-semibold text-foreground">Github</h3>
           </div>
           <div className="text-secondary-foreground mb-4">
@@ -76,12 +67,7 @@ export default async function Page() {
         {/* Gov Forum */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
-            <Image
-              src="/assets/icons/op-icon.svg"
-              alt="Gov Forum"
-              height={20}
-              width={20}
-            />
+            <Optimism className="w-5 h-5" fill="#FF0000" />
             <h3 className="font-semibold text-foreground">
               Collective Governance Forum
             </h3>
