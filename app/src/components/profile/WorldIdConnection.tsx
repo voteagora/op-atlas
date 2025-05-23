@@ -1,10 +1,10 @@
 "use client"
 
-import { IDKitWidget } from "@worldcoin/idkit"
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
+//import { IDKitWidget } from "@worldcoin/idkit"
+//import { useEffect, useState } from "react"
+//import { toast } from "sonner"
 
-import { useWorldIdVerification } from "@/hooks/useWorldIdVerification"
+//import { useWorldIdVerification } from "@/hooks/useWorldIdVerification"
 
 interface Props {
   userId: string
@@ -13,55 +13,58 @@ interface Props {
 }
 
 export function WorldConnection({ userId, children, className }: Props) {
-  const [isClient, setIsClient] = useState(false)
-  const [isVerified, setIsVerified] = useState(false)
-  const { isVerifying, error, verifyProof } = useWorldIdVerification()
 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  return <div>{children}</div>
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error.message)
-    }
-  }, [error])
+  // const [isClient, setIsClient] = useState(false)
+  // const [isVerified, setIsVerified] = useState(false)
+  // const { isVerifying, error, verifyProof } = useWorldIdVerification()
 
-  if (!isClient) {
-    return null
-  }
+  // useEffect(() => {
+  //   setIsClient(true)
+  // }, [])
 
-  const handleSuccess = async (proof: any) => {
-    const success = await verifyProof(proof)
-    if (success) {
-      setIsVerified(true)
-      toast.success("Successfully verified with World ID")
-    }
-  }
+  // useEffect(() => {
+  //   if (error) {
+  //     toast.error(error.message)
+  //   }
+  // }, [error])
 
-  return (
-    <IDKitWidget
-      app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID!}
-      action="atals-humanity-verification"
-      onSuccess={handleSuccess}
-    >
-      {({ open }: { open: () => void }) => (
-        <div
-          className={className}
-          onClick={open}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault()
-              open()
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label="Verify with World ID"
-        >
-          {children}
-        </div>
-      )}
-    </IDKitWidget>
-  )
+  // if (!isClient) {
+  //   return null
+  // }
+
+  // const handleSuccess = async (proof: any) => {
+  //   const success = await verifyProof(proof)
+  //   if (success) {
+  //     setIsVerified(true)
+  //     toast.success("Successfully verified with World ID")
+  //   }
+  // }
+
+  // return (
+  //   <IDKitWidget
+  //     app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID!}
+  //     action="atals-humanity-verification"
+  //     onSuccess={handleSuccess}
+  //   >
+  //     {({ open }: { open: () => void }) => (
+  //       <div
+  //         className={className}
+  //         onClick={open}
+  //         onKeyDown={(e) => {
+  //           if (e.key === "Enter" || e.key === " ") {
+  //             e.preventDefault()
+  //             open()
+  //           }
+  //         }}
+  //         role="button"
+  //         tabIndex={0}
+  //         aria-label="Verify with World ID"
+  //       >
+  //         {children}
+  //       </div>
+  //     )}
+  //   </IDKitWidget>
+  // )
 }

@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { IVerifyResponse, verifyCloudProof } from "@worldcoin/idkit"
+// import { IVerifyResponse, verifyCloudProof } from "@worldcoin/idkit"
 import { NextResponse } from "next/server"
 
 export const runtime = 'edge'
@@ -27,21 +27,21 @@ export async function POST(request: Request) {
       )
     }
 
-    const verifyRes = await verifyCloudProof(
-      proof,
-      app_id as `app_${string}`,
-      action,
-    ) as IVerifyResponse
+    // const verifyRes = await verifyCloudProof(
+    //   proof,
+    //   app_id as `app_${string}`,
+    //   action,
+    // ) as IVerifyResponse
 
-    if (verifyRes.success) {
-      return NextResponse.json({ success: true, message: "Proof verified" })
-    } else {
-      // TODO: Handle errors from the World ID /verify endpoint.
-      return NextResponse.json(
-        { success: false, message: "Proof not verified" },
-        { status: 400 }
-      )
-    }
+    // if (verifyRes.success) {
+    //   return NextResponse.json({ success: true, message: "Proof verified" })
+    // } else {
+    //   // TODO: Handle errors from the World ID /verify endpoint.
+    //   return NextResponse.json(
+    //     { success: false, message: "Proof not verified" },
+    //     { status: 400 }
+    //   )
+    // }
   } catch (error) {
     console.error("Error verifying World ID proof:", error)
     return NextResponse.json(
