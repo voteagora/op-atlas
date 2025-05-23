@@ -2,11 +2,11 @@
 
 import { usePrivy } from "@privy-io/react-auth"
 
-import { AddressConnection } from "@/components/profile/AddressConnection"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { UserAddressSource } from "@/lib/types"
 
+import { Button } from "@/components/common/Button"
 import { VerifiedAddress } from "./verified-address"
 
 interface AddressData {
@@ -26,7 +26,7 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
   const { user: privyUser } = usePrivy()
   const { user } = useUser({ id: userId, enabled: !!userId })
 
-  const { unlinkWallet } = usePrivyLinkWallet(userId)
+  const { unlinkWallet, linkWallet } = usePrivyLinkWallet(userId)
 
   const privyWallets = (privyUser?.linkedAccounts?.filter(
     (account) => account.type === "wallet" && account.chainType === "ethereum",
@@ -105,9 +105,9 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
 
       {user && (
         <div className="flex items-center gap-2">
-          <AddressConnection userId={user.id}>
+          <Button variant="primary" onClick={() => linkWallet()}>
             Verify {Boolean(user?.addresses.length) && "another "}address
-          </AddressConnection>
+          </Button>
         </div>
       )}
     </div>

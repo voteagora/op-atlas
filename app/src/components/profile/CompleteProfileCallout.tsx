@@ -12,17 +12,17 @@ import {
 } from "@/lib/types"
 import { profileProgress } from "@/lib/utils"
 
+import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 import { Badge } from "../common/Badge"
+import { Button } from "../common/Button"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion"
-import { AddressConnection } from "./AddressConnection"
 import { EmailConnection } from "./EmailConnection"
 import { GithubConnection } from "./GithubConnection"
-import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 
 export function CompleteProfileCallout({
   user: initialUser,
@@ -184,7 +184,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
 }
 
 function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
-  const { unlinkWallet } = usePrivyLinkWallet(user.id)
+  const { unlinkWallet, linkWallet } = usePrivyLinkWallet(user.id)
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">
@@ -214,7 +214,9 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
           </div>
 
           {user.addresses.length === 0 && (
-            <AddressConnection userId={user.id}>Add address</AddressConnection>
+            <Button variant="primary" onClick={() => linkWallet()}>
+              Add address
+            </Button>
           )}
 
           {user.addresses.length >= 1 && (
@@ -235,9 +237,9 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
                   />
                 ))}
               </div>
-              <AddressConnection userId={user.id}>
+              <Button variant="primary" onClick={() => linkWallet()}>
                 Add another address
-              </AddressConnection>
+              </Button>
             </div>
           )}
         </div>
