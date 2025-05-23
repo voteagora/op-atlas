@@ -1,5 +1,8 @@
 "use client"
 
+import { UserAddress } from "@prisma/client"
+import Link from "next/link"
+
 import { Check, Close } from "@/components/icons/reminx"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
 import { useUser } from "@/hooks/db/useUser"
@@ -10,8 +13,6 @@ import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { useRefreshPassport } from "@/hooks/useRefreshPassport"
 import { UserPOH } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
-import { UserAddress } from "@prisma/client"
-import Link from "next/link"
 
 const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
 
@@ -35,20 +36,28 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
         if (email) {
             return (
                 <ConditionRow isMet={true}>
-                    You've added email in Atlas:{" "}
+                    You&apos;ve added email in Atlas:{" "}
                     <span className="font-semibold">{email.email}</span> |{" "}
-                    <div className={LINK_STYLE} onClick={() => updateEmail()}>
+                    <button
+                        className={LINK_STYLE}
+                        onClick={() => updateEmail()}
+                        onKeyDown={(e) => e.key === "Enter" && updateEmail()}
+                    >
                         Edit
-                    </div>
+                    </button>
                 </ConditionRow>
             )
         } else {
             return (
                 <ConditionRow isMet={false}>
-                    You've added email in Atlas |{" "}
-                    <div className={LINK_STYLE} onClick={() => linkEmail()}>
+                    You&apos;ve added email in Atlas |{" "}
+                    <button
+                        className={LINK_STYLE}
+                        onClick={() => linkEmail()}
+                        onKeyDown={(e) => e.key === "Enter" && linkEmail()}
+                    >
                         Add your email
-                    </div>
+                    </button>
                 </ConditionRow>
             )
         }
@@ -61,7 +70,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
         if (govAddress) {
             return (
                 <ConditionRow isMet={true}>
-                    You've added a governance address in Atlas:{" "}
+                    You&apos;ve added a governance address in Atlas:{" "}
                     <span className="font-semibold">
                         {truncateAddress(govAddress.address as string)}
                     </span>{" "}
@@ -76,7 +85,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
         if (connectedAddress) {
             return (
                 <ConditionRow isMet={false}>
-                    You've added a governance address in Atlas |{" "}
+                    You&apos;ve added a governance address in Atlas |{" "}
                     <Link href="/profile/verified-addresses" className={LINK_STYLE}>
                         Set {truncateAddress(connectedAddress.address as string)} as
                         Governance Address
@@ -87,10 +96,14 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
             // If a user does not have a connected address
             return (
                 <ConditionRow isMet={false}>
-                    You've added a governance address in Atlas |{" "}
-                    <div className={LINK_STYLE} onClick={() => linkWallet()}>
+                    You&apos;ve added a governance address in Atlas |{" "}
+                    <button
+                        className={LINK_STYLE}
+                        onClick={() => linkWallet()}
+                        onKeyDown={(e) => e.key === "Enter" && linkWallet()}
+                    >
                         Add your address
-                    </div>
+                    </button>
                 </ConditionRow>
             )
         }
@@ -101,11 +114,15 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
         if (user?.github) {
             return (
                 <ConditionRow isMet={true}>
-                    You've connected your GitHub account in Atlas:{" "}
+                    You&apos;ve connected your GitHub account in Atlas:{" "}
                     <span className="font-semibold">@{user?.github}</span> |{" "}
-                    <div className={LINK_STYLE} onClick={() => unlinkGithub()}>
+                    <button
+                        className={LINK_STYLE}
+                        onClick={() => unlinkGithub()}
+                        onKeyDown={(e) => e.key === "Enter" && unlinkGithub()}
+                    >
                         Disconnect
-                    </div>
+                    </button>
                 </ConditionRow>
             )
         } else {
@@ -113,27 +130,43 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
             if (user?.notDeveloper) {
                 return (
                     <ConditionRow isMet={true}>
-                        You've identified yourself as not a developer in Atlas |{" "}
-                        <div className={LINK_STYLE} onClick={() => linkGithub()}>
+                        You&apos;ve identified yourself as not a developer in Atlas |{" "}
+                        <button
+                            className={LINK_STYLE}
+                            onClick={() => linkGithub()}
+                            onKeyDown={(e) => e.key === "Enter" && linkGithub()}
+                        >
                             Connect GitHub
-                        </div>{" "}
+                        </button>{" "}
                         |{" "}
-                        <div className={LINK_STYLE} onClick={() => toggleIsDeveloper()}>
-                            I'm a developer
-                        </div>
+                        <button
+                            className={LINK_STYLE}
+                            onClick={() => toggleIsDeveloper()}
+                            onKeyDown={(e) => e.key === "Enter" && toggleIsDeveloper()}
+                        >
+                            I&apos;m a developer
+                        </button>
                     </ConditionRow>
                 )
             } else {
                 return (
                     <ConditionRow isMet={false}>
-                        You've connected your GitHub account in Atlas |{" "}
-                        <div className={LINK_STYLE} onClick={() => linkGithub()}>
+                        You&apos;ve connected your GitHub account in Atlas |{" "}
+                        <button
+                            className={LINK_STYLE}
+                            onClick={() => linkGithub()}
+                            onKeyDown={(e) => e.key === "Enter" && linkGithub()}
+                        >
                             Connect GitHub
-                        </div>{" "}
+                        </button>{" "}
                         |{" "}
-                        <div className={LINK_STYLE} onClick={() => toggleIsDeveloper()}>
-                            I'm not a developer
-                        </div>
+                        <button
+                            className={LINK_STYLE}
+                            onClick={() => toggleIsDeveloper()}
+                            onKeyDown={(e) => e.key === "Enter" && toggleIsDeveloper()}
+                        >
+                            I&apos;m not a developer
+                        </button>
                     </ConditionRow>
                 )
             }
@@ -166,9 +199,13 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
                         {Number(passport?.sourceMeta?.score).toFixed(2)}
                     </span>{" "}
                     |{" "}
-                    <div className={LINK_STYLE} onClick={() => refreshPassport()}>
+                    <button
+                        className={LINK_STYLE}
+                        onClick={() => refreshPassport()}
+                        onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
+                    >
                         Refresh
-                    </div>
+                    </button>
                 </ConditionRow>
             )
         }
@@ -196,9 +233,13 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
                 <ConditionRow isMet={false}>
                     Verify your Gitcoin Passport:{" "}
                     {truncateAddress(govAddress.address as string)} |{" "}
-                    <div className={LINK_STYLE} onClick={() => refreshPassport()}>
+                    <button
+                        className={LINK_STYLE}
+                        onClick={() => refreshPassport()}
+                        onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
+                    >
                         Verify
-                    </div>
+                    </button>
                 </ConditionRow>
             )
         }
@@ -214,14 +255,13 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const renderWorld = () => {
         if (worldCondition) {
             return (
-                <ConditionRow isMet={true}>
-                    You've connected your World ID
-                </ConditionRow>
+                <ConditionRow isMet={true}>You&apos;ve connected your World ID</ConditionRow>
             )
         } else {
             return (
                 <ConditionRow isMet={false}>
-                    Connect your World ID. <WorldConnection userId={userId} className={LINK_STYLE}>
+                    Connect your World ID.{" "}
+                    <WorldConnection userId={userId} className={LINK_STYLE}>
                         Connect with Worldchain
                     </WorldConnection>
                 </ConditionRow>

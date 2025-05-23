@@ -1,9 +1,10 @@
 "use client"
 
-import { useWorldIdVerification } from "@/hooks/useWorldIdVerification"
 import { IDKitWidget } from "@worldcoin/idkit"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+
+import { useWorldIdVerification } from "@/hooks/useWorldIdVerification"
 
 interface Props {
   userId: string
@@ -45,7 +46,19 @@ export function WorldConnection({ userId, children, className }: Props) {
       onSuccess={handleSuccess}
     >
       {({ open }: { open: () => void }) => (
-        <div className={className} onClick={open}>
+        <div
+          className={className}
+          onClick={open}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              open()
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Verify with World ID"
+        >
           {children}
         </div>
       )}

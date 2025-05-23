@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { CitizenshipEligibility } from "@/app/citizenship/enroll/components/CitizenshipEligibility"
@@ -15,7 +16,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { getUserById } from "@/db/users"
-import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Citizenship Registration",
@@ -70,7 +70,7 @@ export default async function Page() {
               <div className="flex flex-col gap-y-12 text-secondary-foreground">
                 <div className="flex flex-col gap-y-6">
                   <div>
-                    The Citizens' House votes on decisions that shape the
+                    The Citizens&apos; House votes on decisions that shape the
                     direction of the Collective.
                   </div>
                   <div>Season 8 Citizens will:</div>

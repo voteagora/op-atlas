@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
@@ -12,7 +13,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { getUserById } from "@/db/users"
-import Link from "next/link"
+
 import { sharedMetadata } from "../shared-metadata"
 
 export const metadata: Metadata = {
@@ -61,7 +62,7 @@ export default async function Page() {
                 <div className="flex flex-col gap-y-6">
                   <div>
                     As a Citizen, your project will help guide the future of the
-                    Superchain. The Citizens' House votes on decisions that
+                    Superchain. The Citizens&apos; House votes on decisions that
                     shape the technology, funding, and direction of the
                     Collective.
                   </div>
@@ -99,13 +100,13 @@ export default async function Page() {
                     contributed by Superchain members in the last Season
                   </li>
                   <li>
-                    You've added email in Atlas.{" "}
+                    You&apos;ve added email in Atlas.{" "}
                     <Link href="/profile/details" className="underline">
                       Add your email
                     </Link>
                   </li>
                   <li>
-                    You've added a governance address in Atlas.{" "}
+                    You&apos;ve added a governance address in Atlas.{" "}
                     <Link
                       href="/profile/verified-addresses"
                       className="underline"

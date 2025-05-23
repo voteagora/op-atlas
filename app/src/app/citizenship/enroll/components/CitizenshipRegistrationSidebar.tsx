@@ -1,9 +1,10 @@
 "use client"
 
+import { User } from "@prisma/client"
+
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import { Button } from "@/components/ui/button"
 import { useCitizenshipRequirements } from "@/hooks/useCitizenshipRequirements"
-import { User } from "@prisma/client"
 
 export const CitizenshipRegistrationSidebar = ({ user }: { user: User }) => {
   const isEligible = useCitizenshipRequirements({ id: user.id })
