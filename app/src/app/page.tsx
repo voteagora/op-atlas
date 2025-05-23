@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 
-import { Rounds } from "@/components/rounds/Rounds"
+import { Home } from "@/components/home/Home"
 
 import { sharedMetadata } from "./shared-metadata"
 
@@ -17,6 +17,6 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function Home() {
-  return <Rounds />
+export default async function Page() {
+  return <Home />
 }
