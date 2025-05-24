@@ -5,8 +5,8 @@ import { Button } from "../ui/button"
 
 export const GetHelpFooter = () => {
   return (
-    <div className="flex items-center justify-between gap-8 bg-secondary rounded-lg p-8">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col md:flex-row items-center justify-between gap-8 bg-secondary rounded-lg p-8">
+      <div className="flex flex-col md:flex-row items-center gap-4">
         <Image
           src="/assets/images/thinking-emoji-animated.gif"
           alt="OP"
