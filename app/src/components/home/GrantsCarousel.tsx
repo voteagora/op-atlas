@@ -52,7 +52,7 @@ export const GrantsCarousel = () => {
       {grants.map((grant, index) => (
         <div
           key={grant.title}
-          className="border-b md:border-b-0 md:border-r last:border-r-0"
+          className="md:border-b md:border-b-0 md:border-r last:border-r-0"
         >
           <GrantContainer {...grant} />
         </div>
