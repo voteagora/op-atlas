@@ -229,6 +229,7 @@ const getWeightedRandomGrantRecipientsFn = (): Promise<ProjectWithReward[]> => {
         ) as rewards
     FROM "Project" p
     LEFT JOIN "FundingReward" fr ON p.id = fr."projectId"
+    WHERE fr."roundId"::NUMERIC > 6
     GROUP BY p.id, p.name, p.description, p."thumbnailUrl", fr.amount
     ORDER BY -log(RANDOM()) / SUM(fr.amount) OVER (PARTITION BY p.id)
     LIMIT 4;
