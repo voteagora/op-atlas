@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { Rounds } from "@/components/home/Rounds"
+import { Rounds } from "@/components/rounds/Rounds"
 import { getUserById } from "@/db/users"
 import { updateInteractions } from "@/lib/actions/users"
 

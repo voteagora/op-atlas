@@ -17,6 +17,21 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
   }
 }>
 
+export type ProjectWithReward = Prisma.ProjectGetPayload<{
+  include: {
+    id: true
+    name: true
+    description: true
+    thumbnailUrl: true
+    rewards: {
+      select: {
+        id: true
+        amount: true
+      }
+    }
+  }
+}>
+
 export type ProjectTeam = {
   id: string
   role: TeamRole
