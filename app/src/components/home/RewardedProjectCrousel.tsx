@@ -3,6 +3,8 @@ import { getWeightedRandomGrantRecipients } from "@/db/projects"
 import { RewardedProjectContainer } from "./RewardedProjectContainer"
 import Image from "next/image"
 
+export const revalidate = 60 // 1 minute
+
 export const RewardedProjectCrousel = async () => {
   const projects = await getWeightedRandomGrantRecipients()
 
