@@ -36,7 +36,7 @@ export const dropdownList = [
 const Navbar = () => {
   const pathname = usePathname()
   const params = useParams()
-  const isRounds = pathname === "/" || pathname === "/missions"
+  const isRounds = pathname === "/missions"
   const isProjects = pathname.includes("/round/")
 
   const isMissions = pathname.includes("/missions")
@@ -66,7 +66,7 @@ const Navbar = () => {
                 <AlignJustify className="block sm:hidden" />
               )}
             </button>
-            <Link href="/missions" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <Image
                 src="/assets/images/logo.svg"
                 height={24}
