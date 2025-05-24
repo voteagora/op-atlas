@@ -67,7 +67,7 @@ export const createProjectSnapshot = async (projectId: string) => {
       createProjectMetadataAttestations({
         project,
         ipfsHash,
-        farcasterId: session.user.farcasterId,
+        farcasterId: session?.user?.farcasterId || "0",
         unpublishedContractChanges,
       }),
       unpublishContracts(
