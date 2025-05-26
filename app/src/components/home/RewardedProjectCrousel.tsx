@@ -1,7 +1,9 @@
+import Image from "next/image"
+
 import { getWeightedRandomGrantRecipients } from "@/db/projects"
 
+import TrackedLink from "../common/TrackedLink"
 import { RewardedProjectContainer } from "./RewardedProjectContainer"
-import Image from "next/image"
 
 export const revalidate = 60 // 1 minute
 
@@ -19,8 +21,12 @@ export const RewardedProjectCrousel = async () => {
         ))}
       </div>
       <div className="flex flex-col gap-2 items-center">
-        <a
+        <TrackedLink
           href="/round/results?rounds=7,8"
+          eventName="see_all_rewarded_projects_link_clicked"
+          eventData={{
+            source: "home_page",
+          }}
           className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/80 transition-colors text-sm w-fit"
         >
           See all
@@ -30,7 +36,7 @@ export const RewardedProjectCrousel = async () => {
             width={20}
             height={20}
           />
-        </a>
+        </TrackedLink>
       </div>
     </div>
   )

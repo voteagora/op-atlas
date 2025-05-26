@@ -2,7 +2,8 @@ import Image from "next/image"
 
 import { ProjectWithReward } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
-import Link from "next/link"
+
+import TrackedLink from "../common/TrackedLink"
 
 type RewardedProjectContainerProps = {
   project: ProjectWithReward
@@ -17,7 +18,15 @@ export const RewardedProjectContainer = ({
   )
 
   return (
-    <Link href={`/project/${project.id}`} className="group">
+    <TrackedLink
+      href={`/project/${project.id}`}
+      className="group"
+      eventName="rewarded_project_link_clicked"
+      eventData={{
+        source: "home_page",
+        project_id: project.id,
+      }}
+    >
       <div className="h-[316px] flex flex-col justify-between border border-border rounded-lg p-6 gap-6 overflow-hidden">
         <div className="flex flex-col justify-top gap-6">
           <Image
@@ -28,12 +37,12 @@ export const RewardedProjectContainer = ({
             height={64}
           />
           <div>
-            <text className="font-semibold overflow-none line-clamp-1 group-hover:underline">
+            <p className="font-semibold overflow-none line-clamp-1 group-hover:underline text-base">
               {project.name}
-            </text>
-            <text className="text-secondary-foreground line-clamp-4">
+            </p>
+            <p className="text-secondary-foreground line-clamp-4 text-sm">
               {project.description}
-            </text>
+            </p>
           </div>
         </div>
         <div className="w-fit bg-red-100 rounded-2xl px-3 py-1 flex items-center gap-2">
@@ -49,6 +58,6 @@ export const RewardedProjectContainer = ({
           </p>
         </div>
       </div>
-    </Link>
+    </TrackedLink>
   )
 }

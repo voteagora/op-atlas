@@ -1,4 +1,5 @@
 import Image from "next/image"
+import TrackedLink from "../common/TrackedLink"
 
 type GrantContainerProps = {
   title: string
@@ -27,11 +28,19 @@ export const GrantContainer = ({
       </p>
       <div className="flex flex-col gap-2 pt-4">
         {links.map((link) => (
-          <a
+          <TrackedLink
             key={link.label}
             href={link.url}
+            eventName="grant_link_clicked"
+            eventData={{
+              source: "home_page",
+              grant_title: title,
+              grant_link: link.label,
+              category: title,
+            }}
             className="flex items-center justify-between border border-border px-4 py-3 rounded-lg hover:bg-destructive hover:text-white transition-colors text-sm"
           >
+            {/* <div> */}
             {link.label}
             <Image
               src="/assets/icons/arrow-right-s-line.svg"
@@ -39,7 +48,8 @@ export const GrantContainer = ({
               width={20}
               height={20}
             />
-          </a>
+            {/* </div> */}
+          </TrackedLink>
         ))}
       </div>
     </div>
