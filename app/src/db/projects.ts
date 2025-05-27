@@ -1006,17 +1006,8 @@ export async function addProjectContracts(
 ) {
   const createOperations = contracts.map(async (contract) => {
     try {
-      const result = await prisma.projectContract.upsert({
-        where: {
-          contractAddress_chainId: {
-            contractAddress: contract.contractAddress,
-            chainId: contract.chainId,
-          },
-        },
-        update: {
-          projectId,
-        },
-        create: {
+      const result = await prisma.projectContract.create({
+        data: {
           ...contract,
           contractAddress: getAddress(contract.contractAddress),
           deployerAddress: getAddress(contract.deployerAddress),
