@@ -12,6 +12,7 @@ import {
   removeProjectContract,
   removeProjectContractsByDeployer,
   updateProjectContract,
+  upsertProjectContracts,
 } from "@/db/projects"
 import { getDeployedContractsServerParsed } from "@/lib/oso"
 
@@ -340,7 +341,7 @@ export const addAllExcludedProjectContractsAction = async (
   })
 
   try {
-    await addProjectContracts(
+    await upsertProjectContracts(
       projectId,
       excludedContracts.map((c) => ({
         contractAddress: c.contractAddress,

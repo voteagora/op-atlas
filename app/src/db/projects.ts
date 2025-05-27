@@ -1042,6 +1042,53 @@ export async function addProjectContracts(
   }
 }
 
+export async function upsertProjectContracts(
+  projectId: string,
+  contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
+) {
+  const createOperations = contracts.map(async (contract) => {
+    try {
+      const result = await prisma.projectContract.upsert({
+        where: {
+          contractAddress_chainId: {
+            contractAddress: getAddress(contract.contractAddress),
+            chainId: contract.chainId,
+          },
+        },
+        update: {
+          projectId,
+        },
+        create: {
+          ...contract,
+          contractAddress: getAddress(contract.contractAddress),
+          deployerAddress: getAddress(contract.deployerAddress),
+        },
+      })
+      return { success: true, data: result }
+    } catch (error) {
+      console.error(`Failed to create contract:`, error)
+      return { success: false, data: contract, error }
+    }
+  })
+  const results = await Promise.all(createOperations)
+  const createdContracts = {
+    succeeded: results.filter((r) => r.success).map((r) => r.data),
+    failed: results.filter((r) => !r.success).map((r) => r.data),
+  }
+  await prisma.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      lastMetadataUpdate: new Date(),
+    },
+  })
+  return {
+    createdContracts: createdContracts.succeeded,
+    failedContracts: createdContracts.failed,
+  }
+}
+
 export async function addProjectContract({
   projectId,
   contract,
