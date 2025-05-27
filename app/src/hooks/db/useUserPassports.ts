@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { getUserPOH } from "@/db/users"
-import { UserPOH } from "@/lib/types"
+import { getUserPassports } from "@/db/users"
+import { UserPassport } from "@prisma/client"
 
-export const USER_POH_QUERY_KEY = "userPOH"
+export const USER_PASSPORT_QUERY_KEY = "userPassport"
 
-export const useUserPOH = ({
+export const useUserPassports = ({
     id,
     enabled,
 }: {
@@ -18,19 +18,18 @@ export const useUserPOH = ({
     const isEnabled = id ? enabled ?? true : false
 
     const { data, isLoading, isSuccess, isError } = useQuery({
-        queryKey: [USER_POH_QUERY_KEY, id],
+        queryKey: [USER_PASSPORT_QUERY_KEY, id],
         queryFn: async () => {
             if (!id) throw new Error("User ID is required")
-            return await getUserPOH(id)
+            return await getUserPassports(id)
         },
         enabled: isEnabled,
-        staleTime: 1000 * 60 * 10, // 10 minutes
     })
 
     const invalidate = () => {
         if (!id) return Promise.resolve()
-        return queryClient.invalidateQueries({ queryKey: [USER_POH_QUERY_KEY, id] })
+        return queryClient.invalidateQueries({ queryKey: [USER_PASSPORT_QUERY_KEY, id] })
     }
 
-    return { data: data as UserPOH[], isLoading, isSuccess, isError, invalidate }
+    return { data: data as UserPassport[], isLoading, isSuccess, isError, invalidate }
 } 

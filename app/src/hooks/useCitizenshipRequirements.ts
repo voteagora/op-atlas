@@ -1,21 +1,21 @@
 "use client"
 
 import { useUser } from "@/hooks/db/useUser"
-import { useUserPOH } from "@/hooks/db/useUserPOH"
-import { UserPOH } from "@/lib/types"
+import { useUserPassports } from "@/hooks/db/useUserPassports"
+import { UserPassport } from "@prisma/client"
 
 export const useCitizenshipRequirements = ({ id }: { id: string }) => {
     const { user } = useUser({ id })
-    const { data: pohData } = useUserPOH({ id })
+    const { data: passports } = useUserPassports({ id })
 
-    if (!user || !pohData) {
+    if (!user || !passports) {
         return false
     }
 
     const email = user?.emails?.[0]
     const govAddress = user?.addresses?.find((addr) => addr.primary)
-    const passport = pohData?.find((poh: UserPOH) => poh.source === "passport")
-    const validPassport = Boolean(passport && passport.sourceMeta?.score > passport.sourceMeta?.threshold)
+    const passport = passports?.find((passport: UserPassport) => Number(passport.score) >= 20.0)
+    const validPassport = Boolean(passport)
 
     return Boolean(email && (user?.github || user?.notDeveloper) && govAddress && validPassport)
 }

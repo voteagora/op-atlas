@@ -7,13 +7,15 @@ import { mainnet } from "viem/chains"
 
 import { auth } from "@/auth"
 import {
+  getUserById,
   searchByAddress,
   searchByEmail,
   searchUsersByUsername,
   updateUser,
   updateUserInteraction,
-  getUserById,
-  upsertUserPOH
+  upsertUserPassport,
+  deleteUserPassport,
+  getUserPassports,
 } from "@/db/users"
 
 const client = createPublicClient({
@@ -167,11 +169,9 @@ export const refreshUserPassport = async () => {
     }
   }
 
-  const primaryAddress = user.addresses.find(addr => addr.primary)
-
-  if (!primaryAddress) {
+  if (!user.addresses || user.addresses.length === 0) {
     return {
-      error: "Primary address is required",
+      error: "No addresses found",
     }
   }
 
@@ -184,45 +184,54 @@ export const refreshUserPassport = async () => {
     }
   }
 
-  try {
-    const response = await fetch(
-      `https://api.passport.xyz/v2/stamps/${scorerId}/score/${primaryAddress.address}`,
-      {
-        headers: {
-          'X-API-KEY': apiKey,
+  // Delete existing passport records for addresses that are no longer associated with the user
+  const existingPassports = await getUserPassports(userId)
+  const currentAddresses = new Set(user.addresses.map(addr => addr.address))
+  for (const passport of existingPassports) {
+    if (!currentAddresses.has(passport.address)) {
+      await deleteUserPassport(passport.id)
+    }
+  }
+
+  const errors = []
+
+  for (const address of user.addresses) {
+    try {
+      const response = await fetch(
+        `https://api.passport.xyz/v2/stamps/${scorerId}/score/${address.address}`,
+        {
+          headers: {
+            'X-API-KEY': apiKey,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        const error = await response.text()
+        errors.push(`Error for address ${address.address}: ${error}`)
+        continue
+      }
+
+      const data = await response.json()
+
+      await upsertUserPassport({
+        userId,
+        passport: {
+          score: Number(data.score),
+          address: address.address,
+          expiresAt: new Date(data.expiration_timestamp),
         },
-      }
-    )
+      })
 
-    if (!response.ok) {
-      const error = await response.text()
-      return {
-        error: `Passport API error: ${error}`,
-      }
+    } catch (error) {
+      console.error(`Error fetching Passport score for address ${address.address}:`, error)
+      errors.push(`Error for address ${address.address}: Internal server error`)
     }
+  }
 
-    const data = await response.json()
-
-    // Store the Passport verification data
-    await upsertUserPOH({
-      userId,
-      verification: {
-        source: 'passport',
-        sourceId: primaryAddress.address,
-        expiresAt: new Date(data.expiration_timestamp),
-        sourceMeta: data,
-      },
-    })
-
-    return {
-      error: null,
-      data,
-    }
-  } catch (error) {
-    console.error('Error fetching Passport score:', error)
-    return {
-      error: "Internal server error",
-    }
+  return {
+    error: errors.length > 0 ? errors.join(', ') : null,
+    success: errors.length === 0
   }
 }
 

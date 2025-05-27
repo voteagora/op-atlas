@@ -367,17 +367,6 @@ export type ExtendedAggregatedType = AggregatedType & {
   github_repo_builders: { address: string; email?: string }[]
 }
 
-export type UserPOH = {
-  id: number
-  userId: string
-  source: 'world' | 'passport'
-  sourceId: string | null
-  sourceMeta: Record<string, any> | null
-  createdAt: Date
-  updatedAt: Date
-  expiresAt: Date | null
-}
-
 export interface PassportScore {
   score: string
   passing_score: boolean

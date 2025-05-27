@@ -6,6 +6,7 @@ import {
   UserAddress,
   UserEmail,
   UserInteraction,
+  UserPassport
 } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 
@@ -17,10 +18,8 @@ import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
 
 import { auth } from "@/auth"
 import { generateTemporaryUsername } from "@/lib/utils/username"
+import { getAddress, isAddress } from "viem"
 import { prisma } from "./client"
-import { isAddress } from "viem"
-import { getAddress } from "viem"
-import { UserPOH } from "../lib/types"
 
 export type Entity = keyof ExtendedAggregatedType
 export type EntityObject = {
@@ -967,76 +966,59 @@ export async function createUser(privyDid: string) {
   })
 }
 
-export async function upsertUserPOH({
+export async function upsertUserPassport({
   userId,
-  verification,
+  passport,
 }: {
   userId: string
-  verification: {
-    source: 'world' | 'passport'
-    sourceId?: string
-    sourceMeta?: any
-    expiresAt?: Date
+  passport: {
+
+    score: number
+    expiresAt: Date
+    address: string
   }
 }) {
-
-  // Check if a verification of that source already exists
-  const existingVerification = await prisma.userPOF.findFirst({
+  // Check if a passport for that address already exists
+  const existingPassport = await prisma.userPassport.findFirst({
     where: {
       userId,
-      source: verification.source,
+      address: passport.address,
     },
   })
 
-  let safeMeta: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput = Prisma.DbNull;
-
-  if (verification.sourceMeta !== undefined) {
-    if (typeof verification.sourceMeta === "string") {
-      try {
-        safeMeta = JSON.parse(verification.sourceMeta);
-      } catch {
-        safeMeta = verification.sourceMeta;
-      }
-    } else {
-      safeMeta = verification.sourceMeta;
-    }
-  }
-
-  // Delete existing record
-  if (existingVerification) {
-    await prisma.userPOF.delete({
+  // Delete existing record if it exists
+  if (existingPassport) {
+    await prisma.userPassport.delete({
       where: {
-        id: existingVerification.id,
+        id: existingPassport.id,
       }
     })
   }
 
   // Create new record
-  return prisma.userPOF.create({
+  return prisma.userPassport.create({
     data: {
       userId,
-      source: verification.source,
-      sourceId: verification.sourceId,
-      sourceMeta: safeMeta,
-      expiresAt: verification.expiresAt,
-    } as Prisma.UserPOFUncheckedCreateInput,
+      score: passport.score,
+      address: passport.address,
+      expiresAt: passport.expiresAt,
+    },
+  },
+  )
+}
+
+
+
+export async function getUserPassports(userId: string): Promise<UserPassport[]> {
+  return prisma.userPassport.findMany({
+    where: {
+      userId,
+    },
   })
 }
 
-export async function getUserPOH(userId: string): Promise<UserPOH[]> {
-
-  const result = await prisma.$queryRaw<UserPOH[]>`
-    SELECT 
-      id,
-      "userId",
-      "source",
-      "sourceId",
-      "sourceMeta",
-      "createdAt",
-      "updatedAt",
-      "expiresAt"
-    FROM "UserPOF"
-    WHERE "userId" = ${userId}
-  `
-  return result
+export async function deleteUserPassport(id: number) {
+  return prisma.userPassport.delete({
+    where: { id },
+  })
 }
