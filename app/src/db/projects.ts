@@ -1042,39 +1042,6 @@ export async function addProjectContracts(
   }
 }
 
-export async function addProjectContrats(
-  projectId: string,
-  contracts: {
-    contractAddress: string
-    chainId: number
-    deployerAddress: string
-    deploymentHash: string
-    verificationChainId: number
-    verificationProof: string
-  }[],
-) {
-  await prisma.projectContract.createMany({
-    data: contracts.map((c) => ({
-      projectId,
-      contractAddress: c.contractAddress,
-      chainId: c.chainId,
-      deployerAddress: c.deployerAddress,
-      deploymentHash: c.deploymentHash,
-      verificationChainId: c.verificationChainId,
-      verificationProof: c.verificationProof,
-    })),
-  })
-
-  await prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
-  })
-}
-
 export async function addProjectContract({
   projectId,
   contract,

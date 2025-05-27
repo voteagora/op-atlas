@@ -3,18 +3,17 @@
 import { revalidatePath } from "next/cache"
 import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
-import { getDeployedContractsServerParsed } from "@/lib/oso"
 import { auth } from "@/auth"
 import {
   addProjectContract,
   addProjectContracts,
-  addProjectContrats,
   getProjectContracts,
   getProjectContractsByDeployer,
   removeProjectContract,
   removeProjectContractsByDeployer,
   updateProjectContract,
 } from "@/db/projects"
+import { getDeployedContractsServerParsed } from "@/lib/oso"
 
 import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"
@@ -112,6 +111,8 @@ export const verifyContract = async ({
     projectId,
     deployerAddress,
   })
+
+  console.log("existingContracts", existingContracts)
 
   // If the contract is already verified, return
   if (
@@ -339,7 +340,7 @@ export const addAllExcludedProjectContractsAction = async (
   })
 
   try {
-    await addProjectContrats(
+    await addProjectContracts(
       projectId,
       excludedContracts.map((c) => ({
         contractAddress: c.contractAddress,
