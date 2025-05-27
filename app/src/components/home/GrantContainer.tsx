@@ -31,11 +31,11 @@ export const GrantContainer = ({
           <TrackedLink
             key={link.label}
             href={link.url}
-            eventName="grant_link_clicked"
+            eventName="Link Click"
             eventData={{
               source: "home_page",
-              grant_title: title,
-              grant_link: link.label,
+              linkName: link.label,
+              linkUrl: link.url,
               category: title,
             }}
             className="flex items-center justify-between border border-border px-4 py-3 rounded-lg hover:bg-destructive hover:text-white transition-colors text-sm"

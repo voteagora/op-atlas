@@ -23,9 +23,11 @@ export const RewardedProjectCrousel = async () => {
       <div className="flex flex-col gap-2 items-center">
         <TrackedLink
           href="/round/results?rounds=7,8"
-          eventName="see_all_rewarded_projects_link_clicked"
+          eventName="Link Click"
           eventData={{
             source: "home_page",
+            linkName: "See all rewarded projects",
+            linkUrl: "/round/results?rounds=7,8",
           }}
           className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/80 transition-colors text-sm w-fit"
         >

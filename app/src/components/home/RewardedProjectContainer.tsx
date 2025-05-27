@@ -21,10 +21,12 @@ export const RewardedProjectContainer = ({
     <TrackedLink
       href={`/project/${project.id}`}
       className="group"
-      eventName="rewarded_project_link_clicked"
+      eventName="Link Click"
       eventData={{
         source: "home_page",
-        project_id: project.id,
+        projectId: project.id,
+        linkName: "Rewarded Project",
+        linkUrl: `/project/${project.id}`,
       }}
     >
       <div className="h-[316px] flex flex-col justify-between border border-border rounded-lg p-6 gap-6 overflow-hidden">
