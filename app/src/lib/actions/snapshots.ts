@@ -13,8 +13,8 @@ import {
   revokePublishedContracts,
   updateAllForProject,
 } from "@/db/projects"
-
 import { getUserById } from "@/db/users"
+
 import {
   createFullProjectSnapshotAttestations,
   createOrganizationMetadataAttestation,

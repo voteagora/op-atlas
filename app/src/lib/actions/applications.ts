@@ -75,10 +75,7 @@ const createProjectApplication = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(
-    applicationData.projectId,
-    userId,
-  )
+  const isInvalid = await verifyAdminStatus(applicationData.projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -197,7 +194,7 @@ export const submitApplications = async (
   for (const project of projects) {
     const result = await createProjectApplication(
       project,
-      session.user.farcasterId,
+      session.user?.farcasterId ?? 0,
       roundNumber,
       categories?.find((category) => category.id === project.categoryId)!,
       roundName,
