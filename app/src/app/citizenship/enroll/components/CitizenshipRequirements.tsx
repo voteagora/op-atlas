@@ -3,14 +3,13 @@
 import { Check, Close } from "@/components/icons/reminx"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
 import { useUser } from "@/hooks/db/useUser"
-import { useUserPOH } from "@/hooks/db/useUserPOH"
+import { useUserPassports } from "@/hooks/db/useUserPassports"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { useRefreshPassport } from "@/hooks/useRefreshPassport"
-import { UserPOH } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
-import { UserAddress } from "@prisma/client"
+import { UserAddress, UserPassport } from "@prisma/client"
 import Link from "next/link"
 
 const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
@@ -18,7 +17,7 @@ const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
 export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 
     const { user } = useUser({ id: userId })
-    const { data: pohData } = useUserPOH({ id: userId })
+    const { data: userPassports } = useUserPassports({ id: userId })
     const { linkEmail, updateEmail } = usePrivyEmail(userId)
     const { refreshPassport } = useRefreshPassport(userId)
     const { linkWallet } = usePrivyLinkWallet(userId)
@@ -27,7 +26,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const email = user?.emails?.[0];
 
     const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
-    const worldCondition = Boolean(pohData?.some((poh: UserPOH) => poh.source === "world"))
+    // const worldCondition = Boolean(pohData?.some((poh: UserPOH) => poh.source === "world"))
 
     const renderEmail = () => {
         if (email) {
@@ -46,7 +45,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
         }
         // If user has a connected address but didn't set it as governance address
         if (connectedAddress) {
-            return <ConditionRow isMet={false}>You've added a governance address in Atlas | <Link href="/profile/verified-addresses" className={LINK_STYLE}>Set {truncateAddress(connectedAddress.address as string)} as Governance Address</Link></ConditionRow>
+            return <ConditionRow isMet={false}>You've added a governance address in Atlas | <Link href="/profile/verified-addresses" className={LINK_STYLE}>Set {truncateAddress(connectedAddress.address as string)}</Link> as Governance Address</ConditionRow>
         } else {
             // If a user does not have a connected address
             return <ConditionRow isMet={false}>You've added a governance address in Atlas | <div className={LINK_STYLE} onClick={() => linkWallet()}>Add your address</div></ConditionRow>
@@ -71,22 +70,21 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 
     const renderPassport = () => {
 
-        if (!pohData) {
+        if (!userPassports) {
             return null
         }
 
-        const passport = pohData?.find((poh: UserPOH) => poh.source === "passport")
-        const validPassport = Boolean(passport && passport.sourceMeta?.score > passport.sourceMeta?.threshold)
-        const invalidPassport = Boolean(passport && passport.sourceMeta?.score <= passport.sourceMeta?.threshold)
+        const passport = userPassports.find((passport: UserPassport) => Number(passport.score) >= 20.0)
+        const invalidPassport = userPassports.length > 0 && !passport
 
         // Passport verified
-        if (validPassport) {
-            return <ConditionRow isMet={true}>Passport <span className="font-semibold">{truncateAddress(passport?.sourceId as string)}</span> verified! Your score is <span className="font-semibold">{Number(passport?.sourceMeta?.score).toFixed(2)}</span> | <div className={LINK_STYLE} onClick={() => refreshPassport()}>Refresh</div></ConditionRow>
+        if (passport) {
+            return <ConditionRow isMet={true}>Passport <span className="font-semibold">{truncateAddress(passport?.address as string)}</span> verified! Your score is <span className="font-semibold">{Number(passport?.score).toFixed(2)}</span> | <div className={LINK_STYLE} onClick={() => refreshPassport()}>Refresh</div></ConditionRow>
         }
 
         // Passport score below threshold
         if (invalidPassport) {
-            return <ConditionRow isMet={false}>Passport score is below threshold. Verify {truncateAddress(passport?.sourceId as string)} on <Link href="https://app.passport.xyz" target="_blank" className={LINK_STYLE}>passport.xyz</Link></ConditionRow>
+            return <ConditionRow isMet={false}>Low passport score. Verify one of your addresses on <Link href="https://app.passport.xyz" target="_blank" className={LINK_STYLE}>passport.xyz</Link> then <div className={LINK_STYLE} onClick={() => refreshPassport()}>refresh</div>.</ConditionRow>
         }
 
         // Verify passport
@@ -100,11 +98,11 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 
 
     const renderWorld = () => {
-        if (worldCondition) {
-            return <ConditionRow isMet={false}>Connect your World ID. Connect with Worldchain</ConditionRow>
-        } else {
-            return <ConditionRow isMet={true}>You've connected your World ID. <WorldConnection userId={userId} className={LINK_STYLE}>Connect with Worldchain</WorldConnection></ConditionRow>
-        }
+        // if (worldCondition) {
+        //     return <ConditionRow isMet={false}>Connect your World ID. Connect with Worldchain</ConditionRow>
+        // } else {
+        return <ConditionRow isMet={true}>You've connected your World ID. <WorldConnection userId={userId} className={LINK_STYLE}>Connect with Worldchain</WorldConnection></ConditionRow>
+        // }
     }
 
     return (
