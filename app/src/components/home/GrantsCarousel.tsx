@@ -13,7 +13,7 @@ const grants = [
       },
       {
         label: "Grants Council Missions",
-        url: "/",
+        url: "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
       },
     ],
   },
