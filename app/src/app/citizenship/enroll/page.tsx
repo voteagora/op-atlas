@@ -63,7 +63,7 @@ export default async function Page() {
                         <div className="border-b border-border-secondary w-full"></div>
                         <div className="flex flex-col gap-y-12 text-secondary-foreground">
                             <div className="flex flex-col gap-y-6">
-                                <div>The Citizens' House votes on decisions that shape the direction of the Collective.</div>
+                                <div>The Citizens&apos; House votes on decisions that shape the direction of the Collective.</div>
                                 <div>Season 8 Citizens will:</div>
                                 <ul className="list-disc list-inside">
                                     <li>Elect the Developer <span className="font-semibold">Advisory Board</span>, tasked with reviewing <span className="font-semibold">Protocol Upgrades</span></li>
