@@ -33,7 +33,7 @@ function CitizenshipGovernanceCommitmentDialog({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
-                <div className="flex flex-col gap-4 w-full mt-2">
+                <div className="flex flex-col gap-4 w-full">
                     <div className="font-semibold text-center">
                         How many hours per week would you like to spend on governance?
                     </div>
