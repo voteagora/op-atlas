@@ -11,8 +11,6 @@ export default class Tenant {
   private readonly _namespace: TenantNamespace
 
   private constructor() {
-    console.log("Tenant namespace: ", process.env.NEXT_PUBLIC_TENANT_NAMESPACE)
-
     this._namespace = process.env
       .NEXT_PUBLIC_TENANT_NAMESPACE as TenantNamespace
     this._isProd = process.env.PUBLIC_AGORA_ENV === "prod"

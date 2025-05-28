@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation"
-import { auth } from "@/auth"
-import { getPublicProjectAction } from "@/lib/actions/projects"
-import { getProjectMetrics } from "@/lib/oso"
+import styles from "@/app/proposals/proposalPage.module.scss"
 import Markdown from "@/components/common/Markdown/Markdown"
 
 function stripTitleFromDescription(title: string, description: string) {
@@ -31,7 +29,17 @@ const Page = (params: PageProps) => {
 
   return (
     <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12">
-      <Markdown content={stripTitleFromDescription("", "")} />
+      <div className="flex justify-between mt-12">
+        <div className="flex flex-col">
+          <div className="flex gap-8 lg:gap-16 justify-between items-start max-w-[76rem] flex-col md:flex-row md:items-start md:justify-between">
+            <div className={styles.proposal_description_md}>
+              <Markdown
+                content={stripTitleFromDescription("# Title", "Description")}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   )
 }
