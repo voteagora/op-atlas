@@ -1,14 +1,14 @@
 "use client"
 
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { useSession } from "next-auth/react"
 
 import { DeleteKYCTeamDialog } from "../projects/rewards/DeleteKYCTeamDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
+import GovernanceAddressDialog from "./CitizenshipGovernanceAddressDialog"
+import CitizenshipGovernanceCommitmentDialog from "./CitizenshipGovernanceCommitmentDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
-import GovernanceAddressDialog from "./GovernanceAddressDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
@@ -47,10 +47,10 @@ export default function AppDialogs() {
           onOpenChange={onOpenChange("governance_testimonial_request")}
         />
       )}
-      {openDialog === "governance_address" && data.userId && (
+      {openDialog === "citizenship_governance_address" && data.userId && (
         <GovernanceAddressDialog
           open
-          onOpenChange={onOpenChange("governance_address")}
+          onOpenChange={onOpenChange("citizenship_governance_address")}
           userId={data.userId}
         />
       )}
@@ -79,6 +79,12 @@ export default function AppDialogs() {
         <ImportFromFarcasterDialog
           open
           onOpenChange={onOpenChange("import_from_farcaster")}
+        />
+      )}
+      {openDialog === "citizenship_governance_commitment" && (
+        <CitizenshipGovernanceCommitmentDialog
+          open
+          onOpenChange={onOpenChange("citizenship_governance_commitment")}
         />
       )}
     </>

@@ -52,8 +52,8 @@ export function DialogProvider({ children }: PropsWithChildren) {
 
   const handleSetOpenDialog: Dispatch<SetStateAction<DialogType | undefined>> = (value) => {
     const newType = typeof value === 'function' ? value(openDialog) : value
-    if (newType === "governance_address" && !data.userId) {
-      console.warn("Cannot open governance_address dialog without userId")
+    if (newType === "citizenship_governance_address" && !data.userId) {
+      console.warn("Cannot open citizenship_governance_address dialog without userId")
       return
     }
     setOpenDialog(newType)

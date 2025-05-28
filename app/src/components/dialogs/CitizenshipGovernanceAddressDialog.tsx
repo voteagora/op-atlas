@@ -6,14 +6,14 @@ import { useUser } from "@/hooks/db/useUser"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { UserAddressSource } from "@/lib/types"
 
-interface GovernanceAddressDialogProps extends DialogProps<object> {
+interface CitizenshipGovernanceAddressDialog extends DialogProps<object> {
   userId: string
 }
 
 function GovernanceAddressDialog({
   userId,
   ...props
-}: GovernanceAddressDialogProps) {
+}: CitizenshipGovernanceAddressDialog) {
   const { user } = useUser({
     id: userId,
     enabled: true,
