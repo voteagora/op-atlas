@@ -54,8 +54,7 @@ function CitizenshipGovernanceCommitmentDialog({
                     </Select>
                     <Button
                         onClick={() => { }}
-                        type="button"
-                        variant="destructive"
+                        className="button-primary"
                         disabled={!selectedTime}
                     >
                         Continue
