@@ -5,6 +5,7 @@ import Link from "next/link"
 
 import { Check, Close } from "@/components/icons/reminx"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
+import { useAppDialogs } from "@/providers/DialogProvider"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
@@ -22,9 +23,15 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const { refreshPassport } = useRefreshPassport(userId)
     const { linkWallet } = usePrivyLinkWallet(userId)
     const { linkGithub, unlinkGithub, toggleIsDeveloper } = usePrivyLinkGithub(userId)
+    const { setOpenDialog, setData } = useAppDialogs()
 
     const email = user?.emails?.[0]
     const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
+
+    const openGovernanceAddressDialog = () => {
+        setData({ userId })
+        setOpenDialog("governance_address")
+    }
 
     const renderEmail = () => {
         if (email) {
@@ -65,9 +72,14 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
                 <ConditionRow isMet={true}>
                     You&apos;ve added a governance address in Atlas:{" "}
                     <span className="font-semibold">{truncateAddress(govAddress.address as string)}</span> |{" "}
-                    <Link href="/profile/verified-addresses" className={LINK_STYLE}>
+                    <button
+                        type="button"
+                        className={LINK_STYLE}
+                        onClick={openGovernanceAddressDialog}
+                        onKeyDown={(e) => e.key === "Enter" && openGovernanceAddressDialog()}
+                    >
                         Edit
-                    </Link>
+                    </button>
                 </ConditionRow>
             )
         }
@@ -76,9 +88,14 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
             return (
                 <ConditionRow isMet={false}>
                     You&apos;ve added a governance address in Atlas |{" "}
-                    <Link href="/profile/verified-addresses" className={LINK_STYLE}>
+                    <button
+                        type="button"
+                        className={LINK_STYLE}
+                        onClick={openGovernanceAddressDialog}
+                        onKeyDown={(e) => e.key === "Enter" && openGovernanceAddressDialog()}
+                    >
                         Set {truncateAddress(connectedAddress.address as string)}
-                    </Link>{" "}
+                    </button>{" "}
                     as Governance Address
                 </ConditionRow>
             )
