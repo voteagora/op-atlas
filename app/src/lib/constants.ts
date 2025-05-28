@@ -216,3 +216,19 @@ export const OSO_METRICS = {
   onchainBuilderReward: ["R6eoyOPpiinCi8etN5D/qzAGcOxs8caCXTBrPCUarw4="],
   devToolingReward: ["0dWueJWVz1tnXyCQv+vPE9IqED5s1uD3ag2VEA4CDAw="],
 }
+
+export const TENANT_NAMESPACES = {
+  ENS: "ens",
+  ETHERFI: "etherfi",
+  OPTIMISM: "optimism",
+  UNISWAP: "uniswap",
+  CYBER: "cyber",
+  SCROLL: "scroll",
+  DERIVE: "derive",
+  PGUILD: "pguild",
+  BOOST: "boost",
+  XAI: "xai",
+  B3: "b3",
+  DEMO: "demo",
+  LINEA: "linea",
+} as const
