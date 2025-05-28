@@ -255,14 +255,14 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
     const renderCommitment = () => {
         return (
             <ConditionRow isMet={false}>
-                Governance commitment |{" "}
+                Governance time commitment |{" "}
                 <button
                     type="button"
                     className={LINK_STYLE}
                     onClick={() => setOpenDialog("citizenship_governance_commitment")}
                     onKeyDown={(e) => e.key === "Enter" && setOpenDialog("citizenship_governance_commitment")}
                 >
-                    Commit
+                    Specify
                 </button>
             </ConditionRow>
         )
