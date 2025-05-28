@@ -30,7 +30,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 
     const openGovernanceAddressDialog = () => {
         setData({ userId })
-        setOpenDialog("governance_address")
+        setOpenDialog("citizenship_governance_address")
     }
 
     const renderEmail = () => {
