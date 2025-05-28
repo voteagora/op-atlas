@@ -9,7 +9,7 @@ const grants = [
     links: [
       {
         label: "Retro Funding",
-        url: "/rounds",
+        url: "/missions/retro-funding-onchain-builders",
       },
       {
         label: "Grants Council Missions",
@@ -25,7 +25,7 @@ const grants = [
     links: [
       {
         label: "Retro Funding",
-        url: "/rounds",
+        url: "/missions/retro-funding-dev-tooling",
       },
       {
         label: "Foundation Missions",
