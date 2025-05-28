@@ -28,7 +28,7 @@ function GovernanceAddressDialog({
   return (
     <Dialog {...props}>
       <DialogContent className="max-w-md max-h-[80vh]">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2 text-center">
             <div className="font-semibold">Governance Wallet</div>
             <div className="text-sm text-muted-foreground">
@@ -52,8 +52,7 @@ function GovernanceAddressDialog({
 
           <Button
             onClick={() => linkWallet()}
-            type="button"
-            variant="destructive"
+            className="button-primary w-full"
           >
             Add another wallet
           </Button>
