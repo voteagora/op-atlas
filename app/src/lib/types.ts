@@ -1,5 +1,6 @@
 import { Prisma, User } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
+import { TENANT_NAMESPACES } from "@/lib/constants"
 
 export type TeamRole = "member" | "admin"
 
@@ -380,4 +381,60 @@ export interface ProjectContractsByDeployer {
 export type ExtendedAggregatedType = AggregatedType & {
   contributors: { address: string; email?: string }[]
   github_repo_builders: { address: string; email?: string }[]
+}
+
+export type TenantNamespace =
+  (typeof TENANT_NAMESPACES)[keyof typeof TENANT_NAMESPACES]
+
+export type TenantToken = {
+  name: string
+  symbol: string
+  decimals: number
+  address: string
+}
+
+export enum ProposalStage {
+  DRAFTING = "drafting",
+  AWAITING_SUBMISSION = "awaiting_submission",
+  PENDING = "pending",
+  QUEUED = "queued",
+  EXECUTED = "executed",
+}
+
+type TenantProposalLifecycleStage = {
+  stage: ProposalStage
+  order: number
+  isPreSubmission: boolean
+  config?: any
+}
+
+export enum ProposalGatingType {
+  MANAGER = "manager",
+  TOKEN_THRESHOLD = "token threshold",
+  GOVERNOR_V1 = "governor v1",
+}
+
+export type PLMConfig = {
+  // the stages of the proposal lifecycle that
+  // this tenant wants to use
+  stages: TenantProposalLifecycleStage[]
+  // We can read proposal type from the governor
+  // but others might be desired, like snapshot
+  proposalTypes: any[]
+  // custom copy for the proposal lifecycle feature
+  copy: any
+  // optional config for including snapshot as a proposal type
+  snapshotConfig?: {
+    domain: string
+    requiredTokens: number
+  }
+  // The method for gating who can create a proposal
+  // Manager -- only the manager can create proposals
+  // Token Threshold -- a certain amount of tokens must be held
+  // OZ (ENS, UNI): Token threshold
+  // Agora gov 0.1 (OP): manager
+  // Agora gov 1.0+ (everyone else): manager or voting threshold
+  gatingType: ProposalGatingType
+  // Whether to show the create proposal button conditionally with a check
+  protocolLevelCreateProposalButtonCheck?: boolean
 }
