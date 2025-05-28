@@ -235,3 +235,20 @@ export const refreshUserPassport = async () => {
   }
 }
 
+export const getCitizenshipEligibility = async () => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  return {
+    isEligible: true
+  }
+}
+
+
+

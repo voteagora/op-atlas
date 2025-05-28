@@ -21,10 +21,6 @@ function GovernanceAddressDialog({
 
   const { linkWallet } = usePrivyLinkWallet(userId)
 
-  if (!user) {
-    return null
-  }
-
   return (
     <Dialog {...props}>
       <DialogContent className="max-w-md max-h-[80vh]">
@@ -37,7 +33,7 @@ function GovernanceAddressDialog({
           </div>
 
           <div className="flex flex-col gap-2 text-center">
-            {user.addresses.map(({ address, source, primary }) => (
+            {user?.addresses.map(({ address, source, primary }) => (
               <PrimaryAddress
                 key={address}
                 address={address}
