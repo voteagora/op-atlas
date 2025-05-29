@@ -28,6 +28,12 @@ const Page = (params: PageProps) => {
     status: "Nominations [Start Date] - [End Date]",
     description:
       "# Developer Advisory Board: Audit Request Team\n\nDescription",
+    votingCardProps: {
+      cardText: {
+        title: "Title",
+        description: "Description",
+      },
+    },
   }
 
   return (
@@ -45,8 +51,10 @@ const Page = (params: PageProps) => {
               />
             </div>
             <div className="w-full md:w-[304px] md:ml-12">
-              {/* ProposalVotesCard would go here if implemented */}
-              <VotingSidebar className="sticky top-4" />
+              <VotingSidebar
+                className="sticky top-4"
+                votingCardProps={mock.votingCardProps}
+              />
             </div>
           </div>
         </div>
