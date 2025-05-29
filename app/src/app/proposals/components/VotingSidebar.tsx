@@ -1,7 +1,11 @@
 import React from 'react';
 
-const VotingSidebar = () => (
-  <div className="flex flex-col gap-4"></div>
+interface VotingSidebarProps {
+  className?: string;
+}
+
+const VotingSidebar = ({ className = '' }: VotingSidebarProps) => (
+  <div className={`flex flex-col gap-4 ${className}`}></div>
 );
 
 export default VotingSidebar;
