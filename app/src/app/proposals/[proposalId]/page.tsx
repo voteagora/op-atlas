@@ -1,15 +1,9 @@
 import { notFound } from "next/navigation"
-import styles from "@/app/proposals/proposalPage.module.scss"
-import Markdown from "@/components/common/Markdown/Markdown"
-import { describe } from "node:test"
-
-function stripTitleFromDescription(title: string, description: string) {
-  if (description.startsWith(`# ${title}`)) {
-    const newDescription = description.slice(`# ${title}`.length).trim()
-    return newDescription
-  }
-  return description
-}
+import Breadcrumbs from "@/app/proposals/components/Breadcrumbs"
+import ProposalTitle from "@/app/proposals/components/ProposalTitle"
+import ProposalStatus from "@/app/proposals/components/ProposalStatus"
+import ProposalDescription from "@/app/proposals/components/ProposalDescription"
+import VotingSidebar from "@/app/proposals/components/VotingSidebar"
 
 interface PageProps {
   params: {
@@ -50,22 +44,5 @@ const Page = (params: PageProps) => {
   )
 }
 
-const Breadcrumbs = ({ value }: { value: string }) => (
-  <div className="flex gap-4">{value}</div>
-)
-const ProposalTitle = ({ title }: { title: string }) => (
-  <div className="text-h2">{title}</div>
-)
-const ProposalStatus = ({ status }: { status: string }) => (
-  <div className="text-h2">{status}</div>
-)
-const ProposalDescription = ({ description }: { description: string }) => (
-  <div className="flex gap-8 lg:gap-16 justify-between items-start max-w-[76rem] flex-col md:flex-row md:items-start md:justify-between">
-    <div className={styles.proposal_description_md}>
-      <Markdown content={stripTitleFromDescription("# Title", "Description")} />
-    </div>
-  </div>
-)
-const VotingSidebar = () => <div className="flex flex-col gap-4"></div>
 
 export default Page
