@@ -29,6 +29,7 @@ model User {
   organizations      UserOrganization[]
   projects           UserProjects[]
   passports          UserPassport[]
+  citizen            Citizen?
 
   @@index([username])
   @@index([farcasterId])
@@ -650,4 +651,17 @@ enum ProjectOSOMetric {
   DEVELOPER_CONNECTION_COUNT
   TRUSTED_DEVELOPER_USERNAME
   DOWNSTREAM_GAS
+}
+
+model Citizen {
+  id            Int      @id @default(autoincrement())
+  userId        String   @unique
+  address       String?  @unique
+  attestationId String?
+  timeCommitment String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
