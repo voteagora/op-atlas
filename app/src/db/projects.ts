@@ -4,7 +4,10 @@ import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
 
-import { Oso_ProjectsByCollectionV1, Oso_ProjectsV1 } from "@/graphql/__generated__/types"
+import {
+  Oso_ProjectsByCollectionV1,
+  Oso_ProjectsV1,
+} from "@/graphql/__generated__/types"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -12,6 +15,7 @@ import {
   ProjectTeam,
   ProjectWithDetails,
   ProjectWithFullDetails,
+  ProjectWithReward,
   ProjectWithTeam,
   PublishedUserProjectsResult,
   TeamRole,
@@ -206,6 +210,34 @@ const getRandomProjectsFn = () => {
 }
 
 export const getRandomProjects = cache(getRandomProjectsFn)
+
+const getWeightedRandomGrantRecipientsFn = (): Promise<ProjectWithReward[]> => {
+  return prisma.$queryRaw<ProjectWithReward[]>`
+    SELECT 
+        p.id,
+        p.name,
+        p.description,
+        p."thumbnailUrl",
+        COALESCE(
+          jsonb_agg(
+            jsonb_build_object(
+              'id', fr.id,
+              'amount', fr.amount
+            )
+          ) FILTER (WHERE fr.id IS NOT NULL),
+          '[]'::jsonb
+        ) as rewards
+    FROM "Project" p
+    LEFT JOIN "FundingReward" fr ON p.id = fr."projectId" AND fr."roundId"::NUMERIC > 6
+    GROUP BY p.id, p.name, p.description, p."thumbnailUrl"
+    ORDER BY -log(RANDOM()) / COALESCE(SUM(fr.amount), 1) ASC
+    LIMIT 4;
+  `
+}
+
+export const getWeightedRandomGrantRecipients = cache(
+  getWeightedRandomGrantRecipientsFn,
+)
 
 async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<
@@ -451,8 +483,6 @@ async function getProjectFn({
           ELSE NULL
         END as "organization"
       FROM "Project" p
-      LEFT JOIN "UserProjects" t ON p."id" = t."projectId"
-      LEFT JOIN "User" u ON t."userId" = u."id"
       LEFT JOIN "ProjectRepository" r ON p."id" = r."projectId"
       LEFT JOIN "ProjectLinks" l ON p."id" = l."projectId"
       LEFT JOIN "ProjectFunding" f ON p."id" = f."projectId"
@@ -781,36 +811,36 @@ export async function createProject({
           },
           ...(organizationId
             ? await prisma.userOrganization
-              .findMany({
-                where: { organizationId, deletedAt: null },
-                select: { userId: true },
-              })
-              .then((members) =>
-                members
-                  .filter((member) => member.userId !== userId)
-                  .map((member) => ({
-                    role: "member",
+                .findMany({
+                  where: { organizationId, deletedAt: null },
+                  select: { userId: true },
+                })
+                .then((members) =>
+                  members
+                    .filter((member) => member.userId !== userId)
+                    .map((member) => ({
+                      role: "member",
 
-                    user: {
-                      connect: {
-                        id: member.userId,
+                      user: {
+                        connect: {
+                          id: member.userId,
+                        },
                       },
-                    },
-                  })),
-              )
+                    })),
+                )
             : []),
         ],
       },
       organization: organizationId
         ? {
-          create: {
-            organization: {
-              connect: {
-                id: organizationId,
+            create: {
+              organization: {
+                connect: {
+                  id: organizationId,
+                },
               },
             },
-          },
-        }
+          }
         : undefined,
     },
   })
@@ -1005,17 +1035,8 @@ export async function addProjectContracts(
 ) {
   const createOperations = contracts.map(async (contract) => {
     try {
-      const result = await prisma.projectContract.upsert({
-        where: {
-          contractAddress_chainId: {
-            contractAddress: contract.contractAddress,
-            chainId: contract.chainId,
-          },
-        },
-        update: {
-          projectId,
-        },
-        create: {
+      const result = await prisma.projectContract.create({
+        data: {
           ...contract,
           contractAddress: getAddress(contract.contractAddress),
           deployerAddress: getAddress(contract.deployerAddress),
@@ -1050,29 +1071,39 @@ export async function addProjectContracts(
   }
 }
 
-export async function addProjectContrats(
+export async function upsertProjectContracts(
   projectId: string,
-  contracts: {
-    contractAddress: string
-    chainId: number
-    deployerAddress: string
-    deploymentHash: string
-    verificationChainId: number
-    verificationProof: string
-  }[],
+  contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
 ) {
-  await prisma.projectContract.createMany({
-    data: contracts.map((c) => ({
-      projectId,
-      contractAddress: c.contractAddress,
-      chainId: c.chainId,
-      deployerAddress: c.deployerAddress,
-      deploymentHash: c.deploymentHash,
-      verificationChainId: c.verificationChainId,
-      verificationProof: c.verificationProof,
-    })),
+  const createOperations = contracts.map(async (contract) => {
+    try {
+      const result = await prisma.projectContract.upsert({
+        where: {
+          contractAddress_chainId: {
+            contractAddress: getAddress(contract.contractAddress),
+            chainId: contract.chainId,
+          },
+        },
+        update: {
+          projectId,
+        },
+        create: {
+          ...contract,
+          contractAddress: getAddress(contract.contractAddress),
+          deployerAddress: getAddress(contract.deployerAddress),
+        },
+      })
+      return { success: true, data: result }
+    } catch (error) {
+      console.error(`Failed to create contract:`, error)
+      return { success: false, data: contract, error }
+    }
   })
-
+  const results = await Promise.all(createOperations)
+  const createdContracts = {
+    succeeded: results.filter((r) => r.success).map((r) => r.data),
+    failed: results.filter((r) => !r.success).map((r) => r.data),
+  }
   await prisma.project.update({
     where: {
       id: projectId,
@@ -1081,6 +1112,10 @@ export async function addProjectContrats(
       lastMetadataUpdate: new Date(),
     },
   })
+  return {
+    createdContracts: createdContracts.succeeded,
+    failedContracts: createdContracts.failed,
+  }
 }
 
 export async function addProjectContract({
@@ -1505,20 +1540,20 @@ export async function createApplication({
       },
       category: categoryId
         ? {
-          connect: {
-            id: categoryId,
-          },
-        }
+            connect: {
+              id: categoryId,
+            },
+          }
         : undefined,
       impactStatementAnswer: {
         createMany: {
           data: impactStatement
             ? Object.entries(impactStatement).map(
-              ([impactStatementId, answer]) => ({
-                impactStatementId,
-                answer,
-              }),
-            )
+                ([impactStatementId, answer]) => ({
+                  impactStatementId,
+                  answer,
+                }),
+              )
             : [],
         },
       },
@@ -1959,6 +1994,7 @@ export const getPublicProject = cache(async (projectId: string) => {
         select: {
           organization: {
             select: {
+              id: true,
               name: true,
               avatarUrl: true,
               team: {

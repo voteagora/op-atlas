@@ -28,6 +28,15 @@ if (!isServer) {
     track_pageview: true,
     persistence: "localStorage",
     ignore_dnt: true,
+    // @ts-expect-error autocapture is not typed
+    autocapture: {
+      pageview: "full-url",
+      click: true,
+      input: true,
+      scroll: true,
+      submit: true,
+      capture_text_content: false,
+    },
   })
 }
 
