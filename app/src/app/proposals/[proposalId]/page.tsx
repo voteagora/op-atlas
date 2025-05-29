@@ -30,8 +30,9 @@ const Page = (params: PageProps) => {
       "# Developer Advisory Board: Audit Request Team\n\nDescription",
     votingCardProps: {
       cardText: {
-        title: "Title",
-        description: "Description",
+        title: "It's time to vote",
+        description:
+          "This election uses approval voting, meaning voter can approve more than one candidate.",
       },
       cardActions: {
         cardActionList: [
