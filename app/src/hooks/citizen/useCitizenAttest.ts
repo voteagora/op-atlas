@@ -17,7 +17,7 @@ export const useCitizenAttest = (userId: string) => {
         await attestCitizen()
         await invalidate()
         toast.dismiss(loadingToast)
-        toast.success("You&apos;re ready to vote!")
+        toast.success("You are ready to vote!")
       } catch (error) {
         toast.error("Failed to issue citizen badge")
       }

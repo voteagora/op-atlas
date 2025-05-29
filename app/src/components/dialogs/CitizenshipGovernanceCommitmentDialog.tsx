@@ -1,76 +1,74 @@
 "use client"
 
+import { useSession } from "next-auth/react"
 import { memo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select"
+import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
 
 import { DialogProps } from "./types"
-import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
-import { useSession } from "next-auth/react"
 
 const TIME_COMMITMENT_OPTIONS = [
-    "Less than 1 hour",
-    "1-5 hours",
-    "5-10 hours",
-    "10-20 hours",
-    "More than 20 hours",
+  "Less than 1 hour",
+  "1-5 hours",
+  "5-10 hours",
+  "10-20 hours",
+  "More than 20 hours",
 ] as const
 
 type TimeCommitment = (typeof TIME_COMMITMENT_OPTIONS)[number]
 
 function CitizenshipGovernanceCommitmentDialog({
-    open,
-    onOpenChange,
+  open,
+  onOpenChange,
 }: DialogProps<object>) {
+  const { data: session } = useSession()
+  const userId = session?.user?.id ?? ""
 
-    const { data: session } = useSession()
-    const userId = session?.user?.id ?? ""
+  const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>()
+  const { updateCitizen } = useCitizenUpdate(userId)
 
-
-    const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>()
-    const { updateCitizen } = useCitizenUpdate(userId)
-
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
-                <div className="flex flex-col gap-4 w-full">
-                    <div className="font-semibold text-center">
-                        How many hours per week would you like to spend on governance?
-                    </div>
-                    <Select
-                        value={selectedTime}
-                        onValueChange={(value: TimeCommitment) => setSelectedTime(value)}
-                    >
-                        <SelectTrigger className="w-full" >
-                            <SelectValue placeholder="Select your time commitment" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {TIME_COMMITMENT_OPTIONS.map((option) => (
-                                <SelectItem key={option} value={option}>
-                                    {option}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Button
-                        onClick={() => updateCitizen({ timeCommitment: selectedTime })}
-                        className="button-primary"
-                        disabled={!selectedTime}
-                    >
-                        Continue
-                    </Button>
-                </div>
-            </DialogContent>
-        </Dialog>
-    )
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
+        <div className="flex flex-col gap-4 w-full">
+          <div className="font-semibold text-center">
+            How many hours per week would you like to spend on governance?
+          </div>
+          <Select
+            value={selectedTime}
+            onValueChange={(value: TimeCommitment) => setSelectedTime(value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select your time commitment" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIME_COMMITMENT_OPTIONS.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={() => updateCitizen({ timeCommitment: selectedTime })}
+            className="button-primary"
+            disabled={!selectedTime}
+          >
+            Continue
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 export default memo(CitizenshipGovernanceCommitmentDialog)

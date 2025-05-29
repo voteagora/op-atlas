@@ -12,6 +12,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { getUserById } from "@/db/users"
+import { getCitizenByUserId } from "@/lib/actions/citizens"
+
+import { CitizenshipSuccess } from "./individual/components/CitizenshipSuccess"
 
 export const metadata: Metadata = {
   ...sharedMetadata,
@@ -32,40 +36,30 @@ export default async function Page() {
     redirect("/")
   }
 
+  const user = await getUserById(userId)
+  const citizen = await getCitizenByUserId(userId)
+
+  if (!user) {
+    redirect("/")
+  }
+
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      <div className="w-full mt-20 lg:max-w-6xl lg:mx-auto lg:px-0 lg:grid lg:grid-cols-3 lg:gap-x-16">
-        <div className="lg:col-span-2 lg:mt-0">
-          <div className="flex flex-col w-full  z-10">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Citizenship Registration</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            <div className="flex flex-col gap-y-8 mt-12">
-              <div className="text-3xl font-semibold">
-                Citizenship Registration
+      <div className="w-full mt-20 lg:max-w-6xl lg:mx-auto ">
+        {citizen?.attestationId && <CitizenshipSuccess user={user} />}
+
+        <div className="flex flex-col gap-y-8 mt-12">
+          <div className="text-secondary-foreground border border-red-500">
+            <div className="flex flex-col gap-y-4">
+              <div className="text-sm text-red-500">
+                TEST ONLY - REMOVE AFTER QA
               </div>
-              <div className="border-b border-border-secondary w-full"></div>
-              <div className="text-secondary-foreground">
-                <div className="flex flex-col gap-y-4">
-                  <Link
-                    href="/citizenship/individual"
-                    className="hover:underline"
-                  >
-                    Apply as Inidividual
-                  </Link>
-                  <Link href="/citizenship/project" className="hover:underline">
-                    Apply as Project
-                  </Link>
-                </div>
-              </div>
+              <Link href="/citizenship/individual" className="hover:underline">
+                Apply as Inidividual
+              </Link>
+              <Link href="/citizenship/project" className="hover:underline">
+                Apply as Project
+              </Link>
             </div>
           </div>
         </div>
