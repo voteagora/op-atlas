@@ -1,7 +1,7 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { memo, useState } from "react"
+import { memo, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -34,7 +34,24 @@ function CitizenshipGovernanceCommitmentDialog({
   const userId = session?.user?.id ?? ""
 
   const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>()
-  const { updateCitizen } = useCitizenUpdate(userId)
+  const { updateCitizen, isLoading, isSuccess } = useCitizenUpdate(userId)
+
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        onOpenChange(false)
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [isSuccess, onOpenChange])
+
+  const handleUpdate = async () => {
+    try {
+      await updateCitizen({ timeCommitment: selectedTime })
+    } catch (error) {
+      // Error is already handled by the toast in useCitizenUpdate
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -59,11 +76,11 @@ function CitizenshipGovernanceCommitmentDialog({
             </SelectContent>
           </Select>
           <Button
-            onClick={() => updateCitizen({ timeCommitment: selectedTime })}
+            onClick={handleUpdate}
             className="button-primary"
-            disabled={!selectedTime}
+            disabled={!selectedTime || isLoading || isSuccess}
           >
-            Continue
+            {isLoading || isSuccess ? "Updating..." : "Update"}
           </Button>
         </div>
       </DialogContent>
