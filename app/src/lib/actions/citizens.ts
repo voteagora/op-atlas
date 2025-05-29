@@ -36,12 +36,6 @@ export const updateCitizen = async (citizen: {
 
 export const getCitizenByUserId = async (userId: string) => {
   const citizen = await getUserCitizen(userId)
-
-  if (!citizen) {
-    return {
-      error: "Citizen not found",
-    }
-  }
   return citizen
 }
 

@@ -1,7 +1,6 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-
 import { getCitizenByUserId } from "@/lib/actions/citizens"
 
 export const CITIZEN_QUERY_KEY = "citizen"

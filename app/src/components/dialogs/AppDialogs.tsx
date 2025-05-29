@@ -47,7 +47,7 @@ export default function AppDialogs() {
           onOpenChange={onOpenChange("governance_testimonial_request")}
         />
       )}
-      {openDialog === "citizenship_governance_address" && data.userId && (
+      {openDialog === "citizenship_governance_address" && (
         <GovernanceAddressDialog
           open
           onOpenChange={onOpenChange("citizenship_governance_address")}
