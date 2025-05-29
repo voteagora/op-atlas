@@ -62,9 +62,6 @@ export default async function Page() {
                 <div className="text-3xl font-semibold">
                   Citizenship Enrollment
                 </div>
-                <div className="text-sm text-secondary-foreground">
-                  [Start Date] - [End Date]
-                </div>
               </div>
               <div className="border-b border-border-secondary w-full"></div>
               <div className="flex flex-col gap-y-12 text-secondary-foreground">
