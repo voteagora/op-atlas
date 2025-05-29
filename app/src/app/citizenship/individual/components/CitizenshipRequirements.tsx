@@ -4,7 +4,6 @@ import { UserAddress, UserPassport } from "@prisma/client"
 import Link from "next/link"
 
 import { Check, Close } from "@/components/icons/reminx"
-import { WorldConnection } from "@/components/profile/WorldIdConnection"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
@@ -308,10 +307,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
   const renderWorld = () => {
     return (
       <ConditionRow isMet={true}>
-        You&apos;ve connected your World ID.{" "}
-        <WorldConnection userId={userId} className={LINK_STYLE}>
-          Connect with Worldchain
-        </WorldConnection>
+        You&apos;ve connected your World ID. | Connect with Worldchain
       </ConditionRow>
     )
   }
