@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/select"
 
 import { DialogProps } from "./types"
+import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
+import { useSession } from "next-auth/react"
 
 const TIME_COMMITMENT_OPTIONS = [
     "Less than 1 hour",
@@ -28,7 +30,13 @@ function CitizenshipGovernanceCommitmentDialog({
     open,
     onOpenChange,
 }: DialogProps<object>) {
+
+    const { data: session } = useSession()
+    const userId = session?.user?.id ?? ""
+
+
     const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>()
+    const { updateCitizen } = useCitizenUpdate(userId)
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,7 +61,7 @@ function CitizenshipGovernanceCommitmentDialog({
                         </SelectContent>
                     </Select>
                     <Button
-                        onClick={() => { }}
+                        onClick={() => updateCitizen({ timeCommitment: selectedTime })}
                         className="button-primary"
                         disabled={!selectedTime}
                     >
