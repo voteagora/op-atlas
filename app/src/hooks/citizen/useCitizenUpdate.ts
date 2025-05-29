@@ -1,11 +1,15 @@
 "use client"
 
+import { useTransition } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { updateCitizen } from "@/lib/actions/citizens"
 
 export const useCitizenUpdate = (userId: string) => {
+  const [isPending, startTransition] = useTransition()
+  const [isSuccess, setIsSuccess] = useState(false)
   const { invalidate } = useCitizen({ userId, enabled: false })
 
   const call = (citizen: {
@@ -13,17 +17,27 @@ export const useCitizenUpdate = (userId: string) => {
     attestationId?: string
     timeCommitment?: string
   }) => {
-    toast.promise(
-      updateCitizen(citizen).then(() => invalidate()),
-      {
-        success: "Citizenship application updated",
-        loading: "Updating citizenship application...",
-        error: "Failed to update citizenship application",
-      },
-    )
+    setIsSuccess(false)
+    startTransition(async () => {
+      try {
+        const loadingToast = toast.loading(
+          "Updating citizenship application...",
+        )
+        await updateCitizen(citizen)
+        await invalidate()
+        toast.dismiss(loadingToast)
+        toast.success("Citizenship application updated")
+        setIsSuccess(true)
+      } catch (error) {
+        toast.error("Failed to update citizenship application")
+        setIsSuccess(false)
+      }
+    })
   }
 
   return {
     updateCitizen: call,
+    isLoading: isPending,
+    isSuccess,
   }
 }

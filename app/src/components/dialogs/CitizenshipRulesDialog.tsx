@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { memo, useState } from "react"
+import { memo, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -23,7 +23,7 @@ function CitizenshipRulesDialog({ open, onOpenChange }: DialogProps<object>) {
   const userId = session?.user?.id ?? ""
   const router = useRouter()
   const { data: citizen } = useCitizen({ userId })
-  const { attestCitizen, isLoading } = useCitizenAttest(userId)
+  const { attestCitizen, isLoading, isSuccess } = useCitizenAttest(userId)
 
   const [checkedRules, setCheckedRules] = useState<Record<number, boolean>>({})
 
@@ -36,12 +36,11 @@ function CitizenshipRulesDialog({ open, onOpenChange }: DialogProps<object>) {
 
   const allRulesChecked = RULES.every((_, index) => checkedRules[index])
 
-  const handleAttest = async () => {
-    await attestCitizen()
-    if (citizen?.attestationId) {
+  useEffect(() => {
+    if (isSuccess && citizen?.attestationId) {
       router.push("/citizenship")
     }
-  }
+  }, [isSuccess, router, citizen])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,11 +63,11 @@ function CitizenshipRulesDialog({ open, onOpenChange }: DialogProps<object>) {
             ))}
           </div>
           <Button
-            onClick={handleAttest}
+            onClick={attestCitizen}
             className="button-primary w-full"
-            disabled={!allRulesChecked || isLoading}
+            disabled={!allRulesChecked || isLoading || isSuccess}
           >
-            {isLoading ? "Submitting..." : "Submit"}
+            {isLoading || isSuccess ? "Submitting..." : "Submit"}
           </Button>
         </div>
       </DialogContent>
