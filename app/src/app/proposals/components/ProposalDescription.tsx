@@ -16,10 +16,8 @@ interface ProposalDescriptionProps {
 }
 
 const ProposalDescription = ({ description, className = '' }: ProposalDescriptionProps) => (
-  <div className={`flex gap-8 lg:gap-16 justify-between items-start max-w-[76rem] flex-col md:flex-row md:items-start md:justify-between ${className}`}>
-    <div className={styles.proposal_description_md}>
-      <Markdown content={stripTitleFromDescription(description.split('\n')[0].replace('# ', ''), description)} />
-    </div>
+  <div className={`${styles.proposal_description_md} ${className}`}>
+    <Markdown content={stripTitleFromDescription(description.split('\n')[0].replace('# ', ''), description)} />
   </div>
 );
 
