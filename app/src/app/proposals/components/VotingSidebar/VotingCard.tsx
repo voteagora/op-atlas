@@ -1,3 +1,7 @@
+import VotingCardActions, {
+  CardActionsProps,
+} from "@/app/proposals/components/VotingSidebar/VotingCardActions"
+
 interface CardImageProps {
   src: string
   alt: string
@@ -25,28 +29,6 @@ const CardText = ({ title, description }: CardTextProps) => {
   )
 }
 
-interface CardActionsProps {
-  cardActions: CardAction[]
-}
-
-interface CardAction {
-  buttonStyle: string
-  actionText: string
-  onClick: () => void
-}
-
-const CardActions = ({ cardActions }: CardActionsProps) => {
-  return (
-    <div className="flex flex-col items-center">
-      {cardActions.map(({ buttonStyle, actionText, onClick }, idx) => (
-        <button key={idx} onClick={onClick} className={buttonStyle}>
-          {actionText}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 export interface VotingCardProps {
   cardText: CardTextProps
   cardActions?: CardActionsProps
@@ -58,7 +40,7 @@ const VotingCard = ({ cardText, cardActions, cardImage }: VotingCardProps) => {
     <div className="rounded-t-[12px] border border-solid p-6 flex flex-col items-center">
       {cardImage && <CardImage {...cardImage} />}
       <CardText {...cardText} />
-      {cardActions && <CardActions {...cardActions} />}
+      {cardActions && <VotingCardActions {...cardActions} />}
     </div>
   )
 }

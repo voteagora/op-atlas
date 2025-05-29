@@ -22,7 +22,7 @@ const Page = (params: PageProps) => {
     return notFound()
   }
 
-  const mock = {
+  const MOCK = {
     breadcrumbs: "Audit Request Team",
     title: "Developer Advisory Board: Audit Request Team",
     status: "Nominations [Start Date] - [End Date]",
@@ -33,6 +33,20 @@ const Page = (params: PageProps) => {
         title: "Title",
         description: "Description",
       },
+      cardActions: {
+        cardActionList: [
+          {
+            buttonStyle: "button-primary",
+            actionText: "Sign In",
+            actionType: "Log",
+          },
+          {
+            buttonStyle: "button-secondary",
+            actionText: "Learn about approval voting",
+            actionType: "Log",
+          },
+        ],
+      },
     },
   }
 
@@ -42,18 +56,18 @@ const Page = (params: PageProps) => {
         <div className="flex flex-col">
           <div className="flex gap-8 lg:gap-16 justify-between items-start max-w-[76rem] flex-col md:flex-row md:items-start md:justify-between">
             <div className="w-full md:w-[712px] flex flex-col space-y-4 mb-8 md:mb-0">
-              <Breadcrumbs value={mock.breadcrumbs} />
-              <ProposalTitle title={mock.title} className="mt-2" />
-              <ProposalStatus status={mock.status} className="mt-2" />
+              <Breadcrumbs value={MOCK.breadcrumbs} />
+              <ProposalTitle title={MOCK.title} className="mt-2" />
+              <ProposalStatus status={MOCK.status} className="mt-2" />
               <ProposalDescription
-                description={mock.description}
+                description={MOCK.description}
                 className="mt-4"
               />
             </div>
             <div className="w-full md:w-[304px] md:ml-12">
               <VotingSidebar
                 className="sticky top-4"
-                votingCardProps={mock.votingCardProps}
+                votingCardProps={MOCK.votingCardProps}
               />
             </div>
           </div>
