@@ -191,3 +191,9 @@
 .fc-authkit-signin-button button {
   @apply px-4 py-2 !text-sm !font-semibold !border;
 }
+
+/*Helps with Debugging*/
+div:hover {
+  @apply border-2 border-red-500;
+}
+
