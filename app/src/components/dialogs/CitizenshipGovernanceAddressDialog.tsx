@@ -1,3 +1,5 @@
+import { useSession } from "next-auth/react"
+
 import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 import { DialogProps } from "@/components/dialogs/types"
 import { Button } from "@/components/ui/button"
@@ -6,23 +8,15 @@ import { useUser } from "@/hooks/db/useUser"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { UserAddressSource } from "@/lib/types"
 
-interface CitizenshipGovernanceAddressDialog extends DialogProps<object> {
-  userId: string
-}
+function GovernanceAddressDialog({ open, onOpenChange }: DialogProps<object>) {
+  const { data: session } = useSession()
+  const userId = session?.user?.id ?? ""
 
-function GovernanceAddressDialog({
-  userId,
-  ...props
-}: CitizenshipGovernanceAddressDialog) {
-  const { user } = useUser({
-    id: userId,
-    enabled: true,
-  })
-
+  const { user } = useUser({ id: userId })
   const { linkWallet } = usePrivyLinkWallet(userId)
 
   return (
-    <Dialog {...props}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh]">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2 text-center">

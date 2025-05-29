@@ -6,7 +6,13 @@ import { getCitizenByUserId } from "@/lib/actions/citizens"
 
 export const CITIZEN_QUERY_KEY = "citizen"
 
-export const useCitizen = (userId: string, enabled: boolean = true) => {
+export const useCitizen = ({
+  userId,
+  enabled = true,
+}: {
+  userId: string
+  enabled?: boolean
+}) => {
   const queryClient = useQueryClient()
 
   const { data, isLoading, isSuccess, isError } = useQuery({
@@ -23,5 +29,5 @@ export const useCitizen = (userId: string, enabled: boolean = true) => {
     })
   }
 
-  return { citizen: data, isLoading, isSuccess, isError, invalidate }
+  return { data, isLoading, isSuccess, isError, invalidate }
 }

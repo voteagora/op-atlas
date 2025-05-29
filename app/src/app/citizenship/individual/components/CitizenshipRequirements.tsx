@@ -5,6 +5,7 @@ import Link from "next/link"
 
 import { Check, Close } from "@/components/icons/reminx"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
+import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
@@ -19,6 +20,7 @@ const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
 export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId })
   const { data: userPassports } = useUserPassports({ id: userId })
+  const { data: citizen } = useCitizen({ userId })
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { refreshPassport } = useRefreshPassport(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)
@@ -28,11 +30,6 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 
   const email = user?.emails?.[0]
   const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
-
-  const openGovernanceAddressDialog = () => {
-    setData({ userId })
-    setOpenDialog("citizenship_governance_address")
-  }
 
   const renderEmail = () => {
     if (email) {
@@ -80,9 +77,10 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={openGovernanceAddressDialog}
+            onClick={() => setOpenDialog("citizenship_governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" && openGovernanceAddressDialog()
+              e.key === "Enter" &&
+              setOpenDialog("citizenship_governance_address")
             }
           >
             Edit
@@ -98,9 +96,10 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={openGovernanceAddressDialog}
+            onClick={() => setOpenDialog("citizenship_governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" && openGovernanceAddressDialog()
+              e.key === "Enter" &&
+              setOpenDialog("citizenship_governance_address")
             }
           >
             Set {truncateAddress(connectedAddress.address as string)}
@@ -276,6 +275,22 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
   }
 
   const renderCommitment = () => {
+    if (citizen?.timeCommitment) {
+      return (
+        <ConditionRow isMet={true}>
+          Governance time commitment:{" "}
+          <span className="font-semibold">{citizen?.timeCommitment}</span> |{" "}
+          <button
+            type="button"
+            className={LINK_STYLE}
+            onClick={() => setOpenDialog("citizenship_governance_commitment")}
+          >
+            Edit
+          </button>
+        </ConditionRow>
+      )
+    }
+
     return (
       <ConditionRow isMet={false}>
         Governance time commitment |{" "}
@@ -283,10 +298,6 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
           type="button"
           className={LINK_STYLE}
           onClick={() => setOpenDialog("citizenship_governance_commitment")}
-          onKeyDown={(e) =>
-            e.key === "Enter" &&
-            setOpenDialog("citizenship_governance_commitment")
-          }
         >
           Specify
         </button>

@@ -51,7 +51,6 @@ export default function AppDialogs() {
         <GovernanceAddressDialog
           open
           onOpenChange={onOpenChange("citizenship_governance_address")}
-          userId={data.userId}
         />
       )}
       {openDialog === "not_recognized_address" && (

@@ -6,7 +6,7 @@ import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { updateCitizen } from "@/lib/actions/citizens"
 
 export const useCitizenUpdate = (userId: string) => {
-  const { invalidate } = useCitizen(userId, false)
+  const { invalidate } = useCitizen({ userId, enabled: false })
 
   const call = (citizen: {
     address?: string

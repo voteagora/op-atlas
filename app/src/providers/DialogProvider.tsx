@@ -18,7 +18,6 @@ type DataType = {
   kycTeamId?: string
   alreadySelectedProjectIds?: string[]
   rewardStreamId?: string
-  userId?: string
 }
 
 type AppDialog = {
@@ -50,12 +49,10 @@ export function DialogProvider({ children }: PropsWithChildren) {
     rewardStreamId: "",
   })
 
-  const handleSetOpenDialog: Dispatch<SetStateAction<DialogType | undefined>> = (value) => {
-    const newType = typeof value === 'function' ? value(openDialog) : value
-    if (newType === "citizenship_governance_address" && !data.userId) {
-      console.warn("Cannot open citizenship_governance_address dialog without userId")
-      return
-    }
+  const handleSetOpenDialog: Dispatch<
+    SetStateAction<DialogType | undefined>
+  > = (value) => {
+    const newType = typeof value === "function" ? value(openDialog) : value
     setOpenDialog(newType)
   }
 
@@ -67,7 +64,7 @@ export function DialogProvider({ children }: PropsWithChildren) {
         address,
         setAddress,
         data,
-        setData
+        setData,
       }}
     >
       {children}
