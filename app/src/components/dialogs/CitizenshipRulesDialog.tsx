@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 
+import { useCitizenAttest } from "@/hooks/citizen/useCitizenAttest"
+import { useSession } from "next-auth/react"
 import { DialogProps } from "./types"
 
 const RULES = [
@@ -18,6 +20,12 @@ function CitizenshipRulesDialog({
     open,
     onOpenChange,
 }: DialogProps<object>) {
+
+    const { data: session } = useSession()
+    const userId = session?.user?.id ?? ""
+
+    const { attestCitizen, isLoading } = useCitizenAttest(userId)
+
     const [checkedRules, setCheckedRules] = useState<Record<number, boolean>>({})
 
     const handleCheckboxChange = (index: number) => {
@@ -50,11 +58,12 @@ function CitizenshipRulesDialog({
                         ))}
                     </div>
                     <Button
-                        onClick={() => { }}
+                        onClick={() => attestCitizen()}
                         className="button-primary w-full"
-                        disabled={!allRulesChecked}
+                        disabled={!allRulesChecked || isLoading}
+
                     >
-                        Submit
+                        {isLoading ? "Submitting..." : "Submit"}
                     </Button>
                 </div>
             </DialogContent>
