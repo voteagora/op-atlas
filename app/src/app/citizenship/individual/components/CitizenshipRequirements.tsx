@@ -26,7 +26,7 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
   const { linkWallet } = usePrivyLinkWallet(userId)
   const { linkGithub, unlinkGithub, toggleIsDeveloper } =
     usePrivyLinkGithub(userId)
-  const { setOpenDialog, setData } = useAppDialogs()
+  const { setOpenDialog } = useAppDialogs()
 
   const email = user?.emails?.[0]
   const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
