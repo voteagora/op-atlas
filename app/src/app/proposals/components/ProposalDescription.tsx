@@ -12,10 +12,11 @@ function stripTitleFromDescription(title: string, description: string) {
 
 interface ProposalDescriptionProps {
   description: string;
+  className?: string;
 }
 
-const ProposalDescription = ({ description }: ProposalDescriptionProps) => (
-  <div className="flex gap-8 lg:gap-16 justify-between items-start max-w-[76rem] flex-col md:flex-row md:items-start md:justify-between">
+const ProposalDescription = ({ description, className = '' }: ProposalDescriptionProps) => (
+  <div className={`flex gap-8 lg:gap-16 justify-between items-start max-w-[76rem] flex-col md:flex-row md:items-start md:justify-between ${className}`}>
     <div className={styles.proposal_description_md}>
       <Markdown content={stripTitleFromDescription(description.split('\n')[0].replace('# ', ''), description)} />
     </div>
