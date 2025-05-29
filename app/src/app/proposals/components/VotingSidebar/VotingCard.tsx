@@ -5,7 +5,7 @@ interface CardImageProps {
 
 const CardImage = ({ src, alt }: CardImageProps) => {
   return (
-    <div>
+    <div className="flex justify-center">
       <img src={src} alt={alt} />
     </div>
   )
@@ -18,7 +18,7 @@ interface CardTextProps {
 
 const CardText = ({ title, description }: CardTextProps) => {
   return (
-    <div>
+    <div className="text-center">
       <h4 className="text-h4">{title}</h4>
       <p>{description}</p>
     </div>
@@ -37,9 +37,9 @@ interface CardAction {
 
 const CardActions = ({ cardActions }: CardActionsProps) => {
   return (
-    <div>
+    <div className="flex flex-col items-center">
       {cardActions.map(({ buttonStyle, actionText, onClick }, idx) => (
-        <button key={idx} onClick={onClick}>
+        <button key={idx} onClick={onClick} className={buttonStyle}>
           {actionText}
         </button>
       ))}
@@ -55,7 +55,7 @@ export interface VotingCardProps {
 
 const VotingCard = ({ cardText, cardActions, cardImage }: VotingCardProps) => {
   return (
-    <div>
+    <div className="rounded-t-[12px] border border-solid p-6 flex flex-col items-center">
       {cardImage && <CardImage {...cardImage} />}
       <CardText {...cardText} />
       {cardActions && <CardActions {...cardActions} />}
