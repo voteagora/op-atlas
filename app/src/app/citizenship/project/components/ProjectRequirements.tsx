@@ -15,15 +15,10 @@ export const ProjectRequirements = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId })
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)
-  const { setOpenDialog, setData } = useAppDialogs()
+  const { setOpenDialog } = useAppDialogs()
 
   const email = user?.emails?.[0]
   const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
-
-  const openGovernanceAddressDialog = () => {
-    setData({ userId })
-    setOpenDialog("citizenship_governance_address")
-  }
 
   const renderEmail = () => {
     if (email) {
@@ -71,9 +66,10 @@ export const ProjectRequirements = ({ userId }: { userId: string }) => {
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={openGovernanceAddressDialog}
+            onClick={() => setOpenDialog("citizenship_governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" && openGovernanceAddressDialog()
+              e.key === "Enter" &&
+              setOpenDialog("citizenship_governance_address")
             }
           >
             Edit
@@ -89,9 +85,10 @@ export const ProjectRequirements = ({ userId }: { userId: string }) => {
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={openGovernanceAddressDialog}
+            onClick={() => setOpenDialog("citizenship_governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" && openGovernanceAddressDialog()
+              e.key === "Enter" &&
+              setOpenDialog("citizenship_governance_address")
             }
           >
             Set {truncateAddress(connectedAddress.address as string)}
