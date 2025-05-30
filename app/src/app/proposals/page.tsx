@@ -21,7 +21,6 @@ const MOCKDATA = {
     },
     {
       badge: {
-        text: "Soon",
         badgeType: ProposalBadgeType.soon,
       },
       textContent: {
@@ -38,7 +37,6 @@ const MOCKDATA = {
     },
     {
       badge: {
-        text: "Soon",
         badgeType: ProposalBadgeType.soon,
       },
       textContent: {
@@ -51,6 +49,22 @@ const MOCKDATA = {
       },
       arrow: {
         href: "/proposals/3",
+      },
+    },
+    {
+      badge: {
+        badgeType: ProposalBadgeType.past,
+      },
+      textContent: {
+        title: "Lore ipsum Doler: Amet",
+        subtitle: "Voters, Citizens, Delegates",
+      },
+      dates: {
+        startDate: "05-30-2025",
+        endDate: "06-07-2025",
+      },
+      arrow: {
+        href: "/proposals/5",
       },
     },
   ],
