@@ -8,6 +8,8 @@ import ProposalCard, {
 
 interface StandardProposalProps {
   rounded?: boolean
+  voted?: boolean
+  passed?: boolean
   badge: {
     badgeType: ProposalBadgeType
   }
@@ -24,6 +26,33 @@ interface StandardProposalProps {
   }
 }
 const Proposal = (props: StandardProposalProps) => {
+  const voteStatus = () => {
+    if (props.badge.badgeType === ProposalBadgeType.now) {
+      if (props.voted) {
+        return {
+          text: "You voted",
+          styling: "text-[#0DA529]",
+        }
+      }
+      return {
+        text: "You haven't voted yet",
+        styling: "text-[#FF0420]",
+      }
+    } else if (props.badge.badgeType === ProposalBadgeType.past) {
+      if (props.passed) {
+        return {
+          text: "Result Positive ie: Passed",
+          styling: "text-[#0DA529]",
+        }
+      }
+      return {
+        text: "Result Negative ie: Failed",
+        styling: "text-[#FF0420]",
+      }
+    }
+    return undefined
+  }
+
   return (
     <ProposalCard rounded={props.rounded || false}>
       <ProposalBadge type={props.badge.badgeType} />
@@ -34,6 +63,7 @@ const Proposal = (props: StandardProposalProps) => {
       <ProposalDates
         startDate={props.dates.startDate}
         endDate={props.dates.endDate}
+        voteStatus={voteStatus()}
       />
       <ProposalArrow href={props.arrow.href} />
     </ProposalCard>
