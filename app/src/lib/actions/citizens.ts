@@ -59,7 +59,7 @@ export const attestCitizen = async () => {
     }
 
     // Get primary address
-    const primaryAddress = user.addresses.find(addr => addr.primary)?.address
+    const primaryAddress = user.addresses.find((addr) => addr.primary)?.address
     if (!primaryAddress) {
       return {
         error: "No primary address set",
@@ -68,7 +68,9 @@ export const attestCitizen = async () => {
 
     // Create attestation
     const attestationId = await createCitizenAttestation({
+      to: primaryAddress,
       farcasterId: user.farcasterId ? parseInt(user.farcasterId) : 0,
+      selectionMethod: "User",
     })
 
     // Update citizen record

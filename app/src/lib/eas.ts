@@ -25,7 +25,9 @@ const CITIZEN_SCHEMA_ID =
     ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
     : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
 
-const citizenSchema = new SchemaEncoder("uint256 farcasterId,string selectionMethod")
+const citizenSchema = new SchemaEncoder(
+  "uint256 farcasterId,string selectionMethod",
+)
 
 const entitySchema = new SchemaEncoder("uint256 farcasterID,string type")
 const projectMetadataSchema = new SchemaEncoder(
@@ -414,7 +416,8 @@ export async function processAttestationsInBatches<T>(
         throw new Error(`Failed after ${maxRetries} retries: ${error}`)
       }
       console.warn(
-        `Retry ${retryCount + 1}/${maxRetries} for batch of ${batch.length
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+          batch.length
         } items`,
       )
       await new Promise((resolve) =>
@@ -434,18 +437,28 @@ export async function processAttestationsInBatches<T>(
 }
 
 export async function createCitizenAttestation({
+  to,
   farcasterId,
-  selectionMethod = "atlas",
+  selectionMethod,
 }: {
+  to: string
   farcasterId: number
-  selectionMethod?: string
+  selectionMethod: string
 }) {
   const data = citizenSchema.encodeData([
     { name: "farcasterId", value: farcasterId, type: "uint256" },
     { name: "selectionMethod", value: selectionMethod, type: "string" },
   ])
 
-  const attestationId = await createAttestation(CITIZEN_SCHEMA_ID, data)
+  const tx = await eas.attest({
+    schema: CITIZEN_SCHEMA_ID,
+    data: {
+      recipient: to,
+      expirationTime: BigInt(0),
+      revocable: true,
+      data,
+    },
+  })
 
-  return attestationId
+  return await tx.wait()
 }
