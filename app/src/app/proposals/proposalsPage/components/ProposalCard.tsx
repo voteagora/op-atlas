@@ -30,11 +30,11 @@ const ProposalBadge = ({ type }: ProposalBadgeProps) => {
   const badgeClasses = (() => {
     switch (type) {
       case ProposalBadgeType.now:
-        return "bg-[#FF0420] text-[#FBFCFE]"
+        return "bg-primary text-bg/default"
       case ProposalBadgeType.past:
-        return "bg-[#F2F3F8] text-[#404454]"
+        return "bg-secondary text-secondary-foreground"
       case ProposalBadgeType.soon:
-        return "bg-[#D6E4FF] text-[#0E4CAF]"
+        return "bg-callout text-callout-foreground"
       default:
         return "bg-gray-200 text-gray-800" // Default styling
     }
@@ -62,10 +62,10 @@ interface ProposalTextProps {
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
     <div className="flex flex-col justify-center w-[42.1875rem] h-[48px]">
-      <div className="text-base font-[500] text-[#0F111A] leading-normal">
+      <div className="text-base font-[500] text-text/default leading-normal">
         {title}
       </div>
-      <div className="text-base font-normal text-[#404454] leading-normal">
+      <div className="text-base font-normal text-text/secondary leading-normal">
         {subtitle}
       </div>
     </div>
@@ -95,7 +95,7 @@ const ProposalDates = ({
         </div>
       )}
 
-      <div className="text-base font-normal text-[#404454] whitespace-nowrap overflow-hidden text-right sm:text-sm">
+      <div className="text-base font-normal text-text/secondary whitespace-nowrap overflow-hidden text-right sm:text-sm">
         {startDate} - {endDate}
       </div>
     </div>
@@ -108,7 +108,7 @@ interface ProposalArrowProps {
 const ProposalArrow = ({ href }: ProposalArrowProps) => {
   return (
     <a href={href} className="block w-[36px] h-[36px] ">
-      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] gap-[8px] bg-[#F2F3F8] hover:bg-[#FF0420] text-[#0F111A] hover:text-[#F2F3F8]">
+      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] gap-[8px] bg-secondary hover:bg-primary text-text/default hover:text-secondary">
         <svg
           width="24"
           height="24"
