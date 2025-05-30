@@ -37,6 +37,23 @@ const MOCKDATA = {
         href: "/proposals/2",
       },
     },
+    {
+      badge: {
+        text: "Soon",
+        badgeType: ProposalBadgeType.callout,
+      },
+      textContent: {
+        title: "Developer Advisory Board: Foundation Missions Team",
+        subtitle: "Voters, Citizens, Delegates",
+      },
+      dates: {
+        startDate: "05-30-2025",
+        endDate: "06-07-2025",
+      },
+      arrow: {
+        href: "/proposals/3",
+      },
+    },
   ],
 }
 

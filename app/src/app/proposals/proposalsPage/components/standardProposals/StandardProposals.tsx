@@ -45,7 +45,7 @@ interface StandardProposalsProps {
 }
 const StandardProposals = ({ proposals }: StandardProposalsProps) => {
   return (
-    <div>
+    <div className="flex flex-col" style={{ maxWidth: "1000px" }}>
       <div>
         <h2 className="mb-4">Proposals</h2>
       </div>
