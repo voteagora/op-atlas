@@ -61,7 +61,7 @@ interface ProposalTextProps {
 }
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
-    <div className="flex flex-col justify-center w-[42.1875rem] h-[48px] rounded-md">
+    <div className="flex flex-col justify-center w-[42.1875rem] h-[48px]">
       <div className="text-base font-[500] text-[#0F111A] leading-normal">
         {title}
       </div>
@@ -75,10 +75,26 @@ const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
 interface ProposalDatesProps {
   startDate: string
   endDate: string
+  voteStatus?: {
+    text: string
+    styling: string
+  }
 }
-const ProposalDates = ({ startDate, endDate }: ProposalDatesProps) => {
+const ProposalDates = ({
+  startDate,
+  endDate,
+  voteStatus,
+}: ProposalDatesProps) => {
   return (
     <div className="w-[187px] flex items-center justify-end">
+      {voteStatus && (
+        <div
+          className={`text-base font-normal whitespace-nowrap overflow-hidden text-right sm:text-sm ${voteStatus.styling}`}
+        >
+          {voteStatus.text}
+        </div>
+      )}
+
       <div className="text-base font-normal text-[#404454] whitespace-nowrap overflow-hidden text-right sm:text-sm">
         {startDate} - {endDate}
       </div>
