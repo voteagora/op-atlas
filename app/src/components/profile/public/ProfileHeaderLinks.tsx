@@ -5,6 +5,7 @@ import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
 import ProfileSidebarLink from "./ProfileSidebarLink"
+import { truncateAddress } from "@/lib/utils/string"
 
 
 export default function ProfileHeaderLinks({
@@ -13,9 +14,7 @@ export default function ProfileHeaderLinks({
   user: UserWithAddresses
 }) {
   const { delegate } = useDelegateData(user?.addresses?.map((a) => a.address))
-  const truncateAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
+
 
   const { user: farcasterUsers } = useFarcasterUserData(user?.farcasterId, !!user?.farcasterId)
   const { user: githubUserData } = useGithubUserData(user.github || "")

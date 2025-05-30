@@ -4,6 +4,8 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { DeleteKYCTeamDialog } from "../projects/rewards/DeleteKYCTeamDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
+import GovernanceAddressDialog from "./CitizenshipGovernanceAddressDialog"
+import CitizenshipGovernanceCommitmentDialog from "./CitizenshipGovernanceCommitmentDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
@@ -15,7 +17,7 @@ import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
 export default function AppDialogs() {
-  const { openDialog, setOpenDialog } = useAppDialogs()
+  const { openDialog, setOpenDialog, data } = useAppDialogs()
   const onOpenChange = (type: DialogType) => (open: boolean) =>
     setOpenDialog(open ? type : undefined)
 
@@ -45,6 +47,12 @@ export default function AppDialogs() {
           onOpenChange={onOpenChange("governance_testimonial_request")}
         />
       )}
+      {openDialog === "citizenship_governance_address" && (
+        <GovernanceAddressDialog
+          open
+          onOpenChange={onOpenChange("citizenship_governance_address")}
+        />
+      )}
       {openDialog === "not_recognized_address" && (
         <NotRecognizedAddressDialog
           open
@@ -70,6 +78,12 @@ export default function AppDialogs() {
         <ImportFromFarcasterDialog
           open
           onOpenChange={onOpenChange("import_from_farcaster")}
+        />
+      )}
+      {openDialog === "citizenship_governance_commitment" && (
+        <CitizenshipGovernanceCommitmentDialog
+          open
+          onOpenChange={onOpenChange("citizenship_governance_commitment")}
         />
       )}
     </>

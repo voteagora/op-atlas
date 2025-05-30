@@ -1,11 +1,12 @@
+import Link from "next/link"
+import { useSession } from "next-auth/react"
+
+import { PencilFill } from "@/components/icons/reminx"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
+import { useUsername } from "@/hooks/useUsername"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { PencilFill } from "@/components/icons/reminx"
-import { useUsername } from "@/hooks/useUsername"
-import { useSession } from "next-auth/react"
-import Link from "next/link"
 import ProfileHeaderLinks from "./ProfileHeaderLinks"
 
 const ProfileHeader = ({
@@ -34,8 +35,6 @@ const ProfileHeader = ({
                 </AvatarBadge>
               </Link>
             )}
-
-
           </Avatar>
         )}
         <div className="flex flex-col gap-6">

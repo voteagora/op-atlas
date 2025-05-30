@@ -7,6 +7,7 @@ import { Badgeholder } from "@/components/common/Badgeholder"
 import { useUser } from "@/hooks/db/useUser"
 import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
+import { truncateAddress } from "@/lib/utils/string"
 
 import { makeUserAddressPrimaryAction } from "./actions"
 
@@ -16,16 +17,19 @@ export const PrimaryAddress = ({
     primary,
     showCheckmark = true,
     userId,
+    truncateAddress: shouldTruncate = false,
 }: {
     address: string
     source: UserAddressSource
     primary: boolean
     showCheckmark?: boolean
     userId: string
+    truncateAddress?: boolean
 }) => {
     const { isBadgeholderAddress } = useBadgeholderAddress(address)
     const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
 
+    const displayAddress = shouldTruncate ? truncateAddress(address) : address
 
     const onSetPrimary = (address: string) => {
         toast.promise(
@@ -64,7 +68,7 @@ export const PrimaryAddress = ({
                     )}
 
                     <p className="text-sm">
-                        {address}
+                        {displayAddress}
                     </p>
 
                     {primary && <Badge text="Primary address" className="shrink-0" />}
