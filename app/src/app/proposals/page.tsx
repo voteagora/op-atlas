@@ -21,8 +21,9 @@ const MOCKDATA = {
     },
     {
       badge: {
-        badgeType: ProposalBadgeType.soon,
+        badgeType: ProposalBadgeType.now,
       },
+      voted: true,
       textContent: {
         title: "Developer Advisory Board: Governance Missions Team",
         subtitle: "Voters, Citizens, Delegates",
@@ -37,8 +38,9 @@ const MOCKDATA = {
     },
     {
       badge: {
-        badgeType: ProposalBadgeType.soon,
+        badgeType: ProposalBadgeType.now,
       },
+      voted: false,
       textContent: {
         title: "Developer Advisory Board: Foundation Missions Team",
         subtitle: "Voters, Citizens, Delegates",
@@ -55,6 +57,7 @@ const MOCKDATA = {
       badge: {
         badgeType: ProposalBadgeType.past,
       },
+      passed: false,
       textContent: {
         title: "Lore ipsum Doler: Amet",
         subtitle: "Voters, Citizens, Delegates",
@@ -67,12 +70,30 @@ const MOCKDATA = {
         href: "/proposals/5",
       },
     },
+    {
+      badge: {
+        badgeType: ProposalBadgeType.past,
+      },
+      passed: true,
+      textContent: {
+        title: "Lore ipsum Doler: Amet",
+        subtitle: "Voters, Citizens, Delegates",
+      },
+      dates: {
+        startDate: "05-30-2025",
+        endDate: "06-07-2025",
+      },
+      arrow: {
+        href: "/proposals/6",
+      },
+    },
   ],
   selfNominations: [
     {
       badge: {
         badgeType: ProposalBadgeType.now,
       },
+      voted: false,
       textContent: {
         title: "Developer Advisory Board: Audit Request Team",
       },
@@ -82,6 +103,22 @@ const MOCKDATA = {
       },
       arrow: {
         href: "/proposals/5",
+      },
+    },
+    {
+      badge: {
+        badgeType: ProposalBadgeType.now,
+      },
+      voted: true,
+      textContent: {
+        title: "Developer Advisory Board: Audit Request Team",
+      },
+      dates: {
+        startDate: "05-30-2025",
+        endDate: "06-07-2025",
+      },
+      arrow: {
+        href: "/proposals/8",
       },
     },
   ],
