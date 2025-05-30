@@ -666,3 +666,15 @@ model Citizen {
 
   @@index([userId])
 }
+
+model S8QualifyingUser {
+  address String @id
+}
+
+model S8QualifyingChain {
+  organizationId String @id
+}
+
+model S8QualifyingProject {
+  address String @id
+}
