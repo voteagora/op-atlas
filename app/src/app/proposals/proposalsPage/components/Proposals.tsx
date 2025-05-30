@@ -50,15 +50,15 @@ const Proposals = ({
   proposals,
 }: StandardProposalsProps) => {
   return (
-    <div className="flex flex-col" style={{ maxWidth: "1000px" }}>
+    <div className="flex flex-col">
       <div>
         {heading && (
-          <h4 className="mb-4 text-h4 h-7 leading-[0px] tracking-[0%] align-middle">
+          <h4 className="w-full mb-4 text-h4 h-7 leading-[0px] tracking-[0%] align-middle">
             {heading}
           </h4>
         )}
         {subheading && (
-          <p className="w-[617px] h-[24px] font-normal text-base leading-[0px] tracking-[0%]">
+          <p className="w-full h-[24px] font-normal text-base leading-[0px] tracking-[0%]">
             {subheading}
           </p>
         )}
