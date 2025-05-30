@@ -10,7 +10,9 @@ const ProposalCard = ({ children, rounded = false }: ProposalCardProps) => {
         rounded ? "" : "rounded-t-lg"
       }`}
     >
-      <div className="proposal-card-content flex flex-row gap-2 justify-between">{children}</div>
+      <div className="proposal-card-content flex flex-row gap-2 justify-between">
+        {children}
+      </div>
     </div>
   )
 }
@@ -25,9 +27,20 @@ interface ProposalBadgeProps {
   type: ProposalBadgeType
 }
 const ProposalBadge = ({ text, type }: ProposalBadgeProps) => {
+  const badgeClasses =
+    type === ProposalBadgeType.callout ? "bg-[#D6E4FF] text-[#0E4CAF]" : ""
+
   return (
-    <div className="proposal-badge m-5 ">
-      <div className="p-4 rounded-9999">{text}</div>
+    <div
+      className={`status-badge w-[46px] h-[24px] px-2 py-1 rounded-full flex gap-1 ${badgeClasses}`}
+    >
+      <div
+        className={
+          "w-[30px] h-[16px] text-xs font-medium leading-none text-center rounded-full flex items-center justify-center"
+        }
+      >
+        {text}
+      </div>
     </div>
   )
 }
