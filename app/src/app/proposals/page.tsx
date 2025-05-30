@@ -55,7 +55,24 @@ const MOCKDATA = {
       },
     },
   ],
-  selfNominations: [],
+  selfNominations: [
+    {
+      badge: {
+        text: "Soon",
+        badgeType: ProposalBadgeType.callout,
+      },
+      textContent: {
+        title: "Developer Advisory Board: Audit Request Team",
+      },
+      dates: {
+        startDate: "05-30-2025",
+        endDate: "06-07-2025",
+      },
+      arrow: {
+        href: "/proposals/5",
+      },
+    },
+  ],
 }
 
 const Page = () => {

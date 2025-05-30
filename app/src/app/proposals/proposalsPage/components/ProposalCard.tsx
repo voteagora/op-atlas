@@ -47,7 +47,7 @@ const ProposalBadge = ({ text, type }: ProposalBadgeProps) => {
 
 interface ProposalTextProps {
   title: string
-  subtitle: string
+  subtitle?: string
 }
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (

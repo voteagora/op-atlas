@@ -14,7 +14,7 @@ interface StandardProposalProps {
   }
   textContent: {
     title: string
-    subtitle: string
+    subtitle?: string
   }
   dates: {
     startDate: string
