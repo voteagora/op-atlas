@@ -47,7 +47,9 @@ const StandardProposals = ({ proposals }: StandardProposalsProps) => {
   return (
     <div className="flex flex-col" style={{ maxWidth: "1000px" }}>
       <div>
-        <h2 className="mb-4">Proposals</h2>
+        <h4 className="mb-4 text-h4 w-24 h-7 leading-[0px] tracking-[0%] align-middle">
+          Proposals
+        </h4>
       </div>
       <div>
         {proposals.map((proposal, index) => (
