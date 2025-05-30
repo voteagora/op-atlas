@@ -68,8 +68,10 @@ interface ProposalDatesProps {
 }
 const ProposalDates = ({ startDate, endDate }: ProposalDatesProps) => {
   return (
-    <div className="w-[187px] h-[24px] text-base font-normal tracking-[0%] leading-[0px] text-[#404454]">
-      {startDate} - {endDate}
+    <div className="w-[187px] flex items-center justify-end">
+      <div className="text-base font-normal text-[#404454] whitespace-nowrap overflow-hidden text-right sm:text-sm">
+        {startDate} - {endDate}
+      </div>
     </div>
   )
 }
