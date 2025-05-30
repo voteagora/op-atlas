@@ -2,7 +2,7 @@ import Proposals from "@/app/proposals/proposalsPage/components/standardProposal
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 
 const MOCKDATA = {
-  proposals: [
+  standardProposals: [
     {
       badge: {
         text: "Soon",
@@ -55,6 +55,7 @@ const MOCKDATA = {
       },
     },
   ],
+  selfNominations: [],
 }
 
 const Page = () => {
@@ -65,7 +66,12 @@ const Page = () => {
       <h1 className="w-[66.5rem] h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
         Governance
       </h1>
-      <Proposals proposals={MOCKDATA.proposals} heading="Proposals" />
+      <Proposals
+        proposals={MOCKDATA.selfNominations}
+        heading="Self Nominate for a governance role in Season 8 & 9"
+        subheading="Calling all canidates! Submit your nominations from [date] - [date]"
+      />
+      <Proposals proposals={MOCKDATA.standardProposals} heading="Proposals" />
     </main>
   )
 }

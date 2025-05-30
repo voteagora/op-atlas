@@ -54,7 +54,7 @@ const Proposals = ({
     <div className="flex flex-col" style={{ maxWidth: "1000px" }}>
       <div>
         {heading && (
-          <h4 className="mb-4 text-h4 w-24 h-7 leading-[0px] tracking-[0%] align-middle">
+          <h4 className="mb-4 text-h4 h-7 leading-[0px] tracking-[0%] align-middle">
             {heading}
           </h4>
         )}
