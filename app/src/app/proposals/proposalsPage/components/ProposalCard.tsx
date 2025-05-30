@@ -6,11 +6,11 @@ type ProposalCardProps = {
 const ProposalCard = ({ children, rounded = false }: ProposalCardProps) => {
   return (
     <div
-      className={`proposal-card-container p-6 border border-border ${
+      className={`proposal-card-container border border-border ${
         rounded ? "rounded-t-lg" : ""
       }`}
     >
-      <div className="proposal-card-content flex flex-row gap-2 justify-between items-center">
+      <div className="proposal-card-content flex flex-row gap-2 justify-between items-center p-6">
         {children}
       </div>
     </div>
@@ -34,7 +34,7 @@ const ProposalBadge = ({ type }: ProposalBadgeProps) => {
       case ProposalBadgeType.past:
         return "bg-[#FF0420] text-[#FBFCFE]"
       case ProposalBadgeType.soon:
-        return "bg-[#D6E4FF] text-[#0E4CAF]"
+        return "bg-[#F2F3F8] text-[#404454]"
       default:
         return "bg-gray-200 text-gray-800" // Default styling
     }
