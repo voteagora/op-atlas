@@ -77,16 +77,18 @@ const Page = () => {
   // Get the proposals page
 
   return (
-    <main className="flex flex-col flex-1 h-full items-center pb-12 gap-[46px] mt-10">
-      <h1 className="w-[66.5rem] h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
-        Governance
-      </h1>
-      <Proposals
-        proposals={MOCKDATA.selfNominations}
-        heading="Self Nominate for a governance role in Season 8 & 9"
-        subheading="Calling all canidates! Submit your nominations from [date] - [date]"
-      />
-      <Proposals proposals={MOCKDATA.standardProposals} heading="Proposals" />
+    <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] mx-auto">
+      <div className="flex flex-col gap-12">
+        <h1 className="w-full h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
+          Governance
+        </h1>
+        <Proposals
+          proposals={MOCKDATA.selfNominations}
+          heading="Self Nominate for a governance role in Season 8 & 9"
+          subheading="Calling all canidates! Submit your nominations from [date] - [date]"
+        />
+        <Proposals proposals={MOCKDATA.standardProposals} heading="Proposals" />
+      </div>
     </main>
   )
 }
