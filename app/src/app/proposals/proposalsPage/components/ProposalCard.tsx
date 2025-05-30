@@ -79,8 +79,8 @@ interface ProposalArrowProps {
 }
 const ProposalArrow = ({ href }: ProposalArrowProps) => {
   return (
-    <a href={href}>
-      <div>
+    <a href={href} className="block w-[36px] h-[36px]">
+      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] gap-[8px] bg-[#F2F3F8]">
         <svg
           width="24"
           height="24"
