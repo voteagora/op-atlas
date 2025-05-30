@@ -61,7 +61,10 @@ const Page = () => {
   // Get the proposals page
 
   return (
-    <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12 bg-[#FBFCFE]">
+    <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-12 bg-[#FBFCFE] gap-[46px] mt-10">
+      <h1 className="w-[1064px] h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
+        Governance
+      </h1>
       <StandardProposals proposals={MOCKDATA.proposals} />
     </main>
   )
