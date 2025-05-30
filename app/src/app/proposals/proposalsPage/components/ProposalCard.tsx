@@ -27,8 +27,18 @@ interface ProposalBadgeProps {
   type: ProposalBadgeType
 }
 const ProposalBadge = ({ type }: ProposalBadgeProps) => {
-  const badgeClasses =
-    type === ProposalBadgeType.soon ? "bg-[#D6E4FF] text-[#0E4CAF]" : ""
+  const badgeClasses = (() => {
+    switch (type) {
+      case ProposalBadgeType.now:
+        return "bg-[#FF0420] text-[#FBFCFE]"
+      case ProposalBadgeType.past:
+        return "bg-[#FF0420] text-[#FBFCFE]"
+      case ProposalBadgeType.soon:
+        return "bg-[#D6E4FF] text-[#0E4CAF]"
+      default:
+        return "bg-gray-200 text-gray-800" // Default styling
+    }
+  })()
 
   return (
     <div

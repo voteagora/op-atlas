@@ -57,7 +57,6 @@ const MOCKDATA = {
   selfNominations: [
     {
       badge: {
-        text: "Soon",
         badgeType: ProposalBadgeType.now,
       },
       textContent: {
