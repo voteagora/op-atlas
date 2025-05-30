@@ -38,9 +38,9 @@ interface ProposalTextProps {
 }
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
-    <div>
-      <div>{title}</div>
-      <div>{subtitle}</div>
+    <div className="flex flex-col items-start">
+      <div className="text-base font-medium">{title}</div>
+      <div className="text-base font-normal">{subtitle}</div>
     </div>
   )
 }
