@@ -1,15 +1,58 @@
-import ProposalCard from "@/app/proposals/proposalsPage/components/ProposalCard"
+import ProposalCard, {
+  ProposalArrow,
+  ProposalBadge,
+  ProposalBadgeType,
+  ProposalDates,
+  ProposalTextContent,
+} from "@/app/proposals/proposalsPage/components/ProposalCard"
 
-const StandardProposals = () => {
+interface StandardProposalProps {
+  rounded?: boolean
+  badge: {
+    text: string
+    badgeType: ProposalBadgeType
+  }
+  textContent: {
+    title: string
+    subtitle: string
+  }
+  dates: {
+    startDate: string
+    endDate: string
+  }
+  arrow: {
+    href: string
+  }
+}
+const StandardProposal = (props: StandardProposalProps) => {
+  return (
+    <ProposalCard rounded={props.rounded || false}>
+      <ProposalBadge text={props.badge.text} type={props.badge.badgeType} />
+      <ProposalTextContent
+        title={props.textContent.title}
+        subtitle={props.textContent.subtitle}
+      />
+      <ProposalDates
+        startDate={props.dates.startDate}
+        endDate={props.dates.endDate}
+      />
+      <ProposalArrow href={props.arrow.href} />
+    </ProposalCard>
+  )
+}
+interface StandardProposalsProps {
+  proposals: StandardProposalProps[]
+}
+const StandardProposals = ({ proposals }: StandardProposalsProps) => {
   return (
     <div>
       <div>
         <h2 className="mb-4">Proposals</h2>
       </div>
       <div>
-        <ProposalCard>
-          <h3>Proposal 1</h3>
-        </ProposalCard>
+        {proposals.map((proposal, index) => (
+          <StandardProposal key={index} rounded={index === 0} {...proposal} />
+        ))}
       </div>
     </div>
   )
