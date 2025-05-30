@@ -5,8 +5,7 @@ const MOCKDATA = {
   standardProposals: [
     {
       badge: {
-        text: "Soon",
-        badgeType: ProposalBadgeType.callout,
+        badgeType: ProposalBadgeType.soon,
       },
       textContent: {
         title: "Developer Advisory Board: Audit Request Team",
@@ -23,7 +22,7 @@ const MOCKDATA = {
     {
       badge: {
         text: "Soon",
-        badgeType: ProposalBadgeType.callout,
+        badgeType: ProposalBadgeType.soon,
       },
       textContent: {
         title: "Developer Advisory Board: Governance Missions Team",
@@ -40,7 +39,7 @@ const MOCKDATA = {
     {
       badge: {
         text: "Soon",
-        badgeType: ProposalBadgeType.callout,
+        badgeType: ProposalBadgeType.soon,
       },
       textContent: {
         title: "Developer Advisory Board: Foundation Missions Team",
@@ -59,7 +58,7 @@ const MOCKDATA = {
     {
       badge: {
         text: "Soon",
-        badgeType: ProposalBadgeType.callout,
+        badgeType: ProposalBadgeType.now,
       },
       textContent: {
         title: "Developer Advisory Board: Audit Request Team",

@@ -9,7 +9,6 @@ import ProposalCard, {
 interface StandardProposalProps {
   rounded?: boolean
   badge: {
-    text: string
     badgeType: ProposalBadgeType
   }
   textContent: {
@@ -27,7 +26,7 @@ interface StandardProposalProps {
 const Proposal = (props: StandardProposalProps) => {
   return (
     <ProposalCard rounded={props.rounded || false}>
-      <ProposalBadge text={props.badge.text} type={props.badge.badgeType} />
+      <ProposalBadge type={props.badge.badgeType} />
       <ProposalTextContent
         title={props.textContent.title}
         subtitle={props.textContent.subtitle}

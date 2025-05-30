@@ -18,17 +18,17 @@ const ProposalCard = ({ children, rounded = false }: ProposalCardProps) => {
 }
 
 export enum ProposalBadgeType {
-  callout = "callout",
-  info = "info",
+  soon = "soon",
+  now = "now",
+  past = "past",
 }
 
 interface ProposalBadgeProps {
-  text: string
   type: ProposalBadgeType
 }
-const ProposalBadge = ({ text, type }: ProposalBadgeProps) => {
+const ProposalBadge = ({ type }: ProposalBadgeProps) => {
   const badgeClasses =
-    type === ProposalBadgeType.callout ? "bg-[#D6E4FF] text-[#0E4CAF]" : ""
+    type === ProposalBadgeType.soon ? "bg-[#D6E4FF] text-[#0E4CAF]" : ""
 
   return (
     <div
@@ -39,7 +39,7 @@ const ProposalBadge = ({ text, type }: ProposalBadgeProps) => {
           "w-[30px] h-[16px] text-xs font-medium leading-none text-center rounded-full flex items-center justify-center"
         }
       >
-        {text}
+        {type.toString()}
       </div>
     </div>
   )
