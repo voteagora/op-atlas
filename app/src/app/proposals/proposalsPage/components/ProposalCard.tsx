@@ -32,9 +32,9 @@ const ProposalBadge = ({ type }: ProposalBadgeProps) => {
       case ProposalBadgeType.now:
         return "bg-[#FF0420] text-[#FBFCFE]"
       case ProposalBadgeType.past:
-        return "bg-[#FF0420] text-[#FBFCFE]"
-      case ProposalBadgeType.soon:
         return "bg-[#F2F3F8] text-[#404454]"
+      case ProposalBadgeType.soon:
+        return "bg-[#D6E4FF] text-[#0E4CAF]"
       default:
         return "bg-gray-200 text-gray-800" // Default styling
     }
