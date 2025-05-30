@@ -10,7 +10,7 @@ const ProposalCard = ({ children, rounded = false }: ProposalCardProps) => {
         rounded ? "" : "rounded-t-lg"
       }`}
     >
-      <div className="proposal-card-content flex flex-row">{children}</div>
+      <div className="proposal-card-content flex flex-row gap-2 justify-between">{children}</div>
     </div>
   )
 }
