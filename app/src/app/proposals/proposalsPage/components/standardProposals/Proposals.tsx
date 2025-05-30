@@ -24,7 +24,7 @@ interface StandardProposalProps {
     href: string
   }
 }
-const StandardProposal = (props: StandardProposalProps) => {
+const Proposal = (props: StandardProposalProps) => {
   return (
     <ProposalCard rounded={props.rounded || false}>
       <ProposalBadge text={props.badge.text} type={props.badge.badgeType} />
@@ -42,22 +42,35 @@ const StandardProposal = (props: StandardProposalProps) => {
 }
 interface StandardProposalsProps {
   proposals: StandardProposalProps[]
+  heading?: string
+  subheading?: string
 }
-const StandardProposals = ({ proposals }: StandardProposalsProps) => {
+const Proposals = ({
+  heading,
+  subheading,
+  proposals,
+}: StandardProposalsProps) => {
   return (
     <div className="flex flex-col" style={{ maxWidth: "1000px" }}>
       <div>
-        <h4 className="mb-4 text-h4 w-24 h-7 leading-[0px] tracking-[0%] align-middle">
-          Proposals
-        </h4>
+        {heading && (
+          <h4 className="mb-4 text-h4 w-24 h-7 leading-[0px] tracking-[0%] align-middle">
+            {heading}
+          </h4>
+        )}
+        {subheading && (
+          <p className="w-[617px] h-[24px] font-normal text-base leading-[0px] tracking-[0%]">
+            {subheading}
+          </p>
+        )}
       </div>
       <div>
         {proposals.map((proposal, index) => (
-          <StandardProposal key={index} rounded={index === 0} {...proposal} />
+          <Proposal key={index} rounded={index === 0} {...proposal} />
         ))}
       </div>
     </div>
   )
 }
 
-export default StandardProposals
+export default Proposals

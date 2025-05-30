@@ -1,4 +1,4 @@
-import StandardProposals from "@/app/proposals/proposalsPage/components/standardProposals/StandardProposals"
+import Proposals from "@/app/proposals/proposalsPage/components/standardProposals/Proposals"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 
 const MOCKDATA = {
@@ -65,7 +65,7 @@ const Page = () => {
       <h1 className="w-[66.5rem] h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
         Governance
       </h1>
-      <StandardProposals proposals={MOCKDATA.proposals} />
+      <Proposals proposals={MOCKDATA.proposals} heading="Proposals" />
     </main>
   )
 }
