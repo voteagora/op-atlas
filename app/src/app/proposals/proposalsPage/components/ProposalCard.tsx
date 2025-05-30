@@ -7,7 +7,7 @@ const ProposalCard = ({ children, rounded = false }: ProposalCardProps) => {
   return (
     <div
       className={`proposal-card-container p-6 border border-border ${
-        rounded ? "" : "rounded-t-lg"
+        rounded ? "rounded-t-lg" : ""
       }`}
     >
       <div className="proposal-card-content flex flex-row gap-2 justify-between items-center">
