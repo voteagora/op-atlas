@@ -136,8 +136,8 @@ const Page = () => {
   const selfNominations = proposals.selfNominations
 
   return (
-    <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] mx-auto">
-      <div className="flex flex-col gap-12">
+    <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 px-[13.5rem]">
+      <div className="flex flex-col gap-12 w-full max-w-[1064px]">
         <h1 className="w-full h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
           Governance
         </h1>
