@@ -20,7 +20,7 @@ const CONTRACT_SCHEMA_ID =
     ? "0xb4c6ea838744caa6f0bfce726c0223cffefb94d98e5690f818cf0e2800e7a8f2"
     : "0x5560b68760b2ec5a727e6a66e1f9754c307384fe7624ae4e0138c530db14a70b"
 
-const CITIZEN_SCHEMA_ID =
+export const CITIZEN_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
     : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
@@ -313,6 +313,19 @@ export async function revokeContractAttestations(attestationIds: string[]) {
   )
 }
 
+export async function revokeCitizenAttestation(attestationId: string) {
+  const isActive = await isAttestationActive(attestationId)
+  if (!isActive) {
+    return
+  }
+
+  return processAttestationsInBatches(
+    [attestationId],
+    async (batch) => revokeMultiAttestations(CITIZEN_SCHEMA_ID, batch),
+    20,
+  )
+}
+
 function buildProjectMetadataAttestation({
   farcasterId,
   projectId,
@@ -461,4 +474,16 @@ export async function createCitizenAttestation({
   })
 
   return await tx.wait()
+}
+
+export async function isAttestationActive(
+  attestationId: string,
+): Promise<boolean> {
+  try {
+    const attestation = await eas.getAttestation(attestationId)
+    return attestation !== null && !attestation.revocationTime
+  } catch (error) {
+    console.warn("Error checking attestation status:", error)
+    return false
+  }
 }
