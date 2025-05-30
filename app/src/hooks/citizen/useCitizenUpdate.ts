@@ -13,6 +13,7 @@ export const useCitizenUpdate = (userId: string) => {
   const { invalidate } = useCitizen({ userId, enabled: false })
 
   const call = (citizen: {
+    type?: string
     address?: string
     attestationId?: string
     timeCommitment?: string

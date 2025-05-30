@@ -1,3 +1,9 @@
+export const CITIZEN_TYPES = {
+  user: "user",
+  chain: "chain",
+  project: "project",
+} as const
+
 export const EXTENDED_TAG_BY_ENTITY = {
   citizen: "Citizen",
   gov_contribution: "S7 Elected Official",

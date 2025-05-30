@@ -5,7 +5,10 @@ import { getUserCitizen, upsertCitizen } from "@/db/citizens"
 import { getUserById } from "@/db/users"
 import { createCitizenAttestation } from "@/lib/eas"
 
+import { CITIZEN_TYPES } from "../constants"
+
 export const updateCitizen = async (citizen: {
+  type?: string
   address?: string
   attestationId?: string
   timeCommitment?: string
@@ -79,6 +82,7 @@ export const attestCitizen = async () => {
       citizen: {
         address: primaryAddress,
         attestationId,
+        type: CITIZEN_TYPES.user,
       },
     })
 

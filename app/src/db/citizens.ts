@@ -10,6 +10,7 @@ export async function upsertCitizen({
 }: {
   id: string
   citizen: {
+    type?: string
     address?: string
     attestationId?: string
     timeCommitment?: string

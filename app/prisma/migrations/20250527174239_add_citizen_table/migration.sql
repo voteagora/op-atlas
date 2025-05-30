@@ -3,6 +3,7 @@ CREATE TABLE "Citizen" (
     "id" SERIAL NOT NULL,
     "userId" TEXT NOT NULL,
     "address" TEXT,
+    "type" TEXT NOT NULL,
     "attestationId" TEXT,
     "timeCommitment" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

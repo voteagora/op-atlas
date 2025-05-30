@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
+import { CITIZEN_TYPES } from "@/lib/constants"
 
 import { DialogProps } from "./types"
 
@@ -46,11 +47,10 @@ function CitizenshipGovernanceCommitmentDialog({
   }, [isSuccess, onOpenChange])
 
   const handleUpdate = async () => {
-    try {
-      await updateCitizen({ timeCommitment: selectedTime })
-    } catch (error) {
-      // Error is already handled by the toast in useCitizenUpdate
-    }
+    updateCitizen({
+      timeCommitment: selectedTime,
+      type: CITIZEN_TYPES.user,
+    })
   }
 
   return (
