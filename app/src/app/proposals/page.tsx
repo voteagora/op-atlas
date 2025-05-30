@@ -1,4 +1,4 @@
-import Proposals from "@/app/proposals/proposalsPage/components/standardProposals/Proposals"
+import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 
 const MOCKDATA = {
