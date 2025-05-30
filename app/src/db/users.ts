@@ -901,7 +901,7 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
     const attestationId = await createCitizenAttestation({
       to: address,
       farcasterId: parseInt(user?.farcasterId ?? "0"),
-      selectionMethod: "User",
+      selectionMethod: citizen.type,
     })
 
     await upsertCitizen({

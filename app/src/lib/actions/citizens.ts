@@ -73,7 +73,7 @@ export const attestCitizen = async () => {
     const attestationId = await createCitizenAttestation({
       to: primaryAddress,
       farcasterId: user.farcasterId ? parseInt(user.farcasterId) : 0,
-      selectionMethod: "User",
+      selectionMethod: CITIZEN_TYPES.user,
     })
 
     // Update citizen record
