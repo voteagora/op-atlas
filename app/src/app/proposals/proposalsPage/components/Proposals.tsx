@@ -31,23 +31,23 @@ const Proposal = (props: StandardProposalProps) => {
       if (props.voted) {
         return {
           text: "You voted",
-          styling: "text-[#0DA529]",
+          styling: "text-success-foreground",
         }
       }
       return {
         text: "You haven't voted yet",
-        styling: "text-[#FF0420]",
+        styling: "text-primary",
       }
     } else if (props.badge.badgeType === ProposalBadgeType.past) {
       if (props.passed) {
         return {
           text: "Result Positive ie: Passed",
-          styling: "text-[#0DA529]",
+          styling: "text-success-foreground",
         }
       }
       return {
         text: "Result Negative ie: Failed",
-        styling: "text-[#FF0420]",
+        styling: "text-primary",
       }
     }
     return undefined
