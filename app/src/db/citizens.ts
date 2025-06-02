@@ -37,3 +37,25 @@ export async function getUserCitizen(id: string): Promise<Citizen | null> {
     },
   })
 }
+
+export async function getCitizenVotes(id: string): Promise<any> {
+  return prisma.citizen.findMany({
+    where: {
+      userId: id,
+    },
+  })
+}
+
+export async function getCitizenProposalVote(
+  id: string,
+  proposalId: string,
+): Promise<any> {
+  return prisma.citizenVotes.findUnique({
+    where: {
+      citizen_id_proposal_id: {
+        citizen_id: id,
+        proposal_id: proposalId,
+      },
+    },
+  })
+}
