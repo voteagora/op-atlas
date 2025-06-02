@@ -1,5 +1,6 @@
 import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
+import { getUsersCitizens } from "@/db/citizens"
 
 const MOCKDATA = {
   standardProposals: [
@@ -128,18 +129,45 @@ const getMockProposalData = () => {
   return MOCKDATA
 }
 
-const Page = async () => {
-  // Get the proposals page
-
+const getProposalData = async () => {
   const proposalResponse = await fetch(
     process.env.NEXT_PUBLIC_VERCEL_URL
       ? `http://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/v1/proposals`
       : `/api/proposals`,
   )
 
-  const proposals = await proposalResponse.json()
-  const standardProposals = proposals.standardProposals
-  const selfNominations = proposals.selfNominations
+  return proposalResponse.json()
+}
+
+const enrichProposalData = (proposals: any, citizensData: any) => {
+  console.log(proposals)
+  console.log(citizensData)
+}
+
+const getEnrichedProposalData = async () => {
+  try {
+    // Get the proposal data from the API
+    const proposalData = await getProposalData()
+    try {
+      // Get the citizen data from DB
+      const citizensData = await getUsersCitizens()
+      // Enrich the proposal data with citizen data for conditional vote status rendering
+      return enrichProposalData(proposalData, citizensData)
+    } catch (error) {
+      console.error("Failed to fetch Citizen Data")
+    }
+    // If we can't get citizen data, just return the proposal data
+    return proposalData.standardProposals
+  } catch (error) {
+    console.error("Failed to fetch Proposal Data")
+  }
+}
+
+const Page = async () => {
+  // Get the proposals page
+
+  const standardProposals: any[] = await getEnrichedProposalData()
+  const selfNominations: any = [] // TODO
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] mx-auto">
