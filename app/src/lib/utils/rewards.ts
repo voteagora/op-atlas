@@ -128,7 +128,10 @@ export function formatRecurringRewards(
         }
       }),
       kycTeam: kycTeam ?? undefined,
-      streams: kycTeam?.rewardStreams.flatMap((stream) => stream.streams) ?? [],
+      streams:
+        kycTeam?.rewardStreams
+          .filter((stream) => stream.roundId === round)
+          .flatMap((stream) => stream.streams) ?? [],
     }
   })
 }
