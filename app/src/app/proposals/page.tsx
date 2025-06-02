@@ -1,133 +1,7 @@
-import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
+import { UIProposal } from "@/app/api/v1/proposals/route"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
-import { getUsersCitizens } from "@/db/citizens"
-
-const MOCKDATA = {
-  standardProposals: [
-    {
-      badge: {
-        badgeType: ProposalBadgeType.soon,
-      },
-      textContent: {
-        title: "Developer Advisory Board: Audit Request Team",
-        subtitle: "Voters, Citizens, Delegates",
-      },
-      dates: {
-        startDate: "05-30-2025",
-        endDate: "06-07-2025",
-      },
-      arrow: {
-        href: "/proposals/1",
-      },
-    },
-    {
-      badge: {
-        badgeType: ProposalBadgeType.now,
-      },
-      voted: true,
-      textContent: {
-        title: "Developer Advisory Board: Governance Missions Team",
-        subtitle: "Voters, Citizens, Delegates",
-      },
-      dates: {
-        startDate: "05-30-2025",
-        endDate: "06-07-2025",
-      },
-      arrow: {
-        href: "/proposals/2",
-      },
-    },
-    {
-      badge: {
-        badgeType: ProposalBadgeType.now,
-      },
-      voted: false,
-      textContent: {
-        title: "Developer Advisory Board: Foundation Missions Team",
-        subtitle: "Voters, Citizens, Delegates",
-      },
-      dates: {
-        startDate: "05-30-2025",
-        endDate: "06-07-2025",
-      },
-      arrow: {
-        href: "/proposals/3",
-      },
-    },
-    {
-      badge: {
-        badgeType: ProposalBadgeType.past,
-      },
-      passed: false,
-      textContent: {
-        title: "Lore ipsum Doler: Amet",
-        subtitle: "Voters, Citizens, Delegates",
-      },
-      dates: {
-        startDate: "05-30-2025",
-        endDate: "06-07-2025",
-      },
-      arrow: {
-        href: "/proposals/5",
-      },
-    },
-    {
-      badge: {
-        badgeType: ProposalBadgeType.past,
-      },
-      passed: true,
-      textContent: {
-        title: "Lore ipsum Doler: Amet",
-        subtitle: "Voters, Citizens, Delegates",
-      },
-      dates: {
-        startDate: "05-30-2025",
-        endDate: "06-07-2025",
-      },
-      arrow: {
-        href: "/proposals/6",
-      },
-    },
-  ],
-  selfNominations: [
-    // {
-    //   badge: {
-    //     badgeType: ProposalBadgeType.now,
-    //   },
-    //   voted: false,
-    //   textContent: {
-    //     title: "Developer Advisory Board: Audit Request Team",
-    //   },
-    //   dates: {
-    //     startDate: "05-30-2025",
-    //     endDate: "06-07-2025",
-    //   },
-    //   arrow: {
-    //     href: "/proposals/5",
-    //   },
-    // },
-    // {
-    //   badge: {
-    //     badgeType: ProposalBadgeType.now,
-    //   },
-    //   voted: true,
-    //   textContent: {
-    //     title: "Developer Advisory Board: Audit Request Team",
-    //   },
-    //   dates: {
-    //     startDate: "05-30-2025",
-    //     endDate: "06-07-2025",
-    //   },
-    //   arrow: {
-    //     href: "/proposals/8",
-    //   },
-    // },
-  ],
-}
-
-const getMockProposalData = () => {
-  return MOCKDATA
-}
+import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
+import { getUserCitizen } from "@/db/citizens"
 
 const getProposalData = async () => {
   const proposalResponse = await fetch(
@@ -139,35 +13,80 @@ const getProposalData = async () => {
   return proposalResponse.json()
 }
 
-const enrichProposalData = (proposals: any, citizensData: any) => {
-  console.log(proposals)
-  console.log(citizensData)
+const enrichProposalData = (
+  proposals: { standardProposals: UIProposal[]; selfNominations: UIProposal[] },
+  citizen: any,
+) => {
+  // Create a map of proposal IDs to their vote status for quick lookup
+  const proposalVoteMap = new Map()
+
+  // Check if citizen has votes
+  if (citizen && citizen.votes && Array.isArray(citizen.votes)) {
+    // Process each vote from the single citizen
+    citizen.votes.forEach(
+      (vote: { proposalId: string; voteStatus: string }) => {
+        proposalVoteMap.set(vote.proposalId, vote.voteStatus)
+      },
+    )
+  }
+
+  // Update standard proposals with vote information
+  const enrichedStandardProposals = proposals.standardProposals.map(
+    (proposal: UIProposal) => {
+      const voteStatus = proposalVoteMap.get(proposal.id)
+      return {
+        ...proposal,
+        // If we have a vote for this proposal, mark it as voted
+        voted: voteStatus ? true : proposal.voted,
+      }
+    },
+  )
+
+  // Update self nominations with vote information
+  const enrichedSelfNominations = proposals.selfNominations.map(
+    (proposal: UIProposal) => {
+      const voteStatus = proposalVoteMap.get(proposal.id)
+      return {
+        ...proposal,
+        // If we have a vote for this proposal, mark it as voted
+        voted: voteStatus ? true : proposal.voted,
+      }
+    },
+  )
+
+  return {
+    standardProposals: enrichedStandardProposals,
+    selfNominations: enrichedSelfNominations,
+  }
 }
 
 const getEnrichedProposalData = async () => {
+  const userId = "???"
   try {
     // Get the proposal data from the API
     const proposalData = await getProposalData()
     try {
       // Get the citizen data from DB
-      const citizensData = await getUsersCitizens()
+      const citizensData = await getUserCitizen(userId)
       // Enrich the proposal data with citizen data for conditional vote status rendering
       return enrichProposalData(proposalData, citizensData)
     } catch (error) {
       console.error("Failed to fetch Citizen Data")
+      // If we can't get citizen data, just return the proposal data as is
+      return proposalData
     }
-    // If we can't get citizen data, just return the proposal data
-    return proposalData.standardProposals
   } catch (error) {
     console.error("Failed to fetch Proposal Data")
+    // If we can't get proposal data, return empty arrays
+    return { standardProposals: [], selfNominations: [] }
   }
 }
 
 const Page = async () => {
   // Get the proposals page
 
-  const standardProposals: any[] = await getEnrichedProposalData()
-  const selfNominations: any = [] // TODO
+  const proposalData = await getEnrichedProposalData()
+  const { standardProposals, selfNominations } = proposalData
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] mx-auto">
