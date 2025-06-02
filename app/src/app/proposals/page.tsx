@@ -89,38 +89,38 @@ const MOCKDATA = {
     },
   ],
   selfNominations: [
-    {
-      badge: {
-        badgeType: ProposalBadgeType.now,
-      },
-      voted: false,
-      textContent: {
-        title: "Developer Advisory Board: Audit Request Team",
-      },
-      dates: {
-        startDate: "05-30-2025",
-        endDate: "06-07-2025",
-      },
-      arrow: {
-        href: "/proposals/5",
-      },
-    },
-    {
-      badge: {
-        badgeType: ProposalBadgeType.now,
-      },
-      voted: true,
-      textContent: {
-        title: "Developer Advisory Board: Audit Request Team",
-      },
-      dates: {
-        startDate: "05-30-2025",
-        endDate: "06-07-2025",
-      },
-      arrow: {
-        href: "/proposals/8",
-      },
-    },
+    // {
+    //   badge: {
+    //     badgeType: ProposalBadgeType.now,
+    //   },
+    //   voted: false,
+    //   textContent: {
+    //     title: "Developer Advisory Board: Audit Request Team",
+    //   },
+    //   dates: {
+    //     startDate: "05-30-2025",
+    //     endDate: "06-07-2025",
+    //   },
+    //   arrow: {
+    //     href: "/proposals/5",
+    //   },
+    // },
+    // {
+    //   badge: {
+    //     badgeType: ProposalBadgeType.now,
+    //   },
+    //   voted: true,
+    //   textContent: {
+    //     title: "Developer Advisory Board: Audit Request Team",
+    //   },
+    //   dates: {
+    //     startDate: "05-30-2025",
+    //     endDate: "06-07-2025",
+    //   },
+    //   arrow: {
+    //     href: "/proposals/8",
+    //   },
+    // },
   ],
 }
 
@@ -141,11 +141,13 @@ const Page = () => {
         <h1 className="w-full h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
           Governance
         </h1>
-        <Proposals
-          proposals={selfNominations}
-          heading="Self Nominate for a governance role in Season 8 & 9"
-          subheading="Calling all canidates! Submit your nominations from [date] - [date]"
-        />
+        {selfNominations.length > 0 && (
+          <Proposals
+            proposals={selfNominations}
+            heading="Self Nominate for a governance role in Season 8 & 9"
+            subheading="Calling all canidates! Submit your nominations from [date] - [date]"
+          />
+        )}
         <Proposals proposals={standardProposals} heading="Proposals" />
       </div>
     </main>
