@@ -11,7 +11,7 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
 
-export const ProjectRequirements = ({ userId }: { userId: string }) => {
+export const Requirements = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId })
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)

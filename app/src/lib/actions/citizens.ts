@@ -1,7 +1,7 @@
 "use server"
 
 import { ProjectContract } from "@prisma/client"
-import { cookies, headers } from "next/headers"
+import { headers } from "next/headers"
 
 import { auth } from "@/auth"
 import { getUserCitizen, upsertCitizen } from "@/db/citizens"
@@ -10,7 +10,6 @@ import { getUserOrganizationsWithDetails } from "@/db/organizations"
 import { getUserAdminProjectsWithDetail } from "@/db/projects"
 import { getUserById } from "@/db/users"
 import { CITIZEN_TYPES } from "@/lib/constants"
-
 
 interface S8QualifyingUser {
   id: string
@@ -27,12 +26,10 @@ interface S8QualifyingProject {
   address: string
 }
 
-export const isQualifyingForS8Citizenship = async (): Promise<Array<{
+export const s8CitizenshipQualification = async (): Promise<{
   type: string
-  qualifyingAddress?: string
-  qualifyingOrgId?: string
-  qualifyingProjectId?: string
-}> | null> => {
+  identifier: string
+} | null> => {
   const session = await auth()
   const userId = session?.user?.id
 
@@ -52,36 +49,22 @@ export const isQualifyingForS8Citizenship = async (): Promise<Array<{
     getUserAdminProjectsWithDetail({ userId }),
   ])
 
-  const qualifyingResults = []
-
-  // Check S8QualifyingUser addresses
-  const qualifyingUsers = await prisma.$queryRaw<S8QualifyingUser[]>`
-    SELECT * FROM "S8QualifyingUser"
-    WHERE address = ANY(${user.addresses.map((addr) => addr.address)})
-  `
-
-  if (qualifyingUsers.length > 0) {
-    qualifyingResults.push({
-      type: CITIZEN_TYPES.user,
-      qualifyingAddress: qualifyingUsers[0].address,
-    })
-  }
-
-  // Check S8QualifyingChain organizations
+  // Check S8QualifyingChain organizations (highest priority)
   const qualifyingChains = await prisma.$queryRaw<S8QualifyingChain[]>`
     SELECT * FROM "S8QualifyingChain"
-    WHERE "organizationId" = ANY(${userOrgs?.organizations.map((org) => org.organization.id) || []
+    WHERE "organizationId" = ANY(${
+      userOrgs?.organizations.map((org) => org.organization.id) || []
     })
   `
 
   if (qualifyingChains.length > 0) {
-    qualifyingResults.push({
+    return {
       type: CITIZEN_TYPES.chain,
-      qualifyingOrgId: qualifyingChains[0].organizationId,
-    })
+      identifier: qualifyingChains[0].organizationId,
+    }
   }
 
-  // Check S8QualifyingProject addresses
+  // Check S8QualifyingProject addresses (second priority)
   const projectContracts =
     userProjects?.projects.flatMap(({ project }) => {
       // Safely access contracts if present
@@ -100,13 +83,26 @@ export const isQualifyingForS8Citizenship = async (): Promise<Array<{
   `
 
   if (qualifyingProjects.length > 0) {
-    qualifyingResults.push({
+    return {
       type: CITIZEN_TYPES.project,
-      qualifyingProjectId: qualifyingProjects[0].id,
-    })
+      identifier: qualifyingProjects[0].address,
+    }
   }
 
-  return qualifyingResults
+  // Check S8QualifyingUser addresses (lowest priority)
+  const qualifyingUsers = await prisma.$queryRaw<S8QualifyingUser[]>`
+    SELECT * FROM "S8QualifyingUser"
+    WHERE address = ANY(${user.addresses.map((addr) => addr.address)})
+  `
+
+  if (qualifyingUsers.length > 0) {
+    return {
+      type: CITIZEN_TYPES.user,
+      identifier: qualifyingUsers[0].address,
+    }
+  }
+
+  return null
 }
 
 export const updateCitizen = async (citizen: {
@@ -171,18 +167,21 @@ export const attestCitizen = async () => {
       }
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/eas/attestation`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": headers().get("cookie") || "",
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/eas/attestation`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: headers().get("cookie") || "",
+        },
+        body: JSON.stringify({
+          address: primaryAddress,
+          farcasterId: user.farcasterId,
+          selectionMethod: CITIZEN_TYPES.user,
+        }),
       },
-      body: JSON.stringify({
-        address: primaryAddress,
-        farcasterId: user.farcasterId,
-        selectionMethod: CITIZEN_TYPES.user
-      }),
-    })
+    )
 
     if (!response.ok) {
       const error = await response.json()
@@ -221,18 +220,20 @@ export const revokeCitizen = async (attestationId: string) => {
   }
 
   try {
-
     // Call the API to revoke the attestation
-    const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/eas/attestation`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": headers().get("cookie") || "",
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/eas/attestation`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: headers().get("cookie") || "",
+        },
+        body: JSON.stringify({
+          attestationId,
+        }),
       },
-      body: JSON.stringify({
-        attestationId,
-      }),
-    })
+    )
 
     if (!response.ok) {
       const error = await response.json()
@@ -248,4 +249,3 @@ export const revokeCitizen = async (attestationId: string) => {
     }
   }
 }
-
