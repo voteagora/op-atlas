@@ -197,7 +197,7 @@ export const processSuperfluidStream = async (
   roundId: string,
 ) => {
   // Create RewardStream
-  const rewardStream = await createRewardStream(stream, roundId)
+  const rewardStreamId = await createRewardStream(stream, roundId)
   // Create SuperfluidStream
-  await createOrUpdateSuperfluidStream(stream, rewardStream?.id)
+  await createOrUpdateSuperfluidStream(stream, rewardStreamId)
 }
