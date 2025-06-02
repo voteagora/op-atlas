@@ -124,8 +124,16 @@ const MOCKDATA = {
   ],
 }
 
+const getMockProposalData = () => {
+  return MOCKDATA
+}
+
 const Page = () => {
   // Get the proposals page
+
+  const proposals = getMockProposalData()
+  const standardProposals = proposals.standardProposals
+  const selfNominations = proposals.selfNominations
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] mx-auto">
@@ -133,12 +141,12 @@ const Page = () => {
         <h1 className="w-full h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
           Governance
         </h1>
-        <Proposals
-          proposals={MOCKDATA.selfNominations}
-          heading="Self Nominate for a governance role in Season 8 & 9"
-          subheading="Calling all canidates! Submit your nominations from [date] - [date]"
-        />
-        <Proposals proposals={MOCKDATA.standardProposals} heading="Proposals" />
+        {/*<Proposals*/}
+        {/*  proposals={MOCKDATA.selfNominations}*/}
+        {/*  heading="Self Nominate for a governance role in Season 8 & 9"*/}
+        {/*  subheading="Calling all canidates! Submit your nominations from [date] - [date]"*/}
+        {/*/>*/}
+        <Proposals proposals={standardProposals} heading="Proposals" />
       </div>
     </main>
   )
