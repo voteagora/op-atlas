@@ -1,7 +1,7 @@
 import { UIProposal } from "@/app/api/v1/proposals/route"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
-import { getUserCitizen } from "@/db/citizens"
+import { getCitizenVotes, getUserCitizen } from "@/db/citizens"
 
 const getProposalData = async () => {
   const proposalResponse = await fetch(
@@ -11,6 +11,19 @@ const getProposalData = async () => {
   )
 
   return proposalResponse.json()
+}
+
+const getCitizenVoteData = async (userId: string) => {
+  const citizen = await getUserCitizen(userId)
+  if (!citizen) {
+    return []
+  }
+  try {
+    return await getCitizenVotes(citizen.id)
+  } catch (error) {
+    console.error("Failed to fetch Citizen Votes")
+    return []
+  }
 }
 
 const enrichProposalData = (
@@ -67,9 +80,9 @@ const getEnrichedProposalData = async () => {
     const proposalData = await getProposalData()
     try {
       // Get the citizen data from DB
-      const citizensData = await getUserCitizen(userId)
+      const CitizenVoteData = await getCitizenVoteData(userId)
       // Enrich the proposal data with citizen data for conditional vote status rendering
-      return enrichProposalData(proposalData, citizensData)
+      return enrichProposalData(proposalData, CitizenVoteData)
     } catch (error) {
       console.error("Failed to fetch Citizen Data")
       // If we can't get citizen data, just return the proposal data as is
