@@ -128,10 +128,16 @@ const getMockProposalData = () => {
   return MOCKDATA
 }
 
-const Page = () => {
+const Page = async () => {
   // Get the proposals page
 
-  const proposals = getMockProposalData()
+  const proposalResponse = await fetch(
+    process.env.NEXT_PUBLIC_VERCEL_URL
+      ? `http://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/v1/proposals`
+      : `/api/proposals`,
+  )
+
+  const proposals = await proposalResponse.json()
   const standardProposals = proposals.standardProposals
   const selfNominations = proposals.selfNominations
 
