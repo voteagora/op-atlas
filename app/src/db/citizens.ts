@@ -125,3 +125,7 @@ export async function getCitizenProposalVote(
     },
   })
 }
+
+export async function getUsersCitizens(): Promise<Citizen[]> {
+  return prisma.citizen.findMany()
+}
