@@ -38,10 +38,10 @@ export async function getUserCitizen(id: string): Promise<Citizen | null> {
   })
 }
 
-export async function getCitizenVotes(id: string): Promise<any> {
-  return prisma.citizen.findMany({
+export async function getCitizenVotes(citizenId: number): Promise<any> {
+  return prisma.citizenVotes.findMany({
     where: {
-      userId: id,
+      citizen_id: citizenId,
     },
   })
 }
