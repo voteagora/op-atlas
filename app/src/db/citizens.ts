@@ -1,7 +1,6 @@
 "use server"
 
 import { Citizen } from "@prisma/client"
-
 import { prisma } from "@/db/client"
 
 export async function upsertCitizen({
@@ -10,7 +9,7 @@ export async function upsertCitizen({
 }: {
   id: string
   citizen: {
-    type?: string
+    type: string
     address?: string
     attestationId?: string
     timeCommitment?: string

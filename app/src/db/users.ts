@@ -12,16 +12,14 @@ import { AggregatedType } from "eas-indexer/src/types"
 import { getAddress, isAddress } from "viem"
 
 import { auth } from "@/auth"
-import { upsertCitizen } from "@/db/citizens"
-import { getCitizenByUserId } from "@/lib/actions/citizens"
+import { attestCitizen, getCitizenByUserId, revokeCitizen } from "@/lib/actions/citizens"
 import {
   CONTRIBUTOR_ELIGIBLE_PROJECTS,
   EXTENDED_TAG_BY_ENTITY,
 } from "@/lib/constants"
-import { createCitizenAttestation, revokeCitizenAttestation } from "@/lib/eas"
 import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
-import { generateTemporaryUsername } from "@/lib/utils/username"
 
+import { generateTemporaryUsername } from "@/lib/utils/username"
 import { prisma } from "./client"
 
 export type Entity = keyof ExtendedAggregatedType
@@ -72,10 +70,10 @@ export async function getUserById(userId: string) {
 
 export async function getUserByPrivyDid(privyDid: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   return prisma.user.findFirst({
@@ -154,10 +152,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-      addresses: UserAddress[]
-      interaction: UserInteraction | null
-      emails: UserEmail[]
-    })
+    addresses: UserAddress[]
+    interaction: UserInteraction | null
+    emails: UserEmail[]
+  })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -322,24 +320,24 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-        prisma.userEmail.delete({
-          where: {
-            id: currentEmail.id,
-          },
-        }),
-      ]
+      prisma.userEmail.delete({
+        where: {
+          id: currentEmail.id,
+        },
+      }),
+    ]
     : []
 
   const createEmail = email
     ? [
-        prisma.userEmail.create({
-          data: {
-            email,
-            userId: id,
-            verified: verified ?? false,
-          },
-        }),
-      ]
+      prisma.userEmail.create({
+        data: {
+          email,
+          userId: id,
+          verified: verified ?? false,
+        },
+      }),
+    ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])
@@ -892,26 +890,11 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
   const citizen = await getCitizenByUserId(userId)
   const user = await getUserById(userId)
 
-  const existingPrimary = user?.addresses.find((addr) => addr.primary)?.address
-
-  // If user has an active attestation, revoke it and create a new one
-  if (citizen?.attestationId && citizen.address !== address) {
-    await revokeCitizenAttestation(citizen.attestationId)
-
-    const attestationId = await createCitizenAttestation({
-      to: address,
-      farcasterId: parseInt(user?.farcasterId ?? "0"),
-      selectionMethod: citizen.type,
-    })
-
-    await upsertCitizen({
-      id: userId,
-      citizen: {
-        address,
-        attestationId,
-      },
-    })
+  if (!user) {
+    throw new Error("User not found")
   }
+
+  const existingPrimary = user.addresses.find((addr) => addr.primary)?.address
 
   if (existingPrimary) {
     await prisma.userAddress.update({
@@ -938,6 +921,12 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
       primary: true,
     },
   })
+
+  // If user has an active attestation, revoke it and create a new one
+  if (citizen?.attestationId && citizen.address !== address) {
+    await revokeCitizen(citizen.attestationId)
+    await attestCitizen()
+  }
 }
 
 export async function updateUser({

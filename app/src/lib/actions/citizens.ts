@@ -1,6 +1,7 @@
 "use server"
 
 import { ProjectContract } from "@prisma/client"
+import { cookies, headers } from "next/headers"
 
 import { auth } from "@/auth"
 import { getUserCitizen, upsertCitizen } from "@/db/citizens"
@@ -9,7 +10,7 @@ import { getUserOrganizationsWithDetails } from "@/db/organizations"
 import { getUserAdminProjectsWithDetail } from "@/db/projects"
 import { getUserById } from "@/db/users"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { createCitizenAttestation } from "@/lib/eas"
+
 
 interface S8QualifyingUser {
   id: string
@@ -69,8 +70,7 @@ export const isQualifyingForS8Citizenship = async (): Promise<Array<{
   // Check S8QualifyingChain organizations
   const qualifyingChains = await prisma.$queryRaw<S8QualifyingChain[]>`
     SELECT * FROM "S8QualifyingChain"
-    WHERE "organizationId" = ANY(${
-      userOrgs?.organizations.map((org) => org.organization.id) || []
+    WHERE "organizationId" = ANY(${userOrgs?.organizations.map((org) => org.organization.id) || []
     })
   `
 
@@ -110,7 +110,7 @@ export const isQualifyingForS8Citizenship = async (): Promise<Array<{
 }
 
 export const updateCitizen = async (citizen: {
-  type?: string
+  type: string
   address?: string
   attestationId?: string
   timeCommitment?: string
@@ -171,14 +171,28 @@ export const attestCitizen = async () => {
       }
     }
 
-    // Create attestation
-    const attestationId = await createCitizenAttestation({
-      to: primaryAddress,
-      farcasterId: user.farcasterId ? parseInt(user.farcasterId) : 0,
-      selectionMethod: CITIZEN_TYPES.user,
+    const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/eas/attestation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Cookie": headers().get("cookie") || "",
+      },
+      body: JSON.stringify({
+        address: primaryAddress,
+        farcasterId: user.farcasterId,
+        selectionMethod: CITIZEN_TYPES.user
+      }),
     })
 
-    // Update citizen record
+    if (!response.ok) {
+      const error = await response.json()
+      return {
+        error: error.error || "Failed to attest citizen",
+      }
+    }
+
+    const { attestationId } = await response.json()
+
     const result = await upsertCitizen({
       id: userId,
       citizen: {
@@ -187,7 +201,6 @@ export const attestCitizen = async () => {
         type: CITIZEN_TYPES.user,
       },
     })
-
     return result
   } catch (error) {
     console.error("Error attesting citizen:", error)
@@ -196,3 +209,43 @@ export const attestCitizen = async () => {
     }
   }
 }
+
+export const revokeCitizen = async (attestationId: string) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  try {
+
+    // Call the API to revoke the attestation
+    const response = await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL}/api/eas/attestation`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Cookie": headers().get("cookie") || "",
+      },
+      body: JSON.stringify({
+        attestationId,
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      return {
+        error: error.error || "Failed to revoke citizen attestation",
+      }
+    }
+
+    return { success: true }
+  } catch (error) {
+    return {
+      error: "Failed to revoke citizen attestation",
+    }
+  }
+}
+
