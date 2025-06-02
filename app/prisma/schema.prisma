@@ -265,6 +265,7 @@ model Project {
   
   sourceProjects ProjectOSOAtlasRelatedProjects[] @relation("sourceProject")
   targetProjects ProjectOSOAtlasRelatedProjects[] @relation("targetProject")
+  votes         OffChainVote[]
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
@@ -732,4 +733,27 @@ model ProjectOSOAtlasRelatedProjects {
   @@index([relatedProjectId])
 
   @@unique([projectId, tranche, relatedProjectId])
+}
+
+model OffChainVote {
+  id              String     @id @default(uuid())
+  voterAddress    String     // Ethereum address of the voter
+  proposalId      String     // ID of the proposal being voted on
+  choice          Json       // JSON blob containing vote choice details
+  attestationId   String     // EAS attestation ID
+  transactionHash String?    // Hash of the transaction that created the vote
+  
+  // Optional relations to existing models
+  userId          String?
+  user            User?      @relation(fields: [userId], references: [id])
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+
+  @@index([voterAddress])
+  @@index([proposalId])
+  @@index([userId])
+  @@index([attestationId])
+  @@index([transactionHash])
 }
