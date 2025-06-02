@@ -33,7 +33,7 @@ export type OffChainProposal = {
   status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
 }
 
-// For your UI components
+// For UI
 export type UIProposal = {
   badge: {
     badgeType: ProposalBadgeType
