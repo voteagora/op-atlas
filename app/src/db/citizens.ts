@@ -129,20 +129,20 @@ export async function getCitizenProposalVote(
 export async function getCitizenVotes(citizenId: number): Promise<any> {
   return prisma.citizenVotes.findMany({
     where: {
-      citizen_id: citizenId,
+      citizenId: citizenId,
     },
   })
 }
 
 export async function getCitizenProposalVote(
-  id: string,
+  id: number,
   proposalId: string,
 ): Promise<any> {
   return prisma.citizenVotes.findUnique({
     where: {
-      citizen_id_proposal_id: {
-        citizen_id: id,
-        proposal_id: proposalId,
+      citizenId_proposalId: {
+        citizenId: id,
+        proposalId: proposalId,
       },
     },
   })
