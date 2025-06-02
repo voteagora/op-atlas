@@ -35,6 +35,7 @@ export type OffChainProposal = {
 
 // For UI
 export type UIProposal = {
+  id: string
   badge: {
     badgeType: ProposalBadgeType
   }
@@ -101,6 +102,7 @@ export const GET = async (req: NextRequest) => {
         }
 
         return {
+          id: proposal.id,
           badge: {
             badgeType,
           },
