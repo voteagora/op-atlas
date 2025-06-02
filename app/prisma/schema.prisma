@@ -540,8 +540,6 @@ model KYCTeam {
   id             String       @id @default(uuid())
   walletAddress  String       @unique
 
-  rewardStreamId String?
-
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   deletedAt      DateTime?
@@ -551,7 +549,7 @@ model KYCTeam {
   OrganizationKYCTeams       OrganizationKYCTeam[]
   superfludStream            SuperfluidStream[]
 
-  rewardStream   RewardStream? @relation(fields: [rewardStreamId], references: [id])
+  rewardStreams   RewardStream[]
 	
   @@index([walletAddress])
 }
@@ -661,12 +659,13 @@ model RewardStream { // This is used to track the ids for the streams
 		id         String         @id
     projects   String[]       // Immutable list of projectIds redundantly stored for reconciliation & validation
     roundId    String        
+    kycTeamId  String
 		
 		createdAt    DateTime     @default(now())    
 		
-		teams      KYCTeam[]
 		streams    SuperfluidStream[]
     round      FundingRound @relation(fields: [roundId], references: [id])
+    team       KYCTeam @relation(fields: [kycTeamId], references: [id])
 
     @@index([roundId])
 }
