@@ -5,6 +5,7 @@ import {
   KYCStreamTeam,
   KYCTeamWithTeam,
   RecurringRewardWithProject,
+  StreamWithKYCTeam,
 } from "../types"
 import { isKycTeamVerified } from "./kyc"
 
@@ -56,20 +57,22 @@ function calculateRewardAmounts(projectsWithRewards: ProjectWithRewards[]) {
     .map(([_, amounts]) => (amounts.length > 0 ? sumBigNumbers(amounts) : "0"))
 }
 
-export function processStream(teams: KYCStreamTeam[], streamId?: string) {
-  // Order teams by deletedAt: deletedAt is null for the current team -- current team comes last
-  const orderedTeams = teams.sort((a, b) => {
-    if (!a.deletedAt && !b.deletedAt)
-      throw new Error("Multiple active addresses detected")
-    if (!a.deletedAt) return 1
-    if (!b.deletedAt) return -1
-    return a.deletedAt.getTime() - b.deletedAt.getTime()
-  })
+export function processStream(
+  streams: StreamWithKYCTeam[],
+  currentTeam: KYCStreamTeam,
+  streamId?: string,
+) {
+  const orderedStreams = streams.sort(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(), // Sort by createdAt ascending
+  )
 
-  const currentTeam = orderedTeams[0]
+  const wallets = orderedStreams
+    .map((stream) => stream.kycTeam?.walletAddress)
+    .filter((wallet) => wallet !== undefined)
 
-  if (!currentTeam) {
-    throw new Error("No team found for stream")
+  // append current team's wallet address
+  if (!wallets.includes(currentTeam.walletAddress)) {
+    wallets.push(currentTeam.walletAddress)
   }
 
   const projectsWithRewards = currentTeam.projects.filter(
@@ -81,12 +84,9 @@ export function processStream(teams: KYCStreamTeam[], streamId?: string) {
       streamId ?? generateRewardStreamId(projectsWithRewards.map((p) => p.id)),
     projectIds: projectsWithRewards.map((project) => project.id),
     projectNames: projectsWithRewards.map((project) => project.name),
-    wallets: orderedTeams.map((team) => team.walletAddress),
+    wallets,
     KYCStatusCompleted: isKycTeamVerified(currentTeam),
-    amounts: [
-      calculateRewardAmounts(projectsWithRewards)[0],
-      calculateRewardAmounts(projectsWithRewards)[1],
-    ],
+    amounts: calculateRewardAmounts(projectsWithRewards),
   }
 }
 
@@ -123,7 +123,7 @@ export function formatRecurringRewards(
         }
       }),
       kycTeam: kycTeam ?? undefined,
-      streams: kycTeam?.rewardStream?.streams ?? [],
+      streams: kycTeam?.rewardStreams.flatMap((stream) => stream.streams) ?? [],
     }
   })
 }
