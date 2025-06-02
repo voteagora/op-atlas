@@ -85,7 +85,3 @@ export async function getCitizenCountByType(type: string): Promise<number> {
     },
   })
 }
-
-export async function getUsersCitizens(): Promise<Citizen[]> {
-  return prisma.citizen.findMany()
-}
