@@ -37,3 +37,7 @@ export async function getUserCitizen(id: string): Promise<Citizen | null> {
     },
   })
 }
+
+export async function getUsersCitizens(): Promise<Citizen[]> {
+  return prisma.citizen.findMany()
+}
