@@ -2,6 +2,7 @@ import { UIProposal } from "@/app/api/v1/proposals/route"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
 import { getCitizenVotes, getUserCitizen } from "@/db/citizens"
+import { auth } from "@/auth"
 
 const getProposalData = async () => {
   const proposalResponse = await fetch(
@@ -73,12 +74,14 @@ const enrichProposalData = (
   }
 }
 
-const getEnrichedProposalData = async () => {
-  const userId = "???"
+const getEnrichedProposalData = async ({ userId }: { userId?: string }) => {
   try {
     // Get the proposal data from the API
     const proposalData = await getProposalData()
     try {
+      if (!userId) {
+        return proposalData
+      }
       // Get the citizen data from DB
       const CitizenVoteData = await getCitizenVoteData(userId)
       // Enrich the proposal data with citizen data for conditional vote status rendering
@@ -98,7 +101,11 @@ const getEnrichedProposalData = async () => {
 const Page = async () => {
   // Get the proposals page
 
-  const proposalData = await getEnrichedProposalData()
+  const session = await auth()
+
+  const proposalData = await getEnrichedProposalData({
+    userId: session?.user.id,
+  })
   const { standardProposals, selfNominations } = proposalData
 
   return (
