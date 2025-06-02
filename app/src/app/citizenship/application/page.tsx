@@ -2,9 +2,9 @@ import { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
-import { CitizenshipEligibility } from "@/app/citizenship/individual/components/CitizenshipEligibility"
-import { CitizenshipRegistrationSidebar } from "@/app/citizenship/individual/components/CitizenshipRegistrationSidebar"
-import { CitizenshipRequirements } from "@/app/citizenship/individual/components/CitizenshipRequirements"
+import { CitizenshipEligibility } from "@/app/citizenship/application/components/CitizenshipEligibility"
+import { CitizenshipRegistrationSidebar } from "@/app/citizenship/application/components/CitizenshipRegistrationSidebar"
+import { CitizenshipRequirements } from "@/app/citizenship/application/components/CitizenshipRequirements"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import {
