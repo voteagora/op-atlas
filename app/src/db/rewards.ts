@@ -297,10 +297,18 @@ export async function getRewardStreamsWithRewardsForRound(roundId: string) {
               users: true,
             },
           },
-          rewardStreams: true,
+          rewardStreams: {
+            where: {
+              roundId,
+            },
+          },
           projects: {
             include: {
-              recurringRewards: true,
+              recurringRewards: {
+                where: {
+                  roundId,
+                },
+              },
             },
           },
         },
