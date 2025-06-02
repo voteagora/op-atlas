@@ -265,7 +265,6 @@ model Project {
   
   sourceProjects ProjectOSOAtlasRelatedProjects[] @relation("sourceProject")
   targetProjects ProjectOSOAtlasRelatedProjects[] @relation("targetProject")
-  votes         OffChainVote[]
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
