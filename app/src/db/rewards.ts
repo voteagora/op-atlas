@@ -370,6 +370,7 @@ export async function createRewardStream(
 
   const rewardId = generateRewardStreamId(
     kycTeam.projects.map((project) => project.id),
+    roundId,
   )
 
   // if KYCTeam is deleted, this means we don't need to link the reward stream to the KYCTeam

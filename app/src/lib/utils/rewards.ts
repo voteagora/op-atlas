@@ -9,8 +9,8 @@ import {
 } from "../types"
 import { isKycTeamVerified } from "./kyc"
 
-export function generateRewardStreamId(projectIds: string[]) {
-  return keccak256(Buffer.from(projectIds.sort().join("")))
+export function generateRewardStreamId(projectIds: string[], roundId: string) {
+  return keccak256(Buffer.from([...projectIds.sort(), roundId].join("")))
 }
 
 type ProjectWithRewards = {
@@ -60,6 +60,7 @@ function calculateRewardAmounts(projectsWithRewards: ProjectWithRewards[]) {
 export function processStream(
   streams: StreamWithKYCTeam[],
   currentTeam: KYCStreamTeam,
+  roundId: string,
   streamId?: string,
 ) {
   const orderedStreams = streams.sort(
@@ -81,7 +82,11 @@ export function processStream(
 
   return {
     id:
-      streamId ?? generateRewardStreamId(projectsWithRewards.map((p) => p.id)),
+      streamId ??
+      generateRewardStreamId(
+        projectsWithRewards.map((p) => p.id),
+        roundId,
+      ),
     projectIds: projectsWithRewards.map((project) => project.id),
     projectNames: projectsWithRewards.map((project) => project.name),
     wallets,

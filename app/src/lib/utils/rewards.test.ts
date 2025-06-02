@@ -124,8 +124,8 @@ describe("processStream", () => {
     const team1 = createMockTeam("wallet1", null, projects)
     const team2 = createMockTeam("wallet1", null, [...projects].reverse())
 
-    const result1 = processStream([], team1)
-    const result2 = processStream([], team2)
+    const result1 = processStream([], team1, "round-id")
+    const result2 = processStream([], team2, "round-id")
 
     expect(result1.id).toBe(result2.id)
   })
@@ -141,7 +141,7 @@ describe("processStream", () => {
     ]
     const currentTeam = createMockTeam("wallet3", null, [])
 
-    const result = processStream(streams, currentTeam)
+    const result = processStream(streams, currentTeam, "round-id")
     expect(result.wallets).toEqual(["wallet1", "wallet2", "wallet3"])
   })
 
@@ -158,7 +158,7 @@ describe("processStream", () => {
     ]
     const currentTeam = createMockTeam("wallet3", null, [])
 
-    const result = processStream(streams, currentTeam)
+    const result = processStream(streams, currentTeam, "round-id")
 
     // Should include all wallets in order of stream creation
     expect(result.wallets).toEqual(["wallet1", "wallet2", "wallet3"])
@@ -174,7 +174,7 @@ describe("processStream", () => {
       [createMockTeamMember("PENDING")],
     )
 
-    const result = processStream(streams, currentTeam)
+    const result = processStream(streams, currentTeam, "round-id")
     expect(result.KYCStatusCompleted).toBe(false)
   })
 
@@ -199,7 +199,7 @@ describe("processStream", () => {
     ]
 
     const currentTeam = createMockTeam("wallet1", null, projects)
-    const result = processStream([], currentTeam)
+    const result = processStream([], currentTeam, "round-id")
 
     // Tranche 1: 100 + 300 = 400
     // Tranche 2: 200
@@ -210,7 +210,7 @@ describe("processStream", () => {
   it("should use provided streamId when available", () => {
     const currentTeam = createMockTeam("wallet1", null, [])
     const customStreamId = "custom-stream-id"
-    const result = processStream([], currentTeam, customStreamId)
+    const result = processStream([], currentTeam, "round-id", customStreamId)
     expect(result.id).toBe(customStreamId)
   })
 
@@ -229,7 +229,7 @@ describe("processStream", () => {
     ]
 
     const currentTeam = createMockTeam("wallet1", null, projects)
-    const result = processStream([], currentTeam)
+    const result = processStream([], currentTeam, "round-id")
 
     expect(result.projectIds).toEqual(["project1"])
     expect(result.projectNames).toEqual(["Project 1"])

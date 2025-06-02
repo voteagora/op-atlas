@@ -180,13 +180,13 @@ export const getRewardStreamsForRound = async (
   const existingStreams = (async () => {
     const streams = await getRewardStreamsWithRewardsForRound(roundId)
     return streams.map((stream) =>
-      processStream(stream.streams, stream.team, stream.id),
+      processStream(stream.streams, stream.team, roundId, stream.id),
     )
   })()
 
   const newStreams = (async () => {
     const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
-    return kycTeams.map((kycTeam) => processStream([], kycTeam))
+    return kycTeams.map((kycTeam) => processStream([], kycTeam, roundId))
   })()
 
   return [...(await existingStreams), ...(await newStreams)]
