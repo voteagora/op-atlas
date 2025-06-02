@@ -456,8 +456,7 @@ export async function processAttestationsInBatches<T>(
         throw new Error(`Failed after ${maxRetries} retries: ${error}`)
       }
       console.warn(
-        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
-          batch.length
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${batch.length
         } items`,
       )
       await new Promise((resolve) =>
@@ -509,6 +508,7 @@ export async function createCitizenAttestation({
 export async function isAttestationActive(
   attestationId: string,
 ): Promise<boolean> {
+
   try {
     const attestation = await eas.getAttestation(attestationId)
     return attestation !== null && !attestation.revocationTime
