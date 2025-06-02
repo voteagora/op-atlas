@@ -141,11 +141,11 @@ const Page = () => {
         <h1 className="w-full h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
           Governance
         </h1>
-        {/*<Proposals*/}
-        {/*  proposals={MOCKDATA.selfNominations}*/}
-        {/*  heading="Self Nominate for a governance role in Season 8 & 9"*/}
-        {/*  subheading="Calling all canidates! Submit your nominations from [date] - [date]"*/}
-        {/*/>*/}
+        <Proposals
+          proposals={selfNominations}
+          heading="Self Nominate for a governance role in Season 8 & 9"
+          subheading="Calling all canidates! Submit your nominations from [date] - [date]"
+        />
         <Proposals proposals={standardProposals} heading="Proposals" />
       </div>
     </main>
