@@ -14,7 +14,7 @@ const VotingSidebar = ({
   className = "",
   votingCardProps,
 }: VotingSidebarProps) => (
-  <div className={`flex flex-col ${className}`}>
+  <div className={`w-[304px] h-[792px] flex flex-col ${className}`}>
     <VotingCard {...votingCardProps} />
     <VotingColumn />
     <VotingRedirect />
