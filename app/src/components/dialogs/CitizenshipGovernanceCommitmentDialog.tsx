@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/select"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
-import { CITIZEN_TYPES } from "@/lib/constants"
 
 import { DialogProps } from "./types"
 
