@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation"
 import Breadcrumbs from "@/app/proposals/components/Breadcrumbs"
-import ProposalTitle from "@/app/proposals/components/ProposalTitle"
-import ProposalStatus from "@/app/proposals/components/ProposalStatus"
-import ProposalDescription from "@/app/proposals/components/ProposalDescription"
+import ProposalContent from "@/app/proposals/components/ProposalContent"
 import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
+import ProposalHeader from "@/app/proposals/components/ProposalHeader"
 
 interface PageProps {
   params: {
@@ -16,18 +15,24 @@ const Page = (params: PageProps) => {
 
   const { proposalId } = params.params
 
-  const proposalIdData = true
+  const proposalIdData = proposalId !== undefined
 
   if (!proposalIdData) {
     return notFound()
   }
 
   const MOCK = {
-    breadcrumbs: "Audit Request Team",
+    breadcrumbs: ["Proposals", "Audit Request Team"],
     title: "Developer Advisory Board: Audit Request Team",
     status: "Nominations [Start Date] - [End Date]",
     description:
-      "# Developer Advisory Board: Audit Request Team\n\nDescription",
+      "# Developer Advisory Board: Audit Request Team\n\n" +
+      "## Roles & Responsibilities\n\n" +
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\n" +
+      "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n" +
+      "* **Responsibility** for reviewing and auditing smart contracts\n" +
+      "* **Leadership** in maintaining security standards\n" +
+      "* **Collaboration** with development teams across projects",
     votingCardProps: {
       cardText: {
         title: "It's time to vote",
@@ -63,15 +68,14 @@ const Page = (params: PageProps) => {
   }
 
   return (
-    <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center border-red-600">
-      <div className="flex flex-col w-2/3 mt-24 h-[865px] gap-[48px] mx-auto border-blue-600">
+    <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
+      <div className="flex flex-col w-2/3 mt-24 h-[865px] gap-[48px] mx-auto">
         <div className="flex flex-col gap-[44px]">
           <div className="flex justify-between items-start flex-col md:flex-row">
             <div className="w-full flex flex-col gap-[44px] mb-8 md:mb-0">
-              <Breadcrumbs value={MOCK.breadcrumbs} />
-              <ProposalTitle title={MOCK.title} />
-              <ProposalStatus status={MOCK.status} />
-              <ProposalDescription description={MOCK.description} />
+              <Breadcrumbs values={MOCK.breadcrumbs} />
+              <ProposalHeader title={MOCK.title} status={MOCK.status} />
+              <ProposalContent description={MOCK.description} />
             </div>
             <div className="w-full md:w-[304px] md:ml-12">
               <VotingSidebar
