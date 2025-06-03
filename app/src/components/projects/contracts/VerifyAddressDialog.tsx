@@ -15,6 +15,7 @@ import { verifyDeployer } from "@/lib/actions/contracts"
 import { getMessage } from "@/lib/utils/contracts"
 
 import { ChainSelector } from "./ChainSelector"
+import { CHAIN_INFO } from "@/components/common/chain"
 
 const defaultSelectedChain = 10
 
@@ -49,6 +50,12 @@ export function VerifyAddressDialog({
   const [selectedChain, setSelectedChain] =
     useState<number>(defaultSelectedChain)
 
+  const [chainInfo, setChainInfo] = useState<{
+    logo: string
+    name: string
+    blockExplorer?: string
+  }>(CHAIN_INFO[selectedChain.toString()])
+
   const onConfirmSignature = async () => {
     try {
       setLoading(true)
@@ -81,6 +88,13 @@ export function VerifyAddressDialog({
 
   async function onChainChange(value: string) {
     setSelectedChain(parseInt(value))
+    const chainInfo = CHAIN_INFO[value]
+    const chainInfoHasBlockExplorer = chainInfo?.blockExplorer
+    setChainInfo(
+      chainInfoHasBlockExplorer
+        ? chainInfo
+        : CHAIN_INFO[defaultSelectedChain.toString()],
+    )
   }
 
   return (
@@ -99,7 +113,7 @@ export function VerifyAddressDialog({
                   <br />
                   You can{" "}
                   <ExternalLink
-                    href="https://optimistic.etherscan.io/verifiedSignatures"
+                    href={`${chainInfo.blockExplorer}/verifiedSignatures`}
                     className="underline"
                   >
                     use Etherscan
