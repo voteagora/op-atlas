@@ -49,6 +49,10 @@ function CitizenshipGovernanceCommitmentDialog({
   }, [isSuccess, onOpenChange])
 
   const handleUpdate = async () => {
+    if (!qualification?.type) {
+      return
+    }
+
     updateCitizen({
       timeCommitment: selectedTime,
       type: qualification.type,
