@@ -508,6 +508,12 @@ enum KYCStatus {
   REJECTED
 }
 
+enum citizenCategory {
+  CHAIN
+  PROJECT
+  USER
+}
+
 model ContactEmailTags {
   id        String @id @default(uuid())
   email     String @unique
@@ -746,7 +752,7 @@ model OffChainVote {
   
   citizenId          String
   citizen            Citizen  @relation(fields: [citizenId], references: [id])
-
+  citizenCategory    citizenCategory @default(CHAIN)
 
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
@@ -756,3 +762,4 @@ model OffChainVote {
   @@index([citizenId])
   @@index([transactionHash])
 }
+
