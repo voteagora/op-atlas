@@ -744,15 +744,15 @@ model OffChainVote {
 
   transactionHash String?    // Hash of the transaction that created the vote
   
-  // Optional relations to existing models
-  userId          String?
-  user            User?      @relation(fields: [userId], references: [id])
+  citizenId          String
+  citizen            Citizen  @relation(fields: [citizenId], references: [id])
+
 
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
   @@index([voterAddress])
   @@index([proposalId])
-  @@index([userId])
+  @@index([citizenId])
   @@index([transactionHash])
 }
