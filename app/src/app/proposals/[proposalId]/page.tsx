@@ -63,18 +63,15 @@ const Page = (params: PageProps) => {
   }
 
   return (
-    <main className="flex flex-col flex-1 h-full items-center bg-secondary pb-20 md:pb-40 pt-10 md:pt-20">
-      <div className="w-full max-w-[1064px] min-h-[865px] px-4 md:px-0">
-        <div className="flex flex-col">
-          <div className="flex gap-8 lg:gap-16 justify-between items-start max-w-[76rem] flex-col md:flex-row md:items-start md:justify-between">
-            <div className="w-full md:w-body flex flex-col space-y-4 mb-8 md:mb-0">
+    <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center border-red-600">
+      <div className="flex flex-col w-2/3 mt-24 h-[865px] gap-[48px] mx-auto border-blue-600">
+        <div className="flex flex-col gap-[44px]">
+          <div className="flex justify-between items-start flex-col md:flex-row">
+            <div className="w-full flex flex-col gap-[44px] mb-8 md:mb-0">
               <Breadcrumbs value={MOCK.breadcrumbs} />
-              <ProposalTitle title={MOCK.title} className="mt-2" />
-              <ProposalStatus status={MOCK.status} className="mt-2" />
-              <ProposalDescription
-                description={MOCK.description}
-                className="mt-4"
-              />
+              <ProposalTitle title={MOCK.title} />
+              <ProposalStatus status={MOCK.status} />
+              <ProposalDescription description={MOCK.description} />
             </div>
             <div className="w-full md:w-[304px] md:ml-12">
               <VotingSidebar
