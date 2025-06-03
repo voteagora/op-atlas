@@ -1,36 +1,59 @@
 "use client"
 
 import { User } from "@prisma/client"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import { Button } from "@/components/ui/button"
-import { useCitizenQualifications } from "@/hooks/citizen/useCitizenQualification"
+import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
 export const Eligibility = ({ user }: { user: User }) => {
-  const { data: qualification } = useCitizenQualifications()
+  const { data: qualification } = useCitizenQualification()
   const router = useRouter()
+
+  if (!qualification) {
+    return null
+  }
 
   const renderAvatar = () => {
     switch (qualification?.type) {
       case CITIZEN_TYPES.chain:
-        return <div className="w-[64px] h-[64px] bg-black rounded-md"></div>
+        return (
+          <Image
+            className="w-[64px] h-[64px] bg-black rounded-md"
+            src={qualification?.avatar}
+            alt={qualification?.title}
+            width={64}
+            height={64}
+          />
+        )
+
       case CITIZEN_TYPES.project:
-        return <div className="w-[64px] h-[64px] bg-red rounded-md"></div>
+        return (
+          <Image
+            className="w-[64px] h-[64px] bg-red rounded-md"
+            src={qualification?.avatar}
+            alt={qualification?.title}
+            width={64}
+            height={64}
+          />
+        )
+
       default:
-        return <UserAvatarLarge imageUrl={user?.imageUrl} />
+        return <UserAvatarLarge imageUrl={qualification?.avatar} />
     }
   }
 
   const renderCopy = () => {
     switch (qualification?.type) {
       case CITIZEN_TYPES.chain:
-        return "You qualify for Season 8 Citizenship through your organization"
+        return `${qualification.title} is eligible to become a Citizen`
       case CITIZEN_TYPES.project:
-        return "You qualify for Season 8 Citizenship through your project"
+        return `${qualification.title} is eligible to become a Citizen`
       case CITIZEN_TYPES.user:
-        return "You qualify for Season 8 Citizenship"
+        return `${qualification.title} is eligible to become a Citizen`
       default:
         return "Sorry, you are not eligible to become a Citizen"
     }
