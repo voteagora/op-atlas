@@ -87,12 +87,12 @@ const getEnrichedProposalData = async ({ userId }: { userId?: string }) => {
       // Enrich the proposal data with citizen data for conditional vote status rendering
       return enrichProposalData(proposalData, CitizenVoteData)
     } catch (error) {
-      console.error("Failed to fetch Citizen Data")
+      console.error(`Failed to fetch Citizen Data: ${error}`)
       // If we can't get citizen data, just return the proposal data as is
       return proposalData
     }
   } catch (error) {
-    console.error("Failed to fetch Proposal Data")
+    console.error(`Failed to fetch Proposal Data: ${error}`)
     // If we can't get proposal data, return empty arrays
     return { standardProposals: [], selfNominations: [] }
   }
