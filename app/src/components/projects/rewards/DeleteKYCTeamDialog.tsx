@@ -17,7 +17,7 @@ export function DeleteKYCTeamDialog({
   onOpenChange,
 }: DialogProps<object>) {
   const {
-    data: { projectId, organizationId, kycTeamId, rewardStreamId },
+    data: { projectId, organizationId, kycTeamId, hasActiveStream },
   } = useAppDialogs()
 
   const router = useRouter()
@@ -30,7 +30,7 @@ export function DeleteKYCTeamDialog({
         kycTeamId: kycTeamId ?? "",
         projectId: projectId ?? "",
         organizationId: organizationId ?? "",
-        rewardStreamId: rewardStreamId ?? "",
+        hasActiveStream: !!hasActiveStream,
       })
       await Promise.all([
         queryClient.invalidateQueries({
@@ -56,11 +56,11 @@ export function DeleteKYCTeamDialog({
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-0.5 text-center items-center">
             <DialogTitle className="text-center text-xl font-semibold text-text-default">
-              {rewardStreamId
+              {hasActiveStream
                 ? "Are you sure?"
                 : "Are you sure you want to delete this wallet and start the verification process over?"}
             </DialogTitle>
-            {rewardStreamId && (
+            {hasActiveStream && (
               <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">
                 If you stop this stream, your grant delivery address will be
                 permanently invalidated and cannot be used again.
@@ -78,7 +78,7 @@ export function DeleteKYCTeamDialog({
                 deleteProjectKYCTeam()
               }}
             >
-              {rewardStreamId
+              {hasActiveStream
                 ? "Stop stream and invalidate address"
                 : "Yes, delete this wallet"}
             </Button>

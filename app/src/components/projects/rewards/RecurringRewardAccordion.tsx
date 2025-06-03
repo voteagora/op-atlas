@@ -57,11 +57,13 @@ const RewardAccordion = ({
   const linkToStream =
     teamVerified &&
     sortedStreams[0]?.id &&
-    !sortedStreams[0]?.deletedAt &&
+    sortedStreams[0]?.receiver === reward.kycTeam?.walletAddress &&
     `${SUPERFLUID_STREAM_URL}${sortedStreams[0]?.id}`
 
   const stoppedStreams = teamVerified
-    ? sortedStreams.filter((stream) => stream.deletedAt)
+    ? sortedStreams.filter(
+        (stream) => stream.receiver !== reward.kycTeam?.walletAddress,
+      )
     : sortedStreams
 
   return (
@@ -180,7 +182,8 @@ const IsSomethingWrong = ({ kycTeam }: { kycTeam: KYCTeamWithTeam }) => {
       kycTeamId: kycTeam?.id,
       projectId: projectId as string,
       organizationId: organizationId as string,
-      rewardStreamId: kycTeam?.rewardStream?.id,
+      hasActiveStream:
+        kycTeam?.rewardStreams && kycTeam.rewardStreams.length > 0,
     })
     setOpenDialog("delete_kyc_team")
   }

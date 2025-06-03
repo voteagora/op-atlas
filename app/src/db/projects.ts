@@ -1713,8 +1713,8 @@ export async function createProjectKycTeam({
         where: {
           id: projectId,
           kycTeam: {
-            rewardStreamId: {
-              not: null,
+            rewardStreams: {
+              some: {},
             },
           },
         },
@@ -1722,7 +1722,7 @@ export async function createProjectKycTeam({
           kycTeam: {
             select: {
               id: true,
-              rewardStreamId: true,
+              rewardStreams: true,
             },
           },
         },
@@ -1731,9 +1731,17 @@ export async function createProjectKycTeam({
       const kycTeam = await tx.kYCTeam.create({
         data: {
           walletAddress: walletAddress.toLowerCase(),
-          ...(project?.kycTeam?.rewardStreamId && {
-            rewardStreamId: project.kycTeam.rewardStreamId,
-          }),
+        },
+      })
+
+      await tx.rewardStream.updateMany({
+        where: {
+          id: {
+            in: project?.kycTeam?.rewardStreams.map((stream) => stream.id),
+          },
+        },
+        data: {
+          kycTeamId: kycTeam.id,
         },
       })
 
@@ -1788,7 +1796,7 @@ export async function getKycTeamForProject({
               users: true,
             },
           },
-          rewardStream: true,
+          rewardStreams: true,
         },
       },
     },

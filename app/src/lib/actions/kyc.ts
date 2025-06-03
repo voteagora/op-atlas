@@ -221,12 +221,12 @@ export const deleteKYCTeamAction = async ({
   projectId,
   organizationId,
   kycTeamId,
-  rewardStreamId,
+  hasActiveStream,
 }: {
   projectId?: string
   organizationId?: string
   kycTeamId: string
-  rewardStreamId?: string
+  hasActiveStream?: boolean
 }) => {
   const session = await auth()
 
@@ -236,10 +236,7 @@ export const deleteKYCTeamAction = async ({
   }
 
   if (projectId) {
-    const isInvalid = await verifyAdminStatus(
-      projectId,
-      userId,
-    )
+    const isInvalid = await verifyAdminStatus(projectId, userId)
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
     }
@@ -257,6 +254,6 @@ export const deleteKYCTeamAction = async ({
 
   return await deleteKycTeam({
     kycTeamId,
-    rewardStreamId,
+    hasActiveStream,
   })
 }

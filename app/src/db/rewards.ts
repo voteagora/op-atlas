@@ -253,8 +253,10 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
           },
         },
       },
-      rewardStream: {
-        is: null,
+      rewardStreams: {
+        none: {
+          roundId,
+        },
       },
     },
     include: {
@@ -263,7 +265,7 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
           users: true,
         },
       },
-      rewardStream: true,
+      rewardStreams: true,
       projects: {
         select: {
           id: true,
@@ -288,19 +290,32 @@ export async function getRewardStreamsWithRewardsForRound(roundId: string) {
       roundId,
     },
     include: {
-      teams: {
+      team: {
         include: {
           team: {
             include: {
               users: true,
             },
           },
-          rewardStream: true,
-          projects: {
-            include: {
-              recurringRewards: true,
+          rewardStreams: {
+            where: {
+              roundId,
             },
           },
+          projects: {
+            include: {
+              recurringRewards: {
+                where: {
+                  roundId,
+                },
+              },
+            },
+          },
+        },
+      },
+      streams: {
+        include: {
+          kycTeam: true,
         },
       },
     },
@@ -336,48 +351,47 @@ export async function createRewardStream(
   stream: SuperfluidVestingSchedule,
   roundId: string,
 ) {
-  const projects = await prisma.project.findMany({
+  const kycTeam = await prisma.kYCTeam.findUnique({
     where: {
-      kycTeam: {
-        walletAddress: stream.receiver.toLowerCase(),
-      },
+      walletAddress: stream.receiver.toLowerCase(),
     },
-    select: {
-      id: true,
+    include: {
+      projects: {
+        select: {
+          id: true,
+        },
+      },
     },
   })
 
-  if (projects.length === 0) {
-    return null
+  if (!kycTeam || kycTeam.projects.length === 0) {
+    return undefined
   }
 
-  const rewardId = generateRewardStreamId(projects.map((project) => project.id))
+  const rewardId = generateRewardStreamId(
+    kycTeam.projects.map((project) => project.id),
+    roundId,
+  )
 
-  return prisma.$transaction(async (tx) => {
-    const rewardStream = await tx.rewardStream.upsert({
-      where: {
-        id: rewardId,
-      },
-      update: {},
-      create: {
-        id: rewardId,
-        projects: projects.map((project) => project.id),
-        roundId,
-      },
-    })
+  // if KYCTeam is deleted, this means we don't need to link the reward stream to the KYCTeam
+  if (kycTeam.deletedAt) {
+    return rewardId
+  }
 
-    // Update the KYCTeam with the rewardStreamId
-    await tx.kYCTeam.update({
-      where: {
-        walletAddress: stream.receiver.toLowerCase(),
-      },
-      data: {
-        rewardStreamId: rewardStream.id,
-      },
-    })
-
-    return rewardStream
+  const rewardStream = await prisma.rewardStream.upsert({
+    where: {
+      id: rewardId,
+    },
+    update: {},
+    create: {
+      id: rewardId,
+      projects: kycTeam.projects.map((project) => project.id),
+      roundId,
+      kycTeamId: kycTeam.id,
+    },
   })
+
+  return rewardStream.id
 }
 
 export async function getProjectRecurringRewards(projectId: string) {
@@ -396,7 +410,7 @@ export async function getProjectRecurringRewards(projectId: string) {
                   users: true,
                 },
               },
-              rewardStream: {
+              rewardStreams: {
                 include: {
                   streams: true,
                 },
