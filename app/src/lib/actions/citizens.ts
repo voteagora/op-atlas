@@ -69,9 +69,9 @@ export const s8CitizenshipQualification = async (): Promise<{
 
     return {
       type: CITIZEN_TYPES.chain,
-      identifier: organization?.id,
-      title: organization?.name,
-      avatar: organization?.avatarUrl,
+      identifier: organization?.id || "",
+      title: organization?.name || "",
+      avatar: organization?.avatarUrl || "",
     }
   }
 
@@ -98,8 +98,8 @@ export const s8CitizenshipQualification = async (): Promise<{
     return {
       type: CITIZEN_TYPES.project,
       identifier: qualifyingProjects[0].address,
-      title: project?.name,
-      avatar: project?.avatarUrl,
+      title: project?.name || "",
+      avatar: project?.thumbnailUrl || "",
     }
   }
 
@@ -114,7 +114,7 @@ export const s8CitizenshipQualification = async (): Promise<{
       type: CITIZEN_TYPES.user,
       identifier: qualifyingUsers[0].address,
       title: "You",
-      avatar: user.imageUrl,
+      avatar: user.imageUrl || "",
     }
   }
 
