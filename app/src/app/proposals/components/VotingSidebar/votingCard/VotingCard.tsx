@@ -1,6 +1,6 @@
 import VotingCardActions, {
   CardActionsProps,
-} from "@/app/proposals/components/VotingSidebar/VotingCardActions"
+} from "@/app/proposals/components/VotingSidebar/votingCard/VotingCardActions"
 
 interface CardImageProps {
   src: string
