@@ -269,9 +269,11 @@ export const getOrganizationKycTeamsAction = async ({
 export const deleteOrganizationKYCTeam = async ({
   organizationId,
   kycTeamId,
+  hasActiveStream,
 }: {
   organizationId: string
   kycTeamId: string
+  hasActiveStream: boolean
 }) => {
   const session = await auth()
 
@@ -289,5 +291,6 @@ export const deleteOrganizationKYCTeam = async ({
 
   return await deleteKycTeam({
     kycTeamId,
+    hasActiveStream,
   })
 }
