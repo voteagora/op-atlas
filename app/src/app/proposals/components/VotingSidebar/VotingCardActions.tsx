@@ -35,7 +35,7 @@ const CardAction = ({ buttonStyle, actionText, actionType }: CardAction) => {
   return (
     <button
       onClick={handleAction}
-      className={`rounded-[6px] border border-solid p-3 mb-1 w-60 h-10 flex items-center justify-center ${buttonStyle}`}
+      className={`rounded-md border border-solid p-3 mb-1 w-60 h-10 flex items-center justify-center ${buttonStyle}`}
     >
       {actionText}
     </button>
