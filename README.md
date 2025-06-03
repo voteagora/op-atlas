@@ -2,7 +2,7 @@
 
 Bring your identity to the OP collective and signup to get funded via RetroPGF.
 
-Shepherded by the fine folks of [Agora](https://voteagora.com).
+Shepherded by the fine folks of [Agora](https://voteagora.com).  More documentation about the code base can be found [here](https://splashy-wasabi-825.notion.site/OP-Atlas-Codebase-Overview-e4a227380e564dc38af48453c8477791).
 
 ## Project Structure
 
