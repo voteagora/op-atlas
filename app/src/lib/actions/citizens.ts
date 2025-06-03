@@ -6,8 +6,11 @@ import { headers } from "next/headers"
 import { auth } from "@/auth"
 import { getUserCitizen, upsertCitizen } from "@/db/citizens"
 import { prisma } from "@/db/client"
-import { getUserOrganizationsWithDetails } from "@/db/organizations"
-import { getUserAdminProjectsWithDetail } from "@/db/projects"
+import {
+  getOrganization,
+  getUserOrganizationsWithDetails,
+} from "@/db/organizations"
+import { getProject, getUserAdminProjectsWithDetail } from "@/db/projects"
 import { getUserById } from "@/db/users"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
@@ -29,6 +32,8 @@ interface S8QualifyingProject {
 export const s8CitizenshipQualification = async (): Promise<{
   type: string
   identifier: string
+  title: string
+  avatar: string
 } | null> => {
   const session = await auth()
   const userId = session?.user?.id
@@ -58,9 +63,15 @@ export const s8CitizenshipQualification = async (): Promise<{
   `
 
   if (qualifyingChains.length > 0) {
+    const organization = await getOrganization({
+      id: qualifyingChains[0].organizationId,
+    })
+
     return {
       type: CITIZEN_TYPES.chain,
-      identifier: qualifyingChains[0].organizationId,
+      identifier: organization?.id,
+      title: organization?.name,
+      avatar: organization?.avatarUrl,
     }
   }
 
@@ -83,9 +94,12 @@ export const s8CitizenshipQualification = async (): Promise<{
   `
 
   if (qualifyingProjects.length > 0) {
+    const project = await getProject({ id: qualifyingProjects[0].id })
     return {
       type: CITIZEN_TYPES.project,
       identifier: qualifyingProjects[0].address,
+      title: project?.name,
+      avatar: project?.avatarUrl,
     }
   }
 
@@ -99,6 +113,8 @@ export const s8CitizenshipQualification = async (): Promise<{
     return {
       type: CITIZEN_TYPES.user,
       identifier: qualifyingUsers[0].address,
+      title: "You",
+      avatar: user.imageUrl,
     }
   }
 
@@ -150,6 +166,13 @@ export const attestCitizen = async () => {
     }
   }
 
+  const qualification = await s8CitizenshipQualification()
+  if (!qualification) {
+    return {
+      error: "You are not eligible to become a Citizen",
+    }
+  }
+
   try {
     // Get user with addresses
     const user = await getUserById(userId)
@@ -178,7 +201,7 @@ export const attestCitizen = async () => {
         body: JSON.stringify({
           address: primaryAddress,
           farcasterId: user.farcasterId,
-          selectionMethod: CITIZEN_TYPES.user,
+          selectionMethod: qualification.type,
         }),
       },
     )
@@ -197,7 +220,7 @@ export const attestCitizen = async () => {
       citizen: {
         address: primaryAddress,
         attestationId,
-        type: CITIZEN_TYPES.user,
+        type: qualification.type,
       },
     })
     return result

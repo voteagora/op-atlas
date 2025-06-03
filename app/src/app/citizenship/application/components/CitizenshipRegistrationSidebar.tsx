@@ -15,9 +15,6 @@ export const CitizenshipRegistrationSidebar = ({ user }: { user: User }) => {
   return (
     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
       <UserAvatarLarge imageUrl={user?.imageUrl} />
-      <div className="text-sm font-semibold text-secondary-foreground">
-        You are eligible to become a Citizen
-      </div>
 
       {!isEligible && (
         <div className="text-sm text-destructive">
