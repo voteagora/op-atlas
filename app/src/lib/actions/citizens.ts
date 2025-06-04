@@ -12,7 +12,13 @@ import {
 } from "@/db/organizations"
 import { getProject, getUserAdminProjectsWithDetail } from "@/db/projects"
 import { getUserById } from "@/db/users"
-import { CITIZEN_TYPES } from "@/lib/constants"
+import {
+  CITIZEN_ATTESTATION_CODE,
+  CITIZEN_TAGS,
+  CITIZEN_TYPES,
+} from "@/lib/constants"
+
+import { updateMailchimpTags } from "../api/mailchimp"
 
 interface S8QualifyingUser {
   id: string
@@ -96,7 +102,7 @@ export const s8CitizenshipQualification = async (): Promise<{
   if (qualifyingProjects.length > 0) {
     const project = await getProject({ id: qualifyingProjects[0].id })
     return {
-      type: CITIZEN_TYPES.project,
+      type: CITIZEN_TYPES.app,
       identifier: qualifyingProjects[0].address,
       title: project?.name || "",
       avatar: project?.thumbnailUrl || "",
@@ -173,6 +179,14 @@ export const attestCitizen = async () => {
     }
   }
 
+  const citizenType =
+    CITIZEN_TYPES[qualification.type as keyof typeof CITIZEN_TYPES]
+  if (!citizenType) {
+    return {
+      error: "Invalid citizen type",
+    }
+  }
+
   try {
     // Get user with addresses
     const user = await getUserById(userId)
@@ -201,7 +215,7 @@ export const attestCitizen = async () => {
         body: JSON.stringify({
           address: primaryAddress,
           farcasterId: user.farcasterId,
-          selectionMethod: qualification.type,
+          selectionMethod: CITIZEN_ATTESTATION_CODE[citizenType],
         }),
       },
     )
@@ -220,9 +234,17 @@ export const attestCitizen = async () => {
       citizen: {
         address: primaryAddress,
         attestationId,
-        type: qualification.type,
+        type: citizenType,
       },
     })
+
+    await updateMailchimpTags([
+      {
+        email: user.email,
+        tags: [CITIZEN_TAGS[citizenType]],
+      },
+    ])
+
     return result
   } catch (error) {
     console.error("Error attesting citizen:", error)
