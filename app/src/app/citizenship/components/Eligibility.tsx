@@ -1,6 +1,6 @@
 "use client"
 
-import { User } from "@prisma/client"
+import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
@@ -9,13 +9,9 @@ import { Button } from "@/components/ui/button"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
-export const Eligibility = ({ user }: { user: User }) => {
-  const { data: qualification } = useCitizenQualification()
+export const Eligibility = () => {
+  const { data: qualification, isLoading } = useCitizenQualification()
   const router = useRouter()
-
-  if (!qualification) {
-    return null
-  }
 
   const renderAvatar = () => {
     switch (qualification?.type) {
@@ -57,6 +53,22 @@ export const Eligibility = ({ user }: { user: User }) => {
       default:
         return "Sorry, you are not eligible to become a Citizen"
     }
+  }
+
+  if (!qualification && isLoading) {
+    return (
+      <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
+        <div className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+        <div className="text-sm font-semibold text-secondary-foreground">
+          Checking your Citizenship Eligibility...
+        </div>
+        <Button className="w-full button-primary" disabled>
+          Register
+        </Button>
+      </div>
+    )
   }
 
   if (!qualification) {
