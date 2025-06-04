@@ -19,8 +19,8 @@ export const Eligibility = () => {
         return (
           <Image
             className="w-[64px] h-[64px] bg-black rounded-md"
-            src={qualification?.avatar}
-            alt={qualification?.title}
+            src={qualification?.avatar || ""}
+            alt={qualification.title}
             width={64}
             height={64}
           />
@@ -29,9 +29,9 @@ export const Eligibility = () => {
       case CITIZEN_TYPES.app:
         return (
           <Image
-            className="w-[64px] h-[64px] bg-red rounded-md"
-            src={qualification?.avatar}
-            alt={qualification?.title}
+            className="w-[64px] h-[64px] bg-black rounded-md"
+            src={qualification?.avatar || ""}
+            alt={qualification.title}
             width={64}
             height={64}
           />

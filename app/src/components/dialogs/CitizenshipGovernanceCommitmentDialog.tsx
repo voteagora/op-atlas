@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
+import { CITIZEN_TYPES } from "@/lib/constants"
 
 import { DialogProps } from "./types"
 
@@ -55,6 +56,14 @@ function CitizenshipGovernanceCommitmentDialog({
     updateCitizen({
       timeCommitment: selectedTime,
       type: qualification.type,
+      projectId:
+        qualification.type === CITIZEN_TYPES.app
+          ? qualification.identifier
+          : undefined,
+      organizationId:
+        qualification.type === CITIZEN_TYPES.chain
+          ? qualification.identifier
+          : undefined,
     })
   }
 
