@@ -4,7 +4,11 @@ import { ProjectContract } from "@prisma/client"
 import { headers } from "next/headers"
 
 import { auth } from "@/auth"
-import { getUserCitizen, upsertCitizen } from "@/db/citizens"
+import {
+  getCitizenCountByType,
+  getUserCitizen,
+  upsertCitizen,
+} from "@/db/citizens"
 import { prisma } from "@/db/client"
 import {
   getOrganization,
@@ -107,6 +111,12 @@ export const s8CitizenshipQualification = async (): Promise<{
       title: project?.name || "",
       avatar: project?.thumbnailUrl || "",
     }
+  }
+
+  // Check the number of citizens, and if it's more than 1000, return null
+  const citizenCount = await getCitizenCountByType(CITIZEN_TYPES.user)
+  if (citizenCount >= 1000) {
+    return null
   }
 
   // Check S8QualifyingUser addresses (lowest priority)
