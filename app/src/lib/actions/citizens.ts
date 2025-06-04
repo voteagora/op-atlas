@@ -250,7 +250,7 @@ export const attestCitizen = async () => {
 
     await updateMailchimpTags([
       {
-        email: user.email,
+        email: user.emails[0].email,
         tags: [CITIZEN_TAGS[citizenType]],
       },
     ])
