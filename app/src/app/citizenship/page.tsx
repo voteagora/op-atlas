@@ -127,7 +127,7 @@ export default async function Page() {
         </div>
 
         <div className="lg:col-span-1 mt-12 lg:mt-0">
-          <Eligibility user={user} />
+          <Eligibility />
         </div>
       </div>
     </main>
