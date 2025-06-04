@@ -450,6 +450,12 @@ model GithubProximity {
   percentile Float
 }
 
+enum citizenCategory {
+  CHAIN
+  PROJECT
+  USER
+}
+
 model ContactEmailTags {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -663,25 +669,9 @@ model Citizen {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   user           User           @relation(fields: [userId], references: [id])
-  votes          CitizenVotes[]
+  OffChainVote   OffChainVote[]
 
   @@index([userId])
-}
-
-enum VoteType {
-  FOR
-  AGAINST
-  ABSTAIN
-}
-
-model CitizenVotes {
-  citizen    Citizen  @relation(fields: [citizenId], references: [id])
-  citizenId  Int      @map("citizen_id")
-  proposalId String   @map("proposal_id")
-  vote       VoteType @default(ABSTAIN) @map("Vote")
-  votedAt    DateTime @default(now()) @map("voted_at")
-
-  @@id([citizenId, proposalId])
 }
 
 model S8QualifyingUser {
@@ -694,4 +684,27 @@ model S8QualifyingChain {
 
 model S8QualifyingProject {
   address String @id
+}
+
+model OffChainVote {
+  attestationId String @id // EAS attestation ID as primary key
+  voterAddress  String // Ethereum address of the voter
+  proposalId    String // ID of the proposal being voted on
+  vote          Json // For standard proposals, this is an array of choices, 
+  // using strings for the values.
+  // e.g. ["1"], where "0", "1", "2" are for, against, abstain
+
+  transactionHash String? // Hash of the transaction that created the vote
+
+  citizenId       Int
+  citizen         Citizen         @relation(fields: [citizenId], references: [id])
+  citizenCategory citizenCategory @default(CHAIN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([voterAddress])
+  @@index([proposalId])
+  @@index([citizenId])
+  @@index([transactionHash])
 }
