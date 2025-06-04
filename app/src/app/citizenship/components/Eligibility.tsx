@@ -30,7 +30,7 @@ export const Eligibility = ({ user }: { user: User }) => {
           />
         )
 
-      case CITIZEN_TYPES.project:
+      case CITIZEN_TYPES.app:
         return (
           <Image
             className="w-[64px] h-[64px] bg-red rounded-md"
@@ -50,7 +50,7 @@ export const Eligibility = ({ user }: { user: User }) => {
     switch (qualification?.type) {
       case CITIZEN_TYPES.chain:
         return `${qualification.title} is eligible to become a Citizen`
-      case CITIZEN_TYPES.project:
+      case CITIZEN_TYPES.app:
         return `${qualification.title} is eligible to become a Citizen`
       case CITIZEN_TYPES.user:
         return `${qualification.title} is eligible to become a Citizen`
