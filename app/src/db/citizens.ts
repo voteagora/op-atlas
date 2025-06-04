@@ -39,7 +39,7 @@ export async function getUserCitizen(id: string): Promise<Citizen | null> {
 }
 
 export async function getCitizenVotes(citizenId: number): Promise<any> {
-  return prisma.citizenVotes.findMany({
+  return prisma.offChainVote.findMany({
     where: {
       citizenId: citizenId,
     },
@@ -47,15 +47,13 @@ export async function getCitizenVotes(citizenId: number): Promise<any> {
 }
 
 export async function getCitizenProposalVote(
-  id: number,
+  citizenId: number,
   proposalId: string,
 ): Promise<any> {
-  return prisma.citizenVotes.findUnique({
+  return prisma.offChainVote.findFirst({
     where: {
-      citizenId_proposalId: {
-        citizenId: id,
-        proposalId: proposalId,
-      },
+      proposalId: proposalId,
+      citizenId: citizenId,
     },
   })
 }

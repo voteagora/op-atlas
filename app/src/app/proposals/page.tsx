@@ -1,7 +1,11 @@
 import { UIProposal } from "@/app/api/v1/proposals/route"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
-import { getCitizenVotes, getUserCitizen } from "@/db/citizens"
+import {
+  getCitizenProposalVote,
+  getCitizenVotes,
+  getUserCitizen,
+} from "@/db/citizens"
 import { auth } from "@/auth"
 
 const getProposalData = async () => {
@@ -14,34 +18,45 @@ const getProposalData = async () => {
   return proposalResponse.json()
 }
 
-const getCitizenVoteData = async (userId: string) => {
+const getCitizenVoteData = async (userId: string, proposalId: string) => {
   const citizen = await getUserCitizen(userId)
   if (!citizen) {
-    return []
+    return
   }
   try {
-    return await getCitizenVotes(citizen.id)
+    return await getCitizenProposalVote(citizen.id, proposalId)
   } catch (error) {
-    console.error("Failed to fetch Citizen Votes")
-    return []
+    console.error(`Failed to fetch Citizen Votes: ${error}`)
+    return
   }
+}
+
+interface Citizen {
+  attestationId: string
+  voterAddress: string
+  proposalId: string
+  vote: { vote: string[] }
+  transactionHash?: string
+  citizenId: number
+  citizenCategory: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 const enrichProposalData = (
   proposals: { standardProposals: UIProposal[]; selfNominations: UIProposal[] },
-  citizen: any,
+  citizen: Citizen,
 ) => {
   // Create a map of proposal IDs to their vote status for quick lookup
   const proposalVoteMap = new Map()
 
+  console.log(proposals, citizen)
+
   // Check if citizen has votes
-  if (citizen && citizen.votes && Array.isArray(citizen.votes)) {
-    // Process each vote from the single citizen
-    citizen.votes.forEach(
-      (vote: { proposalId: string; voteStatus: string }) => {
-        proposalVoteMap.set(vote.proposalId, vote.voteStatus)
-      },
-    )
+  if (citizen && citizen.vote.vote && Array.isArray(citizen.vote.vote)) {
+    if (citizen.vote.vote.length > 0) {
+      proposalVoteMap.set(proposalId, true)
+    }
   }
 
   // Update standard proposals with vote information
@@ -83,7 +98,7 @@ const getEnrichedProposalData = async ({ userId }: { userId?: string }) => {
         return proposalData
       }
       // Get the citizen data from DB
-      const CitizenVoteData = await getCitizenVoteData(userId)
+      const CitizenVoteData = await getCitizenVoteData(userId, proposalData.id)
       // Enrich the proposal data with citizen data for conditional vote status rendering
       return enrichProposalData(proposalData, CitizenVoteData)
     } catch (error) {
