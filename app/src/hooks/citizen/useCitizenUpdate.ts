@@ -17,6 +17,8 @@ export const useCitizenUpdate = (userId: string) => {
     address?: string
     attestationId?: string
     timeCommitment?: string
+    projectId?: string
+    organizationId?: string
   }) => {
     setIsSuccess(false)
     startTransition(async () => {

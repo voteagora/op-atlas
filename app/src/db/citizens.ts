@@ -14,6 +14,8 @@ export async function upsertCitizen({
     address?: string
     attestationId?: string
     timeCommitment?: string
+    projectId?: string
+    organizationId?: string
   }
 }) {
   return prisma.citizen.upsert({

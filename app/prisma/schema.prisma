@@ -655,17 +655,21 @@ enum ProjectOSOMetric {
 }
 
 model Citizen {
-  id              Int      @id @default(autoincrement())
-  userId          String   @unique
-  address         String?  @unique
-  type            String
-  attestationId   String?
-  timeCommitment  String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id])
+  id             Int      @id @default(autoincrement())
+  userId         String   @unique
+  address        String?  @unique
+  type           String
+  attestationId  String?
+  timeCommitment String?
+  projectId      String?  @unique
+  organizationId String?  @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  @@index([projectId])
+  @@index([organizationId])
 }
 
 model S8QualifyingUser {
