@@ -319,9 +319,8 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
 
     return (
       <ConditionRow isMet={false}>
-        You&apos;ve connected your World ID |{" "}
         <WorldConnection userId={userId}>
-          <span className={LINK_STYLE}>Connect</span>
+          <span className={LINK_STYLE}>Connect your World ID</span>
         </WorldConnection>
       </ConditionRow>
     )
