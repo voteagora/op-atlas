@@ -105,3 +105,11 @@ export async function getCitizenProposalVote(
     },
   })
 }
+
+export async function getCitizenCountByType(type: string): Promise<number> {
+  return prisma.citizen.count({
+    where: {
+      type,
+    },
+  })
+}
