@@ -459,3 +459,186 @@ export type PLMConfig = {
   // Whether to show the create proposal button conditionally with a check
   protocolLevelCreateProposalButtonCheck?: boolean
 }
+
+export type ProposalType =
+  | "STANDARD"
+  | "APPROVAL"
+  | "OPTIMISTIC"
+  | "SNAPSHOT"
+  | "OFFCHAIN_STANDARD"
+  | "OFFCHAIN_APPROVAL"
+  | "OFFCHAIN_OPTIMISTIC"
+  | "OFFCHAIN_OPTIMISTIC_TIERED"
+
+export type ParsedProposalData = {
+  SNAPSHOT: {
+    key: "SNAPSHOT"
+    kind: {
+      title: string
+      start_ts: number
+      end_ts: number
+      created_ts: number
+      link: string
+      scores: string[]
+      type: string
+      votes: string
+      state: "pending" | "active" | "closed"
+      body: string
+      choices: string[]
+    }
+  }
+  STANDARD: {
+    key: "STANDARD"
+    kind: {
+      options: {
+        targets: string[]
+        values: string[]
+        signatures: string[]
+        calldatas: string[]
+        functionArgsName: {
+          functionName: string
+          functionArgs: string[]
+        }[]
+      }[]
+    }
+  }
+  APPROVAL: {
+    key: "APPROVAL"
+    kind: {
+      options: {
+        targets: string[]
+        values: string[]
+        calldatas: string[]
+        description: string
+        functionArgsName: {
+          functionName: string
+          functionArgs: string[]
+        }[]
+        budgetTokensSpent: bigint | null
+      }[]
+      proposalSettings: {
+        maxApprovals: number
+        criteria: "THRESHOLD" | "TOP_CHOICES"
+        budgetToken: string
+        criteriaValue: bigint
+        budgetAmount: bigint
+      }
+    }
+  }
+  OPTIMISTIC: {
+    key: "OPTIMISTIC"
+    kind: { options: [] }
+  }
+  OFFCHAIN_STANDARD: {
+    key: "OFFCHAIN_STANDARD"
+    kind: { options: [] }
+  }
+  OFFCHAIN_APPROVAL: {
+    key: "OFFCHAIN_APPROVAL"
+    kind: { options: [] }
+  }
+  OFFCHAIN_OPTIMISTIC: {
+    key: "OFFCHAIN_OPTIMISTIC"
+    kind: { options: [] }
+  }
+  OFFCHAIN_OPTIMISTIC_TIERED: {
+    key: "OFFCHAIN_OPTIMISTIC_TIERED"
+    kind: { options: [] }
+  }
+}
+
+export type ParsedProposalResults = {
+  SNAPSHOT: {
+    key: "SNAPSHOT"
+    kind: {
+      scores: string[]
+      status: "pending" | "active" | "closed"
+    }
+  }
+  STANDARD: {
+    key: "STANDARD"
+    kind: {
+      for: bigint
+      against: bigint
+      abstain: bigint
+    }
+  }
+  OPTIMISTIC: {
+    key: "OPTIMISTIC"
+    kind: {
+      for: bigint
+      against: bigint
+      abstain: bigint
+    }
+  }
+  APPROVAL: {
+    key: "APPROVAL"
+    kind: {
+      for: bigint
+      abstain: bigint
+      against: bigint
+      options: {
+        option: string
+        votes: bigint
+      }[]
+      criteria: "THRESHOLD" | "TOP_CHOICES"
+      criteriaValue: bigint
+    }
+  }
+  OFFCHAIN_STANDARD: {
+    key: "OFFCHAIN_STANDARD"
+    kind: null
+  }
+  OFFCHAIN_APPROVAL: {
+    key: "OFFCHAIN_APPROVAL"
+    kind: null
+  }
+  OFFCHAIN_OPTIMISTIC: {
+    key: "OFFCHAIN_OPTIMISTIC"
+    kind: null
+  }
+  OFFCHAIN_OPTIMISTIC_TIERED: {
+    key: "OFFCHAIN_OPTIMISTIC_TIERED"
+    kind: null
+  }
+}
+
+export type ProposalStatus =
+  | "CANCELLED"
+  | "SUCCEEDED"
+  | "DEFEATED"
+  | "ACTIVE"
+  | "FAILED"
+  | "PENDING"
+  | "QUEUED"
+  | "EXECUTED"
+  | "CLOSED"
+  | "PASSED"
+
+// Complete Proposal type with all additional properties
+export type Proposal = {
+  id: string
+  proposer: string
+  snapshotBlockNumber: number
+  createdTime: Date | null
+  startTime: Date | null
+  startBlock: bigint | string | null
+  endTime: Date | null
+  endBlock: bigint | string | null
+  cancelledTime: Date | null
+  executedTime: Date | null
+  executedBlock: bigint | string | null
+  queuedTime: Date | null
+  markdowntitle: string
+  description: string | null
+  quorum: bigint | null
+  approvalThreshold: bigint | null
+  proposalData: ParsedProposalData[ProposalType]["kind"]
+  unformattedProposalData: `0x${string}` | null | any
+  proposalResults: ParsedProposalResults[ProposalType]["kind"]
+  proposalType: ProposalType | null
+  status: ProposalStatus | null
+  createdTransactionHash: string | null
+  cancelledTransactionHash: string | null
+  executedTransactionHash: string | null
+}
