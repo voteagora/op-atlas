@@ -1724,6 +1724,11 @@ export async function createProjectKycTeam({
               id: true,
               rewardStreams: true,
             },
+            where: {
+              rewardStreams: {
+                some: {},
+              },
+            },
           },
         },
       })
@@ -1737,7 +1742,8 @@ export async function createProjectKycTeam({
       await tx.rewardStream.updateMany({
         where: {
           id: {
-            in: project?.kycTeam?.rewardStreams.map((stream) => stream.id),
+            in:
+              project?.kycTeam?.rewardStreams.map((stream) => stream.id) ?? [],
           },
         },
         data: {
