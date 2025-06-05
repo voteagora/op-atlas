@@ -696,7 +696,7 @@ model OffChainVote {
 
   transactionHash String?    // Hash of the transaction that created the vote
   
-  citizenId          String
+  citizenId          Int
   citizen            Citizen  @relation(fields: [citizenId], references: [id])
   citizenCategory    citizenCategory @default(CHAIN)
 
