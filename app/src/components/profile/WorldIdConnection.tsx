@@ -1,57 +1,64 @@
-'use client';
+"use client"
 
-// import { useWorldIdVerification } from '@/hooks/useWorldIdVerification';
-// import { IDKitWidget } from '@worldcoin/idkit';
-// import { useEffect, useState } from 'react';
-// import { toast } from 'sonner';
+import { IDKitWidget } from "@worldcoin/idkit"
+import { toast } from "sonner"
 
-interface Props {
-    userId: string;
-    children?: React.ReactNode;
-    className?: string;
+import { useUserWorldId } from "@/hooks/db/useUserWorldId"
+
+export function WorldConnection({
+  userId,
+  children,
+}: {
+  userId: string
+  children: React.ReactNode
+}) {
+  const { invalidate } = useUserWorldId({ id: userId, enabled: false })
+
+  const verifyProof = async (proof: any) => {
+    const toastId = toast.loading("Verifying World ID...")
+
+    try {
+      const response = await fetch("/api/world/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          proof,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        toast.dismiss(toastId)
+        toast.error("Failed to verify World ID")
+        return
+      }
+
+      if (data.code === "max_verifications_reached") {
+        toast.dismiss(toastId)
+        toast.success("You have already verified your World ID")
+        return
+      }
+
+      toast.dismiss(toastId)
+    } catch (error) {
+      toast.dismiss(toastId)
+      toast.error("Failed to verify World ID")
+    }
+  }
+
+  return (
+    <IDKitWidget
+      app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID}
+      action={process.env.NEXT_PUBLIC_WORLD_APP_ACTION}
+      handleVerify={verifyProof}
+      onSuccess={() => invalidate()}
+    >
+      {({ open }: { open: () => void }) => (
+        <button onClick={open}>{children}</button>
+      )}
+    </IDKitWidget>
+  )
 }
-
-export function WorldConnection({ userId, children, className }: Props) {
-
-
-    return <div>{children}</div>
-
-    // const [isClient, setIsClient] = useState(false);
-    // const [isVerified, setIsVerified] = useState(false);
-    // const { isVerifying, error, verifyProof } = useWorldIdVerification();
-
-    // useEffect(() => {
-    //     setIsClient(true);
-    // }, []);
-
-    // useEffect(() => {
-    //     if (error) {
-    //         toast.error(error.message);
-    //     }
-    // }, [error]);
-
-    // if (!isClient) {
-    //     return null;
-    // }
-
-    // const handleSuccess = async (proof: any) => {
-    //     const success = await verifyProof(proof);
-    //     if (success) {
-    //         setIsVerified(true);
-    //         toast.success('Successfully verified with World ID');
-    //     }
-    // };
-
-    // return (
-    //     <IDKitWidget
-    //         app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID!}
-    //         action="atals-humanity-verification"
-    //         onSuccess={handleSuccess}
-    //     >
-    //         {({ open }: { open: () => void }) => (
-    //             <div className={className} onClick={open} >{children}</div>
-    //         )}
-    //     </IDKitWidget>
-
-    // );
-} 

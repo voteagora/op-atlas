@@ -1,10 +1,14 @@
 "use server"
 
-import { ProjectContract } from "@prisma/client"
 import { headers } from "next/headers"
+import { getAddress } from "viem"
 
 import { auth } from "@/auth"
-import { getUserCitizen, upsertCitizen } from "@/db/citizens"
+import {
+  getCitizenCountByType,
+  getUserCitizen,
+  upsertCitizen,
+} from "@/db/citizens"
 import { prisma } from "@/db/client"
 import {
   getOrganization,
@@ -12,7 +16,13 @@ import {
 } from "@/db/organizations"
 import { getProject, getUserAdminProjectsWithDetail } from "@/db/projects"
 import { getUserById } from "@/db/users"
-import { CITIZEN_TYPES } from "@/lib/constants"
+import {
+  CITIZEN_ATTESTATION_CODE,
+  CITIZEN_TAGS,
+  CITIZEN_TYPES,
+} from "@/lib/constants"
+
+import { updateMailchimpTags } from "../api/mailchimp"
 
 interface S8QualifyingUser {
   id: string
@@ -33,7 +43,7 @@ export const s8CitizenshipQualification = async (): Promise<{
   type: string
   identifier: string
   title: string
-  avatar: string
+  avatar: string | null
 } | null> => {
   const session = await auth()
   const userId = session?.user?.id
@@ -42,19 +52,18 @@ export const s8CitizenshipQualification = async (): Promise<{
     return null
   }
 
-  // Get user with addresses
   const user = await getUserById(userId)
   if (!user) {
     return null
   }
 
-  // Get user's organizations and projects
   const [userOrgs, userProjects] = await Promise.all([
     getUserOrganizationsWithDetails(userId),
     getUserAdminProjectsWithDetail({ userId }),
   ])
 
-  // Check S8QualifyingChain organizations (highest priority)
+  // ------------------------------------------------------------
+  // Organization (Chain) qualification
   const qualifyingChains = await prisma.$queryRaw<S8QualifyingChain[]>`
     SELECT * FROM "S8QualifyingChain"
     WHERE "organizationId" = ANY(${
@@ -63,26 +72,36 @@ export const s8CitizenshipQualification = async (): Promise<{
   `
 
   if (qualifyingChains.length > 0) {
+    const existingCitizen = await prisma.citizen.findUnique({
+      where: {
+        organizationId: qualifyingChains[0].organizationId,
+      },
+    })
+
+    // Get the organization
     const organization = await getOrganization({
       id: qualifyingChains[0].organizationId,
     })
 
-    return {
-      type: CITIZEN_TYPES.chain,
-      identifier: organization?.id || "",
-      title: organization?.name || "",
-      avatar: organization?.avatarUrl || "",
+    // Only one citizen per organization
+    if (!existingCitizen && organization) {
+      return {
+        type: CITIZEN_TYPES.chain,
+        identifier: organization.id,
+        title: organization.name,
+        avatar: organization.avatarUrl,
+      }
     }
   }
 
-  // Check S8QualifyingProject addresses (second priority)
+  // ------------------------------------------------------------
+  // Project (App) qualification
   const projectContracts =
     userProjects?.projects.flatMap(({ project }) => {
-      // Safely access contracts if present
       const maybeContracts = (project as any).contracts
       if (Array.isArray(maybeContracts)) {
-        return maybeContracts.map(
-          (contract: ProjectContract) => contract.contractAddress,
+        return maybeContracts.map((contract: { contractAddress: string }) =>
+          getAddress(contract.contractAddress),
         )
       }
       return []
@@ -94,25 +113,60 @@ export const s8CitizenshipQualification = async (): Promise<{
   `
 
   if (qualifyingProjects.length > 0) {
-    const project = await getProject({ id: qualifyingProjects[0].id })
-    return {
-      type: CITIZEN_TYPES.project,
-      identifier: qualifyingProjects[0].address,
-      title: project?.name || "",
-      avatar: project?.thumbnailUrl || "",
+    // Find the first project that doesn't have a citizen yet
+    const projectWithoutCitizen = await prisma.$queryRaw<{ id: string }[]>`
+      SELECT p.id
+      FROM "Project" p
+      LEFT JOIN "Citizen" c ON c."projectId" = p.id
+      WHERE p.id = ANY(${qualifyingProjects.map(
+        (p: S8QualifyingProject) => p.id,
+      )})
+      AND c.id IS NULL
+      LIMIT 1
+    `
+
+    if (projectWithoutCitizen.length > 0) {
+      const project = await getProject({ id: projectWithoutCitizen[0].id })
+
+      if (project) {
+        return {
+          type: CITIZEN_TYPES.app,
+          identifier: project.id,
+          title: project.name,
+          avatar: project.thumbnailUrl,
+        }
+      }
     }
   }
 
-  // Check S8QualifyingUser addresses (lowest priority)
-  const qualifyingUsers = await prisma.$queryRaw<S8QualifyingUser[]>`
+  // ------------------------------------------------------------
+  // User qualification
+
+  // Check if user already has a citizen profile
+  const existingCitizen = await getUserCitizen(userId)
+  if (existingCitizen) {
+    console.log("User already has a citizen profile")
+    return null
+  }
+
+  // Check the active Citizenship limit
+  const citizenCount = await getCitizenCountByType(CITIZEN_TYPES.user)
+  if (citizenCount >= 1000) {
+    console.log("Citizenship limit reached")
+    return null
+  }
+
+  const qualifyingAddress = await prisma.$queryRaw<S8QualifyingUser[]>`
     SELECT * FROM "S8QualifyingUser"
-    WHERE address = ANY(${user.addresses.map((addr) => addr.address)})
+    WHERE address = ANY(${user.addresses.map(
+      (addr: { address: string }) => addr.address,
+    )})
   `
 
-  if (qualifyingUsers.length > 0) {
+  if (qualifyingAddress.length > 0) {
     return {
       type: CITIZEN_TYPES.user,
-      identifier: qualifyingUsers[0].address,
+      identifier: user.id,
       title: "You",
       avatar: user.imageUrl || "",
     }
@@ -173,6 +227,14 @@ export const attestCitizen = async () => {
     }
   }
 
+  const citizenType =
+    CITIZEN_TYPES[qualification.type as keyof typeof CITIZEN_TYPES]
+  if (!citizenType) {
+    return {
+      error: "Invalid citizen type",
+    }
+  }
+
   try {
     // Get user with addresses
     const user = await getUserById(userId)
@@ -183,7 +245,9 @@ export const attestCitizen = async () => {
     }
 
     // Get primary address
-    const primaryAddress = user.addresses.find((addr) => addr.primary)?.address
+    const primaryAddress = user.addresses.find(
+      (addr: { primary: boolean; address: string }) => addr.primary,
+    )?.address
     if (!primaryAddress) {
       return {
         error: "No primary address set",
@@ -201,7 +265,7 @@ export const attestCitizen = async () => {
         body: JSON.stringify({
           address: primaryAddress,
           farcasterId: user.farcasterId,
-          selectionMethod: qualification.type,
+          selectionMethod: CITIZEN_ATTESTATION_CODE[citizenType],
         }),
       },
     )
@@ -220,9 +284,25 @@ export const attestCitizen = async () => {
       citizen: {
         address: primaryAddress,
         attestationId,
-        type: qualification.type,
+        type: citizenType,
+        projectId:
+          qualification.type === CITIZEN_TYPES.app
+            ? qualification.identifier
+            : undefined,
+        organizationId:
+          qualification.type === CITIZEN_TYPES.chain
+            ? qualification.identifier
+            : undefined,
       },
     })
+
+    await updateMailchimpTags([
+      {
+        email: user.emails[0].email,
+        tags: [CITIZEN_TAGS[citizenType]],
+      },
+    ])
+
     return result
   } catch (error) {
     console.error("Error attesting citizen:", error)

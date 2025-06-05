@@ -56,6 +56,14 @@ function CitizenshipGovernanceCommitmentDialog({
     updateCitizen({
       timeCommitment: selectedTime,
       type: qualification.type,
+      projectId:
+        qualification.type === CITIZEN_TYPES.app
+          ? qualification.identifier
+          : undefined,
+      organizationId:
+        qualification.type === CITIZEN_TYPES.chain
+          ? qualification.identifier
+          : undefined,
     })
   }
 

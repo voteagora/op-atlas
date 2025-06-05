@@ -30,6 +30,7 @@ model User {
   projects           UserProjects[]
   passports          UserPassport[]
   citizen            Citizen?
+  worldId            UserWorldId?
 
   @@index([username])
   @@index([farcasterId])
@@ -671,7 +672,10 @@ model Citizen {
   user            User     @relation(fields: [userId], references: [id])
   offChainVotes   OffChainVote[]
 
+
   @@index([userId])
+  @@index([projectId])
+  @@index([organizationId])
 }
 
 model S8QualifyingUser {
@@ -708,4 +712,16 @@ model OffChainVote {
   @@index([citizenId])
   @@index([transactionHash])
   @@unique([proposalId, citizenId])
+}
+
+model UserWorldId {
+  id            Int      @id @default(autoincrement())
+  userId        String   @unique
+  verified      Boolean  @default(false)
+  nullifierHash String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }

@@ -4,9 +4,11 @@ import { UserAddress, UserPassport } from "@prisma/client"
 import Link from "next/link"
 
 import { Check, Close } from "@/components/icons/reminx"
+import { WorldConnection } from "@/components/profile/WorldIdConnection"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
+import { useUserWorldId } from "@/hooks/db/useUserWorldId"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
@@ -19,6 +21,8 @@ const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
 export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId })
   const { data: userPassports } = useUserPassports({ id: userId })
+  const { data: userWorldId } = useUserWorldId({ id: userId })
+
   const { data: citizen } = useCitizen({ userId })
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { refreshPassport } = useRefreshPassport(userId)
@@ -305,9 +309,19 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
   }
 
   const renderWorld = () => {
+    if (userWorldId?.verified) {
+      return (
+        <ConditionRow isMet={true}>
+          You&apos;ve connected your World ID
+        </ConditionRow>
+      )
+    }
+
     return (
-      <ConditionRow isMet={true}>
-        You&apos;ve connected your World ID. | Connect with Worldchain
+      <ConditionRow isMet={false}>
+        <WorldConnection userId={userId}>
+          <span className={LINK_STYLE}>Connect your World ID</span>
+        </WorldConnection>
       </ConditionRow>
     )
   }
