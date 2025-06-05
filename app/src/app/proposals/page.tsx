@@ -1,12 +1,8 @@
 import { UIProposal } from "@/app/api/v1/proposals/route"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
-import {
-  getCitizenProposalVote,
-  getCitizenVotes,
-  getUserCitizen,
-} from "@/db/citizens"
 import { auth } from "@/auth"
+import { getCitizenProposalVote, getUserCitizen } from "@/db/citizens"
 
 const getProposalData = async () => {
   const proposalResponse = await fetch(
@@ -16,19 +12,6 @@ const getProposalData = async () => {
   )
 
   return proposalResponse.json()
-}
-
-const getCitizenVoteData = async (userId: string, proposalId: string) => {
-  const citizen = await getUserCitizen(userId)
-  if (!citizen) {
-    return
-  }
-  try {
-    return await getCitizenProposalVote(citizen.id, proposalId)
-  } catch (error) {
-    console.error(`Failed to fetch Citizen Votes: ${error}`)
-    return
-  }
 }
 
 interface Citizen {
@@ -43,44 +26,40 @@ interface Citizen {
   updatedAt: Date
 }
 
-const enrichProposalData = (
+const enrichProposalData = async (
   proposals: { standardProposals: UIProposal[]; selfNominations: UIProposal[] },
-  citizen: Citizen,
+  citizenId: number,
 ) => {
-  // Create a map of proposal IDs to their vote status for quick lookup
-  const proposalVoteMap = new Map()
+  // Helper function to enrich a single proposal with vote information
+  const enrichSingleProposal = async (
+    proposal: UIProposal,
+  ): Promise<UIProposal> => {
+    const citizen: Citizen = await getCitizenProposalVote(
+      citizenId,
+      proposal.id,
+    )
 
-  console.log(proposals, citizen)
+    // Check if we have a valid citizen with vote data
+    const hasVoted =
+      citizen?.vote?.vote &&
+      Array.isArray(citizen.vote.vote) &&
+      citizen.vote.vote.length > 0
 
-  // Check if citizen has votes
-  if (citizen && citizen.vote.vote && Array.isArray(citizen.vote.vote)) {
-    if (citizen.vote.vote.length > 0) {
-      proposalVoteMap.set(proposalId, true)
+    const isVotedProposal = hasVoted && citizen.proposalId === proposal.id
+
+    return {
+      ...proposal,
+      voted: isVotedProposal ? true : proposal.voted,
     }
   }
 
-  // Update standard proposals with vote information
-  const enrichedStandardProposals = proposals.standardProposals.map(
-    (proposal: UIProposal) => {
-      const voteStatus = proposalVoteMap.get(proposal.id)
-      return {
-        ...proposal,
-        // If we have a vote for this proposal, mark it as voted
-        voted: voteStatus ? true : proposal.voted,
-      }
-    },
+  // Process both types of proposals using the helper function
+  const enrichedStandardProposals = await Promise.all(
+    proposals.standardProposals.map(enrichSingleProposal),
   )
 
-  // Update self nominations with vote information
-  const enrichedSelfNominations = proposals.selfNominations.map(
-    (proposal: UIProposal) => {
-      const voteStatus = proposalVoteMap.get(proposal.id)
-      return {
-        ...proposal,
-        // If we have a vote for this proposal, mark it as voted
-        voted: voteStatus ? true : proposal.voted,
-      }
-    },
+  const enrichedSelfNominations = await Promise.all(
+    proposals.selfNominations.map(enrichSingleProposal),
   )
 
   return {
@@ -97,10 +76,15 @@ const getEnrichedProposalData = async ({ userId }: { userId?: string }) => {
       if (!userId) {
         return proposalData
       }
+
       // Get the citizen data from DB
-      const CitizenVoteData = await getCitizenVoteData(userId, proposalData.id)
+      const citizen = await getUserCitizen(userId)
+      if (!citizen) {
+        return proposalData
+      }
+
       // Enrich the proposal data with citizen data for conditional vote status rendering
-      return enrichProposalData(proposalData, CitizenVoteData)
+      return enrichProposalData(proposalData, citizen.id)
     } catch (error) {
       console.error(`Failed to fetch Citizen Data: ${error}`)
       // If we can't get citizen data, just return the proposal data as is
