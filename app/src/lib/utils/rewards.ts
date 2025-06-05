@@ -91,7 +91,10 @@ export function processStream(
     projectNames: projectsWithRewards.map((project) => project.name),
     wallets,
     KYCStatusCompleted: isKycTeamVerified(currentTeam),
-    amounts: calculateRewardAmounts(projectsWithRewards),
+    amounts: [
+      calculateRewardAmounts(projectsWithRewards)[0],
+      calculateRewardAmounts(projectsWithRewards)[1],
+    ],
   }
 }
 
