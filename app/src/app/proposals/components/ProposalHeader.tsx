@@ -5,7 +5,7 @@ interface ProposalTitleProps {
 }
 
 const ProposalTitle = ({ title }: ProposalTitleProps) => (
-  <div className="gap-2">
+  <div className="gap-2 flex-col items-start">
     <h1 className="font-semibold text-[36px] leading-[44px] tracking-normal text-text-default font-inter">
       {title}
     </h1>
