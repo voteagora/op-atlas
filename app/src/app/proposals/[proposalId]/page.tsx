@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import Breadcrumbs from "@/app/proposals/components/Breadcrumbs"
-import ProposalContent from "@/app/proposals/components/ProposalContent"
+import ProposalContent from "@/app/proposals/components/proposalContent/ProposalContent"
 import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
 import ProposalHeader from "@/app/proposals/components/ProposalHeader"
 
