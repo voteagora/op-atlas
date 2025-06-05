@@ -6,7 +6,7 @@ type ProposalCardProps = {
 const ProposalCard = ({ children, rounded = false }: ProposalCardProps) => {
   return (
     <div
-      className={`proposal-card-container border border-border ${
+      className={`proposal-card-container border-border ${
         rounded
           ? "border border-border rounded-t-lg"
           : "border-l border-r border-b border-border"
