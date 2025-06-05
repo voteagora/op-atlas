@@ -1,3 +1,6 @@
+import { ChevronRight } from "lucide-react"
+import React from "react"
+
 type ProposalCardProps = {
   children: React.ReactNode
   rounded?: boolean
@@ -109,23 +112,9 @@ interface ProposalArrowProps {
 }
 const ProposalArrow = ({ href }: ProposalArrowProps) => {
   return (
-    <a href={href} className="block w-[36px] h-[36px] ">
-      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] gap-[8px] bg-secondary hover:bg-primary text-text/default hover:text-secondary">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M9 5L16 12L9 19"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+    <a href={href} className="block w-[36px] h-[36px]">
+      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] bg-secondary hover:bg-primary text-text/default hover:text-secondary">
+        <ChevronRight width={14} height={14} />
       </div>
     </a>
   )
