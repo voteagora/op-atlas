@@ -4,6 +4,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
+import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,11 +14,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { getUserById } from "@/db/users"
-import { getCitizenByUserId } from "@/lib/actions/citizens"
+import {
+  getCitizenByUserId,
+  s8CitizenshipQualification,
+} from "@/lib/actions/citizens"
+import { CITIZEN_TYPES } from "@/lib/constants"
 
-import { CitizenshipSuccess } from "./application/components/CitizenshipSuccess"
-import { Eligibility } from "./components/Eligibility"
-import { Requirements } from "./components/Requirements"
+import { ChainAppRequirements } from "./components/ChainAppRequirements"
+import { Citizen } from "./components/Citizen"
+import { Sidebar } from "./components/Sidebar"
+import { UserRequirements } from "./components/UserRequirements"
 
 export default async function Page() {
   const session = await auth()
@@ -29,6 +35,7 @@ export default async function Page() {
 
   const user = await getUserById(userId)
   const citizen = await getCitizenByUserId(userId)
+  const qualification = await s8CitizenshipQualification()
 
   if (!user) {
     redirect("/")
@@ -39,7 +46,7 @@ export default async function Page() {
     return (
       <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
         <div className="w-full mt-20 ">
-          <CitizenshipSuccess user={user} />
+          <Citizen user={user} />
         </div>
       </main>
     )
@@ -99,7 +106,19 @@ export default async function Page() {
                   </ul>
                 </div>
               </div>
-              <Requirements userId={userId} />
+              {qualification && (
+                <div>
+                  {qualification?.type === CITIZEN_TYPES.user ? (
+                    <UserRequirements userId={userId} />
+                  ) : (
+                    <ChainAppRequirements
+                      userId={userId}
+                      qualification={qualification}
+                    />
+                  )}
+                </div>
+              )}
+
               <div className="border-b border-border-secondary w-full"></div>
               <div>
                 Learn more about citizenship in{" "}
@@ -115,8 +134,17 @@ export default async function Page() {
           </div>
         </div>
 
-        <div className="lg:col-span-1 mt-12 lg:mt-0">
-          <Eligibility />
+        <div>
+          {qualification ? (
+            <Sidebar user={user} qualification={qualification} />
+          ) : (
+            <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
+              <UserAvatarLarge imageUrl={user?.imageUrl} />
+              <div className="text-sm font-semibold text-secondary-foreground">
+                Sorry, you are not eligible to become a Citizen
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>

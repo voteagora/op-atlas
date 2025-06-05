@@ -395,3 +395,10 @@ export interface PassportScore {
   expiration_timestamp: string
   threshold: string
 }
+
+export interface CitizenshipQualification {
+  type: string
+  identifier: string
+  title: string
+  avatar: string | null
+}

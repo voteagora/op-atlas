@@ -2,17 +2,28 @@
 
 import { UserAddress } from "@prisma/client"
 
-import { Check, Close } from "@/components/icons/reminx"
+import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
+import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
+import { CITIZEN_TYPES } from "@/lib/constants"
+import { CitizenshipQualification } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
 
-export const Requirements = ({ userId }: { userId: string }) => {
+export const ChainAppRequirements = ({
+  userId,
+  qualification,
+}: {
+  userId: string
+  qualification: CitizenshipQualification
+}) => {
   const { user } = useUser({ id: userId })
+  const { data: citizen } = useCitizen({ userId })
+
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)
   const { setOpenDialog } = useAppDialogs()
@@ -113,11 +124,33 @@ export const Requirements = ({ userId }: { userId: string }) => {
     )
   }
 
-  const renderRevenue = () => {
+  const renderCommitment = () => {
+    if (citizen?.timeCommitment) {
+      return (
+        <ConditionRow isMet={true}>
+          Governance time commitment:{" "}
+          <span className="font-semibold">{citizen?.timeCommitment}</span> |{" "}
+          <button
+            type="button"
+            className={LINK_STYLE}
+            onClick={() => setOpenDialog("citizenship_governance_commitment")}
+          >
+            Edit
+          </button>
+        </ConditionRow>
+      )
+    }
+
     return (
       <ConditionRow isMet={false}>
-        The project contributed to ≥0.5% of the surplus revenue contributed by
-        onchain apps in the last Season, or was in the top 100.
+        Governance time commitment |{" "}
+        <button
+          type="button"
+          className={LINK_STYLE}
+          onClick={() => setOpenDialog("citizenship_governance_commitment")}
+        >
+          Specify
+        </button>
       </ConditionRow>
     )
   }
@@ -125,30 +158,17 @@ export const Requirements = ({ userId }: { userId: string }) => {
   return (
     <div className="flex flex-col gap-6">
       <div className="font-semibold text-xl">Requirements</div>
-      <div>
-        {renderRevenue()}
+      <div className="font-semibold">Atlas Profile</div>
+      <div className="flex flex-col gap-1">
+        <ConditionRow isMet={true}>
+          {qualification.type === CITIZEN_TYPES.chain
+            ? "The organization contributed to ≥2% of the total revenue contributed by Superchain members in the last Season, or was in the top 15 revenue-contributing chains."
+            : "The project contributed to ≥0.5% of the surplus revenue contributed by onchain apps in the last Season, or was in the top 100."}
+        </ConditionRow>
         {renderEmail()}
         {renderAddress()}
+        {renderCommitment()}
       </div>
-    </div>
-  )
-}
-
-const ConditionRow = ({
-  children,
-  isMet,
-}: {
-  children: React.ReactNode
-  isMet: boolean
-}) => {
-  return (
-    <div className="flex flex-row items-center gap-3">
-      {isMet ? (
-        <Check className="w-[20px] h-[20px]" fill="#0DA529" />
-      ) : (
-        <Close className="w-[20px] h-[20px]" fill="#BCBFCD" />
-      )}
-      <span>{children}</span>
     </div>
   )
 }

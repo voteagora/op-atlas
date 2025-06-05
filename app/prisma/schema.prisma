@@ -22,14 +22,14 @@ model User {
   govForumProfileUrl String?
   discord            String?
   privyDid           String?
+  citizen            Citizen?
   RewardClaim        RewardClaim[]
   addresses          UserAddress[]
   emails             UserEmail[]
   interaction        UserInteraction?
   organizations      UserOrganization[]
-  projects           UserProjects[]
   passports          UserPassport[]
-  citizen            Citizen?
+  projects           UserProjects[]
   worldId            UserWorldId?
 
   @@index([username])
@@ -477,20 +477,17 @@ model KYCUser {
 }
 
 model KYCTeam {
-  id             String       @id @default(uuid())
-  walletAddress  String       @unique
+  id                   String                @id @default(uuid())
+  walletAddress        String                @unique
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  deletedAt            DateTime?
+  team                 KYCUserTeams[]
+  OrganizationKYCTeams OrganizationKYCTeam[]
+  projects             Project[]
+  rewardStreams        RewardStream[]
+  superfludStream      SuperfluidStream[]
 
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  deletedAt      DateTime?
-  
-	team                       KYCUserTeams[]
-  projects                   Project[]
-  OrganizationKYCTeams       OrganizationKYCTeam[]
-  superfludStream            SuperfluidStream[]
-
-  rewardStreams   RewardStream[]
-	
   @@index([walletAddress])
 }
 
@@ -581,20 +578,15 @@ model SuperfluidStream {
   @@index([internalStreamId])
 }
 
-// To keep track of the streams when user changes their wallet
-// This is used to reconcile the streams when a user changes their wallet address
-// This is the id that's passed to Superfluid to create the stream
-model RewardStream { // This is used to track the ids for the streams
-		id         String         @id
-    projects   String[]       // Immutable list of projectIds redundantly stored for reconciliation & validation
-    roundId    String        
-    kycTeamId  String
-		
-		createdAt    DateTime     @default(now())    
-		
-		streams    SuperfluidStream[]
-    round      FundingRound @relation(fields: [roundId], references: [id])
-    team       KYCTeam @relation(fields: [kycTeamId], references: [id])
+model RewardStream {
+  id        String             @id
+  projects  String[]
+  roundId   String
+  createdAt DateTime           @default(now())
+  kycTeamId String
+  team      KYCTeam            @relation(fields: [kycTeamId], references: [id])
+  round     FundingRound       @relation(fields: [roundId], references: [id])
+  streams   SuperfluidStream[]
 
   @@index([roundId])
 }
@@ -638,6 +630,54 @@ model ProjectOSOAtlasRelatedProjects {
   @@index([relatedProjectId])
 }
 
+model Citizen {
+  id             Int      @id @default(autoincrement())
+  userId         String   @unique
+  address        String?  @unique
+  type           String
+  attestationId  String?
+  timeCommitment String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organizationId String?
+  projectId      String?
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([organizationId])
+}
+
+model S8QualifyingUser {
+  address String @id
+
+  @@index([address])
+}
+
+model S8QualifyingChain {
+  organizationId String @id
+
+  @@index([organizationId])
+}
+
+model S8QualifyingProject {
+  address String @id
+
+  @@index([address])
+}
+
+model UserWorldId {
+  id            Int      @id @default(autoincrement())
+  userId        String   @unique
+  verified      Boolean  @default(false)
+  nullifierHash String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
 enum KYCStatus {
   PENDING
   APPROVED
@@ -660,46 +700,4 @@ enum ProjectOSOMetric {
   DEVELOPER_CONNECTION_COUNT
   TRUSTED_DEVELOPER_USERNAME
   DOWNSTREAM_GAS
-}
-
-model Citizen {
-  id             Int      @id @default(autoincrement())
-  userId         String   @unique
-  address        String?  @unique
-  type           String
-  attestationId  String?
-  timeCommitment String?
-  projectId      String?  @unique
-  organizationId String?  @unique
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([projectId])
-  @@index([organizationId])
-}
-
-model S8QualifyingUser {
-  address String @id
-}
-
-model S8QualifyingChain {
-  organizationId String @id
-}
-
-model S8QualifyingProject {
-  address String @id
-}
-
-model UserWorldId {
-  id            Int      @id @default(autoincrement())
-  userId        String   @unique
-  verified      Boolean  @default(false)
-  nullifierHash String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  user          User     @relation(fields: [userId], references: [id])
-
-  @@index([userId])
 }

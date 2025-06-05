@@ -3,7 +3,7 @@
 import { UserAddress, UserPassport } from "@prisma/client"
 import Link from "next/link"
 
-import { Check, Close } from "@/components/icons/reminx"
+import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
@@ -18,7 +18,7 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 
 const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
 
-export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
+export const UserRequirements = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId })
   const { data: userPassports } = useUserPassports({ id: userId })
   const { data: userWorldId } = useUserWorldId({ id: userId })
@@ -344,25 +344,6 @@ export const CitizenshipRequirements = ({ userId }: { userId: string }) => {
         {renderPassport()}
         {renderWorld()}
       </div>
-    </div>
-  )
-}
-
-const ConditionRow = ({
-  children,
-  isMet,
-}: {
-  children: React.ReactNode
-  isMet: boolean
-}) => {
-  return (
-    <div className="flex items-center gap-3">
-      {isMet ? (
-        <Check className="w-[20px] h-[20px]" fill="#0DA529" />
-      ) : (
-        <Close className="w-[20px] h-[20px]" fill="#BCBFCD" />
-      )}
-      <span>{children}</span>
     </div>
   )
 }

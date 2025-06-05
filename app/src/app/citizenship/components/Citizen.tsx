@@ -6,7 +6,7 @@ import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import { CheckboxCircleFIll } from "@/components/icons/reminx"
 import { AvatarBadge } from "@/components/ui/avatar"
 
-export const CitizenshipSuccess = ({ user }: { user: User }) => {
+export const Citizen = ({ user }: { user: User }) => {
   return (
     <div className="flex flex-col items-center justify-center h-full w-full gap-8">
       <UserAvatarLarge imageUrl={user.imageUrl}>
