@@ -661,9 +661,9 @@ model S8QualifyingChain {
 }
 
 model S8QualifyingProject {
-  address String @id
+  projectId String @id
 
-  @@index([address])
+  @@index([projectId])
 }
 
 model UserWorldId {

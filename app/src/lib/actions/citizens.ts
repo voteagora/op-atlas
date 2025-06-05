@@ -1,7 +1,6 @@
 "use server"
 
 import { headers } from "next/headers"
-import { getAddress } from "viem"
 
 import { auth } from "@/auth"
 import {
@@ -26,18 +25,15 @@ import { CitizenshipQualification } from "@/lib/types"
 import { updateMailchimpTags } from "../api/mailchimp"
 
 interface S8QualifyingUser {
-  id: string
   address: string
 }
 
 interface S8QualifyingChain {
-  id: string
   organizationId: string
 }
 
 interface S8QualifyingProject {
-  id: string
-  address: string
+  projectId: string
 }
 
 export const s8CitizenshipQualification =
@@ -93,20 +89,12 @@ export const s8CitizenshipQualification =
 
     // ------------------------------------------------------------
     // Project (App) qualification
-    const projectContracts =
-      userProjects?.projects.flatMap(({ project }) => {
-        const maybeContracts = (project as any).contracts
-        if (Array.isArray(maybeContracts)) {
-          return maybeContracts.map((contract: { contractAddress: string }) =>
-            getAddress(contract.contractAddress),
-          )
-        }
-        return []
-      }) || []
+    const projectIds =
+      userProjects?.projects.map(({ project }) => project.id) || []
 
     const qualifyingProjects = await prisma.$queryRaw<S8QualifyingProject[]>`
     SELECT * FROM "S8QualifyingProject"
-    WHERE address = ANY(${projectContracts})
+    WHERE "projectId" = ANY(${projectIds})
   `
 
     if (qualifyingProjects.length > 0) {
@@ -116,7 +104,7 @@ export const s8CitizenshipQualification =
       FROM "Project" p
       LEFT JOIN "Citizen" c ON c."projectId" = p.id
       WHERE p.id = ANY(${qualifyingProjects.map(
-        (p: S8QualifyingProject) => p.id,
+        (p: S8QualifyingProject) => p.projectId,
       )})
       AND c.id IS NULL
       LIMIT 1
@@ -285,11 +273,11 @@ export const attestCitizen = async () => {
         projectId:
           qualification.type === CITIZEN_TYPES.app
             ? qualification.identifier
-            : undefined,
+            : null,
         organizationId:
           qualification.type === CITIZEN_TYPES.chain
             ? qualification.identifier
-            : undefined,
+            : null,
       },
     })
 
