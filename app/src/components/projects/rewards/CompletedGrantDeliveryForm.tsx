@@ -45,12 +45,15 @@ export default function CompletedGrantDeliveryForm({
     setOpenDialog("select_kyc_project")
   }
 
+  const hasActiveStream =
+    kycTeam?.rewardStreams && kycTeam.rewardStreams.length > 0
+
   const openDeleteKYCTeamDialog = () => {
     setData({
       kycTeamId: kycTeam?.id,
       projectId: projectId as string,
       organizationId: organizationId as string,
-      rewardStreamId: kycTeam?.rewardStream?.id,
+      hasActiveStream,
     })
     setOpenDialog("delete_kyc_team")
   }
@@ -64,14 +67,16 @@ export default function CompletedGrantDeliveryForm({
         <div className="space-y-2">
           <div className="w-full flex justify-between items-center">
             <span className="font-medium text-sm">Projects</span>
-            <button
-              className="flex items-center space-x-1"
-              onClick={openSelectKYCProjectDialog}
-            >
-              <SquareCheck size={18} />
-              <span>Choose</span>
-              <ChevronRight size={14} />
-            </button>
+            {!hasActiveStream && (
+              <button
+                className="flex items-center space-x-1"
+                onClick={openSelectKYCProjectDialog}
+              >
+                <SquareCheck size={18} />
+                <span>Choose</span>
+                <ChevronRight size={14} />
+              </button>
+            )}
           </div>
           {Boolean(kycTeamProjects?.length) ? (
             <ul className="space-y-2 w-full">

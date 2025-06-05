@@ -144,7 +144,7 @@ export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
-    rewardStream: true
+    rewardStreams: true
   }
 }>
 
@@ -155,7 +155,7 @@ export type KYCStreamTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
-    rewardStream: true
+    rewardStreams: true
     projects: {
       select: {
         id: true
@@ -163,6 +163,12 @@ export type KYCStreamTeam = Prisma.KYCTeamGetPayload<{
         recurringRewards: true
       }
     }
+  }
+}>
+
+export type StreamWithKYCTeam = Prisma.SuperfluidStreamGetPayload<{
+  include: {
+    kycTeam: true
   }
 }>
 
@@ -182,7 +188,7 @@ export type RecurringRewardWithProject = Prisma.RecurringRewardGetPayload<{
                 users: true
               }
             }
-            rewardStream: {
+            rewardStreams: {
               include: {
                 streams: true
               }

@@ -65,10 +65,7 @@ export const addAddressToRewardsClaim = async (
     }
   }
 
-  const isInvalid = await verifyAdminStatus(
-    reward.project.id,
-    userId,
-  )
+  const isInvalid = await verifyAdminStatus(reward.project.id, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -118,10 +115,7 @@ export const completeRewardsClaim = async (rewardId: string) => {
     }
   }
 
-  const isInvalid = await verifyAdminStatus(
-    reward.project.id,
-    userId,
-  )
+  const isInvalid = await verifyAdminStatus(reward.project.id, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -154,10 +148,7 @@ export const resetRewardsClaim = async (rewardId: string) => {
     }
   }
 
-  const isInvalid = await verifyAdminStatus(
-    reward.project.id,
-    userId,
-  )
+  const isInvalid = await verifyAdminStatus(reward.project.id, userId)
   if (isInvalid?.error) {
     return isInvalid
   }
@@ -188,12 +179,14 @@ export const getRewardStreamsForRound = async (
 ): Promise<RewardStream[]> => {
   const existingStreams = (async () => {
     const streams = await getRewardStreamsWithRewardsForRound(roundId)
-    return streams.map((stream) => processStream(stream.teams, stream.id))
+    return streams.map((stream) =>
+      processStream(stream.streams, stream.team, roundId, stream.id),
+    )
   })()
 
   const newStreams = (async () => {
     const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
-    return kycTeams.map((kycTeam) => processStream([kycTeam]))
+    return kycTeams.map((kycTeam) => processStream([], kycTeam, roundId))
   })()
 
   return [...(await existingStreams), ...(await newStreams)]
@@ -204,7 +197,7 @@ export const processSuperfluidStream = async (
   roundId: string,
 ) => {
   // Create RewardStream
-  const rewardStream = await createRewardStream(stream, roundId)
+  const rewardStreamId = await createRewardStream(stream, roundId)
   // Create SuperfluidStream
-  await createOrUpdateSuperfluidStream(stream, rewardStream?.id)
+  await createOrUpdateSuperfluidStream(stream, rewardStreamId)
 }

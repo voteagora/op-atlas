@@ -1,4 +1,4 @@
-import { KYCStreamTeam } from "../types"
+import { KYCStreamTeam, StreamWithKYCTeam } from "../types"
 import { processStream } from "./rewards"
 
 describe("processStream", () => {
@@ -40,13 +40,35 @@ describe("processStream", () => {
   ): KYCStreamTeam => ({
     id: "kyc-team-id",
     walletAddress,
-    rewardStreamId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt,
     projects,
     team: teamMembers,
-    rewardStream: null,
+    rewardStreams: [],
+  })
+
+  const createMockStream = (
+    walletAddress: string,
+    createdAt: Date,
+    rewardStreamId?: string,
+  ): StreamWithKYCTeam => ({
+    id: "stream-id",
+    sender: "sender-address",
+    receiver: walletAddress,
+    flowRate: "100",
+    deposit: "1000",
+    createdAt,
+    updatedAt: new Date(),
+    deletedAt: null,
+    internalStreamId: rewardStreamId ?? null,
+    kycTeam: {
+      id: "kyc-team-id",
+      walletAddress,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    },
   })
 
   const createMockReward = (
@@ -102,50 +124,57 @@ describe("processStream", () => {
     const team1 = createMockTeam("wallet1", null, projects)
     const team2 = createMockTeam("wallet1", null, [...projects].reverse())
 
-    const result1 = processStream([team1])
-    const result2 = processStream([team2])
+    const result1 = processStream([], team1, "round-id")
+    const result2 = processStream([], team2, "round-id")
 
     expect(result1.id).toBe(result2.id)
   })
 
-  it("should order wallets correctly based on deletedAt", () => {
+  it("should order wallets based on stream creation time", () => {
     const now = new Date()
-    const firstDeleted = new Date(now.getTime() - 2000)
-    const secondDeleted = new Date(now.getTime() - 1000)
+    const firstCreated = new Date(now.getTime() - 2000)
+    const secondCreated = new Date(now.getTime() - 1000)
 
-    const teams = [
-      createMockTeam("wallet1", firstDeleted, []),
-      createMockTeam("wallet2", secondDeleted, []),
-      createMockTeam("wallet3", null, []),
+    const streams = [
+      createMockStream("wallet1", firstCreated),
+      createMockStream("wallet2", secondCreated),
     ]
+    const currentTeam = createMockTeam("wallet3", null, [])
 
-    const result = processStream(teams)
+    const result = processStream(streams, currentTeam, "round-id")
     expect(result.wallets).toEqual(["wallet1", "wallet2", "wallet3"])
   })
 
-  it("should throw error when multiple active addresses exist", () => {
-    const teams = [
-      createMockTeam("wallet1", null, []),
-      createMockTeam("wallet2", null, []),
-    ]
+  it("should handle streams with reward stream relationships", () => {
+    const now = new Date()
+    const firstCreated = new Date(now.getTime() - 2000)
+    const secondCreated = new Date(now.getTime() - 1000)
+    const rewardStreamId = "reward-stream-id"
 
-    expect(() => processStream(teams)).toThrow(
-      "Multiple active addresses detected",
-    )
+    // Create two streams for different teams, both linked to the same reward stream
+    const streams = [
+      createMockStream("wallet1", firstCreated, rewardStreamId),
+      createMockStream("wallet2", secondCreated, rewardStreamId),
+    ]
+    const currentTeam = createMockTeam("wallet3", null, [])
+
+    const result = processStream(streams, currentTeam, "round-id")
+
+    // Should include all wallets in order of stream creation
+    expect(result.wallets).toEqual(["wallet1", "wallet2", "wallet3"])
   })
 
   it("should correctly calculate KYCStatusCompleted", () => {
-    const teams = [
-      createMockTeam(
-        "wallet1",
-        new Date(),
-        [],
-        [createMockTeamMember("APPROVED"), createMockTeamMember("APPROVED")],
-      ),
-      createMockTeam("wallet2", null, [], [createMockTeamMember("PENDING")]),
-    ]
+    const now = new Date()
+    const streams = [createMockStream("wallet1", now)]
+    const currentTeam = createMockTeam(
+      "wallet2",
+      null,
+      [],
+      [createMockTeamMember("PENDING")],
+    )
 
-    const result = processStream(teams)
+    const result = processStream(streams, currentTeam, "round-id")
     expect(result.KYCStatusCompleted).toBe(false)
   })
 
@@ -169,8 +198,8 @@ describe("processStream", () => {
       },
     ]
 
-    const team = createMockTeam("wallet1", null, projects)
-    const result = processStream([team])
+    const currentTeam = createMockTeam("wallet1", null, projects)
+    const result = processStream([], currentTeam, "round-id")
 
     // Tranche 1: 100 + 300 = 400
     // Tranche 2: 200
@@ -179,9 +208,9 @@ describe("processStream", () => {
   })
 
   it("should use provided streamId when available", () => {
-    const team = createMockTeam("wallet1", null, [])
+    const currentTeam = createMockTeam("wallet1", null, [])
     const customStreamId = "custom-stream-id"
-    const result = processStream([team], customStreamId)
+    const result = processStream([], currentTeam, "round-id", customStreamId)
     expect(result.id).toBe(customStreamId)
   })
 
@@ -199,8 +228,8 @@ describe("processStream", () => {
       },
     ]
 
-    const team = createMockTeam("wallet1", null, projects)
-    const result = processStream([team])
+    const currentTeam = createMockTeam("wallet1", null, projects)
+    const result = processStream([], currentTeam, "round-id")
 
     expect(result.projectIds).toEqual(["project1"])
     expect(result.projectNames).toEqual(["Project 1"])

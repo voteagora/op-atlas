@@ -477,18 +477,20 @@ model KYCUser {
 }
 
 model KYCTeam {
-  id                   String                @id @default(uuid())
-  walletAddress        String                @unique
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  deletedAt            DateTime?
-  rewardStreamId       String?
-  rewardStream         RewardStream?         @relation(fields: [rewardStreamId], references: [id])
-  team                 KYCUserTeams[]
-  OrganizationKYCTeams OrganizationKYCTeam[]
-  projects             Project[]
-  superfludStream      SuperfluidStream[]
+  id             String       @id @default(uuid())
+  walletAddress  String       @unique
 
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  
+	team                       KYCUserTeams[]
+  projects                   Project[]
+  OrganizationKYCTeams       OrganizationKYCTeam[]
+  superfludStream            SuperfluidStream[]
+
+  rewardStreams   RewardStream[]
+	
   @@index([walletAddress])
 }
 
@@ -579,14 +581,20 @@ model SuperfluidStream {
   @@index([internalStreamId])
 }
 
-model RewardStream {
-  id        String             @id
-  projects  String[]
-  roundId   String
-  createdAt DateTime           @default(now())
-  teams     KYCTeam[]
-  round     FundingRound       @relation(fields: [roundId], references: [id])
-  streams   SuperfluidStream[]
+// To keep track of the streams when user changes their wallet
+// This is used to reconcile the streams when a user changes their wallet address
+// This is the id that's passed to Superfluid to create the stream
+model RewardStream { // This is used to track the ids for the streams
+		id         String         @id
+    projects   String[]       // Immutable list of projectIds redundantly stored for reconciliation & validation
+    roundId    String        
+    kycTeamId  String
+		
+		createdAt    DateTime     @default(now())    
+		
+		streams    SuperfluidStream[]
+    round      FundingRound @relation(fields: [roundId], references: [id])
+    team       KYCTeam @relation(fields: [kycTeamId], references: [id])
 
   @@index([roundId])
 }

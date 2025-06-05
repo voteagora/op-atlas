@@ -74,7 +74,7 @@ export async function getProjectKycTeam(projectId: string) {
               users: true,
             },
           },
-          rewardStream: true,
+          rewardStreams: true,
         },
       },
     },
@@ -85,13 +85,13 @@ export async function getProjectKycTeam(projectId: string) {
 
 export async function deleteKycTeam({
   kycTeamId,
-  rewardStreamId,
+  hasActiveStream,
 }: {
   kycTeamId: string
-  rewardStreamId?: string
+  hasActiveStream?: boolean
 }) {
   // Soft delete if there's an active stream
-  if (rewardStreamId) {
+  if (hasActiveStream) {
     await prisma.kYCTeam.update({
       where: {
         id: kycTeamId,
