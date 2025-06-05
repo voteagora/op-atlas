@@ -26,6 +26,7 @@ export const supportedMappings = {
   SONEIUM: 1868,
   SWELL: 1923,
   ZORA: 7777777,
+  UNICHAIN: 130,
 }
 
 // TODO: Depricate this
