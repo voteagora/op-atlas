@@ -739,7 +739,6 @@ enum citizenCategory {
   USER
 }
 
-
 model OffChainVote {
   attestationId   String     @id  // EAS attestation ID as primary key
   voterAddress    String     // Ethereum address of the voter
@@ -761,4 +760,5 @@ model OffChainVote {
   @@index([proposalId])
   @@index([citizenId])
   @@index([transactionHash])
+  @@unique([proposalId, citizenId])
 }
