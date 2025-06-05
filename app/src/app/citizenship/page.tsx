@@ -1,4 +1,5 @@
-import { Metadata } from "next"
+"use server"
+
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
@@ -14,21 +15,9 @@ import {
 import { getUserById } from "@/db/users"
 import { getCitizenByUserId } from "@/lib/actions/citizens"
 
-import { sharedMetadata } from "../shared-metadata"
 import { CitizenshipSuccess } from "./application/components/CitizenshipSuccess"
 import { Eligibility } from "./components/Eligibility"
 import { Requirements } from "./components/Requirements"
-
-export const metadata: Metadata = {
-  ...sharedMetadata,
-  title: "Citizenship Registration",
-  description: "Register for Citizenship in the Optimism Collective.",
-  openGraph: {
-    ...sharedMetadata.openGraph,
-    title: "Citizenship Registration",
-    description: "Register for Citizenship in the Optimism Collective.",
-  },
-}
 
 export default async function Page() {
   const session = await auth()
