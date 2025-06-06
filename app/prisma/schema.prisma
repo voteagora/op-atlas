@@ -22,14 +22,15 @@ model User {
   govForumProfileUrl String?
   discord            String?
   privyDid           String?
+  citizen            Citizen?
   RewardClaim        RewardClaim[]
   addresses          UserAddress[]
   emails             UserEmail[]
   interaction        UserInteraction?
   organizations      UserOrganization[]
-  projects           UserProjects[]
   passports          UserPassport[]
-  citizen            Citizen?
+  projects           UserProjects[]
+  worldId            UserWorldId?
 
   @@index([username])
   @@index([farcasterId])
@@ -487,11 +488,10 @@ model KYCTeam {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   deletedAt            DateTime?
-  rewardStreamId       String?
-  rewardStream         RewardStream?         @relation(fields: [rewardStreamId], references: [id])
   team                 KYCUserTeams[]
   OrganizationKYCTeams OrganizationKYCTeam[]
   projects             Project[]
+  rewardStreams        RewardStream[]
   superfludStream      SuperfluidStream[]
 
   @@index([walletAddress])
@@ -589,7 +589,8 @@ model RewardStream {
   projects  String[]
   roundId   String
   createdAt DateTime           @default(now())
-  teams     KYCTeam[]
+  kycTeamId String
+  team      KYCTeam            @relation(fields: [kycTeamId], references: [id])
   round     FundingRound       @relation(fields: [roundId], references: [id])
   streams   SuperfluidStream[]
 
@@ -635,6 +636,54 @@ model ProjectOSOAtlasRelatedProjects {
   @@index([relatedProjectId])
 }
 
+model Citizen {
+  id             Int      @id @default(autoincrement())
+  userId         String   @unique
+  address        String?  @unique
+  type           String
+  attestationId  String?
+  timeCommitment String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organizationId String?
+  projectId      String?
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([organizationId])
+}
+
+model S8QualifyingUser {
+  address String @id
+
+  @@index([address])
+}
+
+model S8QualifyingChain {
+  organizationId String @id
+
+  @@index([organizationId])
+}
+
+model S8QualifyingProject {
+  projectId String @id
+
+  @@index([projectId])
+}
+
+model UserWorldId {
+  id            Int      @id @default(autoincrement())
+  userId        String   @unique
+  verified      Boolean  @default(false)
+  nullifierHash String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
 enum KYCStatus {
   PENDING
   APPROVED
@@ -657,54 +706,4 @@ enum ProjectOSOMetric {
   DEVELOPER_CONNECTION_COUNT
   TRUSTED_DEVELOPER_USERNAME
   DOWNSTREAM_GAS
-}
-
-model Citizen {
-  id             Int            @id @default(autoincrement())
-  userId         String         @unique
-  address        String?        @unique
-  type           String
-  attestationId  String?
-  timeCommitment String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  user           User           @relation(fields: [userId], references: [id])
-  OffChainVote   OffChainVote[]
-
-  @@index([userId])
-}
-
-model S8QualifyingUser {
-  address String @id
-}
-
-model S8QualifyingChain {
-  organizationId String @id
-}
-
-model S8QualifyingProject {
-  address String @id
-}
-
-model OffChainVote {
-  attestationId String @id // EAS attestation ID as primary key
-  voterAddress  String // Ethereum address of the voter
-  proposalId    String // ID of the proposal being voted on
-  vote          Json // For standard proposals, this is an array of choices, 
-  // using strings for the values.
-  // e.g. ["1"], where "0", "1", "2" are for, against, abstain
-
-  transactionHash String? // Hash of the transaction that created the vote
-
-  citizenId       Int
-  citizen         Citizen         @relation(fields: [citizenId], references: [id])
-  citizenCategory citizenCategory @default(CHAIN)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([voterAddress])
-  @@index([proposalId])
-  @@index([citizenId])
-  @@index([transactionHash])
 }

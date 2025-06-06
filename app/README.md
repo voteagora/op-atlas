@@ -2,6 +2,8 @@
 
 This is the main OP Atlas Next.js web application.
 
+More documentation about the code base can be found [here](https://splashy-wasabi-825.notion.site/OP-Atlas-Codebase-Overview-e4a227380e564dc38af48453c8477791).
+
 ## Getting Started
 
 First, install the dependencies:

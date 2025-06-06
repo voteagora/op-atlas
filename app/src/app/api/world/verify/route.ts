@@ -1,53 +1,49 @@
-// import { auth } from '@/auth';
-// import { IVerifyResponse, verifyCloudProof } from '@worldcoin/idkit';
-// import { NextResponse } from 'next/server';
+"use server"
+
+import {
+  IVerifyResponse,
+  verifyCloudProof,
+} from "@worldcoin/idkit-core/backend"
+import { NextResponse } from "next/server"
+
+import { auth } from "@/auth"
+import { upsertUserWorldId } from "@/db/users"
 
 export async function POST(request: Request) {
+  const session = await auth()
+  const userId = session?.user?.id
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
-    // const session = await auth();
-    // const userId = session?.user?.id;
+  try {
+    const { proof } = await request.json()
 
-    // if (!userId) {
-    //     return NextResponse.json(
-    //         { error: 'Unauthorized' },
-    //         { status: 401 }
-    //     );
-    // }
+    const app_id = process.env.NEXT_PUBLIC_WORLD_APP_ID!
+    const action = process.env.NEXT_PUBLIC_WORLD_APP_ACTION!
 
-    // try {
+    const response = (await verifyCloudProof(
+      proof,
+      app_id as `app_${string}`,
+      action,
+    )) as IVerifyResponse
 
-    //     const { proof, action } = await request.json();
+    if (
+      response.success === true ||
+      response.code === "max_verifications_reached"
+    ) {
+      await upsertUserWorldId({
+        userId,
+        nullifierHash: proof.nullifier_hash,
+        verified: true,
+      })
+    }
 
-    //     // TODO: Verify that the ation is valid
-    //     // const action = process.env.NEXT_PUBLIC_WORLD_APP_ACTION;
-    //     const app_id = process.env.NEXT_PUBLIC_WORLD_APP_ID;
-    //     const api_key = process.env.WORLD_APP_API_KEY;
-
-    //     if (!app_id || !api_key) {
-    //         return NextResponse.json(
-    //             { error: 'World ID configuration missing' },
-    //             { status: 500 }
-    //         );
-    //     }
-
-    //     const verifyRes = (await verifyCloudProof(proof, app_id as `app_${string}`, action)) as IVerifyResponse
-
-    //     if (verifyRes.success) {
-    //         return NextResponse.json(
-    //             { status: 200, message: 'Proof verified' },
-    //         );
-    //     } else {
-    //         // TODO: Handle errors from the World ID /verify endpoint. 
-    //         return NextResponse.json(
-    //             { status: 400, message: 'Proof not verified' },
-    //         );
-    //     }
-
-    // } catch (error) {
-    //     console.error('Error verifying World ID proof:', error);
-    //     return NextResponse.json(
-    //         { error: 'Failed to verify proof' },
-    //         { status: 500 }
-    //     );
-    // }
-} 
+    return NextResponse.json(response)
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to verify proof" },
+      { status: 500 },
+    )
+  }
+}

@@ -14,6 +14,8 @@ export async function upsertCitizen({
     address?: string
     attestationId?: string
     timeCommitment?: string
+    projectId?: string | null
+    organizationId?: string | null
   }
 }) {
   return prisma.citizen.upsert({
@@ -34,6 +36,14 @@ export async function getUserCitizen(id: string): Promise<Citizen | null> {
   return prisma.citizen.findUnique({
     where: {
       userId: id,
+    },
+  })
+}
+
+export async function getCitizenCountByType(type: string): Promise<number> {
+  return prisma.citizen.count({
+    where: {
+      type,
     },
   })
 }

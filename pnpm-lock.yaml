@@ -109,6 +109,9 @@ importers:
       '@worldcoin/idkit':
         specifier: ^2.1.0
         version: 2.1.0(@emotion/is-prop-valid@1.2.2)(@types/react-dom@18.3.5(@types/react@18.3.16))(@types/react@18.3.16)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.16)(typescript@5.7.2)(zod@3.24.1)
+      '@worldcoin/idkit-core':
+        specifier: ^2.1.0
+        version: 2.1.0(@types/react@18.3.16)(react@18.3.1)(typescript@5.7.2)(zod@3.24.1)
       browser-image-compression:
         specifier: ^2.0.2
         version: 2.0.2
@@ -20242,11 +20245,11 @@ snapshots:
   ox@0.1.2(typescript@5.7.2)(zod@3.24.1):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
-      '@scure/bip32': 1.6.0
-      '@scure/bip39': 1.5.0
-      abitype: 1.0.7(typescript@5.7.2)(zod@3.24.1)
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.7.2)(zod@3.24.1)
       eventemitter3: 5.0.1
     optionalDependencies:
       typescript: 5.7.2

@@ -667,6 +667,9 @@ export async function createOrganizationKycTeam({
               deletedAt: {
                 not: null,
               },
+              rewardStreams: {
+                some: {},
+              },
             },
           },
         },
@@ -677,7 +680,7 @@ export async function createOrganizationKycTeam({
               kycTeam: {
                 select: {
                   id: true,
-                  rewardStreamId: true,
+                  rewardStreams: true,
                 },
               },
             },
@@ -690,52 +693,82 @@ export async function createOrganizationKycTeam({
     // and needs to create a new kyc team for the same stream
     // and connect all projects to the same kyc team
     if (orgProjectWithDeletedKycTeam.length > 0) {
-      const kycTeam = await prisma.kYCTeam.create({
-        data: {
-          walletAddress: walletAddress.toLowerCase(),
-          ...(orgProjectWithDeletedKycTeam[0].project.kycTeam
-            ?.rewardStreamId && {
-            rewardStreamId:
-              orgProjectWithDeletedKycTeam[0].project.kycTeam.rewardStreamId,
-          }),
-        },
-      })
-
-      await prisma.project.updateMany({
-        where: {
-          id: {
-            in: orgProjectWithDeletedKycTeam.map(
-              (project) => project.project.id,
-            ),
+      await prisma.$transaction(async (tx) => {
+        const kycTeam = await tx.kYCTeam.create({
+          data: {
+            walletAddress: walletAddress.toLowerCase(),
           },
-        },
-        data: {
-          kycTeamId: kycTeam.id,
-        },
+        })
+
+        await Promise.all([
+          // Connect all streams to the new kyc team
+          tx.rewardStream.updateMany({
+            where: {
+              id: {
+                in: orgProjectWithDeletedKycTeam.flatMap(
+                  (project) =>
+                    project.project.kycTeam?.rewardStreams.map(
+                      (stream) => stream.id,
+                    ) ?? [],
+                ),
+              },
+            },
+            data: {
+              kycTeamId: kycTeam.id,
+            },
+          }),
+
+          // Connect all projects to the new kyc team
+          tx.project.updateMany({
+            where: {
+              id: {
+                in: orgProjectWithDeletedKycTeam.map(
+                  (project) => project.project.id,
+                ),
+              },
+            },
+            data: {
+              kycTeamId: kycTeam.id,
+            },
+          }),
+
+          // Create kyc team & organization relationship
+          tx.organizationKYCTeam.create({
+            data: {
+              organizationId,
+              kycTeamId: kycTeam.id,
+            },
+          }),
+        ])
       })
     } else {
-      const kycTeam = await prisma.kYCTeam.create({
-        data: {
-          walletAddress: walletAddress.toLowerCase(),
-        },
-      })
+      await prisma.$transaction(async (tx) => {
+        const kycTeam = await tx.kYCTeam.create({
+          data: {
+            walletAddress: walletAddress.toLowerCase(),
+          },
+        })
 
-      await Promise.all([
-        prisma.project.updateMany({
-          where: {
-            id: { in: orgProjects.map((project) => project.projectId) },
-          },
-          data: {
-            kycTeamId: kycTeam.id,
-          },
-        }),
-        prisma.organizationKYCTeam.create({
-          data: {
-            organizationId,
-            kycTeamId: kycTeam.id,
-          },
-        }),
-      ])
+        await Promise.all([
+          // Connect all projects to the new kyc team
+          tx.project.updateMany({
+            where: {
+              id: { in: orgProjects.map((project) => project.projectId) },
+            },
+            data: {
+              kycTeamId: kycTeam.id,
+            },
+          }),
+
+          // Create kyc team & organization relationship
+          tx.organizationKYCTeam.create({
+            data: {
+              organizationId,
+              kycTeamId: kycTeam.id,
+            },
+          }),
+        ])
+      })
     }
 
     return { error: null }
@@ -760,7 +793,7 @@ export async function getOrganizationKYCTeams({
         include: {
           team: { include: { users: true } },
           projects: true,
-          rewardStream: true,
+          rewardStreams: true,
         },
       },
     },

@@ -43,7 +43,6 @@ import {
   verifyOrganizationMembership,
 } from "./utils"
 
-
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
   return (teams?.projects ?? []).map(({ project }) => project)
@@ -150,8 +149,6 @@ export const createNewProject = async (
     }
   }
 
-
-
   // Create entity attestation
   const attestationId = await createEntityAttestation({
     farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
@@ -185,7 +182,6 @@ export const createNewProjectOnBehalf = async (
     }
   }
 
-
   // Create project attestation
   const attestationId = await createEntityAttestation({
     farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
@@ -211,7 +207,6 @@ export const updateProjectDetails = async (
       error: "Unauthorized",
     }
   }
-
 
   const isInvalid = await verifyMembership(projectId, userId)
 
@@ -253,8 +248,6 @@ export const setProjectOrganization = async (
       organizationId,
     }
   }
-
-
 
   // Only project admins can set the organization
   const projectAdmin = verifyAdminStatus(projectId, userId)
@@ -361,7 +354,6 @@ export const removeMemberFromProject = async (
 ) => {
   const session = await auth()
 
-
   // Can't remove yourself (?)
   if (!session?.user?.id || session.user.id === userId) {
     return {
@@ -412,7 +404,6 @@ export const setMemberRole = async (
   role: TeamRole,
 ) => {
   const session = await auth()
-
 
   if (!session?.user?.id) {
     return {
@@ -471,7 +462,6 @@ export const createProjectKycTeamAction = async ({
     }
   }
 
-
   const isInvalid = await verifyMembership(projectId, userId)
   if (isInvalid?.error) {
     return isInvalid
@@ -494,12 +484,8 @@ export const createProjectKYCTeamsAction = async ({
     throw new Error("Unauthorized")
   }
 
-
   projectIds.forEach(async (projectId) => {
-    const isInvalid = await verifyMembership(
-      projectId,
-      userId,
-    )
+    const isInvalid = await verifyMembership(projectId, userId)
 
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
@@ -523,13 +509,8 @@ export const deleteProjectKYCTeamsAction = async ({
     throw new Error("Unauthorized")
   }
 
-
-
   projectIds.forEach(async (projectId) => {
-    const isInvalid = await verifyMembership(
-      projectId,
-      userId,
-    )
+    const isInvalid = await verifyMembership(projectId, userId)
     if (isInvalid?.error) {
       throw new Error(isInvalid.error)
     }
@@ -551,11 +532,11 @@ export const getProjectsForKycTeamAction = async (kycTeamId: string) => {
 export const deleteProjectKYCTeamAction = async ({
   projectId,
   kycTeamId,
-  rewardStreamId,
+  hasActiveStream,
 }: {
   projectId: string
   kycTeamId: string
-  rewardStreamId?: string
+  hasActiveStream: boolean
 }) => {
   const session = await auth()
   const userId = session?.user?.id
@@ -571,7 +552,7 @@ export const deleteProjectKYCTeamAction = async ({
 
   return await deleteKycTeam({
     kycTeamId,
-    rewardStreamId,
+    hasActiveStream,
   })
 }
 

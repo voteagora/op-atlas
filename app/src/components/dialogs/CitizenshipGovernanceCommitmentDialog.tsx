@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
@@ -36,6 +37,7 @@ function CitizenshipGovernanceCommitmentDialog({
 
   const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>()
   const { updateCitizen, isLoading, isSuccess } = useCitizenUpdate(userId)
+  const { data: qualification } = useCitizenQualification()
 
   useEffect(() => {
     if (isSuccess) {
@@ -47,9 +49,13 @@ function CitizenshipGovernanceCommitmentDialog({
   }, [isSuccess, onOpenChange])
 
   const handleUpdate = async () => {
+    if (!qualification?.type) {
+      return
+    }
+
     updateCitizen({
       timeCommitment: selectedTime,
-      type: CITIZEN_TYPES.user,
+      type: qualification.type,
     })
   }
 
