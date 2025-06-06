@@ -2,7 +2,6 @@
 
 import { UserPassport } from "@prisma/client"
 
-import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
 import { CITIZEN_TYPES } from "@/lib/constants"
@@ -17,13 +16,27 @@ export const useCitizenshipRequirements = ({
   id: string
   qualification: CitizenshipQualification
 }) => {
-  const { user } = useUser({ id })
-  const { data: citizen } = useCitizen({ userId: id })
-  const { data: passports } = useUserPassports({ id })
-  const { data: worldId } = useUserWorldId({ id })
+  const { user, isLoading: isUserLoading } = useUser({ id })
+  const { data: passports, isLoading: isPassportsLoading } = useUserPassports({
+    id,
+    enabled: qualification.type === CITIZEN_TYPES.user,
+  })
+  const { data: worldId, isLoading: isWorldIdLoading } = useUserWorldId({
+    id,
+    enabled: qualification.type === CITIZEN_TYPES.user,
+  })
 
-  if (!user || !passports) {
-    return false
+  const isLoading =
+    isUserLoading ||
+    (qualification.type === CITIZEN_TYPES.user &&
+      (isPassportsLoading || isWorldIdLoading))
+
+  if (
+    isLoading ||
+    !user ||
+    (qualification.type === CITIZEN_TYPES.user && !passports)
+  ) {
+    return { isLoading, hasMetRequirements: false }
   }
 
   const email = user?.emails?.[0]
@@ -33,17 +46,19 @@ export const useCitizenshipRequirements = ({
   )
   const validPassport = Boolean(passport)
   const validWorldId = Boolean(worldId?.verified)
-  const validTimeCommitment = Boolean(citizen?.timeCommitment)
+
+  let hasMetRequirements = false
 
   if (qualification.type !== CITIZEN_TYPES.user) {
-    return Boolean(email && govAddress && validTimeCommitment)
+    hasMetRequirements = Boolean(email && govAddress)
+  } else {
+    hasMetRequirements = Boolean(
+      email &&
+        (user?.github || user?.notDeveloper) &&
+        govAddress &&
+        (validPassport || validWorldId),
+    )
   }
 
-  return Boolean(
-    email &&
-      (user?.github || user?.notDeveloper) &&
-      govAddress &&
-      (validPassport || validWorldId) &&
-      validTimeCommitment,
-  )
+  return { isLoading, hasMetRequirements }
 }

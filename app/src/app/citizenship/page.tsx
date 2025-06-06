@@ -20,8 +20,8 @@ import {
 } from "@/lib/actions/citizens"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
+import { ActiveCitizen } from "./components/ActiveCitizen"
 import { ChainAppRequirements } from "./components/ChainAppRequirements"
-import { Citizen } from "./components/Citizen"
 import { Sidebar } from "./components/Sidebar"
 import { UserRequirements } from "./components/UserRequirements"
 
@@ -46,7 +46,7 @@ export default async function Page() {
     return (
       <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
         <div className="w-full mt-20 ">
-          <Citizen user={user} />
+          <ActiveCitizen user={user} />
         </div>
       </main>
     )

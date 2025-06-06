@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useState } from "react"
 
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
-import CitizenshipRulesDialog from "@/components/dialogs/CitizenshipRulesDialog"
+import CitizenshipApplicationDialog from "@/components/dialogs/CitizenshipApplicationDialog"
 import { Button } from "@/components/ui/button"
 import { useCitizenshipRequirements } from "@/hooks/citizen/useCitizenshipRequirements"
 import { CITIZEN_TYPES } from "@/lib/constants"
@@ -18,7 +18,10 @@ export const Sidebar = ({
   user: User
   qualification: CitizenshipQualification
 }) => {
-  const isEligible = useCitizenshipRequirements({ id: user.id, qualification })
+  const { hasMetRequirements, isLoading } = useCitizenshipRequirements({
+    id: user.id,
+    qualification,
+  })
   const [isRulesDialogOpen, setIsRulesDialogOpen] = useState(false)
 
   const renderAvatar = () => {
@@ -54,7 +57,14 @@ export const Sidebar = ({
         {renderCopy()}
       </div>
 
-      {!isEligible && (
+      {isLoading && (
+        <div className="text-sm text-secondary-foreground">
+          {" "}
+          Checking requirements...
+        </div>
+      )}
+
+      {!hasMetRequirements && !isLoading && (
         <div className="text-sm text-destructive">
           {" "}
           Complete your registration requirements in order to continue
@@ -63,13 +73,13 @@ export const Sidebar = ({
 
       <Button
         className="w-full button-primary"
-        disabled={!isEligible}
+        disabled={!hasMetRequirements || isLoading}
         onClick={() => setIsRulesDialogOpen(true)}
       >
         Register
       </Button>
 
-      <CitizenshipRulesDialog
+      <CitizenshipApplicationDialog
         open={isRulesDialogOpen}
         onOpenChange={setIsRulesDialogOpen}
       />

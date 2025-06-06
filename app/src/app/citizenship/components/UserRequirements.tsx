@@ -5,7 +5,6 @@ import Link from "next/link"
 
 import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
-import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
 import { useUserWorldId } from "@/hooks/db/useUserWorldId"
@@ -23,7 +22,6 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
   const { data: userPassports } = useUserPassports({ id: userId })
   const { data: userWorldId } = useUserWorldId({ id: userId })
 
-  const { data: citizen } = useCitizen({ userId })
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { refreshPassport } = useRefreshPassport(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)
@@ -80,10 +78,9 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_address")}
+            onClick={() => setOpenDialog("governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" &&
-              setOpenDialog("citizenship_governance_address")
+              e.key === "Enter" && setOpenDialog("governance_address")
             }
           >
             Edit
@@ -99,10 +96,9 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_address")}
+            onClick={() => setOpenDialog("governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" &&
-              setOpenDialog("citizenship_governance_address")
+              e.key === "Enter" && setOpenDialog("governance_address")
             }
           >
             Set {truncateAddress(connectedAddress.address as string)}
@@ -277,37 +273,6 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
     )
   }
 
-  const renderCommitment = () => {
-    if (citizen?.timeCommitment) {
-      return (
-        <ConditionRow isMet={true}>
-          Governance time commitment:{" "}
-          <span className="font-semibold">{citizen?.timeCommitment}</span> |{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_commitment")}
-          >
-            Edit
-          </button>
-        </ConditionRow>
-      )
-    }
-
-    return (
-      <ConditionRow isMet={false}>
-        Governance time commitment |{" "}
-        <button
-          type="button"
-          className={LINK_STYLE}
-          onClick={() => setOpenDialog("citizenship_governance_commitment")}
-        >
-          Specify
-        </button>
-      </ConditionRow>
-    )
-  }
-
   const renderWorld = () => {
     if (userWorldId?.verified) {
       return (
@@ -334,7 +299,6 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
         {renderGithub()}
         {renderEmail()}
         {renderAddress()}
-        {renderCommitment()}
       </div>
       <div>
         <div className="font-semibold">Proof of personhood</div>

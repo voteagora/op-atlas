@@ -3,7 +3,6 @@
 import { UserAddress } from "@prisma/client"
 
 import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
-import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
@@ -22,7 +21,6 @@ export const ChainAppRequirements = ({
   qualification: CitizenshipQualification
 }) => {
   const { user } = useUser({ id: userId })
-  const { data: citizen } = useCitizen({ userId })
 
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)
@@ -77,10 +75,9 @@ export const ChainAppRequirements = ({
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_address")}
+            onClick={() => setOpenDialog("governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" &&
-              setOpenDialog("citizenship_governance_address")
+              e.key === "Enter" && setOpenDialog("governance_address")
             }
           >
             Edit
@@ -96,10 +93,9 @@ export const ChainAppRequirements = ({
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_address")}
+            onClick={() => setOpenDialog("governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" &&
-              setOpenDialog("citizenship_governance_address")
+              e.key === "Enter" && setOpenDialog("governance_address")
             }
           >
             Set {truncateAddress(connectedAddress.address as string)}
@@ -124,37 +120,6 @@ export const ChainAppRequirements = ({
     )
   }
 
-  const renderCommitment = () => {
-    if (citizen?.timeCommitment) {
-      return (
-        <ConditionRow isMet={true}>
-          Governance time commitment:{" "}
-          <span className="font-semibold">{citizen?.timeCommitment}</span> |{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_commitment")}
-          >
-            Edit
-          </button>
-        </ConditionRow>
-      )
-    }
-
-    return (
-      <ConditionRow isMet={false}>
-        Governance time commitment |{" "}
-        <button
-          type="button"
-          className={LINK_STYLE}
-          onClick={() => setOpenDialog("citizenship_governance_commitment")}
-        >
-          Specify
-        </button>
-      </ConditionRow>
-    )
-  }
-
   return (
     <div className="flex flex-col gap-6">
       <div className="font-semibold text-xl">Requirements</div>
@@ -167,7 +132,6 @@ export const ChainAppRequirements = ({
         </ConditionRow>
         {renderEmail()}
         {renderAddress()}
-        {renderCommitment()}
       </div>
     </div>
   )
