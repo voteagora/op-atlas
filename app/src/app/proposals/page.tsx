@@ -3,16 +3,7 @@ import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/Prop
 import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
 import { auth } from "@/auth"
 import { getCitizenProposalVote, getUserCitizen } from "@/db/citizens"
-
-const getProposalData = async () => {
-  const proposalResponse = await fetch(
-    process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `http://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/v1/proposals`
-      : `/api/proposals`,
-  )
-
-  return proposalResponse.json()
-}
+import { getProposals } from "@/lib/proposals"
 
 interface Citizen {
   attestationId: string
@@ -71,7 +62,7 @@ const enrichProposalData = async (
 const getEnrichedProposalData = async ({ userId }: { userId?: string }) => {
   try {
     // Get the proposal data from the API
-    const proposalData = await getProposalData()
+    const proposalData = await getProposals()
     try {
       if (!userId) {
         return proposalData
