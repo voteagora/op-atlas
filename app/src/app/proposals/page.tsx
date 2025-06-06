@@ -111,7 +111,7 @@ const Page = async () => {
   }
 
   return (
-    <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] mx-auto">
+    <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] md:mx-auto mx-2">
       <h1 className="w-full h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
         Governance
       </h1>
