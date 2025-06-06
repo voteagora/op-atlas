@@ -11,8 +11,8 @@ export const maxDuration = 60
 export default async function Page() {
   const session = await auth()
 
-  if (!session?.user.id) {
-    redirect("/dashboard")
+  if (!session?.user?.id) {
+    redirect("/")
   }
 
   const userOrganizations = await getAdminOrganizations(session?.user.id)

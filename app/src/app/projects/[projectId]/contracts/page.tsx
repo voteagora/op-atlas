@@ -14,7 +14,7 @@ export default async function Page({
   const userId = session?.user.id
 
   if (!userId) {
-    redirect("/dashboard")
+    redirect("/")
   }
 
   const [projectContracts, membership] = await Promise.all([
