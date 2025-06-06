@@ -9,10 +9,7 @@ import {
   upsertCitizen,
 } from "@/db/citizens"
 import { prisma } from "@/db/client"
-import {
-  getOrganization,
-  getUserOrganizationsWithDetails,
-} from "@/db/organizations"
+import { getAdminOrganizations, getOrganization } from "@/db/organizations"
 import { getProject, getUserAdminProjectsWithDetail } from "@/db/projects"
 import { getUserById } from "@/db/users"
 import {
@@ -51,7 +48,7 @@ export const s8CitizenshipQualification =
     }
 
     const [userOrgs, userProjects] = await Promise.all([
-      getUserOrganizationsWithDetails(userId),
+      getAdminOrganizations(userId),
       getUserAdminProjectsWithDetail({ userId }),
     ])
 
@@ -68,6 +65,9 @@ export const s8CitizenshipQualification =
       const existingCitizen = await prisma.citizen.findFirst({
         where: {
           organizationId: qualifyingChains[0].organizationId,
+          attestationId: {
+            not: null,
+          },
         },
       })
 
@@ -102,7 +102,7 @@ export const s8CitizenshipQualification =
       const projectWithoutCitizen = await prisma.$queryRaw<{ id: string }[]>`
       SELECT p.id
       FROM "Project" p
-      LEFT JOIN "Citizen" c ON c."projectId" = p.id
+      LEFT JOIN "Citizen" c ON c."projectId" = p.id 
       WHERE p.id = ANY(${qualifyingProjects.map(
         (p: S8QualifyingProject) => p.projectId,
       )})
@@ -249,7 +249,7 @@ export const attestCitizen = async () => {
         },
         body: JSON.stringify({
           address: primaryAddress,
-          farcasterId: user.farcasterId,
+          farcasterId: user?.farcasterId || "0",
           selectionMethod: CITIZEN_ATTESTATION_CODE[citizenType],
         }),
       },
