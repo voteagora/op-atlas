@@ -16,10 +16,9 @@ export async function makeUserAddressPrimaryAction(address: string) {
   }
 
   await makeUserAddressPrimary(address, userId)
-
   const citizen = await getCitizenByUserId(userId)
 
-  // If user has an active attestation, revoke it and create a new one
+  // If user is a citizen and with an active attestation, revoke it and create a new one
   if (citizen?.attestationId && citizen.address !== address) {
     const user = await getUserById(userId)
     await revokeCitizenAttestation(citizen.attestationId)
@@ -29,7 +28,7 @@ export async function makeUserAddressPrimaryAction(address: string) {
       farcasterId: parseInt(user?.farcasterId || "0"),
       selectionMethod:
         CITIZEN_ATTESTATION_CODE[
-        citizen.type as keyof typeof CITIZEN_ATTESTATION_CODE
+          citizen.type as keyof typeof CITIZEN_ATTESTATION_CODE
         ],
     })
 

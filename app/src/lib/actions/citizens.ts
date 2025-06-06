@@ -1,7 +1,5 @@
 "use server"
 
-import { headers } from "next/headers"
-
 import { auth } from "@/auth"
 import {
   getCitizenCountByType,
@@ -20,6 +18,7 @@ import {
 import { CitizenshipQualification } from "@/lib/types"
 
 import { updateMailchimpTags } from "../api/mailchimp"
+import { createCitizenAttestation } from "../eas"
 
 interface S8QualifyingUser {
   address: string
@@ -134,13 +133,6 @@ export const s8CitizenshipQualification =
       return null
     }
 
-    // Check the active Citizenship limit
-    const citizenCount = await getCitizenCountByType(CITIZEN_TYPES.user)
-    if (citizenCount >= 1000) {
-      console.log("Citizenship limit reached")
-      return null
-    }
-
     const qualifyingAddress = await prisma.$queryRaw<S8QualifyingUser[]>`
     SELECT * FROM "S8QualifyingUser"
     WHERE address = ANY(${user.addresses.map(
@@ -159,6 +151,12 @@ export const s8CitizenshipQualification =
 
     return null
   }
+
+// S8 Citizenship Limit Check
+export const checkCitizenshipLimit = async (): Promise<boolean> => {
+  const citizenCount = await getCitizenCountByType(CITIZEN_TYPES.user)
+  return citizenCount >= 1000
+}
 
 export const updateCitizen = async (citizen: {
   type: string
@@ -205,6 +203,7 @@ export const attestCitizen = async () => {
   }
 
   const qualification = await s8CitizenshipQualification()
+
   if (!qualification) {
     return {
       error: "You are not eligible to become a Citizen",
@@ -219,49 +218,32 @@ export const attestCitizen = async () => {
     }
   }
 
+  const user = await getUserById(userId)
+  if (!user) {
+    return {
+      error: "User not found",
+    }
+  }
+
+  const primaryAddress = user.addresses.find(
+    (addr: { primary: boolean; address: string }) => addr.primary,
+  )?.address
+
+  if (!primaryAddress) {
+    return {
+      error: "No primary address set",
+    }
+  }
+
   try {
-    // Get user with addresses
-    const user = await getUserById(userId)
-    if (!user) {
-      return {
-        error: "User not found",
-      }
-    }
-
-    // Get primary address
-    const primaryAddress = user.addresses.find(
-      (addr: { primary: boolean; address: string }) => addr.primary,
-    )?.address
-    if (!primaryAddress) {
-      return {
-        error: "No primary address set",
-      }
-    }
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/eas/attestation`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Cookie: headers().get("cookie") || "",
-        },
-        body: JSON.stringify({
-          address: primaryAddress,
-          farcasterId: user?.farcasterId || "0",
-          selectionMethod: CITIZEN_ATTESTATION_CODE[citizenType],
-        }),
-      },
-    )
-
-    if (!response.ok) {
-      const error = await response.json()
-      return {
-        error: error.error || "Failed to attest citizen",
-      }
-    }
-
-    const { attestationId } = await response.json()
+    const attestationId = await createCitizenAttestation({
+      to: primaryAddress,
+      farcasterId: parseInt(user?.farcasterId || "0"),
+      selectionMethod:
+        CITIZEN_ATTESTATION_CODE[
+          citizenType as keyof typeof CITIZEN_ATTESTATION_CODE
+        ],
+    })
 
     const result = await upsertCitizen({
       id: userId,
@@ -286,8 +268,6 @@ export const attestCitizen = async () => {
         tags: [CITIZEN_TAGS[citizenType]],
       },
     ])
-
-    return result
   } catch (error) {
     console.error("Error attesting citizen:", error)
     return {

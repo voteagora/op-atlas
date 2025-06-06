@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { getUserById } from "@/db/users"
 import {
+  checkCitizenshipLimit,
   getCitizenByUserId,
   s8CitizenshipQualification,
 } from "@/lib/actions/citizens"
@@ -35,7 +36,9 @@ export default async function Page() {
 
   const user = await getUserById(userId)
   const citizen = await getCitizenByUserId(userId)
+
   const qualification = await s8CitizenshipQualification()
+  const isCitizenshipLimitReached = await checkCitizenshipLimit()
 
   if (!user) {
     redirect("/")
@@ -140,9 +143,21 @@ export default async function Page() {
           ) : (
             <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
               <UserAvatarLarge imageUrl={user?.imageUrl} />
-              <div className="text-sm font-semibold text-secondary-foreground">
-                Sorry, you are not eligible to become a Citizen
-              </div>
+              {isCitizenshipLimitReached ? (
+                <div className="flex flex-col gap-2">
+                  <div className="font-semibold text-secondary-foreground">
+                    Registration has closed
+                  </div>
+                  <div className="text-sm text-secondary-foreground">
+                    Thanks for your interest, but the Citizens&apos; House has
+                    reached it&apos;s maximum capacity.
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm font-semibold text-secondary-foreground">
+                  Sorry, you are not eligible to become a Citizen
+                </div>
+              )}
             </div>
           )}
         </div>
