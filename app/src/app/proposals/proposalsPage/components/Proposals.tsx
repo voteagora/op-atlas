@@ -60,11 +60,13 @@ const Proposal = (props: StandardProposalProps) => {
         title={props.textContent.title}
         subtitle={props.textContent.subtitle}
       />
-      <ProposalDates
-        startDate={props.dates.startDate}
-        endDate={props.dates.endDate}
-        voteStatus={voteStatus()}
-      />
+      <div className="hidden md:block">
+        <ProposalDates
+          startDate={props.dates.startDate}
+          endDate={props.dates.endDate}
+          voteStatus={voteStatus()}
+        />
+      </div>
       <ProposalArrow href={props.arrow.href} />
     </ProposalCard>
   )
