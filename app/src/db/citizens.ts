@@ -32,6 +32,28 @@ export async function upsertCitizen({
   })
 }
 
+export async function updateCitizen({
+  id,
+  citizen,
+}: {
+  id: string
+  citizen: {
+    type?: string
+    address?: string
+    attestationId?: string
+    timeCommitment?: string
+    projectId?: string | null
+    organizationId?: string | null
+  }
+}) {
+  return prisma.citizen.update({
+    where: {
+      userId: id,
+    },
+    data: citizen,
+  })
+}
+
 export async function getUserCitizen(id: string): Promise<Citizen | null> {
   return prisma.citizen.findUnique({
     where: {
