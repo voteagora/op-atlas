@@ -15,7 +15,7 @@ const ProposalCard = ({ children, rounded = false }: ProposalCardProps) => {
           : "border-l border-r border-b border-border"
       }`}
     >
-      <div className="proposal-card-content flex flex-row gap-6 w-full min-w-[66.5rem] flex-shrink justify-between items-center p-6">
+      <div className="proposal-card-content flex flex-row gap-6 w-full max-w-[66.5rem] flex-shrink justify-between items-center p-6">
         {children}
       </div>
     </div>
@@ -66,11 +66,11 @@ interface ProposalTextProps {
 }
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
-    <div className="flex flex-col justify-center w-full max-w-[42.1875rem] h-[48px] flex-shrink min-w-0">
-      <div className="text-base font-[500] text-text/default leading-normal truncate">
+    <div className="flex flex-col justify-center w-full lg:min-w-[42.1875rem] h-[48px] flex-shrink min-w-0">
+      <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate">
         {title}
       </div>
-      <div className="text-base font-normal text-text/secondary leading-normal truncate">
+      <div className="text-base md:font-normal sm:font-200 text-text/secondary leading-normal truncate">
         {subtitle}
       </div>
     </div>
