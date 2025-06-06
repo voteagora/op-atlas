@@ -11,11 +11,10 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const session = await auth()
-
   const userId = session?.user.id
 
   if (!userId) {
-    redirect("/dashboard")
+    redirect("/")
   }
 
   const [project, membership] = await Promise.all([

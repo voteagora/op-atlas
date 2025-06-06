@@ -7,6 +7,7 @@ import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
+import GovernanceAddressDialog from "./GovernanceAddressDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
@@ -15,7 +16,7 @@ import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
 export default function AppDialogs() {
-  const { openDialog, setOpenDialog } = useAppDialogs()
+  const { openDialog, setOpenDialog, data } = useAppDialogs()
   const onOpenChange = (type: DialogType) => (open: boolean) =>
     setOpenDialog(open ? type : undefined)
 
@@ -43,6 +44,12 @@ export default function AppDialogs() {
         <GovernanceTestimonialRequestDialog
           open
           onOpenChange={onOpenChange("governance_testimonial_request")}
+        />
+      )}
+      {openDialog === "governance_address" && (
+        <GovernanceAddressDialog
+          open
+          onOpenChange={onOpenChange("governance_address")}
         />
       )}
       {openDialog === "not_recognized_address" && (

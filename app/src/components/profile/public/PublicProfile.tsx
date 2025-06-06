@@ -22,7 +22,6 @@ const PublicUserProfile = ({
   projects: ProjectWithDetailsLite[]
 }) => {
 
-
   return (
     <div className={"w-full overflow-x-hidden pb-12"}>
       <div className="w-full lg:max-w-6xl lg:mx-auto pt-12 pb-12 lg:px-0 px-6 lg:grid lg:grid-cols-3 lg:gap-x-12">

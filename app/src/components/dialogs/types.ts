@@ -11,6 +11,7 @@ export type DialogType =
   | "claim_rewards"
   | "delete_kyc_team"
   | "import_from_farcaster"
+  | "governance_address"
 
 export type DialogProps<T> = {
   open: boolean

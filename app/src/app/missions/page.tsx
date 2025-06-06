@@ -24,7 +24,6 @@ export default async function Page() {
   const session = await auth()
 
   const userId = session?.user.id ?? ""
-
   const [user] = await Promise.all([getUserById(userId)])
 
   if (session?.user) {

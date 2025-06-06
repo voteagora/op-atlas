@@ -387,3 +387,18 @@ export type ExtendedAggregatedType = AggregatedType & {
   contributors: { address: string; email?: string }[]
   github_repo_builders: { address: string; email?: string }[]
 }
+
+export interface PassportScore {
+  score: string
+  passing_score: boolean
+  last_score_timestamp: string
+  expiration_timestamp: string
+  threshold: string
+}
+
+export interface CitizenshipQualification {
+  type: string
+  identifier: string
+  title: string
+  avatar: string | null
+}

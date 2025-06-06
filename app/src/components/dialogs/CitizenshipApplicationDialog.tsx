@@ -1,0 +1,167 @@
+"use client"
+
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { memo, useEffect, useState } from "react"
+
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useCitizen } from "@/hooks/citizen/useCitizen"
+import { useCitizenAttest } from "@/hooks/citizen/useCitizenAttest"
+import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
+import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
+
+import { DialogProps } from "./types"
+
+const TIME_COMMITMENT_OPTIONS = [
+  "Less than 1 hour",
+  "1-5 hours",
+  "5-10 hours",
+  "10-20 hours",
+  "More than 20 hours",
+] as const
+
+type TimeCommitment = (typeof TIME_COMMITMENT_OPTIONS)[number]
+
+const RULES = [
+  "I will not attempt to get multiple votes in the Citizens House.",
+  "I understand that the eligibility criteria of the Citizens House may change next season and I could no longer be a Citizen.",
+  "I will abide by the rules of engagement",
+] as const
+
+function CitizenshipApplicationDialog({
+  open,
+  onOpenChange,
+}: DialogProps<object>) {
+  const { data: session } = useSession()
+  const userId = session?.user?.id ?? ""
+  const router = useRouter()
+
+  const { data: citizen } = useCitizen({ userId })
+  const {
+    attestCitizen,
+    isLoading: isAttesting,
+    isSuccess: isAttestSuccess,
+  } = useCitizenAttest(userId)
+  const {
+    updateCitizen,
+    isLoading: isUpdating,
+    isSuccess: isUpdateSuccess,
+  } = useCitizenUpdate(userId)
+  const { data: qualification } = useCitizenQualification()
+
+  const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>(
+    citizen?.timeCommitment as TimeCommitment,
+  )
+  const [checkedRules, setCheckedRules] = useState<Record<number, boolean>>({})
+
+  const handleCheckboxChange = (index: number) => {
+    setCheckedRules((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }))
+  }
+
+  const allRulesChecked = RULES.every((_, index) => checkedRules[index])
+
+  const handleTimeCommitmentUpdate = async () => {
+    if (!qualification?.type) {
+      return
+    }
+
+    updateCitizen({
+      timeCommitment: selectedTime,
+      type: qualification.type,
+    })
+  }
+
+  useEffect(() => {
+    if (isAttestSuccess && citizen?.attestationId) {
+      router.push("/citizenship")
+    }
+  }, [isAttestSuccess, router, citizen])
+
+  // Reset selected time when dialog opens and citizen has no time commitment
+  useEffect(() => {
+    if (open && !citizen?.timeCommitment) {
+      setSelectedTime(undefined)
+    }
+  }, [open, citizen?.timeCommitment])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex sm:max-w-md">
+        <DialogTitle className="sr-only">Citizenship Application</DialogTitle>
+        <div className="flex flex-col gap-6 w-full">
+          {!citizen?.timeCommitment ? (
+            <>
+              <div className="font-semibold text-center">
+                How many hours per week would you like to spend on governance?
+              </div>
+              <Select
+                value={selectedTime}
+                onValueChange={(value: TimeCommitment) =>
+                  setSelectedTime(value)
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select your time commitment" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIME_COMMITMENT_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={handleTimeCommitmentUpdate}
+                className="button-primary w-full"
+                disabled={!selectedTime || isUpdating || isUpdateSuccess}
+              >
+                {isUpdating || isUpdateSuccess ? "Updating..." : "Update"}
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="font-semibold text-center">
+                Please agree to the Citizens&apos; House rules
+              </div>
+              <div className="flex flex-col gap-4">
+                {RULES.map((rule, index) => (
+                  <div key={index} className="flex flex-row gap-2">
+                    <Checkbox
+                      className="self-start mt-0.5"
+                      id={`rule-${index}`}
+                      checked={checkedRules[index] || false}
+                      onCheckedChange={() => handleCheckboxChange(index)}
+                    />
+                    <div className="text-sm text-muted-foreground">{rule}</div>
+                  </div>
+                ))}
+              </div>
+              <Button
+                onClick={attestCitizen}
+                className="button-primary w-full"
+                disabled={!allRulesChecked || isAttesting || isAttestSuccess}
+              >
+                {isAttesting || isAttestSuccess ? "Submitting..." : "Submit"}
+              </Button>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export default memo(CitizenshipApplicationDialog)
