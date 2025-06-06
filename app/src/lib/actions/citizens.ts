@@ -191,8 +191,7 @@ export const updateCitizen = async (citizen: {
 }
 
 export const getCitizenByUserId = async (userId: string) => {
-  const citizen = await getUserCitizen(userId)
-  return citizen
+  return await getUserCitizen(userId)
 }
 
 export const attestCitizen = async () => {
