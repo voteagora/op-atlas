@@ -98,6 +98,18 @@ const Page = async () => {
   })
   const { standardProposals, selfNominations } = proposalData
 
+  if (
+    !proposalData ||
+    (proposalData.standardProposals.length === 0 &&
+      proposalData.selfNominations.length === 0)
+  ) {
+    return (
+      <div className="items-center justify-center align-middle">
+        No Governance Proposals Found
+      </div>
+    )
+  }
+
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] mx-auto">
       <h1 className="w-full h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
