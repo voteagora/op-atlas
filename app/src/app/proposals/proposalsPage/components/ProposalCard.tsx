@@ -91,7 +91,7 @@ const ProposalDates = ({
   voteStatus,
 }: ProposalDatesProps) => {
   return (
-    <div className="flex flex-col w-[187px] justify-end">
+    <div className="flex flex-col min-w-[187px] justify-end">
       {voteStatus && (
         <div
           className={`text-base font-normal whitespace-nowrap overflow-hidden text-right sm:text-sm ${voteStatus.styling}`}
@@ -100,7 +100,7 @@ const ProposalDates = ({
         </div>
       )}
 
-      <div className="text-base font-normal text-text/secondary whitespace-nowrap overflow-hidden text-right sm:text-sm">
+      <div className="h-[24px] font-inter font-normal text-[16px] leading-[24px] tracking-[0%] text-secondary-foreground whitespace-nowrap overflow-hidden text-right">
         {startDate} - {endDate}
       </div>
     </div>
