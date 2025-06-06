@@ -3,11 +3,87 @@ import Breadcrumbs from "@/app/proposals/components/Breadcrumbs"
 import ProposalContent from "@/app/proposals/components/proposalContent/ProposalContent"
 import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
 import ProposalHeader from "@/app/proposals/components/ProposalHeader"
+import { VotingCardProps } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
+import { ProposalType } from "@/lib/types"
 
 interface PageProps {
   params: {
     proposalId: string
   }
+}
+
+interface CardType {
+  signedIn: boolean
+  citizen: boolean
+  voted: boolean
+  votingOpen: boolean
+  votingComplete: boolean
+  startDate: Date
+  endDate: Date
+  proposalType: ProposalType
+}
+const CURRENT_DATE = new Date()
+
+const getVotingCardProps = (
+  cardType: CardType,
+): VotingCardProps | undefined => {
+  if (!cardType.signedIn) {
+    return {
+      cardText: {
+        title: "Cast your citizen vote",
+        description:
+          "This election uses approval voting, meaning voter can approve more than one candidate.",
+      },
+    }
+  }
+
+  const getOpenVotingTypes = (cardType: CardType) => {
+    if (cardType.voted) {
+      return {
+        cardText: {
+          title: "TODO",
+          description: "TODO",
+        },
+      }
+    }
+    return {
+      cardText: {
+        title: "TODO",
+        description: "TODO",
+      },
+    }
+  }
+
+  const getClosedVotingTypes = (cardType: CardType) => {
+    return {
+      cardText: {
+        title: "TODO",
+        description: "TODO",
+      },
+    }
+  }
+
+  const getCitizenTypes = (cardType: CardType) => {
+    if (cardType.votingOpen) {
+      return getOpenVotingTypes(cardType)
+    } else if (cardType.votingComplete) {
+      return getClosedVotingTypes(cardType)
+    }
+  }
+
+  const getNonCitizenTypes = (cardType: CardType) => {
+    return {
+      cardText: {
+        title: "TODO",
+        description: "TODO",
+      },
+    }
+  }
+
+  if (cardType.citizen) {
+    return getCitizenTypes(cardType)
+  }
+  return getNonCitizenTypes(cardType)
 }
 
 const Page = (params: PageProps) => {
@@ -67,6 +143,32 @@ const Page = (params: PageProps) => {
     },
   }
 
+  const user = {
+    userId: "1",
+    citizenId: "1",
+  }
+
+  const userSignedIn = user.userId !== undefined
+  const userCitizen = user.citizenId !== undefined
+  const voted = true
+  const votingOpen = true
+  const votingComplete = false
+  const startDate = CURRENT_DATE
+  const endDate = CURRENT_DATE
+  const pType = "STANDARD" as ProposalType
+
+  const votingCardType = {
+    signedIn: userSignedIn,
+    citizen: userCitizen,
+    voted: voted,
+    votingOpen: votingOpen,
+    votingComplete: votingComplete,
+    startDate: startDate,
+    endDate: endDate,
+    proposalType: pType,
+  }
+  const votingCardData = getVotingCardProps(votingCardType)
+
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
       <div className="flex flex-col w-2/3 mt-24 h-[865px] gap-[48px] mx-auto">
@@ -81,7 +183,7 @@ const Page = (params: PageProps) => {
               <VotingSidebar
                 className="sticky top-4"
                 votingColumnProps={MOCK.votingColumnProps}
-                votingCardProps={MOCK.votingCardProps}
+                votingCardProps={votingCardData!}
               />
             </div>
           </div>

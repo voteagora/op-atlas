@@ -3,8 +3,6 @@
 import MarkdownPreview from "@uiw/react-markdown-preview"
 import cn from "classnames"
 
-import Tenant from "@/lib/tenants/tenant"
-
 import styles from "./markdown.module.scss"
 
 const defaults = {
@@ -29,12 +27,11 @@ const toRGBA = (hex: string, alpha: number) => {
 }
 
 export default function Markdown({ content }: { content: string }) {
-  const { ui } = Tenant.current()
-  const primary = ui?.customization?.primary ?? defaults.primary
-  const secondary = ui?.customization?.secondary ?? defaults.secondary
-  const tertiary = ui?.customization?.tertiary ?? defaults.tertiary
-  const line = ui?.customization?.line ?? defaults.line
-  const positive = ui?.customization?.positive ?? defaults.positive
+  const primary = defaults.primary
+  const secondary = defaults.secondary
+  const tertiary = defaults.tertiary
+  const line = defaults.line
+  const positive = defaults.positive
   return (
     <div
       className={cn(styles.proposal_description_md, "max-w-full text-primary")}
@@ -76,7 +73,11 @@ export default function Markdown({ content }: { content: string }) {
         }}
         components={{
           h2: ({ node, ...props }) => (
-            <h1 className="text-primary" {...props} />
+            <h4
+              className="foreground"
+              {...props}
+              aria-label="Section heading"
+            ></h4>
           ),
         }}
       />
