@@ -11,23 +11,37 @@ export const MONTHS = Object.values(INDEXED_MONTHS)
 export const RETROFUNDING_OP_REWARD_MINIMUM = 200
 
 export const supportedMappings = {
-  OPTIMISM: 10,
+  ARENAZ: 7897,
   BASE: 8453,
-  MODE: 34443,
-  WORLDCHAIN: 480,
-  POLYNOMIAL: 8008,
   BOB: 60808,
+  ETHERNITY: 183, // In S7 but not in data
   INK: 57073,
   LISK: 1135,
-  METALL2: 1750,
+  METAL: 1750,
   MINT: 185,
+  MODE: 34443,
+  OPTIMISM: 10,
+  POLYNOMIAL: 8008,
   RACE: 6805,
   SHAPE: 360,
   SONEIUM: 1868,
+  SUPERSEED: 5330, // In S7 but not in data
   SWELL: 1923,
-  ZORA: 7777777,
   UNICHAIN: 130,
+  WORLDCHAIN: 480,
+  ZORA: 7777777,
 }
+
+// The following are in the data but not in S7:
+// AUTOMATA: 65536,
+// CYBER: 7560,
+// FRAXTAL: 252,
+// HAM: 5112,
+// KROMA: 255,
+// LYRA: 957,
+// ORDERLY: 291,
+// REDSTONE: 690,
+// SWAN: 254,
 
 // TODO: Depricate this
 export const OSO_QUERY_DATES = {
