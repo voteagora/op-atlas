@@ -14,9 +14,9 @@ CREATE TABLE "S8QualifyingChain" (
 
 -- CreateTable
 CREATE TABLE "S8QualifyingProject" (
-    "projectId" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
 
-    CONSTRAINT "S8QualifyingProject_pkey" PRIMARY KEY ("projectId")
+    CONSTRAINT "S8QualifyingProject_pkey" PRIMARY KEY ("address")
 );
 
 -- CreateIndex
@@ -26,4 +26,4 @@ CREATE INDEX "S8QualifyingUser_address_idx" ON "S8QualifyingUser"("address");
 CREATE INDEX "S8QualifyingChain_organizationId_idx" ON "S8QualifyingChain"("organizationId");
 
 -- CreateIndex
-CREATE INDEX "S8QualifyingProject_projectId_idx" ON "S8QualifyingProject"("projectId"); 
+CREATE INDEX "S8QualifyingProject_address_idx" ON "S8QualifyingProject"("address"); 

@@ -145,7 +145,7 @@ export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
-    rewardStreams: true
+    rewardStream: true
   }
 }>
 
@@ -156,7 +156,7 @@ export type KYCStreamTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
-    rewardStreams: true
+    rewardStream: true
     projects: {
       select: {
         id: true
@@ -164,12 +164,6 @@ export type KYCStreamTeam = Prisma.KYCTeamGetPayload<{
         recurringRewards: true
       }
     }
-  }
-}>
-
-export type StreamWithKYCTeam = Prisma.SuperfluidStreamGetPayload<{
-  include: {
-    kycTeam: true
   }
 }>
 
@@ -189,7 +183,7 @@ export type RecurringRewardWithProject = Prisma.RecurringRewardGetPayload<{
                 users: true
               }
             }
-            rewardStreams: {
+            rewardStream: {
               include: {
                 streams: true
               }
@@ -387,21 +381,6 @@ export interface ProjectContractsByDeployer {
 export type ExtendedAggregatedType = AggregatedType & {
   contributors: { address: string; email?: string }[]
   github_repo_builders: { address: string; email?: string }[]
-}
-
-export interface PassportScore {
-  score: string
-  passing_score: boolean
-  last_score_timestamp: string
-  expiration_timestamp: string
-  threshold: string
-}
-
-export interface CitizenshipQualification {
-  type: string
-  identifier: string
-  title: string
-  avatar: string | null
 }
 
 export type TenantNamespace =
