@@ -43,7 +43,7 @@ const comingSoon = (startDate: Date, endDate: Date) => {
 const votingEnded = (endDate: Date, result: any) => {
   return {
     cardText: {
-      title: `Ended ${endDate}`,
+      title: `Ended ${endDate.toLocaleDateString()}`,
       descriptionElement: result,
     },
   }
@@ -127,17 +127,52 @@ const getVotingCardProps = (
   return getNonCitizenTypes(cardType)
 }
 
+const getVoteOptions = () => {
+  return Array(8).fill({
+    name: "Username",
+    image: {
+      src: "https://i.imgur.com/0000000.png",
+      alt: "Image",
+    },
+    organizations: ["Org 1", "Org 2", "Org 3"],
+    buttonLink: "https://google.com",
+  })
+}
+
 const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
-  return {
-    candidates: Array(8).fill({
-      name: "Username",
-      image: {
-        src: "https://i.imgur.com/0000000.png",
-        alt: "Image",
-      },
-      organizations: ["Org 1", "Org 2", "Org 3"],
-      buttonLink: "https://google.com",
-    }),
+  let votingActions: any = {}
+  if (!cardType.signedIn) {
+    votingActions = {
+      cardActionList: [
+        {
+          buttonStyle: "button-primary",
+          actionText: "Sign In",
+          actionType: "Log",
+        },
+      ],
+    }
+  } else {
+    votingActions = {
+      cardActionList: [
+        {
+          buttonStyle: "button-primary",
+          actionText: "Cast Vote",
+          actionType: "Log",
+        },
+      ],
+    }
+  }
+
+  switch (cardType.proposalType) {
+    case "APPROVAL":
+      return {
+        candidates: getVoteOptions(),
+        votingActions: votingActions,
+      }
+    default:
+      return {
+        candidates: getVoteOptions(),
+      }
   }
 }
 
@@ -222,7 +257,7 @@ const Page = (params: PageProps) => {
   const pType = "APPROVAL" as ProposalType
 
   const votingCardType = {
-    signedIn: false,
+    signedIn: true,
     citizen: userCitizen,
     voted: voted,
     votingOpen: votingOpen,
