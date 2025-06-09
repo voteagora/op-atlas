@@ -35,7 +35,7 @@ const getVotingCardProps = (
     return {
       cardText: {
         title: "Coming Soon",
-        descriptionElement: `Voting ${cardType.votingOpen} - ${cardType.votingComplete}`,
+        descriptionElement: `Voting ${cardType.startDate.toLocaleDateString()} - ${cardType.endDate.toLocaleDateString()}`,
       },
     }
   }
@@ -71,15 +71,15 @@ const getVotingCardProps = (
     if (cardType.voted) {
       return {
         cardText: {
-          title: "TODO",
-          description: "TODO",
+          title: "You voted!",
+          description: "Thanks for your participation.",
         },
       }
     }
     return {
       cardText: {
-        title: "TODO",
-        description: "TODO",
+        title: `Ended ${cardType.endDate.toLocaleDateString()}`,
+        description: "TODO! candidates were elected",
       },
     }
   }
@@ -185,9 +185,9 @@ const Page = (params: PageProps) => {
   const userCitizen = user.citizenId !== undefined
   const voted = false
   const votingOpen = false
-  const votingComplete = false
-  const startDate = addDays(CURRENT_DATE, 1)
-  const endDate = addDays(CURRENT_DATE, 10)
+  const votingComplete = true
+  const startDate = addDays(CURRENT_DATE, -10)
+  const endDate = addDays(CURRENT_DATE, -1)
   const pType = "APPROVAL" as ProposalType
 
   const votingCardType = {
