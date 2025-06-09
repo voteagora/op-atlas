@@ -22,14 +22,20 @@ interface CardTextProps {
 }
 
 const CardText = ({ title, descriptionElement }: CardTextProps) => {
+  const cardDescriptionTextStyling = "text-h4"
   return (
     <div className="text-center">
       <h4 className="text-h4">{title}</h4>
       {descriptionElement ? (
         React.isValidElement(descriptionElement) ? (
-          descriptionElement
+          React.cloneElement(
+            descriptionElement as React.ReactElement<{ className?: string }>,
+            {
+              className: cardDescriptionTextStyling,
+            },
+          )
         ) : (
-          <p>{descriptionElement}</p>
+          <p className={cardDescriptionTextStyling}>{descriptionElement}</p>
         )
       ) : null}
     </div>
