@@ -22,7 +22,7 @@ interface CardTextProps {
 }
 
 const CardText = ({ title, descriptionElement }: CardTextProps) => {
-  const cardDescriptionTextStyling = "text-h4"
+  const cardDescriptionTextStyling = "font-inter font-normal text-sm leading-5 tracking-[0%] text-center [&_a]:underline [&_a]:decoration-solid [&_a]:underline-offset-[0%] [&_a]:decoration-[0%]"
   return (
     <div className="text-center">
       <h4 className="text-h4">{title}</h4>
