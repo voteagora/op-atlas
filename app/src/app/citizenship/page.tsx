@@ -109,18 +109,20 @@ export default async function Page() {
                   </ul>
                 </div>
               </div>
-              {qualification && (
-                <div>
-                  {qualification?.type === CITIZEN_TYPES.user ? (
-                    <UserRequirements userId={userId} />
-                  ) : (
-                    <ChainAppRequirements
-                      userId={userId}
-                      qualification={qualification}
-                    />
-                  )}
-                </div>
-              )}
+
+              <div>
+                {qualification?.type !== CITIZEN_TYPES.user && qualification ? (
+                  <ChainAppRequirements
+                    userId={userId}
+                    qualification={qualification}
+                  />
+                ) : (
+                  <UserRequirements
+                    userId={userId}
+                    qualification={qualification}
+                  />
+                )}
+              </div>
 
               <div className="border-b border-border-secondary w-full"></div>
               <div>

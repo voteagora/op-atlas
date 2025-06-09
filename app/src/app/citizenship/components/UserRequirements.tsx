@@ -12,12 +12,19 @@ import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { useRefreshPassport } from "@/hooks/useRefreshPassport"
+import { CitizenshipQualification } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
 
-export const UserRequirements = ({ userId }: { userId: string }) => {
+export const UserRequirements = ({
+  userId,
+  qualification,
+}: {
+  userId: string
+  qualification: CitizenshipQualification | null
+}) => {
   const { user } = useUser({ id: userId })
   const { data: userPassports } = useUserPassports({ id: userId })
   const { data: userWorldId } = useUserWorldId({ id: userId })
@@ -291,8 +298,40 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
     )
   }
 
+  const renderEligibility = () => {
+    if (qualification) {
+      return null
+    }
+
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="font-semibold text-xl">Eligibility</div>
+        <div>
+          <div className="font-semibold">Onchain activity</div>
+          <div>
+            One of your verified addresses must meet these criteria.{" "}
+            <Link href="/profile/verified-addresses" className={LINK_STYLE}>
+              Verify more addresses
+            </Link>
+          </div>
+        </div>
+
+        <div>
+          <ConditionRow isMet={false}>
+            Your first Superchain transaction happened before June 2024
+          </ConditionRow>
+          <ConditionRow isMet={false}>
+            {`You&apos;ve had 2 transactions per month, in at least 3 of 6 previous months.`}
+          </ConditionRow>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      {renderEligibility()}
+
       <div className="font-semibold text-xl">Requirements</div>
       <div className="font-semibold">Atlas Profile</div>
       <div>
