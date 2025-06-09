@@ -31,8 +31,12 @@ const getVotingCardProps = (
     return {
       cardText: {
         title: "Cast your citizen vote",
-        description:
-          "This election uses approval voting, meaning voter can approve more than one candidate.",
+        descriptionElement: (
+          <p>
+            This election uses approval voting, meaning voter can approve more
+            than one candidate.
+          </p>
+        ),
       },
     }
   }
