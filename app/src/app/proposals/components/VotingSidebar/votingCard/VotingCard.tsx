@@ -1,6 +1,7 @@
 import VotingCardActions, {
   CardActionsProps,
 } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCardActions"
+import React from "react"
 
 interface CardImageProps {
   src: string
@@ -17,14 +18,20 @@ const CardImage = ({ src, alt }: CardImageProps) => {
 
 interface CardTextProps {
   title: string
-  description: string
+  descriptionElement?: string | React.ReactElement
 }
 
-const CardText = ({ title, description }: CardTextProps) => {
+const CardText = ({ title, descriptionElement }: CardTextProps) => {
   return (
     <div className="text-center">
       <h4 className="text-h4">{title}</h4>
-      <p>{description}</p>
+      {descriptionElement ? (
+        React.isValidElement(descriptionElement) ? (
+          descriptionElement
+        ) : (
+          <p>{descriptionElement}</p>
+        )
+      ) : null}
     </div>
   )
 }
