@@ -47,21 +47,7 @@ const VotingColumn = ({
 
         <div className="w-full flex items-center justify-center gap-2.5">
           <a href="http://todo">
-            <p
-              className="underline secondary-foreground"
-              style={{
-                fontFamily: "Inter",
-                fontWeight: 400,
-                fontSize: "14px",
-                lineHeight: "20px",
-                letterSpacing: "0%",
-                textAlign: "center",
-                textDecoration: "underline",
-                textDecorationStyle: "solid",
-                textDecorationOffset: "0%",
-                textDecorationThickness: "0%",
-              }}
-            >
+            <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
               View results
             </p>
           </a>
