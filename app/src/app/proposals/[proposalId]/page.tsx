@@ -27,77 +27,84 @@ interface CardType {
 }
 const CURRENT_DATE = new Date()
 
+// This section captured different end states for the voting sidebar.
+// Different logical flows capture various sidebar configurations.
+
+const comingSoon = (startDate: Date, endDate: Date) => {
+  return {
+    cardText: {
+      title: "Coming Soon",
+      descriptionElement: `Voting ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`,
+    },
+  }
+}
+
+const votingEnded = (endDate: Date, result: any) => {
+  return {
+    cardText: {
+      title: `Ended ${endDate}`,
+      descriptionElement: result,
+    },
+  }
+}
+
+const youVoted = () => {
+  return {
+    cardText: {
+      title: "You voted!",
+      description: "Thanks for your participation.",
+    },
+  }
+}
+
+const castYourVote = (proposalType: ProposalType) => {
+  const proposalTypeDescription = () => {
+    switch (proposalType) {
+      case "APPROVAL":
+        return (
+          <p>
+            This election uses{" "}
+            <span>
+              <a href="https://todo" target="_blank">
+                approval
+              </a>
+            </span>{" "}
+            voting, meaning voter can approve more than one candidate.
+          </p>
+        )
+      default:
+        return ""
+    }
+  }
+
+  return {
+    cardText: {
+      title: "Cast your citizen vote",
+      descriptionElement: proposalTypeDescription(),
+    },
+  }
+}
+
 const getVotingCardProps = (
   cardType: CardType,
 ): VotingCardProps | undefined => {
   // If voting has not opened yet
   if (!cardType.votingOpen && !cardType.votingComplete) {
-    return {
-      cardText: {
-        title: "Coming Soon",
-        descriptionElement: `Voting ${cardType.startDate.toLocaleDateString()} - ${cardType.endDate.toLocaleDateString()}`,
-      },
-    }
-  }
-  const getNotSignedInVotingTypes = (cardType: CardType) => {
-    const proposalTypeDescription = (() => {
-      switch (cardType.proposalType) {
-        case "APPROVAL":
-          return (
-            <p>
-              This election uses{" "}
-              <span>
-                <a href="https://todo" target="_blank">
-                  approval
-                </a>
-              </span>{" "}
-              voting, meaning voter can approve more than one candidate.
-            </p>
-          )
-        default:
-          return ""
-      }
-    })()
-
-    return {
-      cardText: {
-        title: "Cast your citizen vote",
-        descriptionElement: proposalTypeDescription,
-      },
-    }
+    comingSoon(cardType.startDate, cardType.endDate)
   }
 
   const getOpenVotingTypes = (cardType: CardType) => {
     if (cardType.voted) {
-      return {
-        cardText: {
-          title: "You voted!",
-          description: "Thanks for your participation.",
-        },
-      }
+      return youVoted()
     }
-    return {
-      cardText: {
-        title: `Ended ${cardType.endDate.toLocaleDateString()}`,
-        description: "TODO! candidates were elected",
-      },
-    }
-  }
-
-  const getClosedVotingTypes = (cardType: CardType) => {
-    return {
-      cardText: {
-        title: "TODO",
-        description: "TODO",
-      },
-    }
+    return castYourVote(cardType.proposalType)
   }
 
   const getCitizenTypes = (cardType: CardType) => {
     if (cardType.votingOpen) {
       return getOpenVotingTypes(cardType)
     } else if (cardType.votingComplete) {
-      return getClosedVotingTypes(cardType)
+      return votingEnded(cardType.endDate, "TODO")
     }
   }
 
@@ -111,7 +118,7 @@ const getVotingCardProps = (
   }
 
   if (!cardType.signedIn) {
-    return getNotSignedInVotingTypes(cardType)
+    return castYourVote(cardType.proposalType)
   }
   if (cardType.citizen) {
     return getCitizenTypes(cardType)
@@ -173,6 +180,15 @@ const Page = (params: PageProps) => {
         organizations: ["Org 1", "Org 2", "Org 3"],
         buttonLink: "https://google.com",
       }),
+      votingActions: {
+        cardActionList: [
+          {
+            buttonStyle: "button-primary",
+            actionText: "Sign In",
+            actionType: "Log",
+          },
+        ],
+      },
     },
   }
 
@@ -204,6 +220,8 @@ const Page = (params: PageProps) => {
 
   console.log("votingCardType: ", votingCardType)
   console.log("votingCardData: ", votingCardData)
+
+  console.log(`Voting Column Props: ${MOCK.votingColumnProps.cardActions}`)
 
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
