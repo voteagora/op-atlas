@@ -8,6 +8,7 @@ import votingCard, {
 } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
 import { ProposalType } from "@/lib/types"
 import { addDays } from "date-fns"
+import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 
 interface PageProps {
   params: {
@@ -126,6 +127,20 @@ const getVotingCardProps = (
   return getNonCitizenTypes(cardType)
 }
 
+const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
+  return {
+    candidates: Array(8).fill({
+      name: "Username",
+      image: {
+        src: "https://i.imgur.com/0000000.png",
+        alt: "Image",
+      },
+      organizations: ["Org 1", "Org 2", "Org 3"],
+      buttonLink: "https://google.com",
+    }),
+  }
+}
+
 const Page = (params: PageProps) => {
   // Get the proposals page
 
@@ -217,11 +232,11 @@ const Page = (params: PageProps) => {
     proposalType: pType,
   }
   const votingCardData = getVotingCardProps(votingCardType)
+  const votingColumnProps = getVotingColumnProps(votingCardType)
 
   console.log("votingCardType: ", votingCardType)
   console.log("votingCardData: ", votingCardData)
-
-  console.log(`Voting Column Props: ${MOCK.votingColumnProps.cardActions}`)
+  console.log(`Voting Column Props: ${votingColumnProps}`)
 
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
@@ -236,7 +251,7 @@ const Page = (params: PageProps) => {
             <div className="w-full md:w-[304px] md:ml-12">
               <VotingSidebar
                 className="sticky top-4"
-                votingColumnProps={MOCK.votingColumnProps}
+                votingColumnProps={votingColumnProps}
                 votingCardProps={votingCardData!}
               />
             </div>
