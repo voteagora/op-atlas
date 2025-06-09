@@ -28,15 +28,29 @@ const getVotingCardProps = (
   cardType: CardType,
 ): VotingCardProps | undefined => {
   if (!cardType.signedIn) {
+    const proposalTypeDescription = (() => {
+      switch (cardType.proposalType) {
+        case "APPROVAL":
+          return (
+            <p>
+              This election uses{" "}
+              <span>
+                <a href="https://todo" target="_blank">
+                  approval
+                </a>
+              </span>{" "}
+              voting, meaning voter can approve more than one candidate.
+            </p>
+          )
+        default:
+          return ""
+      }
+    })()
+
     return {
       cardText: {
         title: "Cast your citizen vote",
-        descriptionElement: (
-          <p>
-            This election uses approval voting, meaning voter can approve more
-            than one candidate.
-          </p>
-        ),
+        descriptionElement: proposalTypeDescription,
       },
     }
   }
@@ -159,10 +173,10 @@ const Page = (params: PageProps) => {
   const votingComplete = false
   const startDate = CURRENT_DATE
   const endDate = CURRENT_DATE
-  const pType = "STANDARD" as ProposalType
+  const pType = "APPROVAL" as ProposalType
 
   const votingCardType = {
-    signedIn: userSignedIn,
+    signedIn: false,
     citizen: userCitizen,
     voted: voted,
     votingOpen: votingOpen,
@@ -172,6 +186,9 @@ const Page = (params: PageProps) => {
     proposalType: pType,
   }
   const votingCardData = getVotingCardProps(votingCardType)
+
+  console.log("votingCardType: ", votingCardType)
+  console.log("votingCardData: ", votingCardData)
 
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
