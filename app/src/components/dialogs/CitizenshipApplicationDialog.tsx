@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { CheckCircle, Loader2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { memo, useEffect, useState } from "react"
 
@@ -19,6 +19,7 @@ import { useCitizenAttest } from "@/hooks/citizen/useCitizenAttest"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
 
+import { Check, CheckboxCircleFIll } from "../icons/reminx"
 import { DialogProps } from "./types"
 
 const TIME_COMMITMENT_OPTIONS = [
@@ -43,7 +44,6 @@ function CitizenshipApplicationDialog({
 }: DialogProps<object>) {
   const { data: session } = useSession()
   const userId = session?.user?.id ?? ""
-  const router = useRouter()
 
   const { data: citizen } = useCitizen({ userId })
   const {
@@ -56,8 +56,8 @@ function CitizenshipApplicationDialog({
     isLoading: isUpdating,
     isSuccess: isUpdateSuccess,
   } = useCitizenUpdate(userId)
-  const { data: qualification } = useCitizenQualification()
 
+  const { data: qualification } = useCitizenQualification()
   const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>(
     citizen?.timeCommitment as TimeCommitment,
   )
@@ -83,18 +83,27 @@ function CitizenshipApplicationDialog({
     })
   }
 
-  useEffect(() => {
-    if (isAttestSuccess && citizen?.attestationId) {
-      router.push("/citizenship")
-    }
-  }, [isAttestSuccess, router, citizen])
-
   // Reset selected time when dialog opens and citizen has no time commitment
   useEffect(() => {
     if (open && !citizen?.timeCommitment) {
       setSelectedTime(undefined)
     }
   }, [open, citizen?.timeCommitment])
+
+  const renderAttestingScreen = () => {
+    return (
+      <div className="flex flex-col gap-4 min-h-[150px] justify-center">
+        <div className="text-lg font-semibold text-center">
+          Issuing citizen badge
+        </div>
+        <div className="text-muted-foreground text-center">
+          Optimism is publishing an attestation on your behalf. Please
+          don&apos;t close this window.
+        </div>
+        <Loader2 className="animate-spin mx-auto text-foreground-muted w-6 h-6" />
+      </div>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -132,31 +141,65 @@ function CitizenshipApplicationDialog({
               </Button>
             </>
           ) : (
-            <>
-              <div className="font-semibold text-center">
-                Please agree to the Citizens&apos; House rules
-              </div>
-              <div className="flex flex-col gap-4">
-                {RULES.map((rule, index) => (
-                  <div key={index} className="flex flex-row gap-2">
-                    <Checkbox
-                      className="self-start mt-0.5"
-                      id={`rule-${index}`}
-                      checked={checkedRules[index] || false}
-                      onCheckedChange={() => handleCheckboxChange(index)}
-                    />
-                    <div className="text-sm text-muted-foreground">{rule}</div>
+            <div>
+              {isAttesting && !isAttestSuccess && (
+                <div className="flex flex-col gap-4 min-h-[150px] justify-center">
+                  <div className="text-lg font-semibold text-center">
+                    Issuing citizen badge
                   </div>
-                ))}
-              </div>
-              <Button
-                onClick={attestCitizen}
-                className="button-primary w-full"
-                disabled={!allRulesChecked || isAttesting || isAttestSuccess}
-              >
-                {isAttesting || isAttestSuccess ? "Submitting..." : "Submit"}
-              </Button>
-            </>
+                  <div className="text-muted-foreground text-center">
+                    Optimism is publishing an attestation on your behalf. Please
+                    don&apos;t close this window.
+                  </div>
+                  <Loader2 className="animate-spin mx-auto text-foreground-muted w-6 h-6" />
+                </div>
+              )}
+
+              {!isAttesting && isAttestSuccess && (
+                <div className="flex flex-col gap-4 min-h-[150px] justify-center items-center">
+                  <div className="text-lg font-semibold">
+                    Citizen badge issued
+                  </div>
+                  <div className="text-muted-foreground">
+                    You are ready to vote!
+                  </div>
+                  <CheckboxCircleFIll className="w-6 h-6" fill="#FF0000" />
+                </div>
+              )}
+
+              {!isAttesting && !isAttestSuccess && (
+                <div className="flex flex-col gap-5">
+                  <div className="font-semibold text-center">
+                    Please agree to the Citizens&apos; House rules
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    {RULES.map((rule, index) => (
+                      <div key={index} className="flex flex-row gap-2">
+                        <Checkbox
+                          className="self-start mt-0.5"
+                          id={`rule-${index}`}
+                          checked={checkedRules[index] || false}
+                          onCheckedChange={() => handleCheckboxChange(index)}
+                        />
+                        <div className="text-sm text-muted-foreground">
+                          {rule}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    onClick={attestCitizen}
+                    className="button-primary w-full"
+                    disabled={
+                      !allRulesChecked || isAttesting || isAttestSuccess
+                    }
+                  >
+                    Submit
+                  </Button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </DialogContent>

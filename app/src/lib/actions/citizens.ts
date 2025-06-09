@@ -129,7 +129,6 @@ export const s8CitizenshipQualification =
     // Check if user already has a citizen profile
     const existingCitizen = await getUserCitizen(userId)
     if (existingCitizen && existingCitizen.attestationId) {
-      console.log("User already has a citizen profile")
       return null
     }
 
