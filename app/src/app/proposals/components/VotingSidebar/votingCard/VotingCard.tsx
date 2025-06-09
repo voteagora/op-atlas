@@ -1,6 +1,6 @@
-import VotingCardActions, {
+import VotingActions, {
   CardActionsProps,
-} from "@/app/proposals/components/VotingSidebar/votingCard/VotingCardActions"
+} from "@/app/proposals/components/VotingSidebar/VotingActions"
 import React from "react"
 
 interface CardImageProps {
@@ -22,7 +22,8 @@ interface CardTextProps {
 }
 
 const CardText = ({ title, descriptionElement }: CardTextProps) => {
-  const cardDescriptionTextStyling = "font-inter font-normal text-sm leading-5 tracking-[0%] text-center [&_a]:underline [&_a]:decoration-solid [&_a]:underline-offset-[0%] [&_a]:decoration-[0%]"
+  const cardDescriptionTextStyling =
+    "font-inter font-normal text-sm leading-5 tracking-[0%] text-center [&_a]:underline [&_a]:decoration-solid [&_a]:underline-offset-[0%] [&_a]:decoration-[0%]"
   return (
     <div className="text-center">
       <h4 className="text-h4">{title}</h4>
@@ -53,7 +54,7 @@ const VotingCard = ({ cardText, cardActions, cardImage }: VotingCardProps) => {
     <div className="rounded-t-lg border border-solid p-6 flex flex-col items-center">
       {cardImage && <CardImage {...cardImage} />}
       <CardText {...cardText} />
-      {cardActions && <VotingCardActions {...cardActions} />}
+      {cardActions && <VotingActions {...cardActions} />}
     </div>
   )
 }
