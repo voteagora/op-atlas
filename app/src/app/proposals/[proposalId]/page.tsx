@@ -3,8 +3,11 @@ import Breadcrumbs from "@/app/proposals/components/Breadcrumbs"
 import ProposalContent from "@/app/proposals/components/proposalContent/ProposalContent"
 import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
 import ProposalHeader from "@/app/proposals/components/ProposalHeader"
-import { VotingCardProps } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
+import votingCard, {
+  VotingCardProps,
+} from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
 import { ProposalType } from "@/lib/types"
+import { addDays } from "date-fns"
 
 interface PageProps {
   params: {
@@ -27,7 +30,16 @@ const CURRENT_DATE = new Date()
 const getVotingCardProps = (
   cardType: CardType,
 ): VotingCardProps | undefined => {
-  if (!cardType.signedIn) {
+  // If voting has not opened yet
+  if (!cardType.votingOpen && !cardType.votingComplete) {
+    return {
+      cardText: {
+        title: "Coming Soon",
+        descriptionElement: `Voting ${cardType.votingOpen} - ${cardType.votingComplete}`,
+      },
+    }
+  }
+  const getNotSignedInVotingTypes = (cardType: CardType) => {
     const proposalTypeDescription = (() => {
       switch (cardType.proposalType) {
         case "APPROVAL":
@@ -98,6 +110,9 @@ const getVotingCardProps = (
     }
   }
 
+  if (!cardType.signedIn) {
+    return getNotSignedInVotingTypes(cardType)
+  }
   if (cardType.citizen) {
     return getCitizenTypes(cardType)
   }
@@ -168,11 +183,11 @@ const Page = (params: PageProps) => {
 
   const userSignedIn = user.userId !== undefined
   const userCitizen = user.citizenId !== undefined
-  const voted = true
-  const votingOpen = true
+  const voted = false
+  const votingOpen = false
   const votingComplete = false
-  const startDate = CURRENT_DATE
-  const endDate = CURRENT_DATE
+  const startDate = addDays(CURRENT_DATE, 1)
+  const endDate = addDays(CURRENT_DATE, 10)
   const pType = "APPROVAL" as ProposalType
 
   const votingCardType = {
