@@ -54,6 +54,7 @@ export const TRANCHE_MONTHS_MAP = {
   1: "February",
   2: "March",
   3: "April",
+  4: "May",
 }
 
 export const CHARTS_TRAILING_DAYS = 3

@@ -73,6 +73,7 @@ async function exportEmailsToMailchimp() {
                     select: {
                       roundId: true,
                       tranche: true,
+                      amount: true,
                     },
                   },
                 },
@@ -97,7 +98,15 @@ async function exportEmailsToMailchimp() {
       const userFullName = userEmail.user.name
       const [FNAME, LNAME] = userFullName ? userFullName.split(" ") : ["", ""]
 
-      const projects = userEmail.user.projects.map((p) => p.project)
+      const projects = userEmail.user.projects.map((p) => {
+        return {
+          ...p.project,
+          totalReward: p.project.recurringRewards.reduce(
+            (acc, curr) => BigInt(acc) + BigInt(curr.amount),
+            BigInt(0),
+          ),
+        }
+      })
 
       // Split projects into categories based on round IDs
       const devToolingProjects = projects.filter((p) =>
@@ -139,9 +148,19 @@ async function exportEmailsToMailchimp() {
         return `<a href="https://atlas.optimism.io/project/${project.id}">${project.name}</a>`
       }
 
+      const formatProjectLink = (project: { id: string }) => {
+        return `https://atlas.optimism.io/project/${project.id}`
+      }
+
       // Helper function to clean up project lists
-      const cleanProjectList = (projects: { id: string; name: string }[]) => {
-        if (!projects.length) return { names: "", links: "" }
+      const cleanProjectList = (
+        projects: {
+          id: string
+          name: string
+          totalReward: bigint
+        }[],
+      ) => {
+        if (!projects.length) return { names: "", links: "", topProject: "" }
 
         const names = projects
           .map((p) => p.name)
@@ -151,8 +170,13 @@ async function exportEmailsToMailchimp() {
           .map((p) => formatProjectHtml(p))
           .filter(Boolean)
           .join(", ")
+        const topProject = formatProjectLink(
+          projects.sort((a, b) => {
+            return Number(b.totalReward - a.totalReward)
+          })[0],
+        )
 
-        return { names, links }
+        return { names, links, topProject }
       }
 
       const devToolingRewardedData = cleanProjectList(devToolingRewarded)
@@ -208,6 +232,8 @@ async function exportEmailsToMailchimp() {
           RFOR_L: onchainBuildersRewardedData.links,
           RFONR_N: onchainBuildersNotRewardedData.names,
           RFONR_L: onchainBuildersNotRewardedData.links,
+          RFDR_TOP: devToolingRewardedData.topProject,
+          RFOR_TOP: onchainBuildersRewardedData.topProject,
         },
       }
 
