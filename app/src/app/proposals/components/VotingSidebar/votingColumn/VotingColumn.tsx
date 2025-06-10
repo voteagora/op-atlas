@@ -53,7 +53,7 @@ const CandidateCards = ({
 }) => {
   return (
     <>
-      <div>
+      <div className="border-t pt-3">
         <p className="pl-2 pr-2 h-5">{candidates.length} Candidates</p>
       </div>
       <div className="w-full sm:w-[272px]">
@@ -88,8 +88,8 @@ const VotingColumn = ({
 }: VotingColumnProps) => {
   console.log("VotingActions: ", votingActions)
   return (
-    <div className="w-[19rem] pt-[1.5rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
-      <div className="w-[272px] gap-[16px] flex flex-col">
+    <div className="w-[19rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
+      <div className="w-[272px] gap-[16px] flex flex-col ">
         <ColumnCard
           proposalType={proposalType}
           options={options}
