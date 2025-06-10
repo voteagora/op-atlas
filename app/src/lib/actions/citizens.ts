@@ -249,6 +249,11 @@ export const attestCitizen = async () => {
         CITIZEN_ATTESTATION_CODE[
           citizenType as keyof typeof CITIZEN_ATTESTATION_CODE
         ],
+      refUID:
+        qualification.type === CITIZEN_TYPES.chain ||
+        qualification.type === CITIZEN_TYPES.app
+          ? qualification.identifier
+          : undefined,
     })
 
     const result = await upsertCitizen({

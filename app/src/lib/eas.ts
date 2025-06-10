@@ -25,6 +25,13 @@ export const CITIZEN_SCHEMA_ID =
     ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
     : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
 
+export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
+    : "0x"
+
+const citizenWalletChangeSchema = new SchemaEncoder("bytes32 oldCitizenUID")
+
 const citizenSchema = new SchemaEncoder(
   "uint256 farcasterId,string selectionMethod",
 )
@@ -301,6 +308,26 @@ export async function createFullProjectSnapshotAttestations({
   return processAttestationsInBatches(attestations, createMultiAttestations)
 }
 
+export async function createCitizenWalletChangeAttestation({
+  oldCitizenUID,
+  newCitizenUID,
+}: {
+  oldCitizenUID: string
+  newCitizenUID: string
+}) {
+  const data = citizenWalletChangeSchema.encodeData([
+    { name: "oldCitizenUID", value: oldCitizenUID, type: "bytes32" },
+  ])
+
+  const attestationId = await createAttestation(
+    CITIZEN_WALLET_CHANGE_SCHEMA_ID,
+    data,
+    newCitizenUID,
+  )
+
+  return attestationId
+}
+
 export async function revokeContractAttestations(attestationIds: string[]) {
   if (attestationIds.length === 0) {
     return
@@ -429,7 +456,8 @@ export async function processAttestationsInBatches<T>(
         throw new Error(`Failed after ${maxRetries} retries: ${error}`)
       }
       console.warn(
-        `Retry ${retryCount + 1}/${maxRetries} for batch of ${batch.length
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+          batch.length
         } items`,
       )
       await new Promise((resolve) =>
@@ -452,10 +480,12 @@ export async function createCitizenAttestation({
   to,
   farcasterId,
   selectionMethod,
+  refUID,
 }: {
   to: string
   farcasterId: number
   selectionMethod: string
+  refUID?: string
 }) {
   const data = citizenSchema.encodeData([
     { name: "farcasterId", value: farcasterId, type: "uint256" },
@@ -469,6 +499,7 @@ export async function createCitizenAttestation({
       expirationTime: BigInt(0),
       revocable: true,
       data,
+      refUID,
     },
   })
 
@@ -478,7 +509,6 @@ export async function createCitizenAttestation({
 export async function isAttestationActive(
   attestationId: string,
 ): Promise<boolean> {
-
   try {
     const attestation = await eas.getAttestation(attestationId)
     return attestation !== null && !attestation.revocationTime
