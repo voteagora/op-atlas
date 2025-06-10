@@ -121,8 +121,8 @@ export const UserRequirements = ({
         <button
           type="button"
           className={LINK_STYLE}
-          onClick={() => linkWallet()}
-          onKeyDown={(e) => e.key === "Enter" && linkWallet()}
+          onClick={() => linkWallet({ primary: true })}
+          onKeyDown={(e) => e.key === "Enter" && linkWallet({ primary: true })}
         >
           Add your address
         </button>
