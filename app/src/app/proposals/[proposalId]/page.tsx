@@ -93,7 +93,7 @@ const Page = (params: PageProps) => {
   const votingComplete = true
   const startDate = addDays(CURRENT_DATE, -10)
   const endDate = addDays(CURRENT_DATE, -1)
-  const pType = "STANDARD" as ProposalType
+  const pType = "APPROVAL" as ProposalType
 
   const votingCardType: CardType = {
     signedIn: userSignedIn,
