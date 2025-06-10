@@ -30,6 +30,7 @@ const ColumnCard = ({
   proposalType: string
   options?: CandidateCardProps[]
   signedIn?: boolean
+  title?: string
 }) => {
   switch (proposalType) {
     case "STANDARD":
@@ -51,17 +52,22 @@ const CandidateCards = ({
   candidates: CandidateCardProps[]
 }) => {
   return (
-    <div className="w-full sm:w-[272px]">
-      {candidates.map((candidate, idx) => (
-        <CandidateCard
-          key={idx}
-          img={candidate.image}
-          username={candidate.name}
-          organizations={candidate.organizations}
-          buttonLink={candidate.buttonLink}
-        />
-      ))}
-    </div>
+    <>
+      <div>
+        <p className="pl-2 pr-2 h-5">{candidates.length} Candidates</p>
+      </div>
+      <div className="w-full sm:w-[272px]">
+        {candidates.map((candidate, idx) => (
+          <CandidateCard
+            key={idx}
+            img={candidate.image}
+            username={candidate.name}
+            organizations={candidate.organizations}
+            buttonLink={candidate.buttonLink}
+          />
+        ))}
+      </div>
+    </>
   )
 }
 
@@ -84,10 +90,6 @@ const VotingColumn = ({
   return (
     <div className="w-[19rem] pt-[1.5rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
       <div className="w-[272px] gap-[16px] flex flex-col">
-        {proposalType === "APPROVAL" && (
-          <p className="pl-2 pr-2 h-5">{options?.length} Candidates</p>
-        )}
-
         <ColumnCard
           proposalType={proposalType}
           options={options}
