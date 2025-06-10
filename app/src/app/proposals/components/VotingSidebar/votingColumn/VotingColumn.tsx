@@ -25,12 +25,18 @@ interface CandidateCardProps {
 const ColumnCard = ({
   proposalType,
   options,
+  signedIn,
 }: {
   proposalType: string
   options?: CandidateCardProps[]
+  signedIn?: boolean
 }) => {
   switch (proposalType) {
     case "STANDARD":
+      // If the user is not signed-in we do not want to show the card
+      if (!signedIn) {
+        return <></>
+      }
       return <StandardVoteCard />
     case "APPROVAL":
       return <CandidateCards candidates={options!} />
@@ -64,6 +70,7 @@ export interface VotingColumnProps {
   options?: CandidateCardProps[]
   votingActions?: CardActionsProps
   currentlyActive?: boolean
+  userSignedIn?: boolean
 }
 
 const VotingColumn = ({
@@ -71,6 +78,7 @@ const VotingColumn = ({
   options,
   votingActions,
   currentlyActive,
+  userSignedIn,
 }: VotingColumnProps) => {
   console.log("VotingActions: ", votingActions)
   return (
@@ -80,7 +88,11 @@ const VotingColumn = ({
           <p className="pl-2 pr-2 h-5">{options?.length} Candidates</p>
         )}
 
-        <ColumnCard proposalType={proposalType} options={options} />
+        <ColumnCard
+          proposalType={proposalType}
+          options={options}
+          signedIn={userSignedIn}
+        />
       </div>
       {votingActions && <VotingActions {...votingActions} />}
       {!currentlyActive && (
