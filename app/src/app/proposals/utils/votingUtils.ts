@@ -140,7 +140,7 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
       cardActionList: [
         {
           buttonStyle:
-            "button-primary opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:hover:opacity-50",
+            "button-primary opacity-50 cursor-none disabled:cursor-not-allowed disabled:hover:opacity-50",
           actionText: "Cast Vote",
           actionType: "Disabled",
         },
@@ -150,7 +150,8 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
     votingActions = {
       cardActionList: [
         {
-          buttonStyle: "bg-[#D6FFDA] text-success-foreground",
+          buttonStyle:
+            "bg-[#D6FFDA] text-success-foreground pointer-events-none cursor-none",
           actionText: "✔️ For",
           actionType: "Disabled",
         },
