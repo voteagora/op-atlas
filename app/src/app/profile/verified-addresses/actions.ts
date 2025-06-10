@@ -5,7 +5,11 @@ import { updateCitizen } from "@/db/citizens"
 import { getUserById, makeUserAddressPrimary } from "@/db/users"
 import { getCitizenByUserId } from "@/lib/actions/citizens"
 import { CITIZEN_ATTESTATION_CODE } from "@/lib/constants"
-import { createCitizenAttestation, revokeCitizenAttestation } from "@/lib/eas"
+import {
+  createCitizenAttestation,
+  createCitizenWalletChangeAttestation,
+  revokeCitizenAttestation,
+} from "@/lib/eas"
 
 export async function makeUserAddressPrimaryAction(address: string) {
   const session = await auth()
@@ -30,6 +34,11 @@ export async function makeUserAddressPrimaryAction(address: string) {
         CITIZEN_ATTESTATION_CODE[
           citizen.type as keyof typeof CITIZEN_ATTESTATION_CODE
         ],
+    })
+
+    await createCitizenWalletChangeAttestation({
+      oldCitizenUID: citizen.attestationId,
+      newCitizenUID: attestationId,
     })
 
     await updateCitizen({
