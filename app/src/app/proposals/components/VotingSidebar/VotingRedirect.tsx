@@ -1,6 +1,6 @@
 export interface VotingRedirectProps {
   title: string
-  subtext: string
+  subtext: string | React.ReactElement
 }
 
 const VotingRedirect = ({ title, subtext }: VotingRedirectProps) => {
@@ -10,9 +10,13 @@ const VotingRedirect = ({ title, subtext }: VotingRedirectProps) => {
         <p className="w-[256px] h-[24px] font-['Inter'] font-semibold text-[16px] leading-[24px] text-center align-middle bg-foreground">
           {title}
         </p>
-        <p className="w-[256px] h-[40px] font-['Inter'] font-normal text-[14px] leading-[20px] text-center underline decoration-solid decoration-[0%] underline-offset-[0%] bg-secondary-foreground">
-          {subtext}
-        </p>
+        {typeof subtext === "string" ? (
+          <p className="w-[256px] h-[40px] font-['Inter'] font-normal text-[14px] leading-[20px] text-center underline decoration-solid decoration-[0%] underline-offset-[0%] bg-secondary-foreground">
+            {subtext}
+          </p>
+        ) : (
+          subtext
+        )}
       </div>
     </div>
   )

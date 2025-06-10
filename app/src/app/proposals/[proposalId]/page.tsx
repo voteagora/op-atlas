@@ -3,12 +3,9 @@ import Breadcrumbs from "@/app/proposals/components/Breadcrumbs"
 import ProposalContent from "@/app/proposals/components/proposalContent/ProposalContent"
 import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
 import ProposalHeader from "@/app/proposals/components/ProposalHeader"
-import votingCard, {
-  VotingCardProps,
-} from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
 import { ProposalType } from "@/lib/types"
 import { addDays } from "date-fns"
-import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
+import { CardType, getVotingProps } from "@/app/proposals/utils/votingUtils"
 
 interface PageProps {
   params: {
@@ -16,165 +13,8 @@ interface PageProps {
   }
 }
 
-interface CardType {
-  signedIn: boolean
-  citizen: boolean
-  voted: boolean
-  votingOpen: boolean
-  votingComplete: boolean
-  startDate: Date
-  endDate: Date
-  proposalType: ProposalType
-}
 const CURRENT_DATE = new Date()
 
-// This section captured different end states for the voting sidebar.
-// Different logical flows capture various sidebar configurations.
-
-const comingSoon = (startDate: Date, endDate: Date) => {
-  return {
-    cardText: {
-      title: "Coming Soon",
-      descriptionElement: `Voting ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`,
-    },
-  }
-}
-
-const votingEnded = (endDate: Date, result: any) => {
-  return {
-    cardText: {
-      title: `Ended ${endDate.toLocaleDateString()}`,
-      descriptionElement: result,
-    },
-  }
-}
-
-const youVoted = () => {
-  return {
-    cardText: {
-      title: "You voted!",
-      description: "Thanks for your participation.",
-    },
-  }
-}
-
-const castYourVote = (proposalType: ProposalType) => {
-  const proposalTypeDescription = () => {
-    switch (proposalType) {
-      case "APPROVAL":
-        return (
-          <p>
-            This election uses{" "}
-            <span>
-              <a href="https://todo" target="_blank">
-                approval
-              </a>
-            </span>{" "}
-            voting, meaning voter can approve more than one candidate.
-          </p>
-        )
-      default:
-        return ""
-    }
-  }
-
-  return {
-    cardText: {
-      title: "Cast your citizen vote",
-      descriptionElement: proposalTypeDescription(),
-    },
-  }
-}
-
-const getVotingCardProps = (
-  cardType: CardType,
-): VotingCardProps | undefined => {
-  // If voting has not opened yet
-  if (!cardType.votingOpen && !cardType.votingComplete) {
-    comingSoon(cardType.startDate, cardType.endDate)
-  }
-
-  const getOpenVotingTypes = (cardType: CardType) => {
-    if (cardType.voted) {
-      return youVoted()
-    }
-    return castYourVote(cardType.proposalType)
-  }
-
-  const getCitizenTypes = (cardType: CardType) => {
-    if (cardType.votingOpen) {
-      return getOpenVotingTypes(cardType)
-    } else if (cardType.votingComplete) {
-      return votingEnded(cardType.endDate, "TODO")
-    }
-  }
-
-  const getNonCitizenTypes = (cardType: CardType) => {
-    return {
-      cardText: {
-        title: "TODO",
-        description: "TODO",
-      },
-    }
-  }
-
-  if (!cardType.signedIn) {
-    return castYourVote(cardType.proposalType)
-  }
-  if (cardType.citizen) {
-    return getCitizenTypes(cardType)
-  }
-  return getNonCitizenTypes(cardType)
-}
-
-const getVoteOptions = () => {
-  return Array(8).fill({
-    name: "Username",
-    image: {
-      src: "https://i.imgur.com/0000000.png",
-      alt: "Image",
-    },
-    organizations: ["Org 1", "Org 2", "Org 3"],
-    buttonLink: "https://google.com",
-  })
-}
-
-const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
-  let votingActions: any = {}
-  if (!cardType.signedIn) {
-    votingActions = {
-      cardActionList: [
-        {
-          buttonStyle: "button-primary",
-          actionText: "Sign In",
-          actionType: "Log",
-        },
-      ],
-    }
-  } else {
-    votingActions = {
-      cardActionList: [
-        {
-          buttonStyle: "button-primary",
-          actionText: "Cast Vote",
-          actionType: "Log",
-        },
-      ],
-    }
-  }
-
-  switch (cardType.proposalType) {
-    case "APPROVAL":
-      return {
-        candidates: getVoteOptions(),
-        votingActions: votingActions,
-      }
-    default:
-      return {
-        candidates: getVoteOptions(),
-      }
-  }
-}
 
 const Page = (params: PageProps) => {
   // Get the proposals page
@@ -256,7 +96,7 @@ const Page = (params: PageProps) => {
   const endDate = addDays(CURRENT_DATE, -1)
   const pType = "APPROVAL" as ProposalType
 
-  const votingCardType = {
+  const votingCardType: CardType = {
     signedIn: true,
     citizen: userCitizen,
     voted: voted,
@@ -266,12 +106,12 @@ const Page = (params: PageProps) => {
     endDate: endDate,
     proposalType: pType,
   }
-  const votingCardData = getVotingCardProps(votingCardType)
-  const votingColumnProps = getVotingColumnProps(votingCardType)
+
+  const { votingCardProps, votingColumnProps } = getVotingProps(votingCardType)
 
   console.log("votingCardType: ", votingCardType)
-  console.log("votingCardData: ", votingCardData)
-  console.log(`Voting Column Props: ${votingColumnProps}`)
+  console.log("votingCardProps: ", votingCardProps)
+  console.log("votingColumnProps: ", votingColumnProps)
 
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
@@ -287,7 +127,7 @@ const Page = (params: PageProps) => {
               <VotingSidebar
                 className="sticky top-4"
                 votingColumnProps={votingColumnProps}
-                votingCardProps={votingCardData!}
+                votingCardProps={votingCardProps!}
               />
             </div>
           </div>
