@@ -1,13 +1,15 @@
-import CandidateCard from "@/app/proposals/components/VotingSidebar/votingColumn/CandidateCard"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import VotingActions, {
   CardActionsProps,
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
+import CandidateCard from "@/app/proposals/components/VotingSidebar/votingColumn/CandidateCard"
+import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
 
-export interface VotingColumnProps {
-  proposalType: string
-  options?: CandidateCardProps[]
-  votingActions?: CardActionsProps
-  currentlyActive?: boolean
+// Vote type enum
+export enum VoteType {
+  For = "For",
+  Abstain = "Abstain",
+  Against = "Against",
 }
 
 interface CandidateCardProps {
@@ -27,8 +29,13 @@ const ColumnCard = ({
   proposalType: string
   options?: CandidateCardProps[]
 }) => {
-  if (proposalType === "APPROVAL") {
-    return CandidateCards(options!)
+  switch (proposalType) {
+    case "STANDARD":
+      return StandardVoteCard
+    case "APPROVAL":
+      return CandidateCards(options!)
+    default:
+      return <>TODO</>
   }
 }
 
@@ -48,6 +55,13 @@ const CandidateCards = (candidates: CandidateCardProps[]) => {
   )
 }
 
+export interface VotingColumnProps {
+  proposalType: string
+  options?: CandidateCardProps[]
+  votingActions?: CardActionsProps
+  currentlyActive?: boolean
+}
+
 const VotingColumn = ({
   proposalType,
   options,
@@ -58,7 +72,10 @@ const VotingColumn = ({
   return (
     <div className="w-[19rem] min-h-[25.25rem] pt-[1.5rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
       <div className="w-[272px] h-[356px] gap-[16px] flex flex-col">
-        <p className="pl-2 pr-2 h-5">8 Candidates</p>
+        {proposalType === "APPROVAL" && (
+          <p className="pl-2 pr-2 h-5">{options?.length} Candidates</p>
+        )}
+
         <ColumnCard proposalType={proposalType} options={options} />
       </div>
       {votingActions && <VotingActions {...votingActions} />}
