@@ -18,6 +18,7 @@ import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useCitizenAttest } from "@/hooks/citizen/useCitizenAttest"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
+import { CITIZEN_TYPES } from "@/lib/constants"
 
 import { Check, CheckboxCircleFIll } from "../icons/reminx"
 import { DialogProps } from "./types"
@@ -51,6 +52,7 @@ function CitizenshipApplicationDialog({
     isLoading: isAttesting,
     isSuccess: isAttestSuccess,
   } = useCitizenAttest(userId)
+
   const {
     updateCitizen,
     isLoading: isUpdating,
@@ -58,6 +60,7 @@ function CitizenshipApplicationDialog({
   } = useCitizenUpdate(userId)
 
   const { data: qualification } = useCitizenQualification()
+
   const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>(
     citizen?.timeCommitment as TimeCommitment,
   )
@@ -110,7 +113,8 @@ function CitizenshipApplicationDialog({
       <DialogContent className="flex sm:max-w-md">
         <DialogTitle className="sr-only">Citizenship Application</DialogTitle>
         <div className="flex flex-col gap-6 w-full">
-          {!citizen?.timeCommitment ? (
+          {!citizen?.timeCommitment &&
+          qualification?.type === CITIZEN_TYPES.user ? (
             <>
               <div className="font-semibold text-center">
                 How many hours per week would you like to spend on governance?
