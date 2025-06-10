@@ -26,16 +26,18 @@ const ColumnCard = ({
   proposalType,
   options,
   signedIn,
+  currentlyActive,
 }: {
   proposalType: string
   options?: CandidateCardProps[]
   signedIn?: boolean
   title?: string
+  currentlyActive?: boolean
 }) => {
   switch (proposalType) {
     case "STANDARD":
       // If the user is not signed-in we do not want to show the card
-      if (!signedIn) {
+      if (!signedIn || !currentlyActive) {
         return <></>
       }
       return <StandardVoteCard />
@@ -94,9 +96,10 @@ const VotingColumn = ({
           proposalType={proposalType}
           options={options}
           signedIn={userSignedIn}
+          currentlyActive={currentlyActive}
         />
       </div>
-      {votingActions && <VotingActions {...votingActions} />}
+      {currentlyActive && votingActions && <VotingActions {...votingActions} />}
       {!currentlyActive && (
         // TODO! This needs to point somewhere
         <div className="w-full flex items-center justify-center gap-2.5">
