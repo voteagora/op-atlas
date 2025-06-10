@@ -123,12 +123,11 @@ export const ChainAppRequirements = ({
   return (
     <div className="flex flex-col gap-6">
       <div className="font-semibold text-xl">Requirements</div>
-      <div className="font-semibold">Atlas Profile</div>
       <div className="flex flex-col gap-1">
         <ConditionRow isMet={true}>
           {qualification.type === CITIZEN_TYPES.chain
-            ? "The organization contributed to ≥2% of the total revenue contributed by Superchain members in the last Season, or was in the top 15 revenue-contributing chains."
-            : "The project contributed to ≥0.5% of the surplus revenue contributed by onchain apps in the last Season, or was in the top 100."}
+            ? "The organization accounted for at least 2% of the total revenue share contributed by all chains in the past Season, or was among the top 15 chains by revenue contribution in the past Season."
+            : "The project was responsible for at least 0.5% of the total gas used across the Superchain over the past Season, or was among the top 100 apps by gas usage in the past Season."}
         </ConditionRow>
         {renderEmail()}
         {renderAddress()}
