@@ -48,6 +48,9 @@ const castYourVote = (proposalType: ProposalType) => {
     switch (proposalType) {
       case "APPROVAL":
         return "This election uses approval voting, meaning voter can approve more than one candidate."
+      case "STANDARD":
+        // TODO link 'here'
+        return "This proposal requires approval from the Citizen's House and Token House. Read more about the voting mechanism here."
       default:
         return ""
     }
@@ -165,14 +168,12 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
     case "STANDARD":
       return {
         proposalType: cardType.proposalType,
-        options: getVoteOptions(),
         votingActions: votingActions,
+        userSignedIn: cardType.signedIn,
       }
     default:
       return {
         proposalType: cardType.proposalType,
-        options: [],
-        votingActions: votingActions,
       }
   }
 }
