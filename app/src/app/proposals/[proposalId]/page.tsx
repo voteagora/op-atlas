@@ -6,6 +6,7 @@ import ProposalHeader from "@/app/proposals/components/ProposalHeader"
 import { ProposalType } from "@/lib/types"
 import { addDays } from "date-fns"
 import { CardType, getVotingProps } from "@/app/proposals/utils/votingUtils"
+import { string } from "zod"
 
 interface PageProps {
   params: {
@@ -99,15 +100,16 @@ const Page = (params: PageProps) => {
     organization: {
       name: "Org 1",
       logo: "https://i.imgur.com/0000000.png",
-      eligible: true,
+      eligible: false,
     },
     application: {
       name: "App 1",
       logo: "https://i.imgur.com/0000000.png",
-      eligible: true,
+      eligible: false,
     },
     user: {
-      eligible: userCitizen,
+      eligible: false,
+      pfp: "https://i.imgur.com/0000000.png",
     },
   }
 

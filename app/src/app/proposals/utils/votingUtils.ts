@@ -1,5 +1,8 @@
 import { ProposalType } from "@/lib/types"
-import { VotingCardProps } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
+import {
+  CardTextProps,
+  VotingCardProps,
+} from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
 import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
 import { boolean, undefined } from "zod"
@@ -13,7 +16,7 @@ export interface CardType {
   startDate: Date
   endDate: Date
   proposalType: ProposalType
-  citizenEligibility?: CitizenEligibility
+  citizenEligibility: CitizenEligibility
 }
 
 export interface CitizenEligibility {
@@ -29,6 +32,7 @@ export interface CitizenEligibility {
   }
   user: {
     eligible: boolean
+    pfp: string
   }
 }
 // Helper functions for voting card props
@@ -80,6 +84,60 @@ const castYourVote = (proposalType: ProposalType) => {
   }
 }
 
+const wantToVote = (eligibility: CitizenEligibility) => {
+  const eligibleStatement =
+    "eligible to become a citizen, and to vote on decisions that shape the Collective."
+
+  let cardText: CardTextProps = {
+    title: "Want to vote?",
+  }
+  if (eligibility.organization?.eligible) {
+    return {
+      cardText: {
+        ...cardText,
+        descriptionElement: `${eligibility.organization?.name} is ${eligibleStatement}`,
+      },
+      cardImage: {
+        src: eligibility.organization.logo,
+        alt: "Organization Logo",
+        styling: "rounded-full w-[64px] h-[64px] radius-[Dimensions/19]",
+      },
+    }
+  } else if (eligibility.application?.eligible) {
+    return {
+      cardText: {
+        ...cardText,
+        descriptionElement: `${eligibility.application?.name} is ${eligibleStatement}`,
+      },
+      cardImage: {
+        src: eligibility.application.logo,
+        alt: "Application Logo",
+        styling: "rounded-lg w-[64px] h-[64px] radius-[Dimensions/19]",
+      },
+    }
+  } else if (eligibility.user.eligible) {
+    return {
+      cardText: {
+        ...cardText,
+        descriptionElement: "You are " + eligibleStatement,
+      },
+      cardImage: {
+        src: eligibility.user.pfp,
+        alt: "User Profile Picture",
+        styling: "rounded-full w-[64px] h-[64px] radius-[Dimensions/5]",
+      },
+    }
+  } else {
+    return {
+      cardText: {
+        ...cardText,
+        descriptionElement:
+          "The Citizens' House votes on decisions that shape the direction of the Collective.",
+      },
+    }
+  }
+}
+
 const getOpenVotingTypes = (cardType: CardType) => {
   if (cardType.voted) {
     return youVoted()
@@ -96,7 +154,14 @@ const getCitizenTypes = (cardType: CardType) => {
 }
 
 const getNonCitizenTypes = (cardType: CardType) => {
-  return castYourVote(cardType.proposalType)
+  switch (cardType.proposalType) {
+    case "APPROVAL":
+      return castYourVote(cardType.proposalType)
+    case "STANDARD":
+      return wantToVote(cardType.citizenEligibility)
+    default:
+      return {} as VotingCardProps
+  }
 }
 
 // Function to get vote options
@@ -155,10 +220,10 @@ const getVotingActions = (cardType: CardType) => {
   } else if (!cardType.citizen) {
     // Get the eligibility of the citizen
     const organizationEligible =
-      cardType.citizenEligibility?.organization?.eligible
+      cardType.citizenEligibility.organization?.eligible
     const applicationEligible =
-      cardType.citizenEligibility?.organization?.eligible
-    const userEligible = cardType.citizenEligibility?.user.eligible
+      cardType.citizenEligibility.application?.eligible
+    const userEligible = cardType.citizenEligibility.user.eligible
 
     if (organizationEligible || applicationEligible || userEligible) {
       votingActions = {
