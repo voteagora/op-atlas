@@ -86,17 +86,17 @@ const Page = (params: PageProps) => {
     citizenId: "1",
   }
 
-  const userSignedIn = user.userId !== undefined
-  const userCitizen = user.citizenId !== undefined
+  const userSignedIn = true //user.userId !== undefined
+  const userCitizen = false //user.citizenId !== undefined
   const voted = false
-  const votingOpen = false
-  const votingComplete = true
+  const votingOpen = true
+  const votingComplete = false
   const startDate = addDays(CURRENT_DATE, -10)
   const endDate = addDays(CURRENT_DATE, -1)
   const pType = "APPROVAL" as ProposalType
 
   const votingCardType: CardType = {
-    signedIn: true,
+    signedIn: userSignedIn,
     citizen: userCitizen,
     voted: voted,
     votingOpen: votingOpen,
