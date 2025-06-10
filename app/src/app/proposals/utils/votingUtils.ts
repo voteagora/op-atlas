@@ -13,8 +13,26 @@ export interface CardType {
   startDate: Date
   endDate: Date
   proposalType: ProposalType
+  citizenEligibility?: CitizenEligibility
 }
 
+interface CitizenEligibility {
+  organization?: {
+    name: string
+    logo: string
+    eligible: boolean
+  }
+  application?: {
+    name: string
+    logo: string
+    eligible: boolean
+  }
+  user?: {
+    name: string
+    logo: string
+    eligible: boolean
+  }
+}
 // Helper functions for voting card props
 const comingSoon = (startDate: Date, endDate: Date) => {
   return {
