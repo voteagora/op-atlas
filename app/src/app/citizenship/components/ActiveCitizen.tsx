@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
@@ -13,7 +12,9 @@ import { CITIZEN_TYPES } from "@/lib/constants"
 import { UserWithEmails } from "@/lib/types"
 
 export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
-  const { data: citizen } = useCitizen({ userId: user.id })
+  const { data: citizen } = useCitizen({
+    query: { type: CITIZEN_TYPES.user, id: user.id },
+  })
 
   const { organization } = useOrganization({
     id: citizen?.organizationId ?? "",

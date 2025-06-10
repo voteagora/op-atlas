@@ -3,8 +3,8 @@
 import { auth } from "@/auth"
 import { updateCitizen } from "@/db/citizens"
 import { getUserById, makeUserAddressPrimary } from "@/db/users"
-import { getCitizenByUserId } from "@/lib/actions/citizens"
-import { CITIZEN_ATTESTATION_CODE } from "@/lib/constants"
+import { getCitizen } from "@/lib/actions/citizens"
+import { CITIZEN_ATTESTATION_CODE, CITIZEN_TYPES } from "@/lib/constants"
 import { createCitizenAttestation, revokeCitizenAttestation } from "@/lib/eas"
 
 export async function makeUserAddressPrimaryAction(address: string) {
@@ -16,7 +16,7 @@ export async function makeUserAddressPrimaryAction(address: string) {
   }
 
   await makeUserAddressPrimary(address, userId)
-  const citizen = await getCitizenByUserId(userId)
+  const citizen = await getCitizen({ type: CITIZEN_TYPES.user, id: userId })
 
   // If user is a citizen and with an active attestation, revoke it and create a new one
   if (citizen?.attestationId && citizen.address !== address) {

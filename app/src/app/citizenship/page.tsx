@@ -16,7 +16,7 @@ import {
 import { getUserById } from "@/db/users"
 import {
   checkCitizenshipLimit,
-  getCitizenByUserId,
+  getCitizen,
   s8CitizenshipQualification,
 } from "@/lib/actions/citizens"
 import { CITIZEN_TYPES } from "@/lib/constants"
@@ -35,7 +35,7 @@ export default async function Page() {
   }
 
   const user = await getUserById(userId)
-  const citizen = await getCitizenByUserId(userId)
+  const citizen = await getCitizen({ type: CITIZEN_TYPES.user, id: userId })
 
   const qualification = await s8CitizenshipQualification()
   const isCitizenshipLimitReached = await checkCitizenshipLimit()

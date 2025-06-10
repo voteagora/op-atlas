@@ -9,6 +9,7 @@ import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { useUsername } from "@/hooks/useUsername"
+import { CITIZEN_TYPES } from "@/lib/constants"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 
@@ -36,7 +37,9 @@ const ProfileDetailCard = ({
   const [showImportDialog, setShowImportDialog] = useState(false)
 
   const { isBadgeholder } = useIsBadgeholder(user)
-  const { data: citizen } = useCitizen({ userId: user.id })
+  const { data: citizen } = useCitizen({
+    query: { type: CITIZEN_TYPES.user, id: user.id },
+  })
   const [isCitizen, setIsCitizen] = useState(false)
   const { linkEmail } = usePrivyEmail(user.id)
 
@@ -44,7 +47,11 @@ const ProfileDetailCard = ({
   const email = user.emails?.[0]?.email
 
   useEffect(() => {
-    if (citizen && citizen.attestationId) {
+    if (
+      citizen &&
+      citizen.attestationId &&
+      citizen.type === CITIZEN_TYPES.user
+    ) {
       setIsCitizen(true)
     }
   }, [citizen])

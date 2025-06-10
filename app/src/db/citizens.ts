@@ -3,6 +3,8 @@
 import { Citizen } from "@prisma/client"
 
 import { prisma } from "@/db/client"
+import { CITIZEN_TYPES } from "@/lib/constants"
+import { CitizenLookup } from "@/lib/types"
 
 export async function upsertCitizen({
   id,
@@ -54,12 +56,23 @@ export async function updateCitizen({
   })
 }
 
-export async function getUserCitizen(id: string): Promise<Citizen | null> {
-  return prisma.citizen.findUnique({
-    where: {
-      userId: id,
-    },
-  })
+export async function getCitizenByType(
+  lookup: CitizenLookup,
+): Promise<Citizen | null> {
+  switch (lookup.type) {
+    case CITIZEN_TYPES.user:
+      return prisma.citizen.findUnique({
+        where: { userId: lookup.id },
+      })
+    case CITIZEN_TYPES.chain:
+      return prisma.citizen.findFirst({
+        where: { organizationId: lookup.id },
+      })
+    case CITIZEN_TYPES.app:
+      return prisma.citizen.findFirst({
+        where: { projectId: lookup.id },
+      })
+  }
 }
 
 export async function getCitizenCountByType(type: string): Promise<number> {

@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { memo, useEffect, useState } from "react"
 
@@ -20,7 +20,7 @@ import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
-import { Check, CheckboxCircleFIll } from "../icons/reminx"
+import { CheckboxCircleFIll } from "../icons/reminx"
 import { DialogProps } from "./types"
 
 const TIME_COMMITMENT_OPTIONS = [
@@ -46,7 +46,9 @@ function CitizenshipApplicationDialog({
   const { data: session } = useSession()
   const userId = session?.user?.id ?? ""
 
-  const { data: citizen } = useCitizen({ userId })
+  const { data: citizen } = useCitizen({
+    query: { type: CITIZEN_TYPES.user, id: userId },
+  })
   const {
     attestCitizen,
     isLoading: isAttesting,

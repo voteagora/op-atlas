@@ -5,11 +5,15 @@ import { toast } from "sonner"
 
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { attestCitizen } from "@/lib/actions/citizens"
+import { CITIZEN_TYPES } from "@/lib/constants"
 
 export const useCitizenAttest = (userId: string) => {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
-  const { invalidate } = useCitizen({ userId, enabled: false })
+  const { invalidate } = useCitizen({
+    query: { type: CITIZEN_TYPES.user, id: userId },
+    enabled: false,
+  })
 
   const call = () => {
     startTransition(async () => {
