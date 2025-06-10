@@ -45,7 +45,7 @@ const CandidateCards = ({
   candidates: CandidateCardProps[]
 }) => {
   return (
-    <div className="w-full sm:w-[272px] h-[320px]">
+    <div className="w-full sm:w-[272px]">
       {candidates.map((candidate, idx) => (
         <CandidateCard
           key={idx}
@@ -74,8 +74,8 @@ const VotingColumn = ({
 }: VotingColumnProps) => {
   console.log("VotingActions: ", votingActions)
   return (
-    <div className="w-[19rem] min-h-[25.25rem] pt-[1.5rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
-      <div className="w-[272px] h-[356px] gap-[16px] flex flex-col">
+    <div className="w-[19rem] pt-[1.5rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
+      <div className="w-[272px] gap-[16px] flex flex-col">
         {proposalType === "APPROVAL" && (
           <p className="pl-2 pr-2 h-5">{options?.length} Candidates</p>
         )}
