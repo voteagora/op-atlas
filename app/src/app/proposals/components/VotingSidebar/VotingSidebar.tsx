@@ -22,12 +22,14 @@ const VotingSidebar = ({
   votingColumnProps,
   votingRedirectProps,
 }: VotingSidebarProps) => (
-  <div className={`w-[304px] h-[792px] gap-6 flex flex-col ${className}`}>
-    <div className="w-[304px] h-[648px]">
+  <div className={`w-[304px] gap-6 flex flex-col ${className}`}>
+    <div className="w-[304px] ">
       <VotingCard {...votingCardProps} />
       <VotingColumn {...votingColumnProps} />
+      <div className="mt-5">
+        {votingRedirectProps && <VotingRedirect {...votingRedirectProps} />}
+      </div>
     </div>
-    {votingRedirectProps && <VotingRedirect {...votingRedirectProps} />}
   </div>
 )
 
