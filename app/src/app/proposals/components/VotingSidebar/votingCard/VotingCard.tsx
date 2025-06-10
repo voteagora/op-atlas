@@ -7,12 +7,13 @@ import { CitizenEligibility } from "@/app/proposals/utils/votingUtils"
 interface CardImageProps {
   src: string
   alt: string
+  styling?: string
 }
 
-const CardImage = ({ src, alt }: CardImageProps) => {
+const CardImage = ({ src, alt, styling }: CardImageProps) => {
   return (
     <div className="flex justify-center">
-      <img src={src} alt={alt} />
+      <img src={src} alt={alt} className={styling} />
     </div>
   )
 }
