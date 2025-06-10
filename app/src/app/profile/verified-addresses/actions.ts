@@ -34,6 +34,7 @@ export async function makeUserAddressPrimaryAction(address: string) {
         CITIZEN_ATTESTATION_CODE[
           citizen.type as keyof typeof CITIZEN_ATTESTATION_CODE
         ],
+      refUID: citizen.organizationId || citizen.projectId || undefined,
     })
 
     await createCitizenWalletChangeAttestation({

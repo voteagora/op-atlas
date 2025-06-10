@@ -480,10 +480,12 @@ export async function createCitizenAttestation({
   to,
   farcasterId,
   selectionMethod,
+  refUID,
 }: {
   to: string
   farcasterId: number
   selectionMethod: string
+  refUID?: string
 }) {
   const data = citizenSchema.encodeData([
     { name: "farcasterId", value: farcasterId, type: "uint256" },
@@ -497,6 +499,7 @@ export async function createCitizenAttestation({
       expirationTime: BigInt(0),
       revocable: true,
       data,
+      refUID,
     },
   })
 
