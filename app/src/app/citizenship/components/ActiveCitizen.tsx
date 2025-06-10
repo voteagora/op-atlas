@@ -1,20 +1,83 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import { CheckboxCircleFIll } from "@/components/icons/reminx"
-import { AvatarBadge } from "@/components/ui/avatar"
+import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
+import { useCitizen } from "@/hooks/citizen/useCitizen"
+import { useOrganization } from "@/hooks/db/useOrganization"
+import { useProject } from "@/hooks/db/useProject"
+import { CITIZEN_TYPES } from "@/lib/constants"
 import { UserWithEmails } from "@/lib/types"
 
 export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
-  return (
-    <div className="flex flex-col items-center justify-center h-full gap-8 w-full">
-      <UserAvatarLarge imageUrl={user.imageUrl}>
+  const { data: citizen } = useCitizen({ userId: user.id })
+
+  const { organization } = useOrganization({
+    id: citizen?.organizationId ?? "",
+    enabled: !!citizen?.organizationId,
+  })
+
+  const { project } = useProject({
+    id: citizen?.projectId ?? "",
+    enabled: !!citizen?.projectId,
+  })
+
+  const renderAvatar = () => {
+    if (citizen?.type === CITIZEN_TYPES.user) {
+      return (
+        <UserAvatarLarge imageUrl={user.imageUrl}>
+          <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+            <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
+          </AvatarBadge>
+        </UserAvatarLarge>
+      )
+    }
+
+    if (citizen?.type === CITIZEN_TYPES.chain) {
+      return (
+        <Avatar className="w-20 h-20">
+          <AvatarImage
+            src={organization?.avatarUrl || ""}
+            alt="avatar"
+            className="rounded-md"
+          />
+          <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+            <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
+          </AvatarBadge>
+        </Avatar>
+      )
+    }
+
+    if (citizen?.type === CITIZEN_TYPES.app) {
+      return (
+        <Avatar className="w-20 h-20">
+          <AvatarImage
+            src={project?.thumbnailUrl || ""}
+            alt="avatar"
+            className="rounded-md"
+          />
+          <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+            <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
+          </AvatarBadge>
+        </Avatar>
+      )
+    }
+
+    return (
+      <Avatar className="w-20 h-20">
         <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
           <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
         </AvatarBadge>
-      </UserAvatarLarge>
+      </Avatar>
+    )
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-8 w-full">
+      {renderAvatar()}
       <div className="flex flex-col items-center justify-center gap-12 max-w-[712px]">
         <div className="text-xl font-semibold">Welcome, Citizen!</div>
         <div className="text-center text-lg">
@@ -24,7 +87,7 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
         <div className="text-sm text-muted-foreground text-center">
           Join the{" "}
           <Link
-            href="https://t.me/citizenshouseannouncements"
+            href="https://t.me/CHANGE_ME_IN_PROD"
             target="_blank"
             className="underline"
           >

@@ -93,21 +93,6 @@ function CitizenshipApplicationDialog({
     }
   }, [open, citizen?.timeCommitment])
 
-  const renderAttestingScreen = () => {
-    return (
-      <div className="flex flex-col gap-4 min-h-[150px] justify-center">
-        <div className="text-lg font-semibold text-center">
-          Issuing citizen badge
-        </div>
-        <div className="text-muted-foreground text-center">
-          Optimism is publishing an attestation on your behalf. Please
-          don&apos;t close this window.
-        </div>
-        <Loader2 className="animate-spin mx-auto text-foreground-muted w-6 h-6" />
-      </div>
-    )
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex sm:max-w-md">
