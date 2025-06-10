@@ -38,7 +38,7 @@ const youVoted = () => {
   return {
     cardText: {
       title: "You voted!",
-      description: "Thanks for your participation.",
+      descriptionElement: "Thanks for your participation.",
     },
   }
 }
