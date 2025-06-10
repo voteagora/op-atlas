@@ -1,6 +1,8 @@
 import { Prisma, User } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 
+import { CITIZEN_TYPES } from "@/lib/constants"
+
 export type TeamRole = "member" | "admin"
 
 export type ProjectWithDetails = Prisma.ProjectGetPayload<{
@@ -402,3 +404,8 @@ export interface CitizenshipQualification {
   title: string
   avatar: string | null
 }
+
+export type CitizenLookup =
+  | { type: typeof CITIZEN_TYPES.user; id: string }
+  | { type: typeof CITIZEN_TYPES.chain; id: string }
+  | { type: typeof CITIZEN_TYPES.app; id: string }

@@ -1,9 +1,11 @@
 "use server"
 
+import { Citizen } from "@prisma/client"
+
 import { auth } from "@/auth"
 import {
+  getCitizenByType,
   getCitizenCountByType,
-  getUserCitizen,
   upsertCitizen,
 } from "@/db/citizens"
 import { prisma } from "@/db/client"
@@ -15,7 +17,7 @@ import {
   CITIZEN_TAGS,
   CITIZEN_TYPES,
 } from "@/lib/constants"
-import { CitizenshipQualification } from "@/lib/types"
+import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
 import { updateMailchimpTags } from "../api/mailchimp"
 import { createCitizenAttestation } from "../eas"
@@ -127,7 +129,10 @@ export const s8CitizenshipQualification =
     // User qualification
 
     // Check if user already has a citizen profile
-    const existingCitizen = await getUserCitizen(userId)
+    const existingCitizen = await getCitizenByType({
+      type: CITIZEN_TYPES.user,
+      id: userId,
+    })
     if (existingCitizen && existingCitizen.attestationId) {
       return null
     }
@@ -187,8 +192,10 @@ export const updateCitizen = async (citizen: {
   }
 }
 
-export const getCitizenByUserId = async (userId: string) => {
-  return await getUserCitizen(userId)
+export const getCitizen = async (
+  lookup: CitizenLookup,
+): Promise<Citizen | null> => {
+  return await getCitizenByType(lookup)
 }
 
 export const attestCitizen = async () => {

@@ -8,6 +8,7 @@ import { CheckboxCircleFIll, PencilFill } from "@/components/icons/reminx"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUsername } from "@/hooks/useUsername"
+import { CITIZEN_TYPES } from "@/lib/constants"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -24,11 +25,11 @@ const ProfileHeader = ({
   const { data: session } = useSession()
   const username = useUsername(user)
 
-  const { data: citizen } = useCitizen({ userId: user.id })
+  const { data: citizen } = useCitizen({ query: { type: CITIZEN_TYPES.user, id: user.id } })
   const [isCitizen, setIsCitizen] = useState(false)
 
   useEffect(() => {
-    if (citizen && citizen.attestationId) {
+    if (citizen && citizen.attestationId && citizen.type === CITIZEN_TYPES.user) {
       setIsCitizen(true)
     }
   }, [citizen])
