@@ -75,7 +75,7 @@ const getCitizenTypes = (cardType: CardType) => {
   if (cardType.votingOpen) {
     return getOpenVotingTypes(cardType)
   } else if (cardType.votingComplete) {
-    return votingEnded(cardType.endDate, "TODO")
+    return votingEnded(cardType.endDate, "This proposal has [TODO]")
   }
 }
 
@@ -170,7 +170,9 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
         proposalType: cardType.proposalType,
         votingActions: votingActions,
         userSignedIn: cardType.signedIn,
+        currentlyActive: cardType.votingOpen,
       }
+
     default:
       return {
         proposalType: cardType.proposalType,
