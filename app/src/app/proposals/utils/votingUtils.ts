@@ -16,7 +16,7 @@ export interface CardType {
   citizenEligibility?: CitizenEligibility
 }
 
-interface CitizenEligibility {
+export interface CitizenEligibility {
   organization?: {
     name: string
     logo: string
@@ -27,9 +27,7 @@ interface CitizenEligibility {
     logo: string
     eligible: boolean
   }
-  user?: {
-    name: string
-    logo: string
+  user: {
     eligible: boolean
   }
 }
@@ -137,11 +135,11 @@ export const getVotingCardProps = (
 }
 
 /**
- * Get the voting column props based on the card type
- * @param cardType The card type containing information about the voting state
- * @returns The voting column props
+ * Get the voting actions based on the card type
+ * @param cardType
+ * @returns Object containing the voting actions
  */
-export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
+const getVotingActions = (cardType: CardType) => {
   let votingActions: any = {}
   if (!cardType.signedIn) {
     votingActions = {
@@ -153,17 +151,42 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
         },
       ],
     }
+    // The user is not a citizen
   } else if (!cardType.citizen) {
-    votingActions = {
-      cardActionList: [
-        {
-          buttonStyle:
-            "button-primary opacity-50 cursor-none disabled:cursor-not-allowed disabled:hover:opacity-50",
-          actionText: "Cast Vote",
-          actionType: "Disabled",
-        },
-      ],
+    // Get the eligibility of the citizen
+    const organizationEligible =
+      cardType.citizenEligibility?.organization?.eligible
+    const applicationEligible =
+      cardType.citizenEligibility?.organization?.eligible
+    const userEligible = cardType.citizenEligibility?.user.eligible
+
+    if (organizationEligible || applicationEligible || userEligible) {
+      votingActions = {
+        cardActionList: [
+          {
+            buttonStyle: "button-primary",
+            actionText: "Register",
+            actionType: "Log",
+          },
+          {
+            buttonStyle: "button-secondary",
+            actionText: "Learn more",
+            actionType: "Log",
+          },
+        ],
+      }
+    } else {
+      votingActions = {
+        cardActionList: [
+          {
+            buttonStyle: "button-primary",
+            actionText: "Learn how to become a citizen",
+            actionType: "Log",
+          },
+        ],
+      }
     }
+    // If the user is a citizen and has votes
   } else if (cardType.voted) {
     votingActions = {
       cardActionList: [
@@ -187,27 +210,37 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
     }
   }
 
+  return votingActions
+}
+
+/**
+ * Get the voting column props based on the card type
+ * @param cardType The card type containing information about the voting state
+ * @returns The voting column props
+ */
+export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
+  let votingActions = getVotingActions(cardType)
+
+  let votingColumnProps: any = {
+    proposalType: cardType.proposalType,
+    votingActions: votingActions,
+  }
+
   switch (cardType.proposalType) {
     case "APPROVAL":
-      return {
-        proposalType: cardType.proposalType,
-        options: getVoteOptions(),
-        votingActions: votingActions,
-      }
+      votingColumnProps = { ...votingColumnProps, options: getVoteOptions() }
+      break
     case "STANDARD":
-      return {
-        proposalType: cardType.proposalType,
-        votingActions: votingActions,
+      votingColumnProps = {
+        ...votingColumnProps,
         userSignedIn: cardType.signedIn,
         currentlyActive: cardType.votingOpen,
         userVoted: cardType.voted,
+        userCitizen: cardType.citizen,
       }
-
-    default:
-      return {
-        proposalType: cardType.proposalType,
-      }
+      break
   }
+  return votingColumnProps as VotingColumnProps
 }
 
 const getVotingRedirectProps = (cardType: CardType): VotingRedirectProps => {

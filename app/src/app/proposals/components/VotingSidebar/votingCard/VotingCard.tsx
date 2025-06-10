@@ -2,6 +2,7 @@ import VotingActions, {
   CardActionsProps,
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
 import React from "react"
+import { CitizenEligibility } from "@/app/proposals/utils/votingUtils"
 
 interface CardImageProps {
   src: string
@@ -47,6 +48,7 @@ export interface VotingCardProps {
   cardText: CardTextProps
   cardActions?: CardActionsProps
   cardImage?: CardImageProps
+  eligibility?: CitizenEligibility
 }
 
 const VotingCard = ({ cardText, cardActions, cardImage }: VotingCardProps) => {
