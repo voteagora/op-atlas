@@ -15,7 +15,6 @@ interface PageProps {
 
 const CURRENT_DATE = new Date()
 
-
 const Page = (params: PageProps) => {
   // Get the proposals page
 
@@ -107,7 +106,8 @@ const Page = (params: PageProps) => {
     proposalType: pType,
   }
 
-  const { votingCardProps, votingColumnProps } = getVotingProps(votingCardType)
+  const { votingCardProps, votingColumnProps, votingRedirectProps } =
+    getVotingProps(votingCardType)
 
   console.log("votingCardType: ", votingCardType)
   console.log("votingCardProps: ", votingCardProps)
@@ -128,6 +128,7 @@ const Page = (params: PageProps) => {
                 className="sticky top-4"
                 votingColumnProps={votingColumnProps}
                 votingCardProps={votingCardProps!}
+                votingRedirectProps={votingRedirectProps!}
               />
             </div>
           </div>

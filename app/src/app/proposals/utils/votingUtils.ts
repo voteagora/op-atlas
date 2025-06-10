@@ -1,6 +1,8 @@
 import { ProposalType } from "@/lib/types"
 import { VotingCardProps } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
 import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
+import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
+import { undefined } from "zod"
 
 export interface CardType {
   signedIn: boolean
@@ -160,6 +162,16 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
   }
 }
 
+const getVotingRedirectProps = (cardType: CardType): VotingRedirectProps => {
+  return {
+    callout: "Are you a delegate?",
+    link: {
+      linkText: "Vote here",
+      linkHref: "todo",
+    },
+  }
+}
+
 /**
  * Get all voting props based on the card type
  * @param cardType The card type containing information about the voting state
@@ -169,5 +181,6 @@ export const getVotingProps = (cardType: CardType) => {
   return {
     votingCardProps: getVotingCardProps(cardType),
     votingColumnProps: getVotingColumnProps(cardType),
+    votingRedirectProps: getVotingRedirectProps(cardType),
   }
 }
