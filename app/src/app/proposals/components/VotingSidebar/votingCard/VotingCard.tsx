@@ -51,7 +51,7 @@ export interface VotingCardProps {
 
 const VotingCard = ({ cardText, cardActions, cardImage }: VotingCardProps) => {
   return (
-    <div className="rounded-t-lg border border-solid p-6 flex flex-col items-center">
+    <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
       {cardImage && <CardImage {...cardImage} />}
       <CardText {...cardText} />
       {cardActions && <VotingActions {...cardActions} />}
