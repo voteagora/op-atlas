@@ -87,8 +87,8 @@ const Page = (params: PageProps) => {
   }
 
   const userSignedIn = true //user.userId !== undefined
-  const userCitizen = true //user.citizenId !== undefined
-  const voted = true
+  const userCitizen = false //user.citizenId !== undefined
+  const voted = false
   const votingOpen = true
   const votingComplete = false
   const startDate = addDays(CURRENT_DATE, -10)
@@ -107,8 +107,6 @@ const Page = (params: PageProps) => {
       eligible: true,
     },
     user: {
-      name: "User 1",
-      logo: "https://i.imgur.com/0000000.png",
       eligible: userCitizen,
     },
   }
