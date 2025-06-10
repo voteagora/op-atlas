@@ -77,12 +77,7 @@ const getCitizenTypes = (cardType: CardType) => {
 }
 
 const getNonCitizenTypes = (cardType: CardType) => {
-  return {
-    cardText: {
-      title: "TODO",
-      description: "TODO",
-    },
-  }
+  return castYourVote(cardType.proposalType)
 }
 
 // Function to get vote options
@@ -108,7 +103,7 @@ export const getVotingCardProps = (
 ): VotingCardProps | undefined => {
   // If voting has not opened yet
   if (!cardType.votingOpen && !cardType.votingComplete) {
-    comingSoon(cardType.startDate, cardType.endDate)
+    return comingSoon(cardType.startDate, cardType.endDate)
   }
 
   if (!cardType.signedIn) {
@@ -134,6 +129,17 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
           buttonStyle: "button-primary",
           actionText: "Sign In",
           actionType: "Log",
+        },
+      ],
+    }
+  } else if (!cardType.citizen) {
+    votingActions = {
+      cardActionList: [
+        {
+          buttonStyle:
+            "button-primary opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:hover:opacity-50",
+          actionText: "Cast Vote",
+          actionType: "Disabled",
         },
       ],
     }
