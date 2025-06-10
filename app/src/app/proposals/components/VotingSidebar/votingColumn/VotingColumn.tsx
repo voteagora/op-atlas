@@ -31,15 +31,19 @@ const ColumnCard = ({
 }) => {
   switch (proposalType) {
     case "STANDARD":
-      return StandardVoteCard
+      return <StandardVoteCard />
     case "APPROVAL":
-      return CandidateCards(options!)
+      return <CandidateCards candidates={options!} />
     default:
       return <>TODO</>
   }
 }
 
-const CandidateCards = (candidates: CandidateCardProps[]) => {
+const CandidateCards = ({
+  candidates,
+}: {
+  candidates: CandidateCardProps[]
+}) => {
   return (
     <div className="w-full sm:w-[272px] h-[320px]">
       {candidates.map((candidate, idx) => (
