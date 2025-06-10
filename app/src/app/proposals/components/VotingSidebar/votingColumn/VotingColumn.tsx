@@ -4,7 +4,7 @@ import VotingActions, {
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
 
 export interface VotingColumnProps {
-  candidates: CandidateCardProps[]
+  options: CandidateCardProps[]
   votingActions?: CardActionsProps
   currentlyActive?: boolean
 }
@@ -20,7 +20,7 @@ interface CandidateCardProps {
 }
 
 const VotingColumn = ({
-  candidates,
+  options,
   votingActions,
   currentlyActive,
 }: VotingColumnProps) => {
@@ -30,7 +30,7 @@ const VotingColumn = ({
       <div className="w-[272px] h-[356px] gap-[16px] flex flex-col">
         <p className="pl-2 pr-2 h-5">8 Candidates</p>
         <div className="w-full sm:w-[272px] h-[320px]">
-          {candidates.map((candidate, idx) => (
+          {options.map((candidate, idx) => (
             <CandidateCard
               key={idx}
               img={candidate.image}

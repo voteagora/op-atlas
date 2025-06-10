@@ -158,12 +158,18 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
   switch (cardType.proposalType) {
     case "APPROVAL":
       return {
-        candidates: getVoteOptions(),
+        options: getVoteOptions(),
+        votingActions: votingActions,
+      }
+    case "STANDARD":
+      return {
+        options: getVoteOptions(),
         votingActions: votingActions,
       }
     default:
       return {
-        candidates: getVoteOptions(),
+        options: [],
+        votingActions: votingActions,
       }
   }
 }
