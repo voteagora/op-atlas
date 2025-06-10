@@ -95,6 +95,24 @@ const Page = (params: PageProps) => {
   const endDate = addDays(CURRENT_DATE, -1)
   const pType = "STANDARD" as ProposalType
 
+  const citizenEligibility = {
+    organization: {
+      name: "Org 1",
+      logo: "https://i.imgur.com/0000000.png",
+      eligible: true,
+    },
+    application: {
+      name: "App 1",
+      logo: "https://i.imgur.com/0000000.png",
+      eligible: true,
+    },
+    user: {
+      name: "User 1",
+      logo: "https://i.imgur.com/0000000.png",
+      eligible: userCitizen,
+    },
+  }
+
   const votingCardType: CardType = {
     signedIn: userSignedIn,
     citizen: userCitizen,
@@ -104,6 +122,7 @@ const Page = (params: PageProps) => {
     startDate: startDate,
     endDate: endDate,
     proposalType: pType,
+    citizenEligibility: citizenEligibility,
   }
 
   const { votingCardProps, votingColumnProps, votingRedirectProps } =
