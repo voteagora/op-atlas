@@ -87,10 +87,10 @@ const Page = (params: PageProps) => {
   }
 
   const userSignedIn = true //user.userId !== undefined
-  const userCitizen = false //user.citizenId !== undefined
-  const voted = false
-  const votingOpen = true
-  const votingComplete = false
+  const userCitizen = true //user.citizenId !== undefined
+  const voted = true
+  const votingOpen = false
+  const votingComplete = true
   const startDate = addDays(CURRENT_DATE, -10)
   const endDate = addDays(CURRENT_DATE, -1)
   const pType = "APPROVAL" as ProposalType
