@@ -4,6 +4,7 @@ import VotingActions, {
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
 import CandidateCard from "@/app/proposals/components/VotingSidebar/votingColumn/CandidateCard"
 import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
+import { citizen } from "eas-indexer/ponder.schema"
 
 // Vote type enum
 export enum VoteType {
@@ -26,12 +27,14 @@ const ColumnCard = ({
   proposalType,
   options,
   signedIn,
+  citizen,
   currentlyActive,
   voted,
 }: {
   proposalType: string
   options?: CandidateCardProps[]
   signedIn?: boolean
+  citizen?: boolean
   title?: string
   currentlyActive?: boolean
   voted?: boolean
@@ -39,7 +42,7 @@ const ColumnCard = ({
   switch (proposalType) {
     case "STANDARD":
       // If the user is not signed-in we do not want to show the card
-      if (!signedIn || !currentlyActive || voted) {
+      if (!signedIn || !currentlyActive || voted || !citizen) {
         return <></>
       }
       return <StandardVoteCard />
@@ -81,6 +84,7 @@ export interface VotingColumnProps {
   votingActions?: CardActionsProps
   currentlyActive?: boolean
   userSignedIn?: boolean
+  userCitizen?: boolean
   userVoted?: boolean
 }
 
