@@ -2,7 +2,7 @@ import { ProposalType } from "@/lib/types"
 import { VotingCardProps } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
 import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
-import { undefined } from "zod"
+import { boolean, undefined } from "zod"
 
 export interface CardType {
   signedIn: boolean
@@ -146,6 +146,16 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
         },
       ],
     }
+  } else if (cardType.voted) {
+    votingActions = {
+      cardActionList: [
+        {
+          buttonStyle: "bg-[#D6FFDA] text-success-foreground",
+          actionText: "✔️ For",
+          actionType: "Disabled",
+        },
+      ],
+    }
   } else {
     votingActions = {
       cardActionList: [
@@ -171,6 +181,7 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
         votingActions: votingActions,
         userSignedIn: cardType.signedIn,
         currentlyActive: cardType.votingOpen,
+        userVoted: cardType.voted,
       }
 
     default:
