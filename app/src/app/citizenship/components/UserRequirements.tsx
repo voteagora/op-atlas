@@ -330,7 +330,7 @@ export const UserRequirements = ({
       {renderEligibility()}
 
       <div className="font-semibold text-xl">Requirements</div>
-      <div className="font-semibold">Atlas Profile</div>
+      <div className="font-semibold">Atlas profile</div>
       <div>
         {renderGithub()}
         {renderEmail()}
