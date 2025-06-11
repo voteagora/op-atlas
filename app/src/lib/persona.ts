@@ -144,9 +144,20 @@ async function processPaginatedData<T>(
   processBatch: (items: T[]) => Promise<void>,
 ) {
   const processingPromises: Promise<void>[] = []
+  const oneMonthAgo = new Date()
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 2)
 
   for await (const batch of fetchPage()) {
+    // Since data is sorted by created-at desc, we need to check the last item
+    const lastItem = batch[batch.length - 1]
+    const timestamp = (lastItem as any).attributes?.["created-at"]
+    const isOldData = timestamp && new Date(timestamp) < oneMonthAgo
+
     processingPromises.push(processBatch([...batch]))
+
+    if (isOldData) {
+      break
+    }
   }
 
   return Promise.all(processingPromises)
