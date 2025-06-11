@@ -6,34 +6,32 @@ import VoteButton from "@/app/proposals/components/VotingSidebar/votingColumn/Vo
 
 interface standardVoteCardProps {
   selectedVote: VoteType | null
-  setSelectedVote: (vote: VoteType | null) => void
+  setSelectedVote: (vote: VoteType) => void
 }
 
-const StandardVoteCard = () => {
-  const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
-  const handleVoteClick = (voteType: VoteType) => {
-    setSelectedVote(voteType === selectedVote ? null : voteType)
-  }
-
+const StandardVoteCard = ({
+  selectedVote,
+  setSelectedVote,
+}: standardVoteCardProps) => {
   return (
     <div className={"gap-[8px] flex items-center justify-center"}>
       <VoteButton
         textValue={VoteType.For}
         voteType={VoteType.For}
         selected={selectedVote === VoteType.For}
-        onClick={() => handleVoteClick(VoteType.For)}
+        onClick={() => setSelectedVote(VoteType.For)}
       />
       <VoteButton
         textValue={VoteType.Abstain}
         voteType={VoteType.Abstain}
         selected={selectedVote === VoteType.Abstain}
-        onClick={() => handleVoteClick(VoteType.Abstain)}
+        onClick={() => setSelectedVote(VoteType.Abstain)}
       />
       <VoteButton
         textValue={VoteType.Against}
         voteType={VoteType.Against}
         selected={selectedVote === VoteType.Against}
-        onClick={() => handleVoteClick(VoteType.Against)}
+        onClick={() => setSelectedVote(VoteType.Against)}
       />
     </div>
   )
