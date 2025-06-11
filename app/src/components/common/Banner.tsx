@@ -15,7 +15,7 @@ export const Banner = () => {
     if (!shouldShowBanner) return null
 
     return (
-        <div className="flex w-full bg-[#3374DB] text-white py-3 items-center justify-center">
+        <div className="flex w-full bg-[#3374DB] text-white py-3 items-center justify-center text-[14px] font-medium">
             <Link
                 href="/citizenship"
                 className="hover:underline flex flex-row gap-2 items-center"
