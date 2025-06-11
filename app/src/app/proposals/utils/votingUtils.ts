@@ -7,6 +7,8 @@ import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/voti
 import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
 import { boolean, undefined } from "zod"
 
+const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
+
 export interface CardType {
   signedIn: boolean
   citizen: boolean
@@ -17,6 +19,7 @@ export interface CardType {
   startDate: Date
   endDate: Date
   proposalType: ProposalType
+  proposalId: string
   citizenEligibility: CitizenEligibility
 }
 
@@ -381,7 +384,7 @@ const getVotingRedirectProps = (cardType: CardType): VotingRedirectProps => {
     callout: "Are you a delegate?",
     link: {
       linkText: "Vote here",
-      linkHref: "todo",
+      linkHref: `${API_URL}/${cardType.proposalId}`,
     },
   }
 }

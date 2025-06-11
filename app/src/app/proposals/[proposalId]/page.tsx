@@ -124,6 +124,7 @@ const Page = (params: PageProps) => {
     startDate: startDate,
     endDate: endDate,
     proposalType: pType,
+    proposalId: proposalId,
     citizenEligibility: citizenEligibility,
   }
 
