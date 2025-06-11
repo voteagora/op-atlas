@@ -18,7 +18,7 @@ export const useCitizenUpdate = (userId: string) => {
 
   const call = (citizen: {
     type: string
-    address?: string
+    address: string
     attestationId?: string
     timeCommitment?: string
     projectId?: string

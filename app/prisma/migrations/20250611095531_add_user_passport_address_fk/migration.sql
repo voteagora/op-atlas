@@ -1,0 +1,1 @@
+ALTER TABLE "UserPassport" ADD CONSTRAINT "UserPassport_address_fkey" FOREIGN KEY ("address") REFERENCES "UserAddress"("address") ON DELETE CASCADE ON UPDATE CASCADE; 

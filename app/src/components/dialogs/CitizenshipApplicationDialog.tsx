@@ -18,6 +18,7 @@ import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useCitizenAttest } from "@/hooks/citizen/useCitizenAttest"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
+import { useUser } from "@/hooks/db/useUser"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
 import { CheckboxCircleFIll } from "../icons/reminx"
@@ -62,6 +63,7 @@ function CitizenshipApplicationDialog({
   } = useCitizenUpdate(userId)
 
   const { data: qualification } = useCitizenQualification()
+  const { user } = useUser({ id: userId })
 
   const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>(
     citizen?.timeCommitment as TimeCommitment,
@@ -83,6 +85,7 @@ function CitizenshipApplicationDialog({
     }
 
     updateCitizen({
+      address: user?.addresses[0].address as string,
       timeCommitment: selectedTime,
       type: qualification.type,
     })
@@ -183,7 +186,10 @@ function CitizenshipApplicationDialog({
                     onClick={attestCitizen}
                     className="button-primary w-full"
                     disabled={
-                      !allRulesChecked || isAttesting || isAttestSuccess
+                      !allRulesChecked ||
+                      !user?.addresses[0]?.address ||
+                      isAttesting ||
+                      isAttestSuccess
                     }
                   >
                     Submit

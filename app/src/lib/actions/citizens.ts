@@ -164,7 +164,7 @@ export const checkCitizenshipLimit = async (): Promise<boolean> => {
 
 export const updateCitizen = async (citizen: {
   type: string
-  address?: string
+  address: string
   attestationId?: string
   timeCommitment?: string
 }) => {
