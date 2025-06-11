@@ -357,6 +357,7 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
     userSignedIn: cardType.signedIn,
     userVoted: cardType.voted,
     userCitizen: cardType.citizen,
+    resultsLink: `${API_URL}/${cardType.proposalId}`,
   }
 
   switch (cardType.proposalType) {
