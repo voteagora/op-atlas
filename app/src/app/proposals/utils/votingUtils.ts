@@ -10,9 +10,10 @@ import { boolean, undefined } from "zod"
 export interface CardType {
   signedIn: boolean
   citizen: boolean
-  voted: boolean
   votingOpen: boolean
   votingComplete: boolean
+  voted: boolean
+  votingRecord?: string[]
   startDate: Date
   endDate: Date
   proposalType: ProposalType
@@ -251,17 +252,44 @@ const getVotingActions = (cardType: CardType) => {
         ],
       }
     }
-    // If the user is a citizen and has votes
+    // If the user is a citizen and has voted
   } else if (cardType.voted) {
-    votingActions = {
-      cardActionList: [
-        {
-          buttonStyle:
-            "bg-[#D6FFDA] text-success-foreground pointer-events-none cursor-none",
-          actionText: "✔️ For",
-          actionType: "Disabled",
-        },
-      ],
+    switch (cardType.votingRecord![0]) {
+      case "0":
+        votingActions = {
+          cardActionList: [
+            {
+              buttonStyle:
+                "bg-[#D6FFDA] text-success-foreground pointer-events-none cursor-none",
+              actionText: "✔ For",
+              actionType: "Disabled",
+            },
+          ],
+        }
+        break
+      case "1":
+        votingActions = {
+          cardActionList: [
+            {
+              buttonStyle: "bg-[#F2F3F8] pointer-events-none cursor-none",
+              actionText: "Abstain",
+              actionType: "Disabled",
+            },
+          ],
+        }
+        break
+      case "2":
+        votingActions = {
+          cardActionList: [
+            {
+              buttonStyle:
+                "bg-red-200 text-red-600 pointer-events-none cursor-none",
+              actionText: "x Against",
+              actionType: "Disabled",
+            },
+          ],
+        }
+        break
     }
   } else {
     votingActions = {

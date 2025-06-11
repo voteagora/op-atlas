@@ -39,6 +39,10 @@ const ColumnCard = ({
   currentlyActive?: boolean
   voted?: boolean
 }) => {
+  console.log("Signed in: ", signedIn)
+  console.log("Currently Active: ", currentlyActive)
+  console.log("Voted: ", voted)
+  console.log("Citizen: ", citizen)
   switch (proposalType) {
     case "STANDARD":
       // If the user is not signed-in we do not want to show the card
@@ -94,9 +98,10 @@ const VotingColumn = ({
   votingActions,
   currentlyActive,
   userSignedIn,
+  userCitizen,
   userVoted,
 }: VotingColumnProps) => {
-  console.log("VotingActions: ", votingActions)
+  console.log("userSignedIn: ", userSignedIn)
   return (
     <div className="w-[19rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
       <div className="w-[272px] gap-[16px] flex flex-col ">
@@ -105,6 +110,7 @@ const VotingColumn = ({
           options={options}
           signedIn={userSignedIn}
           currentlyActive={currentlyActive}
+          citizen={userCitizen}
           voted={userVoted}
         />
       </div>

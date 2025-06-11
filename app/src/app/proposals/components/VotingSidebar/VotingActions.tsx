@@ -13,9 +13,10 @@ interface voteAction {
 const VotingActions = ({ cardActionList }: CardActionsProps) => {
   return (
     <div className="flex flex-col items-center mt-4 mr-6 mb-6 ml-6">
-      {cardActionList.map((action, idx) => (
-        <CardAction {...action} key={idx} />
-      ))}
+      {cardActionList &&
+        cardActionList.map((action, idx) => (
+          <CardAction {...action} key={idx} />
+        ))}
     </div>
   )
 }
