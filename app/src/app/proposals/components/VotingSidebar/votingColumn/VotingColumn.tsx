@@ -74,6 +74,7 @@ export interface VotingColumnProps {
   userSignedIn?: boolean
   userCitizen?: boolean
   userVoted?: boolean
+  resultsLink: string
 }
 
 const VotingColumn = ({
@@ -84,6 +85,7 @@ const VotingColumn = ({
   userSignedIn,
   userCitizen,
   userVoted,
+  resultsLink,
 }: VotingColumnProps) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
   const handleVoteClick = (voteType: VoteType) => {
@@ -126,9 +128,8 @@ const VotingColumn = ({
       )}
 
       {!currentlyActive && (
-        // TODO! This needs to point somewhere
         <div className="w-full flex items-center justify-center gap-2.5">
-          <a href="http://todo">
+          <a href={resultsLink} target="_blank">
             <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
               View results
             </p>
