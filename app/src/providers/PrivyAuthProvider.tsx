@@ -16,7 +16,7 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
         appearance: {
           theme: "light",
           accentColor: "#FF0420",
-          logo: "/assets/images/welcome-privy.png",
+          logo: "/assets/images/welcome-privy.svg",
         },
       }}
     >
