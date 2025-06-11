@@ -6,6 +6,7 @@ import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingCol
 import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
 import { useState } from "react"
+import { postCitizenProposalVote } from "@/db/citizens"
 
 // Vote type enum
 export enum VoteType {
@@ -92,8 +93,8 @@ const VotingColumn = ({
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
-  const handleCastVote = () => {
-    console.log(selectedVote)
+  const handleCastVote = async () => {
+    await postCitizenProposalVote(selectedVote!)
   }
 
   return (
@@ -120,7 +121,7 @@ const VotingColumn = ({
               return {
                 ...action,
                 action: handleCastVote,
-                disabled: !selectedVote
+                disabled: !selectedVote,
               }
             }
             // Otherwise, return the original action unchanged
