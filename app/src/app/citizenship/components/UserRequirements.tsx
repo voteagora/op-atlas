@@ -259,7 +259,7 @@ export const UserRequirements = ({
     if (govAddress) {
       return (
         <ConditionRow isMet={false}>
-          Verify your Gitcoin Passport:{" "}
+          Verify your Human Passport:{" "}
           {truncateAddress(govAddress.address as string)} |{" "}
           <button
             type="button"
