@@ -317,6 +317,7 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
   let votingColumnProps: any = {
     proposalType: cardType.proposalType,
     votingActions: votingActions,
+    currentlyActive: cardType.votingOpen,
   }
 
   switch (cardType.proposalType) {
@@ -327,7 +328,6 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
       votingColumnProps = {
         ...votingColumnProps,
         userSignedIn: cardType.signedIn,
-        currentlyActive: cardType.votingOpen,
         userVoted: cardType.voted,
         userCitizen: cardType.citizen,
       }
