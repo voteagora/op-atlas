@@ -87,7 +87,7 @@ const Page = (params: PageProps) => {
     citizenId: "1",
   }
 
-  const userSignedIn = true //user.userId !== undefined
+  const userSignedIn = false //user.userId !== undefined
   const userCitizen = true //user.citizenId !== undefined
   const votingOpen = true
   const votingComplete = false
@@ -95,7 +95,7 @@ const Page = (params: PageProps) => {
   const votingRecord = ["2"]
   const startDate = addDays(CURRENT_DATE, -10)
   const endDate = addDays(CURRENT_DATE, -1)
-  const pType = "APPROVAL" as ProposalType
+  const pType = "OFFCHAIN_OPTIMISTIC" as ProposalType
 
   const citizenEligibility = {
     organization: {
@@ -106,7 +106,7 @@ const Page = (params: PageProps) => {
     application: {
       name: "App 1",
       logo: "https://i.imgur.com/0000000.png",
-      eligible: false,
+      eligible: true,
     },
     user: {
       eligible: false,

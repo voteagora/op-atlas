@@ -1,10 +1,7 @@
-import { ChevronLeft, ChevronRight } from "lucide-react"
 import VotingActions, {
   CardActionsProps,
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
-import CandidateCard from "@/app/proposals/components/VotingSidebar/votingColumn/CandidateCard"
 import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
-import { citizen } from "eas-indexer/ponder.schema"
 import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
 
 // Vote type enum
@@ -40,10 +37,6 @@ const ColumnCard = ({
   currentlyActive?: boolean
   voted?: boolean
 }) => {
-  console.log("Signed in: ", signedIn)
-  console.log("Currently Active: ", currentlyActive)
-  console.log("Voted: ", voted)
-  console.log("Citizen: ", citizen)
   switch (proposalType) {
     case "STANDARD":
       // If the user is not signed-in we do not want to show the card
@@ -77,7 +70,11 @@ const VotingColumn = ({
   userCitizen,
   userVoted,
 }: VotingColumnProps) => {
-  console.log("userSignedIn: ", userSignedIn)
+  console.log("Signed in: ", userSignedIn)
+  console.log("Currently Active: ", currentlyActive)
+  console.log("Voted: ", userVoted)
+  console.log("Citizen: ", userCitizen)
+  console.log("Voting Options: ", votingActions)
   return (
     <div className="w-[19rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
       <div className="w-[272px] gap-[16px] flex flex-col ">
