@@ -64,7 +64,7 @@ const youVoted = () => {
   }
 }
 
-const castYourVote = (proposalType: ProposalType) => {
+const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
   const proposalTypeDescription = () => {
     switch (proposalType) {
       case "APPROVAL":
@@ -72,6 +72,8 @@ const castYourVote = (proposalType: ProposalType) => {
       case "STANDARD":
         // TODO link 'here'
         return "This proposal requires approval from the Citizen's House and Token House. Read more about the voting mechanism here."
+      case "OFFCHAIN_OPTIMISTIC":
+        return "If you do not wish to veto, then no action is required."
       default:
         return ""
     }
@@ -79,7 +81,7 @@ const castYourVote = (proposalType: ProposalType) => {
 
   return {
     cardText: {
-      title: "Cast your citizen vote",
+      title: customTitle ? customTitle : "Cast your citizen vote",
       descriptionElement: proposalTypeDescription(),
     },
   }
@@ -143,6 +145,13 @@ const getOpenVotingTypes = (cardType: CardType) => {
   if (cardType.voted) {
     return youVoted()
   }
+  if (cardType.proposalType === "OFFCHAIN_OPTIMISTIC") {
+    // Custom proposal title for the offchain optimistic proposal
+    return castYourVote(
+      cardType.proposalType,
+      "Do you want to override the decision?",
+    )
+  }
   return castYourVote(cardType.proposalType)
 }
 
@@ -192,6 +201,16 @@ export const getVotingCardProps = (
   }
 
   if (!cardType.signedIn) {
+    if (cardType.proposalType === "OFFCHAIN_OPTIMISTIC") {
+      // Special case for the offchain optimistic proposal
+      return {
+        cardText: {
+          title: "Cast your citizen vote",
+          descriptionElement:
+            "The proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
+        },
+      }
+    }
     return castYourVote(cardType.proposalType)
   }
   if (cardType.citizen) {
@@ -292,14 +311,31 @@ const getVotingActions = (cardType: CardType) => {
         break
     }
   } else {
-    votingActions = {
-      cardActionList: [
-        {
-          buttonStyle: "button-primary",
-          actionText: "Cast Vote",
-          actionType: "Log",
-        },
-      ],
+    if (cardType.proposalType === "OFFCHAIN_OPTIMISTIC") {
+      votingActions = {
+        cardActionList: [
+          {
+            buttonStyle: "secondary-primary",
+            actionText: "Yes, I want to veto",
+            actionType: "Log",
+          },
+          {
+            buttonStyle: "button-primary",
+            actionText: "Cast Vote",
+            actionType: "Log",
+          },
+        ],
+      }
+    } else {
+      votingActions = {
+        cardActionList: [
+          {
+            buttonStyle: "button-primary",
+            actionText: "Cast Vote",
+            actionType: "Log",
+          },
+        ],
+      }
     }
   }
 
@@ -318,6 +354,9 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
     proposalType: cardType.proposalType,
     votingActions: votingActions,
     currentlyActive: cardType.votingOpen,
+    userSignedIn: cardType.signedIn,
+    userVoted: cardType.voted,
+    userCitizen: cardType.citizen,
   }
 
   switch (cardType.proposalType) {
@@ -327,11 +366,12 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
     case "STANDARD":
       votingColumnProps = {
         ...votingColumnProps,
-        userSignedIn: cardType.signedIn,
-        userVoted: cardType.voted,
-        userCitizen: cardType.citizen,
       }
       break
+    case "OFFCHAIN_OPTIMISTIC":
+      votingColumnProps = {
+        ...votingColumnProps,
+      }
   }
   return votingColumnProps as VotingColumnProps
 }
