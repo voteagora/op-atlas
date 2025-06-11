@@ -3,8 +3,7 @@
 import { Citizen } from "@prisma/client"
 
 import { prisma } from "@/db/client"
-import { CITIZEN_TYPES } from "@/lib/constants"
-import { CitizenLookup } from "@/lib/types"
+import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 
 export async function upsertCitizen({
   id,
@@ -13,7 +12,7 @@ export async function upsertCitizen({
   id: string
   citizen: {
     type: string
-    address: string
+    address?: string
     attestationId?: string
     timeCommitment?: string
     projectId?: string | null
@@ -34,58 +33,47 @@ export async function upsertCitizen({
   })
 }
 
-export async function updateCitizen({
-  id,
-  citizen,
-}: {
-  id: string
-  citizen: {
-    type?: string
-    address?: string
-    attestationId?: string
-    timeCommitment?: string
-    projectId?: string | null
-    organizationId?: string | null
-  }
-}) {
-  return prisma.citizen.update({
+export async function getUserCitizen(id: string): Promise<Citizen | null> {
+  return prisma.citizen.findUnique({
     where: {
       userId: id,
     },
-    data: citizen,
   })
-}
-
-export async function getCitizenByType(
-  lookup: CitizenLookup,
-): Promise<Citizen | null> {
-  switch (lookup.type) {
-    case CITIZEN_TYPES.user:
-      return prisma.citizen.findUnique({
-        where: { userId: lookup.id },
-      })
-    case CITIZEN_TYPES.chain:
-      return prisma.citizen.findFirst({
-        where: { organizationId: lookup.id },
-      })
-    case CITIZEN_TYPES.app:
-      return prisma.citizen.findFirst({
-        where: { projectId: lookup.id },
-      })
-  }
 }
 
 export async function getCitizenCountByType(type: string): Promise<number> {
   return prisma.citizen.count({
     where: {
       type,
-      attestationId: {
-        not: null,
-      },
     },
   })
 }
 
-export async function getUsersCitizens(): Promise<Citizen[]> {
-  return prisma.citizen.findMany()
+export async function getCitizenVotes(citizenId: number): Promise<any> {
+  return prisma.offChainVote.findMany({
+    where: {
+      citizenId: citizenId,
+    },
+  })
+}
+
+export async function getCitizenProposalVote(
+  citizenId: number,
+  proposalId: string,
+): Promise<any> {
+  return prisma.offChainVote.findFirst({
+    where: {
+      proposalId: proposalId,
+      citizenId: citizenId,
+    },
+  })
+}
+
+export async function postCitizenProposalVote(
+  voteType: VoteType,
+): Promise<any> {
+  // citizenId: number,
+  // proposalId: string,
+  // vote: number,
+  console.log(`postCitizenProposalVote Works! ${voteType}`)
 }
