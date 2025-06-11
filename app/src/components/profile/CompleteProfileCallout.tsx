@@ -2,6 +2,7 @@ import { User } from "@prisma/client"
 import { ArrowUpRight, Check, X } from "lucide-react"
 import Link from "next/link"
 
+import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
@@ -22,7 +23,6 @@ import {
 import { AddressConnection } from "./AddressConnection"
 import { EmailConnection } from "./EmailConnection"
 import { GithubConnection } from "./GithubConnection"
-import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 
 export function CompleteProfileCallout({
   user: initialUser,
@@ -257,13 +257,12 @@ function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
         )}
         <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-[2px]">
-            <div className="font-medium">Set your primary address</div>
+            <div className="font-medium">Set your governance address</div>
             <div className="text-secondary-foreground">
-              Choose one of your verified address to receive attestations from
+              Choose one of your governance address to receive attestations from
               Optimism (including the voting badge for Citizens and Guest
               Voters).
               <div className="flex flex-col gap-1.5 mt-4">
-
                 {user.addresses.map(({ address, source, primary }) => (
                   <PrimaryAddress
                     key={address}

@@ -51,9 +51,9 @@ export const VerifiedAddress = ({
         invalidateUser()
       }),
       {
-        loading: "Setting primary address...",
-        success: "Primary address set",
-        error: "Failed to set primary address",
+        loading: "Setting governance address...",
+        success: "Governance address set",
+        error: "Failed to set governance address",
       },
     )
   }
@@ -75,7 +75,7 @@ export const VerifiedAddress = ({
             {shouldShortenAddress ? shortenAddress(address) : address}
           </p>
 
-          {primary && <Badge text="Primary address" className="shrink-0" />}
+          {primary && <Badge text="Governance" className="shrink-0" />}
           {isBadgeholderAddress && <Badgeholder />}
           {source === "farcaster" && <Badge text="Farcaster" />}
           {source === "privy" && <Badge text="Privy" />}
@@ -93,7 +93,7 @@ export const VerifiedAddress = ({
                   className="w-full flex justify-start"
                   onClick={() => onSetPrimary(address)}
                 >
-                  Set as primary address
+                  Set as governance address
                 </button>
               </DropdownMenuItem>
             )}

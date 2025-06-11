@@ -244,7 +244,7 @@ export const attestCitizen = async () => {
 
   if (!primaryAddress) {
     return {
-      error: "No primary address set",
+      error: "No governance address set",
     }
   }
 
