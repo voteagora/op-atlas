@@ -172,6 +172,8 @@ const getNonCitizenTypes = (cardType: CardType) => {
       return castYourVote(cardType.proposalType)
     case "STANDARD":
       return wantToVote(cardType.citizenEligibility)
+    case "OFFCHAIN_OPTIMISTIC":
+      return wantToVote(cardType.citizenEligibility)
     default:
       return {} as VotingCardProps
   }
@@ -317,11 +319,6 @@ const getVotingActions = (cardType: CardType) => {
     if (cardType.proposalType === "OFFCHAIN_OPTIMISTIC") {
       votingActions = {
         cardActionList: [
-          {
-            buttonStyle: "secondary-primary",
-            actionText: "Yes, I want to veto",
-            actionType: "Log",
-          },
           {
             buttonStyle: "button-primary",
             actionText: "Cast Vote",
