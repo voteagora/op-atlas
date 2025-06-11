@@ -104,28 +104,30 @@ export const s8CitizenshipQualification =
   `
 
     if (qualifyingProjects.length > 0) {
-      // Find the first project that doesn't have a citizen yet
-      const projectWithoutCitizen = await prisma.$queryRaw<{ id: string }[]>`
+      // Check if any of the qualifying projects already has a citizen
+      const projectsWithCitizens = await prisma.$queryRaw<{ id: string }[]>`
       SELECT p.id
       FROM "Project" p
-      LEFT JOIN "Citizen" c ON c."projectId" = p.id 
+      INNER JOIN "Citizen" c ON c."projectId" = p.id 
       WHERE p.id = ANY(${qualifyingProjects.map(
         (p: S8QualifyingProject) => p.projectId,
       )})
-      AND c.id IS NULL
-      LIMIT 1
     `
 
-      if (projectWithoutCitizen.length > 0) {
-        const project = await getProject({ id: projectWithoutCitizen[0].id })
+      // If any project has a citizen, return null
+      if (projectsWithCitizens.length > 0) {
+        return null
+      }
 
-        if (project) {
-          return {
-            type: CITIZEN_TYPES.app,
-            identifier: project.id,
-            title: project.name,
-            avatar: project.thumbnailUrl,
-          }
+      // Get the first qualifying project
+      const project = await getProject({ id: qualifyingProjects[0].projectId })
+
+      if (project) {
+        return {
+          type: CITIZEN_TYPES.app,
+          identifier: project.id,
+          title: project.name,
+          avatar: project.thumbnailUrl,
         }
       }
     }
