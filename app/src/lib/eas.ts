@@ -25,6 +25,11 @@ export const CITIZEN_SCHEMA_ID =
     ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
     : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
 
+export const VOTE_SCHEMA_ID =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0x8c1d9f8b5b2e5d5e5c5d5e5f5e5d5c5b5a5958575655545352515f5e5d5c5b5a"
+    : "0x8c1d9f8b5b2e5d5e5c5d5e5f5e5d5c5b5a5958575655545352515f5e5d5c5b5a"
+
 const citizenSchema = new SchemaEncoder(
   "uint256 farcasterId,string selectionMethod",
 )
@@ -42,6 +47,8 @@ const applicationSchema = new SchemaEncoder(
 const contractSchema = new SchemaEncoder(
   "address contract, uint32 chainId, address deployer, bytes32 deploymentTx, bytes signature, uint32 verificationChainId, uint256 farcasterID",
 )
+
+const voteSchema = new SchemaEncoder("string voteType")
 
 const EAS_SIGNER_PRIVATE_KEY = process.env.EAS_SIGNER_PRIVATE_KEY
 if (!EAS_SIGNER_PRIVATE_KEY) {
@@ -429,7 +436,8 @@ export async function processAttestationsInBatches<T>(
         throw new Error(`Failed after ${maxRetries} retries: ${error}`)
       }
       console.warn(
-        `Retry ${retryCount + 1}/${maxRetries} for batch of ${batch.length
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+          batch.length
         } items`,
       )
       await new Promise((resolve) =>
@@ -478,7 +486,6 @@ export async function createCitizenAttestation({
 export async function isAttestationActive(
   attestationId: string,
 ): Promise<boolean> {
-
   try {
     const attestation = await eas.getAttestation(attestationId)
     return attestation !== null && !attestation.revocationTime
@@ -486,4 +493,28 @@ export async function isAttestationActive(
     console.warn("Error checking attestation status:", error)
     return false
   }
+}
+
+export async function createVoteAttestation(voteType: string): Promise<string> {
+  console.log("createVoteAttestation Not Implemented")
+  console.log("createVoteAttestation VoteType: ", voteType)
+
+  // const data = voteSchema.encodeData([
+  //   { name: "voteType", value: voteType, type: "string" },
+  // ])
+  //
+  // const tx = await eas.attest({
+  //   schema: VOTE_SCHEMA_ID,
+  //   data: {
+  //     recipient: "0x0000000000000000000000000000000000000000",
+  //     expirationTime: BigInt(0),
+  //     revocable: true,
+  //     data,
+  //   },
+  // })
+  //
+  // const receipt = await tx.wait()
+  // console.log("Vote attestation created with ID:", receipt)
+  // return receipt
+  return "TEST"
 }
