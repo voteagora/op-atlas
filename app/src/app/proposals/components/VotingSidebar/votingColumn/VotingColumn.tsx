@@ -3,12 +3,14 @@ import VotingActions, {
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
 import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
 import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
+import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
 
 // Vote type enum
 export enum VoteType {
   For = "For",
   Abstain = "Abstain",
   Against = "Against",
+  Veto = "Veto",
 }
 
 export interface CandidateCardProps {
@@ -46,6 +48,8 @@ const ColumnCard = ({
       return <StandardVoteCard />
     case "APPROVAL":
       return <CandidateCards candidates={options!} />
+    case "OFFCHAIN_OPTIMISTIC":
+      return <OverrideVoteCard />
     default:
       return <>TODO</>
   }

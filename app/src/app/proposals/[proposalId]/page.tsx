@@ -87,7 +87,7 @@ const Page = (params: PageProps) => {
     citizenId: "1",
   }
 
-  const userSignedIn = false //user.userId !== undefined
+  const userSignedIn = true //user.userId !== undefined
   const userCitizen = true //user.citizenId !== undefined
   const votingOpen = true
   const votingComplete = false
@@ -106,10 +106,10 @@ const Page = (params: PageProps) => {
     application: {
       name: "App 1",
       logo: "https://i.imgur.com/0000000.png",
-      eligible: true,
+      eligible: false,
     },
     user: {
-      eligible: false,
+      eligible: true,
       pfp: "https://i.imgur.com/0000000.png",
     },
   }

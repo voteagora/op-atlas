@@ -1,0 +1,28 @@
+"use client"
+
+import VoteButton from "@/app/proposals/components/VotingSidebar/votingColumn/VoteButton"
+import { useState } from "react"
+import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
+
+const OverrideVoteCard = () => {
+  const vetoText = "Yes, I want to Veto"
+
+  const [selectedVeto, setSelectedVeto] = useState<boolean>(false)
+  const handleVoteClick = () => {
+    setSelectedVeto(!selectedVeto)
+  }
+
+  return (
+    <div className={"gap-[8px] flex items-center justify-center"}>
+      <VoteButton
+        textValue={vetoText}
+        onClick={handleVoteClick}
+        selected={selectedVeto}
+        size={"veto"}
+        voteType={VoteType.Veto}
+      />
+    </div>
+  )
+}
+
+export default OverrideVoteCard
