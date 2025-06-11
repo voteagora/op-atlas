@@ -122,8 +122,8 @@ export const ChainAppRequirements = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="font-semibold text-xl">Requirements</div>
-      <div className="flex flex-col gap-1">
+      <div className="font-semibold text-xl text-foreground">Requirements</div>
+      <div className="flex flex-col gap-1 text-secondary-foreground">
         <ConditionRow isMet={true}>
           {qualification.type === CITIZEN_TYPES.chain
             ? "The organization accounted for at least 2% of the total revenue share contributed by all chains in the past Season, or was among the top 15 chains by revenue contribution in the past Season."

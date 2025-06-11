@@ -74,7 +74,7 @@ export default async function Page() {
             </Breadcrumb>
 
             <div className="flex flex-col gap-y-8 mt-12">
-              <div className="text-[36px] font-semibold">
+              <div className="text-[36px] font-semibold text-foreground">
                 Citizenship Registration
               </div>
               <div className="border-b border-border-secondary w-full"></div>
@@ -126,7 +126,7 @@ export default async function Page() {
               </div>
 
               <div className="border-b border-border-secondary w-full"></div>
-              <div>
+              <div className="text-secondary-foreground">
                 Learn more about citizenship in{" "}
                 <Link
                   href="https://community.optimism.io/citizens-house/citizen-house-overview"

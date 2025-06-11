@@ -329,18 +329,20 @@ export const UserRequirements = ({
     <div className="flex flex-col gap-6">
       {renderEligibility()}
 
-      <div className="font-semibold text-xl">Requirements</div>
-      <div className="font-semibold">Atlas profile</div>
-      <div>
+      <div className="font-semibold text-xl text-foreground">Requirements</div>
+      <div className="font-semibold text-foreground">Atlas Profile</div>
+      <div className="text-secondary-foreground">
         {renderGithub()}
         {renderEmail()}
         {renderAddress()}
       </div>
-      <div>
-        <div className="font-semibold">Proof of personhood</div>
-        <div>Complete at least one of these options.</div>
+      <div className="text-secondary-foreground">
+        <div className="font-semibold text-foreground">Proof of personhood</div>
+        <div className="text-secondary-foreground">
+          Complete at least one of these options.
+        </div>
       </div>
-      <div>
+      <div className="text-secondary-foreground">
         {renderPassport()}
         {renderWorld()}
       </div>
