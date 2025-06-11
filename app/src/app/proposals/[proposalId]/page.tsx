@@ -89,7 +89,7 @@ const Page = (params: PageProps) => {
 
   const userSignedIn = true //user.userId !== undefined
   const userCitizen = true //user.citizenId !== undefined
-  const votingOpen = false
+  const votingOpen = true
   const votingComplete = false
   const voted = false
   const votingRecord = ["2"]
