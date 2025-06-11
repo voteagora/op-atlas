@@ -216,3 +216,5 @@ export const OSO_METRICS = {
   onchainBuilderReward: ["R6eoyOPpiinCi8etN5D/qzAGcOxs8caCXTBrPCUarw4="],
   devToolingReward: ["0dWueJWVz1tnXyCQv+vPE9IqED5s1uD3ag2VEA4CDAw="],
 }
+
+export const LOCAL_STORAGE_LOGIN_REDIRECT = "LOGIN_REDIRECT"
