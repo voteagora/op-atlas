@@ -3,6 +3,10 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
+import { ActiveCitizen } from "@/app/citizenship/components/ActiveCitizen"
+import { ChainAppRequirements } from "@/app/citizenship/components/ChainAppRequirements"
+import { Sidebar } from "@/app/citizenship/components/Sidebar"
+import { UserRequirements } from "@/app/citizenship/components/UserRequirements"
 import { auth } from "@/auth"
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import {
@@ -21,11 +25,6 @@ import {
 } from "@/lib/actions/citizens"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
-import { ActiveCitizen } from "./components/ActiveCitizen"
-import { ChainAppRequirements } from "./components/ChainAppRequirements"
-import { Sidebar } from "./components/Sidebar"
-import { UserRequirements } from "./components/UserRequirements"
-
 export default async function Page() {
   const session = await auth()
   const userId = session?.user?.id
@@ -34,11 +33,13 @@ export default async function Page() {
     redirect("/")
   }
 
-  const user = await getUserById(userId)
-  const citizen = await getCitizen({ type: CITIZEN_TYPES.user, id: userId })
-
-  const qualification = await s8CitizenshipQualification()
-  const isCitizenshipLimitReached = await checkCitizenshipLimit()
+  const [user, citizen, qualification, isCitizenshipLimitReached] =
+    await Promise.all([
+      getUserById(userId),
+      getCitizen({ type: CITIZEN_TYPES.user, id: userId }),
+      s8CitizenshipQualification(),
+      checkCitizenshipLimit(),
+    ])
 
   if (!user) {
     redirect("/")
