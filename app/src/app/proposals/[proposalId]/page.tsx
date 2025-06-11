@@ -88,10 +88,11 @@ const Page = (params: PageProps) => {
   }
 
   const userSignedIn = true //user.userId !== undefined
-  const userCitizen = false //user.citizenId !== undefined
-  const voted = false
+  const userCitizen = true //user.citizenId !== undefined
   const votingOpen = true
   const votingComplete = false
+  const voted = false
+  const votingRecord = ["2"]
   const startDate = addDays(CURRENT_DATE, -10)
   const endDate = addDays(CURRENT_DATE, -1)
   const pType = "STANDARD" as ProposalType
@@ -116,9 +117,10 @@ const Page = (params: PageProps) => {
   const votingCardType: CardType = {
     signedIn: userSignedIn,
     citizen: userCitizen,
-    voted: voted,
     votingOpen: votingOpen,
     votingComplete: votingComplete,
+    voted: voted,
+    votingRecord: votingRecord,
     startDate: startDate,
     endDate: endDate,
     proposalType: pType,
