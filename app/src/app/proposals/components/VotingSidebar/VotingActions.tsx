@@ -1,5 +1,3 @@
-"use client"
-
 import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 
 export interface CardActionsProps {
@@ -11,6 +9,7 @@ interface voteAction {
   actionText: string
   actionType: string
   action: (data?: any) => void
+  disabled?: boolean
 }
 
 const VotingActions = ({ cardActionList }: CardActionsProps) => {
@@ -18,7 +17,10 @@ const VotingActions = ({ cardActionList }: CardActionsProps) => {
     <div className="flex flex-col items-center mt-4 mr-6 mb-6 ml-6">
       {cardActionList &&
         cardActionList.map((action, idx) => (
-          <CardAction {...action} key={idx} />
+          <CardAction
+            {...action}
+            key={idx}
+          />
         ))}
     </div>
   )
@@ -29,6 +31,7 @@ const CardAction = ({
   actionText,
   actionType,
   action,
+  disabled,
 }: voteAction) => {
   const handleAction = () => {
     switch (actionType.toLowerCase()) {
@@ -47,7 +50,10 @@ const CardAction = ({
   return (
     <button
       onClick={handleAction}
-      className={`rounded-md border border-solid p-3 mb-1 w-60 h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle}`}
+      disabled={disabled}
+      className={`rounded-md border border-solid p-3 mb-1 w-60 h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle} ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      }`}
     >
       {actionText}
     </button>

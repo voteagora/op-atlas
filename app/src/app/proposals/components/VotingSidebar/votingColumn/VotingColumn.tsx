@@ -115,10 +115,12 @@ const VotingColumn = ({
           // This is a wonky way to overwrite the call to make an external call.
           cardActionList={votingActions.cardActionList.map((action) => {
             // If this is a vote action, replace its action function with handleCastVote
+            // and determine if it should be disabled based on selectedVote
             if (action.actionType === "Vote") {
               return {
                 ...action,
                 action: handleCastVote,
+                disabled: !selectedVote
               }
             }
             // Otherwise, return the original action unchanged
