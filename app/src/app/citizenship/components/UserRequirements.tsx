@@ -273,11 +273,7 @@ export const UserRequirements = ({
       )
     }
 
-    return (
-      <ConditionRow isMet={false}>
-        Verify governance address to add a verified address.
-      </ConditionRow>
-    )
+    return null
   }
 
   const renderWorld = () => {
