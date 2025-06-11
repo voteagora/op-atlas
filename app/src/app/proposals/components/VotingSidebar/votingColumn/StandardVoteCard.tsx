@@ -83,7 +83,8 @@ const VoteButton = ({
           "border border-solid border-border bg-backgroundSecondary"
         break
       case VoteType.Against:
-        variantStyles = "border border-solid border-border bg-red-500"
+        variantStyles =
+          "border border-solid border-border bg-red-200 text-red-600"
         break
       default:
         break
