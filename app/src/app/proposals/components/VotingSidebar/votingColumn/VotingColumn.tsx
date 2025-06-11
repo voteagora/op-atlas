@@ -1,9 +1,11 @@
+"use client"
 import VotingActions, {
   CardActionsProps,
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
 import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
 import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
+import { useState } from "react"
 
 // Vote type enum
 export enum VoteType {
@@ -30,6 +32,8 @@ const ColumnCard = ({
   citizen,
   currentlyActive,
   voted,
+  selectedVote,
+  setSelectedVote,
 }: {
   proposalType: string
   options?: CandidateCardProps[]
@@ -38,6 +42,8 @@ const ColumnCard = ({
   title?: string
   currentlyActive?: boolean
   voted?: boolean
+  selectedVote?: VoteType | null
+  setSelectedVote?: (vote: VoteType) => void
 }) => {
   switch (proposalType) {
     case "STANDARD":
@@ -45,7 +51,12 @@ const ColumnCard = ({
       if (!signedIn || !currentlyActive || voted || !citizen) {
         return <></>
       }
-      return <StandardVoteCard />
+      return (
+        <StandardVoteCard
+          selectedVote={selectedVote!}
+          setSelectedVote={setSelectedVote!}
+        />
+      )
     case "APPROVAL":
       return <CandidateCards candidates={options!} />
     case "OFFCHAIN_OPTIMISTIC":
@@ -74,11 +85,15 @@ const VotingColumn = ({
   userCitizen,
   userVoted,
 }: VotingColumnProps) => {
-  console.log("Signed in: ", userSignedIn)
-  console.log("Currently Active: ", currentlyActive)
-  console.log("Voted: ", userVoted)
-  console.log("Citizen: ", userCitizen)
-  console.log("Voting Options: ", votingActions)
+  const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
+  const handleVoteClick = (voteType: VoteType) => {
+    setSelectedVote(voteType === selectedVote ? null : voteType)
+  }
+
+  const handleCastVote = () => {
+    console.log(selectedVote)
+  }
+
   return (
     <div className="w-[19rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
       <div className="w-[272px] gap-[16px] flex flex-col ">
@@ -89,9 +104,27 @@ const VotingColumn = ({
           currentlyActive={currentlyActive}
           citizen={userCitizen}
           voted={userVoted}
+          selectedVote={selectedVote}
+          setSelectedVote={handleVoteClick}
         />
       </div>
-      {currentlyActive && votingActions && <VotingActions {...votingActions} />}
+      {currentlyActive && votingActions && (
+        <VotingActions
+          // This is a wonky way to overwrite the call to make an external call.
+          cardActionList={votingActions.cardActionList.map((action) => {
+            // If this is a vote action, replace its action function with handleCastVote
+            if (action.actionType === "Vote") {
+              return {
+                ...action,
+                action: handleCastVote,
+              }
+            }
+            // Otherwise, return the original action unchanged
+            return action
+          })}
+        />
+      )}
+
       {!currentlyActive && (
         // TODO! This needs to point somewhere
         <div className="w-full flex items-center justify-center gap-2.5">

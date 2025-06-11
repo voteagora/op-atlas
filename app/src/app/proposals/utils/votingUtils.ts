@@ -332,7 +332,7 @@ const getVotingActions = (cardType: CardType) => {
           {
             buttonStyle: "button-primary",
             actionText: "Cast Vote",
-            actionType: "Log",
+            actionType: "Vote",
           },
         ],
       }

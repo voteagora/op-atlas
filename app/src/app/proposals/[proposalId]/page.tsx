@@ -95,7 +95,7 @@ const Page = (params: PageProps) => {
   const votingRecord = ["2"]
   const startDate = addDays(CURRENT_DATE, -10)
   const endDate = addDays(CURRENT_DATE, -1)
-  const pType = "OFFCHAIN_OPTIMISTIC" as ProposalType
+  const pType = "STANDARD" as ProposalType
 
   const citizenEligibility = {
     organization: {
