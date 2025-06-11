@@ -256,7 +256,14 @@ export const attestCitizen = async () => {
           : undefined,
     })
 
-    const result = await upsertCitizen({
+    const isValidAttestationId = /^0x[a-fA-F0-9]{64}$/.test(attestationId)
+    if (!isValidAttestationId) {
+      return {
+        error: "Invalid attestation ID format",
+      }
+    }
+
+    await upsertCitizen({
       id: userId,
       citizen: {
         address: primaryAddress,
