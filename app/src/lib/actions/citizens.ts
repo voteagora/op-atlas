@@ -72,6 +72,11 @@ export const s8CitizenshipQualification =
         },
       })
 
+      // If the organization already has a citizen, return null
+      if (existingCitizen) {
+        return null
+      }
+
       // Get the organization
       const organization = await getOrganization({
         id: qualifyingChains[0].organizationId,
