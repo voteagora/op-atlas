@@ -5,6 +5,7 @@ import VotingActions, {
 import CandidateCard from "@/app/proposals/components/VotingSidebar/votingColumn/CandidateCard"
 import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
 import { citizen } from "eas-indexer/ponder.schema"
+import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
 
 // Vote type enum
 export enum VoteType {
@@ -13,7 +14,7 @@ export enum VoteType {
   Against = "Against",
 }
 
-interface CandidateCardProps {
+export interface CandidateCardProps {
   name: string
   image: {
     src: string
@@ -55,31 +56,6 @@ const ColumnCard = ({
     default:
       return <>TODO</>
   }
-}
-
-const CandidateCards = ({
-  candidates,
-}: {
-  candidates: CandidateCardProps[]
-}) => {
-  return (
-    <>
-      <div className="border-t pt-3">
-        <p className="pl-2 pr-2 h-5">{candidates.length} Candidates</p>
-      </div>
-      <div className="w-full sm:w-[272px]">
-        {candidates.map((candidate, idx) => (
-          <CandidateCard
-            key={idx}
-            img={candidate.image}
-            username={candidate.name}
-            organizations={candidate.organizations}
-            buttonLink={candidate.buttonLink}
-          />
-        ))}
-      </div>
-    </>
-  )
 }
 
 export interface VotingColumnProps {
