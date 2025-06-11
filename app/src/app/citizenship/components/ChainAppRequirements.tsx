@@ -11,7 +11,7 @@ import { CitizenshipQualification } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
+const LINK_STYLE = "inline-block cursor-pointer underline"
 
 export const ChainAppRequirements = ({
   userId,
