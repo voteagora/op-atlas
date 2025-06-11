@@ -74,7 +74,7 @@ export default async function Page() {
             </Breadcrumb>
 
             <div className="flex flex-col gap-y-8 mt-12">
-              <div className="text-3xl font-semibold">
+              <div className="text-[36px] font-semibold">
                 Citizenship Registration
               </div>
               <div className="border-b border-border-secondary w-full"></div>
