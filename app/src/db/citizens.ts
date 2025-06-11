@@ -3,6 +3,7 @@
 import { Citizen } from "@prisma/client"
 
 import { prisma } from "@/db/client"
+import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 
 export async function upsertCitizen({
   id,
@@ -66,4 +67,13 @@ export async function getCitizenProposalVote(
       citizenId: citizenId,
     },
   })
+}
+
+export async function postCitizenProposalVote(
+  voteType: VoteType,
+): Promise<any> {
+  // citizenId: number,
+  // proposalId: string,
+  // vote: number,
+  console.log(`postCitizenProposalVote Works! ${voteType}`)
 }

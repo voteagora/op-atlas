@@ -8,7 +8,7 @@ interface voteAction {
   buttonStyle: string
   actionText: string
   actionType: string
-  action: (data?: any) => void
+  action: (data?: any) => Promise<any>
   disabled?: boolean
 }
 
@@ -17,10 +17,7 @@ const VotingActions = ({ cardActionList }: CardActionsProps) => {
     <div className="flex flex-col items-center mt-4 mr-6 mb-6 ml-6">
       {cardActionList &&
         cardActionList.map((action, idx) => (
-          <CardAction
-            {...action}
-            key={idx}
-          />
+          <CardAction {...action} key={idx} />
         ))}
     </div>
   )
@@ -33,14 +30,15 @@ const CardAction = ({
   action,
   disabled,
 }: voteAction) => {
-  const handleAction = () => {
+  const handleAction = async () => {
     switch (actionType.toLowerCase()) {
       case "log":
         console.log("log")
         break
       case "vote":
         // To be overwritten by the component that uses this
-        action()
+        await action()
+        break
       default:
         console.log(`Action type: ${actionType}`)
         break
