@@ -1,5 +1,7 @@
 "use client"
 
+import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
+
 export interface CardActionsProps {
   cardActionList: voteAction[]
 }
@@ -8,6 +10,7 @@ interface voteAction {
   buttonStyle: string
   actionText: string
   actionType: string
+  action: (data?: any) => void
 }
 
 const VotingActions = ({ cardActionList }: CardActionsProps) => {
@@ -21,12 +24,20 @@ const VotingActions = ({ cardActionList }: CardActionsProps) => {
   )
 }
 
-const CardAction = ({ buttonStyle, actionText, actionType }: voteAction) => {
+const CardAction = ({
+  buttonStyle,
+  actionText,
+  actionType,
+  action,
+}: voteAction) => {
   const handleAction = () => {
-    switch (actionType) {
+    switch (actionType.toLowerCase()) {
       case "log":
         console.log("log")
         break
+      case "vote":
+        // To be overwritten by the component that uses this
+        action()
       default:
         console.log(`Action type: ${actionType}`)
         break
