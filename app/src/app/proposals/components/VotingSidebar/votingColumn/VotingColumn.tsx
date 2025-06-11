@@ -7,6 +7,7 @@ import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColum
 import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
 import { useState } from "react"
 import { postCitizenProposalVote } from "@/db/citizens"
+import { createVoteAttestationCall } from "@/lib/api/eas/voteAttestation"
 
 // Vote type enum
 export enum VoteType {
@@ -94,7 +95,17 @@ const VotingColumn = ({
   }
 
   const handleCastVote = async () => {
-    await postCitizenProposalVote(selectedVote!)
+    if (!selectedVote) return
+
+    try {
+      // Create and sign an attestation for the vote
+      await createVoteAttestationCall(selectedVote)
+      await postCitizenProposalVote(selectedVote)
+      // Add success handling if needed
+    } catch (error) {
+      console.error("Failed to cast vote:", error)
+      // Add user-facing error handling (e.g., toast notification)
+    }
   }
 
   return (

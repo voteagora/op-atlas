@@ -75,5 +75,6 @@ export async function postCitizenProposalVote(
   // citizenId: number,
   // proposalId: string,
   // vote: number,
-  console.log(`postCitizenProposalVote Works! ${voteType}`)
+  console.log(`postCitizenProposalVote Not Implemented`)
+  console.log("postCitizenProposalVote VoteType: ", voteType)
 }
