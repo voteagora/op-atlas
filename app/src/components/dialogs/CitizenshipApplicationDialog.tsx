@@ -20,6 +20,7 @@ import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification
 import { useCitizenUpdate } from "@/hooks/citizen/useCitizenUpdate"
 import { useUser } from "@/hooks/db/useUser"
 import { CITIZEN_TYPES } from "@/lib/constants"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { CheckboxCircleFIll } from "../icons/reminx"
 import { DialogProps } from "./types"
@@ -63,6 +64,8 @@ function CitizenshipApplicationDialog({
     isSuccess: isUpdateSuccess,
   } = useCitizenUpdate(userId)
 
+  const { track } = useAnalytics()
+
   const { data: qualification, isLoading: isQualificationLoading } =
     useCitizenQualification()
   const { user } = useUser({ id: userId })
@@ -99,6 +102,15 @@ function CitizenshipApplicationDialog({
       setSelectedTime(undefined)
     }
   }, [open, citizen?.timeCommitment])
+
+  useEffect(() => {
+    if (isAttestSuccess) {
+      track("Registration Success", {
+        user_group: qualification?.type,
+        wallet_address: user?.addresses[0].address as string,
+      })
+    }
+  }, [qualification, isAttestSuccess])
 
   if (isQualificationLoading) {
     return (

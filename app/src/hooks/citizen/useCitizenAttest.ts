@@ -24,7 +24,9 @@ export const useCitizenAttest = (userId: string) => {
           setIsSuccess(true)
           toast.dismiss(loadingToast)
           toast.success("You are ready to vote!")
-          window.location.reload()
+          setTimeout(() => {
+            window.location.reload()
+          }, 3000)
         })
       } catch (error) {
         setIsSuccess(false)

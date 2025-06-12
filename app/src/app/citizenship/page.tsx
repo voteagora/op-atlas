@@ -25,6 +25,8 @@ import {
 } from "@/lib/actions/citizens"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
+import { AnalyticsTracker } from "./components/AnalyticsTracker"
+
 export default async function Page() {
   const session = await auth()
   const userId = session?.user?.id
@@ -72,6 +74,8 @@ export default async function Page() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+
+            <AnalyticsTracker qualification={qualification} />
 
             <div className="flex flex-col gap-y-8 mt-12">
               <div className="text-[36px] font-semibold text-foreground">
