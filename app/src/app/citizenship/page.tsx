@@ -100,7 +100,7 @@ export default async function Page() {
                       Protocol Upgrades
                     </li>
                     <li>
-                      Approve the Collective Intent{" "}
+                      Approve the{" "}
                       <span className="font-semibold">Collective Intent</span>{" "}
                       as well as{" "}
                       <span className="font-semibold">
