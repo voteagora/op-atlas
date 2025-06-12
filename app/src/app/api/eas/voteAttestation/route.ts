@@ -13,20 +13,14 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { voteType } = body
+    const { delegateAttestationSignature } = body
 
     // Log the received data to see what's coming in
     console.log("Received vote request with data:", body)
 
-    // Check if voteType is one of the valid vote types
-    const validVoteTypes = ["For", "Abstain", "Against", "Veto"]
-    if (!voteType || !validVoteTypes.includes(voteType)) {
-      console.log("Invalid vote type:", voteType)
-      console.log("Valid vote types:", validVoteTypes)
-      return NextResponse.json({ error: "Invalid vote type" }, { status: 400 })
-    }
-
-    const attestationId = await createVoteAttestation(voteType)
+    const attestationId = await createVoteAttestation(
+      delegateAttestationSignature,
+    )
 
     return NextResponse.json({ attestationId })
   } catch (error) {
