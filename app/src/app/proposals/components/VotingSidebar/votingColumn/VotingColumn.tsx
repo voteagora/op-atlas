@@ -143,6 +143,16 @@ const VotingColumn = ({
         break
       default:
         choices = []
+        break
+    }
+
+    const getProposalTypeID = (proposalType: string) => {
+      switch (proposalType) {
+        case "STANDARD":
+          return 0
+        default:
+          return 0
+      }
     }
 
     const args = {
@@ -151,10 +161,10 @@ const VotingColumn = ({
       proposer: "0x648BFC4dB7e43e799a84d0f607aF0b4298F932DB",
       description: "# Garrett AttestationTest",
       choices: choices,
-      proposalTypeId: 0,
+      proposalTypeId: getProposalTypeID(proposalType),
       startBlock: "28966158",
       endBlock: "29095758",
-      proposalType: "STANDARD",
+      proposalType: proposalType,
       tiers: [],
       onChainProposalId: "12345",
     }
