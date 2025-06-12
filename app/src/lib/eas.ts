@@ -1,5 +1,6 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
+import { Signature } from "viem"
 
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
@@ -496,30 +497,46 @@ export async function isAttestationActive(
 }
 
 export async function createVoteAttestation(
-  delegateAttestationSignature: string,
+  delegateAttestationSignature: Signature,
 ): Promise<string> {
-  console.log("createVoteAttestation Not Implemented")
   console.log(
-    "createVoteAttestation Delegate Attestation Signature: ",
+    "Processing delegated attestation with signature: ",
     delegateAttestationSignature,
   )
 
-  // const data = voteSchema.encodeData([
-  //   { name: "voteType", value: voteType, type: "string" },
-  // ])
-  //
-  // const tx = await eas.attest({
-  //   schema: VOTE_SCHEMA_ID,
-  //   data: {
-  //     recipient: "0x0000000000000000000000000000000000000000",
-  //     expirationTime: BigInt(0),
-  //     revocable: true,
-  //     data,
-  //   },
-  // })
-  //
-  // const receipt = await tx.wait()
-  // console.log("Vote attestation created with ID:", receipt)
-  // return receipt
-  return "TEST"
+  try {
+    // Get the delegated interface to verify the signature
+    const delegated = await eas.getDelegated()
+
+    // Convert the viem Signature (with v as bigint) to EAS SDK Signature (with v as number)
+    const convertedSignature = {
+      ...delegateAttestationSignature,
+      v: Number(delegateAttestationSignature.v), // Convert bigint to number
+    }
+
+    // Use attestByDelegation to create the attestation
+    const tx = await eas.attestByDelegation({
+      schema:
+        "0xb16fa048b0d597f5a821747eba64efa4762ee5143e9a80600d0005386edfc995",
+      data: {
+        recipient: "0x0000000000000000000000000000000000000000",
+        expirationTime: BigInt(0), // NO_EXPIRATION
+        revocable: true,
+        refUID:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        data: "0x", // The data is included in the signature
+      },
+      signature: convertedSignature,
+      attester: await signer.getAddress(), // Using the signer from the eas.ts file
+      deadline: BigInt(0), // NO_EXPIRATION
+    })
+
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait()
+    console.log("Vote attestation created with ID:", receipt)
+    return receipt
+  } catch (error) {
+    console.error("Error creating vote attestation:", error)
+    throw error
+  }
 }
