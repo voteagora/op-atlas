@@ -8,6 +8,18 @@ import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingCol
 import { useState } from "react"
 import { postCitizenProposalVote } from "@/db/citizens"
 import { createVoteAttestationCall } from "@/lib/api/eas/voteAttestation"
+import {
+  EAS,
+  NO_EXPIRATION,
+  SchemaEncoder,
+} from "@ethereum-attestation-service/eas-sdk"
+import { useAccount, useWalletClient } from "wagmi"
+
+// Optimism address
+const EAS_CONTRACT_ADDRESS =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e"
+    : "0x4200000000000000000000000000000000000021"
 
 // Vote type enum
 export enum VoteType {
@@ -94,12 +106,53 @@ const VotingColumn = ({
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
+  const { data: walletClient } = useWalletClient()
+
+  const { address } = useAccount()
+
+  const createDelegatedAttestation = async (voteType: VoteType) => {
+    const eas = new EAS(EAS_CONTRACT_ADDRESS)
+
+    const schemaEncoder = new SchemaEncoder("uint256 eventId, uint8 voteIndex")
+    const encodedData = schemaEncoder.encodeData([
+      { name: "eventId", value: 1, type: "uint256" },
+      { name: "voteIndex", value: 1, type: "uint8" },
+    ])
+
+    if (!walletClient) {
+      throw new Error("Wallet client not available")
+    }
+
+    const delegated = await eas.getDelegated()
+
+    return await delegated.signDelegatedAttestation(
+      {
+        schema:
+          "0xb16fa048b0d597f5a821747eba64efa4762ee5143e9a80600d0005386edfc995",
+        recipient: address as `0x${string}`,
+        expirationTime: NO_EXPIRATION, // Unix timestamp of when attestation expires (0 for no expiration)
+        revocable: true,
+        refUID:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        data: encodedData,
+        deadline: NO_EXPIRATION, // Unix timestamp of when signature expires (0 for no expiration)
+        value: BigInt("0"),
+      },
+      walletClient,
+    )
+  }
+
   const handleCastVote = async () => {
     if (!selectedVote) return
 
     try {
-      // Create and sign an attestation for the vote
-      await createVoteAttestationCall(selectedVote)
+      // 1. Create and sign an attestation for the vote
+      const delegatedAttestation = await createDelegatedAttestation(
+        selectedVote,
+      )
+      // 2. Send signature to server to relay onchain
+      await createVoteAttestationCall(delegatedAttestation.signature)
+      // 3. Record vote in database
       await postCitizenProposalVote(selectedVote)
       // Add success handling if needed
     } catch (error) {
