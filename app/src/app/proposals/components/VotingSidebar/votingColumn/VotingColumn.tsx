@@ -13,7 +13,8 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { useAccount, useWalletClient } from "wagmi"
+import { ZeroHash } from "ethers"
+import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
@@ -106,40 +107,76 @@ const VotingColumn = ({
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
-  const { data: walletClient } = useWalletClient()
-
-  const { address } = useAccount()
+  const signer = useEthersSigner({ chainId: 11155420 })
 
   const createDelegatedAttestation = async (voteType: VoteType) => {
+    if (!signer) throw new Error("Signer not ready")
     const eas = new EAS(EAS_CONTRACT_ADDRESS)
+    eas.connect(signer.provider!)
+    const delegated = await eas.getDelegated()
+    const VOTE_SCHEMA =
+      "address Contract," +
+      "uint256 Id," +
+      "address Proposer," +
+      "string Description," +
+      "string[] Choices," +
+      "uint8 Proposal_type_id," +
+      "uint256 Start_block," +
+      "uint256 End_block," +
+      "string Proposal_type," +
+      "uint256[] Tiers," +
+      "uint256 Onchain_proposalid"
 
-    const schemaEncoder = new SchemaEncoder("uint256 eventId, uint8 voteIndex")
-    const encodedData = schemaEncoder.encodeData([
-      { name: "eventId", value: 1, type: "uint256" },
-      { name: "voteIndex", value: 1, type: "uint8" },
+    const encoder = new SchemaEncoder(VOTE_SCHEMA)
+
+    const args = {
+      contract: "0x368723068b6C762b416e5A7d506a605E8b816C22",
+      id: "42740012529150791772311325945937601588484139798594959324533215350132958331528",
+      proposer: "0x648BFC4dB7e43e799a84d0f607aF0b4298F932DB",
+      description:
+        "# Jeff - Hybrid + Basic + June 12 9:26 AM ET No on-chain transactions.",
+      choices: ["0"],
+      proposalTypeId: 0,
+      startBlock: "28966158",
+      endBlock: "29095758",
+      proposalType: "STANDARD",
+      tiers: [],
+      onChainProposalId:
+        "112542233745806009107871466048611490894875302937505011175151532497811941558355",
+    }
+    const encodedData = encoder.encodeData([
+      { name: "Contract", value: args.contract, type: "address" },
+      { name: "Id", value: args.id, type: "uint256" },
+      { name: "Proposer", value: args.proposer, type: "address" },
+      { name: "Description", value: args.description, type: "string" },
+      { name: "Choices", value: args.choices, type: "string[]" },
+      { name: "Proposal_type_id", value: args.proposalTypeId, type: "uint8" },
+      { name: "Start_block", value: args.startBlock, type: "uint256" },
+      { name: "End_block", value: args.endBlock, type: "uint256" },
+      { name: "Proposal_type", value: args.proposalType, type: "string" },
+      { name: "Tiers", value: args.tiers, type: "uint256[]" },
+      {
+        name: "Onchain_proposalid",
+        value: args.onChainProposalId,
+        type: "uint256",
+      },
     ])
 
-    if (!walletClient) {
-      throw new Error("Wallet client not available")
+    const nonce = await eas.getNonce(signer.address)
+
+    const delegateRequest = {
+      schema:
+        "0xb16fa048b0d597f5a821747eba64efa4762ee5143e9a80600d0005386edfc995",
+      recipient: signer.address as `0x${string}`,
+      expirationTime: NO_EXPIRATION,
+      revocable: true,
+      refUID: ZeroHash,
+      data: encodedData,
+      value: BigInt(0),
+      nonce,
+      deadline: NO_EXPIRATION,
     }
-
-    const delegated = await eas.getDelegated()
-
-    return await delegated.signDelegatedAttestation(
-      {
-        schema:
-          "0xb16fa048b0d597f5a821747eba64efa4762ee5143e9a80600d0005386edfc995",
-        recipient: address as `0x${string}`,
-        expirationTime: NO_EXPIRATION, // Unix timestamp of when attestation expires (0 for no expiration)
-        revocable: true,
-        refUID:
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        data: encodedData,
-        deadline: NO_EXPIRATION, // Unix timestamp of when signature expires (0 for no expiration)
-        value: BigInt("0"),
-      },
-      walletClient,
-    )
+    return await delegated.signDelegatedAttestation(delegateRequest, signer)
   }
 
   const handleCastVote = async () => {
