@@ -87,11 +87,7 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
         </div>
         <div className="text-sm text-muted-foreground text-center">
           Join the{" "}
-          <Link
-            href="https://t.me/CHANGE_ME_IN_PROD"
-            target="_blank"
-            className="underline"
-          >
+          <Link href="#" target="_blank" className="underline">
             Citizens&apos; House Announcements Group
           </Link>{" "}
           on Telegram for important messages. We&apos;ll send emails to{" "}

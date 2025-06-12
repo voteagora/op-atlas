@@ -44,9 +44,22 @@ export const Sidebar = ({
 
   const renderCopy = () => {
     if (qualification.type === CITIZEN_TYPES.user) {
-      return `You are eligible to become a Citizen`
+      return qualification.eligible
+        ? `You are eligible to become a Citizen`
+        : qualification.error
     }
-    return `${qualification.title} is eligible to become a Citizen`
+
+    if (qualification.type === CITIZEN_TYPES.chain) {
+      return qualification.eligible
+        ? `${qualification.title} is eligible to become a Citizen`
+        : qualification.error
+    }
+
+    if (qualification.type === CITIZEN_TYPES.app) {
+      return qualification.eligible
+        ? `${qualification.title} is eligible to become a Citizen`
+        : qualification.error
+    }
   }
 
   return (
@@ -57,27 +70,29 @@ export const Sidebar = ({
         {renderCopy()}
       </div>
 
-      {isLoading && (
+      {qualification.eligible && isLoading && (
         <div className="text-sm text-secondary-foreground">
           {" "}
           Checking requirements...
         </div>
       )}
 
-      {!hasMetRequirements && !isLoading && (
+      {qualification.eligible && !hasMetRequirements && !isLoading && (
         <div className="text-sm text-destructive">
           {" "}
           Complete your registration requirements in order to continue
         </div>
       )}
 
-      <Button
-        className="w-full button-primary"
-        disabled={!hasMetRequirements || isLoading}
-        onClick={() => setIsRulesDialogOpen(true)}
-      >
-        Register
-      </Button>
+      {qualification.eligible && (
+        <Button
+          className="w-full button-primary"
+          disabled={!hasMetRequirements || isLoading}
+          onClick={() => setIsRulesDialogOpen(true)}
+        >
+          Register
+        </Button>
+      )}
 
       <CitizenshipApplicationDialog
         open={isRulesDialogOpen}

@@ -403,6 +403,8 @@ export interface CitizenshipQualification {
   identifier: string
   title: string
   avatar: string | null
+  eligible: boolean
+  error?: string
 }
 
 export type CitizenLookup =

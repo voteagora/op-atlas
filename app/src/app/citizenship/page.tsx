@@ -141,26 +141,21 @@ export default async function Page() {
         </div>
 
         <div>
-          {qualification ? (
+          {qualification && !isCitizenshipLimitReached ? (
             <Sidebar user={user} qualification={qualification} />
           ) : (
             <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
               <UserAvatarLarge imageUrl={user?.imageUrl} />
-              {isCitizenshipLimitReached ? (
-                <div className="flex flex-col gap-2">
-                  <div className="font-semibold text-secondary-foreground">
-                    Registration has closed
-                  </div>
-                  <div className="text-sm text-secondary-foreground">
-                    Thanks for your interest, but the Citizens&apos; House has
-                    reached it&apos;s maximum capacity.
-                  </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="font-semibold text-secondary-foreground">
+                  Registration has closed
                 </div>
-              ) : (
-                <div className="text-sm font-semibold text-secondary-foreground">
-                  Sorry, you are not eligible to become a Citizen
+                <div className="text-sm text-secondary-foreground">
+                  Thanks for your interest, but the Citizens&apos; House has
+                  reached it&apos;s maximum capacity.
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>

@@ -72,15 +72,22 @@ export const s8CitizenshipQualification =
         },
       })
 
-      // If the organization already has a citizen, return null
-      if (existingCitizen) {
-        return null
-      }
-
       // Get the organization
       const organization = await getOrganization({
         id: qualifyingChains[0].organizationId,
       })
+
+      // If the organization already has a citizen, return not eligible
+      if (existingCitizen && organization) {
+        return {
+          type: CITIZEN_TYPES.chain,
+          identifier: organization.id,
+          title: organization.name,
+          avatar: organization.avatarUrl,
+          eligible: false,
+          error: `${organization.name} is already registered`,
+        }
+      }
 
       // Only one citizen per organization
       if (!existingCitizen && organization) {
@@ -89,6 +96,7 @@ export const s8CitizenshipQualification =
           identifier: organization.id,
           title: organization.name,
           avatar: organization.avatarUrl,
+          eligible: true,
         }
       }
     }
@@ -113,14 +121,20 @@ export const s8CitizenshipQualification =
         (p: S8QualifyingProject) => p.projectId,
       )})
     `
-
-      // If any project has a citizen, return null
-      if (projectsWithCitizens.length > 0) {
-        return null
-      }
-
       // Get the first qualifying project
       const project = await getProject({ id: qualifyingProjects[0].projectId })
+
+      // If any project has a citizen, return not eligible
+      if (projectsWithCitizens.length > 0 && project) {
+        return {
+          type: CITIZEN_TYPES.app,
+          identifier: project.id,
+          title: project.name,
+          avatar: project.thumbnailUrl,
+          eligible: false,
+          error: `${project.name} is already registered`,
+        }
+      }
 
       if (project) {
         return {
@@ -128,6 +142,7 @@ export const s8CitizenshipQualification =
           identifier: project.id,
           title: project.name,
           avatar: project.thumbnailUrl,
+          eligible: true,
         }
       }
     }
@@ -140,8 +155,16 @@ export const s8CitizenshipQualification =
       type: CITIZEN_TYPES.user,
       id: userId,
     })
+
     if (existingCitizen && existingCitizen.attestationId) {
-      return null
+      return {
+        type: CITIZEN_TYPES.user,
+        identifier: user.id,
+        title: "You",
+        avatar: user.imageUrl || "",
+        eligible: false,
+        error: "User already registered",
+      }
     }
 
     const qualifyingAddress = await prisma.$queryRaw<S8QualifyingUser[]>`
@@ -157,10 +180,18 @@ export const s8CitizenshipQualification =
         identifier: user.id,
         title: "You",
         avatar: user.imageUrl || "",
+        eligible: true,
       }
     }
 
-    return null
+    return {
+      type: CITIZEN_TYPES.user,
+      identifier: user.id,
+      title: "You",
+      avatar: user.imageUrl || "",
+      eligible: false,
+      error: "Sorry, you are not eligible to become a Citizen",
+    }
   }
 
 // S8 Citizenship Limit Check
@@ -217,9 +248,9 @@ export const attestCitizen = async () => {
 
   const qualification = await s8CitizenshipQualification()
 
-  if (!qualification) {
+  if (!qualification?.eligible) {
     return {
-      error: "You are not eligible to become a Citizen",
+      error: qualification?.error || "You are not eligible to become a Citizen",
     }
   }
 

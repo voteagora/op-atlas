@@ -19,11 +19,13 @@ export const useCitizenshipRequirements = ({
   const { user, isLoading: isUserLoading } = useUser({ id })
   const { data: passports, isLoading: isPassportsLoading } = useUserPassports({
     id,
-    enabled: qualification.type === CITIZEN_TYPES.user,
+    enabled:
+      qualification.eligible && qualification.type === CITIZEN_TYPES.user,
   })
   const { data: worldId, isLoading: isWorldIdLoading } = useUserWorldId({
     id,
-    enabled: qualification.type === CITIZEN_TYPES.user,
+    enabled:
+      qualification.eligible && qualification.type === CITIZEN_TYPES.user,
   })
 
   const isLoading =
