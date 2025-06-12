@@ -2,6 +2,7 @@ import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { useRef } from "react"
 import { toast } from "sonner"
 
+import { makeUserAddressPrimaryAction } from "@/app/profile/verified-addresses/actions"
 import { syncPrivyUser } from "@/db/privy"
 
 import { useUser } from "../db/useUser"
@@ -9,6 +10,7 @@ import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
 
 export const usePrivyLinkWallet = (userId: string) => {
   const isLinking = useRef(false)
+  const isLinkingPrimary = useRef(false)
   const { unlinkWallet } = usePrivy()
   const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
   const onError = useHandlePrivyErrors()
@@ -30,7 +32,7 @@ export const usePrivyLinkWallet = (userId: string) => {
 
   const { linkWallet } = useLinkAccount({
     onSuccess: ({ user: updatedPrivyUser, linkedAccount }) => {
-      if (linkedAccount.type === "wallet" && !isLinking.current) {
+      if (linkedAccount.type === "wallet" && isLinking.current) {
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
@@ -45,9 +47,36 @@ export const usePrivyLinkWallet = (userId: string) => {
     },
     onError,
   })
-  const linkWalletWithState = () => {
-    isLinking.current = true
-    linkWallet()
+
+  const { linkWallet: linkWithPrimary } = useLinkAccount({
+    onSuccess: ({ user: updatedPrivyUser, linkedAccount }) => {
+      if (linkedAccount.type === "wallet" && isLinkingPrimary.current) {
+        toast.promise(
+          syncPrivyUser(updatedPrivyUser)
+            .then(() => makeUserAddressPrimaryAction(linkedAccount.address))
+            .then(() => invalidateUser())
+            .then(() => (isLinkingPrimary.current = false)),
+          {
+            loading: "Adding wallet address...",
+            success: "Wallet address added successfully",
+            error: "Failed to add wallet address",
+          },
+        )
+      }
+    },
+    onError,
+  })
+
+  const linkWalletWithState = (
+    { primary }: { primary: boolean } = { primary: false },
+  ) => {
+    if (primary === true) {
+      isLinkingPrimary.current = true
+      linkWithPrimary()
+    } else {
+      isLinking.current = true
+      linkWallet()
+    }
   }
 
   return {

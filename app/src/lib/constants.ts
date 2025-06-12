@@ -1,3 +1,21 @@
+export const CITIZEN_TYPES = {
+  user: "user",
+  chain: "chain",
+  app: "app",
+} as const
+
+export const CITIZEN_TAGS = {
+  [CITIZEN_TYPES.user]: "S8_User_Citizen",
+  [CITIZEN_TYPES.chain]: "S8_Chain_Citizen",
+  [CITIZEN_TYPES.app]: "S8_App_Citizen",
+} as const
+
+export const CITIZEN_ATTESTATION_CODE = {
+  [CITIZEN_TYPES.chain]: "5.1",
+  [CITIZEN_TYPES.app]: "5.2",
+  [CITIZEN_TYPES.user]: "5.3",
+} as const
+
 export const EXTENDED_TAG_BY_ENTITY = {
   citizen: "Citizen",
   gov_contribution: "S7 Elected Official",
@@ -198,3 +216,5 @@ export const OSO_METRICS = {
   onchainBuilderReward: ["R6eoyOPpiinCi8etN5D/qzAGcOxs8caCXTBrPCUarw4="],
   devToolingReward: ["0dWueJWVz1tnXyCQv+vPE9IqED5s1uD3ag2VEA4CDAw="],
 }
+
+export const LOCAL_STORAGE_LOGIN_REDIRECT = "LOGIN_REDIRECT"

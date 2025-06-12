@@ -16,7 +16,7 @@ export default async function Page({
   const userId = session?.user.id
 
   if (!userId) {
-    redirect("/login")
+    redirect("/")
   }
 
   const [project, team, membership, recurringRewards] = await Promise.all([

@@ -8,28 +8,29 @@ datasource db {
 }
 
 model User {
-  id                  String  @id @default(uuid())
-  name                String?
-  username            String?
-  farcasterId         String? @unique
-  imageUrl            String?
-  bio                 String?
-  discord             String?
-  github              String?
-  notDeveloper        Boolean @default(false)
-  govForumProfileUrl  String?
-  privyDid            String?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  emails            UserEmail[]
-  projects          UserProjects[]
-  organizations     UserOrganization[]
-  addresses         UserAddress[]
-  RewardClaim       RewardClaim[]
-  interaction       UserInteraction?
+  id                 String             @id @default(uuid())
+  name               String?
+  username           String?
+  farcasterId        String?            @unique
+  imageUrl           String?
+  bio                String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+  github             String?
+  notDeveloper       Boolean            @default(false)
+  govForumProfileUrl String?
+  discord            String?
+  privyDid           String?
+  citizen            Citizen?
+  RewardClaim        RewardClaim[]
+  addresses          UserAddress[]
+  emails             UserEmail[]
+  interaction        UserInteraction?
+  organizations      UserOrganization[]
+  passports          UserPassport[]
+  projects           UserProjects[]
+  worldId            UserWorldId?
 
   @@index([username])
   @@index([farcasterId])
@@ -37,14 +38,13 @@ model User {
 }
 
 model UserEmail {
-  id        String @id @default(uuid())
-  email     String @unique
+  id        String   @id @default(uuid())
+  email     String   @unique
   userId    String
-  verified  Boolean @default(false)
+  verified  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
@@ -52,45 +52,54 @@ model UserEmail {
 model UserInteraction {
   id                     String   @id @default(uuid())
   userId                 String   @unique
-  user                   User     @relation(fields: [userId], references: [id])
   finishSetupLinkClicked Boolean  @default(false)
   orgSettingsVisited     Boolean  @default(false)
   profileVisitCount      Int      @default(0)
   viewProfileClicked     Boolean  @default(false)
   homePageViewCount      Int      @default(0)
   lastInteracted         DateTime @default(now())
+  user                   User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
 
 model UserAddress {
-  address String @unique
-  userId  String
-  source  String
-
-  primary Boolean @default(false)
-
+  address   String   @unique
+  userId    String
+  source    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
+  primary   Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
 
   @@id([address, userId])
   @@index([userId])
 }
 
-model FundingRound {
-  id          String   @id
-  name        String
-  imageUrl    String
-  description String
-  rewards     String?
-  startDate   DateTime
-  endDate     DateTime
+model UserPassport {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  address   String   @unique
+  score     Decimal  @db.Decimal(10, 3)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 
+  @@index([userId])
+}
+
+model FundingRound {
+  id               String            @id
+  name             String
+  imageUrl         String
+  description      String
+  rewards          String?
+  startDate        DateTime
+  endDate          DateTime
   applications     Application[]
-  recipients       FundingReward[]
   Category         Category[]
+  recipients       FundingReward[]
   ImpactStatement  ImpactStatement[]
   ProjectOSO       ProjectOSO[]
   recurringRewards RecurringReward[]
@@ -98,94 +107,79 @@ model FundingRound {
 }
 
 model FundingReward {
-  id        String  @id
+  id        String       @id
   roundId   String
   projectId String
   amount    Decimal
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  round   FundingRound @relation(fields: [roundId], references: [id])
-  project Project      @relation(fields: [projectId], references: [id])
-  claim   RewardClaim?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  project   Project      @relation(fields: [projectId], references: [id])
+  round     FundingRound @relation(fields: [roundId], references: [id])
+  claim     RewardClaim?
 
   @@unique([roundId, projectId])
   @@index([projectId])
 }
 
 model RewardClaim {
-  rewardId String @id
-  status   String
-
-  address        String?
-  addressSetAt   DateTime?
-  addressSetById String?
-
-  kycStatus          String?
-  kycStatusUpdatedAt DateTime?
-
+  rewardId                  String        @id
+  status                    String
+  address                   String?
+  addressSetAt              DateTime?
+  addressSetById            String?
+  tokenStreamStatus         String?
+  tokenStreamClaimableAt    DateTime?
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+  kycStatus                 String?
+  kycStatusUpdatedAt        DateTime?
   grantEligibilityUpdatedAt DateTime?
-
-  tokenStreamStatus      String?
-  tokenStreamClaimableAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  reward       FundingReward @relation(fields: [rewardId], references: [id])
-  addressSetBy User?         @relation(fields: [addressSetById], references: [id])
+  addressSetBy              User?         @relation(fields: [addressSetById], references: [id])
+  reward                    FundingReward @relation(fields: [rewardId], references: [id])
 }
 
 model Organization {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  avatarUrl   String?
-  coverUrl    String?
-  website     String[]
-  farcaster   String[]
-  twitter     String?
-  mirror      String?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  team      UserOrganization[]
-  projects  ProjectOrganization[]
-  snapshots OrganizationSnapshot[]
+  id                   String                 @id @default(uuid())
+  name                 String
+  description          String?
+  avatarUrl            String?
+  coverUrl             String?
+  website              String[]
+  farcaster            String[]
+  twitter              String?
+  mirror               String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  deletedAt            DateTime?
   OrganizationKYCTeams OrganizationKYCTeam[]
+  snapshots            OrganizationSnapshot[]
+  projects             ProjectOrganization[]
+  team                 UserOrganization[]
 
   @@index([deletedAt])
 }
 
 model OrganizationSnapshot {
-  id            String @id @default(uuid())
-  ipfsHash      String
-  attestationId String
-
-  createdAt DateTime @default(now())
-
+  id             String       @id @default(uuid())
+  ipfsHash       String
+  attestationId  String
+  createdAt      DateTime     @default(now())
   organizationId String
-
-  organization Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   @@index([organizationId])
 }
 
 model UserOrganization {
-  id        String    @id @default(uuid())
-  role      String    @default("member")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
+  id             String       @id @default(uuid())
+  role           String       @default("member")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
   userId         String
   organizationId String
-
-  user         User         @relation(fields: [userId], references: [id])
-  organization Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, organizationId])
   @@index([organizationId])
@@ -195,16 +189,14 @@ model UserOrganization {
 }
 
 model ProjectOrganization {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  projectId      String @unique
+  id             String       @id @default(uuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  projectId      String       @unique
   organizationId String
-
-  project      Project      @relation(fields: [projectId], references: [id])
-  organization Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  project        Project      @relation(fields: [projectId], references: [id])
 
   @@unique([projectId, organizationId])
   @@index([organizationId])
@@ -212,81 +204,67 @@ model ProjectOrganization {
 }
 
 model Project {
-  id           String  @id @default(uuid())
-  name         String
-  description  String?
-  category     String?
-  thumbnailUrl String?
-  bannerUrl    String?
-
-  website   String[]
-  farcaster String[]
-  twitter   String?
-  mirror    String?
-
-  pricingModel        String?
-  pricingModelDetails String?
-
-  openSourceObserverSlug String?
-  isSubmittedToOso       Boolean @default(false)
-
-  defiLlamaSlug     String[]
-
-  addedTeamMembers       Boolean  @default(false)
-  addedFunding           Boolean  @default(false)
-  hasCodeRepositories    Boolean  @default(true)
-  isOnChainContract      Boolean  @default(true)
-  lastMetadataUpdate     DateTime @default(now())
-
-  kycTeamId String?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  team         UserProjects[]
-  organization ProjectOrganization?
-  repos        ProjectRepository[]
-  contracts    ProjectContract[]
-  funding      ProjectFunding[]
-  snapshots    ProjectSnapshot[]
-  applications Application[]
-  rewards      FundingReward[]
-  links        ProjectLinks[]
-  publishedContracts PublishedContract[]
-  ProjectOSO ProjectOSO[]
-  projectOSOData projectOSOData[]
-
-  recurringRewards RecurringReward[]
-
-  kycTeam   KYCTeam? @relation(fields: [kycTeamId], references: [id])
-  ProjectOSOMetrics ProjectOSOMetrics[]
+  id                        String                           @id @default(uuid())
+  name                      String
+  description               String?
+  category                  String?
+  thumbnailUrl              String?
+  bannerUrl                 String?
+  website                   String[]
+  farcaster                 String[]
+  twitter                   String?
+  mirror                    String?
+  openSourceObserverSlug    String?
+  addedTeamMembers          Boolean                          @default(false)
+  addedFunding              Boolean                          @default(false)
+  lastMetadataUpdate        DateTime                         @default(now())
+  createdAt                 DateTime                         @default(now())
+  updatedAt                 DateTime                         @updatedAt
+  deletedAt                 DateTime?
+  hasCodeRepositories       Boolean                          @default(true)
+  isOnChainContract         Boolean                          @default(true)
+  pricingModel              String?
+  pricingModelDetails       String?
+  isSubmittedToOso          Boolean                          @default(false)
+  defiLlamaSlug             String[]
+  kycTeamId                 String?
+  applications              Application[]
+  rewards                   FundingReward[]
+  kycTeam                   KYCTeam?                         @relation(fields: [kycTeamId], references: [id])
+  contracts                 ProjectContract[]
+  funding                   ProjectFunding[]
+  links                     ProjectLinks[]
+  ProjectOSO                ProjectOSO[]
+  sourceProjects            ProjectOSOAtlasRelatedProjects[] @relation("sourceProject")
+  targetProjects            ProjectOSOAtlasRelatedProjects[] @relation("targetProject")
+  ProjectOSOMetrics         ProjectOSOMetrics[]
   ProjectOSORelatedProjects ProjectOSORelatedProjects[]
-  
-  sourceProjects ProjectOSOAtlasRelatedProjects[] @relation("sourceProject")
-  targetProjects ProjectOSOAtlasRelatedProjects[] @relation("targetProject")
+  organization              ProjectOrganization?
+  repos                     ProjectRepository[]
+  snapshots                 ProjectSnapshot[]
+  publishedContracts        PublishedContract[]
+  recurringRewards          RecurringReward[]
+  team                      UserProjects[]
+  projectOSOData            projectOSOData[]
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
 }
 
 model Application {
-  id                        String   @id @default(uuid())
-  status                    String   @default("submitted")
+  id                        String                  @id @default(uuid())
+  status                    String                  @default("submitted")
   attestationId             String
+  createdAt                 DateTime                @default(now())
+  updatedAt                 DateTime                @updatedAt
+  roundId                   String
+  projectId                 String
+  categoryId                String?
   projectDescriptionOptions String[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  roundId    String
-  projectId  String
-  categoryId String?
-
-  round                 FundingRound            @relation(fields: [roundId], references: [id])
-  project               Project                 @relation(fields: [projectId], references: [id])
-  category              Category?               @relation(fields: [categoryId], references: [id])
-  impactStatementAnswer ImpactStatementAnswer[]
+  category                  Category?               @relation(fields: [categoryId], references: [id])
+  project                   Project                 @relation(fields: [projectId], references: [id])
+  round                     FundingRound            @relation(fields: [roundId], references: [id])
+  impactStatementAnswer     ImpactStatementAnswer[]
 
   @@index([projectId])
   @@index([roundId])
@@ -294,67 +272,57 @@ model Application {
 }
 
 model Category {
-  id                String        @id @default(uuid())
-  name              String
-  description       String
-  imageUrl          String?
-  question          String
-  options           String[]
-  roundId           String?
-  isMultipleChoice  Boolean @default(true)
-
-  round             FundingRound? @relation(fields: [roundId], references: [id])
-
-  impactStatements ImpactStatement[]
+  id               String            @id @default(uuid())
+  name             String
+  description      String
+  imageUrl         String?
+  question         String
+  options          String[]
+  roundId          String?
+  isMultipleChoice Boolean           @default(true)
   application      Application[]
+  round            FundingRound?     @relation(fields: [roundId], references: [id])
+  impactStatements ImpactStatement[]
 }
 
 model ImpactStatement {
-  id         String  @id @default(uuid())
-  categoryId String
-  question   String
-  subtext    String?
-
-  isRequired          Boolean       @default(true)
-  isMarkdownSupported Boolean       @default(true)
-  roundId             String?
-  limitToCategoryOptions      Int[]         @default([])
-  selectionOptions    String[]
-
-  round               FundingRound? @relation(fields: [roundId], references: [id])
-
-  impactStatementAnswer ImpactStatementAnswer[]
-
-  category Category @relation(fields: [categoryId], references: [id])
+  id                     String                  @id @default(uuid())
+  categoryId             String
+  question               String
+  subtext                String?
+  isRequired             Boolean                 @default(true)
+  isMarkdownSupported    Boolean                 @default(true)
+  roundId                String?
+  limitToCategoryOptions Int[]                   @default([])
+  selectionOptions       String[]
+  category               Category                @relation(fields: [categoryId], references: [id])
+  round                  FundingRound?           @relation(fields: [roundId], references: [id])
+  impactStatementAnswer  ImpactStatementAnswer[]
 
   @@index([categoryId])
 }
 
 model ImpactStatementAnswer {
-  id                String @id @default(uuid())
+  id                String          @id @default(uuid())
   applicationId     String
   impactStatementId String
   answer            String
-
-  application     Application     @relation(fields: [applicationId], references: [id])
-  impactStatement ImpactStatement @relation(fields: [impactStatementId], references: [id])
+  application       Application     @relation(fields: [applicationId], references: [id])
+  impactStatement   ImpactStatement @relation(fields: [impactStatementId], references: [id])
 
   @@index([applicationId, impactStatementId])
 }
 
 model UserProjects {
-  id   String @id @default(uuid())
-  role String @default("member")
-
+  id        String    @id @default(uuid())
+  role      String    @default("member")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-
   userId    String
   projectId String
-
-  user    User    @relation(fields: [userId], references: [id])
-  project Project @relation(fields: [projectId], references: [id])
+  project   Project   @relation(fields: [projectId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
 
   @@unique([userId, projectId])
   @@index([userId, deletedAt])
@@ -362,74 +330,62 @@ model UserProjects {
 }
 
 model ProjectSnapshot {
-  id            String @id @default(uuid())
+  id            String   @id @default(uuid())
   ipfsHash      String
   attestationId String
-
-  createdAt DateTime @default(now())
-
-  projectId String
-
-  project Project @relation(fields: [projectId], references: [id])
+  createdAt     DateTime @default(now())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
 }
 
 model ProjectRepository {
-  id                String  @id @default(uuid())
+  id                String   @id @default(uuid())
   type              String
-  url               String  @unique
-  name              String?
+  url               String   @unique
+  verified          Boolean  @default(false)
+  openSource        Boolean  @default(false)
+  containsContracts Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  projectId         String
   description       String?
-  verified          Boolean @default(false)
-  openSource        Boolean @default(false)
-  containsContracts Boolean @default(false)
-  npmPackage        Boolean @default(false)
-  crate             Boolean @default(false)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  projectId String
-
-  project Project @relation(fields: [projectId], references: [id])
+  name              String?
+  crate             Boolean  @default(false)
+  npmPackage        Boolean  @default(false)
+  project           Project  @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
 }
 
 model ProjectLinks {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   url         String
   name        String?
   description String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  projectId String
-
-  project Project @relation(fields: [projectId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
 }
 
 model ProjectContract {
-  id                  String  @id @default(uuid())
+  id                  String   @id @default(uuid())
   contractAddress     String
   deployerAddress     String
   deploymentHash      String
   verificationProof   String
   chainId             Int
-  verificationChainId Int?
-  name                String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  projectId           String
   description         String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  projectId String
-
-  project Project @relation(fields: [projectId], references: [id])
+  name                String?
+  verificationChainId Int?
+  project             Project  @relation(fields: [projectId], references: [id])
 
   @@unique([contractAddress, chainId])
   @@index([projectId])
@@ -437,7 +393,7 @@ model ProjectContract {
 }
 
 model PublishedContract {
-  id                  String  @id @default(uuid())
+  id                  String    @id @default(uuid())
   contract            String
   chainId             Int
   deployer            String
@@ -445,29 +401,24 @@ model PublishedContract {
   signature           String
   verificationChainId Int
   projectId           String
-
-  createdAt DateTime @default(now())
-  revokedAt DateTime?
-
-  project Project @relation(fields: [projectId], references: [id])
+  createdAt           DateTime  @default(now())
+  revokedAt           DateTime?
+  project             Project   @relation(fields: [projectId], references: [id])
 }
 
 model ProjectFunding {
-  id           String  @id @default(uuid())
+  id           String   @id @default(uuid())
   type         String
   grant        String?
   grantUrl     String?
   amount       String
   receivedAt   String
   details      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  projectId    String
   fundingRound String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  projectId String
-
-  project Project @relation(fields: [projectId], references: [id])
+  project      Project  @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
 }
@@ -496,23 +447,14 @@ model Badgeholder {
 }
 
 model GithubProximity {
-  peer String
+  peer       String @unique
   percentile Float
-
-  @@unique([peer])
-}
-
-enum KYCStatus {
-  PENDING
-  APPROVED
-  REJECTED
 }
 
 model ContactEmailTags {
-  id        String @id @default(uuid())
-  email     String @unique
+  id        String   @id @default(uuid())
+  email     String   @unique
   tags      String[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -520,110 +462,97 @@ model ContactEmailTags {
 }
 
 model KYCUser {
-  id           String    @id @default(uuid())
+  id           String         @id @default(uuid())
   email        String
-	firstName    String
-	lastName     String
-	businessName String?   // For businesses only
-  status       KYCStatus @default(PENDING)
+  firstName    String
+  lastName     String
+  businessName String?
+  status       KYCStatus      @default(PENDING)
   expiry       DateTime
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   KYCUserTeams KYCUserTeams[]
-  
+
   @@index([email])
 }
 
 model KYCTeam {
-  id             String       @id @default(uuid())
-  walletAddress  String       @unique
+  id                   String                @id @default(uuid())
+  walletAddress        String                @unique
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  deletedAt            DateTime?
+  team                 KYCUserTeams[]
+  OrganizationKYCTeams OrganizationKYCTeam[]
+  projects             Project[]
+  rewardStreams        RewardStream[]
+  superfludStream      SuperfluidStream[]
 
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  deletedAt      DateTime?
-  
-	team                       KYCUserTeams[]
-  projects                   Project[]
-  OrganizationKYCTeams       OrganizationKYCTeam[]
-  superfludStream            SuperfluidStream[]
-
-  rewardStreams   RewardStream[]
-	
   @@index([walletAddress])
 }
 
 model KYCUserTeams {
-	id          String    @id @default(uuid())
-	kycUserId   String
-	kycTeamId   String
-	
-	createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-	
-	users       KYCUser   @relation(fields: [kycUserId], references: [id]) 
-	team        KYCTeam   @relation(fields: [kycTeamId], references: [id], onDelete: Cascade) 
-	
-	@@index([kycUserId])
-	@@index([kycTeamId])
+  id        String   @id @default(uuid())
+  kycUserId String
+  kycTeamId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  team      KYCTeam  @relation(fields: [kycTeamId], references: [id], onDelete: Cascade)
+  users     KYCUser  @relation(fields: [kycUserId], references: [id])
+
+  @@index([kycUserId])
+  @@index([kycTeamId])
 }
 
-model OrganizationKYCTeam { // Organization can have many KYCTeam
-	id             String    @id @default(uuid())
-	organizationId String
-	kycTeamId      String
-	
-	createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+model OrganizationKYCTeam {
+  id             String       @id @default(uuid())
+  organizationId String
+  kycTeamId      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   deletedAt      DateTime?
-	
-	organization   Organization @relation(fields: [organizationId], references: [id])
-	team           KYCTeam      @relation(fields: [kycTeamId], references: [id], onDelete: Cascade) 
-	
-	@@index([organizationId])
+  team           KYCTeam      @relation(fields: [kycTeamId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
   @@index([kycTeamId])
 }
 
 model ProjectOSO {
-  id          String  @id @default(uuid())
-  projectId   String
-  osoId       String
-  roundId     String?
-
-  project     Project @relation(fields: [projectId], references: [id])
-  round       FundingRound? @relation(fields: [roundId], references: [id])
+  id        String        @id @default(uuid())
+  projectId String
+  osoId     String
+  roundId   String?
+  project   Project       @relation(fields: [projectId], references: [id])
+  round     FundingRound? @relation(fields: [roundId], references: [id])
 
   @@index([projectId])
   @@index([osoId])
 }
 
 model projectOSOData {
-  id          String  @id @default(uuid())
-  projectId   String
-  osoId       String
-  data        Json
-
-  project     Project @relation(fields: [projectId], references: [id])
+  id        String  @id @default(uuid())
+  projectId String
+  osoId     String
+  data      Json
+  project   Project @relation(fields: [projectId], references: [id])
 
   @@index([projectId])
   @@index([osoId])
 }
 
 model RecurringReward {
-  id           String       @id @default(uuid())
-  roundId      String
-  tranche      Int
-  projectId    String
-  amount       String    // In OP with 18 decimals
-  
-  createdAt    DateTime     @default(now())    
-  updatedAt    DateTime     @default(now())    
-  deletedAt    DateTime?
-  
-  round        FundingRound @relation(fields: [roundId], references: [id])
-  project      Project @relation(fields: [projectId], references: [id])
-  
+  id        String       @id @default(uuid())
+  roundId   String
+  tranche   Int
+  projectId String
+  amount    String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @default(now())
+  deletedAt DateTime?
+  project   Project      @relation(fields: [projectId], references: [id])
+  round     FundingRound @relation(fields: [roundId], references: [id])
+
   @@unique([roundId, tranche, projectId])
   @@index([projectId])
   @@index([roundId])
@@ -631,43 +560,128 @@ model RecurringReward {
 }
 
 model SuperfluidStream {
-  id           String    @id // Superfluid Id
-	sender       String
-	receiver     String
-	flowRate     String
-  deposit      String
-	
-	createdAt    DateTime     @default(now())    
-  updatedAt    DateTime     @default(now())    
-  deletedAt    DateTime? 
-	
-	internalStreamId  String?
-	
-	rewardStream     RewardStream? @relation(fields: [internalStreamId], references: [id])
-  kycTeam          KYCTeam? @relation(fields: [receiver], references: [walletAddress])
-  
+  id               String        @id
+  sender           String
+  receiver         String
+  flowRate         String
+  deposit          String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now())
+  deletedAt        DateTime?
+  internalStreamId String?
+  rewardStream     RewardStream? @relation(fields: [internalStreamId], references: [id])
+  kycTeam          KYCTeam       @relation(fields: [receiver], references: [walletAddress])
+
   @@unique([sender, receiver])
   @@index([sender])
   @@index([receiver])
   @@index([internalStreamId])
 }
 
-// To keep track of the streams when user changes their wallet
-// This is used to reconcile the streams when a user changes their wallet address
-// This is the id that's passed to Superfluid to create the stream
-model RewardStream { // This is used to track the ids for the streams
-		id         String         @id
-    projects   String[]       // Immutable list of projectIds redundantly stored for reconciliation & validation
-    roundId    String        
-    kycTeamId  String
-		
-		createdAt    DateTime     @default(now())    
-		
-		streams    SuperfluidStream[]
-    round      FundingRound @relation(fields: [roundId], references: [id])
-    team       KYCTeam @relation(fields: [kycTeamId], references: [id])
+model RewardStream {
+  id        String             @id
+  projects  String[]
+  roundId   String
+  createdAt DateTime           @default(now())
+  kycTeamId String
+  team      KYCTeam            @relation(fields: [kycTeamId], references: [id])
+  round     FundingRound       @relation(fields: [roundId], references: [id])
+  streams   SuperfluidStream[]
 
-    @@index([roundId])
+  @@index([roundId])
+}
+
+model ProjectOSOMetrics {
+  id        String           @id @default(uuid())
+  projectId String
+  metric    ProjectOSOMetric
+  tranche   Int
+  value     String
+  project   Project          @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, metric, tranche])
+  @@index([projectId])
+  @@index([metric])
+  @@index([tranche])
+}
+
+model ProjectOSORelatedProjects {
+  id        String  @id @default(uuid())
+  projectId String
+  tranche   Int
+  osoId     String
+  project   Project @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, tranche, osoId])
+  @@index([projectId])
+  @@index([osoId])
+}
+
+model ProjectOSOAtlasRelatedProjects {
+  id               String  @id @default(uuid())
+  projectId        String
+  tranche          Int
+  relatedProjectId String
+  sourceProject    Project @relation("sourceProject", fields: [projectId], references: [id])
+  targetProject    Project @relation("targetProject", fields: [relatedProjectId], references: [id])
+
+  @@unique([projectId, tranche, relatedProjectId])
+  @@index([projectId])
+  @@index([relatedProjectId])
+}
+
+model Citizen {
+  id             Int      @id @default(autoincrement())
+  userId         String   @unique
+  address        String?  @unique
+  type           String
+  attestationId  String?
+  timeCommitment String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organizationId String?
+  projectId      String?
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([organizationId])
+}
+
+model S8QualifyingUser {
+  address String @id
+
+  @@index([address])
+}
+
+model S8QualifyingChain {
+  organizationId String @id
+
+  @@index([organizationId])
+}
+
+model S8QualifyingProject {
+  projectId String @id
+
+  @@index([projectId])
+}
+
+model UserWorldId {
+  id            Int      @id @default(autoincrement())
+  userId        String   @unique
+  verified      Boolean  @default(false)
+  nullifierHash String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+enum KYCStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum ProjectOSOMetric {
@@ -686,49 +700,4 @@ enum ProjectOSOMetric {
   DEVELOPER_CONNECTION_COUNT
   TRUSTED_DEVELOPER_USERNAME
   DOWNSTREAM_GAS
-}
-
-model ProjectOSOMetrics {
-  id        String @id @default(uuid())
-  projectId String
-  metric    ProjectOSOMetric
-  tranche   Int
-  value     String
-
-  project   Project @relation(fields: [projectId], references: [id])
-
-  @@index([projectId])
-  @@index([metric])
-  @@index([tranche])
-
-  @@unique([projectId, metric, tranche])
-}
-
-model ProjectOSORelatedProjects {
-  id        String @id @default(uuid())
-  projectId String
-  tranche   Int
-  osoId     String
-
-  project                        Project @relation(fields: [projectId], references: [id])
-
-  @@index([projectId])
-  @@index([osoId])
-
-  @@unique([projectId, tranche, osoId])
-}
-
-model ProjectOSOAtlasRelatedProjects {
-  id                String @id @default(uuid())
-  projectId         String
-  tranche           Int
-  relatedProjectId  String
-
-  sourceProject     Project @relation("sourceProject", fields: [projectId], references: [id])
-  targetProject     Project @relation("targetProject", fields: [relatedProjectId], references: [id])
-
-  @@index([projectId])
-  @@index([relatedProjectId])
-
-  @@unique([projectId, tranche, relatedProjectId])
 }

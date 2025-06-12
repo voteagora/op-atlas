@@ -1,6 +1,8 @@
 import { Prisma, User } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 
+import { CITIZEN_TYPES } from "@/lib/constants"
+
 export type TeamRole = "member" | "admin"
 
 export type ProjectWithDetails = Prisma.ProjectGetPayload<{
@@ -387,3 +389,25 @@ export type ExtendedAggregatedType = AggregatedType & {
   contributors: { address: string; email?: string }[]
   github_repo_builders: { address: string; email?: string }[]
 }
+
+export interface PassportScore {
+  score: string
+  passing_score: boolean
+  last_score_timestamp: string
+  expiration_timestamp: string
+  threshold: string
+}
+
+export interface CitizenshipQualification {
+  type: string
+  identifier: string
+  title: string
+  avatar: string | null
+  eligible: boolean
+  error?: string
+}
+
+export type CitizenLookup =
+  | { type: typeof CITIZEN_TYPES.user; id: string }
+  | { type: typeof CITIZEN_TYPES.chain; id: string }
+  | { type: typeof CITIZEN_TYPES.app; id: string }

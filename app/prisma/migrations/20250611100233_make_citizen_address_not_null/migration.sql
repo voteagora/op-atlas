@@ -1,0 +1,1 @@
+ALTER TABLE "Citizen" ALTER COLUMN "address" SET NOT NULL; 

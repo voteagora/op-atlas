@@ -3,17 +3,21 @@
 import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { memo, useState } from "react"
+import { memo, useEffect, useState } from "react"
 
+import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { useUsername } from "@/hooks/useUsername"
+import { CITIZEN_TYPES } from "@/lib/constants"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 
+import { UserAvatarLarge } from "../common/UserAvatarLarge"
 import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
 import { ArrowDropRight } from "../icons/ArrowDropRight"
-import { Avatar, AvatarImage } from "../ui/avatar"
+import { CheckboxCircleFIll } from "../icons/reminx"
+import { AvatarBadge } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
@@ -33,10 +37,24 @@ const ProfileDetailCard = ({
   const [showImportDialog, setShowImportDialog] = useState(false)
 
   const { isBadgeholder } = useIsBadgeholder(user)
+  const { data: citizen } = useCitizen({
+    query: { type: CITIZEN_TYPES.user, id: user.id },
+  })
+  const [isCitizen, setIsCitizen] = useState(false)
   const { linkEmail } = usePrivyEmail(user.id)
 
   const username = useUsername(loadedUser)
   const email = user.emails?.[0]?.email
+
+  useEffect(() => {
+    if (
+      citizen &&
+      citizen.attestationId &&
+      citizen.type === CITIZEN_TYPES.user
+    ) {
+      setIsCitizen(true)
+    }
+  }, [citizen])
 
   const renderEmail = () => {
     if (email) {
@@ -69,8 +87,12 @@ const ProfileDetailCard = ({
       )
     } else {
       return (
-        <Link href="/profile/details" className="hover:underline flex items-center gap-x-0.5">
-          Add profile details <ArrowDropRight fill="#6B7280" className="text-muted-foreground" />
+        <Link
+          href="/profile/details"
+          className="hover:underline flex items-center gap-x-0.5"
+        >
+          Add profile details{" "}
+          <ArrowDropRight fill="#6B7280" className="text-muted-foreground" />
         </Link>
       )
     }
@@ -79,9 +101,16 @@ const ProfileDetailCard = ({
   return (
     <div className="flex gap-x-4">
       {user.imageUrl ? (
-        <Avatar className="w-20 h-20 my-0.5">
-          <AvatarImage src={user.imageUrl} />
-        </Avatar>
+        <UserAvatarLarge imageUrl={user.imageUrl}>
+          {isCitizen && (
+            <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+              <CheckboxCircleFIll
+                className="w-[20px] h-[20px]"
+                fill="#FF0000"
+              />
+            </AvatarBadge>
+          )}
+        </UserAvatarLarge>
       ) : (
         <button
           onClick={() => setShowImportDialog(true)}
@@ -101,6 +130,14 @@ const ProfileDetailCard = ({
             width={18}
             height={18}
           />
+          {isCitizen && (
+            <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+              <CheckboxCircleFIll
+                className="w-[20px] h-[20px]"
+                fill="#FF0000"
+              />
+            </AvatarBadge>
+          )}
           <Image
             className="absolute w-6 h-6 text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
             src="/assets/icons/add-line.svg"

@@ -28,6 +28,7 @@ type AppDialog = {
   data: DataType
   setData: Dispatch<SetStateAction<DataType>>
 }
+
 const AppDialogContext = createContext<AppDialog>({} as AppDialog)
 
 export function useAppDialogs() {
@@ -48,9 +49,23 @@ export function DialogProvider({ children }: PropsWithChildren) {
     hasActiveStream: false,
   })
 
+  const handleSetOpenDialog: Dispatch<
+    SetStateAction<DialogType | undefined>
+  > = (value) => {
+    const newType = typeof value === "function" ? value(openDialog) : value
+    setOpenDialog(newType)
+  }
+
   return (
     <AppDialogContext.Provider
-      value={{ openDialog, setOpenDialog, address, setAddress, data, setData }}
+      value={{
+        openDialog,
+        setOpenDialog: handleSetOpenDialog,
+        address,
+        setAddress,
+        data,
+        setData,
+      }}
     >
       {children}
     </AppDialogContext.Provider>

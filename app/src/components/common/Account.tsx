@@ -1,21 +1,20 @@
 "use client"
 
 import {
-  User as PrivyUser,
   useLinkAccount,
   useLogin,
   useLogout,
   usePrivy,
+  User as PrivyUser,
 } from "@privy-io/react-auth"
 import { Loader2 } from "lucide-react"
-import { signIn, signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { signIn, signOut, useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
 
-import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +24,7 @@ import {
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
-import { AUTH_STATUS } from "@/lib/constants"
+import { AUTH_STATUS, LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {
   hasShownWelcomeBadgeholderDialog,
@@ -35,6 +34,7 @@ import {
 } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
+
 import { UserAvatarSmall } from "./UserAvatarSmall"
 
 export const Account = () => {
@@ -129,7 +129,11 @@ export const Account = () => {
       saveLogInDate()
       track("Successful Sign In", { userId: session.user.id })
 
-      if (!isMissionsPath) {
+      const loginRedirect = localStorage.getItem(LOCAL_STORAGE_LOGIN_REDIRECT)
+      if (loginRedirect) {
+        localStorage.removeItem(LOCAL_STORAGE_LOGIN_REDIRECT)
+        router.push(loginRedirect)
+      } else if (!isMissionsPath) {
         router.push("/dashboard")
       }
 
@@ -165,7 +169,6 @@ export const Account = () => {
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
-
             <UserAvatarSmall imageUrl={user?.imageUrl} />
 
             {username}
@@ -223,8 +226,9 @@ export const Account = () => {
     return (
       <button
         type="button"
-        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${isLoggingIn.current ? "bg-gray-300" : "bg-brand-primary"
-          }`}
+        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${
+          isLoggingIn.current ? "bg-gray-300" : "bg-brand-primary"
+        }`}
         onClick={privyLogin}
       >
         {isLoggingIn.current ? (

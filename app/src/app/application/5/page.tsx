@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+
 import { auth } from "@/auth"
 import { ApplicationFlow } from "@/components/application/5"
 import { getCategories } from "@/db/category"
@@ -10,6 +12,9 @@ export const maxDuration = 120
 
 export default async function Page() {
   const session = await auth()
+  if (!session?.user?.id) {
+    redirect("/")
+  }
 
   const [projects, applications, categories] = session
     ? await Promise.all([

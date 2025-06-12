@@ -1,78 +1,27 @@
 "use client"
 
-import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
+import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
-import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
-import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
-import { setUserIsNotDeveloper } from "@/lib/actions/users"
+import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { cn } from "@/lib/utils"
 
 import { Checkbox } from "../ui/checkbox"
 
 export const GithubConnection = ({ userId }: { userId: string }) => {
-  const { user: privyUser, unlinkGithub } = usePrivy()
-  const { user, invalidate: invalidateUser } = useUser({
+  const { user: privyUser } = usePrivy()
+  const { user } = useUser({
     id: userId,
     enabled: true,
   })
 
-  const onError = useHandlePrivyErrors()
+  const { linkGithub, unlinkGithub, toggleIsDeveloper } = usePrivyLinkGithub(userId)
 
   const username = user?.github || privyUser?.github?.username
   const isSyncing =
     user?.github?.toLowerCase() !== privyUser?.github?.username?.toLowerCase()
-
-  const { linkGithub } = useLinkAccount({
-    onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      if (linkMethod === "github") {
-        toast.promise(
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser()),
-          {
-            loading: "Linking github...",
-            success: "Github linked successfully",
-            error: "Failed to link github",
-          },
-        )
-      }
-    },
-    onError,
-  })
-
-  const handleUnlinkGithub = () => {
-    if (privyUser?.github?.subject) {
-      toast.promise(unlinkGithub(privyUser.github.subject), {
-        loading: "Unlinking github...",
-        success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
-          return "Github unlinked successfully"
-        },
-        error: (error) => {
-          return error.message
-        },
-      })
-    }
-  }
-
-  const toggleIsDeveloper = () => {
-    const desiredState = !user?.notDeveloper
-
-    toast.promise(setUserIsNotDeveloper(desiredState), {
-      loading: "Updating developer status...",
-      success: () => {
-        if (desiredState && privyUser?.github?.subject) {
-          handleUnlinkGithub()
-        } else {
-          invalidateUser()
-        }
-        return "Developer status updated successfully"
-      },
-      error: "Failed to update developer status",
-    })
-  }
 
   return (
     <div className="flex flex-col space-y-4">
@@ -101,7 +50,7 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
         {username ? (
           <Button
             variant="secondary"
-            onClick={handleUnlinkGithub}
+            onClick={unlinkGithub}
             className={cn(isSyncing && "opacity-50")}
           >
             Disconnect

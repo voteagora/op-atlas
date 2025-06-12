@@ -6,20 +6,20 @@ import {
   UserAddress,
   UserEmail,
   UserInteraction,
+  UserPassport,
 } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
+import { getAddress, isAddress } from "viem"
 
+import { auth } from "@/auth"
 import {
   CONTRIBUTOR_ELIGIBLE_PROJECTS,
   EXTENDED_TAG_BY_ENTITY,
 } from "@/lib/constants"
 import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
-
-import { auth } from "@/auth"
 import { generateTemporaryUsername } from "@/lib/utils/username"
+
 import { prisma } from "./client"
-import { isAddress } from "viem"
-import { getAddress } from "viem"
 
 export type Entity = keyof ExtendedAggregatedType
 export type EntityObject = {
@@ -51,7 +51,7 @@ export async function getUserById(userId: string) {
 
   // If user is not logged in or requesting different user's data, remove sensitive information
   // but return the same object structure for consistency
-  if (!session?.user || session.user.id !== userId && user) {
+  if (!session?.user || (session.user.id !== userId && user)) {
     if (user) {
       user.emails = []
       user.interaction = null
@@ -69,10 +69,10 @@ export async function getUserById(userId: string) {
 
 export async function getUserByPrivyDid(privyDid: string): Promise<
   | (User & {
-    addresses: UserAddress[]
-    interaction: UserInteraction | null
-    emails: UserEmail[]
-  })
+      addresses: UserAddress[]
+      interaction: UserInteraction | null
+      emails: UserEmail[]
+    })
   | null
 > {
   return prisma.user.findFirst({
@@ -151,10 +151,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
 
 export async function getUserByUsername(username: string): Promise<
   | (User & {
-    addresses: UserAddress[]
-    interaction: UserInteraction | null
-    emails: UserEmail[]
-  })
+      addresses: UserAddress[]
+      interaction: UserInteraction | null
+      emails: UserEmail[]
+    })
   | null
 > {
   const result = await prisma.$queryRaw<
@@ -217,18 +217,15 @@ export async function searchUsersByUsername({
   })
 }
 
-export async function searchByAddress({
-  address,
-}: {
-  address: string
-}) {
-
+export async function searchByAddress({ address }: { address: string }) {
   return prisma.user.findMany({
     where: {
       addresses: {
         some: {
           address: {
-            contains: isAddress(address) ? getAddress(address) as string : address,
+            contains: isAddress(address)
+              ? (getAddress(address) as string)
+              : address,
           },
         },
       },
@@ -236,12 +233,7 @@ export async function searchByAddress({
   })
 }
 
-export async function searchByEmail({
-  email,
-}: {
-  email: string
-}) {
-
+export async function searchByEmail({ email }: { email: string }) {
   // Only search if it's a valid email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email)) {
@@ -327,24 +319,24 @@ export async function updateUserEmail({
   })
   const deleteEmails = currentEmail
     ? [
-      prisma.userEmail.delete({
-        where: {
-          id: currentEmail.id,
-        },
-      }),
-    ]
+        prisma.userEmail.delete({
+          where: {
+            id: currentEmail.id,
+          },
+        }),
+      ]
     : []
 
   const createEmail = email
     ? [
-      prisma.userEmail.create({
-        data: {
-          email,
-          userId: id,
-          verified: verified ?? false,
-        },
-      }),
-    ]
+        prisma.userEmail.create({
+          data: {
+            email,
+            userId: id,
+            verified: verified ?? false,
+          },
+        }),
+      ]
     : []
 
   return prisma.$transaction([...deleteEmails, ...createEmail])
@@ -375,7 +367,6 @@ export async function removeUserAddress({
   id: string
   address: string
 }) {
-
   return prisma.userAddress.delete({
     where: {
       address_userId: {
@@ -895,17 +886,19 @@ export async function addTags(records: EntityRecords) {
 }
 
 export async function makeUserAddressPrimary(address: string, userId: string) {
-  const existingPrimary = await prisma.userAddress.findFirst({
-    where: {
-      primary: true,
-      userId,
-    },
-  })
+  const user = await getUserById(userId)
+
+  if (!user) {
+    throw new Error("User not found")
+  }
+
+  const existingPrimary = user.addresses.find((addr) => addr.primary)?.address
+
   if (existingPrimary) {
     await prisma.userAddress.update({
       where: {
         address_userId: {
-          address: existingPrimary.address,
+          address: existingPrimary,
           userId,
         },
       },
@@ -958,6 +951,95 @@ export async function createUser(privyDid: string) {
     data: {
       privyDid,
       username: generateTemporaryUsername(privyDid),
-    }
+    },
+  })
+}
+
+export async function upsertUserPassport({
+  userId,
+  passport,
+}: {
+  userId: string
+  passport: {
+    score: number
+    expiresAt: Date
+    address: string
+  }
+}) {
+  // Check if a passport for that address already exists
+  const existingPassport = await prisma.userPassport.findFirst({
+    where: {
+      userId,
+      address: passport.address,
+    },
+  })
+
+  // Delete existing record if it exists
+  if (existingPassport) {
+    await prisma.userPassport.delete({
+      where: {
+        id: existingPassport.id,
+      },
+    })
+  }
+
+  // Create new record
+  return prisma.userPassport.create({
+    data: {
+      userId,
+      score: passport.score,
+      address: passport.address,
+      expiresAt: passport.expiresAt,
+    },
+  })
+}
+
+export async function getUserPassports(
+  userId: string,
+): Promise<UserPassport[]> {
+  return prisma.userPassport.findMany({
+    where: {
+      userId,
+    },
+  })
+}
+
+export async function deleteUserPassport(id: number) {
+  return prisma.userPassport.delete({
+    where: { id },
+  })
+}
+
+export async function getUserWorldId(userId: string) {
+  return prisma.userWorldId.findFirst({
+    where: {
+      userId,
+    },
+  })
+}
+
+export async function upsertUserWorldId({
+  userId,
+  nullifierHash,
+  verified = false,
+}: {
+  userId: string
+  nullifierHash: string
+  verified?: boolean
+}) {
+  return prisma.userWorldId.upsert({
+    where: {
+      userId,
+    },
+    update: {
+      nullifierHash,
+      verified,
+      updatedAt: new Date(),
+    },
+    create: {
+      userId,
+      nullifierHash,
+      verified,
+    },
   })
 }

@@ -1,11 +1,17 @@
+"use client"
+
+import Link from "next/link"
+import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
+
+import { CheckboxCircleFIll, PencilFill } from "@/components/icons/reminx"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
+import { useCitizen } from "@/hooks/citizen/useCitizen"
+import { useUsername } from "@/hooks/useUsername"
+import { CITIZEN_TYPES } from "@/lib/constants"
 import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { PencilFill } from "@/components/icons/reminx"
-import { useUsername } from "@/hooks/useUsername"
-import { useSession } from "next-auth/react"
-import Link from "next/link"
 import ProfileHeaderLinks from "./ProfileHeaderLinks"
 
 const ProfileHeader = ({
@@ -19,6 +25,16 @@ const ProfileHeader = ({
   const { data: session } = useSession()
   const username = useUsername(user)
 
+  const { data: citizen } = useCitizen({ query: { type: CITIZEN_TYPES.user, id: user.id } })
+  const [isCitizen, setIsCitizen] = useState(false)
+
+  useEffect(() => {
+    if (citizen && citizen.attestationId && citizen.type === CITIZEN_TYPES.user) {
+      setIsCitizen(true)
+    }
+  }, [citizen])
+
+
   const isSelf = session?.user?.id === user.id
 
   return (
@@ -27,6 +43,11 @@ const ProfileHeader = ({
         {user.imageUrl && (
           <Avatar className="relative w-20 h-20 my-0.5">
             <AvatarImage src={user.imageUrl} className="object-cover" />
+            {(isCitizen && !isSelf) &&
+              <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+                <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
+              </AvatarBadge>
+            }
             {isSelf && (
               <Link href="/profile/details">
                 <AvatarBadge className="absolute w-[40px] h-[40px] top-[20px] right-0 bg-white hover:bg-secondary border border-muted/50 hover:border-muted rounded-full">
@@ -34,8 +55,6 @@ const ProfileHeader = ({
                 </AvatarBadge>
               </Link>
             )}
-
-
           </Avatar>
         )}
         <div className="flex flex-col gap-6">
