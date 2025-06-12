@@ -309,10 +309,10 @@ export const UserRequirements = ({
         </div>
 
         <div>
-          <ConditionRow isMet={qualification ? true : false}>
+          <ConditionRow isMet={qualification?.eligible || false}>
             Your first Superchain transaction happened before June 2024
           </ConditionRow>
-          <ConditionRow isMet={qualification ? true : false}>
+          <ConditionRow isMet={qualification?.eligible || false}>
             You&apos;ve had 2 transactions per month, in at least 3 of 6
             previous months.
           </ConditionRow>
