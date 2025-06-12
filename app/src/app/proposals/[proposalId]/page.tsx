@@ -131,9 +131,9 @@ const Page = (params: PageProps) => {
   const { votingCardProps, votingColumnProps, votingRedirectProps } =
     getVotingProps(votingCardType)
 
-  console.log("votingCardType: ", votingCardType)
-  console.log("votingCardProps: ", votingCardProps)
-  console.log("votingColumnProps: ", votingColumnProps)
+  // console.log("votingCardType: ", votingCardType)
+  // console.log("votingCardProps: ", votingCardProps)
+  // console.log("votingColumnProps: ", votingColumnProps)
 
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
