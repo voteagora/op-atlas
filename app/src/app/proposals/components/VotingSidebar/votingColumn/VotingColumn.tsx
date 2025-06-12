@@ -129,20 +129,34 @@ const VotingColumn = ({
 
     const encoder = new SchemaEncoder(VOTE_SCHEMA)
 
+    let choices: string[]
+
+    switch (voteType) {
+      case VoteType.For:
+        choices = ["0"]
+        break
+      case VoteType.Abstain:
+        choices = ["1"]
+        break
+      case VoteType.Against:
+        choices = ["2"]
+        break
+      default:
+        choices = []
+    }
+
     const args = {
       contract: "0x368723068b6C762b416e5A7d506a605E8b816C22",
       id: "42740012529150791772311325945937601588484139798594959324533215350132958331528",
       proposer: "0x648BFC4dB7e43e799a84d0f607aF0b4298F932DB",
-      description:
-        "# Jeff - Hybrid + Basic + June 12 9:26 AM ET No on-chain transactions.",
-      choices: ["0"],
+      description: "# Garrett AttestationTest",
+      choices: choices,
       proposalTypeId: 0,
       startBlock: "28966158",
       endBlock: "29095758",
       proposalType: "STANDARD",
       tiers: [],
-      onChainProposalId:
-        "112542233745806009107871466048611490894875302937505011175151532497811941558355",
+      onChainProposalId: "12345",
     }
     const encodedData = encoder.encodeData([
       { name: "Contract", value: args.contract, type: "address" },
@@ -166,7 +180,7 @@ const VotingColumn = ({
 
     const delegateRequest = {
       schema:
-        "0xb16fa048b0d597f5a821747eba64efa4762ee5143e9a80600d0005386edfc995",
+        "0x875845d42b7cb72da8d97c3442182b9a0ee302d4a8d661ee8b83f13bf1f8f38b",
       recipient: signer.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
       revocable: true,
