@@ -26,11 +26,6 @@ export const CITIZEN_SCHEMA_ID =
     ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
     : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
 
-export const VOTE_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0x8c1d9f8b5b2e5d5e5c5d5e5f5e5d5c5b5a5958575655545352515f5e5d5c5b5a"
-    : "0x8c1d9f8b5b2e5d5e5c5d5e5f5e5d5c5b5a5958575655545352515f5e5d5c5b5a"
-
 const citizenSchema = new SchemaEncoder(
   "uint256 farcasterId,string selectionMethod",
 )
@@ -48,8 +43,6 @@ const applicationSchema = new SchemaEncoder(
 const contractSchema = new SchemaEncoder(
   "address contract, uint32 chainId, address deployer, bytes32 deploymentTx, bytes signature, uint32 verificationChainId, uint256 farcasterID",
 )
-
-const voteSchema = new SchemaEncoder("string voteType")
 
 const EAS_SIGNER_PRIVATE_KEY = process.env.EAS_SIGNER_PRIVATE_KEY
 if (!EAS_SIGNER_PRIVATE_KEY) {
@@ -499,15 +492,7 @@ export async function isAttestationActive(
 export async function createVoteAttestation(
   delegateAttestationSignature: Signature,
 ): Promise<string> {
-  console.log(
-    "Processing delegated attestation with signature: ",
-    delegateAttestationSignature,
-  )
-
   try {
-    // Get the delegated interface to verify the signature
-    const delegated = await eas.getDelegated()
-
     // Convert the viem Signature (with v as bigint) to EAS SDK Signature (with v as number)
     const convertedSignature = {
       ...delegateAttestationSignature,
@@ -517,7 +502,7 @@ export async function createVoteAttestation(
     // Use attestByDelegation to create the attestation
     const tx = await eas.attestByDelegation({
       schema:
-        "0xb16fa048b0d597f5a821747eba64efa4762ee5143e9a80600d0005386edfc995",
+        "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09",
       data: {
         recipient: "0x0000000000000000000000000000000000000000",
         expirationTime: BigInt(0), // NO_EXPIRATION
