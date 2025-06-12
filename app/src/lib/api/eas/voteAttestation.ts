@@ -1,9 +1,11 @@
 import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 
 export async function createVoteAttestationCall(
-  voteType: VoteType,
+  delegateAttestationSignature: string,
 ): Promise<any> {
-  console.log(`Making API request to /api/eas/voteAttestation with vote type: ${voteType}`)
+  console.log(
+    `Making API request to /api/eas/voteAttestation with signature: ${delegateAttestationSignature}`,
+  )
 
   try {
     const response = await fetch("/api/eas/voteAttestation", {
@@ -11,7 +13,7 @@ export async function createVoteAttestationCall(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ voteType }),
+      body: JSON.stringify({ delegateAttestationSignature }),
     })
 
     console.log(`Response status: ${response.status}`)

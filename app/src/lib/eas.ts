@@ -495,9 +495,14 @@ export async function isAttestationActive(
   }
 }
 
-export async function createVoteAttestation(voteType: string): Promise<string> {
+export async function createVoteAttestation(
+  delegateAttestationSignature: string,
+): Promise<string> {
   console.log("createVoteAttestation Not Implemented")
-  console.log("createVoteAttestation VoteType: ", voteType)
+  console.log(
+    "createVoteAttestation Delegate Attestation Signature: ",
+    delegateAttestationSignature,
+  )
 
   // const data = voteSchema.encodeData([
   //   { name: "voteType", value: voteType, type: "string" },
