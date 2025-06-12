@@ -37,7 +37,7 @@ type TimeCommitment = (typeof TIME_COMMITMENT_OPTIONS)[number]
 const RULES = [
   "I will not attempt to get multiple votes in the Citizens House.",
   "I understand that the eligibility criteria of the Citizens House may change next season and I could no longer be a Citizen.",
-  "I will abide by the rules of engagement",
+  'I will abide by the <a href="https://gov.optimism.io/t/code-of-conduct/5751" target="_blank" style="text-decoration: underline;">Code of Conduct</a>.',
 ] as const
 
 function CitizenshipApplicationDialog({
@@ -50,6 +50,7 @@ function CitizenshipApplicationDialog({
   const { data: citizen } = useCitizen({
     query: { type: CITIZEN_TYPES.user, id: userId },
   })
+
   const {
     attestCitizen,
     isLoading: isAttesting,
@@ -62,7 +63,8 @@ function CitizenshipApplicationDialog({
     isSuccess: isUpdateSuccess,
   } = useCitizenUpdate(userId)
 
-  const { data: qualification } = useCitizenQualification()
+  const { data: qualification, isLoading: isQualificationLoading } =
+    useCitizenQualification()
   const { user } = useUser({ id: userId })
 
   const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>(
@@ -97,6 +99,19 @@ function CitizenshipApplicationDialog({
       setSelectedTime(undefined)
     }
   }, [open, citizen?.timeCommitment])
+
+  if (isQualificationLoading) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="flex sm:max-w-md">
+          <DialogTitle className="sr-only">Citizenship Application</DialogTitle>
+          <div className="flex flex-col gap-4 min-h-[175px] justify-center items-center w-full">
+            <Loader2 className="animate-spin mx-auto text-foreground-muted w-6 h-6" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -176,7 +191,7 @@ function CitizenshipApplicationDialog({
                           onCheckedChange={() => handleCheckboxChange(index)}
                         />
                         <div className="text-sm text-muted-foreground">
-                          {rule}
+                          <div dangerouslySetInnerHTML={{ __html: rule }} />
                         </div>
                       </div>
                     ))}
