@@ -1,7 +1,8 @@
 import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
+import { Signature } from "viem"
 
 export async function createVoteAttestationCall(
-  delegateAttestationSignature: string,
+  delegateAttestationSignature: any,
 ): Promise<any> {
   console.log(
     `Making API request to /api/eas/voteAttestation with signature: ${delegateAttestationSignature}`,
