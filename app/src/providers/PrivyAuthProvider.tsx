@@ -3,14 +3,16 @@
 import { PrivyProvider } from "@privy-io/react-auth"
 import { createConfig, WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { mainnet, sepolia } from "viem/chains"
+import { mainnet, sepolia, optimismSepolia } from "viem/chains"
 import { http } from "wagmi"
 
 export const privyWagmiConfig = createConfig({
-  chains: [mainnet, sepolia], // Pass your required chains as an array
+  chains: [mainnet, sepolia, optimismSepolia], // Pass your required chains as an array
   transports: {
     [mainnet.id]: http(),
     [sepolia.id]: http(),
+    [optimismSepolia.id]: http(),
+
     // For each of your required chains, add an entry to `transports` with
     // a key of the chain's `id` and a value of `http()`
   },
