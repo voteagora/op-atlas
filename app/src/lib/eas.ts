@@ -28,7 +28,7 @@ export const CITIZEN_SCHEMA_ID =
 export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
-    : "0x"
+    : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
 
 const citizenWalletChangeSchema = new SchemaEncoder("bytes32 oldCitizenUID")
 
