@@ -76,6 +76,13 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
     )
   }
 
+  // TODO: Add this back in after the release
+  // Join the{" "}
+  //         <Link href="#" target="_blank" className="underline">
+  //           Citizens&apos; House Announcements Group
+  //         </Link>{" "}
+  //         on Telegram for important messages.
+
   return (
     <div className="flex flex-col items-center justify-center h-full gap-8 w-full">
       {renderAvatar()}
@@ -86,11 +93,7 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
           shape the future of the Optimism Collective.
         </div>
         <div className="text-sm text-muted-foreground text-center">
-          Join the{" "}
-          <Link href="#" target="_blank" className="underline">
-            Citizens&apos; House Announcements Group
-          </Link>{" "}
-          on Telegram for important messages. We&apos;ll send emails to{" "}
+          We&apos;ll send emails to{" "}
           <span className="font-semibold text-red-500">
             {user.emails[0].email}
           </span>{" "}
