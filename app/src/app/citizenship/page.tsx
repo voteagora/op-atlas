@@ -3,6 +3,10 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
+import { ActiveCitizen } from "@/app/citizenship/components/ActiveCitizen"
+import { ChainAppRequirements } from "@/app/citizenship/components/ChainAppRequirements"
+import { Sidebar } from "@/app/citizenship/components/Sidebar"
+import { UserRequirements } from "@/app/citizenship/components/UserRequirements"
 import { auth } from "@/auth"
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import {
@@ -15,15 +19,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { getUserById } from "@/db/users"
 import {
-  getCitizenByUserId,
+  checkCitizenshipLimit,
+  getCitizen,
   s8CitizenshipQualification,
 } from "@/lib/actions/citizens"
 import { CITIZEN_TYPES } from "@/lib/constants"
 
-import { ChainAppRequirements } from "./components/ChainAppRequirements"
-import { Citizen } from "./components/Citizen"
-import { Sidebar } from "./components/Sidebar"
-import { UserRequirements } from "./components/UserRequirements"
+import { AnalyticsTracker } from "./components/AnalyticsTracker"
 
 export default async function Page() {
   const session = await auth()
@@ -33,9 +35,13 @@ export default async function Page() {
     redirect("/")
   }
 
-  const user = await getUserById(userId)
-  const citizen = await getCitizenByUserId(userId)
-  const qualification = await s8CitizenshipQualification()
+  const [user, citizen, qualification, isCitizenshipLimitReached] =
+    await Promise.all([
+      getUserById(userId),
+      getCitizen({ type: CITIZEN_TYPES.user, id: userId }),
+      s8CitizenshipQualification(),
+      checkCitizenshipLimit(),
+    ])
 
   if (!user) {
     redirect("/")
@@ -46,7 +52,7 @@ export default async function Page() {
     return (
       <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
         <div className="w-full mt-20 ">
-          <Citizen user={user} />
+          <ActiveCitizen user={user} />
         </div>
       </main>
     )
@@ -69,8 +75,10 @@ export default async function Page() {
               </BreadcrumbList>
             </Breadcrumb>
 
+            <AnalyticsTracker qualification={qualification} />
+
             <div className="flex flex-col gap-y-8 mt-12">
-              <div className="text-3xl font-semibold">
+              <div className="text-[36px] font-semibold text-foreground">
                 Citizenship Registration
               </div>
               <div className="border-b border-border-secondary w-full"></div>
@@ -96,7 +104,7 @@ export default async function Page() {
                       Protocol Upgrades
                     </li>
                     <li>
-                      Approve the Collective Intent{" "}
+                      Approve the{" "}
                       <span className="font-semibold">Collective Intent</span>{" "}
                       as well as{" "}
                       <span className="font-semibold">
@@ -106,21 +114,23 @@ export default async function Page() {
                   </ul>
                 </div>
               </div>
-              {qualification && (
-                <div>
-                  {qualification?.type === CITIZEN_TYPES.user ? (
-                    <UserRequirements userId={userId} />
-                  ) : (
-                    <ChainAppRequirements
-                      userId={userId}
-                      qualification={qualification}
-                    />
-                  )}
-                </div>
-              )}
+
+              <div>
+                {qualification?.type !== CITIZEN_TYPES.user && qualification ? (
+                  <ChainAppRequirements
+                    userId={userId}
+                    qualification={qualification}
+                  />
+                ) : (
+                  <UserRequirements
+                    userId={userId}
+                    qualification={qualification}
+                  />
+                )}
+              </div>
 
               <div className="border-b border-border-secondary w-full"></div>
-              <div>
+              <div className="text-secondary-foreground">
                 Learn more about citizenship in{" "}
                 <Link
                   href="https://community.optimism.io/citizens-house/citizen-house-overview"
@@ -135,13 +145,20 @@ export default async function Page() {
         </div>
 
         <div>
-          {qualification ? (
+          {qualification && !isCitizenshipLimitReached ? (
             <Sidebar user={user} qualification={qualification} />
           ) : (
             <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
               <UserAvatarLarge imageUrl={user?.imageUrl} />
-              <div className="text-sm font-semibold text-secondary-foreground">
-                Sorry, you are not eligible to become a Citizen
+
+              <div className="flex flex-col gap-2">
+                <div className="font-semibold text-secondary-foreground">
+                  Registration has closed
+                </div>
+                <div className="text-sm text-secondary-foreground">
+                  Thanks for your interest, but the Citizens&apos; House has
+                  reached it&apos;s maximum capacity.
+                </div>
               </div>
             </div>
           )}

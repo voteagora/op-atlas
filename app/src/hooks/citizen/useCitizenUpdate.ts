@@ -6,15 +6,19 @@ import { toast } from "sonner"
 
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { updateCitizen } from "@/lib/actions/citizens"
+import { CITIZEN_TYPES } from "@/lib/constants"
 
 export const useCitizenUpdate = (userId: string) => {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
-  const { invalidate } = useCitizen({ userId, enabled: false })
+  const { invalidate } = useCitizen({
+    query: { type: CITIZEN_TYPES.user, id: userId },
+    enabled: false,
+  })
 
   const call = (citizen: {
     type: string
-    address?: string
+    address: string
     attestationId?: string
     timeCommitment?: string
     projectId?: string

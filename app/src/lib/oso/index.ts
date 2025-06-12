@@ -5,17 +5,13 @@ import { cache } from "react"
 
 import {
   createOSOProjects,
-  getDefillamaAdapter,
-  getDevToolingEligibility,
   getDevToolingRecurringReward,
-  getOnchainBuilderEligibility,
   getOnchainBuilderRecurringReward,
   getProjectActiveAddressesCount,
   getProjectEligibility,
   getProjectGasConsumption,
   getProjectGasFees,
   getProjectMetrics as getProjectMetricsFromDB,
-  getProjectOSORelatedProjects,
   getProjectRewards,
   getProjectsOSO,
   getProjectTransactions,
@@ -25,11 +21,9 @@ import {
 } from "@/db/projects"
 import {
   OrderBy,
-  Oso_ArtifactsByProjectV1,
   Oso_ProjectsByCollectionV1,
   Oso_ProjectsV1,
   Oso_TimeseriesMetricsByProjectV0,
-  QueryOso_ArtifactsByProjectV1Args,
   QueryOso_ProjectsByCollectionV1Args,
   QueryOso_ProjectsV1Args,
   QueryOso_TimeseriesMetricsByProjectV0Args,
@@ -67,7 +61,6 @@ import {
   parseMetricsResults,
   parseRewardsResults,
 } from "./utils"
-import { Application } from "@prisma/client"
 
 export const osoClient = new GraphQLClient(
   "https://www.opensource.observer/api/v1/graphql",
@@ -389,15 +382,15 @@ const getOnchainBuilderMetrics = cache(async function getOnchainBuilderMetrics(
 
 const getActiveAddresses = cache(async (projectId: string) => {
   const activeAddressesCount = await getProjectActiveAddressesCount(projectId)
-  const februaryData = activeAddressesCount.filter((p) => p.tranche === 1)
-  const marchData = activeAddressesCount.filter((p) => p.tranche === 2)
-  const aprilData = activeAddressesCount.filter((p) => p.tranche === 3)
-
-  const trancheData = {
-    [TRANCHE_MONTHS_MAP[1]]: februaryData,
-    [TRANCHE_MONTHS_MAP[2]]: marchData,
-    [TRANCHE_MONTHS_MAP[3]]: aprilData,
-  }
+  const trancheData = Object.entries(TRANCHE_MONTHS_MAP).reduce(
+    (acc, [tranche, month]) => ({
+      ...acc,
+      [month]: activeAddressesCount.filter(
+        (p) => p.tranche === Number(tranche),
+      ),
+    }),
+    {},
+  )
 
   const output = formatActiveAddresses(trancheData)
 
@@ -406,14 +399,13 @@ const getActiveAddresses = cache(async (projectId: string) => {
 
 const getGasFees = async function getGasFees(projectId: string) {
   const gasFees = await getProjectGasFees(projectId)
-  const februaryData = gasFees.filter((p) => p.tranche === 1)
-  const marchData = gasFees.filter((p) => p.tranche === 2)
-  const aprilData = gasFees.filter((p) => p.tranche === 3)
-  const trancheData = {
-    [TRANCHE_MONTHS_MAP[1]]: februaryData,
-    [TRANCHE_MONTHS_MAP[2]]: marchData,
-    [TRANCHE_MONTHS_MAP[3]]: aprilData,
-  }
+  const trancheData = Object.entries(TRANCHE_MONTHS_MAP).reduce(
+    (acc, [tranche, month]) => ({
+      ...acc,
+      [month]: gasFees.filter((p) => p.tranche === Number(tranche)),
+    }),
+    {},
+  )
 
   const output = formatGasFees(trancheData)
 
@@ -422,15 +414,13 @@ const getGasFees = async function getGasFees(projectId: string) {
 
 const getTransactions = async function getTransactions(projectId: string) {
   const transactions = await getProjectTransactions(projectId)
-  const februaryData = transactions.filter((p) => p.tranche === 1)
-  const marchData = transactions.filter((p) => p.tranche === 2)
-  const aprilData = transactions.filter((p) => p.tranche === 3)
-
-  const trancheData = {
-    [TRANCHE_MONTHS_MAP[1]]: februaryData,
-    [TRANCHE_MONTHS_MAP[2]]: marchData,
-    [TRANCHE_MONTHS_MAP[3]]: aprilData,
-  }
+  const trancheData = Object.entries(TRANCHE_MONTHS_MAP).reduce(
+    (acc, [tranche, month]) => ({
+      ...acc,
+      [month]: transactions.filter((p) => p.tranche === Number(tranche)),
+    }),
+    {},
+  )
 
   const output = formatTransactions(trancheData)
 
@@ -439,15 +429,13 @@ const getTransactions = async function getTransactions(projectId: string) {
 
 const getTvl = async function getTvl(projectId: string) {
   const tvl = await getProjectTvl(projectId)
-  const februaryData = tvl.filter((p) => p.tranche === 1)
-  const marchData = tvl.filter((p) => p.tranche === 2)
-  const aprilData = tvl.filter((p) => p.tranche === 3)
-
-  const trancheData = {
-    [TRANCHE_MONTHS_MAP[1]]: februaryData,
-    [TRANCHE_MONTHS_MAP[2]]: marchData,
-    [TRANCHE_MONTHS_MAP[3]]: aprilData,
-  }
+  const trancheData = Object.entries(TRANCHE_MONTHS_MAP).reduce(
+    (acc, [tranche, month]) => ({
+      ...acc,
+      [month]: tvl.filter((p) => p.tranche === Number(tranche)),
+    }),
+    {},
+  )
 
   const output = formatTvl(trancheData)
 
@@ -494,15 +482,13 @@ const getDevToolingMetrics = cache(async (projectId: string) => {
 
 const getGasConsumption = cache(async (projectId: string) => {
   const gasConsumption = await getProjectGasConsumption(projectId)
-  const februaryData = gasConsumption.filter((p) => p.tranche === 1)
-  const marchData = gasConsumption.filter((p) => p.tranche === 2)
-  const aprilData = gasConsumption.filter((p) => p.tranche === 3)
-
-  const trancheData = {
-    [TRANCHE_MONTHS_MAP[1]]: februaryData,
-    [TRANCHE_MONTHS_MAP[2]]: marchData,
-    [TRANCHE_MONTHS_MAP[3]]: aprilData,
-  }
+  const trancheData = Object.entries(TRANCHE_MONTHS_MAP).reduce(
+    (acc, [tranche, month]) => ({
+      ...acc,
+      [month]: gasConsumption.filter((p) => p.tranche === Number(tranche)),
+    }),
+    {},
+  )
 
   const output = formatGasConsumption(trancheData)
 
@@ -512,57 +498,42 @@ const getGasConsumption = cache(async (projectId: string) => {
 const getTrustedDevelopersCount = cache(
   async function getTrustedDevelopersCount(osoId: string) {
     const trustedDevelopers = await getTrustedDevelopersCountFromOSO(osoId)
-    const februaryData = trustedDevelopers.filter((p) => p.tranche === 1)
-    const marchData = trustedDevelopers.filter((p) => p.tranche === 2)
-    const aprilData = trustedDevelopers.filter((p) => p.tranche === 3)
+    const trancheData = Object.entries(TRANCHE_MONTHS_MAP).reduce(
+      (acc, [tranche, month]) => ({
+        ...acc,
+        [month]: trustedDevelopers
+          .filter((p) => p.tranche === Number(tranche))
+          .reduce((acc, curr) => {
+            return acc + Number(curr.value)
+          }, 0),
+      }),
+      {},
+    )
 
-    const februaryCountSum = februaryData.reduce((acc, curr) => {
-      return acc + Number(curr.value)
-    }, 0)
-
-    const marchCountSum = marchData.reduce((acc, curr) => {
-      return acc + Number(curr.value)
-    }, 0)
-
-    const aprilCountSum = aprilData.reduce((acc, curr) => {
-      return acc + Number(curr.value)
-    }, 0)
-
-    return {
-      [TRANCHE_MONTHS_MAP[1]]: februaryCountSum,
-      [TRANCHE_MONTHS_MAP[2]]: marchCountSum,
-      [TRANCHE_MONTHS_MAP[3]]: aprilCountSum,
-    }
+    return trancheData
   },
 )
 
 const getTopProjects = cache(async (osoId: string) => {
   const topProjects = await getTopProjectsFromOSO(osoId)
 
-  const februaryProjects = topProjects.filter((p) => p.tranche === 1)
-  const marchProjects = topProjects.filter((p) => p.tranche === 2)
-  const aprilProjects = topProjects.filter((p) => p.tranche === 3)
+  const trancheData = Object.entries(TRANCHE_MONTHS_MAP).reduce(
+    (acc, [tranche, month]) => ({
+      ...acc,
+      [month]: topProjects
+        .filter((p) => p.tranche === Number(tranche))
+        .slice(0, 6)
+        .map((p) => ({
+          id: p.targetProject.id,
+          name: p.targetProject.name,
+          thumbnailUrl: p.targetProject.thumbnailUrl,
+          website: p.targetProject.website,
+        })),
+    }),
+    {},
+  )
 
-  return {
-    [TRANCHE_MONTHS_MAP[1]]: februaryProjects.slice(0, 6).map((p) => ({
-      id: p.targetProject.id,
-      name: p.targetProject.name,
-      thumbnailUrl: p.targetProject.thumbnailUrl,
-      website: p.targetProject.website,
-    })),
-    [TRANCHE_MONTHS_MAP[2]]: marchProjects.slice(0, 6).map((p) => ({
-      id: p.targetProject.id,
-      name: p.targetProject.name,
-      thumbnailUrl: p.targetProject.thumbnailUrl,
-      website: p.targetProject.website,
-    })),
-    [TRANCHE_MONTHS_MAP[3]]: aprilProjects.slice(0, 6).map((p) => ({
-      id: p.targetProject.id,
-      name: p.targetProject.name,
-      thumbnailUrl: p.targetProject.thumbnailUrl,
-      website: p.targetProject.website,
-    })),
-  }
+  return trancheData
 })
 
 export async function getDeployedContracts(

@@ -1,10 +1,13 @@
-import { ChevronUp } from "lucide-react"
-import { ChevronDown } from "lucide-react"
-import Image from "next/image"
-import { or } from "ramda"
-import React, { memo, useState } from "react"
+"use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ChevronDown, ChevronUp } from "lucide-react"
+import Image from "next/image"
+import { memo, useState } from "react"
+
+import { CheckboxCircleFIll } from "@/components/icons/reminx"
+import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
+import { useCitizen } from "@/hooks/citizen/useCitizen"
+import { CITIZEN_TYPES } from "@/lib/constants"
 import { OrganizationWithTeamAndProjects } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -17,7 +20,9 @@ const OrganizationHeader = ({
   className?: string
   organization: OrganizationWithTeamAndProjects
 }) => {
+
   const [showMore, setShowMore] = useState(false)
+  const { data: citizen } = useCitizen({ query: { type: CITIZEN_TYPES.chain, id: organization.id } })
 
   return (
     <div className={cn("flex w-full h-full gap-x-4", className)}>
@@ -39,8 +44,12 @@ const OrganizationHeader = ({
 
         <div className="flex flex-col gap-4 px-8">
           <Avatar className="w-28 h-28">
-            <AvatarImage src={organization.avatarUrl ?? ""} />
-            <AvatarFallback>{organization.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={organization.avatarUrl ?? ""} className="border border-white" />
+            {citizen && citizen.attestationId && (
+              <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-2 bg-white rounded-full">
+                <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
+              </AvatarBadge>
+            )}
           </Avatar>
 
           <div className="flex flex-col w-full">

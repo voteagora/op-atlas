@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useState } from "react"
 
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
-import CitizenshipRulesDialog from "@/components/dialogs/CitizenshipRulesDialog"
+import CitizenshipApplicationDialog from "@/components/dialogs/CitizenshipApplicationDialog"
 import { Button } from "@/components/ui/button"
 import { useCitizenshipRequirements } from "@/hooks/citizen/useCitizenshipRequirements"
 import { CITIZEN_TYPES } from "@/lib/constants"
@@ -18,7 +18,10 @@ export const Sidebar = ({
   user: User
   qualification: CitizenshipQualification
 }) => {
-  const isEligible = useCitizenshipRequirements({ id: user.id, qualification })
+  const { hasMetRequirements, isLoading } = useCitizenshipRequirements({
+    id: user.id,
+    qualification,
+  })
   const [isRulesDialogOpen, setIsRulesDialogOpen] = useState(false)
 
   const renderAvatar = () => {
@@ -41,9 +44,22 @@ export const Sidebar = ({
 
   const renderCopy = () => {
     if (qualification.type === CITIZEN_TYPES.user) {
-      return `You are eligible to become a Citizen`
+      return qualification.eligible
+        ? `You are eligible to become a Citizen`
+        : qualification.error
     }
-    return `${qualification.title} is eligible to become a Citizen`
+
+    if (qualification.type === CITIZEN_TYPES.chain) {
+      return qualification.eligible
+        ? `${qualification.title} is eligible to become a Citizen`
+        : qualification.error
+    }
+
+    if (qualification.type === CITIZEN_TYPES.app) {
+      return qualification.eligible
+        ? `${qualification.title} is eligible to become a Citizen`
+        : qualification.error
+    }
   }
 
   return (
@@ -54,22 +70,31 @@ export const Sidebar = ({
         {renderCopy()}
       </div>
 
-      {!isEligible && (
+      {qualification.eligible && isLoading && (
+        <div className="text-sm text-secondary-foreground">
+          {" "}
+          Checking requirements...
+        </div>
+      )}
+
+      {qualification.eligible && !hasMetRequirements && !isLoading && (
         <div className="text-sm text-destructive">
           {" "}
           Complete your registration requirements in order to continue
         </div>
       )}
 
-      <Button
-        className="w-full button-primary"
-        disabled={!isEligible}
-        onClick={() => setIsRulesDialogOpen(true)}
-      >
-        Register
-      </Button>
+      {qualification.eligible && (
+        <Button
+          className="w-full button-primary"
+          disabled={!hasMetRequirements || isLoading}
+          onClick={() => setIsRulesDialogOpen(true)}
+        >
+          Register
+        </Button>
+      )}
 
-      <CitizenshipRulesDialog
+      <CitizenshipApplicationDialog
         open={isRulesDialogOpen}
         onOpenChange={setIsRulesDialogOpen}
       />

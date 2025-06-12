@@ -5,7 +5,6 @@ import Link from "next/link"
 
 import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
-import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
 import { useUserWorldId } from "@/hooks/db/useUserWorldId"
@@ -13,17 +12,23 @@ import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { useRefreshPassport } from "@/hooks/useRefreshPassport"
+import { CitizenshipQualification } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
+const LINK_STYLE = "inline-block cursor-pointer underline"
 
-export const UserRequirements = ({ userId }: { userId: string }) => {
+export const UserRequirements = ({
+  userId,
+  qualification,
+}: {
+  userId: string
+  qualification: CitizenshipQualification | null
+}) => {
   const { user } = useUser({ id: userId })
   const { data: userPassports } = useUserPassports({ id: userId })
   const { data: userWorldId } = useUserWorldId({ id: userId })
 
-  const { data: citizen } = useCitizen({ userId })
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { refreshPassport } = useRefreshPassport(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)
@@ -80,10 +85,9 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_address")}
+            onClick={() => setOpenDialog("governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" &&
-              setOpenDialog("citizenship_governance_address")
+              e.key === "Enter" && setOpenDialog("governance_address")
             }
           >
             Edit
@@ -99,10 +103,9 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_address")}
+            onClick={() => setOpenDialog("governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" &&
-              setOpenDialog("citizenship_governance_address")
+              e.key === "Enter" && setOpenDialog("governance_address")
             }
           >
             Set {truncateAddress(connectedAddress.address as string)}
@@ -118,8 +121,8 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
         <button
           type="button"
           className={LINK_STYLE}
-          onClick={() => linkWallet()}
-          onKeyDown={(e) => e.key === "Enter" && linkWallet()}
+          onClick={() => linkWallet({ primary: true })}
+          onKeyDown={(e) => e.key === "Enter" && linkWallet({ primary: true })}
         >
           Add your address
         </button>
@@ -256,7 +259,7 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
     if (govAddress) {
       return (
         <ConditionRow isMet={false}>
-          Verify your Gitcoin Passport:{" "}
+          Verify your Human Passport:{" "}
           {truncateAddress(govAddress.address as string)} |{" "}
           <button
             type="button"
@@ -270,42 +273,7 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
       )
     }
 
-    return (
-      <ConditionRow isMet={false}>
-        Verify governance address to add a verified address.
-      </ConditionRow>
-    )
-  }
-
-  const renderCommitment = () => {
-    if (citizen?.timeCommitment) {
-      return (
-        <ConditionRow isMet={true}>
-          Governance time commitment:{" "}
-          <span className="font-semibold">{citizen?.timeCommitment}</span> |{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_commitment")}
-          >
-            Edit
-          </button>
-        </ConditionRow>
-      )
-    }
-
-    return (
-      <ConditionRow isMet={false}>
-        Governance time commitment |{" "}
-        <button
-          type="button"
-          className={LINK_STYLE}
-          onClick={() => setOpenDialog("citizenship_governance_commitment")}
-        >
-          Specify
-        </button>
-      </ConditionRow>
-    )
+    return null
   }
 
   const renderWorld = () => {
@@ -326,21 +294,51 @@ export const UserRequirements = ({ userId }: { userId: string }) => {
     )
   }
 
+  const renderEligibility = () => {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="font-semibold text-xl">Eligibility</div>
+        <div>
+          <div className="font-semibold">Onchain activity</div>
+          <div>
+            One of your verified addresses must meet these criteria.{" "}
+            <Link href="/profile/verified-addresses" className={LINK_STYLE}>
+              Verify more addresses
+            </Link>
+          </div>
+        </div>
+
+        <div>
+          <ConditionRow isMet={qualification?.eligible || false}>
+            Your first Superchain transaction happened before June 2024
+          </ConditionRow>
+          <ConditionRow isMet={qualification?.eligible || false}>
+            You&apos;ve had 2 transactions per month, in at least 3 of 6
+            previous months.
+          </ConditionRow>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="font-semibold text-xl">Requirements</div>
-      <div className="font-semibold">Atlas Profile</div>
-      <div>
+      {renderEligibility()}
+
+      <div className="font-semibold text-xl text-foreground">Requirements</div>
+      <div className="font-semibold text-foreground">Atlas Profile</div>
+      <div className="text-secondary-foreground">
         {renderGithub()}
         {renderEmail()}
         {renderAddress()}
-        {renderCommitment()}
       </div>
-      <div>
-        <div className="font-semibold">Proof of personhood</div>
-        <div>Complete at least one of these options.</div>
+      <div className="text-secondary-foreground">
+        <div className="font-semibold text-foreground">Proof of personhood</div>
+        <div className="text-secondary-foreground">
+          Complete at least one of these options.
+        </div>
       </div>
-      <div>
+      <div className="text-secondary-foreground">
         {renderPassport()}
         {renderWorld()}
       </div>

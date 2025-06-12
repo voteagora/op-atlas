@@ -3,7 +3,6 @@
 import { UserAddress } from "@prisma/client"
 
 import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
-import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
@@ -12,7 +11,7 @@ import { CitizenshipQualification } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-const LINK_STYLE = "inline-block cursor-pointer underline hover:no-underline"
+const LINK_STYLE = "inline-block cursor-pointer underline"
 
 export const ChainAppRequirements = ({
   userId,
@@ -22,7 +21,6 @@ export const ChainAppRequirements = ({
   qualification: CitizenshipQualification
 }) => {
   const { user } = useUser({ id: userId })
-  const { data: citizen } = useCitizen({ userId })
 
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)
@@ -77,10 +75,9 @@ export const ChainAppRequirements = ({
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_address")}
+            onClick={() => setOpenDialog("governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" &&
-              setOpenDialog("citizenship_governance_address")
+              e.key === "Enter" && setOpenDialog("governance_address")
             }
           >
             Edit
@@ -96,10 +93,9 @@ export const ChainAppRequirements = ({
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_address")}
+            onClick={() => setOpenDialog("governance_address")}
             onKeyDown={(e) =>
-              e.key === "Enter" &&
-              setOpenDialog("citizenship_governance_address")
+              e.key === "Enter" && setOpenDialog("governance_address")
             }
           >
             Set {truncateAddress(connectedAddress.address as string)}
@@ -115,8 +111,8 @@ export const ChainAppRequirements = ({
         <button
           type="button"
           className={LINK_STYLE}
-          onClick={() => linkWallet()}
-          onKeyDown={(e) => e.key === "Enter" && linkWallet()}
+          onClick={() => linkWallet({ primary: true })}
+          onKeyDown={(e) => e.key === "Enter" && linkWallet({ primary: true })}
         >
           Add your address
         </button>
@@ -124,50 +120,17 @@ export const ChainAppRequirements = ({
     )
   }
 
-  const renderCommitment = () => {
-    if (citizen?.timeCommitment) {
-      return (
-        <ConditionRow isMet={true}>
-          Governance time commitment:{" "}
-          <span className="font-semibold">{citizen?.timeCommitment}</span> |{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => setOpenDialog("citizenship_governance_commitment")}
-          >
-            Edit
-          </button>
-        </ConditionRow>
-      )
-    }
-
-    return (
-      <ConditionRow isMet={false}>
-        Governance time commitment |{" "}
-        <button
-          type="button"
-          className={LINK_STYLE}
-          onClick={() => setOpenDialog("citizenship_governance_commitment")}
-        >
-          Specify
-        </button>
-      </ConditionRow>
-    )
-  }
-
   return (
     <div className="flex flex-col gap-6">
-      <div className="font-semibold text-xl">Requirements</div>
-      <div className="font-semibold">Atlas Profile</div>
-      <div className="flex flex-col gap-1">
+      <div className="font-semibold text-xl text-foreground">Requirements</div>
+      <div className="flex flex-col gap-1 text-secondary-foreground">
         <ConditionRow isMet={true}>
           {qualification.type === CITIZEN_TYPES.chain
-            ? "The organization contributed to ≥2% of the total revenue contributed by Superchain members in the last Season, or was in the top 15 revenue-contributing chains."
-            : "The project contributed to ≥0.5% of the surplus revenue contributed by onchain apps in the last Season, or was in the top 100."}
+            ? "The organization accounted for at least 2% of the total revenue share contributed by all chains in the past Season, or was among the top 15 chains by revenue contribution in the past Season."
+            : "The project was responsible for at least 0.5% of the total gas used across the Superchain over the past Season, or was among the top 100 apps by gas usage in the past Season."}
         </ConditionRow>
         {renderEmail()}
         {renderAddress()}
-        {renderCommitment()}
       </div>
     </div>
   )

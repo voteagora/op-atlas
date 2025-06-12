@@ -1,8 +1,14 @@
+"use client"
+
 import { PencilLineIcon } from "lucide-react"
 import Image from "next/image"
 import React from "react"
 
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
+import { CheckboxCircleFIll } from "@/components/icons/reminx"
+import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
+import { useCitizen } from "@/hooks/citizen/useCitizen"
+import { CITIZEN_TYPES } from "@/lib/constants"
 
 interface HeaderProps {
   projectId: string
@@ -17,6 +23,10 @@ export default function Header({
   thumbnail,
   banner,
 }: HeaderProps) {
+  const { data: citizen } = useCitizen({
+    query: { type: CITIZEN_TYPES.app, id: projectId },
+  })
+
   return (
     <div className="w-full relative">
       {banner ? (
@@ -54,15 +64,18 @@ export default function Header({
         <div className="w-full h-[80px]" />
       )}
       {thumbnail && (
-        <div className="absolute -bottom-10 left-12 w-28 aspect-square rounded-xl overflow-hidden border-2 border-background bg-[#FBFCFE]">
-          <Image
-            src={thumbnail}
-            layout="responsive"
-            width={112}
-            height={112}
-            objectFit="cover"
-            alt="Project thumbnail"
-          />
+        <div className="absolute -bottom-10 left-12 aspect-square">
+          <Avatar className="w-28 h-28 border  border-[#FBFCFE] rounded-xl">
+            <AvatarImage src={thumbnail} alt="avatar" className="rounded-xl" />
+            {citizen && citizen.attestationId && (
+              <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+                <CheckboxCircleFIll
+                  className="w-[20px] h-[20px]"
+                  fill="#FF0000"
+                />
+              </AvatarBadge>
+            )}
+          </Avatar>
         </div>
       )}
     </div>

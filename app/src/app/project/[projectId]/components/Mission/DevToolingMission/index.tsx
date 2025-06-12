@@ -8,7 +8,7 @@ import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MONTHS } from "@/lib/oso/constants"
+import { MONTHS, TRANCHE_MONTHS_MAP } from "@/lib/oso/constants"
 import { DevToolingMissionProps } from "@/lib/oso/types"
 import { formatNumber } from "@/lib/utils"
 
@@ -82,11 +82,14 @@ export default function DevToolingMission({
           </div>
         </div>
       )}
-      <Tabs defaultValue={MONTHS[2]} className="w-full mt-12">
+      <Tabs
+        defaultValue={MONTHS[Object.keys(TRANCHE_MONTHS_MAP).length - 1]}
+        className="w-full mt-12"
+      >
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
           {MONTHS.map((month, index) => {
             const isFutureMonth =
-              month !== "February" && month !== "March" && month !== "April"
+              !Object.values(TRANCHE_MONTHS_MAP).includes(month)
             return (
               <TabsTrigger
                 disabled={isFutureMonth}

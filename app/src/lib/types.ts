@@ -1,6 +1,7 @@
 import { Prisma, User } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
-import { TENANT_NAMESPACES } from "@/lib/constants"
+
+import { CITIZEN_TYPES } from "@/lib/constants"
 
 export type TeamRole = "member" | "admin"
 
@@ -145,7 +146,7 @@ export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
-    rewardStream: true
+    rewardStreams: true
   }
 }>
 
@@ -156,7 +157,7 @@ export type KYCStreamTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
-    rewardStream: true
+    rewardStreams: true
     projects: {
       select: {
         id: true
@@ -164,6 +165,12 @@ export type KYCStreamTeam = Prisma.KYCTeamGetPayload<{
         recurringRewards: true
       }
     }
+  }
+}>
+
+export type StreamWithKYCTeam = Prisma.SuperfluidStreamGetPayload<{
+  include: {
+    kycTeam: true
   }
 }>
 
@@ -183,7 +190,7 @@ export type RecurringRewardWithProject = Prisma.RecurringRewardGetPayload<{
                 users: true
               }
             }
-            rewardStream: {
+            rewardStreams: {
               include: {
                 streams: true
               }
@@ -383,241 +390,24 @@ export type ExtendedAggregatedType = AggregatedType & {
   github_repo_builders: { address: string; email?: string }[]
 }
 
-export type TenantNamespace =
-  (typeof TENANT_NAMESPACES)[keyof typeof TENANT_NAMESPACES]
-
-export type TenantToken = {
-  name: string
-  symbol: string
-  decimals: number
-  address: string
+export interface PassportScore {
+  score: string
+  passing_score: boolean
+  last_score_timestamp: string
+  expiration_timestamp: string
+  threshold: string
 }
 
-export enum ProposalStage {
-  DRAFTING = "drafting",
-  AWAITING_SUBMISSION = "awaiting_submission",
-  PENDING = "pending",
-  QUEUED = "queued",
-  EXECUTED = "executed",
+export interface CitizenshipQualification {
+  type: string
+  identifier: string
+  title: string
+  avatar: string | null
+  eligible: boolean
+  error?: string
 }
 
-type TenantProposalLifecycleStage = {
-  stage: ProposalStage
-  order: number
-  isPreSubmission: boolean
-  config?: any
-}
-
-export enum ProposalGatingType {
-  MANAGER = "manager",
-  TOKEN_THRESHOLD = "token threshold",
-  GOVERNOR_V1 = "governor v1",
-}
-
-export type PLMConfig = {
-  // the stages of the proposal lifecycle that
-  // this tenant wants to use
-  stages: TenantProposalLifecycleStage[]
-  // We can read proposal type from the governor
-  // but others might be desired, like snapshot
-  proposalTypes: any[]
-  // custom copy for the proposal lifecycle feature
-  copy: any
-  // optional config for including snapshot as a proposal type
-  snapshotConfig?: {
-    domain: string
-    requiredTokens: number
-  }
-  // The method for gating who can create a proposal
-  // Manager -- only the manager can create proposals
-  // Token Threshold -- a certain amount of tokens must be held
-  // OZ (ENS, UNI): Token threshold
-  // Agora gov 0.1 (OP): manager
-  // Agora gov 1.0+ (everyone else): manager or voting threshold
-  gatingType: ProposalGatingType
-  // Whether to show the create proposal button conditionally with a check
-  protocolLevelCreateProposalButtonCheck?: boolean
-}
-
-export type ProposalType =
-  | "STANDARD"
-  | "APPROVAL"
-  | "OPTIMISTIC"
-  | "SNAPSHOT"
-  | "OFFCHAIN_STANDARD"
-  | "OFFCHAIN_APPROVAL"
-  | "OFFCHAIN_OPTIMISTIC"
-  | "OFFCHAIN_OPTIMISTIC_TIERED"
-
-export type ParsedProposalData = {
-  SNAPSHOT: {
-    key: "SNAPSHOT"
-    kind: {
-      title: string
-      start_ts: number
-      end_ts: number
-      created_ts: number
-      link: string
-      scores: string[]
-      type: string
-      votes: string
-      state: "pending" | "active" | "closed"
-      body: string
-      choices: string[]
-    }
-  }
-  STANDARD: {
-    key: "STANDARD"
-    kind: {
-      options: {
-        targets: string[]
-        values: string[]
-        signatures: string[]
-        calldatas: string[]
-        functionArgsName: {
-          functionName: string
-          functionArgs: string[]
-        }[]
-      }[]
-    }
-  }
-  APPROVAL: {
-    key: "APPROVAL"
-    kind: {
-      options: {
-        targets: string[]
-        values: string[]
-        calldatas: string[]
-        description: string
-        functionArgsName: {
-          functionName: string
-          functionArgs: string[]
-        }[]
-        budgetTokensSpent: bigint | null
-      }[]
-      proposalSettings: {
-        maxApprovals: number
-        criteria: "THRESHOLD" | "TOP_CHOICES"
-        budgetToken: string
-        criteriaValue: bigint
-        budgetAmount: bigint
-      }
-    }
-  }
-  OPTIMISTIC: {
-    key: "OPTIMISTIC"
-    kind: { options: [] }
-  }
-  OFFCHAIN_STANDARD: {
-    key: "OFFCHAIN_STANDARD"
-    kind: { options: [] }
-  }
-  OFFCHAIN_APPROVAL: {
-    key: "OFFCHAIN_APPROVAL"
-    kind: { options: [] }
-  }
-  OFFCHAIN_OPTIMISTIC: {
-    key: "OFFCHAIN_OPTIMISTIC"
-    kind: { options: [] }
-  }
-  OFFCHAIN_OPTIMISTIC_TIERED: {
-    key: "OFFCHAIN_OPTIMISTIC_TIERED"
-    kind: { options: [] }
-  }
-}
-
-export type ParsedProposalResults = {
-  SNAPSHOT: {
-    key: "SNAPSHOT"
-    kind: {
-      scores: string[]
-      status: "pending" | "active" | "closed"
-    }
-  }
-  STANDARD: {
-    key: "STANDARD"
-    kind: {
-      for: bigint
-      against: bigint
-      abstain: bigint
-    }
-  }
-  OPTIMISTIC: {
-    key: "OPTIMISTIC"
-    kind: {
-      for: bigint
-      against: bigint
-      abstain: bigint
-    }
-  }
-  APPROVAL: {
-    key: "APPROVAL"
-    kind: {
-      for: bigint
-      abstain: bigint
-      against: bigint
-      options: {
-        option: string
-        votes: bigint
-      }[]
-      criteria: "THRESHOLD" | "TOP_CHOICES"
-      criteriaValue: bigint
-    }
-  }
-  OFFCHAIN_STANDARD: {
-    key: "OFFCHAIN_STANDARD"
-    kind: null
-  }
-  OFFCHAIN_APPROVAL: {
-    key: "OFFCHAIN_APPROVAL"
-    kind: null
-  }
-  OFFCHAIN_OPTIMISTIC: {
-    key: "OFFCHAIN_OPTIMISTIC"
-    kind: null
-  }
-  OFFCHAIN_OPTIMISTIC_TIERED: {
-    key: "OFFCHAIN_OPTIMISTIC_TIERED"
-    kind: null
-  }
-}
-
-export type ProposalStatus =
-  | "CANCELLED"
-  | "SUCCEEDED"
-  | "DEFEATED"
-  | "ACTIVE"
-  | "FAILED"
-  | "PENDING"
-  | "QUEUED"
-  | "EXECUTED"
-  | "CLOSED"
-  | "PASSED"
-
-// Complete Proposal type with all additional properties
-export type Proposal = {
-  id: string
-  proposer: string
-  snapshotBlockNumber: number
-  createdTime: Date | null
-  startTime: Date | null
-  startBlock: bigint | string | null
-  endTime: Date | null
-  endBlock: bigint | string | null
-  cancelledTime: Date | null
-  executedTime: Date | null
-  executedBlock: bigint | string | null
-  queuedTime: Date | null
-  markdowntitle: string
-  description: string | null
-  quorum: bigint | null
-  approvalThreshold: bigint | null
-  proposalData: ParsedProposalData[ProposalType]["kind"]
-  unformattedProposalData: `0x${string}` | null | any
-  proposalResults: ParsedProposalResults[ProposalType]["kind"]
-  proposalType: ProposalType | null
-  status: ProposalStatus | null
-  createdTransactionHash: string | null
-  cancelledTransactionHash: string | null
-  executedTransactionHash: string | null
-}
+export type CitizenLookup =
+  | { type: typeof CITIZEN_TYPES.user; id: string }
+  | { type: typeof CITIZEN_TYPES.chain; id: string }
+  | { type: typeof CITIZEN_TYPES.app; id: string }

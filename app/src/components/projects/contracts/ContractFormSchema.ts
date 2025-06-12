@@ -74,8 +74,10 @@ const defillamaUrlPattern =
 export const DefiLlamaSchema = z.object({
   slug: z
     .string()
-    .regex(defillamaUrlPattern, "Invalid DefiLlama protocol URL")
-    .optional(),
+    .optional()
+    .refine((val) => !val || defillamaUrlPattern.test(val), {
+      message: "Invalid DefiLlama protocol URL",
+    }),
 })
 
 export const DeployersSchema = z.object({

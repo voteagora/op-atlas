@@ -682,6 +682,11 @@ export async function createOrganizationKycTeam({
                   id: true,
                   rewardStreams: true,
                 },
+                where: {
+                  deletedAt: {
+                    not: null,
+                  },
+                },
               },
             },
           },
@@ -705,12 +710,13 @@ export async function createOrganizationKycTeam({
           tx.rewardStream.updateMany({
             where: {
               id: {
-                in: orgProjectWithDeletedKycTeam.flatMap(
-                  (project) =>
-                    project.project.kycTeam?.rewardStreams.map(
-                      (stream) => stream.id,
-                    ) ?? [],
-                ),
+                in:
+                  orgProjectWithDeletedKycTeam.flatMap(
+                    (project) =>
+                      project.project.kycTeam?.rewardStreams.map(
+                        (stream) => stream.id,
+                      ) ?? [],
+                  ) ?? [],
               },
             },
             data: {

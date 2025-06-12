@@ -26,6 +26,13 @@ export const CITIZEN_SCHEMA_ID =
     ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
     : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
 
+export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
+    : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
+
+const citizenWalletChangeSchema = new SchemaEncoder("bytes32 oldCitizenUID")
+
 const citizenSchema = new SchemaEncoder(
   "uint256 farcasterId,string selectionMethod",
 )
@@ -302,6 +309,26 @@ export async function createFullProjectSnapshotAttestations({
   return processAttestationsInBatches(attestations, createMultiAttestations)
 }
 
+export async function createCitizenWalletChangeAttestation({
+  oldCitizenUID,
+  newCitizenUID,
+}: {
+  oldCitizenUID: string
+  newCitizenUID: string
+}) {
+  const data = citizenWalletChangeSchema.encodeData([
+    { name: "oldCitizenUID", value: oldCitizenUID, type: "bytes32" },
+  ])
+
+  const attestationId = await createAttestation(
+    CITIZEN_WALLET_CHANGE_SCHEMA_ID,
+    data,
+    newCitizenUID,
+  )
+
+  return attestationId
+}
+
 export async function revokeContractAttestations(attestationIds: string[]) {
   if (attestationIds.length === 0) {
     return
@@ -454,10 +481,12 @@ export async function createCitizenAttestation({
   to,
   farcasterId,
   selectionMethod,
+  refUID,
 }: {
   to: string
   farcasterId: number
   selectionMethod: string
+  refUID?: string
 }) {
   const data = citizenSchema.encodeData([
     { name: "farcasterId", value: farcasterId, type: "uint256" },
@@ -471,6 +500,7 @@ export async function createCitizenAttestation({
       expirationTime: BigInt(0),
       revocable: true,
       data,
+      refUID,
     },
   })
 
@@ -486,42 +516,5 @@ export async function isAttestationActive(
   } catch (error) {
     console.warn("Error checking attestation status:", error)
     return false
-  }
-}
-
-export async function createVoteAttestation(
-  delegateAttestationSignature: Signature,
-): Promise<string> {
-  try {
-    // Convert the viem Signature (with v as bigint) to EAS SDK Signature (with v as number)
-    const convertedSignature = {
-      ...delegateAttestationSignature,
-      v: Number(delegateAttestationSignature.v), // Convert bigint to number
-    }
-
-    // Use attestByDelegation to create the attestation
-    const tx = await eas.attestByDelegation({
-      schema:
-        "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09",
-      data: {
-        recipient: "0x0000000000000000000000000000000000000000",
-        expirationTime: BigInt(0), // NO_EXPIRATION
-        revocable: true,
-        refUID:
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        data: "0x", // The data is included in the signature
-      },
-      signature: convertedSignature,
-      attester: await signer.getAddress(), // Using the signer from the eas.ts file
-      deadline: BigInt(0), // NO_EXPIRATION
-    })
-
-    // Wait for the transaction to be mined
-    const receipt = await tx.wait()
-    console.log("Vote attestation created with ID:", receipt)
-    return receipt
-  } catch (error) {
-    console.error("Error creating vote attestation:", error)
-    throw error
   }
 }

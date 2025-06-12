@@ -14,13 +14,16 @@ export function UserAvatarLarge({ imageUrl, children }: Props) {
       {children}
     </Avatar>
   ) : (
-    <div className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none">
-      <Image
-        src="/assets/icons/user-icon.svg"
-        alt="user"
-        width={18}
-        height={18}
-      />
-    </div>
+    <Avatar className="w-20 h-20">
+      <div className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none">
+        <Image
+          src="/assets/icons/user-icon.svg"
+          alt="user"
+          width={18}
+          height={18}
+        />
+      </div>
+      {children}
+    </Avatar>
   )
 }
