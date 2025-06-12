@@ -1,6 +1,6 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
-import { Signature } from "viem"
+import { Signature } from "@ethereum-attestation-service/eas-sdk"
 
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
@@ -516,5 +516,66 @@ export async function isAttestationActive(
   } catch (error) {
     console.warn("Error checking attestation status:", error)
     return false
+  }
+}
+
+export async function createVoteAttestation(
+  data: any,
+  delegateAttestationSignature: Signature,
+  signerAddress: string,
+): Promise<string> {
+  console.log(
+    "createVoteAttestation:\n",
+    data,
+    delegateAttestationSignature,
+    signerAddress,
+  )
+  const VOTE_SCHEMA = "uint256 proposalId,string params"
+
+  const encoder = new SchemaEncoder(VOTE_SCHEMA)
+
+  const encodedData = encoder.encodeData([
+    { name: "proposalId", value: 1, type: "uint256" },
+    { name: "params", value: "[0]", type: "string" },
+  ])
+
+  try {
+    // Use attestByDelegation to create the attestation
+    const tx = await eas.attestByDelegation({
+      schema:
+        "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09",
+      data: {
+        recipient: signerAddress,
+        expirationTime: BigInt(0), // NO_EXPIRATION
+        revocable: false,
+        refUID:
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        data: data,
+      },
+      signature: delegateAttestationSignature,
+      attester: signerAddress,
+      deadline: BigInt(0), // NO_EXPIRATION
+    })
+    // const tx = await eas.attest({
+    //   schema:
+    //     "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09",
+    //   data: {
+    //     recipient: "0xDBb050a8692afF8b5EF4A3F36D53900B14210E40",
+    //     expirationTime: BigInt(0), // NO_EXPIRATION
+    //     revocable: false,
+    //     data: encodedData,
+    //   },
+    //   // signature: delegateAttestationSignature,
+    //   // attester: signerAddress,
+    //   // deadline: BigInt(0), // NO_EXPIRATION
+    // })
+
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait()
+    console.log("Vote attestation created with ID:", receipt)
+    return receipt
+  } catch (error) {
+    console.error("Error creating vote attestation:", error)
+    throw error
   }
 }

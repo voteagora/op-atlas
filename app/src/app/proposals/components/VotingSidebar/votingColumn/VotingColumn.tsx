@@ -6,8 +6,7 @@ import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingCol
 import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
 import { useState } from "react"
-import { postCitizenProposalVote } from "@/db/citizens"
-import { createVoteAttestationCall } from "@/lib/api/eas/voteAttestation"
+
 import {
   EAS,
   NO_EXPIRATION,
@@ -15,6 +14,7 @@ import {
 } from "@ethereum-attestation-service/eas-sdk"
 import { ZeroHash } from "ethers"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
+import { vote } from "@/lib/actions/votes"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
@@ -107,25 +107,14 @@ const VotingColumn = ({
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
-  const signer = useEthersSigner({ chainId: 11155420 })
+  const signer = useEthersSigner({ chainId: 11155111 })
 
   const createDelegatedAttestation = async (voteType: VoteType) => {
     if (!signer) throw new Error("Signer not ready")
     const eas = new EAS(EAS_CONTRACT_ADDRESS)
     eas.connect(signer.provider!)
     const delegated = await eas.getDelegated()
-    const VOTE_SCHEMA =
-      "address Contract," +
-      "uint256 Id," +
-      "address Proposer," +
-      "string Description," +
-      "string[] Choices," +
-      "uint8 Proposal_type_id," +
-      "uint256 Start_block," +
-      "uint256 End_block," +
-      "string Proposal_type," +
-      "uint256[] Tiers," +
-      "uint256 Onchain_proposalid"
+    const VOTE_SCHEMA = "uint256 proposalId,string params"
 
     const encoder = new SchemaEncoder(VOTE_SCHEMA)
 
@@ -146,61 +135,39 @@ const VotingColumn = ({
         break
     }
 
-    const getProposalTypeID = (proposalType: string) => {
-      switch (proposalType) {
-        case "STANDARD":
-          return 0
-        default:
-          return 0
-      }
-    }
-
     const args = {
-      contract: "0x368723068b6C762b416e5A7d506a605E8b816C22",
-      id: "42740012529150791772311325945937601588484139798594959324533215350132958331528",
-      proposer: "0x648BFC4dB7e43e799a84d0f607aF0b4298F932DB",
-      description: "# Garrett AttestationTest",
-      choices: choices,
-      proposalTypeId: getProposalTypeID(proposalType),
-      startBlock: "28966158",
-      endBlock: "29095758",
-      proposalType: proposalType,
-      tiers: [],
-      onChainProposalId: "12345",
+      proposalId: 1,
+      choices: JSON.stringify(choices),
     }
     const encodedData = encoder.encodeData([
-      { name: "Contract", value: args.contract, type: "address" },
-      { name: "Id", value: args.id, type: "uint256" },
-      { name: "Proposer", value: args.proposer, type: "address" },
-      { name: "Description", value: args.description, type: "string" },
-      { name: "Choices", value: args.choices, type: "string[]" },
-      { name: "Proposal_type_id", value: args.proposalTypeId, type: "uint8" },
-      { name: "Start_block", value: args.startBlock, type: "uint256" },
-      { name: "End_block", value: args.endBlock, type: "uint256" },
-      { name: "Proposal_type", value: args.proposalType, type: "string" },
-      { name: "Tiers", value: args.tiers, type: "uint256[]" },
-      {
-        name: "Onchain_proposalid",
-        value: args.onChainProposalId,
-        type: "uint256",
-      },
+      { name: "proposalId", value: 1, type: "uint256" },
+      { name: "params", value: "[0]", type: "string" },
     ])
+    console.log("choices", choices)
+    console.log("Encoded Data (in VotingColumn): ", encodedData)
 
     const nonce = await eas.getNonce(signer.address)
 
     const delegateRequest = {
       schema:
-        "0x875845d42b7cb72da8d97c3442182b9a0ee302d4a8d661ee8b83f13bf1f8f38b",
+        "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09",
       recipient: signer.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
-      revocable: true,
+      revocable: false,
       refUID: ZeroHash,
       data: encodedData,
       value: BigInt(0),
       nonce,
       deadline: NO_EXPIRATION,
     }
-    return await delegated.signDelegatedAttestation(delegateRequest, signer)
+    return {
+      data: encodedData,
+      rawSignature: await delegated.signDelegatedAttestation(
+        delegateRequest,
+        signer,
+      ),
+      signerAddress: signer.address,
+    }
   }
 
   const handleCastVote = async () => {
@@ -208,13 +175,12 @@ const VotingColumn = ({
 
     try {
       // 1. Create and sign an attestation for the vote
-      const delegatedAttestation = await createDelegatedAttestation(
-        selectedVote,
-      )
+      const { data, rawSignature, signerAddress } =
+        await createDelegatedAttestation(selectedVote)
       // 2. Send signature to server to relay onchain
-      await createVoteAttestationCall(delegatedAttestation.signature)
+      await vote(data, rawSignature.signature, signerAddress)
       // 3. Record vote in database
-      await postCitizenProposalVote(selectedVote)
+      // await postCitizenProposalVote(selectedVote)
       // Add success handling if needed
     } catch (error) {
       console.error("Failed to cast vote:", error)
