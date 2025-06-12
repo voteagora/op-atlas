@@ -4,10 +4,6 @@ import { Signature } from "viem"
 export async function createVoteAttestationCall(
   delegateAttestationSignature: any,
 ): Promise<any> {
-  console.log(
-    `Making API request to /api/eas/voteAttestation with signature: ${delegateAttestationSignature}`,
-  )
-
   try {
     const response = await fetch("/api/eas/voteAttestation", {
       method: "POST",
