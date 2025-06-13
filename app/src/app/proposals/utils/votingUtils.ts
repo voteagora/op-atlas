@@ -11,6 +11,7 @@ const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
 export interface ProposalPageDataInterface {
   signedIn: boolean
   citizen: boolean
+  citizenId?: string
   votingOpen: boolean
   votingComplete: boolean
   voted: boolean
@@ -69,9 +70,9 @@ const youVoted = () => {
 const castYourVote = (proposalType: string, customTitle?: string) => {
   const proposalTypeDescription = () => {
     switch (proposalType) {
-      case "APPROVAL":
+      case "OFFCHAIN_APPROVAL":
         return "This election uses approval voting, meaning voter can approve more than one candidate."
-      case "STANDARD":
+      case "OFFCHAIN_STANDARD":
         // TODO link 'here'
         return "This proposal requires approval from the Citizen's House and Token House. Read more about the voting mechanism here."
       case "OFFCHAIN_OPTIMISTIC":
@@ -167,9 +168,9 @@ const getCitizenTypes = (cardType: ProposalPageDataInterface) => {
 
 const getNonCitizenTypes = (cardType: ProposalPageDataInterface) => {
   switch (cardType.proposalType) {
-    case "APPROVAL":
+    case "OFFCHAIN_APPROVAL":
       return castYourVote(cardType.proposalType)
-    case "STANDARD":
+    case "OFFCHAIN_STANDARD":
       return wantToVote(cardType.citizenEligibility)
     case "OFFCHAIN_OPTIMISTIC":
       return wantToVote(cardType.citizenEligibility)
@@ -353,19 +354,21 @@ export const getVotingColumnProps = (
 
   let votingColumnProps: any = {
     proposalType: cardType.proposalType,
+    proposalId: cardType.proposalId,
     votingActions: votingActions,
     currentlyActive: cardType.votingOpen,
     userSignedIn: cardType.signedIn,
     userVoted: cardType.voted,
     userCitizen: cardType.citizen,
+    citizenId: cardType.citizen,
     resultsLink: `${API_URL}/${cardType.proposalId}`,
   }
 
   switch (cardType.proposalType) {
-    case "APPROVAL":
+    case "OFFCHAIN_APPROVAL":
       votingColumnProps = { ...votingColumnProps, options: getVoteOptions() }
       break
-    case "STANDARD":
+    case "OFFCHAIN_STANDARD":
       votingColumnProps = {
         ...votingColumnProps,
       }
