@@ -1,8 +1,10 @@
+"use server"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 import {
   OffChainProposalResponse,
   UIProposal,
 } from "@/app/api/v1/proposals/route"
+import { string } from "zod"
 
 const getStandardProposlas = async () => {
   const response = await fetch(
@@ -84,4 +86,52 @@ export const getProposals = async () => {
     standardProposals: standardProposals,
     selfNominations: selfNominations,
   }
+}
+
+type ProposalData = {
+  id: string
+  proposer: string
+  snapshotBlockNumber: number
+  createdTime: string
+  startTime: string
+  startBlock?: string
+  endTime: string
+  endBlock?: string
+  cancelledTime?: string | null
+  executedTime?: string | null
+  executedBlock?: string | null
+  queuedTime?: string | null
+  markdowntitle: string
+  description: string
+  quorum: string
+  approvalThreshold?: string
+  proposalData: object
+  unformattedProposalData?: string | null
+  proposalResults: object
+  proposalType: string
+  status: string
+  createdTransactionHash?: string | null
+  cancelledTransactionHash?: string | null
+  executedTransactionHash?: string | null
+  proposalTemplate?: object
+}
+
+export const getProposal = async (id: string): Promise<ProposalData> => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/v1/proposals/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.AGORA_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store", // For dynamic data
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch off-chain proposals ${response.statusText}`,
+    )
+  }
+  return await response.json()
 }
