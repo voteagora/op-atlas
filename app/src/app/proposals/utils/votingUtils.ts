@@ -360,7 +360,7 @@ export const getVotingColumnProps = (
     userSignedIn: cardType.signedIn,
     userVoted: cardType.voted,
     userCitizen: cardType.citizen,
-    citizenId: cardType.citizen,
+    citizenId: cardType.citizenId,
     resultsLink: `${API_URL}/${cardType.proposalId}`,
   }
 
