@@ -4,7 +4,7 @@ import { UserPassport } from "@prisma/client"
 
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
-import { CITIZEN_TYPES } from "@/lib/constants"
+import { CITIZEN_TYPES, VALID_PASSPORT_THRESHOLD } from "@/lib/constants"
 import { CitizenshipQualification } from "@/lib/types"
 
 import { useUserWorldId } from "../db/useUserWorldId"
@@ -44,7 +44,8 @@ export const useCitizenshipRequirements = ({
   const email = user?.emails?.[0]
   const govAddress = user?.addresses?.find((addr) => addr.primary)
   const passport = passports?.find(
-    (passport: UserPassport) => Number(passport.score) >= 20.0,
+    (passport: UserPassport) =>
+      Number(passport.score) >= VALID_PASSPORT_THRESHOLD,
   )
   const validPassport = Boolean(passport)
   const validWorldId = Boolean(worldId?.verified)
