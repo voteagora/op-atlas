@@ -140,11 +140,9 @@ const VotingColumn = ({
       choices: JSON.stringify(choices),
     }
     const encodedData = encoder.encodeData([
-      { name: "proposalId", value: 1, type: "uint256" },
-      { name: "params", value: "[0]", type: "string" },
+      { name: "proposalId", value: args.proposalId, type: "uint256" },
+      { name: "params", value: choices, type: "string" },
     ])
-    console.log("choices", choices)
-    console.log("Encoded Data (in VotingColumn): ", encodedData)
 
     const nonce = await eas.getNonce(signer.address)
 
