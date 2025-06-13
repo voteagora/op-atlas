@@ -3,9 +3,12 @@ import Breadcrumbs from "@/app/proposals/components/Breadcrumbs"
 import ProposalContent from "@/app/proposals/components/proposalContent/ProposalContent"
 import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
 import ProposalHeader from "@/app/proposals/components/ProposalHeader"
-import { ProposalType } from "@/lib/types"
+
 import { addDays } from "date-fns"
-import { CardType, getVotingProps } from "@/app/proposals/utils/votingUtils"
+import {
+  ProposalPageDataInterface,
+  getVotingProps,
+} from "@/app/proposals/utils/votingUtils"
 
 import { getProposal } from "@/lib/proposals"
 import { auth } from "@/auth"
@@ -37,8 +40,8 @@ const Page = async (params: PageProps) => {
   const session = await auth()
   const userId = session?.user.id ?? ""
   const user = await getUserById(userId)
-  const userAddress = user?.addresses.filter((address) => address.primary)[0]
-    .address
+  const primaryAddress = user?.addresses.filter((address) => address.primary)[0]
+  let userAddress = primaryAddress?.address
   let citizen: any = null
   if (userAddress) {
     citizen = await getCitizen(userAddress!)
@@ -60,7 +63,6 @@ const Page = async (params: PageProps) => {
   // Voting Info
   const voted = false
   const votingRecord = ["2"]
-  const pType = "STANDARD" as ProposalType
 
   const citizenEligibility = {
     organization: {
@@ -79,7 +81,7 @@ const Page = async (params: PageProps) => {
     },
   }
 
-  const votingCardType: CardType = {
+  const proposalPageData: ProposalPageDataInterface = {
     signedIn: userSignedIn,
     citizen: userCitizen,
     votingOpen: votingOpen,
@@ -88,15 +90,15 @@ const Page = async (params: PageProps) => {
     votingRecord: votingRecord,
     startDate: proposalStartDate,
     endDate: proposalEndDate,
-    proposalType: pType,
+    proposalType: proposalData.proposalType,
     proposalId: proposalId,
     citizenEligibility: citizenEligibility,
   }
 
   const { votingCardProps, votingColumnProps, votingRedirectProps } =
-    getVotingProps(votingCardType)
+    getVotingProps(proposalPageData)
 
-  // console.log("votingCardType: ", votingCardType)
+  // console.log("proposalPageData: ", proposalPageData)
   // console.log("votingCardProps: ", votingCardProps)
   // console.log("votingColumnProps: ", votingColumnProps)
 
