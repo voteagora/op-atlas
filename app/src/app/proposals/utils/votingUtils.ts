@@ -1,4 +1,3 @@
-import { ProposalType } from "@/lib/types"
 import {
   CardTextProps,
   VotingCardProps,
@@ -9,7 +8,7 @@ import { boolean, undefined } from "zod"
 
 const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
 
-export interface CardType {
+export interface ProposalPageDataInterface {
   signedIn: boolean
   citizen: boolean
   votingOpen: boolean
@@ -18,7 +17,7 @@ export interface CardType {
   votingRecord?: string[]
   startDate: Date
   endDate: Date
-  proposalType: ProposalType
+  proposalType: string
   proposalId: string
   citizenEligibility: CitizenEligibility
 }
@@ -67,7 +66,7 @@ const youVoted = () => {
   }
 }
 
-const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
+const castYourVote = (proposalType: string, customTitle?: string) => {
   const proposalTypeDescription = () => {
     switch (proposalType) {
       case "APPROVAL":
@@ -144,7 +143,7 @@ const wantToVote = (eligibility: CitizenEligibility) => {
   }
 }
 
-const getOpenVotingTypes = (cardType: CardType) => {
+const getOpenVotingTypes = (cardType: ProposalPageDataInterface) => {
   if (cardType.voted) {
     return youVoted()
   }
@@ -158,7 +157,7 @@ const getOpenVotingTypes = (cardType: CardType) => {
   return castYourVote(cardType.proposalType)
 }
 
-const getCitizenTypes = (cardType: CardType) => {
+const getCitizenTypes = (cardType: ProposalPageDataInterface) => {
   if (cardType.votingOpen) {
     return getOpenVotingTypes(cardType)
   } else if (cardType.votingComplete) {
@@ -166,7 +165,7 @@ const getCitizenTypes = (cardType: CardType) => {
   }
 }
 
-const getNonCitizenTypes = (cardType: CardType) => {
+const getNonCitizenTypes = (cardType: ProposalPageDataInterface) => {
   switch (cardType.proposalType) {
     case "APPROVAL":
       return castYourVote(cardType.proposalType)
@@ -198,7 +197,7 @@ const getVoteOptions = () => {
  * @returns The voting card props
  */
 export const getVotingCardProps = (
-  cardType: CardType,
+  cardType: ProposalPageDataInterface,
 ): VotingCardProps | undefined => {
   // If voting has not opened yet
   if (!cardType.votingOpen && !cardType.votingComplete) {
@@ -229,7 +228,7 @@ export const getVotingCardProps = (
  * @param cardType
  * @returns Object containing the voting actions
  */
-const getVotingActions = (cardType: CardType) => {
+const getVotingActions = (cardType: ProposalPageDataInterface) => {
   let votingActions: any = {}
   if (!cardType.signedIn) {
     votingActions = {
@@ -347,7 +346,9 @@ const getVotingActions = (cardType: CardType) => {
  * @param cardType The card type containing information about the voting state
  * @returns The voting column props
  */
-export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
+export const getVotingColumnProps = (
+  cardType: ProposalPageDataInterface,
+): VotingColumnProps => {
   let votingActions = getVotingActions(cardType)
 
   let votingColumnProps: any = {
@@ -377,7 +378,9 @@ export const getVotingColumnProps = (cardType: CardType): VotingColumnProps => {
   return votingColumnProps as VotingColumnProps
 }
 
-const getVotingRedirectProps = (cardType: CardType): VotingRedirectProps => {
+const getVotingRedirectProps = (
+  cardType: ProposalPageDataInterface,
+): VotingRedirectProps => {
   return {
     callout: "Are you a delegate?",
     link: {
@@ -392,7 +395,7 @@ const getVotingRedirectProps = (cardType: CardType): VotingRedirectProps => {
  * @param cardType The card type containing information about the voting state
  * @returns An object containing both voting card props and voting column props
  */
-export const getVotingProps = (cardType: CardType) => {
+export const getVotingProps = (cardType: ProposalPageDataInterface) => {
   return {
     votingCardProps: getVotingCardProps(cardType),
     votingColumnProps: getVotingColumnProps(cardType),
