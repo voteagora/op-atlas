@@ -1,7 +1,5 @@
 "use client"
 
-import Link from "next/link"
-
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import { CheckboxCircleFIll } from "@/components/icons/reminx"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"

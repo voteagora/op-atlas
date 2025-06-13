@@ -16,6 +16,8 @@ export const CITIZEN_ATTESTATION_CODE = {
   [CITIZEN_TYPES.user]: "5.3",
 } as const
 
+export const VALID_PASSPORT_THRESHOLD = 20.0
+
 export const EXTENDED_TAG_BY_ENTITY = {
   citizen: "Citizen",
   gov_contribution: "S7 Elected Official",

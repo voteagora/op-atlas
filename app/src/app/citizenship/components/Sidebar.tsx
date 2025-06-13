@@ -4,6 +4,7 @@ import { User } from "@prisma/client"
 import Image from "next/image"
 import { useState } from "react"
 
+import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import CitizenshipApplicationDialog from "@/components/dialogs/CitizenshipApplicationDialog"
 import { Button } from "@/components/ui/button"
@@ -23,24 +24,6 @@ export const Sidebar = ({
     qualification,
   })
   const [isRulesDialogOpen, setIsRulesDialogOpen] = useState(false)
-
-  const renderAvatar = () => {
-    if (qualification.type === CITIZEN_TYPES.user) {
-      return <UserAvatarLarge imageUrl={user?.imageUrl} />
-    }
-
-    return qualification.avatar ? (
-      <Image
-        className="w-[64px] h-[64px] rounded-md"
-        src={qualification.avatar || ""}
-        alt={qualification.title}
-        width={64}
-        height={64}
-      />
-    ) : (
-      <div className="w-[64px] h-[64px] rounded-md bg-muted" />
-    )
-  }
 
   const renderCopy = () => {
     if (qualification.type === CITIZEN_TYPES.user) {
@@ -64,7 +47,7 @@ export const Sidebar = ({
 
   return (
     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
-      {renderAvatar()}
+      <EligibleCitizenAvatar user={user} qualification={qualification} />
 
       <div className="text-sm font-semibold text-secondary-foreground">
         {renderCopy()}
