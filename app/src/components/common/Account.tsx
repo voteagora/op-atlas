@@ -127,10 +127,7 @@ export const Account = () => {
     if (didLogIn) {
       isLoggingIn.current = false
       saveLogInDate()
-      track("Successful Sign In", {
-        userId: session.user.id,
-        newUser: isFirstTimeUser(),
-      })
+      track("Successful Sign In", { userId: session.user.id })
 
       const loginRedirect = localStorage.getItem(LOCAL_STORAGE_LOGIN_REDIRECT)
       if (loginRedirect) {
@@ -147,6 +144,8 @@ export const Account = () => {
         } else {
           checkBadgeholderStatus()
         }
+      } else {
+        track("Profile created", { userId: session.user.id })
       }
     }
   }, [
