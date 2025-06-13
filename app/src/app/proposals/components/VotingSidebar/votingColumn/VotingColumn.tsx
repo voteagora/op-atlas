@@ -77,7 +77,7 @@ const ColumnCard = ({
     case "OFFCHAIN_OPTIMISTIC":
       return <OverrideVoteCard />
     default:
-      return <>TODO</>
+      return <>{proposalType} Not Yet Supported</>
   }
 }
 
