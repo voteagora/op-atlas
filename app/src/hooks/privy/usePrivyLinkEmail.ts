@@ -7,6 +7,7 @@ import { useRef } from "react"
 import { toast } from "sonner"
 
 import { syncPrivyUser } from "@/db/privy"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { useUser } from "../db/useUser"
 import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
@@ -17,9 +18,11 @@ export const usePrivyEmail = (userId: string) => {
   const onError = useHandlePrivyErrors()
   const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
   const { user: privyUser, unlinkEmail } = usePrivy()
+  const { track } = useAnalytics()
 
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
+      track("Email Linked", { userId })
       if (linkMethod === "email" && isLinking.current) {
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
