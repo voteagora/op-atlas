@@ -30,7 +30,6 @@ model User {
   organizations      UserOrganization[]
   passports          UserPassport[]
   projects           UserProjects[]
-  worldId            UserWorldId?
 
   @@index([username])
   @@index([farcasterId])
@@ -482,10 +481,11 @@ model KYCTeam {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   deletedAt            DateTime?
+  rewardStreamId       String?
+  RewardStream         RewardStream?         @relation(fields: [rewardStreamId], references: [id])
   team                 KYCUserTeams[]
   OrganizationKYCTeams OrganizationKYCTeam[]
   projects             Project[]
-  rewardStreams        RewardStream[]
   superfludStream      SuperfluidStream[]
 
   @@index([walletAddress])
@@ -583,8 +583,7 @@ model RewardStream {
   projects  String[]
   roundId   String
   createdAt DateTime           @default(now())
-  kycTeamId String
-  team      KYCTeam            @relation(fields: [kycTeamId], references: [id])
+  KYCTeam   KYCTeam[]
   round     FundingRound       @relation(fields: [roundId], references: [id])
   streams   SuperfluidStream[]
 
@@ -631,51 +630,48 @@ model ProjectOSOAtlasRelatedProjects {
 }
 
 model Citizen {
-  id             Int      @id @default(autoincrement())
-  userId         String   @unique
-  address        String?  @unique
+  id             Int            @id @default(autoincrement())
+  userId         String         @unique
+  address        String?        @unique
   type           String
   attestationId  String?
   timeCommitment String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  organizationId String?
-  projectId      String?
-  user           User     @relation(fields: [userId], references: [id])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id])
+  OffChainVote   OffChainVote[]
 
   @@index([userId])
-  @@index([projectId])
-  @@index([organizationId])
 }
 
 model S8QualifyingUser {
   address String @id
-
-  @@index([address])
 }
 
 model S8QualifyingChain {
   organizationId String @id
-
-  @@index([organizationId])
 }
 
 model S8QualifyingProject {
-  projectId String @id
-
-  @@index([projectId])
+  address String @id
 }
 
-model UserWorldId {
-  id            Int      @id @default(autoincrement())
-  userId        String   @unique
-  verified      Boolean  @default(false)
-  nullifierHash String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  user          User     @relation(fields: [userId], references: [id])
+model OffChainVote {
+  attestationId   String          @id
+  voterAddress    String
+  proposalId      String
+  vote            Json
+  transactionHash String?
+  citizenId       Int
+  citizenCategory citizenCategory @default(CHAIN)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime
+  Citizen         Citizen         @relation(fields: [citizenId], references: [id])
 
-  @@index([userId])
+  @@index([citizenId])
+  @@index([proposalId])
+  @@index([transactionHash])
+  @@index([voterAddress])
 }
 
 enum KYCStatus {
@@ -700,4 +696,10 @@ enum ProjectOSOMetric {
   DEVELOPER_CONNECTION_COUNT
   TRUSTED_DEVELOPER_USERNAME
   DOWNSTREAM_GAS
+}
+
+enum citizenCategory {
+  CHAIN
+  PROJECT
+  USER
 }

@@ -556,19 +556,6 @@ export async function createVoteAttestation(
       attester: signerAddress,
       deadline: BigInt(0), // NO_EXPIRATION
     })
-    // const tx = await eas.attest({
-    //   schema:
-    //     "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09",
-    //   data: {
-    //     recipient: "0xDBb050a8692afF8b5EF4A3F36D53900B14210E40",
-    //     expirationTime: BigInt(0), // NO_EXPIRATION
-    //     revocable: false,
-    //     data: encodedData,
-    //   },
-    //   // signature: delegateAttestationSignature,
-    //   // attester: signerAddress,
-    //   // deadline: BigInt(0), // NO_EXPIRATION
-    // })
 
     // Wait for the transaction to be mined
     const receipt = await tx.wait()
