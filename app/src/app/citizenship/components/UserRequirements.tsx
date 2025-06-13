@@ -252,17 +252,37 @@ export const UserRequirements = ({
     if (hasAddress) {
       return (
         <ConditionRow isMet={false}>
+          Connect your wallet with a{" "}
+          <Link
+            href="https://app.passport.xyz"
+            target="_blank"
+            className={LINK_STYLE}
+          >
+            Passport
+          </Link>{" "}
+          score of over {VALID_PASSPORT_THRESHOLD}:{" "}
+          <button
+            type="button"
+            className={LINK_STYLE}
+            onClick={() => linkWallet({ primary: true })}
+            onKeyDown={(e) =>
+              e.key === "Enter" && linkWallet({ primary: true })
+            }
+          >
+            Verify an address
+          </button>{" "}|{" "}
           <button
             type="button"
             className={LINK_STYLE}
             onClick={() => refreshPassport()}
             onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
           >
-            Check passport score for connected addresses
+            Check addresses for Passport
           </button>
         </ConditionRow>
       )
     } else {
+
       return (
         <ConditionRow isMet={false}>
           Connect your wallet with a{" "}
