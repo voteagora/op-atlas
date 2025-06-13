@@ -127,7 +127,10 @@ export const Account = () => {
     if (didLogIn) {
       isLoggingIn.current = false
       saveLogInDate()
-      track("Successful Sign In", { userId: session.user.id })
+      track("Successful Sign In", {
+        userId: session.user.id,
+        newUser: isFirstTimeUser(),
+      })
 
       const loginRedirect = localStorage.getItem(LOCAL_STORAGE_LOGIN_REDIRECT)
       if (loginRedirect) {
