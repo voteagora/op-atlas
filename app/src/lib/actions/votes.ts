@@ -8,5 +8,9 @@ export async function vote(
   delegateAttestationSignature: Signature,
   signerAddress: string,
 ) {
-  await createVoteAttestation(data, delegateAttestationSignature, signerAddress)
+  return await createVoteAttestation(
+    data,
+    delegateAttestationSignature,
+    signerAddress,
+  )
 }

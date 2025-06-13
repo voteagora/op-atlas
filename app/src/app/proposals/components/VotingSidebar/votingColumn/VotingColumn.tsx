@@ -15,6 +15,7 @@ import {
 import { ZeroHash } from "ethers"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
+import { OffchainVote, postOffchainVote, upsertOffchainVote } from "@/db/votes"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
@@ -61,7 +62,7 @@ const ColumnCard = ({
   setSelectedVote?: (vote: VoteType) => void
 }) => {
   switch (proposalType) {
-    case "STANDARD":
+    case "OFFCHAIN_STANDARD":
       // If the user is not signed-in we do not want to show the card
       if (!signedIn || !currentlyActive || voted || !citizen) {
         return <></>
@@ -83,22 +84,26 @@ const ColumnCard = ({
 
 export interface VotingColumnProps {
   proposalType: string
+  proposalId: string
   options?: CandidateCardProps[]
   votingActions?: CardActionsProps
   currentlyActive?: boolean
   userSignedIn?: boolean
   userCitizen?: boolean
+  citizenId?: string
   userVoted?: boolean
   resultsLink: string
 }
 
 const VotingColumn = ({
   proposalType,
+  proposalId,
   options,
   votingActions,
   currentlyActive,
   userSignedIn,
   userCitizen,
+  citizenId,
   userVoted,
   resultsLink,
 }: VotingColumnProps) => {
@@ -141,7 +146,7 @@ const VotingColumn = ({
     }
     const encodedData = encoder.encodeData([
       { name: "proposalId", value: args.proposalId, type: "uint256" },
-      { name: "params", value: choices, type: "string" },
+      { name: "params", value: args.choices, type: "string" },
     ])
 
     const nonce = await eas.getNonce(signer.address)
@@ -176,9 +181,24 @@ const VotingColumn = ({
       const { data, rawSignature, signerAddress } =
         await createDelegatedAttestation(selectedVote)
       // 2. Send signature to server to relay onchain
-      await vote(data, rawSignature.signature, signerAddress)
+      const attestationId = await vote(
+        data,
+        rawSignature.signature,
+        signerAddress,
+      )
+
+      // build an offhchain vote object for the DB
+      const offchainVote: OffchainVote = {
+        attestationId: attestationId,
+        voterAddress: signerAddress,
+        proposalId: proposalId,
+        vote: { vote: selectedVote },
+        citizenId: parseInt(citizenId!),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
       // 3. Record vote in database
-      // await postCitizenProposalVote(selectedVote)
+      await postOffchainVote(offchainVote)
       // Add success handling if needed
     } catch (error) {
       console.error("Failed to cast vote:", error)

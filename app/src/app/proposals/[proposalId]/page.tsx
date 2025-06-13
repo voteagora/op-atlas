@@ -13,7 +13,6 @@ import {
 import { getProposal } from "@/lib/proposals"
 import { auth } from "@/auth"
 import { getCitizen } from "@/lib/api/eas/citizen"
-import privy from "@/lib/privy"
 import { getUserById } from "@/db/users"
 
 interface PageProps {
@@ -83,7 +82,8 @@ const Page = async (params: PageProps) => {
 
   const proposalPageData: ProposalPageDataInterface = {
     signedIn: userSignedIn,
-    citizen: userCitizen,
+    citizen: true,
+    citizenId: "4",
     votingOpen: votingOpen,
     votingComplete: votingComplete,
     voted: voted,
