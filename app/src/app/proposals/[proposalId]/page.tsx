@@ -6,7 +6,12 @@ import ProposalHeader from "@/app/proposals/components/ProposalHeader"
 import { ProposalType } from "@/lib/types"
 import { addDays } from "date-fns"
 import { CardType, getVotingProps } from "@/app/proposals/utils/votingUtils"
-import { string } from "zod"
+
+import { getProposal } from "@/lib/proposals"
+import { auth } from "@/auth"
+import { getCitizen } from "@/lib/api/eas/citizen"
+import privy from "@/lib/privy"
+import { getUserById } from "@/db/users"
 
 interface PageProps {
   params: {
@@ -14,9 +19,9 @@ interface PageProps {
   }
 }
 
-const CURRENT_DATE = new Date()
+const CURRENT_DATETIME = new Date()
 
-const Page = (params: PageProps) => {
+const Page = async (params: PageProps) => {
   // Get the proposals page
 
   const { proposalId } = params.params
@@ -26,75 +31,35 @@ const Page = (params: PageProps) => {
   if (!proposalIdData) {
     return notFound()
   }
+  const proposalData = await getProposal(proposalId)
 
-  const MOCK = {
-    breadcrumbs: ["Proposals", "Audit Request Team"],
-    title: "Developer Advisory Board: Audit Request Team",
-    status: "Nominations [Start Date] - [End Date]",
-    description:
-      "# Developer Advisory Board: Audit Request Team\n\n" +
-      "## Roles & Responsibilities\n\n" +
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\n" +
-      "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n" +
-      "* **Responsibility** for reviewing and auditing smart contracts\n" +
-      "* **Leadership** in maintaining security standards\n" +
-      "* **Collaboration** with development teams across projects",
-    votingCardProps: {
-      cardText: {
-        title: "It's time to vote",
-        description:
-          "This election uses approval voting, meaning voter can approve more than one candidate.",
-      },
-      cardActions: {
-        cardActionList: [
-          {
-            buttonStyle: "button-primary",
-            actionText: "Sign In",
-            actionType: "Log",
-          },
-          {
-            buttonStyle: "button-secondary",
-            actionText: "Learn about approval voting",
-            actionType: "Log",
-          },
-        ],
-      },
-    },
-    votingColumnProps: {
-      candidates: Array(8).fill({
-        name: "Username",
-        image: {
-          src: "https://i.imgur.com/0000000.png",
-          alt: "Image",
-        },
-        organizations: ["Org 1", "Org 2", "Org 3"],
-        buttonLink: "https://google.com",
-      }),
-      votingActions: {
-        cardActionList: [
-          {
-            buttonStyle: "button-primary",
-            actionText: "Sign In",
-            actionType: "Log",
-          },
-        ],
-      },
-    },
+  // console.log("proposalData: ", proposalData)
+  const session = await auth()
+  const userId = session?.user.id ?? ""
+  const user = await getUserById(userId)
+  const userAddress = user?.addresses.filter((address) => address.primary)[0]
+    .address
+  let citizen: any = null
+  if (userAddress) {
+    citizen = await getCitizen(userAddress!)
   }
 
-  const user = {
-    userId: "1",
-    citizenId: "1",
-  }
+  const userSignedIn = userId !== undefined || userId !== ""
+  const userCitizen = citizen !== null
 
-  const userSignedIn = true //user.userId !== undefined
-  const userCitizen = true //user.citizenId !== undefined
-  const votingOpen = true
-  const votingComplete = false
+  // Date Info
+  const proposalStartDate = new Date(proposalData.startTime)
+  const proposalEndDate = new Date(proposalData.endTime)
+  const votingOpen =
+    proposalStartDate < CURRENT_DATETIME && proposalEndDate > CURRENT_DATETIME
+  const votingComplete = CURRENT_DATETIME > proposalEndDate
+
+  // Breadcrumbs
+  const breadcrumbs = ["Proposals", proposalData.proposalType]
+
+  // Voting Info
   const voted = false
   const votingRecord = ["2"]
-  const startDate = addDays(CURRENT_DATE, -10)
-  const endDate = addDays(CURRENT_DATE, -1)
   const pType = "STANDARD" as ProposalType
 
   const citizenEligibility = {
@@ -121,8 +86,8 @@ const Page = (params: PageProps) => {
     votingComplete: votingComplete,
     voted: voted,
     votingRecord: votingRecord,
-    startDate: startDate,
-    endDate: endDate,
+    startDate: proposalStartDate,
+    endDate: proposalEndDate,
     proposalType: pType,
     proposalId: proposalId,
     citizenEligibility: citizenEligibility,
@@ -141,9 +106,12 @@ const Page = (params: PageProps) => {
         <div className="flex flex-col gap-[44px]">
           <div className="flex justify-between items-start flex-col md:flex-row">
             <div className="w-full flex flex-col gap-[44px] mb-8 md:mb-0">
-              <Breadcrumbs values={MOCK.breadcrumbs} />
-              <ProposalHeader title={MOCK.title} status={MOCK.status} />
-              <ProposalContent description={MOCK.description} />
+              <Breadcrumbs values={breadcrumbs} />
+              <ProposalHeader
+                title={proposalData.markdowntitle}
+                status={proposalData.status}
+              />
+              <ProposalContent description={proposalData.description} />
             </div>
             <div className="w-full md:w-[304px] md:ml-12">
               <VotingSidebar
