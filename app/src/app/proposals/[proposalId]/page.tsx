@@ -4,7 +4,6 @@ import ProposalContent from "@/app/proposals/components/proposalContent/Proposal
 import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
 import ProposalHeader from "@/app/proposals/components/ProposalHeader"
 
-import { addDays } from "date-fns"
 import {
   ProposalPageDataInterface,
   getVotingProps,
@@ -12,8 +11,8 @@ import {
 
 import { getProposal } from "@/lib/proposals"
 import { auth } from "@/auth"
-import { getCitizen } from "@/lib/api/eas/citizen"
 import { getUserById } from "@/db/users"
+import { getCitizenByType } from "@/db/citizens"
 
 interface PageProps {
   params: {
@@ -43,7 +42,7 @@ const Page = async (params: PageProps) => {
   let userAddress = primaryAddress?.address
   let citizen: any = null
   if (userAddress) {
-    citizen = await getCitizen(userAddress!)
+    citizen = await getCitizenByType({ type: "user", id: userId })
   }
 
   console.log("user: ", user)
