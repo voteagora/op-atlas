@@ -187,12 +187,31 @@ const VotingColumn = ({
         signerAddress,
       )
 
+      //TODO move somewhere else
+      let choices: string[]
+      switch (selectedVote) {
+        case VoteType.For:
+          choices = ["0"]
+          break
+        case VoteType.Abstain:
+          choices = ["1"]
+          break
+        case VoteType.Against:
+          choices = ["2"]
+          break
+        default:
+          choices = []
+          break
+      }
+
+      console.log("citizenId", citizenId)
+
       // build an offhchain vote object for the DB
       const offchainVote: OffchainVote = {
         attestationId: attestationId,
         voterAddress: signerAddress,
         proposalId: proposalId,
-        vote: { vote: selectedVote },
+        vote: { vote: choices },
         citizenId: parseInt(citizenId!),
         createdAt: new Date(),
         updatedAt: new Date(),
