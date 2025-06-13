@@ -46,8 +46,12 @@ const Page = async (params: PageProps) => {
     citizen = await getCitizen(userAddress!)
   }
 
+  console.log("user: ", user)
+  console.log("userAddress: ", userAddress)
+  console.log("citizen: ", citizen)
+
   const userSignedIn = userId !== undefined || userId !== ""
-  const userCitizen = citizen !== null
+  const userCitizen = citizen !== null && citizen.attestationId !== undefined
 
   // Date Info
   const proposalStartDate = new Date(proposalData.startTime)
@@ -82,8 +86,8 @@ const Page = async (params: PageProps) => {
 
   const proposalPageData: ProposalPageDataInterface = {
     signedIn: userSignedIn,
-    citizen: true,
-    citizenId: "4",
+    citizen: userCitizen,
+    citizenId: citizen?.id,
     votingOpen: votingOpen,
     votingComplete: votingComplete,
     voted: voted,
