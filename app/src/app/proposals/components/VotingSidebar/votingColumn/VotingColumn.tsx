@@ -16,8 +16,7 @@ import { ZeroHash } from "ethers"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
 import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
-import { OffchainVote, VoteType } from "@/app/proposals/proposal.types"
-import { CITIZEN_TYPES } from "@/lib/constants"
+import { Citizen, OffchainVote, VoteType } from "@/app/proposals/proposal.types"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
@@ -83,8 +82,7 @@ export interface VotingColumnProps {
   votingActions?: CardActionsProps
   currentlyActive?: boolean
   userSignedIn?: boolean
-  userCitizen?: boolean
-  citizenId?: string
+  userCitizen?: Citizen
   userVoted?: boolean
   resultsLink: string
 }
@@ -97,7 +95,6 @@ const VotingColumn = ({
   currentlyActive,
   userSignedIn,
   userCitizen,
-  citizenId,
   userVoted,
   resultsLink,
 }: VotingColumnProps) => {
@@ -198,7 +195,7 @@ const VotingColumn = ({
           break
       }
 
-      console.log("citizenId", citizenId)
+      console.log("citizenId", userCitizen?.id)
 
       // build an offhchain vote object for the DB
       const offchainVote: OffchainVote = {
@@ -206,8 +203,8 @@ const VotingColumn = ({
         voterAddress: signerAddress,
         proposalId: proposalId,
         vote: choices,
-        citizenId: parseInt(citizenId!),
-        citizenType: CITIZEN_TYPES,
+        citizenId: userCitizen!.id,
+        citizenType: userCitizen!.type,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -228,7 +225,7 @@ const VotingColumn = ({
           options={options}
           signedIn={userSignedIn}
           currentlyActive={currentlyActive}
-          citizen={userCitizen}
+          citizen={!!userCitizen}
           voted={userVoted}
           selectedVote={selectedVote}
           setSelectedVote={handleVoteClick}
