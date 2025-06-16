@@ -144,6 +144,8 @@ export const Account = () => {
         } else {
           checkBadgeholderStatus()
         }
+      } else {
+        track("Profile created", { userId: session.user.id })
       }
     }
   }, [

@@ -4,6 +4,7 @@ import { toast } from "sonner"
 
 import { makeUserAddressPrimaryAction } from "@/app/profile/verified-addresses/actions"
 import { syncPrivyUser } from "@/db/privy"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { useUser } from "../db/useUser"
 import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
@@ -14,6 +15,7 @@ export const usePrivyLinkWallet = (userId: string) => {
   const { unlinkWallet } = usePrivy()
   const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
   const onError = useHandlePrivyErrors()
+  const { track } = useAnalytics()
 
   const handleUnlinkWallet = (address: string) => {
     toast.promise(unlinkWallet(address), {
@@ -33,6 +35,7 @@ export const usePrivyLinkWallet = (userId: string) => {
   const { linkWallet } = useLinkAccount({
     onSuccess: ({ user: updatedPrivyUser, linkedAccount }) => {
       if (linkedAccount.type === "wallet" && isLinking.current) {
+        track("Wallet Linked", { userId })
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
@@ -51,6 +54,7 @@ export const usePrivyLinkWallet = (userId: string) => {
   const { linkWallet: linkWithPrimary } = useLinkAccount({
     onSuccess: ({ user: updatedPrivyUser, linkedAccount }) => {
       if (linkedAccount.type === "wallet" && isLinkingPrimary.current) {
+        track("Wallet Linked", { userId })
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => makeUserAddressPrimaryAction(linkedAccount.address))

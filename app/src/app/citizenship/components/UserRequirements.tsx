@@ -12,6 +12,7 @@ import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { useRefreshPassport } from "@/hooks/useRefreshPassport"
+import { VALID_PASSPORT_THRESHOLD } from "@/lib/constants"
 import { CitizenshipQualification } from "@/lib/types"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -203,30 +204,20 @@ export const UserRequirements = ({
     }
 
     const passport = userPassports.find(
-      (passport: UserPassport) => Number(passport.score) >= 20.0,
+      (passport: UserPassport) =>
+        Number(passport.score) >= VALID_PASSPORT_THRESHOLD,
     )
     const invalidPassport = userPassports.length > 0 && !passport
+    const hasAddress = user?.addresses.length
 
     if (passport) {
       return (
         <ConditionRow isMet={true}>
-          Passport{" "}
+          Passport found, and your score is {Number(passport?.score).toFixed(2)}
+          {"! "}
           <span className="font-semibold">
             {truncateAddress(passport?.address as string)}
-          </span>{" "}
-          verified! Your score is{" "}
-          <span className="font-semibold">
-            {Number(passport?.score).toFixed(2)}
-          </span>{" "}
-          |{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => refreshPassport()}
-            onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
-          >
-            Refresh
-          </button>
+          </span>
         </ConditionRow>
       )
     }
@@ -234,46 +225,88 @@ export const UserRequirements = ({
     if (invalidPassport) {
       return (
         <ConditionRow isMet={false}>
-          Low passport score. Verify one of your addresses on{" "}
+          Passport found, but your score is under {VALID_PASSPORT_THRESHOLD}:{" "}
+          <button
+            type="button"
+            className={LINK_STYLE}
+            onClick={() => linkWallet({ primary: true })}
+            onKeyDown={(e) =>
+              e.key === "Enter" && linkWallet({ primary: true })
+            }
+          >
+            Verify another address
+          </button>{" "}
+          |{" "}
+          <button
+            type="button"
+            className={LINK_STYLE}
+            onClick={() => refreshPassport()}
+            onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
+          >
+            Check addresses for Passport
+          </button>
+        </ConditionRow>
+      )
+    }
+
+    if (hasAddress) {
+      return (
+        <ConditionRow isMet={false}>
+          Connect your wallet with a{" "}
           <Link
             href="https://app.passport.xyz"
             target="_blank"
             className={LINK_STYLE}
           >
-            passport.xyz
+            Passport
           </Link>{" "}
-          then{" "}
+          score of over {VALID_PASSPORT_THRESHOLD}:{" "}
+          <button
+            type="button"
+            className={LINK_STYLE}
+            onClick={() => linkWallet({ primary: true })}
+            onKeyDown={(e) =>
+              e.key === "Enter" && linkWallet({ primary: true })
+            }
+          >
+            Verify an address
+          </button>{" "}|{" "}
           <button
             type="button"
             className={LINK_STYLE}
             onClick={() => refreshPassport()}
             onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
           >
-            refresh
+            Check addresses for Passport
           </button>
-          .
         </ConditionRow>
       )
-    }
+    } else {
 
-    if (govAddress) {
       return (
         <ConditionRow isMet={false}>
-          Verify your Human Passport:{" "}
-          {truncateAddress(govAddress.address as string)} |{" "}
+          Connect your wallet with a{" "}
+          <Link
+            href="https://app.passport.xyz"
+            target="_blank"
+            className={LINK_STYLE}
+          >
+            Passport
+          </Link>{" "}
+          score of over {VALID_PASSPORT_THRESHOLD}:{" "}
           <button
             type="button"
             className={LINK_STYLE}
-            onClick={() => refreshPassport()}
-            onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
+            onClick={() => linkWallet({ primary: true })}
+            onKeyDown={(e) =>
+              e.key === "Enter" && linkWallet({ primary: true })
+            }
           >
-            Verify
+            Verify an address
           </button>
         </ConditionRow>
       )
     }
-
-    return null
   }
 
   const renderWorld = () => {

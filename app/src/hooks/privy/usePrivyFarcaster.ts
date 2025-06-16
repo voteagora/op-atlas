@@ -3,6 +3,7 @@ import { useRef } from "react"
 import { toast } from "sonner"
 
 import { syncPrivyUser } from "@/db/privy"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { useUser } from "../db/useUser"
 import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
@@ -13,10 +14,12 @@ export const usePrivyFarcaster = (userId: string) => {
   const onError = useHandlePrivyErrors()
   const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
   const { user: privyUser, unlinkFarcaster } = usePrivy()
+  const { track } = useAnalytics()
 
   const { linkFarcaster } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "farcaster" && isLinking.current) {
+        track("Farcaster Linked", { userId })
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())

@@ -6,6 +6,7 @@ import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 import { setUserIsNotDeveloper } from "@/lib/actions/users"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 const LINKING_STATE_KEY = "privy_github_linking_state"
 
@@ -16,13 +17,14 @@ export const usePrivyLinkGithub = (userId: string) => {
     enabled: true,
   })
   const onError = useHandlePrivyErrors()
-
+  const { track } = useAnalytics()
   const isLinking = () => localStorage.getItem(LINKING_STATE_KEY) === "true"
   const setIsLinking = (value: boolean) =>
     localStorage.setItem(LINKING_STATE_KEY, String(value))
 
   const handleUnlinkGithub = () => {
     if (privyUser?.github?.subject) {
+      track("Github Unlinked", { userId })
       toast.promise(unlinkGithub(privyUser.github.subject), {
         loading: "Unlinking github...",
         success: (updatedPrivyUser) => {
