@@ -231,7 +231,7 @@ const VotingColumn = ({
           setSelectedVote={handleVoteClick}
         />
       </div>
-      {currentlyActive && votingActions && (
+      {currentlyActive && votingActions && !userVoted && (
         <VotingActions
           // This is a wonky way to overwrite the call to make an external call.
           cardActionList={votingActions.cardActionList.map((action) => {
@@ -250,15 +250,16 @@ const VotingColumn = ({
         />
       )}
 
-      {!currentlyActive && (
-        <div className="w-full flex items-center justify-center gap-2.5">
-          <a href={resultsLink} target="_blank">
-            <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
-              View results
-            </p>
-          </a>
-        </div>
-      )}
+      {!currentlyActive ||
+        (userVoted && (
+          <div className="w-full flex items-center justify-center gap-2.5">
+            <a href={resultsLink} target="_blank">
+              <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
+                View results
+              </p>
+            </a>
+          </div>
+        ))}
     </div>
   )
 }
