@@ -1,22 +1,22 @@
 "use client"
-import VotingActions, {
-  CardActionsProps,
-} from "@/app/proposals/components/VotingSidebar/VotingActions"
-import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
-import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
-import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
-import { useState } from "react"
-
 import {
   EAS,
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
 import { ZeroHash } from "ethers"
+import { useState } from "react"
+
+import VotingActions, {
+  CardActionsProps,
+} from "@/app/proposals/components/VotingSidebar/VotingActions"
+import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
+import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
+import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
+import { Citizen, OffchainVote, VoteType } from "@/app/proposals/proposal.types"
+import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
-import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
-import { Citizen, OffchainVote, VoteType } from "@/app/proposals/proposal.types"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
