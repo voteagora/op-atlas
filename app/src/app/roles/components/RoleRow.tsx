@@ -1,8 +1,8 @@
 import { format } from "date-fns"
 
-import { type Role as RoleType } from "@/db/role"
+import { Role } from "@prisma/client"
 
-export function Role({ role }: { role: RoleType }) {
+export function RoleRow({ role }: { role: Role }) {
   const isActive =
     new Date() >= new Date(role.startAt) && new Date() <= new Date(role.endAt)
   const isUpcoming = new Date() < new Date(role.startAt)

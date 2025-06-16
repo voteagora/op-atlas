@@ -2,7 +2,7 @@
 
 import { getAllRoles } from "@/db/role"
 
-import { Role } from "./components/Role"
+import { RoleRow } from "./components/RoleRow"
 
 export default async function Page() {
   const roles = await getAllRoles()
@@ -27,7 +27,7 @@ export default async function Page() {
 
           <div className="flex flex-col rounded-lg border border-border-secondary gap-4">
             {roles.map((role) => (
-              <Role key={role.id} role={role} />
+              <RoleRow key={role.id} role={role} />
             ))}
           </div>
         </div>
