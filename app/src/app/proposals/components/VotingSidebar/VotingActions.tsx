@@ -35,10 +35,12 @@ const CardAction = ({
         await action()
         break
       case "register":
-        router.push("/register")
+        router.push("/citizenship")
         break
       case "learn more":
-        router.push("/learn-more")
+        router.push(
+          "https://community.optimism.io/citizens-house/citizen-house-overview",
+        )
         break
       case "sign in":
         break
