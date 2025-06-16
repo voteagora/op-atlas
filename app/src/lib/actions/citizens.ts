@@ -197,7 +197,7 @@ export const s8CitizenshipQualification =
 // S8 Citizenship Limit Check
 export const checkCitizenshipLimit = async (): Promise<boolean> => {
   const citizenCount = await getCitizenCountByType(CITIZEN_TYPES.user)
-  return citizenCount >= 1000
+  return citizenCount >= 950
 }
 
 export const updateCitizen = async (citizen: {
