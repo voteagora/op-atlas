@@ -701,3 +701,43 @@ enum ProjectOSOMetric {
   TRUSTED_DEVELOPER_USERNAME
   DOWNSTREAM_GAS
 }
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  title       String
+  link        String?
+  description String?          @db.VarChar(500)
+  requirements Json            @default("{}")
+  startAt     DateTime?
+  endAt       DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  applications RoleApplication[]
+
+  @@index([createdAt])
+}
+
+model RoleApplication {
+  id             Int         @id @default(autoincrement())
+  status         RoleApplicationStatus
+  roleId         Int
+  userId         String?
+  organizationId String?
+  application    String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  role           Role        @relation(fields: [roleId], references: [id])
+  user           User?       @relation(fields: [userId], references: [id])
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([roleId])
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+}
+
+enum RoleApplicationStatus {
+  pending
+  approved
+  rejected
+}
