@@ -2,7 +2,7 @@ import VotingActions, {
   CardActionsProps,
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
 import React from "react"
-import { CitizenEligibility } from "@/app/proposals/utils/votingUtils"
+import { CitizenEligibility } from "@/app/proposals/proposal.types"
 
 interface CardImageProps {
   src: string

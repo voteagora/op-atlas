@@ -1,5 +1,5 @@
-import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { VoteType } from "@/app/proposals/proposal.types"
 
 interface VoteButtonProps {
   textValue: string

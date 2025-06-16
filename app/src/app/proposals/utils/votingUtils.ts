@@ -5,40 +5,13 @@ import {
 import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
 import { boolean, undefined } from "zod"
+import {
+  ProposalPageDataInterface,
+  CitizenEligibility,
+} from "@/app/proposals/proposal.types"
 
 const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
 
-export interface ProposalPageDataInterface {
-  signedIn: boolean
-  citizen: boolean
-  citizenId?: string
-  votingOpen: boolean
-  votingComplete: boolean
-  voted: boolean
-  votingRecord?: string[]
-  startDate: Date
-  endDate: Date
-  proposalType: string
-  proposalId: string
-  citizenEligibility: CitizenEligibility
-}
-
-export interface CitizenEligibility {
-  organization?: {
-    name: string
-    logo: string
-    eligible: boolean
-  }
-  application?: {
-    name: string
-    logo: string
-    eligible: boolean
-  }
-  user: {
-    eligible: boolean
-    pfp: string
-  }
-}
 // Helper functions for voting card props
 const comingSoon = (startDate: Date, endDate: Date) => {
   return {
@@ -360,7 +333,7 @@ export const getVotingColumnProps = (
     userSignedIn: cardType.signedIn,
     userVoted: cardType.voted,
     userCitizen: cardType.citizen,
-    citizenId: cardType.citizenId,
+    citizenId: cardType.citizen?.id,
     resultsLink: `${API_URL}/${cardType.proposalId}`,
   }
 
