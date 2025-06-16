@@ -1,4 +1,6 @@
+"use client"
 import { voteAction } from "@/app/proposals/proposal.types"
+import { useRouter } from "next/navigation"
 
 export interface CardActionsProps {
   cardActionList: voteAction[]
@@ -22,6 +24,7 @@ const CardAction = ({
   action,
   disabled,
 }: voteAction) => {
+  const router = useRouter()
   const handleAction = async () => {
     switch (actionType.toLowerCase()) {
       case "log":
@@ -30,6 +33,14 @@ const CardAction = ({
       case "vote":
         // To be overwritten by the component that uses this
         await action()
+        break
+      case "register":
+        router.push("/register")
+        break
+      case "learn more":
+        router.push("/learn-more")
+        break
+      case "sign in":
         break
       default:
         console.log(`Action type: ${actionType}`)
