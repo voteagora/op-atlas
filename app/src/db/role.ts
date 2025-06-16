@@ -6,8 +6,13 @@ import { prisma } from "./client"
 
 export async function getAllRoles(): Promise<Role[]> {
   return prisma.role.findMany({
+    where: {
+      endAt: {
+        gte: new Date(),
+      },
+    },
     orderBy: {
-      createdAt: "desc",
+      endAt: "asc",
     },
   })
 }

@@ -14,17 +14,18 @@ export default async function Page() {
           <div>
             <div className="flex justify-between items-center flex-wrap sm:flex-nowrap gap-4">
               <div className="flex flex-col w-full">
-                <h1 className="text-4xl font-semibold text-text-default">
-                  Roles
-                </h1>
-                <p className="mt-2 text-base font-normal text-text-secondary">
-                  Explore available roles within the Optimism Collective
-                </p>
+                <div className="text-1xl font-semibold text-foreground">
+                  Self-nominate for a governance role in Season 8 & 9
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Calling all candidates! Submit your self-nomination from
+                  [Start Date] – [End Date].
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-col rounded-lg border border-border-secondary gap-4">
             {roles.map((role) => (
               <Role key={role.id} role={role} />
             ))}
