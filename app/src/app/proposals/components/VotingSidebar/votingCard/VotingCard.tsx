@@ -60,8 +60,6 @@ const VotingCard = ({
   user,
   eligibility,
 }: VotingCardProps) => {
-  console.log("User in VotingCard", user)
-  console.log("Eligibility in VotingCard", eligibility)
   return (
     <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
       {eligibility && user && (
