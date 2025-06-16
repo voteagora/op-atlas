@@ -1,5 +1,4 @@
 import { UIProposal } from "@/app/api/v1/proposals/route"
-import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
 import { auth } from "@/auth"
 
