@@ -37,7 +37,7 @@ export const postOffchainVote = async (
         vote: vote.vote,
         transactionHash: vote.transactionHash,
         citizenId: vote.citizenId,
-        citizenCategory: vote.citizenCategory,
+        citizenCategory: vote.citizenType,
         updatedAt: new Date(),
       },
     })
@@ -96,7 +96,7 @@ export const upsertOffchainVote = async (
         vote: vote.vote,
         transactionHash: vote.transactionHash,
         citizenId: vote.citizenId,
-        citizenCategory: vote.citizenCategory || "CHAIN",
+        citizenCategory: vote.citizenType,
         updatedAt: new Date(),
       },
       create: {
@@ -106,7 +106,7 @@ export const upsertOffchainVote = async (
         vote: vote.vote,
         transactionHash: vote.transactionHash,
         citizenId: vote.citizenId,
-        citizenCategory: vote.citizenCategory || "CHAIN",
+        citizenCategory: vote.citizenType,
         updatedAt: new Date(),
       },
     })
