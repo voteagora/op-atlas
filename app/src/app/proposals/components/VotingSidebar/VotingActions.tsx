@@ -1,15 +1,7 @@
-import { VoteType } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
+import { voteAction } from "@/app/proposals/proposal.types"
 
 export interface CardActionsProps {
   cardActionList: voteAction[]
-}
-
-interface voteAction {
-  buttonStyle: string
-  actionText: string
-  actionType: string
-  action: (data?: any) => Promise<any>
-  disabled?: boolean
 }
 
 const VotingActions = ({ cardActionList }: CardActionsProps) => {
