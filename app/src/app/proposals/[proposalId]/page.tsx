@@ -37,7 +37,6 @@ const Page = async (params: PageProps) => {
   }
   const proposalData = await getProposal(proposalId)
 
-  // console.log("proposalData: ", proposalData)
   const session = await auth()
   const userId = session?.user.id ?? ""
   const user = await getUserById(userId)
@@ -90,10 +89,6 @@ const Page = async (params: PageProps) => {
 
   const { votingCardProps, votingColumnProps, votingRedirectProps } =
     getVotingProps(proposalPageData)
-
-  // console.log("proposalPageData: ", proposalPageData)
-  // console.log("votingCardProps: ", votingCardProps)
-  // console.log("votingColumnProps: ", votingColumnProps)
 
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
