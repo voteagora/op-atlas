@@ -4,9 +4,7 @@ import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
 import { auth } from "@/auth"
 
 import { getProposals } from "@/lib/proposals"
-import { getUserById } from "@/db/users"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
-import { getCitizen } from "@/lib/api/eas/citizen"
 
 interface OffchainVote {
   attestationId: string
