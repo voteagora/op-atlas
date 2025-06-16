@@ -8,7 +8,6 @@ import { ChainAppRequirements } from "@/app/citizenship/components/ChainAppRequi
 import { Sidebar } from "@/app/citizenship/components/Sidebar"
 import { UserRequirements } from "@/app/citizenship/components/UserRequirements"
 import { auth } from "@/auth"
-import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -152,8 +151,6 @@ export default async function Page() {
                 <div>
                   {isCitizenshipLimitReached ? (
                     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
-                      <UserAvatarLarge imageUrl={user?.imageUrl} />
-
                       <div className="flex flex-col gap-2">
                         <div className="font-semibold text-secondary-foreground">
                           Registration has closed
