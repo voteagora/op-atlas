@@ -24,6 +24,11 @@ const EAS_CONTRACT_ADDRESS =
     ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e"
     : "0x4200000000000000000000000000000000000021"
 
+const OFFCHAIN_VOTE_SCHEMA_ID =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09"
+    : "0xTBD"
+
 export interface CandidateCardProps {
   name: string
   image: {
@@ -143,8 +148,7 @@ const VotingColumn = ({
     const nonce = await eas.getNonce(signer.address)
 
     const delegateRequest = {
-      schema:
-        "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09",
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
       recipient: signer.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
       revocable: false,
