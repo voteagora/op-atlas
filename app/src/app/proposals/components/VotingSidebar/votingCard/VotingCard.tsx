@@ -12,14 +12,6 @@ interface CardImageProps {
   styling?: string
 }
 
-const CardImage = ({ src, alt, styling }: CardImageProps) => {
-  return (
-    <div className="flex justify-center">
-      <img src={src} alt={alt} className={styling} />
-    </div>
-  )
-}
-
 interface CardTextProps {
   title: string
   descriptionElement?: string | React.ReactElement
