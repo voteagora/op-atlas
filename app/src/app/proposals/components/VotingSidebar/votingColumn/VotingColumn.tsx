@@ -15,8 +15,9 @@ import {
 import { ZeroHash } from "ethers"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
-import { OffchainVote, postOffchainVote, upsertOffchainVote } from "@/db/votes"
-import { VoteType } from "@/app/proposals/proposal.types"
+import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
+import { OffchainVote, VoteType } from "@/app/proposals/proposal.types"
+import { CITIZEN_TYPES } from "@/lib/constants"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
@@ -206,6 +207,7 @@ const VotingColumn = ({
         proposalId: proposalId,
         vote: choices,
         citizenId: parseInt(citizenId!),
+        citizenType: CITIZEN_TYPES,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
