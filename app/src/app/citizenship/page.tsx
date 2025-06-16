@@ -143,23 +143,32 @@ export default async function Page() {
             </div>
           </div>
         </div>
-
         <div>
-          {qualification && !isCitizenshipLimitReached ? (
-            <Sidebar user={user} qualification={qualification} />
-          ) : (
-            <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
-              <UserAvatarLarge imageUrl={user?.imageUrl} />
+          {qualification && (
+            <div>
+              {qualification.type !== CITIZEN_TYPES.user ? (
+                <Sidebar user={user} qualification={qualification} />
+              ) : (
+                <div>
+                  {isCitizenshipLimitReached ? (
+                    <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
+                      <UserAvatarLarge imageUrl={user?.imageUrl} />
 
-              <div className="flex flex-col gap-2">
-                <div className="font-semibold text-secondary-foreground">
-                  Registration has closed
+                      <div className="flex flex-col gap-2">
+                        <div className="font-semibold text-secondary-foreground">
+                          Registration has closed
+                        </div>
+                        <div className="text-sm text-secondary-foreground">
+                          Thanks for your interest, but the Citizens&apos; House
+                          has reached it&apos;s maximum capacity.
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <Sidebar user={user} qualification={qualification} />
+                  )}
                 </div>
-                <div className="text-sm text-secondary-foreground">
-                  Thanks for your interest, but the Citizens&apos; House has
-                  reached it&apos;s maximum capacity.
-                </div>
-              </div>
+              )}
             </div>
           )}
         </div>

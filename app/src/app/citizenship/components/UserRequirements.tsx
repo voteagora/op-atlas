@@ -213,7 +213,14 @@ export const UserRequirements = ({
     if (passport) {
       return (
         <ConditionRow isMet={true}>
-          Passport found, and your score is {Number(passport?.score).toFixed(2)}
+          <Link
+            href="https://app.passport.xyz"
+            target="_blank"
+            className={LINK_STYLE}
+          >
+            Passport
+          </Link>{" "}
+          found, and your score is {Number(passport?.score).toFixed(2)}
           {"! "}
           <span className="font-semibold">
             {truncateAddress(passport?.address as string)}
@@ -225,7 +232,14 @@ export const UserRequirements = ({
     if (invalidPassport) {
       return (
         <ConditionRow isMet={false}>
-          Passport found, but your score is under {VALID_PASSPORT_THRESHOLD}:{" "}
+          <Link
+            href="https://app.passport.xyz"
+            target="_blank"
+            className={LINK_STYLE}
+          >
+            Passport
+          </Link>{" "}
+          found, but your score is under {VALID_PASSPORT_THRESHOLD}:{" "}
           <button
             type="button"
             className={LINK_STYLE}
@@ -243,7 +257,14 @@ export const UserRequirements = ({
             onClick={() => refreshPassport()}
             onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
           >
-            Check addresses for Passport
+            Check addresses for{" "}
+            <Link
+              href="https://app.passport.xyz"
+              target="_blank"
+              className={LINK_STYLE}
+            >
+              Passport
+            </Link>
           </button>
         </ConditionRow>
       )
@@ -270,19 +291,26 @@ export const UserRequirements = ({
             }
           >
             Verify an address
-          </button>{" "}|{" "}
+          </button>{" "}
+          |{" "}
           <button
             type="button"
             className={LINK_STYLE}
             onClick={() => refreshPassport()}
             onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
           >
-            Check addresses for Passport
+            Check addresses for{" "}
+            <Link
+              href="https://app.passport.xyz"
+              target="_blank"
+              className={LINK_STYLE}
+            >
+              Passport
+            </Link>
           </button>
         </ConditionRow>
       )
     } else {
-
       return (
         <ConditionRow isMet={false}>
           Connect your wallet with a{" "}
