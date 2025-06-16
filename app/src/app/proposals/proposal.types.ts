@@ -7,7 +7,7 @@ export interface ProposalPageDataInterface {
   votingRecord?: string[]
   startDate: Date
   endDate: Date
-  proposalType: string
+  proposalType: ProposalType
   proposalId: string
   citizenEligibility: CitizenEligibility
 }
@@ -35,6 +35,12 @@ export enum VoteType {
   Abstain = "Abstain",
   Against = "Against",
   Veto = "Veto",
+}
+
+export enum ProposalType {
+  OFFCHAIN_STANDARD = "OFFCHAIN_STANDARD",
+  OFFCHAIN_APPROVAL = "OFFCHAIN_APPROVAL",
+  OFFCHAIN_OPTIMISTIC = "OFFCHAIN_OPTIMISTIC",
 }
 
 export interface voteAction {

@@ -4,10 +4,11 @@ import {
 } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
 import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
-import { boolean, undefined } from "zod"
+import { undefined } from "zod"
 import {
-  ProposalPageDataInterface,
   CitizenEligibility,
+  ProposalPageDataInterface,
+  ProposalType,
 } from "@/app/proposals/proposal.types"
 
 const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
@@ -40,15 +41,15 @@ const youVoted = () => {
   }
 }
 
-const castYourVote = (proposalType: string, customTitle?: string) => {
+const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
   const proposalTypeDescription = () => {
     switch (proposalType) {
-      case "OFFCHAIN_APPROVAL":
+      case ProposalType.OFFCHAIN_APPROVAL:
         return "This election uses approval voting, meaning voter can approve more than one candidate."
-      case "OFFCHAIN_STANDARD":
+      case ProposalType.OFFCHAIN_STANDARD:
         // TODO link 'here'
         return "This proposal requires approval from the Citizen's House and Token House. Read more about the voting mechanism here."
-      case "OFFCHAIN_OPTIMISTIC":
+      case ProposalType.OFFCHAIN_OPTIMISTIC:
         return "If you do not wish to veto, then no action is required."
       default:
         return ""
@@ -179,7 +180,7 @@ export const getVotingCardProps = (
   }
 
   if (!proposalData.signedIn) {
-    if (proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") {
+    if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
       // Special case for the offchain optimistic proposal
       return {
         cardText: {
@@ -289,7 +290,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
         break
     }
   } else {
-    if (proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") {
+    if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
       votingActions = {
         cardActionList: [
           {
@@ -338,15 +339,15 @@ export const getVotingColumnProps = (
   }
 
   switch (proposalData.proposalType) {
-    case "OFFCHAIN_APPROVAL":
+    case ProposalType.OFFCHAIN_APPROVAL:
       votingColumnProps = { ...votingColumnProps, options: getVoteOptions() }
       break
-    case "OFFCHAIN_STANDARD":
+    case ProposalType.OFFCHAIN_STANDARD:
       votingColumnProps = {
         ...votingColumnProps,
       }
       break
-    case "OFFCHAIN_OPTIMISTIC":
+    case ProposalType.OFFCHAIN_OPTIMISTIC:
       votingColumnProps = {
         ...votingColumnProps,
       }
