@@ -187,9 +187,16 @@ export const getVotingCardProps = (
     }
   }
   if (proposalData.citizen) {
-    return { ...getCitizenTypes(proposalData), user: proposalData.user }
+    return {
+      ...getCitizenTypes(proposalData),
+      user: proposalData.user,
+    }
   }
-  return { ...getNonCitizenTypes(proposalData), user: proposalData.user }
+  return {
+    ...getNonCitizenTypes(proposalData),
+    user: proposalData.user,
+    eligibility: proposalData.citizenEligibility!,
+  }
 }
 
 /**
