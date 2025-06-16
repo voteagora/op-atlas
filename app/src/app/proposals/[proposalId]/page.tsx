@@ -47,14 +47,6 @@ const Page = async (params: PageProps) => {
     citizen = await getCitizenByType({ type: "user", id: userId })
   }
   const citizenEligibility = await s8CitizenshipQualification()
-  console.log("-".repeat(10))
-  console.log("session", session)
-  console.log("userId: ", userId)
-  console.log("user: ", user)
-  console.log("userAddress: ", userAddress)
-  console.log("citizen: ", citizen)
-  console.log("citizenEligibility: ", citizenEligibility)
-  console.log("-".repeat(10))
 
   // Date Info
   const proposalStartDate = new Date(proposalData.startTime)
@@ -69,10 +61,8 @@ const Page = async (params: PageProps) => {
   // Voting Info
   let voteHistory
   if (citizen && citizen.id) {
-    console.log("citizen2: ", citizen)
     voteHistory = await getCitizenProposalVote(citizen.id, proposalId)
   }
-  console.log("voteHistory: ", voteHistory)
   const voted = !!voteHistory
 
   const proposalPageData: ProposalPageDataInterface = {
@@ -89,6 +79,7 @@ const Page = async (params: PageProps) => {
       proposalData.proposalType,
     ),
     proposalId: proposalId,
+    proposalStatus: proposalData.status,
     citizenEligibility: citizenEligibility,
   }
 
