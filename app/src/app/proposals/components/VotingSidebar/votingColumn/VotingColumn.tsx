@@ -13,10 +13,16 @@ import VotingActions, {
 import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
 import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
-import { Citizen, OffchainVote, VoteType } from "@/app/proposals/proposal.types"
+import {
+  Citizen,
+  OffchainVote,
+  ProposalType,
+  VoteType,
+} from "@/app/proposals/proposal.types"
 import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
+import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
@@ -110,7 +116,7 @@ const VotingColumn = ({
 
   const signer = useEthersSigner({ chainId: 11155111 })
 
-  const createDelegatedAttestation = async (voteType: VoteType) => {
+  const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
     const eas = new EAS(EAS_CONTRACT_ADDRESS)
     eas.connect(signer.provider!)
@@ -118,23 +124,6 @@ const VotingColumn = ({
     const VOTE_SCHEMA = "uint256 proposalId,string params"
 
     const encoder = new SchemaEncoder(VOTE_SCHEMA)
-
-    let choices: string[]
-
-    switch (voteType) {
-      case VoteType.For:
-        choices = ["0"]
-        break
-      case VoteType.Abstain:
-        choices = ["1"]
-        break
-      case VoteType.Against:
-        choices = ["2"]
-        break
-      default:
-        choices = []
-        break
-    }
 
     const args = {
       proposalId: proposalId,
@@ -172,6 +161,10 @@ const VotingColumn = ({
     if (!selectedVote) return
 
     try {
+      const choices = mapVoteTypeToValue(
+        proposalType as ProposalType,
+        selectedVote,
+      )
       // 1. Create and sign an attestation for the vote
       const { data, rawSignature, signerAddress } =
         await createDelegatedAttestation(selectedVote)
@@ -181,23 +174,6 @@ const VotingColumn = ({
         rawSignature.signature,
         signerAddress,
       )
-
-      //TODO move somewhere else
-      let choices: string[]
-      switch (selectedVote) {
-        case VoteType.For:
-          choices = ["0"]
-          break
-        case VoteType.Abstain:
-          choices = ["1"]
-          break
-        case VoteType.Against:
-          choices = ["2"]
-          break
-        default:
-          choices = []
-          break
-      }
 
       // build an offhchain vote object for the DB
       const offchainVote: OffchainVote = {
