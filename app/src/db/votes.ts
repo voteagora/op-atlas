@@ -2,18 +2,7 @@
 
 import { prisma } from "@/db/client"
 import { citizenCategory } from "@prisma/client"
-
-export interface OffchainVote {
-  attestationId: string
-  voterAddress: string
-  proposalId: string
-  vote: object
-  transactionHash?: string
-  citizenId: number
-  citizenCategory?: citizenCategory
-  createdAt?: Date
-  updatedAt?: Date
-}
+import { OffchainVote } from "@/app/proposals/proposal.types"
 
 /**
  * Creates a new OffChainVote record in the database
@@ -48,7 +37,7 @@ export const postOffchainVote = async (
         vote: vote.vote,
         transactionHash: vote.transactionHash,
         citizenId: vote.citizenId,
-        citizenCategory: vote.citizenCategory || "CHAIN",
+        citizenCategory: vote.citizenCategory,
         updatedAt: new Date(),
       },
     })
