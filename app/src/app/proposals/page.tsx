@@ -2,8 +2,10 @@ import { UIProposal } from "@/app/api/v1/proposals/route"
 import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/ProposalCard"
 import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
 import { auth } from "@/auth"
-import { getCitizenProposalVote, getUserCitizen } from "@/db/citizens"
+
 import { getProposals } from "@/lib/proposals"
+import { getUserById } from "@/db/users"
+import { getCitizenProposalVote } from "@/db/citizens"
 
 interface OffchainVote {
   attestationId: string
@@ -69,13 +71,13 @@ const getEnrichedProposalData = async ({ userId }: { userId?: string }) => {
       }
 
       // Get the citizen data from DB
-      const citizen = await getUserCitizen(userId)
+      const citizen = await getUserById(userId)
       if (!citizen) {
         return proposalData
       }
 
       // Enrich the proposal data with citizen data for conditional vote status rendering
-      return enrichProposalData(proposalData, citizen.id)
+      return enrichProposalData(proposalData, Number(citizen.id))
     } catch (error) {
       console.error(`Failed to fetch Citizen Data: ${error}`)
       // If we can't get citizen data, just return the proposal data as is
