@@ -117,36 +117,36 @@ const wantToVote = (eligibility: CitizenEligibility) => {
   }
 }
 
-const getOpenVotingTypes = (cardType: ProposalPageDataInterface) => {
-  if (cardType.voted) {
+const getOpenVotingTypes = (proposalData: ProposalPageDataInterface) => {
+  if (proposalData.voted) {
     return youVoted()
   }
-  if (cardType.proposalType === "OFFCHAIN_OPTIMISTIC") {
+  if (proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") {
     // Custom proposal title for the offchain optimistic proposal
     return castYourVote(
-      cardType.proposalType,
+      proposalData.proposalType,
       "Do you want to override the decision?",
     )
   }
-  return castYourVote(cardType.proposalType)
+  return castYourVote(proposalData.proposalType)
 }
 
-const getCitizenTypes = (cardType: ProposalPageDataInterface) => {
-  if (cardType.votingOpen) {
-    return getOpenVotingTypes(cardType)
-  } else if (cardType.votingComplete) {
-    return votingEnded(cardType.endDate, "This proposal has [TODO]")
+const getCitizenTypes = (proposalData: ProposalPageDataInterface) => {
+  if (proposalData.votingOpen) {
+    return getOpenVotingTypes(proposalData)
+  } else if (proposalData.votingComplete) {
+    return votingEnded(proposalData.endDate, "This proposal has [TODO]")
   }
 }
 
-const getNonCitizenTypes = (cardType: ProposalPageDataInterface) => {
-  switch (cardType.proposalType) {
+const getNonCitizenTypes = (proposalData: ProposalPageDataInterface) => {
+  switch (proposalData.proposalType) {
     case "OFFCHAIN_APPROVAL":
-      return castYourVote(cardType.proposalType)
+      return castYourVote(proposalData.proposalType)
     case "OFFCHAIN_STANDARD":
-      return wantToVote(cardType.citizenEligibility)
+      return wantToVote(proposalData.citizenEligibility)
     case "OFFCHAIN_OPTIMISTIC":
-      return wantToVote(cardType.citizenEligibility)
+      return wantToVote(proposalData.citizenEligibility)
     default:
       return {} as VotingCardProps
   }
@@ -167,19 +167,19 @@ const getVoteOptions = () => {
 
 /**
  * Get the voting card props based on the card type
- * @param cardType The card type containing information about the voting state
+ * @param proposalData The card type containing information about the voting state
  * @returns The voting card props
  */
 export const getVotingCardProps = (
-  cardType: ProposalPageDataInterface,
+  proposalData: ProposalPageDataInterface,
 ): VotingCardProps | undefined => {
   // If voting has not opened yet
-  if (!cardType.votingOpen && !cardType.votingComplete) {
-    return comingSoon(cardType.startDate, cardType.endDate)
+  if (!proposalData.votingOpen && !proposalData.votingComplete) {
+    return comingSoon(proposalData.startDate, proposalData.endDate)
   }
 
-  if (!cardType.signedIn) {
-    if (cardType.proposalType === "OFFCHAIN_OPTIMISTIC") {
+  if (!proposalData.signedIn) {
+    if (proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") {
       // Special case for the offchain optimistic proposal
       return {
         cardText: {
@@ -189,22 +189,22 @@ export const getVotingCardProps = (
         },
       }
     }
-    return castYourVote(cardType.proposalType)
+    return castYourVote(proposalData.proposalType)
   }
-  if (cardType.citizen) {
-    return getCitizenTypes(cardType)
+  if (proposalData.citizen) {
+    return getCitizenTypes(proposalData)
   }
-  return getNonCitizenTypes(cardType)
+  return getNonCitizenTypes(proposalData)
 }
 
 /**
  * Get the voting actions based on the card type
- * @param cardType
+ * @param proposalData
  * @returns Object containing the voting actions
  */
-const getVotingActions = (cardType: ProposalPageDataInterface) => {
+const getVotingActions = (proposalData: ProposalPageDataInterface) => {
   let votingActions: any = {}
-  if (!cardType.signedIn) {
+  if (!proposalData.signedIn) {
     votingActions = {
       cardActionList: [
         {
@@ -215,13 +215,13 @@ const getVotingActions = (cardType: ProposalPageDataInterface) => {
       ],
     }
     // The user is not a citizen
-  } else if (!cardType.citizen) {
+  } else if (!proposalData.citizen) {
     // Get the eligibility of the citizen
     const organizationEligible =
-      cardType.citizenEligibility.organization?.eligible
+      proposalData.citizenEligibility.organization?.eligible
     const applicationEligible =
-      cardType.citizenEligibility.application?.eligible
-    const userEligible = cardType.citizenEligibility.user.eligible
+      proposalData.citizenEligibility.application?.eligible
+    const userEligible = proposalData.citizenEligibility.user.eligible
 
     if (organizationEligible || applicationEligible || userEligible) {
       votingActions = {
@@ -250,8 +250,8 @@ const getVotingActions = (cardType: ProposalPageDataInterface) => {
       }
     }
     // If the user is a citizen and has voted
-  } else if (cardType.voted) {
-    switch (cardType.votingRecord![0]) {
+  } else if (proposalData.voted) {
+    switch (proposalData.votingRecord![0]) {
       case "0":
         votingActions = {
           cardActionList: [
@@ -289,7 +289,7 @@ const getVotingActions = (cardType: ProposalPageDataInterface) => {
         break
     }
   } else {
-    if (cardType.proposalType === "OFFCHAIN_OPTIMISTIC") {
+    if (proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") {
       votingActions = {
         cardActionList: [
           {
@@ -317,27 +317,27 @@ const getVotingActions = (cardType: ProposalPageDataInterface) => {
 
 /**
  * Get the voting column props based on the card type
- * @param cardType The card type containing information about the voting state
+ * @param proposalData The card type containing information about the voting state
  * @returns The voting column props
  */
 export const getVotingColumnProps = (
-  cardType: ProposalPageDataInterface,
+  proposalData: ProposalPageDataInterface,
 ): VotingColumnProps => {
-  let votingActions = getVotingActions(cardType)
+  let votingActions = getVotingActions(proposalData)
 
   let votingColumnProps: any = {
-    proposalType: cardType.proposalType,
-    proposalId: cardType.proposalId,
+    proposalType: proposalData.proposalType,
+    proposalId: proposalData.proposalId,
     votingActions: votingActions,
-    currentlyActive: cardType.votingOpen,
-    userSignedIn: cardType.signedIn,
-    userVoted: cardType.voted,
-    userCitizen: cardType.citizen,
-    citizenId: cardType.citizen?.id,
-    resultsLink: `${API_URL}/${cardType.proposalId}`,
+    currentlyActive: proposalData.votingOpen,
+    userSignedIn: proposalData.signedIn,
+    userVoted: proposalData.voted,
+    userCitizen: proposalData.citizen,
+    citizenId: proposalData.citizen?.id,
+    resultsLink: `${API_URL}/${proposalData.proposalId}`,
   }
 
-  switch (cardType.proposalType) {
+  switch (proposalData.proposalType) {
     case "OFFCHAIN_APPROVAL":
       votingColumnProps = { ...votingColumnProps, options: getVoteOptions() }
       break
@@ -355,26 +355,26 @@ export const getVotingColumnProps = (
 }
 
 const getVotingRedirectProps = (
-  cardType: ProposalPageDataInterface,
+  proposalData: ProposalPageDataInterface,
 ): VotingRedirectProps => {
   return {
     callout: "Are you a delegate?",
     link: {
       linkText: "Vote here",
-      linkHref: `${API_URL}/${cardType.proposalId}`,
+      linkHref: `${API_URL}/${proposalData.proposalId}`,
     },
   }
 }
 
 /**
  * Get all voting props based on the card type
- * @param cardType The card type containing information about the voting state
+ * @param proposalData The card type containing information about the voting state
  * @returns An object containing both voting card props and voting column props
  */
-export const getVotingProps = (cardType: ProposalPageDataInterface) => {
+export const getVotingProps = (proposalData: ProposalPageDataInterface) => {
   return {
-    votingCardProps: getVotingCardProps(cardType),
-    votingColumnProps: getVotingColumnProps(cardType),
-    votingRedirectProps: getVotingRedirectProps(cardType),
+    votingCardProps: getVotingCardProps(proposalData),
+    votingColumnProps: getVotingColumnProps(proposalData),
+    votingRedirectProps: getVotingRedirectProps(proposalData),
   }
 }
