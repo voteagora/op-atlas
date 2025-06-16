@@ -10,6 +10,7 @@ import {
   ProposalType,
 } from "@/app/proposals/proposal.types"
 import { CitizenshipQualification } from "@/lib/types"
+import { citizen } from "eas-indexer/ponder.schema"
 
 const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
 
@@ -128,11 +129,11 @@ const getCitizenTypes = (proposalData: ProposalPageDataInterface) => {
 
 const getNonCitizenTypes = (proposalData: ProposalPageDataInterface) => {
   switch (proposalData.proposalType) {
-    case "OFFCHAIN_APPROVAL":
+    case ProposalType.OFFCHAIN_APPROVAL:
       return castYourVote(proposalData.proposalType)
-    case "OFFCHAIN_STANDARD":
+    case ProposalType.OFFCHAIN_STANDARD:
       return wantToVote(proposalData.citizenEligibility)
-    case "OFFCHAIN_OPTIMISTIC":
+    case ProposalType.OFFCHAIN_OPTIMISTIC:
       return wantToVote(proposalData.citizenEligibility)
     default:
       return {} as VotingCardProps
@@ -319,7 +320,7 @@ export const getVotingColumnProps = (
     proposalId: proposalData.proposalId,
     votingActions: votingActions,
     currentlyActive: proposalData.votingOpen,
-    userSignedIn: proposalData.user ? true : false,
+    userSignedIn: !!proposalData.user,
     userVoted: proposalData.voted,
     userCitizen: proposalData.citizen,
     citizenId: proposalData.citizen?.id,
