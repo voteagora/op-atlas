@@ -121,7 +121,10 @@ const getCitizenTypes = (proposalData: ProposalPageDataInterface) => {
   if (proposalData.votingOpen) {
     return getOpenVotingTypes(proposalData)
   } else if (proposalData.votingComplete) {
-    return votingEnded(proposalData.endDate, "This proposal has [TODO]")
+    return votingEnded(
+      proposalData.endDate,
+      `This proposal has ${proposalData.proposalStatus}`,
+    )
   } else {
     return comingSoon(proposalData)
   }
