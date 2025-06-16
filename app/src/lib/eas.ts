@@ -531,12 +531,6 @@ export async function createVoteAttestation(
   delegateAttestationSignature: Signature,
   signerAddress: string,
 ): Promise<string> {
-  console.log(
-    "createVoteAttestation:\n",
-    data,
-    delegateAttestationSignature,
-    signerAddress,
-  )
   const VOTE_SCHEMA = "uint256 proposalId,string params"
 
   const encoder = new SchemaEncoder(VOTE_SCHEMA)
