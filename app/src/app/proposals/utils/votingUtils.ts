@@ -10,7 +10,6 @@ import {
   VoteType,
 } from "@/app/proposals/proposal.types"
 import { CitizenshipQualification } from "@/lib/types"
-import { citizen } from "eas-indexer/ponder.schema"
 
 const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
 
