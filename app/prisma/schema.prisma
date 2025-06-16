@@ -31,6 +31,7 @@ model User {
   passports          UserPassport[]
   projects           UserProjects[]
   worldId            UserWorldId?
+  roleApplications   RoleApplication[]
 
   @@index([username])
   @@index([farcasterId])
@@ -155,6 +156,7 @@ model Organization {
   snapshots            OrganizationSnapshot[]
   projects             ProjectOrganization[]
   team                 UserOrganization[]
+  roleApplications     RoleApplication[]
 
   @@index([deletedAt])
 }
