@@ -4,15 +4,17 @@ import ProposalContent from "@/app/proposals/components/proposalContent/Proposal
 import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
 import ProposalHeader from "@/app/proposals/components/ProposalHeader"
 
-import {
-  ProposalPageDataInterface,
-  getVotingProps,
-} from "@/app/proposals/utils/votingUtils"
+import { getVotingProps } from "@/app/proposals/utils/votingUtils"
 
 import { getProposal } from "@/lib/proposals"
 import { auth } from "@/auth"
 import { getUserById } from "@/db/users"
 import { getCitizenByType } from "@/db/citizens"
+import {
+  ProposalPageDataInterface,
+  ProposalType,
+} from "@/app/proposals/proposal.types"
+import { parseEnumValue } from "@/lib/actions/utils"
 
 interface PageProps {
   params: {
@@ -86,14 +88,16 @@ const Page = async (params: PageProps) => {
   const proposalPageData: ProposalPageDataInterface = {
     signedIn: userSignedIn,
     citizen: citizen,
-    citizenId: citizen?.id,
     votingOpen: votingOpen,
     votingComplete: votingComplete,
     voted: voted,
     votingRecord: votingRecord,
     startDate: proposalStartDate,
     endDate: proposalEndDate,
-    proposalType: proposalData.proposalType,
+    proposalType: parseEnumValue<ProposalType>(
+      ProposalType,
+      proposalData.proposalType,
+    ),
     proposalId: proposalId,
     citizenEligibility: citizenEligibility,
   }
