@@ -6,10 +6,10 @@ import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/voti
 import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
 import { undefined } from "zod"
 import {
-  CitizenEligibility,
   ProposalPageDataInterface,
   ProposalType,
 } from "@/app/proposals/proposal.types"
+import { CitizenshipQualification } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
 
@@ -64,56 +64,38 @@ const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
   }
 }
 
-const wantToVote = (eligibility: CitizenEligibility) => {
+const wantToVote = (eligibility: CitizenshipQualification | null) => {
   const eligibleStatement =
     "eligible to become a citizen, and to vote on decisions that shape the Collective."
 
   let cardText: CardTextProps = {
     title: "Want to vote?",
   }
-  if (eligibility.organization?.eligible) {
-    return {
-      cardText: {
-        ...cardText,
-        descriptionElement: `${eligibility.organization?.name} is ${eligibleStatement}`,
-      },
-      cardImage: {
-        src: eligibility.organization.logo,
-        alt: "Organization Logo",
-        styling: "rounded-full w-[64px] h-[64px] radius-[Dimensions/19]",
-      },
-    }
-  } else if (eligibility.application?.eligible) {
-    return {
-      cardText: {
-        ...cardText,
-        descriptionElement: `${eligibility.application?.name} is ${eligibleStatement}`,
-      },
-      cardImage: {
-        src: eligibility.application.logo,
-        alt: "Application Logo",
-        styling: "rounded-lg w-[64px] h-[64px] radius-[Dimensions/19]",
-      },
-    }
-  } else if (eligibility.user.eligible) {
-    return {
-      cardText: {
-        ...cardText,
-        descriptionElement: "You are " + eligibleStatement,
-      },
-      cardImage: {
-        src: eligibility.user.pfp,
-        alt: "User Profile Picture",
-        styling: "rounded-full w-[64px] h-[64px] radius-[Dimensions/5]",
-      },
-    }
-  } else {
+
+  // If Eligibility is null, then the user is not eligible to vote
+  if (!eligibility || !eligibility.eligible) {
     return {
       cardText: {
         ...cardText,
         descriptionElement:
           "The Citizens' House votes on decisions that shape the direction of the Collective.",
       },
+    }
+  } else {
+    if (eligibility.type === "user") {
+      return {
+        cardText: {
+          ...cardText,
+          descriptionElement: "You are " + eligibleStatement,
+        },
+      }
+    } else {
+      return {
+        cardText: {
+          ...cardText,
+          descriptionElement: `${eligibility.title} is ${eligibleStatement}`,
+        },
+      }
     }
   }
 }
