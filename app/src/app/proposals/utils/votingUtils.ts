@@ -4,13 +4,11 @@ import {
 } from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
 import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
 import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
-import { undefined } from "zod"
 import {
   ProposalPageDataInterface,
   ProposalType,
 } from "@/app/proposals/proposal.types"
 import { CitizenshipQualification } from "@/lib/types"
-import { citizen } from "eas-indexer/ponder.schema"
 
 const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
 
