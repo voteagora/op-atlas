@@ -31,6 +31,11 @@ export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
     ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
     : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
 
+const OFFCHAIN_VOTE_SCHEMA_ID =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0x6b6f133272adcd61abbbf70761914caed1448061059a7fc7464c9d2e24b4159e"
+    : "0xTBD"
+
 const citizenWalletChangeSchema = new SchemaEncoder("bytes32 oldCitizenUID")
 
 const citizenSchema = new SchemaEncoder(
@@ -542,8 +547,7 @@ export async function createVoteAttestation(
   try {
     // Use attestByDelegation to create the attestation
     const tx = await eas.attestByDelegation({
-      schema:
-        "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09",
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
       data: {
         recipient: signerAddress,
         expirationTime: BigInt(0), // NO_EXPIRATION
