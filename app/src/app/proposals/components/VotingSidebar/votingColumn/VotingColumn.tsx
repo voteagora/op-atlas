@@ -211,7 +211,7 @@ const VotingColumn = ({
         attestationId: attestationId,
         voterAddress: signerAddress,
         proposalId: proposalId,
-        vote: { vote: choices },
+        vote: choices,
         citizenId: parseInt(citizenId!),
         createdAt: new Date(),
         updatedAt: new Date(),
