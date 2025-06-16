@@ -44,7 +44,8 @@ const Page = async (params: PageProps) => {
   if (userAddress) {
     citizen = await getCitizenByType({ type: "user", id: userId })
   }
-
+  console.log("session", session)
+  console.log("userId: ", userId)
   console.log("user: ", user)
   console.log("userAddress: ", userAddress)
   console.log("citizen: ", citizen)
