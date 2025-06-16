@@ -82,3 +82,15 @@ export async function getCitizenCountByType(type: string): Promise<number> {
     },
   })
 }
+
+export async function getCitizenProposalVote(
+  citizenId: number,
+  proposalId: string,
+): Promise<any> {
+  return prisma.offChainVote.findFirst({
+    where: {
+      citizenId: citizenId,
+      proposalId: proposalId,
+    },
+  })
+}
