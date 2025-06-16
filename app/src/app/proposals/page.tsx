@@ -5,7 +5,8 @@ import { auth } from "@/auth"
 
 import { getProposals } from "@/lib/proposals"
 import { getUserById } from "@/db/users"
-import { getCitizenProposalVote } from "@/db/citizens"
+import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
+import { getCitizen } from "@/lib/api/eas/citizen"
 
 interface OffchainVote {
   attestationId: string
@@ -71,13 +72,15 @@ const getEnrichedProposalData = async ({ userId }: { userId?: string }) => {
       }
 
       // Get the citizen data from DB
-      const citizen = await getUserById(userId)
+      const citizen = await getCitizenByType({ type: "user", id: userId })
+      console.log("citizen in getEnrichedProposalData: ", citizen)
       if (!citizen) {
         return proposalData
       }
 
       // Enrich the proposal data with citizen data for conditional vote status rendering
-      return enrichProposalData(proposalData, Number(citizen.id))
+      console.log("citizen in getEnrichedProposalData: ", citizen)
+      return enrichProposalData(proposalData, citizen.id)
     } catch (error) {
       console.error(`Failed to fetch Citizen Data: ${error}`)
       // If we can't get citizen data, just return the proposal data as is
