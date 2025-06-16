@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { getUserById } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 import { UserWithAddresses } from "@/lib/types"
 
 export const USER_QUERY_KEY = "user"
@@ -21,7 +21,7 @@ export const useUser = ({
     queryKey: [USER_QUERY_KEY, id],
     queryFn: async () => {
       if (!id) throw new Error("User ID is required")
-      return (await getUserById(id)) as UserWithAddresses
+      return (await getUserByIdCached(id)) as UserWithAddresses
     },
     enabled: isEnabled,
     staleTime: 1000 * 60 * 10, // 10 minutes
