@@ -116,7 +116,7 @@ const VotingColumn = ({
 
   const signer = useEthersSigner({ chainId: 11155111 })
 
-  const createDelegatedAttestation = async (voteType: VoteType) => {
+  const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
     const eas = new EAS(EAS_CONTRACT_ADDRESS)
     eas.connect(signer.provider!)
@@ -124,8 +124,6 @@ const VotingColumn = ({
     const VOTE_SCHEMA = "uint256 proposalId,string params"
 
     const encoder = new SchemaEncoder(VOTE_SCHEMA)
-
-    const choices = mapVoteTypeToValue(proposalType as ProposalType, voteType)
 
     const args = {
       proposalId: proposalId,
@@ -163,6 +161,10 @@ const VotingColumn = ({
     if (!selectedVote) return
 
     try {
+      const choices = mapVoteTypeToValue(
+        proposalType as ProposalType,
+        selectedVote,
+      )
       // 1. Create and sign an attestation for the vote
       const { data, rawSignature, signerAddress } =
         await createDelegatedAttestation(selectedVote)
@@ -171,12 +173,6 @@ const VotingColumn = ({
         data,
         rawSignature.signature,
         signerAddress,
-      )
-
-      //TODO move somewhere else
-      const choices = mapVoteTypeToValue(
-        proposalType as ProposalType,
-        selectedVote,
       )
 
       // build an offhchain vote object for the DB
