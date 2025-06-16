@@ -5,7 +5,7 @@ import { auth } from "@/auth"
 import { getCitizenProposalVote, getUserCitizen } from "@/db/citizens"
 import { getProposals } from "@/lib/proposals"
 
-interface Citizen {
+interface OffchainVote {
   attestationId: string
   voterAddress: string
   proposalId: string
@@ -25,18 +25,18 @@ const enrichProposalData = async (
   const enrichSingleProposal = async (
     proposal: UIProposal,
   ): Promise<UIProposal> => {
-    const citizen: Citizen = await getCitizenProposalVote(
+    const offchainVote: OffchainVote = await getCitizenProposalVote(
       citizenId,
       proposal.id,
     )
 
     // Check if we have a valid citizen with vote data
     const hasVoted =
-      citizen?.vote?.vote &&
-      Array.isArray(citizen.vote.vote) &&
-      citizen.vote.vote.length > 0
+      offchainVote?.vote?.vote &&
+      Array.isArray(offchainVote.vote.vote) &&
+      offchainVote.vote.vote.length > 0
 
-    const isVotedProposal = hasVoted && citizen.proposalId === proposal.id
+    const isVotedProposal = hasVoted && offchainVote.proposalId === proposal.id
 
     return {
       ...proposal,
