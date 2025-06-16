@@ -212,7 +212,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
         {
           buttonStyle: "button-primary",
           actionText: "Sign In",
-          actionType: "Log",
+          actionType: "sign in",
         },
       ],
     }
@@ -226,12 +226,12 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
           {
             buttonStyle: "button-primary",
             actionText: "Register",
-            actionType: "Log",
+            actionType: "Register",
           },
           {
             buttonStyle: "button-secondary",
             actionText: "Learn more",
-            actionType: "Log",
+            actionType: "Learn More",
           },
         ],
       }
@@ -241,7 +241,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
           {
             buttonStyle: "button-primary",
             actionText: "Learn how to become a citizen",
-            actionType: "Log",
+            actionType: "Learn More",
           },
         ],
       }
@@ -292,7 +292,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
           {
             buttonStyle: "button-primary",
             actionText: "Cast Vote",
-            actionType: "Log",
+            actionType: "Vote",
           },
         ],
       }
