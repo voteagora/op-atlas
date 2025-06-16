@@ -12,6 +12,7 @@ export interface ProposalPageDataInterface {
   endDate: Date
   proposalType: ProposalType
   proposalId: string
+  proposalStatus: string
   citizenEligibility: CitizenshipQualification | null
 }
 
