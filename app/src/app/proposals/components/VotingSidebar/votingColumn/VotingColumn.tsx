@@ -16,20 +16,13 @@ import { ZeroHash } from "ethers"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
 import { OffchainVote, postOffchainVote, upsertOffchainVote } from "@/db/votes"
+import { VoteType } from "@/app/proposals/proposal.types"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e"
     : "0x4200000000000000000000000000000000000021"
-
-// Vote type enum
-export enum VoteType {
-  For = "For",
-  Abstain = "Abstain",
-  Against = "Against",
-  Veto = "Veto",
-}
 
 export interface CandidateCardProps {
   name: string

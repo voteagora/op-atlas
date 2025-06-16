@@ -22,9 +22,9 @@ const CandidateCard = ({
 }: CandidateCardProps) => {
   const handleClick = () => {
     if (onClick) {
-      onClick();
+      onClick()
     }
-  };
+  }
 
   return (
     <div className="w-[272px] h-[40px] pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] gap-[8px] rounded-[6px] flex items-center">
@@ -67,21 +67,23 @@ const CardOrganizations = ({ organizations }: { organizations: string[] }) => {
   )
 }
 
-const CardApprovalButton = ({ 
-  selected = false, 
-  onClick 
-}: { 
-  selected?: boolean, 
-  onClick?: () => void 
+const CardApprovalButton = ({
+  selected = false,
+  onClick,
+}: {
+  selected?: boolean
+  onClick?: () => void
 }) => {
-  const bgColor = selected ? "bg-success" : "bg-[#F2F3F8]";
+  const bgColor = selected ? "bg-success" : "bg-[#F2F3F8]"
 
   return (
-    <div 
+    <div
       className={`w-[65px] h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md ${bgColor} cursor-pointer`}
-      onClick={onClick}
     >
-      <button className="font-medium text-xs leading-4 font-inter">
+      <button
+        className="font-medium text-xs leading-4 font-inter"
+        onClick={onClick}
+      >
         Approve
       </button>
     </div>
@@ -90,7 +92,12 @@ const CardApprovalButton = ({
 
 const CardCarrot = ({ link }: { link: string }) => {
   return (
-    <a href={link} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+    <a
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="cursor-pointer"
+    >
       <div className="w-[12px] h-[12px] flex items-center justify-center">
         <svg
           width="12"
