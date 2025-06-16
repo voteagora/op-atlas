@@ -1,7 +1,8 @@
-import { citizenCategory } from "@prisma/client"
+import { citizenCategory, User } from "@prisma/client"
+import { CitizenshipQualification } from "@/lib/types"
 
 export interface ProposalPageDataInterface {
-  signedIn: boolean
+  user?: User
   citizen?: Citizen
   votingOpen: boolean
   votingComplete: boolean
@@ -11,24 +12,7 @@ export interface ProposalPageDataInterface {
   endDate: Date
   proposalType: ProposalType
   proposalId: string
-  citizenEligibility: CitizenEligibility
-}
-
-export interface CitizenEligibility {
-  organization?: {
-    name: string
-    logo: string
-    eligible: boolean
-  }
-  application?: {
-    name: string
-    logo: string
-    eligible: boolean
-  }
-  user: {
-    eligible: boolean
-    pfp: string
-  }
+  citizenEligibility: CitizenshipQualification | null
 }
 
 // Vote type enum
