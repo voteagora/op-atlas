@@ -2,7 +2,7 @@ import { citizenCategory, User } from "@prisma/client"
 import { CitizenshipQualification } from "@/lib/types"
 
 export interface ProposalPageDataInterface {
-  user?: User
+  user: User | null
   citizen?: Citizen
   votingOpen: boolean
   votingComplete: boolean
