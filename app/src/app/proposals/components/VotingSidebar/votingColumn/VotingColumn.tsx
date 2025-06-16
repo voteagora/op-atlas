@@ -132,7 +132,7 @@ const VotingColumn = ({
     }
 
     const args = {
-      proposalId: 1,
+      proposalId: proposalId,
       choices: JSON.stringify(choices),
     }
     const encodedData = encoder.encodeData([
