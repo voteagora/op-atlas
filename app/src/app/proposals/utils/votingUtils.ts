@@ -121,6 +121,8 @@ const getCitizenTypes = (proposalData: ProposalPageDataInterface) => {
     return getOpenVotingTypes(proposalData)
   } else if (proposalData.votingComplete) {
     return votingEnded(proposalData.endDate, "This proposal has [TODO]")
+  } else {
+    return comingSoon(proposalData)
   }
 }
 
@@ -160,7 +162,10 @@ export const getVotingCardProps = (
 ): VotingCardProps | undefined => {
   // If voting has not opened yet
   if (!proposalData.votingOpen && !proposalData.votingComplete) {
-    return comingSoon(proposalData)
+    return {
+      ...comingSoon(proposalData),
+      user: proposalData.user,
+    }
   }
 
   if (!proposalData.user) {
@@ -172,14 +177,18 @@ export const getVotingCardProps = (
           descriptionElement:
             "The proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
         },
+        user: null,
       }
     }
-    return castYourVote(proposalData.proposalType)
+    return {
+      ...castYourVote(proposalData.proposalType),
+      user: proposalData.user,
+    }
   }
   if (proposalData.citizen) {
-    return getCitizenTypes(proposalData)
+    return { ...getCitizenTypes(proposalData), user: proposalData.user }
   }
-  return getNonCitizenTypes(proposalData)
+  return { ...getNonCitizenTypes(proposalData), user: proposalData.user }
 }
 
 /**
@@ -310,7 +319,7 @@ export const getVotingColumnProps = (
     proposalId: proposalData.proposalId,
     votingActions: votingActions,
     currentlyActive: proposalData.votingOpen,
-    userSignedIn: proposalData.signedIn,
+    userSignedIn: proposalData.user ? true : false,
     userVoted: proposalData.voted,
     userCitizen: proposalData.citizen,
     citizenId: proposalData.citizen?.id,
