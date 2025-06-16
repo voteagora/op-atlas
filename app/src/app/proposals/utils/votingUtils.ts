@@ -14,7 +14,9 @@ import { CitizenshipQualification } from "@/lib/types"
 const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
 
 // Helper functions for voting card props
-const comingSoon = (startDate: Date, endDate: Date) => {
+const comingSoon = (proposalData: ProposalPageDataInterface) => {
+  const startDate = new Date(proposalData.startDate)
+  const endDate = new Date(proposalData.endDate)
   return {
     cardText: {
       title: "Coming Soon",
@@ -158,10 +160,10 @@ export const getVotingCardProps = (
 ): VotingCardProps | undefined => {
   // If voting has not opened yet
   if (!proposalData.votingOpen && !proposalData.votingComplete) {
-    return comingSoon(proposalData.startDate, proposalData.endDate)
+    return comingSoon(proposalData)
   }
 
-  if (!proposalData.signedIn) {
+  if (!proposalData.user) {
     if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
       // Special case for the offchain optimistic proposal
       return {
@@ -187,7 +189,7 @@ export const getVotingCardProps = (
  */
 const getVotingActions = (proposalData: ProposalPageDataInterface) => {
   let votingActions: any = {}
-  if (!proposalData.signedIn) {
+  if (!proposalData.user) {
     votingActions = {
       cardActionList: [
         {
@@ -200,13 +202,8 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
     // The user is not a citizen
   } else if (!proposalData.citizen) {
     // Get the eligibility of the citizen
-    const organizationEligible =
-      proposalData.citizenEligibility.organization?.eligible
-    const applicationEligible =
-      proposalData.citizenEligibility.application?.eligible
-    const userEligible = proposalData.citizenEligibility.user.eligible
 
-    if (organizationEligible || applicationEligible || userEligible) {
+    if (proposalData.citizenEligibility?.eligible) {
       votingActions = {
         cardActionList: [
           {
