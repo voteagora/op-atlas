@@ -1,4 +1,3 @@
-import { CITIZEN_TYPES } from "@/lib/constants"
 import { citizenCategory } from "@prisma/client"
 
 export interface ProposalPageDataInterface {
