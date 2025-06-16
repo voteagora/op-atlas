@@ -2,7 +2,6 @@ import VotingActions, {
   CardActionsProps,
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
 import React from "react"
-import { CitizenEligibility } from "@/app/proposals/proposal.types"
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
 import { User } from "@prisma/client"
 import { CitizenshipQualification } from "@/lib/types"
@@ -51,7 +50,7 @@ const CardText = ({ title, descriptionElement }: CardTextProps) => {
 export interface VotingCardProps {
   cardText: CardTextProps
   cardActions?: CardActionsProps
-  user: User
+  user: User | null
   eligibility?: CitizenshipQualification
 }
 
@@ -65,7 +64,7 @@ const VotingCard = ({
   console.log("Eligibility in VotingCard", eligibility)
   return (
     <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
-      {eligibility && (
+      {eligibility && user && (
         <EligibleCitizenAvatar user={user} qualification={eligibility} />
       )}
       <CardText {...cardText} />
