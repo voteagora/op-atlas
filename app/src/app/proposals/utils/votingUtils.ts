@@ -7,6 +7,7 @@ import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/Vo
 import {
   ProposalPageDataInterface,
   ProposalType,
+  VoteType,
 } from "@/app/proposals/proposal.types"
 import { CitizenshipQualification } from "@/lib/types"
 
@@ -374,5 +375,25 @@ export const getVotingProps = (proposalData: ProposalPageDataInterface) => {
     votingCardProps: getVotingCardProps(proposalData),
     votingColumnProps: getVotingColumnProps(proposalData),
     votingRedirectProps: getVotingRedirectProps(proposalData),
+  }
+}
+
+export const mapVoteTypeToValue = (
+  proposalType: ProposalType,
+  voteType: VoteType,
+) => {
+  if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
+    switch (voteType) {
+      case VoteType.Against:
+        return ["0"]
+      case VoteType.For:
+        return ["1"]
+      case VoteType.Abstain:
+        return ["2"]
+      default:
+        return []
+    }
+  } else {
+    return [voteType]
   }
 }
