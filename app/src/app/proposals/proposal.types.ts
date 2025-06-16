@@ -1,3 +1,4 @@
+import { CITIZEN_TYPES } from "@/lib/constants"
 import { citizenCategory } from "@prisma/client"
 
 export interface ProposalPageDataInterface {
@@ -57,7 +58,7 @@ export type Citizen = {
   id: number
   userId: string
   address: string | null
-  type: string
+  type: citizenCategory
   attestationId: string | null
   timeCommitment: string | null
   createdAt: Date
@@ -71,7 +72,7 @@ export interface OffchainVote {
   vote: object
   transactionHash?: string
   citizenId: number
-  citizenCategory?: citizenCategory
+  citizenType: citizenCategory
   createdAt?: Date
   updatedAt?: Date
 }
