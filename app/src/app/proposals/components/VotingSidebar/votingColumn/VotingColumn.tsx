@@ -199,8 +199,6 @@ const VotingColumn = ({
           break
       }
 
-      console.log("citizenId", userCitizen?.id)
-
       // build an offhchain vote object for the DB
       const offchainVote: OffchainVote = {
         attestationId: attestationId,

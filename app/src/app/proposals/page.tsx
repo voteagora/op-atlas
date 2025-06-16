@@ -73,13 +73,11 @@ const getEnrichedProposalData = async ({ userId }: { userId?: string }) => {
 
       // Get the citizen data from DB
       const citizen = await getCitizenByType({ type: "user", id: userId })
-      console.log("citizen in getEnrichedProposalData: ", citizen)
       if (!citizen) {
         return proposalData
       }
 
       // Enrich the proposal data with citizen data for conditional vote status rendering
-      console.log("citizen in getEnrichedProposalData: ", citizen)
       return enrichProposalData(proposalData, citizen.id)
     } catch (error) {
       console.error(`Failed to fetch Citizen Data: ${error}`)
