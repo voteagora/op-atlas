@@ -13,7 +13,7 @@ import {
   revokePublishedContracts,
   updateAllForProject,
 } from "@/db/projects"
-import { getUserById } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 
 import {
   createFullProjectSnapshotAttestations,
@@ -243,7 +243,7 @@ export const createOrganizationSnapshot = async (organizationId: string) => {
     }
   }
 
-  const user = await getUserById(userId)
+  const user = await getUserByIdCached(userId)
   if (!user) {
     return {
       error: "User not found",

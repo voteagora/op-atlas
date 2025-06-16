@@ -17,6 +17,7 @@ import { CategoryWithImpact } from "../types"
 import { getProjectStatus } from "../utils"
 import { getUserApplicationsForRound } from "./projects"
 import { verifyAdminStatus } from "./utils"
+import { getUserByIdCached } from "@/db/usersCached"
 
 const whitelist: string[] = []
 
@@ -165,7 +166,7 @@ export const submitApplications = async (
     }
   }
 
-  const user = await getUserById(session.user.id)
+  const user = await getUserByIdCached(session.user.id)
 
   if (user?.emails.length === 0) {
     return {

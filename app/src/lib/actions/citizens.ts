@@ -11,7 +11,7 @@ import {
 import { prisma } from "@/db/client"
 import { getAdminOrganizations, getOrganization } from "@/db/organizations"
 import { getProject, getUserAdminProjectsWithDetail } from "@/db/projects"
-import { getUserById } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 import {
   CITIZEN_ATTESTATION_CODE,
   CITIZEN_TAGS,
@@ -43,7 +43,7 @@ export const s8CitizenshipQualification =
       return null
     }
 
-    const user = await getUserById(userId)
+    const user = await getUserByIdCached(userId)
     if (!user) {
       return null
     }
@@ -262,7 +262,7 @@ export const attestCitizen = async () => {
     }
   }
 
-  const user = await getUserById(userId)
+  const user = await getUserByIdCached(userId)
   if (!user) {
     return {
       error: "User not found",

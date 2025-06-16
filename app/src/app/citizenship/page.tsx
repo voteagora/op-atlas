@@ -16,7 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { getUserById } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 import {
   checkCitizenshipLimit,
   getCitizen,
@@ -36,7 +36,7 @@ export default async function Page() {
 
   const [user, citizen, qualification, isCitizenshipLimitReached] =
     await Promise.all([
-      getUserById(userId),
+      getUserByIdCached(userId),
       getCitizen({ type: CITIZEN_TYPES.user, id: userId }),
       s8CitizenshipQualification(),
       checkCitizenshipLimit(),

@@ -18,7 +18,7 @@ import {
   updateOrganizationMemberRole,
   UpdateOrganizationParams,
 } from "@/db/organizations"
-import { getUserById } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
@@ -45,7 +45,7 @@ export const createNewOrganization = async ({
     }
   }
 
-  const user = await getUserById(userId)
+  const user = await getUserByIdCached(userId)
   if (!user) {
     return {
       error: "User not found",

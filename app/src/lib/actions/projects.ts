@@ -32,7 +32,7 @@ import {
   updateProjectOrganization,
   UpdateProjectParams,
 } from "@/db/projects"
-import { getUserById } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 
 import { createEntityAttestation } from "../eas"
 import { TeamRole } from "../types"
@@ -142,7 +142,7 @@ export const createNewProject = async (
     }
   }
 
-  const user = await getUserById(session.user.id)
+  const user = await getUserByIdCached(session.user.id)
   if (!user) {
     return {
       error: "User not found",
@@ -175,7 +175,7 @@ export const createNewProjectOnBehalf = async (
   details: CreateProjectParams,
   userId: string,
 ) => {
-  const user = await getUserById(userId)
+  const user = await getUserByIdCached(userId)
   if (!user) {
     return {
       error: "User not found",

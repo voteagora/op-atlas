@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache"
 import { getAddress } from "viem"
 
 import { auth } from "@/auth"
-import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
+import { addUserAddresses, removeUserAddress } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 
 import { getUserConnectedAddresses } from "../neynar"
 import verifyMessage from "../utils/serverVerifyMessage"
@@ -25,7 +26,7 @@ export const verifyUserAddress = async (
     }
   }
 
-  const user = await getUserById(session.user.id)
+  const user = await getUserByIdCached(session.user.id)
   if (!user) {
     return {
       error: "Unauthorized",
@@ -61,7 +62,7 @@ export const verifyUserAddress = async (
     source: "atlas",
   })
 
-  const updated = await getUserById(user.id)
+  const updated = await getUserByIdCached(user.id)
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/verified-addresses")
@@ -86,7 +87,7 @@ export const deleteUserAddress = async (address: string) => {
     address: getAddress(address),
   })
 
-  const updated = await getUserById(session.user.id)
+  const updated = await getUserByIdCached(session.user.id)
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/verified-addresses")
@@ -106,7 +107,7 @@ export const syncFarcasterAddresses = async () => {
     }
   }
 
-  const user = await getUserById(session.user.id)
+  const user = await getUserByIdCached(session.user.id)
   if (!user) {
     return {
       error: "Unauthorized",
@@ -144,7 +145,7 @@ export const syncFarcasterAddresses = async () => {
     }
   }
 
-  const updated = await getUserById(user.id)
+  const updated = await getUserByIdCached(user.id)
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/verified-addresses")

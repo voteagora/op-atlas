@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import MakeOrganizationForm from "@/components/organizations/MakeOrganizationForm"
 import MakeOrganizationFormHeader from "@/components/organizations/MakeOrganizationFormHeader"
 import { getOrganization } from "@/db/organizations"
-import { getUserById } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 import { updateInteractions } from "@/lib/actions/users"
 
 export const maxDuration = 120
@@ -21,7 +21,7 @@ export default async function Page({
   }
 
   const [user, organization] = await Promise.all([
-    getUserById(session.user.id),
+    getUserByIdCached(session.user.id),
     getOrganization({ id: params.organizationId }),
   ])
 

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
-import { getUserById } from "@/db/users"
+import { getUserByIdCached } from "@/db/usersCached"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import {
   getAdminProjects,
@@ -21,7 +21,7 @@ export default async function Page() {
 
   const [user, projects, applications, organizations, adminProjects] =
     await Promise.all([
-      getUserById(userId),
+      getUserByIdCached(userId),
       getProjects(userId),
       getApplications(userId),
       getUserOrganizations(userId),

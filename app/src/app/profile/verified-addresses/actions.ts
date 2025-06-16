@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth"
 import { updateCitizen } from "@/db/citizens"
-import { getUserById, makeUserAddressPrimary } from "@/db/users"
+import { makeUserAddressPrimary } from "@/db/users"
 import { getCitizen } from "@/lib/actions/citizens"
 import { CITIZEN_ATTESTATION_CODE, CITIZEN_TYPES } from "@/lib/constants"
 import {
@@ -24,12 +24,11 @@ export async function makeUserAddressPrimaryAction(address: string) {
 
   // If user is a citizen and with an active attestation, revoke it and create a new one
   if (citizen?.attestationId && citizen.address !== address) {
-    const user = await getUserById(userId)
     await revokeCitizenAttestation(citizen.attestationId)
 
     const attestationId = await createCitizenAttestation({
       to: address,
-      farcasterId: parseInt(user?.farcasterId || "0"),
+      farcasterId: parseInt(session.user?.farcasterId || "0"),
       selectionMethod:
         CITIZEN_ATTESTATION_CODE[
           citizen.type as keyof typeof CITIZEN_ATTESTATION_CODE
