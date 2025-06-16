@@ -15,6 +15,7 @@ import {
   ProposalType,
 } from "@/app/proposals/proposal.types"
 import { parseEnumValue } from "@/lib/actions/utils"
+import { s8CitizenshipQualification } from "@/lib/actions/citizens"
 
 interface PageProps {
   params: {
@@ -46,13 +47,15 @@ const Page = async (params: PageProps) => {
   if (userAddress) {
     citizen = await getCitizenByType({ type: "user", id: userId })
   }
+  const citizenEligibility = await s8CitizenshipQualification()
+  console.log("-".repeat(10))
   console.log("session", session)
   console.log("userId: ", userId)
   console.log("user: ", user)
   console.log("userAddress: ", userAddress)
   console.log("citizen: ", citizen)
-
-  const userSignedIn = userId !== undefined || userId !== ""
+  console.log("citizenEligibility: ", citizenEligibility)
+  console.log("-".repeat(10))
 
   // Date Info
   const proposalStartDate = new Date(proposalData.startTime)
@@ -68,25 +71,8 @@ const Page = async (params: PageProps) => {
   const voted = false
   const votingRecord = ["2"]
 
-  const citizenEligibility = {
-    organization: {
-      name: "Org 1",
-      logo: "https://i.imgur.com/0000000.png",
-      eligible: false,
-    },
-    application: {
-      name: "App 1",
-      logo: "https://i.imgur.com/0000000.png",
-      eligible: false,
-    },
-    user: {
-      eligible: true,
-      pfp: "https://i.imgur.com/0000000.png",
-    },
-  }
-
   const proposalPageData: ProposalPageDataInterface = {
-    signedIn: userSignedIn,
+    user: user,
     citizen: citizen,
     votingOpen: votingOpen,
     votingComplete: votingComplete,

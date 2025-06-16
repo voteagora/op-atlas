@@ -3,6 +3,9 @@ import VotingActions, {
 } from "@/app/proposals/components/VotingSidebar/VotingActions"
 import React from "react"
 import { CitizenEligibility } from "@/app/proposals/proposal.types"
+import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
+import { User } from "@prisma/client"
+import { CitizenshipQualification } from "@/lib/types"
 
 interface CardImageProps {
   src: string
@@ -48,14 +51,23 @@ const CardText = ({ title, descriptionElement }: CardTextProps) => {
 export interface VotingCardProps {
   cardText: CardTextProps
   cardActions?: CardActionsProps
-  cardImage?: CardImageProps
-  eligibility?: CitizenEligibility
+  user: User
+  eligibility?: CitizenshipQualification
 }
 
-const VotingCard = ({ cardText, cardActions, cardImage }: VotingCardProps) => {
+const VotingCard = ({
+  cardText,
+  cardActions,
+  user,
+  eligibility,
+}: VotingCardProps) => {
+  console.log("User in VotingCard", user)
+  console.log("Eligibility in VotingCard", eligibility)
   return (
     <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
-      {cardImage && <CardImage {...cardImage} />}
+      {eligibility && (
+        <EligibleCitizenAvatar user={user} qualification={eligibility} />
+      )}
       <CardText {...cardText} />
       {cardActions && <VotingActions {...cardActions} />}
     </div>
