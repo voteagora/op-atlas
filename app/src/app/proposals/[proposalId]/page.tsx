@@ -16,6 +16,9 @@ import {
 } from "@/app/proposals/proposal.types"
 import { parseEnumValue } from "@/lib/actions/utils"
 import { s8CitizenshipQualification } from "@/lib/actions/citizens"
+import { CitizenLookup } from "@/lib/types"
+import { CITIZEN_TYPES } from "@/lib/constants"
+import { Citizen } from "@prisma/client"
 
 interface PageProps {
   params: {
@@ -40,11 +43,34 @@ const Page = async (params: PageProps) => {
   const session = await auth()
   const userId = session?.user.id ?? ""
   const user = await getUserById(userId)
-  const primaryAddress = user?.addresses.filter((address) => address.primary)[0]
-  let userAddress = primaryAddress?.address
   let citizen: any = null
-  if (userAddress) {
-    citizen = await getCitizenByType({ type: "user", id: userId })
+  // Priority in which a citizen should be searched for
+  const CITIZEN_PRIORITY: CitizenLookup["type"][] = [
+    CITIZEN_TYPES.user,
+    CITIZEN_TYPES.app,
+    CITIZEN_TYPES.chain,
+  ]
+
+  /**
+   * Returns the first citizen found according to the provided priority list.
+   */
+  async function findCitizenByPriority(
+    id: string,
+    priorities: CitizenLookup["type"][] = CITIZEN_PRIORITY,
+  ): Promise<Citizen | null> {
+    for (const type of priorities) {
+      try {
+        const found = await getCitizenByType({ type, id })
+        if (found) return found
+      } catch (error) {
+        console.error(`Failed to fetch Citizen Data for ${type}: ${error}`)
+      }
+    }
+    return null
+  }
+
+  if (user) {
+    citizen = (await findCitizenByPriority(userId)) ?? citizen
   }
   const citizenEligibility = await s8CitizenshipQualification()
 
