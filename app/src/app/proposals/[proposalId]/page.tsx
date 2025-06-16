@@ -9,7 +9,7 @@ import { getVotingProps } from "@/app/proposals/utils/votingUtils"
 import { getProposal } from "@/lib/proposals"
 import { auth } from "@/auth"
 import { getUserById } from "@/db/users"
-import { getCitizenByType } from "@/db/citizens"
+import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 import {
   ProposalPageDataInterface,
   ProposalType,
@@ -67,8 +67,13 @@ const Page = async (params: PageProps) => {
   const breadcrumbs = ["Proposals", proposalData.proposalType]
 
   // Voting Info
-  const voted = false
-  const votingRecord = ["2"]
+  let voteHistory
+  if (citizen && citizen.id) {
+    console.log("citizen2: ", citizen)
+    voteHistory = await getCitizenProposalVote(citizen.id, proposalId)
+  }
+  console.log("voteHistory: ", voteHistory)
+  const voted = !!voteHistory
 
   const proposalPageData: ProposalPageDataInterface = {
     user: user,
@@ -76,7 +81,7 @@ const Page = async (params: PageProps) => {
     votingOpen: votingOpen,
     votingComplete: votingComplete,
     voted: voted,
-    votingRecord: votingRecord,
+    votingRecord: voteHistory,
     startDate: proposalStartDate,
     endDate: proposalEndDate,
     proposalType: parseEnumValue<ProposalType>(
