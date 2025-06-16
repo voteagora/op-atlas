@@ -35,9 +35,9 @@ const enrichProposalData = async (
 
     // Check if we have a valid citizen with vote data
     const hasVoted =
-      offchainVote?.vote?.vote &&
-      Array.isArray(offchainVote.vote.vote) &&
-      offchainVote.vote.vote.length > 0
+      offchainVote?.vote &&
+      Array.isArray(offchainVote.vote) &&
+      offchainVote.vote.length > 0
 
     const isVotedProposal = hasVoted && offchainVote.proposalId === proposal.id
 
