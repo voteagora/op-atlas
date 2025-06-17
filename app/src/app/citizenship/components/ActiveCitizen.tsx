@@ -15,13 +15,13 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
   })
 
   const { organization } = useOrganization({
-    id: citizen?.organizationId ?? "",
-    enabled: !!citizen?.organizationId,
+    id: citizen?.userId ?? "",
+    enabled: !!citizen?.userId,
   })
 
   const { project } = useProject({
-    id: citizen?.projectId ?? "",
-    enabled: !!citizen?.projectId,
+    id: citizen?.userId ?? "",
+    enabled: !!citizen?.userId,
   })
 
   const renderAvatar = () => {
