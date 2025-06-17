@@ -3,8 +3,21 @@ import { ProposalBadgeType } from "@/app/proposals/proposalsPage/components/Prop
 import {
   OffChainProposalResponse,
   UIProposal,
-} from "@/app/api/v1/proposals/route"
+} from "@/app/api/agora/proposals/route"
 import { string } from "zod"
+import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
+
+interface OffchainVote {
+  attestationId: string
+  voterAddress: string
+  proposalId: string
+  vote: { vote: string[] }
+  transactionHash?: string
+  citizenId: number
+  citizenCategory: string
+  createdAt: Date
+  updatedAt: Date
+}
 
 const getStandardProposlas = async () => {
   const response = await fetch(
@@ -26,7 +39,7 @@ const getStandardProposlas = async () => {
 
   const offChainProposals: OffChainProposalResponse = await response.json()
 
-  // Transform the data to match your UI structure
+  // Transform the data to match UI structure
   const standardProposals: UIProposal[] = offChainProposals.data.map(
     (proposal: any) => {
       // Determine badge type based on dates and status
@@ -114,6 +127,81 @@ type ProposalData = {
   cancelledTransactionHash?: string | null
   executedTransactionHash?: string | null
   proposalTemplate?: object
+}
+
+export const enrichProposalData = async (
+  proposals: { standardProposals: UIProposal[]; selfNominations: UIProposal[] },
+  citizenId: number,
+) => {
+  // Helper function to enrich a single proposal with vote information
+  const enrichSingleProposal = async (
+    proposal: UIProposal,
+  ): Promise<UIProposal> => {
+    const offchainVote: OffchainVote = await getCitizenProposalVote(
+      citizenId,
+      proposal.id,
+    )
+
+    // Check if we have a valid citizen with vote data
+    const hasVoted =
+      offchainVote?.vote &&
+      Array.isArray(offchainVote.vote) &&
+      offchainVote.vote.length > 0
+
+    const isVotedProposal = hasVoted && offchainVote.proposalId === proposal.id
+
+    return {
+      ...proposal,
+      voted: isVotedProposal ? true : proposal.voted,
+    }
+  }
+
+  // Process both types of proposals using the helper function
+  const enrichedStandardProposals = await Promise.all(
+    proposals.standardProposals.map(enrichSingleProposal),
+  )
+
+  const enrichedSelfNominations = await Promise.all(
+    proposals.selfNominations.map(enrichSingleProposal),
+  )
+
+  return {
+    standardProposals: enrichedStandardProposals,
+    selfNominations: enrichedSelfNominations,
+  }
+}
+
+export const getEnrichedProposalData = async ({
+  userId,
+}: {
+  userId?: string
+}) => {
+  try {
+    // Get the proposal data from the API
+    const proposalData = await getProposals()
+    try {
+      if (!userId) {
+        return proposalData
+      }
+
+      // Get the citizen data from DB
+      const citizen = await getCitizenByType({ type: "user", id: userId })
+      if (!citizen) {
+        return proposalData
+      }
+
+      // Enrich the proposal data with citizen data for conditional vote status rendering
+      return enrichProposalData(proposalData, citizen.id)
+    } catch (error) {
+      console.error(`Failed to fetch Citizen Data: ${error}`)
+      // If we can't get citizen data, just return the proposal data as is
+      return proposalData
+    }
+  } catch (error) {
+    console.error(`Failed to fetch Proposal Data: ${error}`)
+    // If we can't get proposal data, return empty arrays
+    return { standardProposals: [], selfNominations: [] }
+  }
 }
 
 export const getProposal = async (id: string): Promise<ProposalData> => {
