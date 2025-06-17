@@ -631,17 +631,18 @@ model ProjectOSOAtlasRelatedProjects {
 }
 
 model Citizen {
-  id             Int      @id @default(autoincrement())
-  userId         String   @unique
-  address        String?  @unique
+  id             Int            @id @default(autoincrement())
+  userId         String         @unique
+  address        String?        @unique
   type           String
   attestationId  String?
   timeCommitment String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   organizationId String?
   projectId      String?
-  user           User     @relation(fields: [userId], references: [id])
+  user           User           @relation(fields: [userId], references: [id])
+  OffChainVote   OffChainVote[]
 
   @@index([userId])
   @@index([projectId])
@@ -700,4 +701,28 @@ enum ProjectOSOMetric {
   DEVELOPER_CONNECTION_COUNT
   TRUSTED_DEVELOPER_USERNAME
   DOWNSTREAM_GAS
+}
+
+model OffChainVote {
+  attestationId   String          @id
+  voterAddress    String
+  proposalId      String
+  vote            Json
+  transactionHash String?
+  citizenId       Int
+  citizenCategory citizenCategory @default(CHAIN)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime
+  Citizen         Citizen         @relation(fields: [citizenId], references: [id])
+
+  @@index([citizenId])
+  @@index([proposalId])
+  @@index([transactionHash])
+  @@index([voterAddress])
+}
+
+enum citizenCategory {
+  CHAIN
+  PROJECT
+  USER
 }
