@@ -19,7 +19,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "storage.googleapis.com",
-        pathname: "/**",
+        pathname: "/op-atlasa/**",
       },
       {
         protocol: "https",
@@ -38,12 +38,12 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "i.imgur.com",
+        hostname: "farcaster.xyz",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "s3.amazonaws.com",
+        hostname: "i.imgur.com",
         pathname: "/**",
       },
     ],
