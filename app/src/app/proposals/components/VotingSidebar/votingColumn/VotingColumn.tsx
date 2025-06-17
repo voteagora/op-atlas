@@ -32,8 +32,10 @@ const EAS_CONTRACT_ADDRESS =
 
 const OFFCHAIN_VOTE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09"
+    ? "0x6b6f133272adcd61abbbf70761914caed1448061059a7fc7464c9d2e24b4159e"
     : "0xTBD"
+
+const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
 export interface CandidateCardProps {
   name: string
@@ -114,7 +116,7 @@ const VotingColumn = ({
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
-  const signer = useEthersSigner({ chainId: 11155111 })
+  const signer = useEthersSigner({ chainId: CHAIN_ID })
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
