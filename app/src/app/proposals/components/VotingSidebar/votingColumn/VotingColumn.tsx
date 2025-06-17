@@ -143,7 +143,7 @@ const VotingColumn = ({
       recipient: signer.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
       revocable: false,
-      refUID: ZeroHash,
+      refUID: userCitizen!.attestationId! as `0x${string}`,
       data: encodedData,
       value: BigInt(0),
       nonce,
