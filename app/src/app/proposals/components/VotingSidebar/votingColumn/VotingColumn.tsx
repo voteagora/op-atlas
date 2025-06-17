@@ -32,7 +32,7 @@ const EAS_CONTRACT_ADDRESS =
 
 const OFFCHAIN_VOTE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0x6b6f133272adcd61abbbf70761914caed1448061059a7fc7464c9d2e24b4159e"
+    ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e"
     : "0xTBD"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
