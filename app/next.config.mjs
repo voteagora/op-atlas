@@ -19,8 +19,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "storage.googleapis.com",
+        pathname: "/op-atlas/*",
+      },
+      {
+        protocol: "https",
         hostname: "cdn.charmverse.io",
-        pathname: "/**",
+        pathname: "/user-content/*",
       },
       {
         protocol: "https",
@@ -29,8 +34,13 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "s3.amazonaws.com",
+        hostname: "i.imgur.com",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "s3.amazonaws.com",
+        pathname: "/charm.public.staging/user-content/*",
       },
     ],
   },
