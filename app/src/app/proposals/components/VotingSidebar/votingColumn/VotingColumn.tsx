@@ -175,6 +175,7 @@ const VotingColumn = ({
         data,
         rawSignature.signature,
         signerAddress,
+        userCitizen!.attestationId!,
       )
 
       // build an offhchain vote object for the DB
