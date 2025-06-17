@@ -83,7 +83,7 @@ async function getVestingSchedules({ sender }: { sender: string }) {
   const query = gql`
     {
       vestingSchedules(
-        where: { sender: "${sender}" }
+        where: { sender: "${sender}", deletedAt: null }
       ) {
         id
         sender
