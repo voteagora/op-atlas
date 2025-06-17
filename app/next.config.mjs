@@ -18,27 +18,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "storage.googleapis.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
         hostname: "cdn.charmverse.io",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "imagedelivery.net",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
         hostname: "warpcast.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "i.imgur.com",
         pathname: "/**",
       },
       {
