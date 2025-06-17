@@ -37,7 +37,7 @@ export const postOffchainVote = async (
         vote: vote.vote,
         transactionHash: vote.transactionHash,
         citizenId: vote.citizenId,
-        citizenCategory: vote.citizenType,
+        citizenCategory: vote.citizenType.toUpperCase() as citizenCategory,
         updatedAt: new Date(),
       },
     })
