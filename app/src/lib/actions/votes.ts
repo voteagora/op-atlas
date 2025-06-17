@@ -7,10 +7,12 @@ export async function vote(
   data: any,
   delegateAttestationSignature: Signature,
   signerAddress: string,
+  citizenRefUID: string,
 ) {
   return await createVoteAttestation(
     data,
     delegateAttestationSignature,
     signerAddress,
+    citizenRefUID,
   )
 }
