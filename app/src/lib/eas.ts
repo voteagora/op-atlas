@@ -33,7 +33,7 @@ export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
 
 const OFFCHAIN_VOTE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0x6b6f133272adcd61abbbf70761914caed1448061059a7fc7464c9d2e24b4159e"
+    ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e"
     : "0xTBD"
 // OLD "0xe55f129f30d55bd712c8355141474f886a9d38f218d94b0d63a00e73c6d65a09"
 // ? "0x6b6f133272adcd61abbbf70761914caed1448061059a7fc7464c9d2e24b4159e"
@@ -532,15 +532,6 @@ export async function createVoteAttestation(
   signerAddress: string,
   citizenRefUID: string,
 ): Promise<string> {
-  const VOTE_SCHEMA = "uint256 proposalId,string params"
-
-  const encoder = new SchemaEncoder(VOTE_SCHEMA)
-
-  const encodedData = encoder.encodeData([
-    { name: "proposalId", value: 1, type: "uint256" },
-    { name: "params", value: "[0]", type: "string" },
-  ])
-
   try {
     // Use attestByDelegation to create the attestation
     const tx = await eas.attestByDelegation({
