@@ -35,9 +35,7 @@ export default function AddGrantDeliveryAddressForm({
         await deleteProjectKYCTeamAction({
           kycTeamId: kycTeam?.id ?? "",
           projectId: projectId as string,
-          hasActiveStream: !!(
-            kycTeam?.rewardStreams && kycTeam.rewardStreams.length > 0
-          ),
+          hasActiveStream: !!kycTeam?.rewardStreams,
         })
         await queryClient.invalidateQueries({
           queryKey: ["kyc-teams", "project", projectId],
@@ -46,9 +44,7 @@ export default function AddGrantDeliveryAddressForm({
         await deleteOrganizationKYCTeam({
           organizationId: organizationId as string,
           kycTeamId: kycTeam?.id ?? "",
-          hasActiveStream: !!(
-            kycTeam?.rewardStreams && kycTeam.rewardStreams.length > 0
-          ),
+          hasActiveStream: !!kycTeam?.rewardStreams,
         })
         await queryClient.invalidateQueries({
           queryKey: ["kyc-teams", "organization", organizationId],
