@@ -1,5 +1,6 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
+import { Signature } from "@ethereum-attestation-service/eas-sdk"
 
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
@@ -29,6 +30,11 @@ export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
     : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
+
+const OFFCHAIN_VOTE_SCHEMA_ID =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e"
+    : "0xTBD"
 
 const citizenWalletChangeSchema = new SchemaEncoder("bytes32 oldCitizenUID")
 
@@ -515,5 +521,37 @@ export async function isAttestationActive(
   } catch (error) {
     console.warn("Error checking attestation status:", error)
     return false
+  }
+}
+
+export async function createVoteAttestation(
+  data: any,
+  delegateAttestationSignature: Signature,
+  signerAddress: string,
+  citizenRefUID: string,
+): Promise<string> {
+  try {
+    // Use attestByDelegation to create the attestation
+    const tx = await eas.attestByDelegation({
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
+      data: {
+        recipient: signerAddress,
+        expirationTime: BigInt(0), // NO_EXPIRATION
+        revocable: false,
+        refUID: citizenRefUID as `0x${string}`,
+        data: data,
+      },
+      signature: delegateAttestationSignature,
+      attester: signerAddress,
+      deadline: BigInt(0), // NO_EXPIRATION
+    })
+
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait()
+    console.log("Vote attestation created with ID:", receipt)
+    return receipt
+  } catch (error) {
+    console.error("Error creating vote attestation:", error)
+    throw error
   }
 }

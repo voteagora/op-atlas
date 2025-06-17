@@ -86,42 +86,22 @@ export async function getCitizenCountByType(type: string): Promise<number> {
   })
 }
 
+export async function getCitizenProposalVote(
+  citizenId: number,
+  proposalId: string,
+): Promise<any> {
+  return prisma.offChainVote.findFirst({
+    where: {
+      citizenId: citizenId,
+      proposalId: proposalId,
+    },
+  })
+}
+
 export async function getCitizenVotes(citizenId: number): Promise<any> {
   return prisma.offChainVote.findMany({
     where: {
       citizenId: citizenId,
-    },
-  })
-}
-
-export async function getCitizenProposalVote(
-  citizenId: number,
-  proposalId: string,
-): Promise<any> {
-  return prisma.offChainVote.findFirst({
-    where: {
-      proposalId: proposalId,
-      citizenId: citizenId,
-    },
-  })
-}
-
-export async function getCitizenCountByType(type: string): Promise<number> {
-  return prisma.citizen.count({
-    where: {
-      type,
-    },
-  })
-}
-
-export async function getCitizenProposalVote(
-  citizenId: number,
-  proposalId: string,
-): Promise<any> {
-  return prisma.offChainVote.findFirst({
-    where: {
-      citizenId: citizenId,
-      proposalId: proposalId,
     },
   })
 }
