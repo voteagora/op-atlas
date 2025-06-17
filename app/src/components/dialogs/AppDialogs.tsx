@@ -7,13 +7,13 @@ import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
-import GovernanceAddressDialog from "./GovernanceAddressDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
 import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
 import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
+import GovernanceAddressDialog from "@/components/dialogs/CitizenshipGovernanceAddressDialog"
 
 export default function AppDialogs() {
   const { openDialog, setOpenDialog, data } = useAppDialogs()
