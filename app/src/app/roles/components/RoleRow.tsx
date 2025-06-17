@@ -1,16 +1,20 @@
 import { format } from "date-fns"
+import Link from "next/link"
 
 import { Role } from "@prisma/client"
 
 export function RoleRow({ role }: { role: Role }) {
   const isActive =
-    new Date() >= new Date(role.startAt) && new Date() <= new Date(role.endAt)
-  const isUpcoming = new Date() < new Date(role.startAt)
+    role.startAt &&
+    role.endAt &&
+    new Date() >= new Date(role.startAt) &&
+    new Date() <= new Date(role.endAt)
+  const isUpcoming = role.startAt && new Date() < new Date(role.startAt)
 
   return (
-    <div
-      key={role.id}
-      className="last:border-b-0 border-b border-border-secondary px-6 py-4 text-sm"
+    <Link
+      href={`/roles/${role.id}`}
+      className="last:border-b-0 border-b border-border-secondary px-6 py-4 text-sm hover:bg-secondary/50 transition-colors"
     >
       <div className="flex flex-row gap-2 w-full justify-between items-center">
         <div className="flex flex-row gap-6 items-center">
@@ -27,16 +31,18 @@ export function RoleRow({ role }: { role: Role }) {
           <div>{role.title}</div>
         </div>
         <div className="flex flex-row gap-6 items-center">
-          <div className="text-muted-foreground">
-            Nominations open from{" "}
-            {format(new Date(role.startAt), "MMM d, yyyy")} -{" "}
-            {format(new Date(role.endAt), "MMM d, yyyy")}
-          </div>
+          {role.startAt && role.endAt && (
+            <div className="text-muted-foreground">
+              Nominations open from{" "}
+              {format(new Date(role.startAt), "MMM d, yyyy")} -{" "}
+              {format(new Date(role.endAt), "MMM d, yyyy")}
+            </div>
+          )}
           <div className="text-xs text-foreground font-semibold w-[36px] h-[36px] rounded-lg bg-secondary flex items-center justify-center">
             {">"}
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
