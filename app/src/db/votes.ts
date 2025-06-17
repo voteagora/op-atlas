@@ -96,7 +96,7 @@ export const upsertOffchainVote = async (
         vote: vote.vote,
         transactionHash: vote.transactionHash,
         citizenId: vote.citizenId,
-        citizenCategory: vote.citizenType,
+        citizenCategory: vote.citizenType?.toUpperCase() as citizenCategory,
         updatedAt: new Date(),
       },
       create: {
