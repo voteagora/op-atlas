@@ -73,11 +73,9 @@ export default function Markdown({ content }: { content: string }) {
         }}
         components={{
           h2: ({ node, ...props }) => (
-            <h4
-              className="foreground"
-              {...props}
-              aria-label="Section heading"
-            ></h4>
+            <h4 className="foreground" {...props} aria-label="Section heading">
+              {props.children ?? "Section title"}
+            </h4>
           ),
         }}
       />
