@@ -1,6 +1,7 @@
 "use client"
 import { voteAction } from "@/app/proposals/proposal.types"
 import { useRouter } from "next/navigation"
+import { useLogin } from "@privy-io/react-auth"
 
 export interface CardActionsProps {
   cardActionList: voteAction[]
@@ -25,6 +26,7 @@ const CardAction = ({
   disabled,
 }: voteAction) => {
   const router = useRouter()
+  const { login: privyLogin } = useLogin()
   const handleAction = async () => {
     switch (actionType.toLowerCase()) {
       case "log":
@@ -43,7 +45,7 @@ const CardAction = ({
         )
         break
       case "sign in":
-        router.push("/login")
+        privyLogin()
         break
       default:
         console.log(`Action type: ${actionType}`)
