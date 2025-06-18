@@ -1,13 +1,14 @@
 "use client"
 
 import { UserPassport } from "@prisma/client"
+import { useEffect } from "react"
 
+import { useIsS7Citizen } from "@/hooks/citizen/useS7Citizen"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
+import { useUserWorldId } from "@/hooks/db/useUserWorldId"
 import { CITIZEN_TYPES, VALID_PASSPORT_THRESHOLD } from "@/lib/constants"
 import { CitizenshipQualification } from "@/lib/types"
-
-import { useUserWorldId } from "../db/useUserWorldId"
 
 export const useCitizenshipRequirements = ({
   id,
@@ -16,6 +17,10 @@ export const useCitizenshipRequirements = ({
   id: string
   qualification: CitizenshipQualification
 }) => {
+  const { data: isS7Citizen, invalidate: invalidateS7Citizen } = useIsS7Citizen(
+    { id },
+  )
+
   const { user, isLoading: isUserLoading } = useUser({ id })
   const { data: passports, isLoading: isPassportsLoading } = useUserPassports({
     id,
@@ -27,6 +32,13 @@ export const useCitizenshipRequirements = ({
     enabled:
       qualification.eligible && qualification.type === CITIZEN_TYPES.user,
   })
+
+  // Manually invalidate S7 citizen query when user data changes
+  useEffect(() => {
+    if (user) {
+      invalidateS7Citizen()
+    }
+  }, [user, invalidateS7Citizen])
 
   const isLoading =
     isUserLoading ||
@@ -57,6 +69,7 @@ export const useCitizenshipRequirements = ({
   } else {
     hasMetRequirements = Boolean(
       email &&
+        isS7Citizen &&
         (user?.github || user?.notDeveloper) &&
         govAddress &&
         (validPassport || validWorldId),

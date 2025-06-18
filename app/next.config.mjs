@@ -15,21 +15,17 @@ const nextConfig = {
     ]
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
         hostname: "storage.googleapis.com",
-        pathname: "/**",
+        pathname: "/op-atlas/*",
       },
       {
         protocol: "https",
         hostname: "cdn.charmverse.io",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "imagedelivery.net",
-        pathname: "/**",
+        pathname: "/user-content/*",
       },
       {
         protocol: "https",
@@ -44,7 +40,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "s3.amazonaws.com",
-        pathname: "/**",
+        pathname: "/charm.public.staging/user-content/*",
       },
     ],
   },
