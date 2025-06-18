@@ -47,7 +47,13 @@ const Page = async (params: PageProps) => {
 
   const session = await auth()
   const userId = session?.user.id ?? ""
-  const user = await getUserById(userId)
+  let user: any
+  try {
+    user = await getUserById(userId)
+  } catch (error) {
+    console.error(`Failed to fetch User Data: ${error}`)
+  }
+
   let citizen: any = null
   // Priority in which a citizen should be searched for
   const CITIZEN_PRIORITY: CitizenLookup["type"][] = [
