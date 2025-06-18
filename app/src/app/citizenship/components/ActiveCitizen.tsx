@@ -15,12 +15,12 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
   })
 
   const { organization } = useOrganization({
-    id: citizen?.userId ?? "",
+    id: citizen?.organizationId ?? "",
     enabled: !!citizen?.organizationId,
   })
 
   const { project } = useProject({
-    id: citizen?.userId ?? "",
+    id: citizen?.projectId ?? "",
     enabled: !!citizen?.projectId,
   })
 
