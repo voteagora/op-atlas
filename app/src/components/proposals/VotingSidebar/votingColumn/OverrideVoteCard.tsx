@@ -1,6 +1,6 @@
 "use client"
 
-import VoteButton from "@/app/proposals/components/VotingSidebar/votingColumn/VoteButton"
+import VoteButton from "@/components/proposals/VotingSidebar/votingColumn/VoteButton"
 import { useState } from "react"
 import { VoteType } from "@/app/proposals/proposal.types"
 

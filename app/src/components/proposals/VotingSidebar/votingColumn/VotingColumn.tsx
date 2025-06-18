@@ -9,10 +9,10 @@ import { useState } from "react"
 
 import VotingActions, {
   CardActionsProps,
-} from "@/app/proposals/components/VotingSidebar/VotingActions"
-import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
-import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
-import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
+} from "@/components/proposals/VotingSidebar/VotingActions"
+import CandidateCards from "@/components/proposals/VotingSidebar/votingColumn/CanidateCards"
+import OverrideVoteCard from "@/components/proposals/VotingSidebar/votingColumn/OverrideVoteCard"
+import StandardVoteCard from "@/components/proposals/VotingSidebar/votingColumn/StandardVoteCard"
 import {
   Citizen,
   OffchainVote,

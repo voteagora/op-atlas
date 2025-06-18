@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
-import Breadcrumbs from "@/app/proposals/components/Breadcrumbs"
-import ProposalContent from "@/app/proposals/components/proposalContent/ProposalContent"
-import VotingSidebar from "@/app/proposals/components/VotingSidebar/VotingSidebar"
-import ProposalHeader from "@/app/proposals/components/ProposalHeader"
+import Breadcrumbs from "@/components/proposals/Breadcrumbs"
+import ProposalContent from "@/components/proposals/proposalContent/ProposalContent"
+import VotingSidebar from "@/components/proposals/VotingSidebar/VotingSidebar"
+import ProposalHeader from "@/components/proposals/ProposalHeader"
 
 import { getVotingProps } from "@/app/proposals/utils/votingUtils"
 

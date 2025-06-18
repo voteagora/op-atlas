@@ -1,6 +1,6 @@
 import VotingActions, {
   CardActionsProps,
-} from "@/app/proposals/components/VotingSidebar/VotingActions"
+} from "@/components/proposals/VotingSidebar/VotingActions"
 import React from "react"
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
 import { User } from "@prisma/client"
