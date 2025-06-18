@@ -11,7 +11,7 @@ import {
 } from "@/app/proposals/proposal.types"
 import { CitizenshipQualification } from "@/lib/types"
 
-const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
+const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL
 
 // Helper functions for voting card props
 const comingSoon = (proposalData: ProposalPageDataInterface) => {
