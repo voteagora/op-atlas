@@ -31,18 +31,16 @@ const CURRENT_DATETIME = new Date()
 const Page = async (params: PageProps) => {
   // Get the proposals page
 
-  let proposalIdData: any
-  try {
-    const { proposalId } = params.params
-    proposalIdData = proposalId
-  } catch (error) {
-    console.error(`Failed to fetch Proposal ID: ${error}`)
+  const proposalId = params.params.proposalId
+  if (!proposalId) {
+    console.error("Missing Proposal ID")
     return notFound()
+  }
   }
 
   let proposalData: any
   try {
-    proposalData = await getProposal(proposalIdData)
+    proposalData = await getProposal(proposalId)
   } catch (error) {
     console.error(`Failed to fetch Proposal Data: ${error}`)
     return notFound()
