@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import ReactMarkdown from "react-markdown"
 
 import {
   Breadcrumb,
@@ -9,9 +10,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { getRoleById } from "@/db/role"
+import { formatMMMd } from "@/lib/utils/date"
 
-import { RoleDetails } from "./components/RoleDetails"
-import { RoleSidebar } from "./components/RoleSidebar"
+import { Sidebar } from "./components/Sidebar"
 
 export default async function Page({ params }: { params: { id: string } }) {
   const role = await getRoleById(parseInt(params.id))
@@ -19,6 +20,8 @@ export default async function Page({ params }: { params: { id: string } }) {
   if (!role) {
     notFound()
   }
+
+  const hasVoting = role.voteStartAt && role.voteEndAt
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -37,11 +40,68 @@ export default async function Page({ params }: { params: { id: string } }) {
               </BreadcrumbList>
             </Breadcrumb>
 
-            <RoleDetails role={role} />
+            <div className="flex flex-col gap-y-8 mt-12">
+              <div className="flex flex-col gap-4">
+                <div className="text-3xl font-semibold">{role.title}</div>
+                {role.startAt && role.endAt && (
+                  <div className="text-muted-foreground flex flex-row gap-4">
+                    <div>
+                      Nominations {formatMMMd(new Date(role.startAt))} -{" "}
+                      {formatMMMd(new Date(role.endAt))}
+                    </div>
+                    {hasVoting && <div>{"|"}</div>}
+                    {hasVoting && (
+                      <div>
+                        {`Vote ${formatMMMd(
+                          new Date(role.voteStartAt),
+                        )} - ${formatMMMd(new Date(role.voteEndAt))}`}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-b border-border-secondary w-full"></div>
+
+              <div className="flex flex-col gap-6">
+                <div className="text-secondary-foreground">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => (
+                        <p className="mb-6 last:mb-0">{children}</p>
+                      ),
+
+                      h3: ({ children }) => (
+                        <h3 className="text-2xl text-semibold my-6">
+                          {children}
+                        </h3>
+                      ),
+                      h4: ({ children }) => (
+                        <h4 className="text-xl text-semibold my-6">
+                          {children}
+                        </h4>
+                      ),
+                      a: ({ children, href }) => (
+                        <a
+                          href={href}
+                          className="underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {children}
+                        </a>
+                      ),
+                    }}
+                  >
+                    {role.description}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div>
-          <RoleSidebar role={role} />
+          <Sidebar role={role} />
         </div>
       </div>
     </main>
