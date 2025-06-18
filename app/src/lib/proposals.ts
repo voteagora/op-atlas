@@ -242,7 +242,7 @@ export const getEnrichedProposalData = async ({
 
 export const getProposal = async (id: string): Promise<ProposalData> => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/v1/proposals/${id}`,
+    `${process.env.NEXT_PUBLIC_AGORA_API_URL}/api/v1/proposals/${id}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.AGORA_API_KEY}`,
