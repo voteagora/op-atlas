@@ -238,7 +238,7 @@ export default function AddGrantDeliveryAddressForm({
                   {Boolean(teamMembers?.length) && (
                     <div className="space-y-1.5">
                       <span className="font-medium text-sm">Persons</span>
-                      {teamMembers?.map((teamMember, _) => (
+                      {teamMembers?.map((teamMember, i) => (
                         <KYCEntryContainer
                           key={teamMember.id}
                           name={`${teamMember.firstName} ${teamMember.lastName}`}
