@@ -28,7 +28,27 @@ export function RoleDetails({ role }: { role: Role }) {
 
             <div className="flex flex-col gap-6">
                 <div className="text-secondary-foreground">
-                    <ReactMarkdown>{role.description}</ReactMarkdown>
+                    <ReactMarkdown
+                        components={{
+                            p: ({ children }) => (
+                                <p className="mb-6 last:mb-0">{children}</p>
+                            ),
+
+                            h3: ({ children }) => (
+                                <h3 className="text-2xl text-semibold my-6">{children}</h3>
+                            ),
+                            h4: ({ children }) => (
+                                <h4 className="text-xl text-semibold my-6">{children}</h4>
+                            ),
+                            a: ({ children, href }) => (
+                                <a href={href} className="underline" target="_blank" rel="noopener noreferrer">
+                                    {children}
+                                </a>
+                            )
+                        }}
+                    >
+                        {role.description}
+                    </ReactMarkdown>
                 </div>
             </div>
         </div>

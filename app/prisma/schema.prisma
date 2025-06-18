@@ -24,6 +24,7 @@ model User {
   privyDid           String?
   citizen            Citizen?
   RewardClaim        RewardClaim[]
+  roleApplications   RoleApplication[]
   addresses          UserAddress[]
   emails             UserEmail[]
   interaction        UserInteraction?
@@ -31,7 +32,6 @@ model User {
   passports          UserPassport[]
   projects           UserProjects[]
   worldId            UserWorldId?
-  roleApplications   RoleApplication[]
 
   @@index([username])
   @@index([farcasterId])
@@ -155,8 +155,8 @@ model Organization {
   OrganizationKYCTeams OrganizationKYCTeam[]
   snapshots            OrganizationSnapshot[]
   projects             ProjectOrganization[]
-  team                 UserOrganization[]
   roleApplications     RoleApplication[]
+  team                 UserOrganization[]
 
   @@index([deletedAt])
 }
@@ -633,17 +633,18 @@ model ProjectOSOAtlasRelatedProjects {
 }
 
 model Citizen {
-  id             Int      @id @default(autoincrement())
-  userId         String   @unique
-  address        String?  @unique
+  id             Int            @id @default(autoincrement())
+  userId         String         @unique
+  address        String?        @unique
   type           String
   attestationId  String?
   timeCommitment String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   organizationId String?
   projectId      String?
-  user           User     @relation(fields: [userId], references: [id])
+  user           User           @relation(fields: [userId], references: [id])
+  OffChainVote   OffChainVote[]
 
   @@index([userId])
   @@index([projectId])
@@ -680,6 +681,56 @@ model UserWorldId {
   @@index([userId])
 }
 
+model Role {
+  id           Int               @id @default(autoincrement())
+  title        String
+  link         String?
+  description  String?
+  requirements Json              @default("{}")
+  startAt      DateTime?
+  endAt        DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @default(now()) @updatedAt
+  applications RoleApplication[]
+}
+
+model RoleApplication {
+  id             Int                   @id @default(autoincrement())
+  status         RoleApplicationStatus
+  roleId         Int
+  userId         String?
+  organizationId String?
+  application    String
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @default(now()) @updatedAt
+  organization   Organization?         @relation(fields: [organizationId], references: [id])
+  role           Role                  @relation(fields: [roleId], references: [id])
+  user           User?                 @relation(fields: [userId], references: [id])
+
+  @@index([roleId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model OffChainVote {
+  attestationId   String          @id
+  voterAddress    String
+  proposalId      String
+  vote            Json
+  transactionHash String?
+  citizenId       Int
+  citizenCategory citizenCategory @default(CHAIN)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime
+  Citizen         Citizen         @relation(fields: [citizenId], references: [id])
+
+  @@unique([proposalId, citizenId])
+  @@index([citizenId])
+  @@index([proposalId])
+  @@index([transactionHash])
+  @@index([voterAddress])
+}
+
 enum KYCStatus {
   PENDING
   APPROVED
@@ -704,42 +755,14 @@ enum ProjectOSOMetric {
   DOWNSTREAM_GAS
 }
 
-model Role {
-  id          Int              @id @default(autoincrement())
-  title       String
-  link        String?
-  description String?          @db.VarChar(500)
-  requirements Json            @default("{}")
-  startAt     DateTime?
-  endAt       DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  applications RoleApplication[]
-
-  @@index([createdAt])
-}
-
-model RoleApplication {
-  id             Int         @id @default(autoincrement())
-  status         RoleApplicationStatus
-  roleId         Int
-  userId         String?
-  organizationId String?
-  application    String
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  role           Role        @relation(fields: [roleId], references: [id])
-  user           User?       @relation(fields: [userId], references: [id])
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-
-  @@index([roleId])
-  @@index([userId])
-  @@index([organizationId])
-  @@index([status])
-}
-
 enum RoleApplicationStatus {
   pending
   approved
   rejected
+}
+
+enum citizenCategory {
+  CHAIN
+  PROJECT
+  USER
 }
