@@ -333,7 +333,7 @@ export const getVotingColumnProps = (
     userVoted: proposalData.voted,
     userCitizen: proposalData.citizen,
     citizenId: proposalData.citizen?.id,
-    resultsLink: `${API_URL}/${proposalData.proposalId}`,
+    resultsLink: `${API_URL}/proposals/${proposalData.proposalId}`,
   }
 
   switch (proposalData.proposalType) {
