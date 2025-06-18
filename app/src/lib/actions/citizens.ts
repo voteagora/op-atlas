@@ -351,7 +351,7 @@ export const isS7Citizen = async (id: string): Promise<boolean> => {
 // S7 Citizens
 // https://optimism.easscan.org/schema/view/0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a
 const getS7CitizenAddresses = async () => {
-  return [
+  const productionList = [
     "0x585639fBf797c1258eBA8875c080Eb63C833d252",
     "0x3DB5b38ef4b433D9C6A664Bd35551BE73313189A",
     "0xad4f365A550835D40dc2E95FDffa1E4edd3FBE14",
@@ -453,7 +453,23 @@ const getS7CitizenAddresses = async () => {
     "0x1F5D295778796a8b9f29600A585Ab73D452AcB1c",
     "0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1",
     "0xDb150346155675dd0C93eFd960d5985244a34820",
+  ]
+
+  const testList = [
     "0xDBb050a8692afF8b5EF4A3F36D53900B14210E40",
     "0x648BFC4dB7e43e799a84d0f607aF0b4298F932DB",
+    "0xA622279f76ddbed4f2CC986c09244262Dba8f4Ba",
+    "0x47E7cEe058E7e33dA6Ea2Ba9Ba7A14ae5d7E8cC4",
+    "0x6D5eFC4cb936c1d5d13dd9b982C467DD3222A39f",
+    "0x49d2a436899A84ce7EaAf9f5AC506776756d4ea4",
+    "0x249DFBBaf7a9cB9CB47a38e399484DBAec642Cad",
+    "0xC950b9F32259860f4731D318CB5a28B2dB892f88",
+    "0x57De675bb963b341479F98E7c5418Bb3B3de2088",
   ]
+
+  const isTestnet =
+    process.env.NODE_ENV === "development" ||
+    process.env.USE_S7_TEST_ACCOUNTS === "true"
+
+  return isTestnet ? [...productionList, ...testList] : productionList
 }
