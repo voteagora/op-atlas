@@ -360,7 +360,7 @@ const getVotingRedirectProps = (
     callout: "Are you a delegate?",
     link: {
       linkText: "Vote here",
-      linkHref: `${API_URL}/${proposalData.proposalId}`,
+      linkHref: `${API_URL}/proposals/${proposalData.proposalId}`,
     },
   }
 }
