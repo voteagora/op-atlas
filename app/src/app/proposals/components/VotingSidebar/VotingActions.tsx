@@ -26,7 +26,12 @@ const CardAction = ({
   disabled,
 }: voteAction) => {
   const router = useRouter()
-  const { login: privyLogin } = useLogin()
+  const { login: privyLogin } = useLogin({
+    onComplete: () => {
+      // Refresh the page after sign-in to rebuild ProposalPageDataInterface
+      router.refresh()
+    },
+  })
   const handleAction = async () => {
     switch (actionType.toLowerCase()) {
       case "log":
