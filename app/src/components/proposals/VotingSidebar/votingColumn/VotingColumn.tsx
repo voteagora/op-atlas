@@ -176,42 +176,53 @@ const VotingColumn = ({
       selectedVote,
     )
     setIsVoting(true)
-    try {
-      // 1. Create and sign an attestation for the vote
-      const { data, rawSignature, signerAddress } =
-        await createDelegatedAttestation(choices)
-      // 2. Send signature to server to relay onchain
-      const attestationId = await vote(
-        data,
-        rawSignature.signature,
-        signerAddress,
-        userCitizen!.attestationId!,
-      )
 
-      // build an offhchain vote object for the DB
-      const offchainVote: OffchainVote = {
-        attestationId: attestationId,
-        voterAddress: signerAddress,
-        proposalId: proposalId,
-        vote: choices,
-        citizenId: userCitizen!.id,
-        citizenType: userCitizen!.type,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+    const castAndRecordVote = async () => {
+      try {
+        const { data, rawSignature, signerAddress } =
+          await createDelegatedAttestation(choices)
+        // 2. Send signature to server to relay onchain
+        const attestationId = await vote(
+          data,
+          rawSignature.signature,
+          signerAddress,
+          userCitizen!.attestationId!,
+        )
+        // build an offhchain vote object for the DB
+        const offchainVote: OffchainVote = {
+          attestationId: attestationId,
+          voterAddress: signerAddress,
+          proposalId: proposalId,
+          vote: choices,
+          citizenId: userCitizen!.id,
+          citizenType: userCitizen!.type,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+        // 3. Record vote in database
+        await postOffchainVote(offchainVote)
+      } catch (error) {
+        console.error("Failed to cast vote:", error)
+        throw new Error("Failed to cast vote.")
+      } finally {
+        setIsVoting(false)
       }
-      // 3. Record vote in database
-      await postOffchainVote(offchainVote)
-      toast.success("Vote Cast!")
-      setTimeout(() => {
-        router.refresh()
-      }, 1000) // Wait 1s and reload the page to show the new vote
-    } catch (error) {
-      toast.error("Failed to cast vote")
-      console.error("Failed to cast vote:", error)
-      // Add user-facing error handling (e.g., toast notification)
-    } finally {
-      setIsVoting(false)
     }
+
+    // 1. Create and sign an attestation for the vote
+    toast.promise(castAndRecordVote(), {
+      loading: "Casting Vote...",
+      success: () => {
+        return "Vote Cast and Recorded!"
+      },
+      error: (error) => {
+        return error.message
+      },
+    })
+
+    setTimeout(() => {
+      router.refresh()
+    }, 1000) // Wait 1s and reload the page to show the new vote
   }
 
   return (
