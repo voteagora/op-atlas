@@ -31,14 +31,22 @@ const CURRENT_DATETIME = new Date()
 const Page = async (params: PageProps) => {
   // Get the proposals page
 
-  const { proposalId } = params.params
-
-  const proposalIdData = proposalId !== undefined
-
-  if (!proposalIdData) {
+  let proposalIdData: any
+  try {
+    const { proposalId } = params.params
+    proposalIdData = proposalId
+  } catch (error) {
+    console.error(`Failed to fetch Proposal ID: ${error}`)
     return notFound()
   }
-  const proposalData = await getProposal(proposalId)
+
+  let proposalData: any
+  try {
+    proposalData = await getProposal(proposalIdData)
+  } catch (error) {
+    console.error(`Failed to fetch Proposal Data: ${error}`)
+    return notFound()
+  }
 
   const session = await auth()
   const userId = session?.user.id ?? ""
