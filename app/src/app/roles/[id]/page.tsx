@@ -8,17 +8,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { prisma } from "@/db/client"
+import { getRoleById } from "@/db/role"
 
 import { RoleDetails } from "./components/RoleDetails"
 import { RoleSidebar } from "./components/RoleSidebar"
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const role = await prisma.role.findUnique({
-    where: {
-      id: parseInt(params.id),
-    },
-  })
+  const role = await getRoleById(parseInt(params.id))
 
   if (!role) {
     notFound()

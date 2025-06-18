@@ -16,3 +16,11 @@ export async function getAllRoles(): Promise<Role[]> {
     },
   })
 }
+
+export async function getRoleById(id: number): Promise<Role | null> {
+  return prisma.role.findUnique({
+    where: {
+      id,
+    },
+  })
+}
