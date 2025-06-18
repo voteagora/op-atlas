@@ -23,6 +23,8 @@ import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
@@ -112,11 +114,14 @@ const VotingColumn = ({
   resultsLink,
 }: VotingColumnProps) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
+  const [isVoting, setIsVoting] = useState<boolean>(false)
+
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
   const signer = useEthersSigner({ chainId: CHAIN_ID })
+  const router = useRouter()
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
@@ -170,7 +175,7 @@ const VotingColumn = ({
       proposalType as ProposalType,
       selectedVote,
     )
-
+    setIsVoting(true)
     try {
       // 1. Create and sign an attestation for the vote
       const { data, rawSignature, signerAddress } =
@@ -196,10 +201,16 @@ const VotingColumn = ({
       }
       // 3. Record vote in database
       await postOffchainVote(offchainVote)
-      // Add success handling if needed
+      toast.success("Vote Cast!")
+      setTimeout(() => {
+        router.refresh()
+      }, 1000) // Wait 1s and reload the page to show the new vote
     } catch (error) {
+      toast.error("Failed to cast vote")
       console.error("Failed to cast vote:", error)
       // Add user-facing error handling (e.g., toast notification)
+    } finally {
+      setIsVoting(false)
     }
   }
 
@@ -228,6 +239,7 @@ const VotingColumn = ({
                 ...action,
                 action: handleCastVote,
                 disabled: !selectedVote,
+                loading: isVoting,
               }
             }
             // Otherwise, return the original action unchanged
