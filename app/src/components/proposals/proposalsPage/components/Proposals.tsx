@@ -4,7 +4,7 @@ import ProposalCard, {
   ProposalBadgeType,
   ProposalDates,
   ProposalTextContent,
-} from "@/app/proposals/proposalsPage/components/ProposalCard"
+} from "@/components/proposals/proposalsPage/components/ProposalCard"
 
 interface StandardProposalProps {
   rounded?: boolean

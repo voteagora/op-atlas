@@ -1,7 +1,7 @@
 "use client"
 
-import CandidateCard from "@/app/proposals/components/VotingSidebar/votingColumn/CandidateCard"
-import { CandidateCardProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
+import CandidateCard from "@/components/proposals/VotingSidebar/votingColumn/CandidateCard"
+import { CandidateCardProps } from "@/components/proposals/VotingSidebar/votingColumn/VotingColumn"
 import { useState } from "react"
 
 const CandidateCards = ({
@@ -14,17 +14,17 @@ const CandidateCards = ({
   )
   const handleApprovalClick = (idx: number) => {
     if (selectedApprovals === null) {
-      setSelectedApprovals([idx]);
+      setSelectedApprovals([idx])
     } else if (selectedApprovals.includes(idx)) {
       // If the index is already in the array, remove it
-      setSelectedApprovals(selectedApprovals.filter(i => i !== idx));
+      setSelectedApprovals(selectedApprovals.filter((i) => i !== idx))
       if (selectedApprovals.length === 1) {
         // If this was the last item, set to null
-        setSelectedApprovals(null);
+        setSelectedApprovals(null)
       }
     } else {
       // Add the index to the array
-      setSelectedApprovals([...selectedApprovals, idx]);
+      setSelectedApprovals([...selectedApprovals, idx])
     }
   }
   return (

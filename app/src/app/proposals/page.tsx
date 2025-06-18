@@ -1,4 +1,4 @@
-import Proposals from "@/app/proposals/proposalsPage/components/Proposals"
+import Proposals from "@/components/proposals/proposalsPage/components/Proposals"
 import { auth } from "@/auth"
 import { getEnrichedProposalData } from "@/lib/proposals"
 
