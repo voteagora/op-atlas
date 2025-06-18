@@ -1,0 +1,2 @@
+ALTER TABLE "Role" ADD COLUMN "voteStartAt" TIMESTAMP(3),
+ADD COLUMN "voteEndAt" TIMESTAMP(3); 
