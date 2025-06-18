@@ -4,7 +4,7 @@ import { Role } from "@prisma/client"
 import { usePrivy } from "@privy-io/react-auth"
 import { format } from "date-fns"
 import { Loader2 } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
 
@@ -15,6 +15,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
   const { status } = useSession()
   const { login } = usePrivy()
   const pathname = usePathname()
+  const router = useRouter()
   const isLoggingIn = useRef(false)
 
   const isApplicationWindow =
@@ -36,6 +37,8 @@ export const Sidebar = ({ role }: { role: Role }) => {
       isLoggingIn.current = true
       localStorage.setItem(LOCAL_STORAGE_LOGIN_REDIRECT, pathname)
       login()
+    } else if (isApplicationWindow) {
+      router.push(`/roles/${role.id}/apply`)
     }
   }
 
@@ -52,7 +55,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
         disabled={
           (isAuthenticated && !isApplicationWindow) || isLoggingIn.current
         }
-        onClick={!isAuthenticated ? handleButtonClick : undefined}
+        onClick={handleButtonClick}
       >
         {isLoggingIn.current ? (
           <Loader2 className="h-4 w-4 animate-spin" />
