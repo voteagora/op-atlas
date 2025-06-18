@@ -43,6 +43,7 @@ const CardAction = ({
         )
         break
       case "sign in":
+        router.push("/login")
         break
       default:
         console.log(`Action type: ${actionType}`)
