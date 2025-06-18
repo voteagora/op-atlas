@@ -4,7 +4,7 @@ import { User } from "@prisma/client"
 import { useState } from "react"
 
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
-import CitizenshipApplicationDialog from "@/components/dialogs/GovernanceAddressDialog"
+import CitizenshipApplicationDialog from "@/components/dialogs/CitizenshipApplicationDialog"
 import { Button } from "@/components/ui/button"
 import { useCitizenshipRequirements } from "@/hooks/citizen/useCitizenshipRequirements"
 import { CITIZEN_TYPES } from "@/lib/constants"
