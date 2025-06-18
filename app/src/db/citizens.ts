@@ -97,11 +97,3 @@ export async function getCitizenProposalVote(
     },
   })
 }
-
-export async function getCitizenVotes(citizenId: number): Promise<any> {
-  return prisma.offChainVote.findMany({
-    where: {
-      citizenId: citizenId,
-    },
-  })
-}
