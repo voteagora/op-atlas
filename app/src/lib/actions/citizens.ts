@@ -456,7 +456,6 @@ const getS7CitizenAddresses = async () => {
   ]
 
   const testList = [
-    "0xDBb050a8692afF8b5EF4A3F36D53900B14210E40",
     "0x648BFC4dB7e43e799a84d0f607aF0b4298F932DB",
     "0xA622279f76ddbed4f2CC986c09244262Dba8f4Ba",
     "0x47E7cEe058E7e33dA6Ea2Ba9Ba7A14ae5d7E8cC4",
