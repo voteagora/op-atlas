@@ -132,8 +132,6 @@ const VotingColumn = ({
 
     const encoder = new SchemaEncoder(VOTE_SCHEMA)
 
-    console.log("choices in createDelegatedAttestation", choices)
-
     const args = {
       proposalId: proposalId,
       choices: JSON.stringify(choices),
@@ -157,7 +155,6 @@ const VotingColumn = ({
       deadline: NO_EXPIRATION,
     }
 
-    console.log("delegateRequest", delegateRequest)
     return {
       data: encodedData,
       rawSignature: await delegated.signDelegatedAttestation(
@@ -179,6 +176,7 @@ const VotingColumn = ({
 
     const castAndRecordVote = async () => {
       try {
+        // Sign the attestation with user wallet
         const { data, rawSignature, signerAddress } =
           await createDelegatedAttestation(choices)
         // 2. Send signature to server to relay onchain
