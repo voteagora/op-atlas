@@ -9,10 +9,10 @@ import { useState } from "react"
 
 import VotingActions, {
   CardActionsProps,
-} from "@/app/proposals/components/VotingSidebar/VotingActions"
-import CandidateCards from "@/app/proposals/components/VotingSidebar/votingColumn/CanidateCards"
-import OverrideVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/OverrideVoteCard"
-import StandardVoteCard from "@/app/proposals/components/VotingSidebar/votingColumn/StandardVoteCard"
+} from "@/components/proposals/VotingSidebar/VotingActions"
+import CandidateCards from "@/components/proposals/VotingSidebar/votingColumn/CanidateCards"
+import OverrideVoteCard from "@/components/proposals/VotingSidebar/votingColumn/OverrideVoteCard"
+import StandardVoteCard from "@/components/proposals/VotingSidebar/votingColumn/StandardVoteCard"
 import {
   Citizen,
   OffchainVote,
@@ -23,6 +23,8 @@ import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 // Optimism address
 const EAS_CONTRACT_ADDRESS =
@@ -112,11 +114,14 @@ const VotingColumn = ({
   resultsLink,
 }: VotingColumnProps) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
+  const [isVoting, setIsVoting] = useState<boolean>(false)
+
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
   const signer = useEthersSigner({ chainId: CHAIN_ID })
+  const router = useRouter()
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
@@ -126,8 +131,6 @@ const VotingColumn = ({
     const VOTE_SCHEMA = "uint256 proposalId,string params"
 
     const encoder = new SchemaEncoder(VOTE_SCHEMA)
-
-    console.log("choices in createDelegatedAttestation", choices)
 
     const args = {
       proposalId: proposalId,
@@ -152,7 +155,6 @@ const VotingColumn = ({
       deadline: NO_EXPIRATION,
     }
 
-    console.log("delegateRequest", delegateRequest)
     return {
       data: encodedData,
       rawSignature: await delegated.signDelegatedAttestation(
@@ -170,37 +172,55 @@ const VotingColumn = ({
       proposalType as ProposalType,
       selectedVote,
     )
+    setIsVoting(true)
 
-    try {
-      // 1. Create and sign an attestation for the vote
-      const { data, rawSignature, signerAddress } =
-        await createDelegatedAttestation(choices)
-      // 2. Send signature to server to relay onchain
-      const attestationId = await vote(
-        data,
-        rawSignature.signature,
-        signerAddress,
-        userCitizen!.attestationId!,
-      )
-
-      // build an offhchain vote object for the DB
-      const offchainVote: OffchainVote = {
-        attestationId: attestationId,
-        voterAddress: signerAddress,
-        proposalId: proposalId,
-        vote: choices,
-        citizenId: userCitizen!.id,
-        citizenType: userCitizen!.type,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+    const castAndRecordVote = async () => {
+      try {
+        // Sign the attestation with user wallet
+        const { data, rawSignature, signerAddress } =
+          await createDelegatedAttestation(choices)
+        // 2. Send signature to server to relay onchain
+        const attestationId = await vote(
+          data,
+          rawSignature.signature,
+          signerAddress,
+          userCitizen!.attestationId!,
+        )
+        // build an offhchain vote object for the DB
+        const offchainVote: OffchainVote = {
+          attestationId: attestationId,
+          voterAddress: signerAddress,
+          proposalId: proposalId,
+          vote: choices,
+          citizenId: userCitizen!.id,
+          citizenType: userCitizen!.type,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+        // 3. Record vote in database
+        await postOffchainVote(offchainVote)
+      } catch (error) {
+        console.error("Failed to cast vote:", error)
+        throw new Error("Failed to cast vote.")
+      } finally {
+        setIsVoting(false)
       }
-      // 3. Record vote in database
-      await postOffchainVote(offchainVote)
-      // Add success handling if needed
-    } catch (error) {
-      console.error("Failed to cast vote:", error)
-      // Add user-facing error handling (e.g., toast notification)
     }
+
+    // 1. Create and sign an attestation for the vote
+    toast.promise(castAndRecordVote(), {
+      loading: "Casting Vote...",
+      success: () => {
+        return "Vote Cast and Recorded!"
+      },
+      error: (error) => {
+        return error.message
+      },
+    })
+
+    setTimeout(() => {
+      router.refresh()
+    }, 1000) // Wait 1s and reload the page to show the new vote
   }
 
   return (
@@ -228,6 +248,7 @@ const VotingColumn = ({
                 ...action,
                 action: handleCastVote,
                 disabled: !selectedVote,
+                loading: isVoting,
               }
             }
             // Otherwise, return the original action unchanged

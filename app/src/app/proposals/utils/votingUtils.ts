@@ -1,9 +1,9 @@
 import {
   CardTextProps,
   VotingCardProps,
-} from "@/app/proposals/components/VotingSidebar/votingCard/VotingCard"
-import { VotingColumnProps } from "@/app/proposals/components/VotingSidebar/votingColumn/VotingColumn"
-import { VotingRedirectProps } from "@/app/proposals/components/VotingSidebar/VotingRedirect"
+} from "@/components/proposals/VotingSidebar/votingCard/VotingCard"
+import { VotingColumnProps } from "@/components/proposals/VotingSidebar/votingColumn/VotingColumn"
+import { VotingRedirectProps } from "@/components/proposals/VotingSidebar/VotingRedirect"
 import {
   ProposalPageDataInterface,
   ProposalType,

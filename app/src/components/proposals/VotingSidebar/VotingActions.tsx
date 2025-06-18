@@ -2,6 +2,7 @@
 import { voteAction } from "@/app/proposals/proposal.types"
 import { useRouter } from "next/navigation"
 import { useLogin } from "@privy-io/react-auth"
+import { Loader2 } from "lucide-react"
 
 export interface CardActionsProps {
   cardActionList: voteAction[]
@@ -24,6 +25,7 @@ const CardAction = ({
   actionType,
   action,
   disabled,
+  loading,
 }: voteAction) => {
   const router = useRouter()
   const { login: privyLogin } = useLogin({
@@ -56,6 +58,15 @@ const CardAction = ({
         console.log(`Action type: ${actionType}`)
         break
     }
+  }
+  console.log("Loading", loading)
+
+  if (loading) {
+    return (
+      <div className={`rounded-md border border-solid p-3 mb-1 w-60 h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle}`}>
+        <Loader2 className="h-5 w-5 animate-spin" />
+      </div>
+    )
   }
 
   return (

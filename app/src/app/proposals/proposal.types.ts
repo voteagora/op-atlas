@@ -36,6 +36,7 @@ export interface voteAction {
   actionType: string
   action: (data?: any) => Promise<any>
   disabled?: boolean
+  loading?: boolean
 }
 
 export type Citizen = {

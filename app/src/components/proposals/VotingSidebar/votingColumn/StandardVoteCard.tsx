@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import VoteButton from "@/app/proposals/components/VotingSidebar/votingColumn/VoteButton"
+import VoteButton from "@/components/proposals/VotingSidebar/votingColumn/VoteButton"
 import { VoteType } from "@/app/proposals/proposal.types"
 
 interface standardVoteCardProps {
