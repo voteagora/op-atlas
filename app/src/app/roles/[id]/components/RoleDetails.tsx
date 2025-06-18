@@ -2,6 +2,7 @@
 
 import { Role } from "@prisma/client"
 import { format } from "date-fns"
+import ReactMarkdown from 'react-markdown'
 
 
 export function RoleDetails({ role }: { role: Role }) {
@@ -26,7 +27,9 @@ export function RoleDetails({ role }: { role: Role }) {
             <div className="border-b border-border-secondary w-full"></div>
 
             <div className="flex flex-col gap-6">
-                <div className="text-secondary-foreground">{role.description}</div>
+                <div className="text-secondary-foreground">
+                    <ReactMarkdown>{role.description}</ReactMarkdown>
+                </div>
             </div>
         </div>
     )
