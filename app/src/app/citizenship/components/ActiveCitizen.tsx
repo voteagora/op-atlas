@@ -16,12 +16,12 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
 
   const { organization } = useOrganization({
     id: citizen?.userId ?? "",
-    enabled: !!citizen?.userId,
+    enabled: !!citizen?.organizationId,
   })
 
   const { project } = useProject({
     id: citizen?.userId ?? "",
-    enabled: !!citizen?.userId,
+    enabled: !!citizen?.projectId,
   })
 
   const renderAvatar = () => {
