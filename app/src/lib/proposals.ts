@@ -57,7 +57,7 @@ export type UIProposal = {
 
 const getStandardProposlas = async () => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/v1/proposals?type=OFFCHAIN`,
+    `https://vote.optimism.io/api/v1/proposals?type=OFFCHAIN`,
     {
       headers: {
         Authorization: `Bearer ${process.env.AGORA_API_KEY}`,
