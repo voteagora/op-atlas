@@ -36,7 +36,6 @@ const Page = async (params: PageProps) => {
     console.error("Missing Proposal ID")
     return notFound()
   }
-  }
 
   let proposalData: any
   try {
