@@ -1,7 +1,13 @@
 import type { CodegenConfig } from "@graphql-codegen/cli"
 
 const config: CodegenConfig = {
-  schema: "https://www.opensource.observer/api/v1/graphql",
+  schema: {
+    "https://www.opensource.observer/api/v1/graphql": {
+      headers: {
+        Authorization: `Bearer ${process.env.OSO_AUTH_TOKEN ?? ""}`,
+      },
+    },
+  },
   generates: {
     "./src/graphql/__generated__/types.ts": {
       plugins: [
