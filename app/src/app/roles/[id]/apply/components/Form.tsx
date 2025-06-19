@@ -15,6 +15,16 @@ import {
 import { useUsername } from "@/hooks/useUsername"
 import { UserOrganizationsWithDetails } from "@/lib/types"
 
+import { OrganizationForm } from "./OrganizationForm"
+import { UserForm } from "./UserForm"
+
+type SelectedEntity = {
+  name: string
+  avatar?: string
+  userId?: string
+  organizationId?: string
+}
+
 export const Form = ({
   role,
   user,
@@ -26,102 +36,88 @@ export const Form = ({
 }) => {
   const username = useUsername(user)
 
-  const [selectedEntity, setSelectedEntity] = useState<{
-    type: "user" | "organization"
-    source: "user" | "organization"
-    id: string
-    name: string
-    avatar?: string
-  }>({
-    type: "user",
-    source: "user",
-    id: user.id,
-    name: user.name || user.username || "User",
+  const [selectedEntity, setSelectedEntity] = useState<SelectedEntity>({
+    name: `${username} (You)`,
     avatar: user.imageUrl || undefined,
+    userId: user.id,
+    organizationId: undefined,
   })
 
-  const handleSelectEntity = (entity: {
-    type: "user" | "organization"
-    source: "user" | "organization"
-    id: string
-    name: string
-    avatar?: string
-  }) => {
+  const handleSelectEntity = (entity: SelectedEntity) => {
     setSelectedEntity(entity)
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="text-lg font-semibold">Nominate as:</div>
+    <div className="flex flex-col gap-12 w-full">
+      <div className="flex flex-col gap-4">
+        <div className="text-lg font-semibold">Nominate as:</div>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger className="focus:outline-none">
-          <Button
-            variant="outline"
-            className="h-12 px-3 flex items-center justify-between w-full"
-          >
-            <div className="flex items-center gap-3">
-              <UserAvatarSmall imageUrl={selectedEntity.avatar || ""} />
-              <span className="text-sm text-secondary-foreground font-normal">
-                {selectedEntity.name}
-              </span>
-            </div>
-            <Image
-              src="/assets/icons/arrowDownIcon.svg"
-              height={8}
-              width={10}
-              alt="Arrow down"
-              className="ml-auto"
-            />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-full">
-          {/* User option */}
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() =>
-              handleSelectEntity({
-                type: "user",
-                source: "user",
-                id: user.id,
-                name: `${username} (You)`,
-                avatar: user.imageUrl || undefined,
-              })
-            }
-          >
-            <div className="flex items-center gap-3">
-              <UserAvatarSmall imageUrl={user.imageUrl} />
-              <div className="text-sm text-secondary-foreground font-normal">
-                {username} (You)
+        <DropdownMenu>
+          <DropdownMenuTrigger className="focus:outline-none">
+            <Button
+              variant="outline"
+              className="h-12 px-3 flex items-center justify-between w-full"
+            >
+              <div className="flex items-center gap-3">
+                <UserAvatarSmall imageUrl={selectedEntity.avatar || ""} />
+                <span className="text-sm text-secondary-foreground font-normal">
+                  {selectedEntity.name}
+                </span>
               </div>
-            </div>
-          </DropdownMenuItem>
-
-          {/* Organization options */}
-          {userOrgs.map((userOrg) => (
+              <Image
+                src="/assets/icons/arrowDownIcon.svg"
+                height={8}
+                width={10}
+                alt="Arrow down"
+                className="ml-auto"
+              />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-full">
+            {/* User option */}
             <DropdownMenuItem
-              key={userOrg.organizationId}
               className="cursor-pointer"
               onClick={() =>
                 handleSelectEntity({
-                  type: "organization",
-                  source: "organization",
-                  id: userOrg.organizationId,
-                  name: userOrg.organization.name,
-                  avatar: userOrg.organization.avatarUrl || undefined,
+                  userId: user.id,
+                  name: `${username} (You)`,
+                  avatar: user.imageUrl || undefined,
                 })
               }
             >
               <div className="flex items-center gap-3">
-                <UserAvatarSmall imageUrl={userOrg.organization.avatarUrl} />
+                <UserAvatarSmall imageUrl={user.imageUrl} />
                 <div className="text-sm text-secondary-foreground font-normal">
-                  {userOrg.organization.name}
+                  {username} (You)
                 </div>
               </div>
             </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+
+            {userOrgs.map((userOrg) => (
+              <DropdownMenuItem
+                key={userOrg.organizationId}
+                className="cursor-pointer"
+                onClick={() =>
+                  handleSelectEntity({
+                    organizationId: userOrg.organizationId,
+                    name: userOrg.organization.name,
+                    avatar: userOrg.organization.avatarUrl || undefined,
+                  })
+                }
+              >
+                <div className="flex items-center gap-3">
+                  <UserAvatarSmall imageUrl={userOrg.organization.avatarUrl} />
+                  <div className="text-sm text-secondary-foreground font-normal">
+                    {userOrg.organization.name}
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {selectedEntity.userId ? <UserForm user={user} /> : <OrganizationForm />}
     </div>
   )
 }
