@@ -45,7 +45,6 @@ export const UserForm = ({
 
   const [checkedRules, setCheckedRules] = useState<Record<number, boolean>>({})
   const [conflictsOfInterest, setConflictsOfInterest] = useState("")
-  const [selectedProjects] = useState<string[]>([])
 
   const handleCheckboxChange = (index: number) => {
     setCheckedRules((prev) => ({
