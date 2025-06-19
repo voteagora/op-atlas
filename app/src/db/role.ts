@@ -1,6 +1,6 @@
 "use server"
 
-import { Role } from "@prisma/client"
+import { Role, RoleApplication, RoleApplicationStatus } from "@prisma/client"
 
 import { prisma } from "./client"
 
@@ -23,4 +23,59 @@ export async function getRoleById(id: number): Promise<Role | null> {
       id,
     },
   })
+}
+
+export async function getUserRoleApplication(
+  userId: string,
+  roleId: number,
+): Promise<RoleApplication | null> {
+  return prisma.roleApplication.findFirst({
+    where: {
+      userId,
+      roleId,
+    },
+  })
+}
+
+export async function upsertRoleApplication(
+  id: number,
+  applicationParams: {
+    userId?: string
+    organizationId?: string
+    application: string
+  },
+): Promise<RoleApplication> {
+  const { userId, organizationId, application } = applicationParams
+
+  // Check if a role application already exists
+  const existingApplication = await prisma.roleApplication.findFirst({
+    where: {
+      roleId: id,
+      ...(userId && { userId }),
+      ...(organizationId && { organizationId }),
+    },
+  })
+
+  if (existingApplication) {
+    // Update existing application
+    return prisma.roleApplication.update({
+      where: {
+        id: existingApplication.id,
+      },
+      data: {
+        application,
+      },
+    })
+  } else {
+    // Create new application
+    return prisma.roleApplication.create({
+      data: {
+        roleId: id,
+        userId,
+        organizationId,
+        application,
+        status: RoleApplicationStatus.pending,
+      },
+    })
+  }
 }

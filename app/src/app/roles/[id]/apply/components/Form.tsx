@@ -117,7 +117,19 @@ export const Form = ({
         </DropdownMenu>
       </div>
 
-      {selectedEntity.userId ? <UserForm user={user} /> : <OrganizationForm />}
+      {selectedEntity.userId ? (
+        <UserForm
+          user={user}
+          roleId={role.id}
+          selectedEntity={selectedEntity}
+        />
+      ) : (
+        <OrganizationForm
+          user={user}
+          roleId={role.id}
+          selectedEntity={selectedEntity}
+        />
+      )}
     </div>
   )
 }
