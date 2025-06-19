@@ -41,6 +41,8 @@ export interface SuperfluidVestingSchedule {
   claimedAt: string
   startDate: string
   totalAmount: string
+  endExecutedAt: string
+  failedAt: string
 }
 
 export async function getStreams({
@@ -93,6 +95,8 @@ async function getVestingSchedules({ sender }: { sender: string }) {
         claimedAt
         startDate
         totalAmount
+        endExecutedAt
+        failedAt
       }
     }
   `
@@ -118,5 +122,44 @@ export async function getStreamsForRound(round: number) {
   const { vestingSchedules } = await getVestingSchedules({
     sender: GRANT_SENDER_MAP[round as keyof typeof GRANT_SENDER_MAP],
   })
-  return vestingSchedules
+  return groupVestingSchedules(vestingSchedules)
+}
+
+function groupVestingSchedules(vestingSchedules: SuperfluidVestingSchedule[]) {
+  function getTimestamp(value: string) {
+    if (!value) return null
+    return parseInt(value) * 1000 // Convert seconds to milliseconds
+  }
+
+  // group by receiver
+  const grouped = vestingSchedules.reduce((acc, schedule) => {
+    acc[schedule.receiver] = acc[schedule.receiver] || []
+    acc[schedule.receiver].push(schedule)
+    return acc
+  }, {} as Record<string, SuperfluidVestingSchedule[]>)
+
+  for (const receiver in grouped) {
+    grouped[receiver].sort((a, b) => {
+      const aEndTime = getTimestamp(a.endExecutedAt)
+      const bEndTime = getTimestamp(b.endExecutedAt)
+      const aFailTime = getTimestamp(a.failedAt)
+      const bFailTime = getTimestamp(b.failedAt)
+
+      // Active streams (null endExecutedAt) should come first
+      if (aEndTime === null && bEndTime !== null) return -1
+      if (bEndTime === null && aEndTime !== null) return 1
+
+      // If both are active or both are completed, sort by endExecutedAt (most recent first)
+      if (aEndTime !== null && bEndTime !== null) {
+        return bEndTime - aEndTime
+      }
+
+      // If both are active (both null), put streams without failures first
+      return (aFailTime || 0) - (bFailTime || 0)
+    })
+  }
+
+  return Object.values(grouped).map((schedules) => {
+    return schedules[0]
+  })
 }
