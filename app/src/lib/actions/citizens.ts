@@ -57,9 +57,8 @@ export const s8CitizenshipQualification =
     // Organization (Chain) qualification
     const qualifyingChains = await prisma.$queryRaw<S8QualifyingChain[]>`
     SELECT * FROM "S8QualifyingChain"
-    WHERE "organizationId" = ANY(${
-      userOrgs?.organizations.map((org) => org.organization.id) || []
-    })
+    WHERE "organizationId" = ANY(${userOrgs?.organizations.map((org) => org.organization.id) || []
+      })
   `
 
     if (qualifyingChains.length > 0) {
@@ -285,11 +284,11 @@ export const attestCitizen = async () => {
       farcasterId: parseInt(user?.farcasterId || "0"),
       selectionMethod:
         CITIZEN_ATTESTATION_CODE[
-          citizenType as keyof typeof CITIZEN_ATTESTATION_CODE
+        citizenType as keyof typeof CITIZEN_ATTESTATION_CODE
         ],
       refUID:
         qualification.type === CITIZEN_TYPES.chain ||
-        qualification.type === CITIZEN_TYPES.app
+          qualification.type === CITIZEN_TYPES.app
           ? qualification.identifier
           : undefined,
     })
@@ -352,6 +351,7 @@ export const isS7Citizen = async (id: string): Promise<boolean> => {
 // https://optimism.easscan.org/schema/view/0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a
 const getS7CitizenAddresses = async () => {
   return [
+    "0xCb5feBBa6bbeb052D7249Aa315F3C0c1feD94910",
     "0x585639fBf797c1258eBA8875c080Eb63C833d252",
     "0x3DB5b38ef4b433D9C6A664Bd35551BE73313189A",
     "0xad4f365A550835D40dc2E95FDffa1E4edd3FBE14",
