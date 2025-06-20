@@ -1,14 +1,14 @@
 import {
-  CardTextProps,
-  VotingCardProps,
-} from "@/components/proposals/VotingSidebar/votingCard/VotingCard"
-import { VotingColumnProps } from "@/components/proposals/VotingSidebar/votingColumn/VotingColumn"
-import { VotingRedirectProps } from "@/components/proposals/VotingSidebar/VotingRedirect"
-import {
   ProposalPageDataInterface,
   ProposalType,
   VoteType,
-} from "@/app/proposals/proposal.types"
+  VotingColumnProps,
+  VotingRedirectProps,
+} from "@/components/proposals/proposal.types"
+import {
+  CardTextProps,
+  VotingCardProps,
+} from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VotingCard"
 import { CitizenshipQualification } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL

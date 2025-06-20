@@ -4,31 +4,28 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "sonner"
 
-import VotingActions, {
-  CardActionsProps,
-} from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
-import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
-import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
-import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
+import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
 import {
-  Citizen,
   OffchainVote,
   ProposalType,
   VoteType,
+  VotingColumnProps,
 } from "@/components/proposals/proposal.types"
+import VotingActions from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
+import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
+import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
+import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
 import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
-import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
-
 import {
   EAS_CONTRACT_ADDRESS,
-  OFFCHAIN_VOTE_SCHEMA_ID,
   EAS_VOTE_SCHEMA,
+  OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
@@ -82,18 +79,6 @@ const ColumnCard = ({
     default:
       return <>{proposalType} Not Yet Supported</>
   }
-}
-
-export interface VotingColumnProps {
-  proposalType: string
-  proposalId: string
-  options?: CandidateCardProps[]
-  votingActions?: CardActionsProps
-  currentlyActive?: boolean
-  userSignedIn?: boolean
-  userCitizen?: Citizen
-  userVoted?: boolean
-  resultsLink: string
 }
 
 const VotingColumn = ({

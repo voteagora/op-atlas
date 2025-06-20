@@ -1,10 +1,4 @@
-export interface VotingRedirectProps {
-  callout: string
-  link?: {
-    linkText: string
-    linkHref: string
-  }
-}
+import { VotingRedirectProps } from "@/components/proposals/proposal.types"
 
 const VotingRedirect = ({ callout, link }: VotingRedirectProps) => {
   return (
