@@ -1,14 +1,14 @@
 import React from "react"
 
+import {
+  VotingColumnProps,
+  VotingRedirectProps,
+} from "@/components/proposals/proposal.types"
 import VotingCard, {
   VotingCardProps,
 } from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VotingCard"
-import VotingColumn, {
-  VotingColumnProps,
-} from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
-import VotingRedirect, {
-  VotingRedirectProps,
-} from "@/components/proposals/proposalPage/VotingSidebar/VotingRedirect"
+import VotingColumn from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
+import VotingRedirect from "@/components/proposals/proposalPage/VotingSidebar/VotingRedirect"
 
 interface VotingSidebarProps {
   className?: string
