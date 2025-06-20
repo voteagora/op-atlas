@@ -1,5 +1,11 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
+import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
+
+import {
+  OFFCHAIN_VOTE_SCHEMA_ID,
+  EAS_CONTRACT_ADDRESS,
+} from "@/lib/eas/clientSafe"
 
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
@@ -55,11 +61,7 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
   throw new Error("EAS_SIGNER_PRIVATE_KEY is missing from env")
 }
 
-// Optimism address
-const eas =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? new EAS("0xC2679fBD37d54388Ce493F1DB75320D236e1815e")
-    : new EAS("0x4200000000000000000000000000000000000021")
+const eas = new EAS(EAS_CONTRACT_ADDRESS)
 
 const provider = new ethers.AlchemyProvider(
   process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",
@@ -515,5 +517,37 @@ export async function isAttestationActive(
   } catch (error) {
     console.warn("Error checking attestation status:", error)
     return false
+  }
+}
+
+export async function createVoteAttestation(
+  data: any,
+  delegateAttestationSignature: Signature,
+  signerAddress: string,
+  citizenRefUID: string,
+): Promise<string> {
+  try {
+    // Use attestByDelegation to create the attestation
+    const tx = await eas.attestByDelegation({
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
+      data: {
+        recipient: signerAddress,
+        expirationTime: BigInt(0), // NO_EXPIRATION
+        revocable: false,
+        refUID: citizenRefUID as `0x${string}`,
+        data: data,
+      },
+      signature: delegateAttestationSignature,
+      attester: signerAddress,
+      deadline: BigInt(0), // NO_EXPIRATION
+    })
+
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait()
+    console.log("Vote attestation created with ID:", receipt)
+    return receipt
+  } catch (error) {
+    console.error("Error creating vote attestation:", error)
+    throw error
   }
 }
