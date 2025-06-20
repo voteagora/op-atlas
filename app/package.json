@@ -101,6 +101,7 @@
     "react-dom-confetti": "^0.2.0",
     "react-hook-form": "^7.51.2",
     "react-image-crop": "^11.0.5",
+    "react-markdown": "^10.1.0",
     "recharts": "^2.15.1",
     "satori": "^0.10.13",
     "server-only": "^0.0.1",

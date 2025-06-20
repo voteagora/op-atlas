@@ -1,24 +1,23 @@
+import { Citizen } from "@prisma/client"
 import { notFound } from "next/navigation"
-import Breadcrumbs from "@/components/proposals/Breadcrumbs"
-import ProposalContent from "@/components/proposals/proposalContent/ProposalContent"
-import VotingSidebar from "@/components/proposals/VotingSidebar/VotingSidebar"
-import ProposalHeader from "@/components/proposals/ProposalHeader"
 
-import { getVotingProps } from "@/app/proposals/utils/votingUtils"
-
-import { getProposal } from "@/lib/proposals"
-import { auth } from "@/auth"
-import { getUserById } from "@/db/users"
-import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 import {
   ProposalPageDataInterface,
   ProposalType,
 } from "@/app/proposals/proposal.types"
-import { parseEnumValue } from "@/lib/actions/utils"
+import { getVotingProps } from "@/app/proposals/utils/votingUtils"
+import { auth } from "@/auth"
+import Breadcrumbs from "@/components/proposals/Breadcrumbs"
+import ProposalContent from "@/components/proposals/proposalContent/ProposalContent"
+import ProposalHeader from "@/components/proposals/ProposalHeader"
+import VotingSidebar from "@/components/proposals/VotingSidebar/VotingSidebar"
+import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
+import { getUserById } from "@/db/users"
 import { s8CitizenshipQualification } from "@/lib/actions/citizens"
-import { CitizenLookup } from "@/lib/types"
+import { parseEnumValue } from "@/lib/actions/utils"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { Citizen } from "@prisma/client"
+import { getProposal } from "@/lib/proposals"
+import { CitizenLookup } from "@/lib/types"
 
 interface PageProps {
   params: {
@@ -27,6 +26,14 @@ interface PageProps {
 }
 
 const CURRENT_DATETIME = new Date()
+
+function stripTitleFromDescription(title: string, description: string) {
+  if (description.startsWith(`# ${title}`)) {
+    return description.slice(`# ${title}`.length).trim()
+  }
+  // If title not found return the description as is
+  return description
+}
 
 const Page = async (params: PageProps) => {
   // Get the proposals page
@@ -44,6 +51,11 @@ const Page = async (params: PageProps) => {
     console.error(`Failed to fetch Proposal Data: ${error}`)
     return notFound()
   }
+
+  const deTitledProposalDescription = stripTitleFromDescription(
+    proposalData.markdowntitle,
+    proposalData.description,
+  )
 
   const session = await auth()
   const userId = session?.user.id ?? ""
@@ -131,7 +143,7 @@ const Page = async (params: PageProps) => {
                 title={proposalData.markdowntitle}
                 status={proposalData.status}
               />
-              <ProposalContent description={proposalData.description} />
+              <ProposalContent description={deTitledProposalDescription} />
             </div>
             <div className="w-full md:w-[304px] md:ml-12">
               <VotingSidebar

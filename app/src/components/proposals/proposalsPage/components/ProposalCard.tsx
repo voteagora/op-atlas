@@ -35,7 +35,7 @@ const ProposalBadge = ({ type }: ProposalBadgeProps) => {
   const badgeClasses = (() => {
     switch (type) {
       case ProposalBadgeType.now:
-        return "bg-primary text-bg/default"
+        return "bg-primary text-contrast-foreground"
       case ProposalBadgeType.past:
         return "bg-secondary text-secondary-foreground"
       case ProposalBadgeType.soon:
