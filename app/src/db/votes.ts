@@ -2,7 +2,7 @@
 
 import { citizenCategory } from "@prisma/client"
 
-import { OffchainVote } from "@/app/proposals/proposal.types"
+import { OffchainVote } from "@/components/proposals/proposal.types"
 import { prisma } from "@/db/client"
 
 /**

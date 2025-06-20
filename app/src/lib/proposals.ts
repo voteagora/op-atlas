@@ -1,5 +1,5 @@
 "use server"
-import { OffchainVote } from "@/app/proposals/proposal.types"
+import { OffchainVote } from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 

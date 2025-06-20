@@ -2,7 +2,7 @@
 
 import VoteButton from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VoteButton"
 import { useState } from "react"
-import { VoteType } from "@/app/proposals/proposal.types"
+import { VoteType } from "@/components/proposals/proposal.types"
 
 const OverrideVoteCard = () => {
   const vetoText = "Yes, I want to Veto"

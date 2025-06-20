@@ -17,7 +17,7 @@ import {
   OffchainVote,
   ProposalType,
   VoteType,
-} from "@/app/proposals/proposal.types"
+} from "@/components/proposals/proposal.types"
 import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"

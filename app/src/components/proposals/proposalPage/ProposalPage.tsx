@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import {
   ProposalPageDataInterface,
   ProposalType,
-} from "@/app/proposals/proposal.types"
+} from "@/components/proposals/proposal.types"
 import { getVotingProps } from "@/app/proposals/utils/votingUtils"
 import { auth } from "@/auth"
 import Breadcrumbs from "@/components/proposals/proposalPage/proposalContent/Breadcrumbs"
