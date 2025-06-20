@@ -3,6 +3,11 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/common/Button"
+import {
+  ArrowRight,
+  ArrowRightS,
+  CheckboxLine,
+} from "@/components/icons/reminx"
 import { Github } from "@/components/icons/socials"
 import { GithubDisplay } from "@/components/profile/GithubDisplay"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -93,10 +98,15 @@ export const UserForm = ({
         return true
       },
     )
-
     const finalResult = allTermsChecked && userRequirementsSatisfied
     setRequirementsSatisfied(finalResult)
   }, [checkedRules, role, user])
+
+  useEffect(() => {
+    if (isSuccess) {
+      router.push(`/roles/${role.id}`)
+    }
+  }, [isSuccess, router, role])
 
   const onSubmit = () => {
     applyForRole(role.id, {
@@ -165,12 +175,6 @@ export const UserForm = ({
     }
   }
 
-  // Redirect on success
-  if (isSuccess) {
-    router.push(`/roles/${role.id}`)
-    return null
-  }
-
   return (
     <div className="flex flex-col gap-12 w-full text-foreground">
       {renderRequiredModules()}
@@ -219,6 +223,20 @@ export const UserForm = ({
             Atlas, then add your project before continuing here. To join a
             project or organization that already exists in Atlas, please have
             their admin add you.{" "}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row justify-between text-foreground">
+            <div>Projects that demonstrate your expertise (optional)</div>
+            <div className="flex flex-row gap-1 items-center">
+              <CheckboxLine className="w-5 h-5" />
+              <div>Choose</div>
+              <ArrowRightS className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="text-muted-foreground border border-border rounded-md px-3 py-2">
+            None
           </div>
         </div>
 
