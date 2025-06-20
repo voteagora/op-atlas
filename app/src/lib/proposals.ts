@@ -3,6 +3,8 @@ import { OffchainVote } from "@/app/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 
+const CURRENT_DATETIME = new Date()
+
 export type OffChainProposalResponse = {
   meta: {
     has_next: boolean
@@ -79,14 +81,14 @@ const getStandardProposlas = async () => {
   const standardProposals: UIProposal[] = offChainProposals.data.map(
     (proposal: any) => {
       // Determine badge type based on dates and status
+      // Defaults to past
       let badgeType = ProposalBadgeType.past
-      const now = new Date()
       const startTime = new Date(proposal.startTime)
       const endTime = new Date(proposal.endTime)
 
-      if (now < startTime) {
+      if (CURRENT_DATETIME < startTime) {
         badgeType = ProposalBadgeType.soon
-      } else if (now >= startTime && now <= endTime) {
+      } else if (CURRENT_DATETIME >= startTime && CURRENT_DATETIME <= endTime) {
         badgeType = ProposalBadgeType.now
       }
 
