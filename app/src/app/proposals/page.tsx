@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import ProposalsPage from "@/components/proposals/ProposalsPage"
+import ProposalsPage from "@/components/proposals/proposalsPage/ProposalsPage"
 
 const Page = async () => {
   const session = await auth()
