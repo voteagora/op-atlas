@@ -472,6 +472,7 @@ const getS7CitizenAddresses = async () => {
     "0xFdFC6E1BbEc01288447222fC8F1AEE55a7C72b7B",
     "0x155f0A6468f022fE68C25A70fa2DbDbBa2c0B74F",
     "0x5993672EEB4B3e432140D553a0Be330fFCEd1f7D",
+    "0xC323Ee1d28D2508667f4BEbfC26F93c60aBdD203",
   ]
 
   const isTestnet =
