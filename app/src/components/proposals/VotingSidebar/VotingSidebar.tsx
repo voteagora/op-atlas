@@ -1,4 +1,5 @@
 import React from "react"
+
 import VotingCard, {
   VotingCardProps,
 } from "@/components/proposals/VotingSidebar/votingCard/VotingCard"
