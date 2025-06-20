@@ -144,15 +144,17 @@ const getNonCitizenTypes = (proposalData: ProposalPageDataInterface) => {
 
 // Function to get vote options
 const getVoteOptions = () => {
-  return Array(8).fill({
-    name: "Username",
-    image: {
-      src: "https://i.imgur.com/0000000.png",
-      alt: "Image",
-    },
-    organizations: ["Org 1", "Org 2", "Org 3"],
-    buttonLink: "https://google.com",
-  })
+  // TODO: For approval voting
+  // return Array(8).fill({
+  //   name: "Username",
+  //   image: {
+  //     src: "https://i.imgur.com/0000000.png",
+  //     alt: "Image",
+  //   },
+  //   organizations: ["Org 1", "Org 2", "Org 3"],
+  //   buttonLink: "https://google.com",
+  // })
+  return []
 }
 
 /**
