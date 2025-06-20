@@ -521,7 +521,7 @@ export async function isAttestationActive(
   }
 }
 
-export async function createVoteAttestation(
+export async function createDelegatedVoteAttestation(
   data: any,
   delegateAttestationSignature: Signature,
   signerAddress: string,
