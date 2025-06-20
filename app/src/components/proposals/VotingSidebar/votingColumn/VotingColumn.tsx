@@ -26,16 +26,7 @@ import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-// Optimism address
-const EAS_CONTRACT_ADDRESS =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e"
-    : "0x4200000000000000000000000000000000000021"
-
-const OFFCHAIN_VOTE_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e"
-    : "0xTBD"
+import { EAS_CONTRACT_ADDRESS, OFFCHAIN_VOTE_SCHEMA_ID } from "@/lib/eas"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -186,7 +177,7 @@ const VotingColumn = ({
           signerAddress,
           userCitizen!.attestationId!,
         )
-        // build an offhchain vote object for the DB
+        // build an offchain vote object for the DB
         const offchainVote: OffchainVote = {
           attestationId: attestationId,
           voterAddress: signerAddress,
@@ -197,7 +188,7 @@ const VotingColumn = ({
           createdAt: new Date(),
           updatedAt: new Date(),
         }
-        // 3. Record vote in database
+        // 3. Record vote in the database
         await postOffchainVote(offchainVote)
       } catch (error) {
         console.error("Failed to cast vote:", error)
