@@ -69,13 +69,10 @@ const Page = async (params: PageProps) => {
     id: string,
     priorities: CitizenLookup["type"][] = CITIZEN_PRIORITY,
   ): Promise<Citizen | null> {
+    // Loops through citizen types in the priority list and returns the first citizen found
     for (const type of priorities) {
-      try {
-        const found = await getCitizenByType({ type, id })
-        if (found) return found
-      } catch (error) {
-        console.error(`Failed to fetch Citizen Data for ${type}: ${error}`)
-      }
+      const found = await getCitizenByType({ type, id })
+      if (found) return found
     }
     return null
   }
