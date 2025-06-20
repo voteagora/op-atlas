@@ -1,10 +1,12 @@
+"use server"
+
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
 import {
-  OFFCHAIN_VOTE_SCHEMA_ID,
   EAS_CONTRACT_ADDRESS,
+  OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
 
 const ENTITY_SCHEMA_ID =
@@ -26,12 +28,11 @@ const CONTRACT_SCHEMA_ID =
     ? "0xb4c6ea838744caa6f0bfce726c0223cffefb94d98e5690f818cf0e2800e7a8f2"
     : "0x5560b68760b2ec5a727e6a66e1f9754c307384fe7624ae4e0138c530db14a70b"
 
-export const CITIZEN_SCHEMA_ID =
+const CITIZEN_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
     : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
-
-export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
+const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
     : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
@@ -458,7 +459,8 @@ export async function processAttestationsInBatches<T>(
         throw new Error(`Failed after ${maxRetries} retries: ${error}`)
       }
       console.warn(
-        `Retry ${retryCount + 1}/${maxRetries} for batch of ${batch.length
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+          batch.length
         } items`,
       )
       await new Promise((resolve) =>
@@ -510,7 +512,6 @@ export async function createCitizenAttestation({
 export async function isAttestationActive(
   attestationId: string,
 ): Promise<boolean> {
-
   try {
     const attestation = await eas.getAttestation(attestationId)
     return attestation !== null && !attestation.revocationTime
