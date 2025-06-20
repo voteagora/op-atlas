@@ -20,7 +20,7 @@ import {
   createOrganizationMetadataAttestation,
   createProjectMetadataAttestation,
   revokeContractAttestations,
-} from "../eas"
+} from "../eas/serverOnly"
 import { uploadToPinata } from "../pinata"
 import { ProjectWithFullDetails } from "../types"
 import {

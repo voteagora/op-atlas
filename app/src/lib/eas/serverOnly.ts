@@ -1,6 +1,11 @@
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
-import { ethers, Wallet } from "ethers"
 import { Signature } from "@ethereum-attestation-service/eas-sdk"
+import { ethers, Wallet } from "ethers"
+
+import {
+  OFFCHAIN_VOTE_SCHEMA_ID,
+  EAS_CONTRACT_ADDRESS,
+} from "@/lib/eas/clientSafe"
 
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
@@ -31,11 +36,6 @@ export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
     ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
     : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
 
-export const OFFCHAIN_VOTE_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e"
-    : "0xTBD"
-
 const citizenWalletChangeSchema = new SchemaEncoder("bytes32 oldCitizenUID")
 
 const citizenSchema = new SchemaEncoder(
@@ -61,11 +61,6 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
   throw new Error("EAS_SIGNER_PRIVATE_KEY is missing from env")
 }
 
-// Optimism address
-export const EAS_CONTRACT_ADDRESS =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e"
-    : "0x4200000000000000000000000000000000000021"
 const eas = new EAS(EAS_CONTRACT_ADDRESS)
 
 const provider = new ethers.AlchemyProvider(

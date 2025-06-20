@@ -26,7 +26,10 @@ import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-import { EAS_CONTRACT_ADDRESS, OFFCHAIN_VOTE_SCHEMA_ID } from "@/lib/eas"
+import {
+  EAS_CONTRACT_ADDRESS,
+  OFFCHAIN_VOTE_SCHEMA_ID,
+} from "@/lib/eas/clientSafe"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
