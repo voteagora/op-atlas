@@ -19,7 +19,7 @@ import VotingActions from "@/components/proposals/proposalPage/VotingSidebar/Vot
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
-import { postOffchainVote, upsertOffchainVote } from "@/db/votes"
+import { postOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
 import {
