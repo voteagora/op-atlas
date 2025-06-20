@@ -1,17 +1,21 @@
 import { Role, User } from "@prisma/client"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/common/Button"
-import {
-  ArrowRight,
-  ArrowRightS,
-  CheckboxLine,
-} from "@/components/icons/reminx"
+import { ArrowRightS, CheckboxLine, Close } from "@/components/icons/reminx"
 import { Github } from "@/components/icons/socials"
 import { GithubDisplay } from "@/components/profile/GithubDisplay"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useUser } from "@/hooks/db/useUser"
+import { useUserAdminProjects } from "@/hooks/db/useUserAdminProjects"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { useApplyForRole } from "@/hooks/role/useApplyForRole"
 
@@ -65,14 +69,56 @@ export const UserForm = ({
   const { linkGithub } = usePrivyLinkGithub(user.id)
   const { applyForRole, isLoading, isSuccess } = useApplyForRole()
 
+  const { data: userProjects } = useUserAdminProjects({ userId: user.id })
+
   const [checkedRules, setCheckedRules] = useState<Record<number, boolean>>({})
   const [conflictsOfInterest, setConflictsOfInterest] = useState("")
   const [requirementsSatisfied, setRequirementsSatisfied] = useState(false)
+  const [selectedProjects, setSelectedProjects] = useState<any[]>([])
+  const [projectRelevanceText, setProjectRelevanceText] = useState<
+    Record<string, string>
+  >({})
 
   const handleCheckboxChange = (index: number) => {
     setCheckedRules((prev) => ({
       ...prev,
       [index]: !prev[index],
+    }))
+  }
+
+  const handleProjectSelection = (project: any) => {
+    setSelectedProjects((prev) => {
+      const isSelected = prev.some((p) => p.project.id === project.project.id)
+      if (isSelected) {
+        // Remove project relevance text when project is deselected
+        setProjectRelevanceText((prevText) => {
+          const newText = { ...prevText }
+          delete newText[project.project.id]
+          return newText
+        })
+        return prev.filter((p) => p.project.id !== project.project.id)
+      } else {
+        return [...prev, project]
+      }
+    })
+  }
+
+  const removeProject = (projectId: string) => {
+    setSelectedProjects((prev) =>
+      prev.filter((p) => p.project.id !== projectId),
+    )
+    // Remove project relevance text when project is removed
+    setProjectRelevanceText((prevText) => {
+      const newText = { ...prevText }
+      delete newText[projectId]
+      return newText
+    })
+  }
+
+  const handleProjectRelevanceChange = (projectId: string, value: string) => {
+    setProjectRelevanceText((prev) => ({
+      ...prev,
+      [projectId]: value,
     }))
   }
 
@@ -109,11 +155,19 @@ export const UserForm = ({
   }, [isSuccess, router, role])
 
   const onSubmit = () => {
+    // Prepare projects data with descriptions
+    const projectsData = selectedProjects.map((project) => ({
+      projectId: project.project.id,
+      projectName: project.project.name,
+      description: projectRelevanceText[project.project.id] || "",
+    }))
+
     applyForRole(role.id, {
       userId: selectedEntity.userId,
       organizationId: selectedEntity.organizationId,
       application: JSON.stringify({
-        params: "all good",
+        conflictsOfInterest: conflictsOfInterest,
+        projects: projectsData,
       }),
     })
   }
@@ -229,20 +283,106 @@ export const UserForm = ({
         <div className="flex flex-col gap-2">
           <div className="flex flex-row justify-between text-foreground">
             <div>Projects that demonstrate your expertise (optional)</div>
-            <div className="flex flex-row gap-1 items-center">
-              <CheckboxLine className="w-5 h-5" />
-              <div>Choose</div>
-              <ArrowRightS className="w-5 h-5" />
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <div className="flex flex-row gap-1 items-center">
+                  <CheckboxLine className="w-5 h-5" />
+                  <div>Choose</div>
+                  <ArrowRightS className="w-5 h-5" />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {userProjects?.projects.map((project) => {
+                  const isSelected = selectedProjects.some(
+                    (p) => p.project.id === project.project.id,
+                  )
+                  return (
+                    <DropdownMenuItem
+                      key={project.project.id}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <div className="flex flex-row gap-2 justify-between items-center w-[200px]">
+                        <div className="flex flex-row gap-2 items-center">
+                          {project.project.thumbnailUrl && (
+                            <Image
+                              src={project.project.thumbnailUrl}
+                              alt={project.project.name}
+                              width={24}
+                              height={24}
+                              className="rounded-md"
+                            />
+                          )}
+                          <div className="text-foreground">
+                            {project.project.name}
+                          </div>
+                        </div>
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() =>
+                            handleProjectSelection(project)
+                          }
+                        />
+                      </div>
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* NO PROJECTS SELECTED */}
+          {selectedProjects.length === 0 ? (
+            <div className="text-muted-foreground border border-border rounded-md px-3 py-2">
+              None
             </div>
-          </div>
-          <div className="text-muted-foreground border border-border rounded-md px-3 py-2">
-            None
-          </div>
+          ) : null}
         </div>
+
+        {/* PROJECTS SELECTED */}
+        {selectedProjects.map((project) => (
+          <div
+            key={project.project.id}
+            className="text-muted-foreground border border-border rounded-md p-5 flex flex-col gap-4"
+          >
+            <div className="flex flex-row gap-2 justify-between items-center">
+              <div className="flex flex-row gap-2 items-center">
+                {project.project.thumbnailUrl && (
+                  <Image
+                    src={project.project.thumbnailUrl}
+                    alt={project.project.name}
+                    width={24}
+                    height={24}
+                    className="rounded-md"
+                  />
+                )}
+                <div className="text-foreground">{project.project.name}</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => removeProject(project.project.id)}
+                className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary rounded"
+                aria-label={`Remove ${project.project.name} from selection`}
+              >
+                <Close className="w-4 h-4" fill="#000" />
+              </button>
+            </div>
+
+            <textarea
+              className="w-full p-3 border border-border rounded-md bg-background text-foreground text-sm resize-none focus:outline-none "
+              placeholder="How is this project relevant to your application? (optional)"
+              rows={5}
+              maxLength={280}
+              value={projectRelevanceText[project.project.id] || ""}
+              onChange={(e) =>
+                handleProjectRelevanceChange(project.project.id, e.target.value)
+              }
+            />
+          </div>
+        ))}
 
         <Button
           onClick={onSubmit}
-          className="button-primary"
+          className="button-primary mt-10"
           disabled={!requirementsSatisfied || isLoading}
         >
           {isLoading ? "Submitting..." : "Submit"}
