@@ -7,12 +7,6 @@ import VotingActions, {
 } from "@/components/proposals/VotingSidebar/VotingActions"
 import { CitizenshipQualification } from "@/lib/types"
 
-interface CardImageProps {
-  src: string
-  alt: string
-  styling?: string
-}
-
 interface CardTextProps {
   title: string
   descriptionElement?: string | React.ReactElement
