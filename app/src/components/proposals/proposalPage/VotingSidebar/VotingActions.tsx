@@ -1,5 +1,5 @@
 "use client"
-import { voteAction } from "@/app/proposals/proposal.types"
+import { voteAction } from "@/components/proposals/proposal.types"
 import { useRouter } from "next/navigation"
 import { useLogin } from "@privy-io/react-auth"
 import { Loader2 } from "lucide-react"

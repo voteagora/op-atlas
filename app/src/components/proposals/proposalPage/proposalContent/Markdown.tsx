@@ -5,8 +5,8 @@ interface ProposalContentProps {
   description: string
 }
 
-const ProposalContent = ({ description }: ProposalContentProps) => (
+const Markdown = ({ description }: ProposalContentProps) => (
   <ReactMarkdown>{description}</ReactMarkdown>
 )
 
-export default ProposalContent
+export default Markdown

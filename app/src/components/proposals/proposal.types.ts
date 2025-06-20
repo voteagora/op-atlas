@@ -1,5 +1,7 @@
 import { citizenCategory, User } from "@prisma/client"
 import { CitizenshipQualification } from "@/lib/types"
+import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
+import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 
 export interface ProposalPageDataInterface {
   user: User | null
@@ -60,4 +62,24 @@ export interface OffchainVote {
   citizenType: citizenCategory
   createdAt?: Date
   updatedAt?: Date
+}
+
+export interface VotingColumnProps {
+  proposalType: string
+  proposalId: string
+  options?: CandidateCardProps[]
+  votingActions?: CardActionsProps
+  currentlyActive?: boolean
+  userSignedIn?: boolean
+  userCitizen?: Citizen
+  userVoted?: boolean
+  resultsLink: string
+}
+
+export interface VotingRedirectProps {
+  callout: string
+  link?: {
+    linkText: string
+    linkHref: string
+  }
 }
