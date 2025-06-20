@@ -4,7 +4,6 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { ZeroHash } from "ethers"
 import { useState } from "react"
 
 import VotingActions, {
@@ -29,6 +28,7 @@ import { useRouter } from "next/navigation"
 import {
   EAS_CONTRACT_ADDRESS,
   OFFCHAIN_VOTE_SCHEMA_ID,
+  EAS_VOTE_SCHEMA,
 } from "@/lib/eas/clientSafe"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
@@ -122,9 +122,8 @@ const VotingColumn = ({
     const eas = new EAS(EAS_CONTRACT_ADDRESS)
     eas.connect(signer.provider!)
     const delegated = await eas.getDelegated()
-    const VOTE_SCHEMA = "uint256 proposalId,string params"
 
-    const encoder = new SchemaEncoder(VOTE_SCHEMA)
+    const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
 
     const args = {
       proposalId: proposalId,
