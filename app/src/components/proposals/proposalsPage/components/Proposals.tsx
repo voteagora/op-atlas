@@ -25,7 +25,7 @@ interface StandardProposalProps {
     href: string
   }
 }
-const Proposal = (props: StandardProposalProps) => {
+const ProposalRow = (props: StandardProposalProps) => {
   const voteStatus = () => {
     if (props.badge.badgeType === ProposalBadgeType.now) {
       if (props.voted) {
@@ -97,7 +97,7 @@ const Proposals = ({
       </div>
       <div>
         {proposals.map((proposal, index) => (
-          <Proposal key={index} rounded={index === 0} {...proposal} />
+          <ProposalRow key={index} rounded={index === 0} {...proposal} />
         ))}
       </div>
     </div>
