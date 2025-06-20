@@ -59,11 +59,12 @@ const CardAction = ({
         break
     }
   }
-  console.log("Loading", loading)
 
   if (loading) {
     return (
-      <div className={`rounded-md border border-solid p-3 mb-1 w-60 h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle}`}>
+      <div
+        className={`rounded-md border border-solid p-3 mb-1 w-60 h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle}`}
+      >
         <Loader2 className="h-5 w-5 animate-spin" />
       </div>
     )
