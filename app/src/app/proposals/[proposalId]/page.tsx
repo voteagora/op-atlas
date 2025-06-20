@@ -134,10 +134,10 @@ const Page = async (params: PageProps) => {
 
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
-      <div className="flex flex-col w-2/3 mt-24 h-[865px] gap-[48px] mx-auto">
+      <div className="proposal flex flex-col max-w[1064px] mt-24 h-[865px] gap-[48px] mx-auto">
         <div className="flex flex-col gap-[44px]">
-          <div className="flex justify-between items-start flex-col md:flex-row">
-            <div className="w-full flex flex-col gap-[44px] mb-8 md:mb-0">
+          <div className="column-container gap-[48px] flex justify-between items-start flex-col md:flex-row">
+            <div className="proposal-content w-full max-w-[712px] flex flex-col gap-[44px] mb-8 md:mb-0">
               <Breadcrumbs values={breadcrumbs} />
               <ProposalHeader
                 title={proposalData.markdowntitle}
@@ -145,7 +145,7 @@ const Page = async (params: PageProps) => {
               />
               <ProposalContent description={deTitledProposalDescription} />
             </div>
-            <div className="w-full md:w-[304px] md:ml-12">
+            <div className="voting-sidebar w-full md:w-[304px]">
               <VotingSidebar
                 className="sticky top-4"
                 votingCardProps={votingCardProps!}
