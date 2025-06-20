@@ -1,9 +1,10 @@
+import { User } from "@prisma/client"
+import React from "react"
+
+import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
 import VotingActions, {
   CardActionsProps,
 } from "@/components/proposals/VotingSidebar/VotingActions"
-import React from "react"
-import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
-import { User } from "@prisma/client"
 import { CitizenshipQualification } from "@/lib/types"
 
 interface CardImageProps {
