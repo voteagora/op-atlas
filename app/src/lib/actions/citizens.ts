@@ -477,6 +477,10 @@ const getS7CitizenAddresses = async () => {
   const isTestnet =
     process.env.NEXT_PUBLIC_ENV === "dev" ||
     process.env.USE_S7_TEST_ACCOUNTS === "true"
+  
+  console.log(`isTestnet = ${isTestnet}`)
+  console.log(`process.env.NEXT_PUBLIC_ENV = ${process.env.NEXT_PUBLIC_ENV}`)
+  console.log(`process.env.USE_S7_TEST_ACCOUNTS = ${process.env.USE_S7_TEST_ACCOUNTS}`)
 
   return isTestnet ? [...productionList, ...testList] : productionList
 }
