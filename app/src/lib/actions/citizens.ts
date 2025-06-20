@@ -20,7 +20,7 @@ import {
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
 import { updateMailchimpTags } from "../api/mailchimp"
-import { createCitizenAttestation } from "../eas"
+import { createCitizenAttestation } from "../eas/serverOnly"
 
 interface S8QualifyingUser {
   address: string

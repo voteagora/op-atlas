@@ -9,7 +9,7 @@ import {
   createCitizenAttestation,
   createCitizenWalletChangeAttestation,
   revokeCitizenAttestation,
-} from "@/lib/eas"
+} from "@/lib/eas/serverOnly"
 
 export async function makeUserAddressPrimaryAction(address: string) {
   const session = await auth()

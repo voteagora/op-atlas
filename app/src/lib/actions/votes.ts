@@ -1,7 +1,7 @@
 "use server"
 
 import { Signature } from "@ethereum-attestation-service/eas-sdk"
-import { createVoteAttestation } from "@/lib/eas"
+import { createVoteAttestation } from "@/lib/eas/serverOnly"
 
 export async function vote(
   data: any,
