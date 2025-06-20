@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "citizenCategory" AS ENUM ('CHAIN', 'PROJECT', 'USER');
+CREATE TYPE "citizenCategory" AS ENUM ('CHAIN', 'APP', 'USER');
 
 -- DropForeignKey
 ALTER TABLE "UserPassport" DROP CONSTRAINT "UserPassport_address_fkey";

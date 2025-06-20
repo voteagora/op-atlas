@@ -729,6 +729,6 @@ model OffChainVote {
 
 enum citizenCategory {
   CHAIN
-  PROJECT
+  APP
   USER
 }
