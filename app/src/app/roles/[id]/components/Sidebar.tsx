@@ -3,7 +3,6 @@
 import { Role } from "@prisma/client"
 import { usePrivy } from "@privy-io/react-auth"
 import { format } from "date-fns"
-import { Loader2 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
@@ -54,25 +53,15 @@ export const Sidebar = ({ role }: { role: Role }) => {
       return null
     }
 
-    const buttonText = !isAuthenticated
-      ? "Sign in"
-      : isApplicationWindow
-      ? "Apply Now"
-      : "Coming Soon"
+    const buttonText = isApplicationWindow ? "Apply Now" : "Coming Soon"
 
     return (
       <Button
         className="w-full button-primary"
-        disabled={
-          (isAuthenticated && !isApplicationWindow) || isLoggingIn.current
-        }
+        disabled={!isApplicationWindow}
         onClick={handleButtonClick}
       >
-        {isLoggingIn.current ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          buttonText
-        )}
+        {buttonText}
       </Button>
     )
   }
@@ -88,6 +77,24 @@ export const Sidebar = ({ role }: { role: Role }) => {
             Checking application status and eligibility.
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
+        <div className="flex flex-col gap-2">
+          <div className="font-semibold text-secondary-foreground">
+            Self-nominate
+          </div>
+          <div className="text-sm text-secondary-foreground">
+            Checking application status and eligibility.
+          </div>
+        </div>
+        <Button className="w-full button-primary" onClick={handleButtonClick}>
+          Sign in
+        </Button>
       </div>
     )
   }
