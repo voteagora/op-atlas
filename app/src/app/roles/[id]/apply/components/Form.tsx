@@ -118,11 +118,7 @@ export const Form = ({
       </div>
 
       {selectedEntity.userId ? (
-        <UserForm
-          user={user}
-          roleId={role.id}
-          selectedEntity={selectedEntity}
-        />
+        <UserForm user={user} role={role} selectedEntity={selectedEntity} />
       ) : (
         <OrganizationForm
           user={user}

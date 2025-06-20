@@ -1,6 +1,6 @@
-import { User } from "@prisma/client"
+import { Role, User } from "@prisma/client"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/common/Button"
 import { Github } from "@/components/icons/socials"
@@ -24,14 +24,31 @@ type SelectedEntity = {
   organizationId?: string
 }
 
+// Type for the requirements JSON structure
+type RoleRequirements = {
+  user?: string[]
+  organization?: string[]
+}
+
+// Type guard to check if requirements is a valid object with user array
+const isValidRequirements = (
+  requirements: any,
+): requirements is RoleRequirements => {
+  return (
+    requirements &&
+    typeof requirements === "object" &&
+    (!requirements.user || Array.isArray(requirements.user))
+  )
+}
+
 export const UserForm = ({
   user: initialUser,
-  roleId,
   selectedEntity,
+  role,
 }: {
   user: User
-  roleId: number
   selectedEntity: SelectedEntity
+  role: Role
 }) => {
   const { user: loadedUser } = useUser({
     id: initialUser.id,
@@ -45,6 +62,7 @@ export const UserForm = ({
 
   const [checkedRules, setCheckedRules] = useState<Record<number, boolean>>({})
   const [conflictsOfInterest, setConflictsOfInterest] = useState("")
+  const [requirementsSatisfied, setRequirementsSatisfied] = useState(false)
 
   const handleCheckboxChange = (index: number) => {
     setCheckedRules((prev) => ({
@@ -53,10 +71,35 @@ export const UserForm = ({
     }))
   }
 
-  const allTermsChecked = TERMS.every((_, index) => checkedRules[index])
+  useEffect(() => {
+    const allTermsChecked = TERMS.every((_, index) => checkedRules[index])
+    const requirements = role.requirements as RoleRequirements
 
-  const handleSubmit = () => {
-    applyForRole(roleId, {
+    if (
+      !isValidRequirements(requirements) ||
+      !requirements.user ||
+      !Array.isArray(requirements.user)
+    ) {
+      setRequirementsSatisfied(allTermsChecked)
+      return
+    }
+
+    const userRequirementsSatisfied = requirements.user.every(
+      (requirement: string) => {
+        if (requirement === "github") {
+          const githubSatisfied = !!user.github
+          return githubSatisfied
+        }
+        return true
+      },
+    )
+
+    const finalResult = allTermsChecked && userRequirementsSatisfied
+    setRequirementsSatisfied(finalResult)
+  }, [checkedRules, role, user])
+
+  const onSubmit = () => {
+    applyForRole(role.id, {
       userId: selectedEntity.userId,
       organizationId: selectedEntity.organizationId,
       application: JSON.stringify({
@@ -65,38 +108,72 @@ export const UserForm = ({
     })
   }
 
+  const renderRequiredModules = () => {
+    try {
+      const requirements = role.requirements as RoleRequirements
+
+      if (!isValidRequirements(requirements) || !requirements.user) {
+        return null
+      }
+
+      return (
+        <div className="flex flex-col gap-6">
+          {requirements.user.map((requirement: string, index: number) => {
+            if (requirement === "github") {
+              return (
+                <div key={index} className="flex flex-col gap-6">
+                  <div className="text-xl font-semibold">
+                    Connect your GitHub account to show your code contributions
+                    to the Optimism Collective
+                  </div>
+                  {user.github ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="text-sm text-foreground">
+                        Your GitHub account
+                      </div>
+                      <div>
+                        <GithubDisplay userId={user.id} />
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        linkGithub()
+                      }}
+                    >
+                      <Github className="w-4 h-4 mr-1" fill="#FFFFFF" />
+                      Connect GitHub
+                    </Button>
+                  )}
+                </div>
+              )
+            }
+            // Add more requirement types here as needed
+            return null
+          })}
+        </div>
+      )
+    } catch (error) {
+      console.error(
+        "Failed to parse role requirements in renderRequiredModules:",
+        error,
+        "role.requirements:",
+        role.requirements,
+      )
+      return null
+    }
+  }
+
   // Redirect on success
   if (isSuccess) {
-    router.push(`/roles/${roleId}`)
+    router.push(`/roles/${role.id}`)
     return null
   }
 
   return (
     <div className="flex flex-col gap-12 w-full text-foreground">
-      <div className="flex flex-col gap-6">
-        <div className="text-xl font-semibold">
-          Connect your GitHub account to show your code contributions to the
-          Optimism Collective
-        </div>
-        {user.github ? (
-          <div className="flex flex-col gap-2">
-            <div className="text-sm text-foreground">Your GitHub account</div>
-            <div>
-              <GithubDisplay userId={user.id} />
-            </div>
-          </div>
-        ) : (
-          <Button
-            variant="primary"
-            onClick={() => {
-              linkGithub()
-            }}
-          >
-            <Github className="w-4 h-4 mr-1" fill="#FFFFFF" />
-            Connect GitHub
-          </Button>
-        )}
-      </div>
+      {renderRequiredModules()}
       <div className="flex flex-col gap-6">
         <div className="text-xl font-semibold">
           Confirm the following and link to any relevant projects
@@ -146,9 +223,9 @@ export const UserForm = ({
         </div>
 
         <Button
-          onClick={handleSubmit}
+          onClick={onSubmit}
           className="button-primary"
-          disabled={!allTermsChecked || !user.github || isLoading}
+          disabled={!requirementsSatisfied || isLoading}
         >
           {isLoading ? "Submitting..." : "Submit"}
         </Button>

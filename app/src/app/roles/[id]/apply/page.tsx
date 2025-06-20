@@ -64,7 +64,9 @@ export default async function Page({ params }: { params: { id: string } }) {
               {role.startAt && role.endAt && (
                 <div className="text-muted-foreground flex flex-row gap-4">
                   <div>
-                    Nominations {formatMMMd(new Date(role.startAt))} -{" "}
+                    Submit your application between{" "}
+                    {formatMMMd(new Date(role.startAt))}
+                    {" - "}
                     {formatMMMd(new Date(role.endAt))}
                   </div>
                   {hasVoting && <div>{"|"}</div>}
