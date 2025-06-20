@@ -32,7 +32,6 @@ const config = {
       },
       colors: {
         border: "hsl(var(--border))",
-        "border/default": "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         info: "#0E4CAF",
@@ -43,10 +42,7 @@ const config = {
         backgroundaccent: "hsl(var(--background-accent))",
         backgroundSecondary: "hsl(var(--background-secondary))",
         backgroundSecondaryHover: "hsl(var(--background-secondary-hover))",
-        tertiary: "hsl(var(--background-tertiary))",
-        "bg/default": "hsl(var(--background))",
-        "bg/secondary": "hsl(var(--secondary))",
-        "bg/tertiary": "hsl(var(--background-tertiary))",
+        tertiary: "#E0E2EB",
         button: {
           primary: {
             DEFAULT: "hsl(var(--button-primary))",
@@ -66,18 +62,15 @@ const config = {
           muted: "hsl(var(--text-muted))",
           foreground: "hsl(var(--text-foreground))",
           destructive: "#FF0420",
-          white: "hsl(var(--text-white))",
         },
-        "color-text-muted": "hsl(var(--color-text-muted))",
-        foreground: "hsl(var(--foreground))",
-        "secondary-foreground": "hsl(var(--secondary-foreground))",
+        foreground: "var(--foreground)",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          foreground: "var(--secondary-foreground)",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -105,20 +98,13 @@ const config = {
         },
         optimismRed: "hsl(var(--destructive))",
         callout: {
-          DEFAULT: "hsl(var(--callout))",
-          foreground: "hsl(var(--callout-foreground))",
-          strong: "hsl(var(--callout-strong))",
+          DEFAULT: "#D6E4FF",
+          foreground: "#3374DB",
         },
         contrast: {
           DEFAULT: "#05060B",
           white: "#FFFFFF",
           foreground: "#FBFCFE",
-        },
-        neutral: {
-          600: "hsl(var(--neutral-600))",
-        },
-        red: {
-          500: "hsl(var(--red-500))",
         },
       },
       borderRadius: {
