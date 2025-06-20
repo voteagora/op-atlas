@@ -7,7 +7,7 @@ export const useCitizenQualification = () => {
   return useQuery({
     queryKey: ["citizen-qualification"],
     queryFn: async () => {
-      return await s8CitizenshipQualification()
+      return (await s8CitizenshipQualification()) as CitizenshipQualification | null
     },
   })
 }
