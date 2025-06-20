@@ -19,9 +19,7 @@ const UserOrganizationInfoRow = ({
 }) => {
   const handleOrgSettingClicked = () => {
     //track user has clicked the link
-    if (!user.interaction?.finishSetupLinkClicked) {
-      updateInteractions({ userId: user.id, finishSetupLinkClicked: true })
-    }
+    updateInteractions({ userId: user.id, finishSetupLinkClicked: true })
   }
 
   return (
@@ -45,14 +43,11 @@ const UserOrganizationInfoRow = ({
             </Avatar>
           ))}
         </div>
-        {!isOrganizationSetupComplete(organization.organization) &&
-          !user?.interaction?.finishSetupLinkClicked &&
-          +(user?.interaction?.profileVisitCount ?? 0) < 3 &&
-          !user?.interaction?.orgSettingsVisited && (
-            <p className="text-sm font-medium text-secondary-foreground">
-              Finish setting up your org
-            </p>
-          )}
+        {!isOrganizationSetupComplete(organization.organization) && (
+          <p className="text-sm font-medium text-secondary-foreground">
+            Finish setting up your org
+          </p>
+        )}
 
         <Image
           src="/assets/icons/arrow-left.svg"
