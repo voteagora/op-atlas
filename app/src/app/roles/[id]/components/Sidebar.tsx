@@ -2,7 +2,6 @@
 
 import { Role } from "@prisma/client"
 import { usePrivy } from "@privy-io/react-auth"
-import { format } from "date-fns"
 import { usePathname, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
@@ -10,6 +9,7 @@ import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useHasApplied } from "@/hooks/role/useHasApplied"
 import { LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
+import { formatMMMd } from "@/lib/utils/date"
 
 export const Sidebar = ({ role }: { role: Role }) => {
   const { status: authStatus, data: session } = useSession()
@@ -115,8 +115,9 @@ export const Sidebar = ({ role }: { role: Role }) => {
             <br />
             {role.startAt && role.endAt && (
               <>
-                {format(new Date(role.startAt), "MMM d")} -{" "}
-                {format(new Date(role.endAt), "MMM d")}
+                {formatMMMd(new Date(role.startAt))}
+                {" - "}
+                {formatMMMd(new Date(role.endAt))}
               </>
             )}
           </div>
