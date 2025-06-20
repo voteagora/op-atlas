@@ -127,7 +127,7 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
       <div className="proposal flex flex-col max-w[1064px] mt-24 h-[865px] gap-[48px] mx-auto">
         <div className="flex flex-col gap-[44px]">
           <div className="column-container gap-[48px] flex justify-between items-start flex-col md:flex-row">
-            <div className="proposal-content w-full max-w-[712px] flex flex-col gap-[44px] mb-8 md:mb-0">
+            <div className="proposal-content w-full lg:min-w-[712px] max-w-[712px] flex flex-col gap-[44px] mb-8 md:mb-0">
               <Breadcrumbs values={breadcrumbs} />
               <ProposalHeader
                 title={proposalData.markdowntitle}
