@@ -31,7 +31,7 @@ export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
     ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
     : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
 
-const OFFCHAIN_VOTE_SCHEMA_ID =
+export const OFFCHAIN_VOTE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e"
     : "0xTBD"
@@ -62,10 +62,11 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
 }
 
 // Optimism address
-const eas =
+export const EAS_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_ENV === "dev"
-    ? new EAS("0xC2679fBD37d54388Ce493F1DB75320D236e1815e")
-    : new EAS("0x4200000000000000000000000000000000000021")
+    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e"
+    : "0x4200000000000000000000000000000000000021"
+const eas = new EAS(EAS_CONTRACT_ADDRESS)
 
 const provider = new ethers.AlchemyProvider(
   process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",
@@ -462,7 +463,8 @@ export async function processAttestationsInBatches<T>(
         throw new Error(`Failed after ${maxRetries} retries: ${error}`)
       }
       console.warn(
-        `Retry ${retryCount + 1}/${maxRetries} for batch of ${batch.length
+        `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+          batch.length
         } items`,
       )
       await new Promise((resolve) =>
@@ -514,7 +516,6 @@ export async function createCitizenAttestation({
 export async function isAttestationActive(
   attestationId: string,
 ): Promise<boolean> {
-
   try {
     const attestation = await eas.getAttestation(attestationId)
     return attestation !== null && !attestation.revocationTime
