@@ -4,7 +4,7 @@ import React from "react"
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
 import VotingActions, {
   CardActionsProps,
-} from "@/components/proposals/VotingSidebar/VotingActions"
+} from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import { CitizenshipQualification } from "@/lib/types"
 
 interface CardTextProps {
