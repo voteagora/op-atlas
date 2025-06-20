@@ -3,6 +3,7 @@
 import MarkdownPreview from "@uiw/react-markdown-preview"
 import cn from "classnames"
 
+// TODO We are not using sass, will need to convert to tailwind
 import styles from "./markdown.module.scss"
 
 const defaults = {
