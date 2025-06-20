@@ -40,15 +40,15 @@ import {
 } from "../ui/form"
 import { TeamMemberRow } from "./TeamMemberRow"
 
-const StringValue = z.object({ value: z.string() }) // use a intermediate object to represent String arrays because useFieldArray only works on object arrays
+const StringValue = z.object({ value: z.string().url("Please enter a valid URL") }) // use a intermediate object to represent String arrays because useFieldArray only works on object arrays
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   website: z.array(StringValue),
   farcaster: z.array(StringValue),
-  twitter: z.string().optional(),
-  mirror: z.string().optional(),
+  twitter: z.string().url("Please enter a valid Twitter URL").optional().or(z.literal("")),
+  mirror: z.string().url("Please enter a valid Mirror URL").optional().or(z.literal("")),
 })
 
 function toStringObjectArr(strings: string[]) {
@@ -181,12 +181,14 @@ export default function MakeOrganizationForm({
   // CHANGE: Add helper functions to check if the last field has a value
   const shouldShowWebsiteAdd = () => {
     const websites = formValues.website
-    return websites[websites.length - 1]?.value.trim() !== ""
+    const lastWebsite = websites[websites.length - 1]?.value.trim()
+    return lastWebsite !== "" && z.string().url().safeParse(lastWebsite).success
   }
 
   const shouldShowFarcasterAdd = () => {
     const farcasters = formValues.farcaster
-    return farcasters[farcasters.length - 1]?.value.trim() !== ""
+    const lastFarcaster = farcasters[farcasters.length - 1]?.value.trim()
+    return lastFarcaster !== "" && z.string().url().safeParse(lastFarcaster).success
   }
   const onSubmit = () => async (values: z.infer<typeof formSchema>) => {
     setIsSaving(true)
