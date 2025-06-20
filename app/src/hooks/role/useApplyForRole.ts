@@ -12,7 +12,7 @@ export const useApplyForRole = (userId?: string, roleId?: number) => {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
 
-  const { invalidate } = useHasApplied({
+  const { invalidate: invalidateHasApplied } = useHasApplied({
     userId: userId || "",
     roleId: roleId || 0,
     enabled: false,
@@ -31,14 +31,13 @@ export const useApplyForRole = (userId?: string, roleId?: number) => {
       try {
         const loadingToast = toast.loading("Applying for role...")
         await applyForRole(id, applicationParams)
+        // Invalidate hasApplied query on success
+        if (applicationParams.userId) {
+          invalidateHasApplied()
+        }
         toast.dismiss(loadingToast)
         toast.success("Role application submitted successfully")
         setIsSuccess(true)
-
-        // Invalidate hasApplied query on success
-        if (applicationParams.userId) {
-          invalidate()
-        }
       } catch (error) {
         toast.error("Failed to apply for role")
         setIsSuccess(false)

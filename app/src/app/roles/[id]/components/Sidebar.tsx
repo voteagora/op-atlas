@@ -9,22 +9,29 @@ import { useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
 
 import { Button } from "@/components/ui/button"
+import { useHasApplied } from "@/hooks/role/useHasApplied"
 import { LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
 
 export const Sidebar = ({ role }: { role: Role }) => {
-  const { status } = useSession()
+  const { status: authStatus, data: session } = useSession()
+  const isAuthenticated = authStatus === "authenticated"
+
   const { login } = usePrivy()
   const pathname = usePathname()
   const router = useRouter()
   const isLoggingIn = useRef(false)
+
+  const { hasApplied, isLoading: isLoadingHasApplied } = useHasApplied({
+    userId: session?.user?.id || "",
+    roleId: role.id,
+    enabled: isAuthenticated,
+  })
 
   const isApplicationWindow =
     role.startAt &&
     role.endAt &&
     new Date() >= new Date(role.startAt) &&
     new Date() <= new Date(role.endAt)
-
-  const isAuthenticated = status === "authenticated"
 
   useEffect(() => {
     if (isAuthenticated && isLoggingIn.current) {
@@ -43,6 +50,10 @@ export const Sidebar = ({ role }: { role: Role }) => {
   }
 
   const renderButton = () => {
+    if (hasApplied) {
+      return null
+    }
+
     const buttonText = !isAuthenticated
       ? "Sign in"
       : isApplicationWindow
@@ -66,22 +77,43 @@ export const Sidebar = ({ role }: { role: Role }) => {
     )
   }
 
+  if (isLoadingHasApplied || !authStatus) {
+    return (
+      <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
+        <div className="flex flex-col gap-2">
+          <div className="font-semibold text-secondary-foreground">
+            Loading...
+          </div>
+          <div className="text-sm text-secondary-foreground">
+            Checking application status and eligibility.
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
       <div className="flex flex-col gap-2">
         <div className="font-semibold text-secondary-foreground">
-          Self-nominate
+          {hasApplied ? "You're a candidate!" : "Self-nominate"}
         </div>
-        <div className="text-sm text-secondary-foreground">
-          Submit your application between
-          <br />
-          {role.startAt && role.endAt && (
-            <>
-              {format(new Date(role.startAt), "MMM d")} -{" "}
-              {format(new Date(role.endAt), "MMM d")}
-            </>
-          )}
-        </div>
+        {hasApplied ? (
+          <div className="text-sm text-secondary-foreground">
+            You submitted a self-nomination application.
+          </div>
+        ) : (
+          <div className="text-sm text-secondary-foreground">
+            Submit your application between
+            <br />
+            {role.startAt && role.endAt && (
+              <>
+                {format(new Date(role.startAt), "MMM d")} -{" "}
+                {format(new Date(role.endAt), "MMM d")}
+              </>
+            )}
+          </div>
+        )}
       </div>
       {renderButton()}
     </div>
