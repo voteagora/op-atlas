@@ -1,11 +1,9 @@
 "use client"
 
 import { User } from "@prisma/client"
-import Image from "next/image"
 import { useState } from "react"
 
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
-import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import CitizenshipApplicationDialog from "@/components/dialogs/CitizenshipApplicationDialog"
 import { Button } from "@/components/ui/button"
 import { useCitizenshipRequirements } from "@/hooks/citizen/useCitizenshipRequirements"

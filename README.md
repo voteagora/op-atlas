@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/voteagora/op-atlas)
+
 # OP Atlas
 
 Bring your identity to the OP collective and signup to get funded via RetroPGF.
@@ -43,5 +45,14 @@ Each package has its own README with detailed setup and development instructions
    ```bash
    pnpm --filter op-atlas dev
    ```
+
+
+## Scripts 
+
+1. Revoke citizenship attestation by wallet address 
+
+```bash
+pnpm revoke:citizenship 0x123...456
+```
 
 The app will be available at [http://localhost:3000](http://localhost:3000).

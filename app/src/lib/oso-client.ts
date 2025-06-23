@@ -18,6 +18,7 @@ class OsoClient {
     this.endpoint = endpoint
     this.headers = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OSO_AUTH_TOKEN}`,
     }
   }
 

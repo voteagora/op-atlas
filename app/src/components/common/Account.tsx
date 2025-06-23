@@ -228,7 +228,7 @@ export const Account = () => {
     return (
       <button
         type="button"
-        className={`cursor-pointer text-white rounded-md px-4 py-2 flex items-center justify-center w-24 h-10 ${
+        className={`cursor-pointer text-sm text-primary-foreground leading-5 rounded-md px-4 py-2.5 flex items-center justify-center h-10 ${
           isLoggingIn.current ? "bg-gray-300" : "bg-brand-primary"
         }`}
         onClick={privyLogin}
