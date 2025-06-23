@@ -4,7 +4,6 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
@@ -33,7 +32,9 @@ import {
   switchAccount,
   getConnections,
 } from "@wagmi/core"
+import { useAccount } from "wagmi"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
+import { usePrivy } from "@privy-io/react-auth"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -108,16 +109,17 @@ const VotingColumn = ({
   }
 
   const signer = useEthersSigner({ chainId: CHAIN_ID })
-  const router = useRouter()
+  const { user } = usePrivy()
 
   // Check if the current signer address matches the expected citizen address
   useEffect(() => {
+    console.log("Conected address: ", user?.wallet?.address)
     if (signer && userCitizen?.address) {
       const mismatch =
         signer.address?.toLowerCase() !== userCitizen.address.toLowerCase()
       setAddressMismatch(mismatch)
     }
-  }, [signer, signer?.address, userCitizen?.address])
+  }, [signer, user?.wallet?.address, userCitizen?.address])
 
   // Function to prompt user to switch to the correct account
   const promptAccountSwitch = async (expectedAddress: string) => {
