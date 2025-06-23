@@ -117,7 +117,7 @@ const VotingColumn = ({
         signer.address?.toLowerCase() !== userCitizen.address.toLowerCase()
       setAddressMismatch(mismatch)
     }
-  }, [signer, userCitizen?.address])
+  }, [signer, signer?.address, userCitizen?.address])
 
   // Function to prompt user to switch to the correct account
   const promptAccountSwitch = async (expectedAddress: string) => {
@@ -173,11 +173,11 @@ const VotingColumn = ({
       { name: "params", value: args.choices, type: "string" },
     ])
 
-    const nonce = await eas.getNonce(userCitizen.address as `0x${string}`)
+    const nonce = await eas.getNonce(signer.address as `0x${string}`)
 
     const delegateRequest = {
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
-      recipient: userCitizen.address as `0x${string}`,
+      recipient: signer.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
       revocable: false,
       refUID: userCitizen.attestationId! as `0x${string}`,
@@ -269,23 +269,30 @@ const VotingColumn = ({
         />
       </div>
       {currentlyActive && votingActions && !userVoted && (
-        <VotingActions
-          // This is a wonky way to overwrite the call to make an external call.
-          cardActionList={votingActions.cardActionList.map((action) => {
-            // If this is a vote action, replace its action function with handleCastVote
-            // and determine if it should be disabled based on selectedVote or address mismatch
-            if (action.actionType === "Vote") {
-              return {
-                ...action,
-                action: handleCastVote,
-                disabled: !selectedVote || addressMismatch,
-                loading: isVoting,
+        <>
+          <VotingActions
+            // This is a wonky way to overwrite the call to make an external call.
+            cardActionList={votingActions.cardActionList.map((action) => {
+              // If this is a vote action, replace its action function with handleCastVote
+              // and determine if it should be disabled based on selectedVote or address mismatch
+              if (action.actionType === "Vote") {
+                return {
+                  ...action,
+                  action: handleCastVote,
+                  disabled: !selectedVote || addressMismatch,
+                  loading: isVoting,
+                }
               }
-            }
-            // Otherwise, return the original action unchanged
-            return action
-          })}
-        />
+              // Otherwise, return the original action unchanged
+              return action
+            })}
+          />
+          {addressMismatch && (
+            <div className="text-red-500 text-sm text-center mt-2">
+              You must connect your citizen wallet to vote.
+            </div>
+          )}
+        </>
       )}
 
       {!currentlyActive ||
