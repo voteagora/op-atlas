@@ -6,7 +6,7 @@ import { auth } from "@/auth"
 import {
   getCitizenByType,
   getCitizenCountByType,
-  upsertCitizen,
+  upsertCitizen
 } from "@/db/citizens"
 import { prisma } from "@/db/client"
 import { getAdminOrganizations, getOrganization } from "@/db/organizations"
@@ -20,7 +20,9 @@ import {
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
 import { updateMailchimpTags } from "../api/mailchimp"
-import { createCitizenAttestation } from "../eas"
+import {
+  createCitizenAttestation
+} from "../eas"
 
 interface S8QualifyingUser {
   address: string
