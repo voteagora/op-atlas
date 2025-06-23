@@ -5,7 +5,7 @@ import {
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
@@ -27,7 +27,12 @@ import {
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
-import { switchChain, getChainId } from "@wagmi/core"
+import {
+  switchChain,
+  getChainId,
+  switchAccount,
+  getConnections,
+} from "@wagmi/core"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
@@ -96,6 +101,7 @@ const VotingColumn = ({
 }: VotingColumnProps) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
   const [isVoting, setIsVoting] = useState<boolean>(false)
+  const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
 
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType === selectedVote ? null : voteType)
@@ -104,8 +110,49 @@ const VotingColumn = ({
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const router = useRouter()
 
+  // Check if the current signer address matches the expected citizen address
+  useEffect(() => {
+    if (signer && userCitizen?.address) {
+      const mismatch =
+        signer.address?.toLowerCase() !== userCitizen.address.toLowerCase()
+      setAddressMismatch(mismatch)
+    }
+  }, [signer, userCitizen?.address])
+
+  // Function to prompt user to switch to the correct account
+  const promptAccountSwitch = async (expectedAddress: string) => {
+    try {
+      // Attempt to switch account using wagmi
+      const connections = getConnections(privyWagmiConfig)
+      await switchAccount(privyWagmiConfig, {
+        connector: connections[0]?.connector,
+      })
+
+      // The useEthersSigner hook should automatically update with the new account
+      // We'll check the address match in the useEffect above
+    } catch (error) {
+      console.error("Failed to switch account:", error)
+      toast.error(
+        `Please manually switch to account ${expectedAddress} in your wallet`,
+      )
+      throw new Error(`Please switch to account ${expectedAddress} to continue`)
+    }
+  }
+
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
+    if (!userCitizen?.address) {
+      throw new Error("User citizen address not available")
+    }
+
+    // Check if current signer matches expected address
+    if (signer.address?.toLowerCase() !== userCitizen.address.toLowerCase()) {
+      await promptAccountSwitch(userCitizen.address)
+      // After switching, we need to wait for the signer to update
+      // This might require a re-render, so we'll throw an error to stop execution
+      throw new Error("Account switched. Please try voting again.")
+    }
+
     const connectedChainId = getChainId(privyWagmiConfig)
     if (connectedChainId !== CHAIN_ID) {
       await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
@@ -126,14 +173,14 @@ const VotingColumn = ({
       { name: "params", value: args.choices, type: "string" },
     ])
 
-    const nonce = await eas.getNonce(signer.address)
+    const nonce = await eas.getNonce(userCitizen.address as `0x${string}`)
 
     const delegateRequest = {
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
-      recipient: signer.address as `0x${string}`,
+      recipient: userCitizen.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
       revocable: false,
-      refUID: userCitizen!.attestationId! as `0x${string}`,
+      refUID: userCitizen.attestationId! as `0x${string}`,
       data: encodedData,
       value: BigInt(0),
       nonce,
@@ -151,7 +198,6 @@ const VotingColumn = ({
   }
 
   const handleCastVote = async () => {
-    console.log("[debug] handleCastVote called") // should print on click
     if (!selectedVote) return
 
     const choices = mapVoteTypeToValue(
@@ -162,9 +208,10 @@ const VotingColumn = ({
 
     const castAndRecordVote = async () => {
       try {
-        // Sign the attestation with user wallet
+        // Sign the attestation with the correct user wallet
         const { data, rawSignature, signerAddress } =
           await createDelegatedAttestation(choices)
+
         // 2. Send signature to server to relay onchain
         const attestationId = await vote(
           data,
@@ -172,6 +219,7 @@ const VotingColumn = ({
           signerAddress,
           userCitizen!.attestationId!,
         )
+
         // build an offchain vote object for the DB
         const offchainVote: OffchainVote = {
           attestationId: attestationId,
@@ -183,6 +231,7 @@ const VotingColumn = ({
           createdAt: new Date(),
           updatedAt: new Date(),
         }
+
         // 3. Record vote in the database
         await postOffchainVote(offchainVote)
       } catch (error) {
@@ -203,10 +252,6 @@ const VotingColumn = ({
         return error.message
       },
     })
-
-    setTimeout(() => {
-      router.refresh()
-    }, 1000) // Wait 1s and reload the page to show the new vote
   }
 
   return (
@@ -228,12 +273,12 @@ const VotingColumn = ({
           // This is a wonky way to overwrite the call to make an external call.
           cardActionList={votingActions.cardActionList.map((action) => {
             // If this is a vote action, replace its action function with handleCastVote
-            // and determine if it should be disabled based on selectedVote
+            // and determine if it should be disabled based on selectedVote or address mismatch
             if (action.actionType === "Vote") {
               return {
                 ...action,
                 action: handleCastVote,
-                disabled: !selectedVote,
+                disabled: !selectedVote || addressMismatch,
                 loading: isVoting,
               }
             }
