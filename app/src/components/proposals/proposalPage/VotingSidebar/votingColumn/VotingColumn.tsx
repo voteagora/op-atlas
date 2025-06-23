@@ -126,9 +126,14 @@ const VotingColumn = ({
     try {
       // Attempt to switch account using wagmi
       const connections = getConnections(privyWagmiConfig)
-      console.log("Connections: ", connections)
+      const targetConnection = connections.find((connection) =>
+        connection.accounts.includes(expectedAddress as `0x${string}`),
+      )
+      if (!targetConnection) {
+        throw new Error(`No connection found for account ${expectedAddress}`)
+      }
       await switchAccount(privyWagmiConfig, {
-        connector: connections[0]?.connector,
+        connector: targetConnection.connector,
       })
 
       // The useEthersSigner hook should automatically update with the new account
@@ -149,14 +154,6 @@ const VotingColumn = ({
     }
 
     await promptAccountSwitch(userCitizen.address)
-
-    // Check if current signer matches expected address
-    if (signer.address?.toLowerCase() !== userCitizen.address.toLowerCase()) {
-      await promptAccountSwitch(userCitizen.address)
-      // After switching, we need to wait for the signer to update
-      // This might require a re-render, so we'll throw an error to stop execution
-      throw new Error("Account switched. Please try voting again.")
-    }
 
     const connectedChainId = getChainId(privyWagmiConfig)
     if (connectedChainId !== CHAIN_ID) {
