@@ -1,19 +1,17 @@
 "use server"
 
 import { Citizen } from "@prisma/client"
-import { getAddress } from "viem"
 
 import { auth } from "@/auth"
 import {
-  deleteCitizen,
   getCitizenByType,
   getCitizenCountByType,
-  upsertCitizen,
+  upsertCitizen
 } from "@/db/citizens"
 import { prisma } from "@/db/client"
 import { getAdminOrganizations, getOrganization } from "@/db/organizations"
 import { getProject, getUserAdminProjectsWithDetail } from "@/db/projects"
-import { getUserByAddress, getUserById, searchByAddress } from "@/db/users"
+import { getUserById } from "@/db/users"
 import {
   CITIZEN_ATTESTATION_CODE,
   CITIZEN_TAGS,
@@ -23,9 +21,7 @@ import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
 import { updateMailchimpTags } from "../api/mailchimp"
 import {
-  createCitizenAttestation,
-  revokeCitizenAttestation,
-  revokeContractAttestations,
+  createCitizenAttestation
 } from "../eas"
 
 interface S8QualifyingUser {
