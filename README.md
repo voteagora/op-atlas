@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/voteagora/op-atlas)
+
 # OP Atlas
 
 Bring your identity to the OP collective and signup to get funded via RetroPGF.
