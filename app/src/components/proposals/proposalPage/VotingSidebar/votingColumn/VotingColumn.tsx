@@ -113,7 +113,7 @@ const VotingColumn = ({
 
   // Check if the current signer address matches the expected citizen address
   useEffect(() => {
-    console.log("Conected address: ", user?.wallet?.address)
+    console.log("Connected address: ", user?.wallet?.address)
     if (signer && userCitizen?.address) {
       const mismatch =
         signer.address?.toLowerCase() !== userCitizen.address.toLowerCase()
@@ -126,6 +126,7 @@ const VotingColumn = ({
     try {
       // Attempt to switch account using wagmi
       const connections = getConnections(privyWagmiConfig)
+      console.log("Connections: ", connections)
       await switchAccount(privyWagmiConfig, {
         connector: connections[0]?.connector,
       })
@@ -146,6 +147,8 @@ const VotingColumn = ({
     if (!userCitizen?.address) {
       throw new Error("User citizen address not available")
     }
+
+    await promptAccountSwitch(userCitizen.address)
 
     // Check if current signer matches expected address
     if (signer.address?.toLowerCase() !== userCitizen.address.toLowerCase()) {
@@ -210,6 +213,9 @@ const VotingColumn = ({
 
     const castAndRecordVote = async () => {
       try {
+        if (signer!.address !== userCitizen!.address) {
+          throw new Error("Signer address does not match citizen address")
+        }
         // Sign the attestation with the correct user wallet
         const { data, rawSignature, signerAddress } =
           await createDelegatedAttestation(choices)
