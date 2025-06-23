@@ -1,22 +1,21 @@
 "use client"
 
-import { useTransition } from "react"
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { applyForRole } from "@/lib/actions/role"
 
-import { useHasApplied } from "./useHasApplied"
+import { useActiveUserApplications } from "./useActiveUserApplications"
 
 export const useApplyForRole = (userId?: string, roleId?: number) => {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
 
-  const { invalidate: invalidateHasApplied } = useHasApplied({
-    userId: userId || "",
-    roleId: roleId || 0,
-    enabled: false,
-  })
+  const { invalidate: invalidateActiveApplications } =
+    useActiveUserApplications({
+      userId: userId || "",
+      enabled: false,
+    })
 
   const call = (
     id: number,
@@ -33,7 +32,7 @@ export const useApplyForRole = (userId?: string, roleId?: number) => {
         await applyForRole(id, applicationParams)
         // Invalidate hasApplied query on success
         if (applicationParams.userId) {
-          invalidateHasApplied()
+          invalidateActiveApplications()
         }
         toast.dismiss(loadingToast)
         toast.success("Role application submitted successfully")

@@ -1,6 +1,6 @@
 "use server"
 
-import { getUserRoleApplication, upsertRoleApplication } from "@/db/role"
+import { getActiveUserRoleApplications, upsertRoleApplication } from "@/db/role"
 
 export async function applyForRole(
   id: number,
@@ -18,10 +18,8 @@ export async function applyForRole(
   }
 }
 
-export async function hasApplied(
+export async function activeRoleApplications(
   userId: string,
-  roleId: number,
-): Promise<boolean> {
-  const application = await getUserRoleApplication(userId, roleId)
-  return application !== null
+): Promise<number[]> {
+  return await getActiveUserRoleApplications(userId)
 }

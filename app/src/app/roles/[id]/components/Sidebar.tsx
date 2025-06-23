@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react"
 import { useEffect, useRef } from "react"
 
 import { Button } from "@/components/ui/button"
-import { useHasApplied } from "@/hooks/role/useHasApplied"
+import { useActiveUserApplications } from "@/hooks/role/useActiveUserApplications"
 import { LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
 import { formatMMMd } from "@/lib/utils/date"
 
@@ -20,11 +20,14 @@ export const Sidebar = ({ role }: { role: Role }) => {
   const router = useRouter()
   const isLoggingIn = useRef(false)
 
-  const { hasApplied, isLoading: isLoadingHasApplied } = useHasApplied({
-    userId: session?.user?.id || "",
-    roleId: role.id,
-    enabled: isAuthenticated,
-  })
+  const { activeApplications, isLoading: isLoadingActiveApplications } =
+    useActiveUserApplications({
+      userId: session?.user?.id || "",
+      enabled: isAuthenticated,
+    })
+
+  const hasAppliedForThisRole = activeApplications.includes(role.id)
+  const hasAppliedThisSeason = activeApplications.length > 0
 
   const isApplicationWindow =
     role.startAt &&
@@ -49,7 +52,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
   }
 
   const renderButton = () => {
-    if (hasApplied) {
+    if (activeApplications.length > 0) {
       return null
     }
 
@@ -66,7 +69,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
     )
   }
 
-  if (isLoadingHasApplied || !authStatus) {
+  if (isLoadingActiveApplications || !authStatus) {
     return (
       <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
         <div className="flex flex-col gap-2">
@@ -103,11 +106,17 @@ export const Sidebar = ({ role }: { role: Role }) => {
     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
       <div className="flex flex-col gap-2">
         <div className="font-semibold text-secondary-foreground">
-          {hasApplied ? "You're a candidate!" : "Self-nominate"}
+          {hasAppliedThisSeason
+            ? hasAppliedForThisRole
+              ? "You're a candidate!"
+              : "One application per season!"
+            : "Self-nominate"}
         </div>
-        {hasApplied ? (
+        {hasAppliedThisSeason ? (
           <div className="text-sm text-secondary-foreground">
-            You submitted a self-nomination application.
+            {hasAppliedForThisRole
+              ? "You submitted a self-nomination application."
+              : "You already have an active application for another role."}
           </div>
         ) : (
           <div className="text-sm text-secondary-foreground">
