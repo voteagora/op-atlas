@@ -31,10 +31,12 @@ import {
   getChainId,
   switchAccount,
   getConnections,
+  watchAccount,
 } from "@wagmi/core"
-import { useAccount } from "wagmi"
+import { useAccount, useConnections } from "wagmi"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 import { usePrivy } from "@privy-io/react-auth"
+import { useAccountEffect } from "wagmi"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -109,51 +111,12 @@ const VotingColumn = ({
   }
 
   const signer = useEthersSigner({ chainId: CHAIN_ID })
-  const { user } = usePrivy()
-
-  // Check if the current signer address matches the expected citizen address
-  useEffect(() => {
-    console.log("Connected address: ", user?.wallet?.address)
-    if (signer && userCitizen?.address) {
-      const mismatch =
-        signer.address?.toLowerCase() !== userCitizen.address.toLowerCase()
-      setAddressMismatch(mismatch)
-    }
-  }, [signer, user?.wallet?.address, userCitizen?.address])
-
-  // Function to prompt user to switch to the correct account
-  const promptAccountSwitch = async (expectedAddress: string) => {
-    try {
-      // Attempt to switch account using wagmi
-      const connections = getConnections(privyWagmiConfig)
-      const targetConnection = connections.find((connection) =>
-        connection.accounts.includes(expectedAddress as `0x${string}`),
-      )
-      if (!targetConnection) {
-        throw new Error(`No connection found for account ${expectedAddress}`)
-      }
-      await switchAccount(privyWagmiConfig, {
-        connector: targetConnection.connector,
-      })
-
-      // The useEthersSigner hook should automatically update with the new account
-      // We'll check the address match in the useEffect above
-    } catch (error) {
-      console.error("Failed to switch account:", error)
-      toast.error(
-        `Please manually switch to account ${expectedAddress} in your wallet`,
-      )
-      throw new Error(`Please switch to account ${expectedAddress} to continue`)
-    }
-  }
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
     if (!userCitizen?.address) {
       throw new Error("User citizen address not available")
     }
-
-    await promptAccountSwitch(userCitizen.address)
 
     const connectedChainId = getChainId(privyWagmiConfig)
     if (connectedChainId !== CHAIN_ID) {
