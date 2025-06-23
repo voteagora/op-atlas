@@ -26,8 +26,8 @@ export const Sidebar = ({ role }: { role: Role }) => {
       enabled: isAuthenticated,
     })
 
-  const hasAppliedForThisRole = activeApplications.includes(role.id)
-  const hasAppliedThisSeason = activeApplications.length > 0
+  const hasAppliedForThisRole = activeApplications?.some(app => app.roleId === role.id) || false
+  const hasAppliedThisSeason = activeApplications && activeApplications.length > 0 || false
 
   const isApplicationWindow =
     role.startAt &&
@@ -52,7 +52,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
   }
 
   const renderButton = () => {
-    if (activeApplications.length > 0) {
+    if (hasAppliedThisSeason) {
       return null
     }
 
