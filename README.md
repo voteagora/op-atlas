@@ -46,4 +46,13 @@ Each package has its own README with detailed setup and development instructions
    pnpm --filter op-atlas dev
    ```
 
+
+## Scripts 
+
+1. Revoke citizenship attestation by wallet address 
+
+```bash
+pnpm revoke:citizenship 0x123...456
+```
+
 The app will be available at [http://localhost:3000](http://localhost:3000).
