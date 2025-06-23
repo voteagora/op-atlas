@@ -25,7 +25,7 @@ export default async function Page() {
             </div>
           </div>
 
-          <div className="flex flex-col rounded-lg border border-border-secondary gap-4">
+          <div className="flex flex-col rounded-lg border border-border-secondary">
             {roles.map((role) => (
               <RoleRow key={role.id} role={role} />
             ))}

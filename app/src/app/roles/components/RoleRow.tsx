@@ -1,7 +1,8 @@
+import { Role } from "@prisma/client"
 import { format } from "date-fns"
 import Link from "next/link"
 
-import { Role } from "@prisma/client"
+import { ArrowRightS } from "@/components/icons/reminx"
 
 export function RoleRow({ role }: { role: Role }) {
   const isActive =
@@ -39,7 +40,7 @@ export function RoleRow({ role }: { role: Role }) {
             </div>
           )}
           <div className="text-xs text-foreground font-semibold w-[36px] h-[36px] rounded-lg bg-secondary flex items-center justify-center">
-            {">"}
+            <ArrowRightS className="w-4 h-4" />
           </div>
         </div>
       </div>
