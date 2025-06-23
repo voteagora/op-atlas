@@ -21,7 +21,12 @@ export default async function Page({ params }: { params: { id: string } }) {
     notFound()
   }
 
-  const hasVoting = role?.voteStartAt && role?.voteEndAt
+  const voteSchedule =
+    role?.voteStartAt && role?.voteEndAt
+      ? ` | Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
+          new Date(role.voteEndAt!),
+        )}`
+      : ""
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -49,14 +54,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                       Nominations {formatMMMd(new Date(role.startAt))} -{" "}
                       {formatMMMd(new Date(role.endAt))}
                     </div>
-                    {hasVoting && <div>{"|"}</div>}
-                    {hasVoting && (
-                      <div>
-                        {`Vote ${formatMMMd(
-                          new Date(role?.voteStartAt),
-                        )} - ${formatMMMd(new Date(role?.voteEndAt))}`}
-                      </div>
-                    )}
+                    {voteSchedule}
                   </div>
                 )}
               </div>
