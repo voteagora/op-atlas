@@ -27,6 +27,8 @@ import {
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
+import { switchChain, getChainId } from "@wagmi/core"
+import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -104,6 +106,11 @@ const VotingColumn = ({
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
+    const connectedChainId = getChainId(privyWagmiConfig)
+    if (connectedChainId.chainId !== BigInt(CHAIN_ID)) {
+      await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
+    }
+
     const eas = new EAS(EAS_CONTRACT_ADDRESS)
     eas.connect(signer.provider!)
     const delegated = await eas.getDelegated()
@@ -144,6 +151,7 @@ const VotingColumn = ({
   }
 
   const handleCastVote = async () => {
+    console.log("[debug] handleCastVote called") // should print on click
     if (!selectedVote) return
 
     const choices = mapVoteTypeToValue(
