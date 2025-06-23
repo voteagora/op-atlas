@@ -85,3 +85,9 @@ export async function getCitizenCountByType(type: string): Promise<number> {
     },
   })
 }
+
+export async function deleteCitizen(id: number) {
+  return prisma.citizen.delete({
+    where: { id },
+  })
+}
