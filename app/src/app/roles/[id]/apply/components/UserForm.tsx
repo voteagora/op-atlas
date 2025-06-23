@@ -239,14 +239,24 @@ export const UserForm = ({
         <div className="text-foreground">
           If you have any conflicts of interest, please explain them here.
         </div>
-        <textarea
-          className="w-full p-3 border border-border rounded-md bg-background text-foreground text-sm resize-none focus:outline-none "
-          placeholder="Explain your conflicts of interest (optional)"
-          rows={5}
-          maxLength={280}
-          value={conflictsOfInterest}
-          onChange={(e) => setConflictsOfInterest(e.target.value)}
-        />
+        <div className="relative">
+          <textarea
+            className="w-full h-[120px] p-3 pb-8 border border-border rounded-md bg-background text-foreground text-sm resize-none focus:outline-none "
+            placeholder="Explain your conflicts of interest (optional)"
+            maxLength={280}
+            value={conflictsOfInterest}
+            onChange={(e) => setConflictsOfInterest(e.target.value)}
+          />
+          <div className="absolute top-[90px] left-[12px] text-xs text-muted-foreground">
+            <span
+              className={
+                conflictsOfInterest.length >= 280 ? "text-red-500" : ""
+              }
+            >
+              {conflictsOfInterest.length}/280
+            </span>
+          </div>
+        </div>
 
         <div className="flex flex-col gap-6">
           {TERMS.map((term, index) => (
@@ -292,40 +302,46 @@ export const UserForm = ({
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {userProjects?.projects.map((project) => {
-                  const isSelected = selectedProjects.some(
-                    (p) => p.project.id === project.project.id,
-                  )
-                  return (
-                    <DropdownMenuItem
-                      key={project.project.id}
-                      onSelect={(e) => e.preventDefault()}
-                    >
-                      <div className="flex flex-row gap-2 justify-between items-center w-[200px]">
-                        <div className="flex flex-row gap-2 items-center">
-                          {project.project.thumbnailUrl && (
-                            <Image
-                              src={project.project.thumbnailUrl}
-                              alt={project.project.name}
-                              width={24}
-                              height={24}
-                              className="rounded-md"
-                            />
-                          )}
-                          <div className="text-foreground">
-                            {project.project.name}
+                {userProjects?.projects && userProjects.projects.length > 0 ? (
+                  userProjects.projects.map((project) => {
+                    const isSelected = selectedProjects.some(
+                      (p) => p.project.id === project.project.id,
+                    )
+                    return (
+                      <DropdownMenuItem
+                        key={project.project.id}
+                        onSelect={(e) => e.preventDefault()}
+                      >
+                        <div className="flex flex-row gap-2 justify-between items-center w-[200px]">
+                          <div className="flex flex-row gap-2 items-center">
+                            {project.project.thumbnailUrl && (
+                              <Image
+                                src={project.project.thumbnailUrl}
+                                alt={project.project.name}
+                                width={24}
+                                height={24}
+                                className="rounded-md"
+                              />
+                            )}
+                            <div className="text-foreground">
+                              {project.project.name}
+                            </div>
                           </div>
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() =>
+                              handleProjectSelection(project)
+                            }
+                          />
                         </div>
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() =>
-                            handleProjectSelection(project)
-                          }
-                        />
-                      </div>
-                    </DropdownMenuItem>
-                  )
-                })}
+                      </DropdownMenuItem>
+                    )
+                  })
+                ) : (
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                    No projects found
+                  </div>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -367,16 +383,32 @@ export const UserForm = ({
               </button>
             </div>
 
-            <textarea
-              className="w-full p-3 border border-border rounded-md bg-background text-foreground text-sm resize-none focus:outline-none "
-              placeholder="How is this project relevant to your application? (optional)"
-              rows={5}
-              maxLength={280}
-              value={projectRelevanceText[project.project.id] || ""}
-              onChange={(e) =>
-                handleProjectRelevanceChange(project.project.id, e.target.value)
-              }
-            />
+            <div className="relative">
+              <textarea
+                className="w-full h-[120px] p-3 pb-8 border border-border rounded-md bg-background text-foreground text-sm resize-none focus:outline-none "
+                placeholder="How is this project relevant to your application? (optional)"
+                maxLength={280}
+                value={projectRelevanceText[project.project.id] || ""}
+                onChange={(e) =>
+                  handleProjectRelevanceChange(
+                    project.project.id,
+                    e.target.value,
+                  )
+                }
+              />
+              <div className="absolute top-[90px] left-[12px] text-xs text-muted-foreground">
+                <span
+                  className={
+                    (projectRelevanceText[project.project.id] || "").length >=
+                    280
+                      ? "text-red-500"
+                      : ""
+                  }
+                >
+                  {(projectRelevanceText[project.project.id] || "").length}/280
+                </span>
+              </div>
+            </div>
           </div>
         ))}
 
