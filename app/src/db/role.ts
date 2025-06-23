@@ -82,7 +82,7 @@ export async function upsertRoleApplication(
 
 export async function getActiveUserRoleApplications(
   userId: string,
-): Promise<number[]> {
+): Promise<RoleApplication[]> {
   const applications = await prisma.roleApplication.findMany({
     where: {
       userId,
@@ -95,10 +95,7 @@ export async function getActiveUserRoleApplications(
         },
       },
     },
-    select: {
-      roleId: true,
-    },
   })
 
-  return applications.map((app) => app.roleId)
+  return applications
 }

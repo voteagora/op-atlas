@@ -2,28 +2,28 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { activeRoleApplications } from "@/lib/actions/role"
+import { getRole } from "@/lib/actions/role"
 
-export const ACTIVE_USER_APPLICATIONS_QUERY_KEY = "activeUserApplications"
+export const ROLE_QUERY_KEY = "role"
 
-export const useActiveUserApplications = ({
-  userId,
+export const useRole = ({
+  id,
   enabled = true,
 }: {
-  userId: string
+  id: number
   enabled?: boolean
 }) => {
   const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: [ACTIVE_USER_APPLICATIONS_QUERY_KEY, userId],
-    queryFn: () => activeRoleApplications(userId),
+    queryKey: [ROLE_QUERY_KEY, id],
+    queryFn: () => getRole(id),
     enabled,
   })
 
   const invalidate = () => {
     return queryClient.invalidateQueries({
-      queryKey: [ACTIVE_USER_APPLICATIONS_QUERY_KEY, userId],
+      queryKey: [ROLE_QUERY_KEY, id],
     })
   }
 
@@ -31,7 +31,6 @@ export const useActiveUserApplications = ({
     data,
     isLoading,
     error,
-
     invalidate,
   }
 }

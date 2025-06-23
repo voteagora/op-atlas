@@ -20,7 +20,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
   const router = useRouter()
   const isLoggingIn = useRef(false)
 
-  const { activeApplications, isLoading: isLoadingActiveApplications } =
+  const { data: activeApplications, isLoading: isLoadingActiveApplications } =
     useActiveUserApplications({
       userId: session?.user?.id || "",
       enabled: isAuthenticated,

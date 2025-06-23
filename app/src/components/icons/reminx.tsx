@@ -43,6 +43,29 @@ export const Loader3 = ({
     </svg>
   )
 }
+
+export const FileList2 = ({
+  className,
+  fill = "#000",
+}: {
+  className?: string
+  fill?: string
+}) => {
+  return (
+    <svg
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill={fill}
+        d="M20 22H4C3.44772 22 3 21.5523 3 21V3C3 2.44772 3.44772 2 4 2H20C20.5523 2 21 2.44772 21 3V21C21 21.5523 20.5523 22 20 22ZM19 20V4H5V20H19ZM8 7H16V9H8V7ZM8 11H16V13H8V11ZM8 15H13V17H8V15Z"
+      ></path>
+    </svg>
+  )
+}
 export const ArrowRight = ({
   className,
   fill = "#000",
@@ -83,6 +106,29 @@ export const ArrowRightS = ({
       <path
         d="M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z"
         fill={fill}
+      ></path>
+    </svg>
+  )
+}
+
+export const ArrowDownS = ({
+  className,
+  fill = "#000",
+}: {
+  className?: string
+  fill?: string
+}) => {
+  return (
+    <svg
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill={fill}
+        d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"
       ></path>
     </svg>
   )

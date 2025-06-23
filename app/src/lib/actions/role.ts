@@ -1,6 +1,12 @@
 "use server"
 
-import { getActiveUserRoleApplications, upsertRoleApplication } from "@/db/role"
+import { Role, RoleApplication } from "@prisma/client"
+
+import {
+  getActiveUserRoleApplications,
+  getRoleById,
+  upsertRoleApplication,
+} from "@/db/role"
 
 export async function applyForRole(
   id: number,
@@ -18,8 +24,12 @@ export async function applyForRole(
   }
 }
 
+export async function getRole(id: number): Promise<Role | null> {
+  return await getRoleById(id)
+}
+
 export async function activeRoleApplications(
   userId: string,
-): Promise<number[]> {
+): Promise<RoleApplication[]> {
   return await getActiveUserRoleApplications(userId)
 }
