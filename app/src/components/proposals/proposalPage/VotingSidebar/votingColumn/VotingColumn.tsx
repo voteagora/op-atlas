@@ -107,7 +107,7 @@ const VotingColumn = ({
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
     const connectedChainId = getChainId(privyWagmiConfig)
-    if (connectedChainId.chainId !== BigInt(CHAIN_ID)) {
+    if (connectedChainId !== CHAIN_ID) {
       await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
     }
 
