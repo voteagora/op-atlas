@@ -5,7 +5,7 @@ import {
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
 import { getChainId, switchChain, watchAccount } from "@wagmi/core"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
@@ -29,6 +29,8 @@ import {
 } from "@/lib/eas/clientSafe"
 import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
+import { useWallets } from "@privy-io/react-auth"
+import { useSetActiveWallet } from "@privy-io/wagmi"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -97,30 +99,19 @@ const VotingColumn = ({
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
-
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
-  // Does not work.
-  const unwatchAccountChanges = watchAccount(privyWagmiConfig, {
-    onChange(data) {
-      if (data.address !== userCitizen?.address) {
-        setAddressMismatch(true)
-      } else {
-        setAddressMismatch(false)
-      }
-    },
-  })
-
+  const { wallets } = useWallets()
   const signer = useEthersSigner({ chainId: CHAIN_ID })
+  const { setActiveWallet } = useSetActiveWallet()
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
     if (!userCitizen?.address) {
       throw new Error("User citizen address not available")
     }
-
     const connectedChainId = getChainId(privyWagmiConfig)
     if (connectedChainId !== CHAIN_ID) {
       await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
@@ -175,6 +166,19 @@ const VotingColumn = ({
     }
   }
 
+  const validateAddress = () => {
+    const newActiveWallet = wallets.find(
+      (wallet) => wallet.address === userCitizen!.address,
+    )
+    if (!newActiveWallet) {
+      setAddressMismatch(true)
+      throw new Error("Citizen wallet not found. Try reconnecting.")
+    } else {
+      setAddressMismatch(false)
+      return newActiveWallet
+    }
+  }
+
   const handleCastVote = async () => {
     if (!selectedVote) return
 
@@ -185,10 +189,20 @@ const VotingColumn = ({
     setIsVoting(true)
 
     const castAndRecordVote = async () => {
+      if (!userCitizen?.address) {
+        throw new Error("User citizen address not available")
+      }
+
       try {
+        const newActiveWallet = validateAddress()
+        if (newActiveWallet) {
+          await setActiveWallet(newActiveWallet)
+        }
+
         if (signer!.address !== userCitizen!.address) {
           throw new Error("Signer address does not match citizen address")
         }
+
         // Sign the attestation with the correct user wallet
         const { data, rawSignature, signerAddress } =
           await createDelegatedAttestation(choices)
@@ -215,11 +229,37 @@ const VotingColumn = ({
 
         // 3. Record vote in the database
         await postOffchainVote(offchainVote)
-        // Stop watching for account changes
-        unwatchAccountChanges()
       } catch (error) {
         console.error("Failed to cast vote:", error)
-        throw new Error("Failed to cast vote.")
+        if (
+          error instanceof Error &&
+          error.message === "Signer address does not match citizen address"
+        ) {
+          const newActiveWallet = wallets.find(
+            (wallet) =>
+              wallet.address?.toLowerCase() ===
+              userCitizen!.address?.toLowerCase(),
+          )
+
+          console.log({ newActiveWallet, wallets })
+          if (!newActiveWallet) {
+            throw new Error(
+              "Citizen wallet not found. Try disconnecting and reconnecting with your Citizen wallet.",
+            )
+          } else {
+            setActiveWallet(newActiveWallet)
+            // Prompt a retry
+            throw new Error("Something went wrong. Please try again.")
+          }
+        } else if (
+          error instanceof Error &&
+          error.message
+            .toLowerCase()
+            .includes("User rejected the request.".toLowerCase())
+        ) {
+          throw new Error("User rejected signature")
+        }
+        throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)
       }
