@@ -19,6 +19,7 @@
     "export:mailchimp": "tsx src/scripts/mailchimp-export.ts",
     "rewards": "tsx src/scripts/rewards.ts",
     "kyc": "tsx src/scripts/kyc.ts",
+    "revoke:citizenship": "tsx src/scripts/revoke-citizenship.ts",
     "prepare": "husky",
     "studio": "prisma studio",
     "graphql:generate": "pnpm graphql-codegen",
