@@ -9,13 +9,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { getRoleById } from "@/db/role"
+import { getRoleApplications, getRoleById } from "@/db/role"
 import { formatMMMd } from "@/lib/utils/date"
 
 import { Sidebar } from "./components/Sidebar"
+import SidebarApplications from "./components/SidebarApplications"
 
 export default async function Page({ params }: { params: { id: string } }) {
   const role = await getRoleById(parseInt(params.id))
+  const applications = await getRoleApplications(parseInt(params.id))
 
   if (!role) {
     notFound()
@@ -98,8 +100,11 @@ export default async function Page({ params }: { params: { id: string } }) {
             </div>
           </div>
         </div>
-        <div>
+        <div className="flex flex-col gap-6">
           <Sidebar role={role} />
+          {applications && applications.length > 0 && (
+            <SidebarApplications applications={applications} />
+          )}
         </div>
       </div>
     </main>

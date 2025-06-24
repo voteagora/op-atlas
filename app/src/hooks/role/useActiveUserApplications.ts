@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { activeRoleApplications } from "@/lib/actions/role"
+import { activeUserApplications } from "@/lib/actions/role"
 
 export const ACTIVE_USER_APPLICATIONS_QUERY_KEY = "activeUserApplications"
 
@@ -17,7 +17,7 @@ export const useActiveUserApplications = ({
 
   const { data, isLoading, error } = useQuery({
     queryKey: [ACTIVE_USER_APPLICATIONS_QUERY_KEY, userId],
-    queryFn: () => activeRoleApplications(userId),
+    queryFn: () => activeUserApplications(userId),
     enabled,
   })
 

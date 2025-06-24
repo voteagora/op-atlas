@@ -37,6 +37,17 @@ export async function getUserRoleApplication(
   })
 }
 
+export async function getRoleApplications(
+  roleId: number,
+): Promise<RoleApplication[]> {
+  return prisma.roleApplication.findMany({
+    where: { roleId },
+    orderBy: {
+      createdAt: "desc",
+    },
+  })
+}
+
 export async function upsertRoleApplication(
   id: number,
   applicationParams: {
