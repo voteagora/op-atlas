@@ -4,7 +4,7 @@ import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { createDelegatedVoteAttestation } from "@/lib/eas/serverOnly"
 
 export async function vote(
-  data: any,
+  data: string,
   delegateAttestationSignature: Signature,
   signerAddress: string,
   citizenRefUID: string,

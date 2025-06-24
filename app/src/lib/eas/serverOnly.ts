@@ -526,7 +526,7 @@ export async function isAttestationActive(
 }
 
 export async function createDelegatedVoteAttestation(
-  data: any,
+  data: string,
   delegateAttestationSignature: Signature,
   signerAddress: string,
   citizenRefUID: string,
