@@ -5,7 +5,7 @@ import {
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
 import { getChainId, switchChain, watchAccount } from "@wagmi/core"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
