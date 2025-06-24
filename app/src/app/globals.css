@@ -11,18 +11,16 @@
     --button-secondary-text: 228 14% 29%;
 
     --text-primary: 230 30% 96%;
-    --text-default: 229 27% 8%; /* #0F111A */
-    --text-secondary: 228 14% 29%; /* #404454 */
-    --text-muted: 229 10% 43%; /* #636779 */
-    --text-white: 0 0% 100%; /* #FFFFFF */
+    --text-default: 229 27% 8%;
+    --text-secondary: 228 14% 29%;
+    --text-muted: 229 10% 43%;
 
-    --background-secondary: 230 30% 96%; /* #F2F3F8 */
+    --background-secondary: 230 30% 96%;
     --background-secondary-hover: 230 30% 93%;
     --background-accent: 220 100% 92%;
-    --background-tertiary: 229 22% 90%; /* #E0E2EB */
 
-    --background: 220 60% 99%; /* #FBFCFE */
-    --foreground: 229 27% 8%; /* #0F111A */
+    --background: 220 60% 99%;
+    --foreground: 229 27% 8%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -30,15 +28,14 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 348 100% 50%; /* #FF0420 */
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 229 22% 96%; /* #F2F3F8 */
+    --secondary: 229 22% 96%;
     --secondary-foreground: #404454;
 
     --muted: 229 15% 77%;
-    --muted-foreground: 229 10% 43%; /* #636779 */
-    --color-text-muted: 240 3% 46%; /* #71717A */
+    --muted-foreground: 229 10% 43%;
 
     --accent: 220 100% 92%;
     --accent-foreground: 217 70% 53%;
@@ -46,42 +43,34 @@
     --success: 126, 100%, 92%;
     --success-foreground: 131, 85%, 35%;
 
-    --destructive: 353 100% 51%; /* #FF0420 */
+    --destructive: 353 100% 51%;
     --destructive-foreground: 352, 100%, 36%;
 
-    --border: 229 22% 90%; /* #E0E2EB */
+    --border: 229 22% 90%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-
-    --callout: 220 100% 92%; /* #D6E4FF */
-    --callout-foreground: 217 70% 53%; /* #0E4CAF */
-    --callout-strong: 217 70% 53%; /* #3374DB */
-
-    --neutral-600: 228 14% 29%; /* #404454 */
-    --red-500: 348 100% 50%; /* #FF0420 */
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 25% 3%; /* #05060B */
-    --foreground: 229 22% 90%; /* #E0E2EB */
+    --background: 222.2 84% 4.9%;
+    --foreground: #0f111a;
 
-    --card: 240 25% 3%;
-    --card-foreground: 229 22% 90%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 25% 3%;
-    --popover-foreground: 229 22% 90%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 348 100% 50%; /* #FF0420 */
-    --primary-foreground: 229 22% 90%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 229 27% 8%; /* #0F111A */
-    --secondary-foreground: 228 14% 80%; /* #BCBFCD */
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 228 14% 61%; /* #9195A6 */
-    --color-text-muted: 240 3% 65%; /* #A1A1AA */
+    --muted-foreground: 215 20.2% 65.1%;
 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
@@ -89,27 +78,12 @@
     --success: 129 65% 53%;
     --success-foreground: 129 65% 53%;
 
-    --destructive: 348 100% 50%; /* #FF0420 */
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 228 14% 29%; /* #404454 */
-    --input: 228 14% 29%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-
-    --text-default: 229 22% 90%; /* #E0E2EB */
-    --text-secondary: 228 14% 80%; /* #BCBFCD */
-    --text-muted: 228 14% 61%; /* #9195A6 */
-    --text-white: 0 0% 100%; /* #FFFFFF */
-
-    --background-secondary: 223 16% 17%; /* #232634 */
-    --background-tertiary: 228 14% 29%; /* #404454 */
-
-    --callout: 220 100% 23%; /* #002D75 */
-    --callout-foreground: 214 98% 83%; /* #AAC9FD */
-    --callout-strong: 217 70% 53%; /* #3374DB */
-
-    --neutral-600: 228 14% 29%; /* #404454 */
-    --red-500: 348 100% 50%; /* #FF0420 */
   }
 }
 
@@ -191,5 +165,3 @@
 .fc-authkit-signin-button button {
   @apply px-4 py-2 !text-sm !font-semibold !border;
 }
-
-
