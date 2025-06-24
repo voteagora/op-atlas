@@ -19,7 +19,7 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
     enabled: !!citizen?.organizationId,
   })
 
-  const { project } = useProject({
+  const { data: project } = useProject({
     id: citizen?.projectId ?? "",
     enabled: !!citizen?.projectId,
   })

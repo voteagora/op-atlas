@@ -134,6 +134,29 @@ export const ArrowDownS = ({
   )
 }
 
+export const ArrowUpS = ({
+  className,
+  fill = "#000",
+}: {
+  className?: string
+  fill?: string
+}) => {
+  return (
+    <svg
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill={fill}
+        d="M11.9999 10.8284L7.0502 15.7782L5.63599 14.364L11.9999 8L18.3639 14.364L16.9497 15.7782L11.9999 10.8284Z"
+      ></path>
+    </svg>
+  )
+}
+
 export const Check = ({
   className,
   fill = "#000",
