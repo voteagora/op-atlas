@@ -531,6 +531,13 @@ export async function createDelegatedVoteAttestation(
   signerAddress: string,
   citizenRefUID: string,
 ): Promise<string> {
+  console.log("createDelegatedVoteAttestation: ", {
+    data,
+    delegateAttestationSignature,
+    signerAddress,
+    citizenRefUID,
+  })
+
   try {
     // Use attestByDelegation to create the attestation
     const tx = await eas.attestByDelegation({
