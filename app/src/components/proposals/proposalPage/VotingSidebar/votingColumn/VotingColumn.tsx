@@ -103,9 +103,8 @@ const VotingColumn = ({
   }
 
   // Does not work.
-  const unwatch = watchAccount(privyWagmiConfig, {
+  const unwatchAccountChanges = watchAccount(privyWagmiConfig, {
     onChange(data) {
-      console.log("Account changed!", data)
       if (data.address !== userCitizen?.address) {
         setAddressMismatch(true)
       } else {
@@ -216,6 +215,8 @@ const VotingColumn = ({
 
         // 3. Record vote in the database
         await postOffchainVote(offchainVote)
+        // Stop watching for account changes
+        unwatchAccountChanges()
       } catch (error) {
         console.error("Failed to cast vote:", error)
         throw new Error("Failed to cast vote.")
@@ -269,7 +270,7 @@ const VotingColumn = ({
               return action
             })}
           />
-          {addressMismatch && (
+          {addressMismatch && userCitizen && !userVoted && userSignedIn && (
             <div className="text-red-500 text-sm text-center mt-2">
               You must connect your citizen wallet to vote.
             </div>

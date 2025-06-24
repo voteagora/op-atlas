@@ -562,17 +562,13 @@ export const validateSignatureAddressIsValid = async (
   expectedSignerAddress: string,
 ): Promise<boolean> => {
   try {
-    // In ethers v6, use TypedDataEncoder directly
-    const digest = ethers.TypedDataEncoder.hash(
+    const recoveredAddress = ethers.verifyTypedData(
       response.domain,
       response.types,
       response.message,
+      response.signature,
     )
 
-    // Use SigningKey.recoverPublicKey and computeAddress
-    const recoveredAddress = ethers.recoverAddress(digest, response.signature)
-
-    // Validate that the recovered address matches the expected signer
     return (
       recoveredAddress.toLowerCase() === expectedSignerAddress.toLowerCase()
     )
