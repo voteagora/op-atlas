@@ -22,7 +22,6 @@
     "prepare": "husky",
     "studio": "prisma studio",
     "graphql:generate": "pnpm graphql-codegen",
-    "cleanup:funding-rewards": "tsx src/scripts/cleanup-funding-rewards.ts",
     "process:oso-data": "tsx src/scripts/process-oso-data.ts"
   },
   "lint-staged": {
