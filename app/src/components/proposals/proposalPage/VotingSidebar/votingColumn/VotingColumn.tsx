@@ -4,7 +4,8 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { useState, useEffect } from "react"
+import { getChainId, switchChain, watchAccount } from "@wagmi/core"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
@@ -26,17 +27,8 @@ import {
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
-import {
-  switchChain,
-  getChainId,
-  switchAccount,
-  getConnections,
-  watchAccount,
-} from "@wagmi/core"
-import { useAccount, useConnections } from "wagmi"
+import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
-import { usePrivy } from "@privy-io/react-auth"
-import { useAccountEffect } from "wagmi"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -110,6 +102,18 @@ const VotingColumn = ({
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
+  // Does not work.
+  const unwatch = watchAccount(privyWagmiConfig, {
+    onChange(data) {
+      console.log("Account changed!", data)
+      if (data.address !== userCitizen?.address) {
+        setAddressMismatch(true)
+      } else {
+        setAddressMismatch(false)
+      }
+    },
+  })
+
   const signer = useEthersSigner({ chainId: CHAIN_ID })
 
   const createDelegatedAttestation = async (choices: any) => {
@@ -152,13 +156,23 @@ const VotingColumn = ({
       deadline: NO_EXPIRATION,
     }
 
+    const rawSignature = await delegated.signDelegatedAttestation(
+      delegateRequest,
+      signer,
+    )
+    const isValid = await validateSignatureAddressIsValid(
+      rawSignature,
+      userCitizen.address,
+    )
+
+    if (!isValid) {
+      throw new Error("Invalid signature")
+    }
+
     return {
       data: encodedData,
-      rawSignature: await delegated.signDelegatedAttestation(
-        delegateRequest,
-        signer,
-      ),
-      signerAddress: signer.address,
+      rawSignature: rawSignature,
+      signerAddress: signer.address as `0x${string}`,
     }
   }
 
