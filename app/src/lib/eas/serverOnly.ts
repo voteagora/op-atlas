@@ -1,6 +1,10 @@
 "use server"
 
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
+import {
+  EAS,
+  EIP712Response,
+  SchemaEncoder,
+} from "@ethereum-attestation-service/eas-sdk"
 import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
@@ -550,5 +554,26 @@ export async function createDelegatedVoteAttestation(
   } catch (error) {
     console.error("Error creating vote attestation:", error)
     throw error
+  }
+}
+
+export const validateSignatureAddressIsValid = async (
+  response: EIP712Response<any, any>,
+  expectedSignerAddress: string,
+): Promise<boolean> => {
+  try {
+    const recoveredAddress = ethers.verifyTypedData(
+      response.domain,
+      response.types,
+      response.message,
+      response.signature,
+    )
+
+    return (
+      recoveredAddress.toLowerCase() === expectedSignerAddress.toLowerCase()
+    )
+  } catch (error) {
+    console.error("EIP712 validation error:", error)
+    return false
   }
 }

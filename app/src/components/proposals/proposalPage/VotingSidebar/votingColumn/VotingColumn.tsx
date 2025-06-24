@@ -4,8 +4,8 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { getChainId, switchChain, watchAccount } from "@wagmi/core"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
@@ -27,7 +27,7 @@ import {
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
-import { switchChain, getChainId } from "@wagmi/core"
+import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
@@ -96,16 +96,31 @@ const VotingColumn = ({
 }: VotingColumnProps) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
   const [isVoting, setIsVoting] = useState<boolean>(false)
+  const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
 
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
 
+  // Does not work.
+  const unwatchAccountChanges = watchAccount(privyWagmiConfig, {
+    onChange(data) {
+      if (data.address !== userCitizen?.address) {
+        setAddressMismatch(true)
+      } else {
+        setAddressMismatch(false)
+      }
+    },
+  })
+
   const signer = useEthersSigner({ chainId: CHAIN_ID })
-  const router = useRouter()
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
+    if (!userCitizen?.address) {
+      throw new Error("User citizen address not available")
+    }
+
     const connectedChainId = getChainId(privyWagmiConfig)
     if (connectedChainId !== CHAIN_ID) {
       await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
@@ -126,32 +141,41 @@ const VotingColumn = ({
       { name: "params", value: args.choices, type: "string" },
     ])
 
-    const nonce = await eas.getNonce(signer.address)
+    const nonce = await eas.getNonce(signer.address as `0x${string}`)
 
     const delegateRequest = {
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
       recipient: signer.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
       revocable: false,
-      refUID: userCitizen!.attestationId! as `0x${string}`,
+      refUID: userCitizen.attestationId! as `0x${string}`,
       data: encodedData,
       value: BigInt(0),
       nonce,
       deadline: NO_EXPIRATION,
     }
 
+    const rawSignature = await delegated.signDelegatedAttestation(
+      delegateRequest,
+      signer,
+    )
+    const isValid = await validateSignatureAddressIsValid(
+      rawSignature,
+      userCitizen.address,
+    )
+
+    if (!isValid) {
+      throw new Error("Invalid signature")
+    }
+
     return {
       data: encodedData,
-      rawSignature: await delegated.signDelegatedAttestation(
-        delegateRequest,
-        signer,
-      ),
-      signerAddress: signer.address,
+      rawSignature: rawSignature,
+      signerAddress: signer.address as `0x${string}`,
     }
   }
 
   const handleCastVote = async () => {
-    console.log("[debug] handleCastVote called") // should print on click
     if (!selectedVote) return
 
     const choices = mapVoteTypeToValue(
@@ -162,9 +186,13 @@ const VotingColumn = ({
 
     const castAndRecordVote = async () => {
       try {
-        // Sign the attestation with user wallet
+        if (signer!.address !== userCitizen!.address) {
+          throw new Error("Signer address does not match citizen address")
+        }
+        // Sign the attestation with the correct user wallet
         const { data, rawSignature, signerAddress } =
           await createDelegatedAttestation(choices)
+
         // 2. Send signature to server to relay onchain
         const attestationId = await vote(
           data,
@@ -172,6 +200,7 @@ const VotingColumn = ({
           signerAddress,
           userCitizen!.attestationId!,
         )
+
         // build an offchain vote object for the DB
         const offchainVote: OffchainVote = {
           attestationId: attestationId,
@@ -183,8 +212,11 @@ const VotingColumn = ({
           createdAt: new Date(),
           updatedAt: new Date(),
         }
+
         // 3. Record vote in the database
         await postOffchainVote(offchainVote)
+        // Stop watching for account changes
+        unwatchAccountChanges()
       } catch (error) {
         console.error("Failed to cast vote:", error)
         throw new Error("Failed to cast vote.")
@@ -203,10 +235,6 @@ const VotingColumn = ({
         return error.message
       },
     })
-
-    setTimeout(() => {
-      router.refresh()
-    }, 1000) // Wait 1s and reload the page to show the new vote
   }
 
   return (
@@ -224,23 +252,30 @@ const VotingColumn = ({
         />
       </div>
       {currentlyActive && votingActions && !userVoted && (
-        <VotingActions
-          // This is a wonky way to overwrite the call to make an external call.
-          cardActionList={votingActions.cardActionList.map((action) => {
-            // If this is a vote action, replace its action function with handleCastVote
-            // and determine if it should be disabled based on selectedVote
-            if (action.actionType === "Vote") {
-              return {
-                ...action,
-                action: handleCastVote,
-                disabled: !selectedVote,
-                loading: isVoting,
+        <>
+          <VotingActions
+            // This is a wonky way to overwrite the call to make an external call.
+            cardActionList={votingActions.cardActionList.map((action) => {
+              // If this is a vote action, replace its action function with handleCastVote
+              // and determine if it should be disabled based on selectedVote or address mismatch
+              if (action.actionType === "Vote") {
+                return {
+                  ...action,
+                  action: handleCastVote,
+                  disabled: !selectedVote || addressMismatch,
+                  loading: isVoting,
+                }
               }
-            }
-            // Otherwise, return the original action unchanged
-            return action
-          })}
-        />
+              // Otherwise, return the original action unchanged
+              return action
+            })}
+          />
+          {addressMismatch && userCitizen && !userVoted && userSignedIn && (
+            <div className="text-red-500 text-sm text-center mt-2">
+              You must connect your citizen wallet to vote.
+            </div>
+          )}
+        </>
       )}
 
       {!currentlyActive ||
