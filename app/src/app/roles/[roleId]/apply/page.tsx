@@ -16,16 +16,16 @@ import { formatMMMd } from "@/lib/utils/date"
 
 import { Form } from "./components/Form"
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: { roleId: string } }) {
   const session = await auth()
   const userId = session?.user?.id
 
   if (!userId) {
-    redirect(`/roles/${params.id}`)
+    redirect(`/roles/${params.roleId}`)
   }
 
   const [role, user, userOrgs] = await Promise.all([
-    getRoleById(parseInt(params.id)),
+    getRoleById(parseInt(params.roleId)),
     getUserById(userId),
     getUserOrganizations(userId),
   ])
@@ -52,7 +52,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/roles/${params.id}`}>
+                <BreadcrumbLink href={`/roles/${params.roleId}`}>
                   {role.title}
                 </BreadcrumbLink>
               </BreadcrumbItem>

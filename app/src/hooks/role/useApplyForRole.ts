@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
@@ -10,6 +11,7 @@ import { useActiveUserApplications } from "./useActiveUserApplications"
 export const useApplyForRole = (userId?: string, roleId?: number) => {
   const [isPending, startTransition] = useTransition()
   const [isSuccess, setIsSuccess] = useState(false)
+  const router = useRouter()
 
   const { invalidate: invalidateActiveApplications } =
     useActiveUserApplications({
@@ -29,7 +31,7 @@ export const useApplyForRole = (userId?: string, roleId?: number) => {
     startTransition(async () => {
       try {
         const loadingToast = toast.loading("Applying for role...")
-        await applyForRole(id, applicationParams)
+        const application = await applyForRole(id, applicationParams)
         // Invalidate hasApplied query on success
         if (applicationParams.userId) {
           invalidateActiveApplications()
@@ -37,6 +39,7 @@ export const useApplyForRole = (userId?: string, roleId?: number) => {
         toast.dismiss(loadingToast)
         toast.success("Role application submitted successfully")
         setIsSuccess(true)
+        router.push(`/roles/${id}/apply/${application.id}`)
       } catch (error) {
         toast.error("Failed to apply for role")
         setIsSuccess(false)

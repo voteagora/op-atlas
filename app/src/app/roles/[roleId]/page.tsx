@@ -15,9 +15,9 @@ import { formatMMMd } from "@/lib/utils/date"
 import { Sidebar } from "./components/Sidebar"
 import SidebarApplications from "./components/SidebarApplications"
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const role = await getRoleById(parseInt(params.id))
-  const applications = await getRoleApplications(parseInt(params.id))
+export default async function Page({ params }: { params: { roleId: string } }) {
+  const role = await getRoleById(parseInt(params.roleId))
+  const applications = await getRoleApplications(parseInt(params.roleId))
 
   if (!role) {
     notFound()

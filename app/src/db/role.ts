@@ -48,6 +48,14 @@ export async function getRoleApplications(
   })
 }
 
+export async function getRoleApplicationById(
+  id: number,
+): Promise<RoleApplication | null> {
+  return prisma.roleApplication.findUnique({
+    where: { id },
+  })
+}
+
 export async function upsertRoleApplication(
   id: number,
   applicationParams: {

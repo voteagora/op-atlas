@@ -1,6 +1,5 @@
 import { Role, User } from "@prisma/client"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/common/Button"
@@ -65,9 +64,8 @@ export const UserForm = ({
   })
 
   const user = loadedUser || initialUser
-  const router = useRouter()
   const { linkGithub } = usePrivyLinkGithub(user.id)
-  const { applyForRole, isLoading, isSuccess } = useApplyForRole()
+  const { applyForRole, isLoading } = useApplyForRole()
 
   const { data: userProjects } = useUserAdminProjects({ userId: user.id })
 
@@ -147,12 +145,6 @@ export const UserForm = ({
     const finalResult = allTermsChecked && userRequirementsSatisfied
     setRequirementsSatisfied(finalResult)
   }, [checkedRules, role, user])
-
-  useEffect(() => {
-    if (isSuccess) {
-      router.push(`/roles/${role.id}`)
-    }
-  }, [isSuccess, router, role])
 
   const onSubmit = () => {
     // Prepare projects data with descriptions

@@ -26,8 +26,10 @@ export const Sidebar = ({ role }: { role: Role }) => {
       enabled: isAuthenticated,
     })
 
-  const hasAppliedForThisRole = activeApplications?.some(app => app.roleId === role.id) || false
-  const hasAppliedThisSeason = activeApplications && activeApplications.length > 0 || false
+  const hasAppliedForThisRole =
+    activeApplications?.some((app) => app.roleId === role.id) || false
+  const hasAppliedThisSeason =
+    (activeApplications && activeApplications.length > 0) || false
 
   const isApplicationWindow =
     role.startAt &&
