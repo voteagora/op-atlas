@@ -20,9 +20,8 @@ import {
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
 import { updateMailchimpTags } from "../api/mailchimp"
-import {
-  createCitizenAttestation
-} from "../eas"
+
+import { createCitizenAttestation } from "../eas/serverOnly"
 
 interface S8QualifyingUser {
   address: string
@@ -352,7 +351,7 @@ export const isS7Citizen = async (id: string): Promise<boolean> => {
 // S7 Citizens
 // https://optimism.easscan.org/schema/view/0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a
 const getS7CitizenAddresses = async () => {
-  return [
+  const productionList = [
     "0xCb5feBBa6bbeb052D7249Aa315F3C0c1feD94910",
     "0x585639fBf797c1258eBA8875c080Eb63C833d252",
     "0x3DB5b38ef4b433D9C6A664Bd35551BE73313189A",
@@ -455,5 +454,37 @@ const getS7CitizenAddresses = async () => {
     "0x1F5D295778796a8b9f29600A585Ab73D452AcB1c",
     "0x849151d7D0bF1F34b70d5caD5149D28CC2308bf1",
     "0xDb150346155675dd0C93eFd960d5985244a34820",
+    "0xDBb050a8692afF8b5EF4A3F36D53900B14210E40",
+    "0x648BFC4dB7e43e799a84d0f607aF0b4298F932DB",
   ]
+
+  const testList = [
+    "0x648BFC4dB7e43e799a84d0f607aF0b4298F932DB",
+    "0xA622279f76ddbed4f2CC986c09244262Dba8f4Ba",
+    "0x47E7cEe058E7e33dA6Ea2Ba9Ba7A14ae5d7E8cC4",
+    "0x6D5eFC4cb936c1d5d13dd9b982C467DD3222A39f",
+    "0x49d2a436899A84ce7EaAf9f5AC506776756d4ea4",
+    "0x249DFBBaf7a9cB9CB47a38e399484DBAec642Cad",
+    "0xC950b9F32259860f4731D318CB5a28B2dB892f88",
+    "0x57De675bb963b341479F98E7c5418Bb3B3de2088",
+    "0x13AC7d7dA4f9063ba7cabC2AD75f90AFB3D0877B",
+    "0x4a6894Dd556fab996f8D50b521f900CAEedC168e",
+    "0x2adeDC3D5044cf64ebeE8Fe3d0e564E133bB672A",
+    "0x9BB5c1F229235518274A513a48e3D221995e2D5b",
+    "0x4F9CCD8C2d017EaDD0CdAaC6692c9BcD96c92e53",
+    "0xFdFC6E1BbEc01288447222fC8F1AEE55a7C72b7B",
+    "0x155f0A6468f022fE68C25A70fa2DbDbBa2c0B74F",
+    "0x5993672EEB4B3e432140D553a0Be330fFCEd1f7D",
+    "0xC323Ee1d28D2508667f4BEbfC26F93c60aBdD203",
+  ]
+
+  const isTestnet =
+    process.env.NEXT_PUBLIC_ENV === "dev" ||
+    process.env.USE_S7_TEST_ACCOUNTS === "true"
+  
+  console.log(`isTestnet = ${isTestnet}`)
+  console.log(`process.env.NEXT_PUBLIC_ENV = ${process.env.NEXT_PUBLIC_ENV}`)
+  console.log(`process.env.USE_S7_TEST_ACCOUNTS = ${process.env.USE_S7_TEST_ACCOUNTS}`)
+
+  return isTestnet ? [...productionList, ...testList] : productionList
 }

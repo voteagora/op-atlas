@@ -1,5 +1,17 @@
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
+"use server"
+
+import {
+  EAS,
+  EIP712Response,
+  SchemaEncoder,
+} from "@ethereum-attestation-service/eas-sdk"
+import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
+
+import {
+  EAS_CONTRACT_ADDRESS,
+  OFFCHAIN_VOTE_SCHEMA_ID,
+} from "@/lib/eas/clientSafe"
 
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
@@ -20,12 +32,11 @@ const CONTRACT_SCHEMA_ID =
     ? "0xb4c6ea838744caa6f0bfce726c0223cffefb94d98e5690f818cf0e2800e7a8f2"
     : "0x5560b68760b2ec5a727e6a66e1f9754c307384fe7624ae4e0138c530db14a70b"
 
-export const CITIZEN_SCHEMA_ID =
+const CITIZEN_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
     : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
-
-export const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
+const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
     ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
     : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
@@ -55,11 +66,7 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
   throw new Error("EAS_SIGNER_PRIVATE_KEY is missing from env")
 }
 
-// Optimism address
-const eas =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? new EAS("0xC2679fBD37d54388Ce493F1DB75320D236e1815e")
-    : new EAS("0x4200000000000000000000000000000000000021")
+const eas = new EAS(EAS_CONTRACT_ADDRESS)
 
 const provider = new ethers.AlchemyProvider(
   process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",
@@ -514,6 +521,66 @@ export async function isAttestationActive(
     return attestation !== null && !attestation.revocationTime
   } catch (error) {
     console.warn("Error checking attestation status:", error)
+    return false
+  }
+}
+
+export async function createDelegatedVoteAttestation(
+  data: string,
+  delegateAttestationSignature: Signature,
+  signerAddress: string,
+  citizenRefUID: string,
+): Promise<string> {
+  console.log("createDelegatedVoteAttestation: ", {
+    data,
+    delegateAttestationSignature,
+    signerAddress,
+    citizenRefUID,
+  })
+
+  try {
+    // Use attestByDelegation to create the attestation
+    const tx = await eas.attestByDelegation({
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
+      data: {
+        recipient: signerAddress,
+        expirationTime: BigInt(0), // NO_EXPIRATION
+        revocable: false,
+        refUID: citizenRefUID as `0x${string}`,
+        data: data,
+      },
+      signature: delegateAttestationSignature,
+      attester: signerAddress,
+      deadline: BigInt(0), // NO_EXPIRATION
+    })
+
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait()
+    console.log("Vote attestation created with ID:", receipt)
+    return receipt
+  } catch (error) {
+    console.error("Error creating vote attestation:", error)
+    throw error
+  }
+}
+
+export const validateSignatureAddressIsValid = async (
+  response: EIP712Response<any, any>,
+  expectedSignerAddress: string,
+): Promise<boolean> => {
+  try {
+    const recoveredAddress = ethers.verifyTypedData(
+      response.domain,
+      response.types,
+      response.message,
+      response.signature,
+    )
+
+    return (
+      recoveredAddress.toLowerCase() === expectedSignerAddress.toLowerCase()
+    )
+  } catch (error) {
+    console.error("EIP712 validation error:", error)
     return false
   }
 }

@@ -86,6 +86,18 @@ export async function getCitizenCountByType(type: string): Promise<number> {
   })
 }
 
+export async function getCitizenProposalVote(
+  citizenId: number,
+  proposalId: string,
+): Promise<any> {
+  return prisma.offChainVote.findFirst({
+    where: {
+      citizenId: citizenId,
+      proposalId: proposalId,
+    },
+  })
+}
+
 export async function deleteCitizen(id: number) {
   return prisma.citizen.delete({
     where: { id },

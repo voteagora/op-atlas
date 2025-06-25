@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client"
 import { getAddress } from "viem"
 
-import { revokeCitizenAttestation } from "@/lib/eas"
+import { revokeCitizenAttestation } from "@/lib/eas/serverOnly"
 
 const prisma = new PrismaClient()
 

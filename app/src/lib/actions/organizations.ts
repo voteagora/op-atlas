@@ -20,7 +20,7 @@ import {
 } from "@/db/organizations"
 import { getUserById } from "@/db/users"
 
-import { createEntityAttestation } from "../eas"
+import { createEntityAttestation } from "../eas/serverOnly"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin } from "./utils"

@@ -12,7 +12,7 @@ import {
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
 
-import { createApplicationAttestation } from "../eas"
+import { createApplicationAttestation } from "../eas/serverOnly"
 import { CategoryWithImpact } from "../types"
 import { getProjectStatus } from "../utils"
 import { getUserApplicationsForRound } from "./projects"
