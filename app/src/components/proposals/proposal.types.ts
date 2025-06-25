@@ -1,4 +1,4 @@
-import { citizenCategory, User } from "@prisma/client"
+import { Citizen, citizenCategory, User } from "@prisma/client"
 import { CitizenshipQualification } from "@/lib/types"
 import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
@@ -39,17 +39,6 @@ export interface voteAction {
   action: (data?: any) => Promise<any>
   disabled?: boolean
   loading?: boolean
-}
-
-export type Citizen = {
-  id: number
-  userId: string
-  address: string | null
-  type: citizenCategory
-  attestationId: string | null
-  timeCommitment: string | null
-  createdAt: Date
-  updatedAt: Date
 }
 
 export interface OffchainVote {

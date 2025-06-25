@@ -49,14 +49,7 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
 
   const session = await auth()
   const userId = session?.user.id ?? ""
-  let user: any
-  try {
-    user = await getUserById(userId)
-  } catch (error) {
-    console.error(`Failed to fetch User Data: ${error}`)
-  }
-
-  let citizen: any = null
+  const user = await getUserById(userId)
   // Priority in which a citizen should be searched for
   const CITIZEN_PRIORITY: CitizenLookup["type"][] = [
     CITIZEN_TYPES.user,
@@ -70,18 +63,17 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
   async function findCitizenByPriority(
     id: string,
     priorities: CitizenLookup["type"][] = CITIZEN_PRIORITY,
-  ): Promise<Citizen | null> {
+  ): Promise<Citizen | undefined> {
     // Loops through citizen types in the priority list and returns the first citizen found
     for (const type of priorities) {
       const found = await getCitizenByType({ type, id })
       if (found) return found
     }
-    return null
+
+    return undefined
   }
 
-  if (user) {
-    citizen = (await findCitizenByPriority(userId)) ?? citizen
-  }
+  const citizen = await findCitizenByPriority(userId)
   const citizenEligibility = await s8CitizenshipQualification()
 
   // Date Info

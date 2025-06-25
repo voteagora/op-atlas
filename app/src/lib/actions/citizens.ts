@@ -6,7 +6,7 @@ import { auth } from "@/auth"
 import {
   getCitizenByType,
   getCitizenCountByType,
-  upsertCitizen
+  upsertCitizen,
 } from "@/db/citizens"
 import { prisma } from "@/db/client"
 import { getAdminOrganizations, getOrganization } from "@/db/organizations"
@@ -58,8 +58,9 @@ export const s8CitizenshipQualification =
     // Organization (Chain) qualification
     const qualifyingChains = await prisma.$queryRaw<S8QualifyingChain[]>`
     SELECT * FROM "S8QualifyingChain"
-    WHERE "organizationId" = ANY(${userOrgs?.organizations.map((org) => org.organization.id) || []
-      })
+    WHERE "organizationId" = ANY(${
+      userOrgs?.organizations.map((org) => org.organization.id) || []
+    })
   `
 
     if (qualifyingChains.length > 0) {
@@ -285,11 +286,11 @@ export const attestCitizen = async () => {
       farcasterId: parseInt(user?.farcasterId || "0"),
       selectionMethod:
         CITIZEN_ATTESTATION_CODE[
-        citizenType as keyof typeof CITIZEN_ATTESTATION_CODE
+          citizenType as keyof typeof CITIZEN_ATTESTATION_CODE
         ],
       refUID:
         qualification.type === CITIZEN_TYPES.chain ||
-          qualification.type === CITIZEN_TYPES.app
+        qualification.type === CITIZEN_TYPES.app
           ? qualification.identifier
           : undefined,
     })
@@ -476,15 +477,18 @@ const getS7CitizenAddresses = async () => {
     "0x155f0A6468f022fE68C25A70fa2DbDbBa2c0B74F",
     "0x5993672EEB4B3e432140D553a0Be330fFCEd1f7D",
     "0xC323Ee1d28D2508667f4BEbfC26F93c60aBdD203",
+    "0x924A0468961f09aB3c3A457382C9D06f48cff6aA",
   ]
 
   const isTestnet =
     process.env.NEXT_PUBLIC_ENV === "dev" ||
     process.env.USE_S7_TEST_ACCOUNTS === "true"
-  
+
   console.log(`isTestnet = ${isTestnet}`)
   console.log(`process.env.NEXT_PUBLIC_ENV = ${process.env.NEXT_PUBLIC_ENV}`)
-  console.log(`process.env.USE_S7_TEST_ACCOUNTS = ${process.env.USE_S7_TEST_ACCOUNTS}`)
+  console.log(
+    `process.env.USE_S7_TEST_ACCOUNTS = ${process.env.USE_S7_TEST_ACCOUNTS}`,
+  )
 
   return isTestnet ? [...productionList, ...testList] : productionList
 }
