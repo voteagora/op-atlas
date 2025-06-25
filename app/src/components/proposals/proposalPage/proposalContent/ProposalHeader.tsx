@@ -6,7 +6,7 @@ interface ProposalTitleProps {
 
 const ProposalTitle = ({ title }: ProposalTitleProps) => (
   <div className="gap-2 flex-col items-start">
-    <h1 className="font-semibold text-[36px] leading-[44px] tracking-normal text-text-default font-inter">
+    <h1 className="font-semibold text-xl sm:text-2xl md:text-3xl lg:text-[36px] leading-tight lg:leading-[44px] tracking-normal text-text-default font-inter break-words word-break overflow-wrap-anywhere">
       {title}
     </h1>
   </div>
@@ -14,29 +14,54 @@ const ProposalTitle = ({ title }: ProposalTitleProps) => (
 
 interface ProposalStatusProps {
   status: string
+  startDate?: string
+  endDate?: string
   className?: string
 }
 
-const ProposalStatus = ({ status, className = "" }: ProposalStatusProps) => (
-  <div className={`text-h2 ${className}`}>{status}</div>
+const ProposalStatus = ({
+  status,
+  startDate,
+  endDate,
+  className = "",
+}: ProposalStatusProps) => (
+  <div className={`text-h2 ${className} flex flex-col gap-3`}>
+    {startDate && endDate && (
+      <div className="font-inter font-normal text-sm md:text-[16px] leading-5 md:leading-[24px] tracking-[0%] text-secondary-foreground mt-1 max-w-full">
+        <span className="break-all overflow-hidden text-ellipsis">
+          Voting {startDate} - {endDate}
+        </span>
+      </div>
+    )}
+  </div>
 )
 
 const ProposalHeader = ({
   title,
   status,
+  startDate,
+  endDate,
 }: {
   title: string
   status: string
-}) => (
-  <div className="flex flex-col gap-[dimensions[8]]">
-    <div className="gap-[dimensions[5]]">
-      <ProposalTitle title={title} />
-      <ProposalStatus status={status} />
+  startDate?: string
+  endDate?: string
+}) => {
+  return (
+    <div className="flex flex-col gap-4 md:gap-8 w-full">
+      <div className="flex flex-col gap-4 md:gap-5">
+        <ProposalTitle title={title} />
+        <ProposalStatus
+          status={status}
+          startDate={startDate}
+          endDate={endDate}
+        />
+      </div>
+      <div className="pt-4 md:pt-5 pb-1">
+        <div className="divider border-t w-full" />
+      </div>
     </div>
-    <div className="h-[9px] pt-1 pb-1">
-      <div className="divider border w-full" />
-    </div>
-  </div>
-)
+  )
+}
 
 export default ProposalHeader
