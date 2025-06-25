@@ -92,6 +92,7 @@ export const Account = () => {
 
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
+  const isRolePath = pathName.includes("/role")
 
   const didLogIn =
     prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
@@ -133,7 +134,7 @@ export const Account = () => {
       if (loginRedirect) {
         localStorage.removeItem(LOCAL_STORAGE_LOGIN_REDIRECT)
         router.push(loginRedirect)
-      } else if (!isMissionsPath) {
+      } else if (!isMissionsPath && !isRolePath) {
         router.push("/dashboard")
       }
 
