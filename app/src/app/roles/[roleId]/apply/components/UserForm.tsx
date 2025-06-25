@@ -1,7 +1,8 @@
+import { useEffect, useRef, useState } from "react"
+
 import { Role, User } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState, useRef } from "react"
 
 import { Button } from "@/components/common/Button"
 import { ArrowRightS, CheckboxLine, Close } from "@/components/icons/reminx"
@@ -283,17 +284,22 @@ export const UserForm = ({
             <Link href="/projects/new" className="underline">
               add your project
             </Link>{" "}
-            before continuing here. To join a
-            project or organization that already exists in Atlas, please have
-            their admin add you.{" "}
+            before continuing here. To join a project or organization that
+            already exists in Atlas, please have their admin add you.{" "}
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
           <div className="flex flex-row justify-between text-foreground">
             <div>Projects that demonstrate your expertise (optional)</div>
-            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-              <DropdownMenuTrigger ref={dropdownTriggerRef} className="focus:outline-none">
+            <DropdownMenu
+              open={isDropdownOpen}
+              onOpenChange={setIsDropdownOpen}
+            >
+              <DropdownMenuTrigger
+                ref={dropdownTriggerRef}
+                className="focus:outline-none"
+              >
                 <div className="flex flex-row gap-1 items-center">
                   <CheckboxLine className="w-5 h-5" />
                   <div>Choose</div>
@@ -347,8 +353,9 @@ export const UserForm = ({
 
           {/* NO PROJECTS SELECTED */}
           {selectedProjects.length === 0 ? (
-            <div
-              className="text-muted-foreground border border-border rounded-md px-3 py-2 cursor-pointer"
+            <button
+              type="button"
+              className="text-muted-foreground border border-border rounded-md px-3 py-2 cursor-pointer text-left w-full"
               onClick={() => {
                 setIsDropdownOpen(true)
                 // Focus the dropdown trigger to ensure proper keyboard navigation
@@ -356,9 +363,19 @@ export const UserForm = ({
                   dropdownTriggerRef.current?.focus()
                 }, 0)
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  setIsDropdownOpen(true)
+                  setTimeout(() => {
+                    dropdownTriggerRef.current?.focus()
+                  }, 0)
+                }
+              }}
+              aria-label="Open project selection dropdown"
             >
               None
-            </div>
+            </button>
           ) : null}
         </div>
 
