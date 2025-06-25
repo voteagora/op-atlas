@@ -136,11 +136,10 @@ const ProposalPage = async ({
           </div>
           <div className="voting-sidebar w-full md:w-[304px] md:flex-shrink-0 flex justify-center md:justify-start">
             <VotingSidebar
-              className="sticky top-4 w-full max-w-[304px]"
               votingCardProps={votingCardProps!}
               votingColumnProps={votingColumnProps}
               votingRedirectProps={votingRedirectProps!}
-              proposalId={proposalId}
+              proposalId={proposalData.id}
               citizen={citizen}
               citizenEligibility={citizenEligibility}
               proposalType={proposalData.proposalType}

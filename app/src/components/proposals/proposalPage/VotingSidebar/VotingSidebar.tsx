@@ -23,7 +23,6 @@ interface VotingSidebarProps {
 }
 
 const VotingSidebar = ({
-  className = "",
   votingCardProps: initialVotingCardProps,
   votingColumnProps,
   votingRedirectProps,
@@ -70,7 +69,7 @@ const VotingSidebar = ({
   }
 
   return (
-    <div className={`w-[304px] gap-6 flex flex-col ${className}`}>
+    <div className="w-[304px] gap-6 flex flex-col sticky top-4 w-full max-w-[304px]">
       <div className="w-[304px] ">
         <VotingCard {...votingCardProps} />
         <VotingColumn
