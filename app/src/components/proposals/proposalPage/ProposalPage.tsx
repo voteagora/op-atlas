@@ -1,12 +1,12 @@
 import { Citizen } from "@prisma/client"
 import { notFound } from "next/navigation"
 
+import { getVotingProps } from "@/app/proposals/utils/votingUtils"
+import { auth } from "@/auth"
 import {
   ProposalPageDataInterface,
   ProposalType,
 } from "@/components/proposals/proposal.types"
-import { getVotingProps } from "@/app/proposals/utils/votingUtils"
-import { auth } from "@/auth"
 import Breadcrumbs from "@/components/proposals/proposalPage/proposalContent/Breadcrumbs"
 import Markdown from "@/components/proposals/proposalPage/proposalContent/Markdown"
 import ProposalHeader from "@/components/proposals/proposalPage/proposalContent/ProposalHeader"
@@ -141,6 +141,10 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
                 votingCardProps={votingCardProps!}
                 votingColumnProps={votingColumnProps}
                 votingRedirectProps={votingRedirectProps!}
+                proposalId={proposalId}
+                citizen={citizen}
+                citizenEligibility={citizenEligibility}
+                proposalType={proposalData.proposalType}
               />
             </div>
           </div>
