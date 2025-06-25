@@ -139,7 +139,7 @@ export const getProposals = async () => {
   }
 }
 
-type ProposalData = {
+export type ProposalData = {
   id: string
   proposer: string
   snapshotBlockNumber: number

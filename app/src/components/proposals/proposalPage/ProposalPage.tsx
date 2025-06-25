@@ -16,12 +16,8 @@ import { getUserById } from "@/db/users"
 import { s8CitizenshipQualification } from "@/lib/actions/citizens"
 import { parseEnumValue } from "@/lib/actions/utils"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { getProposal } from "@/lib/proposals"
+import { getProposal, ProposalData } from "@/lib/proposals"
 import { CitizenLookup } from "@/lib/types"
-
-interface ProposalPageProps {
-  proposalId: string
-}
 
 const CURRENT_DATETIME = new Date()
 
@@ -33,15 +29,11 @@ function stripTitleFromDescription(title: string, description: string) {
   return description
 }
 
-const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
-  let proposalData: any
-  try {
-    proposalData = await getProposal(proposalId)
-  } catch (error) {
-    console.error(`Failed to fetch Proposal Data: ${error}`)
-    return notFound()
-  }
-
+const ProposalPage = async ({
+  proposalData,
+}: {
+  proposalData: ProposalData
+}) => {
   const deTitledProposalDescription = stripTitleFromDescription(
     proposalData.markdowntitle,
     proposalData.description,
@@ -89,7 +81,7 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
   // Voting Info
   let voteHistory
   if (citizen && citizen.id) {
-    voteHistory = await getCitizenProposalVote(citizen.id, proposalId)
+    voteHistory = await getCitizenProposalVote(citizen.id, proposalData.id)
   }
   const voted = !!voteHistory
 
@@ -106,7 +98,7 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
       ProposalType,
       proposalData.proposalType,
     ),
-    proposalId: proposalId,
+    proposalId: proposalData.id,
     proposalStatus: proposalData.status,
     citizenEligibility: citizenEligibility,
   }

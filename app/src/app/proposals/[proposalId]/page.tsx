@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 
 import ProposalPage from "@/components/proposals/proposalPage/ProposalPage"
+import { getProposal } from "@/lib/proposals"
 
 interface PageProps {
   params: {
@@ -10,12 +11,13 @@ interface PageProps {
 
 const Page = async (params: PageProps) => {
   const proposalId = params.params.proposalId
-  if (!proposalId) {
-    console.error("Missing Proposal ID")
+  const proposalData = await getProposal(proposalId)
+
+  if (!proposalData) {
     return notFound()
   }
 
-  return <ProposalPage proposalId={proposalId} />
+  return <ProposalPage proposalData={proposalData} />
 }
 
 export default Page
