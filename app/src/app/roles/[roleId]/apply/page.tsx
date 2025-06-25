@@ -36,24 +36,24 @@ export default async function Page({ params }: { params: { roleId: string } }) {
 
   const voteSchedule =
     role?.voteStartAt && role?.voteEndAt
-      ? ` | Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
-          new Date(role.voteEndAt!),
-        )}`
-      : ""
+      ? `Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
+        new Date(role.voteEndAt!),
+      )}`
+      : null
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      <div className="w-full mt-20 lg:max-w-6xl lg:mx-auto lg:px-0">
-        <div className="flex flex-col w-full max-w-6xl z-10">
+      <div className="w-full mt-20 max-w-[712px] lg:mx-auto lg:px-0">
+        <div className="flex flex-col w-full max-w-[712px] z-10">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/roles">Roles</BreadcrumbLink>
+                <BreadcrumbLink href="/roles">Governance</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink href={`/roles/${params.roleId}`}>
-                  {role.title}
+                  Role
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -65,16 +65,17 @@ export default async function Page({ params }: { params: { roleId: string } }) {
 
           <div className="flex flex-col gap-y-8 mt-12">
             <div className="flex flex-col gap-4">
-              <div className="text-3xl font-semibold">{role.title}</div>
+              <div className="text-3xl font-semibold">{`Self-nominate for ${role.title}`}</div>
               {role.startAt && role.endAt && (
-                <div className="text-muted-foreground flex flex-row gap-4">
+                <div className="text-muted-foreground flex flex-row gap-2">
                   <div>
                     Submit your application between{" "}
                     {formatMMMd(new Date(role.startAt))}
                     {" - "}
                     {formatMMMd(new Date(role.endAt))}
                   </div>
-                  {voteSchedule}
+                  {voteSchedule && <div>{" | "}</div>}
+                  {voteSchedule && <div>{voteSchedule}</div>}
                 </div>
               )}
             </div>

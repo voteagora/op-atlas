@@ -25,24 +25,24 @@ export default async function Page({ params }: { params: { roleId: string } }) {
 
   const voteSchedule =
     role?.voteStartAt && role?.voteEndAt
-      ? ` | Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
-          new Date(role.voteEndAt!),
-        )}`
-      : ""
+      ? `Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
+        new Date(role.voteEndAt!),
+      )}`
+      : null
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      <div className="w-full mt-20 lg:max-w-6xl lg:mx-auto lg:px-0 lg:grid lg:grid-cols-3 lg:gap-x-16">
-        <div className="lg:col-span-2 lg:mt-0">
+      <div className="w-full mt-20 max-w-[1064px] mx-auto px-4 lg:px-0 lg:flex lg:gap-12">
+        <div className="w-full lg:w-[712px] lg:flex-shrink-0">
           <div className="flex flex-col w-full max-w-6xl z-10">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/roles">Roles</BreadcrumbLink>
+                  <BreadcrumbLink href="/roles">Governance</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{role.title}</BreadcrumbPage>
+                  <BreadcrumbPage>Role</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -51,12 +51,14 @@ export default async function Page({ params }: { params: { roleId: string } }) {
               <div className="flex flex-col gap-4">
                 <div className="text-3xl font-semibold">{role.title}</div>
                 {role.startAt && role.endAt && (
-                  <div className="text-muted-foreground flex flex-row gap-4">
+                  <div className="text-muted-foreground flex flex-row gap-2">
                     <div>
-                      Nominations {formatMMMd(new Date(role.startAt))} -{" "}
+                      Nominations {formatMMMd(new Date(role.startAt))}{" - "}
                       {formatMMMd(new Date(role.endAt))}
                     </div>
-                    {voteSchedule}
+
+                    {voteSchedule && <div>{" | "}</div>}
+                    {voteSchedule && <div>{voteSchedule}</div>}
                   </div>
                 )}
               </div>
@@ -100,7 +102,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 w-full lg:w-[304px] lg:flex-shrink-0">
           <Sidebar role={role} />
           {applications && applications.length > 0 && (
             <SidebarApplications applications={applications} />

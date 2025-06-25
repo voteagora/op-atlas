@@ -17,10 +17,6 @@ export default async function Page() {
                 <div className="text-1xl font-semibold text-foreground">
                   Self-nominate for a governance role in Season 8 & 9
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Calling all candidates! Submit your self-nomination from
-                  [Start Date] – [End Date].
-                </div>
               </div>
             </div>
           </div>

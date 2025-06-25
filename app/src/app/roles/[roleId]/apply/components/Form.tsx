@@ -50,7 +50,7 @@ export const Form = ({
   return (
     <div className="flex flex-col gap-12 w-full">
       <div className="flex flex-col gap-4">
-        <div className="text-lg font-semibold">Nominate as:</div>
+        <div className="text-xl font-semibold">Nominate as:</div>
 
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">

@@ -1,6 +1,7 @@
 import { Role, User } from "@prisma/client"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import Link from "next/link"
+import { useEffect, useState, useRef } from "react"
 
 import { Button } from "@/components/common/Button"
 import { ArrowRightS, CheckboxLine, Close } from "@/components/icons/reminx"
@@ -19,10 +20,10 @@ import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { useApplyForRole } from "@/hooks/role/useApplyForRole"
 
 const TERMS = [
-  "Please verify that you understand you may be removed from this role via the Representative Removal proposal type in the Operating Manual",
-  "Please verify that you understand KYC will be required to receive rewards for this role",
-  "Please verify that you understand you may need to sign an agreement with the Foundation prior to onboarding",
-  "Please verify that you are able to commit the necessary time to this role",
+  "Please verify that you understand you may be removed from this role via the Representative Removal proposal type in the Operating Manual.",
+  "Please verify that you understand KYC will be required to receive rewards for this role.",
+  "Please verify that you understand you may need to sign an agreement with the Foundation prior to onboarding.",
+  "Please verify that you are able to commit the necessary time to this role.",
 ] as const
 
 type SelectedEntity = {
@@ -76,6 +77,8 @@ export const UserForm = ({
   const [projectRelevanceText, setProjectRelevanceText] = useState<
     Record<string, string>
   >({})
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownTriggerRef = useRef<HTMLButtonElement>(null)
 
   const handleCheckboxChange = (index: number) => {
     setCheckedRules((prev) => ({
@@ -263,7 +266,7 @@ export const UserForm = ({
                 />
                 <label
                   htmlFor={`rule-${index}`}
-                  className="text-sm font-medium text-foreground"
+                  className="text-base text-foreground"
                 >
                   I understand
                 </label>
@@ -276,7 +279,11 @@ export const UserForm = ({
           Which projects demonstrate your expertise in this area?
           <div className="text-muted-foreground">
             Choose from your projects in Atlas. If your project isn&apos;t in
-            Atlas, then add your project before continuing here. To join a
+            Atlas, then{" "}
+            <Link href="/projects/new" className="underline">
+              add your project
+            </Link>{" "}
+            before continuing here. To join a
             project or organization that already exists in Atlas, please have
             their admin add you.{" "}
           </div>
@@ -285,8 +292,8 @@ export const UserForm = ({
         <div className="flex flex-col gap-2">
           <div className="flex flex-row justify-between text-foreground">
             <div>Projects that demonstrate your expertise (optional)</div>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="focus:outline-none">
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+              <DropdownMenuTrigger ref={dropdownTriggerRef} className="focus:outline-none">
                 <div className="flex flex-row gap-1 items-center">
                   <CheckboxLine className="w-5 h-5" />
                   <div>Choose</div>
@@ -340,7 +347,16 @@ export const UserForm = ({
 
           {/* NO PROJECTS SELECTED */}
           {selectedProjects.length === 0 ? (
-            <div className="text-muted-foreground border border-border rounded-md px-3 py-2">
+            <div
+              className="text-muted-foreground border border-border rounded-md px-3 py-2 cursor-pointer"
+              onClick={() => {
+                setIsDropdownOpen(true)
+                // Focus the dropdown trigger to ensure proper keyboard navigation
+                setTimeout(() => {
+                  dropdownTriggerRef.current?.focus()
+                }, 0)
+              }}
+            >
               None
             </div>
           ) : null}
@@ -392,7 +408,7 @@ export const UserForm = ({
                 <span
                   className={
                     (projectRelevanceText[project.project.id] || "").length >=
-                    280
+                      280
                       ? "text-red-500"
                       : ""
                   }

@@ -74,7 +74,7 @@ export default function ProfileElections({ user }: { user: UserWithAddresses }) 
                         }
                     </Avatar>
                     <div>
-                        <div className="">{role.title}</div>
+                        <div>Candidate for {role.title}</div>
                         <div className="text-muted-foreground">Season 8 <span className="text-muted">|</span> Voting {formatMMMd(new Date(role.voteStartAt!))} - {formatMMMd(new Date(role.voteEndAt!))}</div>
                     </div>
                 </div>
