@@ -121,7 +121,6 @@ const ProposalPage = async ({
             </div>
             <div className="voting-sidebar w-full md:w-[304px]">
               <VotingSidebar
-                className="sticky top-4"
                 votingCardProps={votingCardProps!}
                 votingColumnProps={votingColumnProps}
                 votingRedirectProps={votingRedirectProps!}
