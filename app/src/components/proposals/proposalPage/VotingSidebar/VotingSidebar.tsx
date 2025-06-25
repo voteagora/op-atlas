@@ -1,13 +1,13 @@
 "use client"
-import React, { useEffect, useRef } from "react"
+
+import React, { useState,useRef, useEffect } from "react"
 
 import {
+  VotingCardProps,
   VotingColumnProps,
   VotingRedirectProps,
 } from "@/components/proposals/proposal.types"
-import VotingCard, {
-  VotingCardProps,
-} from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VotingCard"
+import VotingCard from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VotingCard"
 import VotingColumn from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 import VotingRedirect from "@/components/proposals/proposalPage/VotingSidebar/VotingRedirect"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
@@ -25,7 +25,7 @@ interface VotingSidebarProps {
 
 const VotingSidebar = ({
   className = "",
-  votingCardProps,
+  votingCardProps: initialVotingCardProps,
   votingColumnProps,
   votingRedirectProps,
   proposalId,
@@ -33,6 +33,9 @@ const VotingSidebar = ({
   citizenEligibility,
   proposalType,
 }: VotingSidebarProps) => {
+  const [votingCardProps, setVotingCardProps] = useState<VotingCardProps>(
+    initialVotingCardProps,
+  )
   const { track } = useAnalytics()
   const isTracked = useRef(false)
 
@@ -66,11 +69,21 @@ const VotingSidebar = ({
     track,
   ])
 
+  const updateVotingCardProps = (updatedProps: Partial<VotingCardProps>) => {
+    setVotingCardProps((prevProps) => ({
+      ...prevProps,
+      ...updatedProps,
+    }))
+  }
+
   return (
     <div className={`w-[304px] gap-6 flex flex-col ${className}`}>
       <div className="w-[304px] ">
         <VotingCard {...votingCardProps} />
-        <VotingColumn {...votingColumnProps} />
+        <VotingColumn
+          {...votingColumnProps}
+          updateVotingCardProps={updateVotingCardProps}
+        />
         <div className="mt-5">
           {votingRedirectProps && <VotingRedirect {...votingRedirectProps} />}
         </div>
