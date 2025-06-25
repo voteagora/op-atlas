@@ -134,7 +134,7 @@ export const Account = () => {
         localStorage.removeItem(LOCAL_STORAGE_LOGIN_REDIRECT)
         router.push(loginRedirect)
       } else if (!isMissionsPath) {
-        router.push("/dashboard")
+        router.refresh()
       }
 
       if (!isFirstTimeUser()) {
