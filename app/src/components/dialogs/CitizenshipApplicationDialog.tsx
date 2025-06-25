@@ -44,7 +44,8 @@ const RULES = [
 function CitizenshipApplicationDialog({
   open,
   onOpenChange,
-}: DialogProps<object>) {
+  redirectUrl,
+}: DialogProps<object> & { redirectUrl?: string }) {
   const { data: session } = useSession()
   const userId = session?.user?.id ?? ""
 
@@ -56,7 +57,7 @@ function CitizenshipApplicationDialog({
     attestCitizen,
     isLoading: isAttesting,
     isSuccess: isAttestSuccess,
-  } = useCitizenAttest(userId)
+  } = useCitizenAttest(userId, redirectUrl)
 
   const {
     updateCitizen,
