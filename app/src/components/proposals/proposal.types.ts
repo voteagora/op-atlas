@@ -1,8 +1,9 @@
 import { citizenCategory, User } from "@prisma/client"
-import { CitizenshipQualification } from "@/lib/types"
+import React from "react"
+
 import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
-import React from "react"
+import { CitizenshipQualification } from "@/lib/types"
 
 export interface ProposalPageDataInterface {
   user: User | null
@@ -86,6 +87,7 @@ export interface VotingColumnProps {
   userCitizen?: Citizen
   userVoted?: boolean
   resultsLink: string
+  updateVotingCardProps?: (updatedProps: Partial<VotingCardProps>) => void
 }
 
 export interface VotingCardProps {
