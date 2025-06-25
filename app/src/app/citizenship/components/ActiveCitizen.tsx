@@ -14,7 +14,7 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
     query: { type: CITIZEN_TYPES.user, id: user.id },
   })
 
-  const { organization } = useOrganization({
+  const { data: organization } = useOrganization({
     id: citizen?.organizationId ?? "",
     enabled: !!citizen?.organizationId,
   })

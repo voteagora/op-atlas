@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react"
-
 import { Role, User } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/common/Button"
 import { ArrowRightS, CheckboxLine, Close } from "@/components/icons/reminx"
@@ -47,7 +46,7 @@ const isValidRequirements = (
   return (
     requirements &&
     typeof requirements === "object" &&
-    (!requirements.user || Array.isArray(requirements.user))
+    Array.isArray(requirements.user)
   )
 }
 
@@ -60,6 +59,8 @@ export const UserForm = ({
   selectedEntity: SelectedEntity
   role: Role
 }) => {
+  const isUser = !!selectedEntity.userId
+
   const { user: loadedUser } = useUser({
     id: initialUser.id,
     enabled: true,
@@ -128,27 +129,25 @@ export const UserForm = ({
     const allTermsChecked = TERMS.every((_, index) => checkedRules[index])
     const requirements = role.requirements as RoleRequirements
 
-    if (
-      !isValidRequirements(requirements) ||
-      !requirements.user ||
-      !Array.isArray(requirements.user)
-    ) {
+    if (!isUser) {
       setRequirementsSatisfied(allTermsChecked)
       return
     }
 
-    const userRequirementsSatisfied = requirements.user.every(
-      (requirement: string) => {
-        if (requirement === "github") {
-          const githubSatisfied = !!user.github
-          return githubSatisfied
-        }
-        return true
-      },
-    )
-    const finalResult = allTermsChecked && userRequirementsSatisfied
-    setRequirementsSatisfied(finalResult)
-  }, [checkedRules, role, user])
+    // If organization is selected (!isUser), user requirements are satisfied by default
+    const customRequirementsSatisfied =
+      isUser && requirements.user
+        ? requirements.user.every((requirement: string) => {
+            if (requirement === "github") {
+              const githubSatisfied = !!user.github
+              return githubSatisfied
+            }
+            return true
+          })
+        : false
+
+    setRequirementsSatisfied(allTermsChecked && customRequirementsSatisfied)
+  }, [checkedRules, role, user, isUser])
 
   const onSubmit = () => {
     // Prepare projects data with descriptions
@@ -172,7 +171,8 @@ export const UserForm = ({
     try {
       const requirements = role.requirements as RoleRequirements
 
-      if (!isValidRequirements(requirements) || !requirements.user) {
+      // Only render requirements if the user is selected
+      if (!isUser || !isValidRequirements(requirements) || !requirements.user) {
         return null
       }
 
@@ -425,7 +425,7 @@ export const UserForm = ({
                 <span
                   className={
                     (projectRelevanceText[project.project.id] || "").length >=
-                      280
+                    280
                       ? "text-red-500"
                       : ""
                   }

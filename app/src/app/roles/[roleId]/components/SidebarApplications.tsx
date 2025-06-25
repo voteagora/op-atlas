@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 
 import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
 import { ArrowRightS } from "@/components/icons/reminx"
+import { useOrganization } from "@/hooks/db/useOrganization"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 
@@ -16,7 +17,8 @@ export default function SidebarApplications({
   return (
     <div className="w-full flex flex-col gap-6 border border-border-secondary rounded-lg p-6">
       <div className="text-secondary-foreground text-sm font-semibold">
-        {applications.length} candidates so far
+        {applications.length} candidate{applications.length > 1 ? "s" : ""} so
+        far
       </div>
       <div className="flex flex-col gap-4">
         {applications.map((application) =>
@@ -32,15 +34,39 @@ export default function SidebarApplications({
 }
 
 const OrgCandidate = ({ application }: { application: RoleApplication }) => {
+  const router = useRouter()
+  const { data: org } = useOrganization({ id: application.organizationId! })
+
+  if (!org) return null
+
+  const handleClick = () => router.push(`/${org.id}`)
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault()
+      handleClick()
+    }
+  }
+
   return (
-    <div className="flex flex-row gap-2 w-full justify-between cursor-pointer">
-      <div className="flex flex-row gap-2 text-sm">Hello</div>
+    <div
+      className="flex flex-row gap-2 w-full justify-between cursor-pointer "
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`View ${org.name}`}
+    >
+      <div className="flex flex-row gap-2 text-sm ">
+        <UserAvatarSmall imageUrl={org.avatarUrl} />
+        {org.name}
+      </div>
+      <ArrowRightS className="w-4 h-4" />
     </div>
   )
 }
 
 const UserCandidate = ({ application }: { application: RoleApplication }) => {
-  const { user } = useUser({ id: application.userId || undefined })
+  const { user } = useUser({ id: application.userId! })
   const username = useUsername(user)
   const router = useRouter()
 

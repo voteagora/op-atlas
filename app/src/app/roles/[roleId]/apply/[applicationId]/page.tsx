@@ -35,7 +35,7 @@ export default async function Page({
   const forumText = `I'm a candidate for ${
     role.title
   }. Check out my qualifications here: https://atlas.optimism.io/${
-    isUser ? user?.username : org?.name
+    isUser ? user?.username : org?.id
   }`
 
   const voteSchedule =
