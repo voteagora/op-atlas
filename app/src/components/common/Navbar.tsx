@@ -57,14 +57,14 @@ const Navbar = () => {
             params.id || isMissions ? "bg-background" : ""
           }`}
         >
-          <div className="flex sm:hidden items-center h-full w-full relative">
+          <div className="flex sm:hidden items-center h-full w-full">
             <button
-              className="absolute left-0 z-10"
+              className="flex-shrink-0 w-6 flex justify-start"
               onClick={() => setShowMobileNav(!showMobileNav)}
             >
               {showMobileNav ? <X /> : <AlignJustify />}
             </button>
-            <div className="flex items-center justify-center w-full">
+            <div className="flex-1 flex items-center justify-center">
               <Link href="/" className="flex items-center">
                 <Image
                   src="/assets/images/logo.svg"
@@ -75,6 +75,7 @@ const Navbar = () => {
                 />
               </Link>
             </div>
+            <div className="flex-shrink-0 w-6"></div>
           </div>
 
           <div className="hidden sm:flex h-full">
