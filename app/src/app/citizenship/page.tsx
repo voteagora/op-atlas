@@ -26,7 +26,11 @@ import { CITIZEN_TYPES } from "@/lib/constants"
 
 import { AnalyticsTracker } from "./components/AnalyticsTracker"
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { redirectUrl?: string }
+}) {
   const session = await auth()
   const userId = session?.user?.id
 
@@ -46,8 +50,10 @@ export default async function Page() {
     redirect("/")
   }
 
-  // Existing citizen
   if (citizen?.attestationId) {
+    if (searchParams.redirectUrl) {
+      redirect(searchParams.redirectUrl)
+    }
     return (
       <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
         <div className="w-full mt-20 ">
@@ -146,7 +152,7 @@ export default async function Page() {
           {qualification && (
             <div>
               {qualification.type !== CITIZEN_TYPES.user ? (
-                <Sidebar user={user} qualification={qualification} />
+                <Sidebar user={user} qualification={qualification} redirectUrl={searchParams.redirectUrl} />
               ) : (
                 <div>
                   {isCitizenshipLimitReached ? (
@@ -162,7 +168,7 @@ export default async function Page() {
                       </div>
                     </div>
                   ) : (
-                    <Sidebar user={user} qualification={qualification} />
+                    <Sidebar user={user} qualification={qualification} redirectUrl={searchParams.redirectUrl} />
                   )}
                 </div>
               )}
