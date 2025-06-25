@@ -55,7 +55,10 @@ const CardAction = ({
       case "register":
         buttonType = "Register to Vote"
         trackButtonClick(buttonType)
-        router.push("/citizenship")
+        const currentPath = window.location.pathname + window.location.search
+        router.push(
+          `/citizenship?redirectUrl=${encodeURIComponent(currentPath)}`,
+        )
         break
       case "learn more":
         buttonType = "Go to vote.optimism.io"
