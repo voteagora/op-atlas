@@ -1,14 +1,13 @@
 import {
+  CardTextProps,
   ProposalPageDataInterface,
   ProposalType,
   VoteType,
+  VotingCardProps,
   VotingColumnProps,
   VotingRedirectProps,
 } from "@/components/proposals/proposal.types"
-import {
-  CardTextProps,
-  VotingCardProps,
-} from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VotingCard"
+
 import { CitizenshipQualification } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL
@@ -34,12 +33,18 @@ const votingEnded = (endDate: Date, result: any) => {
   }
 }
 
-const youVoted = () => {
+const youVoted = ({
+  votingRecord,
+  proposalType,
+}: ProposalPageDataInterface) => {
+  const previousVote = votingRecord?.vote
+
+  console.log({ previousVote })
   return {
     cardText: {
-      title: "You voted!",
-      descriptionElement: "Thanks for your participation.",
+      title: "You voted",
     },
+    previousVote: mapValueToVoteType(proposalType, previousVote!),
   }
 }
 
@@ -104,7 +109,7 @@ const wantToVote = (eligibility: CitizenshipQualification | null) => {
 
 const getOpenVotingTypes = (proposalData: ProposalPageDataInterface) => {
   if (proposalData.voted) {
-    return youVoted()
+    return youVoted(proposalData)
   }
   if (proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") {
     // Custom proposal title for the offchain optimistic proposal
@@ -252,8 +257,8 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
     }
     // If the user is a citizen and has voted
   } else if (proposalData.voted) {
-    switch (proposalData.votingRecord![0]) {
-      case "0":
+    switch (proposalData.votingRecord!.vote) {
+      case VoteType.For:
         votingActions = {
           cardActionList: [
             {
@@ -265,7 +270,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
           ],
         }
         break
-      case "1":
+      case VoteType.Abstain:
         votingActions = {
           cardActionList: [
             {
@@ -276,7 +281,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
           ],
         }
         break
-      case "2":
+      case VoteType.Against:
         votingActions = {
           cardActionList: [
             {
@@ -397,5 +402,23 @@ export const mapVoteTypeToValue = (
     }
   } else {
     return [voteType]
+  }
+}
+
+export const mapValueToVoteType = (
+  proposalType: ProposalType,
+  value: string,
+) => {
+  if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
+    switch (value[0]) {
+      case "0":
+        return VoteType.Against
+      case "1":
+        return VoteType.For
+      case "2":
+        return VoteType.Abstain
+      default:
+        return VoteType.Abstain
+    }
   }
 }

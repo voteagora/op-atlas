@@ -6,11 +6,11 @@ import VotingActions, {
   CardActionsProps,
 } from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import { CitizenshipQualification } from "@/lib/types"
-
-interface CardTextProps {
-  title: string
-  descriptionElement?: string | React.ReactElement
-}
+import {
+  CardTextProps,
+  VoteType,
+  VotingCardProps,
+} from "@/components/proposals/proposal.types"
 
 const CardText = ({ title, descriptionElement }: CardTextProps) => {
   const cardDescriptionTextStyling =
@@ -34,11 +34,40 @@ const CardText = ({ title, descriptionElement }: CardTextProps) => {
   )
 }
 
-export interface VotingCardProps {
-  cardText: CardTextProps
-  cardActions?: CardActionsProps
-  user: User | null
-  eligibility?: CitizenshipQualification
+const PreviousVote = ({ voteType }: { voteType: string }) => {
+  let boxColor = ""
+  let textColor = ""
+
+  switch (voteType) {
+    case VoteType.For:
+      boxColor = "bg-success"
+      textColor = "text-success-foreground"
+      break
+    case VoteType.Against:
+      boxColor = "bg-red-200"
+      textColor = "text-red-600"
+      break
+    case VoteType.Abstain:
+      boxColor = "bg-backgroundSecondary"
+      textColor = "text-primary"
+      break
+    default:
+      break
+  }
+
+  return (
+    <div className="w-[256px] h-[40px] gap-[8px] mt-4">
+      <div
+        className={`w-[256px] h-[40px] gap-[5px] rounded-[6px] pt-[10px] pr-[16px] pb-[10px] pl-[16px] ${boxColor} justify-center flex items-center`}
+      >
+        <p
+          className={`${textColor} font-medium text-[14px] leading-[20px] tracking-[0%] text-center`}
+        >
+          {voteType}
+        </p>
+      </div>
+    </div>
+  )
 }
 
 const VotingCard = ({
@@ -46,6 +75,7 @@ const VotingCard = ({
   cardActions,
   user,
   eligibility,
+  previousVote,
 }: VotingCardProps) => {
   return (
     <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
@@ -53,6 +83,7 @@ const VotingCard = ({
         <EligibleCitizenAvatar user={user} qualification={eligibility} />
       )}
       <CardText {...cardText} />
+      {previousVote && <PreviousVote voteType={previousVote} />}
       {cardActions && <VotingActions {...cardActions} />}
     </div>
   )

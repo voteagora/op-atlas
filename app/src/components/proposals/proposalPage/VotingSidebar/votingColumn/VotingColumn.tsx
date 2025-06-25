@@ -4,10 +4,8 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { useWallets } from "@privy-io/react-auth"
-import { useSetActiveWallet } from "@privy-io/wagmi"
-import { getChainId, switchChain, watchAccount } from "@wagmi/core"
-import { useEffect, useState } from "react"
+import { getChainId, switchChain } from "@wagmi/core"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
@@ -32,6 +30,8 @@ import {
 import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
+import { useWallets } from "@privy-io/react-auth"
+import { useSetActiveWallet } from "@privy-io/wagmi"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -90,16 +90,19 @@ const VotingColumn = ({
   proposalType,
   proposalId,
   options,
-  votingActions,
+  votingActions: initialVotingActions,
   currentlyActive,
   userSignedIn,
   userCitizen,
   userVoted,
   resultsLink,
+  updateVotingCardProps,
 }: VotingColumnProps) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
+  const [votingActions, setVotingActions] = useState(initialVotingActions)
+  const [voted, setVoted] = useState<boolean>(userVoted || false)
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
@@ -280,6 +283,10 @@ const VotingColumn = ({
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)
+        updateVotingCardProps?.({
+          cardText: { title: "You voted" },
+          previousVote: selectedVote,
+        })
       }
     }
 
@@ -287,6 +294,14 @@ const VotingColumn = ({
     toast.promise(castAndRecordVote(), {
       loading: "Casting Vote...",
       success: () => {
+        // Update the voting card to show the user's vote
+        if (updateVotingCardProps) {
+          updateVotingCardProps({ previousVote: selectedVote })
+        }
+        // Clear the voting actions after a successful vote
+        setVotingActions({ cardActionList: [] })
+        // Update voted status to true
+        setVoted(true)
         return "Vote Cast and Recorded!"
       },
       error: (error) => {
@@ -304,12 +319,12 @@ const VotingColumn = ({
           signedIn={userSignedIn}
           currentlyActive={currentlyActive}
           citizen={!!userCitizen}
-          voted={userVoted}
+          voted={voted}
           selectedVote={selectedVote}
           setSelectedVote={handleVoteClick}
         />
       </div>
-      {currentlyActive && votingActions && !userVoted && (
+      {currentlyActive && votingActions && !voted && (
         <>
           <VotingActions
             proposalId={proposalId}
@@ -329,7 +344,7 @@ const VotingColumn = ({
               return action
             })}
           />
-          {addressMismatch && userCitizen && !userVoted && userSignedIn && (
+          {addressMismatch && userCitizen && !voted && userSignedIn && (
             <div className="text-red-500 text-sm text-center mt-2">
               You must connect your citizen wallet to vote.
             </div>
