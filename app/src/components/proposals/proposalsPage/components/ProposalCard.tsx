@@ -1,4 +1,11 @@
-import { ChevronRight } from "lucide-react"
+import {
+  CheckCircle,
+  ChevronRight,
+  Circle,
+  Clock,
+  Loader2,
+  XCircle,
+} from "lucide-react"
 import React from "react"
 
 type ProposalCardProps = {
@@ -28,6 +35,15 @@ export enum ProposalBadgeType {
   past = "past",
 }
 
+export enum ProposalStatusBadgeType {
+  ACTIVE = "ACTIVE",
+  EXECUTED = "EXECUTED",
+  PENDING = "PENDING",
+  CANCELLED = "CANCELLED",
+  FAILED = "FAILED",
+  QUEUED = "QUEUED",
+}
+
 interface ProposalBadgeProps {
   type: ProposalBadgeType
 }
@@ -54,8 +70,69 @@ const ProposalBadge = ({ type }: ProposalBadgeProps) => {
           "w-[30px] h-[16px] text-xs font-medium leading-none text-center rounded-full flex items-center justify-center"
         }
       >
-        {type.toString()}
+        {type.toString().charAt(0).toUpperCase() + type.toString().slice(1)}
       </div>
+    </div>
+  )
+}
+
+interface ProposalStatusBadgeProps {
+  type: ProposalStatusBadgeType
+}
+const ProposalStatusBadge = ({ type }: ProposalStatusBadgeProps) => {
+  const badgeConfig = (() => {
+    switch (type) {
+      case ProposalStatusBadgeType.ACTIVE:
+        return {
+          classes: "bg-green-100 text-green-800",
+          icon: <Circle width={12} height={12} fill="currentColor" />,
+          text: "Active",
+        }
+      case ProposalStatusBadgeType.EXECUTED:
+        return {
+          classes: "bg-green-100 text-green-800",
+          icon: <CheckCircle width={12} height={12} />,
+          text: "Executed",
+        }
+      case ProposalStatusBadgeType.PENDING:
+        return {
+          classes: "bg-gray-100 text-gray-600",
+          icon: <Clock width={12} height={12} />,
+          text: "Pending",
+        }
+      case ProposalStatusBadgeType.QUEUED:
+        return {
+          classes: "bg-gray-100 text-gray-600",
+          icon: <Loader2 width={12} height={12} />,
+          text: "Queued",
+        }
+      case ProposalStatusBadgeType.CANCELLED:
+        return {
+          classes: "bg-rose-200 text-rose-800",
+          icon: <Circle width={12} height={12} fill="currentColor" />,
+          text: "Cancelled",
+        }
+      case ProposalStatusBadgeType.FAILED:
+        return {
+          classes: "bg-rose-200 text-rose-800",
+          icon: <XCircle width={12} height={12} />,
+          text: "Failed",
+        }
+      default:
+        return {
+          classes: "bg-gray-100 text-gray-600",
+          icon: <Clock width={12} height={12} />,
+          text: "Unknown",
+        }
+    }
+  })()
+
+  return (
+    <div
+      className={`status-badge h-[24px] px-2 py-1 rounded-full flex items-center justify-center gap-1 ${badgeConfig.classes}`}
+    >
+      {badgeConfig.icon}
+      <div className="text-xs font-medium leading-none">{badgeConfig.text}</div>
     </div>
   )
 }
@@ -120,5 +197,11 @@ const ProposalArrow = ({ href }: ProposalArrowProps) => {
   )
 }
 
-export { ProposalArrow, ProposalBadge, ProposalDates, ProposalTextContent }
+export {
+  ProposalArrow,
+  ProposalBadge,
+  ProposalDates,
+  ProposalStatusBadge,
+  ProposalTextContent,
+}
 export default ProposalCard

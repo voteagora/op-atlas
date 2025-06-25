@@ -231,7 +231,7 @@ const VotingColumn = ({
 
         // 3. Record vote in the database
         await postOffchainVote(offchainVote)
-        
+
         // Track successful vote submission
         track("Citizen Voting Vote Submitted", {
           proposal_id: proposalId,
@@ -240,14 +240,15 @@ const VotingColumn = ({
         })
       } catch (error) {
         console.error("Failed to cast vote:", error)
-        
+
         // Track vote error
-        const errorMessage = error instanceof Error ? error.message : "Unknown error"
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error"
         track("Citizen Voting Vote Error", {
           proposal_id: proposalId,
           error: errorMessage,
         })
-        
+
         if (
           error instanceof Error &&
           error.message === "Signer address does not match citizen address"
@@ -335,17 +336,13 @@ const VotingColumn = ({
           )}
         </>
       )}
-
-      {!currentlyActive ||
-        (userVoted && (
-          <div className="w-full flex items-center justify-center gap-2.5">
-            <a href={resultsLink} target="_blank">
-              <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
-                View results
-              </p>
-            </a>
-          </div>
-        ))}
+      <div className="w-full flex items-center justify-center gap-2.5">
+        <a href={resultsLink} target="_blank">
+          <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
+            View results
+          </p>
+        </a>
+      </div>
     </div>
   )
 }
