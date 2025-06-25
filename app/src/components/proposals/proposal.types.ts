@@ -2,6 +2,7 @@ import { citizenCategory, User } from "@prisma/client"
 import { CitizenshipQualification } from "@/lib/types"
 import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
+import React from "react"
 
 export interface ProposalPageDataInterface {
   user: User | null
@@ -9,13 +10,24 @@ export interface ProposalPageDataInterface {
   votingOpen: boolean
   votingComplete: boolean
   voted: boolean
-  votingRecord?: string[]
+  votingRecord?: VotingRecordInterface
   startDate: Date
   endDate: Date
   proposalType: ProposalType
   proposalId: string
   proposalStatus: string
   citizenEligibility: CitizenshipQualification | null
+}
+
+export interface VotingRecordInterface {
+  attestationId: string
+  voterAddress: string
+  vote: VoteType
+  transactionHash?: string
+  citizenId: number
+  citizenType: citizenCategory
+  createdAt: Date
+  updatedAt: Date
 }
 
 // Vote type enum
@@ -74,6 +86,19 @@ export interface VotingColumnProps {
   userCitizen?: Citizen
   userVoted?: boolean
   resultsLink: string
+}
+
+export interface VotingCardProps {
+  cardText: CardTextProps
+  cardActions?: CardActionsProps
+  user: User | null
+  eligibility?: CitizenshipQualification
+  previousVote?: VoteType
+}
+
+export interface CardTextProps {
+  title: string
+  descriptionElement?: string | React.ReactElement
 }
 
 export interface VotingRedirectProps {
