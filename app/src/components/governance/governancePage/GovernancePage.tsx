@@ -5,7 +5,7 @@ interface ProposalsPageProps {
   userId?: string
 }
 
-const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
+const GovernancePage = async ({ userId }: ProposalsPageProps) => {
   // Get the proposals
   const proposalData = await getEnrichedProposalData({
     userId: userId,
@@ -43,4 +43,4 @@ const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
   )
 }
 
-export default ProposalsPage
+export default GovernancePage
