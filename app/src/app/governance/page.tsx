@@ -1,10 +1,10 @@
 import { auth } from "@/auth"
-import ProposalsPage from "@/components/proposals/proposalsPage/ProposalsPage"
+import GovernancePage from "@/components/governance/governancePage/GovernancePage"
 
 const Page = async () => {
   const session = await auth()
   const userId = session?.user?.id
-  return <ProposalsPage userId={userId} />
+  return <GovernancePage userId={userId} />
 }
 
 export default Page
