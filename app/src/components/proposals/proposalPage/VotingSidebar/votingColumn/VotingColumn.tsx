@@ -4,6 +4,8 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
+import { useWallets } from "@privy-io/react-auth"
+import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain, watchAccount } from "@wagmi/core"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -15,6 +17,7 @@ import {
   VoteType,
   VotingColumnProps,
 } from "@/components/proposals/proposal.types"
+import { useCitizenVoteSubmissionTracking } from "@/components/proposals/proposalPage/CitizenVotingAnalytics"
 import VotingActions from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
@@ -22,7 +25,6 @@ import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/
 import { postOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
-import { useCitizenVoteSubmissionTracking } from "@/components/proposals/proposalPage/CitizenVotingAnalytics"
 import {
   EAS_CONTRACT_ADDRESS,
   EAS_VOTE_SCHEMA,
@@ -30,8 +32,6 @@ import {
 } from "@/lib/eas/clientSafe"
 import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
-import { useWallets } from "@privy-io/react-auth"
-import { useSetActiveWallet } from "@privy-io/wagmi"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
