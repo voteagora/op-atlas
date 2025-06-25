@@ -44,7 +44,8 @@ const CardAction = ({
         await action()
         break
       case "register":
-        router.push("/citizenship")
+        const currentPath = window.location.pathname + window.location.search
+        router.push(`/citizenship?redirectUrl=${encodeURIComponent(currentPath)}`)
         break
       case "learn more":
         router.push(
