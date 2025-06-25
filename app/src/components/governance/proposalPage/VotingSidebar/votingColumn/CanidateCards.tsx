@@ -1,8 +1,9 @@
 "use client"
 
-import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
-import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 import { useState } from "react"
+
+import CandidateCard from "@/components/governance/proposalPage/VotingSidebar/votingColumn/CandidateCard"
+import { CandidateCardProps } from "@/components/governance/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 
 const CandidateCards = ({
   candidates,

@@ -1,8 +1,8 @@
 import { citizenCategory, User } from "@prisma/client"
 import React from "react"
 
-import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
-import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
+import { CardActionsProps } from "@/components/governance/proposalPage/VotingSidebar/VotingActions"
+import { CandidateCardProps } from "@/components/governance/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 import { CitizenshipQualification } from "@/lib/types"
 
 export interface ProposalPageDataInterface {

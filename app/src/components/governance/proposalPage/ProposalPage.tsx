@@ -1,16 +1,16 @@
 import { Citizen } from "@prisma/client"
 import { notFound } from "next/navigation"
 
-import { getVotingProps } from "@/app/proposals/utils/votingUtils"
+import { getVotingProps } from "@/app/governance/utils/votingUtils"
 import { auth } from "@/auth"
 import {
   ProposalPageDataInterface,
   ProposalType,
-} from "@/components/proposals/proposal.types"
-import Breadcrumbs from "@/components/proposals/proposalPage/proposalContent/Breadcrumbs"
-import Markdown from "@/components/proposals/proposalPage/proposalContent/Markdown"
-import ProposalHeader from "@/components/proposals/proposalPage/proposalContent/ProposalHeader"
-import VotingSidebar from "@/components/proposals/proposalPage/VotingSidebar/VotingSidebar"
+} from "@/components/governance/proposal.types"
+import Breadcrumbs from "@/components/governance/proposalPage/proposalContent/Breadcrumbs"
+import Markdown from "@/components/governance/proposalPage/proposalContent/Markdown"
+import ProposalHeader from "@/components/governance/proposalPage/proposalContent/ProposalHeader"
+import VotingSidebar from "@/components/governance/proposalPage/VotingSidebar/VotingSidebar"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 import { getUserById } from "@/db/users"
 import { s8CitizenshipQualification } from "@/lib/actions/citizens"

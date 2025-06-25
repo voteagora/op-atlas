@@ -1,4 +1,4 @@
-import Proposals from "@/components/proposals/proposalsPage/components/Proposals"
+import Proposals from "@/components/governance/governancePage/components/Proposals"
 import { getEnrichedProposalData } from "@/lib/proposals"
 
 interface ProposalsPageProps {

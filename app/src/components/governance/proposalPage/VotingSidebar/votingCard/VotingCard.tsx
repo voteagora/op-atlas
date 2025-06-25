@@ -1,16 +1,12 @@
-import { User } from "@prisma/client"
 import React from "react"
 
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
-import VotingActions, {
-  CardActionsProps,
-} from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
-import { CitizenshipQualification } from "@/lib/types"
+import VotingActions from "@/components/governance/proposalPage/VotingSidebar/VotingActions"
 import {
   CardTextProps,
   VoteType,
   VotingCardProps,
-} from "@/components/proposals/proposal.types"
+} from "@/components/governance/proposal.types"
 
 const CardText = ({ title, descriptionElement }: CardTextProps) => {
   const cardDescriptionTextStyling =

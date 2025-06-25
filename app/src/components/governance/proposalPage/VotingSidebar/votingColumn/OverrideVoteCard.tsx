@@ -1,8 +1,9 @@
 "use client"
 
-import VoteButton from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VoteButton"
 import { useState } from "react"
-import { VoteType } from "@/components/proposals/proposal.types"
+
+import { VoteType } from "@/components/governance/proposal.types"
+import VoteButton from "@/components/governance/proposalPage/VotingSidebar/votingColumn/VoteButton"
 
 const OverrideVoteCard = () => {
   const vetoText = "Yes, I want to Veto"

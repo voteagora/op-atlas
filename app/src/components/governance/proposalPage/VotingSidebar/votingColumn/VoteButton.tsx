@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { VoteType } from "@/components/proposals/proposal.types"
+
+import { VoteType } from "@/components/governance/proposal.types"
 
 interface VoteButtonProps {
   textValue: string

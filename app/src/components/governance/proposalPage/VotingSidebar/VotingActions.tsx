@@ -3,7 +3,7 @@ import { useLogin } from "@privy-io/react-auth"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-import { voteAction } from "@/components/proposals/proposal.types"
+import { voteAction } from "@/components/governance/proposal.types"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export interface CardActionsProps {

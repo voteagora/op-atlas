@@ -1,15 +1,15 @@
 "use client"
 
-import React, { useState,useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect } from "react"
 
 import {
   VotingCardProps,
   VotingColumnProps,
   VotingRedirectProps,
-} from "@/components/proposals/proposal.types"
-import VotingCard from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VotingCard"
-import VotingColumn from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
-import VotingRedirect from "@/components/proposals/proposalPage/VotingSidebar/VotingRedirect"
+} from "@/components/governance/proposal.types"
+import VotingCard from "@/components/governance/proposalPage/VotingSidebar/votingCard/VotingCard"
+import VotingColumn from "@/components/governance/proposalPage/VotingSidebar/votingColumn/VotingColumn"
+import VotingRedirect from "@/components/governance/proposalPage/VotingSidebar/VotingRedirect"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 interface VotingSidebarProps {
@@ -61,13 +61,7 @@ const VotingSidebar = ({
       })
       isTracked.current = true
     }
-  }, [
-    proposalId,
-    citizen,
-    citizenEligibility,
-    proposalType,
-    track,
-  ])
+  }, [proposalId, citizen, citizenEligibility, proposalType, track])
 
   const updateVotingCardProps = (updatedProps: Partial<VotingCardProps>) => {
     setVotingCardProps((prevProps) => ({

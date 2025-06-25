@@ -8,17 +8,17 @@ import { getChainId, switchChain } from "@wagmi/core"
 import { useState } from "react"
 import { toast } from "sonner"
 
-import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
+import { mapVoteTypeToValue } from "@/app/governance/utils/votingUtils"
 import {
   OffchainVote,
   ProposalType,
   VoteType,
   VotingColumnProps,
-} from "@/components/proposals/proposal.types"
-import VotingActions from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
-import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
-import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
-import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
+} from "@/components/governance/proposal.types"
+import VotingActions from "@/components/governance/proposalPage/VotingSidebar/VotingActions"
+import CandidateCards from "@/components/governance/proposalPage/VotingSidebar/votingColumn/CanidateCards"
+import OverrideVoteCard from "@/components/governance/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
+import StandardVoteCard from "@/components/governance/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
 import { postOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
@@ -245,7 +245,8 @@ const VotingColumn = ({
         console.error("Failed to cast vote:", error)
 
         // Track vote error
-        const errorMessage = error instanceof Error ? error.message : "Unknown error"
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error"
         track("Citizen Voting Vote Error", {
           proposal_id: proposalId,
           error: errorMessage,

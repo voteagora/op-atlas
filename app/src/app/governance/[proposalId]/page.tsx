@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 
-import ProposalPage from "@/components/proposals/proposalPage/ProposalPage"
+import ProposalPage from "@/components/governance/proposalPage/ProposalPage"
 
 interface PageProps {
   params: {
