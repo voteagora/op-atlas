@@ -4,8 +4,8 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { getChainId, switchChain, watchAccount } from "@wagmi/core"
-import { useEffect, useState } from "react"
+import { getChainId, switchChain } from "@wagmi/core"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
@@ -28,6 +28,7 @@ import {
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
 import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
@@ -89,16 +90,19 @@ const VotingColumn = ({
   proposalType,
   proposalId,
   options,
-  votingActions,
+  votingActions: initialVotingActions,
   currentlyActive,
   userSignedIn,
   userCitizen,
   userVoted,
   resultsLink,
+  updateVotingCardProps,
 }: VotingColumnProps) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
+  const [votingActions, setVotingActions] = useState(initialVotingActions)
+  const [voted, setVoted] = useState<boolean>(userVoted || false)
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
@@ -106,6 +110,7 @@ const VotingColumn = ({
   const { wallets } = useWallets()
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
+  const { track } = useAnalytics()
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
@@ -229,8 +234,24 @@ const VotingColumn = ({
 
         // 3. Record vote in the database
         await postOffchainVote(offchainVote)
+
+        // Track successful vote submission
+        track("Citizen Voting Vote Submitted", {
+          proposal_id: proposalId,
+          choice: choices,
+          wallet_address: signerAddress,
+        })
       } catch (error) {
         console.error("Failed to cast vote:", error)
+
+        // Track vote error
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error"
+        track("Citizen Voting Vote Error", {
+          proposal_id: proposalId,
+          error: errorMessage,
+        })
+
         if (
           error instanceof Error &&
           error.message === "Signer address does not match citizen address"
@@ -262,6 +283,10 @@ const VotingColumn = ({
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)
+        updateVotingCardProps?.({
+          cardText: { title: "You voted" },
+          previousVote: selectedVote,
+        })
       }
     }
 
@@ -269,6 +294,14 @@ const VotingColumn = ({
     toast.promise(castAndRecordVote(), {
       loading: "Casting Vote...",
       success: () => {
+        // Update the voting card to show the user's vote
+        if (updateVotingCardProps) {
+          updateVotingCardProps({ previousVote: selectedVote })
+        }
+        // Clear the voting actions after a successful vote
+        setVotingActions({ cardActionList: [] })
+        // Update voted status to true
+        setVoted(true)
         return "Vote Cast and Recorded!"
       },
       error: (error) => {
@@ -286,14 +319,15 @@ const VotingColumn = ({
           signedIn={userSignedIn}
           currentlyActive={currentlyActive}
           citizen={!!userCitizen}
-          voted={userVoted}
+          voted={voted}
           selectedVote={selectedVote}
           setSelectedVote={handleVoteClick}
         />
       </div>
-      {currentlyActive && votingActions && !userVoted && (
+      {currentlyActive && votingActions && !voted && (
         <>
           <VotingActions
+            proposalId={proposalId}
             // This is a wonky way to overwrite the call to make an external call.
             cardActionList={votingActions.cardActionList.map((action) => {
               // If this is a vote action, replace its action function with handleCastVote
@@ -310,24 +344,20 @@ const VotingColumn = ({
               return action
             })}
           />
-          {addressMismatch && userCitizen && !userVoted && userSignedIn && (
+          {addressMismatch && userCitizen && !voted && userSignedIn && (
             <div className="text-red-500 text-sm text-center mt-2">
               You must connect your citizen wallet to vote.
             </div>
           )}
         </>
       )}
-
-      {!currentlyActive ||
-        (userVoted && (
-          <div className="w-full flex items-center justify-center gap-2.5">
-            <a href={resultsLink} target="_blank">
-              <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
-                View results
-              </p>
-            </a>
-          </div>
-        ))}
+      <div className="w-full flex items-center justify-center gap-2.5">
+        <a href={resultsLink} target="_blank">
+          <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
+            View results
+          </p>
+        </a>
+      </div>
     </div>
   )
 }

@@ -16,8 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 import { Account } from "./Account"
-import { MobileNav } from "./MobileNav"
 import { Banner } from "./Banner"
+import { MobileNav } from "./MobileNav"
 
 export const dropdownList = [
   {
@@ -48,31 +48,43 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[200] ${params.id || isMissions ? "" : "shadow-sm"
-          }`}
+        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[200] ${
+          params.id || isMissions ? "" : "shadow-sm"
+        }`}
       >
         <div
-          className={`flex items-center justify-between h-full w-full mx-auto ${params.id || isMissions ? "bg-background" : ""
-            }`}
+          className={`flex items-center justify-between h-full w-full mx-auto ${
+            params.id || isMissions ? "bg-background" : ""
+          }`}
         >
-          <div className="flex h-full">
+          <div className="flex sm:hidden items-center h-full w-full relative">
             <button
-              className={showMobileNav ? "block" : "sm:hidden"}
+              className="absolute left-0 z-10 flex items-center"
               onClick={() => setShowMobileNav(!showMobileNav)}
             >
-              {showMobileNav ? (
-                <X />
-              ) : (
-                <AlignJustify className="block sm:hidden" />
-              )}
+              {showMobileNav ? <X /> : <AlignJustify />}
             </button>
-            <Link href="/" className="flex items-center">
+            <div className="absolute inset-x-0 flex items-center justify-center">
+              <Link href="/" className="flex items-center">
+                <Image
+                  src="/assets/images/logo.svg"
+                  height={20}
+                  width={115}
+                  priority
+                  alt="OP Atlas Logo"
+                />
+              </Link>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex h-full">
+            <Link href="/" className="flex items-center mr-10">
               <Image
                 src="/assets/images/logo.svg"
-                height={24}
-                width={167}
+                height={20}
+                width={100}
                 priority
-                alt=""
+                alt="OP Atlas Logo"
               />
             </Link>
             {params.id === undefined || isMissions ? (
@@ -87,8 +99,9 @@ const Navbar = () => {
                 >
                   <div className="flex items-center">
                     <Link
-                      className={`${isRounds ? "mt-1" : "group-hover:mt-1"
-                        } focus:outline-none focus:opacity-80`}
+                      className={`${
+                        isRounds ? "mt-1" : "group-hover:mt-1"
+                      } focus:outline-none focus:opacity-80`}
                       href="/missions"
                     >
                       Retro Missions
@@ -105,15 +118,16 @@ const Navbar = () => {
                 >
                   <div className="flex items-center">
                     <Link
-                      className={`${isProjects ? "mt-1" : "group-hover:mt-1"
-                        } focus:outline-none focus:opacity-80`}
+                      className={`${
+                        isProjects ? "mt-1" : "group-hover:mt-1"
+                      } focus:outline-none focus:opacity-80`}
                       href="/round/results?rounds=7,8"
                     >
                       Recipients
                     </Link>
                   </div>
                 </div>
-                <div
+                {/* <div
                   className={cn(
                     "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
                     isProposals
@@ -131,7 +145,7 @@ const Navbar = () => {
                       Governance
                     </Link>
                   </div>
-                </div>
+                </div> */}
                 <DropdownMenu>
                   <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
                     <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">

@@ -75,6 +75,20 @@ const ProposalPage = async ({
     proposalStartDate < CURRENT_DATETIME && proposalEndDate > CURRENT_DATETIME
   const votingComplete = CURRENT_DATETIME > proposalEndDate
 
+  // Format dates for display (MM-DD-YYYY) - same format as ProposalCard
+  const formatDate = (date: Date) => {
+    return date
+      .toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      })
+      .replace(/\//g, "-")
+  }
+
+  const formattedStartDate = formatDate(proposalStartDate)
+  const formattedEndDate = formatDate(proposalEndDate)
+
   // Breadcrumbs
   const breadcrumbs = ["Proposals", proposalData.proposalType]
 
@@ -107,25 +121,30 @@ const ProposalPage = async ({
     getVotingProps(proposalPageData)
 
   return (
-    <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
-      <div className="proposal flex flex-col max-w[1064px] mt-24 h-[865px] gap-[48px] mx-auto">
-        <div className="flex flex-col gap-[44px]">
-          <div className="column-container gap-[48px] flex justify-between items-start flex-col md:flex-row">
-            <div className="proposal-content w-full lg:min-w-[712px] max-w-[712px] flex flex-col gap-[44px] mb-8 md:mb-0">
-              <Breadcrumbs values={breadcrumbs} />
-              <ProposalHeader
-                title={proposalData.markdowntitle}
-                status={proposalData.status}
-              />
-              <Markdown description={deTitledProposalDescription} />
-            </div>
-            <div className="voting-sidebar w-full md:w-[304px]">
-              <VotingSidebar
-                votingCardProps={votingCardProps!}
-                votingColumnProps={votingColumnProps}
-                votingRedirectProps={votingRedirectProps!}
-              />
-            </div>
+    <main className="flex w-full min-h-screen pb-[160px] mx-auto">
+      <div className="proposal flex flex-col w-full max-w-[1064px] mt-16 md:mt-24 gap-8 md:gap-[48px] mx-auto px-4 md:px-6">
+        <div className="column-container gap-6 md:gap-[48px] flex justify-between items-start flex-col md:flex-row">
+          <div className="proposal-content w-full lg:min-w-[712px] lg:max-w-[712px] flex flex-col gap-6 md:gap-[44px] mb-8 md:mb-0 min-w-0">
+            <Breadcrumbs values={breadcrumbs} />
+            <ProposalHeader
+              title={proposalData.markdowntitle}
+              status={proposalData.status}
+              startDate={formattedStartDate}
+              endDate={formattedEndDate}
+            />
+            <Markdown description={deTitledProposalDescription} />
+          </div>
+          <div className="voting-sidebar w-full md:w-[304px] md:flex-shrink-0 flex justify-center md:justify-start">
+            <VotingSidebar
+              className="sticky top-4 w-full max-w-[304px]"
+              votingCardProps={votingCardProps!}
+              votingColumnProps={votingColumnProps}
+              votingRedirectProps={votingRedirectProps!}
+              proposalId={proposalId}
+              citizen={citizen}
+              citizenEligibility={citizenEligibility}
+              proposalType={proposalData.proposalType}
+            />
           </div>
         </div>
       </div>

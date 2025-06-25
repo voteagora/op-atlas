@@ -20,7 +20,6 @@ import {
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
 import { updateMailchimpTags } from "../api/mailchimp"
-
 import { createCitizenAttestation } from "../eas/serverOnly"
 
 interface S8QualifyingUser {
@@ -198,7 +197,7 @@ export const s8CitizenshipQualification =
 // S8 Citizenship Limit Check
 export const checkCitizenshipLimit = async (): Promise<boolean> => {
   const citizenCount = await getCitizenCountByType(CITIZEN_TYPES.user)
-  return citizenCount >= 1100
+  return citizenCount >= 1000
 }
 
 export const updateCitizen = async (citizen: {
@@ -333,6 +332,7 @@ export const attestCitizen = async () => {
   }
 }
 
+// DEPRECATED. Remove after S8 voting
 export const isS7Citizen = async (id: string): Promise<boolean> => {
   const user = await getUserById(id)
   if (!user) {
@@ -349,6 +349,7 @@ export const isS7Citizen = async (id: string): Promise<boolean> => {
   return Boolean(hasS7CitizenAddress)
 }
 
+// DEPRECATED. Remove after S8 voting
 // S7 Citizens
 // https://optimism.easscan.org/schema/view/0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a
 const getS7CitizenAddresses = async () => {

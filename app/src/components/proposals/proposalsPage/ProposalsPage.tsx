@@ -1,3 +1,5 @@
+import { Scale } from "lucide-react"
+
 import Proposals from "@/components/proposals/proposalsPage/components/Proposals"
 import { getEnrichedProposalData } from "@/lib/proposals"
 
@@ -18,8 +20,13 @@ const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
       proposalData.selfNominations.length === 0)
   ) {
     return (
-      <div className="items-center justify-center align-middle">
-        No Governance Proposals Found
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <Scale className="w-48 h-48 text-muted" />
+        <div className="text-center">
+          <h3 className="text-xl font-medium text-gray-400 mb-2">
+            There are currently no governance proposals available.
+          </h3>
+        </div>
       </div>
     )
   }

@@ -22,7 +22,6 @@ export function FundingRoundPast({
             format(fundingRound.startsAt, "MMM d, yyyy")}
         </span>
       </div>
-
       {fundingRound.resultsLink && (
         <Link href={fundingRound.resultsLink}>
           <Button
