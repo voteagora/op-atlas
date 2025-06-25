@@ -48,12 +48,14 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[200] ${params.id || isMissions ? "" : "shadow-sm"
-          }`}
+        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[200] ${
+          params.id || isMissions ? "" : "shadow-sm"
+        }`}
       >
         <div
-          className={`flex items-center justify-between h-full w-full mx-auto ${params.id || isMissions ? "bg-background" : ""
-            }`}
+          className={`flex items-center justify-between h-full w-full mx-auto ${
+            params.id || isMissions ? "bg-background" : ""
+          }`}
         >
           <div className="flex h-full">
             <button
@@ -87,8 +89,9 @@ const Navbar = () => {
                 >
                   <div className="flex items-center">
                     <Link
-                      className={`${isRounds ? "mt-1" : "group-hover:mt-1"
-                        } focus:outline-none focus:opacity-80`}
+                      className={`${
+                        isRounds ? "mt-1" : "group-hover:mt-1"
+                      } focus:outline-none focus:opacity-80`}
                       href="/missions"
                     >
                       Retro Missions
@@ -105,15 +108,16 @@ const Navbar = () => {
                 >
                   <div className="flex items-center">
                     <Link
-                      className={`${isProjects ? "mt-1" : "group-hover:mt-1"
-                        } focus:outline-none focus:opacity-80`}
+                      className={`${
+                        isProjects ? "mt-1" : "group-hover:mt-1"
+                      } focus:outline-none focus:opacity-80`}
                       href="/round/results?rounds=7,8"
                     >
                       Recipients
                     </Link>
                   </div>
                 </div>
-                <div
+                {/* <div
                   className={cn(
                     "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
                     isProposals
@@ -131,7 +135,7 @@ const Navbar = () => {
                       Governance
                     </Link>
                   </div>
-                </div>
+                </div> */}
                 <DropdownMenu>
                   <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
                     <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
