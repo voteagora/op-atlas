@@ -114,7 +114,7 @@ const getStandardProposlas = async () => {
         passed: proposal.status === "EXECUTED",
         textContent: {
           title: proposal.markdowntitle,
-          subtitle: "Voters, Citizens, Delegates", // Default subtitle
+          subtitle: "Voters: Citizens, Delegates", // Default subtitle
         },
         dates: {
           startDate: formatDate(proposal.startTime),
