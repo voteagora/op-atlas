@@ -1,6 +1,6 @@
 "use server"
-import { OffchainVote } from "@/components/proposals/proposal.types"
-import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
+import { ProposalBadgeType } from "@/components/governance/governancePage/components/ProposalCard"
+import { OffchainVote } from "@/components/governance/proposal.types"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 
 const CURRENT_DATETIME = new Date()
@@ -121,7 +121,7 @@ const getStandardProposlas = async () => {
           endDate: formatDate(proposal.endTime),
         },
         arrow: {
-          href: `/proposals/${proposal.id}`,
+          href: `/governance/${proposal.id}`,
         },
       }
     },
