@@ -141,6 +141,10 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
                 votingCardProps={votingCardProps!}
                 votingColumnProps={votingColumnProps}
                 votingRedirectProps={votingRedirectProps!}
+                proposalId={proposalId}
+                citizen={citizen}
+                citizenEligibility={citizenEligibility}
+                proposalType={proposalData.proposalType}
               />
             </div>
           </div>

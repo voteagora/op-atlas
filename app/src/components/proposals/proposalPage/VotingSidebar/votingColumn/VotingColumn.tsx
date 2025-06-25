@@ -4,6 +4,8 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
+import { useWallets } from "@privy-io/react-auth"
+import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain, watchAccount } from "@wagmi/core"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -28,9 +30,8 @@ import {
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
 import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
-import { useWallets } from "@privy-io/react-auth"
-import { useSetActiveWallet } from "@privy-io/wagmi"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -106,6 +107,7 @@ const VotingColumn = ({
   const { wallets } = useWallets()
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
+  const { track } = useAnalytics()
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
@@ -229,8 +231,23 @@ const VotingColumn = ({
 
         // 3. Record vote in the database
         await postOffchainVote(offchainVote)
+        
+        // Track successful vote submission
+        track("Citizen Voting Vote Submitted", {
+          proposal_id: proposalId,
+          choice: choices,
+          wallet_address: signerAddress,
+        })
       } catch (error) {
         console.error("Failed to cast vote:", error)
+        
+        // Track vote error
+        const errorMessage = error instanceof Error ? error.message : "Unknown error"
+        track("Citizen Voting Vote Error", {
+          proposal_id: proposalId,
+          error: errorMessage,
+        })
+        
         if (
           error instanceof Error &&
           error.message === "Signer address does not match citizen address"
@@ -294,6 +311,7 @@ const VotingColumn = ({
       {currentlyActive && votingActions && !userVoted && (
         <>
           <VotingActions
+            proposalId={proposalId}
             // This is a wonky way to overwrite the call to make an external call.
             cardActionList={votingActions.cardActionList.map((action) => {
               // If this is a vote action, replace its action function with handleCastVote

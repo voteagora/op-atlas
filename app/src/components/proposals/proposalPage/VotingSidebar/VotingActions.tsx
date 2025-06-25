@@ -1,19 +1,22 @@
 "use client"
-import { voteAction } from "@/components/proposals/proposal.types"
-import { useRouter } from "next/navigation"
 import { useLogin } from "@privy-io/react-auth"
 import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+
+import { voteAction } from "@/components/proposals/proposal.types"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export interface CardActionsProps {
   cardActionList: voteAction[]
+  proposalId?: string
 }
 
-const VotingActions = ({ cardActionList }: CardActionsProps) => {
+const VotingActions = ({ cardActionList, proposalId }: CardActionsProps) => {
   return (
     <div className="flex flex-col items-center mt-4 mr-6 mb-6 ml-6">
       {cardActionList &&
         cardActionList.map((action, idx) => (
-          <CardAction {...action} key={idx} />
+          <CardAction {...action} proposalId={proposalId} key={idx} />
         ))}
     </div>
   )
@@ -26,7 +29,8 @@ const CardAction = ({
   action,
   disabled,
   loading,
-}: voteAction) => {
+  proposalId,
+}: voteAction & { proposalId?: string }) => {
   const router = useRouter()
   const { login: privyLogin } = useLogin({
     onComplete: () => {
@@ -34,25 +38,51 @@ const CardAction = ({
       router.refresh()
     },
   })
+  const { track } = useAnalytics()
+
   const handleAction = async () => {
+    // Track button click before performing action
+    let buttonType = ""
     switch (actionType.toLowerCase()) {
       case "log":
         console.log("log")
         break
       case "vote":
+        buttonType = "Submit vote"
+        track("Citizen Voting Button Click", {
+          proposal_id: proposalId,
+          button_type: buttonType,
+        })
         // To be overwritten by the component that uses this
         await action()
         break
       case "register":
+        buttonType = "Register to Vote"
+        track("Citizen Voting Button Click", {
+          proposal_id: proposalId,
+          button_type: buttonType,
+        })
         const currentPath = window.location.pathname + window.location.search
-        router.push(`/citizenship?redirectUrl=${encodeURIComponent(currentPath)}`)
+        router.push(
+          `/citizenship?redirectUrl=${encodeURIComponent(currentPath)}`,
+        )
         break
       case "learn more":
+        buttonType = "Go to vote.optimism.io"
+        track("Citizen Voting Button Click", {
+          proposal_id: proposalId,
+          button_type: buttonType,
+        })
         router.push(
           "https://community.optimism.io/citizens-house/citizen-house-overview",
         )
         break
       case "sign in":
+        buttonType = "Sign In"
+        track("Citizen Voting Button Click", {
+          proposal_id: proposalId,
+          button_type: buttonType,
+        })
         privyLogin()
         break
       default:
