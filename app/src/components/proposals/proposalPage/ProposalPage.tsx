@@ -138,7 +138,7 @@ const ProposalPage = async ({
             <VotingSidebar
               votingCardProps={votingCardProps}
               votingColumnProps={votingColumnProps}
-              votingRedirectProps={votingRedirectProps!}
+              proposalData={proposalData}
             />
           </div>
         </div>

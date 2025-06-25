@@ -321,6 +321,10 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
   return votingActions
 }
 
+export const getAgoraProposalLink = (proposalId: string) => {
+  return `${API_URL}/proposals/${proposalId}`
+}
+
 /**
  * Get the voting column props based on the card type
  * @param proposalData The card type containing information about the voting state

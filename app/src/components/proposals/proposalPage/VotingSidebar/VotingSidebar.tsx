@@ -5,7 +5,6 @@ import React, { useState, useRef, useEffect } from "react"
 import {
   VotingCardProps,
   VotingColumnProps,
-  VotingRedirectProps,
 } from "@/components/proposals/proposal.types"
 import VotingCard from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VotingCard"
 import VotingColumn from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
@@ -13,17 +12,18 @@ import VotingRedirect from "@/components/proposals/proposalPage/VotingSidebar/Vo
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
+import { ProposalData } from "@/lib/proposals"
 
 interface VotingSidebarProps {
   votingCardProps: VotingCardProps
   votingColumnProps: VotingColumnProps
-  votingRedirectProps?: VotingRedirectProps
+  proposalData: ProposalData
 }
 
 const VotingSidebar = ({
   votingCardProps,
   votingColumnProps,
-  votingRedirectProps,
+  proposalData,
 }: VotingSidebarProps) => {
   const { track } = useAnalytics()
   const isTracked = useRef(false)
@@ -54,7 +54,7 @@ const VotingSidebar = ({
         <VotingCard {...votingCardProps} />
         <VotingColumn {...votingColumnProps} />
         <div className="mt-5">
-          {votingRedirectProps && <VotingRedirect {...votingRedirectProps} />}
+          <VotingRedirect proposalData={proposalData} />
         </div>
       </div>
     </div>
