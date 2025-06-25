@@ -169,7 +169,7 @@ const getVoteOptions = () => {
  */
 export const getVotingCardProps = (
   proposalData: ProposalPageDataInterface,
-): VotingCardProps | undefined => {
+): VotingCardProps => {
   // If voting has not opened yet
   if (!proposalData.votingOpen && !proposalData.votingComplete) {
     return {

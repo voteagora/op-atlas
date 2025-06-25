@@ -56,6 +56,14 @@ export async function updateCitizen({
   })
 }
 
+export async function getCitizenForUser(
+  userId: string,
+): Promise<Citizen | null> {
+  return prisma.citizen.findUnique({
+    where: { userId },
+  })
+}
+
 export async function getCitizenByType(
   lookup: CitizenLookup,
 ): Promise<Citizen | null> {

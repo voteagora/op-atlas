@@ -11,71 +11,48 @@ import VotingCard from "@/components/proposals/proposalPage/VotingSidebar/voting
 import VotingColumn from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 import VotingRedirect from "@/components/proposals/proposalPage/VotingSidebar/VotingRedirect"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
+import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
+import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 
 interface VotingSidebarProps {
   votingCardProps: VotingCardProps
   votingColumnProps: VotingColumnProps
   votingRedirectProps?: VotingRedirectProps
-  proposalId: string
-  citizen?: any
-  citizenEligibility?: any
-  proposalType?: string
 }
 
 const VotingSidebar = ({
-  votingCardProps: initialVotingCardProps,
+  votingCardProps,
   votingColumnProps,
   votingRedirectProps,
-  proposalId,
-  citizen,
-  citizenEligibility,
-  proposalType,
 }: VotingSidebarProps) => {
-  const [votingCardProps, setVotingCardProps] = useState<VotingCardProps>(
-    initialVotingCardProps,
-  )
   const { track } = useAnalytics()
   const isTracked = useRef(false)
 
-  // Determine citizen status
-  const getCitizenStatus = () => {
-    if (citizen) {
-      return "registered"
-    } else if (citizenEligibility?.eligible) {
-      return "eligible"
-    } else {
-      return "ineligible"
-    }
-  }
+  const { data: citizenEligibility } = useCitizenQualification()
+  const { citizen } = useUserCitizen()
 
   useEffect(() => {
     if (!isTracked.current) {
       // Page View event - when user visits the voting page
       track("Citizen Voting Page View", {
         page_title: "Proposal Voting",
-        page_type: proposalType,
-        proposal_id: proposalId,
-        citizen_status: getCitizenStatus(),
+        page_type: votingColumnProps.proposalType,
+        proposal_id: votingColumnProps.proposalId,
+        citizen_status: citizen
+          ? "registered"
+          : citizenEligibility?.eligible
+          ? "eligible"
+          : "ineligible",
       })
       isTracked.current = true
     }
-  }, [proposalId, citizen, citizenEligibility, proposalType, track])
-
-  const updateVotingCardProps = (updatedProps: Partial<VotingCardProps>) => {
-    setVotingCardProps((prevProps) => ({
-      ...prevProps,
-      ...updatedProps,
-    }))
-  }
+  }, [votingColumnProps, track, citizen, citizenEligibility])
 
   return (
     <div className="w-[304px] gap-6 flex flex-col sticky top-4 w-full max-w-[304px]">
       <div className="w-[304px] ">
         <VotingCard {...votingCardProps} />
-        <VotingColumn
-          {...votingColumnProps}
-          updateVotingCardProps={updateVotingCardProps}
-        />
+        <VotingColumn {...votingColumnProps} />
         <div className="mt-5">
           {votingRedirectProps && <VotingRedirect {...votingRedirectProps} />}
         </div>

@@ -96,7 +96,6 @@ const VotingColumn = ({
   userCitizen,
   userVoted,
   resultsLink,
-  updateVotingCardProps,
 }: VotingColumnProps) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
   const [isVoting, setIsVoting] = useState<boolean>(false)
@@ -283,10 +282,6 @@ const VotingColumn = ({
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)
-        updateVotingCardProps?.({
-          cardText: { title: "You voted" },
-          previousVote: selectedVote,
-        })
       }
     }
 
@@ -294,10 +289,6 @@ const VotingColumn = ({
     toast.promise(castAndRecordVote(), {
       loading: "Casting Vote...",
       success: () => {
-        // Update the voting card to show the user's vote
-        if (updateVotingCardProps) {
-          updateVotingCardProps({ previousVote: selectedVote })
-        }
         // Clear the voting actions after a successful vote
         setVotingActions({ cardActionList: [] })
         // Update voted status to true
