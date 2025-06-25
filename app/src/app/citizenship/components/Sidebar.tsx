@@ -13,9 +13,11 @@ import { CitizenshipQualification } from "@/lib/types"
 export const Sidebar = ({
   user,
   qualification,
+  redirectUrl,
 }: {
   user: User
   qualification: CitizenshipQualification
+  redirectUrl?: string
 }) => {
   const { hasMetRequirements, isLoading } = useCitizenshipRequirements({
     id: user.id,
@@ -78,6 +80,7 @@ export const Sidebar = ({
       <CitizenshipApplicationDialog
         open={isRulesDialogOpen}
         onOpenChange={setIsRulesDialogOpen}
+        redirectUrl={redirectUrl}
       />
     </div>
   )

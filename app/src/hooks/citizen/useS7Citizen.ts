@@ -6,6 +6,9 @@ import { isS7Citizen } from "@/lib/actions/citizens"
 
 export const IS_S7_CITIZEN_QUERY_KEY = "is-s7-citizen"
 
+// HOOK IS DEPRECATED. Remove after S8 voting
+// We don't need to check if a user is a S7 citizen anymore
+
 export const useIsS7Citizen = ({
   id,
   enabled = true,

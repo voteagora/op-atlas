@@ -2,11 +2,9 @@
 
 import { UserAddress, UserPassport } from "@prisma/client"
 import Link from "next/link"
-import { useEffect } from "react"
 
 import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
-import { useIsS7Citizen } from "@/hooks/citizen/useS7Citizen"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserPassports } from "@/hooks/db/useUserPassports"
 import { useUserWorldId } from "@/hooks/db/useUserWorldId"
@@ -31,9 +29,6 @@ export const UserRequirements = ({
   const { user } = useUser({ id: userId })
   const { data: userPassports } = useUserPassports({ id: userId })
   const { data: userWorldId } = useUserWorldId({ id: userId })
-  const { data: isS7Citizen, invalidate: invalidateS7Citizen } = useIsS7Citizen(
-    { id: userId },
-  )
 
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { refreshPassport } = useRefreshPassport(userId)
@@ -41,13 +36,6 @@ export const UserRequirements = ({
   const { linkGithub, unlinkGithub, toggleIsDeveloper } =
     usePrivyLinkGithub(userId)
   const { setOpenDialog } = useAppDialogs()
-
-  // Manually invalidate S7 citizen query when user data changes
-  useEffect(() => {
-    if (user) {
-      invalidateS7Citizen()
-    }
-  }, [user, invalidateS7Citizen])
 
   const email = user?.emails?.[0]
   const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
@@ -394,22 +382,6 @@ export const UserRequirements = ({
     )
   }
 
-  const renderS7Citizen = () => {
-    return (
-      <ConditionRow isMet={isS7Citizen || false}>
-        Must have S7 Citizen address linked to account |{" "}
-        <button
-          type="button"
-          className={LINK_STYLE}
-          onClick={() => linkWallet()}
-          onKeyDown={(e) => e.key === "Enter" && linkWallet()}
-        >
-          Add your address
-        </button>
-      </ConditionRow>
-    )
-  }
-
   return (
     <div className="flex flex-col gap-6">
       {renderEligibility()}
@@ -420,7 +392,6 @@ export const UserRequirements = ({
         {renderGithub()}
         {renderEmail()}
         {renderAddress()}
-        {renderS7Citizen()}
       </div>
       <div className="text-secondary-foreground">
         <div className="font-semibold text-foreground">Proof of personhood</div>
