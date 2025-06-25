@@ -29,7 +29,8 @@ export async function getRole(id: number): Promise<Role | null> {
 }
 
 export async function activeUserApplications(
-  userId: string,
+  userId?: string,
+  organizationId?: string,
 ): Promise<RoleApplication[]> {
-  return await getActiveUserRoleApplications(userId)
+  return await getActiveUserRoleApplications(userId, organizationId)
 }

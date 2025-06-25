@@ -100,11 +100,17 @@ export async function upsertRoleApplication(
 }
 
 export async function getActiveUserRoleApplications(
-  userId: string,
+  userId?: string,
+  organizationId?: string,
 ): Promise<RoleApplication[]> {
+  if (!userId && !organizationId) {
+    throw new Error("Either userId or organizationId must be provided")
+  }
+
   const applications = await prisma.roleApplication.findMany({
     where: {
-      userId,
+      ...(userId && { userId }),
+      ...(organizationId && { organizationId }),
       role: {
         startAt: {
           lte: new Date(),

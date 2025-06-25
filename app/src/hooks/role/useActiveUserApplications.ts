@@ -8,22 +8,24 @@ export const ACTIVE_USER_APPLICATIONS_QUERY_KEY = "activeUserApplications"
 
 export const useActiveUserApplications = ({
   userId,
+  organizationId,
   enabled = true,
 }: {
-  userId: string
+  userId?: string
+  organizationId?: string
   enabled?: boolean
 }) => {
   const queryClient = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
-    queryKey: [ACTIVE_USER_APPLICATIONS_QUERY_KEY, userId],
-    queryFn: () => activeUserApplications(userId),
+    queryKey: [ACTIVE_USER_APPLICATIONS_QUERY_KEY, userId, organizationId],
+    queryFn: () => activeUserApplications(userId, organizationId),
     enabled,
   })
 
   const invalidate = () => {
     return queryClient.invalidateQueries({
-      queryKey: [ACTIVE_USER_APPLICATIONS_QUERY_KEY, userId],
+      queryKey: [ACTIVE_USER_APPLICATIONS_QUERY_KEY, userId, organizationId],
     })
   }
 
