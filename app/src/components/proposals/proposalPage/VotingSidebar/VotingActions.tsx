@@ -1,9 +1,10 @@
 "use client"
-import { voteAction } from "@/components/proposals/proposal.types"
-import { useRouter } from "next/navigation"
 import { useLogin } from "@privy-io/react-auth"
 import { Loader2 } from "lucide-react"
-import { useCitizenVotingButtonTracking } from "@/components/proposals/proposalPage/CitizenVotingAnalytics"
+import { useRouter } from "next/navigation"
+
+import { voteAction } from "@/components/proposals/proposal.types"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export interface CardActionsProps {
   cardActionList: voteAction[]
@@ -37,7 +38,7 @@ const CardAction = ({
       router.refresh()
     },
   })
-  const { trackButtonClick } = useCitizenVotingButtonTracking(proposalId || "")
+  const { track } = useAnalytics()
 
   const handleAction = async () => {
     // Track button click before performing action
@@ -48,13 +49,19 @@ const CardAction = ({
         break
       case "vote":
         buttonType = "Submit vote"
-        trackButtonClick(buttonType)
+        track("Citizen Voting Button Click", {
+          proposal_id: proposalId,
+          button_type: buttonType,
+        })
         // To be overwritten by the component that uses this
         await action()
         break
       case "register":
         buttonType = "Register to Vote"
-        trackButtonClick(buttonType)
+        track("Citizen Voting Button Click", {
+          proposal_id: proposalId,
+          button_type: buttonType,
+        })
         const currentPath = window.location.pathname + window.location.search
         router.push(
           `/citizenship?redirectUrl=${encodeURIComponent(currentPath)}`,
@@ -62,14 +69,20 @@ const CardAction = ({
         break
       case "learn more":
         buttonType = "Go to vote.optimism.io"
-        trackButtonClick(buttonType)
+        track("Citizen Voting Button Click", {
+          proposal_id: proposalId,
+          button_type: buttonType,
+        })
         router.push(
           "https://community.optimism.io/citizens-house/citizen-house-overview",
         )
         break
       case "sign in":
         buttonType = "Sign In"
-        trackButtonClick(buttonType)
+        track("Citizen Voting Button Click", {
+          proposal_id: proposalId,
+          button_type: buttonType,
+        })
         privyLogin()
         break
       default:

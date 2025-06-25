@@ -17,7 +17,6 @@ import {
   VoteType,
   VotingColumnProps,
 } from "@/components/proposals/proposal.types"
-import { useCitizenVoteSubmissionTracking } from "@/components/proposals/proposalPage/CitizenVotingAnalytics"
 import VotingActions from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
@@ -31,6 +30,7 @@ import {
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
 import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
@@ -107,7 +107,7 @@ const VotingColumn = ({
   const { wallets } = useWallets()
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
-  const { trackVoteSubmitted, trackVoteError } = useCitizenVoteSubmissionTracking(proposalId)
+  const { track } = useAnalytics()
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
@@ -233,13 +233,20 @@ const VotingColumn = ({
         await postOffchainVote(offchainVote)
         
         // Track successful vote submission
-        trackVoteSubmitted(choices, signerAddress)
+        track("Citizen Voting Vote Submitted", {
+          proposal_id: proposalId,
+          choice: choices,
+          wallet_address: signerAddress,
+        })
       } catch (error) {
         console.error("Failed to cast vote:", error)
         
         // Track vote error
         const errorMessage = error instanceof Error ? error.message : "Unknown error"
-        trackVoteError(errorMessage)
+        track("Citizen Voting Vote Error", {
+          proposal_id: proposalId,
+          error: errorMessage,
+        })
         
         if (
           error instanceof Error &&

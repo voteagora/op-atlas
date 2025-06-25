@@ -1,17 +1,16 @@
 import { Citizen } from "@prisma/client"
 import { notFound } from "next/navigation"
 
+import { getVotingProps } from "@/app/proposals/utils/votingUtils"
+import { auth } from "@/auth"
 import {
   ProposalPageDataInterface,
   ProposalType,
 } from "@/components/proposals/proposal.types"
-import { getVotingProps } from "@/app/proposals/utils/votingUtils"
-import { auth } from "@/auth"
 import Breadcrumbs from "@/components/proposals/proposalPage/proposalContent/Breadcrumbs"
 import Markdown from "@/components/proposals/proposalPage/proposalContent/Markdown"
 import ProposalHeader from "@/components/proposals/proposalPage/proposalContent/ProposalHeader"
 import VotingSidebar from "@/components/proposals/proposalPage/VotingSidebar/VotingSidebar"
-import { CitizenVotingAnalytics } from "@/components/proposals/proposalPage/CitizenVotingAnalytics"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 import { getUserById } from "@/db/users"
 import { s8CitizenshipQualification } from "@/lib/actions/citizens"
@@ -125,12 +124,6 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
 
   return (
     <main className="flex w-full h-full pb-[160px] gap-[80px] mx-auto items-center">
-      <CitizenVotingAnalytics
-        proposalId={proposalId}
-        citizen={citizen}
-        citizenEligibility={citizenEligibility}
-        proposalType={proposalData.proposalType}
-      />
       <div className="proposal flex flex-col max-w[1064px] mt-24 h-[865px] gap-[48px] mx-auto">
         <div className="flex flex-col gap-[44px]">
           <div className="column-container gap-[48px] flex justify-between items-start flex-col md:flex-row">
@@ -148,6 +141,10 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
                 votingCardProps={votingCardProps!}
                 votingColumnProps={votingColumnProps}
                 votingRedirectProps={votingRedirectProps!}
+                proposalId={proposalId}
+                citizen={citizen}
+                citizenEligibility={citizenEligibility}
+                proposalType={proposalData.proposalType}
               />
             </div>
           </div>
