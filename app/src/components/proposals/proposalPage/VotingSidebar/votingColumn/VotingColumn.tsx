@@ -22,6 +22,7 @@ import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/
 import { postOffchainVote } from "@/db/votes"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
+import { useCitizenVoteSubmissionTracking } from "@/components/proposals/proposalPage/CitizenVotingAnalytics"
 import {
   EAS_CONTRACT_ADDRESS,
   EAS_VOTE_SCHEMA,
@@ -106,6 +107,7 @@ const VotingColumn = ({
   const { wallets } = useWallets()
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
+  const { trackVoteSubmitted, trackVoteError } = useCitizenVoteSubmissionTracking(proposalId)
 
   const createDelegatedAttestation = async (choices: any) => {
     if (!signer) throw new Error("Signer not ready")
@@ -229,8 +231,16 @@ const VotingColumn = ({
 
         // 3. Record vote in the database
         await postOffchainVote(offchainVote)
+        
+        // Track successful vote submission
+        trackVoteSubmitted(choices, signerAddress)
       } catch (error) {
         console.error("Failed to cast vote:", error)
+        
+        // Track vote error
+        const errorMessage = error instanceof Error ? error.message : "Unknown error"
+        trackVoteError(errorMessage)
+        
         if (
           error instanceof Error &&
           error.message === "Signer address does not match citizen address"
@@ -294,6 +304,7 @@ const VotingColumn = ({
       {currentlyActive && votingActions && !userVoted && (
         <>
           <VotingActions
+            proposalId={proposalId}
             // This is a wonky way to overwrite the call to make an external call.
             cardActionList={votingActions.cardActionList.map((action) => {
               // If this is a vote action, replace its action function with handleCastVote
