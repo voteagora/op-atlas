@@ -88,11 +88,3 @@ export interface CardTextProps {
   title: string
   descriptionElement?: string | React.ReactElement
 }
-
-export interface VotingRedirectProps {
-  callout: string
-  link?: {
-    linkText: string
-    linkHref: string
-  }
-}

@@ -81,6 +81,7 @@ const VoteButton = ({
               : "hover:bg-button-primary-hover"
             : ""
         }
+        focus:outline-none focus:ring-0 focus:ring-offset-0
       `}
       disabled={isDisabled}
       onClick={onClick}

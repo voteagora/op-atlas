@@ -143,7 +143,7 @@ interface ProposalTextProps {
 }
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
-    <div className="flex flex-col justify-center w-full lg:min-w-[42.1875rem] h-[48px] flex-shrink min-w-0 max-w-72">
+    <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 max-w-72">
       <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate">
         {title}
       </div>
@@ -160,7 +160,7 @@ interface ProposalDatesProps {
   voteStatus?: {
     text: string
     styling: string
-  }
+  } | null
 }
 const ProposalDates = ({
   startDate,

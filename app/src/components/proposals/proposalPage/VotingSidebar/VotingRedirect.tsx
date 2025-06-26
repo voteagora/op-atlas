@@ -10,6 +10,7 @@ const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
           <a
             className="underline text-secondary-foreground hover:text-foreground"
             href={getAgoraProposalLink(proposalData.id)}
+            target="_blank"
           >
             Vote here
           </a>
