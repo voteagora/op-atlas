@@ -41,7 +41,8 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   const isTracked = useRef(false)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  const { data: citizenEligibility, isLoading: isEligibilityLoading } = useCitizenQualification()
+  const { data: citizenEligibility, isLoading: isEligibilityLoading } =
+    useCitizenQualification()
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
   const { data: session } = useSession()
 
@@ -71,7 +72,14 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
       })
       isTracked.current = true
     }
-  }, [proposalData, track, citizen, citizenEligibility, session?.user?.id, isInitialLoad])
+  }, [
+    proposalData,
+    track,
+    citizen,
+    citizenEligibility,
+    session?.user?.id,
+    isInitialLoad,
+  ])
 
   if (isInitialLoad) {
     return <VotingSidebarSkeleton />
@@ -83,7 +91,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
         <div className="transition-all duration-300 ease-in-out">
           <VotingColumn proposalData={proposalData} />
         </div>
-        <div className="gap-2 transition-all duration-300 ease-in-out">
+        <div className="mt-5 transition-all duration-300 ease-in-out">
           <VotingRedirect proposalData={proposalData} />
         </div>
       </div>
