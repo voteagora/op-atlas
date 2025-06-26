@@ -186,9 +186,6 @@ export const getVotingCardProps = (
         },
       }
     }
-    return {
-      ...castYourVote(proposalData.proposalType),
-    }
   }
   if (isCitizen) {
     return {
