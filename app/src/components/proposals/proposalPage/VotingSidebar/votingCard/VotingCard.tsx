@@ -29,6 +29,20 @@ const CardText = ({
         {votingCardProps.cardText.title}
       </h4>
       {votingCardProps.cardText.descriptionElement &&
+      votingCardProps.cardText.descriptionElement === "OFFCHAIN_STANDARD" ? (
+        <p className="text-sm text-center">
+          This proposal requires approval from the Citizen's House and Token
+          House. Read more about the voting mechanism{" "}
+          <a
+            href="https://community.optimism.io/citizens-house/citizen-house-overview"
+            className="text-sm text-center underline"
+          >
+            here
+          </a>
+          .
+        </p>
+      ) : (
+        votingCardProps.cardText.descriptionElement &&
         (React.isValidElement(votingCardProps.cardText.descriptionElement) ? (
           React.cloneElement(
             votingCardProps.cardText.descriptionElement as React.ReactElement<{
@@ -42,7 +56,8 @@ const CardText = ({
           <p className="text-sm text-center">
             {votingCardProps.cardText.descriptionElement}
           </p>
-        ))}
+        ))
+      )}
     </div>
   )
 }
