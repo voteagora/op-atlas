@@ -1,21 +1,8 @@
-import { User } from "@prisma/client"
 import React from "react"
 
-import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
-import VotingActions, {
-  CardActionsProps,
-} from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import { CitizenshipQualification } from "@/lib/types"
-import {
-  CardTextProps,
-  VoteType,
-  VotingCardProps,
-} from "@/components/proposals/proposal.types"
+import { CardTextProps, VoteType } from "@/components/proposals/proposal.types"
 import { ProposalData } from "@/lib/proposals"
-import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
-import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
-import { useUser } from "@/hooks/db/useUser"
-import { useSessionUser } from "@/hooks/db/useSessionUser"
 import { getVotingProps } from "@/app/proposals/utils/votingUtils"
 
 const CardText = ({
@@ -95,27 +82,4 @@ const PreviousVote = ({ voteType }: { voteType: string }) => {
   )
 }
 
-// const VotingCard = ({ proposalData }: { proposalData: ProposalData }) => {
-//   const { data: eligibility } = useCitizenQualification()
-//   // const { user } = useSessionUser()
-//   const { citizen } = useUserCitizen()
-
-//   return (
-//     <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
-//       {eligibility && user && (
-//         <EligibleCitizenAvatar user={user} qualification={eligibility} />
-//       )}
-//       <CardText
-//         proposalData={proposalData}
-//         isCitizen={!!citizen}
-//         vote={undefined}
-//         eligibility={eligibility}
-//       />
-//       {previousVote && <PreviousVote voteType={previousVote} />}
-//       <VotingActions proposalId={proposalData.id} />
-//     </div>
-//   )
-// }
-
-// export default VotingCard
 export { CardText, type CardTextProps }

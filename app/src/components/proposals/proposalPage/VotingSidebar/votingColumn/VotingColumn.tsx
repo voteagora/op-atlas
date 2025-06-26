@@ -18,7 +18,7 @@ import {
   ProposalType,
   VoteType,
 } from "@/components/proposals/proposal.types"
-import VotingActions from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
+import VoterActions from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
@@ -54,34 +54,21 @@ export interface CandidateCardProps {
   buttonLink: string
 }
 
-const ColumnCard = ({
+const VotingChoices = ({
   proposalType,
-  signedIn,
-  citizen,
-  currentlyActive,
-  voted,
   selectedVote,
   setSelectedVote,
 }: {
   proposalType: string
-  signedIn?: boolean
-  citizen?: boolean
-  title?: string
-  currentlyActive?: boolean
-  voted?: boolean
-  selectedVote?: VoteType | null
-  setSelectedVote?: (vote: VoteType) => void
+  selectedVote?: VoteType
+  setSelectedVote: (vote: VoteType) => void
 }) => {
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
-      // If the user is not signed-in we do not want to show the card
-      if (!signedIn || !currentlyActive || voted || !citizen) {
-        return <></>
-      }
       return (
         <StandardVoteCard
-          selectedVote={selectedVote!}
-          setSelectedVote={setSelectedVote!}
+          selectedVote={selectedVote}
+          setSelectedVote={setSelectedVote}
         />
       )
     case "APPROVAL":
@@ -94,12 +81,14 @@ const ColumnCard = ({
 }
 
 const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
-  const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
+  const [selectedVote, setSelectedVote] = useState<VoteType | undefined>(
+    undefined,
+  )
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [voted, setVoted] = useState<boolean>(false)
   const handleVoteClick = (voteType: VoteType) => {
-    setSelectedVote(voteType === selectedVote ? null : voteType)
+    setSelectedVote(voteType)
   }
 
   const { data: session } = useSession()
@@ -111,6 +100,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     !!citizen,
     !!citizenEligibility?.eligible,
   )
+
+  const canVote =
+    !!session?.user?.id && !!citizen && proposalData.status === "ACTIVE"
 
   const { wallets } = useWallets()
   const signer = useEthersSigner({ chainId: CHAIN_ID })
@@ -298,24 +290,24 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   return (
     <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
+      {/* Text on the top of the card */}
       <CardText
         proposalData={proposalData}
         isCitizen={!!citizen}
         vote={undefined}
         eligibility={citizenEligibility}
       />
-      <ColumnCard
-        proposalType={proposalData.proposalType}
-        signedIn={!!session?.user?.id}
-        currentlyActive={proposalData.status === "ACTIVE"}
-        citizen={!!citizen}
-        voted={voted}
-        selectedVote={selectedVote}
-        setSelectedVote={handleVoteClick}
-      />
+      {canVote && (
+        <VotingChoices
+          proposalType={proposalData.proposalType}
+          selectedVote={selectedVote}
+          setSelectedVote={handleVoteClick}
+        />
+      )}
+      {/* Actions */}
       {proposalData.status === "ACTIVE" && votingActions && !voted && (
         <>
-          <VotingActions
+          <VoterActions
             proposalId={proposalData.id}
             // This is a wonky way to overwrite the call to make an external call.
             cardActionList={votingActions.cardActionList.map((action) => {
@@ -324,7 +316,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               return {
                 ...action,
                 action: handleCastVote,
-                disabled: !selectedVote || addressMismatch,
+                disabled: canVote && (addressMismatch || !selectedVote),
                 loading: isVoting,
               }
             })}

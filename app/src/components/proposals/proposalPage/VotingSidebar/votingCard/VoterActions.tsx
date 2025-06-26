@@ -11,7 +11,7 @@ export interface CardActionsProps {
   proposalId?: string
 }
 
-const VotingActions = ({ cardActionList, proposalId }: CardActionsProps) => {
+const VoterActions = ({ cardActionList, proposalId }: CardActionsProps) => {
   return (
     <div className="flex flex-col items-center mt-4 mr-6 mb-6 ml-6">
       {cardActionList &&
@@ -114,4 +114,4 @@ const CardAction = ({
   )
 }
 
-export default VotingActions
+export default VoterActions

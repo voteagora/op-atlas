@@ -43,7 +43,6 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   return (
     <div className="w-[304px] gap-6 flex flex-col sticky top-4 w-full max-w-[304px]">
       <div className="w-[304px] ">
-        {/* <VotingCard proposalData={proposalData} /> */}
         <VotingColumn proposalData={proposalData} />
         <div className="mt-5">
           <VotingRedirect proposalData={proposalData} />
