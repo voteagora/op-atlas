@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation"
 import ReactMarkdown from "react-markdown"
 
+import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/components/AnalyticsTracker"
+import { Sidebar } from "@/app/governance/roles/[roleId]/components/Sidebar"
+import SidebarApplications from "@/app/governance/roles/[roleId]/components/SidebarApplications"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,9 +14,6 @@ import {
 } from "@/components/ui/breadcrumb"
 import { getRoleApplications, getRoleById } from "@/db/role"
 import { formatMMMd } from "@/lib/utils/date"
-
-import { Sidebar } from "./components/Sidebar"
-import SidebarApplications from "./components/SidebarApplications"
 
 export default async function Page({ params }: { params: { roleId: string } }) {
   const role = await getRoleById(parseInt(params.roleId))
@@ -46,6 +46,8 @@ export default async function Page({ params }: { params: { roleId: string } }) {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+
+            <AnalyticsTracker role={role} />
 
             <div className="flex flex-col gap-y-8 mt-12">
               <div className="flex flex-col gap-4">

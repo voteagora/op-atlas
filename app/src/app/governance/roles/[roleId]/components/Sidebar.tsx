@@ -2,6 +2,7 @@
 
 import { Role } from "@prisma/client"
 import { usePrivy } from "@privy-io/react-auth"
+import { track } from "mixpanel-browser"
 import { usePathname, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useRef, useState } from "react"
@@ -55,6 +56,13 @@ export const Sidebar = ({ role }: { role: Role }) => {
       localStorage.setItem(LOCAL_STORAGE_LOGIN_REDIRECT, pathname)
       login()
     } else if (isApplicationWindow) {
+      track("Button Click", {
+        button_type: "Nominate Yourself",
+        role_name: role.title,
+        role_id: role.id,
+        candidate_user_id: session?.user?.id || null,
+      })
+
       setIsNavigating(true)
       router.push(`/governance/roles/${role.id}/apply`)
     }

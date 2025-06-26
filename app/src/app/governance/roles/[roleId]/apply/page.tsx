@@ -1,5 +1,7 @@
 import { notFound, redirect } from "next/navigation"
 
+import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/apply/components/AnalyticsTracker"
+import { Form } from "@/app/governance/roles/[roleId]/apply/components/Form"
 import { auth } from "@/auth"
 import {
   Breadcrumb,
@@ -13,8 +15,6 @@ import { getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import { formatMMMd } from "@/lib/utils/date"
-
-import { Form } from "./components/Form"
 
 export default async function Page({ params }: { params: { roleId: string } }) {
   const session = await auth()
@@ -62,6 +62,8 @@ export default async function Page({ params }: { params: { roleId: string } }) {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+
+          <AnalyticsTracker role={role} />
 
           <div className="flex flex-col gap-y-8 mt-12">
             <div className="flex flex-col gap-4">

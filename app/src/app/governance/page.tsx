@@ -1,8 +1,8 @@
 "use server"
 
+import { AnalyticsTracker } from "@/app/governance/components/AnalyticsTracker"
+import { RoleRow } from "@/app/governance/roles/components/RoleRow"
 import { getAllRoles } from "@/db/role"
-
-import { RoleRow } from "./roles/components/RoleRow"
 
 export default async function Page() {
   const roles = await getAllRoles()
@@ -19,6 +19,8 @@ export default async function Page() {
               Self-nominate for a governance role in Season 8 & 9
             </div>
           </div>
+
+          <AnalyticsTracker />
 
           <div className="flex flex-col rounded-lg border border-border-secondary">
             {roles.map((role) => (

@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation"
 
+import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/apply/[applicationId]/components/AnalyticsTracker"
+import { CopyForumTextButton } from "@/app/governance/roles/[roleId]/apply/[applicationId]/components/CopyForumTextButton"
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
 import { getOrganization } from "@/db/organizations"
 import { getRoleApplicationById, getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
 import { formatMMMd } from "@/lib/utils/date"
-
-import { CopyForumTextButton } from "./components/CopyForumTextButton"
 
 export default async function Page({
   params,
@@ -47,6 +47,7 @@ export default async function Page({
 
   return (
     <main className="flex flex-col items-center justify-center h-full gap-8 w-full">
+      <AnalyticsTracker role={role} />
       <div className="flex flex-col items-center justify-center gap-8 max-w-[712px] mt-20">
         {isUser ? (
           <UserAvatarLarge imageUrl={user?.imageUrl} />

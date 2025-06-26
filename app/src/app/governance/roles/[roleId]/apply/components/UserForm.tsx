@@ -1,4 +1,5 @@
 import { Role, User } from "@prisma/client"
+import { track } from "mixpanel-browser"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
@@ -156,6 +157,12 @@ export const UserForm = ({
       projectName: project.project.name,
       description: projectRelevanceText[project.project.id] || "",
     }))
+
+    track("Submitted Nomination", {
+      role_name: role.title,
+      number_projects_added_to_self_nomination: projectsData.length,
+      candidate_user_id: user.id,
+    })
 
     applyForRole(role.id, {
       userId: selectedEntity.userId,
