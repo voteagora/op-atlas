@@ -43,12 +43,12 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   }, [proposalData, track, citizen, citizenEligibility])
 
   return (
-    <div className="w-[304px] gap-6 flex flex-col sticky top-4 w-full max-w-[304px]">
+    <div className="w-[304px] gap-4 flex flex-col sticky top-4 w-full max-w-[304px]">
       <div className="w-[304px] ">
         <VotingColumn proposalData={proposalData} />
-        <div className="mt-5">
-          <VotingRedirect proposalData={proposalData} />
-        </div>
+      </div>
+      <div className="gap-2">
+        <VotingRedirect proposalData={proposalData} />
       </div>
     </div>
   )
