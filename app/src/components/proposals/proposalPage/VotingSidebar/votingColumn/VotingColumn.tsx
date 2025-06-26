@@ -343,11 +343,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           )}
         </>
       )}
-      <div className="w-full flex items-center justify-center gap-2.5">
+      <div className="w-full flex items-center justify-center">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
-          <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
-            View results
-          </p>
+          <p className="text-sm text-center underline">View results</p>
         </a>
       </div>
     </div>

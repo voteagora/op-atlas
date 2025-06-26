@@ -24,7 +24,7 @@ const CardText = ({
   )
 
   return (
-    <div className="text-center">
+    <div className="flex flex-col text-center gap-y-2">
       <h4 className="text-h4">{votingCardProps.cardText.title}</h4>
       {votingCardProps.cardText.descriptionElement &&
         (React.isValidElement(votingCardProps.cardText.descriptionElement) ? (
