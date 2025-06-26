@@ -9,8 +9,6 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import { ProposalData } from "@/lib/proposals"
-import { useSessionUser } from "@/hooks/db/useSessionUser"
-import { CardText } from "./votingCard/VotingCard"
 
 interface VotingSidebarProps {
   proposalData: ProposalData
