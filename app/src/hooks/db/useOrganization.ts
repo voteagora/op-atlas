@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { getOrganization } from "@/db/organizations"
-import { OrganizationWithDetails } from "@/lib/types"
 
 export const ORGANIZATION_QUERY_KEY = "organization"
 
@@ -28,5 +27,5 @@ export const useOrganization = ({
     })
   }
 
-  return { organization: data, isLoading, isSuccess, isError, invalidate }
+  return { data, isLoading, isSuccess, isError, invalidate }
 }

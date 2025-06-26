@@ -9,7 +9,6 @@ export function useUserProjects(userId: string | undefined): {
   isLoading: boolean
   error: Error | null
 } {
-  console.log(userId)
   const { data, isLoading, error } = useQuery({
     queryKey: ["userProjects", userId],
     queryFn: () => getProjects(userId!),

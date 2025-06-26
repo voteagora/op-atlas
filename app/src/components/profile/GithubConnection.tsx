@@ -4,11 +4,12 @@ import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 
 import { Button } from "@/components/common/Button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { cn } from "@/lib/utils"
 
-import { Checkbox } from "../ui/checkbox"
+import { Github } from "../icons/socials"
 
 export const GithubConnection = ({ userId }: { userId: string }) => {
   const { user: privyUser } = usePrivy()
@@ -17,7 +18,8 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
     enabled: true,
   })
 
-  const { linkGithub, unlinkGithub, toggleIsDeveloper } = usePrivyLinkGithub(userId)
+  const { linkGithub, unlinkGithub, toggleIsDeveloper } =
+    usePrivyLinkGithub(userId)
 
   const username = user?.github || privyUser?.github?.username
   const isSyncing =
@@ -34,12 +36,7 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
                 isSyncing && "opacity-50",
               )}
             >
-              <Image
-                src="/assets/icons/githubIcon.svg"
-                height={14}
-                width={14}
-                alt="Github"
-              />
+              <Github className="w-4 h-4 mr-1" />
               <p className="text-sm">{username}</p>
             </div>
           </div>

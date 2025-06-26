@@ -25,5 +25,5 @@ export const useProject = ({
     return queryClient.invalidateQueries({ queryKey: [PROJECT_QUERY_KEY, id] })
   }
 
-  return { project: data, isLoading, isSuccess, isError, invalidate }
+  return { data, isLoading, isSuccess, isError, invalidate }
 }
