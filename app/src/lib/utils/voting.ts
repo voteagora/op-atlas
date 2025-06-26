@@ -35,6 +35,7 @@ const youVoted = (proposalData: ProposalData, vote: VoteType) => {
   return {
     cardText: {
       title: "You voted",
+      descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
     },
     previousVote: mapValueToVoteType(proposalData.proposalType, vote),
   }
