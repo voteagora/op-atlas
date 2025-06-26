@@ -1,16 +1,19 @@
-import { getAgoraProposalLink } from "@/lib/utils/voting"
 import { ProposalData } from "@/lib/proposals"
+import { getAgoraProposalLink } from "@/lib/utils/voting"
 
 const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
   return (
-    <div className="w-[304px] h-10 px-3 py-2 rounded-md flex items-center justify-center bg-secondary">
+    <div className="w-[304px] h-10 px-3 py-2 rounded-md flex items-center justify-center bg-secondary transition-all duration-300 ease-in-out hover:bg-secondary/80">
       <div className="flex items-center gap-2">
-        <p className="font-medium text-sm text-center">Are you a delegate?</p>
+        <p className="font-medium text-sm text-center transition-colors duration-200">
+          Are you a delegate?
+        </p>
         <span className="font-normal text-sm text-center">
           <a
-            className="underline text-secondary-foreground hover:text-foreground"
+            className="underline text-secondary-foreground hover:text-foreground transition-colors duration-200 ease-in-out"
             href={getAgoraProposalLink(proposalData.id)}
             target="_blank"
+            rel="noopener noreferrer"
           >
             Vote here
           </a>
