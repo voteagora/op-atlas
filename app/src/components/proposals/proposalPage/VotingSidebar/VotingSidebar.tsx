@@ -16,13 +16,11 @@ import { ProposalData } from "@/lib/proposals"
 
 interface VotingSidebarProps {
   votingCardProps: VotingCardProps
-  votingColumnProps: VotingColumnProps
   proposalData: ProposalData
 }
 
 const VotingSidebar = ({
   votingCardProps,
-  votingColumnProps,
   proposalData,
 }: VotingSidebarProps) => {
   const { track } = useAnalytics()
@@ -36,8 +34,8 @@ const VotingSidebar = ({
       // Page View event - when user visits the voting page
       track("Citizen Voting Page View", {
         page_title: "Proposal Voting",
-        page_type: votingColumnProps.proposalType,
-        proposal_id: votingColumnProps.proposalId,
+        page_type: proposalData.proposalType,
+        proposal_id: proposalData.id,
         citizen_status: citizen
           ? "registered"
           : citizenEligibility?.eligible
@@ -46,13 +44,13 @@ const VotingSidebar = ({
       })
       isTracked.current = true
     }
-  }, [votingColumnProps, track, citizen, citizenEligibility])
+  }, [proposalData, track, citizen, citizenEligibility])
 
   return (
     <div className="w-[304px] gap-6 flex flex-col sticky top-4 w-full max-w-[304px]">
       <div className="w-[304px] ">
         <VotingCard {...votingCardProps} />
-        <VotingColumn {...votingColumnProps} />
+        <VotingColumn proposalData={proposalData} />
         <div className="mt-5">
           <VotingRedirect proposalData={proposalData} />
         </div>

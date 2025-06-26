@@ -8,12 +8,15 @@ import { getChainId, switchChain } from "@wagmi/core"
 import { useState } from "react"
 import { toast } from "sonner"
 
-import { mapVoteTypeToValue } from "@/app/proposals/utils/votingUtils"
+import {
+  getAgoraProposalLink,
+  getVotingActions,
+  mapVoteTypeToValue,
+} from "@/app/proposals/utils/votingUtils"
 import {
   OffchainVote,
   ProposalType,
   VoteType,
-  VotingColumnProps,
 } from "@/components/proposals/proposal.types"
 import VotingActions from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
@@ -32,6 +35,11 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
+import { ProposalData } from "@/lib/proposals"
+import { useSession } from "next-auth/react"
+import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
+import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
+import { citizenCategory } from "@prisma/client"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -47,7 +55,6 @@ export interface CandidateCardProps {
 
 const ColumnCard = ({
   proposalType,
-  options,
   signedIn,
   citizen,
   currentlyActive,
@@ -56,7 +63,6 @@ const ColumnCard = ({
   setSelectedVote,
 }: {
   proposalType: string
-  options?: CandidateCardProps[]
   signedIn?: boolean
   citizen?: boolean
   title?: string
@@ -78,7 +84,7 @@ const ColumnCard = ({
         />
       )
     case "APPROVAL":
-      return <CandidateCards candidates={options!} />
+      return <CandidateCards candidates={[]} />
     case "OFFCHAIN_OPTIMISTIC":
       return <OverrideVoteCard />
     default:
@@ -86,34 +92,33 @@ const ColumnCard = ({
   }
 }
 
-const VotingColumn = ({
-  proposalType,
-  proposalId,
-  options,
-  votingActions: initialVotingActions,
-  currentlyActive,
-  userSignedIn,
-  userCitizen,
-  userVoted,
-  resultsLink,
-}: VotingColumnProps) => {
+const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [selectedVote, setSelectedVote] = useState<VoteType | null>(null)
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
-  const [votingActions, setVotingActions] = useState(initialVotingActions)
-  const [voted, setVoted] = useState<boolean>(userVoted || false)
+  const [voted, setVoted] = useState<boolean>(false)
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType === selectedVote ? null : voteType)
   }
+
+  const { data: session } = useSession()
+  const { citizen } = useUserCitizen()
+  const { data: citizenEligibility } = useCitizenQualification()
+
+  const votingActions = getVotingActions(
+    !!session?.user?.id,
+    !!citizen,
+    !!citizenEligibility?.eligible,
+  )
 
   const { wallets } = useWallets()
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
 
-  const createDelegatedAttestation = async (choices: any) => {
+  const createDelegatedAttestation = async (choices: string[]) => {
     if (!signer) throw new Error("Signer not ready")
-    if (!userCitizen?.address) {
+    if (!citizen?.address) {
       throw new Error("User citizen address not available")
     }
     const connectedChainId = getChainId(privyWagmiConfig)
@@ -128,7 +133,7 @@ const VotingColumn = ({
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
 
     const args = {
-      proposalId: proposalId,
+      proposalId: proposalData.id,
       choices: JSON.stringify(choices),
     }
     const encodedData = encoder.encodeData([
@@ -143,7 +148,7 @@ const VotingColumn = ({
       recipient: signer.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
       revocable: false,
-      refUID: userCitizen.attestationId! as `0x${string}`,
+      refUID: citizen.attestationId as `0x${string}`,
       data: encodedData,
       value: BigInt(0),
       nonce,
@@ -156,7 +161,7 @@ const VotingColumn = ({
     )
     const isValid = await validateSignatureAddressIsValid(
       rawSignature,
-      userCitizen.address,
+      citizen.address,
     )
 
     if (!isValid) {
@@ -172,7 +177,7 @@ const VotingColumn = ({
 
   const validateAddress = () => {
     const newActiveWallet = wallets.find(
-      (wallet) => wallet.address === userCitizen!.address,
+      (wallet) => wallet.address === citizen?.address,
     )
     if (!newActiveWallet) {
       setAddressMismatch(true)
@@ -187,14 +192,14 @@ const VotingColumn = ({
     if (!selectedVote) return
 
     const choices = mapVoteTypeToValue(
-      proposalType as ProposalType,
+      proposalData.proposalType as ProposalType,
       selectedVote,
     )
     setIsVoting(true)
 
     const castAndRecordVote = async () => {
-      if (!userCitizen?.address) {
-        throw new Error("User citizen address not available")
+      if (!citizen?.attestationId) {
+        throw new Error("User is not a registered citizen")
       }
 
       try {
@@ -203,7 +208,7 @@ const VotingColumn = ({
           await setActiveWallet(newActiveWallet)
         }
 
-        if (signer!.address !== userCitizen!.address) {
+        if (signer!.address !== citizen!.address) {
           throw new Error("Signer address does not match citizen address")
         }
 
@@ -216,17 +221,17 @@ const VotingColumn = ({
           data,
           rawSignature.signature,
           signerAddress,
-          userCitizen!.attestationId!,
+          citizen.attestationId,
         )
 
         // build an offchain vote object for the DB
         const offchainVote: OffchainVote = {
           attestationId: attestationId,
           voterAddress: signerAddress,
-          proposalId: proposalId,
+          proposalId: proposalData.id,
           vote: choices,
-          citizenId: userCitizen!.id,
-          citizenType: userCitizen!.type,
+          citizenId: citizen.id,
+          citizenType: citizen.type as citizenCategory,
           createdAt: new Date(),
           updatedAt: new Date(),
         }
@@ -236,7 +241,7 @@ const VotingColumn = ({
 
         // Track successful vote submission
         track("Citizen Voting Vote Submitted", {
-          proposal_id: proposalId,
+          proposal_id: proposalData.id,
           choice: choices,
           wallet_address: signerAddress,
         })
@@ -247,7 +252,7 @@ const VotingColumn = ({
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error"
         track("Citizen Voting Vote Error", {
-          proposal_id: proposalId,
+          proposal_id: proposalData.id,
           error: errorMessage,
         })
 
@@ -257,8 +262,7 @@ const VotingColumn = ({
         ) {
           const newActiveWallet = wallets.find(
             (wallet) =>
-              wallet.address?.toLowerCase() ===
-              userCitizen!.address?.toLowerCase(),
+              wallet.address?.toLowerCase() === citizen.address?.toLowerCase(),
           )
 
           console.log({ newActiveWallet, wallets })
@@ -289,8 +293,6 @@ const VotingColumn = ({
     toast.promise(castAndRecordVote(), {
       loading: "Casting Vote...",
       success: () => {
-        // Clear the voting actions after a successful vote
-        setVotingActions({ cardActionList: [] })
         // Update voted status to true
         setVoted(true)
         return "Vote Cast and Recorded!"
@@ -305,37 +307,32 @@ const VotingColumn = ({
     <div className="w-[19rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
       <div className="w-[272px] gap-[16px] flex flex-col ">
         <ColumnCard
-          proposalType={proposalType}
-          options={options}
-          signedIn={userSignedIn}
-          currentlyActive={currentlyActive}
-          citizen={!!userCitizen}
+          proposalType={proposalData.proposalType}
+          signedIn={!!session?.user?.id}
+          currentlyActive={proposalData.status === "ACTIVE"}
+          citizen={!!citizen}
           voted={voted}
           selectedVote={selectedVote}
           setSelectedVote={handleVoteClick}
         />
       </div>
-      {currentlyActive && votingActions && !voted && (
+      {proposalData.status === "ACTIVE" && votingActions && !voted && (
         <>
           <VotingActions
-            proposalId={proposalId}
+            proposalId={proposalData.id}
             // This is a wonky way to overwrite the call to make an external call.
             cardActionList={votingActions.cardActionList.map((action) => {
               // If this is a vote action, replace its action function with handleCastVote
               // and determine if it should be disabled based on selectedVote or address mismatch
-              if (action.actionType === "Vote") {
-                return {
-                  ...action,
-                  action: handleCastVote,
-                  disabled: !selectedVote || addressMismatch,
-                  loading: isVoting,
-                }
+              return {
+                ...action,
+                action: handleCastVote,
+                disabled: !selectedVote || addressMismatch,
+                loading: isVoting,
               }
-              // Otherwise, return the original action unchanged
-              return action
             })}
           />
-          {addressMismatch && userCitizen && !voted && userSignedIn && (
+          {addressMismatch && citizen && !voted && !!session?.user?.id && (
             <div className="text-red-500 text-sm text-center mt-2">
               You must connect your citizen wallet to vote.
             </div>
@@ -343,7 +340,7 @@ const VotingColumn = ({
         </>
       )}
       <div className="w-full flex items-center justify-center gap-2.5">
-        <a href={resultsLink} target="_blank">
+        <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
           <p className="font-inter font-normal text-sm leading-5 tracking-normal text-center underline decoration-solid decoration-0">
             View results
           </p>

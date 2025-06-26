@@ -117,8 +117,7 @@ const ProposalPage = async ({
     citizenEligibility: citizenEligibility,
   }
 
-  const { votingCardProps, votingColumnProps, votingRedirectProps } =
-    getVotingProps(proposalPageData)
+  const { votingCardProps } = getVotingProps(proposalPageData)
 
   return (
     <main className="flex w-full min-h-screen pb-[160px] mx-auto">
@@ -137,7 +136,6 @@ const ProposalPage = async ({
           <div className="voting-sidebar w-full md:w-[304px] md:flex-shrink-0 flex justify-center md:justify-start">
             <VotingSidebar
               votingCardProps={votingCardProps}
-              votingColumnProps={votingColumnProps}
               proposalData={proposalData}
             />
           </div>
