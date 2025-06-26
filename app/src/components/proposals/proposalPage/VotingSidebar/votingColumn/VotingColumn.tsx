@@ -41,6 +41,7 @@ import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { citizenCategory } from "@prisma/client"
 import { CardText } from "../votingCard/VotingCard"
+import useMyVote from "@/hooks/voting/useMyVote"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -86,10 +87,13 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   )
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
-  const [voted, setVoted] = useState<boolean>(false)
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
   }
+
+  const { vote: myVote, invalidate: invalidateMyVote } = useMyVote(
+    proposalData.id,
+  )
 
   const { data: session } = useSession()
   const { citizen } = useUserCitizen()
@@ -102,7 +106,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   )
 
   const canVote =
-    !!session?.user?.id && !!citizen && proposalData.status === "ACTIVE"
+    !!session?.user?.id &&
+    !!citizen &&
+    proposalData.status === "ACTIVE" &&
+    !myVote
 
   const { wallets } = useWallets()
   const signer = useEthersSigner({ chainId: CHAIN_ID })
@@ -279,7 +286,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       loading: "Casting Vote...",
       success: () => {
         // Update voted status to true
-        setVoted(true)
+        invalidateMyVote()
         return "Vote Cast and Recorded!"
       },
       error: (error) => {
@@ -305,7 +312,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         />
       )}
       {/* Actions */}
-      {proposalData.status === "ACTIVE" && votingActions && !voted && (
+      {proposalData.status === "ACTIVE" && votingActions && !myVote && (
         <>
           <VoterActions
             proposalId={proposalData.id}
@@ -321,7 +328,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               }
             })}
           />
-          {addressMismatch && citizen && !voted && !!session?.user?.id && (
+          {addressMismatch && citizen && !myVote && !!session?.user?.id && (
             <div className="text-red-500 text-sm text-center mt-2">
               You must connect your citizen wallet to vote.
             </div>
