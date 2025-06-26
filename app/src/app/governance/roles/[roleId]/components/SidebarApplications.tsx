@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 
 import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
 import { ArrowRightS } from "@/components/icons/reminx"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
@@ -37,7 +38,9 @@ const OrgCandidate = ({ application }: { application: RoleApplication }) => {
   const router = useRouter()
   const { data: org } = useOrganization({ id: application.organizationId! })
 
-  if (!org) return null
+  if (!org) {
+    return <CandidateSkeleton />
+  }
 
   const handleClick = () => router.push(`/${org.id}`)
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -70,7 +73,9 @@ const UserCandidate = ({ application }: { application: RoleApplication }) => {
   const username = useUsername(user)
   const router = useRouter()
 
-  if (!user) return null
+  if (!user) {
+    return <CandidateSkeleton />
+  }
 
   const handleClick = () => router.push(`/${user.username}`)
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -94,6 +99,17 @@ const UserCandidate = ({ application }: { application: RoleApplication }) => {
         {username || user.name}
       </div>
       <ArrowRightS className="w-4 h-4" />
+    </div>
+  )
+}
+
+const CandidateSkeleton = () => {
+  return (
+    <div className="flex flex-row gap-2 w-full">
+      <div className="flex flex-row gap-2 text-sm">
+        <Skeleton className="w-6 h-6 rounded-full" />
+        <Skeleton className="w-24 h-4" />
+      </div>
     </div>
   )
 }

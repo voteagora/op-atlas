@@ -4,7 +4,7 @@ import { Role } from "@prisma/client"
 import { usePrivy } from "@privy-io/react-auth"
 import { usePathname, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { useActiveUserApplications } from "@/hooks/role/useActiveUserApplications"
@@ -19,6 +19,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
   const pathname = usePathname()
   const router = useRouter()
   const isLoggingIn = useRef(false)
+  const [isNavigating, setIsNavigating] = useState(false)
 
   const { data: activeApplications, isLoading: isLoadingActiveApplications } =
     useActiveUserApplications({
@@ -43,12 +44,18 @@ export const Sidebar = ({ role }: { role: Role }) => {
     }
   }, [isAuthenticated])
 
+  // Reset navigation state when pathname changes (navigation completed)
+  useEffect(() => {
+    setIsNavigating(false)
+  }, [pathname])
+
   const handleButtonClick = () => {
     if (!isAuthenticated) {
       isLoggingIn.current = true
       localStorage.setItem(LOCAL_STORAGE_LOGIN_REDIRECT, pathname)
       login()
     } else if (isApplicationWindow) {
+      setIsNavigating(true)
       router.push(`/governance/roles/${role.id}/apply`)
     }
   }
@@ -63,8 +70,9 @@ export const Sidebar = ({ role }: { role: Role }) => {
     return (
       <Button
         className="w-full button-primary"
-        disabled={!isApplicationWindow}
+        disabled={!isApplicationWindow || isNavigating}
         onClick={handleButtonClick}
+        isLoading={isNavigating}
       >
         {buttonText}
       </Button>

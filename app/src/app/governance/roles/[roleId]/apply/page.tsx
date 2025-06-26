@@ -48,11 +48,11 @@ export default async function Page({ params }: { params: { roleId: string } }) {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/roles">Governance</BreadcrumbLink>
+                <BreadcrumbLink href="/governance">Governance</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/roles/${params.roleId}`}>
+                <BreadcrumbLink href={`/governance/roles/${params.roleId}`}>
                   Role
                 </BreadcrumbLink>
               </BreadcrumbItem>

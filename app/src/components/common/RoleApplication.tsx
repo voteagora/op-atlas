@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/common/Button"
@@ -190,7 +191,12 @@ const ProjectDedetails = ({
           />
         )}
         <div>
-          {project.name}{" "}
+          <Link
+            href={`/project/${projectId}`}
+            className="hover:underline text-foreground"
+          >
+            {project.name}
+          </Link>{" "}
           <span className="text-muted-foreground">
             {formatMMMdyyyy(new Date(project.createdAt))} -{" "}
             {project.deletedAt
