@@ -160,7 +160,7 @@ interface ProposalDatesProps {
   voteStatus?: {
     text: string
     styling: string
-  }
+  } | null
 }
 const ProposalDates = ({
   startDate,
