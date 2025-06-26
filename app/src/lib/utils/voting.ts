@@ -46,8 +46,7 @@ const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
       case ProposalType.OFFCHAIN_APPROVAL:
         return "This election uses approval voting, meaning voter can approve more than one candidate."
       case ProposalType.OFFCHAIN_STANDARD:
-        // TODO link 'here'
-        return "This proposal requires approval from the Citizen's House and Token House. Read more about the voting mechanism here."
+        return "OFFCHAIN_STANDARD"
       case ProposalType.OFFCHAIN_OPTIMISTIC:
         return "If you do not wish to veto, then no action is required."
       default:
