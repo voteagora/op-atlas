@@ -4,16 +4,14 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
+import { citizenCategory } from "@prisma/client"
+import { useWallets } from "@privy-io/react-auth"
+import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
-import { useState } from "react"
+import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
-import {
-  getAgoraProposalLink,
-  getVotingActions,
-  mapValueToVoteType,
-  mapVoteTypeToValue,
-} from "@/lib/utils/voting"
 import {
   OffchainVote,
   ProposalType,
@@ -23,28 +21,32 @@ import VoterActions from "@/components/proposals/proposalPage/VotingSidebar/voti
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
+import { Skeleton } from "@/components/ui/skeleton"
 import { postOffchainVote } from "@/db/votes"
+import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
+import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
+import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
 import { vote } from "@/lib/actions/votes"
 import {
+  CHAIN_ID,
   EAS_CONTRACT_ADDRESS,
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
-  CHAIN_ID,
 } from "@/lib/eas/clientSafe"
+import { ProposalData } from "@/lib/proposals"
+import { truncateAddress } from "@/lib/utils/string"
+import {
+  getAgoraProposalLink,
+  getVotingActions,
+  mapValueToVoteType,
+  mapVoteTypeToValue,
+} from "@/lib/utils/voting"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
-import { useWallets } from "@privy-io/react-auth"
-import { useSetActiveWallet } from "@privy-io/wagmi"
-import { ProposalData } from "@/lib/proposals"
-import { useSession } from "next-auth/react"
-import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
-import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
-import { citizenCategory } from "@prisma/client"
-import { CardText } from "../votingCard/VotingCard"
-import useMyVote from "@/hooks/voting/useMyVote"
+
 import { MyVote } from "../votingCard/MyVote"
-import { truncateAddress } from "@/lib/utils/string"
+import { CardText } from "../votingCard/VotingCard"
 
 export interface CandidateCardProps {
   name: string
@@ -55,6 +57,19 @@ export interface CandidateCardProps {
   organizations: string[]
   buttonLink: string
 }
+
+const VotingColumnSkeleton = () => (
+  <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
+    <div className="flex flex-col text-center gap-y-2">
+      <Skeleton className="h-6 w-3/4 mx-auto" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-5/6 mx-auto" />
+    </div>
+    <Skeleton className="h-10 w-full" />
+    <Skeleton className="h-10 w-full" />
+    <Skeleton className="h-4 w-1/2 mx-auto" />
+  </div>
+)
 
 const VotingChoices = ({
   proposalType,
@@ -68,15 +83,25 @@ const VotingChoices = ({
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
       return (
-        <StandardVoteCard
-          selectedVote={selectedVote}
-          setSelectedVote={setSelectedVote}
-        />
+        <div className="transition-all duration-300 ease-in-out">
+          <StandardVoteCard
+            selectedVote={selectedVote}
+            setSelectedVote={setSelectedVote}
+          />
+        </div>
       )
     case "APPROVAL":
-      return <CandidateCards candidates={[]} />
+      return (
+        <div className="transition-all duration-300 ease-in-out">
+          <CandidateCards candidates={[]} />
+        </div>
+      )
     case "OFFCHAIN_OPTIMISTIC":
-      return <OverrideVoteCard />
+      return (
+        <div className="transition-all duration-300 ease-in-out">
+          <OverrideVoteCard />
+        </div>
+      )
     default:
       return <>{proposalType} Not Yet Supported</>
   }
@@ -88,17 +113,28 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   )
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
+  
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
   }
 
-  const { vote: myVote, invalidate: invalidateMyVote } = useMyVote(
+  const { vote: myVote, invalidate: invalidateMyVote, isLoading: isVoteLoading } = useMyVote(
     proposalData.id,
   )
 
   const { data: session } = useSession()
-  const { citizen } = useUserCitizen()
-  const { data: citizenEligibility } = useCitizenQualification()
+  const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
+  const { data: citizenEligibility, isLoading: isEligibilityLoading } = useCitizenQualification()
+
+  useEffect(() => {
+    if (!isVoteLoading && !isCitizenLoading && !isEligibilityLoading) {
+      const timer = setTimeout(() => {
+        setIsInitialLoad(false)
+      }, 150)
+      return () => clearTimeout(timer)
+    }
+  }, [isVoteLoading, isCitizenLoading, isEligibilityLoading])
 
   const myVoteType = myVote?.vote
     ? mapValueToVoteType(proposalData.proposalType, myVote.vote)
@@ -120,6 +156,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
+
+  if (isInitialLoad || isVoteLoading || isCitizenLoading || isEligibilityLoading) {
+    return <VotingColumnSkeleton />
+  }
 
   const createDelegatedAttestation = async (choices: string[]) => {
     if (!signer) throw new Error("Signer not ready")
@@ -301,18 +341,26 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   return (
-    <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
+    <div className="flex flex-col p-6 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out">
       {/* Text on the top of the card */}
-      <CardText
-        proposalData={proposalData}
-        isCitizen={!!citizen}
-        vote={myVoteType}
-        eligibility={citizenEligibility}
-      />
-      {myVoteType && <MyVote voteType={myVoteType} />}
+      <div className="transition-opacity duration-300 ease-in-out">
+        <CardText
+          proposalData={proposalData}
+          isCitizen={!!citizen}
+          vote={myVoteType}
+          eligibility={citizenEligibility}
+        />
+      </div>
+      
+      {myVoteType && (
+        <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+          <MyVote voteType={myVoteType} />
+        </div>
+      )}
+      
       {/* Actions */}
       {proposalData.status === "ACTIVE" && votingActions && !myVote && (
-        <div className="flex flex-col items-center gap-y-2">
+        <div className="flex flex-col items-center gap-y-2 transition-all duration-300 ease-in-out">
           {canVote && (
             <VotingChoices
               proposalType={proposalData.proposalType}
@@ -320,22 +368,24 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               setSelectedVote={handleVoteClick}
             />
           )}
-          <VoterActions
-            proposalId={proposalData.id}
-            // This is a wonky way to overwrite the call to make an external call.
-            cardActionList={votingActions.cardActionList.map((action) => {
-              // If this is a vote action, replace its action function with handleCastVote
-              // and determine if it should be disabled based on selectedVote or address mismatch
-              return {
-                ...action,
-                action: handleCastVote,
-                disabled: canVote && (addressMismatch || !selectedVote),
-                loading: isVoting,
-              }
-            })}
-          />
+          <div className="w-full transition-all duration-200 ease-in-out">
+            <VoterActions
+              proposalId={proposalData.id}
+              // This is a wonky way to overwrite the call to make an external call.
+              cardActionList={votingActions.cardActionList.map((action) => {
+                // If this is a vote action, replace its action function with handleCastVote
+                // and determine if it should be disabled based on selectedVote or address mismatch
+                return {
+                  ...action,
+                  action: handleCastVote,
+                  disabled: canVote && (addressMismatch || !selectedVote),
+                  loading: isVoting,
+                }
+              })}
+            />
+          </div>
           {addressMismatch && citizen && !myVote && !!session?.user?.id && (
-            <div className="text-red-500 text-xs text-center">
+            <div className="text-red-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
               You citizen wallet is not connected. Try signing out and signing
               in with your Citizen wallet:{" "}
               {citizen.address && truncateAddress(citizen.address)}
@@ -343,9 +393,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           )}
         </div>
       )}
-      <div className="w-full flex items-center justify-center">
+      
+      <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
-          <p className="text-sm text-center underline">View results</p>
+          <p className="text-sm text-center underline hover:text-foreground/80 transition-colors duration-200">
+            View results
+          </p>
         </a>
       </div>
     </div>
