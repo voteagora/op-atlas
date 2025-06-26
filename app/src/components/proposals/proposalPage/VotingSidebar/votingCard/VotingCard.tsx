@@ -25,7 +25,9 @@ const CardText = ({
 
   return (
     <div className="flex flex-col text-center gap-y-2">
-      <h4 className="text-h4">{votingCardProps.cardText.title}</h4>
+      <h4 className="text-md font-semibold">
+        {votingCardProps.cardText.title}
+      </h4>
       {votingCardProps.cardText.descriptionElement &&
         (React.isValidElement(votingCardProps.cardText.descriptionElement) ? (
           React.cloneElement(

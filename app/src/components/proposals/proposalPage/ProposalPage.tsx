@@ -37,7 +37,10 @@ const ProposalPage = async ({
   const formattedEndDate = formatDate(new Date(proposalData.endTime))
 
   // Breadcrumbs
-  const breadcrumbs = ["Proposals", proposalData.proposalType]
+  const breadcrumbs = [
+    { label: "Governance", href: "/governance" },
+    { label: "Proposal", href: `/proposals/${proposalData.id}` },
+  ]
 
   return (
     <main className="flex w-full min-h-screen pb-[160px] mx-auto">
