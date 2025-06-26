@@ -139,7 +139,7 @@ export const getProposals = async () => {
   }
 }
 
-type ProposalData = {
+export type ProposalData = {
   id: string
   proposer: string
   snapshotBlockNumber: number
@@ -160,7 +160,7 @@ type ProposalData = {
   unformattedProposalData?: string | null
   proposalResults: object
   proposalType: string
-  status: string
+  status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
   createdTransactionHash?: string | null
   cancelledTransactionHash?: string | null
   executedTransactionHash?: string | null

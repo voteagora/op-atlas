@@ -169,7 +169,7 @@ const getVoteOptions = () => {
  */
 export const getVotingCardProps = (
   proposalData: ProposalPageDataInterface,
-): VotingCardProps | undefined => {
+): VotingCardProps => {
   // If voting has not opened yet
   if (!proposalData.votingOpen && !proposalData.votingComplete) {
     return {
@@ -210,13 +210,20 @@ export const getVotingCardProps = (
 
 /**
  * Get the voting actions based on the card type
- * @param proposalData
+ * @param isSignedIn
+ * @param isRegisteredCitizen
+ * @param isEligibleCitizen
+ * @param vote
  * @returns Object containing the voting actions
  */
-const getVotingActions = (proposalData: ProposalPageDataInterface) => {
-  let votingActions: any = {}
-  if (!proposalData.user) {
-    votingActions = {
+export const getVotingActions = (
+  isSignedIn: boolean,
+  isRegisteredCitizen: boolean,
+  isEligibleCitizen: boolean,
+  vote?: VoteType,
+) => {
+  if (!isSignedIn) {
+    return {
       cardActionList: [
         {
           buttonStyle: "button-primary",
@@ -226,11 +233,11 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
       ],
     }
     // The user is not a citizen
-  } else if (!proposalData.citizen) {
+  } else if (!isRegisteredCitizen) {
     // Get the eligibility of the citizen
 
-    if (proposalData.citizenEligibility?.eligible) {
-      votingActions = {
+    if (isEligibleCitizen) {
+      return {
         cardActionList: [
           {
             buttonStyle: "button-primary",
@@ -245,7 +252,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
         ],
       }
     } else {
-      votingActions = {
+      return {
         cardActionList: [
           {
             buttonStyle: "button-primary",
@@ -256,10 +263,10 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
       }
     }
     // If the user is a citizen and has voted
-  } else if (proposalData.voted) {
-    switch (proposalData.votingRecord!.vote) {
+  } else if (!!vote) {
+    switch (vote) {
       case VoteType.For:
-        votingActions = {
+        return {
           cardActionList: [
             {
               buttonStyle:
@@ -271,7 +278,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
         }
         break
       case VoteType.Abstain:
-        votingActions = {
+        return {
           cardActionList: [
             {
               buttonStyle: "bg-[#F2F3F8] pointer-events-none cursor-none",
@@ -282,7 +289,7 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
         }
         break
       case VoteType.Against:
-        votingActions = {
+        return {
           cardActionList: [
             {
               buttonStyle:
@@ -295,30 +302,20 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
         break
     }
   } else {
-    if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
-      votingActions = {
-        cardActionList: [
-          {
-            buttonStyle: "button-primary",
-            actionText: "Cast Vote",
-            actionType: "Vote",
-          },
-        ],
-      }
-    } else {
-      votingActions = {
-        cardActionList: [
-          {
-            buttonStyle: "button-primary",
-            actionText: "Cast Vote",
-            actionType: "Vote",
-          },
-        ],
-      }
+    return {
+      cardActionList: [
+        {
+          buttonStyle: "button-primary",
+          actionText: "Cast Vote",
+          actionType: "Vote",
+        },
+      ],
     }
   }
+}
 
-  return votingActions
+export const getAgoraProposalLink = (proposalId: string) => {
+  return `${API_URL}/proposals/${proposalId}`
 }
 
 /**
@@ -329,7 +326,11 @@ const getVotingActions = (proposalData: ProposalPageDataInterface) => {
 export const getVotingColumnProps = (
   proposalData: ProposalPageDataInterface,
 ): VotingColumnProps => {
-  let votingActions = getVotingActions(proposalData)
+  const votingActions = getVotingActions(
+    !!proposalData.user,
+    !!proposalData.citizen,
+    !!proposalData.citizenEligibility?.eligible,
+  )
 
   let votingColumnProps: any = {
     proposalType: proposalData.proposalType,
@@ -381,7 +382,6 @@ export const getVotingProps = (proposalData: ProposalPageDataInterface) => {
   return {
     votingCardProps: getVotingCardProps(proposalData),
     votingColumnProps: getVotingColumnProps(proposalData),
-    votingRedirectProps: getVotingRedirectProps(proposalData),
   }
 }
 

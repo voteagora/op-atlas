@@ -16,12 +16,8 @@ import { getUserById } from "@/db/users"
 import { s8CitizenshipQualification } from "@/lib/actions/citizens"
 import { parseEnumValue } from "@/lib/actions/utils"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { getProposal } from "@/lib/proposals"
+import { getProposal, ProposalData } from "@/lib/proposals"
 import { CitizenLookup } from "@/lib/types"
-
-interface ProposalPageProps {
-  proposalId: string
-}
 
 const CURRENT_DATETIME = new Date()
 
@@ -33,15 +29,11 @@ function stripTitleFromDescription(title: string, description: string) {
   return description
 }
 
-const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
-  let proposalData: any
-  try {
-    proposalData = await getProposal(proposalId)
-  } catch (error) {
-    console.error(`Failed to fetch Proposal Data: ${error}`)
-    return notFound()
-  }
-
+const ProposalPage = async ({
+  proposalData,
+}: {
+  proposalData: ProposalData
+}) => {
   const deTitledProposalDescription = stripTitleFromDescription(
     proposalData.markdowntitle,
     proposalData.description,
@@ -49,14 +41,7 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
 
   const session = await auth()
   const userId = session?.user.id ?? ""
-  let user: any
-  try {
-    user = await getUserById(userId)
-  } catch (error) {
-    console.error(`Failed to fetch User Data: ${error}`)
-  }
-
-  let citizen: any = null
+  const user = await getUserById(userId)
   // Priority in which a citizen should be searched for
   const CITIZEN_PRIORITY: CitizenLookup["type"][] = [
     CITIZEN_TYPES.user,
@@ -70,18 +55,17 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
   async function findCitizenByPriority(
     id: string,
     priorities: CitizenLookup["type"][] = CITIZEN_PRIORITY,
-  ): Promise<Citizen | null> {
+  ): Promise<Citizen | undefined> {
     // Loops through citizen types in the priority list and returns the first citizen found
     for (const type of priorities) {
       const found = await getCitizenByType({ type, id })
       if (found) return found
     }
-    return null
+
+    return undefined
   }
 
-  if (user) {
-    citizen = (await findCitizenByPriority(userId)) ?? citizen
-  }
+  const citizen = await findCitizenByPriority(userId)
   const citizenEligibility = await s8CitizenshipQualification()
 
   // Date Info
@@ -111,7 +95,7 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
   // Voting Info
   let voteHistory
   if (citizen && citizen.id) {
-    voteHistory = await getCitizenProposalVote(citizen.id, proposalId)
+    voteHistory = await getCitizenProposalVote(citizen.id, proposalData.id)
   }
   const voted = !!voteHistory
 
@@ -128,13 +112,12 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
       ProposalType,
       proposalData.proposalType,
     ),
-    proposalId: proposalId,
+    proposalId: proposalData.id,
     proposalStatus: proposalData.status,
     citizenEligibility: citizenEligibility,
   }
 
-  const { votingCardProps, votingColumnProps, votingRedirectProps } =
-    getVotingProps(proposalPageData)
+  const { votingCardProps } = getVotingProps(proposalPageData)
 
   return (
     <main className="flex w-full min-h-screen pb-[160px] mx-auto">
@@ -152,14 +135,8 @@ const ProposalPage = async ({ proposalId }: ProposalPageProps) => {
           </div>
           <div className="voting-sidebar w-full md:w-[304px] md:flex-shrink-0 flex justify-center md:justify-start">
             <VotingSidebar
-              className="sticky top-4 w-full max-w-[304px]"
-              votingCardProps={votingCardProps!}
-              votingColumnProps={votingColumnProps}
-              votingRedirectProps={votingRedirectProps!}
-              proposalId={proposalId}
-              citizen={citizen}
-              citizenEligibility={citizenEligibility}
-              proposalType={proposalData.proposalType}
+              votingCardProps={votingCardProps}
+              proposalData={proposalData}
             />
           </div>
         </div>
