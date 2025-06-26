@@ -39,7 +39,7 @@ const Navbar = () => {
   const params = useParams()
   const isRounds = pathname === "/missions"
   const isProjects = pathname.includes("/round/")
-  const isProposals = pathname === "/proposals"
+  const isGovernance = pathname === "/governance"
 
   const isMissions = pathname.includes("/missions")
 
@@ -140,7 +140,7 @@ const Navbar = () => {
                       className={`${
                         isProposals ? "mt-1" : "group-hover:mt-1"
                         } focus:outline-none focus:opacity-80`}
-                      href="/proposals"
+                      href="/governance"
                     >
                       Governance
                     </Link>
