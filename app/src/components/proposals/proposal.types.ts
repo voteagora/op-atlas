@@ -82,9 +82,6 @@ export interface VotingColumnProps {
 export interface VotingCardProps {
   cardText: CardTextProps
   cardActions?: CardActionsProps
-  user: User | null
-  eligibility?: CitizenshipQualification
-  previousVote?: VoteType
 }
 
 export interface CardTextProps {

@@ -1,5 +1,4 @@
 import {
-  CardTextProps,
   ProposalPageDataInterface,
   ProposalType,
   VoteType,
@@ -7,15 +6,16 @@ import {
   VotingColumnProps,
   VotingRedirectProps,
 } from "@/components/proposals/proposal.types"
+import { ProposalData } from "@/lib/proposals"
 
 import { CitizenshipQualification } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL
 
 // Helper functions for voting card props
-const comingSoon = (proposalData: ProposalPageDataInterface) => {
-  const startDate = new Date(proposalData.startDate)
-  const endDate = new Date(proposalData.endDate)
+const comingSoon = (proposalData: ProposalData) => {
+  const startDate = new Date(proposalData.createdTime)
+  const endDate = new Date(proposalData.endTime)
   return {
     cardText: {
       title: "Coming Soon",
@@ -33,18 +33,12 @@ const votingEnded = (endDate: Date, result: any) => {
   }
 }
 
-const youVoted = ({
-  votingRecord,
-  proposalType,
-}: ProposalPageDataInterface) => {
-  const previousVote = votingRecord?.vote
-
-  console.log({ previousVote })
+const youVoted = (proposalData: ProposalData, vote: VoteType) => {
   return {
     cardText: {
       title: "You voted",
     },
-    previousVote: mapValueToVoteType(proposalType, previousVote!),
+    previousVote: mapValueToVoteType(proposalData.proposalType, vote),
   }
 }
 
@@ -75,7 +69,7 @@ const wantToVote = (eligibility: CitizenshipQualification | null) => {
   const eligibleStatement =
     "eligible to become a citizen, and to vote on decisions that shape the Collective."
 
-  let cardText: CardTextProps = {
+  const cardText = {
     title: "Want to vote?",
   }
 
@@ -107,11 +101,11 @@ const wantToVote = (eligibility: CitizenshipQualification | null) => {
   }
 }
 
-const getOpenVotingTypes = (proposalData: ProposalPageDataInterface) => {
-  if (proposalData.voted) {
-    return youVoted(proposalData)
+const getOpenVotingTypes = (proposalData: ProposalData, vote?: VoteType) => {
+  if (vote) {
+    return youVoted(proposalData, vote)
   }
-  if (proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") {
+  if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
     // Custom proposal title for the offchain optimistic proposal
     return castYourVote(
       proposalData.proposalType,
@@ -121,27 +115,30 @@ const getOpenVotingTypes = (proposalData: ProposalPageDataInterface) => {
   return castYourVote(proposalData.proposalType)
 }
 
-const getCitizenTypes = (proposalData: ProposalPageDataInterface) => {
-  if (proposalData.votingOpen) {
-    return getOpenVotingTypes(proposalData)
-  } else if (proposalData.votingComplete) {
+const getCitizenTypes = (proposalData: ProposalData, vote?: VoteType) => {
+  if (proposalData.status === "ACTIVE") {
+    return getOpenVotingTypes(proposalData, vote)
+  } else if (new Date(proposalData.endTime) < new Date()) {
     return votingEnded(
-      proposalData.endDate,
-      `This proposal has ${proposalData.proposalStatus}`,
+      new Date(proposalData.endTime),
+      `This proposal has ${proposalData.status}`,
     )
   } else {
     return comingSoon(proposalData)
   }
 }
 
-const getNonCitizenTypes = (proposalData: ProposalPageDataInterface) => {
+const getNonCitizenTypes = (
+  proposalData: ProposalData,
+  eligibility: CitizenshipQualification,
+) => {
   switch (proposalData.proposalType) {
     case ProposalType.OFFCHAIN_APPROVAL:
       return castYourVote(proposalData.proposalType)
     case ProposalType.OFFCHAIN_STANDARD:
-      return wantToVote(proposalData.citizenEligibility)
+      return wantToVote(eligibility)
     case ProposalType.OFFCHAIN_OPTIMISTIC:
-      return wantToVote(proposalData.citizenEligibility)
+      return wantToVote(eligibility)
     default:
       return {} as VotingCardProps
   }
@@ -168,17 +165,19 @@ const getVoteOptions = () => {
  * @returns The voting card props
  */
 export const getVotingCardProps = (
-  proposalData: ProposalPageDataInterface,
+  proposalData: ProposalData,
+  isCitizen: boolean,
+  vote?: VoteType,
+  eligibility?: CitizenshipQualification,
 ): VotingCardProps => {
   // If voting has not opened yet
-  if (!proposalData.votingOpen && !proposalData.votingComplete) {
+  if (proposalData.status === "PENDING") {
     return {
       ...comingSoon(proposalData),
-      user: proposalData.user,
     }
   }
 
-  if (!proposalData.user) {
+  if (!isCitizen) {
     if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
       // Special case for the offchain optimistic proposal
       return {
@@ -187,24 +186,19 @@ export const getVotingCardProps = (
           descriptionElement:
             "The proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
         },
-        user: null,
       }
     }
     return {
       ...castYourVote(proposalData.proposalType),
-      user: proposalData.user,
     }
   }
-  if (proposalData.citizen) {
+  if (isCitizen) {
     return {
-      ...getCitizenTypes(proposalData),
-      user: proposalData.user,
+      ...getCitizenTypes(proposalData, vote),
     }
   }
   return {
-    ...getNonCitizenTypes(proposalData),
-    user: proposalData.user,
-    eligibility: proposalData.citizenEligibility!,
+    ...getNonCitizenTypes(proposalData, eligibility!),
   }
 }
 
@@ -361,27 +355,24 @@ export const getVotingColumnProps = (
   return votingColumnProps as VotingColumnProps
 }
 
-const getVotingRedirectProps = (
-  proposalData: ProposalPageDataInterface,
-): VotingRedirectProps => {
-  return {
-    callout: "Are you a delegate?",
-    link: {
-      linkText: "Vote here",
-      linkHref: `${API_URL}/proposals/${proposalData.proposalId}`,
-    },
-  }
-}
-
 /**
  * Get all voting props based on the card type
  * @param proposalData The card type containing information about the voting state
  * @returns An object containing both voting card props and voting column props
  */
-export const getVotingProps = (proposalData: ProposalPageDataInterface) => {
+export const getVotingProps = (
+  proposalData: ProposalData,
+  isCitizen: boolean,
+  vote?: VoteType,
+  eligibility?: CitizenshipQualification,
+) => {
   return {
-    votingCardProps: getVotingCardProps(proposalData),
-    votingColumnProps: getVotingColumnProps(proposalData),
+    votingCardProps: getVotingCardProps(
+      proposalData,
+      isCitizen,
+      vote,
+      isCitizen ? eligibility : undefined,
+    ),
   }
 }
 

@@ -1,5 +1,4 @@
 import { Citizen } from "@prisma/client"
-import { notFound } from "next/navigation"
 
 import { getVotingProps } from "@/app/proposals/utils/votingUtils"
 import { auth } from "@/auth"
@@ -117,8 +116,6 @@ const ProposalPage = async ({
     citizenEligibility: citizenEligibility,
   }
 
-  const { votingCardProps } = getVotingProps(proposalPageData)
-
   return (
     <main className="flex w-full min-h-screen pb-[160px] mx-auto">
       <div className="proposal flex flex-col w-full max-w-[1064px] mt-16 md:mt-24 gap-8 md:gap-[48px] mx-auto px-4 md:px-6">
@@ -134,10 +131,7 @@ const ProposalPage = async ({
             <Markdown description={deTitledProposalDescription} />
           </div>
           <div className="voting-sidebar w-full md:w-[304px] md:flex-shrink-0 flex justify-center md:justify-start">
-            <VotingSidebar
-              votingCardProps={votingCardProps}
-              proposalData={proposalData}
-            />
+            <VotingSidebar proposalData={proposalData} />
           </div>
         </div>
       </div>

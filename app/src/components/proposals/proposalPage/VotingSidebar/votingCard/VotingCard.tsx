@@ -11,23 +11,48 @@ import {
   VoteType,
   VotingCardProps,
 } from "@/components/proposals/proposal.types"
+import { ProposalData } from "@/lib/proposals"
+import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
+import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
+import { useUser } from "@/hooks/db/useUser"
+import { useSessionUser } from "@/hooks/db/useSessionUser"
+import { getVotingProps } from "@/app/proposals/utils/votingUtils"
 
-const CardText = ({ title, descriptionElement }: CardTextProps) => {
-  const cardDescriptionTextStyling =
-    "font-inter font-normal text-sm leading-5 tracking-[0%] text-center [&_a]:underline [&_a]:decoration-solid [&_a]:underline-offset-[0%] [&_a]:decoration-[0%]"
+const CardText = ({
+  proposalData,
+  isCitizen,
+  vote,
+  eligibility,
+}: {
+  proposalData: ProposalData
+  isCitizen: boolean
+  vote?: VoteType
+  eligibility?: CitizenshipQualification
+}) => {
+  const { votingCardProps } = getVotingProps(
+    proposalData,
+    isCitizen,
+    vote,
+    eligibility,
+  )
+
   return (
     <div className="text-center">
-      <h4 className="text-h4">{title}</h4>
-      {descriptionElement ? (
-        React.isValidElement(descriptionElement) ? (
+      <h4 className="text-h4">{votingCardProps.cardText.title}</h4>
+      {votingCardProps.cardText.descriptionElement ? (
+        React.isValidElement(votingCardProps.cardText.descriptionElement) ? (
           React.cloneElement(
-            descriptionElement as React.ReactElement<{ className?: string }>,
+            votingCardProps.cardText.descriptionElement as React.ReactElement<{
+              className?: string
+            }>,
             {
-              className: cardDescriptionTextStyling,
+              className: "text-sm text-center",
             },
           )
         ) : (
-          <p className={cardDescriptionTextStyling}>{descriptionElement}</p>
+          <p className="text-sm text-center">
+            {votingCardProps.cardText.descriptionElement}
+          </p>
         )
       ) : null}
     </div>
@@ -70,24 +95,27 @@ const PreviousVote = ({ voteType }: { voteType: string }) => {
   )
 }
 
-const VotingCard = ({
-  cardText,
-  cardActions,
-  user,
-  eligibility,
-  previousVote,
-}: VotingCardProps) => {
-  return (
-    <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
-      {eligibility && user && (
-        <EligibleCitizenAvatar user={user} qualification={eligibility} />
-      )}
-      <CardText {...cardText} />
-      {previousVote && <PreviousVote voteType={previousVote} />}
-      {cardActions && <VotingActions {...cardActions} />}
-    </div>
-  )
-}
+// const VotingCard = ({ proposalData }: { proposalData: ProposalData }) => {
+//   const { data: eligibility } = useCitizenQualification()
+//   // const { user } = useSessionUser()
+//   const { citizen } = useUserCitizen()
 
-export default VotingCard
+//   return (
+//     <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
+//       {eligibility && user && (
+//         <EligibleCitizenAvatar user={user} qualification={eligibility} />
+//       )}
+//       <CardText
+//         proposalData={proposalData}
+//         isCitizen={!!citizen}
+//         vote={undefined}
+//         eligibility={eligibility}
+//       />
+//       {previousVote && <PreviousVote voteType={previousVote} />}
+//       <VotingActions proposalId={proposalData.id} />
+//     </div>
+//   )
+// }
+
+// export default VotingCard
 export { CardText, type CardTextProps }

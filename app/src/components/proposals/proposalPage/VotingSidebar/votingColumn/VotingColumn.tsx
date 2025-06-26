@@ -40,6 +40,7 @@ import { useSession } from "next-auth/react"
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { citizenCategory } from "@prisma/client"
+import { CardText } from "../votingCard/VotingCard"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -296,18 +297,22 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   return (
-    <div className="w-[19rem] pr-[1rem] pb-[1.5rem] pl-[1rem] gap-[var(--dimensions-8)] border-l border-b border-r rounded-b-[12px]">
-      <div className="w-[272px] gap-[16px] flex flex-col ">
-        <ColumnCard
-          proposalType={proposalData.proposalType}
-          signedIn={!!session?.user?.id}
-          currentlyActive={proposalData.status === "ACTIVE"}
-          citizen={!!citizen}
-          voted={voted}
-          selectedVote={selectedVote}
-          setSelectedVote={handleVoteClick}
-        />
-      </div>
+    <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
+      <CardText
+        proposalData={proposalData}
+        isCitizen={!!citizen}
+        vote={undefined}
+        eligibility={citizenEligibility}
+      />
+      <ColumnCard
+        proposalType={proposalData.proposalType}
+        signedIn={!!session?.user?.id}
+        currentlyActive={proposalData.status === "ACTIVE"}
+        citizen={!!citizen}
+        voted={voted}
+        selectedVote={selectedVote}
+        setSelectedVote={handleVoteClick}
+      />
       {proposalData.status === "ACTIVE" && votingActions && !voted && (
         <>
           <VotingActions
