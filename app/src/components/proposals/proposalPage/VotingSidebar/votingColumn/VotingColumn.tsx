@@ -166,6 +166,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     ? mapValueToVoteType(proposalData.proposalType, myVote.vote)
     : undefined
 
+  const myVoteType = myVote?.vote
+    ? mapValueToVoteType(proposalData.proposalType, myVote.vote)
+    : undefined
+
   const votingActions = getVotingActions(
     !!session?.user?.id,
     !!citizen,
