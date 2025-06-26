@@ -1,11 +1,22 @@
 import { getCitizenForUser } from "@/db/citizens"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
+import { useEffect } from "react"
 
 export const USER_CITIZEN_QUERY_KEY = "citizen"
 
 export const useUserCitizen = () => {
+  const queryClient = useQueryClient()
   const { data: session } = useSession()
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      queryClient.invalidateQueries({
+        queryKey: [USER_CITIZEN_QUERY_KEY, session.user.id],
+      })
+    }
+  }, [session?.user?.id, queryClient])
+
   if (!session?.user?.id) {
     return { citizen: null, isLoading: false, isSuccess: false, isError: false }
   }
