@@ -17,19 +17,19 @@ export const useUserCitizen = () => {
     }
   }, [session?.user?.id, queryClient])
 
-  if (!session?.user?.id) {
-    return { citizen: null, isLoading: false, isSuccess: false, isError: false }
-  }
-
   const {
     data: citizen,
     isLoading,
     isSuccess,
     isError,
   } = useQuery({
-    queryKey: [USER_CITIZEN_QUERY_KEY, session.user.id],
+    queryKey: [USER_CITIZEN_QUERY_KEY, session?.user?.id],
     queryFn: async () => {
-      return await getCitizenForUser(session.user.id)
+      if (!session?.user?.id) {
+        return null
+      } else {
+        return await getCitizenForUser(session.user.id)
+      }
     },
     enabled: !!session?.user?.id,
   })
