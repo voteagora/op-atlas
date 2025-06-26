@@ -9,7 +9,7 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import {
@@ -221,20 +221,15 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   const validateAddress = () => {
-    try {
-      const newActiveWallet = wallets.find(
-        (wallet) => wallet.address === citizen?.address,
-      )
-      if (!newActiveWallet) {
-        setAddressMismatch(true)
-        throw new Error("Citizen wallet not found. Try reconnecting.")
-      } else {
-        setAddressMismatch(false)
-        return newActiveWallet
-      }
-    } catch (error) {
-      console.error("Failed to validate address:", error)
-      return undefined
+    const newActiveWallet = wallets.find(
+      (wallet) => wallet.address === citizen?.address,
+    )
+    if (!newActiveWallet) {
+      setAddressMismatch(true)
+      throw new Error("Citizen wallet not found. Try reconnecting.")
+    } else {
+      setAddressMismatch(false)
+      return newActiveWallet
     }
   }
 
