@@ -13,7 +13,7 @@ import {
   getVotingActions,
   mapValueToVoteType,
   mapVoteTypeToValue,
-} from "@/app/governance/utils/votingUtils"
+} from "@/lib/utils/voting"
 import {
   OffchainVote,
   ProposalType,

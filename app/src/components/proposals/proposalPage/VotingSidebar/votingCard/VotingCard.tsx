@@ -3,7 +3,7 @@ import React from "react"
 import { CitizenshipQualification } from "@/lib/types"
 import { CardTextProps, VoteType } from "@/components/proposals/proposal.types"
 import { ProposalData } from "@/lib/proposals"
-import { getVotingProps } from "@/app/governance/utils/votingUtils"
+import { getVotingProps } from "@/lib/utils/voting"
 
 const CardText = ({
   proposalData,
