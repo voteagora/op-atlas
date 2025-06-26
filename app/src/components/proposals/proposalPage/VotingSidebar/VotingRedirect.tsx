@@ -3,10 +3,12 @@ import { ProposalData } from "@/lib/proposals"
 
 const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
   return (
-    <>
-      <div className="w-[304px] h-10 px-3 py-2 rounded-md flex items-center justify-center">
+    <div className="flex flex-col gap-2">
+      <div className="w-[304px] h-5 px-3 py-2 rounded-md flex items-center justify-center">
         <div className="flex items-center gap-2">
-          <p className="font-medium text-sm text-center">Are you a delegate?</p>
+          <p className="font-medium text-sm text-center text-[#404454]">
+            Are you a delegate?
+          </p>
           <span className="font-normal text-sm text-center">
             <a
               className="underline text-secondary-foreground hover:text-foreground"
@@ -18,9 +20,11 @@ const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
           </span>
         </div>
       </div>
-      <div className="w-[304px] h-10 px-3 py-2 rounded-md flex items-center justify-center">
+      <div className="w-[304px] h-5 px-3 py-2 rounded-md flex items-center justify-center">
         <div className="flex items-center gap-2">
-          <p className="font-medium text-sm text-center">Need help?</p>
+          <p className="font-medium text-sm text-center text-[#404454]">
+            Need help?
+          </p>
           <span className="font-normal text-sm text-center">
             <a
               className="underline text-secondary-foreground hover:text-foreground"
@@ -32,7 +36,7 @@ const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
           </span>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
