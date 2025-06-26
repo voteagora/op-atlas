@@ -114,18 +114,21 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
-  
+
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
   }
 
-  const { vote: myVote, invalidate: invalidateMyVote, isLoading: isVoteLoading } = useMyVote(
-    proposalData.id,
-  )
+  const {
+    vote: myVote,
+    invalidate: invalidateMyVote,
+    isLoading: isVoteLoading,
+  } = useMyVote(proposalData.id)
 
   const { data: session } = useSession()
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
-  const { data: citizenEligibility, isLoading: isEligibilityLoading } = useCitizenQualification()
+  const { data: citizenEligibility, isLoading: isEligibilityLoading } =
+    useCitizenQualification()
 
   useEffect(() => {
     if (!isVoteLoading && !isCitizenLoading && !isEligibilityLoading) {
@@ -157,7 +160,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
 
-  if (isInitialLoad || isVoteLoading || isCitizenLoading || isEligibilityLoading) {
+  if (
+    isInitialLoad ||
+    isVoteLoading ||
+    isCitizenLoading ||
+    isEligibilityLoading
+  ) {
     return <VotingColumnSkeleton />
   }
 
@@ -213,15 +221,20 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   const validateAddress = () => {
-    const newActiveWallet = wallets.find(
-      (wallet) => wallet.address === citizen?.address,
-    )
-    if (!newActiveWallet) {
-      setAddressMismatch(true)
-      throw new Error("Citizen wallet not found. Try reconnecting.")
-    } else {
-      setAddressMismatch(false)
-      return newActiveWallet
+    try {
+      const newActiveWallet = wallets.find(
+        (wallet) => wallet.address === citizen?.address,
+      )
+      if (!newActiveWallet) {
+        setAddressMismatch(true)
+        throw new Error("Citizen wallet not found. Try reconnecting.")
+      } else {
+        setAddressMismatch(false)
+        return newActiveWallet
+      }
+    } catch (error) {
+      console.error("Failed to validate address:", error)
+      return undefined
     }
   }
 
@@ -252,7 +265,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         // Sign the attestation with the correct user wallet
         const { data, rawSignature, signerAddress } =
           await createDelegatedAttestation(choices)
-
+        // throw new Error("Not implemented")
         // 2. Send signature to server to relay onchain
         const attestationId = await vote(
           data,
@@ -283,15 +296,34 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           wallet_address: signerAddress,
         })
       } catch (error) {
-        console.error("Failed to cast vote:", error)
+        // Collect context for the error
+        const errorMessage =
+          error instanceof Error ? error.message : `Unknown error: ${error}`
+        const errorContext = {
+          proposalId: proposalData.id,
+          choice: choices,
+          walletAddress: signer?.address,
+          citizenAddress: citizen?.address,
+          browser:
+            typeof window !== "undefined" ? navigator.userAgent : "unknown",
+          chain_id:
+            typeof window !== "undefined"
+              ? window.ethereum?.chainId
+              : "unknown",
+          wallet_provider: wallets?.[0]?.walletClientType || "unknown",
+          connected_wallets: wallets?.map((w) => ({
+            type: w.walletClientType,
+            address: w.address,
+          })),
+          selected_vote: selectedVote,
+          timestamp: new Date().toISOString(),
+          error: errorMessage,
+        }
+
+        console.error("Failed to cast vote:", errorContext)
 
         // Track vote error
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error"
-        track("Citizen Voting Vote Error", {
-          proposal_id: proposalData.id,
-          error: errorMessage,
-        })
+        track("Citizen Voting Vote Error", errorContext)
 
         if (
           error instanceof Error &&
@@ -351,13 +383,13 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           eligibility={citizenEligibility}
         />
       </div>
-      
+
       {myVoteType && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <MyVote voteType={myVoteType} />
         </div>
       )}
-      
+
       {/* Actions */}
       {proposalData.status === "ACTIVE" && votingActions && !myVote && (
         <div className="flex flex-col items-center gap-y-2 transition-all duration-300 ease-in-out">
@@ -393,7 +425,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           )}
         </div>
       )}
-      
+
       <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
           <p className="text-sm text-center underline hover:text-foreground/80 transition-colors duration-200">
