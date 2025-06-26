@@ -23,12 +23,12 @@ const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
       </div>
       <div className="w-[304px] h-5 px-3 py-2 rounded-md flex items-center justify-center">
         <div className="flex items-center gap-2">
-          <p className="font-medium text-sm text-center text-[#404454]">
+          <p className="font-medium text-sm text-center transition-colors duration-200">
             Need help?
           </p>
           <span className="font-normal text-sm text-center">
             <a
-              className="underline text-secondary-foreground hover:text-foreground"
+              className="underline text-secondary-foreground hover:text-foreground transition-colors duration-200 ease-in-out"
               href="https://discord.com/channels/667044843901681675/1287789742582403123"
               target="_blank"
               rel="noopener noreferrer"
