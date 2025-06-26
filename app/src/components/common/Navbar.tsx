@@ -16,8 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 import { Account } from "./Account"
-import { MobileNav } from "./MobileNav"
 import { Banner } from "./Banner"
+import { MobileNav } from "./MobileNav"
 
 export const dropdownList = [
   {
@@ -39,7 +39,7 @@ const Navbar = () => {
   const params = useParams()
   const isRounds = pathname === "/missions"
   const isProjects = pathname.includes("/round/")
-  const isProposals = pathname === "/proposals"
+  const isGovernance = pathname === "/governance"
 
   const isMissions = pathname.includes("/missions")
 
@@ -57,24 +57,34 @@ const Navbar = () => {
             params.id || isMissions ? "bg-background" : ""
           }`}
         >
-          <div className="flex h-full">
+          <div className="flex sm:hidden items-center h-full w-full relative">
             <button
-              className={showMobileNav ? "block" : "sm:hidden"}
+              className="absolute left-0 z-10 flex items-center"
               onClick={() => setShowMobileNav(!showMobileNav)}
             >
-              {showMobileNav ? (
-                <X />
-              ) : (
-                <AlignJustify className="block sm:hidden" />
-              )}
+              {showMobileNav ? <X /> : <AlignJustify />}
             </button>
-            <Link href="/" className="flex items-center">
+            <div className="absolute inset-x-0 flex items-center justify-center">
+              <Link href="/" className="flex items-center">
+                <Image
+                  src="/assets/images/logo.svg"
+                  height={20}
+                  width={115}
+                  priority
+                  alt="OP Atlas Logo"
+                />
+              </Link>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex h-full">
+            <Link href="/" className="flex items-center mr-10">
               <Image
                 src="/assets/images/logo.svg"
-                height={24}
-                width={167}
+                height={20}
+                width={100}
                 priority
-                alt=""
+                alt="OP Atlas Logo"
               />
             </Link>
             {params.id === undefined || isMissions ? (
@@ -130,7 +140,7 @@ const Navbar = () => {
                       className={`${
                         isProposals ? "mt-1" : "group-hover:mt-1"
                         } focus:outline-none focus:opacity-80`}
-                      href="/proposals"
+                      href="/governance"
                     >
                       Governance
                     </Link>

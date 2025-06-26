@@ -1,7 +1,9 @@
-import { citizenCategory, User } from "@prisma/client"
-import { CitizenshipQualification } from "@/lib/types"
-import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
+import { Citizen, citizenCategory, User } from "@prisma/client"
+import React from "react"
+
+import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
+import { CitizenshipQualification } from "@/lib/types"
 
 export interface ProposalPageDataInterface {
   user: User | null
@@ -9,13 +11,24 @@ export interface ProposalPageDataInterface {
   votingOpen: boolean
   votingComplete: boolean
   voted: boolean
-  votingRecord?: string[]
+  votingRecord?: VotingRecordInterface
   startDate: Date
   endDate: Date
   proposalType: ProposalType
   proposalId: string
   proposalStatus: string
   citizenEligibility: CitizenshipQualification | null
+}
+
+export interface VotingRecordInterface {
+  attestationId: string
+  voterAddress: string
+  vote: VoteType
+  transactionHash?: string
+  citizenId: number
+  citizenType: citizenCategory
+  createdAt: Date
+  updatedAt: Date
 }
 
 // Vote type enum
@@ -41,17 +54,6 @@ export interface voteAction {
   loading?: boolean
 }
 
-export type Citizen = {
-  id: number
-  userId: string
-  address: string | null
-  type: citizenCategory
-  attestationId: string | null
-  timeCommitment: string | null
-  createdAt: Date
-  updatedAt: Date
-}
-
 export interface OffchainVote {
   attestationId: string
   voterAddress: string
@@ -74,12 +76,15 @@ export interface VotingColumnProps {
   userCitizen?: Citizen
   userVoted?: boolean
   resultsLink: string
+  updateVotingCardProps?: (updatedProps: Partial<VotingCardProps>) => void
 }
 
-export interface VotingRedirectProps {
-  callout: string
-  link?: {
-    linkText: string
-    linkHref: string
-  }
+export interface VotingCardProps {
+  cardText: CardTextProps
+  cardActions?: CardActionsProps
+}
+
+export interface CardTextProps {
+  title: string
+  descriptionElement?: string | React.ReactElement
 }

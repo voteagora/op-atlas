@@ -1,62 +1,66 @@
-import { User } from "@prisma/client"
 import React from "react"
 
-import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
-import VotingActions, {
-  CardActionsProps,
-} from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
 import { CitizenshipQualification } from "@/lib/types"
+import { CardTextProps, VoteType } from "@/components/proposals/proposal.types"
+import { ProposalData } from "@/lib/proposals"
+import { getVotingProps } from "@/lib/utils/voting"
 
-interface CardTextProps {
-  title: string
-  descriptionElement?: string | React.ReactElement
-}
+const CardText = ({
+  proposalData,
+  isCitizen,
+  vote,
+  eligibility,
+}: {
+  proposalData: ProposalData
+  isCitizen: boolean
+  vote?: VoteType
+  eligibility?: CitizenshipQualification
+}) => {
+  const { votingCardProps } = getVotingProps(
+    proposalData,
+    isCitizen,
+    vote,
+    eligibility,
+  )
 
-const CardText = ({ title, descriptionElement }: CardTextProps) => {
-  const cardDescriptionTextStyling =
-    "font-inter font-normal text-sm leading-5 tracking-[0%] text-center [&_a]:underline [&_a]:decoration-solid [&_a]:underline-offset-[0%] [&_a]:decoration-[0%]"
   return (
-    <div className="text-center">
-      <h4 className="text-h4">{title}</h4>
-      {descriptionElement ? (
-        React.isValidElement(descriptionElement) ? (
+    <div className="flex flex-col text-center gap-y-2">
+      <h4 className="text-md font-semibold">
+        {votingCardProps.cardText.title}
+      </h4>
+      {votingCardProps.cardText.descriptionElement &&
+      votingCardProps.cardText.descriptionElement === "OFFCHAIN_STANDARD" ? (
+        <p className="text-sm text-center">
+          This proposal requires approval from the Citizen&#39;s House and Token
+          House. Read more about the voting mechanism{" "}
+          <a
+            href="https://github.com/ethereum-optimism/OPerating-manual/blob/main/manual.md"
+            className="text-sm text-center underline"
+          >
+            here
+          </a>
+          .
+        </p>
+      ) : (
+        votingCardProps.cardText.descriptionElement &&
+        (React.isValidElement(votingCardProps.cardText.descriptionElement) ? (
           React.cloneElement(
-            descriptionElement as React.ReactElement<{ className?: string }>,
+            votingCardProps.cardText.descriptionElement as React.ReactElement<{
+              className?: string
+            }>,
             {
-              className: cardDescriptionTextStyling,
+              className:
+                "text-sm text-center text-[#404454] font-weight-normal",
             },
           )
         ) : (
-          <p className={cardDescriptionTextStyling}>{descriptionElement}</p>
-        )
-      ) : null}
-    </div>
-  )
-}
-
-export interface VotingCardProps {
-  cardText: CardTextProps
-  cardActions?: CardActionsProps
-  user: User | null
-  eligibility?: CitizenshipQualification
-}
-
-const VotingCard = ({
-  cardText,
-  cardActions,
-  user,
-  eligibility,
-}: VotingCardProps) => {
-  return (
-    <div className="rounded-t-lg border-l border-r border-t border-solid p-6 flex flex-col items-center">
-      {eligibility && user && (
-        <EligibleCitizenAvatar user={user} qualification={eligibility} />
+          <p className="text-sm text-center text-[#404454] font-weight-normal">
+            {votingCardProps.cardText.descriptionElement}
+          </p>
+        ))
       )}
-      <CardText {...cardText} />
-      {cardActions && <VotingActions {...cardActions} />}
     </div>
   )
 }
 
-export default VotingCard
 export { CardText, type CardTextProps }
