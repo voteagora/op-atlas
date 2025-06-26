@@ -41,7 +41,8 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   const isTracked = useRef(false)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  const { data: citizenEligibility, isLoading: isEligibilityLoading } = useCitizenQualification()
+  const { data: citizenEligibility, isLoading: isEligibilityLoading } =
+    useCitizenQualification()
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
   const { data: session } = useSession()
 
@@ -71,14 +72,21 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
       })
       isTracked.current = true
     }
-  }, [proposalData, track, citizen, citizenEligibility, session?.user?.id, isInitialLoad])
+  }, [
+    proposalData,
+    track,
+    citizen,
+    citizenEligibility,
+    session?.user?.id,
+    isInitialLoad,
+  ])
 
   if (isInitialLoad) {
     return <VotingSidebarSkeleton />
   }
 
   return (
-    <div className="w-[304px] gap-6 flex flex-col sticky top-4 w-full max-w-[304px] transition-all duration-300 ease-in-out animate-in fade-in-0">
+    <div className="w-[304px] gap-4 flex flex-col sticky top-4 w-full max-w-[304px] transition-all duration-300 ease-in-out animate-in fade-in-0">
       <div className="w-[304px]">
         <div className="transition-all duration-300 ease-in-out">
           <VotingColumn proposalData={proposalData} />

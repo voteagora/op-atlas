@@ -49,11 +49,12 @@ const CardText = ({
               className?: string
             }>,
             {
-              className: "text-sm text-center",
+              className:
+                "text-sm text-center text-[#404454] font-weight-normal",
             },
           )
         ) : (
-          <p className="text-sm text-center">
+          <p className="text-sm text-center text-[#404454] font-weight-normal">
             {votingCardProps.cardText.descriptionElement}
           </p>
         ))
