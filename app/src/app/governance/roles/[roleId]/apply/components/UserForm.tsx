@@ -1,5 +1,4 @@
 import { Role, User } from "@prisma/client"
-import { track } from "mixpanel-browser"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
@@ -19,6 +18,7 @@ import { useUser } from "@/hooks/db/useUser"
 import { useUserAdminProjects } from "@/hooks/db/useUserAdminProjects"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { useApplyForRole } from "@/hooks/role/useApplyForRole"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 const TERMS = [
   "Please verify that you understand you may be removed from this role via the Representative Removal proposal type in the Operating Manual.",
@@ -68,6 +68,8 @@ export const UserForm = ({
   })
 
   const user = loadedUser || initialUser
+
+  const { track } = useAnalytics()
   const { linkGithub } = usePrivyLinkGithub(user.id)
   const { applyForRole, isLoading } = useApplyForRole()
 

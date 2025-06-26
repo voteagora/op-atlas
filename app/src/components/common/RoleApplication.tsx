@@ -72,17 +72,33 @@ export default function RoleApplication({
   const cleanDescription = stripMarkdown(role.description || "")
 
   const renderApplication = () => {
+    const conflictsOfInterest = JSON.parse(
+      activeApplications[0].application,
+    ).conflictsOfInterest
+    const hasConflictsOfInterest = conflictsOfInterest.length > 0
+
+    const projects = JSON.parse(activeApplications[0].application).projects
+    const hasProjects = projects.length > 0
+
     if (expanded) {
       return (
         <div className="flex flex-col gap-6 mb-6">
           <div className="border-t border-border-secondary my-4"></div>
           <div>{`${username || organization?.name}'s self nomination`}</div>
+          <div>
+            If you have any conflicts of interest, please explain them here.
+          </div>
+          <div className="text-muted-foreground">
+            {hasConflictsOfInterest ? conflictsOfInterest : "None"}
+          </div>
           <div>Which of your projects demonstrate your expertise?</div>
 
-          {JSON.parse(activeApplications[0].application).projects.map(
-            (project: any, idx: number) => (
+          {hasProjects ? (
+            projects.map((project: any, idx: number) => (
               <ProjectDedetails key={idx} projectApplication={project} />
-            ),
+            ))
+          ) : (
+            <div className="text-muted-foreground">None</div>
           )}
         </div>
       )

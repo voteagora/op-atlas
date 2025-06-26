@@ -2,7 +2,6 @@
 
 import { Role } from "@prisma/client"
 import { usePrivy } from "@privy-io/react-auth"
-import { track } from "mixpanel-browser"
 import { usePathname, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useRef, useState } from "react"
@@ -11,8 +10,10 @@ import { Button } from "@/components/ui/button"
 import { useActiveUserApplications } from "@/hooks/role/useActiveUserApplications"
 import { LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
 import { formatMMMd } from "@/lib/utils/date"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export const Sidebar = ({ role }: { role: Role }) => {
+  const { track } = useAnalytics()
   const { status: authStatus, data: session } = useSession()
   const isAuthenticated = authStatus === "authenticated"
 
