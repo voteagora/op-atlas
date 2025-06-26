@@ -309,17 +309,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         vote={myVoteType}
         eligibility={citizenEligibility}
       />
-      {canVote && (
-        <VotingChoices
-          proposalType={proposalData.proposalType}
-          selectedVote={selectedVote}
-          setSelectedVote={handleVoteClick}
-        />
-      )}
       {myVoteType && <MyVote voteType={myVoteType} />}
       {/* Actions */}
       {proposalData.status === "ACTIVE" && votingActions && !myVote && (
-        <>
+        <div className="flex flex-col items-center gap-y-2">
+          {canVote && (
+            <VotingChoices
+              proposalType={proposalData.proposalType}
+              selectedVote={selectedVote}
+              setSelectedVote={handleVoteClick}
+            />
+          )}
           <VoterActions
             proposalId={proposalData.id}
             // This is a wonky way to overwrite the call to make an external call.
@@ -341,7 +341,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               {citizen.address && truncateAddress(citizen.address)}
             </div>
           )}
-        </>
+        </div>
       )}
       <div className="w-full flex items-center justify-center">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
