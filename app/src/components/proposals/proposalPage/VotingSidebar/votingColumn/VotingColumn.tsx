@@ -305,6 +305,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             typeof window !== "undefined"
               ? window?.ethereum?.chainId
               : "unknown",
+          ethereumWindow: window?.ethereum,
           wallet_provider: wallets?.[0]?.walletClientType || "unknown",
           connected_wallets: wallets?.map((w) => ({
             type: w?.walletClientType,
