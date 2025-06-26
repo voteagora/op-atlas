@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import {
   getAgoraProposalLink,
   getVotingActions,
+  mapValueToVoteType,
   mapVoteTypeToValue,
 } from "@/app/proposals/utils/votingUtils"
 import {
@@ -42,6 +43,7 @@ import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification
 import { citizenCategory } from "@prisma/client"
 import { CardText } from "../votingCard/VotingCard"
 import useMyVote from "@/hooks/voting/useMyVote"
+import { MyVote } from "../votingCard/MyVote"
 
 const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
@@ -295,13 +297,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     })
   }
 
+  const myVoteType = myVote?.vote
+    ? mapValueToVoteType(proposalData.proposalType, myVote.vote)
+    : undefined
+
   return (
     <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
       {/* Text on the top of the card */}
       <CardText
         proposalData={proposalData}
         isCitizen={!!citizen}
-        vote={undefined}
+        vote={myVoteType}
         eligibility={citizenEligibility}
       />
       {canVote && (
@@ -311,6 +317,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           setSelectedVote={handleVoteClick}
         />
       )}
+      {myVoteType && <MyVote voteType={myVoteType} />}
       {/* Actions */}
       {proposalData.status === "ACTIVE" && votingActions && !myVote && (
         <>

@@ -9,6 +9,7 @@ import {
 import { ProposalData } from "@/lib/proposals"
 
 import { CitizenshipQualification } from "@/lib/types"
+import { JsonValue } from "@prisma/client/runtime/library"
 
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL
 
@@ -398,10 +399,12 @@ export const mapVoteTypeToValue = (
 
 export const mapValueToVoteType = (
   proposalType: ProposalType,
-  value: string,
+  value: JsonValue,
 ) => {
+  const valueArray = Array.isArray(value) ? value : [value]
+
   if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
-    switch (value[0]) {
+    switch (valueArray[0]) {
       case "0":
         return VoteType.Against
       case "1":
