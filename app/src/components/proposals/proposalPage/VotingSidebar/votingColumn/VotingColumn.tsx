@@ -260,7 +260,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         // Sign the attestation with the correct user wallet
         const { data, rawSignature, signerAddress } =
           await createDelegatedAttestation(choices)
-        // throw new Error("Not implemented")
+
         // 2. Send signature to server to relay onchain
         const attestationId = await vote(
           data,
