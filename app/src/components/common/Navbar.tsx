@@ -42,7 +42,7 @@ const Navbar = () => {
   const isProposals = pathname === "/proposals"
 
   const isMissions = pathname.includes("/missions")
-  const isRoles = pathname.includes("/roles")
+  const isGovernance = pathname.includes("/governance")
 
   const [showMobileNav, setShowMobileNav] = useState(false)
 
@@ -78,7 +78,7 @@ const Navbar = () => {
                 alt=""
               />
             </Link>
-            {params.id === undefined || isMissions || isRoles ? (
+            {params.id === undefined || isMissions || isGovernance ? (
               <div className="flex gap-12">
                 <div
                   className={cn(
@@ -115,6 +115,25 @@ const Navbar = () => {
                       href="/round/results?rounds=7,8"
                     >
                       Recipients
+                    </Link>
+                  </div>
+                </div>
+                <div
+                  className={cn(
+                    "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
+                    isGovernance
+                      ? "border-b-4 border-[#0F111A] text-text-default"
+                      : "",
+                  )}
+                >
+                  <div className="flex items-center">
+                    <Link
+                      className={`${
+                        isGovernance ? "mt-1" : "group-hover:mt-1"
+                      } focus:outline-none focus:opacity-80`}
+                      href="/governance"
+                    >
+                      Governance
                     </Link>
                   </div>
                 </div>
