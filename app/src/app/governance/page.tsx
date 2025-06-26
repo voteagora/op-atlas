@@ -2,7 +2,7 @@
 
 import { getAllRoles } from "@/db/role"
 
-import { RoleRow } from "./components/RoleRow"
+import { RoleRow } from "./roles/components/RoleRow"
 
 export default async function Page() {
   const roles = await getAllRoles()

@@ -49,7 +49,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
       localStorage.setItem(LOCAL_STORAGE_LOGIN_REDIRECT, pathname)
       login()
     } else if (isApplicationWindow) {
-      router.push(`/roles/${role.id}/apply`)
+      router.push(`/governance/roles/${role.id}/apply`)
     }
   }
 

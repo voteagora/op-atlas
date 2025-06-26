@@ -39,7 +39,7 @@ export const useApplyForRole = (userId?: string, roleId?: number) => {
         toast.dismiss(loadingToast)
         toast.success("Role application submitted successfully")
         setIsSuccess(true)
-        router.push(`/roles/${id}/apply/${application.id}`)
+        router.push(`/governance/roles/${id}/apply/${application.id}`)
       } catch (error) {
         toast.error("Failed to apply for role")
         setIsSuccess(false)

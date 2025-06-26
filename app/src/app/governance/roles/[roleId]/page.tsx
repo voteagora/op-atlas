@@ -26,8 +26,8 @@ export default async function Page({ params }: { params: { roleId: string } }) {
   const voteSchedule =
     role?.voteStartAt && role?.voteEndAt
       ? `Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
-        new Date(role.voteEndAt!),
-      )}`
+          new Date(role.voteEndAt!),
+        )}`
       : null
 
   return (
@@ -38,7 +38,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/roles">Governance</BreadcrumbLink>
+                  <BreadcrumbLink href="/governance">Governance</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -53,7 +53,8 @@ export default async function Page({ params }: { params: { roleId: string } }) {
                 {role.startAt && role.endAt && (
                   <div className="text-muted-foreground flex flex-row gap-2">
                     <div>
-                      Nominations {formatMMMd(new Date(role.startAt))}{" - "}
+                      Nominations {formatMMMd(new Date(role.startAt))}
+                      {" - "}
                       {formatMMMd(new Date(role.endAt))}
                     </div>
 

@@ -21,7 +21,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
   const userId = session?.user?.id
 
   if (!userId) {
-    redirect(`/roles/${params.roleId}`)
+    redirect(`/governance/roles/${params.roleId}`)
   }
 
   const [role, user, userOrgs] = await Promise.all([
@@ -37,8 +37,8 @@ export default async function Page({ params }: { params: { roleId: string } }) {
   const voteSchedule =
     role?.voteStartAt && role?.voteEndAt
       ? `Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
-        new Date(role.voteEndAt!),
-      )}`
+          new Date(role.voteEndAt!),
+        )}`
       : null
 
   return (
