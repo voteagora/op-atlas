@@ -159,14 +159,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       delegateRequest,
       signer,
     )
-    const isValid = await validateSignatureAddressIsValid(
-      rawSignature,
-      citizen.address,
-    )
-
-    if (!isValid) {
-      throw new Error("Invalid signature")
-    }
 
     return {
       data: encodedData,
