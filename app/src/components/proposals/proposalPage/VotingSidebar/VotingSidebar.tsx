@@ -9,6 +9,7 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import { ProposalData } from "@/lib/proposals"
+import { useSession } from "next-auth/react"
 
 interface VotingSidebarProps {
   proposalData: ProposalData
@@ -20,6 +21,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
 
   const { data: citizenEligibility } = useCitizenQualification()
   const { citizen } = useUserCitizen()
+  const { data: session } = useSession()
 
   useEffect(() => {
     if (!isTracked.current) {
@@ -32,6 +34,8 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
           ? "registered"
           : citizenEligibility?.eligible
           ? "eligible"
+          : session?.user?.id
+          ? "not signed in"
           : "ineligible",
       })
       isTracked.current = true
