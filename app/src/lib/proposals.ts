@@ -124,7 +124,7 @@ const getStandardProposlas = async () => {
           endDate: formatDate(proposal.endTime),
         },
         arrow: {
-          href: `/governance/${proposal.id}`,
+          href: `/proposals/${proposal.id}`,
         },
       }
     },
