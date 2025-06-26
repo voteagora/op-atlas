@@ -31,7 +31,7 @@ const CardText = ({
       {votingCardProps.cardText.descriptionElement &&
       votingCardProps.cardText.descriptionElement === "OFFCHAIN_STANDARD" ? (
         <p className="text-sm text-center">
-          This proposal requires approval from the Citizen's House and Token
+          This proposal requires approval from the Citizen&#39;s House and Token
           House. Read more about the voting mechanism{" "}
           <a
             href="https://community.optimism.io/citizens-house/citizen-house-overview"
