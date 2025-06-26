@@ -31,6 +31,7 @@ const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
               className="underline text-secondary-foreground hover:text-foreground"
               href="https://discord.com/channels/667044843901681675/1287789742582403123"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Ask on Discord
             </a>

@@ -78,12 +78,12 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   }
 
   return (
-    <div className="w-[304px] gap-6 flex flex-col sticky top-4 w-full max-w-[304px] transition-all duration-300 ease-in-out animate-in fade-in-0">
+    <div className="w-[304px] gap-4 flex flex-col sticky top-4 w-full max-w-[304px] transition-all duration-300 ease-in-out animate-in fade-in-0">
       <div className="w-[304px]">
         <div className="transition-all duration-300 ease-in-out">
           <VotingColumn proposalData={proposalData} />
         </div>
-        <div className="mt-5 transition-all duration-300 ease-in-out">
+        <div className="gap-2 transition-all duration-300 ease-in-out">
           <VotingRedirect proposalData={proposalData} />
         </div>
       </div>
