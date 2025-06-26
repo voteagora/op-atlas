@@ -100,6 +100,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { citizen } = useUserCitizen()
   const { data: citizenEligibility } = useCitizenQualification()
 
+  const myVoteType = myVote?.vote
+    ? mapValueToVoteType(proposalData.proposalType, myVote.vote)
+    : undefined
+
   const votingActions = getVotingActions(
     !!session?.user?.id,
     !!citizen,
@@ -295,10 +299,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       },
     })
   }
-
-  const myVoteType = myVote?.vote
-    ? mapValueToVoteType(proposalData.proposalType, myVote.vote)
-    : undefined
 
   return (
     <div className="flex flex-col p-6 gap-y-4 border rounded-lg">

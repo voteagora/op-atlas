@@ -1,10 +1,7 @@
 import {
-  ProposalPageDataInterface,
   ProposalType,
   VoteType,
   VotingCardProps,
-  VotingColumnProps,
-  VotingRedirectProps,
 } from "@/components/proposals/proposal.types"
 import { ProposalData } from "@/lib/proposals"
 
@@ -215,7 +212,6 @@ export const getVotingActions = (
   isSignedIn: boolean,
   isRegisteredCitizen: boolean,
   isEligibleCitizen: boolean,
-  vote?: VoteType,
 ) => {
   if (!isSignedIn) {
     return {
@@ -257,45 +253,6 @@ export const getVotingActions = (
         ],
       }
     }
-    // If the user is a citizen and has voted
-  } else if (!!vote) {
-    switch (vote) {
-      case VoteType.For:
-        return {
-          cardActionList: [
-            {
-              buttonStyle:
-                "bg-[#D6FFDA] text-success-foreground pointer-events-none cursor-none",
-              actionText: "✔ For",
-              actionType: "Disabled",
-            },
-          ],
-        }
-        break
-      case VoteType.Abstain:
-        return {
-          cardActionList: [
-            {
-              buttonStyle: "bg-[#F2F3F8] pointer-events-none cursor-none",
-              actionText: "Abstain",
-              actionType: "Disabled",
-            },
-          ],
-        }
-        break
-      case VoteType.Against:
-        return {
-          cardActionList: [
-            {
-              buttonStyle:
-                "bg-red-200 text-red-600 pointer-events-none cursor-none",
-              actionText: "x Against",
-              actionType: "Disabled",
-            },
-          ],
-        }
-        break
-    }
   } else {
     return {
       cardActionList: [
@@ -311,49 +268,6 @@ export const getVotingActions = (
 
 export const getAgoraProposalLink = (proposalId: string) => {
   return `${API_URL}/proposals/${proposalId}`
-}
-
-/**
- * Get the voting column props based on the card type
- * @param proposalData The card type containing information about the voting state
- * @returns The voting column props
- */
-export const getVotingColumnProps = (
-  proposalData: ProposalPageDataInterface,
-): VotingColumnProps => {
-  const votingActions = getVotingActions(
-    !!proposalData.user,
-    !!proposalData.citizen,
-    !!proposalData.citizenEligibility?.eligible,
-  )
-
-  let votingColumnProps: any = {
-    proposalType: proposalData.proposalType,
-    proposalId: proposalData.proposalId,
-    votingActions: votingActions,
-    currentlyActive: proposalData.votingOpen,
-    userSignedIn: !!proposalData.user,
-    userVoted: proposalData.voted,
-    userCitizen: proposalData.citizen,
-    citizenId: proposalData.citizen?.id,
-    resultsLink: `${API_URL}/proposals/${proposalData.proposalId}`,
-  }
-
-  switch (proposalData.proposalType) {
-    case ProposalType.OFFCHAIN_APPROVAL:
-      votingColumnProps = { ...votingColumnProps, options: getVoteOptions() }
-      break
-    case ProposalType.OFFCHAIN_STANDARD:
-      votingColumnProps = {
-        ...votingColumnProps,
-      }
-      break
-    case ProposalType.OFFCHAIN_OPTIMISTIC:
-      votingColumnProps = {
-        ...votingColumnProps,
-      }
-  }
-  return votingColumnProps as VotingColumnProps
 }
 
 /**
