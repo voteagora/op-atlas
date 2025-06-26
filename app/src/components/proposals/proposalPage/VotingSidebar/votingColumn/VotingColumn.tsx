@@ -30,8 +30,8 @@ import {
   EAS_CONTRACT_ADDRESS,
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
+  CHAIN_ID,
 } from "@/lib/eas/clientSafe"
-import { validateSignatureAddressIsValid } from "@/lib/eas/serverOnly"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 import { useWallets } from "@privy-io/react-auth"
@@ -44,8 +44,7 @@ import { citizenCategory } from "@prisma/client"
 import { CardText } from "../votingCard/VotingCard"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { MyVote } from "../votingCard/MyVote"
-
-const CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
+import { truncateAddress } from "@/lib/utils/string"
 
 export interface CandidateCardProps {
   name: string
@@ -336,8 +335,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             })}
           />
           {addressMismatch && citizen && !myVote && !!session?.user?.id && (
-            <div className="text-red-500 text-sm text-center mt-2">
-              You must connect your citizen wallet to vote.
+            <div className="text-red-500 text-xs text-center">
+              You citizen wallet is not connected. Try signing out and signing
+              in with your Citizen wallet:{" "}
+              {citizen.address && truncateAddress(citizen.address)}
             </div>
           )}
         </>
