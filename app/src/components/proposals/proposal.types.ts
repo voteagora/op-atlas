@@ -1,7 +1,7 @@
 import { Citizen, citizenCategory, User } from "@prisma/client"
 import React from "react"
 
-import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/VotingActions"
+import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 import { CitizenshipQualification } from "@/lib/types"
 
@@ -82,9 +82,6 @@ export interface VotingColumnProps {
 export interface VotingCardProps {
   cardText: CardTextProps
   cardActions?: CardActionsProps
-  user: User | null
-  eligibility?: CitizenshipQualification
-  previousVote?: VoteType
 }
 
 export interface CardTextProps {

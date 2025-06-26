@@ -1,5 +1,8 @@
 "use server"
-import { OffchainVote } from "@/components/proposals/proposal.types"
+import {
+  OffchainVote,
+  ProposalType,
+} from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 
@@ -32,7 +35,7 @@ export type OffChainProposal = {
   quorum: string
   proposalData: object // We can define this more specifically if needed
   proposalResults: object // We can define this more specifically if needed
-  proposalType: string
+  proposalType: ProposalType
   status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
 }
 
@@ -159,7 +162,7 @@ export type ProposalData = {
   proposalData: object
   unformattedProposalData?: string | null
   proposalResults: object
-  proposalType: string
+  proposalType: ProposalType
   status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
   createdTransactionHash?: string | null
   cancelledTransactionHash?: string | null

@@ -5,7 +5,7 @@ import VoteButton from "@/components/proposals/proposalPage/VotingSidebar/voting
 import { VoteType } from "@/components/proposals/proposal.types"
 
 interface standardVoteCardProps {
-  selectedVote: VoteType | null
+  selectedVote?: VoteType
   setSelectedVote: (vote: VoteType) => void
 }
 
