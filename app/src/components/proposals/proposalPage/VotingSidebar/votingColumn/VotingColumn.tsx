@@ -363,7 +363,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         />
       </div>
 
-      {myVoteType && (
+      {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <MyVote voteType={myVoteType} />
         </div>
