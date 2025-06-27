@@ -64,7 +64,7 @@ const VoteButton = ({
       className={cn(
         sizeClasses[size],
         customClasses,
-        "gap-[5px] flex items-center justify-center focus:outline-none focus:ring-0 focus:ring-offset-0 hover:bg-transparent hover:opacity-100",
+        "gap-[5px] flex items-center justify-center focus:outline-none focus:ring-0 focus:ring-offset-0",
       )}
     >
       {iconLeft && <ChevronLeft className="mr-1" size={16} />}
