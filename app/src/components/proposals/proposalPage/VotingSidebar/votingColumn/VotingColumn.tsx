@@ -9,7 +9,7 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import {
@@ -90,7 +90,7 @@ const VotingChoices = ({
           />
         </div>
       )
-    case "APPROVAL":
+    case "OFFCHAIN_APPROVAL":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards candidates={[]} />
