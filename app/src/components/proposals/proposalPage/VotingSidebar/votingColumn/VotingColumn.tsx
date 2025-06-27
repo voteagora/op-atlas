@@ -137,7 +137,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     confettiRef.current = instance
   }
 
-
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
   }
