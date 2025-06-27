@@ -41,7 +41,8 @@ const VoteButton = ({
         variantStyles = "bg-success text-[#006117]"
         break
       case VoteType.Abstain:
-        variantStyles = "border bg-backgroundSecondary text-[#0F111A]"
+        variantStyles =
+          "border border-backgroundSecondary bg-backgroundSecondary text-[#0F111A]"
         break
       case VoteType.Against:
         variantStyles = "bg-[#FFD1D5] text-[#B80018]"
