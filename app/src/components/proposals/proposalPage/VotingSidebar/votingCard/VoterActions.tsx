@@ -13,7 +13,7 @@ export interface CardActionsProps {
 
 const VoterActions = ({ cardActionList, proposalId }: CardActionsProps) => {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-2">
       {cardActionList &&
         cardActionList.map((action, idx) => (
           <CardAction {...action} proposalId={proposalId} key={idx} />
