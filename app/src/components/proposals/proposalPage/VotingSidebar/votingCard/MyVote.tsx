@@ -18,11 +18,6 @@ const MyVote = ({ voteType }: { voteType: VoteType }) => {
           boxColor: "bg-backgroundSecondary",
           textColor: "text-primary",
         }
-      case VoteType.Veto:
-        return {
-          boxColor: "bg-red-200",
-          textColor: "text-red-600",
-        }
       default:
         return {
           boxColor: "",
