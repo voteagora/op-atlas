@@ -404,7 +404,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
       <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
-          <p className="text-sm text-center underline hover:text-foreground/80 transition-colors duration-200">
+          <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
             View results
           </p>
         </a>
