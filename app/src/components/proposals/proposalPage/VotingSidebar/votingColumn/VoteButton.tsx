@@ -31,26 +31,23 @@ const VoteButton = ({
   // Determine styles based on variant
   let variantStyles =
     variant === "outline"
-      ? "border border-solid border-border bg-background"
+      ? "border border-solid border-border bg-[#FBFCFE] rounded-md"
       : "bg-button-primary text-button-primary-foreground"
 
   // Apply selected styles based on vote type
   if (selected && voteType) {
     switch (voteType) {
       case VoteType.For:
-        variantStyles = "border border-solid border-border bg-success"
+        variantStyles = "bg-success text-[#006117]"
         break
       case VoteType.Abstain:
-        variantStyles =
-          "border border-solid border-border bg-backgroundSecondary"
+        variantStyles = "border bg-backgroundSecondary text-[#0F111A]"
         break
       case VoteType.Against:
-        variantStyles =
-          "border border-solid border-border bg-red-200 text-red-600"
+        variantStyles = "bg-[#FFD1D5] text-[#B80018]"
         break
       case VoteType.Veto:
-        variantStyles =
-          "border border-solid border-border bg-red-200 text-red-600"
+        variantStyles = "bg-[#FFD1D5] text-[#B80018]"
         break
       default:
         break
@@ -62,7 +59,7 @@ const VoteButton = ({
     sm: "w-[60px] h-[32px] py-[8px] px-[12px] text-sm",
     default: "w-[80px] h-[40px] py-[10px] px-[16px]",
     lg: "w-[100px] h-[48px] py-[12px] px-[20px] text-lg",
-    veto: "w-[15rem] h-[2.5rem] y-[10px] px-[16px]",
+    veto: "w-[256px] h-[2.5rem] y-[10px] px-[16px]",
   }
 
   return (
@@ -87,7 +84,7 @@ const VoteButton = ({
       onClick={onClick}
     >
       {iconLeft && <ChevronLeft className="mr-1" size={16} />}
-      <p className="text-center">{textValue}</p>
+      <p className="text-center text-sm">{textValue}</p>
       {iconRight && <ChevronRight className="ml-1" size={16} />}
     </button>
   )
