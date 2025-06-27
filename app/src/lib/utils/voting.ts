@@ -32,6 +32,14 @@ const votingEnded = (endDate: Date, result: any) => {
 }
 
 const youVoted = (proposalData: ProposalData, vote: VoteType) => {
+  if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return {
+      cardText: {
+        title: "You vetoed the decision",
+        descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
+      },
+    }
+  }
   return {
     cardText: {
       title: "You voted",
