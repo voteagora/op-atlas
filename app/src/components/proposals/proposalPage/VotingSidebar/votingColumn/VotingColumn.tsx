@@ -99,7 +99,10 @@ const VotingChoices = ({
     case "OFFCHAIN_OPTIMISTIC":
       return (
         <div className="transition-all duration-300 ease-in-out">
-          <OverrideVoteCard />
+          <OverrideVoteCard
+            selectedVote={selectedVote}
+            setSelectedVote={setSelectedVote}
+          />
         </div>
       )
     default:
@@ -169,7 +172,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return <VotingColumnSkeleton />
   }
 
-  const createDelegatedAttestation = async (choices: string[]) => {
+  const createDelegatedAttestation = async (choices: string | string[]) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")
@@ -274,7 +277,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           attestationId: attestationId,
           voterAddress: signerAddress,
           proposalId: proposalData.id,
-          vote: choices,
+          vote: choices as object,
           citizenId: citizen.id,
           citizenType: citizen.type as citizenCategory,
           createdAt: new Date(),
