@@ -9,7 +9,8 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
-import { useState, useEffect } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
 
 import {
@@ -114,18 +115,39 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
-  
+  const [showConfetti, setShowConfetti] = useState(false)
+  const brightColors = useMemo(
+    () => [
+      "#FF0000",
+      "#FFD700",
+      "#00FF00",
+      "#00BFFF",
+      "#FF00FF",
+      "#FF8C00",
+      "#39FF14",
+    ],
+    [],
+  )
+
+  const confettiRef = useRef<any>(null)
+  const getInstance = (instance: any) => {
+    confettiRef.current = instance
+  }
+
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
   }
 
-  const { vote: myVote, invalidate: invalidateMyVote, isLoading: isVoteLoading } = useMyVote(
-    proposalData.id,
-  )
+  const {
+    vote: myVote,
+    invalidate: invalidateMyVote,
+    isLoading: isVoteLoading,
+  } = useMyVote(proposalData.id)
 
   const { data: session } = useSession()
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
-  const { data: citizenEligibility, isLoading: isEligibilityLoading } = useCitizenQualification()
+  const { data: citizenEligibility, isLoading: isEligibilityLoading } =
+    useCitizenQualification()
 
   useEffect(() => {
     if (!isVoteLoading && !isCitizenLoading && !isEligibilityLoading) {
@@ -157,7 +179,40 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
 
-  if (isInitialLoad || isVoteLoading || isCitizenLoading || isEligibilityLoading) {
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null
+    if (
+      showConfetti &&
+      confettiRef.current &&
+      typeof confettiRef.current.confetti === "function"
+    ) {
+      const segments = 20
+      for (let i = 0; i < segments; i++) {
+        const x = i / (segments - 1)
+        confettiRef.current.confetti({
+          particleCount: 150,
+          angle: 90,
+          spread: 200,
+          startVelocity: 100,
+          gravity: 0.35,
+          ticks: 500,
+          origin: { x, y: 0 },
+          colors: brightColors,
+        })
+      }
+      timeoutId = setTimeout(() => setShowConfetti(false), 8000)
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [showConfetti, brightColors])
+
+  if (
+    isInitialLoad ||
+    isVoteLoading ||
+    isCitizenLoading ||
+    isEligibilityLoading
+  ) {
     return <VotingColumnSkeleton />
   }
 
@@ -330,7 +385,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     toast.promise(castAndRecordVote(), {
       loading: "Casting Vote...",
       success: () => {
-        // Update voted status to true
+        setShowConfetti(true)
         invalidateMyVote()
         return "Vote Cast and Recorded!"
       },
@@ -342,6 +397,19 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   return (
     <div className="flex flex-col p-6 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out">
+      <ReactCanvasConfetti
+        style={{
+          position: "fixed",
+          pointerEvents: "none",
+          width: "100vw",
+          height: "100vh",
+          top: 0,
+          left: 0,
+          zIndex: 9999,
+        }}
+        className="confetti-canvas"
+        onInit={getInstance}
+      />
       {/* Text on the top of the card */}
       <div className="transition-opacity duration-300 ease-in-out">
         <CardText
@@ -351,13 +419,13 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           eligibility={citizenEligibility}
         />
       </div>
-      
+
       {myVoteType && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <MyVote voteType={myVoteType} />
         </div>
       )}
-      
+
       {/* Actions */}
       {proposalData.status === "ACTIVE" && votingActions && !myVote && (
         <div className="flex flex-col items-center gap-y-2 transition-all duration-300 ease-in-out">
@@ -393,7 +461,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           )}
         </div>
       )}
-      
+
       <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
           <p className="text-sm text-center underline hover:text-foreground/80 transition-colors duration-200">
