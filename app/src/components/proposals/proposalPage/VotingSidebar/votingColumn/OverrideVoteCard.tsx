@@ -5,7 +5,7 @@ import { useState } from "react"
 import { VoteType } from "@/components/proposals/proposal.types"
 
 const OverrideVoteCard = () => {
-  const vetoText = "Yes, I want to Veto"
+  const vetoText = "Yes, I want to veto"
 
   const [selectedVeto, setSelectedVeto] = useState<boolean>(false)
   const handleVoteClick = () => {

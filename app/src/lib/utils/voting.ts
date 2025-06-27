@@ -255,7 +255,7 @@ export const getVotingActions = (
       cardActionList: [
         {
           buttonStyle: "button-primary",
-          actionText: "Cast Vote",
+          actionText: "Cast vote",
           actionType: "Vote",
         },
       ],

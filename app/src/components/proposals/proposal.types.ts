@@ -88,3 +88,16 @@ export interface CardTextProps {
   title: string
   descriptionElement?: string | React.ReactElement
 }
+
+export interface VoteButtonProps {
+  textValue: string
+  size?: "default" | "sm" | "lg" | "veto"
+  variant?: "outline" | "filled"
+  hover?: "yes" | "no"
+  disabled?: "yes" | "no"
+  iconLeft?: boolean
+  iconRight?: boolean
+  selected?: boolean
+  voteType?: VoteType
+  onClick?: () => void
+}

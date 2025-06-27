@@ -9,7 +9,7 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import {
@@ -90,7 +90,7 @@ const VotingChoices = ({
           />
         </div>
       )
-    case "APPROVAL":
+    case "OFFCHAIN_APPROVAL":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards candidates={[]} />
@@ -114,18 +114,21 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
-  
+
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
   }
 
-  const { vote: myVote, invalidate: invalidateMyVote, isLoading: isVoteLoading } = useMyVote(
-    proposalData.id,
-  )
+  const {
+    vote: myVote,
+    invalidate: invalidateMyVote,
+    isLoading: isVoteLoading,
+  } = useMyVote(proposalData.id)
 
   const { data: session } = useSession()
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
-  const { data: citizenEligibility, isLoading: isEligibilityLoading } = useCitizenQualification()
+  const { data: citizenEligibility, isLoading: isEligibilityLoading } =
+    useCitizenQualification()
 
   useEffect(() => {
     if (!isVoteLoading && !isCitizenLoading && !isEligibilityLoading) {
@@ -157,7 +160,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
 
-  if (isInitialLoad || isVoteLoading || isCitizenLoading || isEligibilityLoading) {
+  if (
+    isInitialLoad ||
+    isVoteLoading ||
+    isCitizenLoading ||
+    isEligibilityLoading
+  ) {
     return <VotingColumnSkeleton />
   }
 
@@ -328,7 +336,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     // 1. Create and sign an attestation for the vote
     toast.promise(castAndRecordVote(), {
-      loading: "Casting Vote...",
+      loading: "Casting vote...",
       success: () => {
         // Update voted status to true
         invalidateMyVote()
@@ -351,13 +359,13 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           eligibility={citizenEligibility}
         />
       </div>
-      
+
       {myVoteType && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <MyVote voteType={myVoteType} />
         </div>
       )}
-      
+
       {/* Actions */}
       {proposalData.status === "ACTIVE" && votingActions && !myVote && (
         <div className="flex flex-col items-center gap-y-2 transition-all duration-300 ease-in-out">
@@ -393,10 +401,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           )}
         </div>
       )}
-      
+
       <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
-          <p className="text-sm text-center underline hover:text-foreground/80 transition-colors duration-200">
+          <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
             View results
           </p>
         </a>
