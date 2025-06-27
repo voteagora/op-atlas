@@ -57,7 +57,7 @@ const ProposalHeader = ({
           endDate={endDate}
         />
       </div>
-      <div className="pt-4 md:pt-5 pb-1">
+      <div className="flex">
         <div className="divider border-t w-full" />
       </div>
     </div>
