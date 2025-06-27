@@ -9,9 +9,9 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
-import { useState, useEffect, useRef } from "react"
-import { toast } from "sonner"
+import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
+import { toast } from "sonner"
 
 import {
   OffchainVote,
@@ -116,16 +116,18 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 })
-  const brightColors = [
-    "#FF0000",
-    "#FFD700",
-    "#00FF00",
-    "#00BFFF",
-    "#FF00FF",
-    "#FF8C00",
-    "#39FF14",
-  ]
+  const brightColors = useMemo(
+    () => [
+      "#FF0000",
+      "#FFD700",
+      "#00FF00",
+      "#00BFFF",
+      "#FF00FF",
+      "#FF8C00",
+      "#39FF14",
+    ],
+    [],
+  )
 
   const confettiRef = useRef<any>(null)
   const getInstance = (instance: any) => {
@@ -156,17 +158,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }, [isVoteLoading, isCitizenLoading, isEligibilityLoading])
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const handleResize = () => {
-        setWindowSize({ width: window.innerWidth, height: window.innerHeight })
-      }
-      handleResize()
-      window.addEventListener("resize", handleResize)
-      return () => window.removeEventListener("resize", handleResize)
-    }
-  }, [])
-
   const myVoteType = myVote?.vote
     ? mapValueToVoteType(proposalData.proposalType, myVote.vote)
     : undefined
@@ -189,6 +180,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { track } = useAnalytics()
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null
     if (
       showConfetti &&
       confettiRef.current &&
@@ -201,16 +193,19 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           particleCount: 150,
           angle: 90,
           spread: 200,
-          startVelocity: 90,
+          startVelocity: 100,
           gravity: 0.35,
           ticks: 500,
           origin: { x, y: 0 },
           colors: brightColors,
         })
       }
-      setTimeout(() => setShowConfetti(false), 8000)
+      timeoutId = setTimeout(() => setShowConfetti(false), 8000)
     }
-  }, [showConfetti])
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [showConfetti, brightColors])
 
   if (
     isInitialLoad ||
