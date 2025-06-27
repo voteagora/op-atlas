@@ -303,6 +303,8 @@ export const mapVoteTypeToValue = (
       default:
         return []
     }
+  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return "0"
   } else {
     return [voteType]
   }
@@ -325,5 +327,7 @@ export const mapValueToVoteType = (
       default:
         return VoteType.Abstain
     }
+  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return VoteType.Veto
   }
 }
