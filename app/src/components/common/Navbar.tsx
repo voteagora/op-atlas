@@ -157,25 +157,27 @@ export const Navbar = () => {
                     </Link>
                   </div>
                 </div>
-                {/* <div
-                  className={cn(
-                    "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
-                    isGovernance
-                      ? "border-b-4 border-[#0F111A] text-text-default"
-                      : "",
-                  )}
-                >
-                  <div className="flex items-center">
-                    <Link
-                      className={`${
-                        isGovernance ? "mt-1" : "group-hover:mt-1"
-                      } focus:outline-none focus:opacity-80`}
-                      href="/governance"
-                    >
-                      Governance
-                    </Link>
+                {
+                  <div
+                    className={cn(
+                      "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
+                      isGovernance
+                        ? "border-b-4 border-[#0F111A] text-text-default"
+                        : "",
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <Link
+                        className={`${
+                          isGovernance ? "mt-1" : "group-hover:mt-1"
+                        } focus:outline-none focus:opacity-80`}
+                        href="/governance"
+                      >
+                        Governance
+                      </Link>
+                    </div>
                   </div>
-                </div> */}
+                }
                 <DropdownMenu>
                   <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
                     <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
