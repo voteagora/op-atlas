@@ -1,38 +1,28 @@
 "use client"
 
-interface CandidateCardProps {
-  img: {
-    src: string
-    alt?: string
-  }
-  username: string
-  organizations: string[]
-  carrotLink: string
-  selected?: boolean
-  onClick?: () => void
-}
+import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
+import { User } from "@prisma/client"
+import { CitizenshipQualification } from "@/lib/types"
+import { VoteType } from "@/components/proposals/proposal.types"
 
 const CandidateCard = ({
-  img,
-  username,
-  organizations,
-  carrotLink,
-  selected = false,
-  onClick,
-}: CandidateCardProps) => {
-  const handleClick = () => {
-    if (onClick) {
-      onClick()
-    }
-  }
-
+  user,
+  qualification,
+  selectedVote,
+  setSelectedVote,
+}: {
+  user: User
+  qualification: CitizenshipQualification
+  selectedVote?: boolean
+  setSelectedVote: () => void
+}) => {
   return (
     <div className="w-[272px] h-[40px] pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] gap-[8px] rounded-[6px] flex items-center">
-      <CardImg src={img.src} alt={img.alt || username} />
-      <CardUsername username={username} />
-      <CardOrganizations organizations={organizations} />
-      <CardApprovalButton selected={selected} onClick={handleClick} />
-      <CardCarrot link={carrotLink} />
+      <EligibleCitizenAvatar user={user} qualification={qualification} />
+      <CardUsername username={user.username!} />
+      {/*<CardOrganizations organizations={organizations} />*/}
+      <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
+      {/*<CardCarrot link={carrotLink} />*/}
     </div>
   )
 }

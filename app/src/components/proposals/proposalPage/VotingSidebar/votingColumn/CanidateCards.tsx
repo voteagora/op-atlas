@@ -1,7 +1,7 @@
 "use client"
 
 import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
-import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
+import { CandidateCardProps } from "@/components/proposals/proposal.types"
 import { useState } from "react"
 
 const CandidateCards = ({
@@ -12,6 +12,8 @@ const CandidateCards = ({
   const [selectedApprovals, setSelectedApprovals] = useState<number[] | null>(
     null,
   )
+
+  console.log({ candidates })
   const handleApprovalClick = (idx: number) => {
     if (selectedApprovals === null) {
       setSelectedApprovals([idx])
@@ -36,12 +38,10 @@ const CandidateCards = ({
         {candidates.map((candidate, idx) => (
           <CandidateCard
             key={idx}
-            img={candidate.image}
-            username={candidate.name}
-            organizations={candidate.organizations}
-            carrotLink={candidate.buttonLink}
-            selected={selectedApprovals?.includes(idx)}
-            onClick={() => handleApprovalClick(idx)}
+            user={candidate.user!}
+            qualification={candidate.qualification!}
+            selectedVote={selectedApprovals?.includes(idx) || false}
+            setSelectedVote={() => handleApprovalClick(idx)}
           />
         ))}
       </div>
