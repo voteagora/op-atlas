@@ -184,14 +184,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
 
-  // Reset Safe detection when citizen address changes
   useEffect(() => {
     setHasCheckedSafe(false)
     setIsSafe(false)
     setIsCheckingSafe(false)
   }, [citizen?.address])
 
-  // Check if wallet is Safe when signer is available
   useEffect(() => {
     const checkSafeWallet = async () => {
       if (!signer || !citizen?.address) return
@@ -203,9 +201,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           citizen.address,
         )
         setIsSafe(safeDetected)
-        if (safeDetected) {
-          console.log("✅ Safe wallet detected for address:", citizen.address)
-        }
       } catch (error) {
         console.warn("Error checking for Safe wallet:", error)
         setIsSafe(false)
@@ -215,7 +210,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       }
     }
 
-    // Only run once when signer and citizen address are available and haven't checked yet
     if (signer && citizen?.address && !hasCheckedSafe && !isCheckingSafe) {
       checkSafeWallet()
     }
@@ -373,8 +367,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         let signerAddress: string
 
         if (isSafe) {
-          // For Safe wallets: use direct attestation (no delegation)
-          console.log("Using direct attestation for Safe wallet")
           const attestationData = await createDirectAttestation(choices)
           signerAddress = attestationData.signerAddress
 
@@ -384,8 +376,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             citizen.attestationId,
           )
         } else {
-          // For regular wallets: use delegated attestation
-          console.log("Using delegated attestation for regular wallet")
           const attestationData = await createDelegatedAttestation(choices)
           signerAddress = attestationData.signerAddress
 
