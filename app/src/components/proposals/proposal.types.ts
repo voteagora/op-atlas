@@ -2,7 +2,6 @@ import { Citizen, citizenCategory, User } from "@prisma/client"
 import React from "react"
 
 import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
-import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 import { CitizenshipQualification } from "@/lib/types"
 
 export interface ProposalPageDataInterface {
@@ -91,4 +90,9 @@ export interface VoteButtonProps {
   selected?: boolean
   voteType?: VoteType
   onClick?: () => void
+}
+
+export interface CandidateCardProps {
+  user?: User
+  qualification?: CitizenshipQualification
 }
