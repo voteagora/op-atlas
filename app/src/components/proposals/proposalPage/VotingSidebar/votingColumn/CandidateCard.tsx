@@ -1,9 +1,9 @@
 "use client"
 
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
-import { User } from "@prisma/client"
+import { Organization, User } from "@prisma/client"
 import { CitizenshipQualification } from "@/lib/types"
-import { VoteType } from "@/components/proposals/proposal.types"
+import { useOrganization } from "@/hooks/db/useOrganization"
 
 const CandidateCard = ({
   user,
@@ -16,27 +16,16 @@ const CandidateCard = ({
   selectedVote?: boolean
   setSelectedVote: () => void
 }) => {
+  const { organization, isLoading } = useOrganization({
+    id: user.id,
+  })
   return (
     <div className="w-[272px] h-[40px] pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] gap-[8px] rounded-[6px] flex items-center">
       <EligibleCitizenAvatar user={user} qualification={qualification} />
       <CardUsername username={user.username!} />
-      {/*<CardOrganizations organizations={organizations} />*/}
+      <CardOrganizations organization={organization} />
       <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
       {/*<CardCarrot link={carrotLink} />*/}
-    </div>
-  )
-}
-
-const CardImg = ({
-  src,
-  alt = "Profile Picture",
-}: {
-  src: string
-  alt?: string
-}) => {
-  return (
-    <div className="w-[20px] h-[20px] rounded-[19px] overflow-hidden">
-      <img className="w-full h-full object-cover" src={src} alt={alt} />
     </div>
   )
 }
@@ -49,10 +38,14 @@ const CardUsername = ({ username }: { username: string }) => {
   )
 }
 
-const CardOrganizations = ({ organizations }: { organizations: string[] }) => {
+const CardOrganizations = ({
+  organization,
+}: {
+  organization?: Organization | null
+}) => {
   return (
     <div className="w-[132px] h-[20px] font-inter font-normal text-[14px] leading-[20px] tracking-[0%] text-[var(--muted-foreground,#636779)] overflow-hidden whitespace-nowrap text-ellipsis">
-      {organizations.join(", ")}
+      {organization?.name}
     </div>
   )
 }
