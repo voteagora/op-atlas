@@ -20,12 +20,18 @@ const CandidateCard = ({
     id: user.id,
   })
   return (
-    <div className="w-[272px] h-[40px] pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] gap-[8px] rounded-[6px] flex items-center">
-      <EligibleCitizenAvatar user={user} qualification={qualification} />
-      <CardUsername username={user.username!} />
-      <CardOrganizations organization={organization} />
-      <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
-      {/*<CardCarrot link={carrotLink} />*/}
+    <div className="w-[272px] h-10 pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] rounded-[6px]">
+      <div className="flex items-center h-5 gap-[8px]">
+        <EligibleCitizenAvatar
+          user={user}
+          qualification={qualification}
+          size={"sm"}
+        />
+        <CardUsername username={user.username!} />
+        <CardOrganizations organization={organization} />
+        <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
+        {/*<CardCarrot link={carrotLink} />*/}
+      </div>
     </div>
   )
 }
