@@ -9,7 +9,6 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
-import Image from "next/image"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
@@ -193,7 +192,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   useEffect(() => {
     const checkWalletType = async () => {
       if (!signer || !citizen?.address) return
-      
+
       setIsCheckingWallet(true)
       try {
         const isSmartContractDetected = await isSmartContractWallet(
