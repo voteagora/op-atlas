@@ -4,7 +4,7 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { citizenCategory } from "@prisma/client"
+import { Citizen, citizenCategory, User } from "@prisma/client"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
@@ -45,6 +45,8 @@ import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
 import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
+import { CitizenshipQualification } from "@/lib/types"
+import { useUser } from "@/hooks/db/useUser"
 
 export interface CandidateCardProps {
   name: string
@@ -73,10 +75,16 @@ const VotingChoices = ({
   proposalType,
   selectedVote,
   setSelectedVote,
+  proposalData,
+  user,
+  qualification,
 }: {
   proposalType: string
   selectedVote?: VoteType
   setSelectedVote: (vote: VoteType) => void
+  proposalData: ProposalData
+  user?: User
+  qualification?: CitizenshipQualification
 }) => {
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
@@ -91,7 +99,12 @@ const VotingChoices = ({
     case "OFFCHAIN_APPROVAL":
       return (
         <div className="transition-all duration-300 ease-in-out">
-          <CandidateCards candidates={[]} />
+          <CandidateCards
+            candidates={Array(8).fill({
+              user: user,
+              qualification: qualification,
+            })}
+          />
         </div>
       )
     case "OFFCHAIN_OPTIMISTIC":
@@ -152,6 +165,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
   const { data: citizenEligibility, isLoading: isEligibilityLoading } =
     useCitizenQualification()
+
+  // TODO TEMP
+  console.log({ proposalData })
+  const { user } = useUser({ id: session?.user?.id })
+
+  //
 
   useEffect(() => {
     if (!isVoteLoading && !isCitizenLoading && !isEligibilityLoading) {
@@ -531,6 +550,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               proposalType={proposalData.proposalType}
               selectedVote={selectedVote}
               setSelectedVote={handleVoteClick}
+              proposalData={proposalData}
+              user={user}
+              qualification={citizenEligibility}
             />
           )}
           <div className="w-full transition-all duration-200 ease-in-out">
