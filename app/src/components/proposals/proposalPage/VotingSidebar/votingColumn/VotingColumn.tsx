@@ -28,7 +28,7 @@ import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
-import { vote } from "@/lib/actions/votes"
+import { vote, voteDirectly } from "@/lib/actions/votes"
 import {
   CHAIN_ID,
   EAS_CONTRACT_ADDRESS,
@@ -43,6 +43,7 @@ import {
   mapValueToVoteType,
   mapVoteTypeToValue,
 } from "@/lib/utils/voting"
+import { isSafeWallet } from "@/lib/utils/walletDetection"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
@@ -116,6 +117,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [isSafe, setIsSafe] = useState<boolean>(false)
+  const [isCheckingSafe, setIsCheckingSafe] = useState<boolean>(false)
   const brightColors = useMemo(
     () => [
       "#FF0000",
@@ -178,6 +181,30 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
+
+  // Check if wallet is Safe when signer is available
+  useEffect(() => {
+    const checkSafeWallet = async () => {
+      if (signer && citizen?.address && !isCheckingSafe) {
+        setIsCheckingSafe(true)
+        try {
+          const safeDetected = await isSafeWallet(
+            signer.provider,
+            citizen.address,
+          )
+          setIsSafe(safeDetected)
+          console.log("Safe wallet detected:", safeDetected)
+        } catch (error) {
+          console.warn("Error checking for Safe wallet:", error)
+          setIsSafe(false)
+        } finally {
+          setIsCheckingSafe(false)
+        }
+      }
+    }
+
+    checkSafeWallet()
+  }, [signer, citizen?.address, isCheckingSafe])
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
@@ -267,6 +294,29 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
+  const createDirectAttestation = async (choices: string[]) => {
+    if (!signer) throw new Error("Signer not ready")
+    if (!citizen?.address) {
+      throw new Error("User citizen address not available")
+    }
+
+    const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
+
+    const args = {
+      proposalId: proposalData.id,
+      choices: JSON.stringify(choices),
+    }
+    const encodedData = encoder.encodeData([
+      { name: "proposalId", value: args.proposalId, type: "uint256" },
+      { name: "params", value: args.choices, type: "string" },
+    ])
+
+    return {
+      data: encodedData,
+      signerAddress: signer.address as `0x${string}`,
+    }
+  }
+
   const validateAddress = () => {
     const newActiveWallet = wallets.find(
       (wallet) => wallet.address === citizen?.address,
@@ -304,17 +354,33 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           throw new Error("Signer address does not match citizen address")
         }
 
-        // Sign the attestation with the correct user wallet
-        const { data, rawSignature, signerAddress } =
-          await createDelegatedAttestation(choices)
+        let attestationId: string
+        let signerAddress: string
 
-        // 2. Send signature to server to relay onchain
-        const attestationId = await vote(
-          data,
-          rawSignature.signature,
-          signerAddress,
-          citizen.attestationId,
-        )
+        if (isSafe) {
+          // For Safe wallets: use direct attestation (no delegation)
+          console.log("Using direct attestation for Safe wallet")
+          const attestationData = await createDirectAttestation(choices)
+          signerAddress = attestationData.signerAddress
+
+          attestationId = await voteDirectly(
+            attestationData.data,
+            signerAddress,
+            citizen.attestationId,
+          )
+        } else {
+          // For regular wallets: use delegated attestation
+          console.log("Using delegated attestation for regular wallet")
+          const attestationData = await createDelegatedAttestation(choices)
+          signerAddress = attestationData.signerAddress
+
+          attestationId = await vote(
+            attestationData.data,
+            attestationData.rawSignature.signature,
+            signerAddress,
+            citizen.attestationId,
+          )
+        }
 
         // build an offchain vote object for the DB
         const offchainVote: OffchainVote = {
@@ -457,6 +523,22 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               You citizen wallet is not connected. Try signing out and signing
               in with your Citizen wallet:{" "}
               {citizen.address && truncateAddress(citizen.address)}
+            </div>
+          )}
+
+          {isSafe &&
+            !addressMismatch &&
+            citizen &&
+            !myVote &&
+            !!session?.user?.id && (
+              <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
+                🔒 Safe wallet detected - Direct voting enabled
+              </div>
+            )}
+
+          {isCheckingSafe && (
+            <div className="text-gray-500 text-xs text-center transition-all duration-300 ease-in-out">
+              Checking wallet type...
             </div>
           )}
         </div>

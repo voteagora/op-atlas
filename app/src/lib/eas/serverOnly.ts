@@ -564,6 +564,47 @@ export async function createDelegatedVoteAttestation(
   }
 }
 
+/**
+ * Creates a direct vote attestation (for Safe wallets that cannot use delegation)
+ * @param data - Encoded vote data
+ * @param signerAddress - Address of the voter
+ * @param citizenRefUID - Citizen attestation UID to reference
+ * @returns Promise<string> - Attestation ID
+ */
+export async function createDirectVoteAttestation(
+  data: string,
+  signerAddress: string,
+  citizenRefUID: string,
+): Promise<string> {
+  console.log("createDirectVoteAttestation: ", {
+    data,
+    signerAddress,
+    citizenRefUID,
+  })
+
+  try {
+    // Create attestation directly from server (no delegation needed)
+    const tx = await eas.attest({
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
+      data: {
+        recipient: signerAddress,
+        expirationTime: BigInt(0), // NO_EXPIRATION
+        revocable: false,
+        refUID: citizenRefUID as `0x${string}`,
+        data: data,
+      },
+    })
+
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait()
+    console.log("Direct vote attestation created with ID:", receipt)
+    return receipt
+  } catch (error) {
+    console.error("Error creating direct vote attestation:", error)
+    throw error
+  }
+}
+
 export const validateSignatureAddressIsValid = async (
   response: EIP712Response<any, any>,
   expectedSignerAddress: string,
