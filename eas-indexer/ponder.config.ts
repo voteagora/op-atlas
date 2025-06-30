@@ -6,6 +6,10 @@ import { EASProxiAbi } from "./abis/EASProxiAbi";
 import schemas from "./schemas.config";
 
 export default createConfig({
+  database: {
+    kind: "postgres",
+    connectionString: process.env.DATABASE_URL,
+  },
   chains: {
     optimism: {
       id: 10,
