@@ -44,7 +44,7 @@ import {
   mapValueToVoteType,
   mapVoteTypeToValue,
 } from "@/lib/utils/voting"
-import { isSafeWallet } from "@/lib/utils/walletDetection"
+import { isSmartContractWallet } from "@/lib/utils/walletDetection"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
@@ -118,9 +118,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [isSafe, setIsSafe] = useState<boolean>(false)
-  const [isCheckingSafe, setIsCheckingSafe] = useState<boolean>(false)
-  const [hasCheckedSafe, setHasCheckedSafe] = useState<boolean>(false)
+  const [isSmartContract, setIsSmartContract] = useState<boolean>(false)
+  const [isCheckingWallet, setIsCheckingWallet] = useState<boolean>(false)
+  const [hasCheckedWallet, setHasCheckedWallet] = useState<boolean>(false)
   const brightColors = useMemo(
     () => [
       "#FF0000",
@@ -185,35 +185,35 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { track } = useAnalytics()
 
   useEffect(() => {
-    setHasCheckedSafe(false)
-    setIsSafe(false)
-    setIsCheckingSafe(false)
+    setHasCheckedWallet(false)
+    setIsSmartContract(false)
+    setIsCheckingWallet(false)
   }, [citizen?.address])
 
   useEffect(() => {
-    const checkSafeWallet = async () => {
+    const checkWalletType = async () => {
       if (!signer || !citizen?.address) return
       
-      setIsCheckingSafe(true)
+      setIsCheckingWallet(true)
       try {
-        const safeDetected = await isSafeWallet(
+        const isSmartContractDetected = await isSmartContractWallet(
           signer.provider,
           citizen.address,
         )
-        setIsSafe(safeDetected)
+        setIsSmartContract(isSmartContractDetected)
       } catch (error) {
-        console.warn("Error checking for Safe wallet:", error)
-        setIsSafe(false)
+        console.warn("Error checking wallet type:", error)
+        setIsSmartContract(false)
       } finally {
-        setIsCheckingSafe(false)
-        setHasCheckedSafe(true)
+        setIsCheckingWallet(false)
+        setHasCheckedWallet(true)
       }
     }
 
-    if (signer && citizen?.address && !hasCheckedSafe && !isCheckingSafe) {
-      checkSafeWallet()
+    if (signer && citizen?.address && !hasCheckedWallet && !isCheckingWallet) {
+      checkWalletType()
     }
-  }, [signer, citizen?.address, hasCheckedSafe, isCheckingSafe])
+  }, [signer, citizen?.address, hasCheckedWallet, isCheckingWallet])
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
@@ -366,7 +366,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         let attestationId: string
         let signerAddress: string
 
-        if (isSafe) {
+        if (isSmartContract) {
           const attestationData = await createDirectAttestation(choices)
           signerAddress = attestationData.signerAddress
 
@@ -531,23 +531,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             </div>
           )}
 
-          {isSafe &&
+          {isSmartContract &&
             !addressMismatch &&
             citizen &&
             !myVote &&
             !!session?.user?.id && (
-              <div className="text-green-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
-                <Image
-                  src="/assets/images/safe-logo-green.svg"
-                  alt="Safe Wallet"
-                  width={32}
-                  height={32}
-                />
-                Safe wallet detected
+              <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
+                🔒 Smart contract wallet detected - Direct voting enabled
               </div>
             )}
 
-          {isCheckingSafe && (
+          {isCheckingWallet && (
             <div className="text-gray-500 text-xs text-center transition-all duration-300 ease-in-out">
               Checking wallet type...
             </div>
