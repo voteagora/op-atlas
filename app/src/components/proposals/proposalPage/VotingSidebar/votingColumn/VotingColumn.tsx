@@ -536,7 +536,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             citizen &&
             !myVote &&
             !!session?.user?.id && (
-              <div className="text-green-500 text-md text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
+              <div className="text-green-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
                 <Image
                   src="/assets/images/safe-logo-green.svg"
                   alt="Safe Wallet"
