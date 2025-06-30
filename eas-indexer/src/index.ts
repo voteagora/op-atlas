@@ -1,4 +1,4 @@
-import { ponder } from "@/generated";
+import { ponder } from "ponder:registry";
 import * as dbSchema from "../ponder.schema";
 import { decodeAbiParameters, hexToBytes } from "viem";
 import { schemaIds, schemaSignatures } from "./schemas";
