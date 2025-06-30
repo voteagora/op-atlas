@@ -30,12 +30,14 @@ const CardText = ({
       </h4>
       {votingCardProps.cardText.descriptionElement &&
       votingCardProps.cardText.descriptionElement === "OFFCHAIN_STANDARD" ? (
-        <p className="text-sm text-center">
+        <p className="text-sm text-center text-secondary-foreground">
           This proposal requires approval from the Citizen&#39;s House and Token
           House. Read more about the voting mechanism{" "}
           <a
             href="https://github.com/ethereum-optimism/OPerating-manual/blob/main/manual.md"
             className="text-sm text-center underline"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             here
           </a>

@@ -91,7 +91,7 @@ const VotingChoices = ({
           />
         </div>
       )
-    case "APPROVAL":
+    case "OFFCHAIN_APPROVAL":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards candidates={[]} />
@@ -100,7 +100,10 @@ const VotingChoices = ({
     case "OFFCHAIN_OPTIMISTIC":
       return (
         <div className="transition-all duration-300 ease-in-out">
-          <OverrideVoteCard />
+          <OverrideVoteCard
+            selectedVote={selectedVote}
+            setSelectedVote={setSelectedVote}
+          />
         </div>
       )
     default:
@@ -216,7 +219,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return <VotingColumnSkeleton />
   }
 
-  const createDelegatedAttestation = async (choices: string[]) => {
+  const createDelegatedAttestation = async (choices: string | string[]) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")
@@ -321,7 +324,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           attestationId: attestationId,
           voterAddress: signerAddress,
           proposalId: proposalData.id,
-          vote: choices,
+          vote: choices as object,
           citizenId: citizen.id,
           citizenType: citizen.type as citizenCategory,
           createdAt: new Date(),
@@ -383,9 +386,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     // 1. Create and sign an attestation for the vote
     toast.promise(castAndRecordVote(), {
-      loading: "Casting Vote...",
+      loading: "Casting vote...",
       success: () => {
         setShowConfetti(true)
+        // Update voted status to true
         invalidateMyVote()
         return "Vote Cast and Recorded!"
       },
@@ -420,7 +424,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         />
       </div>
 
-      {myVoteType && (
+      {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <MyVote voteType={myVoteType} />
         </div>
@@ -464,7 +468,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
       <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
-          <p className="text-sm text-center underline hover:text-foreground/80 transition-colors duration-200">
+          <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
             View results
           </p>
         </a>

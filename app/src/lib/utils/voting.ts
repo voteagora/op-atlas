@@ -32,6 +32,14 @@ const votingEnded = (endDate: Date, result: any) => {
 }
 
 const youVoted = (proposalData: ProposalData, vote: VoteType) => {
+  if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return {
+      cardText: {
+        title: "You vetoed the decision",
+        descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
+      },
+    }
+  }
   return {
     cardText: {
       title: "You voted",
@@ -255,7 +263,7 @@ export const getVotingActions = (
       cardActionList: [
         {
           buttonStyle: "button-primary",
-          actionText: "Cast Vote",
+          actionText: "Cast vote",
           actionType: "Vote",
         },
       ],
@@ -303,6 +311,8 @@ export const mapVoteTypeToValue = (
       default:
         return []
     }
+  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return "0"
   } else {
     return [voteType]
   }
@@ -325,5 +335,7 @@ export const mapValueToVoteType = (
       default:
         return VoteType.Abstain
     }
+  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return VoteType.Veto
   }
 }
