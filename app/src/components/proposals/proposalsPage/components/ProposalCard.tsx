@@ -14,36 +14,31 @@ type ProposalCardProps = {
   href?: string
 }
 
-const ProposalCard = ({ children, rounded = false, href }: ProposalCardProps) => {
+const ProposalCard = ({
+  children,
+  rounded = false,
+  href,
+}: ProposalCardProps) => {
   const handleClick = () => {
     if (href) {
       window.location.href = href
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      handleClick()
-    }
-  }
-
   return (
-    <div
-      className={`proposal-card-container border-border group cursor-pointer ${
+    <button
+      type="button"
+      className={`proposal-card-container border-border group cursor-pointer w-full text-left bg-transparent p-0 ${
         rounded
           ? "border border-border rounded-t-lg"
           : "border-l border-r border-b border-border"
       }`}
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
     >
       <div className="proposal-card-content flex flex-row md:gap-6 gap-4 w-full max-w-[66.5rem] flex-shrink justify-between items-center md:p-6 p-4">
         {children}
       </div>
-    </div>
+    </button>
   )
 }
 
