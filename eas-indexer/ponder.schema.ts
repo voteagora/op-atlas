@@ -43,3 +43,14 @@ export const rf_voter = onchainTable("rf_voter", (t) => ({
   revoked_at: t.bigint(),
   created_at: t.bigint().notNull(),
 }));
+
+export const votes = onchainTable("votes", (t) => ({
+  id: t.text().primaryKey(),
+  address: t.text().notNull(),
+  proposal_id: t.text().notNull(),
+  params: t.text().notNull(),
+  voterId: t.text().notNull(),
+  attester: t.text().notNull(),
+  revoked_at: t.bigint(),
+  created_at: t.bigint().notNull(),
+}));

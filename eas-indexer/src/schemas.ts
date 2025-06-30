@@ -10,6 +10,7 @@ export const schemaSignatures = {
   rf_voter: parseAbiParameters(
     "uint256 farcasterID,string round,string voterType,string votingGroup,string selectionMethod"
   ),
+  votes: parseAbiParameters("uint256 proposalId,string params"),
 };
 
 export const schemaIds: {

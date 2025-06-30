@@ -102,6 +102,22 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
         });
       }
       break;
+
+    case "votes": {
+      const [proposalId, params] = decodeAbiParameters(
+        schemaSignatures[schemaName],
+        hexToBytes(data.data)
+      );
+      await context.db.insert(dbSchema.votes).values({
+        id: uid,
+        address: recipient.toLowerCase(),
+        proposal_id: proposalId.toString(),
+        params,
+        voterId: data.refUID,
+        attester: attester.toLowerCase(),
+        created_at: createdAt,
+      });
+    }
   }
 });
 

@@ -28,6 +28,10 @@ const schemas: {
     id: "0x41513aa7b99bfea09d389c74aacedaeb13c28fb748569e9e2400109cbe284ee5" as `0x${string}`,
     name: "rf_voter",
   },
+  votes: {
+    id: "0xc113116804c90320b3d059ff8eed8b7171e3475f404f65828bbbe260dce15a99" as `0x${string}`,
+    name: "votes",
+  },
 };
 
 export default schemas;

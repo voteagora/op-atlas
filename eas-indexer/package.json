@@ -9,7 +9,8 @@
     "codegen": "ponder codegen",
     "serve": "ponder serve",
     "lint": "eslint .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "db:create-views": "ponder db create-views"
   },
   "dependencies": {
     "ponder": "^0.11.23",
