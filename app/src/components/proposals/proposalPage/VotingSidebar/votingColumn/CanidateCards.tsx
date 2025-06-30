@@ -31,8 +31,10 @@ const CandidateCards = ({
   }
   return (
     <>
-      <div className="border-t pt-3">
-        <p className="pl-2 pr-2 h-5">{candidates.length} Candidates</p>
+      <div className="border-t px-2 align-left w-full">
+        <p className="h-5 font-medium text-[14px] leading-5 text-foreground align-middle">
+          {candidates.length} Candidates
+        </p>
       </div>
       <div className="w-full sm:w-[272px]">
         {candidates.map((candidate, idx) => (

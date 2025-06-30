@@ -20,7 +20,7 @@ const CandidateCard = ({
     id: user.id,
   })
   return (
-    <div className="w-[272px] h-10 pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] rounded-[6px]">
+    <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
       <div className="flex items-center h-5 gap-[8px] justify-between">
         <EligibleCitizenAvatar
           user={user}
@@ -38,8 +38,8 @@ const CandidateCard = ({
 
 const CardUsername = ({ username }: { username: string }) => {
   return (
-    <div className="font-normal text-[14px] leading-[20px] tracking-[0%]">
-      username
+    <div className="font-normal min-w-5 text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis">
+      {username}
     </div>
   )
 }
@@ -50,9 +50,9 @@ const CardOrganizations = ({
   organization?: Organization | null
 }) => {
   return (
-    <div className="max-w-[132px] h-[20px] text-[14px] leading-[20px] tracking-[0%] text-muted-foreground overflow-hidden whitespace-nowrap text-ellipsis">
+    <div className="min-w-1 max-w-32 h-5 text-[14px] leading-5 tracking-[0%] text-muted-foreground overflow-hidden whitespace-nowrap text-ellipsis">
       {organization?.name}
-      Organization
+      Orgnization
     </div>
   )
 }
