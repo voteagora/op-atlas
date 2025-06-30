@@ -9,6 +9,7 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
+
 import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
@@ -118,6 +119,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
+
   const [showConfetti, setShowConfetti] = useState(false)
   const brightColors = useMemo(
     () => [
@@ -136,6 +138,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const getInstance = (instance: any) => {
     confettiRef.current = instance
   }
+
 
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
@@ -181,6 +184,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
+
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
