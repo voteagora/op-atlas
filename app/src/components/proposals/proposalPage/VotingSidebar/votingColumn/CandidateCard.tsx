@@ -21,7 +21,7 @@ const CandidateCard = ({
   })
   return (
     <div className="w-[272px] h-10 pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] rounded-[6px]">
-      <div className="flex items-center h-5 gap-[8px]">
+      <div className="flex items-center h-5 gap-[8px] justify-between">
         <EligibleCitizenAvatar
           user={user}
           qualification={qualification}
@@ -38,8 +38,8 @@ const CandidateCard = ({
 
 const CardUsername = ({ username }: { username: string }) => {
   return (
-    <div className="w-[68px] h-[20px] font-inter font-normal text-[14px] leading-[20px] tracking-[0%] overflow-hidden whitespace-nowrap text-ellipsis">
-      {username}
+    <div className="font-normal text-[14px] leading-[20px] tracking-[0%]">
+      username
     </div>
   )
 }
@@ -50,8 +50,9 @@ const CardOrganizations = ({
   organization?: Organization | null
 }) => {
   return (
-    <div className="w-[132px] h-[20px] font-inter font-normal text-[14px] leading-[20px] tracking-[0%] text-[var(--muted-foreground,#636779)] overflow-hidden whitespace-nowrap text-ellipsis">
+    <div className="max-w-[132px] h-[20px] text-[14px] leading-[20px] tracking-[0%] text-muted-foreground overflow-hidden whitespace-nowrap text-ellipsis">
       {organization?.name}
+      Organization
     </div>
   )
 }
@@ -63,16 +64,24 @@ const CardApprovalButton = ({
   selected?: boolean
   onClick?: () => void
 }) => {
-  const bgColor = selected ? "bg-success" : "bg-[#F2F3F8]"
+  if (selected) {
+    return (
+      <div className="w-[72px] h-6 px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-success cursor-pointer">
+        <button
+          className="font-normal text-xs leading-5 text-success-foreground"
+          onClick={onClick}
+        >
+          Approved
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div
-      className={`w-[65px] h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md ${bgColor} cursor-pointer`}
+      className={`w-[65px] h-[24px] px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-secondary cursor-pointer`}
     >
-      <button
-        className="font-medium text-xs leading-4 font-inter"
-        onClick={onClick}
-      >
+      <button className="font-normal text-xs leading-5" onClick={onClick}>
         Approve
       </button>
     </div>
