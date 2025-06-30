@@ -19,13 +19,12 @@ import { MissionApplicationTerms } from "./MissionApplicationTerms"
 
 export function MissionApplicationTabs({
   form,
+  isSubmitting,
   onSubmit,
 }: {
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
-  onSubmit: (
-    email: string | null | undefined,
-    projects: z.infer<typeof ApplicationFormSchema>["projects"],
-  ) => void
+  isSubmitting: boolean
+  onSubmit: () => void
 }) {
   const mission = useMissionFromPath()
   const session = useSession()
@@ -175,12 +174,8 @@ export function MissionApplicationTabs({
         </TabsContent>
         <TabsContent value="terms">
           <MissionApplicationTerms
-            onSubmit={() => {
-              onSubmit(
-                session?.data?.user.email,
-                form.getValues().projects.filter((project) => project.selected),
-              )
-            }}
+            isSubmitting={isSubmitting}
+            onSubmit={() => onSubmit()}
           />
         </TabsContent>
       </div>
