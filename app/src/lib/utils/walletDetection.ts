@@ -31,7 +31,7 @@ export async function isSafeWallet(
       return false
     }
 
-    // Method 3: Try to call Safe-specific methods
+    // Method 3: Try to call Safe-specific methods (only if it's a contract)
     try {
       // Safe wallets typically have these methods
       const safeContract = new ethers.Contract(
@@ -39,21 +39,19 @@ export async function isSafeWallet(
         [
           "function getOwners() view returns (address[])",
           "function getThreshold() view returns (uint256)",
-          "function VERSION() view returns (string)",
         ],
         provider,
       )
 
       // If we can call getOwners() successfully, it's likely a Safe
-      await safeContract.getOwners()
-      return true
+      const owners = await safeContract.getOwners()
+      return Array.isArray(owners) && owners.length > 0
     } catch {
-      // If Safe methods fail, check for other patterns
+      // If Safe methods fail, it's likely not a Safe but could be another contract
+      return false
     }
-
-    return isContract // If it's a contract but not Safe, still treat carefully
   } catch (error) {
-    console.warn("Error detecting Safe wallet:", error)
+    // Silently fail - not all addresses are contracts and that's normal
     return false
   }
 }

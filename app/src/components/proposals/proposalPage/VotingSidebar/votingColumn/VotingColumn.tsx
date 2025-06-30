@@ -9,6 +9,7 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
+import Image from "next/image"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
@@ -119,6 +120,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [showConfetti, setShowConfetti] = useState(false)
   const [isSafe, setIsSafe] = useState<boolean>(false)
   const [isCheckingSafe, setIsCheckingSafe] = useState<boolean>(false)
+  const [hasCheckedSafe, setHasCheckedSafe] = useState<boolean>(false)
   const brightColors = useMemo(
     () => [
       "#FF0000",
@@ -182,29 +184,42 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
 
+  // Reset Safe detection when citizen address changes
+  useEffect(() => {
+    setHasCheckedSafe(false)
+    setIsSafe(false)
+    setIsCheckingSafe(false)
+  }, [citizen?.address])
+
   // Check if wallet is Safe when signer is available
   useEffect(() => {
     const checkSafeWallet = async () => {
-      if (signer && citizen?.address && !isCheckingSafe) {
-        setIsCheckingSafe(true)
-        try {
-          const safeDetected = await isSafeWallet(
-            signer.provider,
-            citizen.address,
-          )
-          setIsSafe(safeDetected)
-          console.log("Safe wallet detected:", safeDetected)
-        } catch (error) {
-          console.warn("Error checking for Safe wallet:", error)
-          setIsSafe(false)
-        } finally {
-          setIsCheckingSafe(false)
+      if (!signer || !citizen?.address) return
+      
+      setIsCheckingSafe(true)
+      try {
+        const safeDetected = await isSafeWallet(
+          signer.provider,
+          citizen.address,
+        )
+        setIsSafe(safeDetected)
+        if (safeDetected) {
+          console.log("✅ Safe wallet detected for address:", citizen.address)
         }
+      } catch (error) {
+        console.warn("Error checking for Safe wallet:", error)
+        setIsSafe(false)
+      } finally {
+        setIsCheckingSafe(false)
+        setHasCheckedSafe(true)
       }
     }
 
-    checkSafeWallet()
-  }, [signer, citizen?.address, isCheckingSafe])
+    // Only run once when signer and citizen address are available and haven't checked yet
+    if (signer && citizen?.address && !hasCheckedSafe && !isCheckingSafe) {
+      checkSafeWallet()
+    }
+  }, [signer, citizen?.address, hasCheckedSafe, isCheckingSafe])
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
@@ -531,8 +546,14 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             citizen &&
             !myVote &&
             !!session?.user?.id && (
-              <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
-                🔒 Safe wallet detected - Direct voting enabled
+              <div className="text-green-500 text-md text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
+                <Image
+                  src="/assets/images/safe-logo-green.svg"
+                  alt="Safe Wallet"
+                  width={32}
+                  height={32}
+                />
+                Safe wallet detected
               </div>
             )}
 

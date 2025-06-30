@@ -20,6 +20,8 @@
     "rewards": "tsx src/scripts/rewards.ts",
     "kyc": "tsx src/scripts/kyc.ts",
     "revoke:citizenship": "tsx src/scripts/revoke-citizenship.ts",
+    "create:mock-citizens": "tsx src/scripts/create-mock-citizens.ts",
+    "create:mock-citizens-simple": "tsx src/scripts/create-mock-citizens-simple.ts",
     "prepare": "husky",
     "studio": "prisma studio",
     "graphql:generate": "pnpm graphql-codegen",
