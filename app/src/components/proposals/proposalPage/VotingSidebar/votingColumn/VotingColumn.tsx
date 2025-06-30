@@ -9,6 +9,7 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
+
 import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
@@ -91,7 +92,7 @@ const VotingChoices = ({
           />
         </div>
       )
-    case "APPROVAL":
+    case "OFFCHAIN_APPROVAL":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards candidates={[]} />
@@ -115,6 +116,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
+
   const [showConfetti, setShowConfetti] = useState(false)
   const brightColors = useMemo(
     () => [
@@ -133,6 +135,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const getInstance = (instance: any) => {
     confettiRef.current = instance
   }
+
 
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
@@ -178,6 +181,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
+
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
@@ -383,7 +387,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     // 1. Create and sign an attestation for the vote
     toast.promise(castAndRecordVote(), {
-      loading: "Casting Vote...",
+      loading: "Casting vote...",
       success: () => {
         setShowConfetti(true)
         invalidateMyVote()
@@ -464,7 +468,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
       <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
-          <p className="text-sm text-center underline hover:text-foreground/80 transition-colors duration-200">
+          <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
             View results
           </p>
         </a>

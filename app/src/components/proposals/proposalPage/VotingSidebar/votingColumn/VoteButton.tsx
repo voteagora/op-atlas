@@ -1,24 +1,16 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { VoteType } from "@/components/proposals/proposal.types"
 
-interface VoteButtonProps {
-  textValue: string
-  size?: "default" | "sm" | "lg" | "veto"
-  variant?: "outline" | "filled"
-  hover?: "yes" | "no"
-  disabled?: "yes" | "no"
-  iconLeft?: boolean
-  iconRight?: boolean
-  selected?: boolean
-  voteType?: VoteType
-  onClick?: () => void
-}
+import {
+  VoteButtonProps,
+  VoteType,
+} from "@/components/proposals/proposal.types"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 const VoteButton = ({
   textValue,
   size = "default",
   variant = "outline",
-  hover = "no",
   disabled = "no",
   iconLeft = false,
   iconRight = false,
@@ -28,68 +20,57 @@ const VoteButton = ({
 }: VoteButtonProps) => {
   const isDisabled = disabled === "yes"
 
-  // Determine styles based on variant
-  let variantStyles =
-    variant === "outline"
-      ? "border border-solid border-border bg-background"
-      : "bg-button-primary text-button-primary-foreground"
+  // Determine custom class names based on selection and vote type
+  let customClasses = ""
 
   // Apply selected styles based on vote type
   if (selected && voteType) {
     switch (voteType) {
       case VoteType.For:
-        variantStyles = "border border-solid border-border bg-success"
+        customClasses = "bg-success text-[#006117]"
         break
       case VoteType.Abstain:
-        variantStyles =
-          "border border-solid border-border bg-backgroundSecondary"
+        customClasses =
+          "border border-backgroundSecondary bg-backgroundSecondary text-[#0F111A]"
         break
       case VoteType.Against:
-        variantStyles =
-          "border border-solid border-border bg-red-200 text-red-600"
+        customClasses = "bg-[#FFD1D5] text-[#B80018]"
         break
       case VoteType.Veto:
-        variantStyles =
-          "border border-solid border-border bg-red-200 text-red-600"
+        customClasses = "bg-[#FFD1D5] text-[#B80018]"
         break
       default:
         break
     }
   }
 
-  // Determine styles based on size
-  const sizeStyles = {
+  // Map size values to Button component sizes
+  const buttonSize = size === "veto" ? "default" : size
+
+  // Size-specific classes
+  const sizeClasses = {
     sm: "w-[60px] h-[32px] py-[8px] px-[12px] text-sm",
     default: "w-[80px] h-[40px] py-[10px] px-[16px]",
     lg: "w-[100px] h-[48px] py-[12px] px-[20px] text-lg",
-    veto: "w-[15rem] h-[2.5rem] y-[10px] px-[16px]",
+    veto: "w-[256px] h-[2.5rem] py-[10px] px-[16px]",
   }
 
   return (
-    <button
-      className={`
-        ${sizeStyles[size]} 
-        gap-[5px] 
-        rounded-[6px] 
-        ${variantStyles}
-        flex items-center justify-center
-        ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-        ${
-          hover === "yes" && !isDisabled
-            ? variant === "outline"
-              ? "hover:bg-backgroundSecondaryHover"
-              : "hover:bg-button-primary-hover"
-            : ""
-        }
-        focus:outline-none focus:ring-0 focus:ring-offset-0
-      `}
+    <Button
+      variant={variant === "filled" ? "default" : "outline"}
+      size={buttonSize}
       disabled={isDisabled}
       onClick={onClick}
+      className={cn(
+        sizeClasses[size],
+        customClasses,
+        "gap-[5px] flex items-center justify-center focus:outline-none focus:ring-0 focus:ring-offset-0",
+      )}
     >
       {iconLeft && <ChevronLeft className="mr-1" size={16} />}
-      <p className="text-center">{textValue}</p>
+      <span className="text-center text-sm">{textValue}</span>
       {iconRight && <ChevronRight className="ml-1" size={16} />}
-    </button>
+    </Button>
   )
 }
 
