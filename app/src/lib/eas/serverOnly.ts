@@ -564,6 +564,8 @@ export async function createDelegatedVoteAttestation(
   }
 }
 
+
+
 export const validateSignatureAddressIsValid = async (
   response: EIP712Response<any, any>,
   expectedSignerAddress: string,
