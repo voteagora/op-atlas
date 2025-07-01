@@ -1,17 +1,17 @@
 "use client"
 
 import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
-import { CandidateCardProps } from "@/components/proposals/proposal.types"
 import { useState } from "react"
+import { useMultipleUserQualifications } from "@/hooks/citizen/useMultiCitizenUser"
 
-const CandidateCards = ({
-  candidates,
-}: {
-  candidates: CandidateCardProps[]
-}) => {
+const CandidateCards = ({ userIds }: { userIds: string[] }) => {
   const [selectedApprovals, setSelectedApprovals] = useState<number[] | null>(
     null,
   )
+
+  const { data: candidates } = useMultipleUserQualifications(userIds)
+
+  if (!candidates) return null
 
   console.log({ candidates })
   const handleApprovalClick = (idx: number) => {
