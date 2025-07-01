@@ -76,15 +76,11 @@ const VotingChoices = ({
   selectedVote,
   setSelectedVote,
   proposalData,
-  user,
-  qualification,
 }: {
   proposalType: string
   selectedVote?: VoteType
   setSelectedVote: (vote: VoteType) => void
   proposalData: ProposalData
-  user?: User
-  qualification?: CitizenshipQualification
 }) => {
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
@@ -97,14 +93,11 @@ const VotingChoices = ({
         </div>
       )
     case "OFFCHAIN_APPROVAL":
+      //TODO filled in by some data in the proposalData
+      const userIds: string[] = []
       return (
         <div className="transition-all duration-300 ease-in-out">
-          <CandidateCards
-            candidates={Array(8).fill({
-              user: user,
-              qualification: qualification,
-            })}
-          />
+          <CandidateCards userIds={userIds} />
         </div>
       )
     case "OFFCHAIN_OPTIMISTIC":
@@ -168,8 +161,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   // TODO TEMP
   console.log({ proposalData })
-  const { user } = useUser({ id: session?.user?.id })
-
   //
 
   useEffect(() => {
@@ -527,8 +518,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               selectedVote={selectedVote}
               setSelectedVote={handleVoteClick}
               proposalData={proposalData}
-              user={user}
-              qualification={citizenEligibility}
             />
           )}
           <div className="w-full transition-all duration-200 ease-in-out">
