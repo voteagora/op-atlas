@@ -2,8 +2,8 @@
 
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
 import { Organization, User } from "@prisma/client"
-import { CitizenshipQualification } from "@/lib/types"
-import { useOrganization } from "@/hooks/db/useOrganization"
+import { CitizenshipQualification, ProjectWithDetails } from "@/lib/types"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
 
 const CandidateCard = ({
   user,
@@ -16,9 +16,9 @@ const CandidateCard = ({
   selectedVote?: boolean
   setSelectedVote: () => void
 }) => {
-  const { organization, isLoading } = useOrganization({
-    id: user.id,
-  })
+  const { data: projects, isLoading } = useUserProjects(user.id)
+
+  console.log({ projects })
   return (
     <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
       <div className="flex items-center h-5 gap-[8px] justify-between">
@@ -28,7 +28,7 @@ const CandidateCard = ({
           size={"sm"}
         />
         <CardUsername username={user.username!} />
-        <CardOrganizations organization={organization} />
+        <CardOrganizations projects={projects} />
         <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
         {/*<CardCarrot link={carrotLink} />*/}
       </div>
@@ -45,14 +45,19 @@ const CardUsername = ({ username }: { username: string }) => {
 }
 
 const CardOrganizations = ({
-  organization,
+  projects,
 }: {
-  organization?: Organization | null
+  projects?: ProjectWithDetails[] | null
 }) => {
+  // This should give us a list of only organization string values
+  const organizationNames =
+    projects
+      ?.map((proj) => proj?.organization?.organization?.name)
+      .filter((name): name is string => Boolean(name)) ?? []
+
   return (
     <div className="min-w-1 max-w-32 h-5 text-[14px] leading-5 tracking-[0%] text-muted-foreground overflow-hidden whitespace-nowrap text-ellipsis">
-      {organization?.name}
-      Orgnization
+      {organizationNames.join(", ")}
     </div>
   )
 }

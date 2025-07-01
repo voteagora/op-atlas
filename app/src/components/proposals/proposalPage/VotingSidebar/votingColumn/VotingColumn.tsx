@@ -94,7 +94,18 @@ const VotingChoices = ({
       )
     case "OFFCHAIN_APPROVAL":
       //TODO filled in by some data in the proposalData
-      const userIds: string[] = []
+      const userIds: string[] = [
+        "94b7d08e-d3cd-4f5a-8380-02d3a33d1427",
+        // "79a06866-97e0-4d63-8eb1-99ba49c9bc61",
+        // "c2a394e4-8164-437f-8e4b-373493ce058f",
+        // "3dfa76e0-9080-453a-93d2-db9142a356e3",
+        // "b623893b-ecbc-48ae-95db-2b6d9c4dae35",
+        // "08596630-402e-4939-baac-5094edc59559",
+        // "cfd7724b-1fb6-4a31-a224-e43f7490d68a",
+        // "c4846c6c-ecf1-449a-9f6f-b66a461ea9c4",
+        // "c33ff926-2a3c-471d-83e2-372edc6e1610",
+        // "d706d6e0-7efe-4c37-b984-c1cd51f87c6d",
+      ]
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards userIds={userIds} />
@@ -158,10 +169,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
   const { data: citizenEligibility, isLoading: isEligibilityLoading } =
     useCitizenQualification()
-
-  // TODO TEMP
-  console.log({ proposalData })
-  //
 
   useEffect(() => {
     if (!isVoteLoading && !isCitizenLoading && !isEligibilityLoading) {
