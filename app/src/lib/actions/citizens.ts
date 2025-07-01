@@ -34,86 +34,99 @@ interface S8QualifyingProject {
   projectId: string
 }
 
-export const s8CitizenshipQualification =
-  async (): Promise<CitizenshipQualification | null> => {
+interface S8QualificationOptions {
+  userId?: string
+}
+
+export const s8CitizenshipQualification = async (
+  options: S8QualificationOptions = {},
+): Promise<CitizenshipQualification | null> => {
+  const { userId: suppliedUserId } = options
+
+  // If no userId is supplied, attempt to get the session UserId
+  // This should allow for the preservation of existing functionality.
+  const getSessionUserId = async () => {
     const session = await auth()
-    const userId = session?.user?.id
+    return session?.user?.id
+  }
 
-    if (!userId) {
-      return null
-    }
+  const userId = suppliedUserId || (await getSessionUserId())
 
-    const user = await getUserById(userId)
-    if (!user) {
-      return null
-    }
+  if (!userId) {
+    return null
+  }
 
-    const [userOrgs, userProjects] = await Promise.all([
-      getAdminOrganizations(userId),
-      getUserAdminProjectsWithDetail({ userId }),
-    ])
+  const user = await getUserById(userId)
+  if (!user) {
+    return null
+  }
 
-    // ------------------------------------------------------------
-    // Organization (Chain) qualification
-    const qualifyingChains = await prisma.$queryRaw<S8QualifyingChain[]>`
+  const [userOrgs, userProjects] = await Promise.all([
+    getAdminOrganizations(userId),
+    getUserAdminProjectsWithDetail({ userId }),
+  ])
+
+  // ------------------------------------------------------------
+  // Organization (Chain) qualification
+  const qualifyingChains = await prisma.$queryRaw<S8QualifyingChain[]>`
     SELECT * FROM "S8QualifyingChain"
     WHERE "organizationId" = ANY(${
       userOrgs?.organizations.map((org) => org.organization.id) || []
     })
   `
 
-    if (qualifyingChains.length > 0) {
-      const existingCitizen = await prisma.citizen.findFirst({
-        where: {
-          organizationId: qualifyingChains[0].organizationId,
-          attestationId: {
-            not: null,
-          },
+  if (qualifyingChains.length > 0) {
+    const existingCitizen = await prisma.citizen.findFirst({
+      where: {
+        organizationId: qualifyingChains[0].organizationId,
+        attestationId: {
+          not: null,
         },
-      })
+      },
+    })
 
-      // Get the organization
-      const organization = await getOrganization({
-        id: qualifyingChains[0].organizationId,
-      })
+    // Get the organization
+    const organization = await getOrganization({
+      id: qualifyingChains[0].organizationId,
+    })
 
-      // If the organization already has a citizen, return not eligible
-      if (existingCitizen && organization) {
-        return {
-          type: CITIZEN_TYPES.chain,
-          identifier: organization.id,
-          title: organization.name,
-          avatar: organization.avatarUrl,
-          eligible: false,
-          error: `${organization.name} is already registered`,
-        }
-      }
-
-      // Only one citizen per organization
-      if (!existingCitizen && organization) {
-        return {
-          type: CITIZEN_TYPES.chain,
-          identifier: organization.id,
-          title: organization.name,
-          avatar: organization.avatarUrl,
-          eligible: true,
-        }
+    // If the organization already has a citizen, return not eligible
+    if (existingCitizen && organization) {
+      return {
+        type: CITIZEN_TYPES.chain,
+        identifier: organization.id,
+        title: organization.name,
+        avatar: organization.avatarUrl,
+        eligible: false,
+        error: `${organization.name} is already registered`,
       }
     }
 
-    // ------------------------------------------------------------
-    // Project (App) qualification
-    const projectIds =
-      userProjects?.projects.map(({ project }) => project.id) || []
+    // Only one citizen per organization
+    if (!existingCitizen && organization) {
+      return {
+        type: CITIZEN_TYPES.chain,
+        identifier: organization.id,
+        title: organization.name,
+        avatar: organization.avatarUrl,
+        eligible: true,
+      }
+    }
+  }
 
-    const qualifyingProjects = await prisma.$queryRaw<S8QualifyingProject[]>`
+  // ------------------------------------------------------------
+  // Project (App) qualification
+  const projectIds =
+    userProjects?.projects.map(({ project }) => project.id) || []
+
+  const qualifyingProjects = await prisma.$queryRaw<S8QualifyingProject[]>`
     SELECT * FROM "S8QualifyingProject"
     WHERE "projectId" = ANY(${projectIds})
   `
 
-    if (qualifyingProjects.length > 0) {
-      // Check if any of the qualifying projects already has a citizen
-      const projectsWithCitizens = await prisma.$queryRaw<{ id: string }[]>`
+  if (qualifyingProjects.length > 0) {
+    // Check if any of the qualifying projects already has a citizen
+    const projectsWithCitizens = await prisma.$queryRaw<{ id: string }[]>`
       SELECT p.id
       FROM "Project" p
       INNER JOIN "Citizen" c ON c."projectId" = p.id 
@@ -121,78 +134,78 @@ export const s8CitizenshipQualification =
         (p: S8QualifyingProject) => p.projectId,
       )})
     `
-      // Get the first qualifying project
-      const project = await getProject({ id: qualifyingProjects[0].projectId })
+    // Get the first qualifying project
+    const project = await getProject({ id: qualifyingProjects[0].projectId })
 
-      // If any project has a citizen, return not eligible
-      if (projectsWithCitizens.length > 0 && project) {
-        return {
-          type: CITIZEN_TYPES.app,
-          identifier: project.id,
-          title: project.name,
-          avatar: project.thumbnailUrl,
-          eligible: false,
-          error: `${project.name} is already registered`,
-        }
-      }
-
-      if (project) {
-        return {
-          type: CITIZEN_TYPES.app,
-          identifier: project.id,
-          title: project.name,
-          avatar: project.thumbnailUrl,
-          eligible: true,
-        }
-      }
-    }
-
-    // ------------------------------------------------------------
-    // User qualification
-
-    // Check if user already has a citizen profile
-    const existingCitizen = await getCitizenByType({
-      type: CITIZEN_TYPES.user,
-      id: userId,
-    })
-
-    if (existingCitizen && existingCitizen.attestationId) {
+    // If any project has a citizen, return not eligible
+    if (projectsWithCitizens.length > 0 && project) {
       return {
-        type: CITIZEN_TYPES.user,
-        identifier: user.id,
-        title: "You",
-        avatar: user.imageUrl || "",
+        type: CITIZEN_TYPES.app,
+        identifier: project.id,
+        title: project.name,
+        avatar: project.thumbnailUrl,
         eligible: false,
-        error: "User already registered",
+        error: `${project.name} is already registered`,
       }
     }
 
-    const qualifyingAddress = await prisma.$queryRaw<S8QualifyingUser[]>`
-    SELECT * FROM "S8QualifyingUser"
-    WHERE address = ANY(${user.addresses.map(
-      (addr: { address: string }) => addr.address,
-    )})
-  `
-
-    if (qualifyingAddress.length > 0) {
+    if (project) {
       return {
-        type: CITIZEN_TYPES.user,
-        identifier: user.id,
-        title: "You",
-        avatar: user.imageUrl || "",
+        type: CITIZEN_TYPES.app,
+        identifier: project.id,
+        title: project.name,
+        avatar: project.thumbnailUrl,
         eligible: true,
       }
     }
+  }
 
+  // ------------------------------------------------------------
+  // User qualification
+
+  // Check if user already has a citizen profile
+  const existingCitizen = await getCitizenByType({
+    type: CITIZEN_TYPES.user,
+    id: userId,
+  })
+
+  if (existingCitizen && existingCitizen.attestationId) {
     return {
       type: CITIZEN_TYPES.user,
       identifier: user.id,
       title: "You",
       avatar: user.imageUrl || "",
       eligible: false,
-      error: "Sorry, you are not eligible to become a Citizen",
+      error: "User already registered",
     }
   }
+
+  const qualifyingAddress = await prisma.$queryRaw<S8QualifyingUser[]>`
+    SELECT * FROM "S8QualifyingUser"
+    WHERE address = ANY(${user.addresses.map(
+      (addr: { address: string }) => addr.address,
+    )})
+  `
+
+  if (qualifyingAddress.length > 0) {
+    return {
+      type: CITIZEN_TYPES.user,
+      identifier: user.id,
+      title: "You",
+      avatar: user.imageUrl || "",
+      eligible: true,
+    }
+  }
+
+  return {
+    type: CITIZEN_TYPES.user,
+    identifier: user.id,
+    title: "You",
+    avatar: user.imageUrl || "",
+    eligible: false,
+    error: "Sorry, you are not eligible to become a Citizen",
+  }
+}
 
 // S8 Citizenship Limit Check
 export const checkCitizenshipLimit = async (): Promise<boolean> => {
