@@ -3,7 +3,7 @@ import { http } from "viem";
 
 import { EASImplAbi } from "./abis/EASImplAbi";
 import { EASProxiAbi } from "./abis/EASProxiAbi";
-import schemas from "./schemas.config";
+import schemas, { chainConstants, chainId } from "./schemas.config";
 
 export default createConfig({
   database: {
@@ -13,15 +13,15 @@ export default createConfig({
   chains: {
     optimism: {
       id: 10,
-      rpc: http(process.env.PONDER_RPC_URL_10),
+      rpc: http(process.env.PONDER_RPC_URL),
     },
   },
   contracts: {
     EASAttested: {
       chain: "optimism",
       abi: mergeAbis([EASProxiAbi, EASImplAbi]),
-      address: "0x4200000000000000000000000000000000000021",
-      startBlock: 108269604,
+      address: chainConstants[chainId].EAS_ADDRESS,
+      startBlock: chainConstants[chainId].START_BLOCK,
       filter: {
         event: "Attested",
         args: {
@@ -32,8 +32,8 @@ export default createConfig({
     EASRevoked: {
       chain: "optimism",
       abi: mergeAbis([EASProxiAbi, EASImplAbi]),
-      address: "0x4200000000000000000000000000000000000021",
-      startBlock: 124380685,
+      address: chainConstants[chainId].EAS_ADDRESS,
+      startBlock: chainConstants[chainId].START_BLOCK,
       filter: {
         event: "Revoked",
         args: {
