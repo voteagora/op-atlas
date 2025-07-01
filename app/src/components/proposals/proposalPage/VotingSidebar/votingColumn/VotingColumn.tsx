@@ -9,7 +9,6 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
-
 import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
@@ -139,7 +138,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     confettiRef.current = instance
   }
 
-
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
   }
@@ -185,7 +183,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
 
-
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
     if (
@@ -223,7 +220,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return <VotingColumnSkeleton />
   }
 
-  const createDelegatedAttestation = async (choices: string | string[]) => {
+  const createDelegatedAttestation = async (choices: string[]) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")

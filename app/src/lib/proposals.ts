@@ -184,30 +184,7 @@ export const enrichProposalData = async (
     )
 
     // Check if we have a valid citizen with vote data
-    const hasVoted = (() => {
-      if (!offchainVote?.vote) return false
-
-      const vote = offchainVote.vote
-
-      // If it's already an array
-      if (Array.isArray(vote)) {
-        return vote.length > 0
-      }
-
-      // If it's a string (serialized), try to parse it
-      if (typeof vote === "string") {
-        try {
-          const parsed = JSON.parse(vote)
-          return Array.isArray(parsed) ? parsed.length > 0 : vote !== ""
-        } catch {
-          // If parsing fails, treat as regular string
-          return vote !== ""
-        }
-      }
-
-      // If it's an object, check if it has meaningful content
-      return Object.keys(vote).length > 0
-    })()
+    const hasVoted = !!offchainVote?.vote && Array.isArray(offchainVote.vote)
 
     const isVotedProposal = hasVoted && offchainVote.proposalId === proposal.id
 
