@@ -8,6 +8,7 @@ import { citizenCategory } from "@prisma/client"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
+import { Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
@@ -302,10 +303,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
-
-
-
-  const createSafeWalletAttestation = async (choices: string[]) => {
+  const createMultisigWalletAttestation = async (choices: string[]) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")
@@ -342,7 +340,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     })
 
     const receipt = await tx.wait()
-    
+
     return {
       attestationId: receipt,
       signerAddress: signer.address as `0x${string}`,
@@ -390,7 +388,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         let signerAddress: string
 
         if (isSmartContract) {
-          const attestationData = await createSafeWalletAttestation(choices)
+          const attestationData = await createMultisigWalletAttestation(choices)
           signerAddress = attestationData.signerAddress
           attestationId = attestationData.attestationId
         } else {
@@ -555,7 +553,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             !myVote &&
             !!session?.user?.id && (
               <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
-                🔒 Smart contract wallet detected - Direct voting enabled
+                <Lock className="text-blue-500 w-4 h-4" />
+                Smart contract wallet detected
               </div>
             )}
 

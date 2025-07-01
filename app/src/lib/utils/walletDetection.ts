@@ -38,4 +38,4 @@ export async function isSmartContractWallet(
  * Legacy function name for backward compatibility
  * @deprecated Use isSmartContractWallet instead
  */
-export const isSafeWallet = isSmartContractWallet 
+export const isMultisigWallet = isSmartContractWallet 
