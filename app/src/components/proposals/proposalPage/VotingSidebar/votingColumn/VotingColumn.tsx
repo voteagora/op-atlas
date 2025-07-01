@@ -28,7 +28,7 @@ import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
-import { vote, voteDirectly } from "@/lib/actions/votes"
+import { vote } from "@/lib/actions/votes"
 import {
   CHAIN_ID,
   EAS_CONTRACT_ADDRESS,
@@ -302,11 +302,26 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
-  const createDirectAttestation = async (choices: string[]) => {
+
+
+  /**
+   * Creates an attestation directly using the connected Safe wallet (no server involvement)
+   */
+  const createSafeWalletAttestation = async (choices: string[]) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")
     }
+
+    // Ensure we're on the correct chain
+    const connectedChainId = getChainId(privyWagmiConfig)
+    if (connectedChainId !== CHAIN_ID) {
+      await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
+    }
+
+    // Create EAS instance with the user's signer (Safe wallet)
+    const eas = new EAS(EAS_CONTRACT_ADDRESS)
+    eas.connect(signer)
 
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
 
@@ -319,8 +334,24 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       { name: "params", value: args.choices, type: "string" },
     ])
 
+    // Safe wallet creates the attestation directly
+    const tx = await eas.attest({
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
+      data: {
+        recipient: signer.address as `0x${string}`,
+        expirationTime: BigInt(0), // NO_EXPIRATION
+        revocable: false,
+        refUID: citizen.attestationId as `0x${string}`,
+        data: encodedData,
+      },
+    })
+
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait()
+    console.log("Safe wallet attestation created with ID:", receipt)
+    
     return {
-      data: encodedData,
+      attestationId: receipt,
       signerAddress: signer.address as `0x${string}`,
     }
   }
@@ -366,14 +397,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         let signerAddress: string
 
         if (isSmartContract) {
-          const attestationData = await createDirectAttestation(choices)
+          // Safe wallet creates attestation directly (no server involvement)
+          const attestationData = await createSafeWalletAttestation(choices)
           signerAddress = attestationData.signerAddress
-
-          attestationId = await voteDirectly(
-            attestationData.data,
-            signerAddress,
-            citizen.attestationId,
-          )
+          attestationId = attestationData.attestationId
         } else {
           const attestationData = await createDelegatedAttestation(choices)
           signerAddress = attestationData.signerAddress
