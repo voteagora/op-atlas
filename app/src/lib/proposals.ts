@@ -184,10 +184,7 @@ export const enrichProposalData = async (
     )
 
     // Check if we have a valid citizen with vote data
-    const hasVoted =
-      offchainVote?.vote &&
-      Array.isArray(offchainVote.vote) &&
-      offchainVote.vote.length > 0
+    const hasVoted = !!offchainVote?.vote && Array.isArray(offchainVote.vote)
 
     const isVotedProposal = hasVoted && offchainVote.proposalId === proposal.id
 

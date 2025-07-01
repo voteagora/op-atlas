@@ -1,12 +1,12 @@
+import { JsonValue } from "@prisma/client/runtime/library"
+
 import {
   ProposalType,
   VoteType,
   VotingCardProps,
 } from "@/components/proposals/proposal.types"
 import { ProposalData } from "@/lib/proposals"
-
 import { CitizenshipQualification } from "@/lib/types"
-import { JsonValue } from "@prisma/client/runtime/library"
 
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL
 
@@ -32,6 +32,14 @@ const votingEnded = (endDate: Date, result: any) => {
 }
 
 const youVoted = (proposalData: ProposalData, vote: VoteType) => {
+  if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return {
+      cardText: {
+        title: "You vetoed the decision",
+        descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
+      },
+    }
+  }
   return {
     cardText: {
       title: "You voted",
@@ -160,6 +168,9 @@ const getVoteOptions = () => {
 /**
  * Get the voting card props based on the card type
  * @param proposalData The card type containing information about the voting state
+ * @param isCitizen Whether the user is a citizen
+ * @param vote VoteType if the user voted
+ * @param eligibility citizenship qualification details
  * @returns The voting card props
  */
 export const getVotingCardProps = (
@@ -202,7 +213,6 @@ export const getVotingCardProps = (
  * @param isSignedIn
  * @param isRegisteredCitizen
  * @param isEligibleCitizen
- * @param vote
  * @returns Object containing the voting actions
  */
 export const getVotingActions = (
@@ -270,6 +280,9 @@ export const getAgoraProposalLink = (proposalId: string) => {
 /**
  * Get all voting props based on the card type
  * @param proposalData The card type containing information about the voting state
+ * @param isCitizen Whether the user is a citizen
+ * @param vote VoteType if the user voted
+ * @param eligibility citizenship qualification details
  * @returns An object containing both voting card props and voting column props
  */
 export const getVotingProps = (
@@ -303,6 +316,8 @@ export const mapVoteTypeToValue = (
       default:
         return []
     }
+  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return ["0"]
   } else {
     return [voteType]
   }
@@ -325,5 +340,7 @@ export const mapValueToVoteType = (
       default:
         return VoteType.Abstain
     }
+  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    return VoteType.Veto
   }
 }

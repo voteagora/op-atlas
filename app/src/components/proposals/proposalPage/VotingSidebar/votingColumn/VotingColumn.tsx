@@ -9,7 +9,6 @@ import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { useSession } from "next-auth/react"
-
 import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
@@ -101,7 +100,10 @@ const VotingChoices = ({
     case "OFFCHAIN_OPTIMISTIC":
       return (
         <div className="transition-all duration-300 ease-in-out">
-          <OverrideVoteCard />
+          <OverrideVoteCard
+            selectedVote={selectedVote}
+            setSelectedVote={setSelectedVote}
+          />
         </div>
       )
     default:
@@ -135,7 +137,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const getInstance = (instance: any) => {
     confettiRef.current = instance
   }
-
 
   const handleVoteClick = (voteType: VoteType) => {
     setSelectedVote(voteType)
@@ -181,7 +182,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
-
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
@@ -325,7 +325,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           attestationId: attestationId,
           voterAddress: signerAddress,
           proposalId: proposalData.id,
-          vote: choices,
+          vote: choices as object,
           citizenId: citizen.id,
           citizenType: citizen.type as citizenCategory,
           createdAt: new Date(),
@@ -390,6 +390,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       loading: "Casting vote...",
       success: () => {
         setShowConfetti(true)
+        // Update voted status to true
         invalidateMyVote()
         return "Vote Cast and Recorded!"
       },
@@ -424,7 +425,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         />
       </div>
 
-      {myVoteType && (
+      {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <MyVote voteType={myVoteType} />
         </div>
