@@ -11,21 +11,34 @@ import React from "react"
 type ProposalCardProps = {
   children: React.ReactNode
   rounded?: boolean
+  href?: string
 }
 
-const ProposalCard = ({ children, rounded = false }: ProposalCardProps) => {
+const ProposalCard = ({
+  children,
+  rounded = false,
+  href,
+}: ProposalCardProps) => {
+  const handleClick = () => {
+    if (href) {
+      window.location.href = href
+    }
+  }
+
   return (
-    <div
-      className={`proposal-card-container border-border" ${
+    <button
+      type="button"
+      className={`proposal-card-container border-border group cursor-pointer w-full text-left bg-transparent p-0 ${
         rounded
           ? "border border-border rounded-t-lg"
           : "border-l border-r border-b border-border"
       }`}
+      onClick={handleClick}
     >
       <div className="proposal-card-content flex flex-row md:gap-6 gap-4 w-full max-w-[66.5rem] flex-shrink justify-between items-center md:p-6 p-4">
         {children}
       </div>
-    </div>
+    </button>
   )
 }
 
@@ -144,7 +157,7 @@ interface ProposalTextProps {
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
     <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 max-w-72">
-      <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate">
+      <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate group-hover:underline group-hover:underline-offset-4">
         {title}
       </div>
       <div className="text-base md:font-normal sm:font-200 text-text/secondary leading-normal truncate">
@@ -188,9 +201,13 @@ interface ProposalArrowProps {
   href: string
 }
 const ProposalArrow = ({ href }: ProposalArrowProps) => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+  }
+
   return (
-    <a href={href} className="block w-[36px] h-[36px]">
-      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] bg-secondary hover:bg-[#FF0420] text-text/default hover:text-[#FBFCFE]">
+    <a href={href} className="block w-[36px] h-[36px]" onClick={handleClick}>
+      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] bg-secondary hover:bg-[#FF0420] group-hover:bg-[#FF0420] text-text/default hover:text-[#FBFCFE] group-hover:text-[#FBFCFE]">
         <ChevronRight width={14} height={14} />
       </div>
     </a>

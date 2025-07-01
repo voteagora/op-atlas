@@ -43,7 +43,7 @@ export const ProposalRow = (props: StandardProposalProps) => {
   }
 
   return (
-    <ProposalCard rounded={props.rounded || false}>
+    <ProposalCard rounded={props.rounded || false} href={props.arrow.href}>
       <ProposalBadge type={props.badge.badgeType} />
       <ProposalTextContent
         title={props.textContent.title}
