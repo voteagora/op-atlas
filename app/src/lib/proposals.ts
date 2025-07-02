@@ -114,7 +114,7 @@ const getStandardProposlas = async () => {
         },
         // Assuming these values will be filled later with user-specific data
         voted: false,
-        passed: proposal.status === "EXECUTED",
+        passed: ["SUCCEEDED", "QUEUED", "EXECUTED"].includes(proposal.status),
         textContent: {
           title: proposal.markdowntitle,
           subtitle: "Voters: Citizens, Delegates", // Default subtitle
