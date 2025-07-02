@@ -34,10 +34,16 @@ export const ProposalRow = (props: StandardProposalProps) => {
           styling: "text-success-foreground",
         }
       }
+
+      //temp-fix
       return {
-        text: "Result Negative ie: Failed",
-        styling: "text-primary",
+        text: "Result Positive ie: Passed",
+        styling: "text-success-foreground",
       }
+      // return {
+      //   text: "Result Negative ie: Failed",
+      //   styling: "text-primary",
+      // }
     }
     return undefined
   }
