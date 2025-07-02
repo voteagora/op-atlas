@@ -88,8 +88,6 @@ export const ApplicationSubmitted = ({
 
   const email = session?.user?.email
 
-  console.log(application)
-
   return (
     <div
       className={cn(

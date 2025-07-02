@@ -1,0 +1,109 @@
+import React from "react"
+
+import ExternalLink from "@/components/ExternalLink"
+import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
+import { getCutoffDate } from "@/lib/utils"
+
+import { MissionData } from "../MissionsAndRoundData"
+
+export const foundationMissionsData: MissionData = {
+  pageName: "foundation-missions",
+  name: "Foundation Missions",
+  number: 10,
+  roundName: "S8 Foundation Missions",
+  funding: {
+    op: "Up to 3.5M",
+  },
+  startsAt: new Date(),
+  endsAt: new Date(),
+  disableDates: true,
+  season: "8",
+  details: [
+    "Ready to make an impact? Foundation Missions address specific challenges identified by the Optimism Foundation. These challenges are core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
+  ],
+  ogDescription:
+    "Ready to make an impact? Foundation Missions address specific challenges identified by the Optimism Foundation. These challenges are core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
+  status: "ongoing",
+  resultsLink: "/round/results?rounds=8",
+  iconUrl: "/assets/images/onchain-builders.png",
+  applyBy: (() => {
+    return getCutoffDate()
+  })(),
+  evaluationMonth: (() => {
+    const today = new Date()
+    return today.getDate() > 27 ? (today.getMonth() + 1) % 12 : today.getMonth()
+  })(),
+  callout: [
+    <GrantInfoCallout
+      key="budget"
+      title="Budget this season"
+      description="9M OP"
+      icon="/assets/icons/op-icon.svg"
+    />,
+  ],
+  showSupportedNetworks: false,
+  howItWorks: [
+    {
+      number: 1,
+      title: "Explore open opportunities on GitHub",
+      description: "We'Learn about Mission Requests by reviewing the issues.",
+      subDetails: "Visit GitHub",
+      subDetailsLink:
+        "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
+    },
+    {
+      number: 2,
+      title:
+        "Apply by completing the form in the expandable section of the issue",
+      description: "Submit your form as a comment in the issue thread.",
+    },
+    {
+      number: 3,
+      title: "Grant recipients are announced publicly via the GitHub Board",
+      description:
+        "Each mission has a selection date when recipients will be announced.",
+    },
+    {
+      number: 4,
+      title: "Grant winner gets contacted by the Foundation",
+      description:
+        "Winners are required to undergo KYC and sign a grant agreement",
+    },
+    {
+      number: 5,
+      title: "Grant is delivered to a locked multisig",
+      description:
+        "within 1 week of KYC completion and Grant Agreement signature.",
+    },
+  ],
+  supportOptions: [
+    {
+      type: "form",
+      title: "Contact us",
+      description:
+        "Someone from the Foundation Missions Team will respond asap.",
+      buttonText: "Open form",
+      buttonLink:
+        "https://docs.google.com/forms/d/e/1FAIpQLSdU_cgpwqKWY5lRwgLzqCHt0-X3aKGsZVX1WnpiJeHhEiNwCg/viewform",
+      externalLink: true,
+    },
+  ],
+  applicationPageEligibility: [
+    {
+      reactNode: (
+        <p className="text-secondary-foreground">
+          My project has deployed contracts on a supported chain
+        </p>
+      ),
+      type: "hasDeployedContracts",
+    },
+    {
+      reactNode: (
+        <p className="text-secondary-foreground">
+          My project aligns with Interop TVL or Interop TX fees
+        </p>
+      ),
+      type: "alignsWithInteropMetrics",
+    },
+  ],
+}

@@ -60,8 +60,8 @@ export const FundingRounds = ({
         </div>
 
         <div
-          className={`flex gap-4 ${
-            status === "ongoing" ? "flex flex-wrap" : "flex-col"
+          className={`grid grid-cols-1 gap-4 ${
+            status === "ongoing" ? "flex flex-wrap md:grid-cols-2" : ""
           }`}
         >
           {rounds.map((fundingRound) => (
@@ -100,9 +100,6 @@ const Round = ({
   } else if (fundingRound.status === "ongoing") {
     let userApplicationState: "Open" | "Active" | "Coming Soon" = "Open"
 
-    console.log(fundingRound.startsAt)
-    console.log(new Date())
-
     if (fundingRound.startsAt && new Date() < fundingRound.startsAt) {
       userApplicationState = "Coming Soon"
     } else if (applications) {
@@ -124,7 +121,7 @@ const Round = ({
   }
 
   const content = (
-    <div className={cn(`flex flex-1 gap-x-1 border rounded-xl`, className)}>
+    <div className={cn(`flex flex-2 gap-x-1 border rounded-xl`, className)}>
       {SelectedContent}
     </div>
   )
