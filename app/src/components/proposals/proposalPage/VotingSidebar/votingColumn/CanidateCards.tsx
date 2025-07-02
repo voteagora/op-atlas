@@ -1,34 +1,45 @@
 "use client"
 
 import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
-import { useState } from "react"
 import { useMultipleUserQualifications } from "@/hooks/citizen/useMultiCitizenUser"
+import { VoteType } from "@/components/proposals/proposal.types"
 
-const CandidateCards = ({ userIds }: { userIds: string[] }) => {
-  const [selectedApprovals, setSelectedApprovals] = useState<number[] | null>(
-    null,
-  )
+interface CandidateCardsProps {
+  userIds: string[]
+  selectedVote?: { voteType: VoteType; selections?: number[] }
+  setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void
+}
 
+const CandidateCards = ({
+  userIds,
+  selectedVote,
+  setSelectedVote,
+}: CandidateCardsProps) => {
   const { data: candidates } = useMultipleUserQualifications(userIds)
 
   if (!candidates) return null
 
   console.log({ candidates })
+
   const handleApprovalClick = (idx: number) => {
-    if (selectedApprovals === null) {
-      setSelectedApprovals([idx])
-    } else if (selectedApprovals.includes(idx)) {
-      // If the index is already in the array, remove it
-      setSelectedApprovals(selectedApprovals.filter((i) => i !== idx))
-      if (selectedApprovals.length === 1) {
-        // If this was the last item, set to null
-        setSelectedApprovals(null)
-      }
+    const currentSelections = selectedVote?.selections || []
+    let newSelections: number[]
+
+    if (currentSelections.includes(idx)) {
+      // Remove the index if it's already selected
+      newSelections = currentSelections.filter((i) => i !== idx)
     } else {
       // Add the index to the array
-      setSelectedApprovals([...selectedApprovals, idx])
+      newSelections = [...currentSelections, idx]
     }
+
+    // Update the parent state with the new vote
+    setSelectedVote({
+      voteType: VoteType.Approval,
+      selections: newSelections,
+    })
   }
+
   return (
     <>
       <div className="border-t px-2 align-left w-full">
@@ -42,7 +53,7 @@ const CandidateCards = ({ userIds }: { userIds: string[] }) => {
             key={idx}
             user={candidate.user!}
             qualification={candidate.qualification!}
-            selectedVote={selectedApprovals?.includes(idx) || false}
+            selectedVote={selectedVote?.selections?.includes(idx) || false}
             setSelectedVote={() => handleApprovalClick(idx)}
           />
         ))}
