@@ -449,6 +449,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)
+        invalidateMyVote()
       }
     }
 
