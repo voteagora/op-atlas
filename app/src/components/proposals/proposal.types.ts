@@ -36,6 +36,7 @@ export enum VoteType {
   Abstain = "Abstain",
   Against = "Against",
   Veto = "Veto",
+  Approval = "Approval",
 }
 
 export enum ProposalType {
