@@ -33,9 +33,6 @@ const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-40 gap-[46px] mt-10 max-w-[1064px] md:mx-auto mx-2">
-      <h1 className="w-full h-[44px] text-[36px] font-semibold leading-[0px] tracking-[0%]">
-        Governance
-      </h1>
       <div className="flex flex-col gap-12 w-full max-w-[66.5rem] ml-10 mr-10">
         {selfNominations.length > 0 && (
           <Proposals

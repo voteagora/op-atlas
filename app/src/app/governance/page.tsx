@@ -1,10 +1,9 @@
 "use server"
 
-import { AnalyticsTracker } from "@/app/governance/components/AnalyticsTracker"
-import { RoleRow } from "@/app/governance/roles/components/RoleRow"
 import { getAllRoles } from "@/db/role"
 import { auth } from "@/auth"
 import ProposalsPage from "@/components/proposals/proposalsPage/ProposalsPage"
+import RolesPage from "./roles/components/RolesPage"
 
 export default async function Page() {
   const roles = await getAllRoles()
@@ -16,23 +15,9 @@ export default async function Page() {
       <div className="mt-8 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
         <div className="flex flex-col w-full">
           <h1 className="text-4xl font-semibold">Governance</h1>
-          <ProposalsPage userId={userId} />
         </div>
-        <div className="flex flex-col mt-10 gap-6">
-          <div className="flex flex-col w-full">
-            <div className="text-1xl font-semibold text-foreground">
-              Self-nominate for a governance role in Season 8 & 9
-            </div>
-          </div>
-
-          <AnalyticsTracker />
-
-          <div className="flex flex-col rounded-lg border border-border-secondary">
-            {roles.map((role) => (
-              <RoleRow key={role.id} role={role} />
-            ))}
-          </div>
-        </div>
+        <RolesPage roles={roles} />
+        <ProposalsPage userId={userId} />
       </div>
     </main>
   )

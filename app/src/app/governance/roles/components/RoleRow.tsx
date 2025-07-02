@@ -15,7 +15,7 @@ export function RoleRow({ role }: { role: Role }) {
   return (
     <Link
       href={`/governance/roles/${role.id}`}
-      className="last:border-b-0 border-b border-border-secondary px-6 py-4 text-sm hover:bg-secondary/50 transition-colors"
+      className="last:border-b-0 border-b border-border-secondary py-4 text-sm hover:bg-secondary/50 transition-colors"
     >
       <div className="flex flex-row gap-2 w-full justify-between items-center">
         <div className="flex flex-row gap-6 items-center">
