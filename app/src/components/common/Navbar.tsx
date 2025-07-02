@@ -42,7 +42,6 @@ const Navbar = () => {
   const isGovernance = pathname === "/governance"
 
   const isMissions = pathname.includes("/missions")
-  const isGovernance = pathname.includes("/governance")
 
   const [showMobileNav, setShowMobileNav] = useState(false)
 
