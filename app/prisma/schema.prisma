@@ -721,3 +721,18 @@ enum citizenCategory {
   APP
   USER
 }
+
+model RetroFundingByRound {
+  id                Int      @id @default(autoincrement())
+  project_name      String
+  OPAtlas_projectId String?
+  OrgID             String?
+  rpgf2_amount      Float
+  rpgf3_amount      Float
+  rpgf4_amount      Float
+  rpgf5_amount      Float
+  rpgf6_amount      Float
+  rpgf2_projectId   String?
+  rpgf3_projectId   String?
+}
+
