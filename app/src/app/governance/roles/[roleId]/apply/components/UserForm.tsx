@@ -300,7 +300,12 @@ export const UserForm = ({
 
         <div className="flex flex-col gap-2">
           <div className="flex flex-row justify-between text-foreground">
-            <div>Projects that demonstrate your expertise (optional)</div>
+            <div className="flex flex-col">
+              Projects that demonstrate your expertise (optional){" "}
+              <p className="text-muted-foreground text-xs">
+                Create new projects by visiting your profile’s dashboard
+              </p>
+            </div>
             <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={setIsDropdownOpen}
