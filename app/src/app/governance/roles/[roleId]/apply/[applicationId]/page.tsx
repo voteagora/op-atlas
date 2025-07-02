@@ -63,7 +63,7 @@ export default async function Page({
         </div>
         <div className="text-lg font-semibold text-center">Next Steps</div>
         <div className="flex flex-col gap-3 text-center items-center">
-          <div className="font-semibold text-center">Post on the forum</div>
+          <div className="font-semibold text-center">Comment on the forum</div>
           <div className="text-center text-muted-foreground">{forumText}</div>
           <CopyForumTextButton
             forumText={forumText}
