@@ -1,8 +1,5 @@
 "use server"
-import {
-  OffchainVote,
-  ProposalType,
-} from "@/components/proposals/proposal.types"
+import { ProposalType } from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 
@@ -178,10 +175,7 @@ export const enrichProposalData = async (
   const enrichSingleProposal = async (
     proposal: UIProposal,
   ): Promise<UIProposal> => {
-    const offchainVote: OffchainVote = await getCitizenProposalVote(
-      citizenId,
-      proposal.id,
-    )
+    const offchainVote = await getCitizenProposalVote(citizenId, proposal.id)
 
     // Check if we have a valid citizen with vote data
     const hasVoted = !!offchainVote?.vote && Array.isArray(offchainVote.vote)

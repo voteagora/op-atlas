@@ -54,18 +54,6 @@ export interface voteAction {
   loading?: boolean
 }
 
-export interface OffchainVote {
-  attestationId: string
-  voterAddress: string
-  proposalId: string
-  vote: object
-  transactionHash?: string
-  citizenId: number
-  citizenType: citizenCategory
-  createdAt?: Date
-  updatedAt?: Date
-}
-
 export interface VotingColumnProps {
   proposalType: string
   proposalId: string

@@ -14,17 +14,12 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
 
-import {
-  OffchainVote,
-  ProposalType,
-  VoteType,
-} from "@/components/proposals/proposal.types"
+import { ProposalType, VoteType } from "@/components/proposals/proposal.types"
 import VoterActions from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
 import { Skeleton } from "@/components/ui/skeleton"
-import { postOffchainVote } from "@/db/votes"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import useMyVote from "@/hooks/voting/useMyVote"
@@ -407,21 +402,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           )
         }
 
-        // build an offchain vote object for the DB
-        const offchainVote: OffchainVote = {
-          attestationId: attestationId,
-          voterAddress: signerAddress,
-          proposalId: proposalData.id,
-          vote: choices as object,
-          citizenId: citizen.id,
-          citizenType: citizen.type as citizenCategory,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
-
-        // 3. Record vote in the database
-        await postOffchainVote(offchainVote)
-
         // Track successful vote submission
         track("Citizen Voting Vote Submitted", {
           proposal_id: proposalData.id,
@@ -469,6 +449,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)
+        invalidateMyVote()
       }
     }
 

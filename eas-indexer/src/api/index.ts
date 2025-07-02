@@ -1,25 +1,38 @@
-import { ponder } from "@/generated";
-import { and, eq, graphql, isNull } from "@ponder/core";
+import { db } from "ponder:api";
+import schema from "ponder:schema";
+import { Hono } from "hono";
 import * as dbSchema from "../../ponder.schema";
-import schemas from "../../schemas.config";
+import { and, eq, graphql, isNull } from "ponder";
 import { Attestation, Entity, AggregatedType } from "../types";
 import { parseEntity } from "./utils";
+import schemas from "../../schemas.config";
 
-ponder.use("/", graphql());
+const app = new Hono();
+
+app.use("/graphql", graphql({ db, schema }));
 
 const entities = Object.keys(schemas) as (keyof typeof dbSchema)[];
 
 entities.forEach((entity: Entity) => {
-  ponder.get(`/${entity}/:address`, async (c) => {
+  app.get(`/${entity}/:address`, async (c) => {
     const address = c.req.param("address").toLowerCase();
     const table = dbSchema[entity];
-    const data = await (c.db.query[entity] as any).findMany({
-      where: and(eq(table.address, address), isNull(table.revoked_at)),
-    });
+    const data = await db
+      .select()
+      .from(schema[entity])
+      .where(and(eq(table.address, address), isNull(table.revoked_at)));
 
     if (data.length > 0) {
       return c.json({
-        [entity]: data,
+        [entity]: data.map((d) => {
+          return {
+            ...d,
+            created_at: new Date(Number(d.created_at) * 1000).toISOString(),
+            revoked_at: d.revoked_at
+              ? new Date(Number(d.revoked_at) * 1000).toISOString()
+              : null,
+          };
+        }),
       });
     } else {
       return c.json(
@@ -33,15 +46,24 @@ entities.forEach((entity: Entity) => {
 });
 
 entities.forEach((entity: Entity) => {
-  ponder.get(`/${entity}`, async (c) => {
+  app.get(`/${entity}`, async (c) => {
     const table = dbSchema[entity];
-    const data = await (c.db.query[entity] as any).findMany({
-      where: isNull(table.revoked_at),
-    });
+    const data = await db
+      .select()
+      .from(schema[entity])
+      .where(isNull(table.revoked_at));
 
     if (data.length > 0) {
       return c.json({
-        [entity]: data,
+        [entity]: data.map((d) => {
+          return {
+            ...d,
+            created_at: new Date(Number(d.created_at) * 1000).toISOString(),
+            revoked_at: d.revoked_at
+              ? new Date(Number(d.revoked_at) * 1000).toISOString()
+              : null,
+          };
+        }),
       });
     } else {
       return c.json(
@@ -54,7 +76,7 @@ entities.forEach((entity: Entity) => {
   });
 });
 
-ponder.get("/entities/aggregated", async (c) => {
+app.get("/entities/aggregated", async (c) => {
   const aggregated: AggregatedType = entities.reduce((acc, entity) => {
     (acc as Record<Entity, Attestation[]>)[entity] = [];
     return acc;
@@ -64,9 +86,10 @@ ponder.get("/entities/aggregated", async (c) => {
     const attestations: Attestation[] = [];
 
     const table = dbSchema[entity];
-    const data = await (c.db.query[entity] as any).findMany({
-      where: isNull(table.revoked_at),
-    });
+    const data = await db
+      .select()
+      .from(schema[entity])
+      .where(isNull(table.revoked_at));
 
     if (data.length > 0) {
       data.forEach((item: any) => {
@@ -81,15 +104,16 @@ ponder.get("/entities/aggregated", async (c) => {
   return c.json(aggregated);
 });
 
-ponder.get("/attestations/:address", async (c) => {
+app.get("/attestations/:address", async (c) => {
   const address = c.req.param("address").toLowerCase();
   const attestations: Attestation[] = [];
 
   for (const entity of entities) {
     const table = dbSchema[entity];
-    const data = await (c.db.query[entity] as any).findMany({
-      where: and(eq(table.address, address), isNull(table.revoked_at)),
-    });
+    const data = await db
+      .select()
+      .from(schema[entity])
+      .where(and(eq(table.address, address), isNull(table.revoked_at)));
 
     if (data.length > 0) {
       data.forEach((item: any) => {
@@ -101,3 +125,5 @@ ponder.get("/attestations/:address", async (c) => {
 
   return c.json(attestations);
 });
+
+export default app;
