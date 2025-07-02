@@ -75,7 +75,16 @@ export default async function Page({ params }: { params: { roleId: string } }) {
                       p: ({ children }) => (
                         <p className="mb-6 last:mb-0">{children}</p>
                       ),
-
+                      h1: ({ children }) => (
+                        <h1 className="text-4xl font-semibold my-6">
+                          {children}
+                        </h1>
+                      ),
+                      h2: ({ children }) => (
+                        <h2 className="text-3xl font-semibold my-6">
+                          {children}
+                        </h2>
+                      ),
                       h3: ({ children }) => (
                         <h3 className="text-2xl text-semibold my-6">
                           {children}
@@ -95,6 +104,12 @@ export default async function Page({ params }: { params: { roleId: string } }) {
                         >
                           {children}
                         </a>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-disc pl-5">{children}</ul>
+                      ),
+                      li: ({ children }) => (
+                        <li className="mb-2">{children}</li>
                       ),
                     }}
                   >
