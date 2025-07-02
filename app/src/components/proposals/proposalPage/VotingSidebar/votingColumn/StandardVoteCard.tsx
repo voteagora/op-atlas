@@ -1,11 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import VoteButton from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VoteButton"
 import { VoteType } from "@/components/proposals/proposal.types"
+import VoteButton from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VoteButton"
 
 interface standardVoteCardProps {
-  selectedVote: VoteType | null
+  selectedVote?: VoteType
   setSelectedVote: (vote: VoteType) => void
 }
 

@@ -1,4 +1,4 @@
-import { ponder } from "@/generated";
+import { ponder } from "ponder:registry";
 import * as dbSchema from "../ponder.schema";
 import { decodeAbiParameters, hexToBytes } from "viem";
 import { schemaIds, schemaSignatures } from "./schemas";
@@ -102,6 +102,22 @@ ponder.on("EASAttested:Attested", async ({ event, context }) => {
         });
       }
       break;
+
+    case "votes": {
+      const [proposalId, params] = decodeAbiParameters(
+        schemaSignatures[schemaName],
+        hexToBytes(data.data)
+      );
+      await context.db.insert(dbSchema.votes).values({
+        id: uid,
+        address: recipient.toLowerCase(),
+        proposal_id: proposalId.toString(),
+        params,
+        voterId: data.refUID,
+        attester: attester.toLowerCase(),
+        created_at: createdAt,
+      });
+    }
   }
 });
 

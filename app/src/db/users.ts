@@ -27,7 +27,7 @@ export type EntityObject = {
   email: string
 }
 export type EntityRecords = Record<
-  Exclude<Entity, "badgeholder">,
+  Exclude<Entity, "badgeholder" | "votes">,
   EntityObject[]
 >
 

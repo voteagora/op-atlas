@@ -95,6 +95,7 @@ export function processStream(
       calculateRewardAmounts(projectsWithRewards)[0],
       calculateRewardAmounts(projectsWithRewards)[1],
       calculateRewardAmounts(projectsWithRewards)[2],
+      calculateRewardAmounts(projectsWithRewards)[3],
     ],
   }
 }

@@ -47,7 +47,7 @@ This indexer tracks EAS attestations and stores them into Postgres database. It 
 3. Start the indexer:
 
 ```bash
-yarn dev
+yarn start
 ```
 
 ## Development

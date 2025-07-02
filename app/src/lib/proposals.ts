@@ -1,5 +1,5 @@
 "use server"
-import { OffchainVote } from "@/components/proposals/proposal.types"
+import { ProposalType } from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 
@@ -32,7 +32,7 @@ export type OffChainProposal = {
   quorum: string
   proposalData: object // We can define this more specifically if needed
   proposalResults: object // We can define this more specifically if needed
-  proposalType: string
+  proposalType: ProposalType
   status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
 }
 
@@ -114,7 +114,7 @@ const getStandardProposlas = async () => {
         passed: proposal.status === "EXECUTED",
         textContent: {
           title: proposal.markdowntitle,
-          subtitle: "Voters, Citizens, Delegates", // Default subtitle
+          subtitle: "Voters: Citizens, Delegates", // Default subtitle
         },
         dates: {
           startDate: formatDate(proposal.startTime),
@@ -139,7 +139,7 @@ export const getProposals = async () => {
   }
 }
 
-type ProposalData = {
+export type ProposalData = {
   id: string
   proposer: string
   snapshotBlockNumber: number
@@ -159,8 +159,8 @@ type ProposalData = {
   proposalData: object
   unformattedProposalData?: string | null
   proposalResults: object
-  proposalType: string
-  status: string
+  proposalType: ProposalType
+  status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
   createdTransactionHash?: string | null
   cancelledTransactionHash?: string | null
   executedTransactionHash?: string | null
@@ -175,16 +175,10 @@ export const enrichProposalData = async (
   const enrichSingleProposal = async (
     proposal: UIProposal,
   ): Promise<UIProposal> => {
-    const offchainVote: OffchainVote = await getCitizenProposalVote(
-      citizenId,
-      proposal.id,
-    )
+    const offchainVote = await getCitizenProposalVote(citizenId, proposal.id)
 
     // Check if we have a valid citizen with vote data
-    const hasVoted =
-      offchainVote?.vote &&
-      Array.isArray(offchainVote.vote) &&
-      offchainVote.vote.length > 0
+    const hasVoted = !!offchainVote?.vote && Array.isArray(offchainVote.vote)
 
     const isVotedProposal = hasVoted && offchainVote.proposalId === proposal.id
 

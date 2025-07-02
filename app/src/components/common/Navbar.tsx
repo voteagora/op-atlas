@@ -39,7 +39,7 @@ const Navbar = () => {
   const params = useParams()
   const isRounds = pathname === "/missions"
   const isProjects = pathname.includes("/round/")
-  const isProposals = pathname === "/proposals"
+  const isGovernance = pathname === "/governance"
 
   const isMissions = pathname.includes("/missions")
   const isGovernance = pathname.includes("/governance")
@@ -58,24 +58,34 @@ const Navbar = () => {
             params.id || isMissions ? "bg-background" : ""
           }`}
         >
-          <div className="flex h-full">
+          <div className="flex sm:hidden items-center h-full w-full relative">
             <button
-              className={showMobileNav ? "block" : "sm:hidden"}
+              className="absolute left-0 z-10 flex items-center"
               onClick={() => setShowMobileNav(!showMobileNav)}
             >
-              {showMobileNav ? (
-                <X />
-              ) : (
-                <AlignJustify className="block sm:hidden" />
-              )}
+              {showMobileNav ? <X /> : <AlignJustify />}
             </button>
-            <Link href="/" className="flex items-center">
+            <div className="absolute inset-x-0 flex items-center justify-center">
+              <Link href="/" className="flex items-center">
+                <Image
+                  src="/assets/images/logo.svg"
+                  height={20}
+                  width={115}
+                  priority
+                  alt="OP Atlas Logo"
+                />
+              </Link>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex h-full">
+            <Link href="/" className="flex items-center mr-10">
               <Image
                 src="/assets/images/logo.svg"
-                height={24}
-                width={167}
+                height={20}
+                width={100}
                 priority
-                alt=""
+                alt="OP Atlas Logo"
               />
             </Link>
             {params.id === undefined || isMissions || isGovernance ? (
@@ -137,25 +147,6 @@ const Navbar = () => {
                     </Link>
                   </div>
                 </div>
-                {/* <div
-                  className={cn(
-                    "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
-                    isProposals
-                      ? "border-b-4 border-[#0F111A] text-text-default"
-                      : "",
-                  )}
-                >
-                  <div className="flex items-center">
-                    <Link
-                      className={`${
-                        isProposals ? "mt-1" : "group-hover:mt-1"
-                        } focus:outline-none focus:opacity-80`}
-                      href="/proposals"
-                    >
-                      Governance
-                    </Link>
-                  </div>
-                </div> */}
                 <DropdownMenu>
                   <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
                     <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
