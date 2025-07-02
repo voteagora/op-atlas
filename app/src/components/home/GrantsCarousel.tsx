@@ -12,8 +12,12 @@ const grants = [
         url: "/missions/retro-funding-onchain-builders",
       },
       {
-        label: "Grants Council Missions",
-        url: "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
+        label: "Audit Grants",
+        url: "/missions/audit-grants",
+      },
+      {
+        label: "Growth Grants",
+        url: "/missions/growth-grants",
       },
     ],
   },

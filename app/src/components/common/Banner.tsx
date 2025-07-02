@@ -17,7 +17,8 @@ export const Banner = () => {
     pathname === "/" ||
     pathname === "/dashboard" ||
     pathname === "/missions" ||
-    pathname.startsWith("/round/")
+    pathname.startsWith("/round/") ||
+    pathname.includes("/missions/")
 
   if (!shouldShowBanner) return null
 

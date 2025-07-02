@@ -34,7 +34,26 @@ export const dropdownList = [
   },
 ]
 
-const Navbar = () => {
+export const grantLinks = [
+  {
+    title: "Audit Grants",
+    href: "/missions/audit-grants",
+  },
+  {
+    title: "Growth Grants",
+    href: "/missions/growth-grants",
+  },
+  {
+    title: "Retro Funding",
+    href: "/missions",
+  },
+  {
+    title: "Foundation Missions",
+    href: "/missions/foundation-missions",
+  },
+]
+
+export const Navbar = () => {
   const pathname = usePathname()
   const params = useParams()
   const isRounds = pathname === "/missions"
@@ -47,6 +66,7 @@ const Navbar = () => {
 
   return (
     <>
+      <Banner />
       <nav
         className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[200] ${
           params.id || isMissions ? "" : "shadow-sm"
@@ -89,25 +109,36 @@ const Navbar = () => {
             </Link>
             {params.id === undefined || isMissions ? (
               <div className="flex gap-12">
-                <div
-                  className={cn(
-                    "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
-                    isRounds
-                      ? "border-b-4 border-[#0F111A] text-text-default"
-                      : "",
-                  )}
-                >
-                  <div className="flex items-center">
-                    <Link
-                      className={`${
-                        isRounds ? "mt-1" : "group-hover:mt-1"
-                      } focus:outline-none focus:opacity-80`}
-                      href="/missions"
-                    >
-                      Retro Missions
-                    </Link>
-                  </div>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
+                    <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
+                      <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
+                        <div>Grants</div>
+                        <ChevronDown size={12} />
+                      </div>
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56 flex flex-col gap-1"
+                    sideOffset={0}
+                    side="bottom"
+                    align="start"
+                  >
+                    {grantLinks.map((item, index) => (
+                      <DropdownMenuItem
+                        key={index}
+                        className="focus:bg-none! focus:opacity-80"
+                      >
+                        <Link
+                          className="flex items-center gap-1"
+                          href={item.href}
+                        >
+                          <div>{item.title}</div>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <div
                   className={cn(
                     "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
@@ -189,7 +220,6 @@ const Navbar = () => {
         </div>
       </nav>
       {showMobileNav && <MobileNav onClose={() => setShowMobileNav(false)} />}
-      <Banner />
     </>
   )
 }
