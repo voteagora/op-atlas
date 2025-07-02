@@ -71,15 +71,16 @@ const VotingColumnSkeleton = () => (
   </div>
 )
 
+// Update the VotingChoices component props and implementation
 const VotingChoices = ({
   proposalType,
-  selectedVote,
+  selectedVotes,
   setSelectedVote,
   proposalData,
 }: {
   proposalType: string
-  selectedVote?: VoteType
-  setSelectedVote: (vote: VoteType) => void
+  selectedVotes?: { voteType: VoteType; selections?: number[] }
+  setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void // Updated type
   proposalData: ProposalData
 }) => {
   switch (proposalType) {
@@ -87,36 +88,36 @@ const VotingChoices = ({
       return (
         <div className="transition-all duration-300 ease-in-out">
           <StandardVoteCard
-            selectedVote={selectedVote}
-            setSelectedVote={setSelectedVote}
+            selectedVote={selectedVotes?.voteType}
+            setSelectedVote={(voteType: VoteType) =>
+              setSelectedVote({ voteType, selections: undefined })
+            }
           />
         </div>
       )
     case "OFFCHAIN_APPROVAL":
-      //TODO filled in by some data in the proposalData
       const userIds: string[] = [
-        "94b7d08e-d3cd-4f5a-8380-02d3a33d1427",
-        // "79a06866-97e0-4d63-8eb1-99ba49c9bc61",
-        // "c2a394e4-8164-437f-8e4b-373493ce058f",
-        // "3dfa76e0-9080-453a-93d2-db9142a356e3",
-        // "b623893b-ecbc-48ae-95db-2b6d9c4dae35",
-        // "08596630-402e-4939-baac-5094edc59559",
-        // "cfd7724b-1fb6-4a31-a224-e43f7490d68a",
-        // "c4846c6c-ecf1-449a-9f6f-b66a461ea9c4",
-        // "c33ff926-2a3c-471d-83e2-372edc6e1610",
-        // "d706d6e0-7efe-4c37-b984-c1cd51f87c6d",
+        "e01b0e8b-36b6-420e-8ab5-89ca2a668011", // USER
+        "e9103cce-cea4-48a1-a049-b3a0229359b7", // APP
+        "d9f6e9a5-c204-4cf3-bb75-df49a052ba02", // Chain
       ]
       return (
         <div className="transition-all duration-300 ease-in-out">
-          <CandidateCards userIds={userIds} />
+          <CandidateCards
+            userIds={userIds}
+            selectedVote={selectedVotes}
+            setSelectedVote={setSelectedVote}
+          />
         </div>
       )
     case "OFFCHAIN_OPTIMISTIC":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <OverrideVoteCard
-            selectedVote={selectedVote}
-            setSelectedVote={setSelectedVote}
+            selectedVote={selectedVotes?.voteType}
+            setSelectedVote={(voteType: VoteType) =>
+              setSelectedVote({ voteType, selections: undefined })
+            }
           />
         </div>
       )
@@ -126,9 +127,9 @@ const VotingChoices = ({
 }
 
 const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
-  const [selectedVote, setSelectedVote] = useState<VoteType | undefined>(
-    undefined,
-  )
+  const [selectedVotes, setSelectedVotes] = useState<
+    { voteType: VoteType; selections?: number[] } | undefined
+  >(undefined)
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
@@ -155,8 +156,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     confettiRef.current = instance
   }
 
-  const handleVoteClick = (voteType: VoteType) => {
-    setSelectedVote(voteType)
+  const handleVoteClick = (vote: {
+    voteType: VoteType
+    selections?: number[]
+  }) => {
+    setSelectedVotes(vote)
   }
 
   const {
@@ -377,12 +381,14 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   const handleCastVote = async () => {
-    if (!selectedVote) return
+    if (!selectedVotes) return
 
     const choices = mapVoteTypeToValue(
       proposalData.proposalType as ProposalType,
-      selectedVote,
+      selectedVotes.voteType,
     )
+
+    return
     setIsVoting(true)
 
     const castAndRecordVote = async () => {
@@ -509,6 +515,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     })
   }
 
+  console.log("HandleCastVote", { selectedVotes, canVote })
+
   return (
     <div className="flex flex-col p-6 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out">
       <ReactCanvasConfetti
@@ -546,7 +554,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           {canVote && (
             <VotingChoices
               proposalType={proposalData.proposalType}
-              selectedVote={selectedVote}
+              selectedVotes={selectedVotes}
               setSelectedVote={handleVoteClick}
               proposalData={proposalData}
             />
@@ -557,11 +565,18 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               // This is a wonky way to overwrite the call to make an external call.
               cardActionList={votingActions.cardActionList.map((action) => {
                 // If this is a vote action, replace its action function with handleCastVote
-                // and determine if it should be disabled based on selectedVote or address mismatch
+                // and determine if it should be disabled based on selectedVotes or address mismatch
                 return {
                   ...action,
                   action: handleCastVote,
-                  disabled: canVote && (addressMismatch || !selectedVote),
+                  disabled:
+                    canVote &&
+                    (addressMismatch ||
+                      !selectedVotes?.voteType ||
+                      !(
+                        selectedVotes.selections &&
+                        selectedVotes.selections.length > 0
+                      )),
                   loading: isVoting,
                 }
               })}
