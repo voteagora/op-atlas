@@ -4,7 +4,6 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { citizenCategory } from "@prisma/client"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
@@ -46,16 +45,6 @@ import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
 
-export interface CandidateCardProps {
-  name: string
-  image: {
-    src: string
-    alt?: string
-  }
-  organizations: string[]
-  buttonLink: string
-}
-
 const VotingColumnSkeleton = () => (
   <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
     <div className="flex flex-col text-center gap-y-2">
@@ -69,37 +58,54 @@ const VotingColumnSkeleton = () => (
   </div>
 )
 
+// Update the VotingChoices component props and implementation
 const VotingChoices = ({
   proposalType,
-  selectedVote,
+  selectedVotes,
   setSelectedVote,
+  proposalData,
 }: {
   proposalType: string
-  selectedVote?: VoteType
-  setSelectedVote: (vote: VoteType) => void
+  selectedVotes?: { voteType: VoteType; selections?: number[] }
+  setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void // Updated type
+  proposalData: ProposalData
 }) => {
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <StandardVoteCard
-            selectedVote={selectedVote}
-            setSelectedVote={setSelectedVote}
+            selectedVote={selectedVotes?.voteType}
+            setSelectedVote={(voteType: VoteType) =>
+              setSelectedVote({ voteType, selections: undefined })
+            }
           />
         </div>
       )
     case "OFFCHAIN_APPROVAL":
+      const userIds: string[] = [
+        "f1304c1b-e3a0-472b-bb27-d810b7962b05",
+        "35bbf4a9-9193-44af-a693-76890667aedb",
+        "2fa330d4-d3ee-44b3-b704-0477928834d6",
+        "b3eeb98f-1c2d-4b26-9c05-578c9e6a2426",
+      ]
       return (
         <div className="transition-all duration-300 ease-in-out">
-          <CandidateCards candidates={[]} />
+          <CandidateCards
+            userIds={userIds}
+            selectedVote={selectedVotes}
+            setSelectedVote={setSelectedVote}
+          />
         </div>
       )
     case "OFFCHAIN_OPTIMISTIC":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <OverrideVoteCard
-            selectedVote={selectedVote}
-            setSelectedVote={setSelectedVote}
+            selectedVote={selectedVotes?.voteType}
+            setSelectedVote={(voteType: VoteType) =>
+              setSelectedVote({ voteType, selections: undefined })
+            }
           />
         </div>
       )
@@ -109,9 +115,9 @@ const VotingChoices = ({
 }
 
 const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
-  const [selectedVote, setSelectedVote] = useState<VoteType | undefined>(
-    undefined,
-  )
+  const [selectedVotes, setSelectedVotes] = useState<
+    { voteType: VoteType; selections?: number[] } | undefined
+  >(undefined)
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
@@ -138,8 +144,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     confettiRef.current = instance
   }
 
-  const handleVoteClick = (voteType: VoteType) => {
-    setSelectedVote(voteType)
+  const handleVoteClick = (vote: {
+    voteType: VoteType
+    selections?: number[]
+  }) => {
+    setSelectedVotes(vote)
   }
 
   const {
@@ -251,7 +260,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return <VotingColumnSkeleton />
   }
 
-  const createDelegatedAttestation = async (choices: string[]) => {
+  const createDelegatedAttestation = async (choices: string) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")
@@ -269,7 +278,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const args = {
       proposalId: proposalData.id,
-      choices: JSON.stringify(choices),
+      choices: choices,
     }
     const encodedData = encoder.encodeData([
       { name: "proposalId", value: args.proposalId, type: "uint256" },
@@ -302,7 +311,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
-  const createMultisigWalletAttestation = async (choices: string[]) => {
+  const createMultisigWalletAttestation = async (choices: string) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")
@@ -320,7 +329,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const args = {
       proposalId: proposalData.id,
-      choices: JSON.stringify(choices),
+      choices: choices,
     }
     const encodedData = encoder.encodeData([
       { name: "proposalId", value: args.proposalId, type: "uint256" },
@@ -360,12 +369,13 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   const handleCastVote = async () => {
-    if (!selectedVote) return
+    if (!selectedVotes) return
 
     const choices = mapVoteTypeToValue(
       proposalData.proposalType as ProposalType,
-      selectedVote,
+      selectedVotes,
     )
+
     setIsVoting(true)
 
     const castAndRecordVote = async () => {
@@ -505,8 +515,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           {canVote && (
             <VotingChoices
               proposalType={proposalData.proposalType}
-              selectedVote={selectedVote}
+              selectedVotes={selectedVotes}
               setSelectedVote={handleVoteClick}
+              proposalData={proposalData}
             />
           )}
           <div className="w-full transition-all duration-200 ease-in-out">
@@ -515,11 +526,19 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               // This is a wonky way to overwrite the call to make an external call.
               cardActionList={votingActions.cardActionList.map((action) => {
                 // If this is a vote action, replace its action function with handleCastVote
-                // and determine if it should be disabled based on selectedVote or address mismatch
+                // and determine if it should be disabled based on selectedVotes or address mismatch
                 return {
                   ...action,
                   action: handleCastVote,
-                  disabled: canVote && (addressMismatch || !selectedVote),
+                  disabled:
+                    canVote &&
+                    (addressMismatch ||
+                      !selectedVotes?.voteType ||
+                      (selectedVotes.voteType === "Approval" &&
+                        !(
+                          selectedVotes?.selections &&
+                          selectedVotes?.selections.length > 0
+                        ))),
                   loading: isVoting,
                 }
               })}

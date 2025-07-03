@@ -1,68 +1,63 @@
 "use client"
 
-interface CandidateCardProps {
-  img: {
-    src: string
-    alt?: string
-  }
-  username: string
-  organizations: string[]
-  carrotLink: string
-  selected?: boolean
-  onClick?: () => void
-}
+import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
+import { Organization, User } from "@prisma/client"
+import { CitizenshipQualification, ProjectWithDetails } from "@/lib/types"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
 
 const CandidateCard = ({
-  img,
-  username,
-  organizations,
-  carrotLink,
-  selected = false,
-  onClick,
-}: CandidateCardProps) => {
-  const handleClick = () => {
-    if (onClick) {
-      onClick()
-    }
-  }
-
-  return (
-    <div className="w-[272px] h-[40px] pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] gap-[8px] rounded-[6px] flex items-center">
-      <CardImg src={img.src} alt={img.alt || username} />
-      <CardUsername username={username} />
-      <CardOrganizations organizations={organizations} />
-      <CardApprovalButton selected={selected} onClick={handleClick} />
-      <CardCarrot link={carrotLink} />
-    </div>
-  )
-}
-
-const CardImg = ({
-  src,
-  alt = "Profile Picture",
+  user,
+  qualification,
+  selectedVote,
+  setSelectedVote,
 }: {
-  src: string
-  alt?: string
+  user: User
+  qualification: CitizenshipQualification
+  selectedVote?: boolean
+  setSelectedVote: () => void
 }) => {
+  const { data: projects, isLoading } = useUserProjects(user.id)
+
+  console.log({ projects })
   return (
-    <div className="w-[20px] h-[20px] rounded-[19px] overflow-hidden">
-      <img className="w-full h-full object-cover" src={src} alt={alt} />
+    <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
+      <div className="flex items-center h-5 gap-[8px] justify-between">
+        <EligibleCitizenAvatar
+          user={user}
+          qualification={qualification}
+          size={"sm"}
+        />
+        <CardUsername username={user.username!} />
+        <CardOrganizations projects={projects} />
+        <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
+        {/*<CardCarrot link={carrotLink} />*/}
+      </div>
     </div>
   )
 }
 
 const CardUsername = ({ username }: { username: string }) => {
   return (
-    <div className="w-[68px] h-[20px] font-inter font-normal text-[14px] leading-[20px] tracking-[0%] overflow-hidden whitespace-nowrap text-ellipsis">
+    <div className="font-normal min-w-5 text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis">
       {username}
     </div>
   )
 }
 
-const CardOrganizations = ({ organizations }: { organizations: string[] }) => {
+const CardOrganizations = ({
+  projects,
+}: {
+  projects?: ProjectWithDetails[] | null
+}) => {
+  // This should give us a list of only organization string values
+  const organizationNames =
+    projects
+      ?.map((proj) => proj?.organization?.organization?.name)
+      .filter((name): name is string => Boolean(name)) ?? []
+
   return (
-    <div className="w-[132px] h-[20px] font-inter font-normal text-[14px] leading-[20px] tracking-[0%] text-[var(--muted-foreground,#636779)] overflow-hidden whitespace-nowrap text-ellipsis">
-      {organizations.join(", ")}
+    <div className="min-w-1 max-w-32 h-5 text-[14px] leading-5 tracking-[0%] text-muted-foreground overflow-hidden whitespace-nowrap text-ellipsis">
+      {organizationNames.join(", ")}
     </div>
   )
 }
@@ -74,16 +69,24 @@ const CardApprovalButton = ({
   selected?: boolean
   onClick?: () => void
 }) => {
-  const bgColor = selected ? "bg-success" : "bg-[#F2F3F8]"
+  if (selected) {
+    return (
+      <div className="w-[72px] h-6 px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-success cursor-pointer">
+        <button
+          className="font-normal text-xs leading-5 text-success-foreground"
+          onClick={onClick}
+        >
+          Approved
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div
-      className={`w-[65px] h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md ${bgColor} cursor-pointer`}
+      className={`w-[65px] h-[24px] px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-secondary cursor-pointer`}
     >
-      <button
-        className="font-medium text-xs leading-4 font-inter"
-        onClick={onClick}
-      >
+      <button className="font-normal text-xs leading-5" onClick={onClick}>
         Approve
       </button>
     </div>
