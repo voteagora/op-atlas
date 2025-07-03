@@ -356,7 +356,7 @@ export const mapVoteTypeToValue = (
   } else if (proposalType === ProposalType.OFFCHAIN_APPROVAL) {
     // Sort lowest to highest to maintain the index location for voting
     const sortedSelections = selectedVotes.selections?.sort((a, b) => a - b)
-    return selectedVotes.selections ? `[[${sortedSelections}][1]]` : "[[][0]]"
+    return selectedVotes.selections ? `[[${sortedSelections}],[1]]` : "[[],[0]]"
   } else {
     return JSON.stringify([selectedVotes.voteType])
   }
