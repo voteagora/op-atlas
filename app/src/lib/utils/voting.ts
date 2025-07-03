@@ -303,12 +303,14 @@ export const getVotingProps = (
 
 export const mapVoteTypeToValue = (
   proposalType: ProposalType,
-  voteType: VoteType,
-  selections?: number[],
+  selectedVotes: {
+    voteType: VoteType
+    selections?: number[]
+  },
 ) => {
-  console.log("mapVoteTypeToValue", { selections, voteType, proposalType })
+  console.log("mapVoteTypeToValue", { proposalType, selectedVotes })
   if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
-    switch (voteType) {
+    switch (selectedVotes.voteType) {
       case VoteType.Against:
         return JSON.stringify([0])
       case VoteType.For:
@@ -321,9 +323,11 @@ export const mapVoteTypeToValue = (
   } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
     return JSON.stringify([0])
   } else if (proposalType === ProposalType.OFFCHAIN_APPROVAL) {
-    return selections ? `[${selections}][1]` : "[][0]"
+    // Sort lowest to highest to maintain the index location for voting
+    const sortedSelections = selectedVotes.selections?.sort((a, b) => a - b)
+    return selectedVotes.selections ? `[${sortedSelections}][1]` : "[][0]"
   } else {
-    return JSON.stringify([voteType])
+    return JSON.stringify([selectedVotes.voteType])
   }
 }
 
