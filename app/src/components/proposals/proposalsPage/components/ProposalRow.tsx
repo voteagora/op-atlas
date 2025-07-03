@@ -35,15 +35,10 @@ export const ProposalRow = (props: StandardProposalProps) => {
         }
       }
 
-      //temp-fix
       return {
-        text: "Result Positive ie: Passed",
-        styling: "text-success-foreground",
+        text: "Result Negative ie: Failed",
+        styling: "text-primary",
       }
-      // return {
-      //   text: "Result Negative ie: Failed",
-      //   styling: "text-primary",
-      // }
     }
     return undefined
   }
