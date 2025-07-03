@@ -4,7 +4,6 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { Citizen, citizenCategory, User } from "@prisma/client"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
@@ -45,18 +44,6 @@ import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
 import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
-import { CitizenshipQualification } from "@/lib/types"
-import { useUser } from "@/hooks/db/useUser"
-
-export interface CandidateCardProps {
-  name: string
-  image: {
-    src: string
-    alt?: string
-  }
-  organizations: string[]
-  buttonLink: string
-}
 
 const VotingColumnSkeleton = () => (
   <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
@@ -97,9 +84,10 @@ const VotingChoices = ({
       )
     case "OFFCHAIN_APPROVAL":
       const userIds: string[] = [
-        "e01b0e8b-36b6-420e-8ab5-89ca2a668011", // USER
-        "e9103cce-cea4-48a1-a049-b3a0229359b7", // APP
-        "d9f6e9a5-c204-4cf3-bb75-df49a052ba02", // Chain
+        "94b7d08e-d3cd-4f5a-8380-02d3a33d1427", // No Username
+        "e1bf03eb-a3b3-41c6-aa32-e267341a402b", // Stepan
+        "e2886d3a-c949-4bec-b295-6dbde946558b",
+        "6633c415-a04d-4206-8d4a-01c7c844d3f6",
       ]
       return (
         <div className="transition-all duration-300 ease-in-out">
@@ -272,7 +260,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return <VotingColumnSkeleton />
   }
 
-  const createDelegatedAttestation = async (choices: string[]) => {
+  const createDelegatedAttestation = async (choices: string) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")
@@ -290,7 +278,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const args = {
       proposalId: proposalData.id,
-      choices: JSON.stringify(choices),
+      choices: choices,
     }
     const encodedData = encoder.encodeData([
       { name: "proposalId", value: args.proposalId, type: "uint256" },
@@ -323,7 +311,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
-  const createMultisigWalletAttestation = async (choices: string[]) => {
+  const createMultisigWalletAttestation = async (choices: string) => {
     if (!signer) throw new Error("Signer not ready")
     if (!citizen?.address) {
       throw new Error("User citizen address not available")
@@ -341,7 +329,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const args = {
       proposalId: proposalData.id,
-      choices: JSON.stringify(choices),
+      choices: choices,
     }
     const encodedData = encoder.encodeData([
       { name: "proposalId", value: args.proposalId, type: "uint256" },
@@ -385,10 +373,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const choices = mapVoteTypeToValue(
       proposalData.proposalType as ProposalType,
-      selectedVotes.voteType,
+      selectedVotes,
     )
 
-    return
     setIsVoting(true)
 
     const castAndRecordVote = async () => {
@@ -515,8 +502,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     })
   }
 
-  console.log("HandleCastVote", { selectedVotes, canVote })
-
   return (
     <div className="flex flex-col p-6 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out">
       <ReactCanvasConfetti
@@ -573,10 +558,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                     canVote &&
                     (addressMismatch ||
                       !selectedVotes?.voteType ||
-                      !(
-                        selectedVotes.selections &&
-                        selectedVotes.selections.length > 0
-                      )),
+                      (selectedVotes.voteType === "Approval" &&
+                        !(
+                          selectedVotes?.selections &&
+                          selectedVotes?.selections.length > 0
+                        ))),
                   loading: isVoting,
                 }
               })}
