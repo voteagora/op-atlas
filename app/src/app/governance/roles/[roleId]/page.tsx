@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { getRoleApplications, getRoleById } from "@/db/role"
 import { formatMMMd } from "@/lib/utils/date"
+import { RoleDates } from "./components/RoleDates"
 
 export default async function Page({ params }: { params: { roleId: string } }) {
   const role = await getRoleById(parseInt(params.roleId))
@@ -52,18 +53,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
             <div className="flex flex-col gap-y-8 mt-12">
               <div className="flex flex-col gap-4">
                 <div className="text-3xl font-semibold">{role.title}</div>
-                {role.startAt && role.endAt && (
-                  <div className="text-muted-foreground flex flex-row gap-2">
-                    <div>
-                      Nominations {formatMMMd(new Date(role.startAt))}
-                      {" - "}
-                      {formatMMMd(new Date(role.endAt))}
-                    </div>
-
-                    {voteSchedule && <div>{" | "}</div>}
-                    {voteSchedule && <div>{voteSchedule}</div>}
-                  </div>
-                )}
+                {role.startAt && role.endAt && <RoleDates role={role} />}
               </div>
 
               <div className="border-b border-border-secondary w-full"></div>
