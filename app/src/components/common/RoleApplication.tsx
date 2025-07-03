@@ -14,6 +14,7 @@ import { OrganizationWithTeamAndProjects, UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { formatMMMd, formatMMMdyyyy } from "@/lib/utils/date"
 import { stripMarkdown } from "@/lib/utils/markdown"
+import ReactMarkdown from "react-markdown"
 
 export default function RoleApplication({
   user,
@@ -68,8 +69,6 @@ export default function RoleApplication({
     !role
   )
     return null
-
-  const cleanDescription = stripMarkdown(role.description || "")
 
   const renderApplication = () => {
     const conflictsOfInterest = JSON.parse(
@@ -139,7 +138,39 @@ export default function RoleApplication({
             !expanded ? " line-clamp-3" : ""
           }`}
         >
-          {cleanDescription}
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <p className="mb-6 last:mb-0">{children}</p>,
+              h1: ({ children }) => (
+                <h1 className="text-4xl font-semibold my-6">{children}</h1>
+              ),
+              h2: ({ children }) => (
+                <h2 className="text-3xl font-semibold my-6">{children}</h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="text-2xl text-semibold my-6">{children}</h3>
+              ),
+              h4: ({ children }) => (
+                <h4 className="text-xl text-semibold my-6">{children}</h4>
+              ),
+              a: ({ children, href }) => (
+                <a
+                  href={href}
+                  className="underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {children}
+                </a>
+              ),
+              ul: ({ children }) => (
+                <ul className="list-disc pl-5">{children}</ul>
+              ),
+              li: ({ children }) => <li className="mb-2">{children}</li>,
+            }}
+          >
+            {role.description}
+          </ReactMarkdown>
         </div>
         {renderApplication()}
         <div className="flex flex-row justify-between items-center">
