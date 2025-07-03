@@ -62,7 +62,8 @@ export type UIProposal = {
 
 const getStandardProposals = async () => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_AGORA_API_URL}/api/v1/proposals?type=EXCLUDE_ONCHAIN`,
+    // Replace with EXCLUDE_ONCHAIN after agora-next API PR changes
+    `${process.env.NEXT_PUBLIC_AGORA_API_URL}/api/v1/proposals?type=OFFCHAIN`,
     {
       headers: {
         Authorization: `Bearer ${process.env.AGORA_API_KEY}`,
