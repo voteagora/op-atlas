@@ -71,6 +71,7 @@ const getStandardProposals = async () => {
       cache: "no-store", // For dynamic data
     },
   )
+
   if (!response.ok) {
     throw new Error(
       `Failed to fetch off-chain proposals ${response.statusText}`,
@@ -103,10 +104,7 @@ const getStandardProposals = async () => {
         },
         // Assuming these values will be filled later with user-specific data
         voted: false,
-        passed:
-          proposal.status === "SUCCEEDED" ||
-          proposal.status === "QUEUED" ||
-          proposal.status === "EXECUTED",
+        passed: ["SUCCEEDED", "QUEUED", "EXECUTED"].includes(proposal.status),
         textContent: {
           title: proposal.markdowntitle,
           subtitle: "Voters: Citizens, Delegates", // Default subtitle
