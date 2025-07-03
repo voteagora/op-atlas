@@ -2,6 +2,7 @@
 import { ProposalType } from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
+import { formatMMMd } from "./utils/date"
 
 const CURRENT_DATETIME = new Date()
 
@@ -92,18 +93,6 @@ const getStandardProposlas = async () => {
         badgeType = ProposalBadgeType.now
       }
 
-      // Format dates for display (MM-DD-YYYY)
-      const formatDate = (dateString: string) => {
-        const date = new Date(dateString)
-        return date
-          .toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          })
-          .replace(/\//g, "-")
-      }
-
       return {
         id: proposal.id,
         badge: {
@@ -117,8 +106,8 @@ const getStandardProposlas = async () => {
           subtitle: "Voters: Citizens, Delegates", // Default subtitle
         },
         dates: {
-          startDate: formatDate(proposal.startTime),
-          endDate: formatDate(proposal.endTime),
+          startDate: formatMMMd(proposal.startTime),
+          endDate: formatMMMd(proposal.endTime),
         },
         arrow: {
           href: `/proposals/${proposal.id}`,

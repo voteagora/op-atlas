@@ -87,7 +87,7 @@ const Navbar = () => {
                 alt="OP Atlas Logo"
               />
             </Link>
-            {params.id === undefined || isMissions ? (
+            {params.id === undefined || isMissions || isGovernance ? (
               <div className="flex gap-12">
                 <div
                   className={cn(

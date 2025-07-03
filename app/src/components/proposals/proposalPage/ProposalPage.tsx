@@ -3,6 +3,7 @@ import Markdown from "@/components/proposals/proposalPage/proposalContent/Markdo
 import ProposalHeader from "@/components/proposals/proposalPage/proposalContent/ProposalHeader"
 import VotingSidebar from "@/components/proposals/proposalPage/VotingSidebar/VotingSidebar"
 import { ProposalData } from "@/lib/proposals"
+import { formatMMMdyyyy } from "@/lib/utils/date"
 
 function stripTitleFromDescription(title: string, description: string) {
   if (description.startsWith(`# ${title}`)) {
@@ -22,19 +23,8 @@ const ProposalPage = async ({
     proposalData.description,
   )
 
-  // Format dates for display (MM-DD-YYYY) - same format as ProposalCard
-  const formatDate = (date: Date) => {
-    return date
-      .toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      })
-      .replace(/\//g, "-")
-  }
-
-  const formattedStartDate = formatDate(new Date(proposalData.startTime))
-  const formattedEndDate = formatDate(new Date(proposalData.endTime))
+  const formattedStartDate = formatMMMdyyyy(new Date(proposalData.startTime))
+  const formattedEndDate = formatMMMdyyyy(new Date(proposalData.endTime))
 
   // Breadcrumbs
   const breadcrumbs = [

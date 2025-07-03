@@ -28,14 +28,14 @@ const ProposalCard = ({
   return (
     <button
       type="button"
-      className={`proposal-card-container border-border group cursor-pointer w-full text-left bg-transparent p-0 ${
+      className={`border-border group cursor-pointer w-full text-left bg-transparent p-0 ${
         rounded
           ? "border border-border rounded-t-lg"
           : "border-l border-r border-b border-border"
       }`}
       onClick={handleClick}
     >
-      <div className="proposal-card-content flex flex-row md:gap-6 gap-4 w-full max-w-[66.5rem] flex-shrink justify-between items-center md:p-6 p-4">
+      <div className="flex flex-row gap-4 justify-between items-center p-4">
         {children}
       </div>
     </button>
