@@ -88,7 +88,7 @@
     "lucide-react": "^0.363.0",
     "mixpanel-browser": "^2.50.0",
     "nanoid": "^5.0.7",
-    "next": "14.2.21",
+    "next": "14.2.30",
     "next-auth": "^5.0.0-beta.25",
     "next-themes": "^0.3.0",
     "octokit": "^3.2.0",
