@@ -11,4 +11,12 @@ FROM
   (
     eas.votes v
     LEFT JOIN "Citizen" c ON ((c."attestationId" = v.voter_id))
+  )
+WHERE
+  (
+    (v.params IS NOT NULL)
+    AND (v.params !~ '\]\[' :: text)
+    AND (v.params !~ '\}\{' :: text)
+    AND (v.params ~ '^[\s]*[\{\[]' :: text)
+    AND (v.params ~ '[\}\]][\s]*$' :: text)
   );
