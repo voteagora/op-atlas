@@ -1,3 +1,6 @@
+import { ChevronRight } from "lucide-react"
+import React from "react"
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -5,8 +8,6 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { ChevronRight } from "lucide-react"
-import React from "react"
 
 interface BreadcrumbsProps {
   values: {

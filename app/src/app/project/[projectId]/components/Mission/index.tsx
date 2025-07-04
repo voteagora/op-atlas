@@ -7,10 +7,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { MissionProps } from "@/lib/oso/types"
 
 import DevToolingMission from "./DevToolingMission"
 import OnchainBuilderMission from "./OnchainBuilderMission"
-import { MissionProps } from "@/lib/oso/types"
 
 const getDateRange = (type: MissionProps["type"]) =>
   type === "on-chain" ? "Feb 17 - Jul 30, 2025" : "Feb 4 - Jul 30, 2025"

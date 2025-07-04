@@ -1,4 +1,5 @@
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
+
 import { ProposalRow } from "./ProposalRow"
 
 export interface StandardProposalProps {

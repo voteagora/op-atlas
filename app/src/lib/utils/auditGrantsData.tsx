@@ -63,8 +63,8 @@ export const auditGrantsData: MissionData = {
           <ExternalLink className="underline" href={"https://defillama.com"}>
             DefiLlama adapter
           </ExternalLink>
-          . A link to the adaptor must be provided in the &quot;Contracts&quot; step of
-          project setup in OP Atlas.
+          . A link to the adaptor must be provided in the &quot;Contracts&quot;
+          step of project setup in OP Atlas.
         </p>
       ),
     },

@@ -1,12 +1,12 @@
+import { JsonValue } from "@prisma/client/runtime/library"
+
 import {
   ProposalType,
   VoteType,
   VotingCardProps,
 } from "@/components/proposals/proposal.types"
 import { ProposalData } from "@/lib/proposals"
-
 import { CitizenshipQualification } from "@/lib/types"
-import { JsonValue } from "@prisma/client/runtime/library"
 
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL
 

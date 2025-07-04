@@ -1,6 +1,7 @@
 "use server"
 
 import { Signature } from "@ethereum-attestation-service/eas-sdk"
+
 import { createDelegatedVoteAttestation } from "@/lib/eas/serverOnly"
 
 export async function vote(

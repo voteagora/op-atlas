@@ -1,8 +1,9 @@
-import { resolve } from "path"
-import { readFileSync } from "fs"
-import { prisma } from "@/db/client"
 import { ProjectOSOMetric } from "@prisma/client"
+import { readFileSync } from "fs"
+import { resolve } from "path"
 import { formatUnits, parseUnits } from "viem"
+
+import { prisma } from "@/db/client"
 
 enum Mission {
   ONCHAIN_BUILDER = "onchain_builder",

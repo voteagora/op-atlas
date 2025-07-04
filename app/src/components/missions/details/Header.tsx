@@ -9,7 +9,8 @@ import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 export default function Header() {
   const mission = useMissionFromPath()
 
-  const isOpenForEnrollment = mission && mission?.startsAt < new Date()
+  const isOpenForEnrollment =
+    mission && mission?.startsAt && mission?.startsAt < new Date()
 
   return (
     <>
@@ -48,7 +49,7 @@ export default function Header() {
               Season {mission?.season},{" "}
               <span>{format(mission!.startsAt, "MMM d")}</span>
               <span>{" - "}</span>
-              {<span>{format(mission!.endsAt, "MMM d, yyyy")}</span>}
+              {<span>{format(mission!.endsAt || new Date(),  "MMM d, yyyy")}</span>}
             </p>
           </div>
         )}

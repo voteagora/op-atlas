@@ -1,8 +1,10 @@
 "use client"
 
-import { useUserCitizen } from "../citizen/useUserCitizen"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+
 import { getVoteForCitizen } from "@/db/votes"
+
+import { useUserCitizen } from "../citizen/useUserCitizen"
 
 const MY_VOTE_QUERY_KEY = "my-vote"
 

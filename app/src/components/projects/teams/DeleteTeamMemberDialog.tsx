@@ -22,7 +22,7 @@ const DeleteTeamMemberDialog = ({
   const { user } = useUser({ id: member?.id })
   const username = useUsername(user)
 
-  console.log(user);
+  console.log(user)
 
   const onClick = async () => {
     try {

@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Image from "next/image"
+import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React from "react"
 import { toast } from "sonner"
@@ -17,7 +18,6 @@ import {
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { DialogProps } from "./types"
-import { useParams } from "next/navigation"
 
 export default function SelectKYCProjectDialog({
   open,

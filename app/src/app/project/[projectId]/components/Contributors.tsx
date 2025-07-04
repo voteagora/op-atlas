@@ -5,8 +5,8 @@ import { User as UserIcon } from "lucide-react"
 import { ChevronDown } from "lucide-react"
 import React from "react"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface ContributorsProps {
   contributors?: User[]

@@ -1,14 +1,14 @@
 "use client"
 
+import { useLogin } from "@privy-io/react-auth"
 import { format } from "date-fns"
-import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { MissionData } from "@/lib/MissionsAndRoundData"
 
-import { useLogin } from "@privy-io/react-auth"
 import { Button } from "../../ui/button"
 import { GreenBadge } from "../common/badges/GreenBadge"
 

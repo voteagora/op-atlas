@@ -11,10 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { TeamRole } from "@/lib/types"
+
 import { UserAvatarSmall } from "../common/UserAvatarSmall"
-import { useUser } from "@/hooks/db/useUser"
 
 export const TeamMemberRow = memo(function TeamMemberRow({
   user,
@@ -36,7 +37,6 @@ export const TeamMemberRow = memo(function TeamMemberRow({
 
   const { user: loadedUser } = useUser({ id: user.id })
   const username = useUsername(loadedUser || user)
-
 
   return (
     <div

@@ -4,8 +4,9 @@ import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
 import { UserWithAddresses } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
-import ProfileSidebarLink from "./ProfileSidebarLink"
 import { truncateAddress } from "@/lib/utils/string"
+
+import ProfileSidebarLink from "./ProfileSidebarLink"
 
 
 export default function ProfileHeaderLinks({

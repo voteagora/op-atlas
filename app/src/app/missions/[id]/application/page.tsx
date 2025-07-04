@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation"
 import React from "react"
 
+import { auth } from "@/auth"
 import { MissionApplication } from "@/components/missions/application/MissionApplication"
 import { MISSIONS } from "@/lib/MissionsAndRoundData"
-import { auth } from "@/auth"
 
 export default async function MissionApplicationPage({
   params,

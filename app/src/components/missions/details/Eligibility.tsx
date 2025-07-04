@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { Callout } from "@/components/common/Callout"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -10,37 +10,45 @@ import { cn } from "@/lib/utils"
 export const Eligibility = () => {
   const mission = useMissionFromPath()
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({})
+  const eligibilityItems = useMemo(
+    () => mission?.missionPageEligibility || [],
+    [mission?.missionPageEligibility],
+  )
 
-  const eligibilityItems = mission?.missionPageEligibility || []
-  
   // Calculate progress for different item types
   const { requiredItems, extraRewardItems, optionalItems } = useMemo(() => {
     const required: number[] = []
     const extraRewards: number[] = []
     const optional: number[] = []
-    
+
     eligibilityItems.forEach((item, index) => {
-      if (item.type === 'required') required.push(index)
-      else if (item.type === 'extraRewards') extraRewards.push(index)
+      if (item.type === "required") required.push(index)
+      else if (item.type === "extraRewards") extraRewards.push(index)
       else optional.push(index)
     })
-    
+
     return {
       requiredItems: required,
       extraRewardItems: extraRewards,
-      optionalItems: optional
+      optionalItems: optional,
     }
   }, [eligibilityItems])
 
-  const checkedRequiredCount = requiredItems.filter(index => checkedItems[index]).length
-  const checkedExtraRewardsCount = extraRewardItems.filter(index => checkedItems[index]).length
-  const allRequiredChecked = requiredItems.length > 0 && checkedRequiredCount === requiredItems.length
+  const checkedRequiredCount = requiredItems.filter(
+    (index) => checkedItems[index],
+  ).length
+  const checkedExtraRewardsCount = extraRewardItems.filter(
+    (index) => checkedItems[index],
+  ).length
+  const allRequiredChecked =
+    requiredItems.length > 0 && checkedRequiredCount === requiredItems.length
   const hasCheckedExtraRewards = checkedExtraRewardsCount > 0
 
   // Calculate percentage based on required items only
-  const percentage = requiredItems.length > 0 
-    ? Math.round((checkedRequiredCount / requiredItems.length) * 100) 
-    : 0
+  const percentage =
+    requiredItems.length > 0
+      ? Math.round((checkedRequiredCount / requiredItems.length) * 100)
+      : 0
 
   // Determine callout type and message
   const getCalloutConfig = () => {
@@ -75,9 +83,9 @@ export const Eligibility = () => {
   const { type: calloutType, message, barColor } = getCalloutConfig()
 
   const handleCheckChange = (index: number, checked: boolean) => {
-    setCheckedItems(prev => ({
+    setCheckedItems((prev) => ({
       ...prev,
-      [index]: checked
+      [index]: checked,
     }))
   }
 
@@ -92,7 +100,10 @@ export const Eligibility = () => {
           <div className="flex-col items-center w-full text-center">
             <div className="w-full h-3 bg-neutral-200 rounded-sm relative overflow-hidden">
               <div
-                className={cn("h-full bg-primary rounded-sm transition-all duration-300", barColor)}
+                className={cn(
+                  "h-full bg-primary rounded-sm transition-all duration-300",
+                  barColor,
+                )}
                 style={{ width: `${percentage}%` }}
               />
             </div>
@@ -113,6 +124,14 @@ export const Eligibility = () => {
             <div
               className="flex-1 cursor-pointer select-none"
               onClick={() => handleCheckChange(index, !checkedItems[index])}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  handleCheckChange(index, !checkedItems[index])
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
               {item.reactNode}
             </div>

@@ -1,7 +1,7 @@
+import Image from "next/image"
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import Image from "next/image"
 
 export interface LearnMoreLink {
   title: string
@@ -25,12 +25,12 @@ export function LearnMore({ links }: LearnMoreProps) {
               href={link.href}
               className="pl-3 pr-14 py-2.5 bg-background rounded-md border border-border inline-flex items-center gap-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/20 transition-colors"
             >
-      <Image
-          src="/assets/icons/link-icon.svg"
-          alt="link"
-          width={18}
-          height={18}
-        />
+              <Image
+                src="/assets/icons/link-icon.svg"
+                alt="link"
+                width={18}
+                height={18}
+              />
               {link.title}
             </ExternalLink>
           </div>

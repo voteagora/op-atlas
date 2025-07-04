@@ -31,7 +31,7 @@ interface NavItemProps {
 
 const NavItem: React.FC<NavItemProps> = ({ label, targetRef }) => {
   const handleClick = () => {
-    targetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    targetRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   return (
@@ -53,7 +53,7 @@ interface NavSection {
 
 export default function Mission() {
   const mission = useMissionFromPath()
-  
+
   // Create refs for potential sections
   const aboutRef = useRef<HTMLDivElement>(null)
   const rewardsRef = useRef<HTMLDivElement>(null)
@@ -67,57 +67,62 @@ export default function Mission() {
   // Define all possible navigation sections with their conditions
   const navigationSections: NavSection[] = [
     {
-      key: 'about',
-      label: 'About',
+      key: "about",
+      label: "About",
       ref: aboutRef,
-      condition: true // Always show
+      condition: true, // Always show
     },
     {
-      key: 'rewards',
-      label: 'How rewards are calculated',
+      key: "rewards",
+      label: "How rewards are calculated",
       ref: rewardsRef,
-      condition: !!mission?.rewards
+      condition: !!mission?.rewards,
     },
     {
-      key: 'supported-chains',
-      label: 'Supported chains',
+      key: "supported-chains",
+      label: "Supported chains",
       ref: supportedChainsRef,
-      condition: !!mission?.showSupportedNetworks
+      condition: !!mission?.showSupportedNetworks,
     },
     {
-      key: 'eligibility',
-      label: 'Check your eligibility',
+      key: "eligibility",
+      label: "Check your eligibility",
       ref: eligibilityRef,
-      condition: !!mission?.missionPageEligibility && mission.missionPageEligibility.length > 0
+      condition:
+        !!mission?.missionPageEligibility &&
+        mission.missionPageEligibility.length > 0,
     },
     {
-      key: 'how-it-works',
-      label: 'How it works',
+      key: "how-it-works",
+      label: "How it works",
       ref: howItWorksRef,
-      condition: !!mission?.howItWorks && mission.howItWorks.length > 0
+      condition: !!mission?.howItWorks && mission.howItWorks.length > 0,
     },
     {
-      key: 'featured-projects',
-      label: 'Featured projects',
+      key: "featured-projects",
+      label: "Featured projects",
       ref: featuredProjectsRef,
-      condition: !!mission?.featuredProjects && mission.featuredProjects.length > 0
+      condition:
+        !!mission?.featuredProjects && mission.featuredProjects.length > 0,
     },
     {
-      key: 'get-support',
-      label: 'Get support',
+      key: "get-support",
+      label: "Get support",
       ref: getSupportRef,
-      condition: !!mission?.supportOptions && mission.supportOptions.length > 0
+      condition: !!mission?.supportOptions && mission.supportOptions.length > 0,
     },
     {
-      key: 'learn-more',
-      label: 'Learn more',
+      key: "learn-more",
+      label: "Learn more",
       ref: learnMoreRef,
-      condition: !!mission?.learnMoreLinks && mission.learnMoreLinks.length > 0
-    }
+      condition: !!mission?.learnMoreLinks && mission.learnMoreLinks.length > 0,
+    },
   ]
 
   // Filter sections based on conditions
-  const visibleSections = navigationSections.filter(section => section.condition)
+  const visibleSections = navigationSections.filter(
+    (section) => section.condition,
+  )
 
   return (
     <div className="mt-20 bg-background flex flex-col w-full max-w-5xl rounded-3xl z-10">

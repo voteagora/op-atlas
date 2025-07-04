@@ -1,5 +1,6 @@
-import { formatNumber } from "@/lib/utils"
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts"
+
+import { formatNumber } from "@/lib/utils"
 
 type ChartEntry = {
   date: Date

@@ -3,7 +3,7 @@
 import { PrivyProvider } from "@privy-io/react-auth"
 import { createConfig, WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { mainnet, sepolia, optimismSepolia, optimism } from "viem/chains"
+import { mainnet, optimism, optimismSepolia, sepolia } from "viem/chains"
 import { http } from "wagmi"
 
 export const privyWagmiConfig = createConfig({

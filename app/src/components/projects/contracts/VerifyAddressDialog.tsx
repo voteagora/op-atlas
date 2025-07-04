@@ -5,6 +5,7 @@ import { useState } from "react"
 import { type Address } from "viem"
 
 import { Badge } from "@/components/common/Badge"
+import { CHAIN_INFO } from "@/components/common/chain"
 import { DialogProps } from "@/components/dialogs/types"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
@@ -15,7 +16,6 @@ import { verifyDeployer } from "@/lib/actions/contracts"
 import { getMessage } from "@/lib/utils/contracts"
 
 import { ChainSelector } from "./ChainSelector"
-import { CHAIN_INFO } from "@/components/common/chain"
 
 const defaultSelectedChain = 10
 

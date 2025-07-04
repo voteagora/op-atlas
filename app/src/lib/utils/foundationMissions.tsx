@@ -73,5 +73,23 @@ export const foundationMissionsData: MissionData = {
       buttonText: "Add to calendar",
       buttonLink: "#",
     },
-  ]
+  ],
+  applicationPageEligibility: [
+    {
+      reactNode: (
+        <p className="text-secondary-foreground">
+          My project has deployed contracts on a supported chain
+        </p>
+      ),
+      type: "hasDeployedContracts",
+    },
+    {
+      reactNode: (
+        <p className="text-secondary-foreground">
+          My project aligns with Interop TVL or Interop TX fees
+        </p>
+      ),
+      type: "alignsWithInteropMetrics",
+    },
+  ],
 }

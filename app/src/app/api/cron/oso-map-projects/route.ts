@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server"
 
-import { mapOSOProjects } from "@/lib/oso"
 import { getOSOMappedProjectIds } from "@/db/projects"
 import { withCronObservability } from "@/lib/cron"
+import { mapOSOProjects } from "@/lib/oso"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0

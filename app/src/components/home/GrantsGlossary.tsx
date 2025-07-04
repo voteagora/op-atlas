@@ -1,8 +1,8 @@
 import {
   Accordion,
+  AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  AccordionContent,
 } from "../ui/accordion"
 
 export const GrantsGlossary = () => {

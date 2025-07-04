@@ -2,6 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Application } from "@prisma/client"
 import { format } from "date-fns"
+import { useSession } from "next-auth/react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -10,14 +11,13 @@ import { z } from "zod"
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
+import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { submitApplications } from "@/lib/actions/applications"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTabs } from "./MissionApplicationTabs"
-import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
-import { useSession } from "next-auth/react"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(
@@ -33,7 +33,8 @@ export const ApplicationFormSchema = z.object({
 
 export function MissionApplication({ userId }: { userId: string }) {
   const mission = useMissionFromPath()
-  const isOpenForEnrollment = mission && mission?.startsAt < new Date()
+  const isOpenForEnrollment =
+    mission && mission?.startsAt &&mission?.startsAt < new Date()
 
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
@@ -72,7 +73,7 @@ export function MissionApplication({ userId }: { userId: string }) {
                 projectDescriptionOptions: project.projectDescriptionOptions,
                 impactStatement: project.impactStatement,
               })),
-            mission!.startsAt,
+            mission!.startsAt || new Date(),
             mission!.roundName,
             mission!.number,
             undefined,

@@ -8,7 +8,6 @@ import { LearnMoreLink } from "@/components/missions/details/LearnMore"
 
 import { auditGrantsData } from "./utils/auditGrantsData"
 import { foundationMissionsData } from "./utils/foundationMissions"
-
 import { growthGrantsData } from "./utils/growthGrantsData"
 import { retroFundingDevToolingData } from "./utils/retroFundingDevToolingData"
 import { retroFundingOnchainBuildersData } from "./utils/retroFundingOnchainBuildersData"
@@ -19,8 +18,11 @@ export type MissionData = FundingRoundData & {
   pageName: string
   ogDescription: string
   roundName: string
-  missionPageEligibility?: { reactNode: React.ReactNode; type?: "required" | "extraRewards" | "optional" }[]
-  applicationPageEligibility?: { reactNode: React.ReactNode; type?: string }[]
+  missionPageEligibility?: {
+    reactNode: React.ReactNode
+    type?: "required" | "extraRewards" | "optional"
+  }[]
+  applicationPageEligibility: { reactNode: React.ReactNode; type?: string }[]
   footer?: React.ReactNode
   rewards?: { measurement: React.ReactNode; criteria: string[] }
   applyBy: Date

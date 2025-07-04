@@ -1,7 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import React, { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/carousel"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export interface FeaturedProject {
   name: string
@@ -87,7 +87,7 @@ export function FeaturedProjects() {
             ))}
           </CarouselContent>
         </Carousel>
-        
+
         {/* Custom Navigation */}
         <div className="flex justify-center items-center gap-2 mt-4">
           <Button
@@ -100,7 +100,7 @@ export function FeaturedProjects() {
             <ChevronLeft className="w-4 h-4 mr-2" />
             Previous
           </Button>
-          
+
           {Array.from({ length: count }).map((_, index) => (
             <Button
               key={index}
@@ -109,13 +109,13 @@ export function FeaturedProjects() {
               onClick={() => api?.scrollTo(index)}
               className={cn(
                 "w-10 px-4 py-2.5",
-                current === index + 1 && "bg-background border-border"
+                current === index + 1 && "bg-background border-border",
               )}
             >
               {index + 1}
             </Button>
           ))}
-          
+
           <Button
             variant="ghost"
             size="default"

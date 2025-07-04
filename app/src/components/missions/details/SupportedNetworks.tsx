@@ -9,119 +9,119 @@ interface ChainInfo {
 }
 
 const supportedChains: ChainInfo[] = [
-  { 
-    id: "arenaZ", 
-    name: "Arena-Z", 
+  {
+    id: "arenaZ",
+    name: "Arena-Z",
     logo: "/assets/chain-logos/arenaZ.png",
-    website: "https://www.superchain.eco/chains/arena-z"
+    website: "https://www.superchain.eco/chains/arena-z",
   },
-  { 
-    id: "base", 
-    name: "Base", 
+  {
+    id: "base",
+    name: "Base",
     logo: "/assets/chain-logos/Base.png",
-    website: "https://www.superchain.eco/chains/base"
+    website: "https://www.superchain.eco/chains/base",
   },
-  { 
-    id: "bob", 
-    name: "Bob", 
+  {
+    id: "bob",
+    name: "Bob",
     logo: "/assets/chain-logos/Bob.png",
-    website: "https://www.superchain.eco/chains/bob"
+    website: "https://www.superchain.eco/chains/bob",
   },
-  { 
-    id: "epic", 
-    name: "Epic", 
+  {
+    id: "epic",
+    name: "Epic",
     logo: "/assets/chain-logos/Epic.png",
-    website: "https://www.superchain.eco/chains/epic"
+    website: "https://www.superchain.eco/chains/epic",
   },
-  { 
-    id: "ink", 
-    name: "Ink", 
+  {
+    id: "ink",
+    name: "Ink",
     logo: "/assets/chain-logos/Ink.png",
-    website: "https://www.superchain.eco/chains/ink"
+    website: "https://www.superchain.eco/chains/ink",
   },
-  { 
-    id: "lisk", 
-    name: "Lisk", 
+  {
+    id: "lisk",
+    name: "Lisk",
     logo: "/assets/chain-logos/Lisk.png",
-    website: "https://www.superchain.eco/chains/lisk"
+    website: "https://www.superchain.eco/chains/lisk",
   },
-  { 
-    id: "metalL2", 
-    name: "Metal L2", 
+  {
+    id: "metalL2",
+    name: "Metal L2",
     logo: "/assets/chain-logos/metalL2.png",
-    website: "https://www.superchain.eco/chains/metal-l2"
+    website: "https://www.superchain.eco/chains/metal-l2",
   },
-  { 
-    id: "mint", 
-    name: "Mint", 
+  {
+    id: "mint",
+    name: "Mint",
     logo: "/assets/chain-logos/Mint.png",
-    website: "https://www.superchain.eco/chains/mint"
+    website: "https://www.superchain.eco/chains/mint",
   },
-  { 
-    id: "mode", 
-    name: "Mode", 
+  {
+    id: "mode",
+    name: "Mode",
     logo: "/assets/chain-logos/Mode.png",
-    website: "https://www.superchain.eco/chains/mode"
+    website: "https://www.superchain.eco/chains/mode",
   },
   {
     id: "optimism",
     name: "OP Mainnet",
     logo: "/assets/chain-logos/OP-Mainnet.png",
-    website: "https://www.superchain.eco/chains/op-mainnet"
+    website: "https://www.superchain.eco/chains/op-mainnet",
   },
   {
     id: "polynomial",
     name: "Polynomial",
     logo: "/assets/chain-logos/Polynomial.png",
-    website: "https://www.superchain.eco/chains/polynomial"
+    website: "https://www.superchain.eco/chains/polynomial",
   },
-  { 
-    id: "race", 
-    name: "RACE", 
+  {
+    id: "race",
+    name: "RACE",
     logo: "/assets/chain-logos/race.jpeg",
-    website: "https://www.superchain.eco/chains/race"
+    website: "https://www.superchain.eco/chains/race",
   },
-  { 
-    id: "shape", 
-    name: "Shape", 
+  {
+    id: "shape",
+    name: "Shape",
     logo: "/assets/chain-logos/Shape.png",
-    website: "https://www.superchain.eco/chains/shape"
+    website: "https://www.superchain.eco/chains/shape",
   },
-  { 
-    id: "soneium", 
-    name: "Sonium", 
+  {
+    id: "soneium",
+    name: "Sonium",
     logo: "/assets/chain-logos/Soneium.png",
-    website: "https://www.superchain.eco/chains/sonium"
+    website: "https://www.superchain.eco/chains/sonium",
   },
   {
     id: "superseed",
     name: "Superseed",
     logo: "/assets/chain-logos/superseed.jpg",
-    website: "https://www.superchain.eco/chains/superseed"
+    website: "https://www.superchain.eco/chains/superseed",
   },
-  { 
-    id: "swell", 
-    name: "Swell", 
+  {
+    id: "swell",
+    name: "Swell",
     logo: "/assets/chain-logos/Swell.png",
-    website: "https://www.superchain.eco/chains/swell"
+    website: "https://www.superchain.eco/chains/swell",
   },
   {
     id: "unichain",
     name: "Unichain",
     logo: "/assets/chain-logos/Unichain.png",
-    website: "https://www.superchain.eco/chains/unichain"
+    website: "https://www.superchain.eco/chains/unichain",
   },
   {
     id: "worldchain",
     name: "World",
     logo: "/assets/chain-logos/Worldchain.png",
-    website: "https://www.superchain.eco/chains/world-chain"
+    website: "https://www.superchain.eco/chains/world-chain",
   },
-  { 
-    id: "zora", 
-    name: "Zora", 
+  {
+    id: "zora",
+    name: "Zora",
     logo: "/assets/chain-logos/Zora.png",
-    website: "https://www.superchain.eco/chains/zora"
+    website: "https://www.superchain.eco/chains/zora",
   },
 ]
 

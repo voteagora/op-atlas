@@ -1,4 +1,5 @@
 import Image from "next/image"
+
 import TrackedLink from "../common/TrackedLink"
 
 type GrantContainerProps = {

@@ -17,7 +17,8 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
     enabled: true,
   })
 
-  const { linkGithub, unlinkGithub, toggleIsDeveloper } = usePrivyLinkGithub(userId)
+  const { linkGithub, unlinkGithub, toggleIsDeveloper } =
+    usePrivyLinkGithub(userId)
 
   const username = user?.github || privyUser?.github?.username
   const isSyncing =

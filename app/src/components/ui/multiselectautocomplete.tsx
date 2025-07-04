@@ -42,7 +42,6 @@ export function MultiSelect({
   const inputRef = useRef<HTMLInputElement>(null)
   const [, setOpen] = useState(false)
 
-
   const handleUnselect = useCallback(
     (item: IMultiSelectOptions) => {
       setSelectedOptions((prev) => prev.filter((s) => s.value !== item.value))
@@ -127,7 +126,6 @@ export function MultiSelect({
                 className="py-2 px-3 rounded-md shrink-0 flex flex-row items-center gap-2"
                 variant="secondary"
               >
-
                 <div className="flex flex-row items-center gap-2">
                   <UserAvatarSmall imageUrl={item.image} />
                   <p className="text-sm text-secondary-foreground">
@@ -151,8 +149,7 @@ export function MultiSelect({
             )
           })}
         </div>
-      ) : null
-      }
-    </div >
+      ) : null}
+    </div>
   )
 }

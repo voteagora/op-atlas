@@ -7,15 +7,15 @@ import { mainnet } from "viem/chains"
 
 import { auth } from "@/auth"
 import {
+  deleteUserPassport,
   getUserById,
+  getUserPassports,
   searchByAddress,
   searchByEmail,
   searchUsersByUsername,
   updateUser,
   updateUserInteraction,
   upsertUserPassport,
-  deleteUserPassport,
-  getUserPassports,
 } from "@/db/users"
 
 const client = createPublicClient({
@@ -106,7 +106,7 @@ export const searchUsers = async (query: string) => {
 
   // Check if the query is an ENS name (ends with .eth)
   let searchQuery = query
-  if (query.toLowerCase().endsWith('.eth')) {
+  if (query.toLowerCase().endsWith(".eth")) {
     const resolvedAddress = await resolveEnsName(query)
     if (resolvedAddress) {
       searchQuery = resolvedAddress
@@ -116,12 +116,17 @@ export const searchUsers = async (query: string) => {
   const [usernameResults, addressResults, emailResults] = await Promise.all([
     searchUsersByUsername({ username: searchQuery }),
     searchByAddress({ address: searchQuery }),
-    searchByEmail({ email: searchQuery })
+    searchByEmail({ email: searchQuery }),
   ])
 
   // Combine results and remove duplicates based on user ID
   const uniqueUsers = Array.from(
-    new Map([...usernameResults, ...addressResults, ...emailResults].map(user => [user.id, user])).values()
+    new Map(
+      [...usernameResults, ...addressResults, ...emailResults].map((user) => [
+        user.id,
+        user,
+      ]),
+    ).values(),
   )
 
   return {
@@ -186,7 +191,7 @@ export const refreshUserPassport = async () => {
 
   // Delete existing passport records for addresses that are no longer associated with the user
   const existingPassports = await getUserPassports(userId)
-  const currentAddresses = new Set(user.addresses.map(addr => addr.address))
+  const currentAddresses = new Set(user.addresses.map((addr) => addr.address))
   for (const passport of existingPassports) {
     if (!currentAddresses.has(passport.address)) {
       await deleteUserPassport(passport.id)
@@ -201,9 +206,9 @@ export const refreshUserPassport = async () => {
         `https://api.passport.xyz/v2/stamps/${scorerId}/score/${address.address}`,
         {
           headers: {
-            'X-API-KEY': apiKey,
+            "X-API-KEY": apiKey,
           },
-        }
+        },
       )
 
       if (!response.ok) {
@@ -222,16 +227,18 @@ export const refreshUserPassport = async () => {
           expiresAt: new Date(data.expiration_timestamp),
         },
       })
-
     } catch (error) {
-      console.error(`Error fetching Passport score for address ${address.address}:`, error)
+      console.error(
+        `Error fetching Passport score for address ${address.address}:`,
+        error,
+      )
       errors.push(`Error for address ${address.address}: Internal server error`)
     }
   }
 
   return {
-    error: errors.length > 0 ? errors.join(', ') : null,
-    success: errors.length === 0
+    error: errors.length > 0 ? errors.join(", ") : null,
+    success: errors.length === 0,
   }
 }
 
@@ -246,9 +253,6 @@ export const getCitizenshipEligibility = async () => {
   }
 
   return {
-    isEligible: true
+    isEligible: true,
   }
 }
-
-
-

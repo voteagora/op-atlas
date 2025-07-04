@@ -118,8 +118,8 @@ export const retroFundingOnchainBuildersData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          I&apos;ve added my project to the BundleBear-app in GitHub, and my verified
-          contract addresses are present in the registry (optional)
+          I&apos;ve added my project to the BundleBear-app in GitHub, and my
+          verified contract addresses are present in the registry (optional)
         </p>
       ),
       type: "extraRewards",

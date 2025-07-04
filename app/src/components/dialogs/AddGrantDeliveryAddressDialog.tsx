@@ -17,10 +17,10 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { useUser } from "@/hooks/db/useUser"
+import { useUsername } from "@/hooks/useUsername"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { createProjectKycTeamAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { useUsername } from "@/hooks/useUsername"
 
 const formSchema = z.object({
   signature: z.string().min(1, "Signature is required"),
@@ -38,7 +38,6 @@ export function AddGrantDeliveryAddressDialog({
   const { user } = useUser({ id: session?.user?.id, enabled: true })
   const username = useUsername(user)
 
-
   const [isPending, startTransition] = useTransition()
   const {
     control,
@@ -52,12 +51,15 @@ export function AddGrantDeliveryAddressDialog({
     },
   })
 
-  const [messageToSign, setMessageToSign] = useState(`I verify that I am ${username} on Atlas and I'm an optimist.`)
+  const [messageToSign, setMessageToSign] = useState(
+    `I verify that I am ${username} on Atlas and I'm an optimist.`,
+  )
 
   useEffect(() => {
-    setMessageToSign(`I verify that I am ${username} on Atlas and I'm an optimist.`)
+    setMessageToSign(
+      `I verify that I am ${username} on Atlas and I'm an optimist.`,
+    )
   }, [username])
-
 
   const handleClose = useCallback(
     (isOpen: boolean) => {

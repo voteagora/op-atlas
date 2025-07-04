@@ -152,7 +152,11 @@ export default async function Page({
           {qualification && (
             <div>
               {qualification.type !== CITIZEN_TYPES.user ? (
-                <Sidebar user={user} qualification={qualification} redirectUrl={searchParams.redirectUrl} />
+                <Sidebar
+                  user={user}
+                  qualification={qualification}
+                  redirectUrl={searchParams.redirectUrl}
+                />
               ) : (
                 <div>
                   {isCitizenshipLimitReached ? (
@@ -168,7 +172,11 @@ export default async function Page({
                       </div>
                     </div>
                   ) : (
-                    <Sidebar user={user} qualification={qualification} redirectUrl={searchParams.redirectUrl} />
+                    <Sidebar
+                      user={user}
+                      qualification={qualification}
+                      redirectUrl={searchParams.redirectUrl}
+                    />
                   )}
                 </div>
               )}

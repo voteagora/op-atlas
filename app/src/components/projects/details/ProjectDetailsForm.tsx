@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
-import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
@@ -240,16 +240,16 @@ export default function ProjectDetailsForm({
         try {
           const [response, res] = project
             ? await Promise.all([
-              updateProjectDetails(project.id, newValues),
-              setProjectOrganization(
-                project.id,
-                project.organization?.organization?.id,
-                values.organization?.id,
-              ),
-            ])
+                updateProjectDetails(project.id, newValues),
+                setProjectOrganization(
+                  project.id,
+                  project.organization?.organization?.id,
+                  values.organization?.id,
+                ),
+              ])
             : await Promise.all([
-              createNewProject(newValues, values.organization?.id),
-            ])
+                createNewProject(newValues, values.organization?.id),
+              ])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")

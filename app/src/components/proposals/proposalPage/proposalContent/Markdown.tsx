@@ -13,19 +13,27 @@ const Markdown = ({ description }: ProposalContentProps) => (
           <p className="mb-2 leading-normal text-text-default">{children}</p>
         ),
         h1: ({ children }) => (
-          <h1 className="text-2xl font-bold mb-2 mt-4 text-text-default">{children}</h1>
+          <h1 className="text-2xl font-bold mb-2 mt-4 text-text-default">
+            {children}
+          </h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-xl font-semibold mb-2 mt-3 text-text-default">{children}</h2>
+          <h2 className="text-xl font-semibold mb-2 mt-3 text-text-default">
+            {children}
+          </h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-lg font-medium mb-1 mt-2 text-text-default">{children}</h3>
+          <h3 className="text-lg font-medium mb-1 mt-2 text-text-default">
+            {children}
+          </h3>
         ),
         ul: ({ children }) => (
           <ul className="list-disc list-inside mb-2 space-y-0.5">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="list-decimal list-inside mb-2 space-y-0.5">{children}</ol>
+          <ol className="list-decimal list-inside mb-2 space-y-0.5">
+            {children}
+          </ol>
         ),
         li: ({ children }) => (
           <li className="leading-normal text-text-default">{children}</li>

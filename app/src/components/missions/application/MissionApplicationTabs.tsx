@@ -58,7 +58,8 @@ export function MissionApplicationTabs({
     return project.selected
   })
 
-  const isOpenForEnrollment = mission && mission?.startsAt < new Date()
+  const isOpenForEnrollment =
+    mission && mission?.startsAt && mission?.startsAt < new Date()
 
   const viewMissionDetailsBtn = (
     <Button

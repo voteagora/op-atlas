@@ -241,16 +241,16 @@ export default function MakeOrganizationForm({
         try {
           const response = organization
             ? await updateOrganizationDetails({
-              id: organization.id,
-              organization: newValues,
-            })
+                id: organization.id,
+                organization: newValues,
+              })
             : await createNewOrganization({
-              organization: newValues,
-              teamMembers: team.map(({ user, role }) => ({
-                userId: user.id,
-                role,
-              })),
-            })
+                organization: newValues,
+                teamMembers: team.map(({ user, role }) => ({
+                  userId: user.id,
+                  role,
+                })),
+              })
 
           if (response?.error !== null || !response) {
             throw new Error(response?.error ?? "Failed to save project")

@@ -1,7 +1,8 @@
-import { getCitizenForUser } from "@/db/citizens"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useEffect } from "react"
+
+import { getCitizenForUser } from "@/db/citizens"
 
 export const USER_CITIZEN_QUERY_KEY = "citizen"
 

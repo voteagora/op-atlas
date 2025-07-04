@@ -1,5 +1,6 @@
 "use client"
 
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import React, { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/carousel"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export interface HowItWorksStep {
   number: number
@@ -54,9 +54,7 @@ export function HowItWorks() {
                     {step.number}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <div className="text-base font-medium">
-                      {step.title}
-                    </div>
+                    <div className="text-base font-medium">{step.title}</div>
                     {step.description && (
                       <div className="text-secondary-foreground text-base">
                         {step.description}
@@ -68,7 +66,7 @@ export function HowItWorks() {
             ))}
           </CarouselContent>
         </Carousel>
-        
+
         {/* Custom Navigation */}
         <div className="flex justify-center items-center gap-2 mt-4">
           <Button
@@ -81,7 +79,7 @@ export function HowItWorks() {
             <ChevronLeft className="w-4 h-4 mr-2" />
             Previous
           </Button>
-          
+
           {Array.from({ length: count }).map((_, index) => (
             <Button
               key={index}
@@ -90,13 +88,13 @@ export function HowItWorks() {
               onClick={() => api?.scrollTo(index)}
               className={cn(
                 "w-10 px-4 py-2.5",
-                current === index + 1 && "bg-background border-border"
+                current === index + 1 && "bg-background border-border",
               )}
             >
               {index + 1}
             </Button>
           ))}
-          
+
           <Button
             variant="ghost"
             size="default"
