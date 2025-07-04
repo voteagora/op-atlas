@@ -90,21 +90,60 @@ export async function deleteKycTeam({
   kycTeamId: string
   hasActiveStream?: boolean
 }) {
-  // Soft delete if there's an active stream
-  if (hasActiveStream) {
-    await prisma.kYCTeam.update({
+  await prisma.$transaction(async (tx) => {
+    // First, get all KYC users that are only associated with this KYC team
+    // and don't have APPROVED status (since approved users should be preserved)
+    const kycUsersToDelete = await tx.kYCUser.findMany({
       where: {
-        id: kycTeamId,
+        KYCUserTeams: {
+          every: {
+            kycTeamId: kycTeamId,
+          },
+        },
+        status: {
+          not: "APPROVED",
+        },
       },
-      data: {
-        deletedAt: new Date(),
+      select: {
+        id: true,
       },
     })
-  } else {
-    await prisma.kYCTeam.delete({
+
+    // Delete KYCUserTeams relationships for this KYC team
+    await tx.kYCUserTeams.deleteMany({
       where: {
-        id: kycTeamId,
+        kycTeamId: kycTeamId,
       },
     })
-  }
+
+    // Delete KYC users that were only associated with this team
+    if (kycUsersToDelete.length > 0) {
+      await tx.kYCUser.deleteMany({
+        where: {
+          id: {
+            in: kycUsersToDelete.map((user) => user.id),
+          },
+        },
+      })
+    }
+
+    // Finally, delete the KYC team
+    if (hasActiveStream) {
+      // Soft delete if there's an active stream
+      await tx.kYCTeam.update({
+        where: {
+          id: kycTeamId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      })
+    } else {
+      await tx.kYCTeam.delete({
+        where: {
+          id: kycTeamId,
+        },
+      })
+    }
+  })
 }
