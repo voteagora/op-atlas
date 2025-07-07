@@ -1,6 +1,7 @@
 import Image from "next/image"
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 
 interface UserAvatarProps {
   imageUrl?: string | null
@@ -47,7 +48,10 @@ export function UserAvatar({
   ) : (
     <Avatar className={sizeClasses.container}>
       <div
-        className={`${sizeClasses.placeholder} my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none`}
+        className={cn(
+          sizeClasses.placeholder,
+          "my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none",
+        )}
       >
         <Image
           src="/assets/icons/user-icon.svg"
