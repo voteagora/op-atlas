@@ -9,6 +9,7 @@ interface CandidateCardsProps {
   userIds: string[]
   selectedVote?: { voteType: VoteType; selections?: number[] }
   setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void
+  votingDisabled?: boolean
 }
 
 const CandidateCardSkeleton = () => (
@@ -33,6 +34,7 @@ const CandidateCards = ({
   userIds,
   selectedVote,
   setSelectedVote,
+  votingDisabled,
 }: CandidateCardsProps) => {
   const { data: candidates, isLoading: areCandidatesLoading } =
     useMultipleUsers(userIds)
@@ -91,6 +93,7 @@ const CandidateCards = ({
             user={candidate}
             selectedVote={selectedVote?.selections?.includes(idx) || false}
             setSelectedVote={() => handleApprovalClick(idx)}
+            votingDisabled={votingDisabled}
           />
         ))}
       </div>
