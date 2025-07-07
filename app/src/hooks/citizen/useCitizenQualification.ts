@@ -3,21 +3,11 @@ import { useQuery } from "@tanstack/react-query"
 import { s8CitizenshipQualification } from "@/lib/actions/citizens"
 import { CitizenshipQualification } from "@/lib/types"
 
-interface UseCitizenQualificationOptions {
-  userId?: string
-}
-
-export const useCitizenQualification = (
-  options: UseCitizenQualificationOptions = {},
-) => {
-  const { userId } = options
-
+export const useCitizenQualification = () => {
   return useQuery({
-    queryKey: ["citizen-qualification", userId],
+    queryKey: ["citizen-qualification"],
     queryFn: async () => {
-      return (await s8CitizenshipQualification({
-        userId,
-      })) as CitizenshipQualification
+      return (await s8CitizenshipQualification()) as CitizenshipQualification
     },
   })
 }
