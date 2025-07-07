@@ -35,22 +35,12 @@ const CandidateCards = ({
   selectedVote,
   setSelectedVote,
 }: CandidateCardsProps) => {
-  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
   const { data: candidates, isLoading: areCandidatesLoading } =
     useMultipleUsers(userIds)
 
   console.log({ candidates })
 
-  useEffect(() => {
-    if (!areCandidatesLoading) {
-      const timer = setTimeout(() => {
-        setIsInitialLoad(false)
-      }, 150)
-      return () => clearTimeout(timer)
-    }
-  }, [areCandidatesLoading])
-
-  if (isInitialLoad) {
+  if (areCandidatesLoading) {
     return (
       <>
         <div className="border-t px-2 align-left w-full">
