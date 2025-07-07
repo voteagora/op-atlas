@@ -4,7 +4,7 @@ import Image from "next/image"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { CitizenshipQualification } from "@/lib/types"
 
-import { UserAvatarVariable } from "./UserAvatarLarge"
+import { UserAvatar } from "./UserAvatarLarge"
 
 export const EligibleCitizenAvatar = ({
   user,
@@ -16,7 +16,7 @@ export const EligibleCitizenAvatar = ({
   size?: "sm" | "lg"
 }) => {
   if (qualification.type === CITIZEN_TYPES.user) {
-    return <UserAvatarVariable imageUrl={user?.imageUrl} size={size} />
+    return <UserAvatar imageUrl={user?.imageUrl} size={size} />
   }
 
   let imgSize = 64
