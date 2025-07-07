@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { getUserById } from "@/db/users"
-import { s8CitizenshipQualification } from "@/lib/actions/citizens"
 import { UserWithAddresses } from "@/lib/types"
 
 const getUserQualifications = async (candidateUserIds: string[]) => {

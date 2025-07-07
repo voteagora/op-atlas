@@ -1,10 +1,9 @@
 "use client"
 
-import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
-import { useMultipleUsers } from "@/hooks/citizen/useMultiCitizenUser"
 import { VoteType } from "@/components/proposals/proposal.types"
+import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useEffect, useState } from "react"
+import { useMultipleUsers } from "@/hooks/citizen/useMultiCitizenUser"
 
 interface CandidateCardsProps {
   userIds: string[]
