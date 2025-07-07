@@ -5,7 +5,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar"
 interface UserAvatarProps {
   imageUrl?: string | null
   children?: React.ReactNode
-  size?: "sm" | "md" | "lg"
+  size?: "xs" | "sm" | "lg"
 }
 
 export function UserAvatar({
@@ -16,13 +16,13 @@ export function UserAvatar({
   // Define size-based constants
   const sizeClasses = (() => {
     switch (size) {
-      case "sm":
+      case "xs":
         return {
           container: "w-5 h-5",
           placeholder: "w-5 h-5",
           iconSize: 11,
         }
-      case "md":
+      case "sm":
         return {
           container: "w-6 h-6",
           placeholder:

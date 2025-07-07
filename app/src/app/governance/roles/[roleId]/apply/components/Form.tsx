@@ -60,7 +60,7 @@ export const Form = ({
               <div className="flex items-center gap-3">
                 <UserAvatar
                   imageUrl={selectedEntity.avatar || ""}
-                  size={"md"}
+                  size={"sm"}
                 />
                 <span className="text-sm text-secondary-foreground font-normal">
                   {selectedEntity.name}
@@ -88,7 +88,7 @@ export const Form = ({
               }
             >
               <div className="flex items-center gap-3">
-                <UserAvatar imageUrl={user.imageUrl} size={"md"} />
+                <UserAvatar imageUrl={user.imageUrl} size={"sm"} />
                 <div className="text-sm text-secondary-foreground font-normal">
                   {username} (You)
                 </div>
@@ -110,7 +110,7 @@ export const Form = ({
                 <div className="flex items-center gap-3">
                   <UserAvatar
                     imageUrl={userOrg.organization.avatarUrl}
-                    size={"md"}
+                    size={"sm"}
                   />
                   <div className="text-sm text-secondary-foreground font-normal">
                     {userOrg.organization.name}

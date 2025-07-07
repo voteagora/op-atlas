@@ -46,7 +46,7 @@ export const TeamMemberCard = memo(function TeamMemberCard({
       onMouseLeave={() => setMouseEntered(false)}
     >
       <div className="py-2 px-3 rounded-md border border-input flex items-center gap-2 w-full h-10">
-        <UserAvatar imageUrl={user?.imageUrl} size={"md"} />
+        <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
         <p className="text-sm text-foreground">
           {username} {isCurrentUser && "(You)"}
         </p>

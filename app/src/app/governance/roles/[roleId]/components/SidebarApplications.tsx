@@ -60,7 +60,7 @@ const OrgCandidate = ({ application }: { application: RoleApplication }) => {
       aria-label={`View ${org.name}`}
     >
       <div className="flex flex-row gap-2 text-sm ">
-        <UserAvatar imageUrl={org.avatarUrl} size={"md"} />
+        <UserAvatar imageUrl={org.avatarUrl} size={"sm"} />
         {org.name}
       </div>
       <ArrowRightS className="w-4 h-4" />
@@ -95,7 +95,7 @@ const UserCandidate = ({ application }: { application: RoleApplication }) => {
       aria-label={`View profile of ${username || user.name}`}
     >
       <div className="flex flex-row gap-2 text-sm ">
-        <UserAvatar imageUrl={user.imageUrl} size={"md"} />
+        <UserAvatar imageUrl={user.imageUrl} size={"sm"} />
         {username || user.name}
       </div>
       <ArrowRightS className="w-4 h-4" />
