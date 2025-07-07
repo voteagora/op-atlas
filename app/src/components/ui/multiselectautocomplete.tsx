@@ -99,7 +99,7 @@ export function MultiSelect({
                           }}
                         >
                           <div className="flex flex-row items-center gap-2">
-                            <UserAvatar imageUrl={option.image} size={"md"} />
+                            <UserAvatar imageUrl={option.image} size={"sm"} />
                             {option.label}
                           </div>
                         </CommandItem>
@@ -127,7 +127,7 @@ export function MultiSelect({
                 variant="secondary"
               >
                 <div className="flex flex-row items-center gap-2">
-                  <UserAvatar imageUrl={item.image} size={"md"} />
+                  <UserAvatar imageUrl={item.image} size={"sm"} />
                   <p className="text-sm text-secondary-foreground">
                     {item.label}
                   </p>
