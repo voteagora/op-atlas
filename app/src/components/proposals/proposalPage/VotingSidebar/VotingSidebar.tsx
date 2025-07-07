@@ -69,6 +69,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
           : session?.user?.id
           ? "not signed in"
           : "ineligible",
+        user_group: citizenEligibility?.type,
       })
       isTracked.current = true
     }

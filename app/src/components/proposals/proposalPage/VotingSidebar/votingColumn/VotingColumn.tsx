@@ -409,11 +409,35 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           wallet_address: signerAddress,
         })
       } catch (error) {
-        console.error("Failed to cast vote:", error)
+        // Collect context for the error
+        const errorMessage =
+          error instanceof Error ? error.message : `Unknown error: ${error}`
+
+        const errorContext = {
+          proposalData: proposalData,
+          choice: choices,
+          signer: signer,
+          citizen: citizen,
+          browser:
+            typeof window !== "undefined" ? navigator?.userAgent : "unknown",
+          chain_id:
+            typeof window !== "undefined"
+              ? window?.ethereum?.chainId
+              : "unknown",
+          ethereumWindow: window?.ethereum,
+          wallet_provider: wallets?.[0]?.walletClientType || "unknown",
+          connected_wallets: wallets?.map((w) => ({
+            type: w?.walletClientType,
+            address: w?.address,
+          })),
+          selected_vote: selectedVote,
+          timestamp: new Date().toISOString(),
+          error: errorMessage,
+        }
+
+        console.error("Failed to cast vote:", errorContext)
 
         // Track vote error
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error"
         track("Citizen Voting Vote Error", {
           proposal_id: proposalData.id,
           error: errorMessage,
