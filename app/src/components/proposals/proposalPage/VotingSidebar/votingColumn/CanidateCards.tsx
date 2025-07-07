@@ -98,7 +98,6 @@ const CandidateCards = ({
           <CandidateCard
             key={idx}
             user={candidate.user!}
-            qualification={candidate.qualification!}
             selectedVote={selectedVote?.selections?.includes(idx) || false}
             setSelectedVote={() => handleApprovalClick(idx)}
           />
