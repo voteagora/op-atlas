@@ -2,7 +2,7 @@
 
 import { RoleApplication } from "@prisma/client"
 
-import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
+import { UserAvatar } from "@/components/common/UserAvatar"
 import { ArrowRightS } from "@/components/icons/remix"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
@@ -58,7 +58,7 @@ const OrgCandidate = ({ application }: { application: RoleApplication }) => {
       aria-label={`View ${org.name}`}
     >
       <div className="flex flex-row gap-2 text-sm ">
-        <UserAvatarSmall imageUrl={org.avatarUrl} />
+        <UserAvatar imageUrl={org.avatarUrl} size={"sm"} />
         {org.name}
       </div>
       <ArrowRightS className="w-4 h-4" />
@@ -92,7 +92,7 @@ const UserCandidate = ({ application }: { application: RoleApplication }) => {
       aria-label={`View profile of ${username || user.name}`}
     >
       <div className="flex flex-row gap-2 text-sm ">
-        <UserAvatarSmall imageUrl={user.imageUrl} />
+        <UserAvatar imageUrl={user.imageUrl} size={"sm"} />
         {username || user.name}
       </div>
       <ArrowRightS className="w-4 h-4" />
