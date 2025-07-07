@@ -5,7 +5,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar"
 interface UserAvatarProps {
   imageUrl?: string | null
   children?: React.ReactNode
-  size?: "sm" | "lg"
+  size?: "sm" | "md" | "lg"
 }
 
 export function UserAvatar({
@@ -21,6 +21,13 @@ export function UserAvatar({
           container: "w-5 h-5",
           placeholder: "w-5 h-5",
           iconSize: 11,
+        }
+      case "md":
+        return {
+          container: "w-6 h-6",
+          placeholder:
+            "w-6 h-6 bg-secondary rounded-full flex items-center justify-center border border-muted",
+          iconSize: 8,
         }
       case "lg":
       default:
