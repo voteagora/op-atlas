@@ -1,4 +1,5 @@
 import Image from "next/image"
+
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 
 interface UserAvatarProps {

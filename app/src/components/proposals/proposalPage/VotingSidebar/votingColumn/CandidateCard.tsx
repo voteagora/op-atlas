@@ -1,10 +1,10 @@
 "use client"
 
-import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
 import { User } from "@prisma/client"
-import { ProjectWithDetails } from "@/lib/types"
-import { useUserProjects } from "@/hooks/db/useUserProjects"
+
 import { UserAvatar } from "@/components/common/UserAvatarLarge"
+import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { ProjectWithDetails } from "@/lib/types"
 
 const CandidateCard = ({
   user,
