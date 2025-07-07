@@ -84,10 +84,10 @@ const VotingChoices = ({
       )
     case "OFFCHAIN_APPROVAL":
       const userIds: string[] = [
-        "f1304c1b-e3a0-472b-bb27-d810b7962b05",
-        "35bbf4a9-9193-44af-a693-76890667aedb",
-        "2fa330d4-d3ee-44b3-b704-0477928834d6",
-        "b3eeb98f-1c2d-4b26-9c05-578c9e6a2426",
+        "40525dc0-dee7-4905-a9a0-0d6555c08627",
+        "9c6886db-bd9c-4cee-8d7b-056218b75cec",
+        "c983d567-6f99-4c92-9f19-1ea608de942e",
+        "e1bf03eb-a3b3-41c6-aa32-e267341a402b",
       ]
       return (
         <div className="transition-all duration-300 ease-in-out">
