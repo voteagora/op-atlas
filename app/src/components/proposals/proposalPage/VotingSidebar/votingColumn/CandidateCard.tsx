@@ -15,9 +15,9 @@ const CandidateCard = ({
   selectedVote?: boolean
   setSelectedVote: () => void
 }) => {
-  const { data: projects, isLoading } = useUserProjects(user.id)
+  const { data: projects, isLoading } = useUserProjects(user?.id)
 
-  console.log({ projects })
+  console.log({ user, projects })
   return (
     <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
       <div className="flex items-center h-5 gap-[8px] justify-between">
