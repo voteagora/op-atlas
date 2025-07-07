@@ -58,6 +58,14 @@ const VotingColumnSkeleton = () => (
   </div>
 )
 
+//TODO TEMP MOCK
+const userIds: string[] = [
+  "40525dc0-dee7-4905-a9a0-0d6555c08627",
+  "9c6886db-bd9c-4cee-8d7b-056218b75cec",
+  "c983d567-6f99-4c92-9f19-1ea608de942e",
+  "e1bf03eb-a3b3-41c6-aa32-e267341a402b",
+]
+
 // Update the VotingChoices component props and implementation
 const VotingChoices = ({
   proposalType,
@@ -83,12 +91,6 @@ const VotingChoices = ({
         </div>
       )
     case "OFFCHAIN_APPROVAL":
-      const userIds: string[] = [
-        "40525dc0-dee7-4905-a9a0-0d6555c08627",
-        "9c6886db-bd9c-4cee-8d7b-056218b75cec",
-        "c983d567-6f99-4c92-9f19-1ea608de942e",
-        "e1bf03eb-a3b3-41c6-aa32-e267341a402b",
-      ]
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards
@@ -171,9 +173,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }, [isVoteLoading, isCitizenLoading, isEligibilityLoading])
 
-  const myVoteType = myVote?.vote
-    ? mapValueToVoteType(proposalData.proposalType, myVote.vote)
-    : undefined
+  const { voteType: myVoteType, selections: myVoteSelections } = myVote?.vote
+    ? mapValueToVoteType(proposalData.proposalType, myVote.vote) || {}
+    : {}
 
   const votingActions = getVotingActions(
     !!session?.user?.id,
@@ -506,6 +508,23 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <MyVote voteType={myVoteType} />
+        </div>
+      )}
+
+      {myVoteType && proposalData.proposalType === "OFFCHAIN_APPROVAL" && (
+        <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+          <CandidateCards
+            userIds={userIds}
+            selectedVote={{
+              voteType: myVoteType,
+              selections:
+                myVoteSelections && myVoteSelections[0]
+                  ? (myVoteSelections[0] as unknown as number[])
+                  : undefined,
+            }}
+            setSelectedVote={() => {}}
+            votingDisabled={true}
+          />
         </div>
       )}
 

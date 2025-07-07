@@ -5,15 +5,18 @@ import { User } from "@prisma/client"
 import { UserAvatar } from "@/components/common/UserAvatar"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
 import { ProjectWithDetails } from "@/lib/types"
+import { cn } from "@/lib/utils"
 
 const CandidateCard = ({
   user,
   selectedVote,
   setSelectedVote,
+  votingDisabled,
 }: {
   user: User
   selectedVote?: boolean
   setSelectedVote: () => void
+  votingDisabled?: boolean
 }) => {
   const { data: projects, isLoading } = useUserProjects(user?.id)
 
@@ -24,7 +27,11 @@ const CandidateCard = ({
         <UserAvatar imageUrl={user?.imageUrl} size={"xs"} />
         <CardUsername username={user?.username || ""} />
         <CardOrganizations projects={projects} />
-        <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
+        <CardApprovalButton
+          selected={selectedVote}
+          onClick={setSelectedVote}
+          votingDisabled={votingDisabled}
+        />
         {/*<CardCarrot link={carrotLink} />*/}
       </div>
     </div>
@@ -60,16 +67,27 @@ const CardOrganizations = ({
 const CardApprovalButton = ({
   selected = false,
   onClick,
+  votingDisabled,
 }: {
   selected?: boolean
   onClick?: () => void
+  votingDisabled?: boolean
 }) => {
   if (selected) {
     return (
-      <div className="w-[72px] h-6 px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-success cursor-pointer">
+      <div
+        className={cn(
+          "w-[72px] h-6 px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-success",
+          {
+            "cursor-default": votingDisabled,
+            "cursor-pointer": !votingDisabled,
+          },
+        )}
+      >
         <button
           className="font-normal text-xs leading-5 text-success-foreground"
           onClick={onClick}
+          disabled={votingDisabled}
         >
           Approved
         </button>
@@ -79,9 +97,19 @@ const CardApprovalButton = ({
 
   return (
     <div
-      className={`w-[65px] h-[24px] px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-secondary cursor-pointer`}
+      className={cn(
+        "w-[65px] h-[24px] px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-secondary",
+        {
+          "cursor-default": votingDisabled,
+          "cursor-pointer": !votingDisabled,
+        },
+      )}
     >
-      <button className="font-normal text-xs leading-5" onClick={onClick}>
+      <button
+        className="font-normal text-xs leading-5"
+        onClick={onClick}
+        disabled={votingDisabled}
+      >
         Approve
       </button>
     </div>
