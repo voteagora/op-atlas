@@ -1,7 +1,7 @@
 "use client"
 
-import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
-import { CheckboxCircleFIll } from "@/components/icons/remix"
+import { UserAvatar } from "@/components/common/UserAvatar"
+import { CheckboxCircleFIll } from "@/components/icons/reminx"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useOrganization } from "@/hooks/db/useOrganization"
@@ -27,11 +27,11 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
   const renderAvatar = () => {
     if (citizen?.type === CITIZEN_TYPES.user) {
       return (
-        <UserAvatarLarge imageUrl={user.imageUrl}>
+        <UserAvatar imageUrl={user.imageUrl}>
           <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
             <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
           </AvatarBadge>
-        </UserAvatarLarge>
+        </UserAvatar>
       )
     }
 
