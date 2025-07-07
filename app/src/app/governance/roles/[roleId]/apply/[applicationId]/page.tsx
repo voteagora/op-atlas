@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 
 import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/apply/[applicationId]/components/AnalyticsTracker"
 import { CopyForumTextButton } from "@/app/governance/roles/[roleId]/apply/[applicationId]/components/CopyForumTextButton"
-import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
+import { UserAvatar } from "@/components/common/UserAvatar"
 import { getOrganization } from "@/db/organizations"
 import { getRoleApplicationById, getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
@@ -50,9 +50,9 @@ export default async function Page({
       <AnalyticsTracker role={role} />
       <div className="flex flex-col items-center justify-center gap-8 max-w-[712px] mt-20">
         {isUser ? (
-          <UserAvatarLarge imageUrl={user?.imageUrl} />
+          <UserAvatar imageUrl={user?.imageUrl} />
         ) : (
-          <UserAvatarLarge imageUrl={org?.avatarUrl} />
+          <UserAvatar imageUrl={org?.avatarUrl} />
         )}
         <div className="text-2xl font-semibold text-center">
           {"You're a candidate!"}
