@@ -349,11 +349,11 @@ export const mapValueToVoteType = (
 
   if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
     switch (valueArray[0]) {
-      case "0":
+      case 0:
         return { voteType: VoteType.Against }
-      case "1":
+      case 1:
         return { voteType: VoteType.For }
-      case "2":
+      case 2:
         return { voteType: VoteType.Abstain }
       default:
         return { voteType: VoteType.Abstain }
