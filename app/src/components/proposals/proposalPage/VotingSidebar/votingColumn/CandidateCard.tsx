@@ -1,18 +1,17 @@
 "use client"
 
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
-import { Organization, User } from "@prisma/client"
-import { CitizenshipQualification, ProjectWithDetails } from "@/lib/types"
+import { User } from "@prisma/client"
+import { ProjectWithDetails } from "@/lib/types"
 import { useUserProjects } from "@/hooks/db/useUserProjects"
+import { UserAvatar } from "@/components/common/UserAvatarLarge"
 
 const CandidateCard = ({
   user,
-  qualification,
   selectedVote,
   setSelectedVote,
 }: {
   user: User
-  qualification: CitizenshipQualification
   selectedVote?: boolean
   setSelectedVote: () => void
 }) => {
@@ -22,11 +21,7 @@ const CandidateCard = ({
   return (
     <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
       <div className="flex items-center h-5 gap-[8px] justify-between">
-        <EligibleCitizenAvatar
-          user={user}
-          qualification={qualification}
-          size={"sm"}
-        />
+        <UserAvatar imageUrl={user.imageUrl} size={"sm"} />
         <CardUsername username={user.username!} />
         <CardOrganizations projects={projects} />
         <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
