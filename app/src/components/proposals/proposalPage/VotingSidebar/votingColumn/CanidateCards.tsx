@@ -1,7 +1,7 @@
 "use client"
 
 import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
-import { useMultipleUserQualifications } from "@/hooks/citizen/useMultiCitizenUser"
+import { useMultipleUsers } from "@/hooks/citizen/useMultiCitizenUser"
 import { VoteType } from "@/components/proposals/proposal.types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useEffect, useState } from "react"
@@ -37,7 +37,9 @@ const CandidateCards = ({
 }: CandidateCardsProps) => {
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
   const { data: candidates, isLoading: areCandidatesLoading } =
-    useMultipleUserQualifications(userIds)
+    useMultipleUsers(userIds)
+
+  console.log({ candidates })
 
   useEffect(() => {
     if (!areCandidatesLoading) {
@@ -97,7 +99,7 @@ const CandidateCards = ({
         {candidates.map((candidate, idx) => (
           <CandidateCard
             key={idx}
-            user={candidate.user!}
+            user={candidate}
             selectedVote={selectedVote?.selections?.includes(idx) || false}
             setSelectedVote={() => handleApprovalClick(idx)}
           />
