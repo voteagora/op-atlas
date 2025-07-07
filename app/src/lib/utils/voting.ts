@@ -365,21 +365,24 @@ export const mapVoteTypeToValue = (
 export const mapValueToVoteType = (
   proposalType: ProposalType,
   value: JsonValue,
-) => {
+): { voteType: VoteType; selections?: number[] } | null => {
   const valueArray = Array.isArray(value) ? value : [value]
 
   if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
     switch (valueArray[0]) {
       case "0":
-        return VoteType.Against
+        return { voteType: VoteType.Against }
       case "1":
-        return VoteType.For
+        return { voteType: VoteType.For }
       case "2":
-        return VoteType.Abstain
+        return { voteType: VoteType.Abstain }
       default:
-        return VoteType.Abstain
+        return { voteType: VoteType.Abstain }
     }
   } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
-    return VoteType.Veto
+    return { voteType: VoteType.Veto }
+  } else if (proposalType === ProposalType.OFFCHAIN_APPROVAL) {
+    return { voteType: VoteType.Approval, selections: valueArray as number[] }
   }
+  return null
 }
