@@ -4,7 +4,7 @@ import Image from "next/image"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { CitizenshipQualification } from "@/lib/types"
 
-import { UserAvatar } from "./UserAvatarLarge"
+import { UserAvatar } from "./UserAvatar"
 
 export const EligibleCitizenAvatar = ({
   user,

@@ -4,7 +4,7 @@ import { User } from "@prisma/client"
 import { useState } from "react"
 import { toast } from "sonner"
 
-import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
+import { UserAvatar } from "@/components/common/UserAvatar"
 import { DialogProps } from "@/components/dialogs/types"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
@@ -22,7 +22,7 @@ const DeleteTeamMemberDialog = ({
   const { user } = useUser({ id: member?.id })
   const username = useUsername(user)
 
-  console.log(user);
+  console.log(user)
 
   const onClick = async () => {
     try {
@@ -40,7 +40,7 @@ const DeleteTeamMemberDialog = ({
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         <DialogTitle>Remove team member</DialogTitle>
         <div className="flex flex-col items-center gap-y-4">
-          <UserAvatarLarge imageUrl={member?.imageUrl} />
+          <UserAvatar imageUrl={member?.imageUrl} />
 
           <h3 className="text-center px-6">
             Are you sure you want to remove {username} from the team?
