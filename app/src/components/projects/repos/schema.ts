@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const GithubRepoSchema = z.object({
-  url: z.string(),
+  url: z.string().url(),
   verified: z.boolean().default(false),
   openSource: z.boolean().default(false),
   containsContracts: z.boolean().default(false),
@@ -14,7 +14,7 @@ export const GithubRepoSchema = z.object({
 export type GithubRepo = z.infer<typeof GithubRepoSchema>
 
 export const LinkSchema = z.object({
-  url: z.string(),
+  url: z.string().url(),
   name: z.string(),
   description: z.string(),
 })
