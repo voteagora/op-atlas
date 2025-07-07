@@ -21,8 +21,8 @@ const CandidateCard = ({
   return (
     <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
       <div className="flex items-center h-5 gap-[8px] justify-between">
-        <UserAvatar imageUrl={user.imageUrl} size={"xs"} />
-        <CardUsername username={user.username!} />
+        <UserAvatar imageUrl={user?.imageUrl} size={"xs"} />
+        <CardUsername username={user?.username || ""} />
         <CardOrganizations projects={projects} />
         <CardApprovalButton selected={selectedVote} onClick={setSelectedVote} />
         {/*<CardCarrot link={carrotLink} />*/}
