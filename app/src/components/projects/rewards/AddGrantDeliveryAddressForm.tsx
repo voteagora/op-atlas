@@ -80,7 +80,6 @@ export default function AddGrantDeliveryAddressForm({
       values.add("item-2")
     }
 
-    // Convert to array and return
     return Array.from(values)
   }, [kycTeam, allTeamMembersVerified])
 
