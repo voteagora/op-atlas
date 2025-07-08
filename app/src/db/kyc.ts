@@ -83,6 +83,34 @@ export async function getProjectKycTeam(projectId: string) {
   return project?.kycTeam ?? undefined
 }
 
+export async function checkWalletAddressExists(walletAddress: string) {
+  const existingKycTeam = await prisma.kYCTeam.findUnique({
+    where: {
+      walletAddress: walletAddress.toLowerCase(),
+      deletedAt: null,
+    },
+  })
+
+  return existingKycTeam !== null
+}
+
+export async function getKycTeamByWalletAddress(walletAddress: string) {
+  return await prisma.kYCTeam.findUnique({
+    where: {
+      walletAddress: walletAddress.toLowerCase(),
+      deletedAt: null,
+    },
+    include: {
+      team: {
+        include: {
+          users: true,
+        },
+      },
+      rewardStreams: true,
+    },
+  })
+}
+
 export async function deleteKycTeam({
   kycTeamId,
   hasActiveStream,
