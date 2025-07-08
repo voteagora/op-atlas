@@ -1,7 +1,7 @@
 "use client"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
-import { CheckboxCircleFIll } from "@/components/icons/reminx"
+import { CheckboxCircleFIll, UserFill } from "@/components/icons/reminx"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useOrganization } from "@/hooks/db/useOrganization"
@@ -38,11 +38,18 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
     if (citizen?.type === CITIZEN_TYPES.chain) {
       return (
         <Avatar className="w-20 h-20">
-          <AvatarImage
-            src={organization?.avatarUrl || ""}
-            alt="avatar"
-            className="rounded-md"
-          />
+          {organization?.avatarUrl ? (
+            <AvatarImage
+              src={organization.avatarUrl}
+              alt="avatar"
+              className="rounded-md"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-md flex items-center justify-center bg-muted">
+              <UserFill className="w-8 h-8" />
+            </div>
+          )}
+
           <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
             <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
           </AvatarBadge>
@@ -53,11 +60,18 @@ export const ActiveCitizen = ({ user }: { user: UserWithEmails }) => {
     if (citizen?.type === CITIZEN_TYPES.app) {
       return (
         <Avatar className="w-20 h-20">
-          <AvatarImage
-            src={project?.thumbnailUrl || ""}
-            alt="avatar"
-            className="rounded-md"
-          />
+          {project?.thumbnailUrl ? (
+            <AvatarImage
+              src={project?.thumbnailUrl}
+              alt="avatar"
+              className="rounded-md"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-md flex items-center justify-center bg-muted">
+              <UserFill className="w-8 h-8" />
+            </div>
+          )}
+
           <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
             <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
           </AvatarBadge>

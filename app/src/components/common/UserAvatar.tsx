@@ -1,7 +1,7 @@
-import Image from "next/image"
-
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
+
+import { UserFill } from "../icons/reminx"
 
 interface UserAvatarProps {
   imageUrl?: string | null
@@ -21,21 +21,21 @@ export function UserAvatar({
         return {
           container: "w-5 h-5",
           placeholder: "w-5 h-5",
-          iconSize: 11,
+          iconSize: "w-2.5 h-2.5",
         }
       case "sm":
         return {
           container: "w-6 h-6",
           placeholder:
             "w-6 h-6 bg-secondary rounded-full flex items-center justify-center border border-muted",
-          iconSize: 8,
+          iconSize: "w-3 h-3",
         }
       case "lg":
       default:
         return {
           container: "w-20 h-20",
           placeholder: "w-20 h-20",
-          iconSize: 18,
+          iconSize: "w-7 h-7",
         }
     }
   })()
@@ -53,12 +53,7 @@ export function UserAvatar({
           "my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none",
         )}
       >
-        <Image
-          src="/assets/icons/user-icon.svg"
-          alt="user"
-          width={sizeClasses.iconSize}
-          height={sizeClasses.iconSize}
-        />
+        <UserFill className={cn(sizeClasses.iconSize)} fill="#000" />
       </div>
       {children}
     </Avatar>
