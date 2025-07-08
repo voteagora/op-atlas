@@ -58,25 +58,17 @@ const VotingColumnSkeleton = () => (
   </div>
 )
 
-//TODO TEMP MOCK
-const userIds: string[] = [
-  "40525dc0-dee7-4905-a9a0-0d6555c08627",
-  "9c6886db-bd9c-4cee-8d7b-056218b75cec",
-  "c983d567-6f99-4c92-9f19-1ea608de942e",
-  "e1bf03eb-a3b3-41c6-aa32-e267341a402b",
-]
-
 // Update the VotingChoices component props and implementation
 const VotingChoices = ({
   proposalType,
   selectedVotes,
   setSelectedVote,
-  proposalData,
+  userIds,
 }: {
   proposalType: string
   selectedVotes?: { voteType: VoteType; selections?: number[] }
   setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void // Updated type
-  proposalData: ProposalData
+  userIds: string[]
 }) => {
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
@@ -120,6 +112,28 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [selectedVotes, setSelectedVotes] = useState<
     { voteType: VoteType; selections?: number[] } | undefined
   >(undefined)
+
+  // Extract IDs from markdown-formatted choices
+  const extractIdsFromChoices = (choices: any): string[] => {
+    if (!Array.isArray(choices)) return []
+
+    return choices.map((choice: string) => {
+      // Extract URL from markdown format [text](url)
+      const urlMatch = choice.match(/\[.*?\]\((.*?)\)/)
+      if (urlMatch) {
+        const url = urlMatch[1]
+        // Extract the last part of the URL (after the last slash)
+        const urlParts = url.split("/")
+        return urlParts[urlParts.length - 1]
+      }
+      return choice // fallback to original choice if no markdown format
+    })
+  }
+
+  const userIds = extractIdsFromChoices(
+    (proposalData.proposalData as any)?.choices,
+  )
+
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
@@ -560,7 +574,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               proposalType={proposalData.proposalType}
               selectedVotes={selectedVotes}
               setSelectedVote={handleVoteClick}
-              proposalData={proposalData}
+              userIds={userIds}
             />
           )}
           <div className="w-full transition-all duration-200 ease-in-out">
