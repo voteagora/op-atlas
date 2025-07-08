@@ -16,7 +16,7 @@ import { UserWithAddresses } from "@/lib/types"
 import { UserAvatar } from "../common/UserAvatar"
 import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
 import { ArrowDropRight } from "../icons/ArrowDropRight"
-import { CheckboxCircleFIll } from "../icons/reminx"
+import { CheckboxCircleFIll, UserFill } from "../icons/reminx"
 import { AvatarBadge } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
@@ -123,13 +123,7 @@ const ProfileDetailCard = ({
           className="w-20 h-20 my-0.5 flex items-center justify-center rounded-full border border-dashed border-muted bg-none hover:bg-secondary group relative cursor-pointer"
           aria-label="Add profile picture"
         >
-          <Image
-            className="text-foreground group-hover:opacity-0 transition-opacity"
-            src="/assets/icons/user-icon.svg"
-            alt="user"
-            width={18}
-            height={18}
-          />
+          <UserFill className="w-7 h-7 group-hover:opacity-0 transition-opacity" />
           {isCitizen && (
             <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
               <CheckboxCircleFIll
