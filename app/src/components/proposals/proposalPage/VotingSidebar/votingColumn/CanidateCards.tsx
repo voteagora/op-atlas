@@ -39,8 +39,6 @@ const CandidateCards = ({
   const { data: candidates, isLoading: areCandidatesLoading } =
     useMultipleUsers(userIds)
 
-  console.log({ candidates })
-
   if (areCandidatesLoading) {
     return (
       <>
@@ -57,8 +55,6 @@ const CandidateCards = ({
   }
 
   if (!candidates) return null
-
-  console.log({ candidates })
 
   const handleApprovalClick = (idx: number) => {
     const currentSelections = selectedVote?.selections || []
@@ -81,8 +77,8 @@ const CandidateCards = ({
 
   return (
     <>
-      <div className="border-t px-2 align-left w-full">
-        <p className="h-5 font-medium text-[14px] leading-5 text-foreground align-middle">
+      <div className="border-t align-left w-full">
+        <p className="h-5 font-medium text-[14px] leading-5 text-foreground align-middle my-2">
           {candidates.length} Candidates
         </p>
       </div>
@@ -90,7 +86,7 @@ const CandidateCards = ({
         {candidates.map((candidate, idx) => (
           <CandidateCard
             key={idx}
-            user={candidate}
+            candidate={candidate}
             selectedVote={selectedVote?.selections?.includes(idx) || false}
             setSelectedVote={() => handleApprovalClick(idx)}
             votingDisabled={votingDisabled}

@@ -1,65 +1,61 @@
 "use client"
 
-import { User } from "@prisma/client"
+import Link from "next/link"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
-import { useUserProjects } from "@/hooks/db/useUserProjects"
-import { ProjectWithDetails } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
+type SimplifiedUserOrOrg = {
+  id: string
+  name: string
+  avatar?: string | null
+  link: string
+}
+
 const CandidateCard = ({
-  user,
+  candidate,
   selectedVote,
   setSelectedVote,
   votingDisabled,
 }: {
-  user: User
+  candidate: SimplifiedUserOrOrg
   selectedVote?: boolean
   setSelectedVote: () => void
   votingDisabled?: boolean
 }) => {
-  const { data: projects } = useUserProjects(user?.id)
-
   return (
     <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
       <div className="flex items-center h-5 gap-[8px] justify-between">
-        <UserAvatar imageUrl={user?.imageUrl} size={"xs"} />
-        <CardUsername username={user?.username || ""} />
-        <CardOrganizations projects={projects} />
+        <div className="flex flex-row gap-2">
+          <UserAvatar imageUrl={candidate?.avatar} size={"xs"} />
+          <CardUsername username={candidate.name} link={candidate.link} />
+        </div>
         <CardApprovalButton
           selected={selectedVote}
           onClick={setSelectedVote}
           votingDisabled={votingDisabled}
         />
-        {/*<CardCarrot link={carrotLink} />*/}
       </div>
     </div>
   )
 }
 
-const CardUsername = ({ username }: { username: string }) => {
-  return (
-    <div className="font-normal min-w-5 text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis">
-      {username}
-    </div>
-  )
-}
-
-const CardOrganizations = ({
-  projects,
+const CardUsername = ({
+  username,
+  link,
 }: {
-  projects?: ProjectWithDetails[] | null
+  username: string
+  link: string
 }) => {
-  // This should give us a list of only organization string values
-  const organizationNames =
-    projects
-      ?.map((proj) => proj?.organization?.organization?.name)
-      .filter((name): name is string => Boolean(name)) ?? []
-
   return (
-    <div className="min-w-1 max-w-32 h-5 text-[14px] leading-5 tracking-[0%] text-muted-foreground overflow-hidden whitespace-nowrap text-ellipsis">
-      {organizationNames.join(", ")}
-    </div>
+    <Link
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-normal min-w-5 text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis hover:underline cursor-pointer"
+    >
+      {username}
+    </Link>
   )
 }
 
@@ -94,21 +90,17 @@ const CardApprovalButton = ({
     )
   }
 
+  if (votingDisabled) {
+    return null
+  }
+
   return (
     <div
-      className={cn(
-        "w-[65px] h-[24px] px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-secondary",
-        {
-          "cursor-default": votingDisabled,
-          "cursor-pointer": !votingDisabled,
-        },
-      )}
+      className={
+        "w-[65px] h-[24px] px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-secondary cursor-pointer"
+      }
     >
-      <button
-        className="font-normal text-xs leading-5"
-        onClick={onClick}
-        disabled={votingDisabled}
-      >
+      <button className="font-normal text-xs leading-5" onClick={onClick}>
         Approve
       </button>
     </div>
