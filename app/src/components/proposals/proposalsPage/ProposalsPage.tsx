@@ -33,7 +33,7 @@ const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
 
   return (
     <div className="flex flex-col gap-12">
-      <Proposals proposals={standardProposals} heading="Proposals" />
+      <Proposals proposals={standardProposals} />
     </div>
   )
 }
