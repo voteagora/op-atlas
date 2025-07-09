@@ -108,7 +108,9 @@ const getStandardProposals = async () => {
         passed: ["SUCCEEDED", "QUEUED", "EXECUTED"].includes(proposal.status),
         textContent: {
           title: proposal.markdowntitle,
-          subtitle: "Voters: Citizens, Delegates", // Default subtitle
+          subtitle: proposal.proposalType.includes("HYBRID")
+            ? "Voters: Citizens, Delegates"
+            : "Voters: Citizens",
         },
         dates: {
           startDate: formatMMMd(proposal.startTime),
