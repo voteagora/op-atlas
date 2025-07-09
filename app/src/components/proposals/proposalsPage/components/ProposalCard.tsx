@@ -232,15 +232,26 @@ const ProposalDates = ({
 
 interface ProposalArrowProps {
   href: string
+  proposalType?: "STANDARD" | "SELF_NOMINATION"
 }
-const ProposalArrow = ({ href }: ProposalArrowProps) => {
+const ProposalArrow = ({ href, proposalType }: ProposalArrowProps) => {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
   }
 
   return (
     <a href={href} className="block w-[36px] h-[36px]" onClick={handleClick}>
-      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] bg-secondary hover:bg-[#FF0420] group-hover:bg-[#FF0420] text-text/default hover:text-[#FBFCFE] group-hover:text-[#FBFCFE]">
+      <div
+        className={cn(
+          "w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] bg-secondary text-text/default",
+          {
+            "hover:bg-[#FF0420] group-hover:bg-[#FF0420] hover:text-[#FBFCFE] group-hover:text-[#FBFCFE]":
+              proposalType === "SELF_NOMINATION",
+            "hover:bg-tertiary group-hover:bg-tertiary hover:text-text-default group-hover:text-text-default":
+              proposalType !== "SELF_NOMINATION",
+          },
+        )}
+      >
         <ChevronRight width={14} height={14} />
       </div>
     </a>
