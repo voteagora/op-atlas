@@ -25,7 +25,7 @@ export const ProposalRow = (props: StandardProposalProps) => {
       }
       return {
         text: "You haven't voted yet",
-        styling: "text-primary",
+        styling: "text-destructive",
       }
     } else if (props.badge.badgeType === ProposalBadgeType.past) {
       if (props.passed) {
@@ -37,7 +37,7 @@ export const ProposalRow = (props: StandardProposalProps) => {
 
       return {
         text: "Result Negative ie: Failed",
-        styling: "text-primary",
+        styling: "text-destructive",
       }
     }
     return undefined
