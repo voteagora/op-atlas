@@ -3,10 +3,10 @@
 import { VoteType } from "@/components/proposals/proposal.types"
 import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useProposalCandidates } from "@/hooks/citizen/useProposalCandidates"
+import { useProposalCandidates } from "@/hooks/voting/useProposalCandidates"
 
 interface CandidateCardsProps {
-  userIds: string[]
+  candidateIds: string[]
   selectedVote?: { voteType: VoteType; selections?: number[] }
   setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void
   votingDisabled?: boolean
@@ -31,13 +31,13 @@ const CandidateCardSkeleton = () => (
 )
 
 const CandidateCards = ({
-  userIds,
+  candidateIds,
   selectedVote,
   setSelectedVote,
   votingDisabled,
 }: CandidateCardsProps) => {
   const { data: candidates, isLoading: areCandidatesLoading } =
-    useProposalCandidates(userIds)
+    useProposalCandidates(candidateIds)
 
   if (areCandidatesLoading) {
     return (
@@ -93,7 +93,6 @@ const CandidateCards = ({
           />
         ))}
       </div>
-      ∏
     </>
   )
 }
