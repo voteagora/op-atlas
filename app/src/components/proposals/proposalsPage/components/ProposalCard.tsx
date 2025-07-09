@@ -7,6 +7,7 @@ import {
   XCircle,
 } from "lucide-react"
 import React from "react"
+import { cn } from "@/lib/utils"
 
 type ProposalCardProps = {
   children: React.ReactNode
@@ -28,11 +29,13 @@ const ProposalCard = ({
   return (
     <button
       type="button"
-      className={`border-border group cursor-pointer w-full text-left bg-transparent p-0 ${
-        rounded
-          ? "border border-border rounded-t-lg"
-          : "border-l border-r border-b border-border"
-      }`}
+      className={cn(
+        "border-border group cursor-pointer w-full text-left bg-transparent p-0",
+        {
+          "border border-border rounded-t-lg": rounded,
+          "border-l border-r border-b border-border": !rounded,
+        },
+      )}
       onClick={handleClick}
     >
       <div className="flex flex-row gap-4 justify-between items-center p-4">
