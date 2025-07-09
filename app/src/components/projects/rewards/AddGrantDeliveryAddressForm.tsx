@@ -309,7 +309,7 @@ export default function AddGrantDeliveryAddressForm({
                   )}
                   <div className="space-y-4">
                     <div className="text-sm text-secondary-foreground font-normal">
-                      Is somethi ng missing or incorrect? You&apos;ll need to{" "}
+                      Is something missing or incorrect? You&apos;ll need to{" "}
                       <Link
                         className="underline hover:opacity-80 transition-colors duration-300"
                         href={`https://superchain.typeform.com/to/Pq0c7jYJ#l2_address=${kycTeam?.walletAddress}&kyc_team_id=${kycTeam?.id}`}
