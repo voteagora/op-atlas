@@ -63,12 +63,12 @@ const VotingChoices = ({
   proposalType,
   selectedVotes,
   setSelectedVote,
-  userIds,
+  candidateIds,
 }: {
   proposalType: string
   selectedVotes?: { voteType: VoteType; selections?: number[] }
   setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void // Updated type
-  userIds: string[]
+  candidateIds: string[]
 }) => {
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
@@ -86,7 +86,7 @@ const VotingChoices = ({
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards
-            userIds={userIds}
+            candidateIds={candidateIds}
             selectedVote={selectedVotes}
             setSelectedVote={setSelectedVote}
           />
@@ -115,6 +115,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   // Extract IDs from markdown-formatted choices
   const extractIdsFromChoices = (choices: any): string[] => {
+    console.log("choices", choices)
+
     if (!Array.isArray(choices)) return []
 
     return choices.map((choice: string) => {
@@ -130,7 +132,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     })
   }
 
-  const userIds = extractIdsFromChoices(
+  const candidateIds = extractIdsFromChoices(
     (proposalData.proposalData as any)?.choices,
   )
 
@@ -528,7 +530,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       {myVoteType && proposalData.proposalType === "OFFCHAIN_APPROVAL" && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <CandidateCards
-            userIds={userIds}
+            candidateIds={candidateIds}
             selectedVote={{
               voteType: myVoteType,
               selections:
@@ -550,7 +552,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               proposalType={proposalData.proposalType}
               selectedVotes={selectedVotes}
               setSelectedVote={handleVoteClick}
-              userIds={userIds}
+              candidateIds={candidateIds}
             />
           )}
           <div className="w-full transition-all duration-200 ease-in-out">

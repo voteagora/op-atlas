@@ -52,7 +52,7 @@ const CardUsername = ({
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      className="font-normal min-w-5 text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis hover:underline cursor-pointer"
+      className="font-normal min-w-5 max-w-[160px] text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis hover:underline cursor-pointer"
     >
       {username}
     </Link>
