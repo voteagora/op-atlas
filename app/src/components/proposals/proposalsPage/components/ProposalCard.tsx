@@ -38,7 +38,7 @@ const ProposalCard = ({
       )}
       onClick={handleClick}
     >
-      <div className="flex flex-row gap-4 justify-between items-center p-4">
+      <div className="flex flex-row gap-6 justify-between items-center p-6">
         {children}
       </div>
     </button>
@@ -159,13 +159,13 @@ interface ProposalTextProps {
 }
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
-    <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 max-w-72">
-      <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate group-hover:underline group-hover:underline-offset-4">
+    <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 max-w-72 gap-0">
+      <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate group-hover:underline group-hover:underline-offset-4 text-[16px] text-text-default">
         {title}
       </div>
-      <div className="text-base md:font-normal sm:font-200 text-text/secondary leading-normal truncate">
+      <p className="text-base md:font-normal sm:font-200 text-text-secondary leading-6 text-[16px] truncate">
         {subtitle}
-      </div>
+      </p>
     </div>
   )
 }
