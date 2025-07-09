@@ -136,6 +136,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     (proposalData.proposalData as any)?.choices,
   )
 
+  console.log("--------------------------------   ")
+  console.log(proposalData)
+  console.log("--------------------------------   ")
+
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
