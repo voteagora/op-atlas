@@ -159,7 +159,7 @@ interface ProposalTextProps {
 }
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
-    <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 max-w-72 gap-0">
+    <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 gap-0">
       <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate group-hover:underline group-hover:underline-offset-4 text-[16px] text-text-default">
         {title}
       </div>
@@ -193,9 +193,9 @@ const ProposalDates = ({
         </div>
       )}
 
-      <div className="h-[24px] font-inter font-normal text-[16px] leading-[24px] tracking-[0%] text-secondary-foreground whitespace-nowrap overflow-hidden text-right">
+      <p className="font-normal text-[16px] leading-[24px] tracking-[0%] text-secondary-foreground whitespace-nowrap overflow-hidden text-right">
         {startDate} - {endDate}
-      </div>
+      </p>
     </div>
   )
 }
