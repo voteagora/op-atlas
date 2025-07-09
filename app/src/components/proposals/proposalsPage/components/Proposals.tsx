@@ -22,9 +22,8 @@ export interface StandardProposalProps {
 }
 interface StandardProposalsProps {
   proposals: StandardProposalProps[]
-  heading?: string
 }
-const Proposals = ({ heading, proposals }: StandardProposalsProps) => {
+const Proposals = ({ proposals }: StandardProposalsProps) => {
   return (
     <div className="flex flex-col gap-6">
       <div>
