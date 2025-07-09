@@ -6,7 +6,9 @@ import {
   Loader2,
   XCircle,
 } from "lucide-react"
+import { useSession } from "next-auth/react"
 import React from "react"
+
 import { cn } from "@/lib/utils"
 
 type ProposalCardProps = {
@@ -174,25 +176,53 @@ const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
 interface ProposalDatesProps {
   startDate: string
   endDate: string
-  voteStatus?: {
-    text: string
-    styling: string
-  } | null
+  voted?: boolean
+  badgeType?: ProposalBadgeType
+  passed?: boolean
 }
 const ProposalDates = ({
   startDate,
   endDate,
-  voteStatus,
+  voted,
+  badgeType,
+  passed,
 }: ProposalDatesProps) => {
+  const { data: session } = useSession()
+
+  const voteText = () => {
+    if (!session?.user?.id) {
+      return null
+    }
+    if (badgeType === ProposalBadgeType.now) {
+      if (voted) {
+        return "You voted"
+      }
+      return "You haven't voted yet"
+    } else if (badgeType === ProposalBadgeType.past) {
+      if (passed) {
+        return "Result Positive ie: Passed"
+      }
+      return "Result Negative ie: Failed"
+    }
+    return null
+  }
+
   return (
     <div className="flex flex-col min-w-[187px] justify-end">
-      {voteStatus && (
-        <div
-          className={`text-base font-normal whitespace-nowrap overflow-hidden text-right sm:text-sm ${voteStatus.styling}`}
-        >
-          {voteStatus.text}
-        </div>
-      )}
+      <div
+        className={cn(
+          "text-base font-normal whitespace-nowrap overflow-hidden text-right sm:text-sm",
+          {
+            "text-success-foreground":
+              (badgeType === ProposalBadgeType.now && voted) || passed,
+            "text-destructive":
+              (badgeType === ProposalBadgeType.now && !voted) ||
+              (badgeType === ProposalBadgeType.past && !passed),
+          },
+        )}
+      >
+        {voteText()}
+      </div>
 
       <p className="font-normal text-[16px] leading-[24px] tracking-[0%] text-secondary-foreground whitespace-nowrap overflow-hidden text-right">
         {startDate} - {endDate}
