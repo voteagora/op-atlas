@@ -3,7 +3,7 @@
 import { VoteType } from "@/components/proposals/proposal.types"
 import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useMultipleUsers } from "@/hooks/citizen/useMultiCitizenUser"
+import { useProposalCandidates } from "@/hooks/citizen/useProposalCandidates"
 
 interface CandidateCardsProps {
   userIds: string[]
@@ -37,7 +37,7 @@ const CandidateCards = ({
   votingDisabled,
 }: CandidateCardsProps) => {
   const { data: candidates, isLoading: areCandidatesLoading } =
-    useMultipleUsers(userIds)
+    useProposalCandidates(userIds)
 
   if (areCandidatesLoading) {
     return (
@@ -93,6 +93,7 @@ const CandidateCards = ({
           />
         ))}
       </div>
+      ∏
     </>
   )
 }

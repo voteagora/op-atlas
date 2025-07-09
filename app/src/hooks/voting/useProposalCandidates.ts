@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getOrganization } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
 
-type SimplifiedUserOrOrg = {
+type ProposalCandidate = {
   id: string
   name: string
   avatar?: string | null
@@ -12,7 +12,7 @@ type SimplifiedUserOrOrg = {
 
 const getQualifications = async (
   identifiers: string[],
-): Promise<SimplifiedUserOrOrg[]> => {
+): Promise<ProposalCandidate[]> => {
   const promises = identifiers.map(async (identifier) => {
     const isOrgCitizen = identifier.startsWith("0x")
 
@@ -24,7 +24,7 @@ const getQualifications = async (
         name: org?.name,
         avatar: org?.avatarUrl,
         link: `/${identifier}`,
-      } as SimplifiedUserOrOrg
+      } as ProposalCandidate
     } else {
       // Handle regular usernames
       const user = await getUserByUsername(identifier)
@@ -33,16 +33,16 @@ const getQualifications = async (
         name: user?.username || identifier,
         avatar: user?.imageUrl,
         link: `/${identifier}`,
-      } as SimplifiedUserOrOrg
+      } as ProposalCandidate
     }
   })
 
   return Promise.all(promises)
 }
 
-export const useMultipleUsers = (candidateUserIds: string[]) => {
+export const useProposalCandidates = (candidateUserIds: string[]) => {
   return useQuery({
-    queryKey: ["multiple-users", candidateUserIds], // Include the IDs in the query key
+    queryKey: ["proposal-candidates", candidateUserIds],
     queryFn: async () => {
       return await getQualifications(candidateUserIds)
     },
