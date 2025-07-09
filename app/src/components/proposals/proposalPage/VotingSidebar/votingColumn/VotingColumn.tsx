@@ -525,7 +525,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   return (
-    <div className="flex flex-col p-6 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out">
+    <div className="flex flex-col p-4 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out">
       <ReactCanvasConfetti
         style={{
           position: "fixed",
@@ -548,6 +548,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           eligibility={citizenEligibility}
         />
       </div>
+
+      <div className={"border-b w-[304px] -ml-4"}></div>
 
       {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
