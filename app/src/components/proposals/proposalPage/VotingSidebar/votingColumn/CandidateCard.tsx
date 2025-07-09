@@ -4,6 +4,7 @@ import Link from "next/link"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
 import { cn } from "@/lib/utils"
+import { ChevronRight } from "lucide-react"
 
 type SimplifiedUserOrOrg = {
   id: string
@@ -30,11 +31,14 @@ const CandidateCard = ({
           <UserAvatar imageUrl={candidate?.avatar} size={"xs"} />
           <CardUsername username={candidate.name} link={candidate.link} />
         </div>
-        <CardApprovalButton
-          selected={selectedVote}
-          onClick={setSelectedVote}
-          votingDisabled={votingDisabled}
-        />
+        <div className="flex flex-row items-center gap-2">
+          <CardApprovalButton
+            selected={selectedVote}
+            onClick={setSelectedVote}
+            votingDisabled={votingDisabled}
+          />
+          <ChevronRight width={12} height={12} />
+        </div>
       </div>
     </div>
   )
