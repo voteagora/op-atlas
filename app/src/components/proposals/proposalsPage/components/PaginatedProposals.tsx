@@ -3,7 +3,7 @@
 import { Loader2 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { fetchMoreProposals } from "../actions"
+import { fetchMoreProposals } from "@/lib/actions/proposals"
 import Proposals from "./Proposals"
 import { StandardProposalProps } from "./Proposals"
 

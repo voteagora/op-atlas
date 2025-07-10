@@ -281,14 +281,14 @@ export const enrichProposalData = async (
 
 export const getEnrichedProposalData = async ({
   userId,
-  page,
+  offset,
 }: {
   userId?: string
-  page?: number
+  offset?: number
 }) => {
   try {
     // Get the proposal data from the API
-    const proposalData = await getProposals(page)
+    const proposalData = await getProposals(offset)
     try {
       if (!userId) {
         return proposalData
