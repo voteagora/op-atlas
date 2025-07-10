@@ -501,7 +501,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   return (
-    <div className="flex flex-col px-4 py-6 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out w-[304px]">
+    <>
       <ReactCanvasConfetti
         style={{
           position: "fixed",
@@ -515,45 +515,45 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         className="confetti-canvas"
         onInit={getInstance}
       />
-      <div className="w-[272px] gap-2">
-        {/* Text on the top of the card */}
-        <div className="transition-opacity duration-300 ease-in-out">
-          <CardText
-            proposalData={proposalData}
-            isCitizen={!!citizen}
-            vote={myVoteType}
-            eligibility={citizenEligibility}
-          />
+
+      {/* Text on the top of the card */}
+      <div className="w-full transition-opacity duration-300 border rounded-t-lg ease-in-out">
+        <CardText
+          proposalData={proposalData}
+          isCitizen={!!citizen}
+          vote={myVoteType}
+          eligibility={citizenEligibility}
+        />
+      </div>
+
+      <div className="w-[304px] flex flex-col rounded-b-lg border-x border-b py-6 px-4 duration-300 ease-in-out">
+        <div className="w-[272px] gap-2">
+          {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
+            <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+              <MyVote voteType={myVoteType} />
+            </div>
+          )}
+
+          {myVoteType && proposalData.proposalType === "OFFCHAIN_APPROVAL" && (
+            <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+              <CandidateCards
+                candidateIds={candidateIds}
+                selectedVote={{
+                  voteType: myVoteType,
+                  selections:
+                    myVoteSelections && myVoteSelections[0]
+                      ? (myVoteSelections[0] as unknown as number[])
+                      : undefined,
+                }}
+                setSelectedVote={() => {}}
+                votingDisabled={true}
+              />
+            </div>
+          )}
         </div>
-
-        <div className={"border-b w-[304px] -ml-4"}></div>
-
-        {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
-          <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
-            <MyVote voteType={myVoteType} />
-          </div>
-        )}
-
-        {myVoteType && proposalData.proposalType === "OFFCHAIN_APPROVAL" && (
-          <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
-            <CandidateCards
-              candidateIds={candidateIds}
-              selectedVote={{
-                voteType: myVoteType,
-                selections:
-                  myVoteSelections && myVoteSelections[0]
-                    ? (myVoteSelections[0] as unknown as number[])
-                    : undefined,
-              }}
-              setSelectedVote={() => {}}
-              votingDisabled={true}
-            />
-          </div>
-        )}
-
         {/* Actions */}
         {proposalData.status === "ACTIVE" && votingActions && !myVote && (
-          <div className="flex flex-col items-center gap-y-2 transition-all duration-300 ease-in-out">
+          <div className="flex flex-col items-center gap-y-2 mb-4 transition-all duration-300 ease-in-out">
             {canVote && (
               <VotingChoices
                 proposalType={proposalData.proposalType}
@@ -562,7 +562,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                 candidateIds={candidateIds}
               />
             )}
-            <div className="w-full transition-all duration-200 ease-in-out">
+            <div className="w-full gap-2 transition-all duration-200 ease-in-out mt-2">
               <VoterActions
                 proposalId={proposalData.id}
                 // This is a wonky way to overwrite the call to make an external call.
@@ -621,7 +621,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           </a>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
