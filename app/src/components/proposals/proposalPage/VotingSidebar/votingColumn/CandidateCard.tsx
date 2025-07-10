@@ -1,10 +1,10 @@
 "use client"
 
+import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
 import { cn } from "@/lib/utils"
-import { ChevronRight } from "lucide-react"
 
 type SimplifiedUserOrOrg = {
   id: string
@@ -37,7 +37,9 @@ const CandidateCard = ({
             onClick={setSelectedVote}
             votingDisabled={votingDisabled}
           />
-          <ChevronRight width={12} height={12} />
+          <a href={candidate.link} target="_blank" rel="noopener noreferrer">
+            <ChevronRight width={12} height={12} />
+          </a>
         </div>
       </div>
     </div>
@@ -109,35 +111,6 @@ const CardApprovalButton = ({
         Approve
       </button>
     </div>
-  )
-}
-
-const CardCarrot = ({ link }: { link: string }) => {
-  return (
-    <a
-      href={link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="cursor-pointer"
-    >
-      <div className="w-[12px] h-[12px] flex items-center justify-center">
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M4.5 9L7.5 6L4.5 3"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-    </a>
   )
 }
 
