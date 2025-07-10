@@ -72,6 +72,7 @@ const VotingChoices = ({
 }) => {
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
+    case "HYBRID_STANDARD":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <StandardVoteCard
@@ -83,6 +84,7 @@ const VotingChoices = ({
         </div>
       )
     case "OFFCHAIN_APPROVAL":
+    case "HYBRID_APPROVAL":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards
@@ -93,6 +95,7 @@ const VotingChoices = ({
         </div>
       )
     case "OFFCHAIN_OPTIMISTIC":
+    case "HYBRID_OPTIMISTIC":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <OverrideVoteCard
