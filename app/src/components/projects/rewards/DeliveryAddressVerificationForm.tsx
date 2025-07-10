@@ -20,7 +20,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { checkWalletAddressExistsForOrganizationAction } from "@/lib/actions/organizations"
 import { checkWalletAddressExistsAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -62,9 +61,7 @@ export default function DeliveryAddressVerificationForm() {
     setIsChecking(true)
 
     try {
-      const checkResult = organizationId
-        ? await checkWalletAddressExistsForOrganizationAction(data.address)
-        : await checkWalletAddressExistsAction(data.address)
+      const checkResult = await checkWalletAddressExistsAction(data.address)
 
       if (checkResult.error) {
         toast.error(checkResult.error)
