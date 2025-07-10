@@ -9,14 +9,6 @@ import Header from "@/components/missions/details/Header"
 import { HowItWorks } from "@/components/missions/details/HowItWorks"
 import { LearnMore } from "@/components/missions/details/LearnMore"
 import Rewards from "@/components/missions/details/Rewards"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
 import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
@@ -132,18 +124,6 @@ export default function Mission() {
       <div className="px-6 md:px-0 flex flex-1 gap-x-12">
         <div className="flex flex-1 flex-col items-center">
           <div className="flex flex-col gap-y-12 max-w-[712px]">
-            <Breadcrumb className="hidden md:block">
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/missions">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Grants</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-
             <div className="flex flex-col gap-12">
               <div ref={aboutRef}>
                 <Header />
@@ -198,31 +178,33 @@ export default function Mission() {
           </div>
         </div>
 
-        <div className="hidden md:flex flex-col gap-y-6 ml-auto max-w-[304px] sticky top-40 h-full ">
+        <div className="fixed md:sticky md:top-40 bottom-0 left-0 right-0 w-full max-w-full md:max-w-[304px] md:ml-auto bg-background md:bg-transparent z-10 shadow-lg md:shadow-none  md:h-fit">
           <>
             {mission &&
               mission?.startsAt &&
               new Date() > mission?.startsAt &&
               mission?.endsAt && (
-                <>
+                <div className="flex flex-col gap-y-4">
                   <SessionRoundApplicationStatusCard />
                   <RoundEnrolledProjectsCard />
-                </>
+                  {mission?.pageName === "audit-grants" && (
+                    <div className="py-2.5">
+                      <p className="text-secondary-foreground text-sm text-center font-medium leading-tight">
+                        Are you an ASP?{" "}
+                        <ExternalLink
+                          className="text-primary underline font-normal"
+                          href="https://app.charmverse.io/op-grants/audits-hub-759373059217642"
+                        >
+                          Apply here
+                        </ExternalLink>
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
-            {mission?.pageName === "audit-grants" && (
-              <p className="text-center">
-                Are you an ASP?{" "}
-                <ExternalLink
-                  className="text-primary underline font-normal"
-                  href="https://app.charmverse.io/op-grants/audits-hub-759373059217642"
-                >
-                  Apply here
-                </ExternalLink>
-              </p>
-            )}
             {visibleSections.length > 0 && (
-              <div>
-                <p className="font-medium text-base mb-4">Contents</p>
+              <div className="hidden md:block">
+                <p className="font-medium text-sm mb-4 mt-4">Contents</p>
                 <nav className="self-stretch px-6 border-l border-tertiary inline-flex flex-col justify-start items-start gap-3">
                   {visibleSections.map((section) => (
                     <NavItem

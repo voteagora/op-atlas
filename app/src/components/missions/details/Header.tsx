@@ -1,6 +1,5 @@
 "use client"
 
-import { format } from "date-fns"
 import Image from "next/image"
 import React from "react"
 
@@ -19,50 +18,20 @@ export default function Header() {
   return (
     <>
       <div>
-        <h1 className="text-4xl mb-2 font-semibold text-text-default leading-[44px]">
-          {missioName}
-        </h1>
-        {!mission?.disableDates && (
-          <div className="flex gap-2 items-center">
-            {!isOpenForEnrollment && (
-              <>
-                <Image
-                  src={"/assets/icons/triangular-flag-muted-foreground.svg"}
-                  width={16}
-                  height={16}
-                  alt="Flag"
-                />
-
-                <p className="text-secondary-foreground">Not open</p>
-              </>
-            )}
-
-            {isOpenForEnrollment && (
-              <>
-                <Image
-                  src={"/assets/icons/triangular-flag-full.svg"}
-                  width={20}
-                  height={20}
-                  alt="Flag"
-                />
-
-                <p className="text-secondary-foreground">Open</p>
-              </>
-            )}
-            <div className="w-[1px] h-6 bg-gray-300"></div>
-
-            <p className="text-secondary-foreground">
-              Season {mission?.season},{" "}
-              <span>{format(mission!.startsAt, "MMM d")}</span>
-              <span>{" - "}</span>
-              {<span>{format(mission!.endsAt, "MMM d, yyyy")}</span>}
-            </p>
+        {isOpenForEnrollment ? (
+          <div className="px-4 py-2 bg-callout rounded-full inline-flex mb-12">
+            <div className="text-info text-sm">Open</div>
+          </div>
+        ) : (
+          <div className="px-4 py-2 bg-[#FFD1D5] rounded-full inline-flex mb-12">
+            <div className="text-[#B80018] text-sm">Closed</div>
           </div>
         )}
+        <h1 className="text-4xl mb-6 font-semibold text-text-default leading-[44px]">
+          {missioName}
+        </h1>
         <div className="flex gap-2">
           <div className="flex flex-col gap-6">
-            <div className="h-[1px] bg-gray-300 w-full mt-6" />
-
             {mission?.details.map((detail, index) => (
               <div className="" key={index}>
                 <p className="text-secondary-foreground">{detail}</p>

@@ -45,7 +45,6 @@ export type FundingRoundData = {
   iconUrl?: string
   startsAt: Date
   endsAt: Date
-  disableDates?: boolean
   funding?: {
     dollar?: string
     op?: string

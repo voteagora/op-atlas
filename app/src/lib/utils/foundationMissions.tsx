@@ -16,7 +16,6 @@ export const foundationMissionsData: MissionData = {
   },
   startsAt: new Date(),
   endsAt: new Date(),
-  disableDates: true,
   season: "8",
   details: [
     "Ready to make an impact? Foundation Missions address specific challenges identified by the Optimism Foundation. These challenges are core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",

@@ -26,7 +26,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
   status: "ongoing",
   resultsLink: "/round/results?rounds=8",
   iconUrl: "/assets/images/onchain-builders.png",
-  startsAt: new Date("2025-06-01T00:00:00.000Z"),
+  startsAt: new Date("2025-07-24T00:00:00.000Z"),
   endsAt: new Date("2025-12-30T00:00:00.000Z"),
   applyBy: (() => {
     return getCutoffDate()
@@ -102,7 +102,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
   missionPageEligibility: [
     {
       reactNode: (
-        <p className="font-medium">
+        <p className="text-secondary-foreground">
           My project has deployed contracts on a supported chain
         </p>
       ),
@@ -111,7 +111,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
     {
       reactNode: (
         <>
-          <p className="font-medium">
+          <p className="text-secondary-foreground">
             I can provide a link to a functioning{" "}
             <ExternalLink href="https://defillama.com" className="underline">
               DeFiLlama adaptor
@@ -129,7 +129,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
     {
       reactNode: (
         <>
-          <p className="font-medium">
+          <p className="text-secondary-foreground">
             I&apos;ve added my project to the{" "}
             <ExternalLink
               href="https://www.bundlebear.com/overview/all"
@@ -200,6 +200,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
       imageUrl: "/assets/images/application-category-1.png",
       rewardAmount: "275K",
       rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://soliditylang.org/",
     },
     {
       name: "Solidity",
@@ -208,6 +209,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
       imageUrl: "/assets/images/application-category-1.png",
       rewardAmount: "275K",
       rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://soliditylang.org/",
     },
   ],
   supportOptions: [
@@ -215,8 +217,10 @@ export const retroFundingOnchainBuildersData: MissionData = {
       type: "custom",
       title: "Contact us",
       description: "Someone from the Retro Funding Team will respond asap.",
-      buttonText: "Open forum",
-      buttonLink: "TODO: forum link",
+      buttonText: "Open form",
+      buttonLink:
+        "https://docs.google.com/forms/d/e/1FAIpQLSdU_cgpwqKWY5lRwgLzqCHt0-X3aKGsZVX1WnpiJeHhEiNwCg/viewform",
+      externalLink: true,
     },
   ],
 }

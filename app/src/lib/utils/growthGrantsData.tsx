@@ -1,6 +1,7 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
+import { Calendar } from "@/components/icons/calendar"
 import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 import {
   Accordion,
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/accordion"
 
 import { MissionData } from "../MissionsAndRoundData"
-import { Calendar } from "@/components/icons/calendar"
 
 export const growthGrantsData: MissionData = {
   pageName: "growth-grants",
@@ -42,11 +42,11 @@ export const growthGrantsData: MissionData = {
     <div>
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="retro-funding" className="">
-          <AccordionTrigger className="text-base p-0 hover:underline">
+          <AccordionTrigger className="text-base p-0 hover:underline text-secondary-foreground font-normal">
             1. Interop-ready TVL
           </AccordionTrigger>
           <AccordionContent className="mt-6 mb-6">
-            <ul className="list-disc pl-5 space-y-1 text-base">
+            <ul className="list-disc pl-4 space-y-1 text-base">
               <li>
                 Primary metric: TVL/AOP that is interop ready within the{" "}
                 <ExternalLink
@@ -80,7 +80,7 @@ export const growthGrantsData: MissionData = {
       </Accordion>
       <Accordion type="single" collapsible className="w-full space-y-4">
         <AccordionItem value="retro-funding" className="">
-          <AccordionTrigger className="text-base p-0 hover:underline">
+          <AccordionTrigger className="text-base p-0 hover:underline text-secondary-foreground font-normal">
             2. Interop Transaction Fees
           </AccordionTrigger>
           <AccordionContent className="mt-6 mb-6">
@@ -89,7 +89,7 @@ export const growthGrantsData: MissionData = {
                 Primary metric: X ETH / Month transaction fees generated from
                 transactions that interact with the{" "}
                 <ExternalLink
-                  href="https://collectiveintent.optimism.io/"
+                  href="https://docs.optimism.io/interop/message-passing"
                   className="underline"
                 >
                   L2ToL2CrossDomainMessenger
@@ -137,7 +137,7 @@ export const growthGrantsData: MissionData = {
   missionPageEligibility: [
     {
       reactNode: (
-        <p className="font-medium">
+        <p className="text-secondary-foreground">
           My project has deployed contracts on a supported chain
         </p>
       ),
@@ -145,7 +145,7 @@ export const growthGrantsData: MissionData = {
     },
     {
       reactNode: (
-        <p className="font-medium">
+        <p className="text-secondary-foreground">
           My project aligns with Interop TVL or Interop TX fees
         </p>
       ),
@@ -157,10 +157,6 @@ export const growthGrantsData: MissionData = {
     {
       title: "S8 Governance Fund Missions",
       href: "https://gov.optimism.io/t/s8-governance-fund-missions/10004?u=gonna.eth",
-    },
-    {
-      title: "Grant Council landing page",
-      href: "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
     },
     {
       title: "Collective grant policy",
@@ -191,7 +187,10 @@ export const growthGrantsData: MissionData = {
       title: (
         <>
           Submit application via the{" "}
-          <ExternalLink href="#" className="underline">
+          <ExternalLink
+            href="https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944"
+            className="underline"
+          >
             Grants Council (GC) website
           </ExternalLink>
         </>

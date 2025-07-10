@@ -52,7 +52,7 @@ export const retroFundingDevToolingData: MissionData = {
   status: "ongoing",
   resultsLink: "/round/results?rounds=7",
   iconUrl: "/assets/images/dev-tooling.png",
-  startsAt: new Date("2025-06-01T00:00:00.000Z"),
+  startsAt: new Date("2025-07-24T00:00:00.000Z"),
   endsAt: new Date("2025-12-30T00:00:00.000Z"),
   applyBy: (() => {
     return getCutoffDate()
@@ -90,7 +90,10 @@ export const retroFundingDevToolingData: MissionData = {
         <p className="text-secondary-foreground">
           My project has JavaScript and/or Rust packages published on relevant
           registries (e.g, npm or crates.io) with their associated GitHub repo
-          verified in OP Atlas (optional)
+          verified in OP Atlas
+          <span className="text-xs px-2 py-0.5 text-callout-foreground bg-callout rounded-full inline-block ml-2 vertical-align-text-bottom">
+            Optional
+          </span>
         </p>
       ),
       type: "optional",
@@ -181,9 +184,11 @@ export const retroFundingDevToolingData: MissionData = {
       <p className="text-secondary-foreground">
         Your impact will be measured via an evaluation algorithm powered by
         GitHub, npm, Crates, and Onchain data. The{" "}
-        <ExternalLink href="#" className="underline">evaluation algorithm</ExternalLink> will evolve
-        throughout this Retro Funding Mission based on feedback from Optimism
-        Citizens.
+        <ExternalLink href="#" className="underline">
+          evaluation algorithm
+        </ExternalLink>{" "}
+        will evolve throughout this Retro Funding Mission based on feedback from
+        Optimism Citizens.
       </p>
     ),
     criteria: [

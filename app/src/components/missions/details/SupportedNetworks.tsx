@@ -145,7 +145,7 @@ export function SupportedNetworks() {
               height={20}
               className="w-5 h-5 rounded-full object-cover"
             />
-            <div className="justify-start text-secondary-foreground text-sm font-normal leading-[20px]">
+            <div className="justify-start text-foreground text-sm font-normal leading-[20px]">
               {chain.name}
             </div>
           </Link>
@@ -153,7 +153,7 @@ export function SupportedNetworks() {
       </div>
       <div className="mt-6 inline-flex items-center gap-2">
         <span className="text-secondary-foreground">
-          *Please confirm your chain&apos;s status{" "}
+          Please confirm your chain&apos;s eligibility status{" "}
           <Link
             href="https://www.superchain.eco/chains"
             target="_blank"

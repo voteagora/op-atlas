@@ -51,9 +51,9 @@ export const ApplicationStatusCard = ({
   if (mission?.pageName === "growth-grants") {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold">{"Apply"}</p>
+        <p className="font-semibold hidden md:block">{"Apply"}</p>
 
-        <p className="text-sm text-secondary-foreground text-center">
+        <p className="text-sm text-secondary-foreground text-center mb-2">
           Visit the Grants Council website to learn more and apply.
         </p>
         <Button
@@ -75,9 +75,9 @@ export const ApplicationStatusCard = ({
   } else if (mission?.pageName === "audit-grants") {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold">Find an Audit Service Provider</p>
+        <p className="font-semibold hidden md:block">Find an Audit Service Provider</p>
 
-        <p className="text-sm text-secondary-foreground text-center">
+        <p className="text-sm text-secondary-foreground text-center mb-2">
           Get in contact with an ASP, and they&apos;ll apply on your behalf.
         </p>
         <Button
@@ -103,7 +103,7 @@ export const ApplicationStatusCard = ({
   } else if(mission?.pageName === "foundation-missions") {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold">Explore opportunities</p>
+        <p className="font-semibold hidden md:block">Explore opportunities</p>
 
         <p className="text-sm text-secondary-foreground text-center">
           View opportunities in the Optimism GitHub Repo

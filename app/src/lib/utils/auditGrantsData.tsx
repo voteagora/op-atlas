@@ -87,7 +87,7 @@ export const auditGrantsData: MissionData = {
   missionPageEligibility: [
     {
       reactNode: (
-        <p className="font-medium">
+        <p className="text-secondary-foreground">
           Project is deployed or planning to deploy on a supported chain
         </p>
       ),
@@ -95,7 +95,7 @@ export const auditGrantsData: MissionData = {
     },
     {
       reactNode: (
-        <p className="font-medium">
+        <p className="text-secondary-foreground">
           Project is a smart contract audit
         </p>
       ),

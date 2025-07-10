@@ -44,8 +44,12 @@ export const grantLinks = [
     href: "/missions/growth-grants",
   },
   {
-    title: "Retro Funding",
-    href: "/missions",
+    title: "Retro Funding: Dev Tooling",
+    href: "/missions/retro-funding-dev-tooling",
+  },
+  {
+    title: "Retro Funding: Onchain Builders",
+    href: "/missions/retro-funding-onchain-builders",
   },
   {
     title: "Foundation Missions",
@@ -56,7 +60,6 @@ export const grantLinks = [
 export const Navbar = () => {
   const pathname = usePathname()
   const params = useParams()
-  const isRounds = pathname === "/missions"
   const isProjects = pathname.includes("/round/")
   const isGovernance = pathname === "/governance"
 
@@ -88,8 +91,8 @@ export const Navbar = () => {
               <Link href="/" className="flex items-center">
                 <Image
                   src="/assets/images/logo.svg"
-                  height={20}
-                  width={115}
+                  height={24}
+                  width={81}
                   priority
                   alt="OP Atlas Logo"
                 />
@@ -101,8 +104,8 @@ export const Navbar = () => {
             <Link href="/" className="flex items-center mr-10">
               <Image
                 src="/assets/images/logo.svg"
-                height={20}
-                width={100}
+                height={24}
+                width={81}
                 priority
                 alt="OP Atlas Logo"
               />
@@ -129,12 +132,12 @@ export const Navbar = () => {
                         key={index}
                         className="focus:bg-none! focus:opacity-80"
                       >
-                        <ExternalLink
+                        <Link
                           className="flex items-center gap-1"
                           href={item.href}
                         >
                           <div>{item.title}</div>
-                        </ExternalLink>
+                        </Link>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>

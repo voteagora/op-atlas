@@ -1,11 +1,10 @@
 "use client"
 
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import Image from "next/image"
 import React, { useState } from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { ArrowDropRight } from "@/components/icons/ArrowDropRight"
+import { ArrowRightNew } from "@/components/icons/ArrowRightNew"
 import { Button } from "@/components/ui/button"
 import {
   Carousel,
@@ -15,7 +14,6 @@ import {
 } from "@/components/ui/carousel"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { cn } from "@/lib/utils"
-import { ArrowRightNew } from "@/components/icons/ArrowRightNew"
 
 export interface HowItWorksStep {
   number: number
@@ -52,7 +50,6 @@ export function HowItWorks() {
   }, [api])
 
   if (steps.length === 0) return null
-  const isMobile = window.innerWidth < 768
 
   // Calculate the appropriate basis value to show a partial view of the next card
   // when there are 4 or more cards
@@ -60,11 +57,11 @@ export function HowItWorks() {
   const carouselOpts = {
     align: shouldShowPartialNextCard ? "start" as const : "center" as const,
     containScroll: "trimSnaps" as const,
-    dragFree: false
+    dragFree: false,
   }
 
   const paginationClass = steps.length >= 4 ? "" : "flex md:hidden"
-  
+
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-xl font-semibold">How it works</h2>
@@ -84,7 +81,7 @@ export function HowItWorks() {
                     : "basis-1/2 md:basis-1/3",
                 )}
               >
-                <div className="h-[350px] p-6 bg-secondary rounded-xl flex flex-col justify-between">
+                <div className="h-[400px] md:h-[350px] p-6 bg-secondary rounded-xl flex flex-col justify-between">
                   <div className="flex flex-col gap-2">
                     <h1 className="text-callout-foreground text-4xl font-extrabold">
                       {step.number}
@@ -130,44 +127,6 @@ export function HowItWorks() {
             <ChevronLeft className="w-4 h-4 mr-2" />
             Previous
           </Button>
-
-          {steps.map((_, index) => {
-            const isVisible = !isMobile || index < 2 || index === current - 1
-
-            if (!isVisible) {
-              if (index === 2) {
-                return (
-                  <span
-                    key="ellipsis"
-                    className="flex items-center px-2 align-self-center pb-[10px]"
-                  >
-                    ...
-                  </span>
-                )
-              }
-              return null
-            }
-
-            return (
-              <Button
-                key={index}
-                variant={current === index + 1 ? "outline" : "ghost"}
-                size="default"
-                onClick={() => {
-                  api?.scrollTo(index)
-                  setCurrent(index + 1)
-                }}
-                className={cn(
-                  "w-10 px-4 py-2.5",
-                  current === index + 1 && "bg-background border-border",
-                )}
-                aria-current={current === index + 1 ? "page" : undefined}
-              >
-                {index + 1}
-              </Button>
-            )
-          })}
-
           <Button
             variant="ghost"
             size="default"

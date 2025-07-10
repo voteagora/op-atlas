@@ -106,7 +106,14 @@ export const Eligibility = () => {
     }
   }
 
-  const { type: calloutType, message, barColor, barStyle, backgroundColor, barBgColor } = getCalloutConfig()
+  const {
+    type: calloutType,
+    message,
+    barColor,
+    barStyle,
+    backgroundColor,
+    barBgColor,
+  } = getCalloutConfig()
 
   const handleCheckChange = (index: number, checked: boolean) => {
     setCheckedItems((prev) => ({
@@ -162,10 +169,10 @@ export const Eligibility = () => {
               onCheckedChange={(checked) =>
                 handleCheckChange(index, checked as boolean)
               }
-              className="mt-1"
+              className="mt-1 h-6 w-6"
             />
             <div
-              className="flex-1 cursor-pointer select-none"
+              className="flex-1 cursor-pointer select-none self-end"
               onClick={() => handleCheckChange(index, !checkedItems[index])}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {

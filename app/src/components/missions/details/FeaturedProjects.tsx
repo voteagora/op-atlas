@@ -1,7 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import React, { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,8 +12,6 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export interface FeaturedProject {
@@ -49,13 +48,13 @@ export function FeaturedProjects() {
   return (
     <div className="w-full flex flex-col gap-6">
       <h2 className="text-xl font-semibold">Featured projects</h2>
-      <div className="w-full">
+      <div className="w-[calc(100%+48px)] sm:w-full -ml-6 sm:ml-0">
         <Carousel setApi={setApi} className="w-full">
-          <CarouselContent>
+          <CarouselContent className="overflow-visible sm:overflow-hidden">
             {projects.map((project, index) => (
               <CarouselItem key={index} className="basis-full">
                 <div
-                  className="group p-6 bg-background border border-border rounded-xl flex gap-6 hover:bg-secondary hover:cursor-pointer"
+                  className="flex flex-col-reverse sm:flex-row group p-6 bg-background border border-border sm:rounded-xl flex gap-6 hover:bg-secondary hover:cursor-pointer"
                   onClick={() => {
                     if (project.href) {
                       window.open(project.href, "_blank")
@@ -82,7 +81,7 @@ export function FeaturedProjects() {
                         {project.description}
                       </p>
                     </div>
-                    <div className="px-3 py-1.5 bg-red-50 rounded-full border border-red-200 inline-flex items-center gap-1.5 w-fit">
+                    <div className="px-3 py-1.5 bg-red-50 rounded-full border border-red-200 inline-flex items-center gap-1.5 w-fit mt-12 mt-0">
                       {project.rewardIcon && (
                         <Image
                           src={project.rewardIcon}
@@ -97,13 +96,15 @@ export function FeaturedProjects() {
                       </span>
                     </div>
                   </div>
-                  <Image
-                    src={project.imageUrl}
-                    alt={project.name}
-                    width={204}
-                    height={204}
-                    className="w-[204px] h-[204px] rounded-lg border border-border object-cover"
-                  />
+                  <div className="w-full sm:w-[204px] h-auto aspect-square">
+                    <Image
+                      src={project.imageUrl}
+                      alt={project.name}
+                      width={204}
+                      height={204}
+                      className="w-full h-full sm:w-[204px] sm:h-[204px] rounded-lg border border-border object-cover"
+                    />
+                  </div>
                 </div>
               </CarouselItem>
             ))}
@@ -128,27 +129,6 @@ export function FeaturedProjects() {
             <ChevronLeft className="w-4 h-4 mr-2" />
             Previous
           </Button>
-
-          {Array.from({ length: count }).map((_, index) => (
-            <Button
-              key={index}
-              variant={current === index + 1 ? "outline" : "ghost"}
-              size="default"
-              onClick={() => {
-                api?.scrollTo(index)
-                track("Link Click", {
-                  text: projects[index].name,
-                  type: "Featured Projects",
-                })
-              }}
-              className={cn(
-                "w-10 px-4 py-2.5",
-                current === index + 1 && "bg-background border-border",
-              )}
-            >
-              {index + 1}
-            </Button>
-          ))}
 
           <Button
             variant="ghost"

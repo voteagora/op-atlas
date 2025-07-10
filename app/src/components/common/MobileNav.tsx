@@ -20,14 +20,14 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-6 py-6">
             {grantLinks.map((item, index) => (
-              <ExternalLink
+              <Link
                 key={index}
                 className="flex items-center text-sm font-medium gap-1"
                 href={item.href}
               >
                 <div>{item.title}</div>
                 <MoveUpRight size={12} />
-              </ExternalLink>
+              </Link>
             ))}
           </AccordionContent>
         </AccordionItem>
