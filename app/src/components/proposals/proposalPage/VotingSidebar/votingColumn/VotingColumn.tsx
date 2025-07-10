@@ -525,7 +525,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   return (
-    <div className="flex flex-col p-4 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out">
+    <div className="flex flex-col px-4 py-6 gap-y-4 border rounded-lg transition-all duration-500 ease-in-out w-[304px]">
       <ReactCanvasConfetti
         style={{
           position: "fixed",
@@ -539,109 +539,111 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         className="confetti-canvas"
         onInit={getInstance}
       />
-      {/* Text on the top of the card */}
-      <div className="transition-opacity duration-300 ease-in-out">
-        <CardText
-          proposalData={proposalData}
-          isCitizen={!!citizen}
-          vote={myVoteType}
-          eligibility={citizenEligibility}
-        />
-      </div>
-
-      <div className={"border-b w-[304px] -ml-4"}></div>
-
-      {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
-        <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
-          <MyVote voteType={myVoteType} />
-        </div>
-      )}
-
-      {myVoteType && proposalData.proposalType === "OFFCHAIN_APPROVAL" && (
-        <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
-          <CandidateCards
-            candidateIds={candidateIds}
-            selectedVote={{
-              voteType: myVoteType,
-              selections:
-                myVoteSelections && myVoteSelections[0]
-                  ? (myVoteSelections[0] as unknown as number[])
-                  : undefined,
-            }}
-            setSelectedVote={() => {}}
-            votingDisabled={true}
+      <div className="w-[272px] gap-2">
+        {/* Text on the top of the card */}
+        <div className="transition-opacity duration-300 ease-in-out">
+          <CardText
+            proposalData={proposalData}
+            isCitizen={!!citizen}
+            vote={myVoteType}
+            eligibility={citizenEligibility}
           />
         </div>
-      )}
 
-      {/* Actions */}
-      {proposalData.status === "ACTIVE" && votingActions && !myVote && (
-        <div className="flex flex-col items-center gap-y-2 transition-all duration-300 ease-in-out">
-          {canVote && (
-            <VotingChoices
-              proposalType={proposalData.proposalType}
-              selectedVotes={selectedVotes}
-              setSelectedVote={handleVoteClick}
+        <div className={"border-b w-[304px] -ml-4"}></div>
+
+        {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
+          <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+            <MyVote voteType={myVoteType} />
+          </div>
+        )}
+
+        {myVoteType && proposalData.proposalType === "OFFCHAIN_APPROVAL" && (
+          <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+            <CandidateCards
               candidateIds={candidateIds}
-            />
-          )}
-          <div className="w-full transition-all duration-200 ease-in-out">
-            <VoterActions
-              proposalId={proposalData.id}
-              // This is a wonky way to overwrite the call to make an external call.
-              cardActionList={votingActions.cardActionList.map((action) => {
-                // If this is a vote action, replace its action function with handleCastVote
-                // and determine if it should be disabled based on selectedVotes or address mismatch
-                return {
-                  ...action,
-                  action: handleCastVote,
-                  disabled:
-                    canVote &&
-                    (addressMismatch ||
-                      !selectedVotes?.voteType ||
-                      (selectedVotes.voteType === "Approval" &&
-                        !(
-                          selectedVotes?.selections &&
-                          selectedVotes?.selections.length > 0
-                        ))),
-                  loading: isVoting,
-                }
-              })}
+              selectedVote={{
+                voteType: myVoteType,
+                selections:
+                  myVoteSelections && myVoteSelections[0]
+                    ? (myVoteSelections[0] as unknown as number[])
+                    : undefined,
+              }}
+              setSelectedVote={() => {}}
+              votingDisabled={true}
             />
           </div>
-          {addressMismatch && citizen && !myVote && !!session?.user?.id && (
-            <div className="text-red-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
-              You citizen wallet is not connected. Try signing out and signing
-              in with your Citizen wallet:{" "}
-              {citizen.address && truncateAddress(citizen.address)}
-            </div>
-          )}
+        )}
 
-          {isSmartContract &&
-            !addressMismatch &&
-            citizen &&
-            !myVote &&
-            !!session?.user?.id && (
-              <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
-                <Lock className="text-blue-500 w-4 h-4" />
-                Smart contract wallet detected
+        {/* Actions */}
+        {proposalData.status === "ACTIVE" && votingActions && !myVote && (
+          <div className="flex flex-col items-center gap-y-2 transition-all duration-300 ease-in-out">
+            {canVote && (
+              <VotingChoices
+                proposalType={proposalData.proposalType}
+                selectedVotes={selectedVotes}
+                setSelectedVote={handleVoteClick}
+                candidateIds={candidateIds}
+              />
+            )}
+            <div className="w-full transition-all duration-200 ease-in-out">
+              <VoterActions
+                proposalId={proposalData.id}
+                // This is a wonky way to overwrite the call to make an external call.
+                cardActionList={votingActions.cardActionList.map((action) => {
+                  // If this is a vote action, replace its action function with handleCastVote
+                  // and determine if it should be disabled based on selectedVotes or address mismatch
+                  return {
+                    ...action,
+                    action: handleCastVote,
+                    disabled:
+                      canVote &&
+                      (addressMismatch ||
+                        !selectedVotes?.voteType ||
+                        (selectedVotes.voteType === "Approval" &&
+                          !(
+                            selectedVotes?.selections &&
+                            selectedVotes?.selections.length > 0
+                          ))),
+                    loading: isVoting,
+                  }
+                })}
+              />
+            </div>
+            {addressMismatch && citizen && !myVote && !!session?.user?.id && (
+              <div className="text-red-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
+                You citizen wallet is not connected. Try signing out and signing
+                in with your Citizen wallet:{" "}
+                {citizen.address && truncateAddress(citizen.address)}
               </div>
             )}
 
-          {isCheckingWallet && (
-            <div className="text-gray-500 text-xs text-center transition-all duration-300 ease-in-out">
-              Checking wallet type...
-            </div>
-          )}
-        </div>
-      )}
+            {isSmartContract &&
+              !addressMismatch &&
+              citizen &&
+              !myVote &&
+              !!session?.user?.id && (
+                <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
+                  <Lock className="text-blue-500 w-4 h-4" />
+                  Smart contract wallet detected
+                </div>
+              )}
 
-      <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
-        <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
-          <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
-            View results
-          </p>
-        </a>
+            {isCheckingWallet && (
+              <div className="text-gray-500 text-xs text-center transition-all duration-300 ease-in-out">
+                Checking wallet type...
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
+          <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
+            <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
+              View results
+            </p>
+          </a>
+        </div>
       </div>
     </div>
   )
