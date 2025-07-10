@@ -535,15 +535,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
       <div className="w-[304px] flex flex-col rounded-b-lg border-x border-b py-6 px-4 duration-300 ease-in-out">
         <div className="w-[272px] gap-2">
-          {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
-            <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
-              <MyVote voteType={myVoteType} />
-            </div>
-          )}
+          {myVoteType &&
+            (proposalData.proposalType === "OFFCHAIN_STANDARD" ||
+              proposalData.proposalType === "HYBRID_STANDARD") && (
+              <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+                <MyVote voteType={myVoteType} />
+              </div>
+            )}
 
           {myVoteType &&
             (proposalData.proposalType === "OFFCHAIN_APPROVAL" ||
-              proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") && (
+              proposalData.proposalType === "HYBRID_APPROVAL") && (
               <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
                 <CandidateCards
                   candidateIds={candidateIds}
