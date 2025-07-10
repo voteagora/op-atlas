@@ -65,11 +65,10 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
         citizen_status: citizen
           ? "registered"
           : citizenEligibility?.eligible
-            ? "eligible"
-            : session?.user?.id
-              ? "not signed in"
-              : "ineligible",
-        user_group: citizenEligibility?.type,
+          ? "eligible"
+          : session?.user?.id
+          ? "not signed in"
+          : "ineligible",
       })
       isTracked.current = true
     }
