@@ -502,6 +502,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       },
     })
   }
+  console.log({
+    proposalData: proposalData.proposalData,
+    proposalResults: proposalData.proposalResults,
+  })
 
   return (
     <>
@@ -537,22 +541,24 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             </div>
           )}
 
-          {myVoteType && proposalData.proposalType === "OFFCHAIN_APPROVAL" && (
-            <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
-              <CandidateCards
-                candidateIds={candidateIds}
-                selectedVote={{
-                  voteType: myVoteType,
-                  selections:
-                    myVoteSelections && myVoteSelections[0]
-                      ? (myVoteSelections[0] as unknown as number[])
-                      : undefined,
-                }}
-                setSelectedVote={() => {}}
-                votingDisabled={true}
-              />
-            </div>
-          )}
+          {myVoteType &&
+            (proposalData.proposalType === "OFFCHAIN_APPROVAL" ||
+              proposalData.proposalType === "OFFCHAIN_OPTIMISTIC") && (
+              <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+                <CandidateCards
+                  candidateIds={candidateIds}
+                  selectedVote={{
+                    voteType: myVoteType,
+                    selections:
+                      myVoteSelections && myVoteSelections[0]
+                        ? (myVoteSelections[0] as unknown as number[])
+                        : undefined,
+                  }}
+                  setSelectedVote={() => {}}
+                  votingDisabled={true}
+                />
+              </div>
+            )}
         </div>
         {/* Actions */}
         {proposalData.status === "ACTIVE" && votingActions && !myVote && (
