@@ -490,7 +490,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           console.log({ newActiveWallet, wallets })
           if (!newActiveWallet) {
             throw new Error(
-              `Citizen wallet is not connected. Try disconnecting and signing in with your Citizen wallet. ${citizen.address}`,
+              `Your governance wallet is not connected. Please sign out, and sign back in using ${citizen.address}.`,
             )
           } else {
             setActiveWallet(newActiveWallet)
