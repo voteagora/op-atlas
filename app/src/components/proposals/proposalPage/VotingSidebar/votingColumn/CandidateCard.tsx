@@ -25,7 +25,7 @@ const CandidateCard = ({
   votingDisabled?: boolean
 }) => {
   return (
-    <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
+    <div className="w-full h-10 p-2 rounded-[6px]">
       <div className="flex items-center h-5 gap-[8px] justify-between">
         <div className="flex flex-row gap-2">
           <UserAvatar imageUrl={candidate?.avatar} size={"xs"} />
@@ -56,7 +56,8 @@ const CardUsername = ({
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      className="font-normal min-w-5 max-w-[160px] text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis hover:underline cursor-pointer"
+      title={username}
+      className="font-normal min-w-5 max-w-[130px] text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis hover:underline cursor-pointer"
     >
       {username}
     </Link>
