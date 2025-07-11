@@ -117,7 +117,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   >(undefined)
   // Extract IDs from markdown-formatted choices
   const extractIdsFromChoices = (choices: any): string[] => {
-    console.log("choices", choices)
+    console.log({ choices, isArray: Array.isArray(choices) })
 
     if (!Array.isArray(choices)) return []
 
@@ -138,9 +138,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     (proposalData.proposalData as any)?.options,
   )
 
-  console.log("--------------------------------   ")
-  console.log(proposalData)
-  console.log("--------------------------------   ")
+  console.log(
+    "--------------------------------   \n",
+    proposalData,
+    "--------------------------------   \n",
+  )
 
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
@@ -179,7 +181,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     vote: myVote,
     invalidate: invalidateMyVote,
     isLoading: isVoteLoading,
-  } = useMyVote(proposalData.id)
+  } = useMyVote(proposalData.offchainProposalId || proposalData.id)
 
   const { data: session } = useSession()
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()

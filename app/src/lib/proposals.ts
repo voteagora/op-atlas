@@ -177,6 +177,7 @@ export type ProposalData = {
   cancelledTransactionHash?: string | null
   executedTransactionHash?: string | null
   proposalTemplate?: object
+  offchainProposalId?: string
 }
 
 export const enrichProposalData = async (
