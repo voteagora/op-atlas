@@ -115,16 +115,15 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [selectedVotes, setSelectedVotes] = useState<
     { voteType: VoteType; selections?: number[] } | undefined
   >(undefined)
-
   // Extract IDs from markdown-formatted choices
   const extractIdsFromChoices = (choices: any): string[] => {
     console.log("choices", choices)
 
     if (!Array.isArray(choices)) return []
 
-    return choices.map((choice: string) => {
+    return choices.map((choice: any) => {
       // Extract URL from markdown format [text](url)
-      const urlMatch = choice.match(/\[.*?\]\((.*?)\)/)
+      const urlMatch = choice.description.match(/\[.*?\]\((.*?)\)/)
       if (urlMatch) {
         const url = urlMatch[1]
         // Extract the last part of the URL (after the last slash)
@@ -136,7 +135,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   const candidateIds = extractIdsFromChoices(
-    (proposalData.proposalData as any)?.choices,
+    (proposalData.proposalData as any)?.options,
   )
 
   console.log("--------------------------------   ")
