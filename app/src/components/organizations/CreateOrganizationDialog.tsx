@@ -176,12 +176,15 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
               </FileUploadInput>
             </Button>
             <Button
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                setIsDialogOpen(false)
+                setIsShowingAdd(true)
+              }}
               className="w-full !ml-0"
               type="button"
               variant="outline"
             >
-              Close
+              Skip
             </Button>
           </DialogFooter>
         </DialogContent>
