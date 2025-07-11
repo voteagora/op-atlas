@@ -37,6 +37,7 @@ const CandidateCards = ({
   votingDisabled,
 }: CandidateCardsProps) => {
   const { data: candidates, isLoading: areCandidatesLoading } =
+    // This will check userId then OrgId, then username
     useProposalCandidates(candidateIds)
 
   if (areCandidatesLoading) {
