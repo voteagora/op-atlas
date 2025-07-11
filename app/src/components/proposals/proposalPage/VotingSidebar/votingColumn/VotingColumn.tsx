@@ -432,7 +432,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
         // Track successful vote submission
         track("Citizen Voting Vote Submitted", {
-          proposal_id: proposalData.id,
+          proposal_id: proposalData.offchainProposalId || proposalData.id,
           choice: choices,
           wallet_address: signerAddress,
         })
@@ -443,7 +443,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error"
         track("Citizen Voting Vote Error", {
-          proposal_id: proposalData.id,
+          proposal_id: proposalData.offchainProposalId || proposalData.id,
           error: errorMessage,
         })
 
@@ -564,7 +564,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             )}
             <div className="w-full gap-2 transition-all duration-200 ease-in-out mt-2">
               <VoterActions
-                proposalId={proposalData.id}
+                proposalId={proposalData.offchainProposalId || proposalData.id}
                 // This is a wonky way to overwrite the call to make an external call.
                 cardActionList={votingActions.cardActionList.map((action) => {
                   // If this is a vote action, replace its action function with handleCastVote
