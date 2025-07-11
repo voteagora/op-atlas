@@ -138,12 +138,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     (proposalData.proposalData as any)?.options,
   )
 
-  console.log(
-    "--------------------------------   \n",
-    proposalData,
-    "--------------------------------   \n",
-  )
-
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
@@ -503,10 +497,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       },
     })
   }
-  console.log({
-    proposalData: proposalData.proposalData,
-    proposalResults: proposalData.proposalResults,
-  })
 
   return (
     <>
