@@ -173,7 +173,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     vote: myVote,
     invalidate: invalidateMyVote,
     isLoading: isVoteLoading,
-  } = useMyVote(proposalData.id)
+  } = useMyVote(proposalData.offchainProposalId)
 
   const { data: session } = useSession()
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
@@ -295,7 +295,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
 
     const args = {
-      proposalId: proposalData.id,
+      proposalId: proposalData.offchainProposalId,
       choices: choices,
     }
     const encodedData = encoder.encodeData([
@@ -346,7 +346,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
 
     const args = {
-      proposalId: proposalData.id,
+      proposalId: proposalData.offchainProposalId,
       choices: choices,
     }
     const encodedData = encoder.encodeData([
@@ -432,7 +432,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
         // Track successful vote submission
         track("Citizen Voting Vote Submitted", {
-          proposal_id: proposalData.id,
+          proposal_id: proposalData.offchainProposalId,
           choice: choices,
           wallet_address: signerAddress,
         })
@@ -467,7 +467,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
         // Track vote error
         track("Citizen Voting Vote Error", {
-          proposal_id: proposalData.id,
+          proposal_id: proposalData.offchainProposalId,
           error: errorMessage,
         })
 
@@ -588,7 +588,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             )}
             <div className="w-full gap-2 transition-all duration-200 ease-in-out mt-2">
               <VoterActions
-                proposalId={proposalData.id}
+                proposalId={proposalData.offchainProposalId}
                 // This is a wonky way to overwrite the call to make an external call.
                 cardActionList={votingActions.cardActionList.map((action) => {
                   // If this is a vote action, replace its action function with handleCastVote
