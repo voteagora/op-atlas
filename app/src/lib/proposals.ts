@@ -177,7 +177,8 @@ export type ProposalData = {
   cancelledTransactionHash?: string | null
   executedTransactionHash?: string | null
   proposalTemplate?: object
-  offchainProposalId?: string
+  // This value should always be included in offchain and hybrid proposals
+  offchainProposalId: string
 }
 
 export const enrichProposalData = async (
