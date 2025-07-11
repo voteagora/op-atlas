@@ -117,8 +117,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   >(undefined)
   // Extract IDs from markdown-formatted choices
   const extractIdsFromChoices = (choices: any): string[] => {
-    console.log({ choices, isArray: Array.isArray(choices) })
-
     if (!Array.isArray(choices)) return []
 
     return choices.map((choice: any) => {
@@ -297,7 +295,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
 
     const args = {
-      proposalId: proposalData.id,
+      proposalId: proposalData.offchainProposalId || proposalData.id,
       choices: choices,
     }
     const encodedData = encoder.encodeData([
@@ -348,7 +346,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
 
     const args = {
-      proposalId: proposalData.id,
+      proposalId: proposalData.offchainProposalId || proposalData.id,
       choices: choices,
     }
     const encodedData = encoder.encodeData([
