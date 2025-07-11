@@ -1,47 +1,96 @@
 "use client"
 
+import { VoteType } from "@/components/proposals/proposal.types"
 import CandidateCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CandidateCard"
-import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
-import { useState } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useProposalCandidates } from "@/hooks/voting/useProposalCandidates"
+
+interface CandidateCardsProps {
+  candidateIds: string[]
+  selectedVote?: { voteType: VoteType; selections?: number[] }
+  setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void
+  votingDisabled?: boolean
+}
+
+const CandidateCardSkeleton = () => (
+  <div className="w-[272px] h-10 py-2 pr-[var(--dimensions-5)] pl-[var(--dimensions-5)] rounded-[6px]">
+    <div className="flex items-center h-5 gap-[8px] justify-between">
+      {/* Avatar skeleton */}
+      <Skeleton className="w-5 h-5 rounded-full" />
+
+      {/* Username skeleton */}
+      <Skeleton className="w-20 h-5" />
+
+      {/* Organizations skeleton */}
+      <Skeleton className="w-24 h-5" />
+
+      {/* Approval button skeleton */}
+      <Skeleton className="w-[65px] h-[24px] rounded-md" />
+    </div>
+  </div>
+)
 
 const CandidateCards = ({
-  candidates,
-}: {
-  candidates: CandidateCardProps[]
-}) => {
-  const [selectedApprovals, setSelectedApprovals] = useState<number[] | null>(
-    null,
-  )
+  candidateIds,
+  selectedVote,
+  setSelectedVote,
+  votingDisabled,
+}: CandidateCardsProps) => {
+  const { data: candidates, isLoading: areCandidatesLoading } =
+    // This will check userId then OrgId, then username
+    useProposalCandidates(candidateIds)
+
+  if (areCandidatesLoading) {
+    return (
+      <>
+        <div className="border-t px-2 align-left w-full">
+          <Skeleton className="h-5 w-24" />
+        </div>
+        <div className="w-full sm:w-[272px]">
+          {[...Array(3)].map((_, idx) => (
+            <CandidateCardSkeleton key={idx} />
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  if (!candidates) return null
+
   const handleApprovalClick = (idx: number) => {
-    if (selectedApprovals === null) {
-      setSelectedApprovals([idx])
-    } else if (selectedApprovals.includes(idx)) {
-      // If the index is already in the array, remove it
-      setSelectedApprovals(selectedApprovals.filter((i) => i !== idx))
-      if (selectedApprovals.length === 1) {
-        // If this was the last item, set to null
-        setSelectedApprovals(null)
-      }
+    const currentSelections = selectedVote?.selections || []
+    let newSelections: number[]
+
+    if (currentSelections.includes(idx)) {
+      // Remove the index if it's already selected
+      newSelections = currentSelections.filter((i) => i !== idx)
     } else {
       // Add the index to the array
-      setSelectedApprovals([...selectedApprovals, idx])
+      newSelections = [...currentSelections, idx]
     }
+
+    // Update the parent state with the new vote
+    setSelectedVote({
+      voteType: VoteType.Approval,
+      selections: newSelections,
+    })
   }
+
   return (
     <>
-      <div className="border-t pt-3">
-        <p className="pl-2 pr-2 h-5">{candidates.length} Candidates</p>
+      <div className="align-left w-full">
+        <p className="h-5 font-medium text-[14px] leading-5 text-foreground align-middle my-2">
+          {candidates.length} Candidates
+        </p>
       </div>
       <div className="w-full sm:w-[272px]">
         {candidates.map((candidate, idx) => (
           <CandidateCard
             key={idx}
-            img={candidate.image}
-            username={candidate.name}
-            organizations={candidate.organizations}
-            carrotLink={candidate.buttonLink}
-            selected={selectedApprovals?.includes(idx)}
-            onClick={() => handleApprovalClick(idx)}
+            candidate={candidate}
+            selectedVote={selectedVote?.selections?.includes(idx) || false}
+            setSelectedVote={() => handleApprovalClick(idx)}
+            votingDisabled={votingDisabled}
           />
         ))}
       </div>

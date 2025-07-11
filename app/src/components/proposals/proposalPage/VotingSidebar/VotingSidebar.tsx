@@ -17,7 +17,7 @@ interface VotingSidebarProps {
 }
 
 const VotingSidebarSkeleton = () => (
-  <div className="w-[304px] gap-6 flex flex-col sticky top-4 w-full max-w-[304px]">
+  <div className="w-[304px] gap-6 flex flex-col sticky top-4 max-w-[304px]">
     <div className="w-[304px]">
       <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
         <div className="flex flex-col text-center gap-y-2">
@@ -61,7 +61,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
       track("Citizen Voting Page View", {
         page_title: "Proposal Voting",
         page_type: proposalData.proposalType,
-        proposal_id: proposalData.id,
+        proposal_id: proposalData.offchainProposalId,
         citizen_status: citizen
           ? "registered"
           : citizenEligibility?.eligible
@@ -87,14 +87,12 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   }
 
   return (
-    <div className="w-[304px] gap-4 flex flex-col sticky top-4 w-full max-w-[304px] transition-all duration-300 ease-in-out animate-in fade-in-0">
-      <div className="w-[304px]">
-        <div className="transition-all duration-300 ease-in-out">
-          <VotingColumn proposalData={proposalData} />
-        </div>
-        <div className="mt-5 transition-all duration-300 ease-in-out">
-          <VotingRedirect proposalData={proposalData} />
-        </div>
+    <div className="flex flex-col sticky top-4  transition-all duration-300 ease-in-out animate-in fade-in-0">
+      <div>
+        <VotingColumn proposalData={proposalData} />
+      </div>
+      <div className="mt-5 transition-all duration-300 ease-in-out">
+        <VotingRedirect proposalData={proposalData} />
       </div>
     </div>
   )

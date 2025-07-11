@@ -4,10 +4,10 @@ import { RoleRow } from "@/app/governance/roles/components/RoleRow"
 
 export default function RolesPage({ roles }: { roles: Role[] }) {
   return (
-    <div className="flex flex-col">
-      <div className="w-full mb-4 text-h4">
+    <div className="flex flex-col gap-6">
+      <h4 className="w-full font-semibold text-[20px] leading-7 align-middle text-text-default">
         Self-nominate for a governance role in Season 8 & 9
-      </div>
+      </h4>
 
       <AnalyticsTracker />
 

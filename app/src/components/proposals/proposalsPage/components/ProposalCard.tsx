@@ -6,7 +6,10 @@ import {
   Loader2,
   XCircle,
 } from "lucide-react"
+import { useSession } from "next-auth/react"
 import React from "react"
+
+import { cn } from "@/lib/utils"
 
 type ProposalCardProps = {
   children: React.ReactNode
@@ -28,14 +31,16 @@ const ProposalCard = ({
   return (
     <button
       type="button"
-      className={`border-border group cursor-pointer w-full text-left bg-transparent p-0 ${
-        rounded
-          ? "border border-border rounded-t-lg"
-          : "border-l border-r border-b border-border"
-      }`}
+      className={cn(
+        "border-border group cursor-pointer w-full text-left bg-transparent p-0",
+        {
+          "border border-border rounded-t-lg": rounded,
+          "border-l border-r border-b border-border": !rounded,
+        },
+      )}
       onClick={handleClick}
     >
-      <div className="flex flex-row gap-4 justify-between items-center p-4">
+      <div className="flex flex-row gap-6 justify-between items-center p-6">
         {children}
       </div>
     </button>
@@ -156,13 +161,13 @@ interface ProposalTextProps {
 }
 const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   return (
-    <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 max-w-72">
-      <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate group-hover:underline group-hover:underline-offset-4">
+    <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 gap-0">
+      <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate group-hover:underline group-hover:underline-offset-4 text-[16px] text-text-default">
         {title}
       </div>
-      <div className="text-base md:font-normal sm:font-200 text-text/secondary leading-normal truncate">
+      <p className="text-base md:font-normal sm:font-200 text-text-secondary leading-6 text-[16px] truncate">
         {subtitle}
-      </div>
+      </p>
     </div>
   )
 }
@@ -170,44 +175,83 @@ const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
 interface ProposalDatesProps {
   startDate: string
   endDate: string
-  voteStatus?: {
-    text: string
-    styling: string
-  } | null
+  voted?: boolean
+  badgeType?: ProposalBadgeType
+  passed?: boolean
 }
 const ProposalDates = ({
   startDate,
   endDate,
-  voteStatus,
+  voted,
+  badgeType,
+  passed,
 }: ProposalDatesProps) => {
+  const { data: session } = useSession()
+
+  const voteText = () => {
+    if (!session?.user?.id) {
+      return null
+    }
+    if (badgeType === ProposalBadgeType.now) {
+      if (voted) {
+        return "You voted"
+      }
+      return "You haven't voted yet"
+    } else if (badgeType === ProposalBadgeType.past) {
+      if (passed) {
+        return "Result Positive ie: Passed"
+      }
+      return "Result Negative ie: Failed"
+    }
+    return null
+  }
+
   return (
     <div className="flex flex-col min-w-[187px] justify-end">
-      {voteStatus && (
-        <div
-          className={`text-base font-normal whitespace-nowrap overflow-hidden text-right sm:text-sm ${voteStatus.styling}`}
-        >
-          {voteStatus.text}
-        </div>
-      )}
-
-      <div className="h-[24px] font-inter font-normal text-[16px] leading-[24px] tracking-[0%] text-secondary-foreground whitespace-nowrap overflow-hidden text-right">
-        {startDate} - {endDate}
+      <div
+        className={cn(
+          "text-base font-normal whitespace-nowrap overflow-hidden text-right sm:text-sm",
+          {
+            "text-success-foreground":
+              (badgeType === ProposalBadgeType.now && voted) || passed,
+            "text-destructive":
+              (badgeType === ProposalBadgeType.now && !voted) ||
+              (badgeType === ProposalBadgeType.past && !passed),
+          },
+        )}
+      >
+        {voteText()}
       </div>
+
+      <p className="font-normal text-[16px] leading-[24px] tracking-[0%] text-secondary-foreground whitespace-nowrap overflow-hidden text-right">
+        {startDate} - {endDate}
+      </p>
     </div>
   )
 }
 
 interface ProposalArrowProps {
   href: string
+  proposalType?: "STANDARD" | "SELF_NOMINATION"
 }
-const ProposalArrow = ({ href }: ProposalArrowProps) => {
+const ProposalArrow = ({ href, proposalType }: ProposalArrowProps) => {
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
   }
 
   return (
     <a href={href} className="block w-[36px] h-[36px]" onClick={handleClick}>
-      <div className="w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] bg-secondary hover:bg-[#FF0420] group-hover:bg-[#FF0420] text-text/default hover:text-[#FBFCFE] group-hover:text-[#FBFCFE]">
+      <div
+        className={cn(
+          "w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] bg-secondary text-text/default",
+          {
+            "hover:bg-[#FF0420] group-hover:bg-[#FF0420] hover:text-[#FBFCFE] group-hover:text-[#FBFCFE]":
+              proposalType === "SELF_NOMINATION",
+            "hover:bg-tertiary group-hover:bg-tertiary hover:text-text-default group-hover:text-text-default":
+              proposalType !== "SELF_NOMINATION",
+          },
+        )}
+      >
         <ChevronRight width={14} height={14} />
       </div>
     </a>

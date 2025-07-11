@@ -1,7 +1,7 @@
 import { Scale } from "lucide-react"
 
 import { getEnrichedProposalData } from "@/lib/proposals"
-import Proposals from "./components/Proposals"
+import PaginatedProposals from "./components/PaginatedProposals"
 
 interface ProposalsPageProps {
   userId?: string
@@ -16,7 +16,7 @@ const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
 
   if (
     !proposalData ||
-    (proposalData.standardProposals.length === 0 &&
+    (proposalData.standardProposals.proposals.length === 0 &&
       proposalData.selfNominations.length === 0)
   ) {
     return (
@@ -33,7 +33,15 @@ const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
 
   return (
     <div className="flex flex-col gap-12">
-      <Proposals proposals={standardProposals} heading="Proposals" />
+      <PaginatedProposals
+        initialProposals={standardProposals.proposals}
+        initialPagination={{
+          has_next: standardProposals.pagination?.has_next ?? false,
+          total_returned: standardProposals.pagination?.total_returned ?? 0,
+          next_offset: standardProposals.pagination?.next_offset ?? 0,
+        }}
+        userId={userId}
+      />
     </div>
   )
 }
