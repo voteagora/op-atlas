@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { track } from "mixpanel-browser"
 
 import { getOrganization } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
@@ -13,7 +14,7 @@ type ProposalCandidate = {
 const getQualifications = async (
   identifiers: (string | any)[],
 ): Promise<ProposalCandidate[]> => {
-  const results = await Promise.all(
+  return await Promise.all(
     identifiers.map(async (identifier, index) => {
       try {
         // Ensure identifier is a string
@@ -58,6 +59,9 @@ const getQualifications = async (
             : identifier?.id || identifier?.name || `unknown-${index}`
 
         console.error(`Error fetching candidate ${safeId}:`, error)
+        track("Incorrect value passed to getProposalCandidates", {
+          candidate_identifier: identifier,
+        })
         // Return a fallback candidate with the identifier as the name
         return {
           id: safeId,
@@ -67,8 +71,6 @@ const getQualifications = async (
       }
     }),
   )
-
-  return results
 }
 
 export const useProposalCandidates = (candidateUserIds: string[]) => {
