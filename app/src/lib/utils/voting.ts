@@ -349,7 +349,10 @@ export const mapValueToVoteType = (
 ): { voteType: VoteType; selections?: number[] } | null => {
   const valueArray = Array.isArray(value) ? value : [value]
 
-  if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
+  if (
+    proposalType === ProposalType.OFFCHAIN_STANDARD ||
+    proposalType === ProposalType.HYBRID_STANDARD
+  ) {
     switch (valueArray[0]) {
       case 0:
         return { voteType: VoteType.Against }
@@ -362,7 +365,10 @@ export const mapValueToVoteType = (
     }
   } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
     return { voteType: VoteType.Veto }
-  } else if (proposalType === ProposalType.OFFCHAIN_APPROVAL) {
+  } else if (
+    proposalType === ProposalType.OFFCHAIN_APPROVAL ||
+    proposalType === ProposalType.HYBRID_APPROVAL
+  ) {
     return { voteType: VoteType.Approval, selections: valueArray as number[] }
   }
   return null
