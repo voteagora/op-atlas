@@ -26,7 +26,6 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
                 href={item.href}
               >
                 <div>{item.title}</div>
-                <MoveUpRight size={12} />
               </Link>
             ))}
           </AccordionContent>

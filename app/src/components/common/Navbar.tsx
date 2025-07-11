@@ -122,23 +122,21 @@ export const Navbar = () => {
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
-                    className="w-56 flex flex-col gap-1"
+                    className="flex flex-col gap-1 w-auto"
                     sideOffset={0}
                     side="bottom"
                     align="start"
                   >
                     {grantLinks.map((item, index) => (
-                      <DropdownMenuItem
+                      <Link
                         key={index}
-                        className="focus:bg-none! focus:opacity-80"
+                        className="cursor-pointer"
+                        href={item.href}
                       >
-                        <Link
-                          className="flex items-center gap-1"
-                          href={item.href}
-                        >
+                        <DropdownMenuItem className="flex items-center gap-1 cursor-pointer">
                           <div>{item.title}</div>
-                        </Link>
-                      </DropdownMenuItem>
+                        </DropdownMenuItem>
+                      </Link>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -196,18 +194,16 @@ export const Navbar = () => {
                     align="start"
                   >
                     {dropdownList.map((item, index) => (
-                      <DropdownMenuItem
+                      <ExternalLink
+                        className="flex items-center gap-1 cursor-pointer"
+                        href={item.href}
                         key={index}
-                        className="focus:bg-none! focus:opacity-80"
                       >
-                        <ExternalLink
-                          className="flex items-center gap-1"
-                          href={item.href}
-                        >
+                        <DropdownMenuItem className="cursor-pointer w-full">
                           <div>{item.title}</div>
                           <ArrowUpRight size={14} />
-                        </ExternalLink>
-                      </DropdownMenuItem>
+                        </DropdownMenuItem>
+                      </ExternalLink>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>

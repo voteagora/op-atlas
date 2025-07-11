@@ -105,22 +105,33 @@ export const retroFundingDevToolingData: MissionData = {
       title:
         "Create a project in Atlas to which you'll add your onchain contracts",
       description: "Complete all the steps and publish your project.",
+      subDetails: "Add project",
+      subDetailsLink: "/projects/new",
     },
     {
       number: 2,
-      title: "Apply to Retro Funding: Dev Tooling",
-      description:
-        "In the upper right of this page, choose projects and submit your application.",
+      title: "Apply by the monthly deadline",
+      description: "Choose projects and submit your application.",
+      subDetails: "Apply",
+      subDetailsLink: "/projects/new",
     },
     {
       number: 3,
-      title: "Get notified of monthly reward results",
-      description: "Rewards are based on your project's performance.",
+      title: "Earn monthly rewards",
+      description: "Rewards are based on performance.",
     },
     {
       number: 4,
-      title: "Complete KYC and claim grant",
-      description: "TODO: ",
+      title: "Verify your grant delivery address and complete KYC",
+      description: "Proof of personhood is required to claim your rewards",
+    },
+    {
+      number: 5,
+      title: "Claim your rewards",
+      description: "Rewards are streamed to your address via Superfluid.",
+      subDetails: "About Superfluid",
+      subDetailsLink:
+        "https://help.superfluid.finance/en/articles/9128773-how-to-unwrap-your-optimism-prize",
     },
   ],
   featuredProjects: [
@@ -128,17 +139,51 @@ export const retroFundingDevToolingData: MissionData = {
       name: "Solidity",
       description:
         "Solidity is an object-oriented, high-level language for implementing smart contracts.",
-      imageUrl: "/assets/images/application-category-1.png",
-      rewardAmount: "275K",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/b6f312d0-1025-4a19-baa9-3aa218fe0833.png",
+      rewardAmount: "356K OP",
       rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://atlas.optimism.io/project/0xcc8d03e014e121d10602eeff729b755d5dc6a317df0d6302c8a9d3b5424aaba8",
     },
     {
-      name: "Solidity",
+      name: "Solady",
       description:
-        "Solidity is an object-oriented, high-level language for implementing smart contracts.",
-      imageUrl: "/assets/images/application-category-1.png",
-      rewardAmount: "275K",
+        "Solady is an open-source repository containing highly-optimized Solidity snippets. It offers efficient implementations of commonly-used libraries...",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/0e726459-df1e-4cea-bddb-25399f88acea.png",
+      rewardAmount: "167K OP",
       rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://atlas.optimism.io/project/0x9151666888d0ca532a529be98a50d2eb992988117e202163f865fa9a27eb7149",
+    },
+    {
+      name: "🏗️ Scaffold-ETH 2",
+      description:
+        "Scaffold-ETH 2 is an open-source toolkit for building decentralized applications on any EVM chain.",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/f8efb7c2-8fb3-4988-8511-ae6e826b687f.png",
+      rewardAmount: "136K OP",
+      rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://atlas.optimism.io/project/0x154a42e5ca88d7c2732fda74d6eb611057fc88dbe6f0ff3aae7b89c2cd1666ab",
+    },
+    {
+      name: "DefiLlama",
+      description:
+        "Open and transparent DeFi analytics. DEX meta-aggregator. LlamaZIp, a router optimized for optimistic rollups",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/a9e1e4b4-45a2-411b-8f31-059269534381.png",
+      rewardAmount: "137K OP",
+      rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://atlas.optimism.io/project/0xae07bfec2c3c90937679f8c8c5c32e80407c09903aa03d1b5e5a075e67592b86",
+    },
+    {
+      name: "Revm",
+      description:
+        "Revm is a critical component in the Ethereum ecosystem used by builders, toolings, clients and chains.",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/57aeca37-e53b-4bcb-b161-0608d09e5c62.png",
+      rewardAmount: "97.3K OP",
+      rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://atlas.optimism.io/project/0xb2d109759fe14e11ac5cc100ab6006321ebdd7ffdefbd2efac93a002105f8e92",
     },
   ],
   supportOptions: [
@@ -184,7 +229,10 @@ export const retroFundingDevToolingData: MissionData = {
       <p className="text-secondary-foreground">
         Your impact will be measured via an evaluation algorithm powered by
         GitHub, npm, Crates, and Onchain data. The{" "}
-        <ExternalLink href="#" className="underline">
+        <ExternalLink
+          href=" https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
+          className="underline"
+        >
           evaluation algorithm
         </ExternalLink>{" "}
         will evolve throughout this Retro Funding Mission based on feedback from

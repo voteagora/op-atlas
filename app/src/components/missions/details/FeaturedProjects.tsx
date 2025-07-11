@@ -46,15 +46,18 @@ export function FeaturedProjects() {
   if (projects.length === 0) return null
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-6" style={{ maxWidth: "100vw" }}>
       <h2 className="text-xl font-semibold">Featured projects</h2>
-      <div className="w-[calc(100%+48px)] sm:w-full -ml-6 sm:ml-0">
+      <div
+        className=""
+        style={{ maxWidth: "calc(100vw - 48px)", overflowX: "clip" }}
+      >
         <Carousel setApi={setApi} className="w-full">
-          <CarouselContent className="overflow-visible sm:overflow-hidden">
+          <CarouselContent className="">
             {projects.map((project, index) => (
               <CarouselItem key={index} className="basis-full">
                 <div
-                  className="flex flex-col-reverse sm:flex-row group p-6 bg-background border border-border sm:rounded-xl flex gap-6 hover:bg-secondary hover:cursor-pointer"
+                  className="flex flex-col-reverse sm:flex-row group p-6 bg-background border border-border rounded-xl flex gap-6 hover:bg-secondary hover:cursor-pointer h-full"
                   onClick={() => {
                     if (project.href) {
                       window.open(project.href, "_blank")
@@ -136,7 +139,7 @@ export function FeaturedProjects() {
             onClick={() => {
               api?.scrollNext()
               track("Link Click", {
-                text: projects[current + 1].name,
+                text: projects[current - 1].name,
                 type: "Featured Projects",
               })
             }}

@@ -27,7 +27,7 @@ export const growthGrantsData: MissionData = {
       Growth Grants are for Superchain apps that have already launched and are
       looking to scale their impact inline with the{" "}
       <ExternalLink
-        href="https://collectiveintent.optimism.io/"
+        href="https://gov.optimism.io/t/season-8-intent/10009"
         className="underline"
       >
         Collective Intent
@@ -47,7 +47,7 @@ export const growthGrantsData: MissionData = {
           </AccordionTrigger>
           <AccordionContent className="mt-6 mb-6">
             <ul className="list-disc pl-4 space-y-1 text-base">
-              <li>
+              <li className="text-secondary-foreground">
                 Primary metric: TVL/AOP that is interop ready within the{" "}
                 <ExternalLink
                   href="https://collectiveintent.optimism.io/"
@@ -56,7 +56,7 @@ export const growthGrantsData: MissionData = {
                   Interop Set
                 </ExternalLink>
               </li>
-              <li>
+              <li className="text-secondary-foreground">
                 Secondary metric: Percent (%) share of TVL/AOP within the
                 Interop Set that&apos;s interop ready v.s. total TVL/AOP
               </li>
@@ -84,8 +84,8 @@ export const growthGrantsData: MissionData = {
             2. Interop Transaction Fees
           </AccordionTrigger>
           <AccordionContent className="mt-6 mb-6">
-            <ul className="list-disc pl-5 space-y-1 text-base">
-              <li>
+            <ul className="list-disc pl-4 space-y-1 text-base">
+              <li className="text-secondary-foreground">
                 Primary metric: X ETH / Month transaction fees generated from
                 transactions that interact with the{" "}
                 <ExternalLink
@@ -96,7 +96,7 @@ export const growthGrantsData: MissionData = {
                 </ExternalLink>{" "}
                 contract
               </li>
-              <li>
+              <li className="text-secondary-foreground">
                 Secondary metric: % share of interop transaction fees v.s.
                 non-interop
               </li>
@@ -152,14 +152,13 @@ export const growthGrantsData: MissionData = {
       type: "required",
     },
   ],
-  footer: <div className="bg-secondary h-[2px] mt-5 mb-5" />,
   learnMoreLinks: [
     {
       title: "S8 Governance Fund Missions",
       href: "https://gov.optimism.io/t/s8-governance-fund-missions/10004?u=gonna.eth",
     },
     {
-      title: "Collective grant policy",
+      title: "Collective Grant Policies",
       href: "https://gov.optimism.io/t/collective-grant-policies/5833",
     },
   ],

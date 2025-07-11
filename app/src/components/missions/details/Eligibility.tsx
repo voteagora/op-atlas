@@ -56,63 +56,51 @@ export const Eligibility = () => {
   const getCalloutConfig = () => {
     if (allRequiredChecked && hasCheckedExtraRewards) {
       return {
-        type: "success" as const,
         message: "You should be eligible for additional rewards!",
-        barColor: "bg-[#D6FFDA]",
-        barStyle: {
-          width: `${percentage}%`,
-          background: "linear-gradient(90deg, #39D551 0%, #0DA529 100%)",
-        },
+        barWidth: `${percentage}%`,
+        barGradient: "bg-gradient-to-r from-[#39D551] to-[#0DA529]",
         backgroundColor: "bg-[#D6FFDA]",
         barBgColor: "bg-[#D6FFDA]",
+        textColor: "text-[#006117]",
       }
     }
     if (allRequiredChecked) {
       return {
-        type: "success" as const,
         message: "You should be eligible!",
-        barColor: "bg-[#D6FFDA]",
-        barStyle: {
-          width: `${percentage}%`,
-          background: "linear-gradient(90deg, #39D551 0%, #0DA529 100%)",
-        },
+        barWidth: `${percentage}%`,
+        barGradient: "bg-gradient-to-r from-[#39D551] to-[#0DA529]",
         backgroundColor: "bg-[#D6FFDA]",
         barBgColor: "bg-[#D6FFDA]",
+        textColor: "text-[#006117]",
       }
     }
     if (checkedRequiredCount > 0) {
       return {
-        type: "optimismBright" as const,
         message: `${percentage}%`,
-        barColor: "bg-[#FF0420]",
-        barStyle: { 
-          background: "linear-gradient(90deg, #FA5300 0%, #FF0420 100%)",
-          width: `${percentage}%` 
-        },
+        barWidth: `${percentage}%`,
+        barGradient: "bg-gradient-to-r from-brand-primary to-brand-primary",
         backgroundColor: "bg-[#FFD1D5]",
         barBgColor: "bg-[#FF99A1]",
+        textColor: "text-[#B80018]",
       }
     }
     return {
-      type: "gray" as const,
       message: "0%",
-      barColor: "bg-[#E0E2EB]",
       backgroundColor: "bg-[#F2F3F8]",
-      barBgColor: "bg-[#E0E2EB]",
-      barStyle: {
-        width: "0%",
-        background: "linear-gradient(90deg, #E0E2EB 0%, #E0E2EB 100%)",
-      },
+      barBgColor: "bg-tertiary",
+      barWidth: "0%",
+      barGradient: "bg-gradient-to-r from-tertiary to-tertiary",
+      textColor: "text-secondary-foreground",
     }
   }
 
   const {
-    type: calloutType,
     message,
-    barColor,
-    barStyle,
+    barWidth,
+    barGradient,
     backgroundColor,
     barBgColor,
+    textColor,
   } = getCalloutConfig()
 
   const handleCheckChange = (index: number, checked: boolean) => {
@@ -133,7 +121,7 @@ export const Eligibility = () => {
     <div className="flex flex-col gap-6">
       <p className="text-xl font-semibold">Check your eligibility</p>
       <Callout
-        type={calloutType}
+        type="info"
         showIcon={false}
         className={cn(
           "p-6 w-full rounded-xl transition-all duration-100",
@@ -150,12 +138,12 @@ export const Eligibility = () => {
               <div
                 className={cn(
                   "h-full rounded-[2px] transition-all duration-300",
-                  barColor,
+                  barGradient
                 )}
-                style={barStyle}
+                style={{ width: barWidth }}
               />
             </div>
-            <p className="text-base font-semibold mt-4 text-secondary-foreground">
+            <p className={cn("text-base font-semibold mt-4", textColor)}>
               {message}
             </p>
           </div>

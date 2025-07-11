@@ -103,7 +103,13 @@ export const retroFundingOnchainBuildersData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project has deployed contracts on a supported chain
+          My project has deployed contracts on a{" "}
+          <ExternalLink
+            className="underline"
+            href={"https://www.superchain.eco/chains"}
+          >
+            supported chain
+          </ExternalLink>
         </p>
       ),
       type: "required",
@@ -112,15 +118,13 @@ export const retroFundingOnchainBuildersData: MissionData = {
       reactNode: (
         <>
           <p className="text-secondary-foreground">
-            I can provide a link to a functioning{" "}
+            For DeFi, I can provide a link to a functioning{" "}
             <ExternalLink href="https://defillama.com" className="underline">
               DeFiLlama adaptor
             </ExternalLink>
-            (optional)
-          </p>
-          <p className="text-secondary-foreground">
-            {" "}
-            To be considered for additional DeFi rewards.
+            <span className="text-xs px-2 py-0.5 text-callout-foreground bg-callout rounded-full inline-block ml-2 vertical-align-text-bottom">
+              Optional
+            </span>
           </p>
         </>
       ),
@@ -130,7 +134,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
       reactNode: (
         <>
           <p className="text-secondary-foreground">
-            I&apos;ve added my project to the{" "}
+            For Account Abstraction, I&apos;ve added my project to the{" "}
             <ExternalLink
               href="https://www.bundlebear.com/overview/all"
               className="underline"
@@ -138,10 +142,9 @@ export const retroFundingOnchainBuildersData: MissionData = {
               BundleBear-app in GitHub
             </ExternalLink>
             , and my verified contract addresses are present in the registry
-            (optional)
-          </p>
-          <p className="text-secondary-foreground">
-            To be considered for additional Account Abstraction rewards.
+            <span className="text-xs px-2 py-0.5 text-callout-foreground bg-callout rounded-full inline-block ml-2 vertical-align-text-bottom">
+              Optional
+            </span>
           </p>
         </>
       ),
@@ -155,23 +158,32 @@ export const retroFundingOnchainBuildersData: MissionData = {
         "Create a project in Atlas to which you'll add your onchain contracts",
       description: "Complete all the steps and publish your project.",
       subDetails: "Add project",
-      subDetailsLink: `#`,
+      subDetailsLink: "/projects/new",
     },
     {
       number: 2,
-      title: "Apply to Retro Funding: Onchain Builders",
-      description:
-        "In the upper right of this page, choose projects and submit your application.",
+      title: "Apply by the monthly deadline",
+      description: "Choose projects and submit your application.",
+      subDetails: "Apply",
+      subDetailsLink: "/projects/new",
     },
     {
       number: 3,
-      title: "Get monthly rewards",
-      description: "Rewards are based on your project's performance.",
+      title: "Earn monthly rewards",
+      description: "Rewards are based on performance.",
     },
     {
       number: 4,
-      title: "Complete KYC and claim grant",
-      description: "TODO: ",
+      title: "Verify your grant delivery address and complete KYC",
+      description: "Proof of personhood is required to claim your rewards",
+    },
+    {
+      number: 5,
+      title: "Claim your rewards",
+      description: "Rewards are streamed to your address via Superfluid.",
+      subDetails: "About Superfluid",
+      subDetailsLink:
+        "https://help.superfluid.finance/en/articles/9128773-how-to-unwrap-your-optimism-prize",
     },
   ],
   rewards: {
@@ -179,7 +191,10 @@ export const retroFundingOnchainBuildersData: MissionData = {
       <p className="text-secondary-foreground">
         Your impact will be measured via an evaluation algorithm powered by
         onchain data. The{" "}
-        <ExternalLink href="#" className="underline">
+        <ExternalLink
+          href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
+          className="underline"
+        >
           evaluation algorithm
         </ExternalLink>{" "}
         will evolve throughout this Retro Funding Mission based on feedback from
@@ -194,22 +209,52 @@ export const retroFundingOnchainBuildersData: MissionData = {
   },
   featuredProjects: [
     {
-      name: "Solidity",
-      description:
-        "Solidity is an object-oriented, high-level language for implementing smart contracts.",
-      imageUrl: "/assets/images/application-category-1.png",
-      rewardAmount: "275K",
+      name: "Velodrome",
+      description: "The central trading & liquidity marketplace on Superchain",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/438ea57d-059c-4327-82e4-abfc94544bad.png",
+      rewardAmount: "309K",
       rewardIcon: "/assets/icons/op-icon.svg",
-      href: "https://soliditylang.org/",
+      href: "https://atlas.optimism.io/project/0x08df6e20a3cfabbaf8f34d4f4d048fe7da40447c24be0f3ad513db6f13c755dd",
     },
     {
-      name: "Solidity",
+      name: "Morpho",
       description:
-        "Solidity is an object-oriented, high-level language for implementing smart contracts.",
-      imageUrl: "/assets/images/application-category-1.png",
-      rewardAmount: "275K",
+        "Morpho is a decentralized lending platform that allows anyone to earn yield and borrow assets seamlessly",
+      imageUrl:
+        "https://cdn.charmverse.io/user-content/92e825ef-614d-4aaa-b3d7-cf7b4c793477/6c1b26d4-c05c-4c8d-91f9-ce0f077228d2/Morpho-logo-dark-shape-PP.png",
+      rewardAmount: "221K",
       rewardIcon: "/assets/icons/op-icon.svg",
-      href: "https://soliditylang.org/",
+      href: "https://atlas.optimism.io/project/0xda8c593717693ef30f5c62fc2689709784324cfb9b5fe92c9db3a47f596791e5",
+    },
+    {
+      name: "Virtuals Protocol",
+      description: "AI Agent Intelligence Network on Base",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/a8b42e6b-a95c-4a2d-8403-570c275d187a.png",
+      rewardAmount: "194K",
+      rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://atlas.optimism.io/project/0x780cf3d5aa4e3c94b8a4157f4b06a3f92ebcc20813585e20e3fe0271bf76b7a9",
+    },
+    {
+      name: "Stoke Fire",
+      description:
+        "Stoke Fire is a mobile game built on base and the farcaster social graph. Gather resources, raid your friends and stoke the fire to grow your population.",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/72d35628-aead-4ef8-a924-79d355735214.png",
+      rewardAmount: "39.4K",
+      rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://atlas.optimism.io/project/0xfe8e35b3487bd0e0457b9431b12b73403ca1f5c9c19dd1db81a2317c97c1e1a2",
+    },
+    {
+      name: "Bunni.xyz",
+      description:
+        "Bunni is the most advanced DEX ever built. Bunni maximizes LP profits in all market conditions using its first-of-its-kind Shapeshifting Liquidity",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/2c2e4555-6e66-403d-bee1-1762797c1c61.png",
+      rewardAmount: "19.7K",
+      rewardIcon: "/assets/icons/op-icon.svg",
+      href: "https://atlas.optimism.io/project/0xcc230da6ee8cbcc2d4039a526fbc8aa910d63201e350be2fae0cab9864194974",
     },
   ],
   supportOptions: [

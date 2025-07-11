@@ -61,11 +61,15 @@ export const ApplicationStatusCard = ({
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
-              href: `/missions/${mission.pageName}/application`,
+              href: "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
               text: "Apply",
               type: "application",
             })
-            router.push(`/missions/${mission.pageName}/application`)
+            window.open(
+              "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
+              "_blank",
+              "noopener,noreferrer",
+            )
           }}
         >
           Apply via Grants Council

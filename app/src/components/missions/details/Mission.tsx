@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef } from "react"
+import React, { useMemo, useRef } from "react"
 
 import { Eligibility } from "@/components/missions/details/Eligibility"
 import { FeaturedProjects } from "@/components/missions/details/FeaturedProjects"
@@ -15,6 +15,7 @@ import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
 import { SupportedNetworks } from "./SupportedNetworks"
 import { SessionRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
 import ExternalLink from "@/components/ExternalLink"
+import { cn } from "@/lib/utils"
 
 // Navigation item component
 interface NavItemProps {
@@ -58,60 +59,68 @@ export default function Mission() {
   const learnMoreRef = useRef<HTMLDivElement>(null)
 
   // Define all possible navigation sections with their conditions
-  const navigationSections: NavSection[] = [
+  const navigationSections: NavSection[] = useMemo(() => [
     {
-      key: 'about',
-      label: 'About',
+      key: "about",
+      label: "About",
       ref: aboutRef,
-      condition: true // Always show
+      condition: true, // Always show
     },
     {
-      key: 'rewards',
-      label: 'How rewards are calculated',
+      key: "rewards",
+      label: "How rewards are calculated",
       ref: rewardsRef,
-      condition: !!mission?.rewards
+      condition: !!mission?.rewards,
     },
     {
-      key: 'supported-chains',
-      label: 'Supported chains',
+      key: "supported-chains",
+      label: "Supported chains",
       ref: supportedChainsRef,
-      condition: !!mission?.showSupportedNetworks
+      condition: !!mission?.showSupportedNetworks,
     },
     {
-      key: 'eligibility',
-      label: 'Check your eligibility',
+      key: "eligibility",
+      label: "Check your eligibility",
       ref: eligibilityRef,
-      condition: !!mission?.missionPageEligibility && mission.missionPageEligibility.length > 0
+      condition:
+        !!mission?.missionPageEligibility &&
+        mission.missionPageEligibility.length > 0,
     },
     {
-      key: 'how-it-works',
-      label: 'How it works',
+      key: "how-it-works",
+      label: "How it works",
       ref: howItWorksRef,
-      condition: !!mission?.howItWorks && mission.howItWorks.length > 0
+      condition: !!mission?.howItWorks && mission.howItWorks.length > 0,
     },
     {
-      key: 'featured-projects',
-      label: 'Featured projects',
+      key: "featured-projects",
+      label: "Featured projects",
       ref: featuredProjectsRef,
-      condition: !!mission?.featuredProjects && mission.featuredProjects.length > 0
+      condition:
+        !!mission?.featuredProjects && mission.featuredProjects.length > 0,
     },
     {
-      key: 'get-support',
-      label: 'Get support',
+      key: "get-support",
+      label: "Get support",
       ref: getSupportRef,
-      condition: !!mission?.supportOptions && mission.supportOptions.length > 0
+      condition: !!mission?.supportOptions && mission.supportOptions.length > 0,
     },
     {
-      key: 'learn-more',
-      label: 'Learn more',
+      key: "learn-more",
+      label: "Learn more",
       ref: learnMoreRef,
-      condition: !!mission?.learnMoreLinks && mission.learnMoreLinks.length > 0
-    }
-  ]
+      condition: !!mission?.learnMoreLinks && mission.learnMoreLinks.length > 0,
+    },
+  ], [mission])
 
   // Filter sections based on conditions
   const visibleSections = navigationSections.filter(section => section.condition)
   let missioName = mission?.name
+  const showSidePanel =
+    mission &&
+    mission?.startsAt &&
+    new Date() > mission?.startsAt &&
+    mission?.endsAt;
 
   if (
     mission?.pageName === "retro-funding-onchain-builders" ||
@@ -120,7 +129,7 @@ export default function Mission() {
     missioName = `Retro Funding: ${mission.name}`
   }
   return (
-    <div className="mt-12 md:mt-20 bg-background flex flex-col w-full max-w-[1064px] rounded-3xl z-10">
+    <div className={cn("mt-12 md:mt-20 bg-background flex flex-col w-full max-w-[1064px] rounded-3xl z-10", showSidePanel ? "mb-24 sm:mb-0" : "")}>
       <div className="px-6 md:px-0 flex flex-1 gap-x-12">
         <div className="flex flex-1 flex-col items-center">
           <div className="flex flex-col gap-y-12 max-w-[712px]">
@@ -180,15 +189,12 @@ export default function Mission() {
 
         <div className="fixed md:sticky md:top-40 bottom-0 left-0 right-0 w-full max-w-full md:max-w-[304px] md:ml-auto bg-background md:bg-transparent z-10 shadow-lg md:shadow-none  md:h-fit">
           <>
-            {mission &&
-              mission?.startsAt &&
-              new Date() > mission?.startsAt &&
-              mission?.endsAt && (
+            {showSidePanel && (
                 <div className="flex flex-col gap-y-4">
                   <SessionRoundApplicationStatusCard />
                   <RoundEnrolledProjectsCard />
                   {mission?.pageName === "audit-grants" && (
-                    <div className="py-2.5">
+                    <div className="py-2.5 hidden md:block">
                       <p className="text-secondary-foreground text-sm text-center font-medium leading-tight">
                         Are you an ASP?{" "}
                         <ExternalLink
