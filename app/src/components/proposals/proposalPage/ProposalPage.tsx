@@ -29,7 +29,10 @@ const ProposalPage = async ({
   // Breadcrumbs
   const breadcrumbs = [
     { label: "Governance", href: "/governance" },
-    { label: "Proposal", href: `/proposals/${proposalData.id}` },
+    {
+      label: "Proposal",
+      href: `/proposals/${proposalData.offchainProposalId}`,
+    },
   ]
 
   return (
