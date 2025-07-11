@@ -29,7 +29,7 @@ export default function AddGrantDeliveryAddressForm({
   const { organizationId, projectId } = useParams()
   const queryClient = useQueryClient()
 
-  const { mutate: deleteProjectKYCTeam } = useMutation({
+  const { mutate: deleteProjectKYCTeam, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
       if (!organizationId) {
         await deleteProjectKYCTeamAction({
@@ -80,7 +80,6 @@ export default function AddGrantDeliveryAddressForm({
       values.add("item-2")
     }
 
-    // Convert to array and return
     return Array.from(values)
   }, [kycTeam, allTeamMembersVerified])
 
@@ -90,10 +89,26 @@ export default function AddGrantDeliveryAddressForm({
     deleteProjectKYCTeam()
   }
 
+  const onStartOver = () => {
+    if (kycTeam?.id) {
+      deleteProjectKYCTeam()
+    }
+  }
+
   return (
     <div className="p-6 border rounded-xl space-y-6 w-full">
       {!allTeamMembersVerified && (
-        <h4 className="font-semibold text-base">Add an address</h4>
+        <div className="flex justify-between items-center">
+          <h4 className="font-semibold text-base">Add an address</h4>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onStartOver}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Start over
+          </Button>
+        </div>
       )}
       {allTeamMembersVerified ? (
         <CompletedGrantDeliveryForm
@@ -153,16 +168,35 @@ export default function AddGrantDeliveryAddressForm({
                       </div>
                     )}
                   </div>
-                  <Button
-                    className="mt-4"
-                    variant="secondary"
-                    onClick={onDeleteProjectKYCTeam}
-                  >
-                    Start over
-                  </Button>
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      variant="secondary"
+                      onClick={onDeleteProjectKYCTeam}
+                    >
+                      Start over
+                    </Button>
+                  </div>
                 </>
               ) : (
-                <DeliveryAddressVerificationForm />
+                <>
+                  <DeliveryAddressVerificationForm />
+                  <div className="mt-4 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={onStartOver}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Start over"
+                      )}
+                    </Button>
+                  </div>
+                </>
               ),
             },
             {
@@ -275,7 +309,7 @@ export default function AddGrantDeliveryAddressForm({
                   )}
                   <div className="space-y-4">
                     <div className="text-sm text-secondary-foreground font-normal">
-                      Is something missing or incorrect? You’ll need to{" "}
+                      Is something missing or incorrect? You&apos;ll need to{" "}
                       <Link
                         className="underline hover:opacity-80 transition-colors duration-300"
                         href={`https://superchain.typeform.com/to/Pq0c7jYJ#l2_address=${kycTeam?.walletAddress}&kyc_team_id=${kycTeam?.id}`}

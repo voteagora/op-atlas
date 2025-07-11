@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
 import { deleteKycTeam } from "@/db/kyc"
+import { checkWalletAddressExists, getKycTeamByWalletAddress } from "@/db/kyc"
 import {
   addOrganizationMembers,
   createOrganization,
@@ -211,6 +212,36 @@ export const removeMemberFromOrganization = async (
   await removeOrganizationMember({ organizationId, userId })
   revalidatePath("/dashboard")
   revalidatePath("/profile", "layout")
+}
+
+export const checkWalletAddressExistsForOrganizationAction = async (
+  walletAddress: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const exists = await checkWalletAddressExists(walletAddress)
+  return { exists }
+}
+
+export const getKycTeamByWalletAddressForOrganizationAction = async (
+  walletAddress: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const kycTeam = await getKycTeamByWalletAddress(walletAddress)
+  return kycTeam
 }
 
 export const createOrganizationKycTeamAction = async ({

@@ -17,10 +17,10 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { useUser } from "@/hooks/db/useUser"
+import { useUsername } from "@/hooks/useUsername"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { createProjectKycTeamAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { useUsername } from "@/hooks/useUsername"
 
 const formSchema = z.object({
   signature: z.string().min(1, "Signature is required"),
@@ -38,7 +38,6 @@ export function AddGrantDeliveryAddressDialog({
   const { user } = useUser({ id: session?.user?.id, enabled: true })
   const username = useUsername(user)
 
-
   const [isPending, startTransition] = useTransition()
   const {
     control,
@@ -52,12 +51,15 @@ export function AddGrantDeliveryAddressDialog({
     },
   })
 
-  const [messageToSign, setMessageToSign] = useState(`I verify that I am ${username} on Atlas and I'm an optimist.`)
+  const [messageToSign, setMessageToSign] = useState(
+    `I verify that I am ${username} on Atlas and I'm an optimist.`,
+  )
 
   useEffect(() => {
-    setMessageToSign(`I verify that I am ${username} on Atlas and I'm an optimist.`)
+    setMessageToSign(
+      `I verify that I am ${username} on Atlas and I'm an optimist.`,
+    )
   }, [username])
-
 
   const handleClose = useCallback(
     (isOpen: boolean) => {
@@ -84,48 +86,65 @@ export function AddGrantDeliveryAddressDialog({
         if (!data.signature.startsWith("0x"))
           throw new Error("Invalid signature")
 
-        if (organizationId) {
-          const createdOrganizationKycTeam =
-            await createOrganizationKycTeamAction({
+        try {
+          if (organizationId) {
+            const createdOrganizationKycTeam =
+              await createOrganizationKycTeamAction({
+                walletAddress: grantDeliveryData.address,
+                organizationId: organizationId as string,
+              })
+
+            if (createdOrganizationKycTeam.error) {
+              if (createdOrganizationKycTeam.error.includes("already exists")) {
+                toast.error(
+                  "This address is already in use by another KYC team. Please go back to the previous step and use a different address.",
+                )
+              } else {
+                toast.error(createdOrganizationKycTeam.error)
+              }
+              return
+            }
+
+            queryClient.invalidateQueries({
+              queryKey: ["kyc-teams", "organization", organizationId],
+            })
+          } else {
+            if (!projectId) return
+
+            const createdProjectKycTeam = await createProjectKycTeamAction({
               walletAddress: grantDeliveryData.address,
-              organizationId: organizationId as string,
+              projectId: projectId as string,
             })
 
-          if (createdOrganizationKycTeam.error) {
-            toast.error(createdOrganizationKycTeam.error)
-            return
+            if (createdProjectKycTeam.error) {
+              if (createdProjectKycTeam.error.includes("already exists")) {
+                toast.error(
+                  "This address is already in use by another KYC team. Please go back to the previous step and use a different address.",
+                )
+              } else {
+                toast.error(createdProjectKycTeam.error)
+              }
+              return
+            }
+
+            queryClient.invalidateQueries({
+              queryKey: ["kycTeamProjects", grantDeliveryData.kycTeamId],
+            })
+            queryClient.invalidateQueries({
+              queryKey: ["kyc-teams", "project", projectId],
+            })
           }
 
-          queryClient.invalidateQueries({
-            queryKey: ["kyc-teams", "organization", organizationId],
-          })
-        } else {
-          if (!projectId) return
-
-          const createdProjectKycTeam = await createProjectKycTeamAction({
-            walletAddress: grantDeliveryData.address,
-            projectId: projectId as string,
-          })
-
-          if (createdProjectKycTeam.error) {
-            toast.error(createdProjectKycTeam.error)
-            return
-          }
-
-          queryClient.invalidateQueries({
-            queryKey: ["kycTeamProjects", grantDeliveryData.kycTeamId],
-          })
-          queryClient.invalidateQueries({
-            queryKey: ["kyc-teams", "project", projectId],
-          })
+          toast.success("Grant delivery address verified")
+          handleClose(false)
+        } catch (error) {
+          console.error("Error creating KYC team:", error)
+          toast.error("Error verifying the address. Please try again.")
         }
-
-        toast.success("Grant delivery address verified")
-        handleClose(false)
       })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [grantDeliveryData, handleClose],
+    [grantDeliveryData, handleClose, organizationId, projectId, queryClient],
   )
 
   return (
