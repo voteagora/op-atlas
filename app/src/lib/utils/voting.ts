@@ -342,7 +342,10 @@ export const mapVoteTypeToValue = (
   },
 ) => {
   console.log("mapVoteTypeToValue", { proposalType, selectedVotes })
-  if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
+  if (
+    proposalType === ProposalType.OFFCHAIN_STANDARD ||
+    proposalType === ProposalType.HYBRID_STANDARD
+  ) {
     switch (selectedVotes.voteType) {
       case VoteType.Against:
         return JSON.stringify([0])
@@ -355,7 +358,10 @@ export const mapVoteTypeToValue = (
     }
   } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
     return JSON.stringify([0])
-  } else if (proposalType === ProposalType.OFFCHAIN_APPROVAL) {
+  } else if (
+    proposalType === ProposalType.OFFCHAIN_APPROVAL ||
+    proposalType === ProposalType.HYBRID_APPROVAL
+  ) {
     // Sort lowest to highest to maintain the index location for voting
     const sortedSelections = selectedVotes.selections?.sort((a, b) => a - b)
     return selectedVotes.selections ? `[[${sortedSelections}],[1]]` : "[[],[0]]"
