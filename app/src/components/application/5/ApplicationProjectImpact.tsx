@@ -21,12 +21,14 @@ const ApplicationProjectImpactForm = ({
   applications,
   form,
   categories,
+  isLoadingProjects,
 }: {
   onNext?: () => void
   projects?: ProjectWithDetails[]
   applications: ApplicationWithDetails[]
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   categories: CategoryWithImpact[]
+  isLoadingProjects?: boolean
 }) => {
   const { fields } = useFieldArray({
     control: form.control,
@@ -54,33 +56,45 @@ const ApplicationProjectImpactForm = ({
         </p>
       </div>
       <div className="flex flex-col gap-y-4">
-        {!!!projects?.length && (
-          <Callout
-            type="error"
-            text="You haven't added or joined any projects"
-            linkText="View projects"
-            linkHref="/dashboard"
-          />
-        )}
+        {isLoadingProjects ? (
+          <div className="flex flex-col items-center gap-2 p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="text-sm text-secondary-foreground">
+              Loading your projects...
+            </p>
+          </div>
+        ) : (
+          <>
+            {!!!projects?.length && (
+              <Callout
+                type="error"
+                text="You haven't added or joined any projects, or none of your projects are 100% complete"
+                linkText="View projects"
+                linkHref="/dashboard"
+              />
+            )}
 
-        {/* Project Impact Form */}
-        {fields.map((field, index) => (
-          <ProjectImpactForm
-            categories={categories}
-            key={field.id}
-            index={index}
-            project={
-              projects?.find((project) => project.id === field.projectId)!
-            }
-            form={form}
-          />
-        ))}
+            {/* Project Impact Form */}
+            {fields.map((field, index) => (
+              <ProjectImpactForm
+                categories={categories}
+                key={field.id}
+                index={index}
+                project={
+                  projects?.find((project) => project.id === field.projectId)!
+                }
+                form={form}
+              />
+            ))}
+          </>
+        )}
       </div>
 
       <Button
         variant="destructive"
         type="submit"
         disabled={
+          isLoadingProjects ||
           !hasSelectedProjects ||
           !form.formState.isDirty ||
           !form.formState.isValid
