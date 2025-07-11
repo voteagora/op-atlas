@@ -11,33 +11,64 @@ type ProposalCandidate = {
 }
 
 const getQualifications = async (
-  identifiers: string[],
+  identifiers: (string | any)[],
 ): Promise<ProposalCandidate[]> => {
-  const promises = identifiers.map(async (identifier) => {
-    const isOrgCitizen = identifier.startsWith("0x")
+  const results = await Promise.all(
+    identifiers.map(async (identifier, index) => {
+      try {
+        // Ensure identifier is a string
+        const stringIdentifier =
+          typeof identifier === "string"
+            ? identifier
+            : identifier?.id || identifier?.name || `unknown-${index}`
 
-    if (isOrgCitizen) {
-      const org = await getOrganization({ id: identifier })
+        // For debugging
+        if (typeof identifier !== "string") {
+          console.warn(`Non-string identifier at index ${index}:`, identifier)
+        }
 
-      return {
-        id: identifier,
-        name: org?.name,
-        avatar: org?.avatarUrl,
-        link: `/${identifier}`,
-      } as ProposalCandidate
-    } else {
-      // Handle regular usernames
-      const user = await getUserByUsername(identifier)
-      return {
-        id: identifier,
-        name: user?.username || identifier,
-        avatar: user?.imageUrl,
-        link: `/${identifier}`,
-      } as ProposalCandidate
-    }
-  })
+        const isOrgCitizen =
+          typeof stringIdentifier === "string" &&
+          stringIdentifier.startsWith("0x")
 
-  return Promise.all(promises)
+        if (isOrgCitizen) {
+          const org = await getOrganization({ id: stringIdentifier })
+
+          return {
+            id: stringIdentifier,
+            name: org?.name || stringIdentifier,
+            avatar: org?.avatarUrl,
+            link: `/${stringIdentifier}`,
+          } as ProposalCandidate
+        } else {
+          // Handle regular usernames
+          const user = await getUserByUsername(stringIdentifier)
+          return {
+            id: stringIdentifier,
+            name: user?.username || stringIdentifier,
+            avatar: user?.imageUrl,
+            link: `/${stringIdentifier}`,
+          } as ProposalCandidate
+        }
+      } catch (error) {
+        // Create a safe string identifier for fallback
+        const safeId =
+          typeof identifier === "string"
+            ? identifier
+            : identifier?.id || identifier?.name || `unknown-${index}`
+
+        console.error(`Error fetching candidate ${safeId}:`, error)
+        // Return a fallback candidate with the identifier as the name
+        return {
+          id: safeId,
+          name: safeId,
+          link: `/${safeId}`,
+        } as ProposalCandidate
+      }
+    }),
+  )
+
+  return results
 }
 
 export const useProposalCandidates = (candidateUserIds: string[]) => {
