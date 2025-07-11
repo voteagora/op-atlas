@@ -133,21 +133,65 @@ const ApplicationFormTabs = ({
   const [agreedTerms, setAgreedTerms] = useState(
     Array.from({ length: TERMS.length + 1 }, () => false),
   )
+  const [completedProjects, setCompletedProjects] = useState<
+    ProjectWithDetails[]
+  >([])
+  const [isFilteringProjects, setIsFilteringProjects] = useState(false)
 
-  const completedProjects = useMemo(() => {
-    return projects?.filter(async (project) => {
-      const [contract, projectDetails] = await Promise.all([
-        getProjectContracts({ projectId: project.id }),
-        getProject({ id: project.id }),
-      ])
-      return getProjectStatus(projectDetails, contract).progressPercent === 100
-    })
+  useEffect(() => {
+    const filterCompletedProjects = async () => {
+      if (!projects || projects.length === 0) {
+        setCompletedProjects([])
+        return
+      }
+
+      setIsFilteringProjects(true)
+      try {
+        const projectCompletionResults = await Promise.all(
+          projects.map(async (project) => {
+            const [contract, projectDetails] = await Promise.all([
+              getProjectContracts({ projectId: project.id }),
+              getProject({ id: project.id }),
+            ])
+            const { progressPercent } = getProjectStatus(
+              projectDetails,
+              contract,
+            )
+            return {
+              project,
+              isComplete: progressPercent === 100,
+            }
+          }),
+        )
+
+        const filteredProjects = projectCompletionResults
+          .filter(({ isComplete }) => isComplete)
+          .map(({ project }) => project)
+
+        setCompletedProjects(filteredProjects)
+      } catch (error) {
+        console.error("Error filtering completed projects:", error)
+        setCompletedProjects([])
+      } finally {
+        setIsFilteringProjects(false)
+      }
+    }
+
+    filterCompletedProjects()
   }, [projects])
 
   const form = useForm<z.infer<typeof ApplicationFormSchema>>({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
-      projects: completedProjects?.map((project) => {
+      projects: [],
+    },
+    shouldFocusError: true,
+    mode: "onChange",
+  })
+
+  useEffect(() => {
+    if (completedProjects.length > 0) {
+      const projectFormData = completedProjects.map((project) => {
         const application = applications.find(
           (a) => a.project.id === project.id,
         )
@@ -166,11 +210,11 @@ const ApplicationFormTabs = ({
           isSubmitted: !!application,
           selected: !!application,
         }
-      }),
-    },
-    shouldFocusError: true,
-    mode: "onChange",
-  })
+      })
+      
+      form.reset({ projects: projectFormData })
+    }
+  }, [completedProjects, applications, form])
 
   const toggleAgreedTerm = (idx: number) => {
     setAgreedTerms((prev) => {
@@ -255,6 +299,7 @@ const ApplicationFormTabs = ({
               applications={applications}
               categories={categories}
               form={form}
+              isLoadingProjects={isFilteringProjects}
             />
           </TabsContent>
 
