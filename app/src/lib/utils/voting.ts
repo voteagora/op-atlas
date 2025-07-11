@@ -92,6 +92,7 @@ const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
   const proposalTypeDescription = () => {
     switch (proposalType) {
       case ProposalType.OFFCHAIN_APPROVAL:
+      case ProposalType.HYBRID_APPROVAL:
         return "This election uses approval voting, meaning voter can approve more than one candidate."
       case ProposalType.OFFCHAIN_STANDARD:
         return "OFFCHAIN_STANDARD"
@@ -179,6 +180,7 @@ const getNonCitizenTypes = (
 ) => {
   switch (proposalData.proposalType) {
     case ProposalType.OFFCHAIN_APPROVAL:
+    case ProposalType.HYBRID_APPROVAL:
       return castYourVote(proposalData.proposalType)
     case ProposalType.OFFCHAIN_STANDARD:
       return wantToVote(eligibility)
