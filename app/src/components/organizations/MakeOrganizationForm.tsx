@@ -166,10 +166,30 @@ export default function MakeOrganizationForm({
     }
   }
 
+  // Wrap in a function that throws on error, helps our toast promise.
+  const removeMemberOrThrow = async (
+    organizationId: string,
+    userId: string,
+  ) => {
+    const result = await removeMemberFromOrganization(organizationId, userId)
+    if (result?.error) {
+      throw new Error(result.error)
+    }
+    return result
+  }
+
   const handleConfirmDelete = async () => {
     if (!isShowingRemove) return
     if (organization) {
-      await removeMemberFromOrganization(organization.id, isShowingRemove.id)
+      toast.promise(removeMemberOrThrow(organization.id, isShowingRemove.id), {
+        loading: "Removing member...",
+        success: () => {
+          return "Member removed from team"
+        },
+        error: (error) => {
+          return error.message
+        },
+      })
     } else {
       setTeam((prev) =>
         prev.filter((item) => item.user.id !== isShowingRemove.id),
@@ -241,16 +261,16 @@ export default function MakeOrganizationForm({
         try {
           const response = organization
             ? await updateOrganizationDetails({
-              id: organization.id,
-              organization: newValues,
-            })
+                id: organization.id,
+                organization: newValues,
+              })
             : await createNewOrganization({
-              organization: newValues,
-              teamMembers: team.map(({ user, role }) => ({
-                userId: user.id,
-                role,
-              })),
-            })
+                organization: newValues,
+                teamMembers: team.map(({ user, role }) => ({
+                  userId: user.id,
+                  role,
+                })),
+              })
 
           if (response?.error !== null || !response) {
             throw new Error(response?.error ?? "Failed to save project")
