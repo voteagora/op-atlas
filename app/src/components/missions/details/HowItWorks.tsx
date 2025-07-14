@@ -1,11 +1,11 @@
 "use client"
 
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import React, { useState } from "react"
 import { useRouter } from "next/navigation"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useLogin } from "@privy-io/react-auth"
+import { useSession } from "next-auth/react"
+import React, { useState } from "react"
 
-import ExternalLink from "@/components/ExternalLink"
-import { ArrowRightNew } from "@/components/icons/ArrowRightNew"
 import { Button } from "@/components/ui/button"
 import {
   Carousel,
@@ -13,10 +13,10 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel"
+import ExternalLink from "@/components/ExternalLink"
+import { ArrowRightNew } from "@/components/icons/ArrowRightNew"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { cn } from "@/lib/utils"
-import { useLogin } from "@privy-io/react-auth"
-import { useSession } from "next-auth/react"
 
 export interface HowItWorksStep {
   number: number
@@ -71,7 +71,9 @@ export function HowItWorks() {
   // when there are 4 or more cards
   const shouldShowPartialNextCard = steps.length >= 4
   const carouselOpts = {
-    align: shouldShowPartialNextCard ? "start" as const : "center" as const,
+    align: shouldShowPartialNextCard
+      ? ("start" as const)
+      : ("center" as const),
     containScroll: "trimSnaps" as const,
     dragFree: false,
   }
@@ -112,11 +114,20 @@ export function HowItWorks() {
                   {step.subDetails && (
                     <div className="mt-auto pt-4">
                       {step.enforceSignIn ? (
-                        <span className="text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline cursor-pointer"
-                          onClick={() => loginEnforced(step)}>
+                        <button
+                          type="button"
+                          className="text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline cursor-pointer bg-transparent border-none p-0 text-left"
+                          onClick={() => loginEnforced(step)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              loginEnforced(step)
+                            }
+                          }}
+                        >
                           {step.subDetails}
                           <ArrowRightNew className="fill-secondary-foreground h-3 w-3 pl-1" />
-                        </span>
+                        </button>
                       ) : (
                         <ExternalLink
                           href={step.subDetailsLink || "#"}
