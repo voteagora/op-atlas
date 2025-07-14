@@ -165,9 +165,6 @@ export const retroFundingOnchainBuildersData: MissionData = {
       number: 2,
       title: "Apply by the monthly deadline",
       description: "Choose projects and submit your application.",
-      subDetails: "Apply",
-      subDetailsLink: "/missions/retro-funding-onchain-builders/application",
-      enforceSignIn: true,
     },
     {
       number: 3,

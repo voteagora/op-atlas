@@ -112,9 +112,6 @@ export const retroFundingDevToolingData: MissionData = {
       number: 2,
       title: "Apply by the monthly deadline",
       description: "Choose projects and submit your application.",
-      subDetails: "Apply",
-      subDetailsLink: "/missions/retro-funding-dev-tooling/application",
-      enforceSignIn: true,
     },
     {
       number: 3,

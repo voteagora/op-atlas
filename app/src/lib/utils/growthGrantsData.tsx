@@ -42,7 +42,7 @@ export const growthGrantsData: MissionData = {
     <div>
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="retro-funding" className="">
-          <AccordionTrigger className="text-base p-0 hover:underline text-secondary-foreground font-normal">
+          <AccordionTrigger className="text-base p-0 hover:underline text-foreground font-normal">
             1. Interop-ready TVL
           </AccordionTrigger>
           <AccordionContent className="mt-6 mb-6">
@@ -56,8 +56,10 @@ export const growthGrantsData: MissionData = {
                 Interop Set that&apos;s interop ready v.s. total TVL/AOP
               </li>
             </ul>
-            <p className="mt-6">
-              <span className="font-medium">Why this metric?</span>{" "}
+            <p className="mt-6 text-secondary-foreground">
+              <span className="font-medium text-foreground">
+                Why this metric?
+              </span>{" "}
               <ExternalLink
                 href="https://docs.optimism.io/interop/explainer"
                 className="underline"
@@ -75,7 +77,7 @@ export const growthGrantsData: MissionData = {
       </Accordion>
       <Accordion type="single" collapsible className="w-full space-y-4">
         <AccordionItem value="retro-funding" className="">
-          <AccordionTrigger className="text-base p-0 hover:underline text-secondary-foreground font-normal">
+          <AccordionTrigger className="text-base p-0 hover:underline text-foreground font-normal">
             2. Interop Transaction Fees
           </AccordionTrigger>
           <AccordionContent className="mt-6 mb-6">
@@ -97,11 +99,13 @@ export const growthGrantsData: MissionData = {
               </li>
             </ul>
             <p className="mt-6 text-secondary-foreground">
-              <span className="font-medium">Why this metric?</span> The total
-              fees spent on interoperable transactions maps to usage of feature
-              after launch, and is a good indicator of the net growth caused by
-              introducing the feature to the Superchain. This may not may not be
-              measurable until full interop launches in late Q4.
+              <span className="font-medium text-foreground">
+                Why this metric?
+              </span>{" "}
+              The total fees spent on interoperable transactions maps to usage
+              of feature after launch, and is a good indicator of the net growth
+              caused by introducing the feature to the Superchain. This may not
+              may not be measurable until full interop launches in late Q4.
             </p>
           </AccordionContent>
         </AccordionItem>
