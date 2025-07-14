@@ -333,7 +333,9 @@ export default function MakeOrganizationForm({
     }
   }, [organization?.team])
 
-  const canSubmit = form.formState.isValid && !form.formState.isSubmitting
+  const hasAdmin = team.some((member) => member.role === "admin")
+  const canSubmit =
+    form.formState.isValid && !form.formState.isSubmitting && hasAdmin
 
   return (
     <Form {...form}>
@@ -599,7 +601,7 @@ export default function MakeOrganizationForm({
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <Button
             disabled={!canSubmit || isSaving || !form.formState.isDirty}
             onClick={form.handleSubmit(onSubmit())}
@@ -608,6 +610,11 @@ export default function MakeOrganizationForm({
           >
             Save
           </Button>
+          {!hasAdmin && (
+            <p className="text-sm text-destructive">
+              At least one team member must have an admin role.
+            </p>
+          )}
         </div>
       </form>
 
