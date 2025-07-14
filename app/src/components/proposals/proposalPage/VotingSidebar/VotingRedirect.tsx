@@ -1,4 +1,4 @@
-import { ProposalData } from "@/lib/proposals"
+import { ProposalData } from "@/components/proposals/proposal.types"
 import { getAgoraProposalLink } from "@/lib/utils/voting"
 
 const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {

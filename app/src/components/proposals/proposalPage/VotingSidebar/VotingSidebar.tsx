@@ -9,8 +9,9 @@ import VotingRedirect from "@/components/proposals/proposalPage/VotingSidebar/Vo
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
-import { ProposalData } from "@/lib/proposals"
+
 import { useAnalytics } from "@/providers/AnalyticsProvider"
+import { ProposalData } from "@/components/proposals/proposal.types"
 
 interface VotingSidebarProps {
   proposalData: ProposalData

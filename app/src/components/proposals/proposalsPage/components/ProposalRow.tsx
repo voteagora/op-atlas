@@ -1,16 +1,19 @@
 "use client"
 
-import { StandardProposalProps } from "./Proposals"
 import ProposalCard, {
   ProposalArrow,
   ProposalBadge,
   ProposalBadgeType,
-  ProposalDates,
+  ProposalMetaData,
   ProposalTextContent,
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
-import { useSession } from "next-auth/react"
+import { UIProposal } from "@/components/proposals/proposal.types"
 
-export const ProposalRow = (props: StandardProposalProps) => {
+interface ProposalRowProps extends UIProposal {
+  rounded: boolean
+}
+
+export const ProposalRow = (props: ProposalRowProps) => {
   return (
     <ProposalCard rounded={props.rounded || false} href={props.arrow.href}>
       <ProposalBadge type={props.badge.badgeType} />
@@ -19,12 +22,14 @@ export const ProposalRow = (props: StandardProposalProps) => {
         subtitle={props.textContent.subtitle}
       />
       <div className="hidden md:block">
-        <ProposalDates
+        <ProposalMetaData
           startDate={props.dates.startDate}
           endDate={props.dates.endDate}
           voted={props.voted}
           badgeType={props.badge.badgeType as ProposalBadgeType}
           passed={props.passed}
+          proposalType={props.proposalType}
+          proposalResults={props.proposalResults}
         />
       </div>
       <ProposalArrow href={props.arrow.href} />

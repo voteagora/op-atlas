@@ -1,7 +1,10 @@
 import React from "react"
 
-import { CardTextProps, VoteType } from "@/components/proposals/proposal.types"
-import { ProposalData } from "@/lib/proposals"
+import {
+  CardTextProps,
+  ProposalData,
+  VoteType,
+} from "@/components/proposals/proposal.types"
 import { CitizenshipQualification } from "@/lib/types"
 import { getVotingProps } from "@/lib/utils/voting"
 
