@@ -59,6 +59,7 @@ export type UIProposal = {
     href: string
   }
   proposalResults?: object
+  proposalType: ProposalType
 }
 
 const getStandardProposals = async (offset?: number) => {
