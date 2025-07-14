@@ -183,7 +183,7 @@ export const setOrganizationMemberRole = async (
 
   if (!teamHasAdmin) {
     return {
-      error: "At least 1 admin member must remain in the team",
+      error: "At least 1 member on the team must be an Admin",
     }
   }
 
