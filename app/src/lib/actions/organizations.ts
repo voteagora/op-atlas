@@ -14,6 +14,7 @@ import {
   getOrganizationKYCTeams,
   getOrganizationTeam,
   getUserOrganizationsWithDetails,
+  isUserAdminOfOrganization,
   removeOrganizationMember,
   updateOrganization,
   updateOrganizationMemberRole,
@@ -186,8 +187,7 @@ export const removeMemberFromOrganization = async (
 ) => {
   const session = await auth()
 
-  // Can't remove yourself (?)
-  if (!session?.user?.id || session.user.id === userId) {
+  if (!session?.user?.id) {
     return {
       error: "Unauthorized",
     }
@@ -206,6 +206,27 @@ export const removeMemberFromOrganization = async (
   if (team?.team.length === 1) {
     return {
       error: "Cannot remove the final team member",
+    }
+  }
+
+  // At least one remaining member must be an admin
+  const adminChecks = await Promise.all(
+    team?.team.map(
+      (member) =>
+        member.userId !== session.user.id &&
+        isUserAdminOfOrganization(member.userId, organizationId),
+    ) ?? [],
+  )
+
+  console.log(adminChecks)
+  // Team has admin other than the user
+  const teamHasAdmin = adminChecks.filter(Boolean).length >= 1
+
+  console.log(teamHasAdmin)
+
+  if (!teamHasAdmin) {
+    return {
+      error: "At least 1 admin member must remain in the team",
     }
   }
 
