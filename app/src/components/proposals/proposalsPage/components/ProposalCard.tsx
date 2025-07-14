@@ -10,6 +10,8 @@ import { useSession } from "next-auth/react"
 import React from "react"
 
 import { cn } from "@/lib/utils"
+import { ProposalData } from "@/lib/proposals"
+import { ProposalType } from "@/components/proposals/proposal.types"
 
 type ProposalCardProps = {
   children: React.ReactNode
@@ -178,15 +180,47 @@ interface ProposalMetaDataProps {
   voted?: boolean
   badgeType?: ProposalBadgeType
   passed?: boolean
+  proposalResults?: object
+  proposalType?: ProposalType
 }
-const ProposalMetaData = ({
-  startDate,
-  endDate,
+
+const ProposalDates = ({ startDate, endDate }: ProposalMetaDataProps) => (
+  <p className="font-normal text-[16px] leading-[24px] tracking-[0%] text-secondary-foreground whitespace-nowrap overflow-hidden text-right">
+    {startDate} - {endDate}
+  </p>
+)
+
+const ProposalStatusText = ({
   voted,
   badgeType,
   passed,
+  proposalResults,
+  proposalType,
 }: ProposalMetaDataProps) => {
   const { data: session } = useSession()
+
+  const getNumApprovals = ({
+    proposalResults,
+  }: {
+    proposalResults?: object
+  }): [number, number] => {
+    // Ensure proposalResults exists and options is an array
+    const options =
+      proposalResults && Array.isArray((proposalResults as any).options)
+        ? (proposalResults as any).options
+        : null
+
+    if (!options) return [0, 0]
+
+    const total = options.length
+    const approved = options.filter(
+      (option: any) => !!option && option.isApproved === true,
+    ).length
+
+    return [total, approved]
+  }
+
+  const [totalOptions, passedOptions] = getNumApprovals({ proposalResults })
 
   const voteText = () => {
     if (!session?.user?.id) {
@@ -198,6 +232,13 @@ const ProposalMetaData = ({
       }
       return "You haven't voted yet"
     } else if (badgeType === ProposalBadgeType.past) {
+      console.log({ proposalType, proposalResults })
+      // special check for approval voting
+      if (proposalType && proposalType.includes("APPROVAL")) {
+        if (proposalResults && passed) {
+          return `${passedOptions} of ${totalOptions} approved`
+        }
+      }
       if (passed) {
         return "Result Positive ie: Passed"
       }
@@ -206,26 +247,54 @@ const ProposalMetaData = ({
     return null
   }
 
+  const proposalSuccessful = () => {
+    if (badgeType === ProposalBadgeType.now) {
+      return voted
+    }
+    if (badgeType === ProposalBadgeType.past) {
+      if (proposalType?.includes("APPROVAL")) {
+        return passedOptions > 0 && passed
+      }
+      return passed
+    }
+    return false
+  }
+
+  return (
+    <div
+      className={cn(
+        "text-base font-normal whitespace-nowrap overflow-hidden text-right sm:text-sm",
+        {
+          "text-success-foreground": proposalSuccessful(),
+          "text-destructive": !proposalSuccessful(),
+        },
+      )}
+    >
+      {voteText()}
+    </div>
+  )
+}
+const ProposalMetaData = ({
+  startDate,
+  endDate,
+  voted,
+  badgeType,
+  passed,
+  proposalResults,
+  proposalType,
+}: ProposalMetaDataProps) => {
   return (
     <div className="flex flex-col min-w-[187px] justify-end">
-      <div
-        className={cn(
-          "text-base font-normal whitespace-nowrap overflow-hidden text-right sm:text-sm",
-          {
-            "text-success-foreground":
-              (badgeType === ProposalBadgeType.now && voted) || passed,
-            "text-destructive":
-              (badgeType === ProposalBadgeType.now && !voted) ||
-              (badgeType === ProposalBadgeType.past && !passed),
-          },
-        )}
-      >
-        {voteText()}
-      </div>
-
-      <p className="font-normal text-[16px] leading-[24px] tracking-[0%] text-secondary-foreground whitespace-nowrap overflow-hidden text-right">
-        {startDate} - {endDate}
-      </p>
+      <ProposalStatusText
+        voted={voted}
+        badgeType={badgeType}
+        passed={passed}
+        startDate={startDate}
+        endDate={endDate}
+        proposalType={proposalType}
+        proposalResults={proposalResults}
+      />
+      <ProposalDates startDate={startDate} endDate={endDate} />
     </div>
   )
 }

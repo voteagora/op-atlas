@@ -58,6 +58,7 @@ export type UIProposal = {
   arrow: {
     href: string
   }
+  proposalResults?: object
 }
 
 const getStandardProposals = async (offset?: number) => {
@@ -83,6 +84,7 @@ const getStandardProposals = async (offset?: number) => {
 
     const offChainProposals: OffChainProposalResponse = await response.json()
     // Transform the data to match UI structure
+    // In the future it would be better to pass the OffchainProposalObject directly as the response rather than parse it out here.
     const standardProposals: UIProposal[] = offChainProposals.data.map(
       (proposal: any) => {
         // Determine badge type based on dates and status
@@ -124,6 +126,8 @@ const getStandardProposals = async (offset?: number) => {
           arrow: {
             href: `/proposals/${offchainProposalId}`,
           },
+          proposalResults: proposal.proposalResults,
+          proposalType: proposal.proposalType,
         }
       },
     )

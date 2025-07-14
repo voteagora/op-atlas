@@ -1,27 +1,9 @@
-import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
+import { UIProposal } from "@/lib/proposals"
+
 import { ProposalRow } from "./ProposalRow"
 
-export interface StandardProposalProps {
-  rounded?: boolean
-  voted?: boolean
-  passed?: boolean
-  badge: {
-    badgeType: ProposalBadgeType
-  }
-  textContent: {
-    title: string
-    subtitle?: string
-  }
-  dates: {
-    startDate: string
-    endDate: string
-  }
-  arrow: {
-    href: string
-  }
-}
 interface StandardProposalsProps {
-  proposals: StandardProposalProps[]
+  proposals: UIProposal[]
 }
 const Proposals = ({ proposals }: StandardProposalsProps) => {
   return (
@@ -33,7 +15,7 @@ const Proposals = ({ proposals }: StandardProposalsProps) => {
       </div>
       <div>
         {proposals.map((proposal, index) => (
-          <ProposalRow key={index} rounded={index === 0} {...proposal} />
+          <ProposalRow key={index} {...proposal} rounded={index === 0} />
         ))}
       </div>
     </div>
