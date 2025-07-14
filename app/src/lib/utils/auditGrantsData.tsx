@@ -124,9 +124,8 @@ export const auditGrantsData: MissionData = {
     },
     {
       number: 4,
-      title: "Upon grant approval",
-      description:
-        "The ASP performs an audit to identify potential issues and recommend solutions",
+      title:
+        "Upon grant approval, the ASP performs an audit to identify potential issues and recommend solutions",
     },
   ],
   supportOptions: [

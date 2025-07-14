@@ -45,10 +45,7 @@ export const foundationMissionsData: MissionData = {
     {
       number: 1,
       title: "Explore open opportunities on GitHub",
-      description: "We'Learn about Mission Requests by reviewing the issues.",
-      subDetails: "Visit GitHub",
-      subDetailsLink:
-        "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
+      description: "Learn about Mission Requests by reviewing the issues",
     },
     {
       number: 2,
@@ -58,21 +55,21 @@ export const foundationMissionsData: MissionData = {
     },
     {
       number: 3,
-      title: "Grant recipients are announced publicly via the GitHub Board",
+      title: "Mission Request owners announce recipients via the GitHub Board",
       description:
-        "Each mission has a selection date when recipients will be announced.",
+        "Each mission has its own deadline for announcing recipients.",
     },
     {
       number: 4,
       title: "Grant winner gets contacted by the Foundation",
       description:
-        "Winners are required to undergo KYC and sign a grant agreement",
+        "They are required to undergo KYC and sign a grant agreement",
     },
     {
       number: 5,
       title: "Grant is delivered to a locked multisig",
       description:
-        "within 1 week of KYC completion and Grant Agreement signature.",
+        "Within 1 week of KYC completion and Grant Agreement signature.",
     },
   ],
   supportOptions: [

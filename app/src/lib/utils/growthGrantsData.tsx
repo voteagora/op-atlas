@@ -48,13 +48,8 @@ export const growthGrantsData: MissionData = {
           <AccordionContent className="mt-6 mb-6">
             <ul className="list-disc pl-4 space-y-1 text-base">
               <li className="text-secondary-foreground">
-                Primary metric: TVL/AOP that is interop ready within the{" "}
-                <ExternalLink
-                  href="https://collectiveintent.optimism.io/"
-                  className="underline"
-                >
-                  Interop Set
-                </ExternalLink>
+                Primary metric: TVL/AOP that is interop ready within the Interop
+                Set
               </li>
               <li className="text-secondary-foreground">
                 Secondary metric: Percent (%) share of TVL/AOP within the
@@ -64,7 +59,7 @@ export const growthGrantsData: MissionData = {
             <p className="mt-6">
               <span className="font-medium">Why this metric?</span>{" "}
               <ExternalLink
-                href="https://collectiveintent.optimism.io/"
+                href="https://docs.optimism.io/interop/explainer"
                 className="underline"
               >
                 Interop
@@ -101,7 +96,7 @@ export const growthGrantsData: MissionData = {
                 non-interop
               </li>
             </ul>
-            <p className="mt-6">
+            <p className="mt-6 text-secondary-foreground">
               <span className="font-medium">Why this metric?</span> The total
               fees spent on interoperable transactions maps to usage of feature
               after launch, and is a good indicator of the net growth caused by
@@ -199,8 +194,8 @@ export const growthGrantsData: MissionData = {
     },
     {
       number: 2,
-      title:
-        "Grants Council reviews the application and decides whether to approve or reject",
+      title: "The GC reviews the application",
+      description: "Review takes an average of 15 days",
     },
     {
       number: 3,

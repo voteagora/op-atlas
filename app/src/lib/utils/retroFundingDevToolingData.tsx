@@ -102,18 +102,19 @@ export const retroFundingDevToolingData: MissionData = {
   howItWorks: [
     {
       number: 1,
-      title:
-        "Create a project in Atlas to which you'll add your onchain contracts",
+      title: "Create a project in Atlas where you'll connect your GitHub repos",
       description: "Complete all the steps and publish your project.",
       subDetails: "Add project",
       subDetailsLink: "/projects/new",
+      enforceSignIn: true,
     },
     {
       number: 2,
       title: "Apply by the monthly deadline",
       description: "Choose projects and submit your application.",
       subDetails: "Apply",
-      subDetailsLink: "/projects/new",
+      subDetailsLink: "/projects/dashboard",
+      enforceSignIn: true,
     },
     {
       number: 3,

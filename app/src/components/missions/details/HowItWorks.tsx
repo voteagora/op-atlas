@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import React, { useState } from "react"
+import { useRouter } from "next/navigation"
 
 import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightNew } from "@/components/icons/ArrowRightNew"
@@ -14,6 +15,8 @@ import {
 } from "@/components/ui/carousel"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { cn } from "@/lib/utils"
+import { useLogin } from "@privy-io/react-auth"
+import { useSession } from "next-auth/react"
 
 export interface HowItWorksStep {
   number: number
@@ -21,6 +24,7 @@ export interface HowItWorksStep {
   description?: string
   subDetails?: string
   subDetailsLink?: string
+  enforceSignIn?: boolean
 }
 
 export function HowItWorks() {
@@ -28,7 +32,11 @@ export function HowItWorks() {
   const steps = mission?.howItWorks || []
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(1)
-  // Directly use steps.length for count instead of relying on the carousel API
+  const { login: privyLogin } = useLogin()
+  const { data } = useSession()
+
+  const router = useRouter()
+
   const count = steps.length
 
   React.useEffect(() => {
@@ -48,6 +56,14 @@ export function HowItWorks() {
       api.off("select", onSelect)
     }
   }, [api])
+
+  const loginEnforced = (step: HowItWorksStep) => {
+    if (!data) {
+      privyLogin()
+    } else {
+      router.push(step.subDetailsLink || "#")
+    }
+  }
 
   if (steps.length === 0) return null
 
@@ -95,13 +111,21 @@ export function HowItWorks() {
                   </div>
                   {step.subDetails && (
                     <div className="mt-auto pt-4">
-                      <ExternalLink
-                        href={step.subDetailsLink || "#"}
-                        className="text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline"
-                      >
-                        {step.subDetails}
-                        <ArrowRightNew className="fill-secondary-foreground h-3 w-3 pl-1" />
-                      </ExternalLink>
+                      {step.enforceSignIn ? (
+                        <span className="text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline cursor-pointer"
+                          onClick={() => loginEnforced(step)}>
+                          {step.subDetails}
+                          <ArrowRightNew className="fill-secondary-foreground h-3 w-3 pl-1" />
+                        </span>
+                      ) : (
+                        <ExternalLink
+                          href={step.subDetailsLink || "#"}
+                          className="text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline"
+                        >
+                          {step.subDetails}
+                          <ArrowRightNew className="fill-secondary-foreground h-3 w-3 pl-1" />
+                        </ExternalLink>
+                      )}
                     </div>
                   )}
                 </div>
