@@ -1,7 +1,6 @@
 "use client"
 
 import { RoleApplication } from "@prisma/client"
-import { useRouter } from "next/navigation"
 
 import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
 import { ArrowRightS } from "@/components/icons/reminx"
@@ -35,14 +34,13 @@ export default function SidebarApplications({
 }
 
 const OrgCandidate = ({ application }: { application: RoleApplication }) => {
-  const router = useRouter()
   const { data: org } = useOrganization({ id: application.organizationId! })
 
   if (!org) {
     return <CandidateSkeleton />
   }
 
-  const handleClick = () => router.push(`/${org.id}`)
+  const handleClick = () => window.open(`/${org.id}`, "_blank")
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault()
@@ -71,13 +69,12 @@ const OrgCandidate = ({ application }: { application: RoleApplication }) => {
 const UserCandidate = ({ application }: { application: RoleApplication }) => {
   const { user } = useUser({ id: application.userId! })
   const username = useUsername(user)
-  const router = useRouter()
 
   if (!user) {
     return <CandidateSkeleton />
   }
 
-  const handleClick = () => router.push(`/${user.username}`)
+  const handleClick = () => window.open(`/${user.username}`, "_blank")
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault()
