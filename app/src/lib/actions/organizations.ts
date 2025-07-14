@@ -183,19 +183,18 @@ export const setOrganizationMemberRole = async (
 
 export const checkTeamHasAdminOtherThanUser = async ({
   organizationId,
+  userToRemove,
 }: {
   organizationId: string
+  userToRemove: string
 }) => {
   // At least one remaining member must be an admin
-
-  const session = await auth()
-
   const team = await getOrganizationTeam({ id: organizationId })
 
   const adminChecks = await Promise.all(
     team?.team.map(
       (member) =>
-        member.userId !== session?.user.id &&
+        member.userId !== userToRemove &&
         isUserAdminOfOrganization(member.userId, organizationId),
     ) ?? [],
   )
@@ -233,7 +232,10 @@ export const removeMemberFromOrganization = async (
   }
 
   // Team has admin other than the user
-  const teamHasAdmin = await checkTeamHasAdminOtherThanUser({ organizationId })
+  const teamHasAdmin = await checkTeamHasAdminOtherThanUser({
+    organizationId,
+    userToRemove: userId,
+  })
 
   if (!teamHasAdmin) {
     return {
