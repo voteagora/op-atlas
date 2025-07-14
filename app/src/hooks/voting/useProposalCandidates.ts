@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query"
-import { track } from "mixpanel-browser"
 
 import { getOrganization } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
@@ -59,9 +58,6 @@ const getQualifications = async (
             : identifier?.id || identifier?.name || `unknown-${index}`
 
         console.error(`Error fetching candidate ${safeId}:`, error)
-        track("Incorrect value passed to getProposalCandidates", {
-          candidate_identifier: identifier,
-        })
         // Return a fallback candidate with the identifier as the name
         return {
           id: safeId,

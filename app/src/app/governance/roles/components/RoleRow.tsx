@@ -5,7 +5,7 @@ import { Role } from "@prisma/client"
 import { formatMMMd } from "@/lib/utils/date"
 import ProposalCard, {
   ProposalArrow,
-  ProposalMetaDataProps,
+  ProposalMetaData,
   ProposalTextContent,
   ProposalBadge,
   ProposalBadgeType,
