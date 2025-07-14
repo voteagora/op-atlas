@@ -16,6 +16,16 @@ export type OffChainProposalResponse = {
   data: OffChainProposal[]
 }
 
+enum ProposalStatus {
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  CANCELLED = "CANCELLED",
+  EXECUTED = "EXECUTED",
+  QUEUED = "QUEUED",
+  FAILED = "FAILED",
+  DEFEATED = "DEFEATED",
+}
+
 export type OffChainProposal = {
   id: string
   proposer: string
@@ -35,7 +45,7 @@ export type OffChainProposal = {
   proposalData: object // We can define this more specifically if needed
   proposalResults: object // We can define this more specifically if needed
   proposalType: ProposalType
-  status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
+  status: ProposalStatus
   offchainProposalId: string
 }
 
@@ -177,7 +187,7 @@ export type ProposalData = {
   unformattedProposalData?: string | null
   proposalResults: object
   proposalType: ProposalType
-  status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
+  status: ProposalStatus
   createdTransactionHash?: string | null
   cancelledTransactionHash?: string | null
   executedTransactionHash?: string | null

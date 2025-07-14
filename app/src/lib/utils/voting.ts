@@ -126,9 +126,13 @@ const getCitizenTypes = (proposalData: ProposalData, vote?: VoteType) => {
   if (proposalData.status === "ACTIVE") {
     return getOpenVotingTypes(proposalData, vote)
   } else if (new Date(proposalData.endTime) < new Date()) {
+    const votingEndedText =
+      proposalData.status === "DEFEATED"
+        ? `been ${proposalData.status}`
+        : proposalData.status
     return votingEnded(
       new Date(proposalData.endTime),
-      `This proposal has ${proposalData.status}`,
+      `This proposal has ${votingEndedText}`,
     )
   } else {
     return comingSoon(proposalData)
@@ -150,21 +154,6 @@ const getNonCitizenTypes = (
     default:
       return {} as VotingCardProps
   }
-}
-
-// Function to get vote options
-const getVoteOptions = () => {
-  // TODO: For approval voting
-  // return Array(8).fill({
-  //   name: "Username",
-  //   image: {
-  //     src: "https://i.imgur.com/0000000.png",
-  //     alt: "Image",
-  //   },
-  //   organizations: ["Org 1", "Org 2", "Org 3"],
-  //   buttonLink: "https://google.com",
-  // })
-  return []
 }
 
 /**
