@@ -1,6 +1,5 @@
-import { UIProposal } from "@/lib/proposals"
-
 import { ProposalRow } from "./ProposalRow"
+import { UIProposal } from "@/components/proposals/proposal.types"
 
 interface StandardProposalsProps {
   proposals: UIProposal[]

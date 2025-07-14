@@ -10,7 +10,6 @@ import { useSession } from "next-auth/react"
 import React from "react"
 
 import { cn } from "@/lib/utils"
-import { ProposalData } from "@/lib/proposals"
 import { ProposalType } from "@/components/proposals/proposal.types"
 
 type ProposalCardProps = {

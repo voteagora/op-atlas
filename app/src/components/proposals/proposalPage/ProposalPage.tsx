@@ -2,8 +2,9 @@ import Breadcrumbs from "@/components/proposals/proposalPage/proposalContent/Bre
 import Markdown from "@/components/proposals/proposalPage/proposalContent/Markdown"
 import ProposalHeader from "@/components/proposals/proposalPage/proposalContent/ProposalHeader"
 import VotingSidebar from "@/components/proposals/proposalPage/VotingSidebar/VotingSidebar"
-import { ProposalData } from "@/lib/proposals"
+
 import { formatMMMdyyyy } from "@/lib/utils/date"
+import { ProposalData } from "@/components/proposals/proposal.types"
 
 function stripTitleFromDescription(title: string, description: string) {
   if (description.startsWith(`# ${title}`)) {

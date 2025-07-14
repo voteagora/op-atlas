@@ -7,7 +7,7 @@ import ProposalCard, {
   ProposalMetaData,
   ProposalTextContent,
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
-import { UIProposal } from "@/lib/proposals"
+import { UIProposal } from "@/components/proposals/proposal.types"
 
 interface ProposalRowProps extends UIProposal {
   rounded: boolean

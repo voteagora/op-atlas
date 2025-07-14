@@ -13,7 +13,12 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
 
-import { ProposalType, VoteType } from "@/components/proposals/proposal.types"
+import {
+  ProposalData,
+  ProposalStatus,
+  ProposalType,
+  VoteType,
+} from "@/components/proposals/proposal.types"
 import VoterActions from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
@@ -31,7 +36,7 @@ import {
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
-import { ProposalData, ProposalStatus } from "@/lib/proposals"
+
 import { truncateAddress } from "@/lib/utils/string"
 import {
   getAgoraProposalLink,

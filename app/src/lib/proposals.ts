@@ -1,76 +1,15 @@
 "use server"
-import { ProposalType } from "@/components/proposals/proposal.types"
+import {
+  OffChainProposalResponse,
+  ProposalData,
+  UIProposal,
+} from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 
 import { formatMMMd } from "./utils/date"
 
 const CURRENT_DATETIME = new Date()
-
-export type OffChainProposalResponse = {
-  meta: {
-    has_next: boolean
-    total_returned: number
-    next_offset: number
-  }
-  data: OffChainProposal[]
-}
-
-export enum ProposalStatus {
-  PENDING = "PENDING",
-  ACTIVE = "ACTIVE",
-  CANCELLED = "CANCELLED",
-  EXECUTED = "EXECUTED",
-  QUEUED = "QUEUED",
-  FAILED = "FAILED",
-  DEFEATED = "DEFEATED",
-}
-
-export type OffChainProposal = {
-  id: string
-  proposer: string
-  snapshotBlockNumber: number
-  createdTime: string
-  startTime: string
-  startBlock: string
-  endTime: string
-  endBlock: string
-  cancelledTime: string | null
-  executedTime: string | null
-  executedBlock: string | null
-  queuedTime: string | null
-  markdowntitle: string
-  description: string
-  quorum: string
-  proposalData: object // We can define this more specifically if needed
-  proposalResults: object // We can define this more specifically if needed
-  proposalType: ProposalType
-  status: ProposalStatus
-  offchainProposalId: string
-}
-
-// For UI
-export type UIProposal = {
-  id: string
-  badge: {
-    badgeType: ProposalBadgeType
-  }
-  voted?: boolean
-  passed?: boolean
-  textContent: {
-    title: string
-    subtitle?: string
-  }
-  dates: {
-    startDate: string
-    endDate: string
-  }
-  arrow: {
-    href: string
-  }
-  proposalResults?: object
-  proposalType: ProposalType
-}
 
 const getStandardProposals = async (offset?: number) => {
   const offsetVal = offset ? `&offset=${offset}` : ""
@@ -164,36 +103,6 @@ export const getProposals = async (page?: number) => {
     standardProposals: standardProposals,
     selfNominations: selfNominations,
   }
-}
-
-export type ProposalData = {
-  id: string
-  proposer: string
-  snapshotBlockNumber: number
-  createdTime: string
-  startTime: string
-  startBlock?: string
-  endTime: string
-  endBlock?: string
-  cancelledTime?: string | null
-  executedTime?: string | null
-  executedBlock?: string | null
-  queuedTime?: string | null
-  markdowntitle: string
-  description: string
-  quorum: string
-  approvalThreshold?: string
-  proposalData: object
-  unformattedProposalData?: string | null
-  proposalResults: object
-  proposalType: ProposalType
-  status: ProposalStatus
-  createdTransactionHash?: string | null
-  cancelledTransactionHash?: string | null
-  executedTransactionHash?: string | null
-  proposalTemplate?: object
-  // This value should always be included in offchain and hybrid proposals
-  offchainProposalId: string
 }
 
 export const enrichProposalData = async (
