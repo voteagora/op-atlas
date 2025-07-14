@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 import { fetchMoreProposals } from "@/lib/actions/proposals"
 import Proposals from "./Proposals"
-import { StandardProposalProps } from "./Proposals"
+import { UIProposal } from "@/components/proposals/proposal.types"
 
 interface PaginationMetadata {
   has_next: boolean
@@ -14,7 +14,7 @@ interface PaginationMetadata {
 }
 
 interface PaginatedProposalsProps {
-  initialProposals: StandardProposalProps[]
+  initialProposals: UIProposal[]
   initialPagination: PaginationMetadata
   userId?: string
 }
@@ -24,8 +24,7 @@ const PaginatedProposals = ({
   initialPagination,
   userId,
 }: PaginatedProposalsProps) => {
-  const [proposals, setProposals] =
-    useState<StandardProposalProps[]>(initialProposals)
+  const [proposals, setProposals] = useState<UIProposal[]>(initialProposals)
   const [pagination, setPagination] =
     useState<PaginationMetadata>(initialPagination)
   const [currentOffset, setCurrentOffset] = useState(1)
