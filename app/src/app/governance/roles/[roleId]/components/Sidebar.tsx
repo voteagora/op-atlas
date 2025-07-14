@@ -74,7 +74,13 @@ export const Sidebar = ({ role }: { role: Role }) => {
       return null
     }
 
-    const buttonText = isApplicationWindow ? "Apply Now" : "Coming Soon"
+    let buttonText = "Apply Now"
+
+    if (role.startAt && new Date() < new Date(role.startAt)) {
+      buttonText = "Coming Soon"
+    } else if (role.endAt && new Date() > new Date(role.endAt)) {
+      buttonText = "Application closed"
+    }
 
     return (
       <Button
