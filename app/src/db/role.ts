@@ -115,7 +115,7 @@ export async function getActiveUserRoleApplications(
         startAt: {
           lte: new Date(),
         },
-        endAt: {
+        voteEndAt: {
           gte: new Date(),
         },
       },
