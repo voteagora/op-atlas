@@ -31,7 +31,7 @@ import {
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
-import { ProposalData } from "@/lib/proposals"
+import { ProposalData, ProposalStatus } from "@/lib/proposals"
 import { truncateAddress } from "@/lib/utils/string"
 import {
   getAgoraProposalLink,
@@ -236,7 +236,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const canVote =
     !!session?.user?.id &&
     !!citizen &&
-    proposalData.status === ProposalStatusBadgeType.ACTIVE &&
+    proposalData.status === ProposalStatus.ACTIVE &&
     !myVote
 
   const { wallets } = useWallets()
@@ -558,9 +558,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
       {(proposalData.proposalType === "OFFCHAIN_APPROVAL" ||
         proposalData.proposalType === "HYBRID_APPROVAL") &&
-        (proposalData.status === ProposalStatusBadgeType.QUEUED ||
-          proposalData.status === ProposalStatusBadgeType.EXECUTED ||
-          proposalData.status === ProposalStatusBadgeType.FAILED) && (
+        (proposalData.status === ProposalStatus.QUEUED ||
+          proposalData.status === ProposalStatus.EXECUTED ||
+          proposalData.status === ProposalStatus.FAILED) && (
           <div className="border-x border-b py-4">
             <CandidateResults results={resultIdsAndValues} />
           </div>
@@ -597,7 +597,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         </div>
 
         {/* Actions */}
-        {proposalData.status === ProposalStatusBadgeType.ACTIVE &&
+        {proposalData.status === ProposalStatus.ACTIVE &&
           votingActions &&
           !myVote && (
             <div className="flex flex-col items-center gap-y-2 mb-4 transition-all duration-300 ease-in-out">

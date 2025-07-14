@@ -16,7 +16,7 @@ export type OffChainProposalResponse = {
   data: OffChainProposal[]
 }
 
-enum ProposalStatus {
+export enum ProposalStatus {
   PENDING = "PENDING",
   ACTIVE = "ACTIVE",
   CANCELLED = "CANCELLED",
