@@ -17,6 +17,18 @@ export async function applyForRole(
   },
 ) {
   try {
+    // Fetch the role to check application window
+    const role = await getRoleById(id)
+    if (!role) {
+      throw new Error("Role not found")
+    }
+    const now = new Date()
+    if (
+      (role.startAt && now < new Date(role.startAt)) ||
+      (role.endAt && now > new Date(role.endAt))
+    ) {
+      throw new Error("Application window is closed")
+    }
     return await upsertRoleApplication(id, applicationParams)
   } catch (error) {
     console.error("Error applying for role:", error)
