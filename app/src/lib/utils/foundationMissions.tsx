@@ -18,10 +18,10 @@ export const foundationMissionsData: MissionData = {
   endsAt: new Date(),
   season: "8",
   details: [
-    "Ready to make an impact? Foundation Missions address specific challenges identified by the Optimism Foundation. These challenges are core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
+    "Foundation Missions address specific challenges core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
   ],
   ogDescription:
-    "Ready to make an impact? Foundation Missions address specific challenges identified by the Optimism Foundation. These challenges are core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
+    "Foundation Missions address specific challenges core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
   status: "ongoing",
   resultsLink: "/round/results?rounds=8",
   iconUrl: "/assets/images/onchain-builders.png",
@@ -46,6 +46,9 @@ export const foundationMissionsData: MissionData = {
       number: 1,
       title: "Explore open opportunities on GitHub",
       description: "Learn about Mission Requests by reviewing the issues",
+      subDetails: "Visit GitHub",
+      subDetailsLink:
+        "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
     },
     {
       number: 2,
