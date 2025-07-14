@@ -151,7 +151,15 @@ export default function MakeOrganizationForm({
 
   const handleToggleRole = async (selectedUser: User, role: TeamRole) => {
     if (organization) {
-      await setOrganizationMemberRole(organization.id, selectedUser.id, role)
+      const changeResult = await setOrganizationMemberRole(
+        organization.id,
+        selectedUser.id,
+        role,
+      )
+
+      if (changeResult?.error) {
+        toast.error(changeResult.error)
+      }
     } else {
       setTeam((prev) => {
         const updatedTeam = prev.map((item) => {

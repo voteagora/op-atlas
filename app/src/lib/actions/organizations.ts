@@ -175,6 +175,18 @@ export const setOrganizationMemberRole = async (
     return isInvalid
   }
 
+  // Team has admin other than the user
+  const teamHasAdmin = await checkTeamHasAdminOtherThanUser({
+    organizationId,
+    userToRemove: userId,
+  })
+
+  if (!teamHasAdmin) {
+    return {
+      error: "At least 1 admin member must remain in the team",
+    }
+  }
+
   await updateOrganizationMemberRole({ organizationId, userId, role })
 
   revalidatePath("/dashboard")
