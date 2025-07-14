@@ -5,7 +5,7 @@ import { Role } from "@prisma/client"
 import { formatMMMd } from "@/lib/utils/date"
 import ProposalCard, {
   ProposalArrow,
-  ProposalDates,
+  ProposalMetaDataProps,
   ProposalTextContent,
   ProposalBadge,
   ProposalBadgeType,
@@ -32,7 +32,7 @@ export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
       />
       <ProposalTextContent title={role.title} />
       <div className="hidden md:block">
-        <ProposalDates
+        <ProposalMetaData
           startDate={formatMMMd(role.startAt || new Date())}
           endDate={formatMMMd(role.endAt || new Date())}
         />

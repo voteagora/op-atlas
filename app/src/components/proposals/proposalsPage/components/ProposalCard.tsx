@@ -172,20 +172,20 @@ const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
   )
 }
 
-interface ProposalDatesProps {
+interface ProposalMetaDataProps {
   startDate: string
   endDate: string
   voted?: boolean
   badgeType?: ProposalBadgeType
   passed?: boolean
 }
-const ProposalDates = ({
+const ProposalMetaData = ({
   startDate,
   endDate,
   voted,
   badgeType,
   passed,
-}: ProposalDatesProps) => {
+}: ProposalMetaDataProps) => {
   const { data: session } = useSession()
 
   const voteText = () => {
@@ -261,7 +261,7 @@ const ProposalArrow = ({ href, proposalType }: ProposalArrowProps) => {
 export {
   ProposalArrow,
   ProposalBadge,
-  ProposalDates,
+  ProposalMetaData,
   ProposalStatusBadge,
   ProposalTextContent,
 }

@@ -5,7 +5,7 @@ import ProposalCard, {
   ProposalArrow,
   ProposalBadge,
   ProposalBadgeType,
-  ProposalDates,
+  ProposalMetaData,
   ProposalTextContent,
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { useSession } from "next-auth/react"
@@ -19,7 +19,7 @@ export const ProposalRow = (props: StandardProposalProps) => {
         subtitle={props.textContent.subtitle}
       />
       <div className="hidden md:block">
-        <ProposalDates
+        <ProposalMetaData
           startDate={props.dates.startDate}
           endDate={props.dates.endDate}
           voted={props.voted}
