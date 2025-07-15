@@ -11,6 +11,7 @@ import GovernanceAddressDialog from "./GovernanceAddressDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
+import ProposalSubmittedDialog from "./ProposalSubmittedDialog"
 import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
 import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
@@ -71,6 +72,16 @@ export default function AppDialogs() {
         <DeleteKYCTeamDialog
           open
           onOpenChange={onOpenChange("delete_kyc_team")}
+        />
+      )}
+      {openDialog === "proposal_submitted" && (
+        <ProposalSubmittedDialog
+          open
+          onOpenChange={onOpenChange("proposal_submitted")}
+          transactionHash={data.transactionHash}
+          onViewProposals={data.onViewProposals}
+          onViewTransaction={data.onViewTransaction}
+          onClose={data.onProposalModalClose}
         />
       )}
       {openDialog === "import_from_farcaster" && (

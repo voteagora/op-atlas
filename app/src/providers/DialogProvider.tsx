@@ -18,6 +18,10 @@ type DataType = {
   kycTeamId?: string
   alreadySelectedProjectIds?: string[]
   hasActiveStream?: boolean
+  transactionHash?: string
+  onViewProposals?: () => void
+  onViewTransaction?: () => void
+  onProposalModalClose?: () => void
 }
 
 type AppDialog = {
