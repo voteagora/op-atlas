@@ -65,10 +65,10 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
         citizen_status: citizen
           ? "registered"
           : citizenEligibility?.eligible
-          ? "eligible"
-          : session?.user?.id
-          ? "not signed in"
-          : "ineligible",
+            ? "eligible"
+            : session?.user?.id
+              ? "not signed in"
+              : "ineligible",
         user_group: citizenEligibility?.type,
       })
       isTracked.current = true
@@ -95,8 +95,8 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
         <div className="mt-5 transition-all duration-300 ease-in-out">
           <VotingRedirect
             proposalData={proposalData}
-            citizen={citizen}
-            citizenEligibility={citizenEligibility}
+            citizen={citizen ?? undefined}
+            eligibility={citizenEligibility ?? undefined}
           />
         </div>
       </div>

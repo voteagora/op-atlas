@@ -12,13 +12,13 @@ const VotingRedirect = ({
   eligibility,
 }: {
   proposalData: ProposalData
-  citizen: Citizen
-  eligibility: CitizenshipQualification
+  citizen?: Citizen
+  eligibility?: CitizenshipQualification
 }) => {
   const showTelegramLink =
     citizen ||
-    eligibility.type === CITIZEN_TYPES.chain ||
-    eligibility.type === CITIZEN_TYPES.app
+    eligibility?.type === CITIZEN_TYPES.chain ||
+    eligibility?.type === CITIZEN_TYPES.app
 
   return (
     <div className="flex flex-col gap-2 w-[304px] justify-center items-center text-sm text-secondary-foreground">
