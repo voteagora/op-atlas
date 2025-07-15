@@ -93,7 +93,11 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
           <VotingColumn proposalData={proposalData} />
         </div>
         <div className="mt-5 transition-all duration-300 ease-in-out">
-          <VotingRedirect proposalData={proposalData} />
+          <VotingRedirect
+            proposalData={proposalData}
+            citizen={citizen}
+            citizenEligibility={citizenEligibility}
+          />
         </div>
       </div>
     </div>
