@@ -99,7 +99,7 @@ export function HowItWorks() {
                     : "basis-1/2 md:basis-1/3",
                 )}
               >
-                <div className="h-[400px] md:h-[350px] p-6 bg-[#F2F3F8] rounded-xl flex flex-col justify-between">
+                <div className="h-[100%] md:h-[350px] p-6 bg-[#F2F3F8] rounded-xl flex flex-col justify-between">
                   <div className="flex flex-col gap-2">
                     <h1 className="text-callout-foreground text-4xl font-extrabold">
                       {step.number}

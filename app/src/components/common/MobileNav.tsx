@@ -24,6 +24,7 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
                 key={index}
                 className="flex items-center text-sm font-medium gap-1"
                 href={item.href}
+                onClick={onClose}
               >
                 <div>{item.title}</div>
               </Link>
