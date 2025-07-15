@@ -3,8 +3,8 @@ import { getAgoraProposalLink } from "@/lib/utils/voting"
 
 const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="w-[304px] h-5 px-3 py-2 rounded-md flex items-center justify-center">
+    <div className="flex flex-col gap-0.5">
+      <div className="w-[304px] h-5 px-3 py-1 rounded-md flex items-center justify-center">
         <div className="flex items-center gap-2">
           <p className="font-medium text-sm text-center transition-colors duration-200">
             Are you a delegate?
@@ -21,7 +21,7 @@ const VotingRedirect = ({ proposalData }: { proposalData: ProposalData }) => {
           </span>
         </div>
       </div>
-      <div className="w-[304px] h-5 px-3 py-2 rounded-md flex items-center justify-center">
+      <div className="w-[304px] h-5 px-3 py-1 rounded-md flex items-center justify-center">
         <div className="flex items-center gap-2">
           <p className="font-medium text-sm text-center transition-colors duration-200">
             Need help?
