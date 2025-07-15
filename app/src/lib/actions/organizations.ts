@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
 import { deleteKycTeam } from "@/db/kyc"
+import { checkWalletAddressExists, getKycTeamByWalletAddress } from "@/db/kyc"
 import {
   addOrganizationMembers,
   createOrganization,
@@ -13,6 +14,7 @@ import {
   getOrganizationKYCTeams,
   getOrganizationTeam,
   getUserOrganizationsWithDetails,
+  isUserAdminOfOrganization,
   removeOrganizationMember,
   updateOrganization,
   updateOrganizationMemberRole,
@@ -173,10 +175,44 @@ export const setOrganizationMemberRole = async (
     return isInvalid
   }
 
+  // Team has admin other than the user
+  const teamHasAdmin = await checkTeamHasAdminOtherThanUser({
+    organizationId,
+    userToRemove: userId,
+  })
+
+  if (!teamHasAdmin) {
+    return {
+      error: "At least 1 member on the team must be an Admin",
+    }
+  }
+
   await updateOrganizationMemberRole({ organizationId, userId, role })
 
   revalidatePath("/dashboard")
   revalidatePath("/profile", "layout")
+}
+
+export const checkTeamHasAdminOtherThanUser = async ({
+  organizationId,
+  userToRemove,
+}: {
+  organizationId: string
+  userToRemove: string
+}) => {
+  // At least one remaining member must be an admin
+  const team = await getOrganizationTeam({ id: organizationId })
+
+  const adminChecks = await Promise.all(
+    team?.team.map(
+      (member) =>
+        member.userId !== userToRemove &&
+        isUserAdminOfOrganization(member.userId, organizationId),
+    ) ?? [],
+  )
+
+  // Team has admin other than the user
+  return adminChecks.filter(Boolean).length >= 1
 }
 
 export const removeMemberFromOrganization = async (
@@ -185,8 +221,7 @@ export const removeMemberFromOrganization = async (
 ) => {
   const session = await auth()
 
-  // Can't remove yourself (?)
-  if (!session?.user?.id || session.user.id === userId) {
+  if (!session?.user?.id) {
     return {
       error: "Unauthorized",
     }
@@ -208,9 +243,51 @@ export const removeMemberFromOrganization = async (
     }
   }
 
+  // Team has admin other than the user
+  const teamHasAdmin = await checkTeamHasAdminOtherThanUser({
+    organizationId,
+    userToRemove: userId,
+  })
+
+  if (!teamHasAdmin) {
+    return {
+      error: "At least 1 admin member must remain in the team",
+    }
+  }
+
   await removeOrganizationMember({ organizationId, userId })
   revalidatePath("/dashboard")
   revalidatePath("/profile", "layout")
+}
+
+export const checkWalletAddressExistsForOrganizationAction = async (
+  walletAddress: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const exists = await checkWalletAddressExists(walletAddress)
+  return { exists }
+}
+
+export const getKycTeamByWalletAddressForOrganizationAction = async (
+  walletAddress: string,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const kycTeam = await getKycTeamByWalletAddress(walletAddress)
+  return kycTeam
 }
 
 export const createOrganizationKycTeamAction = async ({

@@ -345,17 +345,16 @@ async function getAllPublishedUserProjectsFn({
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]') as "rewards"
       FROM "Project" p
-      LEFT JOIN "UserProjects" up ON p."id" = up."projectId" 
+      JOIN "UserProjects" up ON p."id" = up."projectId" 
         AND up."deletedAt" IS NULL
+        AND up."userId" = ${userId}
       LEFT JOIN "ProjectFunding" pf ON p."id" = pf."projectId"
       LEFT JOIN "ProjectSnapshot" ps ON p."id" = ps."projectId"
       LEFT JOIN "Application" a ON p."id" = a."projectId"
       LEFT JOIN "ProjectLinks" pl ON p."id" = pl."projectId"
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
       LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
-      WHERE up."userId" = ${userId}
-        AND p."deletedAt" IS NULL
-        AND p."id" NOT IN (SELECT "projectId" FROM "ProjectOrganization")
+      WHERE p."deletedAt" IS NULL
       GROUP BY p."id"
     ),
     "org_projects" AS (

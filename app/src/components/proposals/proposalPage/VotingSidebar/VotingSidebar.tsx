@@ -65,10 +65,11 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
         citizen_status: citizen
           ? "registered"
           : citizenEligibility?.eligible
-          ? "eligible"
-          : session?.user?.id
-          ? "not signed in"
-          : "ineligible",
+            ? "eligible"
+            : session?.user?.id
+              ? "not signed in"
+              : "ineligible",
+        user_group: citizenEligibility?.type,
       })
       isTracked.current = true
     }
@@ -86,12 +87,19 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   }
 
   return (
-    <div className="flex flex-col sticky top-4  transition-all duration-300 ease-in-out animate-in fade-in-0">
-      <div>
-        <VotingColumn proposalData={proposalData} />
-      </div>
-      <div className="mt-5 transition-all duration-300 ease-in-out">
-        <VotingRedirect proposalData={proposalData} />
+
+    <div className="w-[304px] gap-4 flex flex-col sticky top-4 w-full max-w-[304px] transition-all duration-300 ease-in-out animate-in fade-in-0">
+      <div className="w-[304px]">
+        <div className="transition-all duration-300 ease-in-out">
+          <VotingColumn proposalData={proposalData} />
+        </div>
+        <div className="mt-5 transition-all duration-300 ease-in-out">
+          <VotingRedirect
+            proposalData={proposalData}
+            citizen={citizen ?? undefined}
+            eligibility={citizenEligibility ?? undefined}
+          />
+        </div>
       </div>
     </div>
   )

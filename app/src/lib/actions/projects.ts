@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
 import { deleteKycTeam } from "@/db/kyc"
+import { checkWalletAddressExists, getKycTeamByWalletAddress } from "@/db/kyc"
 import {
   addTeamMembers,
   createProject,
@@ -565,4 +566,34 @@ export const getPublicProjectAction = async ({
   if (!rawProject) return null
 
   return rawProject
+}
+
+export const checkWalletAddressExistsAction = async (walletAddress: string) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const exists = await checkWalletAddressExists(walletAddress)
+  return { exists }
+}
+
+export const getKycTeamByWalletAddressAction = async (
+  walletAddress: string,
+) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const kycTeam = await getKycTeamByWalletAddress(walletAddress)
+  return kycTeam
 }

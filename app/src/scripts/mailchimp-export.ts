@@ -36,7 +36,7 @@ async function exportEmailsToMailchimp() {
               applications: {
                 some: {
                   createdAt: {
-                    lte: new Date("2025-03-25"),
+                    lte: new Date("2025-06-07"),
                   },
                 },
               },

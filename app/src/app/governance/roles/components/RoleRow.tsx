@@ -2,14 +2,14 @@
 
 import { Role } from "@prisma/client"
 
-import { formatMMMd } from "@/lib/utils/date"
 import ProposalCard, {
   ProposalArrow,
-  ProposalDates,
-  ProposalTextContent,
   ProposalBadge,
   ProposalBadgeType,
+  ProposalDates,
+  ProposalTextContent,
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
+import { formatMMMd } from "@/lib/utils/date"
 
 export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
   const isActive =
@@ -27,7 +27,7 @@ export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
             ? ProposalBadgeType.now
             : isUpcoming
             ? ProposalBadgeType.soon
-            : ProposalBadgeType.past
+            : ProposalBadgeType.closed
         }
       />
       <ProposalTextContent title={role.title} />

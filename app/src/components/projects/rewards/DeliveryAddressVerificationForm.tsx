@@ -3,7 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import { isAddress } from "viem"
 import { z } from "zod"
 
 import { Button } from "@/components/common/Button"
@@ -15,11 +18,19 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form"
+import { checkWalletAddressExistsAction } from "@/lib/actions/projects"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 const FormSchema = z.object({
-  address: z.string().nonempty(),
+  address: z
+    .string()
+    .nonempty("Address is required")
+    .refine(
+      (value) => value === "" || isAddress(value),
+      "Please enter a valid Ethereum address",
+    ),
   confirmIsOpMainnet: z.boolean().default(false),
   confirmCanMakeContractCalls: z.boolean().default(false),
   pledgeToChooseDelegate: z.boolean().default(false),
@@ -27,7 +38,7 @@ const FormSchema = z.object({
 
 export default function DeliveryAddressVerificationForm() {
   const { setOpenDialog, setData } = useAppDialogs()
-
+  const [isChecking, setIsChecking] = useState(false)
   const { organizationId } = useParams()
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -46,29 +57,50 @@ export default function DeliveryAddressVerificationForm() {
     form.watch("pledgeToChooseDelegate") &&
     form.watch("address")
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    setData({
-      address: data.address,
-      organizationId: organizationId as string,
-    })
-    setOpenDialog("verify_grant_delivery_address")
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    setIsChecking(true)
+
+    try {
+      const checkResult = await checkWalletAddressExistsAction(data.address)
+
+      if (checkResult.error) {
+        toast.error(checkResult.error)
+        setIsChecking(false)
+        return
+      }
+
+      if (checkResult.exists) {
+        form.setError("address", {
+          type: "manual",
+          message:
+            "This address is already in use by another KYC team. Please use a different address.",
+        })
+        setIsChecking(false)
+        return
+      }
+
+      setData({
+        address: data.address,
+        organizationId: organizationId as string,
+      })
+      setOpenDialog("verify_grant_delivery_address")
+    } catch (error) {
+      console.error("Error checking wallet address:", error)
+      toast.error("Error verifying the address. Please try again.")
+    } finally {
+      setIsChecking(false)
+    }
   }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={(e) => {
-          form.handleSubmit(onSubmit)(e)
-          form.reset()
-        }}
-        className="w-full space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
         <div className="w-full space-y-2">
           <FormField
             control={form.control}
             name="address"
             render={({ field }) => (
-              <FormItem className="flex items-center space-x-3">
+              <FormItem className="flex flex-col space-y-2">
                 <FormControl>
                   <Input
                     leftIcon="/assets/chain-logos/optimism.svg"
@@ -76,6 +108,7 @@ export default function DeliveryAddressVerificationForm() {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -138,9 +171,15 @@ export default function DeliveryAddressVerificationForm() {
             )}
           />
         </div>
-        <Button variant="primary" type="submit" disabled={!submitEnabled}>
-          Verify
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={!submitEnabled || isChecking}
+          >
+            {isChecking ? "Verifying..." : "Verify"}
+          </Button>
+        </div>
       </form>
     </Form>
   )

@@ -51,6 +51,7 @@ export enum ProposalBadgeType {
   soon = "soon",
   now = "now",
   past = "past",
+  closed = "closed",
 }
 
 export enum ProposalStatusBadgeType {

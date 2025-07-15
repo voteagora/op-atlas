@@ -7,12 +7,12 @@ import { prisma } from "./client"
 export async function getAllRoles(): Promise<Role[]> {
   return prisma.role.findMany({
     where: {
-      endAt: {
+      voteStartAt: {
         gte: new Date(),
       },
     },
     orderBy: {
-      endAt: "asc",
+      voteStartAt: "asc",
     },
   })
 }
@@ -115,7 +115,7 @@ export async function getActiveUserRoleApplications(
         startAt: {
           lte: new Date(),
         },
-        endAt: {
+        voteEndAt: {
           gte: new Date(),
         },
       },

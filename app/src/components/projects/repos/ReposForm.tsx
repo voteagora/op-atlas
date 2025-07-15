@@ -227,7 +227,8 @@ export const ReposForm = ({ project }: { project: ProjectWithFullDetails }) => {
           setProjectLinks(project.id, links),
         ])
 
-        !isSave && router.push(`/projects/${project.id}/contracts`)
+        // Both Save and Next buttons should advance to the next step
+        router.push(`/projects/${project.id}/contracts`)
         setIsSaving(false)
         // form.reset({ links, githubRepos: projectRepos })
         toast.success("Project saved")

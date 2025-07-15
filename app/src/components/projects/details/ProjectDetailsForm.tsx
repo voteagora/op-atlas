@@ -273,9 +273,8 @@ export default function ProjectDetailsForm({
       toast.promise(promise, {
         loading: isCreating ? "Creating project onchain..." : "Saving project",
         success: (project) => {
-          isSave
-            ? router.replace(`/projects/${project.id}/details`)
-            : router.push(`/projects/${project.id}/contributors`)
+          // Both Save and Next buttons should advance to the next step
+          router.push(`/projects/${project.id}/contributors`)
           setIsSaving(false)
           return isCreating ? "Project created onchain!" : "Project saved"
         },
