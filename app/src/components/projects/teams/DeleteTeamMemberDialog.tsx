@@ -37,8 +37,8 @@ const DeleteTeamMemberDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTitle>Remove team member</DialogTitle>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
+        <DialogTitle>Remove team member</DialogTitle>
         <div className="flex flex-col items-center gap-y-4">
           <UserAvatarLarge imageUrl={member?.imageUrl} />
 

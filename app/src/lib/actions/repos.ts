@@ -52,20 +52,37 @@ export const findRepo = async (owner: string, slug: string) => {
 
 const fetchFundingFile = async (owner: string, slug: string) => {
   try {
-    const { data } = await getFileOrFolder(owner, slug, "funding.json")
-    return Buffer.from((data as any).content ?? "", "base64").toString("utf-8")
-  } catch (error: unknown) {
-    // This will also happen if the file doesn't exist - try the all-caps name
-    try {
-      const { data } = await getFileOrFolder(owner, slug, "FUNDING.json")
-      return Buffer.from((data as any).content ?? "", "base64").toString(
-        "utf-8",
-      )
-    } catch (error: unknown) {
-      console.info("Error fetching funding file", (error as Error).message)
-      return null
+    const rootContents = await getContents(owner, slug)
+
+    if (rootContents && Array.isArray(rootContents)) {
+      const validNames = new Set(["funding.json"])
+
+      for (const file of rootContents) {
+        const normalizedFileName = file.name.trim().toLowerCase()
+
+        if (validNames.has(normalizedFileName)) {
+          try {
+            const { data } = await getFileOrFolder(owner, slug, file.name)
+            const content = Buffer.from(
+              (data as any).content ?? "",
+              "base64",
+            ).toString("utf-8")
+            return content
+          } catch (error: unknown) {
+            console.info(
+              `Error fetching funding file "${file.name}" from ${owner}/${slug}:`,
+              error,
+            )
+            continue
+          }
+        }
+      }
     }
+  } catch (error: unknown) {
+    console.info(`Error getting root contents from ${owner}/${slug}:`, error)
   }
+
+  return null
 }
 
 const isValidFundingFile = (contents: string, projectId: string) => {

@@ -1,6 +1,7 @@
 "use client"
 
 
+import RoleApplication from "@/components/common/RoleApplication"
 import { OrganizationWithTeamAndProjects } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -22,10 +23,13 @@ const PublicUserProfile = ({
         <OrganizationHeader organization={organization} />
 
         <div className="max-w-3xl">
+
+          <RoleApplication organization={organization} className="px-8" />
           {/* Team */}
           <OrganizationTeam organization={organization} className="px-8" />
           {/* Projects */}
           <OrganizationProjects organization={organization} className="px-8" />
+
         </div>
       </div>
     </div>

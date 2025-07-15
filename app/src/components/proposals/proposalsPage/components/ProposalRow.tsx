@@ -34,6 +34,7 @@ export const ProposalRow = (props: StandardProposalProps) => {
           styling: "text-success-foreground",
         }
       }
+
       return {
         text: "Result Negative ie: Failed",
         styling: "text-primary",
@@ -43,7 +44,7 @@ export const ProposalRow = (props: StandardProposalProps) => {
   }
 
   return (
-    <ProposalCard rounded={props.rounded || false}>
+    <ProposalCard rounded={props.rounded || false} href={props.arrow.href}>
       <ProposalBadge type={props.badge.badgeType} />
       <ProposalTextContent
         title={props.textContent.title}

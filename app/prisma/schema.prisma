@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -24,6 +25,7 @@ model User {
   privyDid           String?
   citizen            Citizen?
   RewardClaim        RewardClaim[]
+  roleApplications   RoleApplication[]
   addresses          UserAddress[]
   emails             UserEmail[]
   interaction        UserInteraction?
@@ -154,6 +156,7 @@ model Organization {
   OrganizationKYCTeams OrganizationKYCTeam[]
   snapshots            OrganizationSnapshot[]
   projects             ProjectOrganization[]
+  roleApplications     RoleApplication[]
   team                 UserOrganization[]
 
   @@index([deletedAt])
@@ -631,18 +634,17 @@ model ProjectOSOAtlasRelatedProjects {
 }
 
 model Citizen {
-  id             Int            @id @default(autoincrement())
-  userId         String         @unique
-  address        String?        @unique
+  id             Int      @id @default(autoincrement())
+  userId         String   @unique
+  address        String?  @unique
   type           String
   attestationId  String?
   timeCommitment String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   organizationId String?
   projectId      String?
-  user           User           @relation(fields: [userId], references: [id])
-  OffChainVote   OffChainVote[]
+  user           User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([projectId])
@@ -679,6 +681,51 @@ model UserWorldId {
   @@index([userId])
 }
 
+model Role {
+  id           Int               @id @default(autoincrement())
+  title        String
+  link         String?
+  description  String?
+  requirements Json              @default("{}")
+  startAt      DateTime?
+  endAt        DateTime?
+  voteStartAt  DateTime?         
+  voteEndAt    DateTime?         
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @default(now()) @updatedAt
+  applications RoleApplication[]
+}
+
+model RoleApplication {
+  id             Int                   @id @default(autoincrement())
+  status         RoleApplicationStatus
+  roleId         Int
+  userId         String?
+  organizationId String?
+  application    String
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @default(now()) @updatedAt
+  organization   Organization?         @relation(fields: [organizationId], references: [id])
+  role           Role                  @relation(fields: [roleId], references: [id])
+  user           User?                 @relation(fields: [userId], references: [id])
+
+  @@index([roleId])
+  @@index([userId])
+  @@index([organizationId])
+}
+view OffChainVote {
+  attestationId   String          @id
+  voterAddress    String
+  proposalId      String
+  vote            Json
+  transactionHash String?
+  citizenId       Int
+  citizenCategory citizenCategory
+  createdAt       DateTime        @db.Timestamptz(6)
+
+  @@unique([proposalId, citizenId])
+}
+
 enum KYCStatus {
   PENDING
   APPROVED
@@ -703,32 +750,14 @@ enum ProjectOSOMetric {
   DOWNSTREAM_GAS
 }
 
-model OffChainVote {
-  attestationId String @id // EAS attestation ID as primary key
-  voterAddress  String // Ethereum address of the voter
-  proposalId    String // ID of the proposal being voted on
-  vote          Json // For standard proposals, this is an array of choices,
-  // using strings for the values.
-  // e.g. ["1"], where "0", "1", "2" are for, against, abstain
-
-  transactionHash String? // Hash of the transaction that created the vote
-
-  citizenId       Int
-  citizen         Citizen         @relation(fields: [citizenId], references: [id])
-  citizenCategory citizenCategory @default(CHAIN)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([proposalId, citizenId])
-  @@index([voterAddress])
-  @@index([proposalId])
-  @@index([citizenId])
-  @@index([transactionHash])
-}
-
 enum citizenCategory {
   CHAIN
   APP
   USER
+}
+
+enum RoleApplicationStatus {
+  pending
+  approved
+  rejected
 }

@@ -142,6 +142,7 @@ export const OSO_METRICS = {
     "jVe/Dpr1TgIxBLbkMoLKmXWTJthxFB0LhHrxWQmt548=",
     "91Lmuq3ndcnbZwqO7660c9j2fAQSVnhTEVR8rWec17M=",
     "gqPrgjDFJo0cxqAjtajifVr4f+ODszjovnISfmqT3qA=",
+    "XYLS5aF2Pab4k9gE//8iHEnVI9kVBm8AE3NuNGRZMN4=",
   ],
   gasFees: [
     "pzNqT8Daqw9cVBYtLmUabuHeMOKoqKKIhTWxXkYrpzM=",
@@ -170,6 +171,7 @@ export const OSO_METRICS = {
     "hXw/qm4zZq7F+r3+FpPwE11FA6TD7H/cnY0+t697fq0=",
     "4Bi3sOZJ/iDa6Z4pvWMi0IrTTd/oHMqqKqjMKUkjWSQ=",
     "cgfAWKq1l/V12yl1VKIGxFDmaFuotwck19DV+KGl6XY=",
+    "zmymh/YWEqfpLm38nInkHK8QtC3DDbfI1vjXyk65zMA=",
   ],
   transactions: [
     "q4NLzrfmhVgSYYqjehgcKlF7UieUf2voBEujC+NUFTA=",

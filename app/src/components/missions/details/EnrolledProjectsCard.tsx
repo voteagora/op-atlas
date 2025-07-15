@@ -11,11 +11,11 @@ export const IconList = ({
   headerContent?: ReactNode
 }) => {
   return (
-    <div className="flex flex-col gap-y-3 p-6">
+    <div className="flex flex-col p-6">
       {headerContent}
 
       <div
-        className={`flex flex-wrap gap-1 max-h-[120px] overflow-hidden items-start`}
+        className={`flex flex-wrap gap-1 max-h-[120px] overflow-hidden items-start mt-3`}
       >
         {icons.map((icon: string | null, index: number) => {
           return (
@@ -31,7 +31,7 @@ export const IconList = ({
         })}
       </div>
       {icons.length > 10 ? (
-        <div className="w-full bg-gray-300 h-[2px]" />
+        <div className="w-full border-t border-border" />
       ) : (
         <></>
       )}

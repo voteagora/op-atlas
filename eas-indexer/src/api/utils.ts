@@ -1,4 +1,4 @@
-import { Entity, GovContribution, RfVoter } from "../types";
+import { Entity, GovContribution, RfVoter, Votes } from "../types";
 
 import { Citizen } from "../types";
 
@@ -40,6 +40,15 @@ const entityConfigs = {
     getName: () => "Retro Funding Voter",
     getSubtext: (item: Badgeholder) => `Round ${item.rpgf_round}`,
     getMetadata: (item: Badgeholder) => ({}),
+  },
+  votes: {
+    getName: () => "Vote",
+    getSubtext: (item: Votes) => `Proposal ${item.proposal_id}`,
+    getMetadata: (item: Votes) => ({
+      proposalId: item.proposal_id,
+      params: item.params,
+      voterId: item.voterId,
+    }),
   },
 } as const;
 

@@ -43,6 +43,9 @@ export enum ProposalType {
   OFFCHAIN_STANDARD = "OFFCHAIN_STANDARD",
   OFFCHAIN_APPROVAL = "OFFCHAIN_APPROVAL",
   OFFCHAIN_OPTIMISTIC = "OFFCHAIN_OPTIMISTIC",
+  HYBRID_STANDARD = "HYBRID_STANDARD",
+  HYBRID_APPROVAL = "HYBRID_APPROVAL",
+  HYBRID_OPTIMISTIC_TIERED = "HYBRID_OPTIMISTIC_TIERED",
 }
 
 export interface voteAction {
@@ -52,18 +55,6 @@ export interface voteAction {
   action: (data?: any) => Promise<any>
   disabled?: boolean
   loading?: boolean
-}
-
-export interface OffchainVote {
-  attestationId: string
-  voterAddress: string
-  proposalId: string
-  vote: object
-  transactionHash?: string
-  citizenId: number
-  citizenType: citizenCategory
-  createdAt?: Date
-  updatedAt?: Date
 }
 
 export interface VotingColumnProps {
@@ -87,4 +78,17 @@ export interface VotingCardProps {
 export interface CardTextProps {
   title: string
   descriptionElement?: string | React.ReactElement
+}
+
+export interface VoteButtonProps {
+  textValue: string
+  size?: "default" | "sm" | "lg" | "veto"
+  variant?: "outline" | "filled"
+  hover?: "yes" | "no"
+  disabled?: "yes" | "no"
+  iconLeft?: boolean
+  iconRight?: boolean
+  selected?: boolean
+  voteType?: VoteType
+  onClick?: () => void
 }

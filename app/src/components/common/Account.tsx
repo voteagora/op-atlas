@@ -92,6 +92,7 @@ export const Account = () => {
 
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
+  const isRolePath = pathName.includes("/role")
 
   const didLogIn =
     prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&

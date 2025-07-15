@@ -4,6 +4,7 @@ import { Organization } from "@prisma/client"
 
 import { ProjectWithDetailsLite, UserWithAddresses } from "@/lib/types"
 
+import RoleApplication from "../../common/RoleApplication"
 import ProfileGithubProximity from "./ProfileGithubProximity"
 import ProfileHeader from "./ProfileHeader"
 import ProfileOrganizations from "./ProfileOrganizations"
@@ -35,6 +36,7 @@ const PublicUserProfile = ({
 
 
         <div className="lg:col-span-2 space-y-12 mt-12 lg:mt-0">
+          <RoleApplication user={user} />
           <ProfileRoles user={user} />
           <ProfileGithubProximity user={user} />
           <ProfileProjects projects={projects} />

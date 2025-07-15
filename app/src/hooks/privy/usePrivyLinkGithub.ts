@@ -40,6 +40,7 @@ export const usePrivyLinkGithub = (userId: string) => {
 
   const { linkGithub } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
+      track("Github Linked", { userId })
       if (linkMethod === "github" && isLinking()) {
         toast.promise(
           syncPrivyUser(updatedPrivyUser)

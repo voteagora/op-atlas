@@ -151,7 +151,15 @@ export default function MakeOrganizationForm({
 
   const handleToggleRole = async (selectedUser: User, role: TeamRole) => {
     if (organization) {
-      await setOrganizationMemberRole(organization.id, selectedUser.id, role)
+      const changeResult = await setOrganizationMemberRole(
+        organization.id,
+        selectedUser.id,
+        role,
+      )
+
+      if (changeResult?.error) {
+        toast.error(changeResult.error)
+      }
     } else {
       setTeam((prev) => {
         const updatedTeam = prev.map((item) => {
@@ -166,10 +174,30 @@ export default function MakeOrganizationForm({
     }
   }
 
+  // Wrap in a function that throws on error, helps our toast promise.
+  const removeMemberOrThrow = async (
+    organizationId: string,
+    userId: string,
+  ) => {
+    const result = await removeMemberFromOrganization(organizationId, userId)
+    if (result?.error) {
+      throw new Error(result.error)
+    }
+    return result
+  }
+
   const handleConfirmDelete = async () => {
     if (!isShowingRemove) return
     if (organization) {
-      await removeMemberFromOrganization(organization.id, isShowingRemove.id)
+      toast.promise(removeMemberOrThrow(organization.id, isShowingRemove.id), {
+        loading: "Removing member...",
+        success: () => {
+          return "Member removed from team"
+        },
+        error: (error) => {
+          return error.message
+        },
+      })
     } else {
       setTeam((prev) =>
         prev.filter((item) => item.user.id !== isShowingRemove.id),
@@ -241,16 +269,16 @@ export default function MakeOrganizationForm({
         try {
           const response = organization
             ? await updateOrganizationDetails({
-              id: organization.id,
-              organization: newValues,
-            })
+                id: organization.id,
+                organization: newValues,
+              })
             : await createNewOrganization({
-              organization: newValues,
-              teamMembers: team.map(({ user, role }) => ({
-                userId: user.id,
-                role,
-              })),
-            })
+                organization: newValues,
+                teamMembers: team.map(({ user, role }) => ({
+                  userId: user.id,
+                  role,
+                })),
+              })
 
           if (response?.error !== null || !response) {
             throw new Error(response?.error ?? "Failed to save project")
@@ -305,7 +333,9 @@ export default function MakeOrganizationForm({
     }
   }, [organization?.team])
 
-  const canSubmit = form.formState.isValid && !form.formState.isSubmitting
+  const hasAdmin = team.some((member) => member.role === "admin")
+  const canSubmit =
+    form.formState.isValid && !form.formState.isSubmitting && hasAdmin
 
   return (
     <Form {...form}>
@@ -571,7 +601,7 @@ export default function MakeOrganizationForm({
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <Button
             disabled={!canSubmit || isSaving || !form.formState.isDirty}
             onClick={form.handleSubmit(onSubmit())}
@@ -580,6 +610,11 @@ export default function MakeOrganizationForm({
           >
             Save
           </Button>
+          {!hasAdmin && (
+            <p className="text-sm text-destructive">
+              At least one team member must have an admin role.
+            </p>
+          )}
         </div>
       </form>
 

@@ -8,13 +8,17 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
     user?.addresses?.map((a) => a.address),
   )
 
-  if (!attestations || attestations.length === 0) return null
+  const filteredAttestations = attestations?.filter(
+    (attestation) => attestation.entity !== "votes",
+  )
+
+  if (!filteredAttestations || filteredAttestations.length === 0) return null
 
   return (
     <div className="flex flex-col space-y-3 w-full">
       <h2 className="text-xl font-medium">Roles</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 justify-between">
-        {attestations.map((attestation) => (
+        {filteredAttestations.map((attestation) => (
           <div
             key={attestation.id}
             className="rounded-xl border border-gray-200 p-6 bg-background group/card"

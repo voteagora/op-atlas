@@ -79,7 +79,8 @@ export default function AddTeamDetailsForm({
       })
       toast.success("Project saved")
 
-      !isSave && router.push(`/projects/${project.id}/repos`)
+      // Both Save and Next buttons should advance to the next step
+      router.push(`/projects/${project.id}/repos`)
     } catch (error) {
       console.error("Error updating project", error)
     } finally {

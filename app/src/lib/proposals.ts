@@ -1,10 +1,9 @@
 "use server"
-import {
-  OffchainVote,
-  ProposalType,
-} from "@/components/proposals/proposal.types"
+import { ProposalType } from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
+
+import { formatMMMd } from "./utils/date"
 
 const CURRENT_DATETIME = new Date()
 
@@ -37,6 +36,7 @@ export type OffChainProposal = {
   proposalResults: object // We can define this more specifically if needed
   proposalType: ProposalType
   status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
+  offchainProposalId: string
 }
 
 // For UI
@@ -60,9 +60,9 @@ export type UIProposal = {
   }
 }
 
-const getStandardProposlas = async () => {
+const getStandardProposals = async () => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_AGORA_API_URL}/api/v1/proposals?type=OFFCHAIN`,
+    `${process.env.NEXT_PUBLIC_AGORA_API_URL}/api/v1/proposals?type=EXCLUDE_ONCHAIN`,
     {
       headers: {
         Authorization: `Bearer ${process.env.AGORA_API_KEY}`,
@@ -79,7 +79,6 @@ const getStandardProposlas = async () => {
   }
 
   const offChainProposals: OffChainProposalResponse = await response.json()
-
   // Transform the data to match UI structure
   const standardProposals: UIProposal[] = offChainProposals.data.map(
     (proposal: any) => {
@@ -95,36 +94,27 @@ const getStandardProposlas = async () => {
         badgeType = ProposalBadgeType.now
       }
 
-      // Format dates for display (MM-DD-YYYY)
-      const formatDate = (dateString: string) => {
-        const date = new Date(dateString)
-        return date
-          .toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          })
-          .replace(/\//g, "-")
-      }
-
+      const offchainProposalId = proposal.proposalType.includes("HYBRID")
+        ? proposal.offchainProposalId
+        : proposal.id
       return {
-        id: proposal.id,
+        id: offchainProposalId,
         badge: {
           badgeType,
         },
         // Assuming these values will be filled later with user-specific data
         voted: false,
-        passed: proposal.status === "EXECUTED",
+        passed: ["SUCCEEDED", "QUEUED", "EXECUTED"].includes(proposal.status),
         textContent: {
           title: proposal.markdowntitle,
           subtitle: "Voters: Citizens, Delegates", // Default subtitle
         },
         dates: {
-          startDate: formatDate(proposal.startTime),
-          endDate: formatDate(proposal.endTime),
+          startDate: formatMMMd(proposal.startTime),
+          endDate: formatMMMd(proposal.endTime),
         },
         arrow: {
-          href: `/proposals/${proposal.id}`,
+          href: `/proposals/${offchainProposalId}`,
         },
       }
     },
@@ -133,7 +123,7 @@ const getStandardProposlas = async () => {
 }
 
 export const getProposals = async () => {
-  const standardProposals = await getStandardProposlas()
+  const standardProposals = await getStandardProposals()
   const selfNominations: UIProposal[] = []
 
   return {
@@ -178,16 +168,10 @@ export const enrichProposalData = async (
   const enrichSingleProposal = async (
     proposal: UIProposal,
   ): Promise<UIProposal> => {
-    const offchainVote: OffchainVote = await getCitizenProposalVote(
-      citizenId,
-      proposal.id,
-    )
+    const offchainVote = await getCitizenProposalVote(citizenId, proposal.id)
 
     // Check if we have a valid citizen with vote data
-    const hasVoted =
-      offchainVote?.vote &&
-      Array.isArray(offchainVote.vote) &&
-      offchainVote.vote.length > 0
+    const hasVoted = !!offchainVote?.vote && Array.isArray(offchainVote.vote)
 
     const isVotedProposal = hasVoted && offchainVote.proposalId === proposal.id
 

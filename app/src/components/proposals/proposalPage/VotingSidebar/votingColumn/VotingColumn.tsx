@@ -8,22 +8,18 @@ import { citizenCategory } from "@prisma/client"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
+import { Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
 
-import {
-  OffchainVote,
-  ProposalType,
-  VoteType,
-} from "@/components/proposals/proposal.types"
+import { ProposalType, VoteType } from "@/components/proposals/proposal.types"
 import VoterActions from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
 import { Skeleton } from "@/components/ui/skeleton"
-import { postOffchainVote } from "@/db/votes"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import useMyVote from "@/hooks/voting/useMyVote"
@@ -43,6 +39,7 @@ import {
   mapValueToVoteType,
   mapVoteTypeToValue,
 } from "@/lib/utils/voting"
+import { isSmartContractWallet } from "@/lib/utils/walletDetection"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
@@ -91,7 +88,7 @@ const VotingChoices = ({
           />
         </div>
       )
-    case "APPROVAL":
+    case "OFFCHAIN_APPROVAL":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <CandidateCards candidates={[]} />
@@ -100,7 +97,10 @@ const VotingChoices = ({
     case "OFFCHAIN_OPTIMISTIC":
       return (
         <div className="transition-all duration-300 ease-in-out">
-          <OverrideVoteCard />
+          <OverrideVoteCard
+            selectedVote={selectedVote}
+            setSelectedVote={setSelectedVote}
+          />
         </div>
       )
     default:
@@ -115,7 +115,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
+
   const [showConfetti, setShowConfetti] = useState(false)
+  const [isSmartContract, setIsSmartContract] = useState<boolean>(false)
+  const [isCheckingWallet, setIsCheckingWallet] = useState<boolean>(false)
+  const [hasCheckedWallet, setHasCheckedWallet] = useState<boolean>(false)
   const brightColors = useMemo(
     () => [
       "#FF0000",
@@ -178,6 +182,37 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
+
+  useEffect(() => {
+    setHasCheckedWallet(false)
+    setIsSmartContract(false)
+    setIsCheckingWallet(false)
+  }, [citizen?.address])
+
+  useEffect(() => {
+    const checkWalletType = async () => {
+      if (!signer || !citizen?.address) return
+
+      setIsCheckingWallet(true)
+      try {
+        const isSmartContractDetected = await isSmartContractWallet(
+          signer.provider,
+          citizen.address,
+        )
+        setIsSmartContract(isSmartContractDetected)
+      } catch (error) {
+        console.warn("Error checking wallet type:", error)
+        setIsSmartContract(false)
+      } finally {
+        setIsCheckingWallet(false)
+        setHasCheckedWallet(true)
+      }
+    }
+
+    if (signer && citizen?.address && !hasCheckedWallet && !isCheckingWallet) {
+      checkWalletType()
+    }
+  }, [signer, citizen?.address, hasCheckedWallet, isCheckingWallet])
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
@@ -267,6 +302,50 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
+  const createMultisigWalletAttestation = async (choices: string[]) => {
+    if (!signer) throw new Error("Signer not ready")
+    if (!citizen?.address) {
+      throw new Error("User citizen address not available")
+    }
+
+    const connectedChainId = getChainId(privyWagmiConfig)
+    if (connectedChainId !== CHAIN_ID) {
+      await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
+    }
+
+    const eas = new EAS(EAS_CONTRACT_ADDRESS)
+    eas.connect(signer)
+
+    const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
+
+    const args = {
+      proposalId: proposalData.id,
+      choices: JSON.stringify(choices),
+    }
+    const encodedData = encoder.encodeData([
+      { name: "proposalId", value: args.proposalId, type: "uint256" },
+      { name: "params", value: args.choices, type: "string" },
+    ])
+
+    const tx = await eas.attest({
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
+      data: {
+        recipient: signer.address as `0x${string}`,
+        expirationTime: BigInt(0),
+        revocable: false,
+        refUID: citizen.attestationId as `0x${string}`,
+        data: encodedData,
+      },
+    })
+
+    const receipt = await tx.wait()
+
+    return {
+      attestationId: receipt,
+      signerAddress: signer.address as `0x${string}`,
+    }
+  }
+
   const validateAddress = () => {
     const newActiveWallet = wallets.find(
       (wallet) => wallet.address === citizen?.address,
@@ -304,32 +383,24 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           throw new Error("Signer address does not match citizen address")
         }
 
-        // Sign the attestation with the correct user wallet
-        const { data, rawSignature, signerAddress } =
-          await createDelegatedAttestation(choices)
+        let attestationId: string
+        let signerAddress: string
 
-        // 2. Send signature to server to relay onchain
-        const attestationId = await vote(
-          data,
-          rawSignature.signature,
-          signerAddress,
-          citizen.attestationId,
-        )
+        if (isSmartContract) {
+          const attestationData = await createMultisigWalletAttestation(choices)
+          signerAddress = attestationData.signerAddress
+          attestationId = attestationData.attestationId
+        } else {
+          const attestationData = await createDelegatedAttestation(choices)
+          signerAddress = attestationData.signerAddress
 
-        // build an offchain vote object for the DB
-        const offchainVote: OffchainVote = {
-          attestationId: attestationId,
-          voterAddress: signerAddress,
-          proposalId: proposalData.id,
-          vote: choices,
-          citizenId: citizen.id,
-          citizenType: citizen.type as citizenCategory,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          attestationId = await vote(
+            attestationData.data,
+            attestationData.rawSignature.signature,
+            signerAddress,
+            citizen.attestationId,
+          )
         }
-
-        // 3. Record vote in the database
-        await postOffchainVote(offchainVote)
 
         // Track successful vote submission
         track("Citizen Voting Vote Submitted", {
@@ -338,11 +409,35 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           wallet_address: signerAddress,
         })
       } catch (error) {
-        console.error("Failed to cast vote:", error)
+        // Collect context for the error
+        const errorMessage =
+          error instanceof Error ? error.message : `Unknown error: ${error}`
+
+        const errorContext = {
+          proposalData: proposalData,
+          choice: choices,
+          signer: signer,
+          citizen: citizen,
+          browser:
+            typeof window !== "undefined" ? navigator?.userAgent : "unknown",
+          chain_id:
+            typeof window !== "undefined"
+              ? window?.ethereum?.chainId
+              : "unknown",
+          ethereumWindow: window?.ethereum,
+          wallet_provider: wallets?.[0]?.walletClientType || "unknown",
+          connected_wallets: wallets?.map((w) => ({
+            type: w?.walletClientType,
+            address: w?.address,
+          })),
+          selected_vote: selectedVote,
+          timestamp: new Date().toISOString(),
+          error: errorMessage,
+        }
+
+        console.error("Failed to cast vote:", errorContext)
 
         // Track vote error
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error"
         track("Citizen Voting Vote Error", {
           proposal_id: proposalData.id,
           error: errorMessage,
@@ -378,14 +473,16 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)
+        invalidateMyVote()
       }
     }
 
     // 1. Create and sign an attestation for the vote
     toast.promise(castAndRecordVote(), {
-      loading: "Casting Vote...",
+      loading: "Casting vote...",
       success: () => {
         setShowConfetti(true)
+        // Update voted status to true
         invalidateMyVote()
         return "Vote Cast and Recorded!"
       },
@@ -420,7 +517,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         />
       </div>
 
-      {myVoteType && (
+      {myVoteType && proposalData.proposalType === "OFFCHAIN_STANDARD" && (
         <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
           <MyVote voteType={myVoteType} />
         </div>
@@ -459,12 +556,29 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               {citizen.address && truncateAddress(citizen.address)}
             </div>
           )}
+
+          {isSmartContract &&
+            !addressMismatch &&
+            citizen &&
+            !myVote &&
+            !!session?.user?.id && (
+              <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
+                <Lock className="text-blue-500 w-4 h-4" />
+                Smart contract wallet detected
+              </div>
+            )}
+
+          {isCheckingWallet && (
+            <div className="text-gray-500 text-xs text-center transition-all duration-300 ease-in-out">
+              Checking wallet type...
+            </div>
+          )}
         </div>
       )}
 
       <div className="w-full flex items-center justify-center transition-opacity duration-300 ease-in-out">
         <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
-          <p className="text-sm text-center underline hover:text-foreground/80 transition-colors duration-200">
+          <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
             View results
           </p>
         </a>

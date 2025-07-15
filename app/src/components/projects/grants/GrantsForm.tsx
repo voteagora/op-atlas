@@ -331,7 +331,8 @@ export const GrantsForm = ({
           pricingModelDetails: values.pricingModelDetail,
         })
 
-        !isSave && router.push(`/projects/${project.id}/publish`)
+        // Both Save and Next buttons should advance to the next step
+        router.push(`/projects/${project.id}/publish`)
         toast.success("Saved.")
         setIsSaving(false)
       } catch (error) {
