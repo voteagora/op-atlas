@@ -159,7 +159,7 @@ export default function RoleApplication({
 
         {projects && projects.length > 0 ? (
           projects.map((project: any, idx: number) => (
-            <ProjectDedetails key={idx} projectApplication={project} />
+            <ProjectDetails key={idx} projectApplication={project} />
           ))
         ) : (
           <div className="text-secondary-foreground">None</div>
@@ -200,7 +200,7 @@ export default function RoleApplication({
   )
 }
 
-const ProjectDedetails = ({
+const ProjectDetails = ({
   projectApplication,
 }: {
   projectApplication: {
