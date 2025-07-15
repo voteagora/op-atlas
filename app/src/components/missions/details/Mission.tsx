@@ -115,21 +115,19 @@ export default function Mission() {
 
   // Filter sections based on conditions
   const visibleSections = navigationSections.filter(section => section.condition)
-  let missioName = mission?.name
-  const showSidePanel =
+  const missionIsOpen =
     mission &&
     mission?.startsAt &&
     new Date() > mission?.startsAt &&
     mission?.endsAt;
-
-  if (
-    mission?.pageName === "retro-funding-onchain-builders" ||
-    mission?.pageName === "retro-funding-dev-tooling"
-  ) {
-    missioName = `Retro Funding: ${mission.name}`
-  }
+  const showSidePanel = missionIsOpen || mission?.pageName === "audit-grants" || mission?.pageName === "growth-grants";
   return (
-    <div className={cn("mt-12 md:mt-20 bg-background flex flex-col w-full max-w-[1064px] rounded-3xl z-10", showSidePanel ? "mb-24 sm:mb-0" : "")}>
+    <div
+      className={cn(
+        "mt-12 md:mt-20 bg-background flex flex-col w-full max-w-[1064px] rounded-3xl z-10",
+        showSidePanel ? "mb-24 sm:mb-0" : "",
+      )}
+    >
       <div className="px-6 md:px-0 flex flex-1 gap-x-12">
         <div className="flex flex-1 flex-col items-center">
           <div className="flex flex-col gap-y-12 max-w-[712px]">
@@ -190,24 +188,24 @@ export default function Mission() {
         <div className="fixed md:sticky md:top-40 bottom-0 left-0 right-0 w-full max-w-full md:max-w-[304px] md:ml-auto bg-background md:bg-transparent z-10 shadow-lg md:shadow-none  md:h-fit">
           <>
             {showSidePanel && (
-                <div className="flex flex-col gap-y-4">
-                  <SessionRoundApplicationStatusCard />
-                  <RoundEnrolledProjectsCard />
-                  {mission?.pageName === "audit-grants" && (
-                    <div className="py-2.5 hidden md:block">
-                      <p className="text-secondary-foreground text-sm text-center font-medium leading-tight">
-                        Are you an ASP?{" "}
-                        <ExternalLink
-                          className="text-primary underline font-normal"
-                          href="https://app.charmverse.io/op-grants/audits-hub-759373059217642"
-                        >
-                          Apply here
-                        </ExternalLink>
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className="flex flex-col gap-y-4">
+                <SessionRoundApplicationStatusCard />
+                <RoundEnrolledProjectsCard />
+                {mission?.pageName === "audit-grants" && (
+                  <div className="py-2.5 hidden md:block">
+                    <p className="text-secondary-foreground text-sm text-center font-medium leading-tight">
+                      Are you an ASP?{" "}
+                      <ExternalLink
+                        className="text-primary underline font-normal"
+                        href="https://app.charmverse.io/op-grants/audits-hub-759373059217642"
+                      >
+                        Apply here
+                      </ExternalLink>
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
             {visibleSections.length > 0 && (
               <div className="hidden md:block">
                 <p className="font-medium text-sm mb-4 mt-4">Contents</p>

@@ -1,9 +1,7 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 import { getCutoffDate } from "@/lib/utils"
-import { Calendar } from "@/components/icons/calendar"
 import { MissionData } from "../MissionsAndRoundData"
 
 export const auditGrantsData: MissionData = {
@@ -23,7 +21,7 @@ export const auditGrantsData: MissionData = {
   status: "ongoing",
   resultsLink: "/round/results?rounds=8",
   iconUrl: "/assets/images/onchain-builders.png",
-  startsAt: new Date("2025-07-01T00:00:00.000Z"),
+  startsAt: new Date("2025-08-15T00:00:00.000Z"),
   endsAt: new Date("2025-09-30T00:00:00.000Z"),
   applyBy: (() => {
     return getCutoffDate()
@@ -32,20 +30,6 @@ export const auditGrantsData: MissionData = {
     const today = new Date()
     return today.getDate() > 27 ? (today.getMonth() + 1) % 12 : today.getMonth()
   })(),
-  callout: [
-    <GrantInfoCallout
-      key="budget"
-      title="Budget this season"
-      description="9M OP"
-      icon="/assets/icons/op-icon.svg"
-    />,
-    <GrantInfoCallout
-      key="apply-by"
-      title="Apply by"
-      description="Sep 30, 2025"
-      icon={<Calendar fill="#3374DB" />}
-    />,
-  ],
   showSupportedNetworks: true,
   applicationPageEligibility: [
     {
@@ -88,7 +72,8 @@ export const auditGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          Project is deployed or planning to deploy on a supported chain
+          My project is deployed or has a clear plan to deploy on a supported
+          chain.
         </p>
       ),
       type: "required",
@@ -96,7 +81,8 @@ export const auditGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          Project is a smart contract audit
+          My project&apos;s code is &quot;audit-ready&quot; (e.g., code is frozen, has tests
+          and documentation)
         </p>
       ),
       type: "required",
@@ -105,7 +91,7 @@ export const auditGrantsData: MissionData = {
   howItWorks: [
     {
       number: 1,
-      title: "Project contacts an Audit Service Provider (ASP)",
+      title: "Contact an Audit Service Provider (ASP)",
       description: "We've whitelisted a number of reliable providers for you.",
       subDetails: "View ASPs",
       subDetailsLink:
@@ -128,49 +114,10 @@ export const auditGrantsData: MissionData = {
         "Upon grant approval, the ASP performs an audit to identify potential issues and recommend solutions",
     },
   ],
-  supportOptions: [
-    {
-      type: "telegram",
-      title: "Telegram",
-      description: "Reach out anytime.",
-      buttonText: "Join channel",
-      buttonLink: "https://t.me/+CCkKpqGJouk5ZjYx",
-      externalLink: true,
-    },
-    {
-      type: "office-hours",
-      title: "Office Hours",
-      description: "Mondays at 10AM UTC.",
-      buttonText: "Add to calendar",
-      buttonLink: "#",
-    },
-  ],
-  featuredProjects: [
-    {
-      name: "Moonwell",
-      description:
-        "Moonwell is an open and decentralized lending and borrowing protocol built on Base.",
-      imageUrl: "/assets/images/application-category-1.png",
-      rewardAmount: "265K",
-      rewardIcon: "/assets/icons/op-icon.svg",
-    },
-    {
-      name: "Moonwell",
-      description:
-        "Moonwell is an open and decentralized lending and borrowing protocol built on Base.",
-      imageUrl: "/assets/images/application-category-2.png",
-      rewardAmount: "265K",
-      rewardIcon: "/assets/icons/op-icon.svg",
-    },
-  ],
   learnMoreLinks: [
     {
-      title: "Grants Council audit hub",
+      title: "Collective Grant Policy",
       href: "https://gov.optimism.io/t/collective-grant-policies/5833",
-    },
-    {
-      title: "Collective grant policy",
-      href: "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
     },
   ],
 }

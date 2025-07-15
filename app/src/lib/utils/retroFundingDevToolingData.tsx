@@ -17,9 +17,7 @@ export const retroFundingDevToolingData: MissionData = {
   },
   season: "8",
   details: [
-    "Retro Funding: Dev Tooling rewards toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain. This program is for software projects that have already launched and can prove their impact.",
-    "Projects can enter the program at anytime during the season. Apply by the monthly application deadline (usually the third Friday of each month), and your project will be evaluated for rewards starting the following month.",
-    "Impact is assessed monthly, and rewards are delivered monthly. ",
+    "Rewarding toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain. This program is for software projects that have already launched and can prove their impact.",
   ],
   ogDescription:
     "Retro Funding: Dev Tooling is distributing up to 8M OP in H1 2025. If you built tooling on Optimism, sign up to check if you qualify for grants.",
@@ -29,18 +27,6 @@ export const retroFundingDevToolingData: MissionData = {
       title="Best for"
       description="Toolchain software"
       icon="/assets/icons/user.svg"
-    />,
-    <GrantInfoCallout
-      key="up-to"
-      title="Up to"
-      description="250K OP"
-      icon="/assets/icons/op-icon.svg"
-    />,
-    <GrantInfoCallout
-      key="budget"
-      title="Budget this season"
-      description="9M OP"
-      icon="/assets/icons/op-icon.svg"
     />,
     <GrantInfoCallout
       key="apply-by"
@@ -128,8 +114,7 @@ export const retroFundingDevToolingData: MissionData = {
       title: "Claim your rewards",
       description: "Rewards are streamed to your address via Superfluid.",
       subDetails: "About Superfluid",
-      subDetailsLink:
-        "https://help.superfluid.finance/en/articles/9128773-how-to-unwrap-your-optimism-prize",
+      subDetailsLink: "https://superfluid.org/",
     },
   ],
   featuredProjects: [
@@ -225,16 +210,16 @@ export const retroFundingDevToolingData: MissionData = {
   rewards: {
     measurement: (
       <p className="text-secondary-foreground">
-        Your impact will be measured via an evaluation algorithm powered by
-        GitHub, npm, Crates, and Onchain data. The{" "}
+        Your impact will be measured via an{" "}
         <ExternalLink
           href=" https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
           className="underline"
         >
           evaluation algorithm
         </ExternalLink>{" "}
-        will evolve throughout this Retro Funding Mission based on feedback from
-        Optimism Citizens.
+        powered by GitHub, npm, Crates, and Onchain data. The
+        evaluation algorithm will evolve throughout this Retro Funding Mission
+        based on feedback from Optimism Citizens.
       </p>
     ),
     criteria: [
@@ -243,4 +228,18 @@ export const retroFundingDevToolingData: MissionData = {
       "Features that support superchain interop adoption among builders",
     ],
   },
+  learnMoreLinks: [
+    {
+      title: "How Retro Funding Works",
+      href: "https://community.optimism.io/citizens-house/how-retro-funding-works",
+    },
+    {
+      title: "OP Tokenomics",
+      href: "https://community.optimism.io/op-token/op-token-overview#op-tokenomics",
+    },
+    {
+      title: "Retro Funding 2025",
+      href: "https://optimism.mirror.xyz/zWlA9LROAzRee5BFqbquYHawmruKzLmXbONp_hcCwE4",
+    },
+  ],
 }

@@ -1,8 +1,6 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { Calendar } from "@/components/icons/calendar"
-import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 import {
   Accordion,
   AccordionContent,
@@ -112,24 +110,10 @@ export const growthGrantsData: MissionData = {
       </Accordion>
     </div>
   ),
-  callout: [
-    <GrantInfoCallout
-      key="budget"
-      title="Budget this season"
-      description="9M OP"
-      icon="/assets/icons/op-icon.svg"
-    />,
-    <GrantInfoCallout
-      key="apply-by"
-      title="Apply by"
-      description="Sep 30, 2025"
-      icon={<Calendar fill="#3374DB" />}
-    />,
-  ],
   showSupportedNetworks: true,
   status: "ongoing",
   iconUrl: "/assets/images/onchain-builders.png",
-  startsAt: new Date("2025-07-01T00:00:00.000Z"),
+  startsAt: new Date("2025-08-15T00:00:00.000Z"),
   endsAt: new Date("2025-09-30T00:00:00.000Z"),
   applyBy: new Date("2025-09-30T00:00:00.000Z"),
   evaluationMonth: 9,
@@ -182,65 +166,23 @@ export const growthGrantsData: MissionData = {
   howItWorks: [
     {
       number: 1,
-      title: (
-        <>
-          Submit application via the{" "}
-          <ExternalLink
-            href="https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944"
-            className="underline"
-          >
-            Grants Council (GC) website
-          </ExternalLink>
-        </>
-      ),
+      title: "Submit your application via the Grants Council website",
       description:
-        "On the application, inform Grants Council of your plan for growth, including milestones and KPIs.",
+        "Inform the council of your plan for growth, including milestones and KPIs.",
+      subDetails: "Visit site",
+      subDetailsLink:
+        "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
     },
     {
       number: 2,
       title: "The GC reviews the application",
-      description: "Review takes an average of 15 days",
+      description: "Review takes an average of 15 days.",
     },
     {
       number: 3,
       title: "If approved, the grant will be delivered at intervals",
       description:
         "40% upfront and 60% upon completion of critical milestones.",
-    },
-  ],
-  featuredProjects: [
-    {
-      name: "Moonwell",
-      description:
-        "Moonwell is an open and decentralized lending and borrowing protocol built on Base.",
-      imageUrl: "/assets/images/application-category-1.png",
-      rewardAmount: "265K",
-      rewardIcon: "/assets/icons/op-icon.svg",
-    },
-    {
-      name: "Moonwell",
-      description:
-        "Moonwell is an open and decentralized lending and borrowing protocol built on Base.",
-      imageUrl: "/assets/images/application-category-2.png",
-      rewardAmount: "265K",
-      rewardIcon: "/assets/icons/op-icon.svg",
-    },
-  ],
-  supportOptions: [
-    {
-      type: "telegram",
-      title: "Telegram",
-      description: "Reach out anytime.",
-      buttonText: "Join channel",
-      buttonLink: "https://t.me/+CCkKpqGJouk5ZjYx",
-      externalLink: true,
-    },
-    {
-      type: "office-hours",
-      title: "Office Hours",
-      description: "Mondays at 10AM UTC.",
-      buttonText: "Add to calendar",
-      buttonLink: "#",
     },
   ],
 }

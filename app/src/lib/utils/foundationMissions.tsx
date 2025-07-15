@@ -1,7 +1,5 @@
 import React from "react"
 
-import ExternalLink from "@/components/ExternalLink"
-import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 import { getCutoffDate } from "@/lib/utils"
 
 import { MissionData } from "../MissionsAndRoundData"
@@ -32,14 +30,6 @@ export const foundationMissionsData: MissionData = {
     const today = new Date()
     return today.getDate() > 27 ? (today.getMonth() + 1) % 12 : today.getMonth()
   })(),
-  callout: [
-    <GrantInfoCallout
-      key="budget"
-      title="Budget this season"
-      description="9M OP"
-      icon="/assets/icons/op-icon.svg"
-    />,
-  ],
   showSupportedNetworks: false,
   howItWorks: [
     {

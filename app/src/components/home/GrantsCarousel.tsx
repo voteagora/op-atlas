@@ -44,7 +44,7 @@ const grants = [
     links: [
       {
         label: "Foundation Missions",
-        url: "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
+        url: "/missions/foundation-missions",
       },
     ],
   },

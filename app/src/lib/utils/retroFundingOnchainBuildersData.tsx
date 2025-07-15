@@ -17,12 +17,10 @@ export const retroFundingOnchainBuildersData: MissionData = {
   },
   season: "8",
   details: [
-    "Retro Funding: Onchain Builders rewards application developers for their contributions to Superchain growth and interop adoption. This program is for on-chain applications that have seen significant adoption and can prove their impact.",
-    "Projects can enter the program at anytime during the season. Apply by the monthly application deadline (usually the third Friday of each month), and your project will be evaluated for rewards starting the following month.",
-    "Impact is assessed monthly, and rewards are delivered monthly. ",
+    "Rewarding application developers for their contributions to Superchain growth and interop adoption. This program is for onchain applications that have seen significant adoption and can prove their impact.",
   ],
   ogDescription:
-    "Retro Funding: Onchain Builders is allocating up to 8M OP in H1 2025. If you've built on Optimism, sign up to see if you qualify for grants.",
+    "Rewarding application developers for their contributions to Superchain growth and interop adoption. This program is for onchain applications that have seen significant adoption and can prove their impact.",
   status: "ongoing",
   resultsLink: "/round/results?rounds=8",
   iconUrl: "/assets/images/onchain-builders.png",
@@ -41,18 +39,6 @@ export const retroFundingOnchainBuildersData: MissionData = {
       title="Best for"
       description="Onchain apps"
       icon="/assets/icons/user.svg"
-    />,
-    <GrantInfoCallout
-      key="up-to"
-      title="Up to"
-      description="250K OP"
-      icon="/assets/icons/op-icon.svg"
-    />,
-    <GrantInfoCallout
-      key="budget"
-      title="Budget this season"
-      description="9M OP"
-      icon="/assets/icons/op-icon.svg"
     />,
     <GrantInfoCallout
       key="apply-by"
@@ -188,14 +174,15 @@ export const retroFundingOnchainBuildersData: MissionData = {
   rewards: {
     measurement: (
       <p className="text-secondary-foreground">
-        Your impact will be measured via an evaluation algorithm powered by
-        onchain data. The{" "}
+        Your impact will be measured via an{" "} 
         <ExternalLink
           href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
           className="underline"
         >
           evaluation algorithm
-        </ExternalLink>{" "}
+        </ExternalLink>{" "}               
+        powered by
+        onchain data. The evaluation algorithm
         will evolve throughout this Retro Funding Mission based on feedback from
         Optimism Citizens.
       </p>
@@ -265,6 +252,20 @@ export const retroFundingOnchainBuildersData: MissionData = {
       buttonLink:
         "https://docs.google.com/forms/d/e/1FAIpQLSdU_cgpwqKWY5lRwgLzqCHt0-X3aKGsZVX1WnpiJeHhEiNwCg/viewform",
       externalLink: true,
+    },
+  ],
+  learnMoreLinks: [
+    {
+      title: "How Retro Funding Works",
+      href: "https://community.optimism.io/citizens-house/how-retro-funding-works",
+    },
+    {
+      title: "OP Tokenomics",
+      href: "https://community.optimism.io/op-token/op-token-overview#op-tokenomics",
+    },
+    {
+      title: "Retro Funding 2025",
+      href: "https://optimism.mirror.xyz/zWlA9LROAzRee5BFqbquYHawmruKzLmXbONp_hcCwE4",
     },
   ],
 }
