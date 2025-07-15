@@ -99,7 +99,7 @@ export function HowItWorks() {
                     : "basis-1/2 md:basis-1/3",
                 )}
               >
-                <div className="h-[400px] md:h-[350px] p-6 bg-secondary rounded-xl flex flex-col justify-between">
+                <div className="h-[400px] md:h-[350px] p-6 bg-[#F2F3F8] rounded-xl flex flex-col justify-between">
                   <div className="flex flex-col gap-2">
                     <h1 className="text-callout-foreground text-4xl font-extrabold">
                       {step.number}
@@ -119,7 +119,7 @@ export function HowItWorks() {
                           className="text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline cursor-pointer bg-transparent border-none p-0 text-left"
                           onClick={() => loginEnforced(step)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
+                            if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault()
                               loginEnforced(step)
                             }
