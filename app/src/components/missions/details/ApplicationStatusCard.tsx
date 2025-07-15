@@ -116,6 +116,11 @@ export const ApplicationStatusCard = ({
           className="bg-optimismRed text-white w-full"
           variant={"outline"}
           onClick={() => {
+            buttonClickHandler({
+              href: "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
+              text: "Explore opportunities",
+              type: "application",
+            })
             window.open(
               "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
               "_blank",

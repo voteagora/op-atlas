@@ -159,8 +159,7 @@ export function HowItWorks() {
             disabled={current === 1}
             className="px-4 py-2.5"
           >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Previous
+            <ChevronLeft className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
@@ -169,8 +168,7 @@ export function HowItWorks() {
             disabled={current === count}
             className="px-4 py-2.5"
           >
-            Next
-            <ChevronRight className="w-4 h-4 ml-2" />
+            <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       </div>

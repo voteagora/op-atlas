@@ -15,7 +15,7 @@ export function GrantInfoCallout({
     <Callout
       type="gray"
       showIcon={false}
-      className="px-6 py-4 w-full rounded-xl"
+      className="px-6 py-4 w-full rounded-xl bg-[#F2F3F8]"
       leftAlignedContent={
         <div className="flex items-center">
           {typeof icon === "string" ? (
