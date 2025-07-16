@@ -2,7 +2,7 @@
 
 import { toast } from "sonner"
 
-import { ArrowRightUp } from "@/components/icons/reminx"
+import { ArrowRightUp } from "@/components/icons/remix"
 import { Button } from "@/components/ui/button"
 import { copyToClipboard } from "@/lib/utils"
 

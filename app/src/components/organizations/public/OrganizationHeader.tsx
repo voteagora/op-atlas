@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import Image from "next/image"
 import { memo, useState } from "react"
 
-import { CheckboxCircleFIll } from "@/components/icons/reminx"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { CITIZEN_TYPES } from "@/lib/constants"
