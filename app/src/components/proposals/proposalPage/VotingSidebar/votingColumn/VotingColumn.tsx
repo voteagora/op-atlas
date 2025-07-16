@@ -118,19 +118,36 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     { voteType: VoteType; selections?: number[] } | undefined
   >(undefined)
 
+  function extractIdFromChoice(choice: any): string {
+    const urlMatch = choice.description.match(/\[.*?\]\((.*?)\)/)
+    if (urlMatch) {
+      const url = urlMatch[1]
+      // Extract the last part of the URL (after the last slash)
+      const urlParts = url.split("/")
+      return urlParts[urlParts.length - 1]
+    }
+    return choice
+  }
+
+  function extractCalldatafromChoice(choice: any): string {
+    //TODO
+    return "TODO"
+  }
+
   const extractIdsFromChoices = (choices: any): string[] => {
     if (!Array.isArray(choices)) return []
 
     return choices.map((choice: any) => {
       // Extract URL from markdown format [text](url)
-      const urlMatch = choice.description.match(/\[.*?\]\((.*?)\)/)
-      if (urlMatch) {
-        const url = urlMatch[1]
-        // Extract the last part of the URL (after the last slash)
-        const urlParts = url.split("/")
-        return urlParts[urlParts.length - 1]
+      if (choice?.description) {
+        return extractIdFromChoice(choice)
       }
-      return choice
+      // Extract calldata from choices
+      if (choice?.calldatas) {
+        return extractCalldatafromChoice(choice)
+      }
+
+      return choice?.toString() || String(choice)
     })
   }
 

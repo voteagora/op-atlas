@@ -18,6 +18,7 @@ const GOOGLE_ANALYTICS_ID = process.env.GOOGLE_ANALYTICS_ID || ""
 const inter = Inter({
   subsets: ["latin"],
   variable: "--inter",
+  weight: ["400", "500", "600", "700", "800", "900"],
 })
 
 export const metadata: Metadata = {
