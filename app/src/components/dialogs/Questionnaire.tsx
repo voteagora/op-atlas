@@ -15,7 +15,7 @@ type Props = {
 }
 
 const Question = ({ children }: Props) => {
-  return <div className="mb-4">{children}</div>
+  return <div>{children}</div>
 }
 
 export type QuestionType = React.ReactNode
@@ -48,9 +48,9 @@ const Questionnaire = ({
         <div className="flex flex-col h-full">
           {/* Header Section */}
           <DialogHeader className="p-6 space-y-2">
-            <div className="text-xl font-semibold leading-7 tracking-[0px] align-center justify-center text-text-default">
+            <p className="text-xl font-semibold leading-7 tracking-[0px] text-text-default text-center">
               {title}
-            </div>
+            </p>
             {titleAltText && (
               <div className="text-base text-text-secondary text-center leading-6 font-normal">
                 {titleAltText}
@@ -59,7 +59,7 @@ const Questionnaire = ({
           </DialogHeader>
 
           {/* Questions Section */}
-          <div className="flex-grow p-4 flex justify-center">
+          <div className=" flex justify-center">
             <div className="w-full">
               {questions.map((question, index) => (
                 <Question key={`question-${index}`}>{question}</Question>

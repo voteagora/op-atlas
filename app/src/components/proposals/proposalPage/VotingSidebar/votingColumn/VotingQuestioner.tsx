@@ -42,7 +42,7 @@ type VotingQuestionerProps = {
 
 const VotingQuestioner = ({
   title = "On a scale of 1-10, how easy was it for you to identify credible-candidates?",
-  titleAltText = "Required to submit your vote",
+  titleAltText = "Required to submit your vote. You can't make edits after choosing to submit.",
   onVoteSubmit,
   onCancel,
   options,
@@ -92,14 +92,14 @@ const VotingQuestioner = ({
 
   // Custom completion button
   const completionButtons = (
-    <div className="flex flex-col gap-2 mt-4 w-[410px] mx-auto">
+    <div className="flex flex-col gap-2 w-[410px] mx-auto">
       <Button
         variant="destructive"
         className="h-11 py-2.5 rounded-md w-[410px] hover:opacity-80 disabled:bg-destructive disabled:text-background"
         onClick={() => onVoteSubmit && onVoteSubmit(selectedVote)}
         disabled={!selectedVote}
       >
-        Sign Message and Cast Vote
+        Sign message and cast vote
       </Button>
     </div>
   )
@@ -114,6 +114,7 @@ const VotingQuestioner = ({
       hasSelection={!!selectedVote}
       onOpenChange={(isOpen) => {
         if (!isOpen && onCancel) {
+          setSelectedVote("")
           onCancel()
         }
       }}
