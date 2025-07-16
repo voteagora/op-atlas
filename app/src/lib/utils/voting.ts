@@ -320,7 +320,6 @@ export const mapVoteTypeToValue = (
     selections?: number[]
   },
 ) => {
-  console.log("mapVoteTypeToValue", { proposalType, selectedVotes })
   if (
     proposalType === ProposalType.OFFCHAIN_STANDARD ||
     proposalType === ProposalType.HYBRID_STANDARD
