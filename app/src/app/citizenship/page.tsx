@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
-import { ActiveCitizen } from "@/app/citizenship/components/ActiveCitizen"
 import { ChainAppRequirements } from "@/app/citizenship/components/ChainAppRequirements"
 import { Sidebar } from "@/app/citizenship/components/Sidebar"
 import { UserRequirements } from "@/app/citizenship/components/UserRequirements"
@@ -50,19 +49,6 @@ export default async function Page({
   if (!user) {
     redirect("/")
   }
-
-  // if (citizen?.attestationId) {
-  //   if (searchParams.redirectUrl) {
-  //     redirect(searchParams.redirectUrl)
-  //   }
-  //   return (
-  //     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-  //       <div className="w-full mt-20 ">
-  //         <ActiveCitizen user={user} />
-  //       </div>
-  //     </main>
-  //   )
-  // }
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
