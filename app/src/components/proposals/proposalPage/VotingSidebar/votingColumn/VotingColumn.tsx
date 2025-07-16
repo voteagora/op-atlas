@@ -469,6 +469,14 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       return Promise.resolve(true)
     }
 
+    // Only show questionnaire for Approval type proposals (either hybrid or offchain)
+    if (
+      proposalData.proposalType !== "OFFCHAIN_APPROVAL" &&
+      proposalData.proposalType !== "HYBRID_APPROVAL"
+    ) {
+      return Promise.resolve(true)
+    }
+
     return new Promise<boolean>((resolve) => {
       // Store the resolve function so it can be called by the onCancel and onVoteSubmit handlers
       setQuestionnaireResolve(() => resolve)
