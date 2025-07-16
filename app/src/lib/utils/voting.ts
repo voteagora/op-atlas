@@ -227,10 +227,12 @@ export const getVotingCardProps = (
       ...getCitizenTypes(proposalData, vote),
     }
   }
+
   if (eligibility) {
     return {
       ...getNonCitizenTypes(proposalData, eligibility),
     }
+
   }
 
   // Fallback
