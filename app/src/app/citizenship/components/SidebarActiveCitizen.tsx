@@ -1,14 +1,14 @@
 "use client"
 
 import { Citizen, User } from "@prisma/client"
-import { useRouter } from "next/navigation"
-import { useTransition } from "react"
-import { toast } from "sonner"
+import Link from "next/link"
+import { useState } from "react"
 
 import { EligibleCitizenAvatar } from "@/components/common/EligibleCitizenAvatar"
+import CitizenshipResignDialog from "@/components/dialogs/CitizenshipResignDialog"
 import { Button } from "@/components/ui/button"
-import { useCitizen } from "@/hooks/citizen/useCitizen"
-import { deleteCitizen } from "@/lib/actions/citizens"
+import { useUser } from "@/hooks/db/useUser"
+import { useUsername } from "@/hooks/useUsername"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { CitizenshipQualification } from "@/lib/types"
 
@@ -23,34 +23,13 @@ export const SidebarActiveCitizen = ({
   qualification,
   citizen,
 }: Props) => {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const { invalidate } = useCitizen({
-    query: { type: CITIZEN_TYPES.user, id: user.id },
-    enabled: false,
+  const { user: citizenUser } = useUser({
+    id: citizen.userId,
+    enabled: qualification.type !== CITIZEN_TYPES.user,
   })
+  const username = useUsername(citizenUser)
 
-  const handleResign = async () => {
-    startTransition(async () => {
-      try {
-        const loadingToast = toast.loading("Resigning citizenship")
-        const result = await deleteCitizen(citizen.id)
-
-        if (result.error) {
-          toast.dismiss(loadingToast)
-          toast.error(result.error)
-          return
-        }
-
-        await invalidate()
-        toast.dismiss(loadingToast)
-        toast.success("Citizenship resigned")
-        router.refresh()
-      } catch (error) {
-        toast.error("Failed to resign citizenship")
-      }
-    })
-  }
+  const [isResignDialogOpen, setIsResignDialogOpen] = useState(false)
 
   return (
     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
@@ -58,27 +37,47 @@ export const SidebarActiveCitizen = ({
 
       <div className="flex flex-col gap-2">
         <div className="text-sm font-semibold text-secondary-foreground">
-          You are a citizen!
+          {qualification.title} are a citizen!
         </div>
 
-        <div className="text-sm text-secondary-foreground">
-          You&apos;ll receive emails about active proposals.
-        </div>
+        {qualification.type === CITIZEN_TYPES.user ? (
+          <div className="text-sm text-secondary-foreground">
+            You&apos;ll receive emails about active proposals.
+          </div>
+        ) : (
+          <div className="text-sm text-secondary-foreground">
+            <Link
+              target="_blank"
+              className="underline"
+              href={`/${citizenUser?.username}`}
+            >
+              {username}
+            </Link>{" "}
+            holds the voting badge for this app and is responsible for casting
+            votes.
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 w-full">
-        <Button className="w-full button-primary" onClick={() => {}}>
-          Start participating
-        </Button>
+        <Link href="/governance">
+          <Button className="w-full button-primary">Start participating</Button>
+        </Link>
 
         <Button
           className="w-full button-outline"
-          disabled={isPending}
-          onClick={handleResign}
+          onClick={() => setIsResignDialogOpen(true)}
         >
           Resign
         </Button>
       </div>
+
+      <CitizenshipResignDialog
+        open={isResignDialogOpen}
+        onOpenChange={setIsResignDialogOpen}
+        citizenId={citizen.id}
+        userId={user.id}
+      />
     </div>
   )
 }
