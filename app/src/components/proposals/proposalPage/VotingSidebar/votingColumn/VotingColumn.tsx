@@ -146,7 +146,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   const extractIdsFromChoices = (choices: any): string[] => {
-    console.log("extractIdsFromChoices", { choices })
     if (!Array.isArray(choices)) return []
 
     return choices.map((choice: any) => {
@@ -193,8 +192,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     return extractedResults
   }
-
-  console.log({ proposalData: proposalData.proposalData })
 
   const extractIds = (proposalData: ProposalData) => {
     const pData = proposalData.proposalData as any
@@ -583,7 +580,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               wallet.address?.toLowerCase() === citizen.address?.toLowerCase(),
           )
 
-          console.log({ newActiveWallet, wallets })
           if (!newActiveWallet) {
             throw new Error(
               `Your governance wallet is not connected. Please sign out, and sign back in using ${citizen.address}.`,
