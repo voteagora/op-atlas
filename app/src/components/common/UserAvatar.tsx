@@ -1,7 +1,7 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
-import { UserFill } from "../icons/reminx"
+import { UserFill } from "../icons/remix"
 
 interface UserAvatarProps {
   imageUrl?: string | null
