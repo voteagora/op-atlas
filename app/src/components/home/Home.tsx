@@ -3,6 +3,7 @@ import { GrantsCarousel } from "./GrantsCarousel"
 import { GrantsGlossary } from "./GrantsGlossary"
 import { HomeHeader } from "./HomeHeader"
 import { RewardedProjectCrousel } from "./RewardedProjectCrousel"
+import { Sunny } from "./Sunny"
 
 export const Home = () => {
   return (
@@ -15,6 +16,8 @@ export const Home = () => {
 
           <RewardedProjectCrousel />
 
+          <Sunny />
+          
           <GrantsGlossary />
 
           <GetHelpFooter />
