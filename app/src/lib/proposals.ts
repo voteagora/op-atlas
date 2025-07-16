@@ -267,11 +267,6 @@ export const enrichProposalData = async (
     }
   }
 
-  console.log("enrichedStandardProposals", {
-    enrichedStandardProposals,
-    pagination,
-  })
-
   return {
     standardProposals: {
       proposals: enrichedStandardProposals,
