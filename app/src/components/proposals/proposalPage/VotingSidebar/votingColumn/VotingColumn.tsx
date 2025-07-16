@@ -46,7 +46,7 @@ import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
 import { CandidateResults } from "./CandidateResults"
-import VotingQuestioner from "./VotingQuestioner"
+import VotingQuestionnaire from "./VotingQuestionnaire"
 
 const VotingColumnSkeleton = () => (
   <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
@@ -760,7 +760,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             </p>
           </a>
         </div>
-        <VotingQuestioner
+        <VotingQuestionnaire
           open={showVoteQuestionnaire}
           onCancel={() => {
             setShowVoteQuestionnaire(false)

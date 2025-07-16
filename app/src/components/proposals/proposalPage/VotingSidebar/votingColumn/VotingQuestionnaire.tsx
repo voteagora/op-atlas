@@ -42,7 +42,7 @@ type VotingQuestionerProps = {
   open?: boolean
 }
 
-const VotingQuestioner = ({
+const VotingQuestionnaire = ({
   title = "On a scale of 1-10, how easy was it for you to identify credible-candidates?",
   titleAltText = "Required to submit your vote. You can't make edits after choosing to submit.",
   onVoteSubmit,
@@ -125,4 +125,4 @@ const VotingQuestioner = ({
   )
 }
 
-export default VotingQuestioner
+export default VotingQuestionnaire
