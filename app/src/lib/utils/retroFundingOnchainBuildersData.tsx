@@ -24,7 +24,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
   status: "ongoing",
   resultsLink: "/round/results?rounds=8",
   iconUrl: "/assets/images/onchain-builders.png",
-  startsAt: new Date("2025-07-24T00:00:00.000Z"),
+  startsAt: new Date("2025-06-24T00:00:00.000Z"),
   endsAt: new Date("2025-12-30T00:00:00.000Z"),
   applyBy: (() => {
     return getCutoffDate()

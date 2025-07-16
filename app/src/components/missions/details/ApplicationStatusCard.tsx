@@ -109,7 +109,7 @@ export const ApplicationStatusCard = ({
       <div className="flex flex-col items-center gap-2">
         <p className="font-semibold hidden md:block">Explore opportunities</p>
 
-        <p className="text-sm text-secondary-foreground text-center">
+        <p className="text-sm text-secondary-foreground text-center mb-2">
           View opportunities in the Optimism GitHub Repo
         </p>
         <Button
@@ -138,7 +138,7 @@ export const ApplicationStatusCard = ({
       <div className="flex flex-col items-center gap-2">
         <p className="font-semibold">{"Apply"}</p>
 
-        <p className="text-sm text-secondary-foreground text-center">
+        <p className="text-sm text-secondary-foreground text-center mb-2">
           {`Apply by ${format(
             mission.applyBy,
             "MMM d",
@@ -170,7 +170,7 @@ export const ApplicationStatusCard = ({
       <div className="flex flex-col items-center gap-2">
         <p className="font-semibold">{"Apply"}</p>
         {mission.applyBy && (
-          <p className="text-sm text-secondary-foreground text-center">
+          <p className="text-sm text-secondary-foreground text-center mb-2">
             {`Apply by ${format(mission.applyBy, "MMM d")}`}
             <span>
               {" to earn rewards for your performance in "}
@@ -206,7 +206,7 @@ export const ApplicationStatusCard = ({
           <div className="flex flex-col gap-4">
             <p className="font-semibold">{"Your status"}</p>
 
-            <div className="text-sm text-secondary-foreground text-center">
+            <div className="text-sm text-secondary-foreground text-center mb-2">
               <div className="flex flex-col gap-2">
                 {userAppliedProjects.map(
                   (
@@ -256,7 +256,7 @@ export const ApplicationStatusCard = ({
           <div className="flex flex-col items-center gap-2">
             <p className="font-semibold">{"Apply"}</p>
 
-            <p className="text-sm text-secondary-foreground text-center">
+            <p className="text-sm text-secondary-foreground text-center mb-2">
               {`Apply by ${format(
                 mission.applyBy,
                 "MMM d",
@@ -282,7 +282,7 @@ export const ApplicationStatusCard = ({
         <div className="flex flex-col items-center gap-2">
           <p className="font-semibold">{"Add project to apply"}</p>
 
-          <p className="text-sm text-secondary-foreground text-center">
+          <p className="text-sm text-secondary-foreground text-center mb-2">
             {
               "You can't apply for this Retro Funding Mission until you've added your project to OP Atlas."
             }

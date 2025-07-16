@@ -38,7 +38,7 @@ export const retroFundingDevToolingData: MissionData = {
   status: "ongoing",
   resultsLink: "/round/results?rounds=7",
   iconUrl: "/assets/images/dev-tooling.png",
-  startsAt: new Date("2025-07-24T00:00:00.000Z"),
+  startsAt: new Date("2025-06-24T00:00:00.000Z"),
   endsAt: new Date("2025-12-30T00:00:00.000Z"),
   applyBy: (() => {
     return getCutoffDate()
@@ -217,9 +217,9 @@ export const retroFundingDevToolingData: MissionData = {
         >
           evaluation algorithm
         </ExternalLink>{" "}
-        powered by GitHub, npm, Crates, and Onchain data. The
-        evaluation algorithm will evolve throughout this Retro Funding Mission
-        based on feedback from Optimism Citizens.
+        powered by GitHub, npm, Crates, and Onchain data. The evaluation
+        algorithm will evolve throughout this Retro Funding Mission based on
+        feedback from Optimism Citizens.
       </p>
     ),
     criteria: [
