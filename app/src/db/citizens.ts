@@ -94,6 +94,12 @@ export async function getCitizenCountByType(type: string): Promise<number> {
   })
 }
 
+export async function getCitizenById(id: number): Promise<Citizen | null> {
+  return prisma.citizen.findUnique({
+    where: { id },
+  })
+}
+
 export async function getCitizenProposalVote(
   citizenId: number,
   proposalId: string,

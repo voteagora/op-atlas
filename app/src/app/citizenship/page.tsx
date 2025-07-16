@@ -151,7 +151,11 @@ export default async function Page({
         </div>
         <div>
           {citizen?.attestationId && qualification ? (
-            <SidebarActiveCitizen user={user} qualification={qualification} />
+            <SidebarActiveCitizen
+              user={user}
+              qualification={qualification}
+              citizen={citizen}
+            />
           ) : (
             <>
               {qualification && (

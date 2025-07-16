@@ -4,6 +4,8 @@ import { Citizen } from "@prisma/client"
 
 import { auth } from "@/auth"
 import {
+  deleteCitizen as deleteCitizenRecord,
+  getCitizenById,
   getCitizenByType,
   getCitizenCountByType,
   upsertCitizen,
@@ -12,15 +14,17 @@ import { prisma } from "@/db/client"
 import { getAdminOrganizations, getOrganization } from "@/db/organizations"
 import { getProject, getUserAdminProjectsWithDetail } from "@/db/projects"
 import { getUserById } from "@/db/users"
+import { updateMailchimpTags } from "@/lib/api/mailchimp"
 import {
   CITIZEN_ATTESTATION_CODE,
   CITIZEN_TAGS,
   CITIZEN_TYPES,
 } from "@/lib/constants"
+import {
+  createCitizenAttestation,
+  revokeCitizenAttestation,
+} from "@/lib/eas/serverOnly"
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
-
-import { updateMailchimpTags } from "../api/mailchimp"
-import { createCitizenAttestation } from "../eas/serverOnly"
 
 interface S8QualifyingUser {
   address: string
@@ -227,6 +231,52 @@ export const updateCitizen = async (citizen: {
     return {
       error: "Failed to update citizen",
     }
+  }
+}
+
+export const deleteCitizen = async (citizenId: number) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  const citizen = await getCitizenById(citizenId)
+
+  if (!citizen) {
+    return { error: "Citizen not found" }
+  }
+
+  if (!userId || citizen.userId !== userId) {
+    return { error: "Unauthorized" }
+  }
+
+  if (citizen.attestationId) {
+    try {
+      await revokeCitizenAttestation(citizen.attestationId)
+
+      const user = await getUserById(userId)
+      const email = user?.emails?.[0]?.email
+
+      if (email) {
+        await updateMailchimpTags([{ email, tags: [] }])
+      }
+    } catch (err) {
+      console.error("Failed to revoke attestation:", err)
+      return { error: "Failed to revoke attestation" }
+    }
+  }
+
+  try {
+  } catch (err) {
+    console.error("Failed to update Mailchimp tags:", err)
+    // Continue even if Mailchimp fails
+  }
+
+  // 5. Delete citizen record
+  try {
+    await deleteCitizenRecord(citizenId)
+    return { success: true }
+  } catch (err) {
+    console.error("Failed to delete citizen record:", err)
+    return { error: "Failed to delete citizen record" }
   }
 }
 
