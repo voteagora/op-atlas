@@ -492,7 +492,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             type: w?.walletClientType,
             address: w?.address,
           })),
-          selected_vote: selectedVote,
+          selected_vote: selectedVotes,
           timestamp: new Date().toISOString(),
           error: errorMessage,
         }
