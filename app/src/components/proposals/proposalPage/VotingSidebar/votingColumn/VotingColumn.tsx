@@ -98,7 +98,8 @@ const VotingChoices = ({
         </div>
       )
     case "OFFCHAIN_OPTIMISTIC":
-    case "HYBRID_OPTIMISTIC":
+    case "HYBRID_OPTIMISTIC_TIERED":
+    case "OFFCHAIN_OPTIMISTIC_TIERED":
       return (
         <div className="transition-all duration-300 ease-in-out">
           <OverrideVoteCard
@@ -110,6 +111,7 @@ const VotingChoices = ({
         </div>
       )
     default:
+      console.log("Unsupported VotingChoices proposal Type", { proposalType })
       return <>{proposalType} Not Yet Supported</>
   }
 }
