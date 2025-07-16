@@ -71,7 +71,11 @@ const votingEnded = (endDate: Date, result: any) => {
 }
 
 const youVoted = (proposalData: ProposalData, vote: VoteType) => {
-  if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+  if (
+    proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+    proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+    proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+  ) {
     return {
       cardText: {
         title: "You vetoed the decision",
@@ -151,7 +155,11 @@ const getOpenVotingTypes = (proposalData: ProposalData, vote?: VoteType) => {
   if (vote) {
     return youVoted(proposalData, vote)
   }
-  if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+  if (
+    proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+    proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+    proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+  ) {
     // Custom proposal title for the offchain optimistic proposal
     return castYourVote(
       proposalData.proposalType,
@@ -213,7 +221,11 @@ export const getVotingCardProps = (
   }
 
   if (!isCitizen) {
-    if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    if (
+      proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+      proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+      proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+    ) {
       // Special case for the offchain optimistic proposal
       return {
         cardText: {
@@ -355,7 +367,11 @@ export const mapVoteTypeToValue = (
       default:
         return "[]"
     }
-  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+  } else if (
+    proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+    proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+    proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+  ) {
     return JSON.stringify([0])
   } else if (
     proposalType === ProposalType.OFFCHAIN_APPROVAL ||
@@ -389,7 +405,11 @@ export const mapValueToVoteType = (
       default:
         return { voteType: VoteType.Abstain }
     }
-  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+  } else if (
+    proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+    proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+    proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+  ) {
     return { voteType: VoteType.Veto }
   } else if (
     proposalType === ProposalType.OFFCHAIN_APPROVAL ||
