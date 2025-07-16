@@ -345,8 +345,6 @@ export const GrantsForm = ({
 
   const canSubmit = pricingModel
 
-  console.log(retroFundingFields, grantsFields, investmentFields, "data")
-
   return (
     <Form {...form}>
       <form

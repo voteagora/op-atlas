@@ -1,9 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/common/Button"
-import { ArrowDownS, ArrowUpS, FileList2 } from "@/components/icons/reminx"
+import { ArrowDownS, ArrowUpS, Information } from "@/components/icons/reminx"
 import { Optimism } from "@/components/icons/socials"
 import { Avatar, AvatarBadge } from "@/components/ui/avatar"
 import { useProject } from "@/hooks/db/useProject"
@@ -13,8 +14,6 @@ import { useUsername } from "@/hooks/useUsername"
 import { OrganizationWithTeamAndProjects, UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { formatMMMd, formatMMMdyyyy } from "@/lib/utils/date"
-import { stripMarkdown } from "@/lib/utils/markdown"
-import ReactMarkdown from "react-markdown"
 
 export default function RoleApplication({
   user,
@@ -27,6 +26,9 @@ export default function RoleApplication({
 }) {
   const [roleId, setRoleId] = useState<number | null>(null)
   const [expanded, setExpanded] = useState(false)
+
+  const [conflicts, setConflicts] = useState<string | null>(null)
+  const [projects, setProjects] = useState<any[] | null>(null)
 
   const { data: activeApplications, isLoading } = useActiveUserApplications({
     userId: user?.id,
@@ -43,6 +45,10 @@ export default function RoleApplication({
 
   useEffect(() => {
     if (activeApplications && activeApplications.length > 0) {
+      const application = JSON.parse(activeApplications[0].application)
+      setConflicts(application.conflictsOfInterest)
+      setProjects(application.projects)
+
       if (organization) {
         // Find application with matching organizationId
         const orgApplication = activeApplications.find(
@@ -70,35 +76,42 @@ export default function RoleApplication({
   )
     return null
 
-  const renderApplication = () => {
-    const conflictsOfInterest = JSON.parse(
-      activeApplications[0].application,
-    ).conflictsOfInterest
-    const hasConflictsOfInterest = conflictsOfInterest.length > 0
-
-    const projects = JSON.parse(activeApplications[0].application).projects
-    const hasProjects = projects.length > 0
-
+  const renderRoleDescription = () => {
     if (expanded) {
       return (
-        <div className="flex flex-col gap-6 mb-6">
-          <div className="border-t border-border-secondary my-4"></div>
-          <div>{`${username || organization?.name}'s self nomination`}</div>
-          <div>
-            If you have any conflicts of interest, please explain them here.
+        <div className="flex flex-col gap-4">
+          <div className="border-t border-border-secondary"></div>
+          <div className="font-medium">About this role</div>
+          <div className="text-secondary-foreground">
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => (
+                  <p className="mb-6 last:mb-0">{children}</p>
+                ),
+                h1: ({ children }) => <span>{children}</span>,
+                h2: ({ children }) => <span>{children}</span>,
+                h3: ({ children }) => <span>{children}</span>,
+                h4: ({ children }) => <span>{children}</span>,
+                strong: ({ children }) => <span>{children}</span>,
+                a: ({ children, href }) => (
+                  <a
+                    href={href}
+                    className="underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {children}
+                  </a>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-5">{children}</ul>
+                ),
+                li: ({ children }) => <li className="mb-2">{children}</li>,
+              }}
+            >
+              {role.description}
+            </ReactMarkdown>
           </div>
-          <div className="text-muted-foreground">
-            {hasConflictsOfInterest ? conflictsOfInterest : "None"}
-          </div>
-          <div>Which of your projects demonstrate your expertise?</div>
-
-          {hasProjects ? (
-            projects.map((project: any, idx: number) => (
-              <ProjectDedetails key={idx} projectApplication={project} />
-            ))
-          ) : (
-            <div className="text-muted-foreground">None</div>
-          )}
         </div>
       )
     }
@@ -106,7 +119,7 @@ export default function RoleApplication({
 
   return (
     <div className={cn("flex flex-col gap-4 w-full", className)}>
-      <h2 className="text-xl font-medium">Elections</h2>
+      <h2 className="text-xl font-medium">Governance</h2>
 
       <div className="flex flex-col gap-6 border border-border-secondary rounded-lg p-6">
         <div className="flex flex-row gap-5">
@@ -126,65 +139,42 @@ export default function RoleApplication({
           </Avatar>
           <div>
             <div>Candidate for {role.title}</div>
-            <div className="text-muted-foreground">
+            <div className="text-secondary-foreground">
               Season 8 <span className="text-muted">|</span> Voting{" "}
               {formatMMMd(new Date(role.voteStartAt!))} -{" "}
               {formatMMMd(new Date(role.voteEndAt!))}
             </div>
           </div>
         </div>
-        <div
-          className={`text-muted-foreground ${
-            !expanded ? " line-clamp-3" : ""
-          }`}
-        >
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => <p className="mb-6 last:mb-0">{children}</p>,
-              h1: ({ children }) => (
-                <h1 className="text-4xl font-semibold my-6">{children}</h1>
-              ),
-              h2: ({ children }) => (
-                <h2 className="text-3xl font-semibold my-6">{children}</h2>
-              ),
-              h3: ({ children }) => (
-                <h3 className="text-2xl text-semibold my-6">{children}</h3>
-              ),
-              h4: ({ children }) => (
-                <h4 className="text-xl text-semibold my-6">{children}</h4>
-              ),
-              a: ({ children, href }) => (
-                <a
-                  href={href}
-                  className="underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {children}
-                </a>
-              ),
-              ul: ({ children }) => (
-                <ul className="list-disc pl-5">{children}</ul>
-              ),
-              li: ({ children }) => <li className="mb-2">{children}</li>,
-            }}
-          >
-            {role.description}
-          </ReactMarkdown>
+        <div className="border-t border-border-secondary"></div>
+
+        <div>
+          If you have any conflicts of interest, please explain them here.
         </div>
-        {renderApplication()}
+        <div className="text-secondary-foreground">
+          {conflicts ? conflicts : "None"}
+        </div>
+
+        <div>Which of your projects demonstrate your expertise?</div>
+
+        {projects && projects.length > 0 ? (
+          projects.map((project: any, idx: number) => (
+            <ProjectDetails key={idx} projectApplication={project} />
+          ))
+        ) : (
+          <div className="text-secondary-foreground">None</div>
+        )}
+
+        {renderRoleDescription()}
+
         <div className="flex flex-row justify-between items-center">
           <button
             type="button"
             className="flex flex-row gap-2 text-secondary-foreground items-center focus:outline-none"
             onClick={() => setExpanded((prev) => !prev)}
           >
-            <FileList2 className="w-4 h-4" fill="#000" />
-            <div>
-              {expanded
-                ? `Hide ${username || organization?.name}'s application`
-                : `View ${username || organization?.name}'s application`}
-            </div>
+            <Information className="w-4 h-4" fill="#000" />
+            <div className="text-sm">About this role</div>
             {expanded ? (
               <ArrowUpS className="w-4 h-4" fill="#000" />
             ) : (
@@ -210,7 +200,7 @@ export default function RoleApplication({
   )
 }
 
-const ProjectDedetails = ({
+const ProjectDetails = ({
   projectApplication,
 }: {
   projectApplication: {
@@ -244,7 +234,7 @@ const ProjectDedetails = ({
           >
             {project.name}
           </Link>{" "}
-          <span className="text-muted-foreground">
+          <span className="text-secondary-foreground">
             {formatMMMdyyyy(new Date(project.createdAt))} -{" "}
             {project.deletedAt
               ? formatMMMdyyyy(new Date(project.deletedAt))
@@ -252,7 +242,7 @@ const ProjectDedetails = ({
           </span>
         </div>
       </div>
-      <div className="text-muted-foreground">{description}</div>
+      <div className="text-secondary-foreground">{description}</div>
     </div>
   )
 }

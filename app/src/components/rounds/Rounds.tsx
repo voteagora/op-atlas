@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react"
 
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
-import { FUNDING_ROUNDS } from "@/lib/MissionsAndRoundData"
+import { MISSIONS_AND_ROUNDS } from "@/lib/MissionsAndRoundData"
 import { UserWithAddresses } from "@/lib/types"
 
 import { FeedbackButton } from "../common/FeedbackButton"
@@ -30,7 +30,7 @@ export function Rounds({ user }: { user?: UserWithAddresses | null }) {
 
         <div className="mt-10 flex flex-1 gap-x-10">
           <div className="flex flex-col flex-1 gap-y-12">
-            <FundingRounds fundingRounds={FUNDING_ROUNDS} />
+            <FundingRounds fundingRounds={MISSIONS_AND_ROUNDS} />
             <div className="flex flex-col">
               <h2 className="text-xl font-semibold text-text-default">
                 About Retro Funding
