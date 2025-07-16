@@ -46,6 +46,7 @@ import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
 import { CandidateResults } from "./CandidateResults"
+import VotingQuestioner from "./VotingQuestioner"
 
 const VotingColumnSkeleton = () => (
   <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
@@ -117,6 +118,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [selectedVotes, setSelectedVotes] = useState<
     { voteType: VoteType; selections?: number[] } | undefined
   >(undefined)
+  const [showVoteQuestionnaire, setShowVoteQuestionnaire] = useState(true)
+  const [questionnaireWasCancelled, setQuestionnaireWasCancelled] =
+    useState(true)
+  const [questionnaireResolve, setQuestionnaireResolve] = useState<
+    ((value: boolean) => void) | null
+  >(null)
 
   function extractIdFromChoice(choice: any): string {
     const urlMatch = choice.description.match(/\[.*?\]\((.*?)\)/)
@@ -135,6 +142,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   const extractIdsFromChoices = (choices: any): string[] => {
+    console.log("extractIdsFromChoices", { choices })
     if (!Array.isArray(choices)) return []
 
     return choices.map((choice: any) => {
@@ -182,9 +190,23 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return extractedResults
   }
 
-  const candidateIds = extractIdsFromChoices(
-    (proposalData.proposalData as any)?.options,
-  )
+  console.log({ proposalData: proposalData.proposalData })
+
+  const extractIds = (proposalData: ProposalData) => {
+    const pData = proposalData.proposalData as any
+    if (
+      pData?.options &&
+      Array.isArray(pData.options) &&
+      pData.options.length > 0
+    ) {
+      return extractIdsFromChoices(pData.options)
+    } else if (pData?.choices) {
+      return extractIdsFromChoices(pData.choices)
+    }
+    return []
+  }
+
+  const candidateIds = extractIds(proposalData)
   const resultIdsAndValues = extractIdsFromResults(proposalData)
 
   const [isVoting, setIsVoting] = useState<boolean>(false)
@@ -437,8 +459,25 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
+  const handleQuestionnaire = () => {
+    return new Promise<boolean>((resolve) => {
+      // Store the resolve function so it can be called by the onCancel and onVoteSubmit handlers
+      setQuestionnaireResolve(() => resolve)
+
+      // Show the questionnaire dialog
+      setShowVoteQuestionnaire(true)
+    })
+  }
+
   const handleCastVote = async () => {
     if (!selectedVotes) return
+
+    const questionnaireComplete = await handleQuestionnaire()
+    if (!questionnaireComplete) {
+      console.log("Questionnaire cancelled")
+      return
+    }
+    console.log("Questionnaire complete")
 
     const choices = mapVoteTypeToValue(
       proposalData.proposalType as ProposalType,
@@ -712,6 +751,25 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             </p>
           </a>
         </div>
+        <VotingQuestioner
+          open={showVoteQuestionnaire}
+          onCancel={() => {
+            setShowVoteQuestionnaire(false)
+            setQuestionnaireWasCancelled(true) // User cancelled
+            if (questionnaireResolve) {
+              questionnaireResolve(false)
+              setQuestionnaireResolve(null)
+            }
+          }}
+          onVoteSubmit={(vote) => {
+            setShowVoteQuestionnaire(false)
+            setQuestionnaireWasCancelled(false) // User submitted
+            if (questionnaireResolve) {
+              questionnaireResolve(true)
+              setQuestionnaireResolve(null)
+            }
+          }}
+        />
       </div>
     </>
   )
