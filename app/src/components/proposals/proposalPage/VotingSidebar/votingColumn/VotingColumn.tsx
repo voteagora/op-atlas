@@ -46,6 +46,7 @@ import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
 import { CandidateResults } from "./CandidateResults"
+import VotingQuestionnaire from "./VotingQuestionnaire"
 
 const VotingColumnSkeleton = () => (
   <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
@@ -117,6 +118,16 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [selectedVotes, setSelectedVotes] = useState<
     { voteType: VoteType; selections?: number[] } | undefined
   >(undefined)
+  const [showVoteQuestionnaire, setShowVoteQuestionnaire] = useState(false)
+  const [questionnaireWasCancelled, setQuestionnaireWasCancelled] =
+    useState(true)
+  const [questionnaireResolve, setQuestionnaireResolve] = useState<
+    ((value: boolean) => void) | null
+  >(null)
+  // Track if the user has already submitted a vote through the questionnaire
+  // This ensures that if something goes wrong during the voting process,
+  // they won't be shown the questionnaire again on retry
+  const [hasSubmittedVote, setHasSubmittedVote] = useState(false)
 
   const extractIdsFromChoices = (choices: any): string[] => {
     if (!Array.isArray(choices)) return []
@@ -165,9 +176,21 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return extractedResults
   }
 
-  const candidateIds = extractIdsFromChoices(
-    (proposalData.proposalData as any)?.options,
-  )
+  const extractIds = (proposalData: ProposalData) => {
+    const pData = proposalData.proposalData as any
+    if (
+      pData?.options &&
+      Array.isArray(pData.options) &&
+      pData.options.length > 0
+    ) {
+      return extractIdsFromChoices(pData.options)
+    } else if (pData?.choices) {
+      return extractIdsFromChoices(pData.choices)
+    }
+    return []
+  }
+
+  const candidateIds = extractIds(proposalData)
   const resultIdsAndValues = extractIdsFromResults(proposalData)
 
   const [isVoting, setIsVoting] = useState<boolean>(false)
@@ -420,8 +443,34 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
+  const handleQuestionnaire = () => {
+    // If the user has already submitted a vote, skip the questionnaire
+    if (hasSubmittedVote) {
+      return Promise.resolve(true)
+    }
+
+    // Only show questionnaire for Approval type proposals (either hybrid or offchain)
+    if (
+      proposalData.proposalType !== "OFFCHAIN_APPROVAL" &&
+      proposalData.proposalType !== "HYBRID_APPROVAL"
+    ) {
+      return Promise.resolve(true)
+    }
+
+    return new Promise<boolean>((resolve) => {
+      // Store the resolve function so it can be called by the onCancel and onVoteSubmit handlers
+      setQuestionnaireResolve(() => resolve)
+
+      // Show the questionnaire dialog
+      setShowVoteQuestionnaire(true)
+    })
+  }
+
   const handleCastVote = async () => {
     if (!selectedVotes) return
+
+    const questionnaireComplete = await handleQuestionnaire()
+    if (!questionnaireComplete) return
 
     const choices = mapVoteTypeToValue(
       proposalData.proposalType as ProposalType,
@@ -514,7 +563,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               wallet.address?.toLowerCase() === citizen.address?.toLowerCase(),
           )
 
-          console.log({ newActiveWallet, wallets })
           if (!newActiveWallet) {
             throw new Error(
               `Your governance wallet is not connected. Please sign out, and sign back in using ${citizen.address}.`,
@@ -695,6 +743,27 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             </p>
           </a>
         </div>
+        <VotingQuestionnaire
+          open={showVoteQuestionnaire}
+          onCancel={() => {
+            setShowVoteQuestionnaire(false)
+            setQuestionnaireWasCancelled(true) // User cancelled
+            if (questionnaireResolve) {
+              questionnaireResolve(false)
+              setQuestionnaireResolve(null)
+            }
+          }}
+          onVoteSubmit={(vote) => {
+            track("Citizen Voting Questionnaire Submitted", { vote })
+            setShowVoteQuestionnaire(false)
+            setQuestionnaireWasCancelled(false) // User submitted
+            setHasSubmittedVote(true) // Mark that the user has submitted a vote
+            if (questionnaireResolve) {
+              questionnaireResolve(true)
+              setQuestionnaireResolve(null)
+            }
+          }}
+        />
       </div>
     </>
   )
