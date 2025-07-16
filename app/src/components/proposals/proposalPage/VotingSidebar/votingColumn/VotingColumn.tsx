@@ -118,12 +118,16 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [selectedVotes, setSelectedVotes] = useState<
     { voteType: VoteType; selections?: number[] } | undefined
   >(undefined)
-  const [showVoteQuestionnaire, setShowVoteQuestionnaire] = useState(true)
+  const [showVoteQuestionnaire, setShowVoteQuestionnaire] = useState(false)
   const [questionnaireWasCancelled, setQuestionnaireWasCancelled] =
     useState(true)
   const [questionnaireResolve, setQuestionnaireResolve] = useState<
     ((value: boolean) => void) | null
   >(null)
+  // Track if the user has already submitted a vote through the questionnaire
+  // This ensures that if something goes wrong during the voting process,
+  // they won't be shown the questionnaire again on retry
+  const [hasSubmittedVote, setHasSubmittedVote] = useState(false)
 
   function extractIdFromChoice(choice: any): string {
     const urlMatch = choice.description.match(/\[.*?\]\((.*?)\)/)
@@ -460,6 +464,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }
 
   const handleQuestionnaire = () => {
+    // If the user has already submitted a vote, skip the questionnaire
+    if (hasSubmittedVote) {
+      return Promise.resolve(true)
+    }
+
     return new Promise<boolean>((resolve) => {
       // Store the resolve function so it can be called by the onCancel and onVoteSubmit handlers
       setQuestionnaireResolve(() => resolve)
@@ -473,11 +482,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     if (!selectedVotes) return
 
     const questionnaireComplete = await handleQuestionnaire()
-    if (!questionnaireComplete) {
-      console.log("Questionnaire cancelled")
-      return
-    }
-    console.log("Questionnaire complete")
+    if (!questionnaireComplete) return
 
     const choices = mapVoteTypeToValue(
       proposalData.proposalType as ProposalType,
@@ -762,8 +767,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             }
           }}
           onVoteSubmit={(vote) => {
+            track("Citizen Voting Questionnaire Submitted", { vote })
             setShowVoteQuestionnaire(false)
             setQuestionnaireWasCancelled(false) // User submitted
+            setHasSubmittedVote(true) // Mark that the user has submitted a vote
             if (questionnaireResolve) {
               questionnaireResolve(true)
               setQuestionnaireResolve(null)
