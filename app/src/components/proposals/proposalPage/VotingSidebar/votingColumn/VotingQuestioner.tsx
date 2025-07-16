@@ -30,6 +30,8 @@ const SelectItem = React.forwardRef<
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
   </SelectPrimitive.Item>
 ))
+// Necessary for forwardRef
+SelectItem.displayName = "SelectItem"
 
 type VotingQuestionerProps = {
   title?: string
