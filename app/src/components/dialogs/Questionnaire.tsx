@@ -1,14 +1,10 @@
-import { useState } from "react"
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogFooter,
-  DialogClose,
+  DialogHeader,
 } from "@/components/ui/dialog"
-import { X } from "lucide-react"
 
 type Props = {
   children: React.ReactNode
@@ -42,9 +38,6 @@ const Questionnaire = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[458px] min-h-[292px] p-0 rounded-xl">
-        <DialogClose className="absolute right-5 top-5 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-          <span className="sr-only">Close</span>
-        </DialogClose>
         <div className="flex flex-col h-full">
           {/* Header Section */}
           <DialogHeader className="p-6 space-y-2">
