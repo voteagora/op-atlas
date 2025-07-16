@@ -1,16 +1,17 @@
 "use client"
 
+import { useLogin } from "@privy-io/react-auth"
 import { format } from "date-fns"
-import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { MissionData } from "@/lib/MissionsAndRoundData"
 
-import { useLogin } from "@privy-io/react-auth"
 import { Button } from "../../ui/button"
 import { GreenBadge } from "../common/badges/GreenBadge"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export const ApplicationStatusCard = ({
   isLoading,
@@ -29,6 +30,109 @@ export const ApplicationStatusCard = ({
 
   const { data } = useSession()
 
+  const { track } = useAnalytics()
+
+  const buttonClickHandler = ({
+    href,
+    text,
+    type,
+  }: {
+    href: string
+    text: string
+    type: string
+  }) => {
+    track("Link Click", {
+      href,
+      text,
+      type,
+    })
+  }
+
+  if (mission?.pageName === "growth-grants") {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <p className="font-semibold hidden md:block">{"Apply"}</p>
+
+        <p className="text-sm text-secondary-foreground text-center mb-2">
+          Visit the Grants Council website to learn more and apply.
+        </p>
+        <Button
+          className="bg-optimismRed text-white w-full"
+          variant={"outline"}
+          onClick={() => {
+            buttonClickHandler({
+              href: "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
+              text: "Apply",
+              type: "application",
+            })
+            window.open(
+              "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
+              "_blank",
+              "noopener,noreferrer",
+            )
+          }}
+        >
+          Apply via Grants Council
+        </Button>
+      </div>
+    )
+  } else if (mission?.pageName === "audit-grants") {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <p className="font-semibold hidden md:block">Find an Audit Service Provider</p>
+
+        <p className="text-sm text-secondary-foreground text-center mb-2">
+          Get in contact with an ASP, and they&apos;ll apply on your behalf.
+        </p>
+        <Button
+          className="bg-optimismRed text-white w-full"
+          variant={"outline"}
+          onClick={() => {
+            buttonClickHandler({
+              href: "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
+              text: "View ASPs",
+              type: "application",
+            })
+            window.open(
+              "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
+              "_blank",
+              "noopener,noreferrer",
+            )
+          }}
+        >
+          View ASPs
+        </Button>
+      </div>
+    )
+  } else if(mission?.pageName === "foundation-missions") {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <p className="font-semibold hidden md:block">Explore opportunities</p>
+
+        <p className="text-sm text-secondary-foreground text-center">
+          View opportunities in the Optimism GitHub Repo
+        </p>
+        <Button
+          className="bg-optimismRed text-white w-full"
+          variant={"outline"}
+          onClick={() => {
+            buttonClickHandler({
+              href: "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
+              text: "Explore opportunities",
+              type: "application",
+            })
+            window.open(
+              "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
+              "_blank",
+              "noopener,noreferrer",
+            )
+          }}
+        >
+          Visit GitHub
+        </Button>
+      </div>
+    )
+  }
   if (isLoading) {
     return (
       <div className="flex flex-col items-center gap-2">
@@ -47,6 +151,11 @@ export const ApplicationStatusCard = ({
           className="bg-optimismRed text-white w-full"
           variant={"outline"}
           onClick={() => {
+            buttonClickHandler({
+              href: `/missions/${mission.pageName}/application`,
+              text: "Choose projects",
+              type: "application",
+            })
             router.push(`/missions/${mission.pageName}/application`)
           }}
         >
@@ -77,7 +186,14 @@ export const ApplicationStatusCard = ({
         <Button
           variant={"destructive"}
           className="w-full flex gap-2"
-          onClick={privyLogin}
+          onClick={() => {
+            buttonClickHandler({
+              href: "",
+              text: "Sign in",
+              type: "application",
+            })
+            privyLogin()
+          }}
         >
           Sign in or sign up
         </Button>
