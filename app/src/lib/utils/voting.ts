@@ -203,8 +203,18 @@ export const getVotingCardProps = (
       ...getCitizenTypes(proposalData, vote),
     }
   }
+  if (!eligibility) {
+    // may need to change
+    return {
+      cardText: {
+        title: "Cast your citizen vote",
+        descriptionElement:
+          "The proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
+      },
+    }
+  }
   return {
-    ...getNonCitizenTypes(proposalData, eligibility!),
+    ...getNonCitizenTypes(proposalData, eligibility),
   }
 }
 
