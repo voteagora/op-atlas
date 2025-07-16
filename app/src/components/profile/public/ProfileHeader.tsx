@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
-import { CheckboxCircleFIll, PencilFill } from "@/components/icons/reminx"
+import { CheckboxCircleFIll, PencilFill } from "@/components/icons/remix"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUsername } from "@/hooks/useUsername"

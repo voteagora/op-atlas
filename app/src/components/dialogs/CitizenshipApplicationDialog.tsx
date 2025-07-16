@@ -22,7 +22,7 @@ import { useUser } from "@/hooks/db/useUser"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
-import { CheckboxCircleFIll } from "../icons/reminx"
+import { CheckboxCircleFIll } from "../icons/remix"
 import { DialogProps } from "./types"
 
 const TIME_COMMITMENT_OPTIONS = [
@@ -132,7 +132,7 @@ function CitizenshipApplicationDialog({
         <DialogTitle className="sr-only">Citizenship Application</DialogTitle>
         <div className="flex flex-col gap-6 w-full">
           {!citizen?.timeCommitment &&
-          qualification?.type === CITIZEN_TYPES.user ? (
+            qualification?.type === CITIZEN_TYPES.user ? (
             <>
               <div className="font-semibold text-center">
                 How many hours per week would you like to spend on governance?

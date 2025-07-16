@@ -6,7 +6,7 @@ import { useWindowSize } from "usehooks-ts"
 
 import { MobileViewportWarning } from "@/components/common/MobileViewportWarning"
 import Navbar from "@/components/common/Navbar"
-import { ArrowRight } from "@/components/icons/reminx"
+import { ArrowRight } from "@/components/icons/remix"
 import Link from "next/link"
 
 const MOBILE_BREAKPOINT = 640 // Tailwind's `sm` breakpoint
