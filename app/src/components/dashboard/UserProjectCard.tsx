@@ -4,17 +4,19 @@ import { reverse } from "ramda"
 import { memo, useMemo } from "react"
 
 import { Progress } from "@/components/ui/progress"
+import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useProjectDetails } from "@/hooks/db/useProjectDetails"
+import { CITIZEN_TYPES } from "@/lib/constants"
 import { useIsAdmin } from "@/lib/hooks"
 import {
   ApplicationWithDetails,
   ProjectTeam,
   ProjectWithDetails,
 } from "@/lib/types"
-import { cn, getProjectStatus } from "@/lib/utils"
-import { projectHasUnpublishedChanges } from "@/lib/utils"
+import { cn, getProjectStatus, projectHasUnpublishedChanges } from "@/lib/utils"
 
+import { CitizenshipBadge } from "../common/CitizenshipBadge"
 import ExternalLink from "../ExternalLink"
 import { EnrolledCallout } from "../missions/common/callouts/EnrolledCallout"
 import { Avatar, AvatarImage } from "../ui/avatar"
@@ -36,6 +38,12 @@ const UserProjectCard = ({
   ] as ProjectTeam
 
   const isAdmin = useIsAdmin(team)
+
+  const { data: citizen } = useCitizen({
+    query: { type: CITIZEN_TYPES.app, id: project.id },
+  })
+  const isCitizen = citizen && citizen.attestationId !== null
+
   const projectHasChanges = projectHasUnpublishedChanges(
     project.snapshots,
     project.lastMetadataUpdate,
@@ -112,6 +120,8 @@ const UserProjectCard = ({
                 Admin
               </Badge>
             )}
+
+            {isCitizen && <CitizenshipBadge />}
 
             {/* {project.contracts.length > 0 ? (
               <div className="h-full flex flex-row-reverse items-center w-fit mr-3">
