@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react"
 import React from "react"
 
 import { cn } from "@/lib/utils"
+import { ProposalStatus } from "@/components/proposals/proposal.types"
 
 type ProposalCardProps = {
   children: React.ReactNode
@@ -54,15 +55,6 @@ export enum ProposalBadgeType {
   closed = "closed",
 }
 
-export enum ProposalStatusBadgeType {
-  ACTIVE = "ACTIVE",
-  EXECUTED = "EXECUTED",
-  PENDING = "PENDING",
-  CANCELLED = "CANCELLED",
-  FAILED = "FAILED",
-  QUEUED = "QUEUED",
-}
-
 interface ProposalBadgeProps {
   type: ProposalBadgeType
 }
@@ -96,42 +88,42 @@ const ProposalBadge = ({ type }: ProposalBadgeProps) => {
 }
 
 interface ProposalStatusBadgeProps {
-  type: ProposalStatusBadgeType
+  type: ProposalStatus
 }
 const ProposalStatusBadge = ({ type }: ProposalStatusBadgeProps) => {
   const badgeConfig = (() => {
     switch (type) {
-      case ProposalStatusBadgeType.ACTIVE:
+      case ProposalStatus.ACTIVE:
         return {
           classes: "bg-green-100 text-green-800",
           icon: <Circle width={12} height={12} fill="currentColor" />,
           text: "Active",
         }
-      case ProposalStatusBadgeType.EXECUTED:
+      case ProposalStatus.EXECUTED:
         return {
           classes: "bg-green-100 text-green-800",
           icon: <CheckCircle width={12} height={12} />,
           text: "Executed",
         }
-      case ProposalStatusBadgeType.PENDING:
+      case ProposalStatus.PENDING:
         return {
           classes: "bg-gray-100 text-gray-600",
           icon: <Clock width={12} height={12} />,
           text: "Pending",
         }
-      case ProposalStatusBadgeType.QUEUED:
+      case ProposalStatus.QUEUED:
         return {
           classes: "bg-gray-100 text-gray-600",
           icon: <Loader2 width={12} height={12} />,
           text: "Queued",
         }
-      case ProposalStatusBadgeType.CANCELLED:
+      case ProposalStatus.CANCELLED:
         return {
           classes: "bg-rose-200 text-rose-800",
           icon: <Circle width={12} height={12} fill="currentColor" />,
           text: "Cancelled",
         }
-      case ProposalStatusBadgeType.FAILED:
+      case ProposalStatus.FAILED:
         return {
           classes: "bg-rose-200 text-rose-800",
           icon: <XCircle width={12} height={12} />,

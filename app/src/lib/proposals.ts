@@ -1,5 +1,8 @@
 "use server"
-import { ProposalType } from "@/components/proposals/proposal.types"
+import {
+  ProposalStatus,
+  ProposalType,
+} from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
 
@@ -172,7 +175,7 @@ export type ProposalData = {
   unformattedProposalData?: string | null
   proposalResults: object
   proposalType: ProposalType
-  status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
+  status: ProposalStatus
   createdTransactionHash?: string | null
   cancelledTransactionHash?: string | null
   executedTransactionHash?: string | null

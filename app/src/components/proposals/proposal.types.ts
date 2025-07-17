@@ -39,6 +39,16 @@ export enum VoteType {
   Approval = "Approval",
 }
 
+export enum ProposalStatus {
+  ACTIVE = "ACTIVE",
+  EXECUTED = "EXECUTED",
+  PENDING = "PENDING",
+  CANCELLED = "CANCELLED",
+  FAILED = "FAILED",
+  QUEUED = "QUEUED",
+  DEFEATED = "DEFEATED",
+}
+
 export enum ProposalType {
   OFFCHAIN_STANDARD = "OFFCHAIN_STANDARD",
   OFFCHAIN_APPROVAL = "OFFCHAIN_APPROVAL",
