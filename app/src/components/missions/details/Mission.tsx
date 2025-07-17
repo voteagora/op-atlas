@@ -11,7 +11,6 @@ import { LearnMore } from "@/components/missions/details/LearnMore"
 import Rewards from "@/components/missions/details/Rewards"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
-import { RoundEnrolledProjectsCard } from "./RoundEnrolledProjectsCard"
 import { SupportedNetworks } from "./SupportedNetworks"
 import { SessionRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
 import ExternalLink from "@/components/ExternalLink"
@@ -59,59 +58,64 @@ export default function Mission() {
   const learnMoreRef = useRef<HTMLDivElement>(null)
 
   // Define all possible navigation sections with their conditions
-  const navigationSections: NavSection[] = useMemo(() => [
-    {
-      key: "about",
-      label: "About",
-      ref: aboutRef,
-      condition: true, // Always show
-    },
-    {
-      key: "rewards",
-      label: "How rewards are calculated",
-      ref: rewardsRef,
-      condition: !!mission?.rewards,
-    },
-    {
-      key: "supported-chains",
-      label: "Supported chains",
-      ref: supportedChainsRef,
-      condition: !!mission?.showSupportedNetworks,
-    },
-    {
-      key: "eligibility",
-      label: "Check your eligibility",
-      ref: eligibilityRef,
-      condition:
-        !!mission?.missionPageEligibility &&
-        mission.missionPageEligibility.length > 0,
-    },
-    {
-      key: "how-it-works",
-      label: "How it works",
-      ref: howItWorksRef,
-      condition: !!mission?.howItWorks && mission.howItWorks.length > 0,
-    },
-    {
-      key: "featured-projects",
-      label: "Featured projects",
-      ref: featuredProjectsRef,
-      condition:
-        !!mission?.featuredProjects && mission.featuredProjects.length > 0,
-    },
-    {
-      key: "get-support",
-      label: "Get support",
-      ref: getSupportRef,
-      condition: !!mission?.supportOptions && mission.supportOptions.length > 0,
-    },
-    {
-      key: "learn-more",
-      label: "Learn more",
-      ref: learnMoreRef,
-      condition: !!mission?.learnMoreLinks && mission.learnMoreLinks.length > 0,
-    },
-  ], [mission])
+  const navigationSections: NavSection[] = useMemo(
+    () => [
+      {
+        key: "about",
+        label: "About",
+        ref: aboutRef,
+        condition: true, // Always show
+      },
+      {
+        key: "rewards",
+        label: "How impact is measured",
+        ref: rewardsRef,
+        condition: !!mission?.rewards,
+      },
+      {
+        key: "supported-chains",
+        label: "Supported chains",
+        ref: supportedChainsRef,
+        condition: !!mission?.showSupportedNetworks,
+      },
+      {
+        key: "eligibility",
+        label: "Check your eligibility",
+        ref: eligibilityRef,
+        condition:
+          !!mission?.missionPageEligibility &&
+          mission.missionPageEligibility.length > 0,
+      },
+      {
+        key: "how-it-works",
+        label: "How it works",
+        ref: howItWorksRef,
+        condition: !!mission?.howItWorks && mission.howItWorks.length > 0,
+      },
+      {
+        key: "featured-projects",
+        label: "Featured projects",
+        ref: featuredProjectsRef,
+        condition:
+          !!mission?.featuredProjects && mission.featuredProjects.length > 0,
+      },
+      {
+        key: "get-support",
+        label: "Get support",
+        ref: getSupportRef,
+        condition:
+          !!mission?.supportOptions && mission.supportOptions.length > 0,
+      },
+      {
+        key: "learn-more",
+        label: "Learn more",
+        ref: learnMoreRef,
+        condition:
+          !!mission?.learnMoreLinks && mission.learnMoreLinks.length > 0,
+      },
+    ],
+    [mission],
+  )
 
   // Filter sections based on conditions
   const visibleSections = navigationSections.filter(section => section.condition)
@@ -190,7 +194,6 @@ export default function Mission() {
             {showSidePanel && (
               <div className="flex flex-col gap-y-4">
                 <SessionRoundApplicationStatusCard />
-                <RoundEnrolledProjectsCard />
                 {mission?.pageName === "audit-grants" && (
                   <div className="py-2.5 hidden md:block">
                     <p className="text-secondary-foreground text-sm text-center font-medium leading-tight">
@@ -208,7 +211,7 @@ export default function Mission() {
             )}
             {visibleSections.length > 0 && (
               <div className="hidden md:block">
-                <p className="font-medium text-sm mb-4 mt-4">Contents</p>
+                <p className="font-medium text-sm mb-6 mt-6">Contents</p>
                 <nav className="self-stretch px-6 border-l border-tertiary inline-flex flex-col justify-start items-start gap-3">
                   {visibleSections.map((section) => (
                     <NavItem
