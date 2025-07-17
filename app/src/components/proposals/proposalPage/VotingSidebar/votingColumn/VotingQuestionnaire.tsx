@@ -76,7 +76,7 @@ const VotingQuestionnaire = ({
           <SelectValue placeholder="Select your vote" />
         </SelectTrigger>
         <SelectContent className="w-[410px] h-[240px] py-2 rounded-lg border border-input shadow-[0px_12px_42px_-4px_#14171A1F,0px_8px_18px_-6px_#14171A1F]">
-          <div className="w-[410px] h-[224px] border-b">
+          <div className="w-[410px] h-[224px]">
             {voteOptions.map((option) => (
               <SelectItem
                 key={option}
