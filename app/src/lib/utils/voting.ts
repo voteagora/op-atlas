@@ -61,8 +61,11 @@ const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
       case ProposalType.HYBRID_APPROVAL:
         return "This election uses approval voting, meaning voter can approve more than one candidate."
       case ProposalType.OFFCHAIN_STANDARD:
+      case ProposalType.HYBRID_STANDARD:
         return "OFFCHAIN_STANDARD"
       case ProposalType.OFFCHAIN_OPTIMISTIC:
+      case ProposalType.OFFCHAIN_OPTIMISTIC_TIERED:
+      case ProposalType.HYBRID_OPTIMISTIC_TIERED:
         return "If you do not wish to veto, then no action is required."
       default:
         return ""
