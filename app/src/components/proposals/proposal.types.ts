@@ -78,6 +78,8 @@ export interface VotingCardProps {
 export interface CardTextProps {
   title: string
   descriptionElement?: string | React.ReactElement
+  needsAgoraLink?: boolean
+  proposalId?: string
 }
 
 export interface VoteButtonProps {

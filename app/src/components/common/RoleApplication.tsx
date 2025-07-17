@@ -5,8 +5,6 @@ import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/common/Button"
-
-type RoleWithProposalId = Role & { proposalId?: string | null }
 import { ArrowDownS, ArrowUpS, FileList2 } from "@/components/icons/reminx"
 import { Optimism } from "@/components/icons/socials"
 import { Avatar, AvatarBadge } from "@/components/ui/avatar"
@@ -14,7 +12,7 @@ import { useProject } from "@/hooks/db/useProject"
 import { useActiveUserApplications } from "@/hooks/role/useActiveUserApplications"
 import { useRole } from "@/hooks/role/useRole"
 import { useUsername } from "@/hooks/useUsername"
-import { OrganizationWithTeamAndProjects, UserWithAddresses } from "@/lib/types"
+import { OrganizationWithTeamAndProjects, UserWithAddresses, RoleWithProposalId } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { formatMMMd, formatMMMdyyyy } from "@/lib/utils/date"
 import { stripMarkdown } from "@/lib/utils/markdown"

@@ -37,6 +37,8 @@ const youVoted = (proposalData: ProposalData, vote: VoteType) => {
       cardText: {
         title: "You vetoed the decision",
         descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
+        needsAgoraLink: true,
+        proposalId: proposalData.id,
       },
     }
   }
@@ -44,6 +46,8 @@ const youVoted = (proposalData: ProposalData, vote: VoteType) => {
     cardText: {
       title: "You voted",
       descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
+      needsAgoraLink: true,
+      proposalId: proposalData.id,
     },
     previousVote: mapValueToVoteType(proposalData.proposalType, vote),
   }
