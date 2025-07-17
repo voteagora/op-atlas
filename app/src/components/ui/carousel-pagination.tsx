@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { ArrowLeftSLine, ArrowRightSLine } from "@/components/icons/reminx"
+import { ArrowLeftS, ArrowRightS } from "@/components/icons/remix"
 
 import { Button } from "@/components/ui/button"
 import { CarouselApi } from "@/components/ui/carousel"
@@ -45,7 +45,7 @@ export function CarouselPagination({
         disabled={current === 1}
         className="px-3 py-2.5 hover:bg-[#F2F3F8]"
       >
-        <ArrowLeftSLine className="w-4 h-4" fill="#0F111A" />
+        <ArrowLeftS className="w-4 h-4" fill="#0F111A" />
       </Button>
 
       <Button
@@ -55,7 +55,7 @@ export function CarouselPagination({
         disabled={current === count}
         className="px-3 py-2.5 hover:bg-[#F2F3F8]"
       >
-        <ArrowRightSLine className="w-4 h-4" fill="#0F111A" />
+        <ArrowRightS className="w-4 h-4" fill="#0F111A" />
       </Button>
     </div>
   )
