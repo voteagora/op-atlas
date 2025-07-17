@@ -47,6 +47,7 @@ export enum ProposalStatus {
   FAILED = "FAILED",
   QUEUED = "QUEUED",
   DEFEATED = "DEFEATED",
+  SUCCEEDED = "SUCCEEDED",
 }
 
 export enum ProposalType {
