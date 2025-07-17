@@ -145,7 +145,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return choice
   }
 
-  function extractCalldatafromChoice(choice: any): string {
+  function extractCalldataFromChoice(choice: any): string {
     //TODO
     return "TODO"
   }
@@ -160,7 +160,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       }
       // Extract calldata from choices
       if (choice?.calldatas) {
-        return extractCalldatafromChoice(choice)
+        return extractCalldataFromChoice(choice)
       }
 
       return choice?.toString() || String(choice)
@@ -649,17 +649,18 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           eligibility={citizenEligibility}
         />
       </div>
-      {/* If Vote is concluded, show the results*/}
+      {/* If vote is concluded, and passed, show the results*/}
       {(proposalData.proposalType === "OFFCHAIN_APPROVAL" ||
         proposalData.proposalType === "HYBRID_APPROVAL") &&
-        (proposalData.status === ProposalStatus.QUEUED ||
-          proposalData.status === ProposalStatus.EXECUTED ||
-          proposalData.status === ProposalStatus.FAILED ||
-          proposalData.status === ProposalStatus.DEFEATED) && (
-          <div className="border-x border-b py-4">
-            <CandidateResults results={resultIdsAndValues} />
-          </div>
-        )}
+      (proposalData.status === ProposalStatus.QUEUED ||
+        proposalData.status === ProposalStatus.EXECUTED ||
+        proposalData.status === ProposalStatus.SUCCEEDED) ? (
+        <div className="border-x border-b py-4">
+          <CandidateResults results={resultIdsAndValues} />
+        </div>
+      ) : (
+        <></>
+      )}
 
       <div className="w-[304px] flex flex-col rounded-b-lg border-x border-b py-6 px-4 duration-300 ease-in-out">
         <div className="w-[272px] gap-2">
