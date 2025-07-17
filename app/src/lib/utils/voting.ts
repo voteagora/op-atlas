@@ -1,6 +1,7 @@
 import { JsonValue } from "@prisma/client/runtime/library"
 
 import {
+  ProposalStatus,
   ProposalType,
   VoteType,
   VotingCardProps,
@@ -173,9 +174,13 @@ const getCitizenTypes = (proposalData: ProposalData, vote?: VoteType) => {
   if (proposalData.status === "ACTIVE") {
     return getOpenVotingTypes(proposalData, vote)
   } else if (new Date(proposalData.endTime) < new Date()) {
+    const statusText =
+      proposalData.status === ProposalStatus.DEFEATED
+        ? `been ${proposalData.status}`
+        : `${proposalData.status}`
     return votingEnded(
       new Date(proposalData.endTime),
-      `This proposal has ${proposalData.status}`,
+      `This proposal has ${statusText}`,
     )
   } else {
     return comingSoon(proposalData)
