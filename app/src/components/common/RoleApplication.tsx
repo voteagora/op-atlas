@@ -1,8 +1,12 @@
+import { Role } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/common/Button"
+
+type RoleWithProposalId = Role & { proposalId?: string | null }
 import { ArrowDownS, ArrowUpS, FileList2 } from "@/components/icons/reminx"
 import { Optimism } from "@/components/icons/socials"
 import { Avatar, AvatarBadge } from "@/components/ui/avatar"
@@ -14,7 +18,6 @@ import { OrganizationWithTeamAndProjects, UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { formatMMMd, formatMMMdyyyy } from "@/lib/utils/date"
 import { stripMarkdown } from "@/lib/utils/markdown"
-import ReactMarkdown from "react-markdown"
 
 export default function RoleApplication({
   user,
@@ -39,7 +42,7 @@ export default function RoleApplication({
   const { data: role, isLoading: isLoadingRole } = useRole({
     id: roleId!,
     enabled: !!roleId,
-  })
+  }) as { data: Role | null, isLoading: boolean, error: any, invalidate: () => void }
 
   useEffect(() => {
     if (activeApplications && activeApplications.length > 0) {
@@ -198,11 +201,18 @@ export default function RoleApplication({
             >
               View discussion
             </Button>
-            <Button
-              onClick={() => role.link && window.open("/governance", "_blank")}
-            >
-              Vote
-            </Button>
+            {role && 'proposalId' in role && (role as RoleWithProposalId).proposalId && (
+              <Button
+                onClick={() =>
+                  window.open(
+                    `https://vote.optimism.io/proposals/${(role as RoleWithProposalId).proposalId}`,
+                    "_blank",
+                  )
+                }
+              >
+                Vote
+              </Button>
+            )}
           </div>
         </div>
       </div>
