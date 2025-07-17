@@ -1,4 +1,4 @@
-import { Check, Close } from "@/components/icons/reminx"
+import { Check, Close } from "@/components/icons/remix"
 
 export const ConditionRow = ({
   children,

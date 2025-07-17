@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/common/Button"
-import { ArrowDownS, ArrowUpS, Information } from "@/components/icons/reminx"
+import { ArrowDownS, ArrowUpS, Information } from "@/components/icons/remix"
 import { Optimism } from "@/components/icons/socials"
 import { Avatar, AvatarBadge } from "@/components/ui/avatar"
 import { useProject } from "@/hooks/db/useProject"
