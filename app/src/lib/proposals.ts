@@ -38,7 +38,7 @@ export type OffChainProposal = {
   proposalData: object // We can define this more specifically if needed
   proposalResults: object // We can define this more specifically if needed
   proposalType: ProposalType
-  status: "PENDING" | "ACTIVE" | "CANCELLED" | "EXECUTED" | "QUEUED" | "FAILED"
+  status: ProposalStatus
   offchainProposalId: string
 }
 
