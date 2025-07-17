@@ -13,12 +13,15 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { toast } from "sonner"
 
-import { ProposalType, VoteType } from "@/components/proposals/proposal.types"
+import {
+  ProposalStatus,
+  ProposalType,
+  VoteType,
+} from "@/components/proposals/proposal.types"
 import VoterActions from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
-import { ProposalStatusBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
@@ -278,7 +281,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const canVote =
     !!session?.user?.id &&
     !!citizen &&
-    proposalData.status === ProposalStatusBadgeType.ACTIVE &&
+    proposalData.status === ProposalStatus.ACTIVE &&
     !myVote
 
   const { wallets } = useWallets()
@@ -646,12 +649,13 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           eligibility={citizenEligibility}
         />
       </div>
-
+      {/* If Vote is concluded, show the results*/}
       {(proposalData.proposalType === "OFFCHAIN_APPROVAL" ||
         proposalData.proposalType === "HYBRID_APPROVAL") &&
-        (proposalData.status === ProposalStatusBadgeType.QUEUED ||
-          proposalData.status === ProposalStatusBadgeType.EXECUTED ||
-          proposalData.status === ProposalStatusBadgeType.FAILED) && (
+        (proposalData.status === ProposalStatus.QUEUED ||
+          proposalData.status === ProposalStatus.EXECUTED ||
+          proposalData.status === ProposalStatus.FAILED ||
+          proposalData.status === ProposalStatus.DEFEATED) && (
           <div className="border-x border-b py-4">
             <CandidateResults results={resultIdsAndValues} />
           </div>
@@ -660,6 +664,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       <div className="w-[304px] flex flex-col rounded-b-lg border-x border-b py-6 px-4 duration-300 ease-in-out">
         <div className="w-[272px] gap-2">
           {myVoteType &&
+            proposalData.status === ProposalStatus.ACTIVE &&
             (proposalData.proposalType === "OFFCHAIN_STANDARD" ||
               proposalData.proposalType === "HYBRID_STANDARD") && (
               <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
@@ -668,6 +673,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             )}
 
           {myVoteType &&
+            proposalData.status === ProposalStatus.ACTIVE &&
             (proposalData.proposalType === "OFFCHAIN_APPROVAL" ||
               proposalData.proposalType === "HYBRID_APPROVAL") && (
               <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
@@ -688,7 +694,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         </div>
 
         {/* Actions */}
-        {proposalData.status === ProposalStatusBadgeType.ACTIVE &&
+        {proposalData.status === ProposalStatus.ACTIVE &&
           votingActions &&
           !myVote && (
             <div className="flex flex-col items-center gap-y-2 mb-4 transition-all duration-300 ease-in-out">
