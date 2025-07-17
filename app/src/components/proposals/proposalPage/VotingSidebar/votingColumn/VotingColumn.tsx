@@ -74,7 +74,7 @@ const VotingChoices = ({
   proposalType: string
   selectedVotes?: { voteType: VoteType; selections?: number[] }
   setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void // Updated type
-  candidateIds: string[]
+  candidateIds: { name?: string; id: string }[]
 }) => {
   switch (proposalType) {
     case "OFFCHAIN_STANDARD":
@@ -134,15 +134,16 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   // they won't be shown the questionnaire again on retry
   const [hasSubmittedVote, setHasSubmittedVote] = useState(false)
 
-  function extractIdFromChoice(choice: any): string {
-    const urlMatch = choice.description.match(/\[.*?\]\((.*?)\)/)
+  function extractIdFromChoice(choice: any): { name?: string; id: string } {
+    const urlMatch = choice.description.match(/\[(.*?)\]\((.*?)\)/)
     if (urlMatch) {
-      const url = urlMatch[1]
+      const name = urlMatch[1] // Extract just the name part
+      const url = urlMatch[2]
       // Extract the last part of the URL (after the last slash)
       const urlParts = url.split("/")
-      return urlParts[urlParts.length - 1]
+      return { name, id: urlParts[urlParts.length - 1] }
     }
-    return choice
+    return { id: choice }
   }
 
   function extractCalldataFromChoice(choice: any): string {
@@ -150,7 +151,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return "TODO"
   }
 
-  const extractIdsFromChoices = (choices: any): string[] => {
+  const extractIdsFromChoices = (
+    choices: any,
+  ): { name?: string; id: string }[] => {
     if (!Array.isArray(choices)) return []
 
     return choices.map((choice: any) => {
@@ -160,31 +163,34 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       }
       // Extract calldata from choices
       if (choice?.calldatas) {
-        return extractCalldataFromChoice(choice)
+        const calldata = extractCalldataFromChoice(choice)
+        return { id: calldata }
       }
 
-      return choice?.toString() || String(choice)
+      return { id: choice?.toString() || String(choice) }
     })
   }
 
   const extractIdsFromResults = (
     proposalData: ProposalData,
-  ): { id: string; value: number }[] => {
+  ): { id: string; name?: string; value: number }[] => {
     const results = (proposalData.proposalResults as any)?.options
     if (!Array.isArray(results)) return []
 
-    const extractedResults = results
+    return results
       .filter((result: any) => result.isApproved === true)
       .map((result: any) => {
         // Extract URL from markdown format [text](url)
-        const urlMatch = result.option.match(/\[.*?\]\((.*?)\)/)
+        const urlMatch = result.option.match(/\[(.*?)\]\((.*?)\)/)
         if (urlMatch) {
-          const url = urlMatch[1]
+          const name = urlMatch[1] // Extract just the name part
+          const url = urlMatch[2]
           // Extract the last part of the URL (after the last slash)
           const urlParts = url.split("/")
           const id = urlParts[urlParts.length - 1]
           return {
             id,
+            name,
             value: result.weightedPercentage || 0,
           }
         }
@@ -194,8 +200,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         }
       })
       .sort((a, b) => b.value - a.value)
-
-    return extractedResults
   }
 
   const extractIds = (proposalData: ProposalData) => {
