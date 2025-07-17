@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useProposalCandidates } from "@/hooks/voting/useProposalCandidates"
 
 interface CandidateCardsProps {
-  candidateIds: string[]
+  candidateIds: { name?: string; id: string }[]
   selectedVote?: { voteType: VoteType; selections?: number[] }
   setSelectedVote: (vote: { voteType: VoteType; selections?: number[] }) => void
   votingDisabled?: boolean
@@ -36,9 +36,20 @@ const CandidateCards = ({
   setSelectedVote,
   votingDisabled,
 }: CandidateCardsProps) => {
-  const { data: candidates, isLoading: areCandidatesLoading } =
-    // This will check userId then OrgId, then username
-    useProposalCandidates(candidateIds)
+  // Extract just the IDs for the hook
+  const candidateIdsArray = candidateIds.map((candidate) => candidate.id)
+
+  // Create a map of ID to name for later use
+  const idToNameMap = candidateIds.reduce((map, candidate) => {
+    if (candidate.name) {
+      map[candidate.id] = candidate.name
+    }
+    return map
+  }, {} as Record<string, string>)
+
+  const { data: fetchedCandidates, isLoading: areCandidatesLoading } =
+    // Pass only the IDs to the hook
+    useProposalCandidates(candidateIdsArray)
 
   if (areCandidatesLoading) {
     return (
@@ -55,7 +66,18 @@ const CandidateCards = ({
     )
   }
 
-  if (!candidates) return null
+  if (!fetchedCandidates) return null
+
+  // Merge the provided names with the fetched candidates
+  const candidates = fetchedCandidates.map((candidate) => {
+    if (idToNameMap[candidate.id]) {
+      return {
+        ...candidate,
+        name: idToNameMap[candidate.id],
+      }
+    }
+    return candidate
+  })
 
   const handleApprovalClick = (idx: number) => {
     const currentSelections = selectedVote?.selections || []
