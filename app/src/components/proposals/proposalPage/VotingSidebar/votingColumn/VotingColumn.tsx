@@ -134,8 +134,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   // they won't be shown the questionnaire again on retry
   const [hasSubmittedVote, setHasSubmittedVote] = useState(false)
 
-  function extractIdFromChoice(choice: any): { name?: string; id: string } {
-    const urlMatch = choice.description.match(/\[(.*?)\]\((.*?)\)/)
+  function extractIdFromValue(value: any): { name?: string; id: string } {
+    if (!value || typeof value.match !== "function") {
+      return { id: value }
+    }
+    const urlMatch = value.match(/\[(.*?)\]\((.*?)\)/)
     if (urlMatch) {
       const name = urlMatch[1] // Extract just the name part
       const url = urlMatch[2]
@@ -143,7 +146,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       const urlParts = url.split("/")
       return { name, id: urlParts[urlParts.length - 1] }
     }
-    return { id: choice }
+    return { id: value }
   }
 
   function extractCalldataFromChoice(choice: any): string {
@@ -151,23 +154,25 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return "TODO"
   }
 
-  const extractIdsFromChoices = (
-    choices: any,
-  ): { name?: string; id: string }[] => {
-    if (!Array.isArray(choices)) return []
+  const extractIdsFromArray = (arry: any): { name?: string; id: string }[] => {
+    if (!Array.isArray(arry)) return []
 
-    return choices.map((choice: any) => {
+    return arry.map((choice: any) => {
       // Extract URL from markdown format [text](url)
       if (choice?.description) {
-        return extractIdFromChoice(choice)
+        return extractIdFromValue(choice.description)
       }
       // Extract calldata from choices
       if (choice?.calldatas) {
         const calldata = extractCalldataFromChoice(choice)
         return { id: calldata }
       }
-
-      return { id: choice?.toString() || String(choice) }
+      try {
+        return extractIdFromValue(choice)
+      } catch (error) {
+        console.warn("Error extracting id from choice:", error)
+        return { id: choice?.toString() || String(choice) }
+      }
     })
   }
 
@@ -204,14 +209,15 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const extractIds = (proposalData: ProposalData) => {
     const pData = proposalData.proposalData as any
+    console.log("extractIds", { pData })
     if (
       pData?.options &&
       Array.isArray(pData.options) &&
       pData.options.length > 0
     ) {
-      return extractIdsFromChoices(pData.options)
+      return extractIdsFromArray(pData.options)
     } else if (pData?.choices) {
-      return extractIdsFromChoices(pData.choices)
+      return extractIdsFromArray(pData.choices)
     }
     return []
   }
