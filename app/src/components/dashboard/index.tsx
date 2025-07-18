@@ -224,6 +224,7 @@ const Dashboard = ({
                 user={user}
                 organization={organization}
               />
+
               {organization.organization.projects?.length > 0 ? (
                 <>
                   {organization.organization.projects?.map((project) => (

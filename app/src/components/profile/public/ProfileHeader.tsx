@@ -4,7 +4,8 @@ import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
-import { CheckboxCircleFIll, PencilFill } from "@/components/icons/remix"
+import { CitizenshipBadge } from "@/components/common/CitizenshipBadge"
+import { PencilFill } from "@/components/icons/remix"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUsername } from "@/hooks/useUsername"
@@ -43,11 +44,6 @@ const ProfileHeader = ({
         {user.imageUrl && (
           <Avatar className="relative w-20 h-20 my-0.5">
             <AvatarImage src={user.imageUrl} className="object-cover" />
-            {(isCitizen && !isSelf) &&
-              <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
-                <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
-              </AvatarBadge>
-            }
             {isSelf && (
               <Link href="/profile/details">
                 <AvatarBadge className="absolute w-[40px] h-[40px] top-[20px] right-0 bg-white hover:bg-secondary border border-muted/50 hover:border-muted rounded-full">
@@ -58,7 +54,7 @@ const ProfileHeader = ({
           </Avatar>
         )}
         <div className="flex flex-col gap-6">
-          <div className="text-3xl font-semibold">{username} </div>
+          <div className="text-3xl font-semibold flex items-center gap-2">{username} {isCitizen && <CitizenshipBadge />}</div>
           <div className="text-sm text-muted-foreground">{user.bio}</div>
           <ProfileHeaderLinks user={user} />
         </div>

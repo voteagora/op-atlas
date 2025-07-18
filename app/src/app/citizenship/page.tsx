@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
-import { ActiveCitizen } from "@/app/citizenship/components/ActiveCitizen"
 import { ChainAppRequirements } from "@/app/citizenship/components/ChainAppRequirements"
 import { Sidebar } from "@/app/citizenship/components/Sidebar"
 import { UserRequirements } from "@/app/citizenship/components/UserRequirements"
@@ -25,6 +24,7 @@ import {
 import { CITIZEN_TYPES } from "@/lib/constants"
 
 import { AnalyticsTracker } from "./components/AnalyticsTracker"
+import { SidebarActiveCitizen } from "./components/SidebarActiveCitizen"
 
 export default async function Page({
   searchParams,
@@ -48,19 +48,6 @@ export default async function Page({
 
   if (!user) {
     redirect("/")
-  }
-
-  if (citizen?.attestationId) {
-    if (searchParams.redirectUrl) {
-      redirect(searchParams.redirectUrl)
-    }
-    return (
-      <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-        <div className="w-full mt-20 ">
-          <ActiveCitizen user={user} />
-        </div>
-      </main>
-    )
   }
 
   return (
@@ -149,30 +136,48 @@ export default async function Page({
           </div>
         </div>
         <div>
-          {qualification && (
-            <div>
-              {qualification.type !== CITIZEN_TYPES.user ? (
-                <Sidebar user={user} qualification={qualification} redirectUrl={searchParams.redirectUrl} />
-              ) : (
+          {citizen?.attestationId && qualification ? (
+            <SidebarActiveCitizen
+              user={user}
+              qualification={qualification}
+              citizen={citizen}
+            />
+          ) : (
+            <>
+              {qualification && (
                 <div>
-                  {isCitizenshipLimitReached ? (
-                    <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
-                      <div className="flex flex-col gap-2">
-                        <div className="font-semibold text-secondary-foreground">
-                          Registration has closed
-                        </div>
-                        <div className="text-sm text-secondary-foreground">
-                          Thanks for your interest, but the Citizens&apos; House
-                          has reached it&apos;s maximum capacity.
-                        </div>
-                      </div>
-                    </div>
+                  {qualification.type !== CITIZEN_TYPES.user ? (
+                    <Sidebar
+                      user={user}
+                      qualification={qualification}
+                      redirectUrl={searchParams.redirectUrl}
+                    />
                   ) : (
-                    <Sidebar user={user} qualification={qualification} redirectUrl={searchParams.redirectUrl} />
+                    <div>
+                      {isCitizenshipLimitReached ? (
+                        <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
+                          <div className="flex flex-col gap-2">
+                            <div className="font-semibold text-secondary-foreground">
+                              Registration has closed
+                            </div>
+                            <div className="text-sm text-secondary-foreground">
+                              Thanks for your interest, but the Citizens&apos;
+                              House has reached it&apos;s maximum capacity.
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Sidebar
+                          user={user}
+                          qualification={qualification}
+                          redirectUrl={searchParams.redirectUrl}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
