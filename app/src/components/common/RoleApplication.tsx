@@ -117,6 +117,20 @@ export default function RoleApplication({
     }
   }
 
+  const renderVoteButton = () => {
+    if (!role.voteStartAt || !role.voteEndAt) return null
+
+    const now = new Date()
+    const isWithinVotingPeriod =
+      now >= new Date(role.voteStartAt) && now <= new Date(role.voteEndAt)
+
+    if (!isWithinVotingPeriod) return null
+
+    return (
+      <Button onClick={() => window.open("/governance", "_blank")}>Vote</Button>
+    )
+  }
+
   return (
     <div className={cn("flex flex-col gap-4 w-full", className)}>
       <h2 className="text-xl font-medium">Governance</h2>
@@ -188,11 +202,7 @@ export default function RoleApplication({
             >
               View discussion
             </Button>
-            <Button
-              onClick={() => role.link && window.open("/governance", "_blank")}
-            >
-              Vote
-            </Button>
+            {renderVoteButton()}
           </div>
         </div>
       </div>
