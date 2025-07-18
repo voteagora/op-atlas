@@ -711,7 +711,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                   candidateIds={candidateIds}
                 />
               )}
-              <div className="w-full gap-2 transition-all duration-200 ease-in-out mt-2">
+              <div className="w-full gap-2 transition-all duration-200 ease-in-out">
                 <VoterActions
                   proposalId={proposalData.offchainProposalId}
                   // This is a wonky way to overwrite the call to make an external call.
