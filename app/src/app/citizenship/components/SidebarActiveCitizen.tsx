@@ -86,7 +86,7 @@ export const SidebarActiveCitizen = ({
 
       <div className="flex flex-col gap-2">
         <div className="text-sm font-semibold text-secondary-foreground">
-          {citizenTitle} are a citizen!
+          {citizenTitle} is a citizen!
         </div>
 
         {citizen.type === CITIZEN_TYPES.user ? (
