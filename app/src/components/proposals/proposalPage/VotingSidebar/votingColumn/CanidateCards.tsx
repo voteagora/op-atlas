@@ -102,7 +102,7 @@ const CandidateCards = ({
     <>
       <div className="align-left w-full">
         <p className="h-5 font-medium text-[14px] leading-5 text-foreground align-middle my-2">
-          {candidates.length} Candidates
+          {candidates.length} candidates
         </p>
       </div>
       <div className="w-full sm:w-[272px]">
