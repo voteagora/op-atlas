@@ -703,7 +703,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           votingActions &&
           !myVote && (
             <div className="flex flex-col items-center gap-y-2 mb-4 transition-all duration-300 ease-in-out">
-              {canVote && (
+              {(canVote || proposalData.proposalType.includes("APPROVAL")) && (
                 <VotingChoices
                   proposalType={proposalData.proposalType}
                   selectedVotes={selectedVotes}
