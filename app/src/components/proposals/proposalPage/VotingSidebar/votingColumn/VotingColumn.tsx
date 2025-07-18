@@ -620,7 +620,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         setShowConfetti(true)
         // Update voted status to true
         invalidateMyVote()
-        return "Vote Cast and Recorded!"
+        return "Vote cast and recorded!"
       },
       error: (error) => {
         return error.message
