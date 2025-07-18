@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/common/Button"
-import { ArrowRightS, CheckboxLine, Close } from "@/components/icons/reminx"
+import { ArrowRightS, CheckboxLine, Close } from "@/components/icons/remix"
 import { Github } from "@/components/icons/socials"
 import { GithubDisplay } from "@/components/profile/GithubDisplay"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -141,12 +141,12 @@ export const UserForm = ({
     const customRequirementsSatisfied =
       isUser && requirements.user
         ? requirements.user.every((requirement: string) => {
-            if (requirement === "github") {
-              const githubSatisfied = !!user.github
-              return githubSatisfied
-            }
-            return true
-          })
+          if (requirement === "github") {
+            const githubSatisfied = !!user.github
+            return githubSatisfied
+          }
+          return true
+        })
         : false
 
     setRequirementsSatisfied(allTermsChecked && customRequirementsSatisfied)
@@ -439,7 +439,7 @@ export const UserForm = ({
                 <span
                   className={
                     (projectRelevanceText[project.project.id] || "").length >=
-                    280
+                      280
                       ? "text-red-500"
                       : ""
                   }

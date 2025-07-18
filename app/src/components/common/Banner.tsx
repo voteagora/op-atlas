@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 
-import { ArrowRight } from "@/components/icons/reminx"
+import { ArrowRight } from "@/components/icons/remix"
 import { LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
 
 export const Banner = () => {
@@ -17,7 +17,8 @@ export const Banner = () => {
     pathname === "/" ||
     pathname === "/dashboard" ||
     pathname === "/missions" ||
-    pathname === "/governance" ||
+    pathname.includes("/missions/")
+  pathname === "/governance" ||
     pathname.startsWith("/round/")
 
   if (!shouldShowBanner) return null

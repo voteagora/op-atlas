@@ -16,7 +16,7 @@ import { UserWithAddresses } from "@/lib/types"
 import { UserAvatarLarge } from "../common/UserAvatarLarge"
 import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
 import { ArrowDropRight } from "../icons/ArrowDropRight"
-import { CheckboxCircleFIll } from "../icons/reminx"
+import { CheckboxCircleFIll } from "../icons/remix"
 import { AvatarBadge } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {

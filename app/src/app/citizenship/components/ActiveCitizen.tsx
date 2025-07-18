@@ -1,7 +1,7 @@
 "use client"
 
 import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
-import { CheckboxCircleFIll } from "@/components/icons/reminx"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useOrganization } from "@/hooks/db/useOrganization"

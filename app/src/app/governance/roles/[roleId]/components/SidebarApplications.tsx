@@ -3,7 +3,7 @@
 import { RoleApplication } from "@prisma/client"
 
 import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
-import { ArrowRightS } from "@/components/icons/reminx"
+import { ArrowRightS } from "@/components/icons/remix"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
 import { useUser } from "@/hooks/db/useUser"
