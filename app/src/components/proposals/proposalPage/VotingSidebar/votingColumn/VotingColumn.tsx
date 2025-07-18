@@ -672,7 +672,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             proposalData.status === ProposalStatus.ACTIVE &&
             (proposalData.proposalType === "OFFCHAIN_STANDARD" ||
               proposalData.proposalType === "HYBRID_STANDARD") && (
-              <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+              <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2 mb-4">
                 <MyVote voteType={myVoteType} />
               </div>
             )}
@@ -681,7 +681,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             proposalData.status === ProposalStatus.ACTIVE &&
             (proposalData.proposalType === "OFFCHAIN_APPROVAL" ||
               proposalData.proposalType === "HYBRID_APPROVAL") && (
-              <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2">
+              <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2 ">
                 <CandidateCards
                   candidateIds={candidateIds}
                   selectedVote={{
