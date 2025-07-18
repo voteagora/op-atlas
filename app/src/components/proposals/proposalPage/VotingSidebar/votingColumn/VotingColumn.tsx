@@ -763,11 +763,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           )}
 
         <div className="w-full flex flex-col gap-2 items-center justify-center">
-          <a
-            href={getAgoraProposalLink(proposalData.id)}
-            target="_blank"
-            className="mt-2"
-          >
+          <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
             <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
               View results
             </p>
