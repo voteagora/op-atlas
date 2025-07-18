@@ -1,10 +1,9 @@
 "use client"
 
-import { ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import React, { useState } from "react"
 
-import { Button } from "@/components/ui/button"
+import { CarouselPagination } from "@/components/ui/carousel-pagination"
 import {
   Carousel,
   CarouselApi,
@@ -115,39 +114,23 @@ export function FeaturedProjects() {
         </Carousel>
 
         {/* Custom Navigation */}
-        <div className="flex justify-center items-center gap-2 mt-4">
-          <Button
-            variant="ghost"
-            size="default"
-            onClick={() => {
-              api?.scrollPrev()
-              track("Link Click", {
-                text: projects[current - 1].name,
-                type: "Featured Projects",
-              })
-            }}
-            disabled={current === 1}
-            className="px-4 py-2.5"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="default"
-            onClick={() => {
-              api?.scrollNext()
-              track("Link Click", {
-                text: projects[current - 1].name,
-                type: "Featured Projects",
-              })
-            }}
-            disabled={current === count}
-            className="px-4 py-2.5"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
+        <CarouselPagination
+          api={api}
+          current={current}
+          count={count}
+          onPrev={() => {
+            track("Link Click", {
+              text: projects[current - 1].name,
+              type: "Featured Projects",
+            })
+          }}
+          onNext={() => {
+            track("Link Click", {
+              text: projects[current - 1].name,
+              type: "Featured Projects",
+            })
+          }}
+        />
       </div>
     </div>
   )
