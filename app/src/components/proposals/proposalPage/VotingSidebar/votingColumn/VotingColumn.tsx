@@ -769,7 +769,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             className="mt-2"
           >
             <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
-              View Results
+              View results
             </p>
           </a>
         </div>
