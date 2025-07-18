@@ -1,121 +1,116 @@
 "use client"
 
-interface CandidateCardProps {
-  img: {
-    src: string
-    alt?: string
-  }
-  username: string
-  organizations: string[]
-  carrotLink: string
-  selected?: boolean
-  onClick?: () => void
+import { ChevronRight } from "lucide-react"
+import Link from "next/link"
+
+import { UserAvatar } from "@/components/common/UserAvatar"
+import { cn } from "@/lib/utils"
+
+type SimplifiedUserOrOrg = {
+  id: string
+  name: string
+  avatar?: string | null
+  link: string
 }
 
 const CandidateCard = ({
-  img,
-  username,
-  organizations,
-  carrotLink,
-  selected = false,
-  onClick,
-}: CandidateCardProps) => {
-  const handleClick = () => {
-    if (onClick) {
-      onClick()
-    }
-  }
-
-  return (
-    <div className="w-[272px] h-[40px] pt-[8px] pr-[var(--dimensions-5)] pb-[8px] pl-[var(--dimensions-5)] gap-[8px] rounded-[6px] flex items-center">
-      <CardImg src={img.src} alt={img.alt || username} />
-      <CardUsername username={username} />
-      <CardOrganizations organizations={organizations} />
-      <CardApprovalButton selected={selected} onClick={handleClick} />
-      <CardCarrot link={carrotLink} />
-    </div>
-  )
-}
-
-const CardImg = ({
-  src,
-  alt = "Profile Picture",
+  candidate,
+  selectedVote,
+  setSelectedVote,
+  votingDisabled,
 }: {
-  src: string
-  alt?: string
+  candidate: SimplifiedUserOrOrg
+  selectedVote?: boolean
+  setSelectedVote: () => void
+  votingDisabled?: boolean
 }) => {
   return (
-    <div className="w-[20px] h-[20px] rounded-[19px] overflow-hidden">
-      <img className="w-full h-full object-cover" src={src} alt={alt} />
+    <div className="w-full h-10 p-2 rounded-[6px]">
+      <div className="flex items-center h-5 gap-[8px] justify-between">
+        <div className="flex flex-row gap-2">
+          <UserAvatar imageUrl={candidate?.avatar} size={"xs"} />
+          <CardUsername username={candidate.name} link={candidate.link} />
+        </div>
+        <div className="flex flex-row items-center gap-2">
+          <CardApprovalButton
+            selected={selectedVote}
+            onClick={setSelectedVote}
+            votingDisabled={votingDisabled}
+          />
+          <a href={candidate.link} target="_blank" rel="noopener noreferrer">
+            <ChevronRight width={12} height={12} />
+          </a>
+        </div>
+      </div>
     </div>
   )
 }
 
-const CardUsername = ({ username }: { username: string }) => {
+const CardUsername = ({
+  username,
+  link,
+}: {
+  username: string
+  link: string
+}) => {
   return (
-    <div className="w-[68px] h-[20px] font-inter font-normal text-[14px] leading-[20px] tracking-[0%] overflow-hidden whitespace-nowrap text-ellipsis">
+    <Link
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={username}
+      className="font-normal min-w-5 max-w-[130px] text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis hover:underline cursor-pointer"
+    >
       {username}
-    </div>
-  )
-}
-
-const CardOrganizations = ({ organizations }: { organizations: string[] }) => {
-  return (
-    <div className="w-[132px] h-[20px] font-inter font-normal text-[14px] leading-[20px] tracking-[0%] text-[var(--muted-foreground,#636779)] overflow-hidden whitespace-nowrap text-ellipsis">
-      {organizations.join(", ")}
-    </div>
+    </Link>
   )
 }
 
 const CardApprovalButton = ({
   selected = false,
   onClick,
+  votingDisabled,
 }: {
   selected?: boolean
   onClick?: () => void
+  votingDisabled?: boolean
 }) => {
-  const bgColor = selected ? "bg-success" : "bg-[#F2F3F8]"
+  if (selected) {
+    return (
+      <div
+        className={cn(
+          "w-[72px] h-6 px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-success",
+          {
+            "cursor-default": votingDisabled,
+            "cursor-pointer": !votingDisabled,
+          },
+        )}
+      >
+        <button
+          className="font-normal text-xs leading-5 text-success-foreground"
+          onClick={onClick}
+          disabled={votingDisabled}
+        >
+          Approved
+        </button>
+      </div>
+    )
+  }
+
+  if (votingDisabled) {
+    return null
+  }
 
   return (
     <div
-      className={`w-[65px] h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md ${bgColor} cursor-pointer`}
+      className={
+        "w-[65px] h-[24px] px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-secondary cursor-pointer"
+      }
     >
-      <button
-        className="font-medium text-xs leading-4 font-inter"
-        onClick={onClick}
-      >
+      <button className="font-normal text-xs leading-5" onClick={onClick}>
         Approve
       </button>
     </div>
-  )
-}
-
-const CardCarrot = ({ link }: { link: string }) => {
-  return (
-    <a
-      href={link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="cursor-pointer"
-    >
-      <div className="w-[12px] h-[12px] flex items-center justify-center">
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M4.5 9L7.5 6L4.5 3"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-    </a>
   )
 }
 

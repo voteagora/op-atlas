@@ -103,7 +103,7 @@ export function Results() {
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      <div className="mt-8 p-6 sm:mt-8 sm:p-16 bg-background flex flex-col w-full max-w-6xl rounded-3xl z-10">
+      <div className="mt-4 p-6 sm:mt-4 sm:p-16 bg-background flex flex-col w-full max-w-6xl rounded-3xl z-10">
         <ResultsHeader />
         <RoundSelector
           selectedRounds={selectedRounds}

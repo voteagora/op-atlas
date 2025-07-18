@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useUsername } from "@/hooks/useUsername"
 import { TeamRole } from "@/lib/types"
-import { UserAvatarSmall } from "../common/UserAvatarSmall"
+import { UserAvatar } from "@/components/common/UserAvatar"
 import { useUser } from "@/hooks/db/useUser"
 
 export const TeamMemberRow = memo(function TeamMemberRow({
@@ -37,14 +37,13 @@ export const TeamMemberRow = memo(function TeamMemberRow({
   const { user: loadedUser } = useUser({ id: user.id })
   const username = useUsername(loadedUser || user)
 
-
   return (
     <div
       onMouseEnter={() => setMouseEntered(true)}
       onMouseLeave={() => setMouseEntered(false)}
     >
       <div className="py-2 px-3 h-10 rounded-md border border-input flex items-center gap-2 w-full">
-        <UserAvatarSmall imageUrl={user?.imageUrl} />
+        <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
         <p className="text-sm text-foreground">
           {username} {isCurrentUser && "(You)"}
         </p>

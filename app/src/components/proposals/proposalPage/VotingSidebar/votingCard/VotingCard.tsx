@@ -1,8 +1,8 @@
 import React from "react"
 
-import { CitizenshipQualification } from "@/lib/types"
 import { CardTextProps, VoteType } from "@/components/proposals/proposal.types"
 import { ProposalData } from "@/lib/proposals"
+import { CitizenshipQualification } from "@/lib/types"
 import { getVotingProps } from "@/lib/utils/voting"
 
 const CardText = ({
@@ -24,7 +24,7 @@ const CardText = ({
   )
 
   return (
-    <div className="flex flex-col text-center gap-y-2">
+    <div className="flex flex-col text-center gap-2 p-6">
       <h4 className="text-md font-semibold">
         {votingCardProps.cardText.title}
       </h4>

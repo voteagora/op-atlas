@@ -37,7 +37,10 @@ export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
           endDate={formatMMMd(role.endAt || new Date())}
         />
       </div>
-      <ProposalArrow href={`/governance/roles/${role.id}`} />
+      <ProposalArrow
+        href={`/governance/roles/${role.id}`}
+        proposalType={"SELF_NOMINATION"}
+      />
     </ProposalCard>
   )
 }

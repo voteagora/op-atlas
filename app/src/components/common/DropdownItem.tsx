@@ -12,7 +12,7 @@ export default function DropdownItem({
   return (
     <div
       className={cn([
-        "w-full rounded hover:bg-secondary font-normal text-sm px-2 py-1",
+        "w-[394px] h-8 rounded-md hover:bg-secondary font-normal text-sm px-2 py-1.5",
       ])}
     >
       {children}

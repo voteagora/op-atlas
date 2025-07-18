@@ -23,7 +23,7 @@ export function Rounds({ user }: { user?: UserWithAddresses | null }) {
         </div>
       )} */}
       {/* Main content */}
-      <div className="mt-8 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
+      <div className="mt-4 bg-background flex flex-col p-16 w-full max-w-6xl rounded-3xl z-10">
         <div className="flex flex-col w-full">
           <h1 className="text-4xl font-semibold">Retro Funding Missions</h1>
         </div>

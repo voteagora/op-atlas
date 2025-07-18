@@ -61,15 +61,14 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
       track("Citizen Voting Page View", {
         page_title: "Proposal Voting",
         page_type: proposalData.proposalType,
-        proposal_id: proposalData.id,
+        proposal_id: proposalData.offchainProposalId,
         citizen_status: citizen
           ? "registered"
           : citizenEligibility?.eligible
-            ? "eligible"
-            : session?.user?.id
-              ? "not signed in"
-              : "ineligible",
-        user_group: citizenEligibility?.type,
+          ? "eligible"
+          : session?.user?.id
+          ? "not signed in"
+          : "ineligible",
       })
       isTracked.current = true
     }

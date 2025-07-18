@@ -13,7 +13,7 @@ import { CITIZEN_TYPES } from "@/lib/constants"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 
-import { UserAvatarLarge } from "../common/UserAvatarLarge"
+import { UserAvatar } from "../common/UserAvatar"
 import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
 import { ArrowDropRight } from "../icons/ArrowDropRight"
 import { CheckboxCircleFIll } from "../icons/remix"
@@ -101,7 +101,7 @@ const ProfileDetailCard = ({
   return (
     <div className="flex gap-x-4">
       {user.imageUrl ? (
-        <UserAvatarLarge imageUrl={user.imageUrl}>
+        <UserAvatar imageUrl={user.imageUrl}>
           {isCitizen && (
             <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
               <CheckboxCircleFIll
@@ -110,7 +110,7 @@ const ProfileDetailCard = ({
               />
             </AvatarBadge>
           )}
-        </UserAvatarLarge>
+        </UserAvatar>
       ) : (
         <button
           onClick={() => setShowImportDialog(true)}

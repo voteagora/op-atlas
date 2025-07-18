@@ -4,7 +4,7 @@ import clsx from "clsx"
 import { X } from "lucide-react"
 import { useCallback, useRef, useState } from "react"
 
-import { UserAvatarSmall } from "../common/UserAvatarSmall"
+import { UserAvatar } from "@/components/common/UserAvatar"
 import { Badge } from "./badge"
 import { Command, CommandGroup, CommandItem, CommandList } from "./command"
 import { Input } from "./input"
@@ -41,7 +41,6 @@ export function MultiSelect({
 }: MultiSelectAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [, setOpen] = useState(false)
-
 
   const handleUnselect = useCallback(
     (item: IMultiSelectOptions) => {
@@ -100,7 +99,7 @@ export function MultiSelect({
                           }}
                         >
                           <div className="flex flex-row items-center gap-2">
-                            <UserAvatarSmall imageUrl={option.image} />
+                            <UserAvatar imageUrl={option.image} size={"sm"} />
                             {option.label}
                           </div>
                         </CommandItem>
@@ -127,9 +126,8 @@ export function MultiSelect({
                 className="py-2 px-3 rounded-md shrink-0 flex flex-row items-center gap-2"
                 variant="secondary"
               >
-
                 <div className="flex flex-row items-center gap-2">
-                  <UserAvatarSmall imageUrl={item.image} />
+                  <UserAvatar imageUrl={item.image} size={"sm"} />
                   <p className="text-sm text-secondary-foreground">
                     {item.label}
                   </p>
@@ -151,8 +149,7 @@ export function MultiSelect({
             )
           })}
         </div>
-      ) : null
-      }
-    </div >
+      ) : null}
+    </div>
   )
 }
