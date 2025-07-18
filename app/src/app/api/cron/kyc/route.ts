@@ -13,7 +13,7 @@ const MONITOR_SLUG = "cron-kyc"
 async function handleKYCCron(request: NextRequest) {
   // Triggers a fetch and import of PGF KYC data
   const response = await fetch(
-    "https://raw.githubusercontent.com/akathm/hippos/master/rpgf_status.csv",
+    "https://raw.githubusercontent.com/voteagora/op-rpgf-r4-6-kyc-status/main/rpgf_status.csv",
     {
       cache: "no-store",
     },
