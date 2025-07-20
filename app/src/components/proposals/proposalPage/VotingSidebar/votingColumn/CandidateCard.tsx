@@ -2,6 +2,7 @@
 
 import { ChevronRight } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
 import { cn } from "@/lib/utils"
@@ -24,22 +25,50 @@ const CandidateCard = ({
   setSelectedVote: () => void
   votingDisabled?: boolean
 }) => {
+  const [isHoveringButton, setIsHoveringButton] = useState(false)
+
+  const handleCardClick = () => {
+    const profileUrl = candidate.link.includes("http")
+      ? candidate.link
+      : `/${candidate.link}`
+    window.open(profileUrl, "_blank")
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      handleCardClick()
+    }
+  }
+
   return (
-    <div className="w-full h-10 p-2 rounded-[6px]">
+    <div
+      className="group w-full h-10 p-2 rounded-[6px] cursor-pointer hover:bg-secondary transition-colors duration-200"
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+    >
       <div className="flex items-center h-5 gap-[8px] justify-between">
         <div className="flex flex-row gap-2">
           <UserAvatar imageUrl={candidate?.avatar} size={"xs"} />
-          <CardUsername username={candidate.name} link={candidate.link} />
+          <CardUsername
+            username={candidate.name}
+            link={candidate.link}
+            isHoveringButton={isHoveringButton}
+          />
         </div>
         <div className="flex flex-row items-center gap-2">
           <CardApprovalButton
             selected={selectedVote}
             onClick={setSelectedVote}
             votingDisabled={votingDisabled}
+            onMouseEnter={() => setIsHoveringButton(true)}
+            onMouseLeave={() => setIsHoveringButton(false)}
           />
-          <a href={candidate.link} target="_blank" rel="noopener noreferrer">
+          <div className="pointer-events-none">
             <ChevronRight width={12} height={12} />
-          </a>
+          </div>
         </div>
       </div>
     </div>
@@ -49,9 +78,11 @@ const CandidateCard = ({
 const CardUsername = ({
   username,
   link,
+  isHoveringButton,
 }: {
   username: string
   link: string
+  isHoveringButton?: boolean
 }) => {
   return (
     <Link
@@ -59,7 +90,13 @@ const CardUsername = ({
       target="_blank"
       rel="noopener noreferrer"
       title={username}
-      className="font-normal min-w-5 max-w-[130px] text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis hover:underline cursor-pointer"
+      className={cn(
+        "font-normal min-w-5 max-w-[130px] text-[14px] leading-5 tracking-[0%] whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer transition-all duration-200",
+        {
+          "group-hover:underline": !isHoveringButton,
+          "hover:underline": isHoveringButton,
+        },
+      )}
     >
       {username}
     </Link>
@@ -70,30 +107,40 @@ const CardApprovalButton = ({
   selected = false,
   onClick,
   votingDisabled,
+  onMouseEnter,
+  onMouseLeave,
 }: {
   selected?: boolean
   onClick?: () => void
   votingDisabled?: boolean
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
 }) => {
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onClick) {
+      onClick()
+    }
+  }
   if (selected) {
     return (
-      <div
+      <button
         className={cn(
-          "w-[72px] h-6 px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-success",
+          "w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-success-foreground border-success",
           {
             "cursor-default": votingDisabled,
             "cursor-pointer": !votingDisabled,
           },
         )}
+        onClick={handleButtonClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        disabled={votingDisabled}
       >
-        <button
-          className="font-normal text-xs leading-5 text-success-foreground"
-          onClick={onClick}
-          disabled={votingDisabled}
-        >
+        <span className="font-medium text-xs leading-4 font-inter">
           Approved
-        </button>
-      </div>
+        </span>
+      </button>
     )
   }
 
@@ -102,15 +149,14 @@ const CardApprovalButton = ({
   }
 
   return (
-    <div
-      className={
-        "w-[65px] h-[24px] px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-secondary cursor-pointer"
-      }
+    <button
+      className="w-[65px] h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-foreground border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
+      onClick={handleButtonClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
-      <button className="font-normal text-xs leading-5" onClick={onClick}>
-        Approve
-      </button>
-    </div>
+      <span className="font-medium text-xs leading-4 font-inter">Approve</span>
+    </button>
   )
 }
 
