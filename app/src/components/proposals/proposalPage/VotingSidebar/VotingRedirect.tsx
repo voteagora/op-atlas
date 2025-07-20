@@ -21,7 +21,7 @@ const VotingRedirect = ({
     eligibility?.type === CITIZEN_TYPES.app
 
   return (
-    <div className="flex flex-col gap-2 w-[304px] justify-center items-center text-sm text-secondary-foreground">
+    <div className="flex flex-col gap-0.5 w-[304px] justify-center items-center text-sm text-secondary-foreground">
       <div className="flex flex-row gap-2 items-center">
         <div className="font-medium">Are you a delegate?</div>
 
