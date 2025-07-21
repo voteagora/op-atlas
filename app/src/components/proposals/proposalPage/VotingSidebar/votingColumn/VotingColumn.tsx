@@ -10,7 +10,7 @@ import { getChainId, switchChain } from "@wagmi/core"
 import { Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useEffect, useMemo, useRef, useState } from "react"
-import ReactCanvasConfetti from "react-canvas-confetti"
+import { useConfetti } from "@/providers/LayoutProvider"
 import { toast } from "sonner"
 
 import {
@@ -228,11 +228,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
-
-  const [showConfetti, setShowConfetti] = useState(false)
   const [isSmartContract, setIsSmartContract] = useState<boolean>(false)
   const [isCheckingWallet, setIsCheckingWallet] = useState<boolean>(false)
   const [hasCheckedWallet, setHasCheckedWallet] = useState<boolean>(false)
+
+  const setShowConfetti = useConfetti()
   const brightColors = useMemo(
     () => [
       "#FF0000",
@@ -245,11 +245,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     ],
     [],
   )
-
-  const confettiRef = useRef<any>(null)
-  const getInstance = (instance: any) => {
-    confettiRef.current = instance
-  }
 
   const handleVoteClick = (vote: {
     voteType: VoteType
@@ -329,34 +324,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       checkWalletType()
     }
   }, [signer, citizen?.address, hasCheckedWallet, isCheckingWallet])
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout | null = null
-    if (
-      showConfetti &&
-      confettiRef.current &&
-      typeof confettiRef.current.confetti === "function"
-    ) {
-      const segments = 20
-      for (let i = 0; i < segments; i++) {
-        const x = i / (segments - 1)
-        confettiRef.current.confetti({
-          particleCount: 150,
-          angle: 90,
-          spread: 200,
-          startVelocity: 100,
-          gravity: 0.35,
-          ticks: 500,
-          origin: { x, y: 0 },
-          colors: brightColors,
-        })
-      }
-      timeoutId = setTimeout(() => setShowConfetti(false), 8000)
-    }
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId)
-    }
-  }, [showConfetti, brightColors])
 
   if (
     isInitialLoad ||
@@ -636,20 +603,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   return (
     <>
-      <ReactCanvasConfetti
-        style={{
-          position: "fixed",
-          pointerEvents: "none",
-          width: "100vw",
-          height: "100vh",
-          top: 0,
-          left: 0,
-          zIndex: 9999,
-        }}
-        className="confetti-canvas"
-        onInit={getInstance}
-      />
-
       {/* Text on the top of the card */}
       <div className="w-full transition-opacity duration-300 border rounded-t-lg ease-in-out">
         <CardText
