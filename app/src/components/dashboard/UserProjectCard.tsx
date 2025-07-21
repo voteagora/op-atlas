@@ -49,8 +49,7 @@ const UserProjectCard = ({
     project.snapshots,
     project.lastMetadataUpdate,
   )
-  // const hasBeenPublished = project ? project?.snapshots.length > 0 : false
-  const hasBeenPublished = true
+  const hasBeenPublished = project ? project?.snapshots.length > 0 : false
 
   const { data: contracts } = useProjectContracts(project.id)
   const { data: projectDetails } = useProjectDetails(project.id)
