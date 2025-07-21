@@ -18,6 +18,7 @@ import { cn, getProjectStatus, projectHasUnpublishedChanges } from "@/lib/utils"
 
 import { CitizenshipBadge } from "../common/CitizenshipBadge"
 import ExternalLink from "../ExternalLink"
+import { PencilFill } from "../icons/remix"
 import { EnrolledCallout } from "../missions/common/callouts/EnrolledCallout"
 import { Avatar, AvatarImage } from "../ui/avatar"
 import { Badge } from "../ui/badge"
@@ -48,7 +49,8 @@ const UserProjectCard = ({
     project.snapshots,
     project.lastMetadataUpdate,
   )
-  const hasBeenPublished = project ? project?.snapshots.length > 0 : false
+  // const hasBeenPublished = project ? project?.snapshots.length > 0 : false
+  const hasBeenPublished = true
 
   const { data: contracts } = useProjectContracts(project.id)
   const { data: projectDetails } = useProjectDetails(project.id)
@@ -83,10 +85,7 @@ const UserProjectCard = ({
         className,
       )}
     >
-      <Link
-        href={`/projects/${project.id}/details`}
-        className="flex gap-x-6 pt-8 px-8"
-      >
+      <Link href={`/project/${project.id}`} className="flex gap-x-6 pt-8 px-8">
         <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-32 w-32 shrink-0">
           {project.thumbnailUrl ? (
             <Image
@@ -106,8 +105,11 @@ const UserProjectCard = ({
         </div>
 
         <div className="flex flex-col flex-1 min-w-0">
-          <div className="flex items-start">
+          <div className="flex flex-row w-full justify-between items-center">
             <h3 className="mr-3 text-base truncate">{project.name}</h3>
+            <Link href={`/projects/${project.id}/details`}>
+              <PencilFill className="w-4 h-4" />
+            </Link>
           </div>
 
           <p className="text-base text-secondary-foreground mt-3 line-clamp-2">
