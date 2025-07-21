@@ -105,7 +105,7 @@ const CandidateCards = ({
           {candidates.length} candidates
         </p>
       </div>
-      <div className="candidate-card-container mb-2 w-full sm:w-[272px]">
+      <div className="candidate-card-container mb-2 w-full sm:w-[272px] max-h-[344px] overflow-y-auto">
         {candidates.map((candidate, idx) => (
           <CandidateCard
             key={idx}
