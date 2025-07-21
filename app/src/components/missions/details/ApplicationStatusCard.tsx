@@ -31,7 +31,7 @@ export const ApplicationStatusCard = ({
   const { data } = useSession()
 
   const { track } = useAnalytics()
-
+  const applyBy = mission.applyBy as Date
   const buttonClickHandler = ({
     href,
     text,
@@ -142,7 +142,7 @@ export const ApplicationStatusCard = ({
 
         <p className="text-sm text-secondary-foreground text-center mb-2">
           {`Apply by ${format(
-            mission.applyBy,
+            applyBy,
             "MMM d",
           )} to earn rewards for your performance in ${format(
             new Date(new Date().getFullYear(), mission.evaluationMonth, 1),
@@ -260,7 +260,7 @@ export const ApplicationStatusCard = ({
 
             <p className="text-sm text-secondary-foreground text-center mb-2">
               {`Apply by ${format(
-                mission.applyBy,
+                applyBy,
                 "MMM d",
               )} to earn rewards for your performance in ${format(
                 new Date(new Date().getFullYear(), mission.evaluationMonth, 1),

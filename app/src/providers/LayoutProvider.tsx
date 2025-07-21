@@ -2,14 +2,13 @@
 
 import { usePathname } from "next/navigation"
 import React, { useEffect, useState } from "react"
+import { createContext, useContext, useRef } from "react"
+import ReactCanvasConfetti from "react-canvas-confetti"
 import { useWindowSize } from "usehooks-ts"
 
+import { Banner } from "@/components/common/Banner"
 import { MobileViewportWarning } from "@/components/common/MobileViewportWarning"
 import Navbar from "@/components/common/Navbar"
-import { ArrowRight } from "@/components/icons/remix"
-import Link from "next/link"
-import ReactCanvasConfetti from "react-canvas-confetti"
-import { createContext, useContext, useRef } from "react"
 
 const MOBILE_BREAKPOINT = 640 // Tailwind's `sm` breakpoint
 
@@ -44,6 +43,16 @@ export function useConfetti() {
   return ctx
 }
 
+const brightColors = [
+  "#FF0000",
+  "#FFD700",
+  "#00FF00",
+  "#00BFFF",
+  "#FF00FF",
+  "#FF8C00",
+  "#39FF14",
+]
+
 export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   const { width } = useWindowSize()
   const pathname = usePathname()
@@ -52,15 +61,7 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   // Confetti logic
   const [showConfetti, setShowConfetti] = useState(false)
   const confettiRef = useRef<any>(null)
-  const brightColors = [
-    "#FF0000",
-    "#FFD700",
-    "#00FF00",
-    "#00BFFF",
-    "#FF00FF",
-    "#FF8C00",
-    "#39FF14",
-  ]
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
     if (
@@ -84,7 +85,9 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
       }
       timeoutId = setTimeout(() => setShowConfetti(false), 8000)
     }
-    return () => { if (timeoutId) clearTimeout(timeoutId) }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [showConfetti])
 
   useEffect(() => {
@@ -99,6 +102,7 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <ConfettiContext.Provider value={setShowConfetti}>
       <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
+        <Banner />
         <Navbar />
         <ReactCanvasConfetti
           style={{
@@ -111,7 +115,9 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
             zIndex: 10001,
           }}
           className="confetti-canvas"
-          onInit={instance => { confettiRef.current = instance; }}
+          onInit={(instance) => {
+            confettiRef.current = instance
+          }}
         />
         {width < MOBILE_BREAKPOINT && isRestrictedRoute(pathname) ? (
           <MobileViewportWarning />
