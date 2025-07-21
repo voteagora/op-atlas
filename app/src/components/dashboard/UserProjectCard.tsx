@@ -80,7 +80,7 @@ const UserProjectCard = ({
   return (
     <div
       className={cn(
-        "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm",
+        "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm group",
         className,
       )}
     >
@@ -106,14 +106,46 @@ const UserProjectCard = ({
         <div className="flex flex-col flex-1 min-w-0">
           <div className="flex flex-row w-full justify-between items-center">
             <h3 className="mr-3 text-base truncate">{project.name}</h3>
-            <Link href={`/projects/${project.id}/details`}>
-              <PencilFill className="w-4 h-4" />
+
+            <Link
+              href={`/projects/${project.id}/details`}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <div className="flex flex-row items-center gap-2 text-sm text-secondary-foreground border border-border rounded-lg px-2 py-1">
+                Edit
+                <PencilFill className="w-4 h-4" />
+              </div>
             </Link>
           </div>
 
-          <p className="text-base text-secondary-foreground mt-3 line-clamp-2">
-            {project.description}
-          </p>
+          <div className="flex flex-row w-full justify-between items-center gap-4 justify-between">
+            <p className="text-base text-secondary-foreground mt-3 line-clamp-2">
+              {project.description}
+            </p>
+
+            {!hasBeenPublished && (
+              <div className="m-auto">
+                {progress === 100 ? (
+                  <div className="flex items-center">
+                    <Image
+                      alt="Checkmark"
+                      src="/assets/icons/circle-check-green.svg"
+                      height={16}
+                      width={16}
+                      className="w-4 h-4 object-center object-cover"
+                    />
+                    <p className="ml-2 text-sm text-secondary-foreground">
+                      Onchain
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <Progress value={progress} className="h-2 w-16" />
+                  </>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="mt-auto h-6 flex items-center gap-x-2">
             {isAdmin && (
@@ -166,28 +198,6 @@ const UserProjectCard = ({
             )}
           </div>
         </div>
-        {!hasBeenPublished && (
-          <div className="m-auto">
-            {progress === 100 ? (
-              <div className="flex items-center">
-                <Image
-                  alt="Checkmark"
-                  src="/assets/icons/circle-check-green.svg"
-                  height={16}
-                  width={16}
-                  className="w-4 h-4 object-center object-cover"
-                />
-                <p className="ml-2 text-sm text-secondary-foreground">
-                  Onchain
-                </p>
-              </div>
-            ) : (
-              <>
-                <Progress value={progress} className="h-2 w-16" />
-              </>
-            )}
-          </div>
-        )}
       </Link>
 
       <div className="px-8 pb-8">
