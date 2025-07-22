@@ -1,5 +1,8 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { reverse } from "ramda"
 import { memo, useMemo } from "react"
 
@@ -77,10 +80,12 @@ const UserProjectCard = ({
       }, [])
   }, [applications, project.id])
 
+  const router = useRouter()
+
   return (
     <div
       className={cn(
-        "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm group",
+        "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm group relative",
         className,
       )}
     >
@@ -109,12 +114,19 @@ const UserProjectCard = ({
 
             <Link
               href={`/projects/${project.id}/details`}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-row items-center gap-2 text-sm text-secondary-foreground absolute top-0 right-0 mt-8 mr-8"
+              passHref
             >
-              <div className="flex flex-row items-center gap-2 text-sm text-secondary-foreground border border-border rounded-lg px-2 py-1">
-                Edit
-                <PencilFill className="w-4 h-4" />
-              </div>
+              <Button
+                asChild
+                variant="outline"
+                className="flex flex-row items-center gap-2 text-sm text-secondary-foreground"
+              >
+                <span className="flex flex-row items-center gap-2">
+                  Edit
+                  <PencilFill className="w-4 h-4" />
+                </span>
+              </Button>
             </Link>
           </div>
 
