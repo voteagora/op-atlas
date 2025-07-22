@@ -1,8 +1,8 @@
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
+
 import { ProposalRow } from "./ProposalRow"
 
 export interface StandardProposalProps {
-  rounded?: boolean
   voted?: boolean
   passed?: boolean
   badge: {
@@ -31,9 +31,9 @@ const Proposals = ({ proposals }: StandardProposalsProps) => {
           Proposals
         </h4>
       </div>
-      <div>
+      <div className="border border-border rounded-lg divide-y divide-border">
         {proposals.map((proposal, index) => (
-          <ProposalRow key={index} rounded={index === 0} {...proposal} />
+          <ProposalRow key={index} {...proposal} />
         ))}
       </div>
     </div>

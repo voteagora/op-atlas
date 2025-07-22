@@ -13,15 +13,11 @@ import { cn } from "@/lib/utils"
 
 type ProposalCardProps = {
   children: React.ReactNode
-  rounded?: boolean
+  className?: string
   href?: string
 }
 
-const ProposalCard = ({
-  children,
-  rounded = false,
-  href,
-}: ProposalCardProps) => {
+const ProposalCard = ({ children, className, href }: ProposalCardProps) => {
   const handleClick = () => {
     if (href) {
       window.location.href = href
@@ -32,11 +28,8 @@ const ProposalCard = ({
     <button
       type="button"
       className={cn(
-        "border-border group cursor-pointer w-full text-left bg-transparent p-0",
-        {
-          "border border-border rounded-t-lg": rounded,
-          "border-l border-r border-b border-border": !rounded,
-        },
+        "group cursor-pointer w-full text-left bg-transparent p-0 hover:bg-secondary",
+        className,
       )}
       onClick={handleClick}
     >
@@ -165,7 +158,7 @@ const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
       <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate group-hover:underline group-hover:underline-offset-4 text-[16px] text-text-default">
         {title}
       </div>
-      <p className="text-base md:font-normal sm:font-200 text-text-secondary leading-6 text-[16px] truncate">
+      <p className="text-base md:font-normal sm:font-200 text-secondary-foreground leading-6 text-[16px] truncate">
         {subtitle}
       </p>
     </div>

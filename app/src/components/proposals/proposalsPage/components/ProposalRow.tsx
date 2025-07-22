@@ -1,6 +1,7 @@
 "use client"
 
-import { StandardProposalProps } from "./Proposals"
+import { useSession } from "next-auth/react"
+
 import ProposalCard, {
   ProposalArrow,
   ProposalBadge,
@@ -8,11 +9,12 @@ import ProposalCard, {
   ProposalDates,
   ProposalTextContent,
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
-import { useSession } from "next-auth/react"
+
+import { StandardProposalProps } from "./Proposals"
 
 export const ProposalRow = (props: StandardProposalProps) => {
   return (
-    <ProposalCard rounded={props.rounded || false} href={props.arrow.href}>
+    <ProposalCard href={props.arrow.href} >
       <ProposalBadge type={props.badge.badgeType} />
       <ProposalTextContent
         title={props.textContent.title}
