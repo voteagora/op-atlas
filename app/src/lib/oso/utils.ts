@@ -388,3 +388,16 @@ export function formatMetricsData(
     return acc
   }, {} as Record<string, { tranche: number; value: string }[]>)
 }
+
+export const generateTrancheMonths = (startDate: string) => {
+  const start = new Date(startDate)
+  const end = new Date(new Date().setMonth(new Date().getMonth() - 1))
+  const months: Record<number, string> = {}
+  let monthIndex = 1
+
+  for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
+    months[monthIndex++] = d.toLocaleString("default", { month: "short" })
+  }
+
+  return months
+}

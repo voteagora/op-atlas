@@ -11,6 +11,45 @@ import { CitizenshipQualification } from "@/lib/types"
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL
 
 // Helper functions for voting card props
+const defaultCardText = (proposalData?: ProposalData) => {
+  if (proposalData) {
+    switch (proposalData.proposalType) {
+      case ProposalType.OFFCHAIN_STANDARD:
+      case ProposalType.HYBRID_STANDARD:
+        return {
+          cardText: {
+            title: "Cast your citizen vote",
+            descriptionElement:
+              "This proposal requires approval from the Citizens' House and Token House. Read more about the voting mechanism here",
+          },
+        }
+      case ProposalType.OFFCHAIN_OPTIMISTIC:
+      case ProposalType.HYBRID_OPTIMISTIC_TIERED:
+        return {
+          cardText: {
+            title: "Cast your citizen vote",
+            descriptionElement:
+              "This proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
+          },
+        }
+      default:
+        return {
+          cardText: {
+            title: "Cast your citizen vote",
+            descriptionElement: "",
+          },
+        }
+    }
+  }
+  // Fallback to just title
+  return {
+    cardText: {
+      title: "Cast your citizen vote",
+      descriptionElement: "",
+    },
+  }
+}
+
 const comingSoon = (proposalData: ProposalData) => {
   const startDate = new Date(proposalData.createdTime)
   const endDate = new Date(proposalData.endTime)
@@ -146,23 +185,8 @@ const getNonCitizenTypes = (
     case ProposalType.OFFCHAIN_OPTIMISTIC:
       return wantToVote(eligibility)
     default:
-      return {} as VotingCardProps
+      return defaultCardText()
   }
-}
-
-// Function to get vote options
-const getVoteOptions = () => {
-  // TODO: For approval voting
-  // return Array(8).fill({
-  //   name: "Username",
-  //   image: {
-  //     src: "https://i.imgur.com/0000000.png",
-  //     alt: "Image",
-  //   },
-  //   organizations: ["Org 1", "Org 2", "Org 3"],
-  //   buttonLink: "https://google.com",
-  // })
-  return []
 }
 
 /**
@@ -203,19 +227,16 @@ export const getVotingCardProps = (
       ...getCitizenTypes(proposalData, vote),
     }
   }
-  if (!eligibility) {
-    // may need to change
+
+  if (eligibility) {
     return {
-      cardText: {
-        title: "Cast your citizen vote",
-        descriptionElement:
-          "The proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
-      },
+      ...getNonCitizenTypes(proposalData, eligibility),
     }
+
   }
-  return {
-    ...getNonCitizenTypes(proposalData, eligibility),
-  }
+
+  // Fallback
+  return defaultCardText(proposalData)
 }
 
 /**

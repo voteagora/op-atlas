@@ -13,7 +13,7 @@ import OnchainBuilderMission from "./OnchainBuilderMission"
 import { MissionProps } from "@/lib/oso/types"
 
 const getDateRange = (type: MissionProps["type"]) =>
-  type === "on-chain" ? "Feb 17 - Jul 30, 2025" : "Feb 4 - Jul 30, 2025"
+  type === "on-chain" ? "Feb 17 - Dec 31, 2025" : "Feb 4 - Dec 31, 2025"
 
 const getMissionLink = (type: MissionProps["type"]) =>
   type === "on-chain"

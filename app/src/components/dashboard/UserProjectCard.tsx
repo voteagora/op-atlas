@@ -85,7 +85,7 @@ const UserProjectCard = ({
   return (
     <div
       className={cn(
-        "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm group relative",
+        "flex flex-col gap-x-6 border rounded-xl hover:shadow-sm group relative group",
         className,
       )}
     >
@@ -128,35 +128,38 @@ const UserProjectCard = ({
                 </span>
               </Button>
             </Link>
+
           </div>
 
           <div className="flex flex-row w-full justify-between items-center gap-4 justify-between">
-            <p className="text-base text-secondary-foreground mt-3 line-clamp-2">
-              {project.description}
-            </p>
+            <div className="flex flex-row w-full justify-between items-center gap-4 justify-between">
+              <p className="text-base text-secondary-foreground mt-3 line-clamp-2">
+                {project.description}
+              </p>
 
-            {!hasBeenPublished && (
-              <div className="m-auto">
-                {progress === 100 ? (
-                  <div className="flex items-center">
-                    <Image
-                      alt="Checkmark"
-                      src="/assets/icons/circle-check-green.svg"
-                      height={16}
-                      width={16}
-                      className="w-4 h-4 object-center object-cover"
-                    />
-                    <p className="ml-2 text-sm text-secondary-foreground">
-                      Onchain
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <Progress value={progress} className="h-2 w-16" />
-                  </>
-                )}
-              </div>
-            )}
+              {!hasBeenPublished && (
+                <div className="m-auto">
+                  {progress === 100 ? (
+                    <div className="flex items-center">
+                      <Image
+                        alt="Checkmark"
+                        src="/assets/icons/circle-check-green.svg"
+                        height={16}
+                        width={16}
+                        className="w-4 h-4 object-center object-cover"
+                      />
+                      <p className="ml-2 text-sm text-secondary-foreground">
+                        Onchain
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <Progress value={progress} className="h-2 w-16" />
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="mt-auto h-6 flex items-center gap-x-2">

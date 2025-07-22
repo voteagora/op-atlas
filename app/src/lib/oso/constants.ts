@@ -1,11 +1,16 @@
 export const BATCH_SIZE = 100
 export const INDEXED_MONTHS = {
-  2: "February",
-  3: "March",
-  4: "April",
+  2: "Feb",
+  3: "Mar",
+  4: "Apr",
   5: "May",
-  6: "June",
-  7: "July",
+  6: "Jun",
+  7: "Jul",
+  8: "Aug",
+  9: "Sep",
+  10: "Oct",
+  11: "Nov",
+  12: "Dec",
 }
 export const MONTHS = Object.values(INDEXED_MONTHS)
 export const RETROFUNDING_OP_REWARD_MINIMUM = 200
@@ -51,11 +56,12 @@ export const OSO_QUERY_DATES = {
 }
 
 export const TRANCHE_MONTHS_MAP = {
-  1: "February",
-  2: "March",
-  3: "April",
+  1: "Feb",
+  2: "Mar",
+  3: "Apr",
   4: "May",
-  5: "June",
+  5: "Jun",
+  6: "Jul",
 }
 
 export const CHARTS_TRAILING_DAYS = 3
