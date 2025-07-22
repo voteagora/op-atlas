@@ -1,5 +1,6 @@
 "use client"
 
+import { UIProposal } from "@/components/proposals/proposal.types"
 import ProposalCard, {
   ProposalArrow,
   ProposalBadge,
@@ -7,15 +8,10 @@ import ProposalCard, {
   ProposalMetaData,
   ProposalTextContent,
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
-import { UIProposal } from "@/components/proposals/proposal.types"
 
-interface ProposalRowProps extends UIProposal {
-  rounded: boolean
-}
-
-export const ProposalRow = (props: ProposalRowProps) => {
+export const ProposalRow = (props: UIProposal) => {
   return (
-    <ProposalCard rounded={props.rounded || false} href={props.arrow.href}>
+    <ProposalCard href={props.arrow.href} >
       <ProposalBadge type={props.badge.badgeType} />
       <ProposalTextContent
         title={props.textContent.title}

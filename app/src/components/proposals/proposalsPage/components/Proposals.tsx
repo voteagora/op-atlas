@@ -1,5 +1,6 @@
-import { ProposalRow } from "./ProposalRow"
 import { UIProposal } from "@/components/proposals/proposal.types"
+
+import { ProposalRow } from "./ProposalRow"
 
 interface StandardProposalsProps {
   proposals: UIProposal[]
@@ -12,9 +13,9 @@ const Proposals = ({ proposals }: StandardProposalsProps) => {
           Proposals
         </h4>
       </div>
-      <div>
+      <div className="border border-border rounded-lg divide-y divide-border">
         {proposals.map((proposal, index) => (
-          <ProposalRow key={index} {...proposal} rounded={index === 0} />
+          <ProposalRow key={index} {...proposal} />
         ))}
       </div>
     </div>
