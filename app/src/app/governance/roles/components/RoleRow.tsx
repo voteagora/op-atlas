@@ -2,16 +2,16 @@
 
 import { Role } from "@prisma/client"
 
-import { formatMMMd } from "@/lib/utils/date"
 import ProposalCard, {
   ProposalArrow,
-  ProposalMetaData,
-  ProposalTextContent,
   ProposalBadge,
   ProposalBadgeType,
+  ProposalMetaData,
+  ProposalTextContent,
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
+import { formatMMMd } from "@/lib/utils/date"
 
-export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
+export function RoleRow({ role }: { role: Role }) {
   const isActive =
     role.startAt &&
     role.endAt &&
@@ -20,7 +20,7 @@ export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
   const isUpcoming = role.startAt && new Date() < new Date(role.startAt)
 
   return (
-    <ProposalCard rounded={rounded} href={`/governance/roles/${role.id}`}>
+    <ProposalCard href={`/governance/roles/${role.id}`}>
       <ProposalBadge
         type={
           isActive

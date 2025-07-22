@@ -1,4 +1,5 @@
 import { Role } from "@prisma/client"
+
 import { AnalyticsTracker } from "@/app/governance/components/AnalyticsTracker"
 import { RoleRow } from "@/app/governance/roles/components/RoleRow"
 
@@ -11,9 +12,9 @@ export default function RolesPage({ roles }: { roles: Role[] }) {
 
       <AnalyticsTracker />
 
-      <div className="flex flex-col">
-        {roles.map((role, index) => (
-          <RoleRow key={role.id} role={role} rounded={index === 0} />
+      <div className="flex flex-col border border-border rounded-lg divide-y divide-border">
+        {roles.map((role) => (
+          <RoleRow key={role.id} role={role} />
         ))}
       </div>
     </div>
