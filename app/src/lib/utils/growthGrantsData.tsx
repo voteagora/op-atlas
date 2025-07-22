@@ -185,4 +185,26 @@ export const growthGrantsData: MissionData = {
         "40% upfront and 60% upon completion of critical milestones.",
     },
   ],
+  featuredProjects: [
+    {
+      name: "Moonwell",
+      description:
+        "Moonwell is an open and decentralized lending and borrowing protocol built on Base.",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/8d393569-26d8-4ce2-89cf-898077c88b52.png",
+      href: "https://atlas.optimism.io/project/0xd4f0252e6ac2408099cd40d213fb6f42e8fa129b446d6e8da55e673598ef14c0",
+      rewardAmount: "205k",
+      rewardIcon: "/assets/icons/op-icon.svg",
+    },
+    {
+      name: "Sake Finance",
+      description:
+        "Sake Finance is the leading money markets protocol with a decentralized stablecoin and agentic strategies on Soneium.",
+      imageUrl:
+        "https://storage.googleapis.com/op-atlas/161e64ce-bd77-4b81-84a8-5ff04cc6013b.png",
+      href: "https://atlas.optimism.io/project/0x18923b60296e26a8ce35a0b4754cd6fd5427b2820a202f82901c826794fdbc9e",
+      rewardAmount: "66.9k",
+      rewardIcon: "/assets/icons/op-icon.svg",
+    },
+  ],
 }
