@@ -38,10 +38,8 @@ export default function DevToolingMission({
   return (
     <div className="space-y-3">
       {opRewardSum > 0 && (
-        <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
-          <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-[#FFF0F1]" />
-
-          <div className="absolute w-full h-full z-50">
+        <div className="mt-6 relative w-full h-64">
+          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] border-[#FDA4C4] border-[2px] rounded-xl">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
@@ -72,7 +70,7 @@ export default function DevToolingMission({
         </div>
       )}
       <Tabs
-        defaultValue={Object.values(DEV_TOOLING_MONTHS).pop() || ''}
+        defaultValue={Object.values(DEV_TOOLING_MONTHS).pop() || ""}
         className="w-full mt-12"
       >
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
@@ -156,7 +154,7 @@ export default function DevToolingMission({
                 title={`Trusted developers engaging with ${projectName}`}
                 index={1}
               />
-              <div className="w-full col-span-full border rounded-xl p-6 h-[166px]">
+              <div className="w-full col-span-full border rounded-xl p-6 min-h-[166px]">
                 <div className="flex justify-between items-start h-full">
                   <div className="flex flex-col justify-between h-full w-full">
                     <div>
@@ -194,7 +192,7 @@ export default function DevToolingMission({
                                     alt={project?.name ?? ""}
                                     width={24}
                                     height={24}
-                                    className="mr-2 mt-[-1px] mb-[-1px]"
+                                    className="mr-2 mt-[-2px] mb-[-2px]"
                                   />
                                 )}
                                 {project?.name}

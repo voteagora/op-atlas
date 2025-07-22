@@ -44,9 +44,7 @@ export default function OnchainBuilderMission({
     <div className="space-y-3">
       {opRewardSum > 0 && (
         <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
-          <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-[#FFF0F1]" />
-
-          <div className="absolute w-full h-full z-50">
+          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] border-[#FDA4C4] border-[2px] rounded-xl">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
