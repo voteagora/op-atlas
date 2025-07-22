@@ -78,7 +78,7 @@ export default function OnchainBuilderMission({
         defaultValue={Object.values(ONCHAIN_BUILDER_MONTHS).pop() || ""}
         className="w-full mt-12"
       >
-        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
+        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit p-0">
           {MONTHS.map((month, index) => {
             const isFutureMonth = !Object.values(
               ONCHAIN_BUILDER_MONTHS,
