@@ -6,13 +6,17 @@ import React from "react"
 
 import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
+import ExternalLink from "@/components/ExternalLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MONTHS, TRANCHE_MONTHS_MAP } from "@/lib/oso/constants"
+import { MONTHS } from "@/lib/oso/constants"
 import { DevToolingMissionProps } from "@/lib/oso/types"
+import { generateTrancheMonths } from "@/lib/oso/utils"
 import { formatNumber } from "@/lib/utils"
 
 import MetricCard from "./MetricCard"
+
+const DEV_TOOLING_MONTHS = generateTrancheMonths("2025-02-01")
 
 export default function DevToolingMission({
   data,
@@ -34,25 +38,8 @@ export default function DevToolingMission({
   return (
     <div className="space-y-3">
       {opRewardSum > 0 && (
-        <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
-          <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF5C6C] via-[#FF67B5] animate-slow-spin" />
-          <Image
-            className="absolute top-0 left-0 z-0 p-0.5 rounded-xl"
-            src="/assets/images/rewards-dev-tooling-banner.png"
-            objectFit="cover"
-            objectPosition="center"
-            layout="fill"
-            alt="Rewards Banner"
-          />
-          <Image
-            src="/assets/images/rewards-dev-tooling-element.png"
-            width={256}
-            height={256}
-            alt="Dev Tooling"
-            className="absolute bottom-0.5 right-0.5 rounded-br-[11px]"
-          />
-
-          <div className="absolute w-full h-full z-50">
+        <div className="mt-6 relative w-full h-64">
+          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] border-[#FDA4C4] border-[2px] rounded-xl">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
@@ -83,19 +70,19 @@ export default function DevToolingMission({
         </div>
       )}
       <Tabs
-        defaultValue={MONTHS[Object.keys(TRANCHE_MONTHS_MAP).length - 1]}
+        defaultValue={Object.values(DEV_TOOLING_MONTHS).pop() || ""}
         className="w-full mt-12"
       >
-        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
+        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit p-0">
           {MONTHS.map((month, index) => {
             const isFutureMonth =
-              !Object.values(TRANCHE_MONTHS_MAP).includes(month)
+              !Object.values(DEV_TOOLING_MONTHS).includes(month)
             return (
               <TabsTrigger
                 disabled={isFutureMonth}
                 key={index}
                 value={month}
-                className="rounded-lg py-2 px-4 bg-secondary text-secondary-foreground border border-tertiary min-w-36 w-full data-[state=active]:bg-background data-[state=active]:text-foreground"
+                className="rounded-lg py-2 px-4 bg-secondary text-secondary-foreground data-[state=active]:border data-[state=active]:border-tertiary w-full data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=disabled]:opacity-50 h-9"
               >
                 {month}
               </TabsTrigger>
@@ -167,7 +154,7 @@ export default function DevToolingMission({
                 title={`Trusted developers engaging with ${projectName}`}
                 index={1}
               />
-              <div className="w-full col-span-full border rounded-xl p-6 h-[166px]">
+              <div className="w-full col-span-full border rounded-xl p-6 min-h-[166px]">
                 <div className="flex justify-between items-start h-full">
                   <div className="flex flex-col justify-between h-full w-full">
                     <div>
@@ -182,36 +169,35 @@ export default function DevToolingMission({
                       Projects enrolled in Retro Funding: Onchain Builders only
                     </p>
                   </div>
-                  <div className="w-full py-1.5 h-full">
-                    <ul className="w-full grid lg:grid-cols-2 grid-cols-1 gap-4">
+                  <div className="w-full h-full">
+                    <ul className="w-full grid lg:grid-cols-2 grid-cols-1">
                       {devToolingMetrics?.topProjects?.[month]?.map(
                         (project, index) => {
                           return (
-                            <li
-                              key={index}
-                              className="space-x-2 flex items-center"
+                            <TrackedLink
+                              href={`/project/${project?.id}`}
+                              eventName="Link Click"
+                              target="_blank"
+                              eventData={{
+                                projectId: project?.id,
+                                source: "project_page",
+                                linkName: "Top Projects",
+                              }}
+                              key={project?.id || index}
                             >
-                              {project?.thumbnailUrl && (
-                                <Image
-                                  src={project.thumbnailUrl}
-                                  alt={project?.name ?? ""}
-                                  width={24}
-                                  height={24}
-                                />
-                              )}
-                              <TrackedLink
-                                href={`/project/${project?.id}`}
-                                eventName="Link Click"
-                                target="_blank"
-                                eventData={{
-                                  projectId: project?.id,
-                                  source: "project_page",
-                                  linkName: "Top Projects",
-                                }}
-                              >
+                              <li className="space-x-2 flex items-center py-[10px] px-3 hover:underline hover:bg-secondary rounded-lg">
+                                {project?.thumbnailUrl && (
+                                  <Image
+                                    src={project.thumbnailUrl}
+                                    alt={project?.name ?? ""}
+                                    width={24}
+                                    height={24}
+                                    className="mr-2 mt-[-2px] mb-[-2px]"
+                                  />
+                                )}
                                 {project?.name}
-                              </TrackedLink>
-                            </li>
+                              </li>
+                            </TrackedLink>
                           )
                         },
                       )}
@@ -248,9 +234,12 @@ export default function DevToolingMission({
                     <div className="pl-6">
                       <p className="text-secondary-foreground text-base font-normal">
                         Rewards are determined by an{" "}
-                        <span className="font-semibold">
+                        <ExternalLink
+                          href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
+                          className="underline"
+                        >
                           evaluation algorithm
-                        </span>{" "}
+                        </ExternalLink>{" "}
                         powered by onchain data, and some metrics are more
                         valuable than others.
                       </p>

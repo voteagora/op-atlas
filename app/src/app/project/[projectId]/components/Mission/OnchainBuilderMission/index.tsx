@@ -6,6 +6,7 @@ import React from "react"
 
 import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
+import ExternalLink from "@/components/ExternalLink"
 import {
   Accordion,
   AccordionContent,
@@ -13,13 +14,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MONTHS, TRANCHE_MONTHS_MAP } from "@/lib/oso/constants"
+import { MONTHS } from "@/lib/oso/constants"
 import { OnchainBuilderMissionProps } from "@/lib/oso/types"
+import { generateTrancheMonths } from "@/lib/oso/utils"
 import { formatNumber } from "@/lib/utils"
 
 import AlertContainer from "./AlertContainer"
 import MetricCard from "./MetricCard"
 import NotPassingEligibility from "./NotPassingEligibility"
+
+const ONCHAIN_BUILDER_MONTHS = generateTrancheMonths("2025-02-01")
 
 export default function OnchainBuilderMission({
   data,
@@ -40,23 +44,7 @@ export default function OnchainBuilderMission({
     <div className="space-y-3">
       {opRewardSum > 0 && (
         <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
-          <div className="-top-[1024px] -left-[512px] rounded-full absolute w-[2048px] h-[2048px] bg-gradient-to-br from-[#FF744A78] from-50% to-[#FF5C6C] via-[#FF67B5] animate-slow-spin" />
-          <Image
-            className="absolute top-0 left-0 z-0 p-0.5 rounded-xl"
-            src="/assets/images/rewards-on-chain-banner.png"
-            objectFit="cover"
-            objectPosition="center"
-            layout="fill"
-            alt="Rewards Banner"
-          />
-          <Image
-            src="/assets/images/rewards-on-chain-element.png"
-            width={256}
-            height={256}
-            alt="Dev Tooling"
-            className="absolute bottom-0.5 right-0.5 rounded-br-[11px]"
-          />
-          <div className="absolute w-full h-full z-50">
+          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] border-[#FDA4C4] border-[2px] rounded-xl">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
@@ -87,19 +75,20 @@ export default function OnchainBuilderMission({
         </div>
       )}
       <Tabs
-        defaultValue={MONTHS[Object.keys(TRANCHE_MONTHS_MAP).length - 1]}
+        defaultValue={Object.values(ONCHAIN_BUILDER_MONTHS).pop() || ""}
         className="w-full mt-12"
       >
-        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit">
+        <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit p-0">
           {MONTHS.map((month, index) => {
-            const isFutureMonth =
-              !Object.values(TRANCHE_MONTHS_MAP).includes(month)
+            const isFutureMonth = !Object.values(
+              ONCHAIN_BUILDER_MONTHS,
+            ).includes(month)
             return (
               <TabsTrigger
                 disabled={isFutureMonth}
                 key={index}
                 value={month}
-                className="rounded-lg py-2 px-4 bg-secondary text-secondary-foreground border border-tertiary min-w-36 w-full data-[state=active]:bg-background data-[state=active]:text-foreground"
+                className="rounded-lg py-2 px-4 bg-secondary text-secondary-foreground data-[state=active]:border data-[state=active]:border-tertiary w-full data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=disabled]:opacity-50 h-9"
               >
                 {month}
               </TabsTrigger>
@@ -296,9 +285,12 @@ export default function OnchainBuilderMission({
                       <div className="pl-6">
                         <p className="text-secondary-foreground text-base font-normal">
                           Rewards are determined by an{" "}
-                          <span className="font-semibold">
+                          <ExternalLink
+                            href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
+                            className="underline"
+                          >
                             evaluation algorithm
-                          </span>{" "}
+                          </ExternalLink>{" "}
                           powered by onchain data, and some metrics are more
                           valuable than others.
                         </p>

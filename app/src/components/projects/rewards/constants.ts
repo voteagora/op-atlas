@@ -4,10 +4,10 @@ export const REWARDS_NAMES = {
   "6": { name: "Retro Funding 6: Governance", date: "Sep 26, 2024" },
   "7": {
     name: "Retro Funding Mission: Dev Tooling",
-    date: "Feb 4 - Jul 30, 2025",
+    date: "Feb 4 - Dec 31, 2025",
   },
   "8": {
     name: "Retro Funding Mission: Onchain Builders",
-    date: "Feb 12 - July 31, 2025",
+    date: "Feb 12 - Dec 31, 2025",
   },
 }
