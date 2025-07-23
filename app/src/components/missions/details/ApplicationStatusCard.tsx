@@ -8,10 +8,10 @@ import { useSession } from "next-auth/react"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { MissionData } from "@/lib/MissionsAndRoundData"
+import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { Button } from "../../ui/button"
 import { GreenBadge } from "../common/badges/GreenBadge"
-import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export const ApplicationStatusCard = ({
   isLoading,
@@ -57,7 +57,7 @@ export const ApplicationStatusCard = ({
           Visit the Grants Council website to learn more and apply.
         </p>
         <Button
-          className="bg-optimismRed text-white w-full"
+          className="bg-optimismRed text-white w-full border-0"
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
@@ -79,13 +79,15 @@ export const ApplicationStatusCard = ({
   } else if (mission?.pageName === "audit-grants") {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold hidden md:block">Find an Audit Service Provider</p>
+        <p className="font-semibold hidden md:block">
+          Find an Audit Service Provider
+        </p>
 
         <p className="text-sm text-secondary-foreground text-center mb-2">
           Get in contact with an ASP, and they&apos;ll apply on your behalf.
         </p>
         <Button
-          className="bg-optimismRed text-white w-full"
+          className="bg-optimismRed text-white w-full border-0"
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
@@ -104,7 +106,7 @@ export const ApplicationStatusCard = ({
         </Button>
       </div>
     )
-  } else if(mission?.pageName === "foundation-missions") {
+  } else if (mission?.pageName === "foundation-missions") {
     return (
       <div className="flex flex-col items-center gap-2">
         <p className="font-semibold hidden md:block">Explore opportunities</p>
@@ -113,7 +115,7 @@ export const ApplicationStatusCard = ({
           View opportunities in the Optimism GitHub Repo
         </p>
         <Button
-          className="bg-optimismRed text-white w-full"
+          className="bg-optimismRed text-white w-full border-0"
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
@@ -148,7 +150,7 @@ export const ApplicationStatusCard = ({
           )}.`}
         </p>
         <Button
-          className="bg-optimismRed text-white w-full"
+          className="bg-optimismRed text-white w-full border-0"
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
@@ -266,7 +268,7 @@ export const ApplicationStatusCard = ({
               )}.`}
             </p>
             <Button
-              className="bg-optimismRed text-white w-full"
+              className="bg-optimismRed text-white w-full border-0"
               variant={"outline"}
               onClick={() => {
                 router.push(`/missions/${mission.pageName}/application`)
