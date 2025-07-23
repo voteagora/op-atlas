@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
-import { UserAvatarLarge } from "@/components/common/UserAvatarLarge"
+import { UserAvatar } from "@/components/common/UserAvatar"
 import CitizenshipResignDialog from "@/components/dialogs/CitizenshipResignDialog"
 import { Button } from "@/components/ui/button"
 import { useOrganization } from "@/hooks/db/useOrganization"
@@ -67,7 +67,7 @@ export const SidebarActiveCitizen = ({
   return (
     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
       {citizen.type === CITIZEN_TYPES.user ? (
-        <UserAvatarLarge imageUrl={citizenAvatar} />
+        <UserAvatar imageUrl={citizenAvatar} size="lg" />
       ) : (
         <div>
           {citizenAvatar ? (
