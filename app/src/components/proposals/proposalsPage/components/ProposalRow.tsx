@@ -11,38 +11,6 @@ import ProposalCard, {
 import { useSession } from "next-auth/react"
 
 export const ProposalRow = (props: StandardProposalProps) => {
-  const { data: session } = useSession()
-  const voteStatus = () => {
-    if (props.badge.badgeType === ProposalBadgeType.now) {
-      if (!session?.user?.id) {
-        return null
-      }
-      if (props.voted) {
-        return {
-          text: "You voted",
-          styling: "text-success-foreground",
-        }
-      }
-      return {
-        text: "You haven't voted yet",
-        styling: "text-primary",
-      }
-    } else if (props.badge.badgeType === ProposalBadgeType.past) {
-      if (props.passed) {
-        return {
-          text: "Result Positive ie: Passed",
-          styling: "text-success-foreground",
-        }
-      }
-
-      return {
-        text: "Result Negative ie: Failed",
-        styling: "text-primary",
-      }
-    }
-    return undefined
-  }
-
   return (
     <ProposalCard rounded={props.rounded || false} href={props.arrow.href}>
       <ProposalBadge type={props.badge.badgeType} />
@@ -54,7 +22,9 @@ export const ProposalRow = (props: StandardProposalProps) => {
         <ProposalDates
           startDate={props.dates.startDate}
           endDate={props.dates.endDate}
-          voteStatus={voteStatus()}
+          voted={props.voted}
+          badgeType={props.badge.badgeType as ProposalBadgeType}
+          passed={props.passed}
         />
       </div>
       <ProposalArrow href={props.arrow.href} />

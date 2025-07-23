@@ -4,26 +4,35 @@ import Image from "next/image"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { CitizenshipQualification } from "@/lib/types"
 
-import { UserAvatarLarge } from "./UserAvatarLarge"
+import { UserAvatar } from "./UserAvatar"
 
 export const EligibleCitizenAvatar = ({
   user,
   qualification,
+  size,
 }: {
   user: User
   qualification: CitizenshipQualification
+  size?: "sm" | "lg"
 }) => {
   if (qualification.type === CITIZEN_TYPES.user) {
-    return <UserAvatarLarge imageUrl={user?.imageUrl} />
+    return <UserAvatar imageUrl={user?.imageUrl} size={size} />
+  }
+
+  let imgSize = 64
+  switch (size) {
+    case "sm":
+      imgSize = 20
+      break
   }
 
   return qualification.avatar ? (
     <Image
-      className="w-[64px] h-[64px] rounded-md"
+      className={`w-[${imgSize}px] h-[${imgSize}px] rounded-md`}
       src={qualification.avatar || ""}
       alt={qualification.title}
-      width={64}
-      height={64}
+      width={imgSize}
+      height={imgSize}
     />
   ) : (
     <div className="w-[64px] h-[64px] rounded-md bg-muted" />

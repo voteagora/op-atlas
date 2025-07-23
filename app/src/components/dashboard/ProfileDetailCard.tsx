@@ -13,8 +13,8 @@ import { CITIZEN_TYPES } from "@/lib/constants"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 
+import { UserAvatar } from "../common/UserAvatar"
 import { CitizenshipBadge } from "../common/CitizenshipBadge"
-import { UserAvatarLarge } from "../common/UserAvatarLarge"
 import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
 import { ArrowDropRight } from "../icons/ArrowDropRight"
 import { Button } from "../ui/button"
@@ -100,7 +100,7 @@ const ProfileDetailCard = ({
   return (
     <div className="flex gap-x-4">
       {user.imageUrl ? (
-        <UserAvatarLarge imageUrl={user.imageUrl} />
+        <UserAvatar imageUrl={user.imageUrl} />
       ) : (
         <button
           onClick={() => setShowImportDialog(true)}

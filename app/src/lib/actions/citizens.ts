@@ -60,11 +60,11 @@ export const s8CitizenshipQualification =
     // ------------------------------------------------------------
     // Organization (Chain) qualification
     const qualifyingChains = await prisma.$queryRaw<S8QualifyingChain[]>`
-    SELECT * FROM "S8QualifyingChain"
-    WHERE "organizationId" = ANY(${
-      userOrgs?.organizations.map((org) => org.organization.id) || []
-    })
-  `
+      SELECT * FROM "S8QualifyingChain"
+      WHERE "organizationId" = ANY(${
+        userOrgs?.organizations.map((org) => org.organization.id) || []
+      })
+    `
 
     if (qualifyingChains.length > 0) {
       const existingCitizen = await prisma.citizen.findFirst({
@@ -111,20 +111,20 @@ export const s8CitizenshipQualification =
       userProjects?.projects.map(({ project }) => project.id) || []
 
     const qualifyingProjects = await prisma.$queryRaw<S8QualifyingProject[]>`
-    SELECT * FROM "S8QualifyingProject"
-    WHERE "projectId" = ANY(${projectIds})
-  `
+      SELECT * FROM "S8QualifyingProject"
+      WHERE "projectId" = ANY(${projectIds})
+    `
 
     if (qualifyingProjects.length > 0) {
       // Check if any of the qualifying projects already has a citizen
       const projectsWithCitizens = await prisma.$queryRaw<{ id: string }[]>`
-      SELECT p.id
-      FROM "Project" p
-      INNER JOIN "Citizen" c ON c."projectId" = p.id 
-      WHERE p.id = ANY(${qualifyingProjects.map(
-        (p: S8QualifyingProject) => p.projectId,
-      )})
-    `
+        SELECT p.id
+        FROM "Project" p
+               INNER JOIN "Citizen" c ON c."projectId" = p.id
+        WHERE p.id = ANY(${qualifyingProjects.map(
+          (p: S8QualifyingProject) => p.projectId,
+        )})
+      `
       // Get the first qualifying project
       const project = await getProject({ id: qualifyingProjects[0].projectId })
 
@@ -172,11 +172,11 @@ export const s8CitizenshipQualification =
     }
 
     const qualifyingAddress = await prisma.$queryRaw<S8QualifyingUser[]>`
-    SELECT * FROM "S8QualifyingUser"
-    WHERE address = ANY(${user.addresses.map(
-      (addr: { address: string }) => addr.address,
-    )})
-  `
+      SELECT * FROM "S8QualifyingUser"
+      WHERE address = ANY(${user.addresses.map(
+        (addr: { address: string }) => addr.address,
+      )})
+    `
 
     if (qualifyingAddress.length > 0) {
       return {

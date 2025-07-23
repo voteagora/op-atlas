@@ -35,7 +35,7 @@ import {
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
-import { UserAvatarSmall } from "./UserAvatarSmall"
+import { UserAvatar } from "@/components/common/UserAvatar"
 
 export const Account = () => {
   const { user: privyUser, getAccessToken } = usePrivy()
@@ -172,7 +172,7 @@ export const Account = () => {
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
           <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
-            <UserAvatarSmall imageUrl={user?.imageUrl} />
+            <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
 
             {username}
             <Image

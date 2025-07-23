@@ -2,7 +2,6 @@ import { User } from "@prisma/client"
 import Image from "next/image"
 import { memo, useState } from "react"
 
-import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +15,7 @@ import {
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { TeamRole } from "@/lib/types"
+import { UserAvatar } from "@/components/common/UserAvatar"
 
 export const TeamMemberCard = memo(function TeamMemberCard({
   user,
@@ -46,7 +46,7 @@ export const TeamMemberCard = memo(function TeamMemberCard({
       onMouseLeave={() => setMouseEntered(false)}
     >
       <div className="py-2 px-3 rounded-md border border-input flex items-center gap-2 w-full h-10">
-        <UserAvatarSmall imageUrl={user?.imageUrl} />
+        <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
         <p className="text-sm text-foreground">
           {username} {isCurrentUser && "(You)"}
         </p>

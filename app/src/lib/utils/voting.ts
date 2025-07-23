@@ -1,6 +1,7 @@
 import { JsonValue } from "@prisma/client/runtime/library"
 
 import {
+  ProposalStatus,
   ProposalType,
   VoteType,
   VotingCardProps,
@@ -71,11 +72,17 @@ const votingEnded = (endDate: Date, result: any) => {
 }
 
 const youVoted = (proposalData: ProposalData, vote: VoteType) => {
-  if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+  if (
+    proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+    proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+    proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+  ) {
     return {
       cardText: {
         title: "You vetoed the decision",
         descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
+        needsAgoraLink: true,
+        proposalId: proposalData.id,
       },
     }
   }
@@ -83,6 +90,8 @@ const youVoted = (proposalData: ProposalData, vote: VoteType) => {
     cardText: {
       title: "You voted",
       descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
+      needsAgoraLink: true,
+      proposalId: proposalData.id,
     },
     previousVote: mapValueToVoteType(proposalData.proposalType, vote),
   }
@@ -92,10 +101,14 @@ const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
   const proposalTypeDescription = () => {
     switch (proposalType) {
       case ProposalType.OFFCHAIN_APPROVAL:
+      case ProposalType.HYBRID_APPROVAL:
         return "This election uses approval voting, meaning voter can approve more than one candidate."
       case ProposalType.OFFCHAIN_STANDARD:
+      case ProposalType.HYBRID_STANDARD:
         return "OFFCHAIN_STANDARD"
       case ProposalType.OFFCHAIN_OPTIMISTIC:
+      case ProposalType.OFFCHAIN_OPTIMISTIC_TIERED:
+      case ProposalType.HYBRID_OPTIMISTIC_TIERED:
         return "If you do not wish to veto, then no action is required."
       default:
         return ""
@@ -150,7 +163,11 @@ const getOpenVotingTypes = (proposalData: ProposalData, vote?: VoteType) => {
   if (vote) {
     return youVoted(proposalData, vote)
   }
-  if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+  if (
+    proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+    proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+    proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+  ) {
     // Custom proposal title for the offchain optimistic proposal
     return castYourVote(
       proposalData.proposalType,
@@ -164,9 +181,13 @@ const getCitizenTypes = (proposalData: ProposalData, vote?: VoteType) => {
   if (proposalData.status === "ACTIVE") {
     return getOpenVotingTypes(proposalData, vote)
   } else if (new Date(proposalData.endTime) < new Date()) {
+    const statusText =
+      proposalData.status === ProposalStatus.DEFEATED
+        ? `been ${proposalData.status}`
+        : `${proposalData.status}`
     return votingEnded(
       new Date(proposalData.endTime),
-      `This proposal has ${proposalData.status}`,
+      `This proposal has ${statusText}`,
     )
   } else {
     return comingSoon(proposalData)
@@ -179,6 +200,7 @@ const getNonCitizenTypes = (
 ) => {
   switch (proposalData.proposalType) {
     case ProposalType.OFFCHAIN_APPROVAL:
+    case ProposalType.HYBRID_APPROVAL:
       return castYourVote(proposalData.proposalType)
     case ProposalType.OFFCHAIN_STANDARD:
       return wantToVote(eligibility)
@@ -211,7 +233,11 @@ export const getVotingCardProps = (
   }
 
   if (!isCitizen) {
-    if (proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
+    if (
+      proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+      proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+      proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+    ) {
       // Special case for the offchain optimistic proposal
       return {
         cardText: {
@@ -334,44 +360,74 @@ export const getVotingProps = (
 
 export const mapVoteTypeToValue = (
   proposalType: ProposalType,
-  voteType: VoteType,
+  selectedVotes: {
+    voteType: VoteType
+    selections?: number[]
+  },
 ) => {
-  if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
-    switch (voteType) {
+  if (
+    proposalType === ProposalType.OFFCHAIN_STANDARD ||
+    proposalType === ProposalType.HYBRID_STANDARD
+  ) {
+    switch (selectedVotes.voteType) {
       case VoteType.Against:
-        return ["0"]
+        return JSON.stringify([0])
       case VoteType.For:
-        return ["1"]
+        return JSON.stringify([1])
       case VoteType.Abstain:
-        return ["2"]
+        return JSON.stringify([2])
       default:
-        return []
+        return "[]"
     }
-  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
-    return ["0"]
+  } else if (
+    proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+    proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+    proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+  ) {
+    return JSON.stringify([0])
+  } else if (
+    proposalType === ProposalType.OFFCHAIN_APPROVAL ||
+    proposalType === ProposalType.HYBRID_APPROVAL
+  ) {
+    // Sort lowest to highest to maintain the index location for voting
+    const sortedSelections = selectedVotes.selections?.sort((a, b) => a - b)
+    return selectedVotes.selections ? `[[${sortedSelections}],[1]]` : "[[],[0]]"
   } else {
-    return [voteType]
+    return JSON.stringify([selectedVotes.voteType])
   }
 }
 
 export const mapValueToVoteType = (
   proposalType: ProposalType,
   value: JsonValue,
-) => {
+): { voteType: VoteType; selections?: number[] } | null => {
   const valueArray = Array.isArray(value) ? value : [value]
 
-  if (proposalType === ProposalType.OFFCHAIN_STANDARD) {
+  if (
+    proposalType === ProposalType.OFFCHAIN_STANDARD ||
+    proposalType === ProposalType.HYBRID_STANDARD
+  ) {
     switch (valueArray[0]) {
-      case "0":
-        return VoteType.Against
-      case "1":
-        return VoteType.For
-      case "2":
-        return VoteType.Abstain
+      case 0:
+        return { voteType: VoteType.Against }
+      case 1:
+        return { voteType: VoteType.For }
+      case 2:
+        return { voteType: VoteType.Abstain }
       default:
-        return VoteType.Abstain
+        return { voteType: VoteType.Abstain }
     }
-  } else if (proposalType === ProposalType.OFFCHAIN_OPTIMISTIC) {
-    return VoteType.Veto
+  } else if (
+    proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+    proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+    proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+  ) {
+    return { voteType: VoteType.Veto }
+  } else if (
+    proposalType === ProposalType.OFFCHAIN_APPROVAL ||
+    proposalType === ProposalType.HYBRID_APPROVAL
+  ) {
+    return { voteType: VoteType.Approval, selections: valueArray as number[] }
   }
+  return null
 }

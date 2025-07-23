@@ -4,7 +4,7 @@ import { Role, User } from "@prisma/client"
 import Image from "next/image"
 import { useState } from "react"
 
-import { UserAvatarSmall } from "@/components/common/UserAvatarSmall"
+import { UserAvatar } from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -58,7 +58,10 @@ export const Form = ({
               className="h-12 px-3 flex items-center justify-between w-full"
             >
               <div className="flex items-center gap-3">
-                <UserAvatarSmall imageUrl={selectedEntity.avatar || ""} />
+                <UserAvatar
+                  imageUrl={selectedEntity.avatar || ""}
+                  size={"sm"}
+                />
                 <span className="text-sm text-secondary-foreground font-normal">
                   {selectedEntity.name}
                 </span>
@@ -85,7 +88,7 @@ export const Form = ({
               }
             >
               <div className="flex items-center gap-3">
-                <UserAvatarSmall imageUrl={user.imageUrl} />
+                <UserAvatar imageUrl={user.imageUrl} size={"sm"} />
                 <div className="text-sm text-secondary-foreground font-normal">
                   {username} (You)
                 </div>
@@ -105,7 +108,10 @@ export const Form = ({
                 }
               >
                 <div className="flex items-center gap-3">
-                  <UserAvatarSmall imageUrl={userOrg.organization.avatarUrl} />
+                  <UserAvatar
+                    imageUrl={userOrg.organization.avatarUrl}
+                    size={"sm"}
+                  />
                   <div className="text-sm text-secondary-foreground font-normal">
                     {userOrg.organization.name}
                   </div>

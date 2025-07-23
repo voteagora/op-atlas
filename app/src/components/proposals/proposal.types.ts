@@ -2,7 +2,6 @@ import { Citizen, citizenCategory, User } from "@prisma/client"
 import React from "react"
 
 import { CardActionsProps } from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
-import { CandidateCardProps } from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VotingColumn"
 import { CitizenshipQualification } from "@/lib/types"
 
 export interface ProposalPageDataInterface {
@@ -37,12 +36,25 @@ export enum VoteType {
   Abstain = "Abstain",
   Against = "Against",
   Veto = "Veto",
+  Approval = "Approval",
+}
+
+export enum ProposalStatus {
+  ACTIVE = "ACTIVE",
+  EXECUTED = "EXECUTED",
+  PENDING = "PENDING",
+  CANCELLED = "CANCELLED",
+  FAILED = "FAILED",
+  QUEUED = "QUEUED",
+  DEFEATED = "DEFEATED",
+  SUCCEEDED = "SUCCEEDED",
 }
 
 export enum ProposalType {
   OFFCHAIN_STANDARD = "OFFCHAIN_STANDARD",
   OFFCHAIN_APPROVAL = "OFFCHAIN_APPROVAL",
   OFFCHAIN_OPTIMISTIC = "OFFCHAIN_OPTIMISTIC",
+  OFFCHAIN_OPTIMISTIC_TIERED = "OFFCHAIN_OPTIMISTIC_TIERED",
   HYBRID_STANDARD = "HYBRID_STANDARD",
   HYBRID_APPROVAL = "HYBRID_APPROVAL",
   HYBRID_OPTIMISTIC_TIERED = "HYBRID_OPTIMISTIC_TIERED",
@@ -78,6 +90,8 @@ export interface VotingCardProps {
 export interface CardTextProps {
   title: string
   descriptionElement?: string | React.ReactElement
+  needsAgoraLink?: boolean
+  proposalId?: string
 }
 
 export interface VoteButtonProps {
@@ -91,4 +105,9 @@ export interface VoteButtonProps {
   selected?: boolean
   voteType?: VoteType
   onClick?: () => void
+}
+
+export interface CandidateCardProps {
+  user?: User
+  qualification?: CitizenshipQualification
 }
