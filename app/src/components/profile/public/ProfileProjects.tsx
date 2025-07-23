@@ -1,6 +1,3 @@
-import { Scale } from "lucide-react"
-import Image from "next/image"
-
 import { ProjectWithDetailsLite } from "@/lib/types"
 
 import ProjectWithLink from "./ProjectWithLink"
