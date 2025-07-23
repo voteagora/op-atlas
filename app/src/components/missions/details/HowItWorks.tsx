@@ -1,11 +1,12 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useLogin } from "@privy-io/react-auth"
 import { useSession } from "next-auth/react"
 import React, { useState } from "react"
 
-import { CarouselPagination } from "@/components/ui/carousel-pagination"
+import { Button } from "@/components/ui/button"
 import {
   Carousel,
   CarouselApi,
@@ -145,12 +146,31 @@ export function HowItWorks() {
         </Carousel>
 
         {/* Custom Navigation */}
-        <CarouselPagination
-          api={api}
-          current={current}
-          count={count}
-          className={paginationClass}
-        />
+        <div
+          className={cn(
+            "flex justify-center items-center gap-2 mt-4",
+            paginationClass,
+          )}
+        >
+          <Button
+            variant="ghost"
+            size="default"
+            onClick={() => api?.scrollPrev()}
+            disabled={current === 1}
+            className="px-4 py-2.5"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="default"
+            onClick={() => api?.scrollNext()}
+            disabled={current === count}
+            className="px-4 py-2.5"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </div>
   )

@@ -12,45 +12,6 @@ import { CitizenshipQualification } from "@/lib/types"
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL
 
 // Helper functions for voting card props
-const defaultCardText = (proposalData?: ProposalData) => {
-  if (proposalData) {
-    switch (proposalData.proposalType) {
-      case ProposalType.OFFCHAIN_STANDARD:
-      case ProposalType.HYBRID_STANDARD:
-        return {
-          cardText: {
-            title: "Cast your citizen vote",
-            descriptionElement:
-              "This proposal requires approval from the Citizens' House and Token House. Read more about the voting mechanism here",
-          },
-        }
-      case ProposalType.OFFCHAIN_OPTIMISTIC:
-      case ProposalType.HYBRID_OPTIMISTIC_TIERED:
-        return {
-          cardText: {
-            title: "Cast your citizen vote",
-            descriptionElement:
-              "This proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
-          },
-        }
-      default:
-        return {
-          cardText: {
-            title: "Cast your citizen vote",
-            descriptionElement: "",
-          },
-        }
-    }
-  }
-  // Fallback to just title
-  return {
-    cardText: {
-      title: "Cast your citizen vote",
-      descriptionElement: "",
-    },
-  }
-}
-
 const comingSoon = (proposalData: ProposalData) => {
   const startDate = new Date(proposalData.createdTime)
   const endDate = new Date(proposalData.endTime)
@@ -207,7 +168,7 @@ const getNonCitizenTypes = (
     case ProposalType.OFFCHAIN_OPTIMISTIC:
       return wantToVote(eligibility)
     default:
-      return defaultCardText()
+      return {} as VotingCardProps
   }
 }
 
@@ -253,16 +214,19 @@ export const getVotingCardProps = (
       ...getCitizenTypes(proposalData, vote),
     }
   }
-
-  if (eligibility) {
+  if (!eligibility) {
+    // may need to change
     return {
-      ...getNonCitizenTypes(proposalData, eligibility),
+      cardText: {
+        title: "Cast your citizen vote",
+        descriptionElement:
+          "The proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
+      },
     }
-
   }
-
-  // Fallback
-  return defaultCardText(proposalData)
+  return {
+    ...getNonCitizenTypes(proposalData, eligibility),
+  }
 }
 
 /**

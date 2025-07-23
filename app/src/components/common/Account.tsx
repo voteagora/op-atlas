@@ -213,11 +213,6 @@ export const Account = () => {
               Organizations
             </DropdownMenuItem>
           </Link>
-          <Link href="/citizenship">
-            <DropdownMenuItem className="cursor-pointer">
-              Citizen Registration
-            </DropdownMenuItem>
-          </Link>
           <hr className="w-full border-[0.5px] border-border" />
           <DropdownMenuItem
             className="cursor-pointer"

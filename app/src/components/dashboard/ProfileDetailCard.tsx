@@ -14,9 +14,10 @@ import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
 
 import { UserAvatar } from "../common/UserAvatar"
-import { CitizenshipBadge } from "../common/CitizenshipBadge"
 import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
 import { ArrowDropRight } from "../icons/ArrowDropRight"
+import { CheckboxCircleFIll } from "../icons/remix"
+import { AvatarBadge } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
@@ -100,7 +101,16 @@ const ProfileDetailCard = ({
   return (
     <div className="flex gap-x-4">
       {user.imageUrl ? (
-        <UserAvatar imageUrl={user.imageUrl} />
+        <UserAvatar imageUrl={user.imageUrl}>
+          {isCitizen && (
+            <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+              <CheckboxCircleFIll
+                className="w-[20px] h-[20px]"
+                fill="#FF0000"
+              />
+            </AvatarBadge>
+          )}
+        </UserAvatar>
       ) : (
         <button
           onClick={() => setShowImportDialog(true)}
@@ -120,6 +130,14 @@ const ProfileDetailCard = ({
             width={18}
             height={18}
           />
+          {isCitizen && (
+            <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
+              <CheckboxCircleFIll
+                className="w-[20px] h-[20px]"
+                fill="#FF0000"
+              />
+            </AvatarBadge>
+          )}
           <Image
             className="absolute w-6 h-6 text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
             src="/assets/icons/add-line.svg"
@@ -133,7 +151,6 @@ const ProfileDetailCard = ({
       <div className="flex flex-col">
         <div className="text-2xl font-semibold flex items-center gap-x-2">
           {username || ""}
-          {isCitizen && <CitizenshipBadge />}
           {isBadgeholder && (
             <Image
               src="/assets/icons/badgeholder-sunny.png"

@@ -27,13 +27,13 @@ export function EnrolledCallout({
           />
           <ExtendedLink
             href={`/project/${application.projectId}`}
-            className="text-sm font-medium mr-5 ml-2 text-green-800"
+            className="text-sm font-medium mr-5 ml-2"
             text={`Enrolled in Retro Funding: ` + application?.round.name}
           />
         </div>
       }
       rightAlignedContent={
-        <div className="flex items-center gap-2 ml-auto shrink-0 text-sm font-medium">
+        <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
           {/* <ExternalLink
             className="flex items-center text-sm text-success-foreground font-medium"
             href={`${EAS_URL_PREFIX}${application.attestationId}`}
@@ -42,16 +42,16 @@ export function EnrolledCallout({
             <ChevronRight width={16} height={16} />
           </ExternalLink> */}
           <TrackedLink
-            className="flex items-center text-sm font-medium text-green-800"
+            className="flex items-center text-sm text-success-foreground font-medium"
             href={`/project/${application.projectId}`}
             eventName="Link Click"
             eventData={{
               source: "Dashboard",
-              linkName: "View performance",
+              linkName: "Rewards",
               projectId: application.projectId,
             }}
           >
-            View performance
+            Rewards
             <ChevronRight width={16} height={16} />
           </TrackedLink>
         </div>

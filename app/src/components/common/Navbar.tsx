@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 import { Account } from "./Account"
+import { Banner } from "./Banner"
 import { MobileNav } from "./MobileNav"
 
 export const dropdownList = [
@@ -68,6 +69,7 @@ export const Navbar = () => {
 
   return (
     <>
+      <Banner />
       <nav
         className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[200] ${
           params.id || isMissions ? "" : "shadow-sm"
