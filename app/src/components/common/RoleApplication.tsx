@@ -140,13 +140,13 @@ export default function RoleApplication({
           <Avatar>
             <Optimism className="w-[48px] h-[48px]" fill="#FF0000" />
             {(user?.imageUrl || organization?.avatarUrl) && (
-              <AvatarBadge className="absolute w-[24px] h-[24px] top-[14px] right-0 bg-white rounded-full">
+              <AvatarBadge className="absolute w-[24px] h-[24px] top-[14px] right-0 bg-white rounded-full overflow-hidden">
                 <Image
                   src={user?.imageUrl || organization?.avatarUrl!}
                   alt="user"
                   width={24}
                   height={24}
-                  className="rounded-full"
+                  className="w-full h-full object-cover rounded-full"
                 />
               </AvatarBadge>
             )}

@@ -22,19 +22,23 @@ const ProfileHeader = ({
   className?: string
   user: UserWithAddresses
 }) => {
-
   const { data: session } = useSession()
   const username = useUsername(user)
 
-  const { data: citizen } = useCitizen({ query: { type: CITIZEN_TYPES.user, id: user.id } })
+  const { data: citizen } = useCitizen({
+    query: { type: CITIZEN_TYPES.user, id: user.id },
+  })
   const [isCitizen, setIsCitizen] = useState(false)
 
   useEffect(() => {
-    if (citizen && citizen.attestationId && citizen.type === CITIZEN_TYPES.user) {
+    if (
+      citizen &&
+      citizen.attestationId &&
+      citizen.type === CITIZEN_TYPES.user
+    ) {
       setIsCitizen(true)
     }
   }, [citizen])
-
 
   const isSelf = session?.user?.id === user.id
 
@@ -54,7 +58,9 @@ const ProfileHeader = ({
           </Avatar>
         )}
         <div className="flex flex-col gap-6">
-          <div className="text-3xl font-semibold flex items-center gap-2">{username} {isCitizen && <CitizenshipBadge />}</div>
+          <div className="text-3xl font-semibold flex flex-wrap items-center gap-2">
+            {username} {isCitizen && <CitizenshipBadge />}
+          </div>
           <div className="text-sm text-muted-foreground">{user.bio}</div>
           <ProfileHeaderLinks user={user} />
         </div>
@@ -63,4 +69,4 @@ const ProfileHeader = ({
   )
 }
 
-export default ProfileHeader;
+export default ProfileHeader
