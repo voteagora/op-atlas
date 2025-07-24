@@ -3,7 +3,6 @@ import { ProjectWithDetailsLite } from "@/lib/types"
 import ProjectWithLink from "./ProjectWithLink"
 
 function ProfileProjects({ projects }: { projects: ProjectWithDetailsLite[] }) {
-
   if (projects.length === 0) {
     // No projects at all
     return (
