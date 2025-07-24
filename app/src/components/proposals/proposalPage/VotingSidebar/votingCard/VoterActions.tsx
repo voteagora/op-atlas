@@ -105,7 +105,7 @@ const CardAction = ({
     <button
       onClick={handleAction}
       disabled={disabled}
-      className={`rounded-md border border-solid p-3 w-full sm:w-[256px] h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle} ${
+      className={`rounded-md border-solid p-3 w-full sm:w-[256px] h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle} ${
         disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
