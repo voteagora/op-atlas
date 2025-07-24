@@ -39,7 +39,7 @@ const getQualifications = async (
             id: stringIdentifier,
             name: org?.name || stringIdentifier,
             avatar: org?.avatarUrl,
-            link: `/${stringIdentifier}`,
+            link: `${process.env.NEXT_PUBLIC_VERCEL_URL}/${stringIdentifier}`,
           } as ProposalCandidate
         } else {
           // Handle regular usernames
@@ -48,7 +48,7 @@ const getQualifications = async (
             id: stringIdentifier,
             name: user?.username || stringIdentifier,
             avatar: user?.imageUrl,
-            link: `/${stringIdentifier}`,
+            link: `${process.env.NEXT_PUBLIC_VERCEL_URL}/${stringIdentifier}`,
           } as ProposalCandidate
         }
       } catch (error) {
@@ -66,7 +66,7 @@ const getQualifications = async (
         return {
           id: safeId,
           name: safeId,
-          link: `/${safeId}`,
+          link: `${process.env.NEXT_PUBLIC_VERCEL_URL}/${safeId}`,
         } as ProposalCandidate
       }
     }),
