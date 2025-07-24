@@ -4,7 +4,6 @@ import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
 import { ProjectWithDetailsLite } from "@/lib/types"
 
 function ProjectWithLink({ project }: { project: ProjectWithDetailsLite }) {
-  if (project.applications.length === 0) return null
 
   return (
     <div className="flex items-center space-x-2">
