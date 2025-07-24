@@ -41,7 +41,7 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
       </Link>
       <Link
         className="text-2xl font-semibold"
-        href="/proposals"
+        href="/governance"
         onClick={onClose}
       >
         Governance
