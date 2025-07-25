@@ -10,7 +10,6 @@ import { getChainId, switchChain } from "@wagmi/core"
 import { Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useConfetti } from "@/providers/LayoutProvider"
 import { toast } from "sonner"
 
 import {
@@ -44,6 +43,7 @@ import {
 } from "@/lib/utils/voting"
 import { isSmartContractWallet } from "@/lib/utils/walletDetection"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
+import { useConfetti } from "@/providers/LayoutProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
 
 import { MyVote } from "../votingCard/MyVote"
@@ -671,7 +671,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                 />
               )}
               <div className="w-full gap-2 transition-all duration-200 ease-in-out">
-                <div className="w-[90%] border-b border-gray-200 mx-auto mb-2"></div>
                 <VoterActions
                   proposalId={proposalData.offchainProposalId}
                   // This is a wonky way to overwrite the call to make an external call.
