@@ -51,6 +51,7 @@ Each package has its own README with detailed setup and development instructions
 
 1. Revoke citizenship attestation by wallet address 
 
+
 ```bash
 pnpm revoke:citizenship 0x123...456
 ```
