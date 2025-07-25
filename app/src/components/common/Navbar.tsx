@@ -211,7 +211,7 @@ export const Navbar = () => {
             )}
           </div>
 
-          <div className="hidden sm:flex items-center">
+          <div className="flex items-center">
             <Account />
           </div>
         </div>
