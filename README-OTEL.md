@@ -4,49 +4,48 @@ This document describes the OpenTelemetry (OTel) integration for the OP Atlas ap
 
 ## Overview
 
-OpenTelemetry has been integrated to provide distributed tracing and metrics collection for the application. This helps with:
+OpenTelemetry has been integrated specifically for Vercel deployment to provide distributed tracing and metrics collection. This helps with:
 
-- **Observability**: Track request flows across services
-- **Performance Monitoring**: Monitor API response times and database query performance
-- **Error Tracking**: Capture and trace errors with full context
+- **Observability**: Track request flows across Vercel Functions
+- **Performance Monitoring**: Monitor API response times and database query performance in serverless environment
+- **Error Tracking**: Capture and trace errors with full context across function executions
 - **Business Metrics**: Track project creation, user authentication, and other key metrics
 
 ## Configuration
 
 ### Environment Variables
 
-Add these environment variables to your `.env` file:
+Configure these in your Vercel project settings:
 
 ```bash
-# OpenTelemetry Configuration
-OTEL_SDK_DISABLED=false                                    # Set to 'true' to disable OTel
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
-OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://localhost:4318/v1/metrics
-OTEL_EXPORTER_OTLP_HEADERS=                               # Authorization headers if needed
+# OpenTelemetry Configuration for Vercel
+OTEL_SDK_DISABLED=false                                           # Set to 'true' to disable OTel
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://api.honeycomb.io/v1/traces
+OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://api.honeycomb.io/v1/metrics
+OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=YOUR_API_KEY
 ```
 
 ### Supported Exporters
 
-The application supports OTLP HTTP exporters. Common compatible backends include:
+The application is configured to work with OTLP HTTP exporters that support Vercel's serverless environment:
 
-- **Jaeger** (with OTLP receiver)
-- **Grafana Tempo**
-- **Honeycomb**
+- **Honeycomb** (recommended for Vercel)
 - **New Relic**
-- **Datadog**
-- **Local OTEL Collector**
+- **Datadog** (with proper configuration)
+- **Grafana Cloud**
 
 ## What's Instrumented
 
 ### Automatic Instrumentation
 
-The following are automatically instrumented via `@opentelemetry/auto-instrumentations-node`:
+The following are automatically instrumented for Vercel Functions:
 
 - HTTP requests and responses
 - Database queries (via Prisma ORM)
-- Redis operations
-- File system operations (disabled to reduce noise)
-- Network operations (disabled to reduce noise)
+- Express.js middleware (when applicable)
+- File system operations (disabled for serverless optimization)
+- Network operations (disabled for serverless optimization)
+- DNS operations (disabled for serverless optimization)
 
 ### Manual Instrumentation
 
@@ -184,31 +183,70 @@ pnpm dev
 
 Access the Jaeger UI at `http://localhost:16686` to view traces.
 
-## Production Deployment
+## Vercel Deployment
 
-### Environment-Specific Configuration
+This setup is optimized for Vercel's serverless environment with the following adaptations:
 
-For production deployments, configure appropriate OTLP endpoints:
+### Vercel-Specific Optimizations
+
+- **Serverless Detection**: Automatically detects Vercel environment (`VERCEL=1`)
+- **Resource Attributes**: Adds Vercel-specific metadata (cloud provider, platform, deployment URL)
+- **Export Intervals**: Increased to 5 seconds for serverless to reduce cold start impact
+- **Instrumentation**: Disabled DNS and file system instrumentations that don't work well in serverless
+
+### Vercel Environment Variables
+
+Vercel automatically provides these environment variables:
+- `VERCEL=1`: Indicates running on Vercel
+- `VERCEL_ENV`: `development`, `preview`, or `production`
+- `VERCEL_URL`: Your deployment URL
+
+### Setting Up in Vercel
+
+1. **Add Environment Variables** in your Vercel project settings:
 
 ```bash
-# For Honeycomb
+OTEL_SDK_DISABLED=false
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://api.honeycomb.io/v1/traces
+OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://api.honeycomb.io/v1/metrics
+OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=YOUR_API_KEY
+```
+
+2. **Popular Vercel-Compatible Services**:
+
+```bash
+# Honeycomb
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://api.honeycomb.io/v1/traces
 OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=YOUR_API_KEY
 
-# For Datadog
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://trace.agent.datadoghq.com/v0.4/traces
+# Datadog (requires different format)
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://http-intake.logs.datadoghq.com/v1/input/YOUR_API_KEY
 OTEL_EXPORTER_OTLP_HEADERS=DD-API-KEY=YOUR_API_KEY
 
-# For New Relic
+# New Relic
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://otlp.nr-data.net:4318/v1/traces
 OTEL_EXPORTER_OTLP_HEADERS=api-key=YOUR_LICENSE_KEY
+
+# Grafana Cloud
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://otlp-gateway-prod-us-central-0.grafana.net/otlp/v1/traces
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic BASE64_ENCODED_CREDENTIALS
 ```
+
+### Vercel Serverless Considerations
+
+- **Cold Starts**: First requests to new function instances may have higher latency
+- **Memory Limits**: Monitor memory usage as OpenTelemetry adds overhead
+- **Function Duration**: Long-running traces will be cut off when functions timeout
+- **Concurrency**: Each function instance initializes its own OTel SDK
+
+## Production Deployment
 
 ### Performance Considerations
 
-- **Sampling**: Adjust `tracesSampleRate` in `otel.ts` for production (e.g., 0.1 for 10% sampling)
-- **Batch Processing**: The SDK uses batching by default to optimize performance
-- **Resource Usage**: Monitor CPU and memory usage after enabling OTel
+- **Export Intervals**: Optimized for serverless (5s vs 1s for traditional deployments)
+- **Batch Processing**: SDK uses batching to optimize network calls
+- **Memory Usage**: Monitor memory consumption in Vercel function analytics
+- **Network Impact**: OTLP exports use HTTPS for security but add network overhead
 
 ## Troubleshooting
 

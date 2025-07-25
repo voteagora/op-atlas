@@ -20,5 +20,14 @@
       "path": "/api/cron/superfluid",
       "schedule": "0 * * * *"
     }
-  ]
+  ],
+  "functions": {
+    "app/src/app/api/**/*.ts": {
+      "maxDuration": 30,
+      "memory": 512
+    }
+  },
+  "env": {
+    "OTEL_RESOURCE_ATTRIBUTES": "service.name=op-atlas,service.version=0.1.0"
+  }
 }
