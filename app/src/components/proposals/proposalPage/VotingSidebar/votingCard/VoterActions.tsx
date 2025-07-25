@@ -73,9 +73,7 @@ const CardAction = ({
           proposal_id: proposalId,
           button_type: buttonType,
         })
-        router.push(
-          "https://community.optimism.io/citizens-house/citizen-house-overview",
-        )
+        router.push("/citizenship")
         break
       case "sign in":
         buttonType = "Sign In"
