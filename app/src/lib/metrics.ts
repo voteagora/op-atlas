@@ -2,27 +2,34 @@ import { metrics } from "@opentelemetry/api"
 
 const meter = metrics.getMeter("op-atlas", "0.1.0")
 
-// Counter metrics
+// Core metrics
 export const apiRequestCounter = meter.createCounter("api_requests_total", {
   description: "Total number of API requests",
 })
 
-export const projectCreationCounter = meter.createCounter(
-  "projects_created_total",
+export const dbQueryCounter = meter.createCounter("db_queries_total", {
+  description: "Total number of database queries",
+})
+
+export const externalApiCounter = meter.createCounter(
+  "external_api_calls_total",
   {
-    description: "Total number of projects created",
+    description: "Total number of external API calls",
   },
 )
 
-export const userAuthCounter = meter.createCounter("user_auth_attempts_total", {
-  description: "Total number of user authentication attempts",
-})
+export const userOperationCounter = meter.createCounter(
+  "user_operations_total",
+  {
+    description: "Total number of user operations",
+  },
+)
 
 export const errorCounter = meter.createCounter("errors_total", {
   description: "Total number of errors",
 })
 
-// Histogram metrics
+// Duration metrics
 export const apiRequestDuration = meter.createHistogram(
   "api_request_duration_seconds",
   {
@@ -37,57 +44,116 @@ export const dbQueryDuration = meter.createHistogram(
   },
 )
 
-// Gauge metrics
-export const activeUsersGauge = meter.createUpDownCounter("active_users", {
-  description: "Number of active users",
-})
+export const externalApiDuration = meter.createHistogram(
+  "external_api_duration_seconds",
+  {
+    description: "Duration of external API calls in seconds",
+  },
+)
 
-// Utility functions to record metrics
+export const userOperationDuration = meter.createHistogram(
+  "user_operation_duration_seconds",
+  {
+    description: "Duration of user operations in seconds",
+  },
+)
+
+// API request instrumentation
 export const recordApiRequest = (
   method: string,
   route: string,
   status: number,
+  duration?: number,
 ) => {
   apiRequestCounter.add(1, {
     method,
     route,
     status: status.toString(),
   })
+
+  if (duration !== undefined) {
+    apiRequestDuration.record(duration, {
+      method,
+      route,
+    })
+  }
 }
 
-export const recordProjectCreation = (success: boolean) => {
-  projectCreationCounter.add(1, {
+// Database query instrumentation
+export const recordDbQuery = (
+  operation: string,
+  table: string,
+  success: boolean,
+  duration?: number,
+) => {
+  dbQueryCounter.add(1, {
+    operation,
+    table,
     success: success.toString(),
   })
+
+  if (duration !== undefined) {
+    dbQueryDuration.record(duration, {
+      operation,
+      table,
+    })
+  }
 }
 
-export const recordUserAuth = (success: boolean, method: string) => {
-  userAuthCounter.add(1, {
-    success: success.toString(),
+// External API call instrumentation
+export const recordExternalApiCall = (
+  service: string,
+  endpoint: string,
+  method: string,
+  status: number,
+  duration?: number,
+) => {
+  externalApiCounter.add(1, {
+    service,
+    endpoint,
     method,
+    status: status.toString(),
   })
+
+  if (duration !== undefined) {
+    externalApiDuration.record(duration, {
+      service,
+      endpoint,
+      method,
+    })
+  }
 }
 
-export const recordError = (errorType: string, component: string) => {
+// User operation instrumentation
+export const recordUserOperation = (
+  operation: string,
+  userType: string,
+  success: boolean,
+  duration?: number,
+) => {
+  userOperationCounter.add(1, {
+    operation,
+    user_type: userType,
+    success: success.toString(),
+  })
+
+  if (duration !== undefined) {
+    userOperationDuration.record(duration, {
+      operation,
+      user_type: userType,
+    })
+  }
+}
+
+// Error instrumentation
+export const recordError = (
+  errorType: string,
+  component: string,
+  operation?: string,
+) => {
   errorCounter.add(1, {
     error_type: errorType,
     component,
-  })
-}
-
-export const recordApiDuration = (
-  duration: number,
-  method: string,
-  route: string,
-) => {
-  apiRequestDuration.record(duration, {
-    method,
-    route,
-  })
-}
-
-export const recordDbQueryDuration = (duration: number, operation: string) => {
-  dbQueryDuration.record(duration, {
-    operation,
+    ...(operation && { operation }),
   })
 }
