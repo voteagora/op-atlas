@@ -18,21 +18,16 @@ OpenTelemetry has been integrated specifically for Vercel deployment to provide 
 Configure these in your Vercel project settings:
 
 ```bash
-# OpenTelemetry Configuration for Vercel
+# OpenTelemetry Configuration for Vercel with Datadog
 OTEL_SDK_DISABLED=false                                           # Set to 'true' to disable OTel
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://api.honeycomb.io/v1/traces
-OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://api.honeycomb.io/v1/metrics
-OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=YOUR_API_KEY
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://trace-intake.datadoghq.com/v1/traces
+OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://api.datadoghq.com/api/v2/otlp/v1/metrics
+OTEL_EXPORTER_OTLP_HEADERS=dd-api-key=YOUR_DATADOG_API_KEY
 ```
 
-### Supported Exporters
+### Datadog Integration
 
-The application is configured to work with OTLP HTTP exporters that support Vercel's serverless environment:
-
-- **Honeycomb** (recommended for Vercel)
-- **New Relic**
-- **Datadog** (with proper configuration)
-- **Grafana Cloud**
+The application is configured to work with Datadog through Vercel's built-in integration. Configure the Datadog integration through your Vercel dashboard for automatic endpoint and authentication setup.
 
 ## What's Instrumented
 
@@ -60,32 +55,36 @@ Custom spans and metrics have been added for:
 #### Tracing Utilities (`/src/lib/tracing.ts`)
 
 ```typescript
-import { traceApiOperation, traceDbOperation, addSpanAttributes } from '@/lib/tracing';
+import {
+  traceApiOperation,
+  traceDbOperation,
+  addSpanAttributes,
+} from "@/lib/tracing";
 
 // Trace an API operation
-const result = await traceApiOperation('user.create', async () => {
+const result = await traceApiOperation("user.create", async () => {
   return await createUser(userData);
 });
 
 // Trace a database operation
-const projects = await traceDbOperation('projects.findMany', async () => {
+const projects = await traceDbOperation("projects.findMany", async () => {
   return await prisma.project.findMany();
 });
 
 // Add custom attributes to current span
 addSpanAttributes({
-  'user.id': userId,
-  'project.type': 'web3'
+  "user.id": userId,
+  "project.type": "web3",
 });
 ```
 
 #### Metrics Utilities (`/src/lib/metrics.ts`)
 
 ```typescript
-import { recordApiRequest, recordProjectCreation } from '@/lib/metrics';
+import { recordApiRequest, recordProjectCreation } from "@/lib/metrics";
 
 // Record API request metrics
-recordApiRequest('POST', '/api/v1/projects', 201);
+recordApiRequest("POST", "/api/v1/projects", 201);
 
 // Record business metrics
 recordProjectCreation(true);
@@ -94,15 +93,18 @@ recordProjectCreation(true);
 ## Available Metrics
 
 ### API Metrics
+
 - `api_requests_total`: Counter of total API requests
 - `api_request_duration_seconds`: Histogram of API request durations
 
 ### Business Metrics
+
 - `projects_created_total`: Counter of projects created
 - `user_auth_attempts_total`: Counter of authentication attempts
 - `errors_total`: Counter of errors by type and component
 
 ### Database Metrics
+
 - `db_query_duration_seconds`: Histogram of database query durations
 
 ## Development Setup
@@ -112,7 +114,7 @@ recordProjectCreation(true);
 Create a `docker-compose.yml` for local development:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -120,17 +122,17 @@ services:
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP HTTP receiver
-      - "8889:8889"   # Prometheus metrics
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+      - "8889:8889" # Prometheus metrics
     depends_on:
       - jaeger
 
   jaeger:
     image: jaegertracing/all-in-one:latest
     ports:
-      - "16686:16686"  # Jaeger UI
-      - "14250:14250"  # Accept jaeger.thrift over gRPC
+      - "16686:16686" # Jaeger UI
+      - "14250:14250" # Accept jaeger.thrift over gRPC
     environment:
       - COLLECTOR_OTLP_ENABLED=true
 ```
@@ -197,6 +199,7 @@ This setup is optimized for Vercel's serverless environment with the following a
 ### Vercel Environment Variables
 
 Vercel automatically provides these environment variables:
+
 - `VERCEL=1`: Indicates running on Vercel
 - `VERCEL_ENV`: `development`, `preview`, or `production`
 - `VERCEL_URL`: Your deployment URL
@@ -205,31 +208,13 @@ Vercel automatically provides these environment variables:
 
 1. **Add Environment Variables** in your Vercel project settings:
 
+When using Vercel's Datadog integration (recommended), these environment variables are automatically configured. For manual setup:
+
 ```bash
 OTEL_SDK_DISABLED=false
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://api.honeycomb.io/v1/traces
-OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://api.honeycomb.io/v1/metrics
-OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=YOUR_API_KEY
-```
-
-2. **Popular Vercel-Compatible Services**:
-
-```bash
-# Honeycomb
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://api.honeycomb.io/v1/traces
-OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=YOUR_API_KEY
-
-# Datadog (requires different format)
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://http-intake.logs.datadoghq.com/v1/input/YOUR_API_KEY
-OTEL_EXPORTER_OTLP_HEADERS=DD-API-KEY=YOUR_API_KEY
-
-# New Relic
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://otlp.nr-data.net:4318/v1/traces
-OTEL_EXPORTER_OTLP_HEADERS=api-key=YOUR_LICENSE_KEY
-
-# Grafana Cloud
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://otlp-gateway-prod-us-central-0.grafana.net/otlp/v1/traces
-OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic BASE64_ENCODED_CREDENTIALS
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://trace-intake.datadoghq.com/v1/traces
+OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://api.datadoghq.com/api/v2/otlp/v1/metrics
+OTEL_EXPORTER_OTLP_HEADERS=dd-api-key=YOUR_DATADOG_API_KEY
 ```
 
 ### Vercel Serverless Considerations

@@ -43,14 +43,14 @@ const sdk = new NodeSDK({
   traceExporter: new OTLPTraceExporter({
     url:
       process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
-      "http://localhost:4318/v1/traces",
+      "https://trace-intake.datadoghq.com/v1/traces",
     headers: parseOtlpHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
   }),
   metricReader: new PeriodicExportingMetricReader({
     exporter: new OTLPMetricExporter({
       url:
         process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT ||
-        "http://localhost:4318/v1/metrics",
+        "https://api.datadoghq.com/api/v2/otlp/v1/metrics",
       headers: parseOtlpHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
     }),
     // Optimized export interval for Vercel Functions
