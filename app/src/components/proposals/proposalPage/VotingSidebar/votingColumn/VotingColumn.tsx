@@ -225,6 +225,16 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const candidateIds = extractIds(proposalData)
   const resultIdsAndValues = extractIdsFromResults(proposalData)
 
+  // Use this to hardcode values of the offchain approval in the event that we fail to adjust the API response
+  const BACKUP = false
+  const backupIdIds = ["optimist-4d69", "optimist-4214"]
+  const backupResultIdsAndValues = candidateIds
+    .filter(({ id }) => backupIdIds.includes(id))
+    .map((candidateId) => ({
+      ...candidateId,
+      value: 100,
+    }))
+
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
@@ -619,7 +629,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         proposalData.status === ProposalStatus.EXECUTED ||
         proposalData.status === ProposalStatus.SUCCEEDED) ? (
         <div className="border-x border-b py-4">
-          <CandidateResults results={resultIdsAndValues} />
+          <CandidateResults
+            results={BACKUP ? backupResultIdsAndValues : resultIdsAndValues}
+          />
         </div>
       ) : (
         <></>
