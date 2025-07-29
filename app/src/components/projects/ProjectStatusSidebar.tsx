@@ -4,10 +4,10 @@ import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useFeatureFlagEnabled } from "posthog-js/react"
 import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { deleteUserProject } from "@/lib/actions/projects"
@@ -23,6 +23,14 @@ import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
 import { DeleteProjectDialog } from "./DeleteProjectDialog"
 
+// Helper function to count unclaimed rewards
+const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
+  if (!project) return 0
+  return project.rewards.filter(
+    (reward) => !reward.claim || reward.claim.status !== "claimed",
+  ).length
+}
+
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,
   team,
@@ -36,6 +44,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   const pathname = usePathname()
   const isAdmin = useIsAdmin(team)
 
+  const unclaimedCount = getUnclaimedRewardsCount(project)
   const [deletingProject, setDeletingProject] = useState(false)
 
   const { progressPercent, completedSections } = useMemo(() => {
@@ -166,6 +175,11 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               >
                 Rewards
               </Link>
+              {unclaimedCount > 0 && (
+                <div className="text-xs font-medium text-red-600 bg-red-200 rounded-md px-2 py-0.5">
+                  {unclaimedCount}
+                </div>
+              )}
             </div>
             <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
               <Link
