@@ -33,6 +33,55 @@ export function RewardsSection({
     (reward) => reward.claim?.status === "claimed",
   )
 
+  const renderClaimedRewards = () => {
+    if (claimedRewards.length) {
+      return (
+        <div className="flex flex-col space-y-4">
+          <h4 className="font-semibold text-text-default text-xl">Claimed</h4>
+          <ul className="space-y-3">
+            {claimedRewards.map((reward) => (
+              <li key={reward.id}>
+                <RewardAccordion reward={reward} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  }
+
+  const renderInProgressRewards = () => {
+    return (
+      <div className="flex flex-col space-y-4">
+        <h4 className="font-semibold text-text-default text-xl">In progress</h4>
+        {inProgressRewards.length || recurringRewards.length ? (
+          <ul className="space-y-3">
+            {recurringRewards.map((reward) => {
+              return (
+                <li key={reward.roundId}>
+                  <RecurringRewardAccordion
+                    reward={reward}
+                    isAdmin={Boolean(isAdmin)}
+                  />
+                </li>
+              )
+            })}
+
+            {inProgressRewards.map((reward) => (
+              <li key={reward.id}>
+                <RewardAccordion reward={reward} key={reward.id} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="text-sm text-muted-foreground px-3 py-2.5 rounded-md w-full border">
+            No in progress grants yet
+          </span>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col space-y-12">
       <div className="space-y-6">
@@ -44,56 +93,10 @@ export function RewardsSection({
         </p>
       </div>
       {hasRewards && (
-        <div>
-          <div className="flex flex-col space-y-4">
-            <h4 className="font-semibold text-text-default text-xl">
-              In progress
-            </h4>
-            {inProgressRewards.length || recurringRewards.length ? (
-              <ul className="space-y-3">
-                {recurringRewards.map((reward) => {
-                  return (
-                    <li key={reward.roundId}>
-                      <RecurringRewardAccordion
-                        reward={reward}
-                        isAdmin={Boolean(isAdmin)}
-                      />
-                    </li>
-                  )
-                })}
-
-                {inProgressRewards.map((reward) => (
-                  <li key={reward.id}>
-                    <RewardAccordion reward={reward} key={reward.id} />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <span className="text-sm text-muted-foreground px-3 py-2.5 rounded-md w-full border">
-                No in progress grants yet
-              </span>
-            )}
-          </div>
-          <div className="flex flex-col space-y-4">
-            <h4 className="font-semibold text-text-default text-xl">Claimed</h4>
-
-            {/* TODO: Merge in claimed recurring rewards */}
-
-            {claimedRewards.length ? (
-              <ul className="space-y-3">
-                {claimedRewards.map((reward) => (
-                  <li key={reward.id}>
-                    <RewardAccordion reward={reward} />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <span className="text-sm text-muted-foreground px-3 py-2.5 rounded-md w-full border">
-                No claimed grants yet
-              </span>
-            )}
-          </div>
-        </div>
+        <>
+          {renderInProgressRewards()}
+          {renderClaimedRewards()}
+        </>
       )}
     </div>
   )
