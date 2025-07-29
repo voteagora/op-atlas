@@ -5,17 +5,27 @@ import { createConfig, WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { mainnet, sepolia, optimismSepolia, optimism } from "viem/chains"
 import { http } from "wagmi"
+import { addRpcUrlOverrideToChain } from "@privy-io/chains"
+
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
+
+const optimismOverride = addRpcUrlOverrideToChain(
+  optimism,
+  `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+)
+
+const optimismSepoliaOverride = addRpcUrlOverrideToChain(
+  optimismSepolia,
+  `https://opt-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+)
 
 export const privyWagmiConfig = createConfig({
-  chains: [mainnet, sepolia, optimismSepolia, optimism], // Pass your required chains as an array
+  chains: [mainnet, sepolia, optimismSepolia, optimism],
   transports: {
     [mainnet.id]: http(),
     [sepolia.id]: http(),
-    [optimismSepolia.id]: http(),
-    [optimism.id]: http(),
-
-    // For each of your required chains, add an entry to `transports` with
-    // a key of the chain's `id` and a value of `http()`
+    [optimismSepolia.id]: http(`https://opt-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`),
+    [optimism.id]: http(`https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`),
   },
 })
 
@@ -37,6 +47,13 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
           accentColor: "#FF0420",
           logo: "/assets/images/welcome-privy.svg",
         },
+        supportedChains: [mainnet, sepolia, optimismSepoliaOverride, optimismOverride],
+        externalWallets: {
+          signatureRequestTimeouts: {
+            safe: 600000,
+            wallet_connect: 600000,
+          },
+        },        
       }}
     >
       <QueryClientProvider client={queryClient}>
