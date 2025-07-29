@@ -7,10 +7,10 @@ import { usePathname, useRouter } from "next/navigation"
 import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { deleteUserProject } from "@/lib/actions/projects"
+import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { useIsAdmin } from "@/lib/hooks"
 import {
   ProjectContracts,
@@ -27,7 +27,11 @@ import { DeleteProjectDialog } from "./DeleteProjectDialog"
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
   if (!project) return 0
   return project.rewards.filter(
-    (reward) => !reward.claim || reward.claim.status !== "claimed",
+    (reward) =>
+      !reward.claim ||
+      (reward.claim.status !== REWARD_CLAIM_STATUS.CLAIMED &&
+        reward.claim.status !== REWARD_CLAIM_STATUS.EXPIRED &&
+        reward.claim.status !== REWARD_CLAIM_STATUS.REJECTED),
   ).length
 }
 

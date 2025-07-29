@@ -222,4 +222,12 @@ export const OSO_METRICS = {
   devToolingReward: ["0dWueJWVz1tnXyCQv+vPE9IqED5s1uD3ag2VEA4CDAw="],
 }
 
+export const REWARD_CLAIM_STATUS = {
+  PENDING: "pending",
+  CLEARED: "cleared",
+  CLAIMED: "claimed",
+  REJECTED: "rejected",
+  EXPIRED: "expired",
+} as const
+
 export const LOCAL_STORAGE_LOGIN_REDIRECT = "LOGIN_REDIRECT"
