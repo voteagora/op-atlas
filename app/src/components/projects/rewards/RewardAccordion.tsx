@@ -1,11 +1,12 @@
 "use client"
 
-import { format } from "date-fns"
+import { addYears, format, parse } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
 import React from "react"
 import { toast } from "sonner"
 
+import { Information } from "@/components/icons/remix"
 import {
   Accordion,
   AccordionContent,
@@ -13,6 +14,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
+import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { ProjectWithFullDetails } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
 import { truncateAddress } from "@/lib/utils/string"
@@ -37,6 +39,43 @@ const RewardAccordion = ({
 
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
 
+  const renderExpirationDate = () => {
+    const originalDate = REWARDS_NAMES[rewardRoundId].date
+    const parsedDate = parse(originalDate, "MMM d, yyyy", new Date())
+
+    if (
+      reward.claim?.status === REWARD_CLAIM_STATUS.EXPIRED &&
+      (reward.roundId === "4" ||
+        reward.roundId === "5" ||
+        reward.roundId === "6")
+    ) {
+      const datePlusOneYear = addYears(parsedDate, 1)
+      const formattedDate = format(datePlusOneYear, "MMM d, yyyy")
+
+      return (
+        <div className="text-secondary-foreground text-sm flex items-center gap-1">
+          <Information className="w-4 h-4" fill="#404454" />
+          Expired {formattedDate}
+        </div>
+      )
+    }
+    if (
+      reward.claim?.status === REWARD_CLAIM_STATUS.PENDING &&
+      (reward.roundId === "4" ||
+        reward.roundId === "5" ||
+        reward.roundId === "6")
+    ) {
+      const datePlusOneYear = addYears(parsedDate, 1)
+      const formattedDate = format(datePlusOneYear, "MMM d, yyyy")
+
+      return (
+        <div className="text-secondary-foreground text-sm flex items-center gap-1">
+          <Information className="w-4 h-4" fill="#404454" />
+          Expires {formattedDate}
+        </div>
+      )
+    }
+  }
   return (
     <Accordion
       type="single"
@@ -55,29 +94,32 @@ const RewardAccordion = ({
               {REWARDS_NAMES[rewardRoundId].date}
             </span>
           </div>
-          <div className="border border-border rounded-lg flex px-3 py-[10px] gap-3 items-center">
-            <Image
-              src="/assets/icons/op-icon.svg"
-              height={20}
-              width={20}
-              alt="Optimism"
-            />
-            <div className="text-sm text-secondary-foreground">
-              {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-              {formatNumber(reward.amount)}
+          <div className="border border-border rounded-lg flex px-3 py-[10px] gap-3 items-center justify-between">
+            <div className="flex flex-row items-center gap-3">
+              <Image
+                src="/assets/icons/op-icon.svg"
+                height={20}
+                width={20}
+                alt="Optimism"
+              />
+              <div className="text-sm text-secondary-foreground">
+                {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
+                {formatNumber(reward.amount)}
+              </div>
+              {reward.claim?.address && (
+                <button
+                  type="button"
+                  className="text-secondary-foreground text-xs font-medium bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                  onClick={() => handleCopyAddress(reward.claim?.address ?? "")}
+                  aria-label={`Copy address ${truncateAddress(
+                    reward.claim?.address,
+                  )} to clipboard`}
+                >
+                  To: {truncateAddress(reward.claim?.address)}
+                </button>
+              )}
             </div>
-            {reward.claim?.address && (
-              <button
-                type="button"
-                className="text-secondary-foreground text-xs font-medium bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
-                onClick={() => handleCopyAddress(reward.claim?.address ?? "")}
-                aria-label={`Copy address ${truncateAddress(
-                  reward.claim?.address,
-                )} to clipboard`}
-              >
-                To: {truncateAddress(reward.claim?.address)}
-              </button>
-            )}
+            {renderExpirationDate()}
           </div>
         </div>
 
