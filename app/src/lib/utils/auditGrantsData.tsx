@@ -14,10 +14,10 @@ export const auditGrantsData: MissionData = {
   },
   season: "8",
   details: [
-    "Audit Grants cover the cost of smart contract audits for apps across the Superchain. Grants are typically for pre-deployed apps preparing for launch, but are also available to established apps launching new features.",
+    "Audit Grants cover the cost of smart contract audits for apps across the Superchain. Grants are typically for new apps with contracts deployed and preparing for launch, but are also available to established apps launching new features.",
   ],
   ogDescription:
-    "Audit Grants cover the cost of smart contract audits for apps across the Superchain. Grants are typically for pre-deployed apps preparing for launch, but are also available to established apps launching new features.",
+    "Audit Grants cover the cost of smart contract audits for apps across the Superchain. Grants are typically for new apps with contracts deployed and preparing for launch, but are also available to established apps launching new features.",
   status: "ongoing",
   resultsLink: "/round/results?rounds=8",
   iconUrl: "/assets/images/onchain-builders.png",
@@ -72,8 +72,8 @@ export const auditGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project is deployed or has a clear plan to deploy on a supported
-          chain.
+          My project has contracts deployed on a testnet or mainnet of an
+          eligible chain.
         </p>
       ),
       type: "required",
@@ -81,8 +81,23 @@ export const auditGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project&apos;s code is &quot;audit-ready&quot; (e.g., code is frozen, has tests
-          and documentation)
+          My contracts are verified and open source
+        </p>
+      ),
+      type: "required",
+    },
+    {
+      reactNode: (
+        <p className="text-secondary-foreground">
+          My project&apos;s code is &quot;audit-ready&quot; (e.g., code is frozen, has tests and documentation)
+        </p>
+      ),
+      type: "required",
+    },
+    {
+      reactNode: (
+        <p className="text-secondary-foreground">
+          I&apos;ve signed up for Atlas and added my project
         </p>
       ),
       type: "required",
@@ -91,8 +106,8 @@ export const auditGrantsData: MissionData = {
   howItWorks: [
     {
       number: 1,
-      title: "Contact an Audit Service Provider (ASP)",
-      description: "We've whitelisted a number of reliable providers for you.",
+      title: "Contact an Audit Service Provider (ASP) to discuss your project",
+      description: "We've whitelisted a number of providers for you.",
       subDetails: "View ASPs",
       subDetailsLink:
         "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
