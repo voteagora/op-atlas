@@ -1,6 +1,12 @@
 import React from "react"
 
-import { CardTextProps, VoteType } from "@/components/proposals/proposal.types"
+import {
+  CardTextProps,
+  ProposalResultOption,
+  ProposalStatus,
+  ProposalType,
+  VoteType,
+} from "@/components/proposals/proposal.types"
 import { ProposalData } from "@/lib/proposals"
 import { CitizenshipQualification } from "@/lib/types"
 import { getAgoraProposalLink, getVotingProps } from "@/lib/utils/voting"
@@ -26,18 +32,22 @@ const CardText = ({
   const { cardText } = votingCardProps
 
   const renderDescription = () => {
-    if (cardText.needsAgoraLink && cardText.proposalId && typeof cardText.descriptionElement === 'string') {
+    if (
+      cardText.needsAgoraLink &&
+      cardText.proposalId &&
+      typeof cardText.descriptionElement === "string"
+    ) {
       const agoraLink = getAgoraProposalLink(cardText.proposalId)
       const text = cardText.descriptionElement
 
-      const parts = text.split('Agora')
+      const parts = text.split("Agora")
       if (parts.length === 2) {
         return (
           <p className="text-sm text-center text-[#404454] font-weight-normal">
             {parts[0]}
-            <a 
-              href={agoraLink} 
-              target="_blank" 
+            <a
+              href={agoraLink}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-[#404454] hover:opacity-80 transition-opacity duration-200"
             >
@@ -67,6 +77,22 @@ const CardText = ({
       )
     }
 
+    if (
+      (proposalData.proposalType === ProposalType.HYBRID_APPROVAL ||
+        proposalData.proposalType === ProposalType.OFFCHAIN_APPROVAL) &&
+      proposalData.status === ProposalStatus.SUCCEEDED
+    ) {
+      console.log({ proposalResults: proposalData.proposalResults })
+      const candidatesElected = (
+        proposalData.proposalResults as any
+      ).options.filter((option: ProposalResultOption) => option.isApproved)
+      return (
+        <p className="text-sm text-center text-[#404454] font-weight-normal">
+          {candidatesElected.length} candidates were elected.
+        </p>
+      )
+    }
+
     if (cardText.descriptionElement) {
       if (React.isValidElement(cardText.descriptionElement)) {
         return React.cloneElement(
@@ -74,8 +100,7 @@ const CardText = ({
             className?: string
           }>,
           {
-            className:
-              "text-sm text-center text-[#404454] font-weight-normal",
+            className: "text-sm text-center text-[#404454] font-weight-normal",
           },
         )
       } else {
