@@ -1,7 +1,6 @@
 "use client"
 
 import { format } from "date-fns"
-import { Copy } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import React from "react"
@@ -16,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { ProjectWithFullDetails } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
+import { truncateAddress } from "@/lib/utils/string"
 
 import { REWARDS_NAMES } from "./constants"
 
@@ -55,7 +55,7 @@ const RewardAccordion = ({
               {REWARDS_NAMES[rewardRoundId].date}
             </span>
           </div>
-          <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
+          <div className="border border-border rounded-lg flex px-3 py-[10px] gap-3 items-center">
             <Image
               src="/assets/icons/op-icon.svg"
               height={20}
@@ -66,41 +66,23 @@ const RewardAccordion = ({
               {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
               {formatNumber(reward.amount)}
             </div>
+            {reward.claim?.address && (
+              <button
+                type="button"
+                className="text-secondary-foreground text-xs font-medium bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                onClick={() => handleCopyAddress(reward.claim?.address ?? "")}
+                aria-label={`Copy address ${truncateAddress(
+                  reward.claim?.address,
+                )} to clipboard`}
+              >
+                To: {truncateAddress(reward.claim?.address)}
+              </button>
+            )}
           </div>
         </div>
 
         <AccordionContent className="flex flex-col gap-6 pt-6">
           <div className="flex flex-col gap-6">
-            {reward.claim?.address && (
-              <div className="flex flex-col gap-2">
-                <div className="font-medium text-sm text-foreground">
-                  Grant delivery address
-                </div>
-                <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
-                  <Image
-                    src="/assets/icons/tickIcon.svg"
-                    width={16}
-                    height={16}
-                    alt="Check"
-                  />
-                  <div className="text-sm text-foreground">
-                    {reward.claim?.address}
-                  </div>
-                  <Button
-                    onClick={() =>
-                      handleCopyAddress(reward.claim?.address ?? "")
-                    }
-                    variant="ghost"
-                    className="p-0 h-fit"
-                  >
-                    <Copy
-                      className="rotate-90 text-muted cursor-pointer"
-                      size={16}
-                    />
-                  </Button>
-                </div>
-              </div>
-            )}
             {reward.claim?.tokenStreamClaimableAt && (
               <div className="flex flex-col gap-2 w-full">
                 <div className="font-medium text-sm text-foreground">

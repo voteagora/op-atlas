@@ -1,5 +1,6 @@
 "use client"
 
+import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { useIsAdmin } from "@/lib/hooks"
 import { ProjectTeam, ProjectWithFullDetails } from "@/lib/types"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
@@ -18,19 +19,23 @@ export function RewardsSection({
 }) {
   const isAdmin = useIsAdmin(team)
 
-  // If this project receives any grants, we’ll record it here.
-
   const hasRewards = project.rewards.length > 0 || recurringRewards.length > 0
 
   const inProgressRewards = project.rewards.filter(
     (reward) =>
       reward.roundId !== "7" &&
       reward.roundId !== "8" &&
-      reward.claim?.status !== "claimed",
+      reward.claim?.status !== REWARD_CLAIM_STATUS.EXPIRED &&
+      reward.claim?.status !== REWARD_CLAIM_STATUS.CLAIMED &&
+      reward.claim?.status !== REWARD_CLAIM_STATUS.REJECTED,
   )
 
   const claimedRewards = project.rewards.filter(
-    (reward) => reward.claim?.status === "claimed",
+    (reward) => reward.claim?.status === REWARD_CLAIM_STATUS.CLAIMED,
+  )
+
+  const expiredRewards = project.rewards.filter(
+    (reward) => reward.claim?.status === REWARD_CLAIM_STATUS.EXPIRED,
   )
 
   const renderClaimedRewards = () => {
@@ -40,6 +45,23 @@ export function RewardsSection({
           <h4 className="font-semibold text-text-default text-xl">Claimed</h4>
           <ul className="space-y-3">
             {claimedRewards.map((reward) => (
+              <li key={reward.id}>
+                <RewardAccordion reward={reward} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  }
+
+  const renderExpiredRewards = () => {
+    if (expiredRewards.length) {
+      return (
+        <div className="flex flex-col space-y-4">
+          <h4 className="font-semibold text-text-default text-xl">Expired</h4>
+          <ul className="space-y-3">
+            {expiredRewards.map((reward) => (
               <li key={reward.id}>
                 <RewardAccordion reward={reward} />
               </li>
@@ -96,6 +118,7 @@ export function RewardsSection({
         <>
           {renderInProgressRewards()}
           {renderClaimedRewards()}
+          {renderExpiredRewards()}
         </>
       )}
     </div>
