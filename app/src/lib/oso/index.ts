@@ -29,6 +29,7 @@ import {
   QueryOso_TimeseriesMetricsByProjectV0Args,
 } from "@/graphql/__generated__/types"
 import { OSO_METRICS } from "@/lib/constants"
+import { recordExternalApiCall } from "@/lib/metrics"
 import osoGqlClient from "@/lib/oso-client"
 import client from "@/lib/oso-client"
 import {
@@ -62,7 +63,27 @@ import {
   parseRewardsResults,
 } from "./utils"
 
-export const osoClient = new GraphQLClient(
+// Create instrumented GraphQL client
+class InstrumentedGraphQLClient extends GraphQLClient {
+  async request<T = any>(document: any, variables?: any): Promise<T> {
+    const startTime = Date.now()
+
+    try {
+      const result = await super.request<T>(document, variables)
+      const duration = (Date.now() - startTime) / 1000
+      recordExternalApiCall("oso", "graphql", "POST", 200, duration)
+      return result
+    } catch (error) {
+      const duration = (Date.now() - startTime) / 1000
+      const status =
+        error instanceof Error && error.message.includes("400") ? 400 : 500
+      recordExternalApiCall("oso", "graphql", "POST", status, duration)
+      throw error
+    }
+  }
+}
+
+export const osoClient = new InstrumentedGraphQLClient(
   "https://www.opensource.observer/api/v1/graphql",
   {
     headers: {
