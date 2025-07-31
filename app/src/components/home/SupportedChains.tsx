@@ -206,7 +206,7 @@ const SupportedChainsDesktop = () => {
 
   return (
     <>
-      <div className="inline-flex justify-center items-center py-8 w-full">
+      <div className="inline-flex justify-center items-center py-4 w-full">
         <motion.div
           onMouseMove={(e) => {
             const { left, right } = e.currentTarget.getBoundingClientRect()
@@ -220,7 +220,7 @@ const SupportedChainsDesktop = () => {
             mouseRight.set(-Infinity)
             setHoveredChain(null)
           }}
-          className="relative flex h-16 items-end gap-2 px-3 pb-3"
+          className="relative flex h-16 items-end gap-1 px-3 pb-3"
         >
           <motion.div
             className="absolute rounded-2xl inset-y-0 bg-secondary/10 backdrop-blur-sm border border-border -z-10"
@@ -238,7 +238,13 @@ const SupportedChainsDesktop = () => {
           ))}
         </motion.div>
       </div>
-      <div className="text-secondary-foreground text-base font-normal leading-normal mt-12 mb-6">
+      <div
+        className={cn(
+          "text-secondary-foreground text-base font-normal leading-normal mt-1 mb-9",
+          hoveredChain ? "opacity-0" : "opacity-100",
+          "transition-opacity duration-200",
+        )}
+      >
         19 chains in the Superchain are eligible for builder rewards
         <div
           className="hover:cursor-pointer ml-1.5 inline-flex align-middle"
