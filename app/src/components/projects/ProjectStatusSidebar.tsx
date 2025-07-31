@@ -18,6 +18,7 @@ import {
   ProjectWithFullDetails,
 } from "@/lib/types"
 import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
+import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
@@ -39,10 +40,12 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,
   team,
   contracts,
+  recurringRewards,
 }: {
   project: ProjectWithFullDetails | null
   team: ProjectTeam
   contracts: ProjectContracts | null
+  recurringRewards?: RecurringRewardsByRound[]
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -179,9 +182,10 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               >
                 Rewards
               </Link>
-              {unclaimedCount > 0 && (
+              {(unclaimedCount > 0 ||
+                (recurringRewards && recurringRewards.length > 0)) && (
                 <div className="text-xs font-medium text-red-600 bg-red-200 rounded-md px-2 py-0.5">
-                  {unclaimedCount}
+                  {unclaimedCount + (recurringRewards?.length ?? 0)}
                 </div>
               )}
             </div>
