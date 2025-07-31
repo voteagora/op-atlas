@@ -6,9 +6,15 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { Information, InformationFill } from "@/components/icons/remix"
+import { Information } from "@/components/icons/remix"
 import { Optimism } from "@/components/icons/socials"
 import { Button } from "@/components/ui/button"
+import {
+  CantClaimCallout,
+  ScheduleClaimCallout,
+  UnclaimedRewardsCallout,
+  YouAreNotAdminCallout,
+} from "@/components/ui/callouts"
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { ProjectWithFullDetails } from "@/lib/types"
@@ -23,7 +29,7 @@ const RewardAccordion = ({
   reward: ProjectWithFullDetails["rewards"][0]
 }) => {
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
-  const isOlderRound =
+  const isLegacyRound =
     reward.roundId === "4" || reward.roundId === "5" || reward.roundId === "6"
   const [isAdmin, setIsAdmin] = useState(false)
   const [isKyc, setIsKyc] = useState(false)
@@ -54,7 +60,7 @@ const RewardAccordion = ({
     const originalDate = REWARDS_NAMES[rewardRoundId].date
     const parsedDate = parse(originalDate, "MMM d, yyyy", new Date())
 
-    if (reward.claim?.status === REWARD_CLAIM_STATUS.EXPIRED && isOlderRound) {
+    if (reward.claim?.status === REWARD_CLAIM_STATUS.EXPIRED && isLegacyRound) {
       const datePlusOneYear = addYears(parsedDate, 1)
       const formattedDate = format(datePlusOneYear, "MMM d, yyyy")
 
@@ -65,7 +71,7 @@ const RewardAccordion = ({
         </div>
       )
     }
-    if (reward.claim?.status === REWARD_CLAIM_STATUS.PENDING && isOlderRound) {
+    if (reward.claim?.status === REWARD_CLAIM_STATUS.PENDING && isLegacyRound) {
       const datePlusOneYear = addYears(parsedDate, 1)
       const formattedDate = format(datePlusOneYear, "MMM d, yyyy")
 
@@ -114,33 +120,16 @@ const RewardAccordion = ({
 
       {adminProjects &&
         reward.claim?.status === REWARD_CLAIM_STATUS.PENDING &&
-        !isAdmin && (
-          <div className="flex flex-row gap-2 items-center w-full text-red-600 bg-red-200 px-3 py-2 rounded-lg">
-            <InformationFill className="w-5 h-5" fill="#B80018" />
-            <div className="font-medium text-sm">
-              You are not an admin of this project and cannot claim this grant.
-            </div>
-          </div>
-        )}
+        !isAdmin && <YouAreNotAdminCallout />}
+
+      {adminProjects &&
+        reward.claim?.status === REWARD_CLAIM_STATUS.PENDING &&
+        isAdmin &&
+        isKyc && <UnclaimedRewardsCallout />}
 
       {reward.claim?.status === REWARD_CLAIM_STATUS.PENDING &&
         isAdmin &&
-        !isKyc && (
-          <div className="flex flex-row gap-2 items-center w-full text-red-600 bg-red-200 px-3 py-2 rounded-lg">
-            <InformationFill className="w-5 h-5" fill="#B80018" />
-            <div className="font-medium text-sm">
-              You can&apos;t claim your tokens until you&apos;ve completed KYC
-              for your{" "}
-              <Link
-                href={`/projects/${reward.projectId}/grant-address`}
-                className="underline"
-              >
-                grant delivery address
-              </Link>
-              .
-            </div>
-          </div>
-        )}
+        !isKyc && <CantClaimCallout projectId={reward.projectId} />}
 
       <div className="flex flex-col gap-6">
         {reward.claim?.tokenStreamClaimableAt && (

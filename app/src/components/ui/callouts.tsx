@@ -1,23 +1,25 @@
-import { format } from "date-fns"
 import Link from "next/link"
 
-import { getCutoffDate } from "@/lib/utils"
+import { InformationFill } from "../icons/remix"
 
 export const YouAreNotAdminCallout = () => {
   return (
-    <div className="mt-2 px-3 py-2.5 rounded-md  text-red-600 bg-red-200">
-      <span className="text-sm">
+    <div className="flex flex-row gap-2 items-center w-full text-red-600 bg-red-200 px-3 py-2 rounded-lg">
+      <InformationFill className="w-5 h-5" fill="#B80018" />
+      <div className="font-medium text-sm">
         You are not an admin of this project and cannot claim this grant.
-      </span>
+      </div>
     </div>
   )
 }
 
 export const CantClaimCallout = ({ projectId }: { projectId: string }) => {
   return (
-    <div className="mt-2 px-3 py-2.5 rounded-md text-red-600 bg-red-200">
-      <span className="text-sm">
-        You can’t claim your tokens until you’ve completed KYC for your{" "}
+    <div className="flex flex-row gap-2 items-center w-full text-red-600 bg-red-200 px-3 py-2.5 rounded-lg">
+      <InformationFill className="w-5 h-5" fill="#B80018" />
+      <div className="font-medium text-sm">
+        You can&apos;t claim your tokens until you&apos;ve completed KYC for
+        your{" "}
         <Link
           href={`/projects/${projectId}/grant-address`}
           className="underline"
@@ -25,23 +27,30 @@ export const CantClaimCallout = ({ projectId }: { projectId: string }) => {
           grant delivery address
         </Link>
         .
-      </span>
+      </div>
+    </div>
+  )
+}
+
+export const UnclaimedRewardsCallout = () => {
+  return (
+    <div className="flex flex-row gap-2 items-center w-full text-callout-foreground bg-callout px-3 py-2.5 rounded-lg">
+      <InformationFill className="w-5 h-5" fill="#0E4CAF" />
+      <div className="font-medium text-sm">
+        A link to claim this grant has been sent to your email.
+      </div>
     </div>
   )
 }
 
 export const ScheduleClaimCallout = () => {
-  const getReleaseDate = () => {
-    const releaseDate = getCutoffDate()
-    return format(releaseDate, "MMMM d, yyyy")
-  }
-
   return (
-    <div className="mt-2 px-3 py-2.5 rounded-md text-callout-foreground bg-callout">
-      <span className="text-sm">
-        Optimism only releases tokens to Superfluid once per month. Yours will
-        be available to claim on or after {getReleaseDate()}.
-      </span>
+    <div className="flex flex-row gap-2 items-center w-full text-callout-foreground bg-callout px-3 py-2.5 rounded-lg">
+      <InformationFill className="w-5 h-5" fill="#0E4CAF" />
+      <div className="font-medium text-sm">
+        Optimism only releases tokens to Superfluid after the 7th and 22nd day
+        of the month. Check in later to claim your tokens.
+      </div>
     </div>
   )
 }
