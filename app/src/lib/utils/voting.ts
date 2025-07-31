@@ -181,6 +181,14 @@ const getCitizenTypes = (proposalData: ProposalData, vote?: VoteType) => {
   if (proposalData.status === "ACTIVE") {
     return getOpenVotingTypes(proposalData, vote)
   } else if (new Date(proposalData.endTime) < new Date()) {
+    // Special text for optimistic / override proposals
+    if (proposalData.proposalType.includes("OPTIMISTIC")) {
+      const statusText =
+        proposalData.status === ProposalStatus.DEFEATED
+          ? "This decision was vetoed"
+          : "This decision stands"
+      return votingEnded(new Date(proposalData.endTime), statusText)
+    }
     const statusText =
       proposalData.status === ProposalStatus.DEFEATED
         ? `been ${proposalData.status}`
@@ -258,7 +266,6 @@ export const getVotingCardProps = (
     return {
       ...getNonCitizenTypes(proposalData, eligibility),
     }
-
   }
 
   // Fallback
