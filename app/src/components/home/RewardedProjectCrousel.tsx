@@ -62,13 +62,17 @@ export const RewardedProjectCrousel = ({
           <div className="flex flex-col h-full">
             {/* Top content */}
             <div className="flex flex-col items-center gap-4 flex-1">
-              <Image
-                className="w-full h-full md:w-[100px] md:h-[100px] rounded-lg border border-tertiary"
-                src={project.thumbnailUrl || ""}
-                alt={project.name}
-                width={100}
-                height={100}
-              />
+              {project.thumbnailUrl ? (
+                <Image
+                  className="w-full h-full md:w-[100px] md:h-[100px] rounded-lg border border-tertiary"
+                  src={project.thumbnailUrl}
+                  alt={project.name}
+                  width={100}
+                  height={100}
+                />
+              ) : (
+                <div className="w-full h-full md:w-[100px] md:h-[100px] rounded-lg border border-tertiary bg-[#F2F3F8]"></div>
+              )}
               <div className="text-center text-base font-medium leading-normal text-secondary-foreground group-hover:underline line-clamp-2">
                 {project.name}
               </div>
