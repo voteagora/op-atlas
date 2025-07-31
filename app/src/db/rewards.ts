@@ -326,17 +326,32 @@ export async function createOrUpdateSuperfluidStream(
   stream: SuperfluidVestingSchedule,
   rewardStreamId?: string,
 ) {
-  return prisma.superfluidStream.upsert({
+  // Check if a stream with the same sender/receiver combination already exists
+  const existingBySenderReceiver = await prisma.superfluidStream.findFirst({
     where: {
-      id: stream.id,
+      sender: stream.sender,
+      receiver: stream.receiver.toLowerCase(),
     },
-    update: {
-      flowRate: stream.flowRate,
-      deposit: stream.totalAmount,
-      internalStreamId: rewardStreamId,
-      updatedAt: new Date(),
-    },
-    create: {
+  })
+
+  // If a stream with the same sender/receiver exists, update it
+  if (existingBySenderReceiver) {
+    return prisma.superfluidStream.update({
+      where: {
+        id: existingBySenderReceiver.id,
+      },
+      data: {
+        flowRate: stream.flowRate,
+        deposit: stream.totalAmount,
+        internalStreamId: rewardStreamId,
+        updatedAt: new Date(),
+      },
+    })
+  }
+
+  // If no existing stream with same sender/receiver, create new one
+  return prisma.superfluidStream.create({
+    data: {
       id: stream.id,
       flowRate: stream.flowRate,
       sender: stream.sender,
