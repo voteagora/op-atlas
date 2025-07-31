@@ -1,31 +1,41 @@
 "use client"
 
-import { PrivyProvider } from "@privy-io/react-auth"
+import { addRpcUrlOverrideToChain, PrivyProvider } from "@privy-io/react-auth"
 import { createConfig, WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { mainnet, sepolia, optimismSepolia, optimism } from "viem/chains"
+import { mainnet, optimism, optimismSepolia, sepolia } from "viem/chains"
 import { http } from "wagmi"
-import { addRpcUrlOverrideToChain } from "@privy-io/chains"
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
 
-const optimismOverride = addRpcUrlOverrideToChain(
-  optimism,
-  `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-)
+const mainnetRpc = `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
+const sepoliaRpc = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
+const optimismRpc = `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
+const optimismSepoliaRpc = `https://opt-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
+
+const mainnetOverride = addRpcUrlOverrideToChain(mainnet, mainnetRpc)
+
+const sepoliaOverride = addRpcUrlOverrideToChain(sepolia, sepoliaRpc)
+
+const optimismOverride = addRpcUrlOverrideToChain(optimism, optimismRpc)
 
 const optimismSepoliaOverride = addRpcUrlOverrideToChain(
   optimismSepolia,
-  `https://opt-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+  optimismSepoliaRpc,
 )
 
 export const privyWagmiConfig = createConfig({
-  chains: [mainnet, sepolia, optimismSepolia, optimism],
+  chains: [
+    mainnetOverride,
+    sepoliaOverride,
+    optimismSepoliaOverride,
+    optimismOverride,
+  ],
   transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
-    [optimismSepolia.id]: http(`https://opt-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`),
-    [optimism.id]: http(`https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`),
+    [mainnet.id]: http(mainnetRpc),
+    [sepolia.id]: http(sepoliaRpc),
+    [optimismSepolia.id]: http(optimismSepoliaRpc),
+    [optimism.id]: http(optimismRpc),
   },
 })
 
@@ -47,13 +57,18 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
           accentColor: "#FF0420",
           logo: "/assets/images/welcome-privy.svg",
         },
-        supportedChains: [mainnet, sepolia, optimismSepoliaOverride, optimismOverride],
+        supportedChains: [
+          mainnetOverride,
+          sepoliaOverride,
+          optimismSepoliaOverride,
+          optimismOverride,
+        ],
         externalWallets: {
           signatureRequestTimeouts: {
             safe: 600000,
             wallet_connect: 600000,
           },
-        },        
+        },
       }}
     >
       <QueryClientProvider client={queryClient}>
