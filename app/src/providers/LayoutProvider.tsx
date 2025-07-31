@@ -6,7 +6,6 @@ import { createContext, useContext, useRef } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { useWindowSize } from "usehooks-ts"
 
-import { Banner } from "@/components/common/Banner"
 import { MobileViewportWarning } from "@/components/common/MobileViewportWarning"
 import Navbar from "@/components/common/Navbar"
 
@@ -102,7 +101,6 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <ConfettiContext.Provider value={setShowConfetti}>
       <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
-        <Banner />
         <Navbar />
         <ReactCanvasConfetti
           style={{

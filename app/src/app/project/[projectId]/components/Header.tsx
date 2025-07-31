@@ -29,7 +29,7 @@ export default function Header({
 
   return (
     <div className="w-full relative">
-      {banner ? (
+      {banner && (
         <div className="relative">
           {isMember && (
             <TrackedExtendedLink
@@ -60,8 +60,6 @@ export default function Header({
             />
           </div>
         </div>
-      ) : (
-        <div className="w-full h-[80px]" />
       )}
       {thumbnail && (
         <div className="absolute -bottom-10 left-12 aspect-square">
