@@ -16,9 +16,11 @@ import {
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
+import { getKycTeamAction } from "@/lib/actions/projects"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
-import { ProjectWithFullDetails } from "@/lib/types"
+import { KYCTeamWithTeam, ProjectWithFullDetails } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
 import { truncateAddress } from "@/lib/utils/string"
 
 import { REWARDS_NAMES } from "./constants"
@@ -41,12 +43,26 @@ const RewardAccordion = ({
     const isAdmin = adminProjects?.some(
       (project) => project.id === reward.projectId,
     )
-    const isKyc =
-      reward.claim?.kycStatus === "delivered" && reward.claim?.address !== null
 
     setIsAdmin(isAdmin ?? false)
-    setIsKyc(isKyc ?? false)
   }, [adminProjects, reward])
+
+  useEffect(() => {
+    const fetchKycTeam = async () => {
+      try {
+        const kycTeamData = await getKycTeamAction(reward.projectId)
+        setIsKyc(
+          reward.claim?.kycStatus === "delivered" &&
+            isKycTeamVerified(kycTeamData),
+        )
+      } catch (error) {
+        console.error("Error fetching KYC team:", error)
+        setIsKyc(false)
+      }
+    }
+
+    fetchKycTeam()
+  }, [reward.projectId])
 
   const handleCopyAddress = async (address: string) => {
     try {
