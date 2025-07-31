@@ -68,16 +68,8 @@ export const Navbar = () => {
 
   return (
     <>
-      <nav
-        className={`sticky inset-x-0 top-0 h-18 bg-white flex px-6 z-[200] ${
-          params.id || isMissions ? "" : "shadow-sm"
-        }`}
-      >
-        <div
-          className={`flex items-center justify-between h-full w-full mx-auto ${
-            params.id || isMissions ? "bg-background" : ""
-          }`}
-        >
+      <nav className="sticky inset-x-0 top-0 h-18 flex px-6 z-[200] bg-background">
+        <div className="flex items-center justify-between h-full w-full mx-auto">
           <div className="flex sm:hidden items-center h-full w-full relative">
             <button
               className="absolute left-0 z-10 flex items-center"
@@ -88,9 +80,9 @@ export const Navbar = () => {
             <div className="absolute inset-x-0 flex items-center justify-center">
               <Link href="/" className="flex items-center">
                 <Image
-                  src="/assets/images/logo.svg"
-                  height={24}
-                  width={81}
+                  src="/assets/icons/optimismAtlasLogo.svg"
+                  height={12}
+                  width={132}
                   priority
                   alt="OP Atlas Logo"
                 />
@@ -101,9 +93,9 @@ export const Navbar = () => {
           <div className="hidden sm:flex h-full">
             <Link href="/" className="flex items-center mr-10">
               <Image
-                src="/assets/images/logo.svg"
-                height={24}
-                width={81}
+                src="/assets/icons/optimismAtlasLogo.svg"
+                height={12}
+                width={132}
                 priority
                 alt="OP Atlas Logo"
               />

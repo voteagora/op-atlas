@@ -2,6 +2,7 @@ import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
 import { getCutoffDate } from "@/lib/utils"
+
 import { MissionData } from "../MissionsAndRoundData"
 
 export const auditGrantsData: MissionData = {
@@ -16,6 +17,7 @@ export const auditGrantsData: MissionData = {
   details: [
     "Audit Grants cover the cost of smart contract audits for apps across the Superchain. Grants are typically for new apps with contracts deployed and preparing for launch, but are also available to established apps launching new features.",
   ],
+  shortDescription: "For audit-ready apps looking to deploy on the Superchain.",
   ogDescription:
     "Audit Grants cover the cost of smart contract audits for apps across the Superchain. Grants are typically for new apps with contracts deployed and preparing for launch, but are also available to established apps launching new features.",
   status: "ongoing",
@@ -23,9 +25,7 @@ export const auditGrantsData: MissionData = {
   iconUrl: "/assets/images/onchain-builders.png",
   startsAt: new Date("2025-08-15T00:00:00.000Z"),
   endsAt: new Date("2025-09-30T00:00:00.000Z"),
-  applyBy: (() => {
-    return getCutoffDate()
-  })(),
+  applyBy: new Date("2025-09-30T00:00:00.000Z"),
   evaluationMonth: (() => {
     const today = new Date()
     return today.getDate() > 27 ? (today.getMonth() + 1) % 12 : today.getMonth()

@@ -1,11 +1,11 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
+import { CalendarEventFill } from "@/components/icons/remix"
 import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 import { getCutoffDate } from "@/lib/utils"
 
 import { MissionData } from "../MissionsAndRoundData"
-import { Calendar } from "@/components/icons/calendar"
 
 export const retroFundingDevToolingData: MissionData = {
   pageName: "retro-funding-dev-tooling",
@@ -19,6 +19,8 @@ export const retroFundingDevToolingData: MissionData = {
   details: [
     "Rewarding toolchain software, such as compilers, libraries and debuggers, that support builders in developing onchain applications on the Superchain. This program is for software projects that have already launched and can prove their impact.",
   ],
+  shortDescription:
+    "For tools that are already making an impact on the Superchain.",
   ogDescription:
     "Retro Funding: Dev Tooling is distributing up to 8M OP in H1 2025. If you built tooling on Optimism, sign up to check if you qualify for grants.",
   callout: [
@@ -32,7 +34,7 @@ export const retroFundingDevToolingData: MissionData = {
       key="apply-by"
       title="Apply by"
       description="Monthly deadlines"
-      icon={<Calendar fill="#3374DB" />}
+      icon={<CalendarEventFill fill="#3374DB" />}
     />,
   ],
   status: "ongoing",

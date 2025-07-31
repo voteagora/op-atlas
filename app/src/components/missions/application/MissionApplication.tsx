@@ -132,6 +132,7 @@ export function MissionApplication({ userId }: { userId: string }) {
 
         <p className="text-secondary-foreground">
           {isOpenForEnrollment &&
+            mission!.applyBy &&
             `Apply by ${format(
               mission!.applyBy,
               "MMM d",

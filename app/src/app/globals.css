@@ -109,6 +109,7 @@
 }
 
 @layer utilities {
+
   .card {
     @apply bg-background text-card-foreground rounded-3xl border border-solid border-border p-16;
   }

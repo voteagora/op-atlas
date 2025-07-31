@@ -20,6 +20,8 @@ export const growthGrantsData: MissionData = {
   },
   ogDescription:
     "Growth Grants are distributing up to 9M OP in Season 8. If you've built a Superchain app, sign up to check if you qualify for growth funding.",
+  shortDescription:
+    "For apps that have already deployed, looking to boost their TVL.",
   details: [
     <p key="details-1">
       Growth Grants are for Superchain apps that have already launched and are

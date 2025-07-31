@@ -1,14 +1,14 @@
 import Image from "next/image"
 import Link from "next/link"
 
-interface ChainInfo {
+export interface ChainInfo {
   id: string
   name: string
   logo: string
   website: string
 }
 
-const supportedChains: ChainInfo[] = [
+export const supportedChains: ChainInfo[] = [
   {
     id: "arenaZ",
     name: "Arena-Z",
