@@ -1,3 +1,5 @@
+import { recordExternalApiCall } from "./metrics"
+
 interface GraphQLResponse<T = any> {
   data?: T
   errors?: { message: string }[]
@@ -65,6 +67,7 @@ class OsoClient {
     query: Record<string, any>,
     select: ReturnData<T>,
   ): Promise<{ [key in K]: Pick<T, keyof T>[] }> {
+    const startTime = Date.now()
     const { gqlQuery, gqlSelect } = this.buildQuery(query, select.map(String))
 
     const params = Boolean(gqlQuery) ? `(${gqlQuery})` : ""
@@ -73,7 +76,6 @@ class OsoClient {
       }`
 
     const queryString = result.replace(/\s+/g, " ").trim()
-
     const payload = JSON.stringify({ query: queryString })
 
     try {
@@ -83,8 +85,11 @@ class OsoClient {
         body: payload,
       })
 
+      const duration = (Date.now() - startTime) / 1000
+
       if (!response.ok) {
         const errorText = await response.text()
+        recordExternalApiCall("oso", typename, "POST", response.status, duration)
         throw new Error(
           `HTTP Error: ${response.status} ${response.statusText} - ${errorText}`,
         )
@@ -94,11 +99,16 @@ class OsoClient {
 
       if (result.errors) {
         const errorMsg = result.errors.map((error) => error.message).join("\n")
+        recordExternalApiCall("oso", typename, "POST", 400, duration)
         throw new Error(`GraphQL Error: ${errorMsg}`)
       }
 
+      recordExternalApiCall("oso", typename, "POST", 200, duration)
       return result.data as { [key in K]: Pick<T, keyof T>[] }
     } catch (error) {
+      const duration = (Date.now() - startTime) / 1000
+      recordExternalApiCall("oso", typename, "POST", 500, duration)
+      
       if (error instanceof Error) {
         throw new Error(`Request Error: ${error.message}`)
       }
