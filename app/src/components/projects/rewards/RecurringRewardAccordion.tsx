@@ -1,9 +1,9 @@
 "use client"
 
 import { format } from "date-fns"
-import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { toast } from "sonner"
 import { formatEther } from "viem"
 
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
@@ -14,13 +14,13 @@ import {
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
 import { KYCTeamWithTeam } from "@/lib/types"
-import { formatNumber } from "@/lib/utils"
+import { copyToClipboard, formatNumber } from "@/lib/utils"
 import { isKycTeamVerified } from "@/lib/utils/kyc"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
+import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { REWARDS_NAMES } from "./constants"
-import GrantDeliveryAddress from "./GrantDeliveryAddress"
 
 const SUPERFLUID_STREAM_URL = "https://app.superfluid.org/vesting/optimism/"
 
@@ -58,6 +58,15 @@ const RewardAccordion = ({
       )
     : sortedStreams
 
+  const handleCopyAddress = async (address: string) => {
+    try {
+      await copyToClipboard(address)
+      toast("Copied to clipboard")
+    } catch (error) {
+      toast.error("Error copying URL")
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-col gap-2">
@@ -71,15 +80,22 @@ const RewardAccordion = ({
             </span>
           </div>
           <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
-            <Image
-              src="/assets/icons/op-icon.svg"
-              height={20}
-              width={20}
-              alt="Optimism"
-            />
             <div className="text-sm text-secondary-foreground">
-              {formatNumber(formatEther(totalReward))}
+              {formatNumber(formatEther(totalReward))} OP
             </div>
+
+            {reward.kycTeam && linkToStream && teamVerified && (
+              <button
+                type="button"
+                className="text-secondary-foreground text-xs font-medium bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                onClick={() =>
+                  handleCopyAddress(reward?.kycTeam?.walletAddress ?? "")
+                }
+              >
+                To: {truncateAddress(reward?.kycTeam?.walletAddress ?? "")}
+              </button>
+            )}
+
             {linkToStream && (
               <OutboundArrowLink
                 target={linkToStream}
@@ -104,10 +120,6 @@ const RewardAccordion = ({
       </div>
 
       <div className="flex flex-col gap-4 pt-4">
-        {reward.kycTeam && linkToStream && (
-          <GrantDeliveryAddress kycTeam={reward.kycTeam} />
-        )}
-
         {stoppedStreams.length > 0 && (
           <div className="flex flex-col gap-2">
             <div className="font-medium text-sm text-foreground">Notes</div>

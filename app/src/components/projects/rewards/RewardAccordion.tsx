@@ -6,7 +6,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { Information } from "@/components/icons/remix"
+import { Check, Information } from "@/components/icons/remix"
 import { Optimism } from "@/components/icons/socials"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,6 +29,7 @@ const RewardAccordion = ({
   reward: ProjectWithFullDetails["rewards"][0]
 }) => {
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
+  const isClaimed = reward.claim?.status === REWARD_CLAIM_STATUS.CLAIMED
   const isLegacyRound =
     reward.roundId === "4" || reward.roundId === "5" || reward.roundId === "6"
   const [isAdmin, setIsAdmin] = useState(false)
@@ -96,19 +97,19 @@ const RewardAccordion = ({
         </div>
         <div className="border border-border rounded-lg flex px-3 py-[10px] gap-3 items-center justify-between">
           <div className="flex flex-row items-center gap-3">
-            <Optimism className="w-[20px] h-[20px]" fill="#ff0000" />
+            {isClaimed && (
+              <Check className="w-[20px] h-[20px]" fill="#0DA529" />
+            )}
+
             <div className="text-sm text-secondary-foreground">
               {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-              {formatNumber(reward.amount)}
+              {formatNumber(reward.amount)} OP
             </div>
             {reward.claim?.address && (
               <button
                 type="button"
                 className="text-secondary-foreground text-xs font-medium bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
                 onClick={() => handleCopyAddress(reward.claim?.address ?? "")}
-                aria-label={`Copy address ${truncateAddress(
-                  reward.claim?.address,
-                )} to clipboard`}
               >
                 To: {truncateAddress(reward.claim?.address)}
               </button>

@@ -75,7 +75,7 @@ export function RewardsSection({
   const renderInProgressRewards = () => {
     return (
       <div className="flex flex-col space-y-4">
-        <h4 className="font-semibold text-text-default text-xl">In progress</h4>
+        <h4 className="font-semibold text-text-default text-xl">Unclaimed</h4>
         {inProgressRewards.length || recurringRewards.length ? (
           <ul className="space-y-3">
             {recurringRewards.map((reward) => {
