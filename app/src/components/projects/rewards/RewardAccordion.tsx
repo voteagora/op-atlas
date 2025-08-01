@@ -64,28 +64,21 @@ const RewardAccordion = ({
   }
 
   const renderExpirationDate = () => {
-    const originalDate = REWARDS_NAMES[rewardRoundId].date
-    const parsedDate = parse(originalDate, "MMM d, yyyy", new Date())
+    const endDate = REWARDS_NAMES[rewardRoundId].endDate
 
     if (reward.claim?.status === REWARD_CLAIM_STATUS.EXPIRED && isLegacyRound) {
-      const datePlusOneYear = addYears(parsedDate, 1)
-      const formattedDate = format(datePlusOneYear, "MMM d, yyyy")
-
       return (
         <div className="text-secondary-foreground text-sm flex items-center gap-1">
           <Information className="w-4 h-4" fill="#404454" />
-          Expired {formattedDate}
+          Expired {endDate}
         </div>
       )
     }
     if (reward.claim?.status === REWARD_CLAIM_STATUS.PENDING && isLegacyRound) {
-      const datePlusOneYear = addYears(parsedDate, 1)
-      const formattedDate = format(datePlusOneYear, "MMM d, yyyy")
-
       return (
         <div className="text-secondary-foreground text-sm flex items-center gap-1">
           <Information className="w-4 h-4" fill="#404454" />
-          Expires {formattedDate}
+          Expires {endDate}
         </div>
       )
     }
