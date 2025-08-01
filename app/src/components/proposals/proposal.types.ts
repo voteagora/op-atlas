@@ -111,3 +111,9 @@ export interface CandidateCardProps {
   user?: User
   qualification?: CitizenshipQualification
 }
+
+export interface ProposalResultOption {
+  isApproved: boolean
+  option: string
+  weightedPercentage: number
+}
