@@ -1,32 +1,26 @@
 "use client"
 
 import { format } from "date-fns"
-import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import React from "react"
+import { toast } from "sonner"
 import { formatEther } from "viem"
 
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import {
   CantClaimCallout,
   ScheduleClaimCallout,
+  StreamingHelpCallout,
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
 import { KYCTeamWithTeam } from "@/lib/types"
-import { formatNumber } from "@/lib/utils"
+import { copyToClipboard, formatNumber } from "@/lib/utils"
 import { isKycTeamVerified } from "@/lib/utils/kyc"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
+import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { REWARDS_NAMES } from "./constants"
-import GrantDeliveryAddress from "./GrantDeliveryAddress"
 
 const SUPERFLUID_STREAM_URL = "https://app.superfluid.org/vesting/optimism/"
 
@@ -38,8 +32,6 @@ const RewardAccordion = ({
   isAdmin?: boolean
 }) => {
   const { projectId } = useParams()
-
-  const [isExpanded, setIsExpanded] = React.useState("")
 
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
 
@@ -66,80 +58,82 @@ const RewardAccordion = ({
       )
     : sortedStreams
 
+  const handleCopyAddress = async (address: string) => {
+    try {
+      await copyToClipboard(address)
+      toast("Copied to clipboard")
+    } catch (error) {
+      toast.error("Error copying URL")
+    }
+  }
+
   return (
-    <Accordion
-      type="single"
-      value={isExpanded}
-      onValueChange={setIsExpanded}
-      collapsible
-      className="w-full border rounded-xl p-6"
-    >
-      <AccordionItem value="item-1" className="group">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-col space-y-2">
-            <div>
-              <p className="font-medium text-foreground text-sm">
-                {REWARDS_NAMES[rewardRoundId].name}
-              </p>
-              <span className="text-secondary-foreground font-normal text-sm">
-                {REWARDS_NAMES[rewardRoundId].date}
-              </span>
+    <div>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col space-y-2">
+          <div>
+            <p className="font-medium text-foreground text-sm">
+              {REWARDS_NAMES[rewardRoundId].name}
+            </p>
+            <span className="text-secondary-foreground font-normal text-sm">
+              {REWARDS_NAMES[rewardRoundId].date}
+            </span>
+          </div>
+          <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
+            <div className="text-sm text-secondary-foreground">
+              {formatNumber(formatEther(totalReward))} OP
             </div>
-            <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
-              <Image
-                src="/assets/icons/op-icon.svg"
-                height={20}
-                width={20}
-                alt="Optimism"
+
+            {reward.kycTeam && linkToStream && teamVerified && (
+              <button
+                type="button"
+                className="text-secondary-foreground text-xs font-medium bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                onClick={() =>
+                  handleCopyAddress(reward?.kycTeam?.walletAddress ?? "")
+                }
+              >
+                To: {truncateAddress(reward?.kycTeam?.walletAddress ?? "")}
+              </button>
+            )}
+
+            {linkToStream && (
+              <OutboundArrowLink
+                target={linkToStream}
+                className="text-secondary-foreground ml-auto text-sm"
+                text="View on Superfluid"
               />
-              <div className="text-sm text-secondary-foreground">
-                {formatNumber(formatEther(totalReward))}
-              </div>
-              {linkToStream && (
-                <OutboundArrowLink
-                  target={linkToStream}
-                  className="text-secondary-foreground ml-auto text-sm"
-                  text="View on Superfluid"
-                />
-              )}
-            </div>
+            )}
           </div>
-
-          {!isAdmin && <YouAreNotAdminCallout />}
-          {isAdmin && !teamVerified && (
-            <CantClaimCallout projectId={projectId as string} />
-          )}
-          {isAdmin && teamVerified && !linkToStream && <ScheduleClaimCallout />}
         </div>
-        <AccordionContent>
-          <div className="flex flex-col gap-4 pt-4">
-            {reward.kycTeam && linkToStream && (
-              <GrantDeliveryAddress kycTeam={reward.kycTeam} />
-            )}
 
-            {stoppedStreams.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <div className="font-medium text-sm text-foreground">Notes</div>
-                {stoppedStreams.map((stream) => (
-                  <StreamStoppedSection key={stream.id} stream={stream} />
-                ))}
-              </div>
-            )}
+        {!isAdmin && <YouAreNotAdminCallout />}
+        {isAdmin && !teamVerified && (
+          <CantClaimCallout projectId={projectId as string} />
+        )}
+        {isAdmin && teamVerified && !linkToStream && <ScheduleClaimCallout />}
 
-            {teamVerified && reward.kycTeam && linkToStream && (
-              <IsSomethingWrong kycTeam={reward.kycTeam} />
-            )}
+        {isAdmin && teamVerified && linkToStream && (
+          <div className="mt-4">
+            <StreamingHelpCallout />
           </div>
-        </AccordionContent>
+        )}
+      </div>
 
-        <AccordionTrigger className="text-secondary-foreground font-medium text-sm mt-6">
-          <span className="group-data-[state=open]:hidden">Show details</span>
-          <span className="group-data-[state=closed]:hidden">
-            Close details
-          </span>
-        </AccordionTrigger>
-      </AccordionItem>
-    </Accordion>
+      <div className="flex flex-col gap-4 pt-4">
+        {stoppedStreams.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <div className="font-medium text-sm text-foreground">Notes</div>
+            {stoppedStreams.map((stream) => (
+              <StreamStoppedSection key={stream.id} stream={stream} />
+            ))}
+          </div>
+        )}
+
+        {teamVerified && reward.kycTeam && linkToStream && (
+          <IsSomethingWrong kycTeam={reward.kycTeam} />
+        )}
+      </div>
+    </div>
   )
 }
 

@@ -4,13 +4,13 @@ import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useFeatureFlagEnabled } from "posthog-js/react"
 import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { deleteUserProject } from "@/lib/actions/projects"
+import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { useIsAdmin } from "@/lib/hooks"
 import {
   ProjectContracts,
@@ -18,24 +18,40 @@ import {
   ProjectWithFullDetails,
 } from "@/lib/types"
 import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
+import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
 import { DeleteProjectDialog } from "./DeleteProjectDialog"
 
+// Helper function to count unclaimed rewards
+const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
+  if (!project) return 0
+  return project.rewards.filter(
+    (reward) =>
+      !reward.claim ||
+      (reward.claim.status !== REWARD_CLAIM_STATUS.CLAIMED &&
+        reward.claim.status !== REWARD_CLAIM_STATUS.EXPIRED &&
+        reward.claim.status !== REWARD_CLAIM_STATUS.REJECTED),
+  ).length
+}
+
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,
   team,
   contracts,
+  recurringRewards,
 }: {
   project: ProjectWithFullDetails | null
   team: ProjectTeam
   contracts: ProjectContracts | null
+  recurringRewards?: RecurringRewardsByRound[]
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const isAdmin = useIsAdmin(team)
 
+  const unclaimedCount = getUnclaimedRewardsCount(project)
   const [deletingProject, setDeletingProject] = useState(false)
 
   const { progressPercent, completedSections } = useMemo(() => {
@@ -166,6 +182,12 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               >
                 Rewards
               </Link>
+              {(unclaimedCount > 0 ||
+                (recurringRewards && recurringRewards.length > 0)) && (
+                <div className="text-xs font-medium text-red-600 bg-red-200 rounded-md px-2 py-0.5">
+                  {unclaimedCount + (recurringRewards?.length ?? 0)}
+                </div>
+              )}
             </div>
             <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
               <Link
