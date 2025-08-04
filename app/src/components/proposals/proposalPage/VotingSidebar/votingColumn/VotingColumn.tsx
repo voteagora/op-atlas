@@ -618,7 +618,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       (proposalData.status === ProposalStatus.QUEUED ||
         proposalData.status === ProposalStatus.EXECUTED ||
         proposalData.status === ProposalStatus.SUCCEEDED) ? (
-        <div className="border-x border-b py-4">
+        <div className="flex border-x border-b py-4 justify-center items-center">
           <CandidateResults results={resultIdsAndValues} />
         </div>
       ) : (

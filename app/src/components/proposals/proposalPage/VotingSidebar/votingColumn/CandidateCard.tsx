@@ -43,7 +43,7 @@ const CandidateCard = ({
 
   return (
     <div
-      className="group w-full h-10 p-2 rounded-[6px] cursor-pointer hover:bg-secondary transition-colors duration-200"
+      className="group w-full h-10 p-2 rounded-[6px] cursor-pointer hover:bg-backgroundSecondary transition-colors duration-200"
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       role="button"
@@ -126,7 +126,7 @@ const CardApprovalButton = ({
     return (
       <button
         className={cn(
-          "w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-success-foreground border-success",
+          "w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400",
           {
             "cursor-default": votingDisabled,
             "cursor-pointer": !votingDisabled,
@@ -137,7 +137,7 @@ const CardApprovalButton = ({
         onMouseLeave={onMouseLeave}
         disabled={votingDisabled}
       >
-        <span className="font-medium text-xs leading-4 font-inter">
+        <span className="font-medium text-xs leading-4 font-inter ">
           Approved
         </span>
       </button>
@@ -150,12 +150,12 @@ const CardApprovalButton = ({
 
   return (
     <button
-      className="w-[65px] h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-foreground border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
+      className="w-[65px] h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
       onClick={handleButtonClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <span className="font-medium text-xs leading-4 font-inter">Approve</span>
+      <span className="font-medium text-xs leading-4 font-inter ">Approve</span>
     </button>
   )
 }
