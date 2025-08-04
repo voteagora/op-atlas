@@ -12,26 +12,26 @@ interface StatusRowProps {
 const statusDescription = {
   open: {
     description: "Accepting proposals from individuals and teams.",
-    color: "text-callout-foreground",
+    color: "text-info",
     label: "Open",
     backgroundColor: "bg-callout",
   },
   inProgress: {
     description: "An individual or team is working on these missions.",
-    color: "text-success-foreground",
+    color: "text-[#006117]",
     label: "In Progress",
     backgroundColor: "bg-success",
   },
   done: {
     description: "Missions are live and deployed.",
-    color: "text-red-600",
+    color: "text-[#B80018]",
     label: "Done",
     backgroundColor: "bg-red-200",
   },
 }
 
 const StatusRow: React.FC<StatusRowProps> = ({ type, count, isLoading }) => (
-  <div className="w-[712px] inline-flex justify-start items-center gap-4 overflow-hidden">
+  <div className="flex flex-row w-full justify-start items-center gap-4 overflow-hidden">
     <div
       className={cn(
         "py-4 rounded-full w-14 h-14 inline-flex flex-col justify-center items-center gap-2.5",
@@ -74,9 +74,9 @@ export function MissionStatus() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-foreground">
+        <h3 className="text-xl font-semibold text-foreground">
           Status of missions
         </h3>
       </div>
