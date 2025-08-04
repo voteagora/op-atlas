@@ -82,7 +82,6 @@ const CardText = ({
         proposalData.proposalType === ProposalType.OFFCHAIN_APPROVAL) &&
       proposalData.status === ProposalStatus.SUCCEEDED
     ) {
-      console.log({ proposalResults: proposalData.proposalResults })
       const candidatesElected = (
         proposalData.proposalResults as any
       ).options.filter((option: ProposalResultOption) => option.isApproved)
