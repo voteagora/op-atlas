@@ -70,7 +70,7 @@ export function useGitHubMissions() {
     select: (data: GitHubMission[]) => ({
       missions: data,
       statusCounts: categorizeMissions(data),
-      isPageOpen: categorizeMissions(data).open > 0
+      AreMissionsOpen: categorizeMissions(data).open > 0
     })
   })
 }

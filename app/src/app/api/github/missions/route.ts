@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { Octokit } from "octokit"
 
+export const revalidate = 60 * 60
+
 const octokit = new Octokit({
   auth: process.env.GITHUB_AUTH_TOKEN,
 })

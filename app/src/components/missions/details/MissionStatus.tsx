@@ -34,7 +34,7 @@ const StatusRow: React.FC<StatusRowProps> = ({ type, count, isLoading }) => (
   <div className="w-[712px] inline-flex justify-start items-center gap-4 overflow-hidden">
     <div
       className={cn(
-        "py-4 rounded-full w-14 inline-flex flex-col justify-center items-center gap-2.5",
+        "py-4 rounded-full w-14 h-14 inline-flex flex-col justify-center items-center gap-2.5",
         statusDescription[type].backgroundColor,
       )}
     >
@@ -44,7 +44,7 @@ const StatusRow: React.FC<StatusRowProps> = ({ type, count, isLoading }) => (
           statusDescription[type].color,
         )}
       >
-        {isLoading ? ".." : count}
+        {isLoading ? "" : count}
       </div>
     </div>
     <div className="flex-1 inline-flex flex-col justify-start items-start">
