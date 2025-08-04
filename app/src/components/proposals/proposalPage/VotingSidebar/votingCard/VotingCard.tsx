@@ -99,12 +99,13 @@ const CardText = ({
             className?: string
           }>,
           {
-            className: "text-sm text-center text-[#404454] font-weight-normal",
+            className:
+              "text-sm text-center text-secondary-foreground font-weight-normal",
           },
         )
       } else {
         return (
-          <p className="text-sm text-center text-[#404454] font-weight-normal">
+          <p className="text-sm text-center text-secondary-foreground font-weight-normal">
             {cardText.descriptionElement}
           </p>
         )

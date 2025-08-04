@@ -43,7 +43,7 @@ const CandidateCard = ({
 
   return (
     <div
-      className="group w-full h-10 p-2 rounded-[6px] cursor-pointer hover:bg-[#F2F3F8] transition-colors duration-200"
+      className="group w-full h-10 p-2 rounded-[6px] cursor-pointer hover:bg-backgroundSecondary transition-colors duration-200"
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       role="button"
@@ -126,7 +126,7 @@ const CardApprovalButton = ({
     return (
       <button
         className={cn(
-          "w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-[#7AF088]",
+          "w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400",
           {
             "cursor-default": votingDisabled,
             "cursor-pointer": !votingDisabled,
