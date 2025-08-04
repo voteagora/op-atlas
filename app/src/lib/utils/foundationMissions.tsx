@@ -31,7 +31,7 @@ export const foundationMissionsData: MissionData = {
   howItWorks: [
     {
       number: 1,
-      title: "Explore open opportunities on GitHub",
+      title: "Explore open missions on GitHub",
       description: "Learn about Mission Requests by reviewing the issues",
       subDetails: "Visit GitHub",
       subDetailsLink:
