@@ -3,6 +3,7 @@
 import { Prisma, Project, PublishedContract } from "@prisma/client"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
+import { unstable_cache } from "next/cache"
 
 import {
   Oso_ProjectsByCollectionV1,
@@ -230,13 +231,18 @@ const getWeightedRandomGrantRecipientsFn = (): Promise<ProjectWithReward[]> => {
     FROM "Project" p
     LEFT JOIN "FundingReward" fr ON p.id = fr."projectId" AND fr."roundId"::NUMERIC > 6
     GROUP BY p.id, p.name, p.description, p."thumbnailUrl"
+    HAVING SUM(fr.amount) > 20000
     ORDER BY -log(RANDOM()) / COALESCE(SUM(fr.amount), 1) ASC
-    LIMIT 4;
+    LIMIT 20;
   `
 }
 
-export const getWeightedRandomGrantRecipients = cache(
+export const getWeightedRandomGrantRecipients = unstable_cache(
   getWeightedRandomGrantRecipientsFn,
+  ["projects"],
+  {
+    revalidate: 60 * 60,
+  }
 )
 
 async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {

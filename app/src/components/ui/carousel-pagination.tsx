@@ -14,6 +14,7 @@ export interface CarouselPaginationProps {
   className?: string
   onPrev?: () => void
   onNext?: () => void
+  showDots?: boolean
 }
 
 export function CarouselPagination({
@@ -23,6 +24,7 @@ export function CarouselPagination({
   className,
   onPrev,
   onNext,
+  showDots,
 }: CarouselPaginationProps) {
   const handlePrev = () => {
     api?.scrollPrev()
@@ -47,7 +49,18 @@ export function CarouselPagination({
       >
         <ArrowLeftS className="w-4 h-4" fill="#0F111A" />
       </Button>
-
+      {showDots && (
+        <div className="flex items-center" style={{ gap: "8px" }}>
+          {Array.from({ length: count }, (_, index) => (
+            <div
+              key={index}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                current === index + 1 ? "bg-[#0F111A]" : "bg-border"
+              }`}
+            />
+          ))}
+        </div>
+      )}
       <Button
         variant="ghost"
         size="default"

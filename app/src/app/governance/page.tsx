@@ -7,6 +7,9 @@ import RolesPage from "./roles/components/RolesPage"
 
 export default async function Page() {
   const roles = await getAllRoles()
+
+  const hasRoles = roles.length > 0
+
   const session = await auth()
   const userId = session?.user?.id
 
@@ -18,7 +21,9 @@ export default async function Page() {
             Governance
           </h1>
         </div>
-        <RolesPage roles={roles} />
+        {hasRoles &&
+          <RolesPage roles={roles} />
+        }
         <ProposalsPage userId={userId} />
       </div>
     </main>

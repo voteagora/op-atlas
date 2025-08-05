@@ -105,7 +105,7 @@ const CandidateCards = ({
           {candidates.length} candidates
         </p>
       </div>
-      <div className="candidate-card-container mb-2 w-full sm:w-[272px] max-h-[344px] overflow-y-auto [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full">
+      <div className="candidate-card-container mb-2 w-full sm:w-[272px] sm:max-h-[344px] overflow-y-auto [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full">
 
         {candidates.map((candidate, idx) => (
           <CandidateCard

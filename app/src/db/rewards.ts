@@ -3,6 +3,7 @@
 import { Prisma } from "@prisma/client"
 import { cache } from "react"
 
+import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { SuperfluidVestingSchedule } from "@/lib/superfluid"
 import { generateRewardStreamId } from "@/lib/utils/rewards"
 
@@ -419,6 +420,27 @@ export async function getProjectRecurringRewards(projectId: string) {
           },
         },
       },
+    },
+  })
+}
+
+export async function expireClaims() {
+  const oneYearAgo = new Date()
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+
+  return prisma.rewardClaim.updateMany({
+    where: {
+      status: REWARD_CLAIM_STATUS.PENDING,
+      reward: {
+        round: {
+          endDate: {
+            lt: oneYearAgo,
+          },
+        },
+      },
+    },
+    data: {
+      status: REWARD_CLAIM_STATUS.EXPIRED,
     },
   })
 }

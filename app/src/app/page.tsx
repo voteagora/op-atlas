@@ -6,12 +6,12 @@ import { sharedMetadata } from "./shared-metadata"
 
 export const metadata: Metadata = {
   ...sharedMetadata,
-  title: "Homepage - OP Atlas",
+  title: "Optimism Atlas",
   description:
     "OP Atlas is the home of Optimism Contributors. Discover Retro Funding, grants and governance opportunities on the Superchain.",
   openGraph: {
     ...sharedMetadata.openGraph,
-    title: "Homepage - OP Atlas",
+    title: "Optimism Atlas",
     description:
       "OP Atlas is the home of Optimism Contributors. Discover Retro Funding, grants and governance opportunities on the Superchain.",
   },

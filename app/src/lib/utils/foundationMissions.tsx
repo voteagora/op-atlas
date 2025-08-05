@@ -1,7 +1,5 @@
 import React from "react"
 
-import { getCutoffDate } from "@/lib/utils"
-
 import { MissionData } from "../MissionsAndRoundData"
 
 export const foundationMissionsData: MissionData = {
@@ -18,14 +16,13 @@ export const foundationMissionsData: MissionData = {
   details: [
     "Foundation Missions address specific challenges core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
   ],
+  shortDescription: "For anyone who wants to tackle pre-determined problems.",
   ogDescription:
     "Foundation Missions address specific challenges core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
   status: "ongoing",
   resultsLink: "/round/results?rounds=8",
   iconUrl: "/assets/images/onchain-builders.png",
-  applyBy: (() => {
-    return getCutoffDate()
-  })(),
+  applyBy: null,
   evaluationMonth: (() => {
     const today = new Date()
     return today.getDate() > 27 ? (today.getMonth() + 1) % 12 : today.getMonth()

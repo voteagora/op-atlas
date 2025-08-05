@@ -3,13 +3,13 @@
 import Image from "next/image"
 import React, { useState } from "react"
 
-import { CarouselPagination } from "@/components/ui/carousel-pagination"
 import {
   Carousel,
   CarouselApi,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel"
+import { CarouselPagination } from "@/components/ui/carousel-pagination"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -44,6 +44,16 @@ export function FeaturedProjects() {
 
   if (projects.length === 0) return null
 
+  const handleProjectClick = (project: FeaturedProject) => {
+    track("Link Click", {
+      category: "Featured Projects",
+      text: project.name,
+      linkUrl: project.href,
+      source: `${mission?.pageName}_page`,
+    })
+    window.open(project.href, "_blank")
+  }
+
   return (
     <div className="w-full flex flex-col gap-6" style={{ maxWidth: "100vw" }}>
       <h2 className="text-xl font-semibold">Featured projects</h2>
@@ -59,14 +69,14 @@ export function FeaturedProjects() {
                   className="flex flex-col-reverse sm:flex-row group p-6 bg-background border border-border rounded-xl flex gap-6 hover:bg-secondary hover:cursor-pointer h-full"
                   onClick={() => {
                     if (project.href) {
-                      window.open(project.href, "_blank")
+                      handleProjectClick(project)
                     }
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault()
                       if (project.href) {
-                        window.open(project.href, "_blank")
+                        handleProjectClick(project)
                       }
                     }
                   }}
@@ -119,15 +129,19 @@ export function FeaturedProjects() {
           current={current}
           count={count}
           onPrev={() => {
-            track("Link Click", {
+            track("Button Click", {
+              button_type: "Navigation",
+              source: `${mission?.pageName}_page`,
               text: projects[current - 1].name,
-              type: "Featured Projects",
+              category: "Featured Projects",
             })
           }}
           onNext={() => {
-            track("Link Click", {
-              text: projects[current - 1].name,
-              type: "Featured Projects",
+            track("Button Click", {
+              button_type: "Navigation",
+              source: `${mission?.pageName}_page`,
+              label: projects[current - 1].name,
+              category: "Featured Projects",
             })
           }}
         />

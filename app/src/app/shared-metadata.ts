@@ -15,7 +15,7 @@ const sharedKeywords = [
 
 export const sharedMetadata: Metadata = {
   metadataBase: new URL("https://atlas.optimism.io"),
-  icons: "/favicon.ico",
+  icons: "/Favicon.jpg",
   keywords: sharedKeywords,
   openGraph: {
     title: "Atlas",

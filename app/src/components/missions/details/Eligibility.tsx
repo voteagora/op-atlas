@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { Callout } from "@/components/common/Callout"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -113,9 +113,18 @@ export const Eligibility = () => {
         missionName: mission?.name,
         index: index,
         parameter: eligibilityItems[index].type,
+        text: eligibilityItems[index],
       })
     }
   }
+
+  useEffect(() => {
+    if (percentage === 100) {
+      track("Eligibility Check Fulfilled", {
+        missionName: mission?.name,
+      })
+    }
+  }, [percentage, mission?.name, track])
 
   return (
     <div className="flex flex-col gap-6">

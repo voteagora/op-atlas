@@ -16,14 +16,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MONTHS } from "@/lib/oso/constants"
 import { OnchainBuilderMissionProps } from "@/lib/oso/types"
-import { generateTrancheMonths } from "@/lib/oso/utils"
+import { REWARD_GENERATED_MONTHS } from "@/lib/oso/utils"
 import { formatNumber } from "@/lib/utils"
 
 import AlertContainer from "./AlertContainer"
 import MetricCard from "./MetricCard"
 import NotPassingEligibility from "./NotPassingEligibility"
 
-const ONCHAIN_BUILDER_MONTHS = generateTrancheMonths("2025-02-01")
+// Cant automatically generate months as the rewards can be processed after few days into the month
+const ONCHAIN_BUILDER_MONTHS = REWARD_GENERATED_MONTHS
 
 export default function OnchainBuilderMission({
   data,

@@ -1,11 +1,11 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
+import { CalendarEventFill } from "@/components/icons/remix"
 import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 import { getCutoffDate } from "@/lib/utils"
 
 import { MissionData } from "../MissionsAndRoundData"
-import { Calendar } from "@/components/icons/calendar"
 
 export const retroFundingOnchainBuildersData: MissionData = {
   pageName: "retro-funding-onchain-builders",
@@ -19,6 +19,8 @@ export const retroFundingOnchainBuildersData: MissionData = {
   details: [
     "Rewarding application developers for their contributions to Superchain growth and interop adoption. This program is for onchain applications that have seen significant adoption and can prove their impact.",
   ],
+  shortDescription:
+    "For apps that are already making an impact on the Superchain.",
   ogDescription:
     "Rewarding application developers for their contributions to Superchain growth and interop adoption. This program is for onchain applications that have seen significant adoption and can prove their impact.",
   status: "ongoing",
@@ -44,7 +46,7 @@ export const retroFundingOnchainBuildersData: MissionData = {
       key="apply-by"
       title="Apply by"
       description="Monthly deadlines"
-      icon={<Calendar fill="#3374DB" />}
+      icon={<CalendarEventFill fill="#3374DB" />}
     />,
   ],
   showSupportedNetworks: true,
@@ -174,17 +176,15 @@ export const retroFundingOnchainBuildersData: MissionData = {
   rewards: {
     measurement: (
       <p className="text-secondary-foreground">
-        Your impact will be measured via an{" "} 
+        Your impact will be measured via an{" "}
         <ExternalLink
           href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
           className="underline"
         >
           evaluation algorithm
-        </ExternalLink>{" "}               
-        powered by
-        onchain data. The evaluation algorithm
-        will evolve throughout this Retro Funding Mission based on feedback from
-        Optimism Citizens.
+        </ExternalLink>{" "}
+        powered by onchain data. The evaluation algorithm will evolve throughout
+        this Retro Funding Mission based on feedback from Optimism Citizens.
       </p>
     ),
     criteria: [

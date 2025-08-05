@@ -1,6 +1,5 @@
 import React from "react"
 
-import ExternalLink from "@/components/ExternalLink"
 import { FeaturedProject } from "@/components/missions/details/FeaturedProjects"
 import { SupportOption } from "@/components/missions/details/GetSupport"
 import { HowItWorksStep } from "@/components/missions/details/HowItWorks"
@@ -8,7 +7,6 @@ import { LearnMoreLink } from "@/components/missions/details/LearnMore"
 
 import { auditGrantsData } from "./utils/auditGrantsData"
 import { foundationMissionsData } from "./utils/foundationMissions"
-
 import { growthGrantsData } from "./utils/growthGrantsData"
 import { retroFundingDevToolingData } from "./utils/retroFundingDevToolingData"
 import { retroFundingOnchainBuildersData } from "./utils/retroFundingOnchainBuildersData"
@@ -26,12 +24,13 @@ export type MissionData = FundingRoundData & {
   applicationPageEligibility: { reactNode: React.ReactNode; type?: string }[]
   footer?: React.ReactNode
   rewards?: { measurement: React.ReactNode; criteria: string[] }
-  applyBy: Date
+  applyBy: Date | null
   evaluationMonth: number
   howItWorks?: HowItWorksStep[]
   featuredProjects?: FeaturedProject[]
   learnMoreLinks?: LearnMoreLink[]
   supportOptions?: SupportOption[]
+  shortDescription?: string
 }
 
 export type FundingRoundData = {
@@ -56,11 +55,11 @@ export type FundingRoundData = {
 }
 
 export const MISSIONS: MissionData[] = [
-  growthGrantsData,
   auditGrantsData,
-  foundationMissionsData,
+  growthGrantsData,
   retroFundingDevToolingData,
   retroFundingOnchainBuildersData,
+  foundationMissionsData,
 ]
 
 export const PAST_FUNDING_ROUNDS: FundingRoundData[] = [

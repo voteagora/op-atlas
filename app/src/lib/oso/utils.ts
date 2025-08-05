@@ -401,3 +401,12 @@ export const generateTrancheMonths = (startDate: string) => {
 
   return months
 }
+
+
+export const REWARD_GENERATED_MONTHS = {
+  1: "Feb",
+  2: "Mar",
+  3: "Apr",
+  4: "May",
+  5: "Jun",
+}

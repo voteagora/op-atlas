@@ -113,6 +113,23 @@ const config = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        "scale-bounce": {
+          "0%": {
+            transform: "scale(0.7)",
+            marginLeft: "0rem",
+            marginRight: "0rem",
+          },
+          "50%": {
+            transform: "scale(1.2)",
+            marginLeft: "2.3rem",
+            marginRight: "2.3rem",
+          },
+          "100%": {
+            transform: "scale(1)",
+            marginLeft: "1.5rem",
+            marginRight: "1.5rem",
+          },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -127,6 +144,7 @@ const config = {
         },
       },
       animation: {
+        "scale-bounce": "scale-bounce 0.2s ease-in forwards",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "slow-spin": "slow-spin 2s linear infinite",

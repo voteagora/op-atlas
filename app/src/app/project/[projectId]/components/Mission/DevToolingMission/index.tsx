@@ -11,12 +11,13 @@ import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MONTHS } from "@/lib/oso/constants"
 import { DevToolingMissionProps } from "@/lib/oso/types"
-import { generateTrancheMonths } from "@/lib/oso/utils"
+import { REWARD_GENERATED_MONTHS } from "@/lib/oso/utils"
 import { formatNumber } from "@/lib/utils"
 
 import MetricCard from "./MetricCard"
 
-const DEV_TOOLING_MONTHS = generateTrancheMonths("2025-02-01")
+// Cant automatically generate months as the rewards can be processed after few days into the month
+const DEV_TOOLING_MONTHS = REWARD_GENERATED_MONTHS
 
 export default function DevToolingMission({
   data,

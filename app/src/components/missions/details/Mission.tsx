@@ -2,6 +2,7 @@
 
 import React, { useMemo, useRef } from "react"
 
+import ExternalLink from "@/components/ExternalLink"
 import { Eligibility } from "@/components/missions/details/Eligibility"
 import { FeaturedProjects } from "@/components/missions/details/FeaturedProjects"
 import { GetSupport } from "@/components/missions/details/GetSupport"
@@ -10,11 +11,10 @@ import { HowItWorks } from "@/components/missions/details/HowItWorks"
 import { LearnMore } from "@/components/missions/details/LearnMore"
 import Rewards from "@/components/missions/details/Rewards"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
+import { cn } from "@/lib/utils"
 
 import { SupportedNetworks } from "./SupportedNetworks"
 import { SessionRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
-import ExternalLink from "@/components/ExternalLink"
-import { cn } from "@/lib/utils"
 
 // Navigation item component
 interface NavItemProps {
@@ -46,7 +46,7 @@ interface NavSection {
 
 export default function Mission() {
   const mission = useMissionFromPath()
-  
+
   // Create refs for potential sections
   const aboutRef = useRef<HTMLDivElement>(null)
   const rewardsRef = useRef<HTMLDivElement>(null)
@@ -118,13 +118,18 @@ export default function Mission() {
   )
 
   // Filter sections based on conditions
-  const visibleSections = navigationSections.filter(section => section.condition)
+  const visibleSections = navigationSections.filter(
+    (section) => section.condition,
+  )
   const missionIsOpen =
     mission &&
     mission?.startsAt &&
     new Date() > mission?.startsAt &&
     mission?.endsAt;
-  const showSidePanel = missionIsOpen || mission?.pageName === "audit-grants" || mission?.pageName === "growth-grants";
+  const showSidePanel =
+    missionIsOpen ||
+    mission?.pageName === "audit-grants" ||
+    mission?.pageName === "growth-grants"
   return (
     <div
       className={cn(

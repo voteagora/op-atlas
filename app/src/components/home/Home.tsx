@@ -1,25 +1,27 @@
-import { GetHelpFooter } from "./GetHelpFooter"
-import { GrantsCarousel } from "./GrantsCarousel"
-import { GrantsGlossary } from "./GrantsGlossary"
+import { getWeightedRandomGrantRecipients } from "@/db/projects"
+
+import { GrantsInfo } from "./GrantsInfo"
+import { HomeFooter } from "./HomeFooter"
 import { HomeHeader } from "./HomeHeader"
 import { RewardedProjectCrousel } from "./RewardedProjectCrousel"
+import { SunnyGuide } from "./SunnyGuide"
+import { UserProjectsCTA } from "./UserProjectsCTA"
 
-export const Home = () => {
+export const Home = async () => {
+  const projects = await getWeightedRandomGrantRecipients()
+
   return (
-    <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
-      <div className="mt-8 bg-background flex flex-col p-8 md:p-16 w-full max-w-6xl rounded-3xl z-10">
-        <div className="flex flex-col w-full gap-16">
+    <main className="flex flex-col flex-1 h-full items-center relative pt-12 md:pt-[100px] gap-12 md:gap-20">
+      <div className="bg-background flex flex-col max-w-[1064px] w-full px-6 md:px-0">
+        <div className="flex flex-col w-full gap-12 md:gap-20">
           <HomeHeader />
-
-          <GrantsCarousel />
-
-          <RewardedProjectCrousel />
-
-          <GrantsGlossary />
-
-          <GetHelpFooter />
+          <GrantsInfo />
+          <SunnyGuide />
+          <RewardedProjectCrousel projects={projects} />
+          <UserProjectsCTA />
         </div>
       </div>
+      <HomeFooter />
     </main>
   )
 }
