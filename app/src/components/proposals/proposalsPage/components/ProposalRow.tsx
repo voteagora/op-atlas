@@ -17,6 +17,8 @@ export const ProposalRow = (props: StandardProposalProps) => {
       <ProposalTextContent
         title={props.textContent.title}
         subtitle={props.textContent.subtitle}
+        startDate={props.dates.startDate}
+        endDate={props.dates.endDate}
       />
       <div className="hidden md:block">
         <ProposalDates
