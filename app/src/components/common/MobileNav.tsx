@@ -12,7 +12,7 @@ import { dropdownList, grantLinks } from "./Navbar"
 
 export function MobileNav({ onClose }: { onClose: () => void }) {
   return (
-    <div className="absolute z-50 bg-white top-24 w-full h-[calc(100vh-72px)] py-6 px-8 flex flex-col gap-6">
+    <div className="absolute z-50 bg-[#FBFCFE] top-24 w-full h-[calc(100vh-72px)] py-6 px-8 flex flex-col gap-6">
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
           <AccordionTrigger className="text-2xl font-semibold hover:no-underline">
