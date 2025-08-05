@@ -1,41 +1,18 @@
 "use client"
 
-import { addRpcUrlOverrideToChain, PrivyProvider } from "@privy-io/react-auth"
+import { PrivyProvider } from "@privy-io/react-auth"
 import { createConfig, WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { mainnet, optimism, optimismSepolia, sepolia } from "viem/chains"
 import { http } from "wagmi"
 
-const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
-
-const mainnetRpc = `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
-const sepoliaRpc = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
-const optimismRpc = `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
-const optimismSepoliaRpc = `https://opt-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
-
-const mainnetOverride = addRpcUrlOverrideToChain(mainnet, mainnetRpc)
-
-const sepoliaOverride = addRpcUrlOverrideToChain(sepolia, sepoliaRpc)
-
-const optimismOverride = addRpcUrlOverrideToChain(optimism, optimismRpc)
-
-const optimismSepoliaOverride = addRpcUrlOverrideToChain(
-  optimismSepolia,
-  optimismSepoliaRpc,
-)
-
 export const privyWagmiConfig = createConfig({
-  chains: [
-    mainnetOverride,
-    sepoliaOverride,
-    optimismSepoliaOverride,
-    optimismOverride,
-  ],
+  chains: [mainnet, sepolia, optimismSepolia, optimism],
   transports: {
-    [mainnet.id]: http(mainnetRpc),
-    [sepolia.id]: http(sepoliaRpc),
-    [optimismSepolia.id]: http(optimismSepoliaRpc),
-    [optimism.id]: http(optimismRpc),
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+    [optimismSepolia.id]: http(),
+    [optimism.id]: http(),
   },
 })
 
@@ -57,12 +34,6 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
           accentColor: "#FF0420",
           logo: "/assets/images/welcome-privy.svg",
         },
-        supportedChains: [
-          mainnetOverride,
-          sepoliaOverride,
-          optimismSepoliaOverride,
-          optimismOverride,
-        ],
         externalWallets: {
           signatureRequestTimeouts: {
             safe: 600000,
