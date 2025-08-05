@@ -1,7 +1,16 @@
 "use client"
 
+import * as Tooltip from "@radix-ui/react-tooltip"
+import {
+  animate,
+  motion,
+  MotionValue,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "motion/react"
 import Image from "next/image"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   ChainInfo,
@@ -20,15 +29,6 @@ import { DialogProps } from "../dialogs/types"
 import ExternalLink from "../ExternalLink"
 import { Information } from "../icons/remix"
 import { Dialog, DialogDrawer } from "../ui/dialog"
-import {
-  MotionValue,
-  animate,
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "motion/react"
-import * as Tooltip from "@radix-ui/react-tooltip"
 
 const RenderSuperChainInfo = (props: DialogProps<object>) => {
   return (
@@ -49,7 +49,7 @@ const RenderSuperChainInfo = (props: DialogProps<object>) => {
               </div>
               <div className="self-stretch text-center justify-center text-secondary-foreground text-base font-normal leading-normal">
                 There are more chains in the Superchain Ecosystem than what you
-                see here. We're continuously working to make more of them
+                see here. We&apos;re continuously working to make more of them
                 eligible for grants.
               </div>
             </div>
