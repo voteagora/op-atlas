@@ -4,7 +4,7 @@ import { AlignJustify, ArrowUpRight, ChevronDown, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams, usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -65,6 +65,18 @@ export const Navbar = () => {
   const isMissions = pathname.includes("/missions")
 
   const [showMobileNav, setShowMobileNav] = useState(false)
+
+  useEffect(() => {
+    if (showMobileNav) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
+    }
+
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [showMobileNav])
 
   return (
     <>
