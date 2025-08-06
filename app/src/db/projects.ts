@@ -1940,6 +1940,24 @@ export async function createProjectKycTeams({
   projectIds: string[]
   kycTeamId: string
 }) {
+  // Check for projects with active reward streams before reassignment
+  const projectsWithActiveStreams = await prisma.project.findMany({
+    where: {
+      id: { in: projectIds },
+      kycTeam: {
+        rewardStreams: {},
+      },
+    },
+    select: { id: true, name: true },
+  })
+
+  if (projectsWithActiveStreams.length > 0) {
+    const projectNames = projectsWithActiveStreams.map((p) => p.name).join(", ")
+    throw new Error(
+      `Cannot reassign KYC team: The following projects have active reward streams: ${projectNames}`,
+    )
+  }
+
   const updates = await prisma.project.updateMany({
     where: {
       id: { in: projectIds },
