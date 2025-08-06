@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils"
 
 import { SupportedNetworks } from "./SupportedNetworks"
 import { SessionRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
-import { MissionStatus } from "./MissionStatus"
 
 // Navigation item component
 interface NavItemProps {
@@ -57,7 +56,6 @@ export default function Mission() {
   const featuredProjectsRef = useRef<HTMLDivElement>(null)
   const getSupportRef = useRef<HTMLDivElement>(null)
   const learnMoreRef = useRef<HTMLDivElement>(null)
-  const missionStatusRef = useRef<HTMLDivElement>(null)
 
   // Define all possible navigation sections with their conditions
   const navigationSections: NavSection[] = useMemo(
@@ -67,12 +65,6 @@ export default function Mission() {
         label: "About",
         ref: aboutRef,
         condition: true, // Always show
-      },
-      {
-        key: "mission-status",
-        label: "Status of missions",
-        ref: missionStatusRef,
-        condition: mission?.pageName === "foundation-missions",
       },
       {
         key: "rewards",
@@ -152,12 +144,6 @@ export default function Mission() {
               <div ref={aboutRef}>
                 <Header />
               </div>
-
-              {mission?.pageName === "foundation-missions" && (
-                <div ref={missionStatusRef} className="scroll-mt-20">
-                  <MissionStatus />
-                </div>
-              )}
 
               {mission?.rewards && (
                 <div ref={rewardsRef} className="scroll-mt-20">
