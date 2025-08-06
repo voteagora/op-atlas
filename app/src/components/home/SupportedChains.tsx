@@ -1,7 +1,16 @@
 "use client"
 
+import * as Tooltip from "@radix-ui/react-tooltip"
+import {
+  animate,
+  motion,
+  MotionValue,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "motion/react"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   ChainInfo,
@@ -40,7 +49,7 @@ const RenderSuperChainInfo = (props: DialogProps<object>) => {
               </div>
               <div className="self-stretch text-center justify-center text-secondary-foreground text-base font-normal leading-normal">
                 There are more chains in the Superchain Ecosystem than what you
-                see here. We’re continuously working to make more of them
+                see here. We&apos;re continuously working to make more of them
                 eligible for grants.
               </div>
             </div>
@@ -76,10 +85,110 @@ const RenderSuperChainInfo = (props: DialogProps<object>) => {
   )
 }
 
+// Constants for dock animation
+const SCALE = 1.8 // max scale factor of an icon
+const DISTANCE = 90 // pixels before mouse affects an icon
+const NUDGE = 30 // pixels icons are moved away from mouse
+const SPRING = {
+  mass: 0.1,
+  stiffness: 170,
+  damping: 12,
+}
+
+const ChainIcon = ({
+  chain,
+  mouseLeft,
+  onChainClick,
+  showLabel,
+  onHover,
+}: {
+  chain: ChainInfo
+  mouseLeft: MotionValue
+  onChainClick: (chain: ChainInfo) => void
+  showLabel: boolean
+  onHover: (chain: ChainInfo | null) => void
+}) => {
+  const ref = useRef<HTMLButtonElement>(null)
+  const y = useMotionValue(0)
+
+  const distance = useTransform(() => {
+    const bounds = ref.current
+      ? { x: ref.current.offsetLeft, width: ref.current.offsetWidth }
+      : { x: 0, width: 0 }
+
+    return mouseLeft.get() - bounds.x - bounds.width / 2
+  })
+
+  const scale = useTransform(distance, [-DISTANCE, 0, DISTANCE], [1, SCALE, 1])
+  const x = useTransform(() => {
+    const d = distance.get()
+    if (d === -Infinity) {
+      return 0
+    } else if (d < -DISTANCE || d > DISTANCE) {
+      return Math.sign(d) * -1 * NUDGE
+    } else {
+      return (-d / DISTANCE) * NUDGE * scale.get()
+    }
+  })
+
+  const scaleSpring = useSpring(scale, SPRING)
+  const xSpring = useSpring(x, SPRING)
+
+  return (
+    <Tooltip.Provider delayDuration={0}>
+      <Tooltip.Root open={showLabel}>
+        <Tooltip.Trigger asChild>
+          <motion.button
+            ref={ref}
+            style={{ x: xSpring, scale: scaleSpring, y }}
+            onMouseEnter={() => onHover(chain)}
+            onClick={() => {
+              animate(y, [0, -30, 0], {
+                repeat: 1,
+                ease: [
+                  [0, 0, 0.2, 1],
+                  [0.8, 0, 1, 1],
+                ],
+                duration: 0.5,
+              })
+              onChainClick(chain)
+            }}
+            className="aspect-square block w-10 origin-bottom"
+          >
+            <Image
+              className="rounded-full border border-tertiary cursor-pointer w-full h-full"
+              src={chain.logo}
+              alt={chain.name}
+              width={56}
+              height={56}
+            />
+          </motion.button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            side="bottom"
+            sideOffset={10}
+            className="bg-background shadow-lg border border-border px-3 py-1.5 text-sm rounded-md text-foreground font-medium"
+          >
+            {chain.name}
+            <Tooltip.Arrow className="fill-border" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  )
+}
+
 const SupportedChainsDesktop = () => {
-  const [isHovering, setIsHovering] = useState(false)
   const [open, setOpen] = useState(false)
+  const [hoveredChain, setHoveredChain] = useState<ChainInfo | null>(null)
   const { track } = useAnalytics()
+  const mouseLeft = useMotionValue(-Infinity)
+  const mouseRight = useMotionValue(-Infinity)
+  const left = useTransform(mouseLeft, [0, 40], [0, -40])
+  const right = useTransform(mouseRight, [0, 40], [0, -40])
+  const leftSpring = useSpring(left, SPRING)
+  const rightSpring = useSpring(right, SPRING)
 
   const handleOpenChange = (open: boolean) => {
     setOpen(open)
@@ -95,64 +204,45 @@ const SupportedChainsDesktop = () => {
     window.open(chain.website, "_blank")
   }
 
-  const renderImage = (chain: ChainInfo, index: number) => {
-    return (
-      <div
-        key={chain.name}
-        className="mx-[-2px] relative group flex items-center justify-center h-14"
-        style={{ zIndex: supportedChains.length - index }}
-        onClick={() => handleChainClick(chain)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            handleChainClick(chain)
-          }
-        }}
-      >
-        <div className="relative w-10 h-10 group-hover:w-20 group-hover:h-20 group-hover:animate-scale-bounce transition-all duration-200 flex items-center justify-center group-hover:mx-6">
-          <Image
-            className="rounded-full border border-tertiary cursor-pointer w-full h-full"
-            src={chain.logo}
-            alt={chain.name}
-            width={56}
-            height={56}
-          />
-        </div>
-        <div
-          className={`absolute top-1/2 border border-muted opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-[-1] border-dashed 
-            ${index === 0 ? "left-[30px]" : "left-[4px]"} 
-            ${
-              index === supportedChains.length - 1
-                ? "right-[30px]"
-                : "right-[4px]"
-            }`}
-        />
-        <div className="w-max -translate-x-1/2 left-1/2 top-[66px] px-3 py-2 inline-flex flex-col justify-center items-center hidden absolute group-hover:block">
-          <div className="text-text-foreground text-base font-medium leading-normal">
-            {chain.name}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <>
-      <div className="inline-flex justify-center items-center py-2 w-full">
-        <div
-          data-property-1="Default"
-          className="flex justify-center items-center"
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
+      <div className="inline-flex justify-center items-center py-4 w-full">
+        <motion.div
+          onMouseMove={(e) => {
+            const { left, right } = e.currentTarget.getBoundingClientRect()
+            const offsetLeft = e.clientX - left
+            const offsetRight = right - e.clientX
+            mouseLeft.set(offsetLeft)
+            mouseRight.set(offsetRight)
+          }}
+          onMouseLeave={() => {
+            mouseLeft.set(-Infinity)
+            mouseRight.set(-Infinity)
+            setHoveredChain(null)
+          }}
+          className="relative flex h-16 items-end gap-1 px-3 pb-3"
         >
-          {supportedChains.map((chain, index) => renderImage(chain, index))}
-        </div>
+          <motion.div
+            className="absolute rounded-2xl inset-y-0 bg-secondary/10 backdrop-blur-sm border border-border -z-10"
+            style={{ left: leftSpring, right: rightSpring }}
+          />
+          {supportedChains.map((chain) => (
+            <ChainIcon
+              key={chain.name}
+              chain={chain}
+              mouseLeft={mouseLeft}
+              onChainClick={handleChainClick}
+              showLabel={hoveredChain?.name === chain.name}
+              onHover={setHoveredChain}
+            />
+          ))}
+        </motion.div>
       </div>
       <div
         className={cn(
-          "text-secondary-foreground text-base font-normal leading-normal mt-2 mb-6",
-          isHovering ? "hidden" : "",
+          "text-secondary-foreground text-base font-normal leading-normal mt-1 mb-9",
+          hoveredChain ? "opacity-0" : "opacity-100",
+          "transition-opacity duration-200",
         )}
       >
         19 chains in the Superchain are eligible for builder rewards
