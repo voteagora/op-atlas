@@ -1,12 +1,14 @@
-import { MetricValues } from "./types"
+import { formatUnits } from "viem"
+
+import { CHAIN_INFO } from "@/components/common/chain"
+
 import {
   INDEXED_MONTHS,
   RETROFUNDING_OP_REWARD_MINIMUM,
   TRANCHE_MONTHS_MAP,
 } from "./constants"
+import { MetricValues } from "./types"
 import { Trend } from "./types"
-import { CHAIN_INFO } from "@/components/common/chain"
-import { formatUnits } from "viem"
 
 export const formatPerformanceMetrics = (metrics: MetricValues[]) => {
   const groupedData = groupByDate(metrics)
@@ -400,13 +402,4 @@ export const generateTrancheMonths = (startDate: string) => {
   }
 
   return months
-}
-
-
-export const REWARD_GENERATED_MONTHS = {
-  1: "Feb",
-  2: "Mar",
-  3: "Apr",
-  4: "May",
-  5: "Jun",
 }
