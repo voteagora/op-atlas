@@ -10,8 +10,8 @@ export const foundationMissionsData: MissionData = {
   funding: {
     op: "Up to 3.5M",
   },
-  startsAt: new Date(),
-  endsAt: new Date(),
+  startsAt: new Date("2025-06-24T00:00:00.000Z"), 
+  endsAt: new Date("2025-12-30T00:00:00.000Z"), // The open status now is driven by API from GitHub, This is to have a placeholder date for default Open status.
   season: "8",
   details: [
     "Foundation Missions address specific challenges core to Optimism’s vision and strategy. Whether you’re a developer, designer, or just passionate about making a difference, there’s a place for you to contribute.",
@@ -31,7 +31,7 @@ export const foundationMissionsData: MissionData = {
   howItWorks: [
     {
       number: 1,
-      title: "Explore open opportunities on GitHub",
+      title: "Explore open missions on GitHub",
       description: "Learn about Mission Requests by reviewing the issues",
       subDetails: "Visit GitHub",
       subDetailsLink:
