@@ -19,11 +19,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
+import { useWallet } from "@/hooks/useWallet"
 import { AUTH_STATUS, LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {
@@ -36,6 +39,7 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
+import { truncateAddress } from "@/lib/utils/string"
 
 export const Account = () => {
   const { user: privyUser, getAccessToken } = usePrivy()
@@ -50,6 +54,18 @@ export const Account = () => {
   })
 
   const username = useUsername(user)
+  
+  // Safe wallet integration
+  const {
+    currentAddress,
+    currentContext,
+    signerWallet,
+    selectedSafeWallet,
+    availableSafeWallets,
+    switchToSafe,
+    switchToEOA,
+    isLoadingSafeWallets
+  } = useWallet()
 
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
@@ -171,10 +187,22 @@ export const Account = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
-          <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
+          <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium relative">
             <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
 
-            <span className="hidden sm:inline">{username}</span>
+            {/* Safe wallet context indicator */}
+            {currentContext === "SAFE" && (
+              <div
+                className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"
+                title="Safe Wallet Active"
+              />
+            )}
+
+            <span className="hidden sm:inline">
+              {currentContext === "SAFE"
+                ? truncateAddress(currentAddress)
+                : username}
+            </span>
             <Image
               src="/assets/icons/arrowDownIcon.svg"
               width={10}
@@ -185,14 +213,94 @@ export const Account = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="w-56 flex flex-col gap-1 z-[9999]"
+          className="w-64 flex flex-col gap-1 z-[9999]"
         >
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               Dashboard
             </DropdownMenuItem>
           </Link>
-          <hr className="w-full border-[0.5px] border-border" />
+
+          {/* Current EOA Wallet */}
+          <DropdownMenuItem
+            className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
+              currentContext === "EOA" ? "bg-accent" : ""
+            }`}
+            onClick={() => switchToEOA()}
+          >
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  currentContext === "EOA" ? "bg-green-500" : "bg-gray-300"
+                }`}
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">EOA Wallet</span>
+                <span className="text-xs text-muted-foreground">
+                  {signerWallet?.address
+                    ? `${signerWallet.address.slice(
+                        0,
+                        6,
+                      )}...${signerWallet.address.slice(-4)}`
+                    : "Not connected"}
+                </span>
+              </div>
+            </div>
+            {currentContext === "EOA" && (
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                Active
+              </span>
+            )}
+          </DropdownMenuItem>
+
+          {/* Safe Wallets */}
+          {availableSafeWallets.length > 0 && (
+            <>
+              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+                Safe Wallets {isLoadingSafeWallets && "(Loading...)"}
+              </DropdownMenuLabel>
+              {availableSafeWallets.map((safeWallet) => (
+                <DropdownMenuItem
+                  key={safeWallet.address}
+                  className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
+                    currentContext === "SAFE" &&
+                    selectedSafeWallet?.address === safeWallet.address
+                      ? "bg-accent"
+                      : ""
+                  }`}
+                  onClick={() => switchToSafe(safeWallet.address)}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        currentContext === "SAFE" &&
+                        selectedSafeWallet?.address === safeWallet.address
+                          ? "bg-blue-500"
+                          : "bg-gray-300"
+                      }`}
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">Safe Wallet</span>
+                      <span className="text-xs text-muted-foreground">
+                        {`${safeWallet.address.slice(
+                          0,
+                          6,
+                        )}...${safeWallet.address.slice(-4)}`}
+                      </span>
+                    </div>
+                  </div>
+                  {currentContext === "SAFE" &&
+                    selectedSafeWallet?.address === safeWallet.address && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                        Active
+                      </span>
+                    )}
+                </DropdownMenuItem>
+              ))}
+            </>
+          )}
+
+          <DropdownMenuSeparator />
           <Link href="/profile/details">
             <DropdownMenuItem className="cursor-pointer">
               Profile details
