@@ -109,10 +109,10 @@ export const ApplicationStatusCard = ({
   } else if (mission?.pageName === "foundation-missions") {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold hidden md:block">Explore missions</p>
+        <p className="font-semibold hidden md:block">Explore opportunities</p>
 
         <p className="text-sm text-secondary-foreground text-center mb-2">
-          View missions in the Optimism GitHub Repo
+          View opportunities in the Optimism GitHub Repo
         </p>
         <Button
           className="bg-optimismRed text-white w-full border-0"
@@ -120,7 +120,7 @@ export const ApplicationStatusCard = ({
           onClick={() => {
             buttonClickHandler({
               href: "https://github.com/orgs/ethereum-optimism/projects/31/views/1",
-              text: "Explore missions",
+              text: "Explore opportunities",
               type: "application",
             })
             window.open(
