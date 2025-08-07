@@ -349,6 +349,7 @@ export const updateGithubRepos = async (
       project: {
         hasCodeRepositories: !noRepos,
       },
+      userId,
     })
 
     const repoUpdates = Promise.all(
