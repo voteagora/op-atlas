@@ -58,16 +58,7 @@ export default function SelectKYCProjectDialog({
       // A project has active streams if it has a kycTeam with rewardStreams that have active rounds
       if (!project.kycTeam?.rewardStreams?.length) return true
 
-      const now = new Date()
-      const hasActiveStreams = project.kycTeam.rewardStreams.some((stream) => {
-        return (
-          stream.round &&
-          new Date(stream.round.startDate) <= now &&
-          new Date(stream.round.endDate) >= now
-        )
-      })
-
-      return !hasActiveStreams
+      return !project.kycTeam.rewardStreams.some((stream) => stream.round)
     })
   }, [projects])
 
