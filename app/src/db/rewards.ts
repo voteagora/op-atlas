@@ -327,6 +327,30 @@ export async function createOrUpdateSuperfluidStream(
   stream: SuperfluidVestingSchedule,
   rewardStreamId?: string,
 ) {
+  // Check if there's an existing stream with the same sender/receiver combination
+  // This handles the case where a user might have multiple streams (e.g., one vested, one vesting)
+  const existingStream = await prisma.superfluidStream.findFirst({
+    where: {
+      sender: stream.sender,
+      receiver: stream.receiver.toLowerCase(),
+    },
+  })
+
+  // Only delete the existing stream if:
+  // 1. There is an existing stream with the same sender/receiver
+  // 2. The new stream has a different ID (not just an update)
+  // 3. The new stream has flowRate > 0 (active vesting)
+  if (
+    existingStream &&
+    existingStream.id !== stream.id &&
+    parseFloat(stream.flowRate) > 0
+  ) {
+    await prisma.superfluidStream.delete({
+      where: {
+        id: existingStream.id,
+      },
+    })
+  }
   return prisma.superfluidStream.upsert({
     where: {
       id: stream.id,

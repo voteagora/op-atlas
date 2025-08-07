@@ -41,7 +41,7 @@ const ProposalCard = ({
       )}
       onClick={handleClick}
     >
-      <div className="flex flex-row gap-6 justify-between items-center p-6">
+      <div className="flex flex-row gap-6 justify-between items-center pt-6 pr-6 pb-6 pl-4 md:p-6">
         {children}
       </div>
     </button>
@@ -151,15 +151,25 @@ const ProposalStatusBadge = ({ type }: ProposalStatusBadgeProps) => {
 interface ProposalTextProps {
   title: string
   subtitle?: string
+  startDate?: string
+  endDate?: string
 }
-const ProposalTextContent = ({ title, subtitle }: ProposalTextProps) => {
+const ProposalTextContent = ({
+  title,
+  subtitle,
+  startDate,
+  endDate,
+}: ProposalTextProps) => {
   return (
     <div className="flex flex-col justify-center w-full lg:min-w-[41rem] h-[48px] flex-shrink min-w-0 gap-0">
       <div className="text-base md:font-[500] sm:font-300 text-text/default leading-normal truncate group-hover:underline group-hover:underline-offset-4 text-[16px] text-text-default">
         {title}
       </div>
       <p className="text-base md:font-normal sm:font-200 text-text-secondary leading-6 text-[16px] truncate">
-        {subtitle}
+        <span className="md:hidden">
+          {startDate && endDate ? `${startDate} - ${endDate}` : subtitle}
+        </span>
+        <span className="hidden md:inline">{subtitle}</span>
       </p>
     </div>
   )
@@ -233,7 +243,11 @@ const ProposalArrow = ({ href, proposalType }: ProposalArrowProps) => {
   }
 
   return (
-    <a href={href} className="block w-[36px] h-[36px]" onClick={handleClick}>
+    <a
+      href={href}
+      className="hidden md:block w-[36px] h-[36px]"
+      onClick={handleClick}
+    >
       <div
         className={cn(
           "w-full h-full rounded-[6px] flex items-center justify-center p-[6px_12px_6px_12px] bg-secondary text-text/default",

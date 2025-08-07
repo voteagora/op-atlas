@@ -37,7 +37,7 @@ const Questionnaire = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[458px] min-h-[292px] p-0 rounded-xl">
+      <DialogContent className="w-full max-w-[458px] min-h-[292px] p-0 rounded-xl">
         <div className="flex flex-col h-full">
           {/* Header Section */}
           <DialogHeader className="p-6 space-y-2">
@@ -52,8 +52,8 @@ const Questionnaire = ({
           </DialogHeader>
 
           {/* Questions Section */}
-          <div className=" flex justify-center">
-            <div className="w-full">
+          <div className="px-6 flex justify-center">
+            <div className="w-full relative z-10">
               {questions.map((question, index) => (
                 <Question key={`question-${index}`}>{question}</Question>
               ))}
@@ -61,11 +61,11 @@ const Questionnaire = ({
           </div>
 
           {/* Buttons Section */}
-          <DialogFooter className="p-6 space-y-2 sm:space-y-0 rounded-b-xl flex justify-center">
+          <DialogFooter className="p-6 space-y-2 sm:space-y-0 rounded-b-xl flex justify-center ">
             {completionButtons || (
               <Button
                 variant="destructive"
-                className="w-[410px] h-11 py-2.5 rounded-md hover:opacity-80 disabled:bg-destructive disabled:text-background"
+                className="w-full max-w-[410px] h-11 py-2.5 rounded-md hover:opacity-80 disabled:bg-destructive disabled:text-background"
                 onClick={onComplete}
                 disabled={!hasSelection}
               >
