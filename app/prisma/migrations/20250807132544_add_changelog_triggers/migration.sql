@@ -49,14 +49,21 @@ DECLARE
     old_data JSONB;
     new_data JSONB;
     action_type TEXT;
+    performer TEXT;
 BEGIN
+    performer := current_setting('app.current_user_id', true);
+
     -- Determine action type
     IF TG_OP = 'INSERT' THEN
         action_type := 'created';
         old_data := NULL;
         new_data := to_jsonb(NEW);
     ELSIF TG_OP = 'UPDATE' THEN
-        -- Check if it's a status change (deletedAt field)
+        -- Ignore cosmetic-only updates: updatedAt and/or lastMetadataUpdate
+        IF (to_jsonb(NEW) - 'lastMetadataUpdate' - 'updatedAt') = (to_jsonb(OLD) - 'lastMetadataUpdate' - 'updatedAt') THEN
+          RETURN NEW;
+        END IF;
+
         IF OLD."deletedAt" IS NULL AND NEW."deletedAt" IS NOT NULL THEN
             action_type := 'status_change';
         ELSE
@@ -83,7 +90,7 @@ BEGIN
         gen_random_uuid(),
         COALESCE(NEW.id, OLD.id),
         action_type,
-        current_setting('app.current_user_id', true),
+        NULLIF(performer, ''),
         old_data,
         new_data,
         NOW()
@@ -100,7 +107,10 @@ DECLARE
     old_data JSONB;
     new_data JSONB;
     action_type TEXT;
+    performer TEXT;
 BEGIN
+    performer := current_setting('app.current_user_id', true);
+
     -- Determine action type
     IF TG_OP = 'INSERT' THEN
         action_type := 'submitted';
@@ -138,7 +148,7 @@ BEGIN
         gen_random_uuid(),
         COALESCE(NEW.id, OLD.id),
         action_type,
-        current_setting('app.current_user_id', true),
+        NULLIF(performer, ''),
         old_data,
         new_data,
         NOW()
@@ -203,7 +213,10 @@ DECLARE
     old_data JSONB;
     new_data JSONB;
     action_type TEXT;
+    performer TEXT;
 BEGIN
+    performer := current_setting('app.current_user_id', true);
+
     -- Determine action type
     IF TG_OP = 'INSERT' THEN
         action_type := 'collaborator_added';
@@ -212,8 +225,12 @@ BEGIN
     ELSIF TG_OP = 'UPDATE' THEN
         IF OLD."deletedAt" IS NULL AND NEW."deletedAt" IS NOT NULL THEN
             action_type := 'collaborator_removed';
-        ELSE
+        ELSIF OLD."deletedAt" IS NOT NULL AND NEW."deletedAt" IS NULL THEN
+            action_type := 'collaborator_added';
+        ELSIF OLD.role IS DISTINCT FROM NEW.role THEN
             action_type := 'collaborator_updated';
+        ELSE
+            RETURN NEW; -- ignore no-op updates
         END IF;
         old_data := to_jsonb(OLD);
         new_data := to_jsonb(NEW);
@@ -236,7 +253,7 @@ BEGIN
         gen_random_uuid(),
         COALESCE(NEW."projectId", OLD."projectId"),
         action_type,
-        current_setting('app.current_user_id', true),
+        NULLIF(performer, ''),
         old_data,
         new_data,
         NOW()

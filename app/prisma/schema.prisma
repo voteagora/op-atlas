@@ -779,14 +779,13 @@ enum RoleApplicationStatus {
 }
 
 model UserChangelog {
-  id          String   @id @default(uuid())
-  userId      String
-  action      String
-  performedBy String?
-  oldData     Json?
-  newData     Json?
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  oldData   Json?
+  newData   Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([action])

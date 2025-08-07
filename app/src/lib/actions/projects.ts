@@ -43,7 +43,6 @@ import {
   verifyMembership,
   verifyOrganizationMembership,
 } from "./utils"
-import { withChangelogTracking } from "@/lib/utils/changelog"
 
 export const getProjects = async (userId: string) => {
   const teams = await getUserProjectsWithDetails({ userId })
