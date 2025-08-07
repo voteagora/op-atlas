@@ -3,7 +3,6 @@ CREATE TABLE "UserChangelog" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "action" TEXT NOT NULL,
-    "performedBy" TEXT,
     "oldData" JSONB,
     "newData" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
