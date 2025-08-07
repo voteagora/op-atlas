@@ -14,7 +14,10 @@ export const DELETE = async (
   }
 
   try {
-    const res = await deleteProject({ id: route.params.projectId })
+    const res = await deleteProject({
+      id: route.params.projectId,
+      userId: authResponse.userId,
+    })
     const updatedProject = res.updatedProject
     const deletedRepositories = res.deletedRepositories
 
