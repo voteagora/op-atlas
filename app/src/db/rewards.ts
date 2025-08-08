@@ -3,6 +3,7 @@
 import { Prisma } from "@prisma/client"
 import { cache } from "react"
 
+import { isProjectBlacklisted } from "@/db/projects"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { SuperfluidVestingSchedule } from "@/lib/superfluid"
 import { generateRewardStreamId } from "@/lib/utils/rewards"
@@ -141,8 +142,26 @@ export async function insertRewards(
     amount: number
   }[],
 ) {
+  // Filter out blacklisted projects
+  const validRewards = await Promise.all(
+    rewards.map(async (reward) => {
+      const blacklisted = await isProjectBlacklisted(reward.projectId)
+
+      if (blacklisted) {
+        console.warn(
+          `Skipping blacklisted project ${reward.projectId} for reward ${reward.id}`,
+        )
+        return null
+      }
+
+      return reward
+    }),
+  )
+
+  const filteredRewards = validRewards.filter(Boolean) as typeof rewards
+
   return prisma.fundingReward.createMany({
-    data: rewards.map((reward) => ({
+    data: filteredRewards.map((reward) => ({
       roundId: "4",
       ...reward,
     })),
@@ -393,8 +412,25 @@ export async function createRewardStream(
     return undefined
   }
 
+  // Filter out blacklisted projects
+  const validProjects = await Promise.all(
+    kycTeam.projects.map(async (project) => {
+      const blacklisted = await isProjectBlacklisted(project.id)
+      return blacklisted ? null : project
+    }),
+  )
+
+  const filteredProjects = validProjects.filter(
+    Boolean,
+  ) as typeof kycTeam.projects
+
+  if (filteredProjects.length === 0) {
+    console.warn(`All projects for KYC team ${kycTeam.id} are blacklisted`)
+    return undefined
+  }
+
   const rewardId = generateRewardStreamId(
-    kycTeam.projects.map((project) => project.id),
+    filteredProjects.map((project) => project.id),
     roundId,
   )
 
@@ -410,7 +446,7 @@ export async function createRewardStream(
     update: {},
     create: {
       id: rewardId,
-      projects: kycTeam.projects.map((project) => project.id),
+      projects: filteredProjects.map((project) => project.id),
       roundId,
       kycTeamId: kycTeam.id,
     },
