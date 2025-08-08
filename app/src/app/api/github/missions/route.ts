@@ -4,7 +4,7 @@ import { Octokit } from "octokit"
 export const revalidate = 60 * 60
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_AUTH_TOKEN,
+  auth: process.env.GITHUB_PROJECTS_API_KEY,
 })
 
 export async function GET() {
