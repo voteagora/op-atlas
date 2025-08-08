@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Image from "next/image"
+import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React from "react"
 import { toast } from "sonner"
@@ -9,7 +10,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/common/Button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { getAdminProjects, getProjects } from "@/lib/actions/projects"
+import { getAdminProjects } from "@/lib/actions/projects"
 import {
   createProjectKYCTeamsAction,
   deleteProjectKYCTeamsAction,
@@ -17,7 +18,6 @@ import {
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 import { DialogProps } from "./types"
-import { useParams } from "next/navigation"
 
 export default function SelectKYCProjectDialog({
   open,
@@ -38,14 +38,29 @@ export default function SelectKYCProjectDialog({
     isLoading: projectsLoading,
     isPending: projectsPending,
   } = useQuery({
-    queryKey: ["userProjects"],
+    queryKey: ["userProjects", organizationId],
     queryFn: async () => {
       if (!session.data?.user.id) return []
-      return (await getAdminProjects(session.data.user.id)).filter(
+      const allProjects = (await getAdminProjects(session.data.user.id)).filter(
         (project) => project.organization?.organization?.id === organizationId,
       )
+
+      return allProjects
     },
   })
+
+  // Filter projects that can be assigned to KYC teams (no active reward streams)
+  const availableProjects = React.useMemo(() => {
+    if (!projects) return []
+
+    return projects.filter((project) => {
+      // Check if project has active reward streams
+      // A project has active streams if it has a kycTeam with rewardStreams that have active rounds
+      if (!project.kycTeam?.rewardStreams?.length) return true
+
+      return !project.kycTeam.rewardStreams.some((stream) => stream.round)
+    })
+  }, [projects])
 
   const { mutate: createProjectKYCTeams, isPending: createIsPending } =
     useMutation({
@@ -120,17 +135,21 @@ export default function SelectKYCProjectDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
-        {projects?.length !== 0 && (
+        {availableProjects?.length !== 0 && (
           <DialogTitle className="text-center leading-7 font-semibold text-xl">
             Choose the projects that will use this grant delivery address
           </DialogTitle>
         )}
-        {projects?.length === 0 ? (
-          <span className="text-sm text-secondary-foreground">No projects</span>
+        {availableProjects?.length === 0 ? (
+          <span className="text-sm text-secondary-foreground">
+            {projects?.length === 0
+              ? "No projects"
+              : "No projects available for KYC team assignment (all have active reward streams)"}
+          </span>
         ) : (
           <>
             <ul className="space-y-2 w-full">
-              {projects?.map((project, i) => (
+              {availableProjects?.map((project, i) => (
                 <li
                   key={`${project.id} - ${i}`}
                   className="input-container space-x-2 text-sm text"

@@ -557,6 +557,7 @@ export const deleteProjectKYCTeamAction = async ({
   })
 }
 
+
 export const getPublicProjectAction = async ({
   projectId,
 }: {

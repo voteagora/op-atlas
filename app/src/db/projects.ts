@@ -80,6 +80,19 @@ async function getUserAdminProjectsWithDetailFn({
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
         CASE 
+          WHEN kt."id" IS NOT NULL THEN jsonb_build_object(
+            'id', kt."id",
+            'walletAddress', kt."walletAddress",
+            'createdAt', kt."createdAt",
+            'rewardStreams', COALESCE(jsonb_agg(
+              DISTINCT to_jsonb(rs.*) || jsonb_build_object(
+                'round', to_jsonb(rsround.*)
+              )
+            ) FILTER (WHERE rs."id" IS NOT NULL), '[]'::jsonb)
+          )
+          ELSE NULL
+        END as "kycTeam",
+        CASE 
           WHEN po."organizationId" IS NOT NULL THEN jsonb_build_object(
             'organization', jsonb_build_object(
               'id', po."organizationId",
@@ -103,6 +116,9 @@ async function getUserAdminProjectsWithDetailFn({
         AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
       LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      LEFT JOIN "KYCTeam" kt ON p."kycTeamId" = kt."id" AND kt."deletedAt" IS NULL
+      LEFT JOIN "RewardStream" rs ON kt."id" = rs."kycTeamId"
+      LEFT JOIN "FundingRound" rsround ON rs."roundId" = rsround."id"
       LEFT JOIN "ProjectOrganization" po ON p."id" = po."projectId" AND po."deletedAt" IS NULL
       LEFT JOIN "Organization" o ON po."organizationId" = o."id" AND o."deletedAt" IS NULL
       LEFT JOIN "UserOrganization" ot ON o."id" = ot."organizationId" AND ot."deletedAt" IS NULL
@@ -110,7 +126,7 @@ async function getUserAdminProjectsWithDetailFn({
       WHERE up."userId" = ${userId}
         AND up."role" = 'admin'
         AND p."deletedAt" IS NULL
-      GROUP BY p."id", po."organizationId", o."name"
+      GROUP BY p."id", po."organizationId", o."name", kt."id", kt."walletAddress", kt."createdAt"
     ),
     org_projects AS (
       SELECT 
@@ -125,6 +141,19 @@ async function getUserAdminProjectsWithDetailFn({
             'claim', to_jsonb(rc.*)
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
+        CASE 
+          WHEN kt."id" IS NOT NULL THEN jsonb_build_object(
+            'id', kt."id",
+            'walletAddress', kt."walletAddress",
+            'createdAt', kt."createdAt",
+            'rewardStreams', COALESCE(jsonb_agg(
+              DISTINCT to_jsonb(rs.*) || jsonb_build_object(
+                'round', to_jsonb(rsround.*)
+              )
+            ) FILTER (WHERE rs."id" IS NOT NULL), '[]'::jsonb)
+          )
+          ELSE NULL
+        END as "kycTeam",
         o."id" as "organization_id",
         o."name" as "organization_name",
         jsonb_build_object(
@@ -150,8 +179,11 @@ async function getUserAdminProjectsWithDetailFn({
         AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
       LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      LEFT JOIN "KYCTeam" kt ON p."kycTeamId" = kt."id" AND kt."deletedAt" IS NULL
+      LEFT JOIN "RewardStream" rs ON kt."id" = rs."kycTeamId"
+      LEFT JOIN "FundingRound" rsround ON rs."roundId" = rsround."id"
       WHERE p."deletedAt" IS NULL
-      GROUP BY p."id", o."id", o."name"
+      GROUP BY p."id", o."id", o."name", kt."id", kt."walletAddress", kt."createdAt"
     ),
     org_projects_grouped AS (
       SELECT 
@@ -242,7 +274,7 @@ export const getWeightedRandomGrantRecipients = unstable_cache(
   ["projects"],
   {
     revalidate: 60 * 60,
-  }
+  },
 )
 
 async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
@@ -1940,6 +1972,24 @@ export async function createProjectKycTeams({
   projectIds: string[]
   kycTeamId: string
 }) {
+  // Check for projects with active reward streams before reassignment
+  const projectsWithActiveStreams = await prisma.project.findMany({
+    where: {
+      id: { in: projectIds },
+      kycTeam: {
+        rewardStreams: {},
+      },
+    },
+    select: { id: true, name: true },
+  })
+
+  if (projectsWithActiveStreams.length > 0) {
+    const projectNames = projectsWithActiveStreams.map((p) => p.name).join(", ")
+    throw new Error(
+      `Cannot reassign KYC team: The following projects have active reward streams: ${projectNames}`,
+    )
+  }
+
   const updates = await prisma.project.updateMany({
     where: {
       id: { in: projectIds },

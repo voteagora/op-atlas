@@ -1,4 +1,4 @@
-import { Prisma, User, Role } from "@prisma/client"
+import { Prisma, Role, User } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 
 import { CITIZEN_TYPES } from "@/lib/constants"
@@ -18,6 +18,15 @@ export type ProjectWithDetails = Prisma.ProjectGetPayload<{
     snapshots: true
     applications: true
     rewards: { include: { claim: true } }
+    kycTeam: {
+      include: {
+        rewardStreams: {
+          include: {
+            round: true
+          }
+        }
+      }
+    }
   }
 }>
 
