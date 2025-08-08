@@ -218,6 +218,7 @@ export const updateProjectDetails = async (
   const updated = await updateProject({
     id: projectId,
     project: details,
+    userId,
   })
 
   revalidatePath("/dashboard")
@@ -315,7 +316,7 @@ export const deleteUserProject = async (projectId: string) => {
     return isInvalid
   }
 
-  await deleteProject({ id: projectId })
+  await deleteProject({ id: projectId, userId })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
@@ -343,7 +344,7 @@ export const addMembersToProject = async (
     return isInvalid
   }
 
-  await addTeamMembers({ projectId, userIds })
+  await addTeamMembers({ projectId, userIds, performedBy: userId })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
@@ -375,7 +376,7 @@ export const removeMemberFromProject = async (
     }
   }
 
-  await removeTeamMember({ projectId, userId })
+  await removeTeamMember({ projectId, userId, performedBy: session.user.id })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
@@ -417,7 +418,12 @@ export const setMemberRole = async (
     return isInvalid
   }
 
-  await updateMemberRole({ projectId, userId, role })
+  await updateMemberRole({
+    projectId,
+    userId,
+    role,
+    performedBy: session.user.id,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
