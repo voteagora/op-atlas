@@ -1,18 +1,25 @@
 "use client"
 
-import Image from "next/image"
 import React from "react"
 
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
+import { useGitHubMissions } from "@/hooks/api/useGithubMissions"
 
 export default function Header() {
   const mission = useMissionFromPath()
 
-  const isOpenForEnrollment = mission && mission?.startsAt < new Date()
+  const { data } = useGitHubMissions()
+
+  let isOpenForEnrollment = mission && mission?.startsAt < new Date()
   let missioName = mission?.name;
+
 
   if (mission?.pageName === "retro-funding-onchain-builders" || mission?.pageName === "retro-funding-dev-tooling") {
     missioName = `Retro Funding: ${mission.name}`;
+  }
+
+  if (mission?.pageName === "foundation-missions" && data) {
+    isOpenForEnrollment = data?.AreMissionsOpen
   }
 
   return (
