@@ -23,7 +23,8 @@
     "prepare": "husky",
     "studio": "prisma studio",
     "graphql:generate": "pnpm graphql-codegen",
-    "process:oso-data": "tsx src/scripts/process-oso-data.ts"
+    "process:oso-data": "tsx src/scripts/process-oso-data.ts",
+    "blacklist:project": "tsx src/scripts/blacklist-project.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
