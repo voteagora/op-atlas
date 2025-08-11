@@ -5,6 +5,7 @@ import { intersection, sortBy } from "ramda"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { Snapshot } from "@/components/projects/publish/Snapshot"
 import { Button } from "@/components/ui/button"
 import { createProjectSnapshot } from "@/lib/actions/snapshots"
 import { ProjectContracts, ProjectWithFullDetails } from "@/lib/types"
@@ -16,7 +17,6 @@ import {
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import MetadataPublishedConfirmationDialog from "./MetadataPublishedConfirmationDialog"
-import { Snapshot } from "./Snapshot"
 
 export const PublishForm = ({
   project,
