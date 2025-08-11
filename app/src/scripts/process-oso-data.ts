@@ -1,10 +1,8 @@
-import { ProjectOSOMetric } from "@prisma/client"
-import { readFileSync } from "fs"
 import { resolve } from "path"
-import { formatUnits, parseUnits } from "viem"
-
+import { readFileSync } from "fs"
 import { prisma } from "@/db/client"
-import { isProjectBlacklisted } from "@/db/projects"
+import { ProjectOSOMetric } from "@prisma/client"
+import { formatUnits, parseUnits } from "viem"
 
 enum Mission {
   ONCHAIN_BUILDER = "onchain_builder",
@@ -145,13 +143,6 @@ const processOnchainBuilderData = async (
 
     const projectId = project.op_atlas_id
 
-    // Check if project is blacklisted
-    const blacklisted = await isProjectBlacklisted(projectId)
-    if (blacklisted) {
-      console.log(`Skipping blacklisted project ${projectId}`)
-      continue
-    }
-
     // Create RecurringReward entry if op_reward exists
     if (project.op_reward) {
       try {
@@ -287,13 +278,6 @@ const processDevToolingData = async (
         project.display_name || "unknown"
       } (${projectId})`,
     )
-
-    // Check if project is blacklisted
-    const blacklisted = await isProjectBlacklisted(projectId)
-    if (blacklisted) {
-      console.log(`Skipping blacklisted project ${projectId}`)
-      continue
-    }
 
     // Create RecurringReward entry if op_reward exists
     if (project.op_reward) {
