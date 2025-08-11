@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 import { isAddress } from "viem"
 
 import { auth } from "@/auth"
+import { prisma } from "@/db/client"
+import { isProjectBlacklisted } from "@/db/projects"
 import {
   canClaimToAddress,
   createOrUpdateSuperfluidStream,
@@ -181,12 +183,12 @@ export const getRewardStreamsForRound = async (
   const processedExistingStreams = await Promise.all(
     existingStreams.map((stream) =>
       processStream(stream.streams, stream.team, roundId, stream.id),
-    )
+    ),
   )
 
   const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
   const newStreams = await Promise.all(
-    kycTeams.map((kycTeam) => processStream([], kycTeam, roundId))
+    kycTeams.map((kycTeam) => processStream([], kycTeam, roundId)),
   )
 
   return [...processedExistingStreams, ...newStreams]
@@ -200,4 +202,56 @@ export const processSuperfluidStream = async (
   const rewardStreamId = await createRewardStream(stream, roundId)
   // Create SuperfluidStream
   await createOrUpdateSuperfluidStream(stream, rewardStreamId)
+}
+
+export const isKycTeamVerified = async (kycTeamId: string) => {
+  if (!kycTeamId) return false
+
+  // Dynamically import the database functions to avoid bundling
+
+  // Fetch the KYC team with team members
+  const kycTeam = await prisma.kYCTeam.findUnique({
+    where: { id: kycTeamId },
+    include: {
+      team: {
+        select: {
+          users: true,
+        },
+      },
+    },
+  })
+
+  if (!kycTeam || kycTeam.deletedAt || kycTeam.team.length === 0) {
+    return false
+  }
+
+  // Check if all team members are approved
+  const allTeamMembersApproved = kycTeam.team.every(
+    (teamMember) => teamMember.users.status === "APPROVED",
+  )
+
+  if (!allTeamMembersApproved) {
+    return false
+  }
+
+  // Check if any projects associated with this KYC team are blacklisted
+  const projects = await prisma.project.findMany({
+    where: {
+      kycTeamId: kycTeam.id,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  // Check if any projects are blacklisted
+  for (const project of projects) {
+    const blacklisted = await isProjectBlacklisted(project.id)
+    if (blacklisted) {
+      return false
+    }
+  }
+
+  return true
 }

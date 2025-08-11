@@ -1,6 +1,6 @@
 "use client"
 
-import { addYears, format, parse } from "date-fns"
+import { format } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/callouts"
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useProjectKycTeam } from "@/hooks/db/useProjectKycTeam"
+import { isKycTeamVerified } from "@/lib/actions/rewards"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { ProjectWithFullDetails } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
-import { isKycTeamVerified } from "@/lib/utils/kyc"
 import { truncateAddress } from "@/lib/utils/string"
 
 import { REWARDS_NAMES } from "./constants"
@@ -50,8 +50,8 @@ const RewardAccordion = ({
 
   useEffect(() => {
     const checkKycStatus = async () => {
-      if (reward.claim?.kycStatus === "delivered" && kycTeamData) {
-        const kycVerified = await isKycTeamVerified(kycTeamData)
+      if (reward.claim?.kycStatus === "delivered" && kycTeamData?.id) {
+        const kycVerified = await isKycTeamVerified(kycTeamData.id)
         setIsKyc(kycVerified)
       } else {
         setIsKyc(false)

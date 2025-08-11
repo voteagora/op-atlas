@@ -13,10 +13,10 @@ import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
 import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
+import { isKycTeamVerified } from "@/lib/actions/rewards"
 import { KYCTeamWithTeam } from "@/lib/types"
 import { cn, getValidUntil } from "@/lib/utils"
 import { shortenAddress } from "@/lib/utils"
-import { isKycTeamVerified } from "@/lib/utils/kyc"
 
 import CompletedGrantDeliveryForm from "./CompletedGrantDeliveryForm"
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
@@ -60,8 +60,8 @@ export default function AddGrantDeliveryAddressForm({
 
   useEffect(() => {
     const checkKycStatus = async () => {
-      if (kycTeam) {
-        const verified = await isKycTeamVerified(kycTeam)
+      if (kycTeam?.id) {
+        const verified = await isKycTeamVerified(kycTeam.id)
         setAllTeamMembersVerified(verified)
       } else {
         setAllTeamMembersVerified(false)

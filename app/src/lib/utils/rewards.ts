@@ -1,13 +1,14 @@
 import { SuperfluidStream } from "@prisma/client"
 import { formatUnits, keccak256, parseUnits } from "viem"
 
+import { isKycTeamVerified } from "@/lib/actions/rewards"
+
 import {
   KYCStreamTeam,
   KYCTeamWithTeam,
   RecurringRewardWithProject,
   StreamWithKYCTeam,
 } from "../types"
-import { isKycTeamVerified } from "./kyc"
 
 export function generateRewardStreamId(projectIds: string[], roundId: string) {
   return keccak256(Buffer.from([...projectIds.sort(), roundId].join("")))
@@ -90,7 +91,7 @@ export async function processStream(
     projectIds: projectsWithRewards.map((project) => project.id),
     projectNames: projectsWithRewards.map((project) => project.name),
     wallets,
-    KYCStatusCompleted: await isKycTeamVerified(currentTeam),
+    KYCStatusCompleted: await isKycTeamVerified(currentTeam.id),
     amounts: [
       calculateRewardAmounts(projectsWithRewards)[0],
       calculateRewardAmounts(projectsWithRewards)[1],

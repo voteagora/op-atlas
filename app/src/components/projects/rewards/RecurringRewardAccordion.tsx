@@ -14,9 +14,9 @@ import {
   StreamingHelpCallout,
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
+import { isKycTeamVerified } from "@/lib/actions/rewards"
 import { KYCTeamWithTeam } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
-import { isKycTeamVerified } from "@/lib/utils/kyc"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -44,8 +44,8 @@ const RewardAccordion = ({
 
   useEffect(() => {
     const checkKycStatus = async () => {
-      if (reward.kycTeam) {
-        const verified = await isKycTeamVerified(reward.kycTeam)
+      if (reward.kycTeam?.id) {
+        const verified = await isKycTeamVerified(reward.kycTeam.id)
         setTeamVerified(verified)
       } else {
         setTeamVerified(false)
