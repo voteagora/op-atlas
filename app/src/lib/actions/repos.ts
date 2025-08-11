@@ -16,7 +16,8 @@ import {
 import { getCrate } from "../crates"
 import {
   getContents,
-  getFileOrFolder,
+  getContentsUncached,
+  getFileOrFolderUncached,
   getFilesContentsToml,
   getLicense,
   getPackageJsonFiles,
@@ -52,7 +53,7 @@ export const findRepo = async (owner: string, slug: string) => {
 
 const fetchFundingFile = async (owner: string, slug: string) => {
   try {
-    const rootContents = await getContents(owner, slug)
+    const rootContents = await getContentsUncached(owner, slug)
 
     if (rootContents && Array.isArray(rootContents)) {
       const validNames = new Set(["funding.json"])
@@ -62,7 +63,11 @@ const fetchFundingFile = async (owner: string, slug: string) => {
 
         if (validNames.has(normalizedFileName)) {
           try {
-            const { data } = await getFileOrFolder(owner, slug, file.name)
+            const { data } = await getFileOrFolderUncached(
+              owner,
+              slug,
+              file.name,
+            )
             const content = Buffer.from(
               (data as any).content ?? "",
               "base64",

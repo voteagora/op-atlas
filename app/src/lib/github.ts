@@ -30,6 +30,14 @@ export async function getFileOrFolder(
   })
 }
 
+export async function getFileOrFolderUncached(
+  owner: string,
+  slug: string,
+  path: string,
+) {
+  return await octokit.rest.repos.getContent({ owner, repo: slug, path })
+}
+
 // Fetch the SPDX license ID for a repository
 export async function getLicense(owner: string, slug: string) {
   return cacheGitHubData(`license:${owner}:${slug}`, async () => {
@@ -65,6 +73,19 @@ export const getContents = async (owner: string, slug: string) => {
       return null
     }
   })
+}
+
+export const getContentsUncached = async (owner: string, slug: string) => {
+  try {
+    const result = await octokit.request("GET /repos/{owner}/{repo}/contents", {
+      owner,
+      repo: slug,
+      headers: { "X-GitHub-Api-Version": "2022-11-28" },
+    })
+    return result.data
+  } catch (error) {
+    return null
+  }
 }
 
 export const getFilesContentsToml = async (
