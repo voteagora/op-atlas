@@ -49,9 +49,16 @@ const RewardAccordion = ({
   }, [adminProjects, reward])
 
   useEffect(() => {
-    setIsKyc(
-      reward.claim?.kycStatus === "delivered" && isKycTeamVerified(kycTeamData),
-    )
+    const checkKycStatus = async () => {
+      if (reward.claim?.kycStatus === "delivered" && kycTeamData) {
+        const kycVerified = await isKycTeamVerified(kycTeamData)
+        setIsKyc(kycVerified)
+      } else {
+        setIsKyc(false)
+      }
+    }
+
+    checkKycStatus()
   }, [reward.claim?.kycStatus, kycTeamData])
 
   const handleCopyAddress = async (address: string) => {

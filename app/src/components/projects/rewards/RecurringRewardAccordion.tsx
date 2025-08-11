@@ -3,6 +3,7 @@
 import { format } from "date-fns"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { formatEther } from "viem"
 
@@ -32,6 +33,7 @@ const RewardAccordion = ({
   isAdmin?: boolean
 }) => {
   const { projectId } = useParams()
+  const [teamVerified, setTeamVerified] = useState(false)
 
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
 
@@ -40,7 +42,18 @@ const RewardAccordion = ({
     BigInt(0),
   )
 
-  const teamVerified = isKycTeamVerified(reward.kycTeam)
+  useEffect(() => {
+    const checkKycStatus = async () => {
+      if (reward.kycTeam) {
+        const verified = await isKycTeamVerified(reward.kycTeam)
+        setTeamVerified(verified)
+      } else {
+        setTeamVerified(false)
+      }
+    }
+
+    checkKycStatus()
+  }, [reward.kycTeam])
 
   const sortedStreams = reward.streams.sort((a, b) => {
     return b.createdAt.getTime() - a.createdAt.getTime()

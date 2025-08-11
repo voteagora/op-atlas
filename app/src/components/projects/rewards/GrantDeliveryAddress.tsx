@@ -1,17 +1,32 @@
+"use client"
 
+import { CheckIcon } from "lucide-react"
+import { useEffect, useState } from "react"
 
 import { KYCTeamWithTeam } from "@/lib/types"
 import { shortenAddress } from "@/lib/utils"
 import { getValidUntil } from "@/lib/utils"
 import { isKycTeamVerified } from "@/lib/utils/kyc"
-import { CheckIcon } from "lucide-react"
 
 export default function GrantDeliveryAddress({
   kycTeam,
 }: {
   kycTeam?: KYCTeamWithTeam
 }) {
-  const isCompleted = isKycTeamVerified(kycTeam)
+  const [isCompleted, setIsCompleted] = useState(false)
+
+  useEffect(() => {
+    const checkKycStatus = async () => {
+      if (kycTeam) {
+        const verified = await isKycTeamVerified(kycTeam)
+        setIsCompleted(verified)
+      } else {
+        setIsCompleted(false)
+      }
+    }
+
+    checkKycStatus()
+  }, [kycTeam])
 
   if (!isCompleted || !kycTeam) {
     return null

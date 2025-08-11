@@ -5,7 +5,7 @@ import { CheckIcon, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import Accordion from "@/components/common/Accordion"
@@ -28,6 +28,7 @@ export default function AddGrantDeliveryAddressForm({
 }) {
   const { organizationId, projectId } = useParams()
   const queryClient = useQueryClient()
+  const [allTeamMembersVerified, setAllTeamMembersVerified] = useState(false)
 
   const { mutate: deleteProjectKYCTeam, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -57,13 +58,25 @@ export default function AddGrantDeliveryAddressForm({
     },
   })
 
+  useEffect(() => {
+    const checkKycStatus = async () => {
+      if (kycTeam) {
+        const verified = await isKycTeamVerified(kycTeam)
+        setAllTeamMembersVerified(verified)
+      } else {
+        setAllTeamMembersVerified(false)
+      }
+    }
+
+    checkKycStatus()
+  }, [kycTeam])
+
   const teamMembers = kycTeam?.team
     ?.filter((teamMember) => !Boolean(teamMember.users.businessName))
     .map((teamMember) => teamMember.users)
   const entities = kycTeam?.team
     ?.filter((teamMember) => Boolean(teamMember.users.businessName))
     .map((teamMember) => teamMember.users)
-  const allTeamMembersVerified = isKycTeamVerified(kycTeam)
 
   const processCompleted =
     kycTeam?.walletAddress &&

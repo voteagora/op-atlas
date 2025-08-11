@@ -57,7 +57,7 @@ function calculateRewardAmounts(projectsWithRewards: ProjectWithRewards[]) {
     .map(([_, amounts]) => (amounts.length > 0 ? sumBigNumbers(amounts) : "0"))
 }
 
-export function processStream(
+export async function processStream(
   streams: StreamWithKYCTeam[],
   currentTeam: KYCStreamTeam,
   roundId: string,
@@ -90,7 +90,7 @@ export function processStream(
     projectIds: projectsWithRewards.map((project) => project.id),
     projectNames: projectsWithRewards.map((project) => project.name),
     wallets,
-    KYCStatusCompleted: isKycTeamVerified(currentTeam),
+    KYCStatusCompleted: await isKycTeamVerified(currentTeam),
     amounts: [
       calculateRewardAmounts(projectsWithRewards)[0],
       calculateRewardAmounts(projectsWithRewards)[1],
