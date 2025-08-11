@@ -143,7 +143,7 @@ export default function SelectKYCProjectDialog({
         {availableProjects?.length === 0 ? (
           <span className="text-sm text-secondary-foreground">
             {projects?.length === 0
-              ? "No projects"
+              ? "No available projects"
               : "No projects available for KYC team assignment (all have active reward streams)"}
           </span>
         ) : (
