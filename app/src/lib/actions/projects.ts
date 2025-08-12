@@ -417,7 +417,11 @@ export const setMemberRole = async (
     return isInvalid
   }
 
-  await updateMemberRole({ projectId, userId, role })
+  await updateMemberRole({
+    projectId,
+    userId,
+    role,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
@@ -556,7 +560,6 @@ export const deleteProjectKYCTeamAction = async ({
     hasActiveStream,
   })
 }
-
 
 export const getPublicProjectAction = async ({
   projectId,

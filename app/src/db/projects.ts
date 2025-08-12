@@ -26,6 +26,7 @@ import {
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
+import { withChangelogTracking } from "@/lib/utils/changelog"
 
 async function getUserProjectsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -832,54 +833,40 @@ export async function createProject({
   organizationId?: string
   project: CreateProjectParams
 }) {
-  return prisma.project.create({
-    data: {
-      id: projectId,
-      ...project,
-      team: {
-        create: [
-          {
-            role: "admin" satisfies TeamRole,
-            user: {
-              connect: {
-                id: userId,
-              },
+  return withChangelogTracking(async (tx) => {
+    const orgMembers = organizationId
+      ? await tx.userOrganization
+          .findMany({
+            where: { organizationId, deletedAt: null },
+            select: { userId: true },
+          })
+          .then((members) =>
+            members
+              .filter((member) => member.userId !== userId)
+              .map((member) => ({
+                role: "member",
+                user: { connect: { id: member.userId } },
+              })),
+          )
+      : []
+    return tx.project.create({
+      data: {
+        id: projectId,
+        ...project,
+        team: {
+          create: [
+            {
+              role: "admin" satisfies TeamRole,
+              user: { connect: { id: userId } },
             },
-          },
-          ...(organizationId
-            ? await prisma.userOrganization
-                .findMany({
-                  where: { organizationId, deletedAt: null },
-                  select: { userId: true },
-                })
-                .then((members) =>
-                  members
-                    .filter((member) => member.userId !== userId)
-                    .map((member) => ({
-                      role: "member",
-
-                      user: {
-                        connect: {
-                          id: member.userId,
-                        },
-                      },
-                    })),
-                )
-            : []),
-        ],
+            ...orgMembers,
+          ],
+        },
+        organization: organizationId
+          ? { create: { organization: { connect: { id: organizationId } } } }
+          : undefined,
       },
-      organization: organizationId
-        ? {
-            create: {
-              organization: {
-                connect: {
-                  id: organizationId,
-                },
-              },
-            },
-          }
-        : undefined,
-    },
+    })
   })
 }
 
@@ -894,14 +881,11 @@ export async function updateProject({
   id: string
   project: UpdateProjectParams
 }) {
-  return prisma.project.update({
-    where: {
-      id,
-    },
-    data: {
-      ...project,
-      lastMetadataUpdate: new Date(),
-    },
+  return withChangelogTracking(async (tx) => {
+    return tx.project.update({
+      where: { id },
+      data: { ...project, lastMetadataUpdate: new Date() },
+    })
   })
 }
 
@@ -930,19 +914,14 @@ export async function removeProjectOrganization({
 }
 
 export async function deleteProject({ id }: { id: string }) {
-  return prisma.$transaction(async (tx) => {
+  return withChangelogTracking(async (tx) => {
     const updatedProject = await tx.project.update({
-      where: {
-        id,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
+      where: { id },
+      data: { deletedAt: new Date() },
     })
     const deletedRepositories = await tx.projectRepository.deleteMany({
       where: { projectId: id },
     })
-
     return { updatedProject, deletedRepositories }
   })
 }
@@ -957,48 +936,31 @@ export async function addTeamMembers({
   role?: TeamRole
 }) {
   // There may be users who were previously soft deleted, so this is complex
-  const deletedMembers = await prisma.userProjects.findMany({
-    where: {
-      projectId,
-      userId: {
-        in: userIds,
-      },
-    },
+  return withChangelogTracking(async (tx) => {
+    const deletedMembers = await tx.userProjects.findMany({
+      where: { projectId, userId: { in: userIds } },
+    })
+    const updateMemberIds = deletedMembers.map((m) => m.userId)
+    const createMemberIds = userIds.filter(
+      (id) => !updateMemberIds.includes(id),
+    )
+
+    await tx.userProjects.updateMany({
+      where: { projectId, userId: { in: updateMemberIds } },
+      data: { deletedAt: null },
+    })
+
+    if (createMemberIds.length > 0) {
+      await tx.userProjects.createMany({
+        data: createMemberIds.map((userId) => ({ role, userId, projectId })),
+      })
+    }
+
+    await tx.project.update({
+      where: { id: projectId },
+      data: { lastMetadataUpdate: new Date() },
+    })
   })
-
-  const updateMemberIds = deletedMembers.map((m) => m.userId)
-  const createMemberIds = userIds.filter((id) => !updateMemberIds.includes(id))
-
-  const memberUpdate = prisma.userProjects.updateMany({
-    where: {
-      projectId,
-      userId: {
-        in: updateMemberIds,
-      },
-    },
-    data: {
-      deletedAt: null,
-    },
-  })
-
-  const memberCreate = prisma.userProjects.createMany({
-    data: createMemberIds.map((userId) => ({
-      role,
-      userId,
-      projectId,
-    })),
-  })
-
-  const projectUpdate = prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
-  })
-
-  return prisma.$transaction([memberUpdate, memberCreate, projectUpdate])
 }
 
 export async function updateMemberRole({
@@ -1010,28 +972,17 @@ export async function updateMemberRole({
   userId: string
   role: TeamRole
 }) {
-  const memberUpdate = prisma.userProjects.update({
-    where: {
-      userId_projectId: {
-        projectId,
-        userId,
-      },
-    },
-    data: {
-      role,
-    },
-  })
+  return withChangelogTracking(async (tx) => {
+    await tx.userProjects.update({
+      where: { userId_projectId: { projectId, userId } },
+      data: { role },
+    })
 
-  const projectUpdate = prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
+    await tx.project.update({
+      where: { id: projectId },
+      data: { lastMetadataUpdate: new Date() },
+    })
   })
-
-  return prisma.$transaction([memberUpdate, projectUpdate])
 }
 
 export async function removeTeamMember({
@@ -1041,29 +992,17 @@ export async function removeTeamMember({
   projectId: string
   userId: string
 }) {
-  const memberDelete = prisma.userProjects.update({
-    where: {
-      userId_projectId: {
-        projectId,
-        userId,
-      },
-    },
-    data: {
-      role: "member",
-      deletedAt: new Date(),
-    },
-  })
+  return withChangelogTracking(async (tx) => {
+    await tx.userProjects.update({
+      where: { userId_projectId: { projectId, userId } },
+      data: { role: "member", deletedAt: new Date() },
+    })
 
-  const projectUpdate = prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
+    await tx.project.update({
+      where: { id: projectId },
+      data: { lastMetadataUpdate: new Date() },
+    })
   })
-
-  return prisma.$transaction([memberDelete, projectUpdate])
 }
 
 export async function addProjectContracts(
@@ -1561,40 +1500,28 @@ export async function createApplication({
   projectDescriptionOptions: string[]
   impactStatement: Record<string, string>
 }) {
-  return prisma.application.create({
-    data: {
-      attestationId,
-      projectDescriptionOptions: [],
-      project: {
-        connect: {
-          id: projectId,
+  return withChangelogTracking(async (tx) => {
+    return tx.application.create({
+      data: {
+        attestationId,
+        projectDescriptionOptions: [],
+        project: { connect: { id: projectId } },
+        round: { connect: { id: round.toString() } },
+        category: categoryId ? { connect: { id: categoryId } } : undefined,
+        impactStatementAnswer: {
+          createMany: {
+            data: impactStatement
+              ? Object.entries(impactStatement).map(
+                  ([impactStatementId, answer]) => ({
+                    impactStatementId,
+                    answer,
+                  }),
+                )
+              : [],
+          },
         },
       },
-      round: {
-        connect: {
-          id: round.toString(),
-        },
-      },
-      category: categoryId
-        ? {
-            connect: {
-              id: categoryId,
-            },
-          }
-        : undefined,
-      impactStatementAnswer: {
-        createMany: {
-          data: impactStatement
-            ? Object.entries(impactStatement).map(
-                ([impactStatementId, answer]) => ({
-                  impactStatementId,
-                  answer,
-                }),
-              )
-            : [],
-        },
-      },
-    },
+    })
   })
 }
 

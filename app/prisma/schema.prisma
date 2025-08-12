@@ -33,6 +33,7 @@ model User {
   passports          UserPassport[]
   projects           UserProjects[]
   worldId            UserWorldId?
+  changelog          UserChangelog[]
 
   @@index([username])
   @@index([farcasterId])
@@ -250,6 +251,7 @@ model Project {
   team                      UserProjects[]
   projectOSOData            projectOSOData[]
   blacklist                 ProjectBlacklist?
+  changelog                 ProjectChangelog[]
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
@@ -261,7 +263,7 @@ model ProjectBlacklist {
   reason    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([projectId])
 }
@@ -280,6 +282,7 @@ model Application {
   project                   Project                 @relation(fields: [projectId], references: [id])
   round                     FundingRound            @relation(fields: [roundId], references: [id])
   impactStatementAnswer     ImpactStatementAnswer[]
+  changelog                 ApplicationChangelog[]
 
   @@index([projectId])
   @@index([roundId])
@@ -701,8 +704,8 @@ model Role {
   requirements Json              @default("{}")
   startAt      DateTime?
   endAt        DateTime?
-  voteStartAt  DateTime?         
-  voteEndAt    DateTime?         
+  voteStartAt  DateTime?
+  voteEndAt    DateTime?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @default(now()) @updatedAt
   applications RoleApplication[]
@@ -725,6 +728,7 @@ model RoleApplication {
   @@index([userId])
   @@index([organizationId])
 }
+
 view OffChainVote {
   attestationId   String          @id
   voterAddress    String
@@ -772,4 +776,48 @@ enum RoleApplicationStatus {
   pending
   approved
   rejected
+}
+
+model UserChangelog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  oldData   Json?
+  newData   Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model ProjectChangelog {
+  id          String   @id @default(uuid())
+  projectId   String
+  action      String
+  performedBy String?
+  oldData     Json?
+  newData     Json?
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model ApplicationChangelog {
+  id            String      @id @default(uuid())
+  applicationId String
+  action        String
+  performedBy   String?
+  oldData       Json?
+  newData       Json?
+  createdAt     DateTime    @default(now())
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  @@index([applicationId])
+  @@index([action])
+  @@index([createdAt])
 }
