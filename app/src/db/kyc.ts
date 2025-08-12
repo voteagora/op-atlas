@@ -75,6 +75,11 @@ export async function getProjectKycTeam(projectId: string) {
             },
           },
           rewardStreams: true,
+          projects: {
+            include: {
+              blacklist: true,
+            },
+          },
         },
       },
     },
@@ -107,6 +112,11 @@ export async function getKycTeamByWalletAddress(walletAddress: string) {
         },
       },
       rewardStreams: true,
+      projects: {
+        include: {
+          blacklist: true,
+        },
+      },
     },
   })
 }

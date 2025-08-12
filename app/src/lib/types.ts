@@ -158,6 +158,11 @@ export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
       }
     }
     rewardStreams: true
+    projects: {
+      include: {
+        blacklist: true
+      }
+    }
   }
 }>
 

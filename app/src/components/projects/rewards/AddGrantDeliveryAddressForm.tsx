@@ -5,7 +5,7 @@ import { CheckIcon, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { toast } from "sonner"
 
 import Accordion from "@/components/common/Accordion"
@@ -13,10 +13,10 @@ import { Button } from "@/components/common/Button"
 import ExtendedLink from "@/components/common/ExtendedLink"
 import { deleteOrganizationKYCTeam } from "@/lib/actions/organizations"
 import { deleteProjectKYCTeamAction } from "@/lib/actions/projects"
-import { isKycTeamVerified } from "@/lib/actions/rewards"
 import { KYCTeamWithTeam } from "@/lib/types"
 import { cn, getValidUntil } from "@/lib/utils"
 import { shortenAddress } from "@/lib/utils"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
 
 import CompletedGrantDeliveryForm from "./CompletedGrantDeliveryForm"
 import DeliveryAddressVerificationForm from "./DeliveryAddressVerificationForm"
@@ -28,7 +28,6 @@ export default function AddGrantDeliveryAddressForm({
 }) {
   const { organizationId, projectId } = useParams()
   const queryClient = useQueryClient()
-  const [allTeamMembersVerified, setAllTeamMembersVerified] = useState(false)
 
   const { mutate: deleteProjectKYCTeam, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -58,25 +57,13 @@ export default function AddGrantDeliveryAddressForm({
     },
   })
 
-  useEffect(() => {
-    const checkKycStatus = async () => {
-      if (kycTeam?.id) {
-        const verified = await isKycTeamVerified(kycTeam.id)
-        setAllTeamMembersVerified(verified)
-      } else {
-        setAllTeamMembersVerified(false)
-      }
-    }
-
-    checkKycStatus()
-  }, [kycTeam])
-
   const teamMembers = kycTeam?.team
     ?.filter((teamMember) => !Boolean(teamMember.users.businessName))
     .map((teamMember) => teamMember.users)
   const entities = kycTeam?.team
     ?.filter((teamMember) => Boolean(teamMember.users.businessName))
     .map((teamMember) => teamMember.users)
+  const allTeamMembersVerified = isKycTeamVerified(kycTeam)
 
   const processCompleted =
     kycTeam?.walletAddress &&

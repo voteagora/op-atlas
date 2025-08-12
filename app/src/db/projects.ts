@@ -848,36 +848,36 @@ export async function createProject({
           },
           ...(organizationId
             ? await prisma.userOrganization
-              .findMany({
-                where: { organizationId, deletedAt: null },
-                select: { userId: true },
-              })
-              .then((members) =>
-                members
-                  .filter((member) => member.userId !== userId)
-                  .map((member) => ({
-                    role: "member",
+                .findMany({
+                  where: { organizationId, deletedAt: null },
+                  select: { userId: true },
+                })
+                .then((members) =>
+                  members
+                    .filter((member) => member.userId !== userId)
+                    .map((member) => ({
+                      role: "member",
 
-                    user: {
-                      connect: {
-                        id: member.userId,
+                      user: {
+                        connect: {
+                          id: member.userId,
+                        },
                       },
-                    },
-                  })),
-              )
+                    })),
+                )
             : []),
         ],
       },
       organization: organizationId
         ? {
-          create: {
-            organization: {
-              connect: {
-                id: organizationId,
+            create: {
+              organization: {
+                connect: {
+                  id: organizationId,
+                },
               },
             },
-          },
-        }
+          }
         : undefined,
     },
   })
@@ -1577,20 +1577,20 @@ export async function createApplication({
       },
       category: categoryId
         ? {
-          connect: {
-            id: categoryId,
-          },
-        }
+            connect: {
+              id: categoryId,
+            },
+          }
         : undefined,
       impactStatementAnswer: {
         createMany: {
           data: impactStatement
             ? Object.entries(impactStatement).map(
-              ([impactStatementId, answer]) => ({
-                impactStatementId,
-                answer,
-              }),
-            )
+                ([impactStatementId, answer]) => ({
+                  impactStatementId,
+                  answer,
+                }),
+              )
             : [],
         },
       },
@@ -1840,6 +1840,11 @@ export async function getKycTeamForProject({
             },
           },
           rewardStreams: true,
+          projects: {
+            include: {
+              blacklist: true,
+            },
+          },
         },
       },
     },
@@ -2343,20 +2348,4 @@ export async function isProjectBlacklisted(projectId: string) {
     where: { projectId },
   })
   return !!blacklistEntry
-}
-
-export async function getBlacklistedProjects() {
-  return prisma.projectBlacklist.findMany({
-    include: {
-      project: {
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          thumbnailUrl: true,
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  })
 }

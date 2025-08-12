@@ -3,7 +3,6 @@
 import { format } from "date-fns"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { formatEther } from "viem"
 
@@ -14,9 +13,9 @@ import {
   StreamingHelpCallout,
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
-import { isKycTeamVerified } from "@/lib/actions/rewards"
 import { KYCTeamWithTeam } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -33,7 +32,6 @@ const RewardAccordion = ({
   isAdmin?: boolean
 }) => {
   const { projectId } = useParams()
-  const [teamVerified, setTeamVerified] = useState(false)
 
   const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
 
@@ -42,18 +40,7 @@ const RewardAccordion = ({
     BigInt(0),
   )
 
-  useEffect(() => {
-    const checkKycStatus = async () => {
-      if (reward.kycTeam?.id) {
-        const verified = await isKycTeamVerified(reward.kycTeam.id)
-        setTeamVerified(verified)
-      } else {
-        setTeamVerified(false)
-      }
-    }
-
-    checkKycStatus()
-  }, [reward.kycTeam])
+  const teamVerified = isKycTeamVerified(reward.kycTeam)
 
   const sortedStreams = reward.streams.sort((a, b) => {
     return b.createdAt.getTime() - a.createdAt.getTime()

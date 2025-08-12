@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/callouts"
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useProjectKycTeam } from "@/hooks/db/useProjectKycTeam"
-import { isKycTeamVerified } from "@/lib/actions/rewards"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { ProjectWithFullDetails } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
+import { isKycTeamVerified } from "@/lib/utils/kyc"
 import { truncateAddress } from "@/lib/utils/string"
 
 import { REWARDS_NAMES } from "./constants"
@@ -49,16 +49,9 @@ const RewardAccordion = ({
   }, [adminProjects, reward])
 
   useEffect(() => {
-    const checkKycStatus = async () => {
-      if (reward.claim?.kycStatus === "delivered" && kycTeamData?.id) {
-        const kycVerified = await isKycTeamVerified(kycTeamData.id)
-        setIsKyc(kycVerified)
-      } else {
-        setIsKyc(false)
-      }
-    }
-
-    checkKycStatus()
+    setIsKyc(
+      reward.claim?.kycStatus === "delivered" && isKycTeamVerified(kycTeamData),
+    )
   }, [reward.claim?.kycStatus, kycTeamData])
 
   const handleCopyAddress = async (address: string) => {
