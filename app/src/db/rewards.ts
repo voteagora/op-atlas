@@ -403,34 +403,25 @@ export async function createRewardStream(
       projects: {
         select: {
           id: true,
+          blacklist: true,
         },
       },
     },
   })
 
-  if (!kycTeam || kycTeam.projects.length === 0) {
+  if (!kycTeam) {
     return undefined
   }
 
   // Filter out blacklisted projects
-  const validProjects = await Promise.all(
-    kycTeam.projects.map(async (project) => {
-      const blacklisted = await isProjectBlacklisted(project.id)
-      return blacklisted ? null : project
-    }),
-  )
+  const validProjects = kycTeam.projects.filter((project) => !project.blacklist)
 
-  const filteredProjects = validProjects.filter(
-    Boolean,
-  ) as typeof kycTeam.projects
-
-  if (filteredProjects.length === 0) {
-    console.warn(`All projects for KYC team ${kycTeam.id} are blacklisted`)
+  if (validProjects.length === 0) {
     return undefined
   }
 
   const rewardId = generateRewardStreamId(
-    filteredProjects.map((project) => project.id),
+    validProjects.map((project) => project.id),
     roundId,
   )
 
@@ -446,7 +437,7 @@ export async function createRewardStream(
     update: {},
     create: {
       id: rewardId,
-      projects: filteredProjects.map((project) => project.id),
+      projects: validProjects.map((project) => project.id),
       roundId,
       kycTeamId: kycTeam.id,
     },
