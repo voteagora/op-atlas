@@ -773,14 +773,3 @@ enum RoleApplicationStatus {
   approved
   rejected
 }
-
-enum PersonaStatus {
-  created
-  pending
-  completed
-  failed
-  expired
-  needs_review
-  approved
-  declined
-}
