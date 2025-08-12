@@ -1,4 +1,4 @@
-import { KYCTeamWithTeam } from "../types"
+import { KYCStreamTeam, KYCTeamWithTeam } from "../types"
 
 export function isKycTeamVerified(kycTeam?: KYCTeamWithTeam) {
   return Boolean(
@@ -9,5 +9,16 @@ export function isKycTeamVerified(kycTeam?: KYCTeamWithTeam) {
         (teamMember) => teamMember.users.status === "APPROVED",
       ) &&
       !kycTeam.projects.some((project) => project.blacklist),
+  )
+}
+
+export function isKycStreamTeamVerified(kycTeam?: KYCStreamTeam) {
+  return Boolean(
+    kycTeam &&
+      !kycTeam.deletedAt &&
+      kycTeam.team.length > 0 &&
+      kycTeam.team.every(
+        (teamMember) => teamMember.users.status === "APPROVED",
+      ),
   )
 }

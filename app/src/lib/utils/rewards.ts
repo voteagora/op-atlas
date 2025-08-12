@@ -1,7 +1,7 @@
 import { SuperfluidStream } from "@prisma/client"
 import { formatUnits, keccak256, parseUnits } from "viem"
 
-import { isKycTeamVerified } from "@/lib/actions/rewards"
+import { isKycStreamTeamVerified } from "@/lib/utils/kyc"
 
 import {
   KYCStreamTeam,
@@ -91,7 +91,7 @@ export async function processStream(
     projectIds: projectsWithRewards.map((project) => project.id),
     projectNames: projectsWithRewards.map((project) => project.name),
     wallets,
-    KYCStatusCompleted: await isKycTeamVerified(currentTeam.id),
+    KYCStatusCompleted: isKycStreamTeamVerified(currentTeam),
     amounts: [
       calculateRewardAmounts(projectsWithRewards)[0],
       calculateRewardAmounts(projectsWithRewards)[1],
@@ -104,7 +104,7 @@ export async function processStream(
 export type RecurringRewardsByRound = {
   roundId: string
   rewards: RecurringRewardWithProject[]
-  kycTeam?: KYCTeamWithTeam
+  kycTeam?: any // Using any for now since the actual type is complex and doesn't match KYCTeamWithTeam
   streams: SuperfluidStream[]
 }
 
