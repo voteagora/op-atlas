@@ -1,4 +1,5 @@
 import { KYCStreamTeam, KYCTeamWithTeam } from "../types"
+import { RecurringRewardKycTeam } from "./rewards"
 
 export function isKycTeamVerified(kycTeam?: KYCTeamWithTeam) {
   return Boolean(
@@ -12,7 +13,9 @@ export function isKycTeamVerified(kycTeam?: KYCTeamWithTeam) {
   )
 }
 
-export function isKycStreamTeamVerified(kycTeam?: KYCStreamTeam) {
+export function isKycStreamTeamVerified(
+  kycTeam?: KYCStreamTeam | RecurringRewardKycTeam,
+) {
   return Boolean(
     kycTeam &&
       !kycTeam.deletedAt &&

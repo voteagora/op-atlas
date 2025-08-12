@@ -1,4 +1,4 @@
-import { SuperfluidStream } from "@prisma/client"
+import { Prisma, SuperfluidStream } from "@prisma/client"
 import { formatUnits, keccak256, parseUnits } from "viem"
 
 import { isKycStreamTeamVerified } from "@/lib/utils/kyc"
@@ -101,10 +101,26 @@ export async function processStream(
   }
 }
 
+export type RecurringRewardKycTeam = Prisma.KYCTeamGetPayload<{
+  include: {
+    superfludStream: true
+    team: {
+      select: {
+        users: true
+      }
+    }
+    rewardStreams: {
+      include: {
+        streams: true
+      }
+    }
+  }
+}>
+
 export type RecurringRewardsByRound = {
   roundId: string
   rewards: RecurringRewardWithProject[]
-  kycTeam?: any // Using any for now since the actual type is complex and doesn't match KYCTeamWithTeam
+  kycTeam?: RecurringRewardKycTeam
   streams: SuperfluidStream[]
 }
 

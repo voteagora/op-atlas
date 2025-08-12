@@ -13,10 +13,12 @@ import {
   StreamingHelpCallout,
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
-import { KYCTeamWithTeam } from "@/lib/types"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
-import { isKycTeamVerified } from "@/lib/utils/kyc"
-import { RecurringRewardsByRound } from "@/lib/utils/rewards"
+import { isKycStreamTeamVerified } from "@/lib/utils/kyc"
+import {
+  RecurringRewardKycTeam,
+  RecurringRewardsByRound,
+} from "@/lib/utils/rewards"
 import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -40,7 +42,7 @@ const RewardAccordion = ({
     BigInt(0),
   )
 
-  const teamVerified = isKycTeamVerified(reward.kycTeam)
+  const teamVerified = isKycStreamTeamVerified(reward.kycTeam)
 
   const sortedStreams = reward.streams.sort((a, b) => {
     return b.createdAt.getTime() - a.createdAt.getTime()
@@ -167,7 +169,7 @@ const StreamStoppedSection = ({
   )
 }
 
-const IsSomethingWrong = ({ kycTeam }: { kycTeam: KYCTeamWithTeam }) => {
+const IsSomethingWrong = ({ kycTeam }: { kycTeam: RecurringRewardKycTeam }) => {
   const { setData, setOpenDialog } = useAppDialogs()
   const { projectId, organizationId } = useParams()
 
