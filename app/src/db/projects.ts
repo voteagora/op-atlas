@@ -1,9 +1,9 @@
 "use server"
 
 import { Prisma, Project, PublishedContract } from "@prisma/client"
+import { unstable_cache } from "next/cache"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
-import { unstable_cache } from "next/cache"
 
 import {
   Oso_ProjectsByCollectionV1,
@@ -1840,6 +1840,11 @@ export async function getKycTeamForProject({
             },
           },
           rewardStreams: true,
+          projects: {
+            include: {
+              blacklist: true,
+            },
+          },
         },
       },
     },
@@ -2322,4 +2327,25 @@ export async function getProjectGasConsumption(projectId: string) {
     where: { projectId, metric: "DOWNSTREAM_GAS" },
     select: { value: true, tranche: true },
   })
+}
+
+export async function blacklistProject(projectId: string, reason?: string) {
+  return prisma.projectBlacklist.upsert({
+    where: { projectId },
+    update: {
+      reason,
+      updatedAt: new Date(),
+    },
+    create: {
+      projectId,
+      reason,
+    },
+  })
+}
+
+export async function isProjectBlacklisted(projectId: string) {
+  const blacklistEntry = await prisma.projectBlacklist.findUnique({
+    where: { projectId },
+  })
+  return !!blacklistEntry
 }

@@ -1,6 +1,6 @@
 "use server"
 
-import { KYCUser, Organization, Prisma } from "@prisma/client"
+import { Organization, Prisma } from "@prisma/client"
 import { cache } from "react"
 
 import {
@@ -798,7 +798,11 @@ export async function getOrganizationKYCTeams({
       team: {
         include: {
           team: { include: { users: true } },
-          projects: true,
+          projects: {
+            include: {
+              blacklist: true,
+            },
+          },
           rewardStreams: true,
         },
       },
