@@ -1,6 +1,58 @@
-import { prisma } from "@/db/client"
-import { rejectProjectKYC } from "@/db/kyc"
-import { blacklistProject } from "@/db/projects"
+import { PrismaClient } from "@prisma/client"
+
+const prisma = new PrismaClient()
+
+async function blacklistProject(projectId: string, reason?: string) {
+    return prisma.projectBlacklist.upsert({
+        where: { projectId },
+        update: {
+            reason,
+            updatedAt: new Date(),
+        },
+        create: {
+            projectId,
+            reason,
+        },
+    })
+}
+
+async function rejectProjectKYC(projectId: string): Promise<number> {
+    // Find all KYC users associated with this project
+    const kycUsers = await prisma.kYCUser.findMany({
+        where: {
+            KYCUserTeams: {
+                some: {
+                    team: {
+                        projects: {
+                            some: {
+                                id: projectId,
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        select: {
+            id: true,
+        },
+    })
+
+    // Update KYC status to rejected for all found users
+    if (kycUsers.length > 0) {
+        await prisma.kYCUser.updateMany({
+            where: {
+                id: {
+                    in: kycUsers.map((user) => user.id),
+                },
+            },
+            data: {
+                status: "REJECTED",
+            },
+        })
+    }
+
+    return kycUsers.length
+}
 
 async function blacklistProjectScript() {
     const projectId = process.argv[2]
