@@ -1,9 +1,9 @@
+import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
 export async function withChangelogTracking<T>(
-  userId: string | undefined,
   run: (
     tx: Omit<
       PrismaClient,
@@ -20,6 +20,8 @@ export async function withChangelogTracking<T>(
     > & { $executeRaw: typeof prisma.$executeRaw },
   ) => Promise<T>,
 ): Promise<T> {
+  const session = await auth()
+  const userId = session?.user?.id
   return prisma.$transaction(async (tx) => {
     if (userId) {
       try {

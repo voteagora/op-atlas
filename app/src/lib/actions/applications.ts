@@ -34,7 +34,6 @@ export const publishAndSaveApplication = async ({
   metadataSnapshotId,
   round,
   roundName,
-  userId,
 }: {
   project: SubmitApplicationRequest
   category: CategoryWithImpact
@@ -42,7 +41,6 @@ export const publishAndSaveApplication = async ({
   metadataSnapshotId: string
   round: number
   roundName?: string
-  userId?: string
 }): Promise<Application> => {
   // Publish attestation
   const attestationId = await createApplicationAttestation({
@@ -58,7 +56,6 @@ export const publishAndSaveApplication = async ({
     round: round,
     ...project,
     attestationId,
-    userId,
   })
 }
 
@@ -138,7 +135,6 @@ const createProjectApplication = async (
     metadataSnapshotId: latestSnapshot.attestationId,
     round,
     roundName,
-    userId: session?.user?.id ?? "",
   })
 
   return {

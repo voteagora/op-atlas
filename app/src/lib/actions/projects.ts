@@ -218,7 +218,6 @@ export const updateProjectDetails = async (
   const updated = await updateProject({
     id: projectId,
     project: details,
-    userId,
   })
 
   revalidatePath("/dashboard")
@@ -316,7 +315,7 @@ export const deleteUserProject = async (projectId: string) => {
     return isInvalid
   }
 
-  await deleteProject({ id: projectId, userId })
+  await deleteProject({ id: projectId })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
@@ -344,7 +343,7 @@ export const addMembersToProject = async (
     return isInvalid
   }
 
-  await addTeamMembers({ projectId, userIds, performedBy: userId })
+  await addTeamMembers({ projectId, userIds })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
@@ -376,7 +375,7 @@ export const removeMemberFromProject = async (
     }
   }
 
-  await removeTeamMember({ projectId, userId, performedBy: session.user.id })
+  await removeTeamMember({ projectId, userId })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
@@ -422,7 +421,6 @@ export const setMemberRole = async (
     projectId,
     userId,
     role,
-    performedBy: session.user.id,
   })
 
   revalidatePath("/dashboard")
@@ -562,7 +560,6 @@ export const deleteProjectKYCTeamAction = async ({
     hasActiveStream,
   })
 }
-
 
 export const getPublicProjectAction = async ({
   projectId,

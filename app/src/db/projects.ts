@@ -833,7 +833,7 @@ export async function createProject({
   organizationId?: string
   project: CreateProjectParams
 }) {
-  return withChangelogTracking(userId, async (tx) => {
+  return withChangelogTracking(async (tx) => {
     const orgMembers = organizationId
       ? await tx.userOrganization
           .findMany({
@@ -877,13 +877,11 @@ export type UpdateProjectParams = Partial<
 export async function updateProject({
   id,
   project,
-  userId,
 }: {
   id: string
   project: UpdateProjectParams
-  userId?: string
 }) {
-  return withChangelogTracking(userId, async (tx) => {
+  return withChangelogTracking(async (tx) => {
     return tx.project.update({
       where: { id },
       data: { ...project, lastMetadataUpdate: new Date() },
@@ -915,14 +913,8 @@ export async function removeProjectOrganization({
   })
 }
 
-export async function deleteProject({
-  id,
-  userId,
-}: {
-  id: string
-  userId?: string
-}) {
-  return withChangelogTracking(userId, async (tx) => {
+export async function deleteProject({ id }: { id: string }) {
+  return withChangelogTracking(async (tx) => {
     const updatedProject = await tx.project.update({
       where: { id },
       data: { deletedAt: new Date() },
@@ -938,15 +930,13 @@ export async function addTeamMembers({
   projectId,
   userIds,
   role = "member",
-  performedBy,
 }: {
   projectId: string
   userIds: string[]
   role?: TeamRole
-  performedBy?: string
 }) {
   // There may be users who were previously soft deleted, so this is complex
-  return withChangelogTracking(performedBy, async (tx) => {
+  return withChangelogTracking(async (tx) => {
     const deletedMembers = await tx.userProjects.findMany({
       where: { projectId, userId: { in: userIds } },
     })
@@ -977,14 +967,12 @@ export async function updateMemberRole({
   projectId,
   userId,
   role,
-  performedBy,
 }: {
   projectId: string
   userId: string
   role: TeamRole
-  performedBy?: string
 }) {
-  return withChangelogTracking(performedBy, async (tx) => {
+  return withChangelogTracking(async (tx) => {
     await tx.userProjects.update({
       where: { userId_projectId: { projectId, userId } },
       data: { role },
@@ -1000,13 +988,11 @@ export async function updateMemberRole({
 export async function removeTeamMember({
   projectId,
   userId,
-  performedBy,
 }: {
   projectId: string
   userId: string
-  performedBy?: string
 }) {
-  return withChangelogTracking(performedBy, async (tx) => {
+  return withChangelogTracking(async (tx) => {
     await tx.userProjects.update({
       where: { userId_projectId: { projectId, userId } },
       data: { role: "member", deletedAt: new Date() },
@@ -1506,7 +1492,6 @@ export async function createApplication({
   categoryId,
   impactStatement,
   projectDescriptionOptions,
-  userId,
 }: {
   round: number
   projectId: string
@@ -1514,9 +1499,8 @@ export async function createApplication({
   categoryId: string
   projectDescriptionOptions: string[]
   impactStatement: Record<string, string>
-  userId?: string
 }) {
-  return withChangelogTracking(userId, async (tx) => {
+  return withChangelogTracking(async (tx) => {
     return tx.application.create({
       data: {
         attestationId,
