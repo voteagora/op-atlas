@@ -4,6 +4,7 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
+import { ethers } from "ethers"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
@@ -23,9 +24,10 @@ import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
-import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
+import { useUserByContext, useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
+import { useWallet } from "@/hooks/useWallet"
 import { vote } from "@/lib/actions/votes"
 import {
   CHAIN_ID,
@@ -33,6 +35,7 @@ import {
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
+import { safeService } from "@/services/SafeService"
 import { ProposalData } from "@/lib/proposals"
 import { truncateAddress } from "@/lib/utils/string"
 import {
@@ -50,6 +53,7 @@ import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
 import { CandidateResults } from "./CandidateResults"
 import VotingQuestionnaire from "./VotingQuestionnaire"
+import { useAccount } from "wagmi"
 
 const VotingColumnSkeleton = () => (
   <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
@@ -260,9 +264,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   } = useMyVote(proposalData.offchainProposalId)
 
   const { data: session } = useSession()
-  const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
+  const { user } = useWallet()
+
+  const { citizen, isLoading: isCitizenLoading } = useUserByContext()
+
   const { data: citizenEligibility, isLoading: isEligibilityLoading } =
-    useCitizenQualification()
+    useCitizenQualification(user?.id)
 
   useEffect(() => {
     if (!isVoteLoading && !isCitizenLoading && !isEligibilityLoading) {
@@ -290,9 +297,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     !myVote
 
   const { wallets } = useWallets()
-  const signer = useEthersSigner({ chainId: CHAIN_ID })
+  const signer = useEthersSigner({ chainId: 10 })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
+  const { currentContext, selectedSafeWallet } = useWallet()
+
+  const { connector } = useAccount()
 
   useEffect(() => {
     setHasCheckedWallet(false)
@@ -429,10 +439,93 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }
 
+  const createSafeVoteTransaction = async (choices: string) => {
+    if (!signer) throw new Error("Signer not ready")
+    if (!citizen?.address) {
+      throw new Error("User citizen address not available")
+    }
+    if (!selectedSafeWallet) {
+      throw new Error("No Safe wallet selected")
+    }
+
+    const connectedChainId = getChainId(privyWagmiConfig)
+    // if (connectedChainId !== CHAIN_ID) {
+    //   await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
+    // }
+    const provider = await connector?.getProvider({
+      chainId: 10,
+    })
+    // Initialize Safe SDK
+    const safe = await safeService.initializeSafe(
+      selectedSafeWallet.address,
+      signer,
+      provider,
+    )
+    if (!safe) {
+      throw new Error("Failed to initialize Safe SDK")
+    }
+
+    // Prepare EAS attestation data (same as regular voting)
+    const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
+
+    const args = {
+      proposalId: proposalData.offchainProposalId,
+      choices: choices,
+    }
+    const encodedData = encoder.encodeData([
+      { name: "proposalId", value: args.proposalId, type: "uint256" },
+      { name: "params", value: args.choices, type: "string" },
+    ])
+
+    // Create the attestation request structure that matches EAS.attest() parameters
+    const attestRequest = {
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
+      data: {
+        recipient: selectedSafeWallet.address,
+        expirationTime: BigInt(0), // No expiration
+        revocable: false,
+        refUID: citizen.attestationId as `0x${string}`,
+        data: encodedData,
+      },
+    }
+
+    // Encode the EAS.attest() function call using ethers Interface
+    // EAS contract ABI fragment for the attest function
+    const easInterface = new ethers.Interface([
+      "function attest((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data) data)) external payable returns (bytes32)"
+    ])
+
+    const txData = {
+      to: EAS_CONTRACT_ADDRESS,
+      data: easInterface.encodeFunctionData("attest", [attestRequest]),
+      value: "0",
+      operation: 0 as const, // CALL operation
+    }
+
+    const txHash = await safeService.proposeTransaction(safe, signer.address as `0x${string}`, txData)
+    if (!txHash) {
+      throw new Error("Failed to propose Safe transaction")
+    }
+
+    console.log("Safe vote transaction proposed:", {
+      safeAddress: selectedSafeWallet.address,
+      txHash,
+      proposalId: proposalData.offchainProposalId,
+      choices,
+      note: "This creates a Safe transaction proposal that will execute the EAS attestation when approved and executed by Safe owners"
+    })
+
+    return {
+      attestationId: txHash, // Use transaction hash as identifier
+      signerAddress: selectedSafeWallet.address,
+    }
+  }
+
   const validateAddress = () => {
     const newActiveWallet = wallets.find(
       (wallet) => wallet.address === citizen?.address,
     )
+    console.log("newActiveWallet", wallets, citizen?.address)
     if (!newActiveWallet) {
       setAddressMismatch(true)
       throw new Error("Citizen wallet not found. Try reconnecting.")
@@ -484,23 +577,30 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       }
 
       try {
-        const newActiveWallet = validateAddress()
-        if (newActiveWallet) {
-          await setActiveWallet(newActiveWallet)
-        }
+        // const newActiveWallet = validateAddress()
+        // if (newActiveWallet) {
+        //   await setActiveWallet(newActiveWallet)
+        // }
 
-        if (signer!.address !== citizen!.address) {
-          throw new Error("Signer address does not match citizen address")
-        }
+        // if (signer!.address !== citizen!.address) {
+        //   throw new Error("Signer address does not match citizen address")
+        // }
 
         let attestationId: string
         let signerAddress: string
 
-        if (isSmartContract) {
+        if (currentContext === 'SAFE') {
+          // Safe wallet voting
+          const attestationData = await createSafeVoteTransaction(choices)
+          signerAddress = attestationData.signerAddress
+          attestationId = attestationData.attestationId
+        } else if (isSmartContract) {
+          // Smart contract wallet (non-Safe) voting
           const attestationData = await createMultisigWalletAttestation(choices)
           signerAddress = attestationData.signerAddress
           attestationId = attestationData.attestationId
         } else {
+          // EOA wallet voting
           const attestationData = await createDelegatedAttestation(choices)
           signerAddress = attestationData.signerAddress
 
@@ -519,6 +619,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           wallet_address: signerAddress,
         })
       } catch (error) {
+        console.error("Failed to cast vote:", error)
         // Collect context for the error
         const errorMessage =
           error instanceof Error ? error.message : `Unknown error: ${error}`
@@ -567,7 +668,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               `Your governance wallet is not connected. Please sign out, and sign back in using ${citizen.address}.`,
             )
           } else {
-            setActiveWallet(newActiveWallet)
+            // setActiveWallet(newActiveWallet)
             // Prompt a retry
             throw new Error("Something went wrong. Please try again.")
           }
