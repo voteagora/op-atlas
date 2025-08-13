@@ -83,7 +83,19 @@ export const createProjectSnapshot = async (projectId: string) => {
       error: null,
     }
   } catch (error) {
-    console.error("Error creating snapshot", error)
+    const errorType = error instanceof Error ? error.name : "UnknownError"
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorCode = errorMessage.match(/0x[a-fA-F0-9]+/)?.[0] ?? ""
+
+    const errorDetails = {
+      errorOrigination: "createProjectSnapshot",
+      errorType,
+      errorMessage,
+      errorCode,
+      error: error,
+    }
+    console.error("Error creating snapshot", errorDetails)
+
     return {
       error,
     }
