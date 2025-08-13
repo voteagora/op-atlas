@@ -3,21 +3,24 @@
  * Wraps the application with Safe wallet context management
  */
 
-'use client'
+"use client"
 
-import { createContext, useContext, useEffect, ReactNode, useMemo } from 'react'
-import { usePrivy } from '@privy-io/react-auth'
-import { useAccount } from 'wagmi'
+import { usePrivy } from "@privy-io/react-auth"
+import { createContext, ReactNode, useContext, useEffect, useMemo } from "react"
+import { useAccount } from "wagmi"
 
-import { useSafeContext } from '@/hooks/useSafeContext'
-import type { SafeContextValue, SignerWallet } from '@/types/safe'
+import { useSafeContext } from "@/hooks/useSafeContext"
+import { safeService } from "@/services/SafeService"
+import type { SafeContextValue, SignerWallet } from "@/types/safe"
 
 const SafeContext = createContext<SafeContextValue | null>(null)
 
 export const useSafeContextValue = (): SafeContextValue => {
   const context = useContext(SafeContext)
   if (!context) {
-    throw new Error('useSafeContextValue must be used within SafeContextProvider')
+    throw new Error(
+      "useSafeContextValue must be used within SafeContextProvider",
+    )
   }
   return context
 }
@@ -29,20 +32,26 @@ interface SafeContextProviderProps {
 export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
   const { user: privyUser } = usePrivy()
   const { address, isConnected, chainId } = useAccount()
-  
+
   // Use wagmi account info as primary source, fallback to Privy
   // Memoize the signer wallet to prevent unnecessary re-renders
   const signerWallet = useMemo<SignerWallet | null>(() => {
     if (isConnected && address) {
-        console.log('Using wagmi signer wallet')
       return {
         address,
         chainId: chainId || 1,
       }
-    } else if (privyUser?.linkedAccounts?.find((account: any) => account.type === 'wallet')) {
-        console.log('Using Privy signer wallet')
+    } else if (
+      privyUser?.linkedAccounts?.find(
+        (account: any) => account.type === "wallet",
+      )
+    ) {
       return {
-        address: (privyUser.linkedAccounts.find((account: any) => account.type === 'wallet') as any).address,
+        address: (
+          privyUser.linkedAccounts.find(
+            (account: any) => account.type === "wallet",
+          ) as any
+        ).address,
         chainId: 1,
       }
     }
@@ -60,10 +69,43 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
   useEffect(() => {
     const signerAddress = signerWallet?.address
     if (signerAddress) {
-        console.log('Refreshing Safe wallets...')
       safeContextValue.refreshSafeWallets()
     }
   }, [signerWallet?.address, safeContextValue.refreshSafeWallets])
+
+  // Auto-switch to SAFE context when connected via Safe app or when signer address is a known Safe
+  useEffect(() => {
+    const signerAddress = signerWallet?.address
+    if (!signerAddress) return
+
+    const ethereum: any =
+      typeof window !== "undefined" ? (window as any).ethereum : undefined
+    const isSafeEnv = !!(ethereum?.isSafe || ethereum?.isGnosisSafe)
+    const isSignerInList = safeContextValue.availableSafeWallets.some(
+      (safe) => safe.address.toLowerCase() === signerAddress.toLowerCase(),
+    )
+
+    if (
+      (isSafeEnv || isSignerInList) &&
+      safeContextValue.currentContext !== "SAFE" &&
+      !safeContextValue.selectedSafeWallet
+    ) {
+      const trySwitch = async () => {
+        if (!isSignerInList) {
+          const info = await safeService.getSafeInfoByAddress(signerAddress)
+          if (!info) return
+        }
+        safeContextValue.switchToSafe(signerAddress)
+      }
+      trySwitch()
+    }
+  }, [
+    signerWallet?.address,
+    safeContextValue.availableSafeWallets,
+    safeContextValue.currentContext,
+    safeContextValue.selectedSafeWallet,
+    safeContextValue.switchToSafe,
+  ])
 
   return (
     <SafeContext.Provider value={safeContextValue}>
