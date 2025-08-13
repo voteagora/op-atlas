@@ -37,6 +37,25 @@ export class SafeService {
   }
 
   /**
+   * Get Safe info by address
+   */
+  async getSafeInfoByAddress(address: string): Promise<SafeWallet | null> {
+    try {
+      if (!this.apiKit) return null
+      const info = await this.apiKit.getSafeInfo(address)
+      return {
+        address,
+        threshold: Number(info.threshold),
+        owners: info.owners,
+        nonce: Number(info.nonce),
+        version: info.version || "1.3.0",
+      }
+    } catch (_e) {
+      return null
+    }
+  }
+
+  /**
    * Get Safe wallets where the provided address is an owner
    */
   async getSafeWalletsForSigner(signerAddress: string): Promise<SafeWallet[]> {
