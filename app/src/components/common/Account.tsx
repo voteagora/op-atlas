@@ -12,9 +12,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
+import { UserAvatar } from "@/components/common/UserAvatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,11 +36,10 @@ import {
   saveHasShownWelcomeBadgeholderDialog,
   saveLogInDate,
 } from "@/lib/utils"
+import { truncateAddress } from "@/lib/utils/string"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
-
-import { UserAvatar } from "@/components/common/UserAvatar"
-import { truncateAddress } from "@/lib/utils/string"
+import { safeService } from "@/services/SafeService"
 
 export const Account = () => {
   const { user: privyUser, getAccessToken } = usePrivy()
@@ -54,7 +54,7 @@ export const Account = () => {
   })
 
   const username = useUsername(user)
-  
+
   // Safe wallet integration
   const {
     currentAddress,
@@ -64,8 +64,38 @@ export const Account = () => {
     availableSafeWallets,
     switchToSafe,
     switchToEOA,
-    isLoadingSafeWallets
+    isLoadingSafeWallets,
   } = useWallet()
+
+  const isSafeEnv =
+    typeof window !== "undefined" &&
+    !!(
+      (window as any)?.ethereum?.isSafe ||
+      (window as any)?.ethereum?.isGnosisSafe
+    )
+
+  // Robust detection: mark connected account as Safe if flag present or API confirms address is a Safe
+  const [isSafeConnected, setIsSafeConnected] = useState(false)
+
+  useEffect(() => {
+    let mounted = true
+    const detectSafe = async () => {
+      if (isSafeEnv) {
+        if (mounted) setIsSafeConnected(true)
+        return
+      }
+      if (signerWallet?.address) {
+        const info = await safeService.getSafeInfoByAddress(signerWallet.address)
+        if (mounted) setIsSafeConnected(!!info)
+      } else if (mounted) {
+        setIsSafeConnected(false)
+      }
+    }
+    detectSafe()
+    return () => {
+      mounted = false
+    }
+  }, [isSafeEnv, signerWallet?.address])
 
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
@@ -94,6 +124,12 @@ export const Account = () => {
   const { logout: privyLogout } = useLogout({
     onSuccess: () => {
       isLoggingIn.current = false
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("atlas_wallet_context")
+          window.localStorage.removeItem("atlas_selected_safe_address")
+        }
+      } catch (_) {}
       signOut()
     },
   })
@@ -200,7 +236,14 @@ export const Account = () => {
 
             <span className="hidden sm:inline">
               {currentContext === "SAFE"
-                ? truncateAddress(currentAddress)
+                ? truncateAddress(
+                    (
+                      currentAddress ||
+                      selectedSafeWallet?.address ||
+                      signerWallet?.address ||
+                      "0x"
+                    ) as `0x${string}`,
+                  )
                 : username}
             </span>
             <Image
@@ -222,83 +265,98 @@ export const Account = () => {
           </Link>
 
           {/* Current EOA Wallet */}
-          <DropdownMenuItem
-            className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
-              currentContext === "EOA" ? "bg-accent" : ""
-            }`}
-            onClick={() => switchToEOA()}
-          >
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  currentContext === "EOA" ? "bg-green-500" : "bg-gray-300"
+          {(() => {
+            // Hide EOA block when the connected account is a Safe (detected via flag or API)
+            const shouldHideEOA = isSafeConnected
+
+            if (shouldHideEOA) return null
+
+            return (
+              <DropdownMenuItem
+                className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
+                  currentContext === "EOA" ? "bg-gray-100" : ""
                 }`}
-              />
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">EOA Wallet</span>
-                <span className="text-xs text-muted-foreground">
-                  {signerWallet?.address
-                    ? `${signerWallet.address.slice(
-                        0,
-                        6,
-                      )}...${signerWallet.address.slice(-4)}`
-                    : "Not connected"}
-                </span>
-              </div>
-            </div>
-            {currentContext === "EOA" && (
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                Active
-              </span>
-            )}
-          </DropdownMenuItem>
+                onClick={() => switchToEOA()}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      currentContext === "EOA" ? "bg-green-500" : "bg-gray-300"
+                    }`}
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">EOA Wallet</span>
+                    <span className="text-xs text-muted-foreground">
+                      {signerWallet?.address
+                        ? `${signerWallet.address.slice(0, 6)}...${signerWallet.address.slice(-4)}`
+                        : "Not connected"}
+                    </span>
+                  </div>
+                </div>
+                {currentContext === "EOA" && (
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Active</span>
+                )}
+              </DropdownMenuItem>
+            )
+          })()}
 
           {/* Safe Wallets */}
-          {availableSafeWallets.length > 0 && (
-            <>
-              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-                Safe Wallets {isLoadingSafeWallets && "(Loading...)"}
-              </DropdownMenuLabel>
-              {availableSafeWallets.map((safeWallet) => (
-                <DropdownMenuItem
-                  key={safeWallet.address}
-                  className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
-                    currentContext === "SAFE" &&
-                    selectedSafeWallet?.address === safeWallet.address
-                      ? "bg-accent"
-                      : ""
-                  }`}
-                  onClick={() => switchToSafe(safeWallet.address)}
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        currentContext === "SAFE" &&
-                        selectedSafeWallet?.address === safeWallet.address
-                          ? "bg-blue-500"
-                          : "bg-gray-300"
-                      }`}
-                    />
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">Safe Wallet</span>
-                      <span className="text-xs text-muted-foreground">
-                        {`${safeWallet.address.slice(
-                          0,
-                          6,
-                        )}...${safeWallet.address.slice(-4)}`}
-                      </span>
+          {(() => {
+            const safesToRender =
+              availableSafeWallets.length > 0
+                ? availableSafeWallets
+                : selectedSafeWallet
+                ? [selectedSafeWallet]
+                : isSafeConnected && signerWallet?.address
+                ? ([{ address: signerWallet.address }] as any)
+                : []
+
+            if (safesToRender.length === 0) return null
+
+            return (
+              <>
+                <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+                  Safe Wallets {isLoadingSafeWallets && "(Loading...)"}
+                </DropdownMenuLabel>
+                {safesToRender.map((safeWallet: any) => (
+                  <DropdownMenuItem
+                    key={safeWallet.address}
+                    className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
+                      currentContext === "SAFE" &&
+                      selectedSafeWallet?.address === safeWallet.address
+                        ? "bg-gray-100"
+                        : ""
+                    }`}
+                    onClick={() => switchToSafe(safeWallet.address)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          currentContext === "SAFE" &&
+                          selectedSafeWallet?.address === safeWallet.address
+                            ? "bg-blue-500"
+                            : "bg-gray-300"
+                        }`}
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">Safe Wallet</span>
+                        <span className="text-xs text-muted-foreground">
+                          {`${safeWallet.address.slice(0, 6)}...${safeWallet.address.slice(-4)}`}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  {currentContext === "SAFE" &&
-                    selectedSafeWallet?.address === safeWallet.address && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                        Active
-                      </span>
-                    )}
-                </DropdownMenuItem>
-              ))}
-            </>
-          )}
+                    {currentContext === "SAFE" &&
+                      (selectedSafeWallet?.address === safeWallet.address ||
+                        (!selectedSafeWallet && signerWallet?.address === safeWallet.address)) && (
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                          Active
+                        </span>
+                      )}
+                  </DropdownMenuItem>
+                ))}
+              </>
+            )
+          })()}
 
           <DropdownMenuSeparator />
           <Link href="/profile/details">
