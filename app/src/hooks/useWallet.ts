@@ -3,15 +3,15 @@
  * Combines Privy, user data, and Safe context into a single interface
  */
 
-'use client'
+"use client"
 
-import { useMemo, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession } from "next-auth/react"
+import { useCallback, useMemo } from "react"
 
-import { useUser, useUserAddresses } from '@/hooks/db/useUser'
-import { useEthersSigner } from '@/hooks/wagmi/useEthersSigner'
-import { useSafeContextValue } from '@/providers/SafeContextProvider'
-import type { UseWalletReturn } from '@/types/safe'
+import { useUser, useUserAddresses } from "@/hooks/db/useUser"
+import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
+import { useSafeContextValue } from "@/providers/SafeContextProvider"
+import type { UseWalletReturn } from "@/types/safe"
 
 /**
  * Unified wallet hook that provides a single interface for all wallet operations
@@ -20,7 +20,7 @@ import type { UseWalletReturn } from '@/types/safe'
 export const useWallet = (): UseWalletReturn => {
   // Get session data
   const { data: session } = useSession()
-  
+
   // Get ethers signer
   const signer = useEthersSigner()
 
@@ -79,7 +79,6 @@ export const useWallet = (): UseWalletReturn => {
 
     return user
   }, [currentContext, selectedSafeWallet, userFromAddress, user])
-
 
   // Memoize the return value to prevent unnecessary re-renders
   return useMemo(
