@@ -45,7 +45,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   const { data: citizenEligibility, isLoading: isEligibilityLoading } =
     useCitizenQualification(user?.id)
   const { citizen, isLoading: isCitizenLoading } = useUserByContext()
-  console.log("citizen", citizen)
+  // Citizen context fetched
   const { data: session } = useSession()
   useEffect(() => {
     if (!isEligibilityLoading && !isCitizenLoading) {
