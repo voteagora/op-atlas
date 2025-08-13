@@ -1,9 +1,9 @@
 "use server"
 
 import { Prisma, Project, PublishedContract } from "@prisma/client"
+import { unstable_cache } from "next/cache"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
-import { unstable_cache } from "next/cache"
 
 import {
   Oso_ProjectsByCollectionV1,
@@ -26,6 +26,7 @@ import {
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
+import { withChangelogTracking } from "@/lib/utils/changelog"
 
 async function getUserProjectsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -80,6 +81,19 @@ async function getUserAdminProjectsWithDetailFn({
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
         CASE 
+          WHEN kt."id" IS NOT NULL THEN jsonb_build_object(
+            'id', kt."id",
+            'walletAddress', kt."walletAddress",
+            'createdAt', kt."createdAt",
+            'rewardStreams', COALESCE(jsonb_agg(
+              DISTINCT to_jsonb(rs.*) || jsonb_build_object(
+                'round', to_jsonb(rsround.*)
+              )
+            ) FILTER (WHERE rs."id" IS NOT NULL), '[]'::jsonb)
+          )
+          ELSE NULL
+        END as "kycTeam",
+        CASE 
           WHEN po."organizationId" IS NOT NULL THEN jsonb_build_object(
             'organization', jsonb_build_object(
               'id', po."organizationId",
@@ -103,6 +117,9 @@ async function getUserAdminProjectsWithDetailFn({
         AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
       LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      LEFT JOIN "KYCTeam" kt ON p."kycTeamId" = kt."id" AND kt."deletedAt" IS NULL
+      LEFT JOIN "RewardStream" rs ON kt."id" = rs."kycTeamId"
+      LEFT JOIN "FundingRound" rsround ON rs."roundId" = rsround."id"
       LEFT JOIN "ProjectOrganization" po ON p."id" = po."projectId" AND po."deletedAt" IS NULL
       LEFT JOIN "Organization" o ON po."organizationId" = o."id" AND o."deletedAt" IS NULL
       LEFT JOIN "UserOrganization" ot ON o."id" = ot."organizationId" AND ot."deletedAt" IS NULL
@@ -110,7 +127,7 @@ async function getUserAdminProjectsWithDetailFn({
       WHERE up."userId" = ${userId}
         AND up."role" = 'admin'
         AND p."deletedAt" IS NULL
-      GROUP BY p."id", po."organizationId", o."name"
+      GROUP BY p."id", po."organizationId", o."name", kt."id", kt."walletAddress", kt."createdAt"
     ),
     org_projects AS (
       SELECT 
@@ -125,6 +142,19 @@ async function getUserAdminProjectsWithDetailFn({
             'claim', to_jsonb(rc.*)
           )
         ) FILTER (WHERE fr."id" IS NOT NULL), '[]'::jsonb) as "rewards",
+        CASE 
+          WHEN kt."id" IS NOT NULL THEN jsonb_build_object(
+            'id', kt."id",
+            'walletAddress', kt."walletAddress",
+            'createdAt', kt."createdAt",
+            'rewardStreams', COALESCE(jsonb_agg(
+              DISTINCT to_jsonb(rs.*) || jsonb_build_object(
+                'round', to_jsonb(rsround.*)
+              )
+            ) FILTER (WHERE rs."id" IS NOT NULL), '[]'::jsonb)
+          )
+          ELSE NULL
+        END as "kycTeam",
         o."id" as "organization_id",
         o."name" as "organization_name",
         jsonb_build_object(
@@ -150,8 +180,11 @@ async function getUserAdminProjectsWithDetailFn({
         AND (${roundId}::text IS NULL OR a."roundId" = ${roundId}::text)
       LEFT JOIN "FundingReward" fr ON p."id" = fr."projectId"
       LEFT JOIN "RewardClaim" rc ON fr."id" = rc."rewardId"
+      LEFT JOIN "KYCTeam" kt ON p."kycTeamId" = kt."id" AND kt."deletedAt" IS NULL
+      LEFT JOIN "RewardStream" rs ON kt."id" = rs."kycTeamId"
+      LEFT JOIN "FundingRound" rsround ON rs."roundId" = rsround."id"
       WHERE p."deletedAt" IS NULL
-      GROUP BY p."id", o."id", o."name"
+      GROUP BY p."id", o."id", o."name", kt."id", kt."walletAddress", kt."createdAt"
     ),
     org_projects_grouped AS (
       SELECT 
@@ -242,7 +275,7 @@ export const getWeightedRandomGrantRecipients = unstable_cache(
   ["projects"],
   {
     revalidate: 60 * 60,
-  }
+  },
 )
 
 async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
@@ -800,54 +833,40 @@ export async function createProject({
   organizationId?: string
   project: CreateProjectParams
 }) {
-  return prisma.project.create({
-    data: {
-      id: projectId,
-      ...project,
-      team: {
-        create: [
-          {
-            role: "admin" satisfies TeamRole,
-            user: {
-              connect: {
-                id: userId,
-              },
+  return withChangelogTracking(async (tx) => {
+    const orgMembers = organizationId
+      ? await tx.userOrganization
+          .findMany({
+            where: { organizationId, deletedAt: null },
+            select: { userId: true },
+          })
+          .then((members) =>
+            members
+              .filter((member) => member.userId !== userId)
+              .map((member) => ({
+                role: "member",
+                user: { connect: { id: member.userId } },
+              })),
+          )
+      : []
+    return tx.project.create({
+      data: {
+        id: projectId,
+        ...project,
+        team: {
+          create: [
+            {
+              role: "admin" satisfies TeamRole,
+              user: { connect: { id: userId } },
             },
-          },
-          ...(organizationId
-            ? await prisma.userOrganization
-                .findMany({
-                  where: { organizationId, deletedAt: null },
-                  select: { userId: true },
-                })
-                .then((members) =>
-                  members
-                    .filter((member) => member.userId !== userId)
-                    .map((member) => ({
-                      role: "member",
-
-                      user: {
-                        connect: {
-                          id: member.userId,
-                        },
-                      },
-                    })),
-                )
-            : []),
-        ],
+            ...orgMembers,
+          ],
+        },
+        organization: organizationId
+          ? { create: { organization: { connect: { id: organizationId } } } }
+          : undefined,
       },
-      organization: organizationId
-        ? {
-            create: {
-              organization: {
-                connect: {
-                  id: organizationId,
-                },
-              },
-            },
-          }
-        : undefined,
-    },
+    })
   })
 }
 
@@ -862,14 +881,11 @@ export async function updateProject({
   id: string
   project: UpdateProjectParams
 }) {
-  return prisma.project.update({
-    where: {
-      id,
-    },
-    data: {
-      ...project,
-      lastMetadataUpdate: new Date(),
-    },
+  return withChangelogTracking(async (tx) => {
+    return tx.project.update({
+      where: { id },
+      data: { ...project, lastMetadataUpdate: new Date() },
+    })
   })
 }
 
@@ -898,19 +914,14 @@ export async function removeProjectOrganization({
 }
 
 export async function deleteProject({ id }: { id: string }) {
-  return prisma.$transaction(async (tx) => {
+  return withChangelogTracking(async (tx) => {
     const updatedProject = await tx.project.update({
-      where: {
-        id,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
+      where: { id },
+      data: { deletedAt: new Date() },
     })
     const deletedRepositories = await tx.projectRepository.deleteMany({
       where: { projectId: id },
     })
-
     return { updatedProject, deletedRepositories }
   })
 }
@@ -925,48 +936,31 @@ export async function addTeamMembers({
   role?: TeamRole
 }) {
   // There may be users who were previously soft deleted, so this is complex
-  const deletedMembers = await prisma.userProjects.findMany({
-    where: {
-      projectId,
-      userId: {
-        in: userIds,
-      },
-    },
+  return withChangelogTracking(async (tx) => {
+    const deletedMembers = await tx.userProjects.findMany({
+      where: { projectId, userId: { in: userIds } },
+    })
+    const updateMemberIds = deletedMembers.map((m) => m.userId)
+    const createMemberIds = userIds.filter(
+      (id) => !updateMemberIds.includes(id),
+    )
+
+    await tx.userProjects.updateMany({
+      where: { projectId, userId: { in: updateMemberIds } },
+      data: { deletedAt: null },
+    })
+
+    if (createMemberIds.length > 0) {
+      await tx.userProjects.createMany({
+        data: createMemberIds.map((userId) => ({ role, userId, projectId })),
+      })
+    }
+
+    await tx.project.update({
+      where: { id: projectId },
+      data: { lastMetadataUpdate: new Date() },
+    })
   })
-
-  const updateMemberIds = deletedMembers.map((m) => m.userId)
-  const createMemberIds = userIds.filter((id) => !updateMemberIds.includes(id))
-
-  const memberUpdate = prisma.userProjects.updateMany({
-    where: {
-      projectId,
-      userId: {
-        in: updateMemberIds,
-      },
-    },
-    data: {
-      deletedAt: null,
-    },
-  })
-
-  const memberCreate = prisma.userProjects.createMany({
-    data: createMemberIds.map((userId) => ({
-      role,
-      userId,
-      projectId,
-    })),
-  })
-
-  const projectUpdate = prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
-  })
-
-  return prisma.$transaction([memberUpdate, memberCreate, projectUpdate])
 }
 
 export async function updateMemberRole({
@@ -978,28 +972,17 @@ export async function updateMemberRole({
   userId: string
   role: TeamRole
 }) {
-  const memberUpdate = prisma.userProjects.update({
-    where: {
-      userId_projectId: {
-        projectId,
-        userId,
-      },
-    },
-    data: {
-      role,
-    },
-  })
+  return withChangelogTracking(async (tx) => {
+    await tx.userProjects.update({
+      where: { userId_projectId: { projectId, userId } },
+      data: { role },
+    })
 
-  const projectUpdate = prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
+    await tx.project.update({
+      where: { id: projectId },
+      data: { lastMetadataUpdate: new Date() },
+    })
   })
-
-  return prisma.$transaction([memberUpdate, projectUpdate])
 }
 
 export async function removeTeamMember({
@@ -1009,29 +992,17 @@ export async function removeTeamMember({
   projectId: string
   userId: string
 }) {
-  const memberDelete = prisma.userProjects.update({
-    where: {
-      userId_projectId: {
-        projectId,
-        userId,
-      },
-    },
-    data: {
-      role: "member",
-      deletedAt: new Date(),
-    },
-  })
+  return withChangelogTracking(async (tx) => {
+    await tx.userProjects.update({
+      where: { userId_projectId: { projectId, userId } },
+      data: { role: "member", deletedAt: new Date() },
+    })
 
-  const projectUpdate = prisma.project.update({
-    where: {
-      id: projectId,
-    },
-    data: {
-      lastMetadataUpdate: new Date(),
-    },
+    await tx.project.update({
+      where: { id: projectId },
+      data: { lastMetadataUpdate: new Date() },
+    })
   })
-
-  return prisma.$transaction([memberDelete, projectUpdate])
 }
 
 export async function addProjectContracts(
@@ -1529,40 +1500,28 @@ export async function createApplication({
   projectDescriptionOptions: string[]
   impactStatement: Record<string, string>
 }) {
-  return prisma.application.create({
-    data: {
-      attestationId,
-      projectDescriptionOptions: [],
-      project: {
-        connect: {
-          id: projectId,
+  return withChangelogTracking(async (tx) => {
+    return tx.application.create({
+      data: {
+        attestationId,
+        projectDescriptionOptions: [],
+        project: { connect: { id: projectId } },
+        round: { connect: { id: round.toString() } },
+        category: categoryId ? { connect: { id: categoryId } } : undefined,
+        impactStatementAnswer: {
+          createMany: {
+            data: impactStatement
+              ? Object.entries(impactStatement).map(
+                  ([impactStatementId, answer]) => ({
+                    impactStatementId,
+                    answer,
+                  }),
+                )
+              : [],
+          },
         },
       },
-      round: {
-        connect: {
-          id: round.toString(),
-        },
-      },
-      category: categoryId
-        ? {
-            connect: {
-              id: categoryId,
-            },
-          }
-        : undefined,
-      impactStatementAnswer: {
-        createMany: {
-          data: impactStatement
-            ? Object.entries(impactStatement).map(
-                ([impactStatementId, answer]) => ({
-                  impactStatementId,
-                  answer,
-                }),
-              )
-            : [],
-        },
-      },
-    },
+    })
   })
 }
 
@@ -1808,6 +1767,11 @@ export async function getKycTeamForProject({
             },
           },
           rewardStreams: true,
+          projects: {
+            include: {
+              blacklist: true,
+            },
+          },
         },
       },
     },
@@ -1940,6 +1904,24 @@ export async function createProjectKycTeams({
   projectIds: string[]
   kycTeamId: string
 }) {
+  // Check for projects with active reward streams before reassignment
+  const projectsWithActiveStreams = await prisma.project.findMany({
+    where: {
+      id: { in: projectIds },
+      kycTeam: {
+        rewardStreams: {},
+      },
+    },
+    select: { id: true, name: true },
+  })
+
+  if (projectsWithActiveStreams.length > 0) {
+    const projectNames = projectsWithActiveStreams.map((p) => p.name).join(", ")
+    throw new Error(
+      `Cannot reassign KYC team: The following projects have active reward streams: ${projectNames}`,
+    )
+  }
+
   const updates = await prisma.project.updateMany({
     where: {
       id: { in: projectIds },
@@ -2272,4 +2254,25 @@ export async function getProjectGasConsumption(projectId: string) {
     where: { projectId, metric: "DOWNSTREAM_GAS" },
     select: { value: true, tranche: true },
   })
+}
+
+export async function blacklistProject(projectId: string, reason?: string) {
+  return prisma.projectBlacklist.upsert({
+    where: { projectId },
+    update: {
+      reason,
+      updatedAt: new Date(),
+    },
+    create: {
+      projectId,
+      reason,
+    },
+  })
+}
+
+export async function isProjectBlacklisted(projectId: string) {
+  const blacklistEntry = await prisma.projectBlacklist.findUnique({
+    where: { projectId },
+  })
+  return !!blacklistEntry
 }

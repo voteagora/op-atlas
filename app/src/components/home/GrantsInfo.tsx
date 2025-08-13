@@ -23,7 +23,7 @@ import { foundationMissionsData } from "@/lib/utils/foundationMissions"
 import { growthGrantsData } from "@/lib/utils/growthGrantsData"
 import { retroFundingDevToolingData } from "@/lib/utils/retroFundingDevToolingData"
 import { retroFundingOnchainBuildersData } from "@/lib/utils/retroFundingOnchainBuildersData"
-
+import { useGitHubMissions } from "@/hooks/api/useGithubMissions"
 import TrackedLink from "../common/TrackedLink"
 
 const missionsMap = {
@@ -54,6 +54,8 @@ export const GrantsInfo = () => {
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
 
+  const { data } = useGitHubMissions()
+
   React.useEffect(() => {
     if (!api) {
       return
@@ -67,8 +69,12 @@ export const GrantsInfo = () => {
     })
   }, [api])
   const renderStatusPill = (mission: MissionData) => {
-    const missionOpen =
+    let missionOpen =
       mission.startsAt < new Date() && mission.endsAt > new Date()
+    if (mission.pageName === "foundation-missions" && data) {
+      missionOpen = data?.AreMissionsOpen
+    }
+
     let status = {
       text: missionOpen ? "Open" : "Closed",
       color: missionOpen ? "bg-callout" : "bg-secondary",

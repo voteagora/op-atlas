@@ -15,7 +15,13 @@ export default function GrantAddressForm() {
   const { data: organizationKycTeams, isLoading } = useQuery({
     queryKey: ["kyc-teams", "organization", organizationId],
     queryFn: async () => {
-      return await getOrganizationKycTeamsAction({ organizationId })
+      try {
+        return await getOrganizationKycTeamsAction({ organizationId })
+      } catch (error) {
+        console.error("Error fetching organization KYC teams:", error)
+        // Let queryFn handle the error
+        throw error
+      }
     },
   })
 
