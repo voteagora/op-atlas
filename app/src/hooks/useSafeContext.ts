@@ -3,19 +3,20 @@
  * Manages Safe wallet state and context switching
  */
 
-import { useCallback, useState, useEffect, useMemo } from 'react'
-import { toast } from 'sonner'
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 
-import { useSafeWallets } from '@/hooks/safe/useSafeWallets'
-import type { SafeWallet } from '@/services/SafeService'
+import { useSafeWallets } from "@/hooks/safe/useSafeWallets"
+import type { SafeWallet } from "@/services/SafeService"
+import { safeService } from "@/services/SafeService"
 import type {
-  SafeContextState,
-  SafeContextActions,
-  WalletContext,
-  SignerWallet,
   FeatureFlag,
-} from '@/types/safe'
-import { FEATURE_AVAILABILITY } from '@/types/safe'
+  SafeContextActions,
+  SafeContextState,
+  SignerWallet,
+  WalletContext,
+} from "@/types/safe"
+import { FEATURE_AVAILABILITY } from "@/types/safe"
 
 interface UseSafeContextProps {
   signerWallet: SignerWallet | null
@@ -24,24 +25,25 @@ interface UseSafeContextProps {
 
 const emptyWallets: SafeWallet[] = [] // This is to make sure we dont end up with unnecessary re-renders
 
-export const useSafeContext = ({ 
-  signerWallet, 
-  enabled = true 
+export const useSafeContext = ({
+  signerWallet,
+  enabled = true,
 }: UseSafeContextProps): SafeContextState & SafeContextActions => {
   // Use React Query for Safe wallets
-  const signerAddress = useMemo(() => 
-    enabled ? signerWallet?.address || null : null
-  , [enabled, signerWallet?.address])
-  
+  const signerAddress = useMemo(
+    () => (enabled ? signerWallet?.address || null : null),
+    [enabled, signerWallet?.address],
+  )
+
   const {
     data: availableSafeWallets = emptyWallets,
     isLoading: isLoadingSafeWallets,
     error: queryError,
-    refetch: refreshSafeWallets
+    refetch: refreshSafeWallets,
   } = useSafeWallets(signerAddress)
 
   const [state, setState] = useState<SafeContextState>({
-    currentContext: 'EOA' as WalletContext,
+    currentContext: "EOA" as WalletContext,
     signerWallet,
     availableSafeWallets: emptyWallets,
     selectedSafeWallet: null,
@@ -51,7 +53,7 @@ export const useSafeContext = ({
 
   // Update state when React Query data changes
   useEffect(() => {
-    setState(prev => {      
+    setState((prev) => {
       return {
         ...prev,
         availableSafeWallets,
@@ -63,45 +65,115 @@ export const useSafeContext = ({
   }, [availableSafeWallets, isLoadingSafeWallets, signerWallet, queryError])
 
   // Switch to Safe wallet context
-  const switchToSafe = useCallback(async (safeAddress: string) => {
-    const targetSafe = state.availableSafeWallets.find(
-      safe => safe.address.toLowerCase() === safeAddress.toLowerCase()
-    )
+  const switchToSafe = useCallback(
+    async (safeAddress: string) => {
+      // Try to find in the pre-fetched list first
+      let targetSafe = state.availableSafeWallets.find(
+        (safe) => safe.address.toLowerCase() === safeAddress.toLowerCase(),
+      )
 
-    if (!targetSafe) {
-      toast.error('Safe wallet not found')
-      return
-    }
+      // If not found (e.g., signer IS the Safe, so owner lookup returns empty), fetch info directly
+      if (!targetSafe) {
+        const info = await safeService.getSafeInfoByAddress(safeAddress)
+        if (info) {
+          targetSafe = info
+        }
+      }
 
-    setState(prev => ({
-      ...prev,
-      currentContext: 'SAFE',
-      selectedSafeWallet: targetSafe,
-      error: null,
-    }))
+      if (!targetSafe) {
+        toast.error("Safe wallet not found")
+        return
+      }
 
-    toast.success(`Switched to Safe wallet: ${targetSafe.address.slice(0, 6)}...${targetSafe.address.slice(-4)}`)
-  }, [state.availableSafeWallets])
+      setState((prev) => ({
+        ...prev,
+        currentContext: "SAFE",
+        selectedSafeWallet: targetSafe,
+        error: null,
+      }))
+
+      toast.success(
+        `Switched to Safe wallet: ${targetSafe.address.slice(
+          0,
+          6,
+        )}...${targetSafe.address.slice(-4)}`,
+      )
+
+      // Persist selection for reloads
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("atlas_wallet_context", "SAFE")
+          window.localStorage.setItem("atlas_selected_safe_address", targetSafe.address)
+        }
+      } catch (_e) {}
+    },
+    [state.availableSafeWallets],
+  )
 
   // Switch back to EOA context
   const switchToEOA = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      currentContext: 'EOA',
+      currentContext: "EOA",
       selectedSafeWallet: null,
       error: null,
     }))
-  }, [])
+    if (signerWallet?.address) {
+      const addr = signerWallet.address
+      toast.success(
+        `Switched to EOA wallet: ${addr.slice(0, 6)}...${addr.slice(-4)}`,
+      )
+    } else {
+      toast.success("Switched to EOA wallet")
+    }
+    // Persist context for reloads
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("atlas_wallet_context", "EOA")
+        window.localStorage.removeItem("atlas_selected_safe_address")
+      }
+    } catch (_e) {}
+  }, [signerWallet?.address])
+
+  // Restore persisted context on mount / signer change
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const savedContext = window.localStorage.getItem("atlas_wallet_context")
+    const savedSafe = window.localStorage.getItem("atlas_selected_safe_address")
+    if (savedContext !== "SAFE" || !savedSafe) return
+
+    if (state.currentContext === "SAFE" && state.selectedSafeWallet) return
+
+    const existing = availableSafeWallets.find(
+      (s) => s.address.toLowerCase() === savedSafe.toLowerCase(),
+    )
+
+    const apply = async () => {
+      const target = existing || (await safeService.getSafeInfoByAddress(savedSafe))
+      if (!target) return
+      setState((prev) => ({
+        ...prev,
+        currentContext: "SAFE",
+        selectedSafeWallet: target,
+        error: null,
+      }))
+    }
+
+    apply()
+  }, [availableSafeWallets, state.currentContext, state.selectedSafeWallet])
 
   // Check if a feature is enabled in current context
-  const isFeatureEnabled = useCallback((feature: FeatureFlag): boolean => {
-    const availableFeatures = FEATURE_AVAILABILITY[state.currentContext]
-    return availableFeatures.includes(feature)
-  }, [state.currentContext])
+  const isFeatureEnabled = useCallback(
+    (feature: FeatureFlag): boolean => {
+      const availableFeatures = FEATURE_AVAILABILITY[state.currentContext]
+      return availableFeatures.includes(feature)
+    },
+    [state.currentContext],
+  )
 
   // Clear error state
   const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }))
+    setState((prev) => ({ ...prev, error: null }))
   }, [])
 
   // Wrap refetch to match expected signature
@@ -114,21 +186,21 @@ export const useSafeContext = ({
   // Memoize the return value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
     return {
-    ...state,
-    refreshSafeWallets: wrappedRefreshSafeWallets,
-    switchToSafe,
-    switchToEOA,
-    isFeatureEnabled,
-    clearError,
-  }
+      ...state,
+      refreshSafeWallets: wrappedRefreshSafeWallets,
+      switchToSafe,
+      switchToEOA,
+      isFeatureEnabled,
+      clearError,
+    }
   }, [
     state,
     wrappedRefreshSafeWallets,
     switchToSafe,
     switchToEOA,
     isFeatureEnabled,
-    clearError
+    clearError,
   ])
-  
+
   return contextValue
 }
