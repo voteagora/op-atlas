@@ -27,7 +27,6 @@ model User {
   RewardClaim        RewardClaim[]
   roleApplications   RoleApplication[]
   addresses          UserAddress[]
-  UserChangelog      UserChangelog[]
   emails             UserEmail[]
   interaction        UserInteraction?
   organizations      UserOrganization[]
@@ -235,7 +234,6 @@ model Project {
   applications              Application[]
   rewards                   FundingReward[]
   kycTeam                   KYCTeam?                         @relation(fields: [kycTeamId], references: [id])
-  ProjectChangelog          ProjectChangelog[]
   contracts                 ProjectContract[]
   funding                   ProjectFunding[]
   links                     ProjectLinks[]
@@ -269,7 +267,6 @@ model Application {
   category                  Category?               @relation(fields: [categoryId], references: [id])
   project                   Project                 @relation(fields: [projectId], references: [id])
   round                     FundingRound            @relation(fields: [roundId], references: [id])
-  ApplicationChangelog      ApplicationChangelog[]
   impactStatementAnswer     ImpactStatementAnswer[]
 
   @@index([projectId])
@@ -719,51 +716,6 @@ model RoleApplication {
   @@index([organizationId])
 }
 
-model ApplicationChangelog {
-  id            String      @id
-  applicationId String
-  action        String
-  performedBy   String?
-  oldData       Json?
-  newData       Json?
-  createdAt     DateTime    @default(now())
-  Application   Application @relation(fields: [applicationId], references: [id])
-
-  @@index([action])
-  @@index([applicationId])
-  @@index([createdAt])
-}
-
-model ProjectChangelog {
-  id          String   @id
-  projectId   String
-  action      String
-  performedBy String?
-  oldData     Json?
-  newData     Json?
-  createdAt   DateTime @default(now())
-  Project     Project  @relation(fields: [projectId], references: [id])
-
-  @@index([action])
-  @@index([createdAt])
-  @@index([projectId])
-}
-
-model UserChangelog {
-  id          String   @id
-  userId      String
-  action      String
-  performedBy String?
-  oldData     Json?
-  newData     Json?
-  createdAt   DateTime @default(now())
-  User        User     @relation(fields: [userId], references: [id])
-
-  @@index([action])
-  @@index([createdAt])
-  @@index([userId])
-}
-
 view OffChainVote {
   attestationId   String          @id
   voterAddress    String
@@ -775,22 +727,6 @@ view OffChainVote {
   createdAt       DateTime        @db.Timestamptz(6)
 
   @@unique([proposalId, citizenId])
-}
-
-/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-view VotesWithMeta {
-  transaction_hash String?
-  proposal_id      String?
-  voter            String?
-  support          String?
-  weight           Decimal? @db.Decimal
-  reason           String?
-  params           String?
-  block_number     Int?
-  citizen_type     String?
-  voter_metadata   Json?    @db.Json
-
-  @@ignore
 }
 
 enum KYCStatus {
