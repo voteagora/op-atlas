@@ -102,6 +102,10 @@ export function AddGrantDeliveryAddressDialog({
               } else {
                 toast.error(createdOrganizationKycTeam.error)
               }
+              console.error(
+                "createdOrganizationKycTeam Error: ",
+                createdOrganizationKycTeam.error,
+              )
               return
             }
 

@@ -75,6 +75,11 @@ export async function getProjectKycTeam(projectId: string) {
             },
           },
           rewardStreams: true,
+          projects: {
+            include: {
+              blacklist: true,
+            },
+          },
         },
       },
     },
@@ -107,6 +112,11 @@ export async function getKycTeamByWalletAddress(walletAddress: string) {
         },
       },
       rewardStreams: true,
+      projects: {
+        include: {
+          blacklist: true,
+        },
+      },
     },
   })
 }
@@ -174,4 +184,38 @@ export async function deleteKycTeam({
       })
     }
   })
+}
+
+export async function rejectProjectKYC(projectId: string) {
+  // Find all KYC users associated with this project
+  const kycUsers = await prisma.kYCUser.findMany({
+    where: {
+      KYCUserTeams: {
+        some: {
+          team: {
+            projects: {
+              some: {
+                id: projectId,
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // Update all KYC users to REJECTED status
+  const updatePromises = kycUsers.map((user) =>
+    prisma.kYCUser.update({
+      where: { id: user.id },
+      data: {
+        status: "REJECTED",
+        updatedAt: new Date(),
+      },
+    }),
+  )
+
+  await Promise.all(updatePromises)
+
+  return kycUsers.length
 }

@@ -3,6 +3,7 @@
 import { Prisma } from "@prisma/client"
 import { cache } from "react"
 
+import { isProjectBlacklisted } from "@/db/projects"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { SuperfluidVestingSchedule } from "@/lib/superfluid"
 import { generateRewardStreamId } from "@/lib/utils/rewards"
@@ -141,8 +142,26 @@ export async function insertRewards(
     amount: number
   }[],
 ) {
+  // Filter out blacklisted projects
+  const validRewards = await Promise.all(
+    rewards.map(async (reward) => {
+      const blacklisted = await isProjectBlacklisted(reward.projectId)
+
+      if (blacklisted) {
+        console.warn(
+          `Skipping blacklisted project ${reward.projectId} for reward ${reward.id}`,
+        )
+        return null
+      }
+
+      return reward
+    }),
+  )
+
+  const filteredRewards = validRewards.filter(Boolean) as typeof rewards
+
   return prisma.fundingReward.createMany({
-    data: rewards.map((reward) => ({
+    data: filteredRewards.map((reward) => ({
       roundId: "4",
       ...reward,
     })),
@@ -327,6 +346,30 @@ export async function createOrUpdateSuperfluidStream(
   stream: SuperfluidVestingSchedule,
   rewardStreamId?: string,
 ) {
+  // Check if there's an existing stream with the same sender/receiver combination
+  // This handles the case where a user might have multiple streams (e.g., one vested, one vesting)
+  const existingStream = await prisma.superfluidStream.findFirst({
+    where: {
+      sender: stream.sender,
+      receiver: stream.receiver.toLowerCase(),
+    },
+  })
+
+  // Only delete the existing stream if:
+  // 1. There is an existing stream with the same sender/receiver
+  // 2. The new stream has a different ID (not just an update)
+  // 3. The new stream has flowRate > 0 (active vesting)
+  if (
+    existingStream &&
+    existingStream.id !== stream.id &&
+    parseFloat(stream.flowRate) > 0
+  ) {
+    await prisma.superfluidStream.delete({
+      where: {
+        id: existingStream.id,
+      },
+    })
+  }
   return prisma.superfluidStream.upsert({
     where: {
       id: stream.id,
@@ -360,17 +403,25 @@ export async function createRewardStream(
       projects: {
         select: {
           id: true,
+          blacklist: true,
         },
       },
     },
   })
 
-  if (!kycTeam || kycTeam.projects.length === 0) {
+  if (!kycTeam) {
+    return undefined
+  }
+
+  // Filter out blacklisted projects
+  const validProjects = kycTeam.projects.filter((project) => !project.blacklist)
+
+  if (validProjects.length === 0) {
     return undefined
   }
 
   const rewardId = generateRewardStreamId(
-    kycTeam.projects.map((project) => project.id),
+    validProjects.map((project) => project.id),
     roundId,
   )
 
@@ -386,7 +437,7 @@ export async function createRewardStream(
     update: {},
     create: {
       id: rewardId,
-      projects: kycTeam.projects.map((project) => project.id),
+      projects: validProjects.map((project) => project.id),
       roundId,
       kycTeamId: kycTeam.id,
     },

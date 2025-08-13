@@ -16,11 +16,7 @@ import {
   updateClaim,
 } from "@/db/rewards"
 
-import {
-  getActiveStreams,
-  SuperfluidStream,
-  SuperfluidVestingSchedule,
-} from "../superfluid"
+import { getActiveStreams, SuperfluidVestingSchedule } from "../superfluid"
 import { processStream } from "../utils/rewards"
 import { verifyAdminStatus } from "./utils"
 
@@ -177,19 +173,19 @@ type RewardStream = {
 export const getRewardStreamsForRound = async (
   roundId: string,
 ): Promise<RewardStream[]> => {
-  const existingStreams = (async () => {
-    const streams = await getRewardStreamsWithRewardsForRound(roundId)
-    return streams.map((stream) =>
+  const existingStreams = await getRewardStreamsWithRewardsForRound(roundId)
+  const processedExistingStreams = await Promise.all(
+    existingStreams.map((stream) =>
       processStream(stream.streams, stream.team, roundId, stream.id),
-    )
-  })()
+    ),
+  )
 
-  const newStreams = (async () => {
-    const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
-    return kycTeams.map((kycTeam) => processStream([], kycTeam, roundId))
-  })()
+  const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
+  const newStreams = await Promise.all(
+    kycTeams.map((kycTeam) => processStream([], kycTeam, roundId)),
+  )
 
-  return [...(await existingStreams), ...(await newStreams)]
+  return [...processedExistingStreams, ...newStreams]
 }
 
 export const processSuperfluidStream = async (

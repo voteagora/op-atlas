@@ -2,7 +2,7 @@
 
 import { KYCUser } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
-import { CheckIcon, ChevronRight, SquareCheck } from "lucide-react"
+import { ChevronRight, LockIcon, SquareCheck } from "lucide-react"
 import { User } from "lucide-react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
@@ -67,7 +67,15 @@ export default function CompletedGrantDeliveryForm({
         <div className="space-y-2">
           <div className="w-full flex justify-between items-center">
             <span className="font-medium text-sm">Projects</span>
-            {!hasActiveStream && (
+            {hasActiveStream ? (
+              <div
+                className="flex items-center space-x-1 cursor-default"
+                title="Active Superfluid stream, projects cannot be modified."
+              >
+                <LockIcon size={18} />
+                <span className="text-sm">Locked</span>
+              </div>
+            ) : (
               <button
                 className="flex items-center space-x-1"
                 onClick={openSelectKYCProjectDialog}

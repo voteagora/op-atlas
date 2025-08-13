@@ -2,22 +2,17 @@
 
 import Image from "next/image"
 import { useParams } from "next/navigation"
-import React from "react"
 
 import ExtendedLink from "@/components/common/TrackedExtendedLink"
 import TrackedLink from "@/components/common/TrackedLink"
 import ExternalLink from "@/components/ExternalLink"
 import { Accordion, AccordionItem } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MONTHS } from "@/lib/oso/constants"
+import { MONTHS, TRANCHE_MONTHS_MAP } from "@/lib/oso/constants"
 import { DevToolingMissionProps } from "@/lib/oso/types"
-import { REWARD_GENERATED_MONTHS } from "@/lib/oso/utils"
 import { formatNumber } from "@/lib/utils"
 
 import MetricCard from "./MetricCard"
-
-// Cant automatically generate months as the rewards can be processed after few days into the month
-const DEV_TOOLING_MONTHS = REWARD_GENERATED_MONTHS
 
 export default function DevToolingMission({
   data,
@@ -71,13 +66,13 @@ export default function DevToolingMission({
         </div>
       )}
       <Tabs
-        defaultValue={Object.values(DEV_TOOLING_MONTHS).pop() || ""}
+        defaultValue={Object.values(TRANCHE_MONTHS_MAP).pop() || ""}
         className="w-full mt-12"
       >
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit p-0">
           {MONTHS.map((month, index) => {
             const isFutureMonth =
-              !Object.values(DEV_TOOLING_MONTHS).includes(month)
+              !Object.values(TRANCHE_MONTHS_MAP).includes(month)
             return (
               <TabsTrigger
                 disabled={isFutureMonth}

@@ -417,7 +417,11 @@ export const setMemberRole = async (
     return isInvalid
   }
 
-  await updateMemberRole({ projectId, userId, role })
+  await updateMemberRole({
+    projectId,
+    userId,
+    role,
+  })
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")

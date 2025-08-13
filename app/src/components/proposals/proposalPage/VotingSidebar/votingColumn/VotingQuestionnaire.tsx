@@ -22,7 +22,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-2 text-sm outline-none focus:bg-secondary focus:text-secondary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-2 text-sm outline-none focus:bg-secondary focus:text-secondary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 z-[100]",
       className,
     )}
     {...props}
@@ -70,20 +70,26 @@ const VotingQuestionnaire = ({
 
   // Create the dropdown question
   const voteQuestion: QuestionType = (
-    <div className="w-full flex justify-center">
+    <div className="w-full max-w-[410px] flex justify-center">
       <Select value={selectedVote} onValueChange={setSelectedVote}>
-        <SelectTrigger className="w-[410px] py-2 rounded-lg border border-input">
+        <SelectTrigger className="w-full max-w-[410px] py-2 rounded-lg border border-input">
           <SelectValue placeholder="Select your vote" />
         </SelectTrigger>
-        <SelectContent className="w-[410px] h-[240px] py-2 rounded-lg border border-input shadow-[0px_12px_42px_-4px_#14171A1F,0px_8px_18px_-6px_#14171A1F]">
-          <div className="w-[410px] h-[224px]">
+        <SelectContent
+          className="w-full max-w-[410px] h-[240px] py-2 rounded-lg border border-input shadow-[0px_12px_42px_-4px_#14171A1F,0px_8px_18px_-6px_#14171A1F] z-[201]"
+          position="popper"
+          sideOffset={4}
+        >
+          <div className="w-full max-w-[410px] h-[224px]">
             {voteOptions.map((option) => (
               <SelectItem
                 key={option}
                 value={option}
-                className="mb-1 last:mb-0 w-[410px] h-8 px-2"
+                className="mb-1 last:mb-0 w-full max-w-[410px] h-8 px-2"
               >
-                <DropdownItem>{option}</DropdownItem>
+                <DropdownItem className="w-full max-w-[410px]">
+                  {option}
+                </DropdownItem>
               </SelectItem>
             ))}
           </div>
@@ -94,10 +100,10 @@ const VotingQuestionnaire = ({
 
   // Custom completion button
   const completionButtons = (
-    <div className="flex flex-col gap-2 w-[410px] mx-auto">
+    <div className="flex flex-col gap-2 w-full max-w-[410px] mx-auto">
       <Button
         variant="destructive"
-        className="h-11 py-2.5 rounded-md w-[410px] hover:opacity-80 disabled:bg-destructive disabled:text-background"
+        className="h-11 py-2.5 rounded-md w-full max-w-[410px] hover:opacity-80 disabled:bg-destructive disabled:text-background"
         onClick={() => onVoteSubmit && onVoteSubmit(selectedVote)}
         disabled={!selectedVote}
       >

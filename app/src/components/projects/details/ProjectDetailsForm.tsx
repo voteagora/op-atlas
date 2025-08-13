@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Organization, Project } from "@prisma/client"
 import { Plus } from "lucide-react"
-import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useMemo, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
@@ -236,20 +236,20 @@ export default function ProjectDetailsForm({
 
       const isCreating = !project
 
-      const promise: Promise<Project> = new Promise(async (resolve, reject) => {
+      const createOrUpdateProject = async (): Promise<Project> => {
         try {
           const [response, res] = project
             ? await Promise.all([
-              updateProjectDetails(project.id, newValues),
-              setProjectOrganization(
-                project.id,
-                project.organization?.organization?.id,
-                values.organization?.id,
-              ),
-            ])
+                updateProjectDetails(project.id, newValues),
+                setProjectOrganization(
+                  project.id,
+                  project.organization?.organization?.id,
+                  values.organization?.id,
+                ),
+              ])
             : await Promise.all([
-              createNewProject(newValues, values.organization?.id),
-            ])
+                createNewProject(newValues, values.organization?.id),
+              ])
 
           if (response.error !== null || !response.project) {
             throw new Error(response.error ?? "Failed to save project")
@@ -263,14 +263,27 @@ export default function ProjectDetailsForm({
             track("Add Project", { projectId: response.project.id })
           }
 
-          resolve(response.project)
+          return response.project
         } catch (error) {
-          console.error("Error creating project", error)
-          reject(error)
-        }
-      })
+          const errorType = error instanceof Error ? error.name : "UnknownError"
+          const errorMessage =
+            error instanceof Error ? error.message : String(error)
 
-      toast.promise(promise, {
+          const errorDetails = {
+            errorOrigination: "ProjectDetailsForm",
+            errorType,
+            isCreating,
+            errorMessage,
+            error: error,
+          }
+
+          console.error("Error creating project: ", errorDetails)
+
+          throw error // Re-throw so the toast can still show the error
+        }
+      }
+
+      toast.promise(createOrUpdateProject(), {
         loading: isCreating ? "Creating project onchain..." : "Saving project",
         success: (project) => {
           // Both Save and Next buttons should advance to the next step
