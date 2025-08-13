@@ -45,7 +45,7 @@ const CardAction = ({
     let buttonType = ""
     switch (actionType.toLowerCase()) {
       case "log":
-        // Debug: action started
+        console.log("log")
         break
       case "vote":
         buttonType = "Submit vote"
@@ -84,7 +84,7 @@ const CardAction = ({
         privyLogin()
         break
       default:
-        // Debug: action type
+        console.log(`Action type: ${actionType}`)
         break
     }
   }

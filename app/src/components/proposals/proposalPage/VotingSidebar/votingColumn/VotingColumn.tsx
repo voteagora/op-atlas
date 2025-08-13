@@ -118,7 +118,7 @@ const VotingChoices = ({
         </div>
       )
     default:
-      // Unsupported proposal type; keep placeholder
+      console.log("Unsupported VotingChoices proposal Type", { proposalType })
       return <>{proposalType} Not Yet Supported</>
   }
 }
@@ -213,7 +213,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const extractIds = (proposalData: ProposalData) => {
     const pData = proposalData.proposalData as any
-    // Extract IDs from proposal data
+    console.log("extractIds", { pData })
     if (
       pData?.options &&
       Array.isArray(pData.options) &&
@@ -507,7 +507,13 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       throw new Error("Failed to propose Safe transaction")
     }
 
-    // Safe vote transaction proposed successfully
+    console.log("Safe vote transaction proposed:", {
+      safeAddress: selectedSafeWallet.address,
+      txHash,
+      proposalId: proposalData.offchainProposalId,
+      choices,
+      note: "This creates a Safe transaction proposal that will execute the EAS attestation when approved and executed by Safe owners"
+    })
 
     return {
       attestationId: txHash, // Use transaction hash as identifier
@@ -519,7 +525,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     const newActiveWallet = wallets.find(
       (wallet) => wallet.address === citizen?.address,
     )
-    // Attempt to find active wallet in connected wallets
+    console.log("newActiveWallet", wallets, citizen?.address)
     if (!newActiveWallet) {
       setAddressMismatch(true)
       throw new Error("Citizen wallet not found. Try reconnecting.")
