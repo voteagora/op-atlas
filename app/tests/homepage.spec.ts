@@ -3,8 +3,9 @@ import { test, expect } from "@playwright/test"
 test.describe("Homepage", () => {
   test("should display the Optimism logo", async ({ page }) => {
     await page.goto("/")
-    await page.waitForLoadState("domcontentloaded")
-    await page.waitForSelector("body", { state: "visible" })
+    await page.waitForLoadState("networkidle")
+    await page.evaluate(() => document.readyState === "complete")
+    await page.waitForSelector("body", { state: "attached" })
 
     console.log("Page title:", await page.title())
     console.log("Page URL:", page.url())

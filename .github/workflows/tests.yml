@@ -67,6 +67,7 @@ jobs:
           NEXT_PUBLIC_VERCEL_URL: "http://localhost:3000"
           NEXT_PUBLIC_PRIVY_APP_ID: "test-app-id"
           NEXT_PUBLIC_E2E: "true"
+          NEXT_PUBLIC_MIXPANEL_TOKEN: "test"
           NEXTAUTH_SECRET: "test-secret"
 
       - name: Upload Playwright report
