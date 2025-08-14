@@ -4,8 +4,8 @@ import {
   EAS,
   EIP712Response,
   SchemaEncoder,
+  Signature,
 } from "@ethereum-attestation-service/eas-sdk"
-import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
 import {
@@ -102,44 +102,91 @@ async function createMultiAttestations(
     data: string
     refUID?: string
   }[],
-  batch?: boolean,
 ): Promise<string[]> {
-  const multiAttestations = attestations.map((a) => ({
-    schema: a.schema,
-    data: [
-      {
-        recipient: "0x0000000000000000000000000000000000000000",
-        expirationTime: BigInt(0),
-        revocable: true,
-        data: a.data,
-        refUID: a.refUID,
-      },
-    ],
-  }))
-  try {
-    if (batch) {
-      const tx = await eas.multiAttest(multiAttestations)
-      return await tx.wait()
-    }
-
-    const ids: string[] = []
-    for (const attestation of multiAttestations) {
+  if (attestations.length === 0) {
+    return []
+  }
+  if (attestations.length === 1) {
+    // Single-attest fallback
+    const [a] = attestations
+    try {
       const tx = await eas.attest({
-        schema: attestation.schema,
-        data: attestation.data[0],
+        schema: a.schema,
+        data: {
+          recipient: "0x0000000000000000000000000000000000000000",
+          expirationTime: BigInt(0),
+          revocable: true,
+          data: a.data,
+          refUID: a.refUID,
+        },
       })
-      const id = await tx.wait()
-      ids.push(id)
+      const uid = await tx.wait()
+      return [uid]
+    } catch (error) {
+      console.error("Attestation failed", {
+        size: attestations.length,
+        error,
+      })
+      return createMultiAttestations([a])
     }
-    return ids
+  }
+
+  // Group by schema to reduce calldata and improve gas efficiency
+  const grouped = new Map<
+    string,
+    {
+      schema: string
+      data: {
+        recipient: string
+        expirationTime: bigint
+        revocable: boolean
+        data: string
+        refUID?: string
+      }[]
+    }
+  >()
+
+  // For each unique schema value, it checks if grouped already has a bucket.
+  for (const a of attestations) {
+    // if not, create a new bucket
+    if (!grouped.has(a.schema)) {
+      grouped.set(a.schema, {
+        schema: a.schema,
+        data: [],
+      })
+    }
+    // Add the attestation to the bucket
+    grouped.get(a.schema)!.data.push({
+      recipient: "0x0000000000000000000000000000000000000000",
+      expirationTime: BigInt(0),
+      revocable: true,
+      data: a.data,
+      refUID: a.refUID,
+    })
+  }
+
+  const attestationRequests = Array.from(grouped.values())
+
+  try {
+    // Try to submit as one batched multiAttest call
+    const tx = await eas.multiAttest(attestationRequests)
+    const uids = await tx.wait()
+    return uids
   } catch (error) {
-    const errorDetails = {
-      rawError: error,
-      batched: batch,
-      multiAttestations,
-    }
-    console.error("Error creating multi attestations: ", errorDetails)
-    throw error
+    // If it fails (gas/size/other constraint), split the input in half and recurse.
+    console.warn("multiAttest failed, splitting batch:", {
+      size: attestations.length,
+    })
+
+    const mid = Math.floor(attestations.length / 2)
+    const left = attestations.slice(0, mid)
+    const right = attestations.slice(mid)
+
+    // Recurse sequentially to avoid nonce/race issues
+    const leftUids = await createMultiAttestations(left)
+    const rightUids = await createMultiAttestations(right)
+
+    return leftUids.concat(rightUids)
   }
 }
 
