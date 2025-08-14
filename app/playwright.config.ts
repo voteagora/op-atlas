@@ -29,9 +29,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: process.env.CI ? "npx next dev" : "pnpm dev",
+    command: process.env.CI ? "pnpm build && pnpm start -p 3000" : "pnpm dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 120000, // 2 minutes timeout for CI
+    timeout: process.env.CI ? 300000 : 120000,
   },
 })

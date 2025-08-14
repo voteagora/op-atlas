@@ -58,7 +58,7 @@ jobs:
         run: |
           cd app
           export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/atlas_test"
-          npx playwright test
+          npx playwright test --reporter=line
         env:
           CI: true
           MAILCHIMP_API_KEY: ""
