@@ -18,34 +18,38 @@ export const privyWagmiConfig = createConfig({
 
 const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
-  if (!appId) {
-    throw new Error("Missing NEXT_PUBLIC_PRIVY_APP_ID environment variable")
-  }
+  const disablePrivy = process.env.NEXT_PUBLIC_DISABLE_PRIVY === "true" || !appId
 
   const queryClient = new QueryClient()
 
   return (
-    <PrivyProvider
-      appId={appId}
-      config={{
-        loginMethods: ["email", "farcaster", "wallet"],
-        appearance: {
-          theme: "light",
-          accentColor: "#FF0420",
-          logo: "/assets/images/welcome-privy.svg",
-        },
-        externalWallets: {
-          signatureRequestTimeouts: {
-            safe: 600000,
-            wallet_connect: 600000,
-          },
-        },
-      }}
-    >
+    disablePrivy ? (
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={privyWagmiConfig}>{children}</WagmiProvider>
       </QueryClientProvider>
-    </PrivyProvider>
+    ) : (
+      <PrivyProvider
+        appId={appId as string}
+        config={{
+          loginMethods: ["email", "farcaster", "wallet"],
+          appearance: {
+            theme: "light",
+            accentColor: "#FF0420",
+            logo: "/assets/images/welcome-privy.svg",
+          },
+          externalWallets: {
+            signatureRequestTimeouts: {
+              safe: 600000,
+              wallet_connect: 600000,
+            },
+          },
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <WagmiProvider config={privyWagmiConfig}>{children}</WagmiProvider>
+        </QueryClientProvider>
+      </PrivyProvider>
+    )
   )
 }
 
