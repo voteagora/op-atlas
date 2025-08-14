@@ -18,36 +18,34 @@ export const privyWagmiConfig = createConfig({
 
 const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
-  const disablePrivy = process.env.NEXT_PUBLIC_DISABLE_PRIVY === "true" || !appId
+  const disablePrivy = process.env.NEXT_PUBLIC_E2E === "true" || !appId
 
   const queryClient = new QueryClient()
 
-  return (
-    disablePrivy ? (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    ) : (
-      <PrivyProvider
-        appId={appId as string}
-        config={{
-          loginMethods: ["email", "farcaster", "wallet"],
-          appearance: {
-            theme: "light",
-            accentColor: "#FF0420",
-            logo: "/assets/images/welcome-privy.svg",
+  return disablePrivy ? (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  ) : (
+    <PrivyProvider
+      appId={appId as string}
+      config={{
+        loginMethods: ["email", "farcaster", "wallet"],
+        appearance: {
+          theme: "light",
+          accentColor: "#FF0420",
+          logo: "/assets/images/welcome-privy.svg",
+        },
+        externalWallets: {
+          signatureRequestTimeouts: {
+            safe: 600000,
+            wallet_connect: 600000,
           },
-          externalWallets: {
-            signatureRequestTimeouts: {
-              safe: 600000,
-              wallet_connect: 600000,
-            },
-          },
-        }}
-      >
-        <QueryClientProvider client={queryClient}>
-          <WagmiProvider config={privyWagmiConfig}>{children}</WagmiProvider>
-        </QueryClientProvider>
-      </PrivyProvider>
-    )
+        },
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={privyWagmiConfig}>{children}</WagmiProvider>
+      </QueryClientProvider>
+    </PrivyProvider>
   )
 }
 
