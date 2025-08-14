@@ -12,7 +12,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: atlas_test
@@ -25,40 +25,39 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      # Install pnpm before Node so caching works
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
 
-    - name: Install dependencies
-      run: |
-        cd app
-        pnpm install
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-    - name: Install Playwright browsers
-      run: |
-        cd app
-        npx playwright install --with-deps
+      - name: Install Playwright browsers
+        run: |
+          cd app
+          npx playwright install --with-deps
 
-    - name: Run Playwright tests
-      run: |
-        cd app
-        pnpm test:e2e
-      env:
-        CI: true
+      - name: Run Playwright tests
+        run: |
+          cd app
+          pnpm test:e2e
+        env:
+          CI: true
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: playwright-report
-        path: app/playwright-report/
-        retention-days: 30 
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: app/playwright-report/
+          retention-days: 30
