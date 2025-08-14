@@ -2,8 +2,8 @@
 
 import mailchimp from "@mailchimp/mailchimp_transactional"
 
-// Initialize Mailchimp client
-const client = mailchimp(process.env.MAILCHIMP_API_KEY || "")
+// Initialize Mailchimp Transactional client (requires transactional API key)
+const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY || "")
 
 export interface EmailData {
   to: string
@@ -35,22 +35,35 @@ export const sendTransactionEmail = async (
         emailData.from ||
         process.env.DEFAULT_FROM_EMAIL ||
         "noreply@example.com",
-      to: [{ email: emailData.to, type: "to" }],
+      to: [{ email: emailData.to, type: "to" as const }],
       ...(emailData.replyTo && { reply_to: emailData.replyTo }),
     }
 
     const response = await client.messages.send({ message })
 
-    if (response && response.length > 0 && response[0].status === "sent") {
+    // Check if response is an error
+    if ("isAxiosError" in response) {
+      return {
+        success: false,
+        error: response.message || "Failed to send email",
+      }
+    }
+
+    // Check if response is successful
+    if (
+      Array.isArray(response) &&
+      response.length > 0 &&
+      response[0].status === "sent"
+    ) {
       return {
         success: true,
         messageId: response[0]._id,
       }
-    } else {
-      return {
-        success: false,
-        error: "Failed to send email",
-      }
+    }
+
+    return {
+      success: false,
+      error: "Failed to send email",
     }
   } catch (error) {
     console.error("Error sending transactional email:", error)
