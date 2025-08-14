@@ -23,10 +23,10 @@ import {
   UserProjectsWithDetails,
   UserWithProjects,
 } from "@/lib/types"
+import { withChangelogTracking } from "@/lib/utils/changelog"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
-import { withChangelogTracking } from "@/lib/utils/changelog"
 
 async function getUserProjectsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -1878,6 +1878,16 @@ export async function addKYCTeamMembers({
         businessName: b.companyName,
       })),
     })
+
+    // TODO: Send transactional email to new KYC users
+    console.log(
+      "Created individual KYCUser IDs:",
+      createdIndividuals.map((u) => u.id),
+    )
+    console.log(
+      "Created business KYCUser IDs:",
+      createdBusinesses.map((u) => u.id),
+    )
 
     const allMembers = [...toAdd, ...createdIndividuals, ...createdBusinesses]
 
