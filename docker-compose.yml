@@ -8,14 +8,17 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     depends_on:
       - postgres
     networks:
       - atlas-network
+    volumes:
+      - ./app:/workspace/app
+      - /workspace/app/node_modules
 
   postgres:
-    image: postgres:15
+    image: postgres:16
     environment:
       POSTGRES_DB: atlas_test
       POSTGRES_USER: postgres
