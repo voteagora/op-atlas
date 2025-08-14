@@ -24,9 +24,7 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     disablePrivy ? (
-      <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={privyWagmiConfig}>{children}</WagmiProvider>
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     ) : (
       <PrivyProvider
         appId={appId as string}
