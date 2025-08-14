@@ -56,6 +56,7 @@ type PersonaInquiry = {
         "name-last": string
         "name-middle": string
         "email-address": string
+        "reference-id": string
     }
 }
 
@@ -149,26 +150,43 @@ async function updateKYCUserStatus(
     email: string,
     status: string,
     updatedAt: Date,
+    referenceId?: string,
+    personaStatus?: string,
 ) {
+
+    if (referenceId) {
+        const existingUser = await prisma.kYCUser.findUnique({
+            where: {
+                id: referenceId,
+            },
+        })
+
+        if (existingUser) {
+            console.log("Existing user found for reference id: ", referenceId)
+            // Update the existing user record
+            const updatedUser = await prisma.kYCUser.update({
+                where: { id: referenceId },
+                data: {
+                    status: status as any,
+                    personaStatus: personaStatus as any,
+                    updatedAt: updatedAt,
+                    expiry: new Date(updatedAt.getTime() + 365 * 24 * 60 * 60 * 1000), // 1 year from updatedAt
+                },
+            })
+            return updatedUser
+        }
+    }
+
     const result = await prisma.$queryRaw<any[]>`
-    WITH closest_match AS (
-      SELECT id, difference(lower(unaccent("firstName") || ' ' || unaccent("lastName")), lower(unaccent(${name}))) as name_similarity
-      FROM "KYCUser" 
-      WHERE "email" = ${email.toLowerCase()}
-      ORDER BY name_similarity DESC
-      LIMIT 1
-    )
     UPDATE "KYCUser" SET
       "status" = ${status}::"KYCStatus",
+      "personaStatus" = ${personaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE EXISTS (
-      SELECT 1 FROM closest_match 
-      WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 2
-    )
+    WHERE "email" = ${email.toLowerCase()}
     RETURNING *;
   `
+
 
     return result
 }
@@ -178,24 +196,15 @@ async function updateKYBUserStatus(
     email: string,
     status: string,
     updatedAt: Date,
+    personaStatus?: string,
 ) {
     const result = await prisma.$queryRaw<any[]>`
-    WITH closest_match AS (
-      SELECT id, difference(lower(unaccent("businessName")), lower(unaccent(${name}))) as name_similarity
-      FROM "KYCUser" 
-      WHERE "email" = ${email.toLowerCase()} AND "businessName" IS NOT NULL
-      ORDER BY name_similarity DESC
-      LIMIT 1
-    )
     UPDATE "KYCUser" SET
       "status" = ${status}::"KYCStatus",
+      "personaStatus" = ${personaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE EXISTS (
-      SELECT 1 FROM closest_match 
-      WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 2
-    )
+    WHERE "email" = ${email.toLowerCase()} AND "businessName" IS NOT NULL
     RETURNING *;
   `
 
@@ -211,6 +220,7 @@ async function processPersonaInquiries(inquiries: PersonaInquiry[]) {
                     "name-first": firstName,
                     "name-last": lastName,
                     "updated-at": updatedAt,
+                    "reference-id": referenceId,
                     status,
                 },
             } = inquiry
@@ -223,16 +233,18 @@ async function processPersonaInquiries(inquiries: PersonaInquiry[]) {
                 return
             }
 
-            if (!email || !firstName || !lastName) {
+            if (!email || !referenceId) {
                 console.warn(`Missing required fields for inquiry ${inquiry.id}`)
                 return
             }
 
             await updateKYCUserStatus(
-                `${firstName.split(" ")[0]} ${lastName}`,
+                `${firstName} ${lastName}`,
                 email,
                 parsedStatus,
                 new Date(updatedAt),
+                referenceId,
+                status,
             )
         }),
     )
@@ -274,6 +286,7 @@ async function processPersonaCases(cases: PersonaCase[]) {
                 email,
                 parsedStatus,
                 new Date(updatedAt),
+                status,
             )
         }),
     )
