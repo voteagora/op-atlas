@@ -4,14 +4,15 @@ import {
   NO_EXPIRATION,
   SchemaEncoder,
 } from "@ethereum-attestation-service/eas-sdk"
-import { ethers } from "ethers"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
+import { ethers } from "ethers"
 import { Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
+import { useAccount } from "wagmi"
 
 import {
   ProposalStatus,
@@ -24,10 +25,13 @@ import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
-import { useUserByContext, useUserCitizen } from "@/hooks/citizen/useUserCitizen"
+import {
+  useUserByContext,
+  useUserCitizen,
+} from "@/hooks/citizen/useUserCitizen"
+import { useWallet } from "@/hooks/useWallet"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
-import { useWallet } from "@/hooks/useWallet"
 import { vote } from "@/lib/actions/votes"
 import {
   CHAIN_ID,
@@ -35,7 +39,6 @@ import {
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
-import { safeService } from "@/services/SafeService"
 import { ProposalData } from "@/lib/proposals"
 import { truncateAddress } from "@/lib/utils/string"
 import {
@@ -48,12 +51,12 @@ import { isSmartContractWallet } from "@/lib/utils/walletDetection"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useConfetti } from "@/providers/LayoutProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
+import { safeService } from "@/services/SafeService"
 
 import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
 import { CandidateResults } from "./CandidateResults"
 import VotingQuestionnaire from "./VotingQuestionnaire"
-import { useAccount } from "wagmi"
 
 const VotingColumnSkeleton = () => (
   <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
@@ -492,7 +495,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     // Encode the EAS.attest() function call using ethers Interface
     // EAS contract ABI fragment for the attest function
     const easInterface = new ethers.Interface([
-      "function attest((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data) data)) external payable returns (bytes32)"
+      "function attest((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data) data)) external payable returns (bytes32)",
     ])
 
     const txData = {
@@ -502,7 +505,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       operation: 0 as const, // CALL operation
     }
 
-    const txHash = await safeService.proposeTransaction(safe, signer.address as `0x${string}`, txData)
+    const txHash = await safeService.proposeTransaction(
+      safe,
+      signer.address as `0x${string}`,
+      txData,
+    )
     if (!txHash) {
       throw new Error("Failed to propose Safe transaction")
     }
@@ -512,7 +519,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       txHash,
       proposalId: proposalData.offchainProposalId,
       choices,
-      note: "This creates a Safe transaction proposal that will execute the EAS attestation when approved and executed by Safe owners"
+      note: "This creates a Safe transaction proposal that will execute the EAS attestation when approved and executed by Safe owners",
     })
 
     return {
@@ -589,7 +596,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         let attestationId: string
         let signerAddress: string
 
-        if (currentContext === 'SAFE') {
+        if (currentContext === "SAFE") {
           // Safe wallet voting
           const attestationData = await createSafeVoteTransaction(choices)
           signerAddress = attestationData.signerAddress
