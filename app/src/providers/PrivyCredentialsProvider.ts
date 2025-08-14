@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 
 import { syncPrivyUser } from "../db/privy"
 import { createUser, getUserByPrivyDid } from "../db/users"
-import privy from "../lib/privy"
+import { getPrivy } from "../lib/privy"
 interface UserResponse {
   id: string
   farcasterId?: string
@@ -24,7 +24,9 @@ export const PrivyCredentialsProvider = CredentialsProvider({
     const { privyAccessToken, privy: privyUserObject } = credentials
 
     try {
-      const verified = await privy.verifyAuthToken(privyAccessToken as string)
+      const verified = await getPrivy().verifyAuthToken(
+        privyAccessToken as string,
+      )
 
       // TODO: Check whether futher token validation is needed
 
