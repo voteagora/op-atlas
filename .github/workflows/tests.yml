@@ -50,7 +50,7 @@ jobs:
       - name: Run Playwright tests
         run: |
           cd app
-          pnpm test:e2e
+          npx playwright test
         env:
           CI: true
 
