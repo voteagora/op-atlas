@@ -102,23 +102,45 @@ async function createMultiAttestations(
     data: string
     refUID?: string
   }[],
-) {
-  const tx = await eas.multiAttest(
-    attestations.map((a) => ({
-      schema: a.schema,
-      data: [
-        {
-          recipient: "0x0000000000000000000000000000000000000000",
-          expirationTime: BigInt(0),
-          revocable: true,
-          data: a.data,
-          refUID: a.refUID,
-        },
-      ],
-    })),
-  )
+  batch?: boolean,
+): Promise<string[]> {
+  const multiAttestations = attestations.map((a) => ({
+    schema: a.schema,
+    data: [
+      {
+        recipient: "0x0000000000000000000000000000000000000000",
+        expirationTime: BigInt(0),
+        revocable: true,
+        data: a.data,
+        refUID: a.refUID,
+      },
+    ],
+  }))
+  try {
+    if (batch) {
+      const tx = await eas.multiAttest(multiAttestations)
+      return await tx.wait()
+    }
 
-  return await tx.wait()
+    const ids: string[] = []
+    for (const attestation of multiAttestations) {
+      const tx = await eas.attest({
+        schema: attestation.schema,
+        data: attestation.data[0],
+      })
+      const id = await tx.wait()
+      ids.push(id)
+    }
+    return ids
+  } catch (error) {
+    const errorDetails = {
+      rawError: error,
+      batched: batch,
+      multiAttestations,
+    }
+    console.error("Error creating multi attestations: ", errorDetails)
+    throw error
+  }
 }
 
 async function revokeMultiAttestations(
@@ -563,8 +585,6 @@ export async function createDelegatedVoteAttestation(
     throw error
   }
 }
-
-
 
 export const validateSignatureAddressIsValid = async (
   response: EIP712Response<any, any>,
