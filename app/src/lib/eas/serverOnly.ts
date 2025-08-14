@@ -121,6 +121,25 @@ async function createMultiAttestations(
   return await tx.wait()
 }
 
+async function createSingleAttestations(
+  attestations: {
+    schema: string
+    data: string
+    refUID?: string
+  }[],
+): Promise<string[]> {
+  const attestationIds: string[] = []
+  for (const attestation of attestations) {
+    const id = await createAttestation(
+      attestation.schema,
+      attestation.data,
+      attestation.refUID,
+    )
+    attestationIds.push(id)
+  }
+  return attestationIds
+}
+
 async function revokeMultiAttestations(
   schemaId: string,
   attestationIds: string[],
@@ -272,7 +291,7 @@ export async function createContractAttestations({
     farcasterId,
   })
 
-  const attestationIds = await createMultiAttestations(attestations)
+  const attestationIds = await createSingleAttestations(attestations)
 
   return attestationIds
 }
@@ -312,7 +331,7 @@ export async function createFullProjectSnapshotAttestations({
     }),
   ]
 
-  return processAttestationsInBatches(attestations, createMultiAttestations)
+  return processAttestationsInBatches(attestations, createSingleAttestations)
 }
 
 export async function createCitizenWalletChangeAttestation({
@@ -563,8 +582,6 @@ export async function createDelegatedVoteAttestation(
     throw error
   }
 }
-
-
 
 export const validateSignatureAddressIsValid = async (
   response: EIP712Response<any, any>,
