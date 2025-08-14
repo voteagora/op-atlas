@@ -2,7 +2,7 @@ import "server-only"
 
 import { Md5 } from "ts-md5"
 
-import mailchimp from "@/lib/mailchimp"
+import { getMailchimp } from "@/lib/mailchimp"
 import { arrayDifference } from "@/lib/utils"
 
 export async function updateMailchimpTags(
@@ -22,7 +22,7 @@ export async function updateMailchimpTags(
 
   if (users.length > 0) {
     const existingTagsMap = new Map<string, string[]>()
-    const existingTags = (await mailchimp.lists.getListMembersInfo(LIST_ID, {
+    const existingTags = (await getMailchimp().lists.getListMembersInfo(LIST_ID, {
       fields: ["members.email_address", "members.tags"],
       count: 9999, // There is no way to specify which emails to get the info for so we can't batch. We have to get all of them at once
     })) as any
@@ -51,7 +51,7 @@ export async function updateMailchimpTags(
         ]),
       )
 
-      const results = (await mailchimp.lists.batchListMembers(LIST_ID, {
+      const results = (await getMailchimp().lists.batchListMembers(LIST_ID, {
         members: batch.map((user) => ({
           email_address: user.email,
           tags: [...user.tags, ...(usersTagsDifference.get(user.email) ?? [])],
@@ -96,7 +96,7 @@ export async function addContactToList({ email }: { email: string }) {
   }
 
   try {
-    await mailchimp.lists.addListMember(LIST_ID, {
+    await getMailchimp().lists.addListMember(LIST_ID, {
       email_address: email,
       status: "subscribed",
     })
@@ -117,7 +117,7 @@ export async function removeContactFromList({ email }: { email: string }) {
   }
 
   try {
-    await mailchimp.lists.deleteListMember(LIST_ID, email)
+    await getMailchimp().lists.deleteListMember(LIST_ID, email)
   } catch (error: any) {
     console.log("Error removing contact email", error)
   }
@@ -144,7 +144,7 @@ export async function updateContactEmail({
   try {
     const subscriberHash = Md5.hashStr(currentEmail)
 
-    await mailchimp.lists.updateListMember(LIST_ID, subscriberHash, {
+    await getMailchimp().lists.updateListMember(LIST_ID, subscriberHash, {
       email_address: newEmail,
       status: "subscribed",
     })
@@ -160,7 +160,7 @@ async function getContact(email: string) {
   }
 
   try {
-    return await mailchimp.lists.getListMember(LIST_ID, Md5.hashStr(email))
+    return await getMailchimp().lists.getListMember(LIST_ID, Md5.hashStr(email))
   } catch (error: any) {
     if (error.status === 404) {
       return null

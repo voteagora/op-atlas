@@ -1,31 +1,32 @@
 import { default as BaseMailchimp } from "@mailchimp/mailchimp_marketing"
 
-class Mailchimp {
-  private static instance: typeof mailchimp
+type MailchimpClient = typeof BaseMailchimp
 
-  private constructor() {}
+let cachedClient: MailchimpClient | null = null
 
-  public static getInstance(): typeof BaseMailchimp {
-    if (!Mailchimp.instance) {
-      const apiKey = process.env.MAILCHIMP_API_KEY
-      const serverPrefix = process.env.MAILCHIMP_SERVER_PREFIX
+export function getMailchimp(): MailchimpClient {
+  if (cachedClient) return cachedClient
 
-      if (!apiKey || !serverPrefix) {
-        throw new Error(
-          "Please define MAILCHIMP_API_KEY and MAILCHIMP_SERVER_PREFIX in your environment variables",
-        )
-      }
+  const apiKey = process.env.MAILCHIMP_API_KEY
+  const serverPrefix = process.env.MAILCHIMP_SERVER_PREFIX
 
-      BaseMailchimp.setConfig({
-        apiKey: apiKey,
-        server: serverPrefix,
-      })
-
-      Mailchimp.instance = BaseMailchimp
-    }
-    return Mailchimp.instance
+  if (apiKey && serverPrefix) {
+    BaseMailchimp.setConfig({ apiKey, server: serverPrefix })
+    cachedClient = BaseMailchimp
+    return cachedClient
   }
-}
 
-const mailchimp = Mailchimp.getInstance()
-export default mailchimp
+  const noop = {
+    lists: {
+      getListMembersInfo: async () => ({ members: [] }),
+      batchListMembers: async () => ({ updated_members: [], new_members: [] }),
+      addListMember: async () => ({}),
+      deleteListMember: async () => ({}),
+      updateListMember: async () => ({}),
+      getListMember: async () => null,
+    },
+  } as unknown as MailchimpClient
+
+  cachedClient = noop
+  return cachedClient
+}

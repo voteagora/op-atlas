@@ -1,7 +1,7 @@
 import { default as BaseMailchimp } from "@mailchimp/mailchimp_marketing"
 
 import { prisma } from "@/db/client"
-import mailchimp from "@/lib/mailchimp"
+import { getMailchimp } from "@/lib/mailchimp"
 
 const BATCH_SIZE = 500
 type SUBSCRIBED_MEMBER = {
@@ -351,7 +351,7 @@ async function exportEmailsToMailchimp() {
 
       console.log("batch", batch)
 
-      const res = await mailchimp.lists.batchListMembers(LIST_ID, {
+      const res = await getMailchimp().lists.batchListMembers(LIST_ID, {
         members: batch,
         update_existing: true,
       })

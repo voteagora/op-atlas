@@ -47,12 +47,26 @@ jobs:
           cd app
           npx playwright install --with-deps
 
+      - name: Prepare database
+        run: |
+          cd app
+          export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/atlas_test"
+          npx prisma generate
+          npx prisma migrate deploy
+
       - name: Run Playwright tests
         run: |
           cd app
+          export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/atlas_test"
           npx playwright test
         env:
           CI: true
+          MAILCHIMP_API_KEY: ""
+          MAILCHIMP_SERVER_PREFIX: ""
+          MAILCHIMP_LIST_ID: ""
+          NEXT_PUBLIC_VERCEL_URL: "http://localhost:3000"
+          NEXT_PUBLIC_PRIVY_APP_ID: "test-app-id"
+          NEXTAUTH_SECRET: "test-secret"
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

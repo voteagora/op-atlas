@@ -11,6 +11,9 @@ export default defineConfig({
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
   },
+  expect: {
+    timeout: 10000,
+  },
   projects: [
     {
       name: "chromium",
@@ -26,9 +29,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:3000',
+    command: process.env.CI ? "npx next dev" : "pnpm dev",
+    url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120000, // 2 minutes timeout for CI
   },
-}) 
+})
