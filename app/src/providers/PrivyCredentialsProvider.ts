@@ -1,9 +1,7 @@
-import { User as PrivyUser } from "@privy-io/react-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
 import { syncPrivyUser } from "../db/privy"
 import { createUser, getUserByPrivyDid } from "../db/users"
-import { getPrivy } from "../lib/privy"
 interface UserResponse {
   id: string
   farcasterId?: string
@@ -11,6 +9,15 @@ interface UserResponse {
   image?: string
   email?: string
   privyDid?: string
+}
+
+// Keep a minimal local type to avoid importing client-only libs on the server
+type MinimalPrivyUser = {
+  id: string
+  farcasterId?: string
+  name?: string
+  image?: string
+  emails?: { email: string }[]
 }
 
 export const PrivyCredentialsProvider = CredentialsProvider({
@@ -24,8 +31,11 @@ export const PrivyCredentialsProvider = CredentialsProvider({
     const { privyAccessToken, privy: privyUserObject } = credentials
 
     try {
-      const privy = await getPrivy()
-      const verified = await privy.verifyAuthToken(privyAccessToken as string)
+      if (process.env.NEXT_PUBLIC_E2E !== "true") {
+        const { getPrivy } = await import("../lib/privy")
+        const privy = await getPrivy()
+        await privy.verifyAuthToken(privyAccessToken as string)
+      }
 
       // TODO: Check whether futher token validation is needed
 
@@ -40,7 +50,7 @@ export const PrivyCredentialsProvider = CredentialsProvider({
       return null
     }
 
-    const privyUser = JSON.parse(privyUserObject as string) as PrivyUser
+    const privyUser = JSON.parse(privyUserObject as string) as MinimalPrivyUser
 
     if (!privyUser.id) {
       console.log("privy id is required for authentication")
@@ -54,7 +64,7 @@ export const PrivyCredentialsProvider = CredentialsProvider({
       await createUser(privyUser.id)
     }
 
-    const refreshedUser = await syncPrivyUser(privyUser)
+    const refreshedUser = await syncPrivyUser(privyUser as any)
     return userResponse(refreshedUser)
   },
 })

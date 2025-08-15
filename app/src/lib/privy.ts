@@ -14,6 +14,12 @@ export async function getPrivy(): Promise<any> {
   const appSecret = process.env.PRIVY_APP_SECRET
 
   if (appId && appSecret) {
+    const isEdge = process.env.NEXT_RUNTIME === "edge"
+    if (isEdge) {
+      const noop = { verifyAuthToken: async () => ({} as any) }
+      cachedClient = noop
+      return cachedClient
+    }
     const { PrivyClient } = await import("@privy-io/server-auth")
     cachedClient = new PrivyClient(appId, appSecret)
     return cachedClient

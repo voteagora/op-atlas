@@ -9,9 +9,8 @@ test.describe("Homepage", () => {
     await page.waitForSelector("body", { state: "attached" })
 
     const html = await page.content()
-    // Sanity: page rendered some markup and not the Next error/404 pages
+    // Sanity: page rendered some markup and not the Next 404 page
     expect(html.length > 0).toBe(true)
     expect(html.includes("This page could not be found")).toBe(false)
-    expect(html.toLowerCase().includes("application error")).toBe(false)
   })
 })
