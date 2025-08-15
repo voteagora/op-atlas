@@ -1,10 +1,6 @@
 "use server"
 
-import {
-  EAS,
-  EIP712Response,
-  SchemaEncoder,
-} from "@ethereum-attestation-service/eas-sdk"
+import { EAS, EIP712Response, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
@@ -61,21 +57,33 @@ const contractSchema = new SchemaEncoder(
   "address contract, uint32 chainId, address deployer, bytes32 deploymentTx, bytes signature, uint32 verificationChainId, uint256 farcasterID",
 )
 
-const EAS_SIGNER_PRIVATE_KEY = process.env.EAS_SIGNER_PRIVATE_KEY
-if (!EAS_SIGNER_PRIVATE_KEY) {
-  throw new Error("EAS_SIGNER_PRIVATE_KEY is missing from env")
-}
+const __isE2E__ = process.env.NEXT_PUBLIC_E2E === "true"
 
-const eas = new EAS(EAS_CONTRACT_ADDRESS)
-
-const provider = new ethers.AlchemyProvider(
-  process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",
-  process.env.ALCHEMY_API_KEY,
-)
-
-const signer = new Wallet(EAS_SIGNER_PRIVATE_KEY, provider)
-
-eas.connect(signer)
+// In E2E, avoid requiring real keys/providers and use a no-op EAS client
+const eas: any = (() => {
+  if (!__isE2E__) {
+    const pk = process.env.EAS_SIGNER_PRIVATE_KEY
+    if (!pk) {
+      throw new Error("EAS_SIGNER_PRIVATE_KEY is missing from env")
+    }
+    const realEas = new EAS(EAS_CONTRACT_ADDRESS)
+    const provider = new ethers.AlchemyProvider(
+      process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",
+      process.env.ALCHEMY_API_KEY,
+    )
+    const signer = new Wallet(pk, provider)
+    realEas.connect(signer)
+    return realEas
+  }
+  // Minimal mock that matches methods used below
+  return {
+    attest: async () => ({ wait: async () => "0xmock-attest" }),
+    multiAttest: async () => ({ wait: async () => ["0xmock-multi-attest"] }),
+    multiRevoke: async () => ({ wait: async () => undefined }),
+    getAttestation: async () => ({ revocationTime: 0 }),
+    attestByDelegation: async () => ({ wait: async () => "0xmock-delegated" }),
+  }
+})()
 
 async function createAttestation(
   schemaId: string,
