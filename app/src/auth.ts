@@ -18,6 +18,7 @@ declare module "next-auth" {
 }
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers: [PrivyCredentialsProvider],
   callbacks: {
     async signIn({ account }) {
