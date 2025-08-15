@@ -1,17 +1,31 @@
 import { PinataSDK } from "pinata-web3"
 
-if (!process.env.PINATA_JWT) {
-  throw new Error("PINATA_JWT is missing from env")
+const __isE2E__ = process.env.NEXT_PUBLIC_E2E === "true"
+
+function createClient() {
+  if (__isE2E__) {
+    return {
+      upload: {
+        json: (_json: Record<string, unknown>) => ({
+          addMetadata: async () => ({ IpfsHash: "bafy-mock-hash" }),
+        }),
+      },
+      testAuthentication: async () => ({ authenticated: true }),
+    } as any
+  }
+  if (!process.env.PINATA_JWT) {
+    throw new Error("PINATA_JWT is missing from env")
+  }
+  if (!process.env.NEXT_PUBLIC_GATEWAY_URL) {
+    throw new Error("NEXT_PUBLIC_GATEWAY_URL is missing from env")
+  }
+  return new PinataSDK({
+    pinataJwt: process.env.PINATA_JWT,
+    pinataGateway: process.env.NEXT_PUBLIC_GATEWAY_URL,
+  })
 }
 
-if (!process.env.NEXT_PUBLIC_GATEWAY_URL) {
-  throw new Error("NEXT_PUBLIC_GATEWAY_URL is missing from env")
-}
-
-const pinata = new PinataSDK({
-  pinataJwt: process.env.PINATA_JWT,
-  pinataGateway: process.env.NEXT_PUBLIC_GATEWAY_URL,
-})
+const pinata = createClient()
 
 export async function testConnection() {
   const res = await pinata.testAuthentication()
