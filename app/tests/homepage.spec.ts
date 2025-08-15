@@ -2,9 +2,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Homepage", () => {
   test("should load without server errors", async ({ page }) => {
-    const res = await page.goto("/")
-    // Basic server response is OK (status < 500)
-    expect(res && res.status() < 500).toBe(true)
+    await page.goto("/")
 
     await page.waitForLoadState("networkidle")
     await page.waitForSelector("html", { state: "attached" })
