@@ -2,8 +2,10 @@ import NextAuth, { type DefaultSession } from "next-auth"
 
 import { PrivyCredentialsProvider } from "./providers/PrivyCredentialsProvider"
 
-if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
-  throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in .env")
+if (process.env.NEXT_PUBLIC_E2E !== "true") {
+  if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
+    throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in .env")
+  }
 }
 
 declare module "next-auth" {

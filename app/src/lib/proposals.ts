@@ -63,7 +63,15 @@ export type UIProposal = {
   }
 }
 
+const IS_E2E = process.env.NEXT_PUBLIC_E2E === "true"
+
 const getStandardProposals = async (offset?: number) => {
+  if (IS_E2E) {
+    return {
+      proposals: [],
+      pagination: { has_next: false, total_returned: 0, next_offset: 0 },
+    }
+  }
   const offsetVal = offset ? `&offset=${offset}` : ""
   try {
     const response = await fetch(
