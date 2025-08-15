@@ -1,4 +1,16 @@
-import * as util from "util"
+function inspectForEnv(value: any): string {
+  const isNode = typeof process !== "undefined" && !!(process as any).versions?.node
+  if (isNode) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const nodeUtil = require("util") as typeof import("util")
+    return nodeUtil.inspect(value, { showHidden: false, depth: null, colors: true })
+  }
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(value)
+  }
+}
 
 export const timeThis = async <T>(
   fn: () => Promise<T>,
@@ -16,12 +28,7 @@ export const timeThis = async <T>(
       throw error
     } finally {
       const end = performance.now()
-      console.log(
-        util.inspect(
-          { ...log_fields, time: end - start },
-          { showHidden: false, depth: null, colors: true },
-        ),
-      )
+      console.log(inspectForEnv({ ...log_fields, time: end - start }))
     }
   } else {
     try {
