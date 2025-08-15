@@ -7,6 +7,10 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+env:
+  PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
+  PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
