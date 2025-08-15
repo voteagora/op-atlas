@@ -4,10 +4,9 @@
  * Using Safe Protocol Kit v4
  */
 
-import Safe from '@safe-global/protocol-kit'
-import SafeApiKit from '@safe-global/api-kit'
-import { ethers } from 'ethers'
-import { useAccount } from 'wagmi'
+import SafeApiKit from "@safe-global/api-kit"
+import Safe from "@safe-global/protocol-kit"
+import { ethers } from "ethers"
 
 export interface SafeWallet {
   address: string
@@ -17,7 +16,7 @@ export interface SafeWallet {
   version: string
 }
 
-const SAFE_API_KEY = process.env.NEXT_PUBLIC_SAFE_API_KEY || process.env.SAFE_API_KEY
+const SAFE_API_KEY = process.env.NEXT_PUBLIC_SAFE_API_KEY
 
 export interface SafeTransactionRequest {
   to: string
@@ -28,12 +27,25 @@ export interface SafeTransactionRequest {
 
 export class SafeService {
   private apiKit: SafeApiKit | null = null
-    
+
+  private ensureApiKit(): void {
+    if (this.apiKit) return
+    if (!SAFE_API_KEY) {
+      this.apiKit = null
+      return
+    }
+    try {
+      this.apiKit = new SafeApiKit({
+        chainId: BigInt(10),
+        apiKey: SAFE_API_KEY,
+      })
+    } catch (_e) {
+      this.apiKit = null
+    }
+  }
   constructor() {
-    this.apiKit = new SafeApiKit({
-      chainId: BigInt(10), // Optimism chain ID
-      apiKey: SAFE_API_KEY,
-    })
+    // Lazy init to avoid crashes when the key isn't available in client bundles/SSR
+    this.ensureApiKit()
   }
 
   /**
@@ -41,6 +53,7 @@ export class SafeService {
    */
   async getSafeInfoByAddress(address: string): Promise<SafeWallet | null> {
     try {
+      this.ensureApiKit()
       if (!this.apiKit) return null
       const info = await this.apiKit.getSafeInfo(address)
       return {
@@ -59,6 +72,7 @@ export class SafeService {
    * Get Safe wallets where the provided address is an owner
    */
   async getSafeWalletsForSigner(signerAddress: string): Promise<SafeWallet[]> {
+    this.ensureApiKit()
     if (!this.apiKit || !signerAddress) {
       return []
     }
@@ -133,7 +147,7 @@ export class SafeService {
     senderAddress: string,
     transaction: SafeTransactionRequest
   ): Promise<string | null> {
-
+    this.ensureApiKit()
     if (!this.apiKit) {
       throw new Error('Safe API kit not initialized')
     }
@@ -194,6 +208,7 @@ export class SafeService {
       }
 
       // Try to get Safe info to verify it's actually a Safe
+      this.ensureApiKit()
       if (this.apiKit) {
         await this.apiKit.getSafeInfo(address)
         return true
