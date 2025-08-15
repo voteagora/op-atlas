@@ -1,9 +1,22 @@
 function inspectForEnv(value: any): string {
-  const isNode = typeof process !== "undefined" && !!(process as any).versions?.node
+  // Avoid Node-only APIs in Edge: rely on NEXT_RUNTIME which Next injects at build time
+  const isNode = process.env.NEXT_RUNTIME !== "edge"
   if (isNode) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const nodeUtil = require("util") as typeof import("util")
-    return nodeUtil.inspect(value, { showHidden: false, depth: null, colors: true })
+    try {
+      const nodeUtil = eval("require")("util") as typeof import("util")
+      return nodeUtil.inspect(value, {
+        showHidden: false,
+        depth: null,
+        colors: true,
+      })
+    } catch {
+      // Fallback if require is unavailable
+      try {
+        return JSON.stringify(value)
+      } catch {
+        return String(value)
+      }
+    }
   }
   try {
     return JSON.stringify(value)
