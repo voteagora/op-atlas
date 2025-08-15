@@ -10,6 +10,9 @@ on:
 env:
   PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
   PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  NEXT_PUBLIC_AGORA_API_URL: ${{ secrets.NEXT_PUBLIC_AGORA_API_URL}}
+  NEXT_PUBLIC_VERCEL_URL: ${{ secrets.NEXT_PUBLIC_VERCEL_URL}}
 
 jobs:
   test:
