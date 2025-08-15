@@ -63,9 +63,22 @@ export const createPersonaInquiryLink = async (
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
+      console.error(
+        "Persona API Error Response:",
+        JSON.stringify(errorData, null, 2),
+      )
+
+      const errorMessage =
+        errorData.errors?.[0]?.detail ||
+        errorData.errors?.[0]?.title ||
+        errorData.error ||
+        errorData.message ||
+        errorData.detail ||
+        "Unknown error"
+
       return {
         success: false,
-        error: `Failed to create Persona inquiry: ${response.status} ${response.statusText}`,
+        error: `Failed to create Persona inquiry: ${response.status} ${response.statusText} - ${errorMessage}`,
       }
     }
 
