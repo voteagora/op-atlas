@@ -8,6 +8,8 @@ on:
     branches: [ main, develop ]
 
 env:
+#  Not sure why this is defined twice
+  NEXT_PUBLIC_PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
   PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
   PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }}
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
