@@ -1,4 +1,6 @@
-import { defineConfig, devices } from "@playwright/test"
+// Avoid typecheck error in Next build when playwright isn't installed/server-side
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { defineConfig, devices } = require("@playwright/test")
 
 export default defineConfig({
   testDir: "./tests",

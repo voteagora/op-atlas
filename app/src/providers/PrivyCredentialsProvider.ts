@@ -24,9 +24,8 @@ export const PrivyCredentialsProvider = CredentialsProvider({
     const { privyAccessToken, privy: privyUserObject } = credentials
 
     try {
-      const verified = await getPrivy().verifyAuthToken(
-        privyAccessToken as string,
-      )
+      const privy = await getPrivy()
+      const verified = await privy.verifyAuthToken(privyAccessToken as string)
 
       // TODO: Check whether futher token validation is needed
 

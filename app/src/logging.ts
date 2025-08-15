@@ -1,23 +1,5 @@
 function inspectForEnv(value: any): string {
-  // Avoid Node-only APIs in Edge: rely on NEXT_RUNTIME which Next injects at build time
-  const isNode = process.env.NEXT_RUNTIME !== "edge"
-  if (isNode) {
-    try {
-      const nodeUtil = eval("require")("util") as typeof import("util")
-      return nodeUtil.inspect(value, {
-        showHidden: false,
-        depth: null,
-        colors: true,
-      })
-    } catch {
-      // Fallback if require is unavailable
-      try {
-        return JSON.stringify(value)
-      } catch {
-        return String(value)
-      }
-    }
-  }
+  // Edge-safe: avoid Node-only APIs and dynamic evaluation
   try {
     return JSON.stringify(value)
   } catch {

@@ -37,50 +37,53 @@ const parseOtlpHeaders = (headersString: string = "") => {
   return headers
 }
 
-// Create OpenTelemetry SDK
-const sdk = new NodeSDK({
-  resource: resourceFromAttributes(resourceAttributes),
-  traceExporter: new OTLPTraceExporter({
-    url:
-      process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
-      "https://trace-intake.datadoghq.com/v1/traces",
-    headers: parseOtlpHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
-  }),
-  metricReader: new PeriodicExportingMetricReader({
-    exporter: new OTLPMetricExporter({
-      url:
-        process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT ||
-        "https://api.datadoghq.com/api/v2/otlp/v1/metrics",
-      headers: parseOtlpHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
-    }),
-    // Optimized export interval for Vercel Functions
-    exportIntervalMillis: 5000,
-  }),
-  instrumentations: [
-    getNodeAutoInstrumentations({
-      // Disable instrumentations that don't work well in Vercel Functions
-      "@opentelemetry/instrumentation-fs": {
-        enabled: false,
-      },
-      "@opentelemetry/instrumentation-net": {
-        enabled: false,
-      },
-      "@opentelemetry/instrumentation-dns": {
-        enabled: false,
-      },
-      // Enable key instrumentations for Vercel Functions
-      "@opentelemetry/instrumentation-http": {
-        enabled: true,
-      },
-      "@opentelemetry/instrumentation-express": {
-        enabled: true,
-      },
-    }),
-  ],
-})
+// Create OpenTelemetry SDK (disabled in E2E to avoid missing deps)
+const sdk =
+  process.env.NEXT_PUBLIC_E2E === "true"
+    ? null
+    : new NodeSDK({
+        resource: resourceFromAttributes(resourceAttributes),
+        traceExporter: new OTLPTraceExporter({
+          url:
+            process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
+            "https://trace-intake.datadoghq.com/v1/traces",
+          headers: parseOtlpHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
+        }),
+        metricReader: new PeriodicExportingMetricReader({
+          exporter: new OTLPMetricExporter({
+            url:
+              process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT ||
+              "https://api.datadoghq.com/api/v2/otlp/v1/metrics",
+            headers: parseOtlpHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
+          }),
+          // Optimized export interval for Vercel Functions
+          exportIntervalMillis: 5000,
+        }),
+        instrumentations: [
+          getNodeAutoInstrumentations({
+            // Disable instrumentations that don't work well in Vercel Functions
+            "@opentelemetry/instrumentation-fs": {
+              enabled: false,
+            },
+            "@opentelemetry/instrumentation-net": {
+              enabled: false,
+            },
+            "@opentelemetry/instrumentation-dns": {
+              enabled: false,
+            },
+            // Enable key instrumentations for Vercel Functions
+            "@opentelemetry/instrumentation-http": {
+              enabled: true,
+            },
+            "@opentelemetry/instrumentation-express": {
+              enabled: true,
+            },
+          }),
+        ],
+      })
 
 // Start the SDK only if OpenTelemetry is enabled
-if (process.env.OTEL_SDK_DISABLED !== "true") {
+if (sdk && process.env.OTEL_SDK_DISABLED !== "true") {
   sdk.start()
   if (process.env.NODE_ENV === "development") {
     console.log("OpenTelemetry started for Vercel Functions")

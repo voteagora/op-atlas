@@ -8,6 +8,9 @@ const octokit = new Octokit({
 })
 
 export async function GET() {
+  if (process.env.NEXT_PUBLIC_E2E === "true") {
+    return NextResponse.json([])
+  }
   try {
     // Fetch all project items with pagination
     const fetchAllProjectItems = async (org: string, projectNumber: number) => {
@@ -65,9 +68,9 @@ export async function GET() {
 
         const variables: any = {
           org,
-          projectNumber
+          projectNumber,
         }
-        
+
         if (cursor) {
           variables.after = cursor
         }
@@ -93,37 +96,38 @@ export async function GET() {
       .filter((item: any) => {
         // Only items with content (issues) AND Foundation Mission Request label
         if (!item.content) return false
-        
+
         const labels = item.content.labels?.nodes || []
-        return labels.some((label: any) => 
-          label.name.toLowerCase().includes('foundation mission request')
+        return labels.some((label: any) =>
+          label.name.toLowerCase().includes("foundation mission request"),
         )
       })
       .map((item: any) => {
         const content = item.content
-        
+
         // Find the Status field value (actual project board column)
-        const statusField = item.fieldValues.nodes.find((field: any) => 
-          field.field?.name?.toLowerCase().includes('status')
+        const statusField = item.fieldValues.nodes.find((field: any) =>
+          field.field?.name?.toLowerCase().includes("status"),
         )
-        
+
         let column = statusField?.name
-        
+
         return {
           id: parseInt(content.id),
           title: content.title,
           state: content.state.toLowerCase() as "open" | "closed",
           column: column,
-          labels: content.labels?.nodes.map((label: any) => ({
-            name: label.name,
-          })) || [],
+          labels:
+            content.labels?.nodes.map((label: any) => ({
+              name: label.name,
+            })) || [],
         }
       })
 
     return NextResponse.json(missions)
   } catch (error) {
-    console.error('Error fetching GitHub project missions:', error)
-    
+    console.error("Error fetching GitHub project missions:", error)
+
     return NextResponse.json([])
   }
 }
