@@ -95,7 +95,7 @@ export const useWallet = (): UseWalletReturn => {
       selectedSafeWallet,
       availableSafeWallets,
       isLoadingSafeWallets,
-      user: selectedUserData,
+      user: selectedUserData ?? null,
       // Context switching
       switchToSafe,
       switchToEOA,

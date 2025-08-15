@@ -1,4 +1,5 @@
 "use server"
+export const dynamic = "force-dynamic"
 
 import { getAllRoles } from "@/db/role"
 import { auth } from "@/auth"
