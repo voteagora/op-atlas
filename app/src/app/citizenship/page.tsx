@@ -42,7 +42,7 @@ export default async function Page({
     await Promise.all([
       getUserById(userId),
       getCitizen({ type: CITIZEN_TYPES.user, id: userId }),
-      s8CitizenshipQualification(),
+      s8CitizenshipQualification(userId),
       checkCitizenshipLimit(),
     ])
 

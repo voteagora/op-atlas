@@ -68,7 +68,7 @@ function CitizenshipApplicationDialog({
   const { track } = useAnalytics()
 
   const { data: qualification, isLoading: isQualificationLoading } =
-    useCitizenQualification()
+    useCitizenQualification(userId)
   const { user } = useUser({ id: userId })
 
   const [selectedTime, setSelectedTime] = useState<TimeCommitment | undefined>(

@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { mainnet, optimism, optimismSepolia, sepolia } from "viem/chains"
 import { http } from "wagmi"
 
+import { SafeContextProvider } from "@/providers/SafeContextProvider"
+
 export const privyWagmiConfig = createConfig({
   chains: [mainnet, sepolia, optimismSepolia, optimism],
   transports: {
@@ -43,7 +45,11 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={privyWagmiConfig}>{children}</WagmiProvider>
+        <WagmiProvider config={privyWagmiConfig}>
+          <SafeContextProvider>
+            {children}
+          </SafeContextProvider>
+        </WagmiProvider>
       </QueryClientProvider>
     </PrivyProvider>
   )
