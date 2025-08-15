@@ -1,6 +1,6 @@
 "use server"
 
-import { Prisma, Project, PublishedContract } from "@prisma/client"
+import { KYCUser, Prisma, Project, PublishedContract } from "@prisma/client"
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
@@ -9,6 +9,7 @@ import {
   Oso_ProjectsByCollectionV1,
   Oso_ProjectsV1,
 } from "@/graphql/__generated__/types"
+import { sendKYCStartedEmail } from "@/lib/actions/emails"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -23,10 +24,10 @@ import {
   UserProjectsWithDetails,
   UserWithProjects,
 } from "@/lib/types"
+import { withChangelogTracking } from "@/lib/utils/changelog"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
-import { withChangelogTracking } from "@/lib/utils/changelog"
 
 async function getUserProjectsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -1878,6 +1879,13 @@ export async function addKYCTeamMembers({
         businessName: b.companyName,
       })),
     })
+
+    // Send transactional email to new KYC users
+    await Promise.all(
+      [...createdIndividuals, ...createdBusinesses].map((kycUser: KYCUser) =>
+        sendKYCStartedEmail(kycUser),
+      ),
+    )
 
     const allMembers = [...toAdd, ...createdIndividuals, ...createdBusinesses]
 
