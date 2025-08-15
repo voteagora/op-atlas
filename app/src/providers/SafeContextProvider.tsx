@@ -85,19 +85,19 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
       (safe) => safe.address.toLowerCase() === signerAddress.toLowerCase(),
     )
 
+    // If running inside the Safe app, switch immediately without API verification
+    if (isSafeEnv && safeContextValue.currentContext !== "SAFE") {
+      safeContextValue.switchToSafe(signerAddress)
+      return
+    }
+
+    // Otherwise, switch when the signer shows up in the fetched Safe list
     if (
-      (isSafeEnv || isSignerInList) &&
+      isSignerInList &&
       safeContextValue.currentContext !== "SAFE" &&
       !safeContextValue.selectedSafeWallet
     ) {
-      const trySwitch = async () => {
-        if (!isSignerInList) {
-          const info = await safeService.getSafeInfoByAddress(signerAddress)
-          if (!info) return
-        }
-        safeContextValue.switchToSafe(signerAddress)
-      }
-      trySwitch()
+      safeContextValue.switchToSafe(signerAddress)
     }
   }, [
     signerWallet?.address,
