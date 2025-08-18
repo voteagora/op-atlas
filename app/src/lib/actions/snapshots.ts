@@ -135,6 +135,10 @@ const createProjectMetadataAttestations = async ({
       })) ?? [],
   })
 
+  if (attestationsIds.length === 0) {
+    throw new Error("Failed to create attestations")
+  }
+
   // Update database
   const [snapshot] = await updateProjectMetadataDatabase({
     project,
