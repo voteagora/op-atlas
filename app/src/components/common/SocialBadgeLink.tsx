@@ -31,10 +31,24 @@ export default function SocialBadgeLink({
     })
   }
 
+  const normalizedLink = (href: string): string => {
+    if (!href.startsWith("@")) return href
+
+    switch (type) {
+      case "twitter":
+      case "X":
+        return `https://x.com/${href.slice(1)}`
+      case "farcaster":
+        return `https://farcaster.xyz/${href.slice(1)}`
+      default:
+        return href
+    }
+  }
+
   return (
     <div className="py-1 px-2.5 rounded-full bg-secondary text-sm font-medium flex items-center space-x-1">
       {icon}
-      <Link href={href} target={target} onClick={handleClick}>
+      <Link href={normalizedLink(href)} target={target} onClick={handleClick}>
         {text}
       </Link>
     </div>
