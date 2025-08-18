@@ -19,7 +19,6 @@ export interface EmailData {
 
 export interface EmailResponse {
   success: boolean
-  messageId?: string
   error?: string
 }
 
@@ -55,10 +54,7 @@ export const sendTransactionEmail = async (
       response.length > 0 &&
       response[0].status === "sent"
     ) {
-      return {
-        success: true,
-        messageId: response[0]._id,
-      }
+      return { success: true }
     }
 
     return {
@@ -74,69 +70,6 @@ export const sendTransactionEmail = async (
   }
 }
 
-export const sendKYCNudgeEmail = async (
-  userEmail: string,
-  userName?: string,
-): Promise<EmailResponse> => {
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #333; text-align: center;">Welcome to OP Atlas!</h1>
-        <p>Hi ${userName || "there"},</p>
-        <p>Thank you for joining our community. We're excited to have you on board!</p>
-        <p>To get started with your KYC verification, please complete the verification process.</p>
-        <p>Best regards,<br>The OP Atlas Team</p>
-    </div>
-  `
-
-  return sendTransactionEmail({
-    to: userEmail,
-    subject: "Welcome to OP Atlas - Complete Your KYC",
-    html,
-  })
-}
-
-export const sendKYCExpiredEmail = async (
-  userEmail: string,
-  userName?: string,
-): Promise<EmailResponse> => {
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #e74c3c; text-align: center;">KYC Verification Expired</h1>
-        <p>Hi ${userName || "there"},</p>
-        <p>Your KYC verification has expired. To continue using OP Atlas, please complete a new verification.</p>
-        <p>If you need assistance, please contact our support team.</p>
-        <p>Best regards,<br>The OP Atlas Team</p>
-    </div>
-  `
-
-  return sendTransactionEmail({
-    to: userEmail,
-    subject: "KYC Verification Expired - Action Required",
-    html,
-  })
-}
-
-export const sendKYCCompletedEmail = async (
-  userEmail: string,
-  userName?: string,
-): Promise<EmailResponse> => {
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #27ae60; text-align: center;">KYC Verification Completed!</h1>
-        <p>Hi ${userName || "there"},</p>
-        <p>Congratulations! Your KYC verification has been completed successfully.</p>
-        <p>You now have full access to all OP Atlas features.</p>
-        <p>Best regards,<br>The OP Atlas Team</p>
-    </div>
-  `
-
-  return sendTransactionEmail({
-    to: userEmail,
-    subject: "KYC Verification Completed - Welcome to OP Atlas",
-    html,
-  })
-}
-
 export const sendKYCStartedEmail = async (
   kycUser: KYCUser,
 ): Promise<EmailResponse> => {
@@ -145,18 +78,12 @@ export const sendKYCStartedEmail = async (
 
   // If inquiry link creation failed, return error instead of sending email
   if (!inquiryResult.success) {
-    return {
-      success: false,
-      messageId: undefined,
-    }
+    return { success: false }
   }
 
   // Ensure we have a valid inquiry URL
   if (!inquiryResult.inquiryUrl) {
-    return {
-      success: false,
-      messageId: undefined,
-    }
+    return { success: false }
   }
 
   const kycLink = inquiryResult.inquiryUrl
@@ -169,7 +96,7 @@ export const sendKYCStartedEmail = async (
         <p>In order to receive your OP tokens, you must complete KYC for your project.</p>
         <p><strong>To start your KYC process, click the link below:</strong></p>
         <div style="text-align: center; margin: 30px 0;">
-            <a href="${kycLink}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Start KYC Verification</a>
+            <a href="${kycLink}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">${kycLink}</a>
         </div>
         <p><strong>Important Notes:</strong></p>
         <ul>

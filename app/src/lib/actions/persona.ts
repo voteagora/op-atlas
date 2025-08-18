@@ -9,16 +9,14 @@ export interface PersonaInquiryLinkResponse {
   error?: string
 }
 
-/**
- * Create a Persona KYC inquiry and return a one-time link
- */
+const PERSONA_API_URL = "https://api.withpersona.com"
+
 export const createPersonaInquiryLink = async (
   kycUser: KYCUser,
 ): Promise<PersonaInquiryLinkResponse> => {
   try {
-    const PERSONA_API_URL = "https://app.withpersona.com"
     const PERSONA_API_KEY = process.env.PERSONA_API_KEY
-    const PERSONA_TEMPLATE_ID = process.env.PERSONA_TEMPLATE_ID
+    const PERSONA_INQUIRY_TEMPLATE_ID = process.env.PERSONA_INQUIRY_TEMPLATE_ID
 
     if (!PERSONA_API_KEY) {
       return {
@@ -27,7 +25,7 @@ export const createPersonaInquiryLink = async (
       }
     }
 
-    if (!PERSONA_TEMPLATE_ID) {
+    if (!PERSONA_INQUIRY_TEMPLATE_ID) {
       return {
         success: false,
         error: "Persona template ID not configured",
@@ -39,7 +37,7 @@ export const createPersonaInquiryLink = async (
       data: {
         type: "inquiry",
         attributes: {
-          "template-id": PERSONA_TEMPLATE_ID,
+          "inquiry-template-id": PERSONA_INQUIRY_TEMPLATE_ID,
           "reference-id": kycUser.id,
           "name-first": kycUser.firstName,
           "name-last": kycUser.lastName,
@@ -87,7 +85,7 @@ export const createPersonaInquiryLink = async (
     if (inquiryData.data?.id) {
       // Generate one-time link for the inquiry
       const linkResponse = await fetch(
-        `${PERSONA_API_URL}/api/v1/inquiries/${inquiryData.data.id}/one-time-link`,
+        `${PERSONA_API_URL}/api/v1/inquiries/${inquiryData.data.id}/generate-one-time-link`,
         {
           method: "POST",
           headers: {
@@ -95,16 +93,7 @@ export const createPersonaInquiryLink = async (
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify({
-            data: {
-              type: "one-time-link",
-              attributes: {
-                expires_at: new Date(
-                  Date.now() + 7 * 24 * 60 * 60 * 1000,
-                ).toISOString(), // 7 days from now
-              },
-            },
-          }),
+          body: JSON.stringify({}),
         },
       )
 
@@ -120,7 +109,7 @@ export const createPersonaInquiryLink = async (
       return {
         success: true,
         inquiryId: inquiryData.data.id,
-        inquiryUrl: linkData.data?.attributes?.url,
+        inquiryUrl: linkData.meta?.["one-time-link"],
       }
     }
 
