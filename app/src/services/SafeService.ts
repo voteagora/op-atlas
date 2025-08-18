@@ -35,8 +35,10 @@ export class SafeService {
       return
     }
     try {
+      const isDev = process.env.NEXT_PUBLIC_ENV === 'dev'
+      const chainId = isDev ? BigInt(11155420) : BigInt(10) // OP Sepolia vs OP Mainnet
       this.apiKit = new SafeApiKit({
-        chainId: BigInt(10),
+        chainId,
         apiKey: SAFE_API_KEY,
       })
     } catch (_e) {
