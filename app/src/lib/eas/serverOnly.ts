@@ -104,6 +104,7 @@ async function createMultiAttestations(
   }[],
 ): Promise<string[]> {
   if (attestations.length === 0) {
+    console.warn("No attestations to create")
     return []
   }
   if (attestations.length === 1) {
@@ -124,10 +125,10 @@ async function createMultiAttestations(
       return [uid]
     } catch (error) {
       console.error("Attestation failed", {
-        size: attestations.length,
-        error,
+        attestation: a,
+        error: error,
       })
-      return createMultiAttestations([a])
+      return []
     }
   }
 
@@ -170,8 +171,7 @@ async function createMultiAttestations(
   try {
     // Try to submit as one batched multiAttest call
     const tx = await eas.multiAttest(attestationRequests)
-    const uids = await tx.wait()
-    return uids
+    return await tx.wait()
   } catch (error) {
     // If it fails (gas/size/other constraint), split the input in half and recurse.
     console.warn("multiAttest failed, splitting batch:", {
@@ -310,13 +310,7 @@ export async function createApplicationAttestation({
     { name: "metadataUrl", value: ipfsUrl, type: "string" },
   ])
 
-  const attestationId = await createAttestation(
-    APPLICATION_SCHEMA_ID,
-    data,
-    projectId,
-  )
-
-  return attestationId
+  return await createAttestation(APPLICATION_SCHEMA_ID, data, projectId)
 }
 
 export async function createContractAttestations({
@@ -341,9 +335,7 @@ export async function createContractAttestations({
     farcasterId,
   })
 
-  const attestationIds = await createMultiAttestations(attestations)
-
-  return attestationIds
+  return await createMultiAttestations(attestations)
 }
 
 export async function createFullProjectSnapshotAttestations({
@@ -395,13 +387,11 @@ export async function createCitizenWalletChangeAttestation({
     { name: "oldCitizenUID", value: oldCitizenUID, type: "bytes32" },
   ])
 
-  const attestationId = await createAttestation(
+  return await createAttestation(
     CITIZEN_WALLET_CHANGE_SCHEMA_ID,
     data,
     newCitizenUID,
   )
-
-  return attestationId
 }
 
 export async function revokeContractAttestations(attestationIds: string[]) {
