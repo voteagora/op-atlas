@@ -73,15 +73,12 @@ export const sendTransactionEmail = async (
 export const sendKYCStartedEmail = async (
   kycUser: KYCUser,
 ): Promise<EmailResponse> => {
-  // Create Persona inquiry link
   const inquiryResult = await createPersonaInquiryLink(kycUser)
 
-  // If inquiry link creation failed, return error instead of sending email
   if (!inquiryResult.success) {
     return { success: false }
   }
 
-  // Ensure we have a valid inquiry URL
   if (!inquiryResult.inquiryUrl) {
     return { success: false }
   }

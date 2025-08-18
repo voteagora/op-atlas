@@ -37,6 +37,7 @@ export type PersonaInquiry = {
     "name-last": string
     "name-middle": string
     "email-address": string
+    "reference-id": string
   }
 }
 
@@ -49,6 +50,7 @@ export type PersonaCase = {
     "updated-at": string
     "started-at": string
     "resolved-at": string
+    "reference-id": string
     fields: {
       "business-name": {
         type: string
