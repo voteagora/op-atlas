@@ -32,6 +32,8 @@ export default function SocialBadgeLink({
   }
 
   const normalizedLink = (href: string): string => {
+    if (!href.startsWith("@")) return href
+
     switch (type) {
       case "twitter":
       case "X":
