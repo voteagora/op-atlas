@@ -1,17 +1,10 @@
 "use server"
 
-import {
-  EAS,
-  EIP712Response,
-  SchemaEncoder,
-} from "@ethereum-attestation-service/eas-sdk"
+import { EAS, EIP712Response, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk"
 import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
-import {
-  EAS_CONTRACT_ADDRESS,
-  OFFCHAIN_VOTE_SCHEMA_ID,
-} from "@/lib/eas/clientSafe"
+import { OFFCHAIN_VOTE_SCHEMA_ID } from "@/lib/eas/clientSafe"
 
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
@@ -66,7 +59,12 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
   throw new Error("EAS_SIGNER_PRIVATE_KEY is missing from env")
 }
 
-const eas = new EAS(EAS_CONTRACT_ADDRESS)
+const EAS_ADDRESS =
+  process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e" // Sepolia L1
+    : "0x4200000000000000000000000000000000000021" // Optimism Mainnet
+
+const eas = new EAS(EAS_ADDRESS)
 
 const provider = new ethers.AlchemyProvider(
   process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",

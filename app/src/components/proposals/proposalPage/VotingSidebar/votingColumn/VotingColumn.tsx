@@ -289,13 +289,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const votingActions = getVotingActions(
     !!session?.user?.id,
-    !!citizen,
+    true, // TEMP: bypass citizen registration gating for testing
     !!citizenEligibility?.eligible,
   )
 
   const canVote =
     !!session?.user?.id &&
-    !!citizen &&
     proposalData.status === ProposalStatus.ACTIVE &&
     !myVote
 
@@ -349,16 +348,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const createDelegatedAttestation = async (choices: string) => {
     if (!signer) throw new Error("Signer not ready")
-    if (!citizen?.address) {
-      throw new Error("User citizen address not available")
-    }
-    const connectedChainId = getChainId(privyWagmiConfig)
-    if (connectedChainId !== CHAIN_ID) {
+    const currentChainId = getChainId(privyWagmiConfig)
+    if (currentChainId !== CHAIN_ID) {
       await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
     }
+    // Re-hydrate provider and signer after chain switch to avoid network-changed errors
+    const rpcProvider = await connector?.getProvider({ chainId: CHAIN_ID })
+    const browserProvider = new ethers.BrowserProvider(rpcProvider as any)
+    const signerToUse = await browserProvider.getSigner()
 
     const eas = new EAS(EAS_CONTRACT_ADDRESS)
-    eas.connect(signer.provider!)
+    eas.connect(browserProvider)
     const delegated = await eas.getDelegated()
 
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
@@ -372,14 +372,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       { name: "params", value: args.choices, type: "string" },
     ])
 
-    const nonce = await eas.getNonce(signer.address as `0x${string}`)
+    const nonce = await eas.getNonce(signerToUse.address as `0x${string}`)
+
+    const refUID = (citizen?.attestationId as `0x${string}`) ??
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
 
     const delegateRequest = {
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
-      recipient: signer.address as `0x${string}`,
+      recipient: signerToUse.address as `0x${string}`,
       expirationTime: NO_EXPIRATION,
       revocable: false,
-      refUID: citizen.attestationId as `0x${string}`,
+      refUID,
       data: encodedData,
       value: BigInt(0),
       nonce,
@@ -388,29 +391,29 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const rawSignature = await delegated.signDelegatedAttestation(
       delegateRequest,
-      signer,
+      signerToUse,
     )
 
     return {
       data: encodedData,
       rawSignature: rawSignature,
-      signerAddress: signer.address as `0x${string}`,
+      signerAddress: signerToUse.address as `0x${string}`,
     }
   }
 
   const createMultisigWalletAttestation = async (choices: string) => {
     if (!signer) throw new Error("Signer not ready")
-    if (!citizen?.address) {
-      throw new Error("User citizen address not available")
-    }
 
-    const connectedChainId = getChainId(privyWagmiConfig)
-    if (connectedChainId !== CHAIN_ID) {
+    const currentChainId = getChainId(privyWagmiConfig)
+    if (currentChainId !== CHAIN_ID) {
       await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
     }
+    const rpcProvider = await connector?.getProvider({ chainId: CHAIN_ID })
+    const browserProvider = new ethers.BrowserProvider(rpcProvider as any)
+    const signerToUse = await browserProvider.getSigner()
 
     const eas = new EAS(EAS_CONTRACT_ADDRESS)
-    eas.connect(signer)
+    eas.connect(signerToUse)
 
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
 
@@ -423,13 +426,16 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       { name: "params", value: args.choices, type: "string" },
     ])
 
+    const refUID = (citizen?.attestationId as `0x${string}`) ??
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+
     const tx = await eas.attest({
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
       data: {
-        recipient: signer.address as `0x${string}`,
+        recipient: signerToUse.address as `0x${string}`,
         expirationTime: BigInt(0),
         revocable: false,
-        refUID: citizen.attestationId as `0x${string}`,
+        refUID,
         data: encodedData,
       },
     })
@@ -438,31 +444,36 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     return {
       attestationId: receipt,
-      signerAddress: signer.address as `0x${string}`,
+      signerAddress: signerToUse.address as `0x${string}`,
     }
   }
 
   const createSafeVoteTransaction = async (choices: string) => {
     if (!signer) throw new Error("Signer not ready")
-    if (!citizen?.address) {
-      throw new Error("User citizen address not available")
-    }
     if (!selectedSafeWallet) {
       throw new Error("No Safe wallet selected")
     }
 
-    const connectedChainId = getChainId(privyWagmiConfig)
-    // if (connectedChainId !== CHAIN_ID) {
-    //   await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
-    // }
-    const provider = await connector?.getProvider({
-      chainId: 10,
-    })
+    // In Safe App env, the provider cannot sign as an owner EOA
+    const isSafeEnv =
+      typeof window !== "undefined" &&
+      !!((window as any)?.ethereum?.isSafe || (window as any)?.ethereum?.isGnosisSafe)
+    if (isSafeEnv) {
+      throw new Error("Connect an owner EOA and switch to SAFE context to propose the transaction")
+    }
+
+    const currentChainId = getChainId(privyWagmiConfig)
+    if (currentChainId !== CHAIN_ID) {
+      await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
+    }
+    const rpcProvider = await connector?.getProvider({ chainId: CHAIN_ID })
+    const browserProvider = new ethers.BrowserProvider(rpcProvider as any)
+    const ownerSigner = await browserProvider.getSigner()
     // Initialize Safe SDK
     const safe = await safeService.initializeSafe(
       selectedSafeWallet.address,
-      signer,
-      provider,
+      ownerSigner,
+      browserProvider,
     )
     if (!safe) {
       throw new Error("Failed to initialize Safe SDK")
@@ -481,13 +492,16 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     ])
 
     // Create the attestation request structure that matches EAS.attest() parameters
+    const refUID = (citizen?.attestationId as `0x${string}`) ??
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+
     const attestRequest = {
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
       data: {
         recipient: selectedSafeWallet.address,
         expirationTime: BigInt(0), // No expiration
         revocable: false,
-        refUID: citizen.attestationId as `0x${string}`,
+        refUID,
         data: encodedData,
       },
     }
@@ -579,9 +593,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     setIsVoting(true)
 
     const castAndRecordVote = async () => {
-      if (!citizen?.attestationId) {
-        throw new Error("User is not a registered citizen")
-      }
+      // TEMP: bypass citizen attestation requirement for testing
 
       try {
         // const newActiveWallet = validateAddress()
