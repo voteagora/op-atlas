@@ -10,16 +10,14 @@ import { getRoleApplicationById, getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
 import { formatMMMd } from "@/lib/utils/date"
 
-interface pageProps {
-  roleId: string
-  applicationId: string
+type PageProps = {
+  params: { roleId: string; applicationId: string }
+  searchParams?: { [key: string]: string | string[] | undefined }
 }
 
 export async function generateMetadata({
   params,
-}: {
-  params: pageProps
-}): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
   const role = await getRoleById(parseInt(params.roleId))
   return {
     ...sharedMetadata,
@@ -32,7 +30,7 @@ export async function generateMetadata({
     },
   }
 }
-export default async function Page(params: pageProps) {
+export default async function Page({ params }: PageProps) {
   const [role, application] = await Promise.all([
     getRoleById(parseInt(params.roleId)),
     getRoleApplicationById(parseInt(params.applicationId)),
