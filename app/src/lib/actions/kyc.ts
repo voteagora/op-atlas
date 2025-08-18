@@ -149,6 +149,7 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
           "name-first": firstName,
           "name-last": lastName,
           "updated-at": updatedAt,
+          "reference-id": referenceId,
           status,
         },
       } = inquiry
@@ -171,6 +172,8 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
         email,
         parsedStatus,
         new Date(updatedAt),
+        status,
+        referenceId,
       )
     }),
   )
@@ -192,6 +195,7 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           },
           "updated-at": updatedAt,
           status,
+          "reference-id": referenceId,
         },
       } = c
 
@@ -212,6 +216,8 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
         email,
         parsedStatus,
         new Date(updatedAt),
+        status,
+        referenceId,
       )
     }),
   )
