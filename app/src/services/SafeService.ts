@@ -27,6 +27,7 @@ export interface SafeTransactionRequest {
 
 export class SafeService {
   private apiKit: SafeApiKit | null = null
+  private txServiceUrl: string | null = null
 
   private ensureApiKit(): void {
     if (this.apiKit) return
@@ -35,14 +36,20 @@ export class SafeService {
       return
     }
     try {
-      const isDev = process.env.NEXT_PUBLIC_ENV === 'dev'
+      const isDev = process.env.NEXT_PUBLIC_ENV === "dev"
       const chainId = isDev ? BigInt(11155420) : BigInt(10) // OP Sepolia vs OP Mainnet
+      const txServiceUrl = isDev
+        ? "https://transaction-optimism-sepolia.safe.optimism.io"
+        : "https://safe-transaction-optimism.safe.global"
       this.apiKit = new SafeApiKit({
         chainId,
         apiKey: SAFE_API_KEY,
-      })
+        txServiceUrl,
+      } as any)
+      this.txServiceUrl = txServiceUrl
     } catch (_e) {
       this.apiKit = null
+      this.txServiceUrl = null
     }
   }
   constructor() {
@@ -82,19 +89,19 @@ export class SafeService {
     try {
       // Get all Safe wallets owned by the signer
       const safesByOwner = await this.apiKit.getSafesByOwner(signerAddress)
-      
+
       const safeWallets: SafeWallet[] = []
-      
+
       for (const safeAddress of safesByOwner.safes) {
         try {
           const safeInfo = await this.apiKit.getSafeInfo(safeAddress)
-          
+
           safeWallets.push({
             address: safeAddress,
             threshold: Number(safeInfo.threshold),
             owners: safeInfo.owners,
             nonce: Number(safeInfo.nonce),
-            version: safeInfo.version || '1.3.0',
+            version: safeInfo.version || "1.3.0",
           })
         } catch (error) {
           console.warn(`Failed to fetch info for Safe ${safeAddress}:`, error)
@@ -103,8 +110,38 @@ export class SafeService {
 
       return safeWallets
     } catch (error) {
-      console.error('Error fetching Safe wallets:', error)
-      return []
+      console.error("Error fetching Safe wallets via SDK:", error)
+      // Fallback: fetch directly from Transaction Service
+      try {
+        if (!this.txServiceUrl) return []
+        const ownerUrl = `${this.txServiceUrl}/api/v1/owners/${signerAddress}/safes`
+        const ownerRes = await fetch(ownerUrl)
+        if (!ownerRes.ok) {
+          console.error("Owner safes fetch failed:", ownerRes.status, ownerRes.statusText)
+          return []
+        }
+        const ownerJson: any = await ownerRes.json()
+        const safes: string[] = ownerJson?.safes || []
+        const results: SafeWallet[] = []
+        for (const safeAddress of safes) {
+          try {
+            const infoRes = await fetch(`${this.txServiceUrl}/api/v1/safes/${safeAddress}`)
+            if (!infoRes.ok) continue
+            const info = await infoRes.json()
+            results.push({
+              address: safeAddress,
+              threshold: Number(info.threshold ?? 0),
+              owners: info.owners ?? [],
+              nonce: Number(info.nonce ?? 0),
+              version: info.version || "1.3.0",
+            })
+          } catch (_) {}
+        }
+        return results
+      } catch (fallbackError) {
+        console.error("Fallback fetch Safe wallets failed:", fallbackError)
+        return []
+      }
     }
   }
 
@@ -114,13 +151,13 @@ export class SafeService {
   async initializeSafe(
     safeAddress: string,
     signer: ethers.JsonRpcSigner,
-    provider: any
+    provider: any,
   ): Promise<Safe | null> {
     try {
       // Get the provider from the signer
 
       const signerAddress = await signer.getAddress()
-      
+
       // Initialize Safe SDK with provider and signer address
       const safeSdk = await Safe.init({
         provider,
@@ -136,7 +173,7 @@ export class SafeService {
 
       return safeSdk
     } catch (error) {
-      console.error('Error initializing Safe SDK:', error)
+      console.error("Error initializing Safe SDK:", error)
       return null
     }
   }
@@ -147,16 +184,14 @@ export class SafeService {
   async proposeTransaction(
     safe: Safe,
     senderAddress: string,
-    transaction: SafeTransactionRequest
+    transaction: SafeTransactionRequest,
   ): Promise<string | null> {
     this.ensureApiKit()
     if (!this.apiKit) {
-      throw new Error('Safe API kit not initialized')
+      throw new Error("Safe API kit not initialized")
     }
 
-    const nextNonce = await this.apiKit?.getNextNonce(
-      await safe.getAddress(),
-    )
+    const nextNonce = await this.apiKit?.getNextNonce(await safe.getAddress())
 
     try {
       // Create the transaction
@@ -193,7 +228,7 @@ export class SafeService {
 
       return safeTxHash
     } catch (error) {
-      console.error('Error proposing Safe transaction:', error)
+      console.error("Error proposing Safe transaction:", error)
       return null
     }
   }
@@ -205,7 +240,7 @@ export class SafeService {
     try {
       // Check if the address has code (is a contract)
       const code = await provider.getCode(address)
-      if (code === '0x') {
+      if (code === "0x") {
         return false
       }
 
