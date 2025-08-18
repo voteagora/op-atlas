@@ -16,6 +16,12 @@ import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import { formatMMMd } from "@/lib/utils/date"
 
+export const metadata = {
+  title: "Governance - OP Atlas",
+  description:
+    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+}
+
 export default async function Page({ params }: { params: { roleId: string } }) {
   const session = await auth()
   const userId = session?.user?.id
