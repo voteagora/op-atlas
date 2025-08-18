@@ -1,9 +1,9 @@
-"use server"
 export const dynamic = "force-dynamic"
 
-import { getAllRoles } from "@/db/role"
 import { auth } from "@/auth"
 import ProposalsPage from "@/components/proposals/proposalsPage/ProposalsPage"
+import { getAllRoles } from "@/db/role"
+
 import RolesPage from "./roles/components/RolesPage"
 
 export default async function Page() {
