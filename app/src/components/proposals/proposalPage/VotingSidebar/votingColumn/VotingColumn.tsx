@@ -682,12 +682,15 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         ) {
           const newActiveWallet = wallets.find(
             (wallet) =>
-              wallet.address?.toLowerCase() === citizen.address?.toLowerCase(),
+              wallet.address?.toLowerCase() ===
+              citizen?.address?.toLowerCase(),
           )
 
           if (!newActiveWallet) {
             throw new Error(
-              `Your governance wallet is not connected. Please sign out, and sign back in using ${citizen.address}.`,
+              `Your governance wallet is not connected. Please sign out, and sign back in using ${
+                citizen?.address || "your citizen address"
+              }.`,
             )
           } else {
             // setActiveWallet(newActiveWallet)
