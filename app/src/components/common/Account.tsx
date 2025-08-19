@@ -93,17 +93,29 @@ export const Account = () => {
         return
       }
       if (signerWallet?.address) {
-        // Prefer an on-chain bytecode check to avoid 404s against the Safe Tx Service for EOAs
+        // Prefer on-chain bytecode check; if mismatch/blocked, fallback to Safe Tx Service
         let connectedIsSafe = false
         try {
           const eip1193 =
             typeof window !== "undefined" ? (window as any)?.ethereum : null
           if (eip1193) {
-            const browserProvider = new ethers.BrowserProvider(eip1193)
-            connectedIsSafe = await safeService.isSafeWallet(
-              signerWallet.address,
-              browserProvider,
-            )
+            // If multiple providers are injected, prefer the Safe provider
+            const providers: any[] = (eip1193 as any).providers || []
+            const preferred = providers.find((p) => p?.isSafe || p?.isGnosisSafe) || eip1193
+            // Use raw request to avoid requiring accounts
+            const code: string = await preferred.request({
+              method: "eth_getCode",
+              params: [signerWallet.address, "latest"],
+            })
+            if (code && code !== "0x") {
+              connectedIsSafe = true
+            } else {
+              // Fallback to Safe Tx Service (Sepolia L1 in dev; OP in prod)
+              const info = await safeService.getSafeInfoByAddress(
+                signerWallet.address,
+              )
+              connectedIsSafe = !!info
+            }
           } else {
             const info = await safeService.getSafeInfoByAddress(
               signerWallet.address,
@@ -111,7 +123,13 @@ export const Account = () => {
             connectedIsSafe = !!info
           }
         } catch (_e) {
-          connectedIsSafe = false
+          // Final fallback: try Safe Tx Service
+          try {
+            const info = await safeService.getSafeInfoByAddress(
+              signerWallet.address,
+            )
+            connectedIsSafe = !!info
+          } catch {}
         }
         if (mounted) setIsSafeConnected(connectedIsSafe)
         if (mounted) setHasDetectedSafe(true)
