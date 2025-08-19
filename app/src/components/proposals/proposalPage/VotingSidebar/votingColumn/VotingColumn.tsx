@@ -289,7 +289,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const votingActions = getVotingActions(
     !!session?.user?.id,
-    true, // TEMP: bypass citizen registration gating for testing
+    !!citizen,
     !!citizenEligibility?.eligible,
   )
 
@@ -609,8 +609,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     setIsVoting(true)
 
     const castAndRecordVote = async () => {
-      // TEMP: bypass citizen attestation requirement for testing
-
+      let skipInvalidate = false
       try {
         // const newActiveWallet = validateAddress()
         // if (newActiveWallet) {
@@ -629,6 +628,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           const attestationData = await createSafeVoteTransaction(choices)
           signerAddress = attestationData.signerAddress
           attestationId = attestationData.attestationId
+          // Do not invalidate myVote: the Safe tx is only proposed; there is no vote recorded until execution
+          skipInvalidate = true
         } else if (isSmartContract) {
           // Smart contract wallet (non-Safe) voting
           const attestationData = await createMultisigWalletAttestation(choices)
@@ -722,7 +723,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)
-        invalidateMyVote()
+        if (!skipInvalidate) {
+          invalidateMyVote()
+        }
       }
     }
 
