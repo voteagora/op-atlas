@@ -115,7 +115,8 @@ export const useSafeContext = ({
     setState((prev) => ({
       ...prev,
       currentContext: "EOA",
-      selectedSafeWallet: null,
+      // Keep last selectedSafeWallet so the Safe block remains available to switch back quickly
+      selectedSafeWallet: prev.selectedSafeWallet,
       error: null,
     }))
     if (signerWallet?.address) {
@@ -130,7 +131,7 @@ export const useSafeContext = ({
     try {
       if (typeof window !== "undefined") {
         window.localStorage.setItem("atlas_wallet_context", "EOA")
-        window.localStorage.removeItem("atlas_selected_safe_address")
+        // Do not remove last selected safe address; keep it to render the Safe block
       }
     } catch (_e) {}
   }, [signerWallet?.address])

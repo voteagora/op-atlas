@@ -355,14 +355,11 @@ export const Account = () => {
           {/* Current EOA Wallet */}
               {(() => {
                 // Hide EOA only when the CONNECTED account is a Safe (Safe app or signer equals Safe)
-                const sameAsSelectedSafe =
-                  !!(
-                    selectedSafeWallet?.address &&
-                    signerWallet?.address &&
-                    selectedSafeWallet.address.toLowerCase() ===
-                      signerWallet.address.toLowerCase()
-                  )
-                const shouldHideEOA = isSafeEnv || (isSafeConnected && sameAsSelectedSafe)
+                // Hide EOA when in Safe App env, or when API confirms connected is a Safe,
+                // or when signer matches the last persisted Safe address
+                const lastSafe = (typeof window !== 'undefined') ? window.localStorage.getItem('atlas_selected_safe_address') : null
+                const signerIsPersistedSafe = !!(lastSafe && signerWallet?.address && lastSafe.toLowerCase() === signerWallet.address.toLowerCase())
+                const shouldHideEOA = isSafeEnv || isSafeConnected || signerIsPersistedSafe
 
             if (shouldHideEOA) return null
 
@@ -397,14 +394,17 @@ export const Account = () => {
 
           {/* Safe Wallets */}
           {(() => {
-            const safesToRender =
-              availableSafeWallets.length > 0
-                ? availableSafeWallets
-                : selectedSafeWallet
-                ? [selectedSafeWallet]
-                : isSafeConnected && signerWallet?.address
-                ? ([{ address: signerWallet.address }] as any)
-                : []
+            const safesToRender = (() => {
+              if (availableSafeWallets.length > 0) return availableSafeWallets
+              if (selectedSafeWallet) return [selectedSafeWallet]
+              if (isSafeConnected && signerWallet?.address) return ([{ address: signerWallet.address }] as any)
+              // Persisted last-safe fallback to avoid disappearing block
+              if (typeof window !== 'undefined') {
+                const last = window.localStorage.getItem('atlas_selected_safe_address')
+                if (last) return ([{ address: last }] as any)
+              }
+              return []
+            })()
 
             if (safesToRender.length === 0) return null
 
