@@ -471,6 +471,20 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     const rpcProvider = await connector?.getProvider({ chainId: SAFE_CHAIN_ID })
     const browserProvider = new ethers.BrowserProvider(rpcProvider as any)
     const ownerSigner = await browserProvider.getSigner()
+    // Ensure the current EOA is an owner of the selected Safe
+    const safeInfo = await safeService.getSafeInfoByAddress(
+      selectedSafeWallet.address,
+    )
+    const isOwner = (safeInfo?.owners || [])
+      .map((o) => o.toLowerCase())
+      .includes((ownerSigner.address as string).toLowerCase())
+    if (!isOwner) {
+      throw new Error(
+        `Connect a Safe owner EOA to propose the transaction. Current: ${ownerSigner.address}. Owners: ${
+          safeInfo?.owners?.join(", ") || "unknown"
+        }`,
+      )
+    }
     // Initialize Safe SDK
     const safe = await safeService.initializeSafe(
       selectedSafeWallet.address,
@@ -523,7 +537,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const txHash = await safeService.proposeTransaction(
       safe,
-      signer.address as `0x${string}`,
+      (ownerSigner.address as `0x${string}`),
       txData,
     )
     if (!txHash) {
