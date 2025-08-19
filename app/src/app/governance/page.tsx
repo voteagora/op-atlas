@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic"
-
 import { auth } from "@/auth"
 import ProposalsPage from "@/components/proposals/proposalsPage/ProposalsPage"
 import { getAllRoles } from "@/db/role"
