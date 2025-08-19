@@ -119,7 +119,7 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
         // If signer is not a Safe and context remains SAFE without a selected Safe, correct to EOA
         if (
           !info &&
-          safeContextValue.currentContext === "SAFE" &&
+          safeContextValue.currentContext !== "EOA" &&
           !safeContextValue.selectedSafeWallet
         ) {
           // only adjust on initial connect to avoid overriding user action
