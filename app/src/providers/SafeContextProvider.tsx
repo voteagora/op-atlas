@@ -98,7 +98,27 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
       !safeContextValue.selectedSafeWallet
     ) {
       safeContextValue.switchToSafe(signerAddress)
+      return
     }
+
+    // Fallback: if not inside Safe app and list is not yet populated, but the signer is a Safe per service, switch now
+    const tryServiceDetect = async () => {
+      if (
+        safeContextValue.currentContext === "SAFE" ||
+        safeContextValue.selectedSafeWallet ||
+        isSignerInList ||
+        isSafeEnv
+      )
+        return
+      try {
+        const info = await safeService.getSafeInfoByAddress(signerAddress)
+        if (info) {
+          safeContextValue.switchToSafe(signerAddress)
+        }
+      } catch {}
+    }
+
+    tryServiceDetect()
   }, [
     signerWallet?.address,
     safeContextValue.availableSafeWallets,
