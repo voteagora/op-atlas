@@ -629,7 +629,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             attestationData.data,
             attestationData.rawSignature.signature,
             signerAddress,
-            citizen.attestationId,
+            (citizen?.attestationId as `0x${string}`) ??
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
           )
         }
 
