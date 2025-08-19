@@ -7,6 +7,7 @@ import {
   usePrivy,
   User as PrivyUser,
 } from "@privy-io/react-auth"
+import { ethers } from "ethers"
 import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -77,7 +78,9 @@ export const Account = () => {
   // Robust detection: mark connected account as Safe if flag present or API confirms address is a Safe
   const [isSafeConnected, setIsSafeConnected] = useState(false)
   const [hasDetectedSafe, setHasDetectedSafe] = useState(false)
-  const [savedPreferredContext, setSavedPreferredContext] = useState<"SAFE" | "EOA" | null>(null)
+  const [savedPreferredContext, setSavedPreferredContext] = useState<
+    "SAFE" | "EOA" | null
+  >(null)
   const [isInitialResolving, setIsInitialResolving] = useState(true)
   const [isMenuReady, setIsMenuReady] = useState(false)
 
@@ -90,8 +93,27 @@ export const Account = () => {
         return
       }
       if (signerWallet?.address) {
-        const info = await safeService.getSafeInfoByAddress(signerWallet.address)
-        if (mounted) setIsSafeConnected(!!info)
+        // Prefer an on-chain bytecode check to avoid 404s against the Safe Tx Service for EOAs
+        let connectedIsSafe = false
+        try {
+          const eip1193 =
+            typeof window !== "undefined" ? (window as any)?.ethereum : null
+          if (eip1193) {
+            const browserProvider = new ethers.BrowserProvider(eip1193)
+            connectedIsSafe = await safeService.isSafeWallet(
+              signerWallet.address,
+              browserProvider,
+            )
+          } else {
+            const info = await safeService.getSafeInfoByAddress(
+              signerWallet.address,
+            )
+            connectedIsSafe = !!info
+          }
+        } catch (_e) {
+          connectedIsSafe = false
+        }
+        if (mounted) setIsSafeConnected(connectedIsSafe)
         if (mounted) setHasDetectedSafe(true)
       } else if (mounted) {
         setIsSafeConnected(false)
@@ -134,12 +156,10 @@ export const Account = () => {
 
     const safeResolved =
       currentContext === "SAFE" &&
-      (
-        !!selectedSafeWallet ||
+      (!!selectedSafeWallet ||
         availableSafeWallets.length > 0 ||
         // When inside Safe app, consider resolved once signer is known
-        (isSafeEnv && !!signerWallet?.address)
-      )
+        (isSafeEnv && !!signerWallet?.address))
 
     const eoaResolved = !!signerWallet?.address && !isSafeConnected
 
@@ -295,11 +315,15 @@ export const Account = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger
-          className={`focus:outline-none focus:opacity-80 ${!isMenuReady ? "pointer-events-none" : ""}`}
+          className={`focus:outline-none focus:opacity-80 ${
+            !isMenuReady ? "pointer-events-none" : ""
+          }`}
         >
-          <div className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${
-            !isMenuReady ? "bg-gray-300" : "bg-background hover:bg-secondary"
-          } h-10 px-4 py-2 gap-x-2.5 text-sm font-medium relative`}>
+          <div
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${
+              !isMenuReady ? "bg-gray-300" : "bg-background hover:bg-secondary"
+            } h-10 px-4 py-2 gap-x-2.5 text-sm font-medium relative`}
+          >
             {!isMenuReady ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -323,12 +347,10 @@ export const Account = () => {
                 <span className="hidden sm:inline">
                   {currentContext === "SAFE"
                     ? truncateAddress(
-                        (
-                          currentAddress ||
+                        (currentAddress ||
                           selectedSafeWallet?.address ||
                           signerWallet?.address ||
-                          "0x"
-                        ) as `0x${string}`,
+                          "0x") as `0x${string}`,
                       )
                     : username}
                 </span>
@@ -353,13 +375,21 @@ export const Account = () => {
           </Link>
 
           {/* Current EOA Wallet */}
-              {(() => {
-                // Hide EOA only when the CONNECTED account is a Safe (Safe app or signer equals Safe)
-                // Hide EOA when in Safe App env, or when API confirms connected is a Safe,
-                // or when signer matches the last persisted Safe address
-                const lastSafe = (typeof window !== 'undefined') ? window.localStorage.getItem('atlas_selected_safe_address') : null
-                const signerIsPersistedSafe = !!(lastSafe && signerWallet?.address && lastSafe.toLowerCase() === signerWallet.address.toLowerCase())
-                const shouldHideEOA = isSafeEnv || isSafeConnected || signerIsPersistedSafe
+          {(() => {
+            // Hide EOA only when the CONNECTED account is a Safe (Safe app or signer equals Safe)
+            // Hide EOA when in Safe App env, or when API confirms connected is a Safe,
+            // or when signer matches the last persisted Safe address
+            const lastSafe =
+              typeof window !== "undefined"
+                ? window.localStorage.getItem("atlas_selected_safe_address")
+                : null
+            const signerIsPersistedSafe = !!(
+              lastSafe &&
+              signerWallet?.address &&
+              lastSafe.toLowerCase() === signerWallet.address.toLowerCase()
+            )
+            const shouldHideEOA =
+              isSafeEnv || isSafeConnected || signerIsPersistedSafe
 
             if (shouldHideEOA) return null
 
@@ -380,13 +410,18 @@ export const Account = () => {
                     <span className="text-sm font-medium">EOA Wallet</span>
                     <span className="text-xs text-muted-foreground">
                       {signerWallet?.address
-                        ? `${signerWallet.address.slice(0, 6)}...${signerWallet.address.slice(-4)}`
+                        ? `${signerWallet.address.slice(
+                            0,
+                            6,
+                          )}...${signerWallet.address.slice(-4)}`
                         : "Not connected"}
                     </span>
                   </div>
                 </div>
                 {currentContext === "EOA" && (
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Active</span>
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                    Active
+                  </span>
                 )}
               </DropdownMenuItem>
             )
@@ -397,11 +432,14 @@ export const Account = () => {
             const safesToRender = (() => {
               if (availableSafeWallets.length > 0) return availableSafeWallets
               if (selectedSafeWallet) return [selectedSafeWallet]
-              if (isSafeConnected && signerWallet?.address) return ([{ address: signerWallet.address }] as any)
+              if (isSafeConnected && signerWallet?.address)
+                return [{ address: signerWallet.address }] as any
               // Persisted last-safe fallback to avoid disappearing block
-              if (typeof window !== 'undefined') {
-                const last = window.localStorage.getItem('atlas_selected_safe_address')
-                if (last) return ([{ address: last }] as any)
+              if (typeof window !== "undefined") {
+                const last = window.localStorage.getItem(
+                  "atlas_selected_safe_address",
+                )
+                if (last) return [{ address: last }] as any
               }
               return []
             })()
@@ -436,13 +474,17 @@ export const Account = () => {
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">Safe Wallet</span>
                         <span className="text-xs text-muted-foreground">
-                          {`${safeWallet.address.slice(0, 6)}...${safeWallet.address.slice(-4)}`}
+                          {`${safeWallet.address.slice(
+                            0,
+                            6,
+                          )}...${safeWallet.address.slice(-4)}`}
                         </span>
                       </div>
                     </div>
                     {currentContext === "SAFE" &&
                       (selectedSafeWallet?.address === safeWallet.address ||
-                        (!selectedSafeWallet && signerWallet?.address === safeWallet.address)) && (
+                        (!selectedSafeWallet &&
+                          signerWallet?.address === safeWallet.address)) && (
                         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                           Active
                         </span>

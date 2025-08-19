@@ -462,18 +462,20 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       throw new Error("Connect an owner EOA and switch to SAFE context to propose the transaction")
     }
 
+    // Use Safe chain (OP Sepolia in dev, OP Mainnet in prod) for Safe SDK
+    const SAFE_CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155420 : 10
     const currentChainId = getChainId(privyWagmiConfig)
-    if (currentChainId !== CHAIN_ID) {
-      await switchChain(privyWagmiConfig, { chainId: CHAIN_ID })
+    if (currentChainId !== SAFE_CHAIN_ID) {
+      await switchChain(privyWagmiConfig, { chainId: SAFE_CHAIN_ID })
     }
-    const rpcProvider = await connector?.getProvider({ chainId: CHAIN_ID })
+    const rpcProvider = await connector?.getProvider({ chainId: SAFE_CHAIN_ID })
     const browserProvider = new ethers.BrowserProvider(rpcProvider as any)
     const ownerSigner = await browserProvider.getSigner()
     // Initialize Safe SDK
     const safe = await safeService.initializeSafe(
       selectedSafeWallet.address,
       ownerSigner,
-      browserProvider,
+      rpcProvider as any,
     )
     if (!safe) {
       throw new Error("Failed to initialize Safe SDK")
