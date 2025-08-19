@@ -1,18 +1,36 @@
+import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/apply/[applicationId]/components/AnalyticsTracker"
 import { CopyForumTextButton } from "@/app/governance/roles/[roleId]/apply/[applicationId]/components/CopyForumTextButton"
+import { sharedMetadata } from "@/app/shared-metadata"
 import { UserAvatar } from "@/components/common/UserAvatar"
 import { getOrganization } from "@/db/organizations"
 import { getRoleApplicationById, getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
 import { formatMMMd } from "@/lib/utils/date"
 
-export default async function Page({
-  params,
-}: {
+type PageProps = {
   params: { roleId: string; applicationId: string }
-}) {
+  searchParams?: { [key: string]: string | string[] | undefined }
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const role = await getRoleById(parseInt(params.roleId))
+  return {
+    ...sharedMetadata,
+    title: `Governance: ${role?.title ?? ""} | Application - OP Atlas`,
+    description: role?.description,
+    openGraph: {
+      ...sharedMetadata.openGraph,
+      title: `Governance: ${role?.title ?? ""} | Application - OP Atlas`,
+      description: role?.description?.slice(0, 240) || undefined,
+    },
+  }
+}
+export default async function Page({ params }: PageProps) {
   const [role, application] = await Promise.all([
     getRoleById(parseInt(params.roleId)),
     getRoleApplicationById(parseInt(params.applicationId)),

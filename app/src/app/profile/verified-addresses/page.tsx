@@ -1,8 +1,15 @@
+import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
 
 import { VerifiedAddressesContent } from "./content"
+
+export const metadata: Metadata = {
+  title: "Profile Verified Addresses - OP Atlas",
+  description:
+    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+}
 
 export default async function Page() {
   const session = await auth()
