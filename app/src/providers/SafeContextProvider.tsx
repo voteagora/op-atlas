@@ -114,6 +114,16 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
         const info = await safeService.getSafeInfoByAddress(signerAddress)
         if (info) {
           safeContextValue.switchToSafe(signerAddress)
+          return
+        }
+        // If signer is not a Safe and context remains SAFE without a selected Safe, correct to EOA
+        if (
+          !info &&
+          safeContextValue.currentContext === "SAFE" &&
+          !safeContextValue.selectedSafeWallet
+        ) {
+          // only adjust on initial connect to avoid overriding user action
+          safeContextValue.switchToEOA()
         }
       } catch {}
     }
