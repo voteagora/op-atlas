@@ -164,9 +164,6 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
     inquiries.map(async (inquiry) => {
       const {
         attributes: {
-          "email-address": email,
-          "name-first": firstName,
-          "name-last": lastName,
           "updated-at": updatedAt,
           "reference-id": referenceId,
           status,
