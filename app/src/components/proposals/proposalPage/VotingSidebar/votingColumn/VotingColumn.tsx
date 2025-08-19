@@ -299,7 +299,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     !myVote
 
   const { wallets } = useWallets()
-  const signer = useEthersSigner({ chainId: 10 })
+  const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
   const { currentContext, selectedSafeWallet } = useWallet()
