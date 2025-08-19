@@ -15,6 +15,26 @@ import {
 import { getRoleApplications, getRoleById } from "@/db/role"
 import { formatMMMd } from "@/lib/utils/date"
 import { RoleDates } from "./components/RoleDates"
+import { Metadata } from "next"
+import { sharedMetadata } from "@/app/shared-metadata"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { roleId: string }
+}): Promise<Metadata> {
+  const role = await getRoleById(parseInt(params.roleId))
+  return {
+    ...sharedMetadata,
+    title: `Governance: ${role?.title ?? ""} - OP Atlas`,
+    description: role?.description,
+    openGraph: {
+      ...sharedMetadata.openGraph,
+      title: `Governance: ${role?.title ?? ""} - OP Atlas`,
+      description: role?.description?.slice(0, 240) || undefined,
+    },
+  }
+}
 
 export default async function Page({ params }: { params: { roleId: string } }) {
   const role = await getRoleById(parseInt(params.roleId))

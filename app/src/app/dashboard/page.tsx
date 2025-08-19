@@ -11,6 +11,12 @@ import {
   getProjects,
 } from "@/lib/actions/projects"
 
+export const metadata = {
+  title: "Dashboard - OP Atlas",
+  description:
+    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+}
+
 export default async function Page() {
   const session = await auth()
   const userId = session?.user?.id
