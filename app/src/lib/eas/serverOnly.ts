@@ -4,8 +4,8 @@ import {
   EAS,
   EIP712Response,
   SchemaEncoder,
+  Signature,
 } from "@ethereum-attestation-service/eas-sdk"
-import { Signature } from "@ethereum-attestation-service/eas-sdk"
 import { ethers, Wallet } from "ethers"
 
 import {
@@ -102,23 +102,92 @@ async function createMultiAttestations(
     data: string
     refUID?: string
   }[],
-) {
-  const tx = await eas.multiAttest(
-    attestations.map((a) => ({
-      schema: a.schema,
-      data: [
-        {
+): Promise<string[]> {
+  if (attestations.length === 0) {
+    console.warn("No attestations to create")
+    return []
+  }
+  if (attestations.length === 1) {
+    // Single-attest fallback
+    const [a] = attestations
+    try {
+      const tx = await eas.attest({
+        schema: a.schema,
+        data: {
           recipient: "0x0000000000000000000000000000000000000000",
           expirationTime: BigInt(0),
           revocable: true,
           data: a.data,
           refUID: a.refUID,
         },
-      ],
-    })),
-  )
+      })
+      const uid = await tx.wait()
+      return [uid]
+    } catch (error) {
+      console.error("Attestation failed", {
+        attestation: a,
+        error: error,
+      })
+      return []
+    }
+  }
 
-  return await tx.wait()
+  // Group by schema to reduce calldata and improve gas efficiency
+  const grouped = new Map<
+    string,
+    {
+      schema: string
+      data: {
+        recipient: string
+        expirationTime: bigint
+        revocable: boolean
+        data: string
+        refUID?: string
+      }[]
+    }
+  >()
+
+  // For each unique schema value, it checks if grouped already has a bucket.
+  for (const a of attestations) {
+    // if not, create a new bucket
+    if (!grouped.has(a.schema)) {
+      grouped.set(a.schema, {
+        schema: a.schema,
+        data: [],
+      })
+    }
+    // Add the attestation to the bucket
+    grouped.get(a.schema)!.data.push({
+      recipient: "0x0000000000000000000000000000000000000000",
+      expirationTime: BigInt(0),
+      revocable: true,
+      data: a.data,
+      refUID: a.refUID,
+    })
+  }
+
+  const attestationRequests = Array.from(grouped.values())
+
+  try {
+    // Try to submit as one batched multiAttest call
+    const tx = await eas.multiAttest(attestationRequests)
+    return await tx.wait()
+  } catch (error) {
+    // If it fails (gas/size/other constraint), split the input in half and recurse.
+    console.warn("multiAttest failed, splitting batch:", {
+      size: attestations.length,
+    })
+
+    const mid = Math.floor(attestations.length / 2)
+    const left = attestations.slice(0, mid)
+    const right = attestations.slice(mid)
+
+    // Recurse sequentially to avoid nonce/race issues
+    const leftUids = await createMultiAttestations(left)
+    const rightUids = await createMultiAttestations(right)
+
+    return leftUids.concat(rightUids)
+  }
 }
 
 async function revokeMultiAttestations(
@@ -241,13 +310,7 @@ export async function createApplicationAttestation({
     { name: "metadataUrl", value: ipfsUrl, type: "string" },
   ])
 
-  const attestationId = await createAttestation(
-    APPLICATION_SCHEMA_ID,
-    data,
-    projectId,
-  )
-
-  return attestationId
+  return await createAttestation(APPLICATION_SCHEMA_ID, data, projectId)
 }
 
 export async function createContractAttestations({
@@ -272,9 +335,7 @@ export async function createContractAttestations({
     farcasterId,
   })
 
-  const attestationIds = await createMultiAttestations(attestations)
-
-  return attestationIds
+  return await createMultiAttestations(attestations)
 }
 
 export async function createFullProjectSnapshotAttestations({
@@ -326,13 +387,11 @@ export async function createCitizenWalletChangeAttestation({
     { name: "oldCitizenUID", value: oldCitizenUID, type: "bytes32" },
   ])
 
-  const attestationId = await createAttestation(
+  return await createAttestation(
     CITIZEN_WALLET_CHANGE_SCHEMA_ID,
     data,
     newCitizenUID,
   )
-
-  return attestationId
 }
 
 export async function revokeContractAttestations(attestationIds: string[]) {
@@ -563,8 +622,6 @@ export async function createDelegatedVoteAttestation(
     throw error
   }
 }
-
-
 
 export const validateSignatureAddressIsValid = async (
   response: EIP712Response<any, any>,
