@@ -10,36 +10,17 @@ export async function updateKYCUserStatus(
   personaStatus: string,
   referenceId?: string,
 ) {
+  if (!referenceId) {
+    throw new Error("Reference ID is required for KYC user status update")
+  }
+
   const result = await prisma.$queryRaw<KYCUser[]>`
-    WITH exact_match AS (
-      SELECT id, 0 as name_similarity
-      FROM "KYCUser" 
-      WHERE ${referenceId ? `id = ${referenceId}` : `FALSE`}
-    ),
-    fuzzy_match AS (
-      SELECT id, difference(lower(unaccent("firstName") || ' ' || unaccent("lastName")), lower(unaccent(${name}))) as name_similarity
-      FROM "KYCUser" 
-      WHERE "email" = ${email.toLowerCase()}
-      AND ${referenceId ? `id != ${referenceId}` : `TRUE`}
-      ORDER BY name_similarity DESC
-      LIMIT 1
-    ),
-    combined_matches AS (
-      SELECT * FROM exact_match
-      UNION ALL
-      SELECT * FROM fuzzy_match
-      WHERE NOT EXISTS (SELECT 1 FROM exact_match)
-    )
     UPDATE "KYCUser" SET
       "status" = ${status}::"KYCStatus",
       "personaStatus" = ${personaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE EXISTS (
-      SELECT 1 FROM combined_matches 
-      WHERE combined_matches.id = "KYCUser".id
-      AND (combined_matches.name_similarity = 0 OR combined_matches.name_similarity > 2)
-    )
+    WHERE id = ${referenceId}
     RETURNING *;
   `
 
@@ -54,36 +35,17 @@ export async function updateKYBUserStatus(
   personaStatus: string,
   referenceId?: string,
 ) {
+  if (!referenceId) {
+    throw new Error("Reference ID is required for KYB user status update")
+  }
+
   const result = await prisma.$queryRaw<KYCUser[]>`
-    WITH exact_match AS (
-      SELECT id, 0 as name_similarity
-      FROM "KYCUser" 
-      WHERE ${referenceId ? `id = ${referenceId}` : `FALSE`}
-    ),
-    fuzzy_match AS (
-      SELECT id, difference(lower(unaccent("businessName")), lower(unaccent(${name}))) as name_similarity
-      FROM "KYCUser" 
-      WHERE "email" = ${email.toLowerCase()} AND "businessName" IS NOT NULL
-      AND ${referenceId ? `id != ${referenceId}` : `TRUE`}
-      ORDER BY name_similarity DESC
-      LIMIT 1
-    ),
-    combined_matches AS (
-      SELECT * FROM exact_match
-      UNION ALL
-      SELECT * FROM fuzzy_match
-      WHERE NOT EXISTS (SELECT 1 FROM exact_match)
-    )
     UPDATE "KYCUser" SET
       "status" = ${status}::"KYCStatus",
       "personaStatus" = ${personaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE EXISTS (
-      SELECT 1 FROM combined_matches 
-      WHERE combined_matches.id = "KYCUser".id
-      AND (combined_matches.name_similarity = 0 OR combined_matches.name_similarity > 2)
-    )
+    WHERE id = ${referenceId}
     RETURNING *;
   `
 
