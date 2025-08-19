@@ -739,7 +739,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             }
           }}
           onVoteSubmit={(vote) => {
-            track("Citizen Voting Questionnaire Submitted", { vote })
+            track("Citizen Voting Questionnaire Submitted", { vote: vote })
             setShowVoteQuestionnaire(false)
             setQuestionnaireWasCancelled(false) // User submitted
             setHasSubmittedVote(true) // Mark that the user has submitted a vote
