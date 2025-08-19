@@ -83,7 +83,19 @@ export const createProjectSnapshot = async (projectId: string) => {
       error: null,
     }
   } catch (error) {
-    console.error("Error creating snapshot", error)
+    const errorType = error instanceof Error ? error.name : "UnknownError"
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorCode = errorMessage.match(/0x[a-fA-F0-9]+/)?.[0] ?? ""
+
+    const errorDetails = {
+      errorOrigination: "createProjectSnapshot",
+      errorType,
+      errorMessage,
+      errorCode,
+      error: error,
+    }
+    console.error("Error creating snapshot", errorDetails)
+
     return {
       error,
     }
@@ -122,6 +134,10 @@ const createProjectMetadataAttestations = async ({
         verificationChainId: c.verificationChainId || c.chainId,
       })) ?? [],
   })
+
+  if (attestationsIds.length === 0) {
+    throw new Error("Failed to create attestations")
+  }
 
   // Update database
   const [snapshot] = await updateProjectMetadataDatabase({
