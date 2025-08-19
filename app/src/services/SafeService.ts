@@ -265,18 +265,19 @@ export class SafeService {
     try {
       // Check if the address has code (is a contract)
       const code = await provider.getCode(address)
-      if (code === "0x") {
-        return false
-      }
+      if (code === "0x") return false
 
-      // Try to get Safe info to verify it's actually a Safe
+      // Best-effort verification via API if available; otherwise consider contract as Safe for UI purposes
       this.ensureApiKit()
       if (this.apiKit) {
-        await this.apiKit.getSafeInfo(address)
-        return true
+        try {
+          await this.apiKit.getSafeInfo(address)
+          return true
+        } catch {
+          // ignore and fallback to contract heuristics
+        }
       }
-
-      return false
+      return true
     } catch (error) {
       return false
     }

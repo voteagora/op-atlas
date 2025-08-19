@@ -152,7 +152,7 @@ export const Account = () => {
       // If running inside Safe app, force SAFE to avoid spinner hanging waiting for API
       isSafeEnv ||
       savedPreferredContext === "SAFE" ||
-      (isSafeConnected && savedPreferredContext !== "EOA")
+      isSafeConnected
 
     const safeResolved =
       currentContext === "SAFE" &&
@@ -161,7 +161,7 @@ export const Account = () => {
         // When inside Safe app, consider resolved once signer is known
         (isSafeEnv && !!signerWallet?.address))
 
-    const eoaResolved = !!signerWallet?.address && !isSafeConnected
+    const eoaResolved = !!signerWallet?.address && !(isSafeEnv || isSafeConnected)
 
     const uiStableCandidate = mustResolveAsSafe ? safeResolved : eoaResolved
 
