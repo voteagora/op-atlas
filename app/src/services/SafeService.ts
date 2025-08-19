@@ -37,9 +37,10 @@ export class SafeService {
     }
     try {
       const isDev = process.env.NEXT_PUBLIC_ENV === "dev"
-      const chainId = isDev ? BigInt(11155420) : BigInt(10) // OP Sepolia vs OP Mainnet
+      // Dev aligns to Sepolia L1 (EAS on Sepolia L1), Prod to OP Mainnet
+      const chainId = isDev ? BigInt(11155111) : BigInt(10)
       const txServiceUrlRoot = isDev
-        ? "https://transaction-optimism-sepolia.safe.optimism.io"
+        ? "https://safe-transaction-sepolia.safe.global"
         : "https://safe-transaction-optimism.safe.global"
       const txServiceUrl = isDev ? `${txServiceUrlRoot}/api` : txServiceUrlRoot
       this.apiKit = new SafeApiKit({

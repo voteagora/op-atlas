@@ -463,7 +463,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
 
     // Use Safe chain (OP Sepolia in dev, OP Mainnet in prod) for Safe SDK
-    const SAFE_CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155420 : 10
+    const SAFE_CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
     const currentChainId = getChainId(privyWagmiConfig)
     if (currentChainId !== SAFE_CHAIN_ID) {
       await switchChain(privyWagmiConfig, { chainId: SAFE_CHAIN_ID })
