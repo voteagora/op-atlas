@@ -3,8 +3,6 @@ import { KYCUser } from "@prisma/client"
 import { prisma } from "./client"
 
 export async function updateKYCUserStatus(
-  name: string,
-  email: string,
   status: string,
   updatedAt: Date,
   personaStatus: string,
@@ -23,13 +21,10 @@ export async function updateKYCUserStatus(
     WHERE id = ${referenceId}
     RETURNING *;
   `
-
   return result
 }
 
 export async function updateKYBUserStatus(
-  name: string,
-  email: string,
   status: string,
   updatedAt: Date,
   personaStatus: string,

@@ -148,8 +148,6 @@ async function* fetchGenerator<T>(
 }
 
 async function updateKYCUserStatus(
-  name: string,
-  email: string,
   status: string,
   updatedAt: Date,
   referenceId?: string,
@@ -184,7 +182,7 @@ async function updateKYCUserStatus(
       "personaStatus" = ${personaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE "email" = ${email.toLowerCase()}
+    WHERE "id" = ${referenceId}
     RETURNING *;
   `
 
@@ -192,11 +190,10 @@ async function updateKYCUserStatus(
 }
 
 async function updateKYBUserStatus(
-  name: string,
-  email: string,
   status: string,
   updatedAt: Date,
   personaStatus?: string,
+  referenceId?: string,
 ) {
   const result = await prisma.$queryRaw<any[]>`
     UPDATE "KYCUser" SET
@@ -204,7 +201,7 @@ async function updateKYBUserStatus(
       "personaStatus" = ${personaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE "email" = ${email.toLowerCase()} AND "businessName" IS NOT NULL
+    WHERE "id" = ${referenceId}
     RETURNING *;
   `
 
@@ -233,14 +230,19 @@ async function processPersonaInquiries(inquiries: PersonaInquiry[]) {
         return
       }
 
-      if (!email || !referenceId) {
-        console.warn(`Missing required fields for inquiry ${inquiry.id}`)
+      if (!referenceId) {
+        console.warn(`Missing reference id for inquiry ${inquiry.id}`)
         return
       }
 
+      console.log(
+        "Updating inquiry status: ",
+        parsedStatus,
+        referenceId,
+        status,
+      )
+
       await updateKYCUserStatus(
-        `${firstName} ${lastName}`,
-        email,
         parsedStatus,
         new Date(updatedAt),
         referenceId,
