@@ -34,6 +34,29 @@ export async function generateMetadata({
   }
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: {
+    projectId: string
+  }
+}): Promise<Metadata> {
+  const project = await getPublicProjectAction({ projectId: params.projectId })
+
+  const title = `Project Grant-address: ${project?.name ?? ""} - OP Atlas`
+  const description = project?.description ?? ""
+  return {
+    ...sharedMetadata,
+    title,
+    description,
+    openGraph: {
+      ...sharedMetadata.openGraph,
+      title,
+      description,
+    },
+  }
+}
+
 export default async function Page({
   params,
 }: {
