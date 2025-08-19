@@ -295,6 +295,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const canVote =
     !!session?.user?.id &&
+    !!citizen &&
     proposalData.status === ProposalStatus.ACTIVE &&
     !myVote
 
