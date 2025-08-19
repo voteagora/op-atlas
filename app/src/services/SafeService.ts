@@ -38,9 +38,10 @@ export class SafeService {
     try {
       const isDev = process.env.NEXT_PUBLIC_ENV === "dev"
       const chainId = isDev ? BigInt(11155420) : BigInt(10) // OP Sepolia vs OP Mainnet
-      const txServiceUrl = isDev
+      const txServiceUrlRoot = isDev
         ? "https://transaction-optimism-sepolia.safe.optimism.io"
         : "https://safe-transaction-optimism.safe.global"
+      const txServiceUrl = isDev ? `${txServiceUrlRoot}/api` : txServiceUrlRoot
       this.apiKit = new SafeApiKit({
         chainId,
         apiKey: SAFE_API_KEY,
@@ -73,7 +74,27 @@ export class SafeService {
         version: info.version || "1.3.0",
       }
     } catch (_e) {
-      return null
+      // Fallback REST for 404s
+      try {
+        const baseApi = this.txServiceUrl
+          ? this.txServiceUrl.endsWith("/api")
+            ? this.txServiceUrl
+            : `${this.txServiceUrl}/api`
+          : null
+        if (!baseApi) return null
+        const res = await fetch(`${baseApi}/v1/safes/${address}`)
+        if (!res.ok) return null
+        const info: any = await res.json()
+        return {
+          address,
+          threshold: Number(info.threshold ?? 0),
+          owners: info.owners ?? [],
+          nonce: Number(info.nonce ?? 0),
+          version: info.version || "1.3.0",
+        }
+      } catch {
+        return null
+      }
     }
   }
 
@@ -114,7 +135,10 @@ export class SafeService {
       // Fallback: fetch directly from Transaction Service
       try {
         if (!this.txServiceUrl) return []
-        const ownerUrl = `${this.txServiceUrl}/api/v1/owners/${signerAddress}/safes`
+        const baseApi = this.txServiceUrl.endsWith("/api")
+          ? this.txServiceUrl
+          : `${this.txServiceUrl}/api`
+        const ownerUrl = `${baseApi}/v1/owners/${signerAddress}/safes`
         const ownerRes = await fetch(ownerUrl)
         if (!ownerRes.ok) {
           console.error("Owner safes fetch failed:", ownerRes.status, ownerRes.statusText)
@@ -125,7 +149,7 @@ export class SafeService {
         const results: SafeWallet[] = []
         for (const safeAddress of safes) {
           try {
-            const infoRes = await fetch(`${this.txServiceUrl}/api/v1/safes/${safeAddress}`)
+            const infoRes = await fetch(`${baseApi}/v1/safes/${safeAddress}`)
             if (!infoRes.ok) continue
             const info = await infoRes.json()
             results.push({
