@@ -60,9 +60,10 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
 }
 
 const EAS_ADDRESS =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e" // Sepolia L1
-    : "0x4200000000000000000000000000000000000021" // Optimism Mainnet
+  process.env.EAS_CONTRACT_ADDRESS ||
+  (process.env.NEXT_PUBLIC_ENV === "dev"
+    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e" // Sepolia L1 (fallback in dev)
+    : "0x4200000000000000000000000000000000000021") // Optimism Mainnet (fallback)
 
 const eas = new EAS(EAS_ADDRESS)
 
