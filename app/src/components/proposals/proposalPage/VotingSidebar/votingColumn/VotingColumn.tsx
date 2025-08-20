@@ -9,7 +9,7 @@ import { useSetActiveWallet } from "@privy-io/wagmi"
 import { getChainId, switchChain } from "@wagmi/core"
 import { Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import {
@@ -517,6 +517,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           proposal_id: proposalData.offchainProposalId,
           choice: choices,
           wallet_address: signerAddress,
+          elementType: "vote",
+          elementName: "Vote Submission",
+          url: window.location.pathname,
         })
       } catch (error) {
         // Collect context for the error
@@ -551,6 +554,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         track("Citizen Voting Vote Error", {
           proposal_id: proposalData.offchainProposalId,
           error: errorMessage,
+          elementType: "vote",
+          elementName: "Vote Error",
+          url: window.location.pathname,
         })
 
         if (
@@ -739,7 +745,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             }
           }}
           onVoteSubmit={(vote) => {
-            track("Citizen Voting Questionnaire Submitted", { vote: vote })
+            track("Citizen Voting Questionnaire Submitted", {
+              vote: vote,
+              elementType: "form",
+              elementName: "Voting Questionnaire",
+              url: window.location.pathname,
+            })
             setShowVoteQuestionnaire(false)
             setQuestionnaireWasCancelled(false) // User submitted
             setHasSubmittedVote(true) // Mark that the user has submitted a vote
