@@ -43,8 +43,37 @@ if (!isServer) {
   })
 }
 
+/**
+ * EventTriggerInfo defines the required context information for analytics tracking.
+ *
+ * IMPORTANT: All track() calls must include at least the elementType parameter to provide
+ * context about what triggered the event (button click, link click, form submission, etc.).
+ *
+ * Best practices:
+ * - Always include elementType (required)
+ * - Include elementName when available (button text, link text, etc.)
+ * - Include url for navigation events
+ * - Include projectId, applicationId, or other relevant IDs when the event relates to specific entities
+ *
+ * Examples:
+ * - Button click: { elementType: "button", elementName: "Submit Application", projectId: "123" }
+ * - Link click: { elementType: "link", elementName: "View Details", url: "/projects/123" }
+ * - Form submission: { elementType: "form", elementName: "Project Application", projectId: "123" }
+ */
+type EventTriggerInfo = {
+  elementType: string // 'button', 'link', 'form', etc.
+  elementName: string // name of the button, link, etc.
+  elementId?: string // id of the element if available
+  url?: string // url for links
+  projectId?: string // project id if relevant
+  organizationId?: string // organization id if relevant
+}
+
 type Analytics = {
-  track: (event: string, data?: Record<string, unknown>) => void
+  track: (
+    event: string,
+    data?: Record<string, unknown> & EventTriggerInfo,
+  ) => void
   generateEventData: (
     extra?: Record<string, unknown>,
   ) => Record<string, unknown>
@@ -121,7 +150,18 @@ export function AnalyticsProvider({ children }: PropsWithChildren) {
   )
 
   const track = useCallback(
-    (event: string, data?: Record<string, unknown>) => {
+    (
+      event: string,
+      data?: Record<string, unknown> & Partial<EventTriggerInfo>,
+    ) => {
+      // Validate that at least elementType is provided for tracking context
+      if (!data?.elementType) {
+        console.warn(
+          `Analytics tracking for "${event}" is missing required trigger information. Please include at least 'elementType' in tracking data.`,
+          data,
+        )
+      }
+
       const payload = generateEventData(data)
       mixpanel.track(event, payload)
     },
