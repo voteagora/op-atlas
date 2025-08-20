@@ -31,10 +31,6 @@ export class SafeService {
 
   private ensureApiKit(): void {
     if (this.apiKit) return
-    if (!SAFE_API_KEY) {
-      this.apiKit = null
-      return
-    }
     try {
       const isDev = process.env.NEXT_PUBLIC_ENV === "dev"
       // Dev aligns to Sepolia L1 (EAS on Sepolia L1), Prod to OP Mainnet
@@ -43,12 +39,18 @@ export class SafeService {
         ? "https://safe-transaction-sepolia.safe.global"
         : "https://safe-transaction-optimism.safe.global"
       const txServiceUrl = isDev ? `${txServiceUrlRoot}/api` : txServiceUrlRoot
-      this.apiKit = new SafeApiKit({
-        chainId,
-        apiKey: SAFE_API_KEY,
-        txServiceUrl,
-      } as any)
+      // Always set txServiceUrl for REST fallback, even without API key
       this.txServiceUrl = txServiceUrl
+      // Initialize SDK only when API key is available
+      if (SAFE_API_KEY) {
+        this.apiKit = new SafeApiKit({
+          chainId,
+          apiKey: SAFE_API_KEY,
+          txServiceUrl,
+        } as any)
+      } else {
+        this.apiKit = null
+      }
     } catch (_e) {
       this.apiKit = null
       this.txServiceUrl = null
@@ -142,7 +144,11 @@ export class SafeService {
         const ownerUrl = `${baseApi}/v1/owners/${signerAddress}/safes`
         const ownerRes = await fetch(ownerUrl)
         if (!ownerRes.ok) {
-          console.error("Owner safes fetch failed:", ownerRes.status, ownerRes.statusText)
+          console.error(
+            "Owner safes fetch failed:",
+            ownerRes.status,
+            ownerRes.statusText,
+          )
           return []
         }
         const ownerJson: any = await ownerRes.json()
@@ -216,7 +222,16 @@ export class SafeService {
       throw new Error("Safe API kit not initialized")
     }
 
-    const nextNonce = await this.apiKit?.getNextNonce(await safe.getAddress())
+    // Prefer on-chain nonce to avoid stale service state after deleting queued txs
+    const nextNonce = await safe.getNonce()
+
+    // Try to pre-estimate safeTxGas via Transaction Service to avoid GS013 due to 0 gas
+    const estimation = await this.getExecutionEstimation(
+      await safe.getAddress(),
+      transaction,
+    ).catch(() => null)
+    const estimated = Number(estimation?.safeTxGas || 0)
+    const safeTxGasNum = Math.max(estimated, 700000)
 
     try {
       // Create the transaction
@@ -232,8 +247,15 @@ export class SafeService {
         onlyCalls: true,
         options: {
           nonce: Number(nextNonce),
+          // ensure non-zero safeTxGas to avoid GS013
+          safeTxGas: safeTxGasNum.toString(),
         },
       })
+
+      // Additionally set on data to be explicit
+      if (typeof (safeTransaction as any)?.data?.safeTxGas !== "undefined") {
+        ;(safeTransaction as any).data.safeTxGas = safeTxGasNum
+      }
 
       // Sign the transaction
       const signedTransaction = await safe.signTransaction(safeTransaction)
@@ -280,6 +302,100 @@ export class SafeService {
       return true
     } catch (error) {
       return false
+    }
+  }
+
+  /**
+   * Fetch queued multisig transactions for a Safe
+   */
+  async getQueuedTransactionsForSafe(safeAddress: string): Promise<any[]> {
+    try {
+      this.ensureApiKit()
+      const baseApi = this.txServiceUrl
+        ? this.txServiceUrl.endsWith("/api")
+          ? this.txServiceUrl
+          : `${this.txServiceUrl}/api`
+        : null
+      if (!baseApi) return []
+      const url = `${baseApi}/v1/safes/${safeAddress}/multisig-transactions/?executed=false&queued=true&ordering=nonce`
+      const res = await fetch(url)
+      if (!res.ok) return []
+      const json: any = await res.json()
+      // Only keep the next nonce group to avoid stale entries inflating list
+      const results = Array.isArray(json?.results) ? json.results : []
+      if (!results.length) return []
+      const minNonce = Math.min(
+        ...results.map((r: any) => Number(r?.nonce || 0)),
+      )
+      return results.filter((r: any) => Number(r?.nonce || 0) === minNonce)
+    } catch (_e) {
+      return []
+    }
+  }
+
+  /**
+   * Estimate execution gas for a multisig transaction via Transaction Service
+   */
+  async getExecutionEstimation(
+    safeAddress: string,
+    tx: SafeTransactionRequest,
+  ): Promise<{
+    safeTxGas: number
+    baseGas?: number
+    gasPrice?: string
+  } | null> {
+    try {
+      this.ensureApiKit()
+      const baseApi = this.txServiceUrl
+        ? this.txServiceUrl.endsWith("/api")
+          ? this.txServiceUrl
+          : `${this.txServiceUrl}/api`
+        : null
+      if (!baseApi) return null
+      const res = await fetch(
+        `${baseApi}/v1/safes/${safeAddress}/multisig-transactions/estimations`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            to: tx.to,
+            value: tx.value || "0",
+            data: tx.data || "0x",
+            operation: tx.operation || 0,
+          }),
+        },
+      )
+      if (!res.ok) return null
+      const json: any = await res.json()
+      return {
+        safeTxGas: Number(json?.safeTxGas || 0),
+        baseGas: Number(json?.baseGas || 0),
+        gasPrice: String(json?.gasPrice || "0"),
+      }
+    } catch (_e) {
+      return null
+    }
+  }
+
+  /**
+   * Fetch a transaction by safeTxHash to check execution status
+   */
+  async getTransactionByHash(safeTxHash: string): Promise<any | null> {
+    try {
+      this.ensureApiKit()
+      const baseApi = this.txServiceUrl
+        ? this.txServiceUrl.endsWith("/api")
+          ? this.txServiceUrl
+          : `${this.txServiceUrl}/api`
+        : null
+      if (!baseApi) return null
+      const res = await fetch(
+        `${baseApi}/v1/multisig-transactions/${safeTxHash}`,
+      )
+      if (!res.ok) return null
+      return await res.json()
+    } catch (_e) {
+      return null
     }
   }
 }
