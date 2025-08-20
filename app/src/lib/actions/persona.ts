@@ -13,10 +13,10 @@ const PERSONA_API_URL = "https://api.withpersona.com"
 
 export const createPersonaInquiryLink = async (
   kycUser: KYCUser,
+  templateId: string,
 ): Promise<PersonaInquiryLinkResponse> => {
   try {
     const PERSONA_API_KEY = process.env.PERSONA_API_KEY
-    const PERSONA_INQUIRY_TEMPLATE_ID = process.env.PERSONA_INQUIRY_TEMPLATE_ID
 
     if (!PERSONA_API_KEY) {
       return {
@@ -25,7 +25,7 @@ export const createPersonaInquiryLink = async (
       }
     }
 
-    if (!PERSONA_INQUIRY_TEMPLATE_ID) {
+    if (!templateId) {
       return {
         success: false,
         error: "Persona template ID not configured",
@@ -37,7 +37,7 @@ export const createPersonaInquiryLink = async (
       data: {
         type: "inquiry",
         attributes: {
-          "inquiry-template-id": PERSONA_INQUIRY_TEMPLATE_ID,
+          "inquiry-template-id": templateId,
           "reference-id": kycUser.id,
           "name-first": kycUser.firstName,
           "name-last": kycUser.lastName,
