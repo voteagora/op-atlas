@@ -62,6 +62,20 @@ type PersonaInquiry = {
     "name-middle": string
     "email-address": string
     "reference-id": string
+    fields: {
+      "form-filler-email-address": {
+        type: string
+        value: string
+      }
+      "form-filler-name-first": {
+        type: string
+        value: string
+      }
+      "form-filler-name-last": {
+        type: string
+        value: string
+      }
+    }
   }
 }
 
@@ -85,6 +99,9 @@ type PersonaCase = {
       }
     }
     "reference-id": string
+  }
+  relationships: {
+    inquiries: { data: { type: string; id: string }[] }
   }
 }
 
@@ -124,6 +141,38 @@ class PersonaClient {
     })
 
     return response.json()
+  }
+
+  async getInquiryById(inquiryId: string): Promise<PersonaInquiry | null> {
+    const apiKey = this.apiKey
+    if (!apiKey) {
+      console.warn("Persona API key not set")
+      return null
+    }
+
+    try {
+      const url = `${PERSONA_API_URL}/api/v1/inquiries/${inquiryId}`
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      })
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null
+        }
+        throw new Error(
+          `Failed to fetch inquiry: ${response.status} ${response.statusText}`,
+        )
+      }
+
+      const data: { data: PersonaInquiry } = await response.json()
+      return data.data
+    } catch (error) {
+      console.error(`Error fetching inquiry ${inquiryId}:`, error)
+      return null
+    }
   }
 }
 
@@ -272,10 +321,37 @@ async function processPersonaCases(cases: PersonaCase[]) {
           status,
           "reference-id": referenceId,
         },
+        relationships: {
+          inquiries: { data: inquiries },
+        },
       } = c
 
-      console.log(businessName, email, referenceId)
-      console.log("---- CASE: ", c)
+      // Loop through inquiries and load each inquiry using getInquiryById() method
+      for (const inquiryRef of inquiries) {
+        const inquiryId = inquiryRef.id
+        if (!inquiryId) {
+          console.warn(`Missing inquiry id in case ${c.id}`)
+          continue
+        }
+        // getInquiryById is available on personaClient
+        const inquiry: PersonaInquiry | null =
+          await personaClient.getInquiryById(inquiryId)
+        if (!inquiry) {
+          console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)
+          continue
+        }
+        if (inquiry.attributes["reference-id"]) {
+          console.log("++++++++++++++++++++++++++++++++")
+          console.log(inquiry.attributes["reference-id"])
+          console.log(
+            inquiry.attributes.fields["form-filler-email-address"].value,
+          )
+          console.log(inquiry.attributes.fields["form-filler-name-first"].value)
+          console.log(inquiry.attributes.fields["form-filler-name-last"].value)
+          // console.log(businessName, "REFERECE ID ", inquiry.attributes["reference-id"], inquiry.attributes["status"], inquiry.attributes["email-address"])
+          console.log("++++++++++++++++++++++++++++++++")
+        }
+      }
 
       if (!email || !businessName) {
         console.warn(`Missing required fields for case ${c.id}`)
@@ -285,7 +361,6 @@ async function processPersonaCases(cases: PersonaCase[]) {
       const parsedStatus = caseStatusMap[status as keyof typeof caseStatusMap]
 
       if (!parsedStatus) {
-        console.warn(`Unknown case status: ${status}`)
         return
       }
 
@@ -349,7 +424,7 @@ async function syncPersonaData() {
     // Follow the same pattern as the cron job
     await Promise.all([
       getAndProcessPersonaCases(),
-      getAndProcessPersonaInquiries(),
+      // getAndProcessPersonaInquiries(),
     ])
 
     console.log("✅ Persona data synced successfully")

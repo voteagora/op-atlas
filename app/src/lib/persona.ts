@@ -71,6 +71,10 @@ type PersonaResponse<T> = {
   }
 }
 
+type PersonaSingleResponse<T> = {
+  data: T
+}
+
 class PersonaClient {
   constructor(private readonly apiKey?: string) {
     if (!apiKey) {
@@ -101,6 +105,38 @@ class PersonaClient {
 
     return response.json()
   }
+
+  async getInquiryById(inquiryId: string): Promise<PersonaInquiry | null> {
+    const apiKey = this.apiKey
+    if (!apiKey) {
+      console.warn("Persona API key not set")
+      return null
+    }
+
+    try {
+      const url = `${PERSONA_API_URL}/api/v1/inquiries/${inquiryId}`
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      })
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null
+        }
+        throw new Error(
+          `Failed to fetch inquiry: ${response.status} ${response.statusText}`,
+        )
+      }
+
+      const data: PersonaSingleResponse<PersonaInquiry> = await response.json()
+      return data.data
+    } catch (error) {
+      console.error(`Error fetching inquiry ${inquiryId}:`, error)
+      return null
+    }
+  }
 }
 
 const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
@@ -114,7 +150,7 @@ async function* fetchGenerator<T>(
 
   do {
     const response = (await client[path as keyof PersonaClient](
-      currentUrl,
+      currentUrl || "",
     )) as PersonaResponse<T>
 
     const batch = response.data
