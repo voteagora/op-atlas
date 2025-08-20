@@ -9,7 +9,7 @@ import {
   Oso_ProjectsByCollectionV1,
   Oso_ProjectsV1,
 } from "@/graphql/__generated__/types"
-import { sendKYCStartedEmail } from "@/lib/actions/emails"
+import { sendKYBStartedEmail, sendKYCStartedEmail } from "@/lib/actions/emails"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -1880,12 +1880,11 @@ export async function addKYCTeamMembers({
       })),
     })
 
-    // Send transactional email to new KYC users
-    await Promise.all(
-      [...createdIndividuals, ...createdBusinesses].map((kycUser: KYCUser) =>
-        sendKYCStartedEmail(kycUser),
-      ),
-    )
+    // Send transactional email to new KYC and KYB users
+    await Promise.all([
+      ...createdIndividuals.map(sendKYCStartedEmail),
+      ...createdBusinesses.map(sendKYBStartedEmail),
+    ])
 
     const allMembers = [...toAdd, ...createdIndividuals, ...createdBusinesses]
 
