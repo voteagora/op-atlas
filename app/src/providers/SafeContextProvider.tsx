@@ -73,7 +73,7 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
     }
   }, [signerWallet?.address, safeContextValue.refreshSafeWallets])
 
-  // Auto-switch to SAFE context when connected via Safe app or when signer address is a known Safe
+  // Auto-switch to SAFE context when connected via Safe app
   useEffect(() => {
     const signerAddress = signerWallet?.address
     if (!signerAddress) return
@@ -81,57 +81,14 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
     const ethereum: any =
       typeof window !== "undefined" ? (window as any).ethereum : undefined
     const isSafeEnv = !!(ethereum?.isSafe || ethereum?.isGnosisSafe)
-    const isSignerInList = safeContextValue.availableSafeWallets.some(
-      (safe) => safe.address.toLowerCase() === signerAddress.toLowerCase(),
-    )
-
     // If running inside the Safe app, switch immediately without API verification
     if (isSafeEnv && safeContextValue.currentContext !== "SAFE") {
       safeContextValue.switchToSafe(signerAddress)
       return
     }
-
-    // Otherwise, switch when the signer shows up in the fetched Safe list
-    if (
-      isSignerInList &&
-      safeContextValue.currentContext !== "SAFE" &&
-      !safeContextValue.selectedSafeWallet
-    ) {
-      safeContextValue.switchToSafe(signerAddress)
-      return
-    }
-
-    // Fallback: if not inside Safe app and list is not yet populated, but the signer is a Safe per service, switch now
-    const tryServiceDetect = async () => {
-      if (
-        safeContextValue.currentContext === "SAFE" ||
-        safeContextValue.selectedSafeWallet ||
-        isSignerInList ||
-        isSafeEnv
-      )
-        return
-      try {
-        const info = await safeService.getSafeInfoByAddress(signerAddress)
-        if (info) {
-          safeContextValue.switchToSafe(signerAddress)
-          return
-        }
-        // If signer is not a Safe and context remains SAFE without a selected Safe, correct to EOA
-        if (
-          !info &&
-          safeContextValue.currentContext !== "EOA" &&
-          !safeContextValue.selectedSafeWallet
-        ) {
-          // only adjust on initial connect to avoid overriding user action
-          safeContextValue.switchToEOA()
-        }
-      } catch {}
-    }
-
-    tryServiceDetect()
+    // Do not auto-switch to SAFE based on ownership list or service detection.
   }, [
     signerWallet?.address,
-    safeContextValue.availableSafeWallets,
     safeContextValue.currentContext,
     safeContextValue.selectedSafeWallet,
     safeContextValue.switchToSafe,
