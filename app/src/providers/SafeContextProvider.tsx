@@ -86,7 +86,22 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
       safeContextValue.switchToSafe(signerAddress)
       return
     }
-    // Do not auto-switch to SAFE based on ownership list or service detection.
+    // Multisig-only via WalletConnect: if the signer IS a Safe and no Safe is selected yet, switch to SAFE
+    const ensureSafeWhenSignerIsSafe = async () => {
+      if (
+        safeContextValue.currentContext === "SAFE" ||
+        safeContextValue.selectedSafeWallet ||
+        isSafeEnv
+      )
+        return
+      try {
+        const info = await safeService.getSafeInfoByAddress(signerAddress)
+        if (info) {
+          safeContextValue.switchToSafe(signerAddress)
+        }
+      } catch {}
+    }
+    ensureSafeWhenSignerIsSafe()
   }, [
     signerWallet?.address,
     safeContextValue.currentContext,
