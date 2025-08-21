@@ -1,3 +1,4 @@
+import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { auth } from "@/auth"
@@ -5,6 +6,12 @@ import MakeOrganizationForm from "@/components/organizations/MakeOrganizationFor
 import { getUserById } from "@/db/users"
 
 export const maxDuration = 120
+
+export const metadata: Metadata = {
+  title: "Profile Organizations: New - OP Atlas",
+  description:
+    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+}
 
 export default async function Page() {
   const session = await auth()

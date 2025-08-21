@@ -4,6 +4,13 @@ import { getAllRoles } from "@/db/role"
 
 import RolesPage from "./roles/components/RolesPage"
 
+export const metadata = {
+  title: "Governance: Roles - OP Atlas",
+  description:
+    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+  openGraph: { title: "Governance: Roles - OP Atlas" },
+}
+
 export default async function Page() {
   const roles = await getAllRoles()
 

@@ -7,6 +7,11 @@ import { ProjectStatusSidebar } from "@/components/projects/ProjectStatusSidebar
 import { getAdminOrganizations } from "@/db/organizations"
 
 export const maxDuration = 60
+export const metadata = {
+  title: "Projects: New - OP Atlas",
+  description:
+    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+}
 
 export default async function Page() {
   const session = await auth()
