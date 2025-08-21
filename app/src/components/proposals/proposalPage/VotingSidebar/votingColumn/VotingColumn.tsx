@@ -438,7 +438,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const nonce = await eas.getNonce(signerToUse.address as `0x${string}`)
 
-    const refUID = (citizen?.attestationId as `0x${string}`) ??
+    const refUID =
+      (citizen?.attestationId as `0x${string}`) ??
       "0x0000000000000000000000000000000000000000000000000000000000000000"
 
     const delegateRequest = {
@@ -573,6 +574,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
 
     console.log("[Voting][SC] attest submitted", { txHash })
+    if (!txHash) {
+      throw new Error(
+        "Transaction not submitted by provider. Please open your Safe and approve the transaction, then try again.",
+      )
+    }
     return {
       attestationId: txHash,
       signerAddress: signerToUse.address as `0x${string}`,
@@ -631,7 +637,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         "0x0000000000000000000000000000000000000000000000000000000000000000"
 
       const easInterface = new ethers.Interface([
-        "function attest((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data) data)) external payable returns (bytes32)",
+        "function attest((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data, uint256 value) data)) external payable returns (bytes32)",
       ])
 
       const attestRequest = {
@@ -642,6 +648,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           revocable: false,
           refUID,
           data: encodedData,
+          value: BigInt(0),
         },
       }
 
@@ -708,7 +715,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     if (!ownerSigner) {
       throw new Error(
         `Connect a Safe owner EOA to propose the transaction. Current: ${
-          (typeof window !== "undefined" && (window as any)?.ethereum?.selectedAddress) ||
+          (typeof window !== "undefined" &&
+            (window as any)?.ethereum?.selectedAddress) ||
           "unknown"
         }. Owners: ${safeInfo?.owners?.join(", ") || "unknown"}`,
       )
@@ -754,7 +762,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     // Encode the EAS.attest() function call using ethers Interface
     // EAS contract ABI fragment for the attest function
     const easInterface = new ethers.Interface([
-      "function attest((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data) data)) external payable returns (bytes32)",
+      "function attest((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data, uint256 value) data)) external payable returns (bytes32)",
     ])
 
     const txData = {
@@ -785,6 +793,121 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return {
       attestationId: txHash, // Use transaction hash as identifier
       signerAddress: selectedSafeWallet.address,
+    }
+  }
+
+  const createSafeVoteTransactionForAddress = async (
+    choices: string,
+    safeAddress: string,
+  ) => {
+    const SAFE_CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
+    const currentChainId = getChainId(privyWagmiConfig)
+    if (currentChainId !== SAFE_CHAIN_ID) {
+      await switchChain(privyWagmiConfig, { chainId: SAFE_CHAIN_ID })
+    }
+    const rpcProvider = await (async () => {
+      try {
+        return await connector?.getProvider({ chainId: SAFE_CHAIN_ID })
+      } catch (_e) {
+        return null
+      }
+    })()
+
+    // Ensure current EOA is an owner of the target Safe
+    const safeInfo = await safeService.getSafeInfoByAddress(safeAddress)
+    const ownerAddresses = (safeInfo?.owners || []).map((o) => o.toLowerCase())
+
+    const candidates: any[] = []
+    if (rpcProvider) candidates.push(rpcProvider)
+    if (typeof window !== "undefined") {
+      const eth: any = (window as any).ethereum
+      if (eth) candidates.push(eth)
+      const list = Array.isArray(eth?.providers) ? eth.providers : []
+      for (const p of list) candidates.push(p)
+    }
+
+    let ownerSigner: ethers.JsonRpcSigner | null = null
+    let pickedProvider: any = null
+    for (const prov of candidates) {
+      try {
+        const bp = new ethers.BrowserProvider(prov as any)
+        const s = (await bp.getSigner()) as ethers.JsonRpcSigner
+        const addr = (await s.getAddress())?.toLowerCase()
+        if (addr && ownerAddresses.includes(addr)) {
+          ownerSigner = s
+          pickedProvider = prov
+          break
+        }
+      } catch (_e) {}
+    }
+    if (!ownerSigner) {
+      throw new Error(
+        `Connect a Safe owner EOA to propose the transaction. Current: ${
+          (typeof window !== "undefined" && (window as any)?.ethereum?.selectedAddress) ||
+          "unknown"
+        }. Owners: ${safeInfo?.owners?.join(", ") || "unknown"}`,
+      )
+    }
+
+    const safe = await safeService.initializeSafe(
+      safeAddress,
+      ownerSigner,
+      (pickedProvider || rpcProvider) as any,
+    )
+    if (!safe) {
+      throw new Error("Failed to initialize Safe SDK")
+    }
+
+    const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
+    const args = {
+      proposalId: proposalData.offchainProposalId,
+      choices: choices,
+    }
+    const encodedData = encoder.encodeData([
+      { name: "proposalId", value: args.proposalId, type: "uint256" },
+      { name: "params", value: args.choices, type: "string" },
+    ])
+
+    const refUID =
+      (citizen?.attestationId as `0x${string}`) ??
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+
+    const attestRequest = {
+      schema: OFFCHAIN_VOTE_SCHEMA_ID,
+      data: {
+        recipient: safeAddress,
+        expirationTime: BigInt(0),
+        revocable: false,
+        refUID,
+        data: encodedData,
+        value: BigInt(0),
+      },
+    }
+
+    const easInterface = new ethers.Interface([
+      "function attest((bytes32 schema, (address recipient, uint64 expirationTime, bool revocable, bytes32 refUID, bytes data, uint256 value) data)) external payable returns (bytes32)",
+    ])
+
+    const txData = {
+      to: EAS_CONTRACT_ADDRESS,
+      data: easInterface.encodeFunctionData("attest", [attestRequest]),
+      value: "0",
+      operation: 0 as const,
+    }
+
+    const ownerSignerAddress = (await ownerSigner.getAddress()) as `0x${string}`
+    const txHash = await safeService.proposeTransaction(
+      safe,
+      ownerSignerAddress,
+      txData,
+    )
+    if (!txHash) {
+      throw new Error("Failed to propose Safe transaction")
+    }
+
+    return {
+      attestationId: txHash,
+      signerAddress: safeAddress,
     }
   }
 
@@ -853,13 +976,69 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
         let attestationId: string
         let signerAddress: string
+        const targetSafeAddress =
+          selectedSafeWallet?.address ||
+          (isSmartContract
+            ? (citizen?.address as string | undefined)
+            : undefined)
 
         if (currentContext === "SAFE") {
-          // Direct Safe: send tx to EAS so Safe prompts confirmation in its UI
-          const attestationData = await createMultisigWalletAttestation(choices)
+          const isSafeAppEnv =
+            typeof window !== "undefined" &&
+            !!(
+              (window as any)?.ethereum?.isSafe ||
+              (window as any)?.ethereum?.isGnosisSafe
+            )
+
+          if (isSafeAppEnv) {
+            console.log("[Voting] SAFE context inside Safe App → attest direct")
+            // Direct Safe: send tx to EAS so Safe prompts confirmation in its UI
+            const attestationData = await createMultisigWalletAttestation(choices)
+            signerAddress = attestationData.signerAddress
+            attestationId = attestationData.attestationId
+            // Do not invalidate myVote: the Safe tx is only proposed; there is no vote recorded until execution
+            skipInvalidate = true
+            usedContext = "SAFE"
+          } else if (selectedSafeWallet?.address) {
+            console.log(
+              "[Voting] SAFE context outside Safe App → propose via Safe Tx Service",
+              selectedSafeWallet.address,
+            )
+            const attestationData = await createSafeVoteTransactionForAddress(
+              choices,
+              selectedSafeWallet.address,
+            )
+            signerAddress = attestationData.signerAddress
+            attestationId = attestationData.attestationId
+            skipInvalidate = true
+            usedContext = "SAFE"
+          } else {
+            // Fallback if no selected Safe (should not happen in SAFE context)
+            console.log(
+              "[Voting] SAFE context but no selectedSafeWallet; treating as SC",
+            )
+            const attestationData = await createMultisigWalletAttestation(
+              choices,
+            )
+            signerAddress = attestationData.signerAddress
+            attestationId = attestationData.attestationId
+            skipInvalidate = true
+            usedContext = "SAFE"
+          }
+        } else if (targetSafeAddress) {
+          console.log("[Voting] EOA + targetSafeAddress", {
+            targetSafeAddress,
+            selectedSafe: selectedSafeWallet?.address,
+            isSmartContract,
+            citizenAddress: citizen?.address,
+          })
+          // EOA + selected Safe: always propose via Safe Transaction Service (opens Safe UI)
+          const attestationData = await createSafeVoteTransactionForAddress(
+            choices,
+            targetSafeAddress,
+          )
           signerAddress = attestationData.signerAddress
           attestationId = attestationData.attestationId
-          // Do not invalidate myVote: the Safe tx is only proposed; there is no vote recorded until execution
           skipInvalidate = true
           usedContext = "SAFE"
         } else if (isSmartContract) {

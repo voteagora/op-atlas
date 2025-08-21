@@ -231,9 +231,10 @@ export class SafeService {
       transaction,
     ).catch(() => null)
     const estimated = Number(estimation?.safeTxGas || 0)
-    const safeTxGasNum = Math.max(estimated, 700000)
+    // If estimation endpoint is 405 or returns null, proceed with a conservative default
+    const safeTxGasNum = Math.max(estimated, 900000)
 
-    try {
+    const attemptPropose = async (forcedNonce?: number) => {
       // Create the transaction
       const safeTransaction = await safe.createTransaction({
         transactions: [
@@ -246,7 +247,7 @@ export class SafeService {
         ],
         onlyCalls: true,
         options: {
-          nonce: Number(nextNonce),
+          nonce: typeof forcedNonce === "number" ? forcedNonce : Number(nextNonce),
           // ensure non-zero safeTxGas to avoid GS013
           safeTxGas: safeTxGasNum.toString(),
         },
@@ -265,7 +266,7 @@ export class SafeService {
       const safeAddress = await safe.getAddress()
 
       // Propose the transaction to the Safe service
-      await this.apiKit.proposeTransaction({
+      await this.apiKit!.proposeTransaction({
         safeAddress,
         safeTransactionData: signedTransaction.data,
         safeTxHash: safeTxHash,
@@ -274,7 +275,21 @@ export class SafeService {
       })
 
       return safeTxHash
+    }
+
+    try {
+      return await attemptPropose()
     } catch (error) {
+      const message = String((error as any)?.message || error)
+      // Retry once if previously executed nonce caused a 422
+      if (message.toLowerCase().includes("already executed")) {
+        try {
+          const freshNonce = await safe.getNonce()
+          if (Number(freshNonce) !== Number(nextNonce)) {
+            return await attemptPropose(Number(freshNonce))
+          }
+        } catch (_) {}
+      }
       console.error("Error proposing Safe transaction:", error)
       return null
     }
