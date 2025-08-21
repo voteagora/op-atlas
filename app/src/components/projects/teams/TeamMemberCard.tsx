@@ -2,6 +2,7 @@ import { User } from "@prisma/client"
 import Image from "next/image"
 import { memo, useState } from "react"
 
+import { UserAvatar } from "@/components/common/UserAvatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,7 +16,6 @@ import {
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { TeamRole } from "@/lib/types"
-import { UserAvatar } from "@/components/common/UserAvatar"
 
 export const TeamMemberCard = memo(function TeamMemberCard({
   user,

@@ -2,8 +2,8 @@
 
 import React from "react"
 
-import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useGitHubMissions } from "@/hooks/api/useGithubMissions"
+import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
 export default function Header() {
   const mission = useMissionFromPath()
@@ -11,11 +11,13 @@ export default function Header() {
   const { data } = useGitHubMissions()
 
   let isOpenForEnrollment = mission && mission?.startsAt < new Date()
-  let missioName = mission?.name;
+  let missioName = mission?.name
 
-
-  if (mission?.pageName === "retro-funding-onchain-builders" || mission?.pageName === "retro-funding-dev-tooling") {
-    missioName = `Retro Funding: ${mission.name}`;
+  if (
+    mission?.pageName === "retro-funding-onchain-builders" ||
+    mission?.pageName === "retro-funding-dev-tooling"
+  ) {
+    missioName = `Retro Funding: ${mission.name}`
   }
 
   if (mission?.pageName === "foundation-missions" && data) {

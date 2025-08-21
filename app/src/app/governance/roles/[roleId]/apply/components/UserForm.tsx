@@ -141,12 +141,11 @@ export const UserForm = ({
     const customRequirementsSatisfied =
       isUser && requirements.user
         ? requirements.user.every((requirement: string) => {
-          if (requirement === "github") {
-            const githubSatisfied = !!user.github
-            return githubSatisfied
-          }
-          return true
-        })
+            if (requirement === "github") {
+              return !!user.github
+            }
+            return true
+          })
         : false
 
     setRequirementsSatisfied(allTermsChecked && customRequirementsSatisfied)
@@ -164,6 +163,8 @@ export const UserForm = ({
       role_name: role.title,
       number_projects_added_to_self_nomination: projectsData.length,
       candidate_user_id: user.id,
+      elementType: "Button",
+      elementName: "Submit",
     })
 
     applyForRole(role.id, {
@@ -439,7 +440,7 @@ export const UserForm = ({
                 <span
                   className={
                     (projectRelevanceText[project.project.id] || "").length >=
-                      280
+                    280
                       ? "text-red-500"
                       : ""
                   }

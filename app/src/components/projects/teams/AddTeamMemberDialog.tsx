@@ -65,6 +65,8 @@ const AddTeamMemberDialog = ({
       )
       track("Add Collaborators", {
         userIds: selectedUsers.map((user) => user.farcasterId),
+        elementType: "Button",
+        elementName: "Add",
       })
     } catch (error) {
       console.error("Error adding team members", error)

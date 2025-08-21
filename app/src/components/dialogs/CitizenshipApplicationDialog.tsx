@@ -109,6 +109,8 @@ function CitizenshipApplicationDialog({
       track("Registration Success", {
         user_group: qualification?.type,
         wallet_address: user?.addresses[0].address as string,
+        elementType: "EAS Response",
+        elementName: "Attestation Success",
       })
     }
   }, [qualification, isAttestSuccess])
@@ -132,7 +134,7 @@ function CitizenshipApplicationDialog({
         <DialogTitle className="sr-only">Citizenship Application</DialogTitle>
         <div className="flex flex-col gap-6 w-full">
           {!citizen?.timeCommitment &&
-            qualification?.type === CITIZEN_TYPES.user ? (
+          qualification?.type === CITIZEN_TYPES.user ? (
             <>
               <div className="font-semibold text-center">
                 How many hours per week would you like to spend on governance?

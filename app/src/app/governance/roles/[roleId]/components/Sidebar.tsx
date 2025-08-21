@@ -57,11 +57,21 @@ export const Sidebar = ({ role }: { role: Role }) => {
       localStorage.setItem(LOCAL_STORAGE_LOGIN_REDIRECT, pathname)
       login()
     } else if (isApplicationWindow) {
+      let btext
+      if (role.startAt && new Date() < new Date(role.startAt)) {
+        btext = "Coming Soon"
+      } else if (role.endAt && new Date() > new Date(role.endAt)) {
+        btext = "Application closed"
+      } else {
+        btext = "Apply Now"
+      }
       track("Button Click", {
         button_type: "Nominate Yourself",
         role_name: role.title,
         role_id: role.id,
         candidate_user_id: session?.user?.id || null,
+        elementType: "Button",
+        elementName: btext,
       })
 
       setIsNavigating(true)

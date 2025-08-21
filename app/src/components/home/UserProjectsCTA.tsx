@@ -49,6 +49,8 @@ export const UserProjectsCTA = () => {
         : "Add your first project",
       linkUrl: isAuthenticated ? "/dashboard" : "/dashboard",
       category: "User Projects CTA",
+      elementType: "Div: Role=Button",
+      elementName: content.toString() || "Add your first project",
     })
     if (!isAuthenticated) {
       handleLogin()
