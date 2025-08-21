@@ -987,22 +987,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             skipInvalidate = true
             usedContext = "SAFE"
           }
-        } else if (targetSafeAddress) {
-          console.log("[Voting] EOA + targetSafeAddress", {
-            targetSafeAddress,
-            selectedSafe: selectedSafeWallet?.address,
-            isSmartContract,
-            citizenAddress: citizen?.address,
-          })
-          // EOA + selected Safe: always propose via Safe Transaction Service (opens Safe UI)
-          const attestationData = await createSafeVoteTransactionForAddress(
-            choices,
-            targetSafeAddress,
-          )
-          signerAddress = attestationData.signerAddress
-          attestationId = attestationData.attestationId
-          skipInvalidate = true
-          usedContext = "SAFE"
+        } else if (false) {
+          // EOA + selected Safe path disabled to preserve classic EOA flow
         } else if (isSmartContract) {
           // Smart contract wallet (non-Safe) voting
           const attestationData = await createMultisigWalletAttestation(choices)
@@ -1186,7 +1172,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         </div>
 
         {/* Actions */}
-        {/* Pending Safe banner removed */}
         {proposalData.status === ProposalStatus.ACTIVE &&
           votingActions &&
           !myVote && (
@@ -1217,8 +1202,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                               !(
                                 selectedVotes?.selections &&
                                 selectedVotes?.selections.length > 0
-                              )))) ||
-                        false,
+                              )))),
                       loading: isVoting,
                     }
                   })}
