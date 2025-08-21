@@ -231,8 +231,8 @@ export class SafeService {
       transaction,
     ).catch(() => null)
     const estimated = Number(estimation?.safeTxGas || 0)
-    // If estimation endpoint is 405 or returns null, proceed with a conservative default
-    const safeTxGasNum = Math.max(estimated, 900000)
+    // If estimation endpoint is 405 or returns null, proceed with a conservative default (bump to 1.5M)
+    const safeTxGasNum = Math.max(estimated, 1500000)
 
     const attemptPropose = async (forcedNonce?: number) => {
       // Create the transaction

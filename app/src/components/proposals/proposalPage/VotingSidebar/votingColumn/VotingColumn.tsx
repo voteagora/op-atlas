@@ -30,6 +30,7 @@ import {
   useUserByContext,
   useUserCitizen,
 } from "@/hooks/citizen/useUserCitizen"
+import { useUserByAddress } from "@/hooks/citizen/useUserCitizen"
 import { useWallet } from "@/hooks/useWallet"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
@@ -318,6 +319,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
   const { currentContext, selectedSafeWallet } = useWallet()
+  // When a Safe is selected (EOA + Safe), fetch its citizen to use the correct refUID
+  const { citizen: safeCitizenByAddress } = useUserByAddress(
+    selectedSafeWallet?.address || null,
+  )
 
   const { connector } = useAccount()
 
@@ -401,8 +406,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     const nonce = await eas.getNonce(signerToUse.address as `0x${string}`)
 
     const refUID =
-      (citizen?.attestationId as `0x${string}`) ??
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
+      (process.env.NEXT_PUBLIC_ENV === "prod"
+        ? (safeCitizenByAddress?.attestationId as `0x${string}`)
+        : undefined) ||
+      ("0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`)
 
     const delegateRequest = {
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
@@ -467,10 +474,13 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     })
 
     const receiptOrTx: any = typeof (tx as any)?.wait === "function" ? await (tx as any).wait() : tx
-    const attestationId = receiptOrTx?.transactionHash || receiptOrTx?.hash || receiptOrTx
+    const attestationId =
+      receiptOrTx?.transactionHash || receiptOrTx?.hash || receiptOrTx
 
     if (!attestationId) {
-      throw new Error("Transaction not submitted by provider. Please open your Safe and approve the transaction, then try again.")
+      throw new Error(
+        "Transaction not submitted by provider. Please open your Safe and approve the transaction, then try again.",
+      )
     }
     return {
       attestationId,
@@ -549,6 +559,41 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         to: EAS_CONTRACT_ADDRESS,
         data: easInterface.encodeFunctionData("attest", [attestRequest]),
         value: "0",
+      }
+
+      // Pre-simulation also in Safe App context
+      try {
+        const eth: any =
+          typeof window !== "undefined" ? (window as any).ethereum : null
+        if (eth) {
+          const browserProvider = new ethers.BrowserProvider(eth)
+          const callReq = {
+            to: EAS_CONTRACT_ADDRESS,
+            from: selectedSafeWallet.address as `0x${string}`,
+            data: easInterface.encodeFunctionData("attest", [attestRequest]),
+          }
+          await (browserProvider as any).call(callReq)
+        }
+      } catch (err: any) {
+        const raw = String(
+          err?.shortMessage || err?.reason || err?.message || err,
+        )
+        const knownPrefix = "execution reverted:"
+        const reason = raw.includes(knownPrefix)
+          ? raw.slice(raw.indexOf(knownPrefix) + knownPrefix.length).trim()
+          : raw
+        console.error("Pre-simulation failed (Safe App, EAS.attest)", {
+          raw,
+          reason,
+        })
+        toast.error(
+          reason
+            ? `Transaction will revert: ${reason}`
+            : "Transaction will revert. Check parameters and try again.",
+        )
+        throw new Error(
+          reason ? `Pre-simulation revert: ${reason}` : "Pre-simulation revert",
+        )
       }
 
       const resp = await appsSdk.txs.send({ txs: [txData as any] })
@@ -638,8 +683,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     // Create the attestation request structure that matches EAS.attest() parameters
     const refUID =
-      (citizen?.attestationId as `0x${string}`) ??
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
+      (process.env.NEXT_PUBLIC_ENV === "prod"
+        ? (citizen?.attestationId as `0x${string}`)
+        : undefined) ||
+      ("0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`)
 
     const attestRequest = {
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
@@ -751,6 +798,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       throw new Error("Failed to initialize Safe SDK")
     }
 
+    // Resolve owner signer address early for downstream usage
+    const ownerSignerAddress = (await ownerSigner.getAddress()) as `0x${string}`
+
     const encoder = new SchemaEncoder(EAS_VOTE_SCHEMA)
     const args = {
       proposalId: proposalData.offchainProposalId,
@@ -765,10 +815,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       (citizen?.attestationId as `0x${string}`) ??
       "0x0000000000000000000000000000000000000000000000000000000000000000"
 
+    const recipientForAttest = safeAddress as `0x${string}`
     const attestRequest = {
       schema: OFFCHAIN_VOTE_SCHEMA_ID,
       data: {
-        recipient: safeAddress,
+        recipient: recipientForAttest,
         expirationTime: BigInt(0),
         revocable: false,
         refUID,
@@ -788,7 +839,38 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       operation: 0 as const,
     }
 
-    const ownerSignerAddress = (await ownerSigner.getAddress()) as `0x${string}`
+    // Pre-simulation: execute an eth_call from the Safe address against EAS
+    try {
+      const browserProvider = new ethers.BrowserProvider(
+        (pickedProvider || rpcProvider) as any,
+      )
+      // eth_call with from = Safe, to = EAS, data = encoded attest
+      const callReq = {
+        to: EAS_CONTRACT_ADDRESS,
+        from: safeAddress as `0x${string}`,
+        data: easInterface.encodeFunctionData("attest", [attestRequest]),
+      }
+      await (browserProvider as any).call(callReq)
+    } catch (err: any) {
+      // Try to extract a readable revert reason
+      const raw = String(
+        err?.shortMessage || err?.reason || err?.message || err,
+      )
+      const knownPrefix = "execution reverted:"
+      const reason = raw.includes(knownPrefix)
+        ? raw.slice(raw.indexOf(knownPrefix) + knownPrefix.length).trim()
+        : raw
+      console.error("Pre-simulation failed (EAS.attest)", { raw, reason })
+      toast.error(
+        reason
+          ? `Transaction will revert: ${reason}`
+          : "Transaction will revert. Check parameters and try again.",
+      )
+      throw new Error(
+        reason ? `Pre-simulation revert: ${reason}` : "Pre-simulation revert",
+      )
+    }
+
     const txHash = await safeService.proposeTransaction(
       safe,
       ownerSignerAddress,
@@ -886,7 +968,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           if (isSafeAppEnv) {
             console.log("[Voting] SAFE context inside Safe App → attest direct")
             // Direct Safe: send tx to EAS so Safe prompts confirmation in its UI
-            const attestationData = await createMultisigWalletAttestation(choices)
+            const attestationData = await createMultisigWalletAttestation(
+              choices,
+            )
             signerAddress = attestationData.signerAddress
             attestationId = attestationData.attestationId
             // Do not invalidate myVote: the Safe tx is only proposed; there is no vote recorded until execution
@@ -898,7 +982,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               selectedSafeWallet.address.toLowerCase()
             if (activeEqualsSafe) {
               // Multisig connected directly (no EOA): attest directly
-              console.log("[Voting] SAFE context with multisig-only → attest direct")
+              console.log(
+                "[Voting] SAFE context with multisig-only → attest direct",
+              )
               const attestationData = await createMultisigWalletAttestation(
                 choices,
               )
