@@ -52,6 +52,11 @@ jobs:
           node-version: 21
           cache: 'pnpm'
 
+      - name: Set Mailchimp environment variables
+        run: |
+          echo "MAILCHIMP_API_KEY=${{ secrets.MAILCHIMP_API_KEY }}" >> $GITHUB_ENV
+          echo "MAILCHIMP_SERVER_PREFIX=${{ secrets.MAILCHIMP_SERVER_PREFIX }}" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
