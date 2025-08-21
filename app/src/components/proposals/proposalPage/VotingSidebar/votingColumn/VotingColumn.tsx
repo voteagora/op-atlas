@@ -30,8 +30,6 @@ import {
   useUserByContext,
   useUserCitizen,
 } from "@/hooks/citizen/useUserCitizen"
-import { usePendingSafeVotes } from "@/hooks/safe/usePendingSafeVotes"
-import { usePendingSafeVotesForOwner } from "@/hooks/safe/usePendingSafeVotesForOwner"
 import { useWallet } from "@/hooks/useWallet"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
@@ -323,43 +321,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const { connector } = useAccount()
 
-  // Detect Safe proposals queued for the selected Safe and current proposal
-  const { pendingVotes, observeProposal } = usePendingSafeVotes(
-    selectedSafeWallet?.address,
-  )
-  const pendingSafeItem = useMemo(
-    () =>
-      (pendingVotes || []).find(
-        (v) => v.proposalId === String(proposalData.offchainProposalId),
-      ),
-    [pendingVotes, proposalData.offchainProposalId],
-  )
-
-  // Also detect across all Safes owned by the connected EOA
-  const { pendingVotes: ownerPendingVotes } = usePendingSafeVotesForOwner(
-    wallets?.[0]?.address,
-  )
-  const ownerPendingItem = useMemo(
-    () =>
-      (ownerPendingVotes || []).find(
-        (v) => v.proposalId === String(proposalData.offchainProposalId),
-      ),
-    [ownerPendingVotes, proposalData.offchainProposalId],
-  )
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (pendingSafeItem) {
-        observeProposal(String(pendingSafeItem.proposalId))
-      }
-    }, 2000)
-    return () => clearTimeout(t)
-  }, [
-    pendingSafeItem,
-    pendingSafeItem?.safeTxHash,
-    pendingVotes?.length,
-    observeProposal,
-  ])
+  // Pending Safe tracking removed
 
   const getSafeAppLink = (
     safeAddress?: string,
@@ -1224,25 +1186,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         </div>
 
         {/* Actions */}
-        {(pendingSafeItem || ownerPendingItem) && !myVote && (
-          <div className="w-full mb-3 p-3 border border-blue-300 bg-blue-50 text-blue-700 rounded">
-            <div className="text-xs">
-              Pending Safe vote. Open your Safe to approve and execute the
-              transaction.
-            </div>
-            <div className="mt-2 flex gap-2">
-              {selectedSafeWallet?.address && (
-                <a
-                  className="text-xs underline"
-                  target="_blank"
-                  href={getSafeAppLink(selectedSafeWallet.address)}
-                >
-                  Open in Safe
-                </a>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Pending Safe banner removed */}
         {proposalData.status === ProposalStatus.ACTIVE &&
           votingActions &&
           !myVote && (
@@ -1274,7 +1218,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                                 selectedVotes?.selections &&
                                 selectedVotes?.selections.length > 0
                               )))) ||
-                        !!(pendingSafeItem || ownerPendingItem),
+                        false,
                       loading: isVoting,
                     }
                   })}
