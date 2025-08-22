@@ -38,8 +38,10 @@ export function CompleteProfileCallout({
   const isComplete = progress === 100
 
   const onDismiss = () => {
+    // Use last 16 chars of privyDid for user-specific cookie (30 days expiry)
+    const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : 'default'
     document.cookie =
-      "completeProfileAccordionDismissed=true; max-age=31536000; path=/"
+      `completeProfileAccordionDismissed_${userIdentifier}=true; max-age=2592000; path=/`
     setIsCompleteProfileAccordionDismissed(true)
   }
 
