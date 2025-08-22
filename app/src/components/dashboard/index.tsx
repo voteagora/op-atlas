@@ -48,8 +48,10 @@ const Dashboard = ({
   organizations?: UserOrganizationsWithDetails[]
   adminProjects: ProjectWithDetails[]
 }) => {
+  // Use last 16 chars of privyDid for user-specific cookie
+  const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : 'default'
   const completeProfileAccordionDismissed = document.cookie.includes(
-    "completeProfileAccordionDismissed",
+    `completeProfileAccordionDismissed_${userIdentifier}`,
   )
   const [
     isCompleteProfileAccordionDismissed,
