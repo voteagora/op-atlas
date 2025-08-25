@@ -20,20 +20,28 @@ const VotingRedirect = ({
     eligibility?.type === CITIZEN_TYPES.chain ||
     eligibility?.type === CITIZEN_TYPES.app
 
+  const isCitizenHouseOnly = proposalData.proposalType.startsWith("OFFCHAIN")
+
   return (
     <div className="flex flex-col gap-0.5 w-[304px] justify-center items-center text-sm text-secondary-foreground">
-      <div className="flex flex-row gap-2 items-center">
-        <div className="font-medium">Are you a delegate?</div>
+      {isCitizenHouseOnly ? (
+        <div className="font-medium text-center">
+          Only the Citizen House can vote on this proposal.
+        </div>
+      ) : (
+        <div className="flex flex-row gap-2 items-center">
+          <div className="font-medium">Are you a delegate?</div>
 
-        <Link
-          className="underline"
-          href={getAgoraProposalLink(proposalData.id)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Vote here
-        </Link>
-      </div>
+          <Link
+            className="underline"
+            href={getAgoraProposalLink(proposalData.id)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Vote here
+          </Link>
+        </div>
+      )}
 
       <div className="flex flex-row gap-2 items-center">
         <div className="font-medium">Need help?</div>
