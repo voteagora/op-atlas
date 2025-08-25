@@ -740,6 +740,25 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     choices: string,
     safeAddress: string,
   ) => {
+    // Background poller to mark UI after Safe execution succeeds
+    const pollSafeExecution = async (safeTxHash: string) => {
+      const startedAt = Date.now()
+      const MAX_MS = 2 * 60 * 1000
+      const INTERVAL_MS = 3000
+      while (Date.now() - startedAt < MAX_MS) {
+        try {
+          const tx = await safeService.getTransactionByHash(safeTxHash)
+          const isDone = tx && tx.isExecuted === true && tx.isSuccessful === true
+          if (isDone) {
+            invalidateMyVote()
+            toast.success("Vote cast and recorded!")
+            setShowConfetti(true)
+            return
+          }
+        } catch (_e) {}
+        await new Promise((r) => setTimeout(r, INTERVAL_MS))
+      }
+    }
     const SAFE_CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
     const currentChainId = getChainId(privyWagmiConfig)
     if (currentChainId !== SAFE_CHAIN_ID) {
@@ -839,6 +858,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       operation: 0 as const,
     }
 
+    // Assert selector matches EAS.attest (with value)
+    if (!String(txData.data).toLowerCase().startsWith("0xf17325e7")) {
+      throw new Error("Invalid EAS encode: expected attest selector 0xF17325E7")
+    }
+
     // Pre-simulation: execute an eth_call from the Safe address against EAS
     try {
       const browserProvider = new ethers.BrowserProvider(
@@ -879,6 +903,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     if (!txHash) {
       throw new Error("Failed to propose Safe transaction")
     }
+
+    // Fire-and-forget poll; do not block the main flow
+    pollSafeExecution(txHash)
 
     return {
       attestationId: txHash,
@@ -1027,11 +1054,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             isSmartContract,
             citizenAddress: citizen?.address,
           })
-          // EOA + selected Safe: always propose via Safe Transaction Service (opens Safe UI)
-          const attestationData = await createSafeVoteTransactionForAddress(
-            choices,
-            targetSafeAddress,
-          )
+          // EOA + selected Safe: propose via Safe Transaction Service (opens Safe UI)
+          const attestationData = await createSafeVoteTransactionForAddress(choices, targetSafeAddress)
           signerAddress = attestationData.signerAddress
           attestationId = attestationData.attestationId
           skipInvalidate = true
