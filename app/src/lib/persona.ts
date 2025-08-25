@@ -22,6 +22,28 @@ export const caseStatusMap = {
   "Ready for Review": "PENDING",
 } as const
 
+// Add a function to map case statuses to valid PersonaStatus enum values
+export function mapCaseStatusToPersonaStatus(caseStatus: string): string {
+  const status = caseStatus.toLowerCase()
+
+  // Map to valid PersonaStatus enum values
+  switch (status) {
+    case "approved":
+      return "approved"
+    case "declined":
+      return "declined"
+    case "open":
+    case "created":
+    case "expired":
+    case "waiting on ubos":
+    case "ready for review":
+      return "pending"
+    default:
+      console.warn(`Unknown case status: ${caseStatus}, defaulting to pending`)
+      return "pending"
+  }
+}
+
 export type PersonaInquiry = {
   id: string
   attributes: {
@@ -61,6 +83,9 @@ export type PersonaCase = {
         value: string
       }
     }
+  }
+  relationships: {
+    inquiries: { data: { type: string; id: string }[] }
   }
 }
 
@@ -139,7 +164,7 @@ class PersonaClient {
   }
 }
 
-const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
+export const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
 
 async function* fetchGenerator<T>(
   client: PersonaClient,

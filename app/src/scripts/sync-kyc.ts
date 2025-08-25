@@ -46,6 +46,28 @@ const caseStatusMap = {
   "Ready for Review": "PENDING",
 } as const
 
+// Add a function to map case statuses to valid PersonaStatus enum values
+function mapCaseStatusToPersonaStatus(caseStatus: string): string {
+  const status = caseStatus.toLowerCase()
+
+  // Map to valid PersonaStatus enum values
+  switch (status) {
+    case "approved":
+      return "approved"
+    case "declined":
+      return "declined"
+    case "open":
+    case "created":
+    case "expired":
+    case "waiting on ubos":
+    case "ready for review":
+      return "pending"
+    default:
+      console.warn(`Unknown case status: ${caseStatus}, defaulting to pending`)
+      return "pending"
+  }
+}
+
 type PersonaInquiry = {
   id: string
   attributes: {
@@ -307,20 +329,11 @@ async function processPersonaCases(cases: PersonaCase[]) {
   await Promise.all(
     cases.map(async (c) => {
       if (Object.keys(c.attributes.fields).length === 0) {
-        console.warn(`No fields found for case ${c.id}`)
         return
       }
 
       const {
-        attributes: {
-          fields: {
-            "form-filler-email-address": { value: email },
-            "business-name": { value: businessName },
-          },
-          "updated-at": updatedAt,
-          status,
-          "reference-id": referenceId,
-        },
+        attributes: { "updated-at": updatedAt, status },
         relationships: {
           inquiries: { data: inquiries },
         },
@@ -333,48 +346,27 @@ async function processPersonaCases(cases: PersonaCase[]) {
           console.warn(`Missing inquiry id in case ${c.id}`)
           continue
         }
-        // getInquiryById is available on personaClient
+
         const inquiry: PersonaInquiry | null =
           await personaClient.getInquiryById(inquiryId)
+
         if (!inquiry) {
           console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)
           continue
         }
         if (inquiry.attributes["reference-id"]) {
-          console.log("++++++++++++++++++++++++++++++++")
-          console.log(inquiry.attributes["reference-id"])
-          console.log(
-            inquiry.attributes.fields["form-filler-email-address"].value,
+          const parsedStatus =
+            caseStatusMap[status as keyof typeof caseStatusMap]
+          const personaStatus = mapCaseStatusToPersonaStatus(status)
+
+          await updateKYBUserStatus(
+            parsedStatus,
+            new Date(updatedAt),
+            personaStatus,
+            inquiry.attributes["reference-id"],
           )
-          console.log(inquiry.attributes.fields["form-filler-name-first"].value)
-          console.log(inquiry.attributes.fields["form-filler-name-last"].value)
-          // console.log(businessName, "REFERECE ID ", inquiry.attributes["reference-id"], inquiry.attributes["status"], inquiry.attributes["email-address"])
-          console.log("++++++++++++++++++++++++++++++++")
         }
       }
-
-      if (!email || !businessName) {
-        console.warn(`Missing required fields for case ${c.id}`)
-        return
-      }
-
-      const parsedStatus = caseStatusMap[status as keyof typeof caseStatusMap]
-
-      if (!parsedStatus) {
-        return
-      }
-
-      if (!referenceId) {
-        console.warn(`Missing reference id for case ${c.id}`)
-        return
-      }
-
-      await updateKYBUserStatus(
-        parsedStatus,
-        new Date(updatedAt),
-        status,
-        referenceId,
-      )
     }),
   )
 }
@@ -423,8 +415,8 @@ async function syncPersonaData() {
   try {
     // Follow the same pattern as the cron job
     await Promise.all([
+      getAndProcessPersonaInquiries(),
       getAndProcessPersonaCases(),
-      // getAndProcessPersonaInquiries(),
     ])
 
     console.log("✅ Persona data synced successfully")
