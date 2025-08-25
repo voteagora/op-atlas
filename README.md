@@ -55,4 +55,11 @@ Each package has its own README with detailed setup and development instructions
 pnpm revoke:citizenship 0x123...456
 ```
 
+
+2. Create mock citizenship records with attestations. Since we’re using Privy, the wallet needs to be associated with an account. To achieve this, a tester needs to log in using a test wallet at least once. After that’s done, rerun the script to create a citizenship record.
+
+```bash
+pnpm create:mock-citizens
+```
+
 The app will be available at [http://localhost:3000](http://localhost:3000).
