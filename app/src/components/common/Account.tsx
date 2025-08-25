@@ -42,6 +42,185 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { safeService } from "@/services/SafeService"
 
+// EOA Wallet Menu Item Component
+type EOAWalletMenuItemProps = {
+  currentContext: string
+  signerWallet: any
+  isSafeEnv: boolean
+  isSafeConnected: boolean
+  switchToEOA: () => void
+}
+
+// Profile Menu Item Component
+type ProfileMenuItemProps = {
+  href: string
+  label: string
+  currentContext: string
+}
+
+// Profile Menu Item Component
+const ProfileMenuItem = ({
+  href,
+  label,
+  currentContext,
+}: ProfileMenuItemProps) => {
+  return currentContext === "EOA" ? (
+    <Link href={href}>
+      <DropdownMenuItem className="cursor-pointer">{label}</DropdownMenuItem>
+    </Link>
+  ) : (
+    <DropdownMenuItem
+      className="cursor-pointer text-muted-foreground opacity-50"
+      disabled
+    >
+      {label}
+    </DropdownMenuItem>
+  )
+}
+
+const EOAWalletMenuItem = ({
+  currentContext,
+  signerWallet,
+  isSafeEnv,
+  isSafeConnected,
+  switchToEOA,
+}: EOAWalletMenuItemProps) => {
+  // Hide EOA only when the CONNECTED account is a Safe (Safe app or signer equals Safe)
+  // Hide EOA when in Safe App env, or when API confirms connected is a Safe,
+  // or when signer matches the last persisted Safe address
+  const lastSafe =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("atlas_selected_safe_address")
+      : null
+  const signerIsPersistedSafe = !!(
+    lastSafe &&
+    signerWallet?.address &&
+    lastSafe.toLowerCase() === signerWallet.address.toLowerCase()
+  )
+  const shouldHideEOA = isSafeEnv || isSafeConnected || signerIsPersistedSafe
+
+  if (shouldHideEOA) return null
+
+  return (
+    <DropdownMenuItem
+      className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
+        currentContext === "EOA" ? "bg-gray-100" : ""
+      }`}
+      onClick={() => switchToEOA()}
+    >
+      <div className="flex items-center gap-2">
+        <div
+          className={`w-2 h-2 rounded-full ${
+            currentContext === "EOA" ? "bg-green-500" : "bg-gray-300"
+          }`}
+        />
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">EOA Wallet</span>
+          <span className="text-xs text-muted-foreground">
+            {signerWallet?.address
+              ? `${signerWallet.address.slice(
+                  0,
+                  6,
+                )}...${signerWallet.address.slice(-4)}`
+              : "Not connected"}
+          </span>
+        </div>
+      </div>
+      {currentContext === "EOA" && (
+        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+          Active
+        </span>
+      )}
+    </DropdownMenuItem>
+  )
+}
+
+// Safe Wallets Menu Items Component
+type SafeWalletsMenuItemsProps = {
+  availableSafeWallets: any[]
+  selectedSafeWallet: any
+  isSafeConnected: boolean
+  signerWallet: any
+  currentContext: string
+  isLoadingSafeWallets: boolean
+  switchToSafe: (address: string) => void
+}
+
+const SafeWalletsMenuItems = ({
+  availableSafeWallets,
+  selectedSafeWallet,
+  isSafeConnected,
+  signerWallet,
+  currentContext,
+  isLoadingSafeWallets,
+  switchToSafe,
+}: SafeWalletsMenuItemsProps) => {
+  const getSafesToRender = () => {
+    if (availableSafeWallets.length > 0) return availableSafeWallets
+    if (selectedSafeWallet) return [selectedSafeWallet]
+    if (isSafeConnected && signerWallet?.address)
+      return [{ address: signerWallet.address }] as any
+    // Persisted last-safe fallback to avoid disappearing block
+    if (typeof window !== "undefined") {
+      const last = window.localStorage.getItem("atlas_selected_safe_address")
+      if (last) return [{ address: last }] as any
+    }
+    return []
+  }
+
+  const safesToRender = getSafesToRender()
+
+  if (safesToRender.length === 0) return null
+
+  return (
+    <>
+      <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+        Safe Wallets {isLoadingSafeWallets && "(Loading...)"}
+      </DropdownMenuLabel>
+      {safesToRender.map((safeWallet: any) => (
+        <DropdownMenuItem
+          key={safeWallet.address}
+          className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
+            currentContext === "SAFE" &&
+            selectedSafeWallet?.address === safeWallet.address
+              ? "bg-gray-100"
+              : ""
+          }`}
+          onClick={() => switchToSafe(safeWallet.address)}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                currentContext === "SAFE" &&
+                selectedSafeWallet?.address === safeWallet.address
+                  ? "bg-blue-500"
+                  : "bg-gray-300"
+              }`}
+            />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">Safe Wallet</span>
+              <span className="text-xs text-muted-foreground">
+                {`${safeWallet.address.slice(
+                  0,
+                  6,
+                )}...${safeWallet.address.slice(-4)}`}
+              </span>
+            </div>
+          </div>
+          {currentContext === "SAFE" &&
+            (selectedSafeWallet?.address === safeWallet.address ||
+              (!selectedSafeWallet &&
+                signerWallet?.address === safeWallet.address)) && (
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                Active
+              </span>
+            )}
+        </DropdownMenuItem>
+      ))}
+    </>
+  )
+}
+
 export const Account = () => {
   const { user: privyUser, getAccessToken } = usePrivy()
 
@@ -168,9 +347,7 @@ export const Account = () => {
     // Decide if we must resolve as SAFE (to avoid EOA flash) or EOA
     const mustResolveAsSafe =
       // If running inside Safe app, force SAFE to avoid spinner hanging waiting for API
-      isSafeEnv ||
-      savedPreferredContext === "SAFE" ||
-      isSafeConnected
+      isSafeEnv || savedPreferredContext === "SAFE" || isSafeConnected
 
     const safeResolved =
       currentContext === "SAFE" &&
@@ -349,18 +526,20 @@ export const Account = () => {
                 <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
 
                 {/* Wallet context indicator */}
-                {currentContext === "SAFE" && (
-                  <div
-                    className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"
-                    title="Safe Wallet Active"
-                  />
-                )}
-                {currentContext === "EOA" && (
-                  <div
-                    className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
-                    title="EOA Wallet Active"
-                  />
-                )}
+                {currentContext === "SAFE" &&
+                  availableSafeWallets.length > 0 && (
+                    <div
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"
+                      title="Safe Wallet Active"
+                    />
+                  )}
+                {currentContext === "EOA" &&
+                  availableSafeWallets.length > 0 && (
+                    <div
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
+                      title="EOA Wallet Active"
+                    />
+                  )}
 
                 <span className="hidden sm:inline">
                   {currentContext === "SAFE"
@@ -384,7 +563,7 @@ export const Account = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="w-64 flex flex-col gap-1 z-[9999]"
+          className="w-56 flex flex-col gap-1 z-[9999]"
         >
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
@@ -393,152 +572,54 @@ export const Account = () => {
           </Link>
 
           {/* Current EOA Wallet */}
-          {(() => {
-            // Hide EOA only when the CONNECTED account is a Safe (Safe app or signer equals Safe)
-            // Hide EOA when in Safe App env, or when API confirms connected is a Safe,
-            // or when signer matches the last persisted Safe address
-            const lastSafe =
-              typeof window !== "undefined"
-                ? window.localStorage.getItem("atlas_selected_safe_address")
-                : null
-            const signerIsPersistedSafe = !!(
-              lastSafe &&
-              signerWallet?.address &&
-              lastSafe.toLowerCase() === signerWallet.address.toLowerCase()
-            )
-            const shouldHideEOA =
-              isSafeEnv || isSafeConnected || signerIsPersistedSafe
-
-            if (shouldHideEOA) return null
-
-            return (
-              <DropdownMenuItem
-                className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
-                  currentContext === "EOA" ? "bg-gray-100" : ""
-                }`}
-                onClick={() => switchToEOA()}
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      currentContext === "EOA" ? "bg-green-500" : "bg-gray-300"
-                    }`}
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">EOA Wallet</span>
-                    <span className="text-xs text-muted-foreground">
-                      {signerWallet?.address
-                        ? `${signerWallet.address.slice(
-                            0,
-                            6,
-                          )}...${signerWallet.address.slice(-4)}`
-                        : "Not connected"}
-                    </span>
-                  </div>
-                </div>
-                {currentContext === "EOA" && (
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                    Active
-                  </span>
-                )}
-              </DropdownMenuItem>
-            )
-          })()}
+          {availableSafeWallets.length > 0 && (
+            <EOAWalletMenuItem
+              currentContext={currentContext}
+              signerWallet={signerWallet}
+              isSafeEnv={isSafeEnv}
+              isSafeConnected={isSafeConnected}
+              switchToEOA={switchToEOA}
+            />
+          )}
 
           {/* Safe Wallets */}
-          {(() => {
-            const safesToRender = (() => {
-              if (availableSafeWallets.length > 0) return availableSafeWallets
-              if (selectedSafeWallet) return [selectedSafeWallet]
-              if (isSafeConnected && signerWallet?.address)
-                return [{ address: signerWallet.address }] as any
-              // Persisted last-safe fallback to avoid disappearing block
-              if (typeof window !== "undefined") {
-                const last = window.localStorage.getItem(
-                  "atlas_selected_safe_address",
-                )
-                if (last) return [{ address: last }] as any
-              }
-              return []
-            })()
-
-            if (safesToRender.length === 0) return null
-
-            return (
-              <>
-                <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-                  Safe Wallets {isLoadingSafeWallets && "(Loading...)"}
-                </DropdownMenuLabel>
-                {safesToRender.map((safeWallet: any) => (
-                  <DropdownMenuItem
-                    key={safeWallet.address}
-                    className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
-                      currentContext === "SAFE" &&
-                      selectedSafeWallet?.address === safeWallet.address
-                        ? "bg-gray-100"
-                        : ""
-                    }`}
-                    onClick={() => switchToSafe(safeWallet.address)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          currentContext === "SAFE" &&
-                          selectedSafeWallet?.address === safeWallet.address
-                            ? "bg-blue-500"
-                            : "bg-gray-300"
-                        }`}
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">Safe Wallet</span>
-                        <span className="text-xs text-muted-foreground">
-                          {`${safeWallet.address.slice(
-                            0,
-                            6,
-                          )}...${safeWallet.address.slice(-4)}`}
-                        </span>
-                      </div>
-                    </div>
-                    {currentContext === "SAFE" &&
-                      (selectedSafeWallet?.address === safeWallet.address ||
-                        (!selectedSafeWallet &&
-                          signerWallet?.address === safeWallet.address)) && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                          Active
-                        </span>
-                      )}
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )
-          })()}
-
-          <DropdownMenuSeparator />
-          <Link href="/profile/details">
-            <DropdownMenuItem className="cursor-pointer">
-              Profile details
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/profile/connected-apps">
-            <DropdownMenuItem className="cursor-pointer">
-              Connected apps
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/profile/verified-addresses">
-            <DropdownMenuItem className="cursor-pointer">
-              Verified addresses
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/profile/organizations/new">
-            <DropdownMenuItem className="cursor-pointer">
-              Organizations
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/citizenship">
-            <DropdownMenuItem className="cursor-pointer">
-              Citizen Registration
-            </DropdownMenuItem>
-          </Link>
+          {availableSafeWallets.length > 0 && (
+            <SafeWalletsMenuItems
+              availableSafeWallets={availableSafeWallets}
+              selectedSafeWallet={selectedSafeWallet}
+              isSafeConnected={isSafeConnected}
+              signerWallet={signerWallet}
+              currentContext={currentContext}
+              isLoadingSafeWallets={isLoadingSafeWallets}
+              switchToSafe={switchToSafe}
+            />
+          )}
+          <hr className="w-full border-[0.5px] border-border" />
+          <ProfileMenuItem
+            href="/profile/details"
+            label="Profile details"
+            currentContext={currentContext}
+          />
+          <ProfileMenuItem
+            href="/profile/connected-apps"
+            label="Connected apps"
+            currentContext={currentContext}
+          />
+          <ProfileMenuItem
+            href="/profile/verified-addresses"
+            label="Verified addresses"
+            currentContext={currentContext}
+          />
+          <ProfileMenuItem
+            href="/profile/organizations/new"
+            label="Organizations"
+            currentContext={currentContext}
+          />
+          <ProfileMenuItem
+            href="/citizenship"
+            label="Citizen Registration"
+            currentContext={currentContext}
+          />
           <hr className="w-full border-[0.5px] border-border" />
           <DropdownMenuItem
             className="cursor-pointer"
