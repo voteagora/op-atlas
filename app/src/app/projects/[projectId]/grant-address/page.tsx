@@ -6,10 +6,11 @@ import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { Button } from "@/components/common/Button"
 import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
-import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
 import { getKycTeamForProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 
+import { AddGrantDeliveryAddressContainer } from "./components"
+import KYCStatusContainer from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
 export async function generateMetadata({
   params,
 }: {
@@ -49,6 +50,8 @@ export default async function Page({
 
   const kycTeam = project?.kycTeam ?? undefined
 
+  console.log(project?.organization)
+
   return (
     <div className="space-y-12">
       <div className="space-y-6">
@@ -61,24 +64,7 @@ export default async function Page({
           KYC (identity verification) is required for each address.
         </p>
       </div>
-      {project?.organization?.organization?.id ? (
-        <>
-          <GrantDeliveryAddress kycTeam={kycTeam} />
-          <Button>
-            <Link
-              href={`/profile/organizations/${project.organization.organization.id}/grant-address`}
-            >
-              Go to organization settings
-            </Link>
-          </Button>
-        </>
-      ) : (
-        <div className="space-y-6">
-          <GrantDeliveryAddressSection 
-            projectId={params.projectId}
-          />
-        </div>
-      )}
+      <KYCStatusContainer />
     </div>
   )
 }
