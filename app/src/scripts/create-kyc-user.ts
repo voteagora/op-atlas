@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client"
+import { sendKYCStartedEmail } from "@/lib/actions/emails"
 
 const prisma = new PrismaClient()
 
@@ -47,6 +48,58 @@ async function createKYCUser({
         expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
       },
     })
+
+    // Send welcome email to the new user
+    try {
+      console.log("📧 Attempting to send welcome email to:", newUser.email)
+      console.log("📧 User data being sent:", {
+        id: newUser.id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        businessName: newUser.businessName
+      })
+
+      console.log("🔍 [DEBUG] sendKYCStartedEmail function:", typeof sendKYCStartedEmail)
+      console.log("🔍 [DEBUG] About to call sendKYCStartedEmail...")
+
+      // Test direct call to sendTransactionEmail to see if debugging works
+      console.log("🔍 [DEBUG] Testing direct sendTransactionEmail call...")
+      try {
+        const { sendTransactionEmail } = await import("@/lib/actions/emails")
+        console.log("🔍 [DEBUG] sendTransactionEmail imported successfully:", typeof sendTransactionEmail)
+
+        // Test with a simple email
+        const testResult = await sendTransactionEmail({
+          to: "test@example.com",
+          subject: "Test Email",
+          html: "<p>Test</p>",
+          from: "noreply@mailchimp.com"
+        })
+        console.log("🔍 [DEBUG] Direct sendTransactionEmail test result:", testResult)
+      } catch (testError) {
+        console.log("🔍 [DEBUG] Direct sendTransactionEmail test failed:", testError)
+      }
+
+      const emailResult = await sendKYCStartedEmail(newUser)
+      console.log("📧 Email sending result:", emailResult)
+
+      if (emailResult.success) {
+        console.log("✅ Welcome email sent successfully")
+      } else {
+        console.log("⚠️  Welcome email failed to send")
+        console.log("⚠️  Error details:", emailResult.error)
+        console.log("⚠️  Full result object:", JSON.stringify(emailResult, null, 2))
+      }
+    } catch (emailError) {
+      console.log("❌ Exception occurred while sending welcome email:")
+      console.log("❌ Error type:", emailError?.constructor?.name)
+      console.log("❌ Error message:", emailError instanceof Error ? emailError.message : String(emailError))
+      console.log("❌ Full error object:", JSON.stringify(emailError, null, 2))
+      if (emailError instanceof Error && emailError.stack) {
+        console.log("❌ Stack trace:", emailError.stack)
+      }
+    }
 
     console.log("✅ KYC user created successfully:")
     console.log({
