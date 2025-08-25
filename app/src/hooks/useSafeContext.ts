@@ -151,7 +151,8 @@ export const useSafeContext = ({
     )
 
     const apply = async () => {
-      const target = existing || (await safeService.getSafeInfoByAddress(savedSafe))
+      // Only rehydrate SAFE if the persisted Safe exists in the filtered list (EOA is owner)
+      const target = existing
       if (!target) return
       setState((prev) => ({
         ...prev,

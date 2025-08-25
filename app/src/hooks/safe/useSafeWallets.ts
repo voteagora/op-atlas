@@ -2,17 +2,23 @@
  * React Query hook for Safe wallet operations
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { safeService } from '@/services/SafeService'
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+
+import { safeService } from "@/services/SafeService"
 
 export const useSafeWallets = (signerAddress: string | null) => {
   return useQuery({
-    queryKey: ['safe-wallets', signerAddress],
-    queryFn: () => {
-      if (!signerAddress) {
-        return Promise.resolve([])
-      }
-      return safeService.getSafeWalletsForSigner(signerAddress)
+    queryKey: ["safe-wallets", signerAddress],
+    queryFn: async () => {
+      if (!signerAddress) return []
+      const safes = await safeService.getSafeWalletsForSigner(signerAddress)
+      const signerLc = signerAddress.toLowerCase()
+      // Defensive filter: only keep safes where the active EOA is an owner
+      return safes.filter(
+        (s) =>
+          Array.isArray(s.owners) &&
+          s.owners.some((o) => o.toLowerCase() === signerLc),
+      )
     },
     enabled: !!signerAddress,
     staleTime: 5 * 60 * 1000, // 5 minutes
