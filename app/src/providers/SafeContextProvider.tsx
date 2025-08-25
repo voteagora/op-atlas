@@ -6,7 +6,9 @@
 "use client"
 
 import { usePrivy } from "@privy-io/react-auth"
+import { usePathname, useRouter } from "next/navigation"
 import { createContext, ReactNode, useContext, useEffect, useMemo } from "react"
+import { toast } from "sonner"
 import { useAccount } from "wagmi"
 
 import { useSafeContext } from "@/hooks/useSafeContext"
@@ -63,6 +65,41 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
     signerWallet,
     enabled: !!signerWallet,
   })
+
+  // Global navigation guard for SAFE: block disallowed routes at click-time
+  useEffect(() => {
+    function onClickCapture(e: MouseEvent) {
+      if (safeContextValue.currentContext !== "SAFE") return
+      const target = e.target as HTMLElement
+      const anchor = (target.closest &&
+        target.closest("a")) as HTMLAnchorElement | null
+      if (!anchor) return
+      const href = anchor.getAttribute("href") || ""
+      if (/^(https?:|mailto:|#)/.test(href)) return
+      const SAFE_ALLOWED = ["/proposals", "/rounds"]
+      const isAllowed = SAFE_ALLOWED.some((p) => href.startsWith(p))
+      if (!isAllowed) {
+        e.preventDefault()
+        e.stopPropagation()
+        toast.info("Switch to EOA to perform this action")
+      }
+    }
+    document.addEventListener("click", onClickCapture, true)
+    return () => document.removeEventListener("click", onClickCapture, true)
+  }, [safeContextValue.currentContext])
+
+  // Path-based guard if user already landed on a disallowed page while in SAFE
+  const pathname = usePathname()
+  const router = useRouter()
+  useEffect(() => {
+    if (safeContextValue.currentContext !== "SAFE") return
+    const SAFE_ALLOWED = ["/proposals", "/rounds"]
+    const isAllowed = SAFE_ALLOWED.some((p) => pathname?.startsWith(p))
+    if (!isAllowed) {
+      toast.info("Switch to EOA to perform this action")
+      router.replace("/proposals")
+    }
+  }, [safeContextValue.currentContext, pathname, router])
 
   // Auto-refresh Safe wallets when signer changes
   // Using a stable dependency array to prevent unnecessary effect triggers
