@@ -242,6 +242,19 @@ export async function updateClaim(
   })
 }
 
+export async function ensureClaim(rewardId: string) {
+  return prisma.rewardClaim.upsert({
+    where: {
+      rewardId,
+    },
+    update: {},
+    create: {
+      rewardId,
+      status: "pending",
+    },
+  })
+}
+
 async function getClaimByRewardIdFn({ rewardId }: { rewardId: string }) {
   return prisma.rewardClaim.findFirst({
     where: {
