@@ -98,14 +98,6 @@ export const useSafeContext = ({
           6,
         )}...${targetSafe.address.slice(-4)}`,
       )
-
-      // Persist selection for reloads
-      try {
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem("atlas_wallet_context", "SAFE")
-          window.localStorage.setItem("atlas_selected_safe_address", targetSafe.address)
-        }
-      } catch (_e) {}
     },
     [state.availableSafeWallets],
   )
@@ -128,42 +120,10 @@ export const useSafeContext = ({
       toast.success("Switched to EOA wallet")
     }
     // Persist context for reloads
-    try {
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("atlas_wallet_context", "EOA")
-        // Clear last selected safe address to prevent accidental Safe path
-        window.localStorage.removeItem("atlas_selected_safe_address")
-      }
-    } catch (_e) {}
+    // No persistence by design
   }, [signerWallet?.address])
 
-  // Restore persisted context on mount / signer change
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const savedContext = window.localStorage.getItem("atlas_wallet_context")
-    const savedSafe = window.localStorage.getItem("atlas_selected_safe_address")
-    if (savedContext !== "SAFE" || !savedSafe) return
-
-    if (state.currentContext === "SAFE" && state.selectedSafeWallet) return
-
-    const existing = availableSafeWallets.find(
-      (s) => s.address.toLowerCase() === savedSafe.toLowerCase(),
-    )
-
-    const apply = async () => {
-      // Only rehydrate SAFE if the persisted Safe exists in the filtered list (EOA is owner)
-      const target = existing
-      if (!target) return
-      setState((prev) => ({
-        ...prev,
-        currentContext: "SAFE",
-        selectedSafeWallet: target,
-        error: null,
-      }))
-    }
-
-    apply()
-  }, [availableSafeWallets, state.currentContext, state.selectedSafeWallet])
+  // No persisted rehydration by design
 
   // Check if a feature is enabled in current context
   const isFeatureEnabled = useCallback(

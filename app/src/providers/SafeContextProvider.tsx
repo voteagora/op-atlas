@@ -64,6 +64,8 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
     enabled: !!signerWallet,
   })
 
+  // No global navigation restrictions in SAFE mode
+
   // Auto-refresh Safe wallets when signer changes
   // Using a stable dependency array to prevent unnecessary effect triggers
   useEffect(() => {
