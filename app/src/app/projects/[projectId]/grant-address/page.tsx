@@ -7,6 +7,7 @@ import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAdd
 import { getKycTeamForProject } from "@/db/projects"
 
 import { AddGrantDeliveryAddressContainer } from "./components"
+import KYCStatusContainer from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
 
 export default async function Page({
   params,
@@ -38,33 +39,34 @@ export default async function Page({
           KYC (identity verification) is required for each address.
         </p>
       </div>
-      {project?.organization?.organization?.id ? (
-        <>
-          <GrantDeliveryAddress kycTeam={kycTeam} />
-          <Button>
-            <Link
-              href={`/profile/organizations/${project.organization.organization.id}/grant-address`}
-            >
-              Go to organization settings
-            </Link>
-          </Button>
-        </>
-      ) : (
-        <div className="space-y-6">
-          <AddGrantDeliveryAddressContainer projectId={params.projectId} />
-          <div>
-            <p className="text-secondary-foreground text-sm font-normal">
-              Need help? Contact{" "}
-              <Link
-                href="mailto:retrofunding@optimism.io"
-                className="underline"
-              >
-                retrofunding@optimism.io
-              </Link>
-            </p>
-          </div>
-        </div>
-      )}
+      {/*{project?.organization?.organization?.id ? (*/}
+      {/*  <>*/}
+      {/*    <GrantDeliveryAddress kycTeam={kycTeam} />*/}
+      {/*    <Button>*/}
+      {/*      <Link*/}
+      {/*        href={`/profile/organizations/${project.organization.organization.id}/grant-address`}*/}
+      {/*      >*/}
+      {/*        Go to organization settings*/}
+      {/*      </Link>*/}
+      {/*    </Button>*/}
+      {/*  </>*/}
+      {/*) : (*/}
+      {/*  <div className="space-y-6">*/}
+      {/*    <AddGrantDeliveryAddressContainer projectId={params.projectId} />*/}
+      {/*    <div>*/}
+      {/*      <p className="text-secondary-foreground text-sm font-normal">*/}
+      {/*        Need help? Contact{" "}*/}
+      {/*        <Link*/}
+      {/*          href="mailto:retrofunding@optimism.io"*/}
+      {/*          className="underline"*/}
+      {/*        >*/}
+      {/*          retrofunding@optimism.io*/}
+      {/*        </Link>*/}
+      {/*      </p>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*)}*/}
+      <KYCStatusContainer />
     </div>
   )
 }
