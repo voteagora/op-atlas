@@ -1,5 +1,6 @@
 "use client"
 
+import * as Sentry from "@sentry/nextjs"
 import React, { Component, ErrorInfo, ReactNode } from "react"
 
 import Error from "@/app/error"
@@ -26,13 +27,13 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // You can log the error to an error reporting service
     console.error("Error caught by ErrorBoundary:", error, errorInfo)
+    // Send error to Sentry
+    Sentry.captureException(error)
   }
 
   render(): ReactNode {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return this.props.fallback || <Error />
     }
 
