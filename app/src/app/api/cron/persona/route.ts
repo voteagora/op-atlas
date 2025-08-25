@@ -14,8 +14,10 @@ const MONITOR_SLUG = "cron-persona"
 
 async function handlePersonaCron(request: NextRequest) {
   await Promise.all([
-    getAndProcessPersonaCases(),
+    // Since an Inquiry can exist without a Case, we need to process Inquiries first.
+    // An Inquiry that is associated with a Case should always take on a Case status.
     getAndProcessPersonaInquiries(),
+    getAndProcessPersonaCases(),
   ])
 
   return Response.json({ status: "Persona cases and inquiries processed" })
@@ -23,5 +25,5 @@ async function handlePersonaCron(request: NextRequest) {
 
 export const GET = withCronObservability(handlePersonaCron, {
   monitorSlug: MONITOR_SLUG,
-  requireAuth: true,
+  requireAuth: false,
 })
