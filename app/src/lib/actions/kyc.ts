@@ -145,10 +145,8 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
     inquiries.map(async (inquiry) => {
       const {
         attributes: {
-          "email-address": email,
-          "name-first": firstName,
-          "name-last": lastName,
           "updated-at": updatedAt,
+          "reference-id": referenceId,
           status,
         },
       } = inquiry
@@ -161,16 +159,18 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
         return
       }
 
-      if (!email || !firstName || !lastName) {
-        console.warn(`Missing required fields for inquiry ${inquiry.id}`)
+      if (!referenceId) {
+        console.warn(
+          `Missing the required referecedId for inquiry ${inquiry.id}`,
+        )
         return
       }
 
       await updateKYCUserStatus(
-        `${firstName.split(" ")[0]} ${lastName}`,
-        email,
         parsedStatus,
         new Date(updatedAt),
+        status,
+        referenceId,
       )
     }),
   )
@@ -192,10 +192,11 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           },
           "updated-at": updatedAt,
           status,
+          "reference-id": referenceId,
         },
       } = c
 
-      if (!email || !businessName) {
+      if (!referenceId) {
         console.warn(`Missing required fields for case ${c.id}`)
         return
       }
@@ -208,10 +209,10 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
       }
 
       await updateKYBUserStatus(
-        businessName,
-        email,
         parsedStatus,
         new Date(updatedAt),
+        status,
+        referenceId,
       )
     }),
   )
