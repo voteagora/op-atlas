@@ -10,12 +10,23 @@ export async function vote(
   signerAddress: string,
   citizenRefUID: string,
 ) {
-  return await createDelegatedVoteAttestation(
-    data,
-    delegateAttestationSignature,
-    signerAddress,
-    citizenRefUID,
-  )
+  try {
+    console.info("[vote] createDelegatedVoteAttestation params:", {
+      dataLength: data?.length,
+      signerAddress,
+      hasSignature: !!delegateAttestationSignature,
+      citizenRefUID,
+    })
+    const uid = await createDelegatedVoteAttestation(
+      data,
+      delegateAttestationSignature,
+      signerAddress,
+      citizenRefUID,
+    )
+    console.info("[vote] attested UID:", uid)
+    return uid
+  } catch (error) {
+    console.error("[vote] error:", error)
+    throw error
+  }
 }
-
-

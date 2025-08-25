@@ -16,7 +16,7 @@ export const verifyUserAddress = async (
   address: `0x${string}`,
   signature: `0x${string}`,
 ) => {
-  const checksumAddress = getAddress(address)
+  const checksumAddress = getAddress(address) as `0x${string}`
   const session = await auth()
 
   if (!session?.user?.id) {

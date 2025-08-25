@@ -74,7 +74,6 @@ const getStandardProposals = async (offset?: number) => {
           Authorization: `Bearer ${process.env.AGORA_API_KEY}`,
           "Content-Type": "application/json",
         },
-        cache: "no-store", // For dynamic data
       },
     )
 
@@ -332,7 +331,6 @@ export const getProposal = async (id: string): Promise<ProposalData> => {
         Authorization: `Bearer ${process.env.AGORA_API_KEY}`,
         "Content-Type": "application/json",
       },
-      cache: "no-store", // For dynamic data
     },
   )
 

@@ -4,13 +4,13 @@ import { optimism, sepolia } from "viem/chains"
 
 export const OFFCHAIN_VOTE_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e"
-    : "0xc113116804c90320b3d059ff8eed8b7171e3475f404f65828bbbe260dce15a99"
+    ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e" // Sepolia L1
+    : "0xc113116804c90320b3d059ff8eed8b7171e3475f404f65828bbbe260dce15a99" // Optimism Mainnet
 
 export const EAS_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e"
-    : "0x4200000000000000000000000000000000000021"
+    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e" // Sepolia L1
+    : "0x4200000000000000000000000000000000000021" // Optimism Mainnet
 
 export const EAS_VOTE_SCHEMA = "uint256 proposalId,string params"
 

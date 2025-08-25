@@ -8,9 +8,10 @@ import VotingColumn from "@/components/proposals/proposalPage/VotingSidebar/voti
 import VotingRedirect from "@/components/proposals/proposalPage/VotingSidebar/VotingRedirect"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
-import { useUserCitizen } from "@/hooks/citizen/useUserCitizen"
+import { useUserByContext, useUserCitizen } from "@/hooks/citizen/useUserCitizen"
 import { ProposalData } from "@/lib/proposals"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
+import { useWallet } from "@/hooks/useWallet"
 
 interface VotingSidebarProps {
   proposalData: ProposalData
@@ -40,12 +41,12 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   const { track } = useAnalytics()
   const isTracked = useRef(false)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
-
+  const { user } = useWallet()
   const { data: citizenEligibility, isLoading: isEligibilityLoading } =
-    useCitizenQualification()
-  const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
+    useCitizenQualification(user?.id)
+  const { citizen, isLoading: isCitizenLoading } = useUserByContext()
+  console.log("citizen", citizen)
   const { data: session } = useSession()
-
   useEffect(() => {
     if (!isEligibilityLoading && !isCitizenLoading) {
       const timer = setTimeout(() => {
@@ -66,7 +67,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
           ? "registered"
           : citizenEligibility?.eligible
           ? "eligible"
-          : session?.user?.id
+          : user?.id
           ? "not signed in"
           : "ineligible",
         user_group: citizenEligibility?.type,

@@ -16,7 +16,11 @@ import {
   CONTRIBUTOR_ELIGIBLE_PROJECTS,
   EXTENDED_TAG_BY_ENTITY,
 } from "@/lib/constants"
-import { ExtendedAggregatedType, UserAddressSource } from "@/lib/types"
+import {
+  ExtendedAggregatedType,
+  UserAddressSource,
+  UserWithAddresses,
+} from "@/lib/types"
 import { generateTemporaryUsername } from "@/lib/utils/username"
 
 import { prisma } from "./client"
@@ -91,27 +95,29 @@ export async function getUserByPrivyDid(privyDid: string): Promise<
   })
 }
 
-export async function getUserByAddress(address: string): Promise<User | null> {
-  const userAddress = await prisma.userAddress.findFirst({
+export async function getUserByAddress(
+  address: string,
+): Promise<UserWithAddresses | null> {
+  const user = await prisma.user.findFirst({
     where: {
-      address,
-    },
-    include: {
-      user: {
-        include: {
-          addresses: {
-            orderBy: {
-              primary: "desc",
-            },
-          },
-          interaction: true,
-          emails: true,
+      addresses: {
+        some: {
+          address,
         },
       },
     },
+    include: {
+      addresses: {
+        orderBy: {
+          primary: "desc",
+        },
+      },
+      interaction: true,
+      emails: true,
+    },
   })
 
-  return userAddress?.user || null
+  return user as UserWithAddresses | null
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {

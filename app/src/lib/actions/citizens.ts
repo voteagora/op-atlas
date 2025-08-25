@@ -39,10 +39,7 @@ interface S8QualifyingProject {
 }
 
 export const s8CitizenshipQualification =
-  async (): Promise<CitizenshipQualification | null> => {
-    const session = await auth()
-    const userId = session?.user?.id
-
+  async (userId: string): Promise<CitizenshipQualification | null> => {
     if (!userId) {
       return null
     }
@@ -296,7 +293,7 @@ export const attestCitizen = async () => {
     }
   }
 
-  const qualification = await s8CitizenshipQualification()
+  const qualification = await s8CitizenshipQualification(userId)
 
   if (!qualification?.eligible) {
     return {

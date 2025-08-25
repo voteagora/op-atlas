@@ -1,18 +1,19 @@
-import { getCitizenForUser } from "@/db/citizens"
+import { getCitizenByAddress, getCitizenForUser } from "@/db/citizens"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useEffect } from "react"
+import { useWallet } from "../useWallet"
 
 export const USER_CITIZEN_QUERY_KEY = "citizen"
+export const USER_CITIZEN_BY_ADDRESS_QUERY_KEY = "citizen-by-address"
 
 export const useUserCitizen = () => {
   const queryClient = useQueryClient()
   const { data: session } = useSession()
-
   useEffect(() => {
     if (session?.user?.id) {
       queryClient.invalidateQueries({
-        queryKey: [USER_CITIZEN_QUERY_KEY, session.user.id],
+        queryKey: [USER_CITIZEN_QUERY_KEY, session?.user?.id],
       })
     }
   }, [session?.user?.id, queryClient])
@@ -28,11 +29,48 @@ export const useUserCitizen = () => {
       if (!session?.user?.id) {
         return null
       } else {
-        return await getCitizenForUser(session.user.id)
+        return await getCitizenForUser(session?.user?.id)
       }
     },
     enabled: !!session?.user?.id,
   })
 
+  return { citizen, isLoading, isSuccess, isError }
+}
+
+export const useUserByAddress = (address: string | null) => {
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (address) {
+      queryClient.invalidateQueries({
+        queryKey: [USER_CITIZEN_BY_ADDRESS_QUERY_KEY, address],
+      })
+    }
+  }, [address, queryClient])
+
+  const {
+    data: citizen,
+    isLoading,
+    isSuccess,
+    isError,
+  } = useQuery({
+    queryKey: [USER_CITIZEN_BY_ADDRESS_QUERY_KEY, address],
+    queryFn: async () => {
+      if (!address) {
+        return null
+      } else {
+        return await getCitizenByAddress(address)
+      }
+    },
+    enabled: !!address,
+  })
+
+  return { citizen, isLoading, isSuccess, isError }
+}
+
+export const useUserByContext = () => {
+  const { currentAddress } = useWallet()
+  const { citizen, isLoading, isSuccess, isError } = useUserByAddress(currentAddress)
   return { citizen, isLoading, isSuccess, isError }
 }

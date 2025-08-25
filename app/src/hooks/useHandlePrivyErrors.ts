@@ -6,7 +6,13 @@ export const useHandlePrivyErrors = () => {
     switch (error) {
       case "must_be_authenticated":
         toast.error("Session expired. Please sign in again.")
-        return signOut()
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("atlas_wallet_context")
+          window.localStorage.removeItem("atlas_selected_safe_address")
+        }
+      } catch (_) {}
+      return signOut()
 
       case "failed_to_update_account":
         return toast.error(

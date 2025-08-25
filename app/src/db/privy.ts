@@ -26,8 +26,10 @@ export const syncPrivyUser = async (
     return null
   }
 
-  const addressesInDB =
-    existingUser?.addresses?.map((addr) => getAddress(addr.address)) || []
+  const addressesInDB: `0x${string}`[] =
+    (existingUser?.addresses?.map((addr) =>
+      getAddress(addr.address as `0x${string}`),
+    ) as `0x${string}`[]) || []
   const addressesInPrivy =
     privyUser.linkedAccounts && privyUser.linkedAccounts.length > 0
       ? (privyUser.linkedAccounts
@@ -78,7 +80,7 @@ export const syncPrivyUser = async (
 
   // Remove addresses that exist in DB but not in Privy
   for (const addr of addressesInDB) {
-    if (!addressesInPrivy.includes(addr)) {
+    if (!addressesInPrivy.includes(addr as `0x${string}`)) {
       try {
         await removeUserAddress({
           id: existingUser.id,
