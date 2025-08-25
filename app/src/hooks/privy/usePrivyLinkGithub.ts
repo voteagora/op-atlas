@@ -24,7 +24,11 @@ export const usePrivyLinkGithub = (userId: string) => {
 
   const handleUnlinkGithub = () => {
     if (privyUser?.github?.subject) {
-      track("Github Unlinked", { userId })
+      track("Github Unlinked", {
+        userId,
+        elementType: "Hook",
+        elementName: "usePrivyFarcaster",
+      })
       toast.promise(unlinkGithub(privyUser.github.subject), {
         loading: "Unlinking github...",
         success: (updatedPrivyUser) => {
@@ -40,7 +44,11 @@ export const usePrivyLinkGithub = (userId: string) => {
 
   const { linkGithub } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      track("Github Linked", { userId })
+      track("Github Linked", {
+        userId,
+        elementType: "Hook",
+        elementName: "useLinkPrivyGithub",
+      })
       if (linkMethod === "github" && isLinking()) {
         toast.promise(
           syncPrivyUser(updatedPrivyUser)

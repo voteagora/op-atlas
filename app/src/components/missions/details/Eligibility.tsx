@@ -114,6 +114,8 @@ export const Eligibility = () => {
         index: index,
         parameter: eligibilityItems[index].type,
         text: eligibilityItems[index],
+        elementType: "Checkbox",
+        elementName: eligibilityItems[index].toString(),
       })
     }
   }
@@ -122,6 +124,8 @@ export const Eligibility = () => {
     if (percentage === 100) {
       track("Eligibility Check Fulfilled", {
         missionName: mission?.name,
+        elementType: "Effect",
+        elementName: "Percentage",
       })
     }
   }, [percentage, mission?.name, track])
@@ -147,7 +151,7 @@ export const Eligibility = () => {
               <div
                 className={cn(
                   "h-full rounded-[2px] transition-all duration-300",
-                  barGradient
+                  barGradient,
                 )}
                 style={{ width: barWidth }}
               />

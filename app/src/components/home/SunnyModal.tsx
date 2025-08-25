@@ -273,6 +273,8 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
         source: "sunny_modal",
         session_id: sessionId,
         category: "Sunny Guide",
+        elementType: "Div: Role=Button",
+        elementName: "Open Sunny Guide",
       })
     }
   }, [calculateProgress, open, sessionId, track])
@@ -298,6 +300,8 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
         journey_steps: newJourneyPath,
         total_steps: newJourneyPath.length,
         category: "Sunny Guide",
+        elementType: "Button",
+        elementName: "Complete Sunny Guide",
       })
     } else {
       track("Sunny Guide Navigation", {
@@ -310,6 +314,8 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
         journey_path: newJourneyPath.join(" → "),
         journey_steps: newJourneyPath,
         category: "Sunny Guide",
+        elementType: "Button",
+        elementName: "Navigate Sunny Guide",
       })
     }
   }
@@ -323,6 +329,8 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
       previous_journey_path: journeyPath.join(" → "),
       previous_journey_steps: journeyPath,
       category: "Sunny Guide",
+      elementType: "Button",
+      elementName: "Start Over",
     })
 
     setCurrentNode(decisionTree)
@@ -379,6 +387,8 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
         journey_steps: journeyPath,
         session_id: sessionId,
         category: "Sunny Guide",
+        elementType: "Button",
+        elementName: helpful ? "Yes" : "No",
       })
 
       toast("\u{1F64F} Thank you for your feedback", {
@@ -450,6 +460,8 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
                       journey_path: journeyPath.join(" → "),
                       journey_steps: journeyPath,
                       category: "Sunny Guide",
+                      elementType: "Link",
+                      elementName: program.name,
                     })
                   }}
                 >

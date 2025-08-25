@@ -2,6 +2,7 @@ import { User } from "@prisma/client"
 import Image from "next/image"
 import { memo, useState } from "react"
 
+import { UserAvatar } from "@/components/common/UserAvatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,10 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { TeamRole } from "@/lib/types"
-import { UserAvatar } from "@/components/common/UserAvatar"
-import { useUser } from "@/hooks/db/useUser"
 
 export const TeamMemberRow = memo(function TeamMemberRow({
   user,

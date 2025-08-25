@@ -19,6 +19,8 @@ export const AnalyticsTracker = ({
         user_group: qualification?.type,
         eligible: qualification?.eligible || false,
         page_title: "Citizenship",
+        elementType: "Page View",
+        elementName: "Citizenship",
       })
       isTracked.current = true
     }

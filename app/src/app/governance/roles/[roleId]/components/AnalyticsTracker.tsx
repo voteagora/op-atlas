@@ -19,6 +19,9 @@ export const AnalyticsTracker = ({ role }: { role: Role }) => {
         role_id: role.id,
         page_title: "Role Page",
         candidate_user_id: session?.user?.id || null,
+
+        elementType: "Page View",
+        elementName: "Role Page",
       })
       isTracked.current = true
     }

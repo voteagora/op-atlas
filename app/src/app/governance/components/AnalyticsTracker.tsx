@@ -12,6 +12,8 @@ export const AnalyticsTracker = () => {
     if (!isTracked.current) {
       track("Page View", {
         page_title: "Governance",
+        elementType: "Page View",
+        elementName: "Citizenship",
       })
       isTracked.current = true
     }

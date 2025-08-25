@@ -19,6 +19,8 @@ export const AnalyticsTracker = ({ role }: { role: Role }) => {
         role_id: role.id,
         page_title: "Nomination Form",
         candidate_user_id: session?.user?.id || null,
+        elementType: "Page View",
+        elementName: "Nomination Form",
       })
       isTracked.current = true
     }

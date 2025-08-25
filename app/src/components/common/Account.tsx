@@ -92,7 +92,6 @@ export const Account = () => {
 
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
-  const isRolePath = pathName.includes("/role")
 
   const didLogIn =
     prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
@@ -128,7 +127,11 @@ export const Account = () => {
     if (didLogIn) {
       isLoggingIn.current = false
       saveLogInDate()
-      track("Successful Sign In", { userId: session.user.id })
+      track("Successful Sign In", {
+        userId: session.user.id,
+        elementType: "auth",
+        elementName: "Sign In",
+      })
 
       const loginRedirect = localStorage.getItem(LOCAL_STORAGE_LOGIN_REDIRECT)
       if (loginRedirect) {
@@ -146,7 +149,11 @@ export const Account = () => {
           checkBadgeholderStatus()
         }
       } else {
-        track("Profile created", { userId: session.user.id })
+        track("Profile created", {
+          userId: session.user.id,
+          elementType: "auth",
+          elementName: "Profile Creation",
+        })
       }
     }
   }, [

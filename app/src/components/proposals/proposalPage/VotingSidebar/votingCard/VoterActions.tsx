@@ -52,6 +52,8 @@ const CardAction = ({
         track("Citizen Voting Button Click", {
           proposal_id: proposalId,
           button_type: buttonType,
+          elementType: "button",
+          elementName: buttonType,
         })
         // To be overwritten by the component that uses this
         await action()
@@ -61,6 +63,9 @@ const CardAction = ({
         track("Citizen Voting Button Click", {
           proposal_id: proposalId,
           button_type: buttonType,
+          elementType: "button",
+          elementName: buttonType,
+          url: "/citizenship",
         })
         const currentPath = window.location.pathname + window.location.search
         router.push(
@@ -72,6 +77,9 @@ const CardAction = ({
         track("Citizen Voting Button Click", {
           proposal_id: proposalId,
           button_type: buttonType,
+          elementType: "button",
+          elementName: buttonType,
+          url: "/citizenship",
         })
         router.push("/citizenship")
         break
@@ -80,6 +88,9 @@ const CardAction = ({
         track("Citizen Voting Button Click", {
           proposal_id: proposalId,
           button_type: buttonType,
+          elementType: "button",
+          elementName: buttonType,
+          url: window.location.pathname,
         })
         privyLogin()
         break
