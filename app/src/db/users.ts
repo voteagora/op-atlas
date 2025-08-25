@@ -98,26 +98,26 @@ export async function getUserByPrivyDid(privyDid: string): Promise<
 export async function getUserByAddress(
   address: string,
 ): Promise<UserWithAddresses | null> {
-  const userAddress = await prisma.userAddress.findFirst({
+  const user = await prisma.user.findFirst({
     where: {
-      address,
-    },
-    include: {
-      user: {
-        include: {
-          addresses: {
-            orderBy: {
-              primary: "desc",
-            },
-          },
-          interaction: true,
-          emails: true,
+      addresses: {
+        some: {
+          address,
         },
       },
     },
+    include: {
+      addresses: {
+        orderBy: {
+          primary: "desc",
+        },
+      },
+      interaction: true,
+      emails: true,
+    },
   })
 
-  return (userAddress?.user as unknown as UserWithAddresses) || null
+  return user as UserWithAddresses | null
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
