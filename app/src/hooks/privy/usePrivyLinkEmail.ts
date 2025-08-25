@@ -22,7 +22,11 @@ export const usePrivyEmail = (userId: string) => {
 
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
-      track("Email Linked", { userId })
+      track("Email Linked", {
+        userId,
+        elementType: "Hook",
+        elementName: "UseLinkPrivyEmail",
+      })
       if (linkMethod === "email" && isLinking.current) {
         toast.promise(
           syncPrivyUser(updatedPrivyUser)

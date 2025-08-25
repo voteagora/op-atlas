@@ -1,7 +1,7 @@
+import Image from "next/image"
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import Image from "next/image"
 
 export interface LearnMoreLink {
   title: string
@@ -31,7 +31,9 @@ export function LearnMore({ links }: LearnMoreProps) {
                 width={20}
                 height={20}
               />
-              <span className="text-base text-secondary-foreground">{link.title}</span>
+              <span className="text-base text-secondary-foreground">
+                {link.title}
+              </span>
             </ExternalLink>
           </div>
         ))}

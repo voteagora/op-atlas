@@ -45,6 +45,8 @@ export const ApplicationStatusCard = ({
       href,
       text,
       type,
+      elementType: "Button",
+      elementName: text,
     })
   }
 

@@ -52,6 +52,8 @@ const ProjectsList = ({
               track("Project rewarded", {
                 projectId: project.project.id,
                 projectName: project.project.name,
+                elementType: "Link",
+                elementName: project.project.name,
               })
             }}
             eventName="Link Click"

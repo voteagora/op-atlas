@@ -33,6 +33,8 @@ const UnsavedChangesToastClient = ({
         track("Publish Project", {
           projectId: project.id,
           attestationId: snapshot?.attestationId,
+          elementType: "Button",
+          elementName: "Publish",
         })
         return "Snapshot published"
       },

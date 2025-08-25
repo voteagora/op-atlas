@@ -30,8 +30,11 @@ export default function TrackedExtendedLink({
   const handleClick = () => {
     track(eventName, {
       ...eventData,
-      href,
-      text,
+      elementType: "link",
+      elementName: text,
+      url: href,
+      href, // Keep for backward compatibility
+      text, // Keep for backward compatibility
     })
   }
 
