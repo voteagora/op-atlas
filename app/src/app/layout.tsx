@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 
 import AppDialogs from "@/components/dialogs/AppDialogs"
-import ErrorBoundary from "@/components/error/ErrorBoundary"
+import ErrorBoundary from "@/components/common/ErrorBoundary"
 import { CheckIconFilled } from "@/components/icons/checkIconFilled"
 import { InfoIconFilled } from "@/components/icons/infoIconFilled"
 import { Toaster } from "@/components/ui/sonner"
