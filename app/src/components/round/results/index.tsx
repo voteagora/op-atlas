@@ -10,7 +10,6 @@ import { FundingRewardDetails } from "@/lib/types"
 import ProjectsList from "./ProjectsList"
 import ResultFilters from "./ResultFilters"
 import ResultsHeader from "./ResultsHeader"
-import RoundSelector from "./RoundSelector"
 
 export function Results() {
   const searchParams = useSearchParams()
@@ -26,7 +25,6 @@ export function Results() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
-
   const pageSize = 10
   const debouncedSearchText = useDebounce<string>(searchText, 300)
 
@@ -53,17 +51,17 @@ export function Results() {
       try {
         setLoading(true)
         setError("")
-        const fetchedRewards = await findFundingRewards({
-          roundIds: selectedRounds,
-          search: debouncedSearchText,
-          sortBy: sortByAmount,
-          page: 1,
-          pageSize,
-        })
-
-        setProjectRewards(fetchedRewards.fundingRewards?.rewards ?? [])
-        setTotalCount(fetchedRewards.fundingRewards?.totalCount || 0)
-        setCurrentPage(1)
+        {
+          const fetchedRewards = await findFundingRewards({
+            roundIds: selectedRounds,
+            search: debouncedSearchText,
+            sortBy: sortByAmount,
+            page: 1,
+            pageSize,
+          })
+          setProjectRewards(fetchedRewards.fundingRewards?.rewards ?? [])
+          setTotalCount(fetchedRewards.fundingRewards?.totalCount || 0)
+        }
       } catch (error) {
         setError("Failed to fetch projectRewards")
       } finally {
@@ -71,9 +69,7 @@ export function Results() {
       }
     }
 
-    if (selectedRounds.length > 0) {
-      fetchData()
-    }
+    fetchData()
   }, [debouncedSearchText, selectedRounds, sortByAmount])
 
   const loadMore = useCallback(async () => {
@@ -81,19 +77,20 @@ export function Results() {
       setIsFetchingMore(true)
       setError("")
       const nextPage = currentPage + 1
-      const fetchedRewards = await findFundingRewards({
-        roundIds: selectedRounds,
-        search: debouncedSearchText,
-        sortBy: sortByAmount,
-        page: nextPage,
-        pageSize,
-      })
-
-      setProjectRewards((prevRewards) => [
-        ...prevRewards,
-        ...(fetchedRewards.fundingRewards?.rewards ?? []),
-      ])
-      setCurrentPage(nextPage)
+      {
+        const fetchedRewards = await findFundingRewards({
+          roundIds: selectedRounds,
+          search: debouncedSearchText,
+          sortBy: sortByAmount,
+          page: nextPage,
+          pageSize,
+        })
+        setProjectRewards((prevRewards) => [
+          ...prevRewards,
+          ...(fetchedRewards.fundingRewards?.rewards ?? []),
+        ])
+        setCurrentPage(nextPage)
+      }
     } catch (error) {
       setError("Failed to fetch projectRewards")
     } finally {
@@ -105,16 +102,14 @@ export function Results() {
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       <div className="mt-4 p-6 sm:mt-4 sm:p-16 bg-background flex flex-col w-full max-w-6xl rounded-3xl z-10">
         <ResultsHeader />
-        <RoundSelector
-          selectedRounds={selectedRounds}
-          setSelectedRounds={updateSelectedRounds}
-          totalCount={totalCount}
-        />
         <ResultFilters
           setSearchText={setSearchText}
           searchText={searchText}
           sortByAmount={sortByAmount}
           setSortByAmount={setSortByAmount}
+          selectedRounds={selectedRounds}
+          setSelectedRounds={updateSelectedRounds}
+          totalCount={totalCount}
         />
         <ProjectsList
           handleLoadMore={loadMore}

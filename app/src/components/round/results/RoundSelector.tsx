@@ -60,7 +60,7 @@ const RoundSelector = ({
     } else if (selectedLabels.length === 2) {
       previewText = selectedLabels.join(" and ")
     } else {
-      return `${selectedLabels.length} rounds selected`
+      return `${selectedLabels.length} Rounds selected`
     }
 
     return previewText.length > 80
