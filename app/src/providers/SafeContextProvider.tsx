@@ -73,42 +73,10 @@ export const SafeContextProvider = ({ children }: SafeContextProviderProps) => {
     if (signerAddress) {
       safeContextValue.refreshSafeWallets()
     }
-  }, [signerWallet?.address, safeContextValue.refreshSafeWallets])
-
-  // Auto-switch to SAFE context when connected via Safe app
-  useEffect(() => {
-    const signerAddress = signerWallet?.address
-    if (!signerAddress) return
-
-    const ethereum: any =
-      typeof window !== "undefined" ? (window as any).ethereum : undefined
-    const isSafeEnv = !!(ethereum?.isSafe || ethereum?.isGnosisSafe)
-    // If running inside the Safe app, switch immediately without API verification
-    if (isSafeEnv && safeContextValue.currentContext !== "SAFE") {
-      safeContextValue.switchToSafe(signerAddress)
-      return
-    }
-    // Multisig-only via WalletConnect: if the signer IS a Safe and no Safe is selected yet, switch to SAFE
-    const ensureSafeWhenSignerIsSafe = async () => {
-      if (
-        safeContextValue.currentContext === "SAFE" ||
-        safeContextValue.selectedSafeWallet ||
-        isSafeEnv
-      )
-        return
-      try {
-        const info = await safeService.getSafeInfoByAddress(signerAddress)
-        if (info) {
-          safeContextValue.switchToSafe(signerAddress)
-        }
-      } catch {}
-    }
-    ensureSafeWhenSignerIsSafe()
   }, [
     signerWallet?.address,
-    safeContextValue.currentContext,
-    safeContextValue.selectedSafeWallet,
-    safeContextValue.switchToSafe,
+    safeContextValue.refreshSafeWallets,
+    safeContextValue,
   ])
 
   return (

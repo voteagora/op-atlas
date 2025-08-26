@@ -657,120 +657,52 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       let skipInvalidate = false
       let usedContext: "EOA" | "SAFE" | "SC" = "EOA"
       try {
-        // const newActiveWallet = validateAddress()
-        // if (newActiveWallet) {
-        //   await setActiveWallet(newActiveWallet)
-        // }
-
-        // if (signer!.address !== citizen!.address) {
-        //   throw new Error("Signer address does not match citizen address")
-        // }
-
         let attestationId: string
         let signerAddress: string
-        const targetSafeAddress =
-          selectedSafeWallet?.address ||
-          (isSmartContract
-            ? (citizen?.address as string | undefined)
-            : undefined)
-
-        if (currentContext === "SAFE") {
-          const isSafeAppEnv =
-            typeof window !== "undefined" &&
-            !!(
-              (window as any)?.ethereum?.isSafe ||
-              (window as any)?.ethereum?.isGnosisSafe
-            )
-
-          if (isSafeAppEnv) {
-            console.log("[Voting] SAFE context inside Safe App → attest direct")
-            // Direct Safe: send tx to EAS so Safe prompts confirmation in its UI
-            const attestationData = await createMultisigWalletAttestation(
-              choices,
-            )
-            signerAddress = attestationData.signerAddress
-            attestationId = attestationData.attestationId
-            // Do not invalidate myVote: the Safe tx is only proposed; there is no vote recorded until execution
-            skipInvalidate = true
-            usedContext = "SAFE"
-          } else if (selectedSafeWallet?.address) {
-            const activeEqualsSafe =
-              (wallets?.[0]?.address || "").toLowerCase() ===
-              selectedSafeWallet.address.toLowerCase()
-            if (activeEqualsSafe) {
-              // Multisig connected directly (no EOA): attest directly
-              console.log(
-                "[Voting] SAFE context with multisig-only → attest direct",
-              )
-              const attestationData = await createMultisigWalletAttestation(
-                choices,
-              )
-              signerAddress = attestationData.signerAddress
-              attestationId = attestationData.attestationId
-              skipInvalidate = true
-              usedContext = "SAFE"
-            } else {
-              // EOA + Safe: propose via Safe Tx Service
-              console.log(
-                "[Voting] SAFE context with EOA+Safe → propose via Safe Tx Service",
-                selectedSafeWallet.address,
-              )
-              const attestationData = await createSafeVoteTransactionForAddress(
-                choices,
-                selectedSafeWallet.address,
-              )
-              signerAddress = attestationData.signerAddress
-              attestationId = attestationData.attestationId
-              skipInvalidate = true
-              usedContext = "SAFE"
-            }
-          } else {
-            // Fallback if no selected Safe (should not happen in SAFE context)
-            console.log(
-              "[Voting] SAFE context but no selectedSafeWallet; treating as SC",
-            )
-            const attestationData = await createMultisigWalletAttestation(
-              choices,
-            )
-            signerAddress = attestationData.signerAddress
-            attestationId = attestationData.attestationId
-            skipInvalidate = true
-            usedContext = "SAFE"
-          }
-        } else if (targetSafeAddress) {
-          console.log("[Voting] EOA + targetSafeAddress", {
-            targetSafeAddress,
-            selectedSafe: selectedSafeWallet?.address,
-            isSmartContract,
-            citizenAddress: citizen?.address,
-          })
-          // EOA + selected Safe: propose via Safe Transaction Service (opens Safe UI)
+        if (currentContext === "SAFE" && selectedSafeWallet?.address) {
+          // EOA + Safe: propose via Safe Tx Service
+          console.log(
+            "[Voting] SAFE context with EOA+Safe → propose via Safe Tx Service",
+            selectedSafeWallet.address,
+          )
           const attestationData = await createSafeVoteTransactionForAddress(
             choices,
-            targetSafeAddress,
+            selectedSafeWallet.address,
           )
           signerAddress = attestationData.signerAddress
           attestationId = attestationData.attestationId
           skipInvalidate = true
           usedContext = "SAFE"
-        } else if (isSmartContract) {
-          // Smart contract wallet (non-Safe) voting
-          const attestationData = await createMultisigWalletAttestation(choices)
-          signerAddress = attestationData.signerAddress
-          attestationId = attestationData.attestationId
-          usedContext = "SC"
         } else {
-          // EOA wallet voting
-          const attestationData = await createDelegatedAttestation(choices)
-          signerAddress = attestationData.signerAddress
+          const newActiveWallet = validateAddress()
+          if (newActiveWallet) {
+            await setActiveWallet(newActiveWallet)
+          }
 
-          attestationId = await vote(
-            attestationData.data,
-            attestationData.rawSignature.signature,
-            signerAddress,
-            (citizen?.attestationId as `0x${string}`) ??
-              "0x0000000000000000000000000000000000000000000000000000000000000000",
-          )
+          if (signer!.address !== citizen!.address) {
+            throw new Error("Signer address does not match citizen address")
+          }
+          if (isSmartContract) {
+            // Smart contract wallet (non-Safe) voting
+            const attestationData = await createMultisigWalletAttestation(
+              choices,
+            )
+            signerAddress = attestationData.signerAddress
+            attestationId = attestationData.attestationId
+            usedContext = "SC"
+          } else {
+            // EOA wallet voting
+            const attestationData = await createDelegatedAttestation(choices)
+            signerAddress = attestationData.signerAddress
+
+            attestationId = await vote(
+              attestationData.data,
+              attestationData.rawSignature.signature,
+              signerAddress,
+              (citizen?.attestationId as `0x${string}`) ??
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+            )
+          }
         }
 
         // Track successful vote submission
