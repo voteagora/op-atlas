@@ -30,6 +30,8 @@ export const SunnyGuide = () => {
       source: "home_page",
       button_type: "Dialog",
       category: "Sunny Guide",
+      elementType: "Div: role=button",
+      elementName: "Previous",
     })
     setOpen(open)
   }

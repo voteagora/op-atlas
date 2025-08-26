@@ -28,6 +28,8 @@ export default function SocialBadgeLink({
       source,
       linkName: `Social Link Click`,
       type,
+      elementType: "link",
+      elementName: text,
     })
   }
 

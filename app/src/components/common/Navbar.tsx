@@ -89,7 +89,7 @@ export const Navbar = () => {
             >
               {showMobileNav ? <X /> : <AlignJustify />}
             </button>
-            <div className="absolute inset-x-0 flex items-center justify-center">
+            <div className="flex items-center justify-start w-full pl-4">
               <Link href="/" className="flex items-center">
                 <Image
                   src="/assets/icons/optimismAtlasLogo.svg"

@@ -19,7 +19,11 @@ export const usePrivyFarcaster = (userId: string) => {
   const { linkFarcaster } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "farcaster" && isLinking.current) {
-        track("Farcaster Linked", { userId })
+        track("Farcaster Linked", {
+          userId,
+          elementType: "Hook",
+          elementName: "usePrivyFarcaster",
+        })
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())

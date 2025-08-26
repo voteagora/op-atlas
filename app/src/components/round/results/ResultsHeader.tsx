@@ -1,15 +1,8 @@
 "use client"
 
-import { useSession } from "next-auth/react"
 import React from "react"
 
-import { Account } from "@/components/common/Account"
-import { useAnalytics } from "@/providers/AnalyticsProvider"
-
 const ResultsHeader = () => {
-  const { data: session, status } = useSession()
-  const { track } = useAnalytics()
-
   return (
     <div>
       <div className="flex justify-between items-center flex-wrap sm:flex-nowrap gap-4">

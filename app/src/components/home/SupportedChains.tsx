@@ -200,6 +200,8 @@ const SupportedChainsDesktop = () => {
       text: chain.name,
       linkUrl: chain.website,
       source: "home_page",
+      elementType: "Icon",
+      elementName: chain.name,
     })
     window.open(chain.website, "_blank")
   }
@@ -279,6 +281,8 @@ const SupportedChainsMobile = () => {
       source: "home_page",
       button_type: "Dialog",
       category: "Supported Chains",
+      elementType: "Div: role=button",
+      elementName: "Information",
     })
     setOpen(open)
   }
@@ -311,6 +315,8 @@ const SupportedChainsMobile = () => {
       text: chain.name,
       linkUrl: chain.website,
       source: "home_page",
+      elementType: "Div: role=button",
+      elementName: chain.name,
     })
     window.open(chain.website, "_blank")
   }

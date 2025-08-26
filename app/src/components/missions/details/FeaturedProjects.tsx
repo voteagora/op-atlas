@@ -50,6 +50,8 @@ export function FeaturedProjects() {
       text: project.name,
       linkUrl: project.href,
       source: `${mission?.pageName}_page`,
+      elementType: "Div",
+      elementName: project.name,
     })
     window.open(project.href, "_blank")
   }
@@ -134,6 +136,8 @@ export function FeaturedProjects() {
               source: `${mission?.pageName}_page`,
               text: projects[current - 1].name,
               category: "Featured Projects",
+              elementType: "Button",
+              elementName: "Previous",
             })
           }}
           onNext={() => {
@@ -142,6 +146,8 @@ export function FeaturedProjects() {
               source: `${mission?.pageName}_page`,
               label: projects[current - 1].name,
               category: "Featured Projects",
+              elementType: "Button",
+              elementName: "Next",
             })
           }}
         />

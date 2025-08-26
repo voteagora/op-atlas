@@ -1,4 +1,3 @@
-import { Application } from "@prisma/client"
 import { format } from "date-fns"
 import { Ellipsis } from "lucide-react"
 import Image from "next/image"
@@ -48,7 +47,11 @@ const ApplicationBanner = ({
   const onClickApply = () => {
     if (data?.user?.email) {
       setLoadingNextPage(true)
-      track("Start Application")
+      track("Start Application", {
+        elementType: "button",
+        elementName: "Apply",
+        url: "/application",
+      })
       router.push("/application")
     } else {
       setOpenDialog("email")

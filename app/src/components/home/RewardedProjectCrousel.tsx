@@ -141,6 +141,8 @@ export const RewardedProjectCrousel = ({
                 source: "home_page",
                 text: "Previous",
                 category: "Rewarded Projects",
+                elementType: "Button",
+                elementName: "Previous",
               })
           }}
           onNext={() => {
@@ -150,6 +152,8 @@ export const RewardedProjectCrousel = ({
                 source: "home_page",
                 text: "Next",
                 category: "Rewarded Projects",
+                elementType: "Button",
+                elementName: "Next",
               })
           }}
         />

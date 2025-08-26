@@ -51,21 +51,30 @@ export function GetSupport() {
 
   const buttonClickHandler = (option: SupportOption) => {
     if (option.buttonLink) {
-      window.open(option.buttonLink, '_blank')
+      window.open(option.buttonLink, "_blank")
     }
     track("Link Click", {
       href: option.buttonLink,
       text: option.buttonText,
       type: option.type,
+      elementType: "Button",
+      elementName: option.type,
     })
   }
 
   return (
     <div className="w-full flex flex-col gap-6">
       <h2 className="text-xl font-semibold">Get support</h2>
-      <div className={`grid grid-cols-1 ${supportOptions.length > 1 ? 'md:grid-cols-2' : ''} gap-3`}>
+      <div
+        className={`grid grid-cols-1 ${
+          supportOptions.length > 1 ? "md:grid-cols-2" : ""
+        } gap-3`}
+      >
         {supportOptions.map((option, index) => (
-          <div key={index} className="p-6 bg-background border border-border rounded-xl flex flex-col gap-6">
+          <div
+            key={index}
+            className="p-6 bg-background border border-border rounded-xl flex flex-col gap-6"
+          >
             <div className="flex justify-between items-start gap-6">
               <div className="flex-1 flex flex-col">
                 <h3 className="text-base font-semibold">{option.title}</h3>
@@ -75,9 +84,9 @@ export function GetSupport() {
               </div>
               {getIcon(option)}
             </div>
-            <Button 
-              variant="secondary" 
-              size="default" 
+            <Button
+              variant="secondary"
+              size="default"
               className="w-fit"
               onClick={() => buttonClickHandler(option)}
             >
