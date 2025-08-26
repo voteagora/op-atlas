@@ -15,7 +15,7 @@ export default function IncreaseYourImpact({
   const isOnchainBuilder = type === "onchain-builders"
   const isDevTooling = type === "dev-tooling"
   return (
-    <div className="overflow-hidden relative w-full rounded-lg flex flex-col items-center justify-center bg-primary space-y-6 p-20">
+    <div className="overflow-hidden relative w-full rounded-lg flex flex-col items-center justify-center bg-[#FF0420] space-y-6 p-20">
       <div className="space-y-3 text-center z-50">
         <h4 className="font-semibold text-xl text-contrast-foreground">
           {isOnchainBuilder && "Make your application interopable"}
