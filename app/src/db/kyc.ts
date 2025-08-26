@@ -1,6 +1,7 @@
 import { KYCUser } from "@prisma/client"
 
 import { prisma } from "./client"
+import { string } from "zod"
 
 export async function updateKYCUserStatus(
   status: string,
@@ -205,4 +206,31 @@ export async function rejectProjectKYC(projectId: string) {
   await Promise.all(updatePromises)
 
   return kycUsers.length
+}
+
+export async function getKYCUsersByProjectId({
+  projectId,
+}: {
+  projectId: string
+}) {
+  // This query follows the SQL join logic:
+  // select * from "Project" p
+  // join "KYCUserTeams" kut on kut."kycTeamId" = p."kycTeamId"
+  // join "KYCUser" ku on ku.id = kut."kycUserId"
+  // where p.id = '...'
+  return await prisma.kYCUser.findMany({
+    where: {
+      KYCUserTeams: {
+        some: {
+          team: {
+            projects: {
+              some: {
+                id: projectId,
+              },
+            },
+          },
+        },
+      },
+    },
+  })
 }
