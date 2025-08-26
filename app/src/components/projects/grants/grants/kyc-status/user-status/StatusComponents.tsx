@@ -47,14 +47,10 @@ const Badge = ({ text }: { text: string }) => {
 }
 
 const StatusRow = ({
-  name,
-  email,
-  organization,
+  user,
   isUser,
-  status = "pending", // Default to pending if no status is provided
-  expirationDate,
-  handleEmailResend,
   emailResendBlock,
+  handleEmailResend,
 }: KYCUserStatusProps) => {
   return (
     <div className="flex flex-row w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rotate-0 opacity-100 rounded-[6px] border border-border bg-background">
@@ -62,30 +58,41 @@ const StatusRow = ({
         <div
           className="flex flex-row items-center gap-2"
           title={
-            // Sentence case the status and replace underscores with spaces
-            status.replace(/_/g, " ").charAt(0).toUpperCase() +
-            status.replace(/_/g, " ").slice(1)
+            user.personaStatus
+              ? // Sentence case the status and replace underscores with spaces
+                user!.personaStatus.replace(/_/g, " ").charAt(0).toUpperCase() +
+                user!.personaStatus.replace(/_/g, " ").slice(1)
+              : "Pending"
           }
         >
-          <StatusIcon status={status} />
+          <StatusIcon status={user!.personaStatus!} />
           <div className="flex flex-row gap-2">
-            <RowText values={[name, email, organization]} />
+            <RowText
+              values={[
+                user.firstName + " " + user.lastName,
+                user.email,
+                user.businessName || "",
+              ]}
+            />
           </div>
           <div className="flex flex-row gap-2">
             {isUser && <Badge text="You" />}
-            {expirationDate && (
+            {user.expiry && (
               <Badge
                 // Convert expiration date to a human-readable format
-                text={`Valid until ${expirationDate.toLocaleDateString(
-                  "en-US",
-                  { month: "long", day: "numeric", year: "numeric" },
-                )}`}
+                text={`Valid until ${user.expiry.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}`}
               />
             )}
           </div>
         </div>
-        {!expirationDate && !emailResendBlock && (
-          <button onClick={() => handleEmailResend(email)}>Resend Email</button>
+        {!user.expiry && !emailResendBlock && (
+          <button onClick={() => handleEmailResend(user.email)}>
+            Resend Email
+          </button>
         )}
       </div>
     </div>

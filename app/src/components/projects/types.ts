@@ -1,3 +1,5 @@
+import { KYCUser } from "@prisma/client"
+
 export type PersonaStatus =
   | "created"
   | "pending"
@@ -12,12 +14,8 @@ export type PersonaStatus =
 export type ExtendedPersonaStatus = PersonaStatus | "project_issue"
 
 export interface KYCUserStatusProps {
-  name: string
-  email: string
-  organization: string
+  user: KYCUser
   isUser?: boolean
-  status?: PersonaStatus
-  expirationDate?: Date
   handleEmailResend: (emailAddress: string) => void
   emailResendBlock?: boolean
 }

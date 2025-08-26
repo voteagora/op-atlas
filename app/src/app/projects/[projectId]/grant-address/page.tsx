@@ -64,7 +64,7 @@ export default async function Page({
           KYC (identity verification) is required for each address.
         </p>
       </div>
-      <KYCStatusContainer />
+      <KYCStatusContainer projectId={params.projectId} />
     </div>
   )
 }

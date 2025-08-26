@@ -5,6 +5,9 @@ import ProjectStatus from "@/components/projects/grants/grants/kyc-status/Projec
 import IndividualStatuses from "@/components/projects/grants/grants/kyc-status/user-status/IndividualStatuses"
 import LegalEntities from "@/components/projects/grants/grants/kyc-status/user-status/LegalEntities"
 import { KYCUserStatusProps, PersonaStatus } from "@/components/projects/types"
+import { useKYCProject } from "@/hooks/db/useKYCProject"
+import { KYCUser } from "@prisma/client"
+import { useSession } from "next-auth/react"
 
 const mockAddress = "0xc2658A2d5ADf4a4F08f5c9b83D39816951465538"
 
@@ -43,14 +46,14 @@ const MOCK_USERS = [
   // },
 ]
 
-const resolveProjectStatus = (users: Pick<KYCUserStatusProps, "status">[]) => {
+const resolveProjectStatus = (users: Pick<KYCUser, "personaStatus">[]) => {
   // If any users are expired, failed, or declined, return "project_issue"
   if (
     users.some(
       (user) =>
-        user.status === "expired" ||
-        user.status === "failed" ||
-        user.status === "declined",
+        user.personaStatus === "expired" ||
+        user.personaStatus === "failed" ||
+        user.personaStatus === "declined",
     )
   ) {
     return "project_issue"
@@ -58,19 +61,24 @@ const resolveProjectStatus = (users: Pick<KYCUserStatusProps, "status">[]) => {
 
   // If any users are created or pending, resolve to that status
   if (
-    users.some((user) => user.status === "created" || user.status === "pending")
+    users.some(
+      (user) =>
+        user.personaStatus === "created" || user.personaStatus === "pending",
+    )
   ) {
     return (
       users.find(
-        (user) => user.status === "created" || user.status === "pending",
-      )?.status || "pending"
+        (user) =>
+          user.personaStatus === "created" || user.personaStatus === "pending",
+      )?.personaStatus || "pending"
     )
   }
 
   // If all users are completed or approved, resolve to "completed"
   if (
     users.every(
-      (user) => user.status === "completed" || user.status === "approved",
+      (user) =>
+        user.personaStatus === "completed" || user.personaStatus === "approved",
     )
   ) {
     return "completed"
@@ -80,20 +88,31 @@ const resolveProjectStatus = (users: Pick<KYCUserStatusProps, "status">[]) => {
   return "pending"
 }
 
-const KYCStatusContainer = () => {
-  const projectStatus = resolveProjectStatus(MOCK_USERS)
+const KYCStatusContainer = ({ projectId }: { projectId: string }) => {
+  const { data: session } = useSession()
+  const { data: kycUsers, isLoading, isError } = useKYCProject({ projectId })
+  const projectStatus = kycUsers ? resolveProjectStatus(kycUsers) : "pending"
 
   const handleEmailResend = (emailAddress: string) => {
     console.log(`Resending email to ${emailAddress}`)
   }
-  const users = MOCK_USERS.map((user) => ({
-    ...user,
+
+  // Use mock data if we're loading or have an error
+  const users = kycUsers?.map((user) => ({
+    user,
     handleEmailResend: handleEmailResend,
     emailResendBlock:
       projectStatus === "project_issue" ||
-      user.status === "approved" ||
-      user.status === "completed",
+      user.personaStatus === "approved" ||
+      user.personaStatus === "completed",
+    isUser: session?.user.id === user.id,
   }))
+
+  if (isError) {
+    console.error("Error loading KYC users data")
+  }
+
+  console.log({ users })
 
   return (
     <div className="flex flex-col max-w-[762px] gap-6">
@@ -103,10 +122,22 @@ const KYCStatusContainer = () => {
           : "Verified"}
       </h4>
       <div className="flex flex-col w-[762px] min-h-[640px] border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
-        <ProjectStatus status={projectStatus} />
-        <GrantDeliveryAddress address={mockAddress} />
-        <IndividualStatuses users={users.slice(0, -1)} />
-        <LegalEntities users={users.slice(-1)} />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <p>Loading KYC data...</p>
+          </div>
+        ) : (
+          <>
+            <ProjectStatus status={projectStatus} />
+            <GrantDeliveryAddress address={mockAddress} />
+            {users && users.length > 0 && (
+              <>
+                <IndividualStatuses users={users!.slice(0, -1)} />
+                <LegalEntities users={users!.slice(-1)} />
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
   )
