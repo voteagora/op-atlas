@@ -6,6 +6,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 
 import AppDialogs from "@/components/dialogs/AppDialogs"
+import ErrorBoundary from "@/components/common/ErrorBoundary"
 import { CheckIconFilled } from "@/components/icons/checkIconFilled"
 import { InfoIconFilled } from "@/components/icons/infoIconFilled"
 import { Toaster } from "@/components/ui/sonner"
@@ -43,15 +44,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className}`}>
         <Providers>
-          <AppDialogs />
-          {children}
-          <Toaster
-            icons={{
-              loading: <Loader2 size={18} className="animate-spin" />,
-              success: <CheckIconFilled size={18} />,
-              info: <InfoIconFilled size={18} />,
-            }}
-          />
+          <ErrorBoundary>
+            <AppDialogs />
+            {children}
+            <Toaster
+              icons={{
+                loading: <Loader2 size={18} className="animate-spin" />,
+                success: <CheckIconFilled size={18} />,
+                info: <InfoIconFilled size={18} />,
+              }}
+            />
+          </ErrorBoundary>
         </Providers>
       </body>
       <GoogleAnalytics gaId={GOOGLE_ANALYTICS_ID} />
