@@ -1,24 +1,61 @@
+import { Ellipsis } from "lucide-react"
+
 import { StatusIcon } from "@/components/projects/grants/grants/kyc-status/user-status/StatusComponents"
 import { ExtendedPersonaStatus } from "@/components/projects/types"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const ProjectStatus = ({ status }: { status: ExtendedPersonaStatus }) => {
   if (status === "completed") {
     return null
   }
   return (
-    <div className="w-664px] h-[176px] rounded-[6px] p-6 gap-3 justify-center items-center flex flex-col">
+    <div className="w-664px] h-[176px] rounded-[6px] p-6 gap-3 justify-center items-center flex flex-col relative">
+      {status !== "pending" && (
+        <div className="absolute top-2 right-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Ellipsis className="h-5 w-5 cursor-pointer" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem className="cursor-pointer">
+                Remove address
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
       <div className={"text-center"}>
         <StatusIcon status={status} size={6} />
       </div>
-      <p className="font-[Inter] font-medium text-[14px] leading-[20px] text-center text-text-foreground">
-        We are checking for verifications
-      </p>
-      <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-secondary">
-        An email from [address@email.com] has been sent to each person declared
-        in the grant eligibility form. They must complete KYC/KYB via the link
-        provided. Please ensure everyone has taken action and allow 48 hours for
-        your status to update.
-      </p>
+      {status === "pending" ? (
+        <>
+          <p className="font-[Inter] font-medium text-[14px] leading-[20px] text-center text-text-foreground">
+            We are checking for verifications
+          </p>
+          <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-secondary">
+            An email from [address@email.com] has been sent to each person
+            declared in the grant eligibility form. They must complete KYC/KYB
+            via the link provided. Please ensure everyone has taken action and
+            allow 48 hours for your status to update.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="font-[Inter] font-medium text-[14px] leading-[20px] text-center text-text-destructive">
+            Your grant delivery address cannot be verified
+          </p>
+          <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-destructive">
+            One or more of the associated parties is having an issue with their
+            verification process. Please reach out to us
+            at compliance@optimism.io for assistance.
+          </p>
+        </>
+      )}
     </div>
   )
 }
