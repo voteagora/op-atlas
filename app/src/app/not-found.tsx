@@ -16,7 +16,7 @@ export default function NotFound() {
         The page you&apos;re looking for doesn&apos;t exist.
       </h4>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="grid grid-cols-2 gap-4 justify-items-center">
         <ExtendedLink
           as="button"
           text={"Optimism"}
