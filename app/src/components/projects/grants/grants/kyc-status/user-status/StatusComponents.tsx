@@ -28,7 +28,9 @@ const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
       return <Clock className={cn(`h-${size} w-${size}`, "text-yellow-500")} />
     case "project_issue":
       return (
-        <AlertTriangle className={cn(`h-${size} w-${size}`, "text-red-500")} />
+        <AlertTriangle
+          className={cn(`h-${size} w-${size}`, "text-text-destructive")}
+        />
       )
     default:
       return <Loader2 className={cn(`h-${size} w-${size}`, "animate-spin")} />
