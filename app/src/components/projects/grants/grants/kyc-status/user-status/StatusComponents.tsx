@@ -37,13 +37,15 @@ const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
   }
 }
 
-const Card = ({ text }: { text: string }) => (
-  <div className="flex items-center justify-center rounded-full px-[2px] py-2 bg-backgroundSecondary">
-    <p className="font-[Inter] font-medium text-xs leading-[16px] text-center">
-      {text}
-    </p>
-  </div>
-)
+const Badge = ({ text }: { text: string }) => {
+  return (
+    <div className="flex items-center justify-center rounded-full bg-backgroundSecondary gap-4 py-[2px] px-2 border max-h-5">
+      <p className="font-[Inter] font-medium text-[12px] leading-[16px] text-center tracking-[0%] text-text-secondary">
+        {text}
+      </p>
+    </div>
+  )
+}
 
 const StatusRow = ({
   name,
@@ -71,9 +73,9 @@ const StatusRow = ({
             <RowText values={[name, email, organization]} />
           </div>
           <div className="flex flex-row gap-2">
-            {isUser && <Card text="You" />}
+            {isUser && <Badge text="You" />}
             {expirationDate && (
-              <Card
+              <Badge
                 // Convert expiration date to a human-readable format
                 text={`Valid until ${expirationDate.toLocaleDateString(
                   "en-US",
@@ -97,4 +99,4 @@ const RowText = ({ values }: { values: string[] }) => (
   </p>
 )
 
-export { StatusIcon, StatusRow, Card }
+export { StatusIcon, StatusRow, Badge }
