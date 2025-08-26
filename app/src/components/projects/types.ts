@@ -18,6 +18,6 @@ export interface KYCUserStatusProps {
   isUser?: boolean
   status?: PersonaStatus
   expirationDate?: Date
-  handleEmailResend?: (emailAddress: string) => void
+  handleEmailResend: (emailAddress: string) => void
   emailResendBlock?: boolean
 }
