@@ -288,8 +288,8 @@ async function createPersonaInquiryForUser(kycUser: any) {
         // Determine appropriate template ID based on user type
         const isBusiness = !!kycUser.businessName
         const templateId = isBusiness
-            ? process.env.PERSONA_INQUIRY_KYB_TEMPLATE_ID
-            : process.env.PERSONA_INQUIRY_KYC_TEMPLATE_ID
+            ? process.env.PERSONA_INQUIRY_KYB_TEMPLATE
+            : process.env.PERSONA_INQUIRY_KYC_TEMPLATE
 
         if (!templateId) {
             throw new Error(
