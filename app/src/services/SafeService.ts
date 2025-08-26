@@ -226,15 +226,7 @@ export class SafeService {
     const nextNonce = await safe.getNonce()
 
     // Try to pre-estimate safeTxGas via Transaction Service to avoid GS013 due to 0 gas
-    const estimation = await this.getExecutionEstimation(
-      await safe.getAddress(),
-      transaction,
-    ).catch(() => null)
-    const estimated = Number(estimation?.safeTxGas || 0)
-    // If estimation endpoint is 405 or returns null, proceed with a conservative default (bump to 1.5M)
-    const safeTxGasNum = Math.max(estimated, 1500000)
-
-    const attemptPropose = async (forcedNonce?: number) => {
+    const attemptPropose = async () => {
       // Create the transaction
       const safeTransaction = await safe.createTransaction({
         transactions: [
@@ -247,16 +239,9 @@ export class SafeService {
         ],
         onlyCalls: true,
         options: {
-          nonce: typeof forcedNonce === "number" ? forcedNonce : Number(nextNonce),
-          // ensure non-zero safeTxGas to avoid GS013
-          safeTxGas: safeTxGasNum.toString(),
+          nonce: Number(nextNonce),
         },
       })
-
-      // Additionally set on data to be explicit
-      if (typeof (safeTransaction as any)?.data?.safeTxGas !== "undefined") {
-        ;(safeTransaction as any).data.safeTxGas = safeTxGasNum
-      }
 
       // Sign the transaction
       const signedTransaction = await safe.signTransaction(safeTransaction)
@@ -280,16 +265,6 @@ export class SafeService {
     try {
       return await attemptPropose()
     } catch (error) {
-      const message = String((error as any)?.message || error)
-      // Retry once if previously executed nonce caused a 422
-      if (message.toLowerCase().includes("already executed")) {
-        try {
-          const freshNonce = await safe.getNonce()
-          if (Number(freshNonce) !== Number(nextNonce)) {
-            return await attemptPropose(Number(freshNonce))
-          }
-        } catch (_) {}
-      }
       console.error("Error proposing Safe transaction:", error)
       return null
     }
