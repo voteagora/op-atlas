@@ -109,7 +109,7 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <div className="w-full h-full mt-6 pb-12">
-      <div className="mx-auto w-full max-w-[1128px] px-8 space-y-12">
+      <div className="mx-auto w-full max-w-[1128px] px-8 space-y-20">
         <div className="w-full mt-8">
           <Header
             projectId={projectId}
@@ -119,7 +119,7 @@ export default async function Page({ params }: PageProps) {
           />
         </div>
 
-        <div className="space-y-12 px-12 pt-12">
+        <div className="space-y-20 px-12 pt-12">
           <Description
             projectId={projectId}
             isMember={isMember}
@@ -166,10 +166,9 @@ export default async function Page({ params }: PageProps) {
           {enrolledInMission && (
             <>
               <div className="w-full space-y-6">
-                <h4 className="font-semibold text-xl">Missions</h4>
                 <ul className="space-y-12">
                   {enrolledInOnchainBuilders && (
-                    <li>
+                    <li className="space-y-6">
                       <Mission
                         type="on-chain"
                         onchainBuilderMetrics={onchainBuilderMetrics}
@@ -185,10 +184,15 @@ export default async function Page({ params }: PageProps) {
                         isMember={isMember}
                         projectName={publicProject.name ?? ""}
                       />
+                      <IncreaseYourImpact
+                        type="onchain-builders"
+                        projectId={projectId}
+                        isMember={isMember}
+                      />
                     </li>
                   )}
                   {enrolledInDevTooling && (
-                    <li>
+                    <li className="space-y-6">
                       <Mission
                         type="dev-tooling"
                         devToolingMetrics={devToolingMetrics}
@@ -196,35 +200,15 @@ export default async function Page({ params }: PageProps) {
                         isMember={isMember}
                         projectName={publicProject.name ?? ""}
                       />
-                    </li>
-                  )}
-                </ul>
-              </div>
-              {enrolledInMission && (
-                <div className="w-full space-y-6">
-                  <div className="flex items-center space-x-2 group">
-                    <h4 className="font-semibold text-xl">
-                      Get ready for Superchain interop
-                    </h4>
-                  </div>
-                  <div className="flex gap-4 lg:flex-row flex-col">
-                    {enrolledInOnchainBuilders && (
-                      <IncreaseYourImpact
-                        type="onchain-builders"
-                        projectId={projectId}
-                        isMember={isMember}
-                      />
-                    )}
-                    {enrolledInDevTooling && (
                       <IncreaseYourImpact
                         type="dev-tooling"
                         projectId={projectId}
                         isMember={isMember}
                       />
-                    )}
-                  </div>
-                </div>
-              )}
+                    </li>
+                  )}
+                </ul>
+              </div>
             </>
           )}
 
