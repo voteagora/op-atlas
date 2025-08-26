@@ -1,5 +1,5 @@
-import Image from "next/image"
 import Link from "next/link"
+import { ChevronDown } from "lucide-react"
 
 import {
   Accordion,
@@ -32,22 +32,15 @@ function MissionContainer({
       <AccordionItem value="retro-funding" className="w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Image
-              src="/assets/icons/sunny-red.svg"
-              width={48}
-              height={48}
-              alt="Project Profile"
-            />
             <div className="flex flex-col justify-between">
               <div className="flex items-center space-x-2">
-                <Link
-                  href={getMissionLink(type)}
-                  className="font-semibold text-base text-foreground"
-                >
-                  {type === "on-chain"
-                    ? "Retro Funding: Onchain Builders"
-                    : "Retro Funding: Dev Tooling"}
-                </Link>
+                <h4 className="text-xl leading-7 font-semibold text-foreground">
+                  <Link href={getMissionLink(type)} className="hover:underline">
+                    {type === "on-chain"
+                      ? "Retro Funding: Onchain Builders"
+                      : "Retro Funding: Dev Tooling"}
+                  </Link>
+                </h4>
                 <span className="px-2 py-1 bg-callout text-callout-foreground rounded-full text-xs font-medium">
                   In Progress
                 </span>
@@ -57,7 +50,9 @@ function MissionContainer({
               </p>
             </div>
           </div>
-          <AccordionTrigger />
+          <AccordionTrigger hideChevron className="w-8 h-8 rounded-md p-0 justify-center hover:bg-secondary" aria-label="Toggle section">
+            <ChevronDown className="h-4 w-4" />
+          </AccordionTrigger>
         </div>
         <AccordionContent>{children}</AccordionContent>
       </AccordionItem>
