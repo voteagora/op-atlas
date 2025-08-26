@@ -18,8 +18,6 @@
     "db:push": "prisma db push",
     "export:mailchimp": "tsx src/scripts/mailchimp-export.ts",
     "kyc": "tsx src/scripts/kyc.ts",
-    "kyc:sync": "tsx src/scripts/sync-kyc.ts",
-    "kyc:new-inquiry": "tsx src/scripts/sync-kyc.ts new-inquiry",
     "revoke:citizenship": "tsx src/scripts/revoke-citizenship.ts",
     "prepare": "husky",
     "studio": "prisma studio",
