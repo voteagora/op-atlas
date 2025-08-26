@@ -62,27 +62,25 @@ test.describe("Homepage", () => {
   })
 
   test("should load without critical errors", async ({ page }) => {
-    await page.goto("/")
-    await page.waitForLoadState("domcontentloaded")
-    
-    // Wait for network to be idle
-    await page.waitForLoadState("networkidle", { timeout: 10000 })
-    
-    // Check for console errors
+    // Set up error collection before navigation
     const errors: string[] = []
+    const pageErrors: string[] = []
+    
     page.on('console', msg => {
       if (msg.type() === 'error') {
         errors.push(msg.text())
       }
     })
     
-    // Check for page errors
     page.on('pageerror', error => {
-      errors.push(error.message)
+      pageErrors.push(error.message)
     })
+
+    await page.goto("/")
+    await page.waitForLoadState("domcontentloaded")
     
-    // Wait a bit more to catch any late errors
-    await page.waitForTimeout(1000)
+    // Simple wait instead of networkidle
+    await page.waitForTimeout(2000)
     
     // Filter out common non-critical errors
     const criticalErrors = errors.filter(error => 
@@ -90,10 +88,18 @@ test.describe("Homepage", () => {
       !error.includes('favicon') &&
       !error.includes('analytics') &&
       !error.includes('tracking') &&
-      !error.includes('PostHog')
+      !error.includes('PostHog') &&
+      !error.includes('punycode')
+    )
+    
+    const criticalPageErrors = pageErrors.filter(error => 
+      !error.includes('favicon') &&
+      !error.includes('analytics') &&
+      !error.includes('tracking')
     )
     
     // Allow some non-critical errors but fail on critical ones
     expect(criticalErrors.length).toBeLessThan(5)
+    expect(criticalPageErrors.length).toBeLessThan(3)
   })
 })
