@@ -405,10 +405,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     const nonce = await eas.getNonce(signerToUse.address as `0x${string}`)
 
+    // EOA path: refUID must match what the server will use for attestByDelegation
+    // Use the current citizen's attestationId if present, otherwise zero
     const refUID =
-      (process.env.NEXT_PUBLIC_ENV === "prod"
-        ? (safeCitizenByAddress?.attestationId as `0x${string}`)
-        : undefined) ||
+      (citizen?.attestationId as `0x${string}`) ||
       ("0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`)
 
     const delegateRequest = {
@@ -473,7 +473,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       },
     })
 
-    const receiptOrTx: any = typeof (tx as any)?.wait === "function" ? await (tx as any).wait() : tx
+    const receiptOrTx: any =
+      typeof (tx as any)?.wait === "function" ? await (tx as any).wait() : tx
     const attestationId =
       receiptOrTx?.transactionHash || receiptOrTx?.hash || receiptOrTx
 
@@ -748,7 +749,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       while (Date.now() - startedAt < MAX_MS) {
         try {
           const tx = await safeService.getTransactionByHash(safeTxHash)
-          const isDone = tx && tx.isExecuted === true && tx.isSuccessful === true
+          const isDone =
+            tx && tx.isExecuted === true && tx.isSuccessful === true
           if (isDone) {
             invalidateMyVote()
             toast.success("Vote cast and recorded!")
@@ -802,7 +804,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     if (!ownerSigner) {
       throw new Error(
         `Connect a Safe owner EOA to propose the transaction. Current: ${
-          (typeof window !== "undefined" && (window as any)?.ethereum?.selectedAddress) ||
+          (typeof window !== "undefined" &&
+            (window as any)?.ethereum?.selectedAddress) ||
           "unknown"
         }. Owners: ${safeInfo?.owners?.join(", ") || "unknown"}`,
       )
@@ -1055,7 +1058,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             citizenAddress: citizen?.address,
           })
           // EOA + selected Safe: propose via Safe Transaction Service (opens Safe UI)
-          const attestationData = await createSafeVoteTransactionForAddress(choices, targetSafeAddress)
+          const attestationData = await createSafeVoteTransactionForAddress(
+            choices,
+            targetSafeAddress,
+          )
           signerAddress = attestationData.signerAddress
           attestationId = attestationData.attestationId
           skipInvalidate = true
