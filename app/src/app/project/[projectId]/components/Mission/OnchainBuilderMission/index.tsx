@@ -39,8 +39,8 @@ export default function OnchainBuilderMission({
   return (
     <div className="space-y-3">
       {opRewardSum > 0 && (
-        <div className="mt-6 relative w-full h-64 rounded-xl z-10 overflow-hidden">
-          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] border-[#FDA4C4] border-[2px] rounded-xl">
+        <div className="mt-6 relative w-full rounded-xl z-10 overflow-hidden">
+          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] rounded-xl p-20">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
@@ -158,7 +158,7 @@ export default function OnchainBuilderMission({
               <TabsContent
                 key={month}
                 value={month}
-                className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
+                className="w-full grid grid-cols-2 gap-3 data-[state=inactive]:hidden mt-3"
               >
                 <MetricCard
                   value={formatNumber(
@@ -279,15 +279,7 @@ export default function OnchainBuilderMission({
                       <div className="h-full w-px bg-tertiary" />
                       <div className="pl-6">
                         <p className="text-secondary-foreground text-base font-normal">
-                          Rewards are determined by an{" "}
-                          <ExternalLink
-                            href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
-                            className="underline"
-                          >
-                            evaluation algorithm
-                          </ExternalLink>{" "}
-                          powered by onchain data, and some metrics are more
-                          valuable than others.
+                          Rewards are determined by an <ExternalLink href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024" className="underline">evaluation algorithm</ExternalLink> powered by onchain data.
                         </p>
                       </div>
                     </div>
