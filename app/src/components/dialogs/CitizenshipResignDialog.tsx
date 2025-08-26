@@ -57,7 +57,7 @@ export default function CitizenshipResignDialog({
       <DialogContent className="sm:max-w-md">
         <DialogTitle className="text-center">
           {isUserCitizen
-            ? "Resign your position in the Citizen's House?"
+            ? "Resign your position in the Citizens' House?"
             : "Edit or resign citizenship"}
         </DialogTitle>
 
