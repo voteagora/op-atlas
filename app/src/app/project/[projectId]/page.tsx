@@ -1,8 +1,9 @@
-import { notFound, redirect } from "next/navigation"
+import { Metadata } from "next"
+import { notFound } from "next/navigation"
 
+import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
-import { getUserById } from "@/db/users"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 import { getProjectMetrics } from "@/lib/oso"
@@ -20,6 +21,29 @@ import {
 interface PageProps {
   params: {
     projectId: string
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: {
+    projectId: string
+  }
+}): Promise<Metadata> {
+  const project = await getPublicProjectAction({ projectId: params.projectId })
+
+  const title = `Project: ${project?.name ?? ""} - OP Atlas`
+  const description = project?.description ?? ""
+  return {
+    ...sharedMetadata,
+    title,
+    description,
+    openGraph: {
+      ...sharedMetadata.openGraph,
+      title,
+      description,
+    },
   }
 }
 

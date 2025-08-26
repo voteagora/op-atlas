@@ -35,7 +35,11 @@ export const usePrivyLinkWallet = (userId: string) => {
   const { linkWallet } = useLinkAccount({
     onSuccess: ({ user: updatedPrivyUser, linkedAccount }) => {
       if (linkedAccount.type === "wallet" && isLinking.current) {
-        track("Wallet Linked", { userId })
+        track("Wallet Linked", {
+          userId,
+          elementType: "Hook",
+          elementName: "useLinkPrivyWallet",
+        })
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
@@ -54,7 +58,11 @@ export const usePrivyLinkWallet = (userId: string) => {
   const { linkWallet: linkWithPrimary } = useLinkAccount({
     onSuccess: ({ user: updatedPrivyUser, linkedAccount }) => {
       if (linkedAccount.type === "wallet" && isLinkingPrimary.current) {
-        track("Wallet Linked", { userId })
+        track("Wallet Linked", {
+          userId,
+          elementType: "Hook",
+          elementName: "useLinkPrivyWallet",
+        })
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => makeUserAddressPrimaryAction(linkedAccount.address))

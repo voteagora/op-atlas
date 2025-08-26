@@ -1,19 +1,19 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { useLogin } from "@privy-io/react-auth"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React, { useState } from "react"
 
-import { CarouselPagination } from "@/components/ui/carousel-pagination"
+import ExternalLink from "@/components/ExternalLink"
+import { ArrowRightNew } from "@/components/icons/ArrowRightNew"
 import {
   Carousel,
   CarouselApi,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel"
-import ExternalLink from "@/components/ExternalLink"
-import { ArrowRightNew } from "@/components/icons/ArrowRightNew"
+import { CarouselPagination } from "@/components/ui/carousel-pagination"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { cn } from "@/lib/utils"
 
@@ -70,9 +70,7 @@ export function HowItWorks() {
   // when there are 4 or more cards
   const shouldShowPartialNextCard = steps.length >= 4
   const carouselOpts = {
-    align: shouldShowPartialNextCard
-      ? ("start" as const)
-      : ("center" as const),
+    align: shouldShowPartialNextCard ? ("start" as const) : ("center" as const),
     containScroll: "trimSnaps" as const,
     dragFree: false,
   }

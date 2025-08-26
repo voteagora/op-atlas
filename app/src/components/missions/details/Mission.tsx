@@ -13,9 +13,9 @@ import Rewards from "@/components/missions/details/Rewards"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { cn } from "@/lib/utils"
 
+import { MissionStatus } from "./MissionStatus"
 import { SupportedNetworks } from "./SupportedNetworks"
 import { SessionRoundApplicationStatusCard } from "./UserRoundApplicationStatusCard"
-import { MissionStatus } from "./MissionStatus"
 
 // Navigation item component
 interface NavItemProps {
@@ -25,7 +25,7 @@ interface NavItemProps {
 
 const NavItem: React.FC<NavItemProps> = ({ label, targetRef }) => {
   const handleClick = () => {
-    targetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    targetRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   return (
@@ -133,7 +133,7 @@ export default function Mission() {
     mission &&
     mission?.startsAt &&
     new Date() > mission?.startsAt &&
-    mission?.endsAt;
+    mission?.endsAt
   const showSidePanel =
     missionIsOpen ||
     mission?.pageName === "audit-grants" ||

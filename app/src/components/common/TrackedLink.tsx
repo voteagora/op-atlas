@@ -9,6 +9,7 @@ interface TrackedLinkProps extends LinkProps {
   eventData?: Record<string, unknown>
   target?: React.HTMLAttributeAnchorTarget
   children: React.ReactNode
+  linkName?: string // Optional name for the link for better tracking
 }
 
 export default function TrackedLink({
@@ -17,6 +18,7 @@ export default function TrackedLink({
   children,
   className,
   target = "_self",
+  linkName,
   ...props
 }: TrackedLinkProps & { className?: string }) {
   const { track } = useAnalytics()
@@ -24,7 +26,11 @@ export default function TrackedLink({
   const handleClick = () => {
     track(eventName, {
       ...eventData,
-      href: props.href,
+      elementType: "link",
+      elementName:
+        linkName || (typeof children === "string" ? children : "unknown"),
+      url: typeof props.href === "string" ? props.href : undefined,
+      href: props.href, // Keep for backward compatibility
     })
   }
 

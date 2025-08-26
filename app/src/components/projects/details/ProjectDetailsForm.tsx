@@ -220,6 +220,8 @@ export default function ProjectDetailsForm({
       track("Project Categorisation", {
         category: values.category,
         projectId: project?.id,
+        elementType: "Form",
+        elementName: "Save",
       })
 
       const newValues = {
@@ -260,7 +262,11 @@ export default function ProjectDetailsForm({
           }
 
           if (isCreating) {
-            track("Add Project", { projectId: response.project.id })
+            track("Add Project", {
+              projectId: response.project.id,
+              elementType: "Form",
+              elementName: "Save",
+            })
           }
 
           return response.project

@@ -124,7 +124,11 @@ export default function AddTeamDetailsForm({
 
           <Button
             onClick={() => {
-              track("Add Collaborators")
+              track("Add Collaborators", {
+                elementType: "button",
+                elementName: "Add contributors",
+                projectId: project.id,
+              })
               setIsShowingAdd(true)
             }}
             type="button"

@@ -36,7 +36,7 @@ export function ChainSelector({
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
             </FormControl>
-            <SelectContent>
+            <SelectContent className="z-[201]" position="popper">
               {Chain.options.map((chain) => (
                 <SelectItem key={chain} value={chain}>
                   <div className="flex gap-2 items-center py-1">

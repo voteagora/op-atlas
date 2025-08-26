@@ -62,8 +62,8 @@ const CardText = ({
     if (cardText.descriptionElement === "OFFCHAIN_STANDARD") {
       return (
         <p className="text-sm text-center text-secondary-foreground">
-          This proposal requires approval from the Citizen&#39;s House and Token
-          House. Read more about the voting mechanism{" "}
+          This proposal requires approval from the Citizens&apos; House and
+          Token House. Read more about the voting mechanism{" "}
           <a
             href="https://github.com/ethereum-optimism/OPerating-manual/blob/main/manual.md"
             className="text-sm text-center underline"

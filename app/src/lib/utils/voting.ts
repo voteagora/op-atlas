@@ -20,8 +20,8 @@ const defaultCardText = (proposalData?: ProposalData) => {
         return {
           cardText: {
             title: "Cast your citizen vote",
-            descriptionElement:
-              "This proposal requires approval from the Citizens' House and Token House. Read more about the voting mechanism here",
+            // Use marker so VotingCard renders the hyperlink with underline and period
+            descriptionElement: "OFFCHAIN_STANDARD",
           },
         }
       case ProposalType.OFFCHAIN_OPTIMISTIC:
