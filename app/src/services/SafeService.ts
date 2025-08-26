@@ -226,15 +226,7 @@ export class SafeService {
     const nextNonce = await safe.getNonce()
 
     // Try to pre-estimate safeTxGas via Transaction Service to avoid GS013 due to 0 gas
-    const estimation = await this.getExecutionEstimation(
-      await safe.getAddress(),
-      transaction,
-    ).catch(() => null)
-    const estimated = Number(estimation?.safeTxGas || 0)
-    // If estimation endpoint is 405 or returns null, proceed with a conservative default (bump to 1.5M)
-    const safeTxGasNum = Math.max(estimated, 1500000)
-
-    const attemptPropose = async (forcedNonce?: number) => {
+    const attemptPropose = async () => {
       // Create the transaction
       const safeTransaction = await safe.createTransaction({
         transactions: [
@@ -247,16 +239,9 @@ export class SafeService {
         ],
         onlyCalls: true,
         options: {
-          nonce: typeof forcedNonce === "number" ? forcedNonce : Number(nextNonce),
-          // ensure non-zero safeTxGas to avoid GS013
-          safeTxGas: safeTxGasNum.toString(),
+          nonce: Number(nextNonce),
         },
       })
-
-      // Additionally set on data to be explicit
-      if (typeof (safeTransaction as any)?.data?.safeTxGas !== "undefined") {
-        ;(safeTransaction as any).data.safeTxGas = safeTxGasNum
-      }
 
       // Sign the transaction
       const signedTransaction = await safe.signTransaction(safeTransaction)
@@ -280,16 +265,6 @@ export class SafeService {
     try {
       return await attemptPropose()
     } catch (error) {
-      const message = String((error as any)?.message || error)
-      // Retry once if previously executed nonce caused a 422
-      if (message.toLowerCase().includes("already executed")) {
-        try {
-          const freshNonce = await safe.getNonce()
-          if (Number(freshNonce) !== Number(nextNonce)) {
-            return await attemptPropose(Number(freshNonce))
-          }
-        } catch (_) {}
-      }
       console.error("Error proposing Safe transaction:", error)
       return null
     }
@@ -317,100 +292,6 @@ export class SafeService {
       return true
     } catch (error) {
       return false
-    }
-  }
-
-  /**
-   * Fetch queued multisig transactions for a Safe
-   */
-  async getQueuedTransactionsForSafe(safeAddress: string): Promise<any[]> {
-    try {
-      this.ensureApiKit()
-      const baseApi = this.txServiceUrl
-        ? this.txServiceUrl.endsWith("/api")
-          ? this.txServiceUrl
-          : `${this.txServiceUrl}/api`
-        : null
-      if (!baseApi) return []
-      const url = `${baseApi}/v1/safes/${safeAddress}/multisig-transactions/?executed=false&queued=true&ordering=nonce`
-      const res = await fetch(url)
-      if (!res.ok) return []
-      const json: any = await res.json()
-      // Only keep the next nonce group to avoid stale entries inflating list
-      const results = Array.isArray(json?.results) ? json.results : []
-      if (!results.length) return []
-      const minNonce = Math.min(
-        ...results.map((r: any) => Number(r?.nonce || 0)),
-      )
-      return results.filter((r: any) => Number(r?.nonce || 0) === minNonce)
-    } catch (_e) {
-      return []
-    }
-  }
-
-  /**
-   * Estimate execution gas for a multisig transaction via Transaction Service
-   */
-  async getExecutionEstimation(
-    safeAddress: string,
-    tx: SafeTransactionRequest,
-  ): Promise<{
-    safeTxGas: number
-    baseGas?: number
-    gasPrice?: string
-  } | null> {
-    try {
-      this.ensureApiKit()
-      const baseApi = this.txServiceUrl
-        ? this.txServiceUrl.endsWith("/api")
-          ? this.txServiceUrl
-          : `${this.txServiceUrl}/api`
-        : null
-      if (!baseApi) return null
-      const res = await fetch(
-        `${baseApi}/v1/safes/${safeAddress}/multisig-transactions/estimations`,
-        {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            to: tx.to,
-            value: tx.value || "0",
-            data: tx.data || "0x",
-            operation: tx.operation || 0,
-          }),
-        },
-      )
-      if (!res.ok) return null
-      const json: any = await res.json()
-      return {
-        safeTxGas: Number(json?.safeTxGas || 0),
-        baseGas: Number(json?.baseGas || 0),
-        gasPrice: String(json?.gasPrice || "0"),
-      }
-    } catch (_e) {
-      return null
-    }
-  }
-
-  /**
-   * Fetch a transaction by safeTxHash to check execution status
-   */
-  async getTransactionByHash(safeTxHash: string): Promise<any | null> {
-    try {
-      this.ensureApiKit()
-      const baseApi = this.txServiceUrl
-        ? this.txServiceUrl.endsWith("/api")
-          ? this.txServiceUrl
-          : `${this.txServiceUrl}/api`
-        : null
-      if (!baseApi) return null
-      const res = await fetch(
-        `${baseApi}/v1/multisig-transactions/${safeTxHash}`,
-      )
-      if (!res.ok) return null
-      return await res.json()
-    } catch (_e) {
-      return null
     }
   }
 }

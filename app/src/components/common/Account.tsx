@@ -46,8 +46,6 @@ import { safeService } from "@/services/SafeService"
 type EOAWalletMenuItemProps = {
   currentContext: string
   signerWallet: any
-  isSafeEnv: boolean
-  isSafeConnected: boolean
   switchToEOA: () => void
 }
 
@@ -81,26 +79,8 @@ const ProfileMenuItem = ({
 const EOAWalletMenuItem = ({
   currentContext,
   signerWallet,
-  isSafeEnv,
-  isSafeConnected,
   switchToEOA,
 }: EOAWalletMenuItemProps) => {
-  // Hide EOA only when the CONNECTED account is a Safe (Safe app or signer equals Safe)
-  // Hide EOA when in Safe App env, or when API confirms connected is a Safe,
-  // or when signer matches the last persisted Safe address
-  const lastSafe =
-    typeof window !== "undefined"
-      ? window.localStorage.getItem("atlas_selected_safe_address")
-      : null
-  const signerIsPersistedSafe = !!(
-    lastSafe &&
-    signerWallet?.address &&
-    lastSafe.toLowerCase() === signerWallet.address.toLowerCase()
-  )
-  const shouldHideEOA = isSafeEnv || isSafeConnected || signerIsPersistedSafe
-
-  if (shouldHideEOA) return null
-
   return (
     <DropdownMenuItem
       className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
@@ -139,7 +119,6 @@ const EOAWalletMenuItem = ({
 type SafeWalletsMenuItemsProps = {
   availableSafeWallets: any[]
   selectedSafeWallet: any
-  isSafeConnected: boolean
   signerWallet: any
   currentContext: string
   isLoadingSafeWallets: boolean
@@ -149,7 +128,6 @@ type SafeWalletsMenuItemsProps = {
 const SafeWalletsMenuItems = ({
   availableSafeWallets,
   selectedSafeWallet,
-  isSafeConnected,
   signerWallet,
   currentContext,
   isLoadingSafeWallets,
@@ -158,13 +136,6 @@ const SafeWalletsMenuItems = ({
   const getSafesToRender = () => {
     if (availableSafeWallets.length > 0) return availableSafeWallets
     if (selectedSafeWallet) return [selectedSafeWallet]
-    if (isSafeConnected && signerWallet?.address)
-      return [{ address: signerWallet.address }] as any
-    // Persisted last-safe fallback to avoid disappearing block
-    if (typeof window !== "undefined") {
-      const last = window.localStorage.getItem("atlas_selected_safe_address")
-      if (last) return [{ address: last }] as any
-    }
     return []
   }
 
@@ -247,143 +218,6 @@ export const Account = () => {
     isLoadingSafeWallets,
   } = useWallet()
 
-  const isSafeEnv =
-    typeof window !== "undefined" &&
-    !!(
-      (window as any)?.ethereum?.isSafe ||
-      (window as any)?.ethereum?.isGnosisSafe
-    )
-
-  // Robust detection: mark connected account as Safe if flag present or API confirms address is a Safe
-  const [isSafeConnected, setIsSafeConnected] = useState(false)
-  const [hasDetectedSafe, setHasDetectedSafe] = useState(false)
-  const [savedPreferredContext, setSavedPreferredContext] = useState<
-    "SAFE" | "EOA" | null
-  >(null)
-  const [isInitialResolving, setIsInitialResolving] = useState(true)
-  const [isMenuReady, setIsMenuReady] = useState(false)
-
-  useEffect(() => {
-    let mounted = true
-    const detectSafe = async () => {
-      if (isSafeEnv) {
-        if (mounted) setIsSafeConnected(true)
-        if (mounted) setHasDetectedSafe(true)
-        return
-      }
-      if (signerWallet?.address) {
-        // Prefer on-chain bytecode check; if mismatch/blocked, fallback to Safe Tx Service
-        let connectedIsSafe = false
-        try {
-          const eip1193 =
-            typeof window !== "undefined" ? (window as any)?.ethereum : null
-          if (eip1193) {
-            // If multiple providers are injected, prefer the Safe provider
-            const providers: any[] = (eip1193 as any).providers || []
-            const preferred = providers.find((p) => p?.isSafe || p?.isGnosisSafe) || eip1193
-            // Use raw request to avoid requiring accounts
-            const code: string = await preferred.request({
-              method: "eth_getCode",
-              params: [signerWallet.address, "latest"],
-            })
-            if (code && code !== "0x") {
-              connectedIsSafe = true
-            } else {
-              // Fallback to Safe Tx Service (Sepolia L1 in dev; OP in prod)
-              const info = await safeService.getSafeInfoByAddress(
-                signerWallet.address,
-              )
-              connectedIsSafe = !!info
-            }
-          } else {
-            const info = await safeService.getSafeInfoByAddress(
-              signerWallet.address,
-            )
-            connectedIsSafe = !!info
-          }
-        } catch (_e) {
-          // Final fallback: try Safe Tx Service
-          try {
-            const info = await safeService.getSafeInfoByAddress(
-              signerWallet.address,
-            )
-            connectedIsSafe = !!info
-          } catch {}
-        }
-        if (mounted) setIsSafeConnected(connectedIsSafe)
-        if (mounted) setHasDetectedSafe(true)
-      } else if (mounted) {
-        setIsSafeConnected(false)
-        setHasDetectedSafe(true)
-      }
-    }
-    detectSafe()
-    return () => {
-      mounted = false
-    }
-  }, [isSafeEnv, signerWallet?.address])
-
-  // Read preferred context saved from previous session
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const saved = window.localStorage.getItem("atlas_wallet_context")
-    if (saved === "SAFE" || saved === "EOA") {
-      setSavedPreferredContext(saved)
-    } else {
-      setSavedPreferredContext(null)
-    }
-  }, [])
-
-  // Determine when initial wallet UI is resolved to avoid flicker and disable dropdown until then
-  useEffect(() => {
-    // Once ready, do not revoke readiness to avoid double spinner
-    if (isMenuReady) return
-    // Until detection and first list load complete, keep disabled
-    if (!hasDetectedSafe || isLoadingSafeWallets) {
-      setIsMenuReady(false)
-      return
-    }
-
-    // Decide if we must resolve as SAFE (to avoid EOA flash) or EOA
-    const mustResolveAsSafe =
-      // If running inside Safe app, force SAFE to avoid spinner hanging waiting for API
-      isSafeEnv || savedPreferredContext === "SAFE" || isSafeConnected
-
-    const safeResolved =
-      currentContext === "SAFE" &&
-      (!!selectedSafeWallet ||
-        availableSafeWallets.length > 0 ||
-        // When inside Safe app, consider resolved once signer is known
-        (isSafeEnv && !!signerWallet?.address))
-
-    const eoaResolved = !!signerWallet?.address && !(isSafeEnv || isSafeConnected)
-
-    const uiStableCandidate = mustResolveAsSafe ? safeResolved : eoaResolved
-
-    if (!uiStableCandidate) {
-      setIsMenuReady(false)
-      return
-    }
-
-    // Arm readiness on the next frame so inner content has settled (prevents a one-frame flash)
-    const raf = requestAnimationFrame(() => {
-      setIsInitialResolving(false)
-      setIsMenuReady(true)
-    })
-    return () => cancelAnimationFrame(raf)
-  }, [
-    isMenuReady,
-    hasDetectedSafe,
-    isLoadingSafeWallets,
-    savedPreferredContext,
-    isSafeEnv,
-    isSafeConnected,
-    currentContext,
-    selectedSafeWallet,
-    availableSafeWallets.length,
-    signerWallet?.address,
-  ])
-
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
       onPrivyLogin(params.user)
@@ -411,12 +245,6 @@ export const Account = () => {
   const { logout: privyLogout } = useLogout({
     onSuccess: () => {
       isLoggingIn.current = false
-      try {
-        if (typeof window !== "undefined") {
-          window.localStorage.removeItem("atlas_wallet_context")
-          window.localStorage.removeItem("atlas_selected_safe_address")
-        }
-      } catch (_) {}
       signOut()
     },
   })
@@ -431,7 +259,6 @@ export const Account = () => {
 
   const pathName = usePathname()
   const isMissionsPath = pathName.includes("/missions")
-  const isRolePath = pathName.includes("/role")
 
   const didLogIn =
     prevAuthStatus === AUTH_STATUS.UNAUTHENTICATED &&
@@ -509,56 +336,44 @@ export const Account = () => {
   if (session) {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger
-          className={`focus:outline-none focus:opacity-80 ${
-            !isMenuReady ? "pointer-events-none" : ""
-          }`}
-        >
+        <DropdownMenuTrigger className={`focus:outline-none focus:opacity-80`}>
           <div
-            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${
-              !isMenuReady ? "bg-gray-300" : "bg-background hover:bg-secondary"
-            } h-10 px-4 py-2 gap-x-2.5 text-sm font-medium relative`}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${"bg-background hover:bg-secondary"} h-10 px-4 py-2 gap-x-2.5 text-sm font-medium relative`}
           >
-            {!isMenuReady ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
+            <>
+              <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
 
-                {/* Wallet context indicator */}
-                {currentContext === "SAFE" &&
-                  availableSafeWallets.length > 0 && (
-                    <div
-                      className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"
-                      title="Safe Wallet Active"
-                    />
-                  )}
-                {currentContext === "EOA" &&
-                  availableSafeWallets.length > 0 && (
-                    <div
-                      className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
-                      title="EOA Wallet Active"
-                    />
-                  )}
-
-                <span className="hidden sm:inline">
-                  {currentContext === "SAFE"
-                    ? truncateAddress(
-                        (currentAddress ||
-                          selectedSafeWallet?.address ||
-                          signerWallet?.address ||
-                          "0x") as `0x${string}`,
-                      )
-                    : username}
-                </span>
-                <Image
-                  src="/assets/icons/arrowDownIcon.svg"
-                  width={10}
-                  height={6}
-                  alt=""
+              {/* Wallet context indicator */}
+              {currentContext === "SAFE" && availableSafeWallets.length > 0 && (
+                <div
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"
+                  title="Safe Wallet Active"
                 />
-              </>
-            )}
+              )}
+              {currentContext === "EOA" && availableSafeWallets.length > 0 && (
+                <div
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
+                  title="EOA Wallet Active"
+                />
+              )}
+
+              <span className="hidden sm:inline">
+                {currentContext === "SAFE"
+                  ? truncateAddress(
+                      (currentAddress ||
+                        selectedSafeWallet?.address ||
+                        signerWallet?.address ||
+                        "0x") as `0x${string}`,
+                    )
+                  : username}
+              </span>
+              <Image
+                src="/assets/icons/arrowDownIcon.svg"
+                width={10}
+                height={6}
+                alt=""
+              />
+            </>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -576,8 +391,6 @@ export const Account = () => {
             <EOAWalletMenuItem
               currentContext={currentContext}
               signerWallet={signerWallet}
-              isSafeEnv={isSafeEnv}
-              isSafeConnected={isSafeConnected}
               switchToEOA={switchToEOA}
             />
           )}
@@ -587,7 +400,6 @@ export const Account = () => {
             <SafeWalletsMenuItems
               availableSafeWallets={availableSafeWallets}
               selectedSafeWallet={selectedSafeWallet}
-              isSafeConnected={isSafeConnected}
               signerWallet={signerWallet}
               currentContext={currentContext}
               isLoadingSafeWallets={isLoadingSafeWallets}
