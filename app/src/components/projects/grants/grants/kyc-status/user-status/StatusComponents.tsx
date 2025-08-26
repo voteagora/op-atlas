@@ -1,10 +1,14 @@
-import { AlertCircle, Check, Clock, Loader2, X } from "lucide-react"
+import { AlertTriangle, Check, Clock, Loader2, X } from "lucide-react"
 
-import { PersonaStatus } from "@/components/projects/types"
+import {
+  ExtendedPersonaStatus,
+  KYCUserStatusProps,
+  PersonaStatus,
+} from "@/components/projects/types"
 import { cn } from "@/lib/utils"
 
 interface StatusIconProps {
-  status: PersonaStatus
+  status: ExtendedPersonaStatus
   size?: number
 }
 
@@ -22,32 +26,22 @@ const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
       return <X className={cn(`h-${size} w-${size}`, "text-red-500")} />
     case "expired":
       return <Clock className={cn(`h-${size} w-${size}`, "text-yellow-500")} />
-    default:
+    case "project_issue":
       return (
-        <AlertCircle className={cn(`h-${size} w-${size}`, "text-yellow-500")} />
+        <AlertTriangle className={cn(`h-${size} w-${size}`, "text-red-500")} />
       )
+    default:
+      return <Loader2 className={cn(`h-${size} w-${size}`, "animate-spin")} />
   }
 }
 
-const YouCard = () => (
-  <div className="w-[38px] h-[20px] flex items-center justify-center rounded-full bg-backgroundSecondary">
+const Card = ({ text }: { text: string }) => (
+  <div className="flex items-center justify-center rounded-full px-[2px] py-2 bg-backgroundSecondary">
     <p className="font-[Inter] font-medium text-xs leading-[16px] text-center">
-      You
+      {text}
     </p>
   </div>
 )
-
-const ResendEmailButton = ({ emailAddress }: { emailAddress: string }) => (
-  <button>Resend Email</button>
-)
-
-interface IndividualStatusProps {
-  name: string
-  email: string
-  organization: string
-  isUser?: boolean
-  status?: PersonaStatus
-}
 
 const StatusRow = ({
   name,
@@ -55,7 +49,10 @@ const StatusRow = ({
   organization,
   isUser,
   status = "pending", // Default to pending if no status is provided
-}: IndividualStatusProps) => {
+  expirationDate,
+  handleEmailResend,
+  emailResendBlock,
+}: KYCUserStatusProps) => {
   return (
     <div className="flex flex-row w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rotate-0 opacity-100 rounded-[6px] border border-border bg-background">
       <div className="flex flex-row justify-between items-center w-full">
@@ -71,9 +68,22 @@ const StatusRow = ({
           <div className="flex flex-row gap-2">
             <RowText values={[name, email, organization]} />
           </div>
-          {isUser && <YouCard />}
+          <div className="flex flex-row gap-2">
+            {isUser && <Card text="You" />}
+            {expirationDate && (
+              <Card
+                // Convert expiration date to a human-readable format
+                text={`Valid until ${expirationDate.toLocaleDateString(
+                  "en-US",
+                  { month: "long", day: "numeric", year: "numeric" },
+                )}`}
+              />
+            )}
+          </div>
         </div>
-        <ResendEmailButton emailAddress={email} />
+        {!expirationDate && !emailResendBlock && handleEmailResend && (
+          <button onClick={() => handleEmailResend(email)}>Resend Email</button>
+        )}
       </div>
     </div>
   )
@@ -85,4 +95,4 @@ const RowText = ({ values }: { values: string[] }) => (
   </p>
 )
 
-export { ResendEmailButton, StatusIcon, StatusRow, YouCard }
+export { StatusIcon, StatusRow, Card }

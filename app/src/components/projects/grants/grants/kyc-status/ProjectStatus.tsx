@@ -1,10 +1,14 @@
 import { StatusIcon } from "@/components/projects/grants/grants/kyc-status/user-status/StatusComponents"
+import { ExtendedPersonaStatus } from "@/components/projects/types"
 
-const ProjectStatus = () => {
+const ProjectStatus = ({ status }: { status: ExtendedPersonaStatus }) => {
+  if (status === "completed") {
+    return null
+  }
   return (
     <div className="w-664px] h-[176px] rounded-[6px] p-6 gap-3 justify-center items-center flex flex-col">
       <div className={"text-center"}>
-        <StatusIcon status={"pending"} size={6} />
+        <StatusIcon status={status} size={6} />
       </div>
       <p className="font-[Inter] font-medium text-[14px] leading-[20px] text-center text-text-foreground">
         We are checking for verifications
