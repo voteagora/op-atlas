@@ -66,7 +66,7 @@ export default async function Page({
       {/*    </div>*/}
       {/*  </div>*/}
       {/*)}*/}
-      <KYCStatusContainer />
+      <KYCStatusContainer projectId={params.projectId} />
     </div>
   )
 }

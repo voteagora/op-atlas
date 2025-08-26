@@ -9,6 +9,7 @@ import {
   updateKYCUserStatus,
 } from "@/db/kyc"
 import { getReward, updateClaim } from "@/db/rewards"
+import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
 import {
   caseStatusMap,
   inquiryStatusMap,
@@ -19,6 +20,7 @@ import {
 } from "@/lib/persona"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+import { getUserByPrivyDid } from "@/db/users"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -270,4 +272,23 @@ export const deleteKYCTeamAction = async ({
     kycTeamId,
     hasActiveStream,
   })
+}
+
+export const getKYCUsersByProjectId = async (projectId: string) => {
+  // TODO validate user
+  // console.log("getKYCUsersByProjectId", { projectId })
+  // const session = await auth()
+  //
+  // const privyId = session?.user?.id
+  // console.log("getKYCUsersByProjectId", { privyId })
+  //
+  // if (!privyId) {
+  //   throw new Error("Unauthorized")
+  // }
+  // const userId = await getUserByPrivyDid(privyId)
+  // if (!userId) {
+  //   throw new Error("Unauthorized")
+  // }
+
+  return await getKYCUsersByProjId({ projectId })
 }
