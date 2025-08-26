@@ -136,6 +136,18 @@ export default async function Page({ params }: PageProps) {
             }}
           />
 
+          {!publicProject.organization &&
+            (publicProject.team?.length ?? 0) > 1 && (
+              <Contributors
+                contributors={publicProject.team!.map(({ user }) => ({
+                  imageUrl: user.imageUrl,
+                  name: user.name,
+                  username: user.username ?? undefined,
+                  id: user.id,
+                }))}
+              />
+            )}
+
           {!enrolledInMission && !onchainBuilderMetrics && (
             <div className="w-full h-[208px] space-y-6 rounded-xl border flex flex-col justify-center items-center p-6">
               <div className="text-center">
