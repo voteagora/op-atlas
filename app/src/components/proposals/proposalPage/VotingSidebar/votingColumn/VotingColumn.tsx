@@ -6,12 +6,11 @@ import {
 } from "@ethereum-attestation-service/eas-sdk"
 import { useWallets } from "@privy-io/react-auth"
 import { useSetActiveWallet } from "@privy-io/wagmi"
-import SafeAppsSDK from "@safe-global/safe-apps-sdk"
 import { getChainId, switchChain } from "@wagmi/core"
 import { ethers } from "ethers"
 import { Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { useAccount } from "wagmi"
 
@@ -129,19 +128,6 @@ const VotingChoices = ({
 }
 
 const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
-  const withTimeout = async <T,>(
-    promise: Promise<T>,
-    ms: number,
-    errorMessage: string,
-  ): Promise<T> => {
-    return (await Promise.race([
-      promise,
-      new Promise<T>((_, reject) =>
-        setTimeout(() => reject(new Error(errorMessage)), ms),
-      ),
-    ])) as T
-  }
-
   const [selectedVotes, setSelectedVotes] = useState<
     { voteType: VoteType; selections?: number[] } | undefined
   >(undefined)
@@ -325,17 +311,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   )
 
   const { connector } = useAccount()
-
-  // Pending Safe tracking removed
-
-  const getSafeAppLink = (
-    safeAddress?: string,
-    _safeTxHash?: string,
-  ): string | undefined => {
-    if (!safeAddress) return undefined
-    const prefix = process.env.NEXT_PUBLIC_ENV === "dev" ? "sep" : "oeth"
-    return `https://app.safe.global/home?safe=${prefix}:${safeAddress}`
-  }
 
   useEffect(() => {
     setHasCheckedWallet(false)
@@ -763,7 +738,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                 citizen?.address || "your citizen address"
               }.`,
             )
-          } else {
+          } else if (!selectedSafeWallet?.address) {
             // setActiveWallet(newActiveWallet)
             // Prompt a retry
             throw new Error("Something went wrong. Please try again.")
@@ -775,13 +750,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             .includes("User rejected the request.".toLowerCase())
         ) {
           throw new Error("User rejected signature")
-        } else if (
-          error instanceof Error &&
-          error.message.toLowerCase().includes("invalid eip-1193 provider")
-        ) {
-          throw new Error(
-            "No wallet provider detected. Connect a Safe owner EOA in this browser on Sepolia and try again. If you are inside the Safe app, open Atlas outside the Safe app to propose the transaction.",
-          )
         }
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {

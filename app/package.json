@@ -78,7 +78,6 @@
     "@rive-app/react-canvas-lite": "^4.13.0",
     "@safe-global/api-kit": "^4.0.0",
     "@safe-global/protocol-kit": "^6.1.0",
-    "@safe-global/safe-apps-sdk": "^9.1.0",
     "@safe-global/safe-core-sdk": "^3.3.5",
     "@sentry/nextjs": "^9.6.1",
     "@tanstack/react-query": "^5.62.7",
