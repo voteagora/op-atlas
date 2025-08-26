@@ -3,7 +3,6 @@ import { AlertTriangle, Check, Clock, Loader2, X } from "lucide-react"
 import {
   ExtendedPersonaStatus,
   KYCUserStatusProps,
-  PersonaStatus,
 } from "@/components/projects/types"
 import { cn } from "@/lib/utils"
 
@@ -85,7 +84,7 @@ const StatusRow = ({
             )}
           </div>
         </div>
-        {!expirationDate && !emailResendBlock && handleEmailResend && (
+        {!expirationDate && !emailResendBlock && (
           <button onClick={() => handleEmailResend(email)}>Resend Email</button>
         )}
       </div>
