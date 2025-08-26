@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Homepage", () => {
   test("should display Optimism branding", async ({ page }) => {
-    // Navigate to homepage
     await page.goto("/")
     await page.waitForLoadState("domcontentloaded")
 
