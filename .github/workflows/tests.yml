@@ -8,13 +8,16 @@ on:
     branches: [ main, develop ]
 
 env:
-#  Not sure why this is defined twice
   NEXT_PUBLIC_PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
   PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
   PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }}
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   NEXT_PUBLIC_AGORA_API_URL: ${{ secrets.NEXT_PUBLIC_AGORA_API_URL}}
   NEXT_PUBLIC_VERCEL_URL: ${{ secrets.NEXT_PUBLIC_VERCEL_URL}}
+  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  NEXTAUTH_URL: "http://localhost:3000"
+  MAILCHIMP_API_KEY: ${{ secrets.MAILCHIMP_API_KEY }}
+  MAILCHIMP_SERVER_PREFIX: ${{ secrets.MAILCHIMP_SERVER_PREFIX }}
 
 jobs:
   test:
@@ -48,11 +51,6 @@ jobs:
         with:
           node-version: 21
           cache: 'pnpm'
-
-      - name: Set Mailchimp environment variables
-        run: |
-          echo "MAILCHIMP_API_KEY=${{ secrets.MAILCHIMP_API_KEY }}" >> $GITHUB_ENV
-          echo "MAILCHIMP_SERVER_PREFIX=${{ secrets.MAILCHIMP_SERVER_PREFIX }}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
