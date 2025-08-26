@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server"
+
+export const dynamic = "force-dynamic"
 import { Octokit } from "octokit"
 
 export const revalidate = 60 * 60
