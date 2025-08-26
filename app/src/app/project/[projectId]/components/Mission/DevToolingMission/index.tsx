@@ -34,8 +34,8 @@ export default function DevToolingMission({
   return (
     <div className="space-y-3">
       {opRewardSum > 0 && (
-        <div className="mt-6 relative w-full h-64">
-          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] border-[#FDA4C4] border-[2px] rounded-xl">
+        <div className="mt-6 relative w-full">
+          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] rounded-xl p-20">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
@@ -131,7 +131,7 @@ export default function DevToolingMission({
             <TabsContent
               key={month}
               value={month}
-              className="w-full grid grid-cols-2 gap-4 data-[state=inactive]:hidden mt-3"
+              className="w-full grid grid-cols-2 gap-3 data-[state=inactive]:hidden mt-3"
             >
               <MetricCard
                 value={formatNumber(
@@ -161,7 +161,7 @@ export default function DevToolingMission({
                         Top projects in Atlas using {projectName}
                       </p>
                     </div>
-                    <p className="!text-secondary-foreground">
+                    <p className="!text-secondary-foreground text-xs">
                       Projects enrolled in Retro Funding: Onchain Builders only
                     </p>
                   </div>
@@ -191,7 +191,7 @@ export default function DevToolingMission({
                                     className="mr-2 mt-[-2px] mb-[-2px]"
                                   />
                                 )}
-                                {project?.name}
+                                <span className="truncate block max-w-[220px]">{project?.name}</span>
                               </li>
                             </TrackedLink>
                           )
@@ -201,7 +201,7 @@ export default function DevToolingMission({
                   </div>
                 </div>
               </div>
-              <div className="w-full rounded-xl border p-6 bg-background col-span-full h-32">
+              <div className="w-full rounded-xl border p-6 bg-background col-span-full">
                 <div className="w-full h-full flex justify-between">
                   <div className="w-full pr-6">
                     <div className="flex items-center space-x-3">
@@ -229,15 +229,7 @@ export default function DevToolingMission({
                     <div className="h-full w-px bg-tertiary" />
                     <div className="pl-6">
                       <p className="text-secondary-foreground text-base font-normal">
-                        Rewards are determined by an{" "}
-                        <ExternalLink
-                          href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
-                          className="underline"
-                        >
-                          evaluation algorithm
-                        </ExternalLink>{" "}
-                        powered by onchain data, and some metrics are more
-                        valuable than others.
+                        Rewards are determined by an <ExternalLink href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024" className="underline">evaluation algorithm</ExternalLink> powered by onchain data.
                       </p>
                     </div>
                   </div>
