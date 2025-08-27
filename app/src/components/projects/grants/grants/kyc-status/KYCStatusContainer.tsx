@@ -9,8 +9,6 @@ import IndividualStatuses from "@/components/projects/grants/grants/kyc-status/u
 import LegalEntities from "@/components/projects/grants/grants/kyc-status/user-status/LegalEntities"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 
-const mockAddress = "0xc2658A2d5ADf4a4F08f5c9b83D39816951465538"
-
 const resolveProjectStatus = (users: Pick<KYCUser, "personaStatus">[]) => {
   // If any users are expired, failed, or declined, return "project_issue"
   if (
@@ -81,6 +79,13 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
     console.error("Error loading KYC users data")
   }
 
+  const individualStatuses = users
+    ? users.filter((user) => user.user.kycUserType === "USER")
+    : []
+
+  const legalEntitiesStatuses = users
+    ? users.filter((user) => user.user.kycUserType === "LEGAL_ENTITY")
+    : []
   console.log({ users, project })
 
   return (
@@ -101,8 +106,8 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
             <GrantDeliveryAddress address={project.kycTeam.walletAddress} />
             {users && users.length > 0 && (
               <>
-                <IndividualStatuses users={users!.slice(0, -1)} />
-                <LegalEntities users={users!.slice(-1)} />
+                <IndividualStatuses users={individualStatuses} />
+                <LegalEntities users={legalEntitiesStatuses} />
               </>
             )}
           </>
