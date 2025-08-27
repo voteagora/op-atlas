@@ -16,6 +16,6 @@ export type ExtendedPersonaStatus = PersonaStatus | "project_issue"
 export interface KYCUserStatusProps {
   user: KYCUser
   isUser?: boolean
-  handleEmailResend: (emailAddress: string) => void
+  handleEmailResend: (kycUser: KYCUser) => void
   emailResendBlock?: boolean
 }
