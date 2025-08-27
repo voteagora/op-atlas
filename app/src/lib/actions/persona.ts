@@ -39,12 +39,6 @@ export const createPersonaInquiryLink = async (
         attributes: {
           "inquiry-template-id": templateId,
           "reference-id": kycUser.id,
-          "name-first": kycUser.firstName,
-          "name-last": kycUser.lastName,
-          "email-address": kycUser.email,
-          "expires-at": new Date(
-            Date.now() + 7 * 24 * 60 * 60 * 1000,
-          ).toISOString(), // 7 days from now
         },
       },
     }
