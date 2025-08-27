@@ -142,23 +142,23 @@ model RewardClaim {
 }
 
 model Organization {
-  id                   String                 @id @default(uuid())
-  name                 String
-  description          String?
-  avatarUrl            String?
-  coverUrl             String?
-  website              String[]
-  farcaster            String[]
-  twitter              String?
-  mirror               String?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  deletedAt            DateTime?
-  OrganizationKYCTeams OrganizationKYCTeam[]
-  snapshots            OrganizationSnapshot[]
-  projects             ProjectOrganization[]
-  roleApplications     RoleApplication[]
-  team                 UserOrganization[]
+  id                    String                 @id @default(uuid())
+  name                  String
+  description           String?
+  avatarUrl             String?
+  coverUrl              String?
+  website               String[]
+  farcaster             String[]
+  twitter               String?
+  mirror                String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  deletedAt             DateTime?
+  OrganizationKYCTeams  OrganizationKYCTeam[]
+  snapshots             OrganizationSnapshot[]
+  projects              ProjectOrganization[]
+  roleApplications      RoleApplication[]
+  team                  UserOrganization[]
   grantEligibilityForms GrantEligibilityForm[]
 
   @@index([deletedAt])
@@ -481,33 +481,39 @@ model ContactEmailTags {
   @@index([email])
 }
 
+enum KYCUserType {
+  USER
+  LEGAL_ENTITY
+}
+
 model KYCUser {
-  id           String         @id @default(uuid())
-  email        String
-  firstName    String
-  lastName     String
-  businessName String?
-  status       KYCStatus      @default(PENDING)
+  id            String         @id @default(uuid())
+  email         String
+  firstName     String
+  lastName      String
+  businessName  String?
+  status        KYCStatus      @default(PENDING)
   personaStatus PersonaStatus?
-  expiry       DateTime
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  KYCUserTeams KYCUserTeams[]
+  expiry        DateTime
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  KYCUserTeams  KYCUserTeams[]
+  kycUserType   KYCUserType    @default(USER)
 
   @@index([email])
 }
 
 model KYCTeam {
-  id                   String                @id @default(uuid())
-  walletAddress        String                @unique
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  deletedAt            DateTime?
-  team                 KYCUserTeams[]
-  OrganizationKYCTeams OrganizationKYCTeam[]
-  projects             Project[]
-  rewardStreams        RewardStream[]
-  superfludStream      SuperfluidStream[]
+  id                    String                 @id @default(uuid())
+  walletAddress         String                 @unique
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  deletedAt             DateTime?
+  team                  KYCUserTeams[]
+  OrganizationKYCTeams  OrganizationKYCTeam[]
+  projects              Project[]
+  rewardStreams         RewardStream[]
+  superfludStream       SuperfluidStream[]
   grantEligibilityForms GrantEligibilityForm[]
 
   @@index([walletAddress])
@@ -802,24 +808,24 @@ enum GrantType {
 }
 
 model GrantEligibilityForm {
-  id              String                       @id @default(uuid())
-  currentStep     Int                           @default(1) // 1..5 (Grant, Wallet, Signers, Entities, Submit)
-  expiresAt       DateTime?
-  submittedAt     DateTime?
-  grantType       GrantType?
-  walletAddress   String?
-  attestations    Json? // checkbox values at steps, final consent stored at submit
-  data            Json   // draft payload: { signers: [...], entities: [...] }
-  createdAt       DateTime                     @default(now())
-  updatedAt       DateTime                     @updatedAt
-  deletedAt       DateTime?
-  projectId       String?
-  organizationId  String?
-  kycTeamId       String?
-  project         Project?                     @relation(fields: [projectId], references: [id])
-  organization    Organization?                @relation(fields: [organizationId], references: [id])
-  kycTeam         KYCTeam?                     @relation(fields: [kycTeamId], references: [id])
-  changelog       GrantEligibilityChangelog[]
+  id             String                      @id @default(uuid())
+  currentStep    Int                         @default(1) // 1..5 (Grant, Wallet, Signers, Entities, Submit)
+  expiresAt      DateTime?
+  submittedAt    DateTime?
+  grantType      GrantType?
+  walletAddress  String?
+  attestations   Json? // checkbox values at steps, final consent stored at submit
+  data           Json // draft payload: { signers: [...], entities: [...] }
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+  deletedAt      DateTime?
+  projectId      String?
+  organizationId String?
+  kycTeamId      String?
+  project        Project?                    @relation(fields: [projectId], references: [id])
+  organization   Organization?               @relation(fields: [organizationId], references: [id])
+  kycTeam        KYCTeam?                    @relation(fields: [kycTeamId], references: [id])
+  changelog      GrantEligibilityChangelog[]
 
   @@index([projectId])
   @@index([organizationId])
@@ -828,14 +834,14 @@ model GrantEligibilityForm {
 }
 
 model GrantEligibilityChangelog {
-  id          String    @id @default(uuid())
+  id          String               @id @default(uuid())
   formId      String
-  action      String               // created|saved|submitted|expired|canceled
+  action      String // created|saved|submitted|expired|canceled
   performedBy String?
   oldData     Json?
   newData     Json?
-  createdAt   DateTime  @default(now())
-  form      GrantEligibilityForm @relation(fields: [formId], references: [id])
+  createdAt   DateTime             @default(now())
+  form        GrantEligibilityForm @relation(fields: [formId], references: [id])
 
   @@index([formId])
   @@index([action])
