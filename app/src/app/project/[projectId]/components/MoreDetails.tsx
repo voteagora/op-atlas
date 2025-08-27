@@ -2,7 +2,7 @@ import ExtendedLink from "@/components/common/ExtendedLink"
 
 export default function MoreDetails() {
   return (
-    <div className="w-full flex flex-col items-center justify-center border rounded-xl bg-background h-[208px] p-6 space-y-6">
+    <div className="w-full flex flex-col items-center justify-center p-0 space-y-4">
       <div className="text-center">
         <h1 className="font-semibold text-base text-foreground">
           More details about this project are coming soon

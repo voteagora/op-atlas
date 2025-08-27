@@ -15,13 +15,7 @@ export default function IncreaseYourImpact({
   const isOnchainBuilder = type === "onchain-builders"
   const isDevTooling = type === "dev-tooling"
   return (
-    <div className="overflow-hidden relative w-full rounded-lg flex flex-col items-center justify-center bg-gradient-to-b from-[#FF4B04] to-[#FF0420] space-y-6 p-12">
-      <Image
-        src="/assets/icons/shining-white.svg"
-        width={24}
-        height={24}
-        alt="Shinning Icon"
-      />
+    <div className="overflow-hidden relative w-full rounded-lg flex flex-col items-center justify-center bg-[#FF0420] space-y-6 p-20">
       <div className="space-y-3 text-center z-50">
         <h4 className="font-semibold text-xl text-contrast-foreground">
           {isOnchainBuilder && "Make your application interopable"}
