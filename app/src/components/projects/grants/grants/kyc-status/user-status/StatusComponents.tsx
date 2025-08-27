@@ -105,4 +105,4 @@ const RowText = ({ values }: { values: string[] }) => (
   </p>
 )
 
-export { StatusIcon, StatusRow, Badge }
+export { Badge, StatusIcon, StatusRow }
