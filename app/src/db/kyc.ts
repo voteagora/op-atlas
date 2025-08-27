@@ -24,29 +24,6 @@ export async function updateKYCUserStatus(
   return result
 }
 
-export async function updateKYBUserStatus(
-  status: string,
-  updatedAt: Date,
-  personaStatus: string,
-  referenceId?: string,
-) {
-  if (!referenceId) {
-    throw new Error("Reference ID is required for KYB user status update")
-  }
-
-  const result = await prisma.$queryRaw<KYCUser[]>`
-    UPDATE "KYCUser" SET
-      "status" = ${status}::"KYCStatus",
-      "personaStatus" = ${personaStatus}::"PersonaStatus",
-      "updatedAt" = ${updatedAt},
-      "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE id = ${referenceId}
-    RETURNING *;
-  `
-
-  return result
-}
-
 export async function getProjectKycTeam(projectId: string) {
   const project = await prisma.project.findUnique({
     where: {

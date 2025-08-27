@@ -5,8 +5,7 @@ import { isAfter, parse } from "date-fns"
 import { auth } from "@/auth"
 import {
   deleteKycTeam,
-  updateKYBUserStatus,
-  updateKYCUserStatus,
+  updateKYCUserStatus
 } from "@/db/kyc"
 import { getReward, updateClaim } from "@/db/rewards"
 import {
@@ -219,7 +218,7 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           // Adjust Case statues like "Waiting on UBOs" to Pending for now.
           const personaStatus = mapCaseStatusToPersonaStatus(status)
 
-          await updateKYBUserStatus(
+          await updateKYCUserStatus(
             parsedStatus,
             new Date(updatedAt),
             personaStatus,
