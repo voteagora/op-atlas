@@ -488,6 +488,7 @@ model KYCUser {
   lastName     String
   businessName String?
   status       KYCStatus      @default(PENDING)
+  personaStatus PersonaStatus?
   expiry       DateTime
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -711,6 +712,7 @@ model Role {
   voteEndAt    DateTime?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @default(now()) @updatedAt
+  proposalId   String?
   applications RoleApplication[]
 }
 
@@ -779,6 +781,17 @@ enum RoleApplicationStatus {
   pending
   approved
   rejected
+}
+
+enum PersonaStatus {
+  created
+  pending
+  completed
+  failed
+  expired
+  needs_review
+  approved
+  declined
 }
 
 // Grant Eligibility embedded form
