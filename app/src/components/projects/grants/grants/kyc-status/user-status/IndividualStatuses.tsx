@@ -4,7 +4,7 @@ import { KYCUserStatusProps } from "@/components/projects/types"
 
 const IndividualStatuses = ({ users }: { users: KYCUserStatusProps[] }) => {
   return (
-    <KYCSubSection title="Individuals and wallet Signers">
+    <KYCSubSection title="Individuals and wallet signers">
       {users.map((user, index) => (
         <StatusRow key={index} {...user} isUser={index === 0} />
       ))}
