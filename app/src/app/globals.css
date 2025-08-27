@@ -96,6 +96,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-riforma), ui-sans-serif, system-ui, -apple-system,
+      Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+      "Segoe UI Emoji";
   }
   h2 {
     @apply text-2xl font-semibold;

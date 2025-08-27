@@ -31,12 +31,30 @@ export function formatNumber(
   maximumSignificantDigits = 2,
   notation: "standard" | "scientific" | "engineering" | "compact" = "standard",
 ) {
+  const value = Number(amount)
+
+  // Custom compact suffix for K/M when notation is standard
+  if (notation === "standard") {
+    const abs = Math.abs(value)
+    const compact = (n: number) =>
+      new Intl.NumberFormat("en", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: maximumSignificantDigits,
+      }).format(n)
+    if (abs >= 1_000_000) {
+      return `${compact(value / 1_000_000)}M`
+    }
+    if (abs >= 1_000) {
+      return `${compact(value / 1_000)}K`
+    }
+  }
+
   const numberFormat = new Intl.NumberFormat("en", {
     notation,
     maximumFractionDigits: maximumSignificantDigits,
   })
 
-  return numberFormat.format(Number(amount))
+  return numberFormat.format(value)
 }
 
 export function cn(...inputs: ClassValue[]) {

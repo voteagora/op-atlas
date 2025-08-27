@@ -37,7 +37,7 @@ const ProposalPage = async ({
 
   return (
     <main className="flex w-full min-h-screen pb-[160px] mx-auto">
-      <div className="proposal flex flex-col w-full max-w-[1064px] mt-16 md:mt-24 gap-8 md:gap-[48px] mx-auto px-4 md:px-6">
+      <div className="proposal flex flex-col w-full max-w-[1064px] mt-16 md:mt-24 gap-8 md:gap-[48px] mx-auto px-6 md:px-6">
         <div className="column-container gap-6 md:gap-[48px] flex justify-between items-start flex-col md:flex-row">
           <div className="proposal-content w-full lg:min-w-[712px] lg:max-w-[712px] flex flex-col gap-6 md:gap-[44px] mb-8 md:mb-0 min-w-0">
             <Breadcrumbs values={breadcrumbs} />
