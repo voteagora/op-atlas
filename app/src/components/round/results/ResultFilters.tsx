@@ -87,7 +87,7 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
       .map((r) => `${r.label} (${r.year})`)
     if (labels.length === 1) return labels[0]
     if (labels.length === 2) return labels.join(", ")
-    return `${labels.length} Rounds selected`
+    return `${labels.length} rounds selected`
   }, [selectedRounds])
 
   return (
