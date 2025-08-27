@@ -12,12 +12,6 @@ export default function Error() {
       <div className="flex flex-wrap gap-3">
         <ExtendedLink
           as="button"
-          text={"Give feedback"}
-          href={"https://ztfatrpxjq1.typeform.com/to/pBEaxkMN"}
-        />
-
-        <ExtendedLink
-          as="button"
           text={"Retry"}
           href={"#"}
           onClick={() => window.location.reload()}
