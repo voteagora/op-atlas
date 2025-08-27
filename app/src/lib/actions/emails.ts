@@ -29,9 +29,9 @@ export const sendTransactionEmail = async (
       html: emailData.html,
       text: emailData.text || emailData.html.replace(/<[^>]*>/g, ""),
       subject: emailData.subject,
-      from_email: "noreply@mailchimp.com",
+      from_email: "compliance@optimism.io",
       to: [{ email: emailData.to, type: "to" as const }],
-      reply_to: "noreply@mailchimp.com",
+      reply_to: "compliance@optimism.io.",
     }
 
     const response = await client.messages.send({ message })
