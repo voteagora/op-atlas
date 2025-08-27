@@ -21,6 +21,7 @@ import {
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
 import { getUserByPrivyDid } from "@/db/users"
+import { getProject } from "@/db/projects"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -275,20 +276,27 @@ export const deleteKYCTeamAction = async ({
 }
 
 export const getKYCUsersByProjectId = async (projectId: string) => {
-  // TODO validate user
-  // console.log("getKYCUsersByProjectId", { projectId })
-  // const session = await auth()
-  //
-  // const privyId = session?.user?.id
-  // console.log("getKYCUsersByProjectId", { privyId })
-  //
-  // if (!privyId) {
-  //   throw new Error("Unauthorized")
-  // }
-  // const userId = await getUserByPrivyDid(privyId)
-  // if (!userId) {
-  //   throw new Error("Unauthorized")
-  // }
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, userId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
 
   return await getKYCUsersByProjId({ projectId })
+}
+
+export const getKYCIdOffUser = async (projectId: string) => {
+  const session = await auth()
+  const userId = session?.user?.id
+  if (!userId) {
+    return false
+  }
+
+  const project = await getProject({ id: projectId })
 }
