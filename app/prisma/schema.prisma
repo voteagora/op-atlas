@@ -794,14 +794,6 @@ enum PersonaStatus {
   declined
 }
 
-// Grant Eligibility embedded form
-enum GrantEligibilityFormStatus {
-  DRAFT
-  SUBMITTED
-  EXPIRED
-  CANCELED
-}
-
 enum GrantType {
   RETRO_FUNDING
   AUDIT_GRANT
@@ -811,7 +803,6 @@ enum GrantType {
 
 model GrantEligibilityForm {
   id              String                       @id @default(uuid())
-  status          GrantEligibilityFormStatus    @default(DRAFT)
   currentStep     Int                           @default(1) // 1..5 (Grant, Wallet, Signers, Entities, Submit)
   expiresAt       DateTime?
   submittedAt     DateTime?
@@ -821,6 +812,7 @@ model GrantEligibilityForm {
   data            Json   // draft payload: { signers: [...], entities: [...] }
   createdAt       DateTime                     @default(now())
   updatedAt       DateTime                     @updatedAt
+  deletedAt       DateTime?
   projectId       String?
   organizationId  String?
   kycTeamId       String?
@@ -832,7 +824,6 @@ model GrantEligibilityForm {
   @@index([projectId])
   @@index([organizationId])
   @@index([kycTeamId])
-  @@index([status])
   @@index([createdAt])
 }
 
