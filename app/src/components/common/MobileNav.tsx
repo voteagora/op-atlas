@@ -37,7 +37,7 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
         href="/round/results"
         onClick={onClose}
       >
-        Projects
+        Recipients
       </Link>
       <Link
         className="text-2xl font-semibold"
