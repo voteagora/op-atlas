@@ -10,6 +10,7 @@ import { getProjectMetrics } from "@/lib/oso"
 import { getProjectDeployedChains } from "@/lib/oso/utils"
 
 import {
+  Contributors,
   Description,
   Header,
   IncreaseYourImpact,
