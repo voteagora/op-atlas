@@ -89,10 +89,8 @@ const StatusRow = ({
             )}
           </div>
         </div>
-        {!user.expiry && !emailResendBlock && (
-          <button onClick={() => handleEmailResend(user.email)}>
-            Resend Email
-          </button>
+        {!emailResendBlock && (
+          <button onClick={() => handleEmailResend(user)}>Resend Email</button>
         )}
       </div>
     </div>
