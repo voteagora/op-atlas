@@ -137,7 +137,7 @@ const CardApprovalButton = ({
         onMouseLeave={onMouseLeave}
         disabled={votingDisabled}
       >
-        <span className="font-medium text-xs leading-4 font-inter ">
+        <span className="font-medium text-xs leading-4 font-riforma ">
           Approved
         </span>
       </button>
@@ -155,7 +155,9 @@ const CardApprovalButton = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <span className="font-medium text-xs leading-4 font-inter ">Approve</span>
+      <span className="font-medium text-xs leading-4 font-riforma ">
+        Approve
+      </span>
     </button>
   )
 }

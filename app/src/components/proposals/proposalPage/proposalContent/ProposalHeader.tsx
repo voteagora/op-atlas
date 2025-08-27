@@ -6,7 +6,7 @@ interface ProposalTitleProps {
 
 const ProposalTitle = ({ title }: ProposalTitleProps) => (
   <div className="gap-2 flex-col items-start">
-    <h1 className="font-semibold text-xl sm:text-2xl md:text-3xl lg:text-[36px] leading-tight lg:leading-[44px] tracking-normal text-text-default font-inter break-words word-break overflow-wrap-anywhere">
+    <h1 className="font-semibold text-xl sm:text-2xl md:text-3xl lg:text-[36px] leading-tight lg:leading-[44px] tracking-normal text-text-default font-riforma break-words word-break overflow-wrap-anywhere">
       {title}
     </h1>
   </div>
@@ -27,7 +27,7 @@ const ProposalStatus = ({
 }: ProposalStatusProps) => (
   <div className={`text-h2 ${className} flex flex-col gap-3`}>
     {startDate && endDate && (
-      <div className="font-inter font-normal text-sm md:text-[16px] leading-5 md:leading-[24px] tracking-[0%] text-secondary-foreground mt-1 max-w-full">
+      <div className="font-riforma font-normal text-sm md:text-[16px] leading-5 md:leading-[24px] tracking-[0%] text-secondary-foreground mt-1 max-w-full">
         <span className="break-all overflow-hidden text-ellipsis">
           Voting {startDate} - {endDate}
         </span>
