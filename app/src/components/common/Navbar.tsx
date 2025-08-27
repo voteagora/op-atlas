@@ -82,14 +82,14 @@ export const Navbar = () => {
     <>
       <nav className="sticky inset-x-0 top-0 h-18 flex px-6 z-[200] bg-background">
         <div className="flex items-center justify-between h-full w-full mx-auto">
-          <div className="flex sm:hidden items-center h-full w-full relative">
+          <div className="flex sm:hidden items-center h-full w-full gap-4">
             <button
-              className="absolute left-0 z-10 flex items-center"
+              className="flex items-center"
               onClick={() => setShowMobileNav(!showMobileNav)}
             >
               {showMobileNav ? <X /> : <AlignJustify />}
             </button>
-            <div className="flex items-center justify-start w-full pl-4">
+            <div className="flex items-center">
               <Link href="/" className="flex items-center">
                 <Image
                   src="/assets/icons/optimismAtlasLogo.svg"
