@@ -8,6 +8,7 @@ import ProjectStatus from "@/components/projects/grants/grants/kyc-status/Projec
 import IndividualStatuses from "@/components/projects/grants/grants/kyc-status/user-status/IndividualStatuses"
 import LegalEntities from "@/components/projects/grants/grants/kyc-status/user-status/LegalEntities"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
+import { sendKYCReminderEmail } from "@/lib/actions/emails"
 
 const resolveProjectStatus = (users: Pick<KYCUser, "personaStatus">[]) => {
   // If any users are expired, failed, or declined, return "project_issue"
@@ -60,8 +61,15 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
   } = useKYCProject({ projectId: project.id })
   const projectStatus = kycUsers ? resolveProjectStatus(kycUsers) : "pending"
 
-  const handleEmailResend = (emailAddress: string) => {
-    console.log(`Resending email to ${emailAddress}`)
+  const handleEmailResend = (kycUser: KYCUser) => {
+    console.log(`attempting to send email to ${kycUser.email}`)
+    try {
+      sendKYCReminderEmail(kycUser)
+        .then((r) => console.log("email resend", r))
+        .catch((err) => console.error(err))
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   // Use mock data if we're loading or have an error
@@ -86,7 +94,7 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
   const legalEntitiesStatuses = users
     ? users.filter((user) => user.user.kycUserType === "LEGAL_ENTITY")
     : []
-  console.log({ users, project })
+  // console.log({ users, project })
 
   return (
     <div className="flex flex-col max-w-[762px] gap-6">
