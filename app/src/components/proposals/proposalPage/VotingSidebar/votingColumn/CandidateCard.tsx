@@ -51,7 +51,7 @@ const CandidateCard = ({
     >
       <div className="flex items-center h-5 gap-[8px] justify-between">
         <div className="flex flex-row gap-2">
-          <UserAvatar imageUrl={candidate?.avatar} size={"xs"} />
+          <UserAvatar imageUrl={candidate?.avatar} size={"sm"} />
           <CardUsername
             username={candidate.name}
             link={candidate.link}
@@ -137,7 +137,7 @@ const CardApprovalButton = ({
         onMouseLeave={onMouseLeave}
         disabled={votingDisabled}
       >
-        <span className="font-medium text-xs leading-4 font-riforma ">
+        <span className="font-medium text-xs leading-4 font-riforma">
           Approved
         </span>
       </button>
@@ -150,12 +150,12 @@ const CardApprovalButton = ({
 
   return (
     <button
-      className="w-[65px] h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
+      className="w-[72px] h-[28px] md:w-[65px] md:h-[24px] px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
       onClick={handleButtonClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <span className="font-medium text-xs leading-4 font-riforma ">
+      <span className="font-medium text-sm leading-5 md:text-xs md:leading-4 font-riforma">
         Approve
       </span>
     </button>
