@@ -159,6 +159,7 @@ model Organization {
   projects             ProjectOrganization[]
   roleApplications     RoleApplication[]
   team                 UserOrganization[]
+  grantEligibilityForms GrantEligibilityForm[]
 
   @@index([deletedAt])
 }
@@ -251,6 +252,7 @@ model Project {
   team                      UserProjects[]
   projectOSOData            projectOSOData[]
   blacklist                 ProjectBlacklist?
+  grantEligibilityForms     GrantEligibilityForm[]
   changelog                 ProjectChangelog[]
 
   @@index([deletedAt, createdAt])
@@ -506,6 +508,7 @@ model KYCTeam {
   projects             Project[]
   rewardStreams        RewardStream[]
   superfludStream      SuperfluidStream[]
+  grantEligibilityForms GrantEligibilityForm[]
 
   @@index([walletAddress])
 }
@@ -791,6 +794,53 @@ enum PersonaStatus {
   declined
 }
 
+enum GrantType {
+  RETRO_FUNDING
+  AUDIT_GRANT
+  GROWTH_GRANT
+  FOUNDATION_MISSION
+}
+
+model GrantEligibilityForm {
+  id              String                       @id @default(uuid())
+  currentStep     Int                           @default(1) // 1..5 (Grant, Wallet, Signers, Entities, Submit)
+  expiresAt       DateTime?
+  submittedAt     DateTime?
+  grantType       GrantType?
+  walletAddress   String?
+  attestations    Json? // checkbox values at steps, final consent stored at submit
+  data            Json   // draft payload: { signers: [...], entities: [...] }
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+  deletedAt       DateTime?
+  projectId       String?
+  organizationId  String?
+  kycTeamId       String?
+  project         Project?                     @relation(fields: [projectId], references: [id])
+  organization    Organization?                @relation(fields: [organizationId], references: [id])
+  kycTeam         KYCTeam?                     @relation(fields: [kycTeamId], references: [id])
+  changelog       GrantEligibilityChangelog[]
+
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([kycTeamId])
+  @@index([createdAt])
+}
+
+model GrantEligibilityChangelog {
+  id          String    @id @default(uuid())
+  formId      String
+  action      String               // created|saved|submitted|expired|canceled
+  performedBy String?
+  oldData     Json?
+  newData     Json?
+  createdAt   DateTime  @default(now())
+  form      GrantEligibilityForm @relation(fields: [formId], references: [id])
+
+  @@index([formId])
+  @@index([action])
+  @@index([createdAt])
+}
 
 model UserChangelog {
   id        String   @id @default(uuid())
