@@ -2,10 +2,7 @@ import { Sora } from "next/font/google"
 
 import { formatNumber } from "@/lib/utils"
 
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--inter",
-})
+const sora = Sora({ subsets: ["latin"] })
 
 export const ShareImage = ({
   name,

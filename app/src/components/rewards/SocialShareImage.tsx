@@ -4,10 +4,7 @@ import Image from "next/image"
 import { RewardWithProject } from "@/lib/types"
 import { cn, formatNumber } from "@/lib/utils"
 
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--inter",
-})
+const sora = Sora({ subsets: ["latin"] })
 
 export function SocialShareImage({ reward }: { reward: RewardWithProject }) {
   return (

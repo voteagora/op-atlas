@@ -6,7 +6,7 @@ export const useHandlePrivyErrors = () => {
     switch (error) {
       case "must_be_authenticated":
         toast.error("Session expired. Please sign in again.")
-        return signOut()
+      return signOut()
 
       case "failed_to_update_account":
         return toast.error(

@@ -7,23 +7,28 @@ import {
   usePrivy,
   User as PrivyUser,
 } from "@privy-io/react-auth"
+import { ethers } from "ethers"
 import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
+import { UserAvatar } from "@/components/common/UserAvatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
+import { useWallet } from "@/hooks/useWallet"
 import { AUTH_STATUS, LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {
@@ -32,10 +37,160 @@ import {
   saveHasShownWelcomeBadgeholderDialog,
   saveLogInDate,
 } from "@/lib/utils"
+import { truncateAddress } from "@/lib/utils/string"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import { safeService } from "@/services/SafeService"
 
-import { UserAvatar } from "@/components/common/UserAvatar"
+// EOA Wallet Menu Item Component
+type EOAWalletMenuItemProps = {
+  currentContext: string
+  signerWallet: any
+  switchToEOA: () => void
+}
+
+// Profile Menu Item Component
+type ProfileMenuItemProps = {
+  href: string
+  label: string
+  currentContext: string
+}
+
+// Profile Menu Item Component
+const ProfileMenuItem = ({
+  href,
+  label,
+  currentContext,
+}: ProfileMenuItemProps) => {
+  return currentContext === "EOA" ? (
+    <Link href={href}>
+      <DropdownMenuItem className="cursor-pointer">{label}</DropdownMenuItem>
+    </Link>
+  ) : (
+    <DropdownMenuItem
+      className="cursor-pointer text-muted-foreground opacity-50"
+      disabled
+    >
+      {label}
+    </DropdownMenuItem>
+  )
+}
+
+const EOAWalletMenuItem = ({
+  currentContext,
+  signerWallet,
+  switchToEOA,
+}: EOAWalletMenuItemProps) => {
+  return (
+    <DropdownMenuItem
+      className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
+        currentContext === "EOA" ? "bg-gray-100" : ""
+      }`}
+      onClick={() => switchToEOA()}
+    >
+      <div className="flex items-center gap-2">
+        <div
+          className={`w-2 h-2 rounded-full ${
+            currentContext === "EOA" ? "bg-green-500" : "bg-gray-300"
+          }`}
+        />
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">EOA Wallet</span>
+          <span className="text-xs text-muted-foreground">
+            {signerWallet?.address
+              ? `${signerWallet.address.slice(
+                  0,
+                  6,
+                )}...${signerWallet.address.slice(-4)}`
+              : "Not connected"}
+          </span>
+        </div>
+      </div>
+      {currentContext === "EOA" && (
+        <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+          Active
+        </span>
+      )}
+    </DropdownMenuItem>
+  )
+}
+
+// Safe Wallets Menu Items Component
+type SafeWalletsMenuItemsProps = {
+  availableSafeWallets: any[]
+  selectedSafeWallet: any
+  signerWallet: any
+  currentContext: string
+  isLoadingSafeWallets: boolean
+  switchToSafe: (address: string) => void
+}
+
+const SafeWalletsMenuItems = ({
+  availableSafeWallets,
+  selectedSafeWallet,
+  signerWallet,
+  currentContext,
+  isLoadingSafeWallets,
+  switchToSafe,
+}: SafeWalletsMenuItemsProps) => {
+  const getSafesToRender = () => {
+    if (availableSafeWallets.length > 0) return availableSafeWallets
+    if (selectedSafeWallet) return [selectedSafeWallet]
+    return []
+  }
+
+  const safesToRender = getSafesToRender()
+
+  if (safesToRender.length === 0) return null
+
+  return (
+    <>
+      <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+        Safe Wallets {isLoadingSafeWallets && "(Loading...)"}
+      </DropdownMenuLabel>
+      {safesToRender.map((safeWallet: any) => (
+        <DropdownMenuItem
+          key={safeWallet.address}
+          className={`cursor-pointer flex items-center justify-between px-3 py-2 ${
+            currentContext === "SAFE" &&
+            selectedSafeWallet?.address === safeWallet.address
+              ? "bg-gray-100"
+              : ""
+          }`}
+          onClick={() => switchToSafe(safeWallet.address)}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                currentContext === "SAFE" &&
+                selectedSafeWallet?.address === safeWallet.address
+                  ? "bg-blue-500"
+                  : "bg-gray-300"
+              }`}
+            />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">Safe Wallet</span>
+              <span className="text-xs text-muted-foreground">
+                {`${safeWallet.address.slice(
+                  0,
+                  6,
+                )}...${safeWallet.address.slice(-4)}`}
+              </span>
+            </div>
+          </div>
+          {currentContext === "SAFE" &&
+            (selectedSafeWallet?.address === safeWallet.address ||
+              (!selectedSafeWallet &&
+                signerWallet?.address === safeWallet.address)) && (
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                Active
+              </span>
+            )}
+        </DropdownMenuItem>
+      ))}
+    </>
+  )
+}
 
 export const Account = () => {
   const { user: privyUser, getAccessToken } = usePrivy()
@@ -50,6 +205,18 @@ export const Account = () => {
   })
 
   const username = useUsername(user)
+
+  // Safe wallet integration
+  const {
+    currentAddress,
+    currentContext,
+    signerWallet,
+    selectedSafeWallet,
+    availableSafeWallets,
+    switchToSafe,
+    switchToEOA,
+    isLoadingSafeWallets,
+  } = useWallet()
 
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
@@ -177,17 +344,44 @@ export const Account = () => {
   if (session) {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
-          <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
-            <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
+        <DropdownMenuTrigger className={`focus:outline-none focus:opacity-80`}>
+          <div
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${"bg-background hover:bg-secondary"} h-10 px-4 py-2 gap-x-2.5 text-sm font-medium relative`}
+          >
+            <>
+              <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
 
-            <span className="hidden sm:inline">{username}</span>
-            <Image
-              src="/assets/icons/arrowDownIcon.svg"
-              width={10}
-              height={6}
-              alt=""
-            />
+              {/* Wallet context indicator */}
+              {currentContext === "SAFE" && availableSafeWallets.length > 0 && (
+                <div
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"
+                  title="Safe Wallet Active"
+                />
+              )}
+              {currentContext === "EOA" && availableSafeWallets.length > 0 && (
+                <div
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
+                  title="EOA Wallet Active"
+                />
+              )}
+
+              <span className="hidden sm:inline">
+                {currentContext === "SAFE"
+                  ? truncateAddress(
+                      (currentAddress ||
+                        selectedSafeWallet?.address ||
+                        signerWallet?.address ||
+                        "0x") as `0x${string}`,
+                    )
+                  : username}
+              </span>
+              <Image
+                src="/assets/icons/arrowDownIcon.svg"
+                width={10}
+                height={6}
+                alt=""
+              />
+            </>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -199,32 +393,53 @@ export const Account = () => {
               Dashboard
             </DropdownMenuItem>
           </Link>
+
+          {/* Current EOA Wallet */}
+          {availableSafeWallets.length > 0 && (
+            <EOAWalletMenuItem
+              currentContext={currentContext}
+              signerWallet={signerWallet}
+              switchToEOA={switchToEOA}
+            />
+          )}
+
+          {/* Safe Wallets */}
+          {availableSafeWallets.length > 0 && (
+            <SafeWalletsMenuItems
+              availableSafeWallets={availableSafeWallets}
+              selectedSafeWallet={selectedSafeWallet}
+              signerWallet={signerWallet}
+              currentContext={currentContext}
+              isLoadingSafeWallets={isLoadingSafeWallets}
+              switchToSafe={switchToSafe}
+            />
+          )}
           <hr className="w-full border-[0.5px] border-border" />
-          <Link href="/profile/details">
-            <DropdownMenuItem className="cursor-pointer">
-              Profile details
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/profile/connected-apps">
-            <DropdownMenuItem className="cursor-pointer">
-              Connected apps
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/profile/verified-addresses">
-            <DropdownMenuItem className="cursor-pointer">
-              Verified addresses
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/profile/organizations/new">
-            <DropdownMenuItem className="cursor-pointer">
-              Organizations
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/citizenship">
-            <DropdownMenuItem className="cursor-pointer">
-              Citizen Registration
-            </DropdownMenuItem>
-          </Link>
+          <ProfileMenuItem
+            href="/profile/details"
+            label="Profile details"
+            currentContext={currentContext}
+          />
+          <ProfileMenuItem
+            href="/profile/connected-apps"
+            label="Connected apps"
+            currentContext={currentContext}
+          />
+          <ProfileMenuItem
+            href="/profile/verified-addresses"
+            label="Verified addresses"
+            currentContext={currentContext}
+          />
+          <ProfileMenuItem
+            href="/profile/organizations/new"
+            label="Organizations"
+            currentContext={currentContext}
+          />
+          <ProfileMenuItem
+            href="/citizenship"
+            label="Citizen Registration"
+            currentContext={currentContext}
+          />
           <hr className="w-full border-[0.5px] border-border" />
           <DropdownMenuItem
             className="cursor-pointer"
