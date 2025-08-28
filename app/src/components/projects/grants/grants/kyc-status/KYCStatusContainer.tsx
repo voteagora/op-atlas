@@ -10,6 +10,7 @@ import LegalEntities from "@/components/projects/grants/grants/kyc-status/user-s
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { sendKYCReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
+import { useState } from "react"
 
 const KYCStatusContainer = ({ project }: { project: Project }) => {
   const { data: session } = useSession()
@@ -20,18 +21,24 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
   } = useKYCProject({ projectId: project.id })
   const projectStatus = kycUsers ? resolveProjectStatus(kycUsers) : "pending"
 
+  const [sendingEmailUsers, setSendingEmailUsers] = useState<
+    Record<string, boolean>
+  >({})
+
   const handleEmailResend = (kycUser: KYCUser) => {
     console.log(`attempting to send email to ${kycUser.email}`)
+    setSendingEmailUsers((prev) => ({ ...prev, [kycUser.id]: true }))
     try {
       sendKYCReminderEmail(kycUser)
         .then((r) => console.log("email resend", r))
         .catch((err) => console.error(err))
     } catch (error) {
       console.log(error)
+    } finally {
+      setSendingEmailUsers((prev) => ({ ...prev, [kycUser.id]: false }))
     }
   }
 
-  // Use mock data if we're loading or have an error
   const users = kycUsers?.map((user) => ({
     user,
     handleEmailResend: handleEmailResend,
@@ -40,6 +47,7 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
       user.personaStatus === "approved" ||
       user.personaStatus === "completed",
     isUser: session?.user.id === user.id,
+    isSendingEmail: sendingEmailUsers[user.id] || false,
   }))
 
   if (isError) {
