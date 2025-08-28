@@ -13,6 +13,7 @@ import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useState } from "react"
 import { EmailState } from "@/components/projects/types"
 import TrackedLink from "@/components/common/TrackedLink"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const KYCStatusContainer = ({ project }: { project: Project }) => {
   const { data: session } = useSession()
@@ -79,8 +80,45 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
       </h4>
       <div className="flex flex-col w-[762px] border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <p>Loading KYC data...</p>
+          <div className="flex flex-col gap-6">
+            {/* Project Status Skeleton */}
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <Skeleton className="h-5 w-32" />
+            </div>
+
+            {/* Grant Delivery Address Skeleton */}
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            {/* Individual Statuses Skeleton */}
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-5 w-36" />
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-5 w-32" />
+                  </div>
+                  <Skeleton className="h-6 w-24" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-5 w-32" />
+                  </div>
+                  <Skeleton className="h-6 w-24" />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Skeleton */}
+            <div className="flex justify-center items-center gap-2 mt-2">
+              <Skeleton className="h-5 w-48" />
+              <Skeleton className="h-5 w-16" />
+            </div>
           </div>
         ) : (
           <>
