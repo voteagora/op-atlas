@@ -159,6 +159,7 @@ model Organization {
   projects             ProjectOrganization[]
   roleApplications     RoleApplication[]
   team                 UserOrganization[]
+  GrantEligibilitys GrantEligibility[]
 
   @@index([deletedAt])
 }
@@ -251,6 +252,7 @@ model Project {
   team                      UserProjects[]
   projectOSOData            projectOSOData[]
   blacklist                 ProjectBlacklist?
+  GrantEligibilitys     GrantEligibility[]
   changelog                 ProjectChangelog[]
 
   @@index([deletedAt, createdAt])
@@ -479,13 +481,20 @@ model ContactEmailTags {
   @@index([email])
 }
 
+enum KYCUserType {
+  USER
+  LEGAL_ENTITY
+}
+
 model KYCUser {
   id           String         @id @default(uuid())
   email        String
   firstName    String
   lastName     String
   businessName String?
+  kycUserType  KYCUserType    @default(USER)
   status       KYCStatus      @default(PENDING)
+  personaStatus PersonaStatus?
   expiry       DateTime
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -505,6 +514,7 @@ model KYCTeam {
   projects             Project[]
   rewardStreams        RewardStream[]
   superfludStream      SuperfluidStream[]
+  GrantEligibilitys GrantEligibility[]
 
   @@index([walletAddress])
 }
@@ -708,6 +718,7 @@ model Role {
   voteEndAt    DateTime?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @default(now()) @updatedAt
+  proposalId   String?
   applications RoleApplication[]
 }
 
@@ -776,6 +787,65 @@ enum RoleApplicationStatus {
   pending
   approved
   rejected
+}
+
+enum PersonaStatus {
+  created
+  pending
+  completed
+  failed
+  expired
+  needs_review
+  approved
+  declined
+}
+
+enum GrantType {
+  RETRO_FUNDING
+  AUDIT_GRANT
+  GROWTH_GRANT
+  FOUNDATION_MISSION
+}
+
+model GrantEligibility {
+  id              String                       @id @default(uuid())
+  currentStep     Int                           @default(1)
+  expiresAt       DateTime?
+  submittedAt     DateTime?
+  grantType       GrantType?
+  walletAddress   String?
+  attestations    Json? // checkbox values at steps, final consent stored at submit
+  data            Json   // draft payload: { signers: [...], entities: [...] }
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+  deletedAt       DateTime?
+  projectId       String?
+  organizationId  String?
+  kycTeamId       String?
+  project         Project?                     @relation(fields: [projectId], references: [id])
+  organization    Organization?                @relation(fields: [organizationId], references: [id])
+  kycTeam         KYCTeam?                     @relation(fields: [kycTeamId], references: [id])
+  changelog       GrantEligibilityChangelog[]
+
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([kycTeamId])
+  @@index([createdAt])
+}
+
+model GrantEligibilityChangelog {
+  id          String    @id @default(uuid())
+  formId      String
+  action      String               // created|saved|submitted|expired|canceled
+  performedBy String?
+  oldData     Json?
+  newData     Json?
+  createdAt   DateTime  @default(now())
+  form      GrantEligibility @relation(fields: [formId], references: [id])
+
+  @@index([formId])
+  @@index([action])
+  @@index([createdAt])
 }
 
 model UserChangelog {
