@@ -87,7 +87,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   const hasNotBeenPublished = project ? project?.snapshots.length === 0 : true
 
   return (
-    <div className="sm:flex flex-col gap-4 items-start hidden">
+    <div className="sm:flex flex-col gap-4 items-start hidden md:w-full md:max-w-[228px]">
       <Button
         isLoading={dashboardLoading}
         onClick={handleGoBack}
@@ -110,7 +110,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
 
       {hasNotBeenPublished && (
         <div className="flex flex-col gap-2 pl-2">
-          <Progress value={progressPercent} className="w-[228px] h-2" />
+          <Progress value={progressPercent} className="w-[220px] h-2" />
           <p className="text-sm font-normal">{progressPercent}% complete</p>
         </div>
       )}
@@ -197,7 +197,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               <Link
                 className={cn([
                   {
-                    "font-medium text-foreground":
+                    "font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap":
                       currentPage === "grant-address",
                   },
                 ])}
@@ -205,6 +205,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               >
                 Grant Delivery Address
               </Link>
+              {/* Only shows if Project status resolves to 'PENDING' */}
               <IncompleteCard project={project} />
             </div>
             <Separator />
@@ -257,8 +258,10 @@ const IncompleteCard = ({ project }: { project: Project | null }) => {
 
   if (projectStatus !== "pending") return null
   return (
-    <div className="flex flex-col gap-2 bg-red-200 ">
-      <p className="text-red-600">Incomplete</p>
+    <div className="flex items-center justify-center bg-red-200 w-[80px] h-5 rotate-[0deg] opacity-100 rounded-full py-[2px] px-2">
+      <p className="text-red-600 font-inter font-medium text-[12px] leading-[16px] tracking-[0%] text-center">
+        Incomplete
+      </p>
     </div>
   )
 }
