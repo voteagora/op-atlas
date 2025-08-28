@@ -3,7 +3,7 @@ import "./globals.css"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import { Loader2 } from "lucide-react"
 import type { Metadata } from "next"
-import localFont from "next/font/local"
+import { Inter } from "next/font/google"
 
 import AppDialogs from "@/components/dialogs/AppDialogs"
 import ErrorBoundary from "@/components/common/ErrorBoundary"
@@ -16,55 +16,9 @@ import { sharedMetadata } from "./shared-metadata"
 
 const GOOGLE_ANALYTICS_ID = process.env.GOOGLE_ANALYTICS_ID || ""
 
-const riforma = localFont({
-  src: [
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-Light.woff2",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-Medium.woff2",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-Heavy.woff2",
-      weight: "800",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-Italic.woff2",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-MediumItalic.woff2",
-      weight: "500",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-BoldItalic.woff2",
-      weight: "700",
-      style: "italic",
-    },
-    {
-      path: "../../public/fonts/riforma/RiformaLLWeb-HeavyItalic.woff2",
-      weight: "800",
-      style: "italic",
-    },
-  ],
-  variable: "--font-riforma",
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
   display: "swap",
 })
 
@@ -88,7 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${riforma.className}`}>
+      <body className={`${inter.className}`}>
         <Providers>
           <ErrorBoundary>
             <AppDialogs />
