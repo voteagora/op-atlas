@@ -14,7 +14,7 @@ const ProjectStatus = ({ status }: { status: ExtendedPersonaStatus }) => {
     return null
   }
   return (
-    <div className="w-664px] h-[176px] rounded-[6px] p-6 gap-3 justify-center items-center flex flex-col relative">
+    <div className="w-full max-w-[664px] h-[176px] rounded-[6px] p-6 gap-3 justify-center items-center flex flex-col relative">
       {status !== "pending" && (
         <div className="absolute top-2 right-2">
           <DropdownMenu>

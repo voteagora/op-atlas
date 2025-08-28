@@ -7,7 +7,7 @@ interface KYCSubSectionProps {
 
 const KYCSubSection = ({ title, children }: KYCSubSectionProps) => {
   return (
-    <div className="flex flex-col gap-[8px]">
+    <div className="flex flex-col gap-[8px] max-w-[664px]">
       <p className="font-[Inter] font-medium text-[14px] leading-[20px] text-text-foreground">
         {title}
       </p>
