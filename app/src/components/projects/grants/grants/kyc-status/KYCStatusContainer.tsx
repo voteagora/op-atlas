@@ -12,6 +12,7 @@ import { sendKYCReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useState } from "react"
 import { EmailState } from "@/components/projects/types"
+import TrackedLink from "@/components/common/TrackedLink"
 
 const KYCStatusContainer = ({ project }: { project: Project }) => {
   const { data: session } = useSession()
@@ -76,7 +77,7 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
           ? "In progress"
           : "Verified"}
       </h4>
-      <div className="flex flex-col w-[762px] min-h-[640px] border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
+      <div className="flex flex-col w-[762px] border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <p>Loading KYC data...</p>
@@ -84,7 +85,9 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
         ) : (
           <>
             <ProjectStatus status={projectStatus} />
-            <GrantDeliveryAddress address={project.kycTeam.walletAddress} />
+            <GrantDeliveryAddress
+              address={project.kycTeam.walletAddress || ""}
+            />
             {users && users.length > 0 && (
               <>
                 <IndividualStatuses users={individualStatuses} />
@@ -93,6 +96,21 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
                 ) && <LegalEntities users={legalEntitiesStatuses} />}
               </>
             )}
+            <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">
+              <p className="font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
+                Is something missing or incorrect?
+              </p>
+              <span>
+                <TrackedLink
+                  eventName={"grant-address edit form"}
+                  href={"" /*TODO*/}
+                >
+                  <p className="underline font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
+                    Edit form
+                  </p>
+                </TrackedLink>
+              </span>
+            </div>
           </>
         )}
       </div>
