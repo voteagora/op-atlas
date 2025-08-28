@@ -9,48 +9,7 @@ import IndividualStatuses from "@/components/projects/grants/grants/kyc-status/u
 import LegalEntities from "@/components/projects/grants/grants/kyc-status/user-status/LegalEntities"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { sendKYCReminderEmail } from "@/lib/actions/emails"
-
-const resolveProjectStatus = (users: Pick<KYCUser, "personaStatus">[]) => {
-  // If any users are expired, failed, or declined, return "project_issue"
-  if (
-    users.some(
-      (user) =>
-        user.personaStatus === "expired" ||
-        user.personaStatus === "failed" ||
-        user.personaStatus === "declined",
-    )
-  ) {
-    return "project_issue"
-  }
-
-  // If any users are created or pending, resolve to that status
-  if (
-    users.some(
-      (user) =>
-        user.personaStatus === "created" || user.personaStatus === "pending",
-    )
-  ) {
-    return (
-      users.find(
-        (user) =>
-          user.personaStatus === "created" || user.personaStatus === "pending",
-      )?.personaStatus || "pending"
-    )
-  }
-
-  // If all users are completed or approved, resolve to "completed"
-  if (
-    users.every(
-      (user) =>
-        user.personaStatus === "completed" || user.personaStatus === "approved",
-    )
-  ) {
-    return "completed"
-  }
-
-  // Default fallback
-  return "pending"
-}
+import { resolveProjectStatus } from "@/lib/utils/kyc"
 
 const KYCStatusContainer = ({ project }: { project: Project }) => {
   const { data: session } = useSession()
