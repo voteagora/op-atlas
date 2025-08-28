@@ -1,7 +1,6 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { LiveFill } from "@/components/icons/remix"
 import { Discord } from "@/components/icons/socials"
 
 import { MissionData } from "../MissionsAndRoundData"
@@ -142,13 +141,12 @@ export const auditGrantsData: MissionData = {
       icon: <Discord />,
     },
     {
-      type: "custom",
+      type: "office-hours",
       title: "Office Hours",
       description: "Bi-weekly on Tuesdays at 2:00 PM UTC.",
       buttonText: "Join call",
       buttonLink: "https://meet.google.com/pgj-ibvv-trr",
       externalLink: true,
-      icon: <LiveFill fill="#0F111A" />,
     },
   ],
   learnMoreLinks: [
