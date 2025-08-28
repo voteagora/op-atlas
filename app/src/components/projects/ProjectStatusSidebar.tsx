@@ -23,6 +23,10 @@ import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
 import { DeleteProjectDialog } from "./DeleteProjectDialog"
+import { resolveProjectStatus } from "@/lib/utils/kyc"
+import { useKYCProject } from "@/hooks/db/useKYCProject"
+import { project } from "ramda"
+import { Project } from "@prisma/client"
 
 // Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
@@ -199,8 +203,9 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
                 ])}
                 href={`/projects/${project.id}/grant-address`}
               >
-                Grant Address
+                Grant Delivery Address
               </Link>
+              <IncompleteCard project={project} />
             </div>
             <Separator />
           </>
@@ -244,3 +249,16 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
     </div>
   )
 })
+
+const IncompleteCard = ({project: Project | null}) => {
+  if (!project || !project.id) return null
+  const { data: kycUsers } = useKYCProject({ projectId: project.id })
+  const projectStatus = resolveProjectStatus(kycUsers)
+
+  if (projectStatus !== "pending") return null
+  return (
+    <div className="flex flex-col gap-2 bg-red-200 ">
+      <p className="text-red-600">Incomplete</p>
+    </div>
+  )
+}
