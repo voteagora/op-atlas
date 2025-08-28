@@ -250,9 +250,9 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   )
 })
 
-const IncompleteCard = ({project: Project | null}) => {
-  if (!project || !project.id) return null
-  const { data: kycUsers } = useKYCProject({ projectId: project.id })
+const IncompleteCard = ({ project }: { project: Project | null }) => {
+  const { data: kycUsers } = useKYCProject({ projectId: project?.id || "" })
+  if (!project || !project.id || !kycUsers) return null
   const projectStatus = resolveProjectStatus(kycUsers)
 
   if (projectStatus !== "pending") return null
