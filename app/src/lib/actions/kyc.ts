@@ -308,13 +308,3 @@ export const getKYCUsersByProjectId = async (projectId: string) => {
 
   return await getKYCUsersByProjId({ projectId })
 }
-
-export const getKYCIdOffUser = async (projectId: string) => {
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) {
-    return false
-  }
-
-  const project = await getProject({ id: projectId })
-}
