@@ -1,7 +1,8 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { getCutoffDate } from "@/lib/utils"
+import { LiveFill } from "@/components/icons/remix"
+import { Discord } from "@/components/icons/socials"
 
 import { MissionData } from "../MissionsAndRoundData"
 
@@ -89,7 +90,8 @@ export const auditGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project&apos;s code is &quot;audit-ready&quot; (e.g., code is frozen, has tests and documentation)
+          My project&apos;s code is &quot;audit-ready&quot; (e.g., code is
+          frozen, has tests and documentation)
         </p>
       ),
       type: "required",
@@ -127,6 +129,26 @@ export const auditGrantsData: MissionData = {
       number: 4,
       title:
         "Upon grant approval, the ASP performs an audit to identify potential issues and recommend solutions",
+    },
+  ],
+  supportOptions: [
+    {
+      type: "custom",
+      title: "Discord",
+      description: "Leave a message in the channel.",
+      buttonText: "Join Channel",
+      buttonLink: "https://discord.com/invite/optimism",
+      externalLink: true,
+      icon: <Discord />,
+    },
+    {
+      type: "custom",
+      title: "Office Hours",
+      description: "Bi-weekly on Tuesdays at 2:00 PM UTC.",
+      buttonText: "Join call",
+      buttonLink: "https://meet.google.com/pgj-ibvv-trr",
+      externalLink: true,
+      icon: <LiveFill fill="#0F111A" />,
     },
   ],
   learnMoreLinks: [
