@@ -6,7 +6,7 @@ const IndividualStatuses = ({ users }: { users: KYCUserStatusProps[] }) => {
   return (
     <KYCSubSection title="Individuals and wallet signers">
       {users.map((user, index) => (
-        <StatusRow key={index} {...user} isUser={index === 0} />
+        <StatusRow key={index} {...user} />
       ))}
     </KYCSubSection>
   )

@@ -48,7 +48,6 @@ const Badge = ({ text }: { text: string }) => {
 
 const StatusRow = ({
   user,
-  isUser,
   emailResendBlock,
   handleEmailResend,
 }: KYCUserStatusProps) => {
@@ -76,7 +75,6 @@ const StatusRow = ({
             />
           </div>
           <div className="flex flex-row gap-2">
-            {isUser && <Badge text="You" />}
             {user.expiry && (
               <Badge
                 // Convert expiration date to a human-readable format
