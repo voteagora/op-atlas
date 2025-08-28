@@ -53,7 +53,6 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
   const legalEntitiesStatuses = users
     ? users.filter((user) => user.user.kycUserType === "LEGAL_ENTITY")
     : []
-  // console.log({ users, project })
 
   return (
     <div className="flex flex-col max-w-[762px] gap-6">

@@ -3,10 +3,7 @@
 import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
-import {
-  deleteKycTeam,
-  updateKYCUserStatus
-} from "@/db/kyc"
+import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
 import { getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
 import {
@@ -288,14 +285,4 @@ export const getKYCUsersByProjectId = async (projectId: string) => {
   }
 
   return await getKYCUsersByProjId({ projectId })
-}
-
-export const getKYCIdOffUser = async (projectId: string) => {
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) {
-    return false
-  }
-
-  const project = await getProject({ id: projectId })
 }
