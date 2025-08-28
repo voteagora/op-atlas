@@ -113,7 +113,9 @@ const EmailSendButton = ({
   switch (emailState) {
     case EmailState.NOT_SENT:
       return (
-        <button onClick={() => handleEmailResend(user)}>Resend Email</button>
+        <div className="rounded-md px-2 py-1 hover:bg-button-secondary hover:border hover:border-button-secondary hover:cursor-pointer active:border active:border-b-accent">
+          <button onClick={() => handleEmailResend(user)}>Resend Email</button>
+        </div>
       )
     case EmailState.SENDING:
       return <Loader2 className={cn(`h-4 w-4`, "animate-spin")} />
