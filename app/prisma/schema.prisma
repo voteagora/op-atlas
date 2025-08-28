@@ -159,7 +159,7 @@ model Organization {
   projects             ProjectOrganization[]
   roleApplications     RoleApplication[]
   team                 UserOrganization[]
-  grantEligibilityForms GrantEligibilityForm[]
+  GrantEligibilitys GrantEligibility[]
 
   @@index([deletedAt])
 }
@@ -819,7 +819,7 @@ enum GrantType {
 model GrantEligibility {
   id              String                       @id @default(uuid())
   status          GrantEligibilityFormStatus    @default(DRAFT)
-  currentStep     Int                           @default(1) // 1..5 (Grant, Wallet, Signers, Entities, Submit)
+  currentStep     Int                           @default(1)
   expiresAt       DateTime?
   submittedAt     DateTime?
   grantType       GrantType?
