@@ -252,7 +252,7 @@ model Project {
   team                      UserProjects[]
   projectOSOData            projectOSOData[]
   blacklist                 ProjectBlacklist?
-  grantEligibilityForms     GrantEligibilityForm[]
+  GrantEligibilitys     GrantEligibility[]
   changelog                 ProjectChangelog[]
 
   @@index([deletedAt, createdAt])
@@ -481,12 +481,18 @@ model ContactEmailTags {
   @@index([email])
 }
 
+enum KYCUserType {
+  USER
+  LEGAL_ENTITY
+}
+
 model KYCUser {
   id           String         @id @default(uuid())
   email        String
   firstName    String
   lastName     String
   businessName String?
+  kycUserType  KYCUserType    @default(USER)
   status       KYCStatus      @default(PENDING)
   personaStatus PersonaStatus?
   expiry       DateTime
@@ -508,7 +514,7 @@ model KYCTeam {
   projects             Project[]
   rewardStreams        RewardStream[]
   superfludStream      SuperfluidStream[]
-  grantEligibilityForms GrantEligibilityForm[]
+  GrantEligibilitys GrantEligibility[]
 
   @@index([walletAddress])
 }
@@ -810,7 +816,7 @@ enum GrantType {
   FOUNDATION_MISSION
 }
 
-model GrantEligibilityForm {
+model GrantEligibility {
   id              String                       @id @default(uuid())
   status          GrantEligibilityFormStatus    @default(DRAFT)
   currentStep     Int                           @default(1) // 1..5 (Grant, Wallet, Signers, Entities, Submit)
@@ -846,7 +852,7 @@ model GrantEligibilityChangelog {
   oldData     Json?
   newData     Json?
   createdAt   DateTime  @default(now())
-  form      GrantEligibilityForm @relation(fields: [formId], references: [id])
+  form      GrantEligibility @relation(fields: [formId], references: [id])
 
   @@index([formId])
   @@index([action])
