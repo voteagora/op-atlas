@@ -5,7 +5,7 @@
 
 */
 -- DropIndex
-DROP INDEX "GrantEligibilityForm_status_idx";
+DROP INDEX IF EXISTS "GrantEligibilityForm_status_idx";
 
 -- AlterTable
 ALTER TABLE "GrantEligibilityForm" DROP COLUMN "status",
