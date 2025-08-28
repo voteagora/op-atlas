@@ -1,6 +1,7 @@
 import { AlertTriangle, Check, Clock, Loader2, X } from "lucide-react"
 
 import {
+  EmailState,
   ExtendedPersonaStatus,
   KYCUserStatusProps,
 } from "@/components/projects/types"
@@ -50,7 +51,7 @@ const StatusRow = ({
   user,
   emailResendBlock,
   handleEmailResend,
-  isSendingEmail,
+  emailState,
 }: KYCUserStatusProps) => {
   return (
     <div className="flex flex-row w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rotate-0 opacity-100 rounded-[6px] border border-border bg-background">
@@ -88,17 +89,42 @@ const StatusRow = ({
             )}
           </div>
         </div>
-        {!emailResendBlock &&
-          (isSendingEmail ? (
-            <Loader2 className={cn(`h-4 w-4`, "animate-spin")} />
-          ) : (
-            <button onClick={() => handleEmailResend(user)}>
-              Resend Email
-            </button>
-          ))}
+        {!emailResendBlock && (
+          <EmailSendButton
+            user={user}
+            handleEmailResend={handleEmailResend}
+            emailState={emailState}
+          />
+        )}
       </div>
     </div>
   )
+}
+
+const EmailSendButton = ({
+  user,
+  handleEmailResend,
+  emailState,
+}: {
+  user: KYCUserStatusProps["user"]
+  handleEmailResend: KYCUserStatusProps["handleEmailResend"]
+  emailState: KYCUserStatusProps["emailState"]
+}) => {
+  switch (emailState) {
+    case EmailState.NOT_SENT:
+      return (
+        <button onClick={() => handleEmailResend(user)}>Resend Email</button>
+      )
+    case EmailState.SENDING:
+      return <Loader2 className={cn(`h-4 w-4`, "animate-spin")} />
+    case EmailState.SENT:
+      return (
+        <div className="flex flex-row items-center gap-2" title="Email sent">
+          <p className="text-green-900 text-xs font-light">Email sent</p>
+          <Check className={cn(`h-4 w-4`, "text-green-900")} />
+        </div>
+      )
+  }
 }
 
 const RowText = ({ values }: { values: string[] }) => (
