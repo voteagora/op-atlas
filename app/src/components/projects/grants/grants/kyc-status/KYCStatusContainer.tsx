@@ -74,7 +74,9 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
             {users && users.length > 0 && (
               <>
                 <IndividualStatuses users={individualStatuses} />
-                <LegalEntities users={legalEntitiesStatuses} />
+                {users.some(
+                  (user) => user.user.kycUserType === "LEGAL_ENTITY",
+                ) && <LegalEntities users={legalEntitiesStatuses} />}
               </>
             )}
           </>
