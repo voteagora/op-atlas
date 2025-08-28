@@ -50,6 +50,7 @@ const StatusRow = ({
   user,
   emailResendBlock,
   handleEmailResend,
+  isSendingEmail,
 }: KYCUserStatusProps) => {
   return (
     <div className="flex flex-row w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rotate-0 opacity-100 rounded-[6px] border border-border bg-background">
@@ -87,9 +88,14 @@ const StatusRow = ({
             )}
           </div>
         </div>
-        {!emailResendBlock && (
-          <button onClick={() => handleEmailResend(user)}>Resend Email</button>
-        )}
+        {!emailResendBlock &&
+          (isSendingEmail ? (
+            <Loader2 className={cn(`h-4 w-4`, "animate-spin")} />
+          ) : (
+            <button onClick={() => handleEmailResend(user)}>
+              Resend Email
+            </button>
+          ))}
       </div>
     </div>
   )
