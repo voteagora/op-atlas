@@ -114,7 +114,12 @@ const EmailSendButton = ({
     case EmailState.NOT_SENT:
       return (
         <div className="rounded-md px-2 py-1 hover:bg-button-secondary hover:border hover:border-button-secondary hover:cursor-pointer active:border active:border-b-accent">
-          <button onClick={() => handleEmailResend(user)}>Resend Email</button>
+          <button
+            onClick={() => handleEmailResend(user)}
+            className="font-[Inter] font-normal text-[14px] leading-[20px] tracking-[0%]"
+          >
+            Resend email
+          </button>
         </div>
       )
     case EmailState.SENDING:
