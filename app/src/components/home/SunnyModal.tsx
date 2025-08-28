@@ -515,8 +515,8 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogDrawer>
-        <DialogDescription className="p-6 md:py-8 md:px-14 gap-6 flex flex-col">
+      <DialogDrawer className="">
+        <DialogDescription className="p-6 pb-10 md:py-8 md:px-14 gap-6 flex flex-col">
           <div className="flex flex-col justify-start items-center gap-4">
             <div
               data-has-face="True"
