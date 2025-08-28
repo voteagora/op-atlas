@@ -11,6 +11,7 @@ import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { sendKYCReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useState } from "react"
+import { EmailState } from "@/components/projects/types"
 
 const KYCStatusContainer = ({ project }: { project: Project }) => {
   const { data: session } = useSession()
@@ -22,20 +23,26 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
   const projectStatus = kycUsers ? resolveProjectStatus(kycUsers) : "pending"
 
   const [sendingEmailUsers, setSendingEmailUsers] = useState<
-    Record<string, boolean>
+    Record<string, EmailState>
   >({})
 
-  const handleEmailResend = (kycUser: KYCUser) => {
+  const handleEmailResend = async (kycUser: KYCUser) => {
     console.log(`attempting to send email to ${kycUser.email}`)
-    setSendingEmailUsers((prev) => ({ ...prev, [kycUser.id]: true }))
+    setSendingEmailUsers((prev) => ({
+      ...prev,
+      [kycUser.id]: EmailState.SENDING,
+    }))
     try {
-      sendKYCReminderEmail(kycUser)
-        .then((r) => console.log("email resend", r))
-        .catch((err) => console.error(err))
+      const response = await sendKYCReminderEmail(kycUser)
+      console.log("Email resend success:", response)
     } catch (error) {
-      console.log(error)
+      console.error("Failed to send email:", error)
     } finally {
-      setSendingEmailUsers((prev) => ({ ...prev, [kycUser.id]: false }))
+      // Set "sending" state to false for this user
+      setSendingEmailUsers((prev) => ({
+        ...prev,
+        [kycUser.id]: EmailState.SENT,
+      }))
     }
   }
 
@@ -47,7 +54,7 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
       user.personaStatus === "approved" ||
       user.personaStatus === "completed",
     isUser: session?.user.id === user.id,
-    isSendingEmail: sendingEmailUsers[user.id] || false,
+    emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
   }))
 
   if (isError) {
