@@ -265,3 +265,5 @@ const IncompleteCard = ({ project }: { project: Project | null }) => {
     </div>
   )
 }
+
+export { IncompleteCard }
