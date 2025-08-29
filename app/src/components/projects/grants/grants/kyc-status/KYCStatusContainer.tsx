@@ -11,11 +11,11 @@ import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { sendKYCReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useState } from "react"
-import { EmailState } from "@/components/projects/types"
+import { EmailState, ProjectWithKycTeam } from "@/components/projects/types"
 import TrackedLink from "@/components/common/TrackedLink"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const KYCStatusContainer = ({ project }: { project: Project }) => {
+const KYCStatusContainer = ({ project }: { project: ProjectWithKycTeam }) => {
   const { data: session } = useSession()
   const {
     data: kycUsers,

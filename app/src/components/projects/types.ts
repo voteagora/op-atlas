@@ -1,4 +1,38 @@
-import { KYCUser } from "@prisma/client"
+import { KYCUser, Prisma } from "@prisma/client"
+
+/**
+ * Type representing a Project with its KYC team information.
+ * Used for components that need to access the project's KYC team data,
+ * particularly the wallet address for grant delivery.
+ */
+export type ProjectWithKycTeam = Prisma.ProjectGetPayload<{
+  include: {
+    organization: {
+      select: {
+        organization: {
+          select: {
+            id: true
+          }
+        }
+      }
+    }
+    kycTeam: {
+      include: {
+        team: {
+          select: {
+            users: true
+          }
+        }
+        rewardStreams: true
+        projects: {
+          include: {
+            blacklist: true
+          }
+        }
+      }
+    }
+  }
+}>
 
 export type PersonaStatus =
   | "created"
