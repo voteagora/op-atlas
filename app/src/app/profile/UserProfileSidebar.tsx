@@ -66,7 +66,12 @@ export function UserProfileSidebar({
           let incompleteProject = null
           for (const project of projects) {
             const kycUsers = await getKYCUsersByProjectId(project.id)
-            if (kycUsers && resolveProjectStatus(kycUsers) === "pending") {
+            const resolvedStatus = resolveProjectStatus(kycUsers)
+            if (
+              kycUsers &&
+              (resolvedStatus === "pending" ||
+                resolvedStatus === "project_issue")
+            ) {
               incompleteProject = project
               break
             }
@@ -198,7 +203,7 @@ export function UserProfileSidebar({
                 <Link
                   href={`/profile/organizations/${organization.id}/grant-address`}
                   className={cn([
-                    "text-secondary-foreground font-normal space-x-2 pl-4",
+                    "text-secondary-foreground space-x-2 pl-4 flex flex-row ",
                     {
                       "text-foreground font-medium": isGrantAddressActive,
                     },
@@ -206,16 +211,20 @@ export function UserProfileSidebar({
                 >
                   <span
                     className={cn([
-                      "font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap",
+                      "font-medium text-foreground",
                       { "opacity-100": isGrantAddressActive },
                     ])}
                   >
                     •
                   </span>
-                  <span>Grant addresses</span>
+                  <div className="flex flex-row gap-2">
+                    <span className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-foreground text-[14px]">
+                      Grant Addresses
+                    </span>
+                    {/* Only shows if Project status resolves to 'PENDING' */}
+                    <IncompleteCard project={incompleteProject} />
+                  </div>
                 </Link>
-                {/* Only shows if Project status resolves to 'PENDING' */}
-                <IncompleteCard project={incompleteProject} />
               </li>
             )
           })}
