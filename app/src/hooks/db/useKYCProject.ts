@@ -17,6 +17,7 @@ export const useKYCProject = ({
       return await getKYCUsersByProjectId(projectId)
     },
     enabled: enabled && !!projectId,
+    refetchInterval: 300000, // Refetch every 5 minutes (300000 ms)
   })
 
   return { data, isLoading, isSuccess, isError, error }
