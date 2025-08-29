@@ -51,8 +51,11 @@ const ProjectStatus = ({ status }: { status: ExtendedPersonaStatus }) => {
           </p>
           <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-destructive">
             One or more of the associated parties is having an issue with their
-            verification process. Please reach out to us
-            at compliance@optimism.io for assistance.
+            verification process. Please reach out to us at&nbsp;
+            <a href="mailto:compliance@optimism.io" className="underline">
+              compliance@optimism.io
+            </a>
+            &nbsp;for assistance.
           </p>
         </>
       )}
