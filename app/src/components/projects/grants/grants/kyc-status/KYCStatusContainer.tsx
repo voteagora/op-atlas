@@ -134,21 +134,23 @@ const KYCStatusContainer = ({ project }: { project: ProjectWithKycTeam }) => {
                 ) && <LegalEntities users={legalEntitiesStatuses} />}
               </>
             )}
-            <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">
-              <p className="font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
-                Is something missing or incorrect?
-              </p>
-              <span>
-                <TrackedLink
-                  eventName={"grant-address edit form"}
-                  href={"" /*TODO*/}
-                >
-                  <p className="underline font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
-                    Edit form
-                  </p>
-                </TrackedLink>
-              </span>
-            </div>
+            {projectStatus !== "completed" && (
+              <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">
+                <p className="font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
+                  Is something missing or incorrect?
+                </p>
+                <span>
+                  <TrackedLink
+                    eventName={"grant-address edit form"}
+                    href={"" /*TODO*/}
+                  >
+                    <p className="underline font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
+                      Edit form
+                    </p>
+                  </TrackedLink>
+                </span>
+              </div>
+            )}
           </>
         )}
       </div>
