@@ -40,19 +40,14 @@ export function resolveProjectStatus(users: Pick<KYCUser, "personaStatus">[]) {
     return "project_issue"
   }
 
-  // If any users are created or pending, resolve to that status
+  // If any users are created or pending, resolve to "pending
   if (
     users.some(
       (user) =>
         user.personaStatus === "created" || user.personaStatus === "pending",
     )
   ) {
-    return (
-      users.find(
-        (user) =>
-          user.personaStatus === "created" || user.personaStatus === "pending",
-      )?.personaStatus || "pending"
-    )
+    return "pending"
   }
 
   // If all users are completed or approved, resolve to "completed"
