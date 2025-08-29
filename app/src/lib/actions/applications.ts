@@ -12,6 +12,7 @@ import {
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
 
+import { ZERO_BYTES32 } from "../constants"
 import { createApplicationAttestation } from "../eas/serverOnly"
 import { CategoryWithImpact } from "../types"
 import { getProjectStatus } from "../utils"
@@ -47,7 +48,8 @@ export const publishAndSaveApplication = async ({
     farcasterId: parseInt(farcasterId),
     projectId: project.projectId,
     round: `${roundName ?? round}`,
-    snapshotRef: "", // Skipping snapshot for S7
+    // Use provided metadata snapshot if available; otherwise a zero-bytes32 ref.
+    snapshotRef: metadataSnapshotId || ZERO_BYTES32,
     ipfsUrl: "", // Skipping IPFS for S7
   })
 
@@ -132,7 +134,7 @@ const createProjectApplication = async (
     },
     category,
     farcasterId,
-    metadataSnapshotId: latestSnapshot.attestationId,
+    metadataSnapshotId: latestSnapshot?.attestationId || ZERO_BYTES32,
     round,
     roundName,
   })

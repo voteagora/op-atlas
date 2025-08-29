@@ -1504,7 +1504,7 @@ export async function createApplication({
     return tx.application.create({
       data: {
         attestationId,
-        projectDescriptionOptions: [],
+        projectDescriptionOptions: projectDescriptionOptions ?? [],
         project: { connect: { id: projectId } },
         round: { connect: { id: round.toString() } },
         category: categoryId ? { connect: { id: categoryId } } : undefined,
