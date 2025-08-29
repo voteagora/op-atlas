@@ -124,7 +124,7 @@ const KYCStatusContainer = ({ project }: { project: ProjectWithKycTeam }) => {
           <>
             <ProjectStatus status={projectStatus} />
             <GrantDeliveryAddress
-              address={project.kycTeam.walletAddress || ""}
+              address={project.kycTeam?.walletAddress || ""}
             />
             {users && users.length > 0 && (
               <>
