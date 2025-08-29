@@ -74,9 +74,14 @@ export const createPersonaInquiryLink = async (
       }
     }
 
+
     const inquiryData = await response.json()
 
     if (inquiryData.data?.id) {
+
+      console.log("Persona Inquiry created:", inquiryData.data.id)
+
+
       // Generate one-time link for the inquiry
       const linkResponse = await fetch(
         `${PERSONA_API_URL}/api/v1/inquiries/${inquiryData.data.id}/generate-one-time-link`,

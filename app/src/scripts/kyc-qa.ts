@@ -22,7 +22,7 @@
 
 import { PrismaClient } from "@prisma/client"
 
-import { sendKYCStartedEmail } from "@/lib/actions/emails"
+import { sendKYBStartedEmail, sendKYCStartedEmail } from "@/lib/actions/emails"
 import { createPersonaInquiryLink } from "@/lib/actions/persona"
 
 const prisma = new PrismaClient()
@@ -219,6 +219,7 @@ async function createKYCUser({
   status = "PENDING",
 }: CreateKYCUserParams) {
   try {
+
     // Check if KYC user already exists with this email
     const existingUser = await prisma.kYCUser.findFirst({
       where: { email: email.toLowerCase() },
@@ -251,7 +252,8 @@ async function createKYCUser({
 
     // Send welcome email to the new user
     try {
-      const emailResult = await sendKYCStartedEmail(newUser)
+      const emailResult =
+        businessName ? await sendKYBStartedEmail(newUser) : await sendKYCStartedEmail(newUser)
 
       if (!emailResult.success) {
         console.log("⚠️  Welcome email failed to send:", emailResult.error)
@@ -289,6 +291,8 @@ async function createPersonaInquiryForUser(kycUser: any) {
     const templateId = isBusiness
       ? process.env.PERSONA_INQUIRY_KYB_TEMPLATE
       : process.env.PERSONA_INQUIRY_KYC_TEMPLATE
+
+    console.log("Template ID:", isBusiness, templateId)
 
     if (!templateId) {
       throw new Error(
