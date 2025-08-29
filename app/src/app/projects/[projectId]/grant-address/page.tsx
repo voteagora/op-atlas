@@ -46,10 +46,6 @@ export default async function Page({
 
   const project = await getKycTeamForProject({ projectId: params.projectId })
 
-  const kycTeam = project?.kycTeam ?? undefined
-
-  console.log(project?.organization)
-
   return (
     <div className="space-y-12">
       <KYCStatusTitle />

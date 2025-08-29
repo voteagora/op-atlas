@@ -29,7 +29,10 @@ const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
     case "project_issue":
       return (
         <AlertTriangle
-          className={cn(`h-${size} w-${size}`, "text-text-destructive")}
+          className={cn(
+            `h-${size} w-${size}`,
+            "text-background fill-text-destructive",
+          )}
         />
       )
     default:
