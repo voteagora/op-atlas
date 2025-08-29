@@ -40,6 +40,8 @@ if (!isServer) {
       submit: true,
       capture_text_content: false,
     },
+    record_sessions_percent: 1,
+    record_heatmap_data: true,
   })
 }
 
