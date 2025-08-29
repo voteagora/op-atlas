@@ -3,7 +3,9 @@ import { redirect } from "next/navigation"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { getOrganization } from "@/db/organizations"
-import KYCStatusContainer from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
+import KYCStatusContainer, {
+  KYCStatusTitle,
+} from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
 import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
 import { getKycTeamForProject } from "@/db/projects"
 
@@ -64,7 +66,8 @@ export default async function Page({
 
   // Pass resolved data to the client-side component
   return (
-    <div>
+    <div className="space-y-12">
+      <KYCStatusTitle />
       {/* For KYC team statuses */}
       {resolvedProjects.map(
         (project) =>
