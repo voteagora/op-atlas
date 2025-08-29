@@ -112,6 +112,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
         }
       },
     )
+
     toast.promise(promise, {
       loading: "Creating organization onchain...",
 
@@ -126,6 +127,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
         return "Failed to save organization onchain"
       },
     })
+    
   }
 
   return (

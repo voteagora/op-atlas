@@ -180,7 +180,7 @@ export const verifyContract = async ({
     const calls = (trace as any).calls as TraceCall[]
     const creation = calls.find((call) => {
       return (
-        call.type === "CREATE2" &&
+        (call.type === "CREATE" || call.type === "CREATE2") &&
         call.to !== null &&
         isAddressEqual(call.to, contractAddress)
       )
