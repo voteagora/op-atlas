@@ -59,6 +59,8 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
     emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
   }))
 
+  console.log({ users })
+
   if (isError) {
     console.error("Error loading KYC users data")
   }
@@ -72,13 +74,13 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
     : []
 
   return (
-    <div className="flex flex-col max-w-[762px] gap-6">
-      <h4>
+    <div className="flex flex-col w-full max-w-[712px] gap-6">
+      <h4 className="font-semibold text-xl leading-6 text-text-default">
         {projectStatus === "pending" || projectStatus === "created"
           ? "In progress"
           : "Verified"}
       </h4>
-      <div className="flex flex-col w-[762px] border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
+      <div className="flex flex-col max-w border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
         {isLoading ? (
           <div className="flex flex-col gap-6">
             {/* Project Status Skeleton */}
@@ -155,5 +157,19 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
     </div>
   )
 }
+
+const KYCStatusTitle = () => {
+  return (
+    <div className="space-y-6">
+      <h2>Grant Delivery Address</h2>
+      <p className="text-secondary-foreground font-normal">
+        Add the wallet address your rewards will be delivered to. Identity
+        verification is required for each address.
+      </p>
+    </div>
+  )
+}
+
+export { KYCStatusTitle }
 
 export default KYCStatusContainer
