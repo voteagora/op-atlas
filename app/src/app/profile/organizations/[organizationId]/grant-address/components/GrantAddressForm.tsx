@@ -1,18 +1,18 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { PlusIcon } from "lucide-react"
 import { useParams } from "next/navigation"
 import React from "react"
 
-import { Button } from "@/components/common/Button"
-import AddGrantDeliveryAddressForm from "@/components/projects/rewards/AddGrantDeliveryAddressForm"
+import GrantEligibilityFormButton from "@/components/grant-eligibility/GrantEligibilityFormButton"
 import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
+import { getLatestDraftFormAction } from "@/lib/actions/grantEligibility"
 
 export default function GrantAddressForm() {
   const params = useParams()
   const organizationId = params.organizationId as string
-  const { data: organizationKycTeams, isLoading } = useQuery({
+  
+  const { data: organizationKycTeams, isLoading: isLoadingKycTeams } = useQuery({
     queryKey: ["kyc-teams", "organization", organizationId],
     queryFn: async () => {
       try {
@@ -25,22 +25,38 @@ export default function GrantAddressForm() {
     },
   })
 
-  const [addMoreActive, setAddMoreActive] = React.useState(false)
+  const { data: latestDraftForm, isLoading: isLoadingDraft } = useQuery({
+    queryKey: ["grant-eligibility-draft", "organization", organizationId],
+    queryFn: async () => {
+      try {
+        const result = await getLatestDraftFormAction({ organizationId })
+        if (result.error) {
+          throw new Error(result.error)
+        }
+        return result.form || null
+      } catch (error) {
+        console.error("Error fetching latest draft form:", error)
+        throw error
+      }
+    },
+  })
+
+  const isLoading = isLoadingKycTeams || isLoadingDraft
+  const hasKycTeams = organizationKycTeams && organizationKycTeams.length > 0
 
   return (
     <div className="space-y-12">
       <div className="space-y-6">
         <h2>Grant Delivery Address</h2>
         <p className="text-secondary-foreground font-normal">
-          Add the address(es) your rewards will be delivered to. You can do this
-          at any time, and your entry will be valid for one year.
+          Add the wallet address your rewards will be delivered to. Identity verification is required for each address.
         </p>
         <p className="text-secondary-foreground font-normal">
-          KYC (identity verification) is required for each address.
+          Get started by submitting the grant eligibility form.
         </p>
       </div>
       <div className="space-y-6">
-        <h3>Verified addresses</h3>
+        {/* Show loading state */}
         {isLoading ? (
           <div className="p-6 border rounded-md space-y-6 w-full h-[356px]">
             <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
@@ -51,24 +67,16 @@ export default function GrantAddressForm() {
             </div>
           </div>
         ) : (
-          organizationKycTeams?.map((organizationKycTeam) => (
-            <AddGrantDeliveryAddressForm
-              key={organizationKycTeam.id}
-              kycTeam={organizationKycTeam.team}
-            />
-          ))
+          <>
+            {/* Show button to create new form or resume draft if no verified addresses */}
+            {!hasKycTeams && (
+              <GrantEligibilityFormButton 
+                organizationId={organizationId}
+                existingForm={latestDraftForm || undefined}
+              />
+            )}
+          </>
         )}
-        {(organizationKycTeams?.length === 0 || addMoreActive) && (
-          <AddGrantDeliveryAddressForm />
-        )}
-        <Button
-          variant="secondary"
-          disabled={addMoreActive}
-          leftIcon={<PlusIcon size={16} />}
-          onClick={() => setAddMoreActive(true)}
-        >
-          Add more
-        </Button>
       </div>
     </div>
   )

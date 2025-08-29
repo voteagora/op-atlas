@@ -16,10 +16,12 @@ import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { Loader2 } from "lucide-react"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { createOrganizationKycTeamAction } from "@/lib/actions/organizations"
 import { createProjectKycTeamAction } from "@/lib/actions/projects"
+import { updateGrantEligibilityForm } from "@/lib/actions/grantEligibility"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 const formSchema = z.object({
@@ -87,6 +89,8 @@ export function AddGrantDeliveryAddressDialog({
           throw new Error("Invalid signature")
 
         try {
+          let kycTeamId: string | undefined
+
           if (organizationId) {
             const createdOrganizationKycTeam =
               await createOrganizationKycTeamAction({
@@ -107,6 +111,10 @@ export function AddGrantDeliveryAddressDialog({
                 createdOrganizationKycTeam.error,
               )
               return
+            }
+
+            if ('id' in createdOrganizationKycTeam) {
+              kycTeamId = createdOrganizationKycTeam.id
             }
 
             queryClient.invalidateQueries({
@@ -131,12 +139,34 @@ export function AddGrantDeliveryAddressDialog({
               return
             }
 
+            if ('id' in createdProjectKycTeam) {
+              kycTeamId = createdProjectKycTeam.id
+            }
+
             queryClient.invalidateQueries({
               queryKey: ["kycTeamProjects", grantDeliveryData.kycTeamId],
             })
             queryClient.invalidateQueries({
               queryKey: ["kyc-teams", "project", projectId],
             })
+          }
+
+          // If we have a formId from grant eligibility form, update it with the kycTeamId
+          if (grantDeliveryData.formId && kycTeamId) {
+            const updateResult = await updateGrantEligibilityForm({
+              formId: grantDeliveryData.formId,
+              kycTeamId,
+            })
+
+            if (updateResult.error) {
+              console.error("Error updating grant eligibility form:", updateResult.error)
+              // Don't show error to user as the KYC team was created successfully
+            } else if (updateResult.form) {
+              // Call the success callback if provided
+              if (grantDeliveryData.onSuccess) {
+                grantDeliveryData.onSuccess(updateResult.form)
+              }
+            }
           }
 
           toast.success("Grant delivery address verified")
@@ -206,7 +236,8 @@ export function AddGrantDeliveryAddressDialog({
             type="submit"
             disabled={isPending}
           >
-            {isPending ? "Verifying..." : "Continue"}
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending ? "Verifying" : "Continue"}
           </Button>
         </form>
       </DialogContent>
