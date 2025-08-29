@@ -1,7 +1,8 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { getCutoffDate } from "@/lib/utils"
+import { CalendarEventFill } from "@/components/icons/remix"
+import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 
 import { MissionData } from "../MissionsAndRoundData"
 
@@ -11,7 +12,7 @@ export const auditGrantsData: MissionData = {
   number: 10,
   roundName: "S8 Audit Grants",
   funding: {
-    op: "Up to 3.5M",
+    op: "969.5K",
   },
   season: "8",
   details: [
@@ -24,12 +25,26 @@ export const auditGrantsData: MissionData = {
   resultsLink: "/round/results?rounds=8",
   iconUrl: "/assets/images/onchain-builders.png",
   startsAt: new Date("2025-08-15T00:00:00.000Z"),
-  endsAt: new Date("2025-09-30T00:00:00.000Z"),
-  applyBy: new Date("2025-09-30T00:00:00.000Z"),
+  endsAt: new Date("2025-11-04T00:00:00.000Z"),
+  applyBy: new Date("2025-11-04T00:00:00.000Z"),
   evaluationMonth: (() => {
     const today = new Date()
     return today.getDate() > 27 ? (today.getMonth() + 1) % 12 : today.getMonth()
   })(),
+  callout: [
+    <GrantInfoCallout
+      key="season-budget"
+      title="Season budget"
+      description="969.5K OP"
+      icon="/assets/icons/op-icon.svg"
+    />,
+    <GrantInfoCallout
+      key="apply-by"
+      title="Apply by"
+      description="Nov 4, 2025"
+      icon={<CalendarEventFill fill="#3374DB" />}
+    />,
+  ],
   showSupportedNetworks: true,
   applicationPageEligibility: [
     {
@@ -89,7 +104,8 @@ export const auditGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project&apos;s code is &quot;audit-ready&quot; (e.g., code is frozen, has tests and documentation)
+          My project&apos;s code is &quot;audit-ready&quot; (e.g., code is
+          frozen, has tests and documentation)
         </p>
       ),
       type: "required",
@@ -110,7 +126,7 @@ export const auditGrantsData: MissionData = {
       description: "We've whitelisted a number of providers for you.",
       subDetails: "View ASPs",
       subDetailsLink:
-        "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
+        "https://hackmd.io/@wbnns/superchain-audit-service-providers",
     },
     {
       number: 2,

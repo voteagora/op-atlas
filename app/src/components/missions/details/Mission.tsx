@@ -219,7 +219,7 @@ export default function Mission() {
                       Are you an ASP?{" "}
                       <ExternalLink
                         className="text-primary underline font-normal"
-                        href="https://app.charmverse.io/op-grants/audits-hub-759373059217642"
+                        href="https://app.opgrants.io/programs/958/apply"
                       >
                         Apply here
                       </ExternalLink>

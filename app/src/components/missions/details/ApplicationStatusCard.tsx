@@ -93,12 +93,12 @@ export const ApplicationStatusCard = ({
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
-              href: "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
+              href: "https://hackmd.io/@wbnns/superchain-audit-service-providers",
               text: "View ASPs",
               type: "application",
             })
             window.open(
-              "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
+              "https://hackmd.io/@wbnns/superchain-audit-service-providers",
               "_blank",
               "noopener,noreferrer",
             )
