@@ -697,8 +697,10 @@ export async function createOrganizationKycTeam({
     // This means that user has recently stopped one of their streams
     // and needs to create a new kyc team for the same stream
     // and connect all projects to the same kyc team
+    let createdKycTeam: { id: string; walletAddress: string }
+    
     if (orgProjectWithDeletedKycTeam.length > 0) {
-      await prisma.$transaction(async (tx) => {
+      createdKycTeam = await prisma.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
           data: {
             walletAddress: walletAddress.toLowerCase(),
@@ -746,9 +748,11 @@ export async function createOrganizationKycTeam({
             },
           }),
         ])
+        
+        return kycTeam
       })
     } else {
-      await prisma.$transaction(async (tx) => {
+      createdKycTeam = await prisma.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
           data: {
             walletAddress: walletAddress.toLowerCase(),
@@ -774,10 +778,12 @@ export async function createOrganizationKycTeam({
             },
           }),
         ])
+        
+        return kycTeam
       })
     }
 
-    return { error: null }
+    return { id: createdKycTeam.id, walletAddress: createdKycTeam.walletAddress, error: null }
   } catch (error: any) {
     if (error.message.includes("Unique constraint failed")) {
       return { error: "KYC team with this Wallet Address already exists" }

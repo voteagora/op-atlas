@@ -6,10 +6,9 @@ import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { Button } from "@/components/common/Button"
 import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
+import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
 import { getKycTeamForProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
-
-import { AddGrantDeliveryAddressContainer } from "./components"
 
 export async function generateMetadata({
   params,
@@ -75,18 +74,9 @@ export default async function Page({
         </>
       ) : (
         <div className="space-y-6">
-          <AddGrantDeliveryAddressContainer projectId={params.projectId} />
-          <div>
-            <p className="text-secondary-foreground text-sm font-normal">
-              Need help? Contact{" "}
-              <Link
-                href="mailto:retrofunding@optimism.io"
-                className="underline"
-              >
-                retrofunding@optimism.io
-              </Link>
-            </p>
-          </div>
+          <GrantDeliveryAddressSection 
+            projectId={params.projectId}
+          />
         </div>
       )}
     </div>

@@ -1672,7 +1672,7 @@ export async function createProjectKycTeam({
   walletAddress: string
 }) {
   try {
-    await prisma.$transaction(async (tx) => {
+    const kycTeam = await prisma.$transaction(async (tx) => {
       // Check if project already has a kyc team
       const project = await tx.project.findUnique({
         where: {
@@ -1728,7 +1728,7 @@ export async function createProjectKycTeam({
       return kycTeam
     })
 
-    return { error: null }
+    return { id: kycTeam.id, walletAddress: kycTeam.walletAddress, error: null }
   } catch (error: any) {
     if (error.message.includes("Unique constraint failed")) {
       return { error: "KYC team with this Wallet Address already exists" }
