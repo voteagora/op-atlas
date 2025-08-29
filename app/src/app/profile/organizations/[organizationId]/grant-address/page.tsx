@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { getOrganization } from "@/db/organizations"
@@ -45,12 +45,7 @@ export default async function Page({
   // Fetch organization data
   const organization = await getOrganization({ id: params.organizationId })
   if (!organization) {
-    return (
-      <div>
-        <h1>Organization not found</h1>
-        <p>The organization you are looking for does not exist.</p>
-      </div>
-    )
+    return notFound()
   }
 
   // Fetch organization KYC teams
