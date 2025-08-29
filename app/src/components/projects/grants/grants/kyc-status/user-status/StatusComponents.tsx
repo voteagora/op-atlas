@@ -113,13 +113,21 @@ const EmailSendButton = ({
   switch (emailState) {
     case EmailState.NOT_SENT:
       return (
-        <div className="rounded-md px-2 py-1 hover:bg-button-secondary hover:border hover:border-button-secondary hover:cursor-pointer active:border active:border-b-accent">
-          <button
-            onClick={() => handleEmailResend(user)}
-            className="font-[Inter] font-normal text-[14px] leading-[20px] tracking-[0%]"
-          >
+        <div
+          role={"button"}
+          tabIndex={0}
+          title={"Resend email"}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleEmailResend(user)
+            }
+          }}
+          onClick={() => handleEmailResend(user)}
+          className="rounded-md px-2 py-1 hover:bg-button-secondary hover:border hover:border-button-secondary hover:cursor-pointer active:border active:border-b-accent"
+        >
+          <p className="font-[Inter] font-normal text-[14px] leading-[20px] tracking-[0%]">
             Resend email
-          </button>
+          </p>
         </div>
       )
     case EmailState.SENDING:
