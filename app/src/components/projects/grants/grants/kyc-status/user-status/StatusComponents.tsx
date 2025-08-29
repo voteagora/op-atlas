@@ -77,14 +77,17 @@ const StatusRow = ({
             />
           </div>
           <div className="flex flex-row gap-2">
-            {user.expiry && (
+            {user.personaExpiry && (
               <Badge
                 // Convert expiration date to a human-readable format
-                text={`Valid until ${user.expiry.toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}`}
+                text={`Verified until ${user.personaExpiry.toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  },
+                )}`}
               />
             )}
           </div>
