@@ -73,7 +73,7 @@ export function GetSupport() {
         {supportOptions.map((option, index) => (
           <div
             key={index}
-            className="p-6 bg-background border border-border rounded-xl flex flex-col gap-6"
+            className="p-6 bg-background border border-border rounded-xl flex flex-col gap-6 justify-between"
           >
             <div className="flex justify-between items-start gap-6">
               <div className="flex-1 flex flex-col">
