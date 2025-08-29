@@ -48,7 +48,6 @@ export async function getUserById(userId: string) {
           primary: "desc",
         },
       },
-      interaction: true,
       emails: true,
     },
   })
@@ -58,7 +57,6 @@ export async function getUserById(userId: string) {
   if (!session?.user || (session.user.id !== userId && user)) {
     if (user) {
       user.emails = []
-      user.interaction = null
       user.privyDid = null
       user.createdAt = new Date(0)
       user.deletedAt = new Date(0)
