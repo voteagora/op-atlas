@@ -76,9 +76,7 @@ const KYCStatusContainer = ({ project }: { project: Project }) => {
   return (
     <div className="flex flex-col w-full max-w-[712px] gap-6">
       <h4 className="font-semibold text-xl leading-6 text-text-default">
-        {projectStatus === "pending" || projectStatus === "created"
-          ? "In progress"
-          : "Verified"}
+        {projectStatus !== "completed" ? "In progress" : "Verified"}
       </h4>
       <div className="flex flex-col max-w border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
         {isLoading ? (
