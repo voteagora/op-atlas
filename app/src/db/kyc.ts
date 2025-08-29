@@ -1,6 +1,7 @@
 import { KYCUser } from "@prisma/client"
 
 import { prisma } from "./client"
+import { string } from "zod"
 
 export async function updateKYCUserStatus(
   status: string,
@@ -21,29 +22,6 @@ export async function updateKYCUserStatus(
     WHERE id = ${referenceId}
     RETURNING *;
   `
-  return result
-}
-
-export async function updateKYBUserStatus(
-  status: string,
-  updatedAt: Date,
-  personaStatus: string,
-  referenceId?: string,
-) {
-  if (!referenceId) {
-    throw new Error("Reference ID is required for KYB user status update")
-  }
-
-  const result = await prisma.$queryRaw<KYCUser[]>`
-    UPDATE "KYCUser" SET
-      "status" = ${status}::"KYCStatus",
-      "personaStatus" = ${personaStatus}::"PersonaStatus",
-      "updatedAt" = ${updatedAt},
-      "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE id = ${referenceId}
-    RETURNING *;
-  `
-
   return result
 }
 
@@ -205,4 +183,31 @@ export async function rejectProjectKYC(projectId: string) {
   await Promise.all(updatePromises)
 
   return kycUsers.length
+}
+
+export async function getKYCUsersByProjectId({
+  projectId,
+}: {
+  projectId: string
+}) {
+  // This query follows the SQL join logic:
+  // select * from "Project" p
+  // join "KYCUserTeams" kut on kut."kycTeamId" = p."kycTeamId"
+  // join "KYCUser" ku on ku.id = kut."kycUserId"
+  // where p.id = '...'
+  return await prisma.kYCUser.findMany({
+    where: {
+      KYCUserTeams: {
+        some: {
+          team: {
+            projects: {
+              some: {
+                id: projectId,
+              },
+            },
+          },
+        },
+      },
+    },
+  })
 }

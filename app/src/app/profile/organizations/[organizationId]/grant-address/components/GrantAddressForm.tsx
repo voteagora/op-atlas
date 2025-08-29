@@ -19,7 +19,6 @@ export default function GrantAddressForm() {
         return await getOrganizationKycTeamsAction({ organizationId })
       } catch (error) {
         console.error("Error fetching organization KYC teams:", error)
-        // Let queryFn handle the error
         throw error
       }
     },

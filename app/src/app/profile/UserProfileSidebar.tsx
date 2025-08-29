@@ -6,10 +6,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useFeatureFlagEnabled } from "posthog-js/react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { IncompleteCard } from "@/components/projects/ProjectStatusSidebar"
+import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
+import { resolveProjectStatus } from "@/lib/utils/kyc"
+import { getKYCUsersByProjectId } from "@/lib/actions/kyc"
 
 export function UserProfileSidebar({
   organizations,
@@ -22,21 +26,82 @@ export function UserProfileSidebar({
   const currentPage = pathname.split("/").slice(-1)[0]
 
   const [dashboardLoading, setDashboardLoading] = useState(false)
+  const [organizationsData, setOrganizationsData] = useState<
+    Array<{
+      organization: Organization
+      incompleteProject: any | null
+      organizationUrl: string
+      isLinkActive: boolean
+      isGrantAddressActive: boolean
+    }>
+  >([])
 
   const handleGoBack = () => {
     setDashboardLoading(true)
     router.push("/dashboard")
   }
 
+  useEffect(() => {
+    const fetchOrganizationData = async () => {
+      if (!organizations) return
+
+      const orgData = await Promise.all(
+        organizations.map(async (organization) => {
+          const organizationUrl = `profile/organizations/${organization.id}`
+          const isLinkActive = pathname.includes(organizationUrl)
+          const isGrantAddressActive = pathname.includes(
+            `${organizationUrl}/grant-address`,
+          )
+
+          // Fetch organization KYC teams
+          const organizationKycTeams = await getOrganizationKycTeamsAction({
+            organizationId: organization.id,
+          })
+
+          const projects = organizationKycTeams.flatMap(
+            (org) => org.team.projects,
+          )
+
+          // Check if any of the resolved projects have incomplete KYC status
+          let incompleteProject = null
+          for (const project of projects) {
+            const kycUsers = await getKYCUsersByProjectId(project.id)
+            const resolvedStatus = resolveProjectStatus(kycUsers)
+            if (
+              kycUsers &&
+              (resolvedStatus === "pending" ||
+                resolvedStatus === "project_issue")
+            ) {
+              incompleteProject = project
+              break
+            }
+          }
+
+          return {
+            organization,
+            incompleteProject,
+            organizationUrl,
+            isLinkActive,
+            isGrantAddressActive,
+          }
+        }),
+      )
+
+      setOrganizationsData(orgData)
+    }
+
+    fetchOrganizationData()
+  }, [organizations, pathname])
+
   return (
-    <div className="flex flex-col gap-y-6">
+    <div className="flex flex-col gap-y-6 w-full max-w-[228px]">
       <Button
         isLoading={dashboardLoading}
         onClick={handleGoBack}
         variant="ghost"
         className="text-sm font-medium text-secondary-foreground !p-0 justify-start"
       >
-        Your profile
+        Dashboard
         <Image
           src="/assets/icons/arrow-left.svg"
           height={8}
@@ -65,7 +130,7 @@ export function UserProfileSidebar({
             >
               •
             </div>
-            Details
+            Profile details
           </Link>
           <Link
             href="/profile/connected-apps"
@@ -108,12 +173,14 @@ export function UserProfileSidebar({
           Organizations
         </div>
         <ul className="text-sm space-y-1.5 py-3.5">
-          {organizations?.map((organization, index) => {
-            const organizationUrl = `profile/organizations/${organization.id}`
-            const isLinkActive = pathname.includes(organizationUrl)
-            const isGrantAddressActive = pathname.includes(
-              `${organizationUrl}/grant-address`,
-            )
+          {organizationsData.map((orgData, index) => {
+            const {
+              organization,
+              incompleteProject,
+              isLinkActive,
+              isGrantAddressActive,
+            } = orgData
+
             return (
               <li key={index} className={"flex flex-col"}>
                 <Link
@@ -136,7 +203,7 @@ export function UserProfileSidebar({
                 <Link
                   href={`/profile/organizations/${organization.id}/grant-address`}
                   className={cn([
-                    "text-secondary-foreground font-normal space-x-2 pl-4",
+                    "text-secondary-foreground space-x-2 pl-4 flex flex-row ",
                     {
                       "text-foreground font-medium": isGrantAddressActive,
                     },
@@ -144,13 +211,19 @@ export function UserProfileSidebar({
                 >
                   <span
                     className={cn([
-                      "opacity-0 text-lg",
+                      "font-medium text-foreground",
                       { "opacity-100": isGrantAddressActive },
                     ])}
                   >
                     •
                   </span>
-                  <span>Grant addresses</span>
+                  <div className="flex flex-row gap-2">
+                    <span className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-foreground text-[14px]">
+                      Grant Addresses
+                    </span>
+                    {/* Only shows if Project status resolves to 'PENDING' */}
+                    <IncompleteCard project={incompleteProject} />
+                  </div>
                 </Link>
               </li>
             )

@@ -815,3 +815,71 @@ export async function getOrganizationKYCTeams({
     },
   })
 }
+
+export async function getOrganizationWithGrantEligibility({
+  organizationId,
+}: {
+  organizationId: string
+}) {
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: organizationId,
+    },
+    include: {
+      GrantEligibilitys: {
+        where: {
+          deletedAt: null,
+          submittedAt: {
+            not: null,
+          },
+        },
+        select: {
+          id: true,
+          submittedAt: true,
+          expiresAt: true,
+          kycTeamId: true,
+        },
+      },
+      OrganizationKYCTeams: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          team: {
+            include: {
+              team: {
+                select: {
+                  users: true,
+                },
+              },
+              rewardStreams: true,
+              projects: {
+                include: {
+                  blacklist: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // Check if organization has KYC team with submitted grant eligibility
+  const hasKycTeam = !!(
+    organization?.OrganizationKYCTeams && 
+    organization.OrganizationKYCTeams.length > 0
+  )
+  
+  const hasSubmittedGrantEligibility = !!(
+    organization?.GrantEligibilitys && 
+    organization.GrantEligibilitys.length > 0
+  )
+
+  return {
+    organization,
+    hasKycTeam,
+    hasSubmittedGrantEligibility,
+    hasKycTeamWithSubmittedForm: hasKycTeam && hasSubmittedGrantEligibility,
+  }
+}

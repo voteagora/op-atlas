@@ -7,7 +7,10 @@ import { auth } from "@/auth"
 import { Button } from "@/components/common/Button"
 import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
 import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
-import { getKycTeamForProject } from "@/db/projects"
+import KYCStatusContainer, {
+  KYCStatusTitle,
+} from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
+import { getProjectWithGrantEligibility } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 
 export async function generateMetadata({
@@ -45,24 +48,14 @@ export default async function Page({
     redirect("/")
   }
 
-  const project = await getKycTeamForProject({ projectId: params.projectId })
-
+  const { project, hasSubmittedGrantEligibility } = await getProjectWithGrantEligibility({ 
+    projectId: params.projectId 
+  })
   const kycTeam = project?.kycTeam ?? undefined
-
-  console.log(project?.organization)
 
   return (
     <div className="space-y-12">
-      <div className="space-y-6">
-        <h2>Grant Delivery Address</h2>
-        <p className="text-secondary-foreground font-normal">
-          Add the address(es) your rewards will be delivered to. You can do this
-          at any time, and your entry will be valid for one year.
-        </p>
-        <p className="text-secondary-foreground font-normal">
-          KYC (identity verification) is required for each address.
-        </p>
-      </div>
+      <KYCStatusTitle />
       {project?.organization?.organization?.id ? (
         <>
           <GrantDeliveryAddress kycTeam={kycTeam} />
@@ -75,11 +68,17 @@ export default async function Page({
           </Button>
         </>
       ) : (
-        <div className="space-y-6">
-          <GrantDeliveryAddressSection 
-            projectId={params.projectId}
-          />
-        </div>
+        !hasSubmittedGrantEligibility && (
+          <div className="space-y-6">
+            <GrantDeliveryAddressSection 
+              projectId={params.projectId}
+            />
+          </div>
+        )
+      )}
+      
+      {project && hasSubmittedGrantEligibility && (
+        <KYCStatusContainer project={project} />
       )}
     </div>
   )

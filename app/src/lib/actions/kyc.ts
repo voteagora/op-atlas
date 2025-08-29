@@ -3,12 +3,9 @@
 import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
-import {
-  deleteKycTeam,
-  updateKYBUserStatus,
-  updateKYCUserStatus,
-} from "@/db/kyc"
+import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
 import { getReward, updateClaim } from "@/db/rewards"
+import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
 import {
   caseStatusMap,
   inquiryStatusMap,
@@ -19,6 +16,8 @@ import {
 } from "@/lib/persona"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+import { getUserByPrivyDid } from "@/db/users"
+import { getProject } from "@/db/projects"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -219,7 +218,7 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           // Adjust Case statues like "Waiting on UBOs" to Pending for now.
           const personaStatus = mapCaseStatusToPersonaStatus(status)
 
-          await updateKYBUserStatus(
+          await updateKYCUserStatus(
             parsedStatus,
             new Date(updatedAt),
             personaStatus,
@@ -270,4 +269,20 @@ export const deleteKYCTeamAction = async ({
     kycTeamId,
     hasActiveStream,
   })
+}
+
+export const getKYCUsersByProjectId = async (projectId: string) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, userId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  return await getKYCUsersByProjId({ projectId })
 }

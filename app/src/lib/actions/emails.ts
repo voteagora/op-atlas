@@ -29,12 +29,14 @@ export const sendTransactionEmail = async (
       html: emailData.html,
       text: emailData.text || emailData.html.replace(/<[^>]*>/g, ""),
       subject: emailData.subject,
-      from_email: "noreply@mailchimp.com",
+      from_email: "compliance@optimism.io",
       to: [{ email: emailData.to, type: "to" as const }],
-      reply_to: "noreply@mailchimp.com",
+      reply_to: "compliance@optimism.io.",
     }
 
     const response = await client.messages.send({ message })
+
+    console.log({ response })
 
     if ("isAxiosError" in response) {
       return {
@@ -189,4 +191,40 @@ function getKYBEmailTemplate(kycUser: KYCUser, kycLink: string): string {
         <p>Best regards,<br>The OP Atlas Team</p>
     </div>
     `
+}
+
+export const sendKYCReminderEmail = async (
+  kycUser: KYCUser,
+): Promise<EmailResponse> => {
+  const templateId = process.env.PERSONA_INQUIRY_KYC_TEMPLATE
+
+  if (!templateId) {
+    return {
+      success: false,
+      error:
+        "Missing required Persona KYC template ID. Look this up in Persona dashboard.",
+    }
+  }
+
+  const inquiryResult = await createPersonaInquiryLink(kycUser, templateId)
+
+  if (!inquiryResult.success) {
+    return { success: false }
+  }
+
+  if (!inquiryResult.inquiryUrl) {
+    return { success: false }
+  }
+
+  const kycLink = inquiryResult.inquiryUrl
+
+  const html = getKYCEmailTemplate(kycUser, kycLink)
+
+  const emailParams = {
+    to: kycUser.email,
+    subject: "Reminder: Complete KYC to receive your rewards.",
+    html,
+  }
+
+  return await sendTransactionEmail(emailParams)
 }
