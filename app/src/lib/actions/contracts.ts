@@ -16,7 +16,7 @@ import {
 } from "@/db/projects"
 import { getDeployedContractsServerParsed } from "@/lib/oso"
 
-import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
+import { clients, getTransaction, getTransactionTrace } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
@@ -178,7 +178,7 @@ export const verifyContract = async ({
     }
 
     // Recursively search for contract creation in the trace
-    function findContractCreation(traceObj: any): any {
+    const findContractCreation = (traceObj: any): any => {
       // Check if this object itself is a CREATE/CREATE2 operation
       if (
         traceObj &&
