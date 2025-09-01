@@ -4,7 +4,7 @@ import { processSuperfluidStream } from "@/lib/actions/rewards"
 import { withCronObservability } from "@/lib/cron"
 import { getStreamsForRound } from "@/lib/superfluid"
 
-export const maxDuration = 900
+export const maxDuration = 800
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
