@@ -1,16 +1,10 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+import { CalendarEventFill } from "@/components/icons/remix"
+import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 
 import { MissionData } from "../MissionsAndRoundData"
-import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
-import { CalendarEventFill } from "@/components/icons/remix"
 
 export const growthGrantsData: MissionData = {
   pageName: "growth-grants",
@@ -39,50 +33,26 @@ export const growthGrantsData: MissionData = {
     </p>,
     <p key="details-2">
       For Season 8, growth plans should target one following success metrics:
+      <ul className="list-disc pl-4 space-y-2 text-base text-secondary-foreground">
+        <li className="mt-4">
+          <span>Total Value Locked (TVL) - </span>
+          <span className="text-foreground">
+            TVL represents supply for onchain economic activity
+          </span>
+        </li>
+        <li>
+          <span>Transaction Fees - </span>
+          <span className="text-foreground">
+            measure demand for transacting and willingness to pay
+          </span>
+        </li>
+      </ul>
     </p>,
   ],
   season: "8",
   subDetails: (
     <div>
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="tvl" className="">
-          <AccordionTrigger className="text-base p-0 hover:underline text-foreground font-normal">
-            Total Value Locked (TVL)
-          </AccordionTrigger>
-          <AccordionContent className="mt-6 mb-6">
-            <p className="text-secondary-foreground mb-4">
-              <span className="font-medium text-foreground">Formula:</span> ΔTVL
-              = (Tokens_end − Tokens_start) × Price_end
-            </p>
-            <p className="text-secondary-foreground">
-              <span className="font-medium text-foreground">
-                Why this metric:
-              </span>{" "}
-              TVL represents supply for onchain economic activity.
-            </p>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-      <Accordion type="single" collapsible className="w-full space-y-4">
-        <AccordionItem value="fees" className="">
-          <AccordionTrigger className="text-base p-0 hover:underline text-foreground font-normal">
-            Transaction Fees
-          </AccordionTrigger>
-          <AccordionContent className="mt-6 mb-6">
-            <p className="text-secondary-foreground mb-4">
-              <span className="font-medium text-foreground">Formula:</span>{" "}
-              ΔFees = Fees_end − Fees_start
-            </p>
-            <p className="text-secondary-foreground">
-              <span className="font-medium text-foreground">
-                Why this metric:
-              </span>{" "}
-              Fees measure demand for transacting and willingness to pay.
-            </p>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-      <div className="mt-8">
+      <div className="">
         <p className="text-secondary-foreground mb-4">
           <span className="">Eligible projects look like:</span>
         </p>
