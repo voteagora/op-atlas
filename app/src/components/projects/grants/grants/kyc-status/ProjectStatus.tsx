@@ -1,4 +1,7 @@
+"use client"
+
 import { Ellipsis } from "lucide-react"
+import { useParams } from "next/navigation"
 
 import { StatusIcon } from "@/components/projects/grants/grants/kyc-status/user-status/StatusComponents"
 import { ExtendedPersonaStatus } from "@/components/projects/types"
@@ -8,8 +11,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
-const ProjectStatus = ({ status }: { status: ExtendedPersonaStatus }) => {
+const ProjectStatus = ({
+  status,
+  kycTeamId,
+}: {
+  status: ExtendedPersonaStatus
+  kycTeamId?: string
+}) => {
+  const { organizationId, projectId } = useParams()
+  const { setData, setOpenDialog } = useAppDialogs()
+
+  const openDeleteKYCTeamDialog = () => {
+    setData({
+      kycTeamId,
+      projectId: projectId as string,
+      organizationId: organizationId as string,
+      hasActiveStream: false,
+    })
+    setOpenDialog("delete_kyc_team")
+  }
+
   if (status === "completed") {
     return null
   }
@@ -22,7 +45,10 @@ const ProjectStatus = ({ status }: { status: ExtendedPersonaStatus }) => {
               <Ellipsis className="h-5 w-5 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={openDeleteKYCTeamDialog}
+              >
                 Remove address
               </DropdownMenuItem>
             </DropdownMenuContent>
