@@ -13,6 +13,7 @@ interface StepControls {
   enabled?: boolean
   onNext?: () => void | Promise<void>
   nextLabel?: string
+  isLoading?: boolean
 }
 
 interface GrantEligibilityFormContextType {
@@ -56,7 +57,7 @@ export function GrantEligibilityFormProvider({
   setCurrentStep,
 }: GrantEligibilityFormProviderProps) {
   const [form, setForm] = useState<FullGrantEligibilityForm>(initialForm)
-  const [stepControls, setStepControls] = useState<StepControls>({ enabled: true })
+  const [stepControls, setStepControls] = useState<StepControls>({ enabled: true, isLoading: false })
 
   const goToNextStep = () => {
     if (currentStep < 5) {

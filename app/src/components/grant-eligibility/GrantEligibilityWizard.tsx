@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 
 import { GrantEligibilityFormProvider, useGrantEligibilityForm } from "@/providers/GrantEligibilityFormProvider"
@@ -40,6 +40,11 @@ export default function GrantEligibilityWizard({
 }: GrantEligibilityWizardProps) {
   const [currentStep, setCurrentStep] = useState(form.currentStep || 1)
   const [showSuccess, setShowSuccess] = useState(false)
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentStep])
 
   const renderStep = () => {
     switch (currentStep) {
@@ -113,9 +118,6 @@ export default function GrantEligibilityWizard({
 function WizardControls({ currentStep }: { currentStep: number }) {
   const { goToPreviousStep, goToNextStep, stepControls } = useGrantEligibilityForm()
 
-  const nextText = stepControls.nextLabel || (currentStep === 5 ? "Submit" : "Next")
-  const isLoading = nextText?.includes("Verifying") || nextText?.includes("Loading") || nextText?.includes("Submitting")
-
   const handleNext = async () => {
     if (stepControls.onNext) {
       await stepControls.onNext()
@@ -123,6 +125,9 @@ function WizardControls({ currentStep }: { currentStep: number }) {
       goToNextStep()
     }
   }
+
+  const isLoading = stepControls.isLoading || false
+  const buttonLabel = stepControls.nextLabel || "Next"
 
   return (
     <div className="flex justify-center gap-3 pt-6">
@@ -138,11 +143,11 @@ function WizardControls({ currentStep }: { currentStep: number }) {
       <button
         type="button"
         onClick={handleNext}
-        disabled={stepControls.enabled === false}
-        className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-destructive text-white disabled:bg-secondary disabled:text-secondary-foreground disabled:cursor-not-allowed"
+        disabled={stepControls.enabled === false || isLoading}
+        className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-destructive text-white disabled:bg-secondary disabled:text-secondary-foreground disabled:cursor-not-allowed transition-all"
       >
         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {isLoading ? nextText?.replace("...", "") : nextText}
+        {buttonLabel}
       </button>
     </div>
   )

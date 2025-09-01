@@ -179,13 +179,19 @@ export default function EntitiesStep() {
     const enabled = !hasIncomplete && !isPending
     const nextLabel = hasValidEntities ? "Next" : "Skip"
 
-    setStepControls({ enabled, onNext: handleNext, nextLabel })
+    setStepControls({ 
+      enabled, 
+      onNext: handleNext, 
+      nextLabel: isPending ? "Loading" : nextLabel,
+      isLoading: isPending 
+    })
 
     return () => {
       setStepControls({
         enabled: true,
         onNext: undefined,
         nextLabel: undefined,
+        isLoading: false,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

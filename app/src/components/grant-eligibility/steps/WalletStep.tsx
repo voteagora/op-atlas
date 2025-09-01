@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { isAddress } from "viem"
 
@@ -14,8 +14,8 @@ type VerificationStatus = "not_verified" | "verifying" | "verified"
 
 export default function WalletStep() {
   const { form, setForm, goToNextStep, setStepControls } = useGrantEligibilityForm()
-  const { setOpenDialog, setData } = useAppDialogs()
-  const [isPending, startTransition] = useTransition()
+  const { openDialog, setOpenDialog, setData } = useAppDialogs()
+  const [isProcessing, setIsProcessing] = useState(false)
 
   // Initialize state from form data
   const [walletAddress, setWalletAddress] = useState(form.walletAddress || "")
@@ -40,108 +40,135 @@ export default function WalletStep() {
   const canProceed = isAddressValid && allCheckboxesChecked
   const isVerified = verificationStatus === "verified"
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     if (!canProceed) {
       toast.error("Please complete all requirements")
       return
     }
 
-    startTransition(async () => {
-      try {
-        // Save wallet address and attestations to form
-        const result = await updateGrantEligibilityForm({
-          formId: form.id,
-          walletAddress,
-          attestations: {
-            ...attestations,
-            walletOnMainnet: checkboxes.onMainnet,
-            walletCanMakeCalls: checkboxes.canMakeCalls,
-            walletPledgeDelegate: checkboxes.pledgeDelegate,
-          },
-        })
+    try {
+      // Save wallet address and attestations to form
+      const result = await updateGrantEligibilityForm({
+        formId: form.id,
+        walletAddress,
+        attestations: {
+          ...attestations,
+          walletOnMainnet: checkboxes.onMainnet,
+          walletCanMakeCalls: checkboxes.canMakeCalls,
+          walletPledgeDelegate: checkboxes.pledgeDelegate,
+        },
+      })
 
-        if (result.error) {
-          toast.error(result.error)
-          return
-        }
-
-        if (result.form) {
-          setForm(result.form)
-          
-          // Open verification dialog with success callback
-          setData({
-            address: walletAddress,
-            formId: form.id,
-            projectId: form.projectId || undefined,
-            organizationId: form.organizationId || undefined,
-            onSuccess: (updatedForm) => {
-              // Update the form with the new data including kycTeamId
-              setForm(updatedForm)
-              setVerificationStatus("verified")
-            }
-          })
-          setOpenDialog("verify_grant_delivery_address")
-          setVerificationStatus("verifying")
-        }
-      } catch (error) {
-        console.error("Error saving wallet address:", error)
-        toast.error("Failed to save progress. Please try again.")
+      if (result.error) {
+        toast.error(result.error)
+        return
       }
-    })
+
+      if (result.form) {
+        setForm(result.form)
+        
+        // Set verifying status AFTER saving but BEFORE opening modal
+        setVerificationStatus("verifying")
+        setIsProcessing(true)
+        
+        // Open verification dialog with success callback
+        setData({
+          address: walletAddress,
+          formId: form.id,
+          projectId: form.projectId || undefined,
+          organizationId: form.organizationId || undefined,
+          onSuccess: (updatedForm) => {
+            // Update the form with the new data including kycTeamId
+            setForm(updatedForm)
+            setVerificationStatus("verified")
+            setIsProcessing(false)
+          }
+        })
+        setOpenDialog("verify_grant_delivery_address")
+      }
+    } catch (error) {
+      console.error("Error saving wallet address:", error)
+      toast.error("Failed to save progress. Please try again.")
+    }
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!isVerified) {
       toast.error("Please verify your wallet address first")
       return
     }
 
-    startTransition(async () => {
-      try {
-        const result = await updateGrantEligibilityForm({
-          formId: form.id,
-          currentStep: Math.max(form.currentStep, 3),  // Never reduce the step
-        })
+    setIsProcessing(true)
+    try {
+      const result = await updateGrantEligibilityForm({
+        formId: form.id,
+        currentStep: Math.max(form.currentStep, 3),  // Never reduce the step
+      })
 
-        if (result.error) {
-          toast.error(result.error)
-          return
-        }
-
-        if (result.form) {
-          setForm(result.form)
-          goToNextStep()
-        }
-      } catch (error) {
-        console.error("Error updating form:", error)
-        toast.error("Failed to save progress. Please try again.")
+      if (result.error) {
+        toast.error(result.error)
+        setIsProcessing(false)
+        return
       }
-    })
+
+      if (result.form) {
+        setForm(result.form)
+        goToNextStep()
+      }
+    } catch (error) {
+      console.error("Error updating form:", error)
+      toast.error("Failed to save progress. Please try again.")
+      setIsProcessing(false)
+    }
   }
 
+
+  // Reset verification status when dialog closes without completing verification
+  useEffect(() => {
+    if (!openDialog && verificationStatus === "verifying" && isProcessing) {
+      setVerificationStatus("not_verified")
+      setIsProcessing(false)
+    }
+  }, [openDialog, verificationStatus, isProcessing])
 
   useEffect(() => {
     let enabled = false
     let onNext: (() => void) | undefined
     let nextLabel = "Verify"
+    let isLoading = false
 
     if (isVerified) {
-      enabled = true
+      enabled = !isProcessing
       onNext = handleNext
-      nextLabel = "Next"
-    } else if (canProceed && !isPending) {
+      nextLabel = isProcessing ? "Loading" : "Next"
+      isLoading = isProcessing
+    } else if (verificationStatus === "verifying" || isProcessing) {
+      // While verifying or processing, keep button disabled with loading state
+      enabled = false
+      onNext = undefined
+      nextLabel = "Verifying"
+      isLoading = true
+    } else if (canProceed) {
+      // Ready to verify - wrap handleVerify to set loading state immediately
       enabled = true
-      onNext = handleVerify
-      nextLabel = verificationStatus === "verifying" ? "Verifying" : "Verify"
+      onNext = () => {
+        // Set loading state immediately when button is clicked
+        setIsProcessing(true)
+        setVerificationStatus("verifying")
+        // Call the actual handler
+        handleVerify()
+      }
+      nextLabel = "Verify"
+      isLoading = false
     }
 
-    setStepControls({ enabled, onNext, nextLabel })
+    setStepControls({ enabled, onNext, nextLabel, isLoading })
 
     return () => {
-      setStepControls({ enabled: true, onNext: undefined, nextLabel: undefined })
+      setStepControls({ enabled: true, onNext: undefined, nextLabel: undefined, isLoading: false })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walletAddress, checkboxes, verificationStatus, isPending, canProceed])
+  }, [walletAddress, checkboxes, verificationStatus, isProcessing, canProceed])
 
   return (
     <div className="space-y-8 w-full">
