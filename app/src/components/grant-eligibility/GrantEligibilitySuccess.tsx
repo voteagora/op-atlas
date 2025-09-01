@@ -55,7 +55,7 @@ export default function GrantEligibilitySuccess({
 
           
           <p className="text-secondary-foreground">
-            Emails will come from [address@email.com]. Please ensure everyone has taken action and 
+            Emails will come from <a className="ml-1 underline" href="mailto:compliance@optimism.io">compliance@optimism.io</a>. Please ensure everyone has taken action and 
             allow 48 hours for your status to update.
           </p>
         </div>
