@@ -112,10 +112,15 @@ export default function SignersStep() {
   useEffect(() => {
     const enabled = validateSigners() && !isPending
 
-    setStepControls({ enabled, onNext: handleNext, nextLabel: "Next" })
+    setStepControls({ 
+      enabled, 
+      onNext: handleNext, 
+      nextLabel: isPending ? "Loading" : "Next",
+      isLoading: isPending 
+    })
 
     return () => {
-      setStepControls({ enabled: true, onNext: undefined, nextLabel: undefined })
+      setStepControls({ enabled: true, onNext: undefined, nextLabel: undefined, isLoading: false })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signers, isPending])

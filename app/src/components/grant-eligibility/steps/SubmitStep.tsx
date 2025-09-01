@@ -95,11 +95,12 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
     setStepControls({ 
       enabled: allAttestationsChecked && !isPending, 
       onNext: handleSubmit, 
-      nextLabel: isPending ? "Submitting..." : "Submit"
+      nextLabel: isPending ? "Submitting" : "Submit",
+      isLoading: isPending
     })
 
     return () => {
-      setStepControls({ enabled: true, onNext: undefined, nextLabel: undefined })
+      setStepControls({ enabled: true, onNext: undefined, nextLabel: undefined, isLoading: false })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attestations, isPending])
