@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { prisma } from "@/db/client"
 import { GrantType, Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { sendKYCStartedEmail, sendKYBStartedEmail } from "./emails"
 
 import { getGrantEligibilityFormStatus, GrantEligibilityFormStatus } from "@/lib/utils/grantEligibilityFormStatus"
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
@@ -390,14 +391,13 @@ export async function submitGrantEligibilityForm(params: {
         }
 
         // Send KYC email
-        /* const { sendKYCStartedEmail } = await import("./emails")
         const emailResult = await sendKYCStartedEmail(kycUser)
         emailResults.push({
           type: "KYC",
           user: `${signer.firstName} ${signer.lastName}`,
           email: signer.email,
           success: emailResult.success,
-        }) */
+        })
       } catch (error) {
         console.error("Error processing signer:", signer, error)
         emailResults.push({
@@ -457,7 +457,6 @@ export async function submitGrantEligibilityForm(params: {
         }
 
         // Send KYB email
-        /* const { sendKYBStartedEmail } = await import("./emails")
         const emailResult = await sendKYBStartedEmail(kycUser)
         emailResults.push({
           type: "KYB",
@@ -465,7 +464,7 @@ export async function submitGrantEligibilityForm(params: {
           email: entity.controllerEmail,
           company: entity.company,
           success: emailResult.success,
-        }) */
+        })
       } catch (error) {
         console.error("Error processing entity:", entity, error)
         emailResults.push({
