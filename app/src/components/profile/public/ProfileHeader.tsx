@@ -43,7 +43,7 @@ const ProfileHeader = ({
   const isSelf = session?.user?.id === user.id
 
   return (
-    <div className={cn("flex pb-6 w-full flex-col", className)}>
+    <div className={cn("flex w-full flex-col", className)}>
       <div className="flex flex-col space-y-6">
         {user.imageUrl && (
           <Avatar className="relative w-20 h-20 my-0.5 ml-3">

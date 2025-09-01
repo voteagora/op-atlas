@@ -14,7 +14,10 @@ function ProfileOrganizations({
   }
 
   return (
-    <div className="flex flex-col border-t border-border pt-4">
+    <div className="flex flex-col pt-6">
+      <h2 className="text-foreground text-sm font-medium leading-tight pl-3 pb-3">
+        Organizations
+      </h2>
       {organizations.map((organization) => (
         <ProfileSidebarLink
           href={`/${organization.id}`}
@@ -25,12 +28,12 @@ function ProfileOrganizations({
               <Image
                 src={organization.avatarUrl ?? ""}
                 alt={organization.name}
-                width={16}
-                height={16}
+                width={20}
+                height={20}
                 className="rounded-full object-cover"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm">
+              <div className="w-[20px] h-[20px] rounded-full bg-gray-200 flex items-center justify-center text-sm">
                 <span>{organization.name.charAt(0)}</span>
               </div>
             )
