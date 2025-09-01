@@ -117,12 +117,18 @@ export default function GrantEligibilityWizard({
 
 function WizardControls({ currentStep }: { currentStep: number }) {
   const { goToPreviousStep, goToNextStep, stepControls } = useGrantEligibilityForm()
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const handleNext = async () => {
-    if (stepControls.onNext) {
-      await stepControls.onNext()
-    } else {
-      goToNextStep()
+    setIsProcessing(true)
+    try {
+      if (stepControls.onNext) {
+        await stepControls.onNext()
+      } else {
+        goToNextStep()
+      }
+    } finally {
+      setIsProcessing(false)
     }
   }
 

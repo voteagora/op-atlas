@@ -2,11 +2,12 @@
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { GrantType, Prisma } from "@prisma/client"
+import { GrantType, Prisma, KYCUser } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { sendKYCStartedEmail, sendKYBStartedEmail } from "./emails"
 
 import { getGrantEligibilityFormStatus, GrantEligibilityFormStatus } from "@/lib/utils/grantEligibilityFormStatus"
+import { withChangelogTracking } from "@/lib/utils/changelog"
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
 import { getLatestDraftForm } from "@/db/grantEligibility"
 
@@ -67,54 +68,48 @@ export async function createGrantEligibilityForm(
   }
 
   try {
-    // Check for existing draft forms
-    const existingDrafts = await prisma.grantEligibility.findMany({
-      where: {
-        ...(projectId ? { projectId } : {  }),
-        ...(organizationId ? { organizationId } : {}),
-        deletedAt: null,
-        submittedAt: null,
-        expiresAt: {
-          gt: new Date(),
+    const result = await withChangelogTracking(async (tx) => {
+      // Check for existing draft forms
+      const existingDrafts = await tx.grantEligibility.findMany({
+        where: {
+          ...(projectId ? { projectId } : {  }),
+          ...(organizationId ? { organizationId } : {}),
+          deletedAt: null,
+          submittedAt: null,
+          expiresAt: {
+            gt: new Date(),
+          },
         },
-      },
-    })
-    
-    if (existingDrafts.length > 0) {
-      return { 
-        form: existingDrafts[0],
-        message: "Continuing existing draft"
+      })
+      
+      if (existingDrafts.length > 0) {
+        return { 
+          form: existingDrafts[0],
+          message: "Continuing existing draft"
+        }
       }
-    }
 
-    // Create new form
-    const form = await prisma.grantEligibility.create({
-      data: {
-        currentStep: 1,
-        projectId,
-        organizationId,
-        grantType,
+      // Create new form
+      const form = await tx.grantEligibility.create({
         data: {
-          signers: [],
-          entities: []
-        },
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      },
-    })
-
-    // Create initial changelog entry
-    await prisma.grantEligibilityChangelog.create({
-      data: {
-        formId: form.id,
-        action: "created",
-        performedBy: userId,
-        newData: {
-          currentStep: form.currentStep,
+          currentStep: 1,
           projectId,
           organizationId,
+          grantType,
+          data: {
+            signers: [],
+            entities: []
+          },
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         },
-      },
+      })
+
+      return { form }
     })
+
+    if (result.message) {
+      return result
+    }
 
     if (projectId) {
       revalidatePath(`/projects/${projectId}/grant-address`)
@@ -122,7 +117,7 @@ export async function createGrantEligibilityForm(
       revalidatePath(`/profile/organizations/${organizationId}/grant-address`)
     }
 
-    return { form }
+    return result
   } catch (error) {
     console.error("Error creating grant eligibility form:", error)
     return { error: "Failed to create form" }
@@ -142,94 +137,74 @@ export async function updateGrantEligibilityForm(
   const { formId, ...updates } = params
 
   try {
-    // Get existing form
-    const existingForm = await prisma.grantEligibility.findUnique({
-      where: { id: formId },
-    })
+    const form = await withChangelogTracking(async (tx) => {
+      // Get existing form
+      const existingForm = await tx.grantEligibility.findUnique({
+        where: { id: formId },
+      })
 
-    if (!existingForm) {
-      return { error: "Form not found" }
-    }
-
-    const formStatus = getGrantEligibilityFormStatus(existingForm)
-    if (formStatus !== GrantEligibilityFormStatus.DRAFT) {
-      return { error: "Can only update draft forms" }
-    }
-
-    // Verify permissions
-    if (existingForm.projectId) {
-      const isInvalid = await verifyAdminStatus(existingForm.projectId, userId)
-      if (isInvalid?.error) {
-        return { error: isInvalid.error }
+      if (!existingForm) {
+        throw new Error("Form not found")
       }
-    } else if (existingForm.organizationId) {
-      const isInvalid = await verifyOrganizationAdmin(existingForm.organizationId, userId)
-      if (isInvalid?.error) {
-        return { error: isInvalid.error }
+
+      const formStatus = getGrantEligibilityFormStatus(existingForm)
+      if (formStatus !== GrantEligibilityFormStatus.DRAFT) {
+        throw new Error("Can only update draft forms")
       }
-    }
 
-    // Merge existing data with updates
-    const updatedData = updates.data ? {
-      ...((existingForm.data as any) || {}),
-      ...updates.data,
-    } : existingForm.data
+      // Verify permissions
+      if (existingForm.projectId) {
+        const isInvalid = await verifyAdminStatus(existingForm.projectId, userId)
+        if (isInvalid?.error) {
+          throw new Error(isInvalid.error)
+        }
+      } else if (existingForm.organizationId) {
+        const isInvalid = await verifyOrganizationAdmin(existingForm.organizationId, userId)
+        if (isInvalid?.error) {
+          throw new Error(isInvalid.error)
+        }
+      }
 
-    // Prepare attestations value - handle null properly for Prisma
-    let attestationsValue: Prisma.InputJsonValue | undefined = undefined
-    if (updates.attestations !== undefined) {
-      attestationsValue = updates.attestations
-    } else if (existingForm.attestations !== null) {
-      attestationsValue = existingForm.attestations as Prisma.InputJsonValue
-    }
+      // Merge existing data with updates
+      const updatedData = updates.data ? {
+        ...((existingForm.data as any) || {}),
+        ...updates.data,
+      } : existingForm.data
 
-    // Update form
-    const form = await prisma.grantEligibility.update({
-      where: { id: formId },
-      data: {
-        currentStep: updates.currentStep ?? existingForm.currentStep,
-        grantType: updates.grantType ?? existingForm.grantType,
-        walletAddress: updates.walletAddress ?? existingForm.walletAddress,
-        kycTeamId: updates.kycTeamId ?? existingForm.kycTeamId,
-        attestations: attestationsValue,
-        data: updatedData,
-      },
-    })
+      // Prepare attestations value - handle null properly for Prisma
+      let attestationsValue: Prisma.InputJsonValue | undefined = undefined
+      if (updates.attestations !== undefined) {
+        attestationsValue = updates.attestations
+      } else if (existingForm.attestations !== null) {
+        attestationsValue = existingForm.attestations as Prisma.InputJsonValue
+      }
 
-    // Log changes if step completed
-    const shouldLogChange = 
-      updates.currentStep && 
-      updates.currentStep > (existingForm.currentStep || 1)
-
-    if (shouldLogChange) {
-      await prisma.grantEligibilityChangelog.create({
+      // Update form
+      return await tx.grantEligibility.update({
+        where: { id: formId },
         data: {
-          formId: form.id,
-          action: "saved",
-          performedBy: userId,
-          oldData: {
-            currentStep: existingForm.currentStep,
-            grantType: existingForm.grantType,
-            walletAddress: existingForm.walletAddress,
-          },
-          newData: {
-            currentStep: form.currentStep,
-            grantType: form.grantType,
-            walletAddress: form.walletAddress,
-          },
+          currentStep: updates.currentStep ?? existingForm.currentStep,
+          grantType: updates.grantType ?? existingForm.grantType,
+          walletAddress: updates.walletAddress ?? existingForm.walletAddress,
+          kycTeamId: updates.kycTeamId ?? existingForm.kycTeamId,
+          attestations: attestationsValue,
+          data: updatedData,
         },
       })
-    }
+    })
 
-    if (existingForm.projectId) {
-      revalidatePath(`/projects/${existingForm.projectId}/grant-eligibility/${formId}`)
-    } else if (existingForm.organizationId) {
-      revalidatePath(`/profile/organizations/${existingForm.organizationId}/grant-eligibility/${formId}`)
+    if (form.projectId) {
+      revalidatePath(`/projects/${form.projectId}/grant-eligibility/${formId}`)
+    } else if (form.organizationId) {
+      revalidatePath(`/profile/organizations/${form.organizationId}/grant-eligibility/${formId}`)
     }
 
     return { form }
   } catch (error) {
     console.error("Error updating grant eligibility form:", error)
+    if (error instanceof Error) {
+      return { error: error.message }
+    }
     return { error: "Failed to update form" }
   }
 }
@@ -290,7 +265,7 @@ export async function submitGrantEligibilityForm(params: {
   const { formId, finalAttestations } = params
 
   try {
-    // Get existing form
+    // Get existing form (read-only) first to validate and to avoid long-running work inside a transaction
     const existingForm = await prisma.grantEligibility.findUnique({
       where: { id: formId },
       include: {
@@ -307,7 +282,6 @@ export async function submitGrantEligibilityForm(params: {
       return { error: "Form has already been submitted or is not in draft status" }
     }
 
-    // Verify permissions
     if (existingForm.projectId) {
       const isInvalid = await verifyAdminStatus(existingForm.projectId, userId)
       if (isInvalid?.error) {
@@ -326,106 +300,83 @@ export async function submitGrantEligibilityForm(params: {
     }
 
     // Parse signers and entities from form data
-    const formData = existingForm.data as any || {}
+    const formData = (existingForm.data as any) || {}
     const signers = formData.signers || []
     const entities = formData.entities || []
+    const kycTeamId: string = existingForm.kycTeamId as string
 
-    // Update form with submittedAt and final attestations
-    const updatedForm = await prisma.grantEligibility.update({
-      where: { id: formId },
-      data: {
-        submittedAt: new Date(),
-        attestations: {
-          ...((existingForm.attestations as any) || {}),
-          ...finalAttestations,
+    // Do ONLY database work inside the transaction
+    const { updatedForm, kycEmailTargets, kybEmailTargets } = await withChangelogTracking(async (tx) => {
+      const updated = await tx.grantEligibility.update({
+        where: { id: formId },
+        data: {
+          submittedAt: new Date(),
+          attestations: {
+            ...((existingForm.attestations as any) || {}),
+            ...finalAttestations,
+          },
         },
-      },
-    })
+      })
 
-    // Create KYCUser records and send emails
-    const emailResults = []
+      const kycTargets: KYCUser[] = []
+      const kybTargets: KYCUser[] = []
 
-    // Process signers (individual KYC)
-    for (const signer of signers) {
-      if (!signer.email || !signer.firstName || !signer.lastName) {
-        console.warn("Skipping signer with incomplete data:", signer)
-        continue
-      }
+      // Process signers (individual KYC)
+      for (const signer of signers) {
+        if (!signer.email || !signer.firstName || !signer.lastName) {
+          console.warn("Skipping signer with incomplete data:", signer)
+          continue
+        }
 
-      try {
-        // Check if KYCUser already exists
-        let kycUser = await prisma.kYCUser.findFirst({
+        let kycUser = await tx.kYCUser.findFirst({
           where: { email: signer.email.toLowerCase() },
         })
 
         if (!kycUser) {
-          // Create new KYCUser for signer
-          kycUser = await prisma.kYCUser.create({
+          kycUser = await tx.kYCUser.create({
             data: {
               email: signer.email.toLowerCase(),
               firstName: signer.firstName,
               lastName: signer.lastName,
               kycUserType: "USER",
               status: "PENDING",
-              expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+              expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
             },
           })
         }
 
-        // Check if already linked to this KYC team
-        const existingLink = await prisma.kYCUserTeams.findFirst({
+        const existingLink = await tx.kYCUserTeams.findFirst({
           where: {
             kycUserId: kycUser.id,
-            kycTeamId: existingForm.kycTeamId,
+            kycTeamId,
           },
         })
 
         if (!existingLink) {
-          // Link to KYC team
-          await prisma.kYCUserTeams.create({
+          await tx.kYCUserTeams.create({
             data: {
               kycUserId: kycUser.id,
-              kycTeamId: existingForm.kycTeamId,
+              kycTeamId,
             },
           })
         }
 
-        // Send KYC email
-        const emailResult = await sendKYCStartedEmail(kycUser)
-        emailResults.push({
-          type: "KYC",
-          user: `${signer.firstName} ${signer.lastName}`,
-          email: signer.email,
-          success: emailResult.success,
-        })
-      } catch (error) {
-        console.error("Error processing signer:", signer, error)
-        emailResults.push({
-          type: "KYC",
-          user: `${signer.firstName} ${signer.lastName}`,
-          email: signer.email,
-          success: false,
-          error: error instanceof Error ? error.message : "Unknown error",
-        })
-      }
-    }
-
-    // Process entities (business KYB)
-    for (const entity of entities) {
-      if (!entity.controllerEmail || !entity.controllerFirstName || !entity.controllerLastName || !entity.company) {
-        console.warn("Skipping entity with incomplete data:", entity)
-        continue
+        kycTargets.push(kycUser)
       }
 
-      try {
-        // Check if KYCUser already exists
-        let kycUser = await prisma.kYCUser.findFirst({
+      // Process entities (business KYB)
+      for (const entity of entities) {
+        if (!entity.controllerEmail || !entity.controllerFirstName || !entity.controllerLastName || !entity.company) {
+          console.warn("Skipping entity with incomplete data:", entity)
+          continue
+        }
+
+        let kycUser = await tx.kYCUser.findFirst({
           where: { email: entity.controllerEmail.toLowerCase() },
         })
 
         if (!kycUser) {
-          // Create new KYCUser for entity controller
-          kycUser = await prisma.kYCUser.create({
+          kycUser = await tx.kYCUser.create({
             data: {
               email: entity.controllerEmail.toLowerCase(),
               firstName: entity.controllerFirstName,
@@ -433,65 +384,69 @@ export async function submitGrantEligibilityForm(params: {
               businessName: entity.company,
               kycUserType: "LEGAL_ENTITY",
               status: "PENDING",
-              expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+              expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
             },
           })
         }
 
-        // Check if already linked to this KYC team
-        const existingLink = await prisma.kYCUserTeams.findFirst({
+        const existingLink = await tx.kYCUserTeams.findFirst({
           where: {
             kycUserId: kycUser.id,
-            kycTeamId: existingForm.kycTeamId,
+            kycTeamId,
           },
         })
 
         if (!existingLink) {
-          // Link to KYC team
-          await prisma.kYCUserTeams.create({
+          await tx.kYCUserTeams.create({
             data: {
               kycUserId: kycUser.id,
-              kycTeamId: existingForm.kycTeamId,
+              kycTeamId,
             },
           })
         }
 
-        // Send KYB email
-        const emailResult = await sendKYBStartedEmail(kycUser)
-        emailResults.push({
-          type: "KYB",
-          user: `${entity.controllerFirstName} ${entity.controllerLastName}`,
-          email: entity.controllerEmail,
-          company: entity.company,
-          success: emailResult.success,
-        })
-      } catch (error) {
-        console.error("Error processing entity:", entity, error)
-        emailResults.push({
-          type: "KYB",
-          user: `${entity.controllerFirstName} ${entity.controllerLastName}`,
-          email: entity.controllerEmail,
-          company: entity.company,
-          success: false,
-          error: error instanceof Error ? error.message : "Unknown error",
-        })
+        kybTargets.push(kycUser)
       }
+
+      return { updatedForm: updated, kycEmailTargets: kycTargets, kybEmailTargets: kybTargets }
+    })
+
+    const emailPromises: Array<Promise<{
+      type: "KYC" | "KYB"
+      user?: string
+      email: string
+      company?: string
+      success: boolean
+      error?: string
+    }>> = []
+
+    for (const user of kycEmailTargets) {
+      emailPromises.push(
+        (async () => {
+          try {
+            const res = await sendKYCStartedEmail(user)
+            return { type: "KYC" as const, user: `${user.firstName} ${user.lastName}`, email: user.email, success: res.success, error: res.error }
+          } catch (e: any) {
+            return { type: "KYC" as const, user: `${user.firstName} ${user.lastName}`, email: user.email, success: false, error: e?.message || "Unknown error" }
+          }
+        })(),
+      )
     }
 
-    // Log submission in changelog
-    await prisma.grantEligibilityChangelog.create({
-      data: {
-        formId: updatedForm.id,
-        action: "submitted",
-        performedBy: userId,
-        newData: {
-          submittedAt: updatedForm.submittedAt,
-          attestations: finalAttestations,
-          kycUsersCreated: signers.length + entities.length,
-          emailResults,
-        },
-      },
-    })
+    for (const user of kybEmailTargets) {
+      emailPromises.push(
+        (async () => {
+          try {
+            const res = await sendKYBStartedEmail(user)
+            return { type: "KYB" as const, user: `${user.firstName} ${user.lastName}`, email: user.email, company: user.businessName ?? undefined, success: res.success, error: res.error }
+          } catch (e: any) {
+            return { type: "KYB" as const, user: `${user.firstName} ${user.lastName}`, email: user.email, company: user.businessName ?? undefined, success: false, error: e?.message || "Unknown error" }
+          }
+        })(),
+      )
+    }
+
+    const emailResults = await Promise.all(emailPromises)
 
     // Revalidate paths
     if (existingForm.projectId) {
@@ -502,20 +457,21 @@ export async function submitGrantEligibilityForm(params: {
       revalidatePath(`/profile/organizations/${existingForm.organizationId}/grant-eligibility/${formId}`)
     }
 
-    // Check if any emails failed
-    const failedEmails = emailResults.filter(r => !r.success)
+    const failedEmails = emailResults.filter((r) => !r.success)
     if (failedEmails.length > 0) {
       console.warn("Some KYC/KYB emails failed to send:", failedEmails)
-      // Still return success but with a warning
-      return { 
-        success: true, 
-        warning: `Form submitted successfully, but ${failedEmails.length} email(s) failed to send. The recipients may need to be contacted manually.` 
+      return {
+        success: true,
+        warning: `Form submitted successfully, but ${failedEmails.length} email(s) failed to send. The recipients may need to be contacted manually.`,
       }
     }
 
     return { success: true }
   } catch (error) {
     console.error("Error submitting grant eligibility form:", error)
+    if (error instanceof Error) {
+      return { error: error.message }
+    }
     return { error: "Failed to submit form" }
   }
 }
@@ -568,47 +524,42 @@ export async function cancelGrantEligibilityForm(formId: string) {
   }
 
   try {
-    const form = await prisma.grantEligibility.findUnique({
-      where: { id: formId },
-    })
+    const form = await withChangelogTracking(async (tx) => {
+      const form = await tx.grantEligibility.findUnique({
+        where: { id: formId },
+      })
 
-    if (!form) {
-      return { error: "Form not found" }
-    }
-
-    const formStatus = getGrantEligibilityFormStatus(form)
-    if (formStatus !== GrantEligibilityFormStatus.DRAFT) {
-      return { error: "Can only cancel draft forms" }
-    }
-
-    // Verify permissions
-    if (form.projectId) {
-      const isInvalid = await verifyAdminStatus(form.projectId, userId)
-      if (isInvalid?.error) {
-        return { error: isInvalid.error }
+      if (!form) {
+        throw new Error("Form not found")
       }
-    } else if (form.organizationId) {
-      const isInvalid = await verifyOrganizationAdmin(form.organizationId, userId)
-      if (isInvalid?.error) {
-        return { error: isInvalid.error }
+
+      const formStatus = getGrantEligibilityFormStatus(form)
+      if (formStatus !== GrantEligibilityFormStatus.DRAFT) {
+        throw new Error("Can only cancel draft forms")
       }
-    }
 
-    // Mark form as deleted
-    await prisma.grantEligibility.update({
-      where: { id: formId },
-      data: {
-        deletedAt: new Date(),
-      },
-    })
+      // Verify permissions
+      if (form.projectId) {
+        const isInvalid = await verifyAdminStatus(form.projectId, userId)
+        if (isInvalid?.error) {
+          throw new Error(isInvalid.error)
+        }
+      } else if (form.organizationId) {
+        const isInvalid = await verifyOrganizationAdmin(form.organizationId, userId)
+        if (isInvalid?.error) {
+          throw new Error(isInvalid.error)
+        }
+      }
 
-    // Log cancellation
-    await prisma.grantEligibilityChangelog.create({
-      data: {
-        formId: form.id,
-        action: "canceled",
-        performedBy: userId,
-      },
+      // Mark form as deleted
+      await tx.grantEligibility.update({
+        where: { id: formId },
+        data: {
+          deletedAt: new Date(),
+        },
+      })
+
+      return form
     })
 
     if (form.projectId) {
@@ -620,6 +571,9 @@ export async function cancelGrantEligibilityForm(formId: string) {
     return { success: true }
   } catch (error) {
     console.error("Error canceling grant eligibility form:", error)
+    if (error instanceof Error) {
+      return { error: error.message }
+    }
     return { error: "Failed to cancel form" }
   }
 }
