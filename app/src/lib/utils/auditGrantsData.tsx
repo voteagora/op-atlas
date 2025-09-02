@@ -2,6 +2,7 @@ import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
 import { CalendarEventFill } from "@/components/icons/remix"
+import { Discord } from "@/components/icons/socials"
 import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 
 import { MissionData } from "../MissionsAndRoundData"
@@ -143,6 +144,25 @@ export const auditGrantsData: MissionData = {
       number: 4,
       title:
         "Upon grant approval, the ASP performs an audit to identify potential issues and recommend solutions",
+    },
+  ],
+  supportOptions: [
+    {
+      type: "custom",
+      title: "Discord",
+      description: "Leave a message in the channel.",
+      buttonText: "Join Channel",
+      buttonLink: "https://discord.com/invite/optimism",
+      externalLink: true,
+      icon: <Discord />,
+    },
+    {
+      type: "office-hours",
+      title: "Office Hours",
+      description: "Bi-weekly on Tuesdays at 2:00 PM UTC.",
+      buttonText: "Join call",
+      buttonLink: "https://meet.google.com/pgj-ibvv-trr",
+      externalLink: true,
     },
   ],
   learnMoreLinks: [
