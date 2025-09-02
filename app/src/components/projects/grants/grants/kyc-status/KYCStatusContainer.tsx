@@ -285,9 +285,7 @@ const OrganizationKYCStatusContainer = ({
       users={users}
       isLoading={isLoading}
       extraMiddleContent={
-        kycOrg?.team.projects && kycOrg.team.projects.length > 0 ? (
-          <ConnectedOrganizationProjects projects={kycOrg.team.projects} />
-        ) : undefined
+        <ConnectedOrganizationProjects organizationId={organization.id} />
       }
       showEditFooter
     />
