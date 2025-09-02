@@ -18,13 +18,20 @@ export const testWagmiConfig = createConfig({
   },
 })
 
+// Test-safe version of SafeContextProvider that doesn't use Privy hooks
+const TestSafeContextProvider = ({ children }: { children: React.ReactNode }) => {
+  // In test mode, we don't need real Safe wallet functionality
+  // Just provide a minimal context that won't cause errors
+  return <>{children}</>
+}
+
 const TestModeProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = new QueryClient()
 
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={testWagmiConfig}>
-        <SafeContextProvider>{children}</SafeContextProvider>
+        <TestSafeContextProvider>{children}</TestSafeContextProvider>
       </WagmiProvider>
     </QueryClientProvider>
   )
