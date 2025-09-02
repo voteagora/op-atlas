@@ -8,16 +8,27 @@ on:
     branches: [ main, develop ]
 
 env:
-  NEXT_PUBLIC_PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
-  PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
-  PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }}
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
-  NEXT_PUBLIC_AGORA_API_URL: ${{ secrets.NEXT_PUBLIC_AGORA_API_URL}}
-  NEXT_PUBLIC_VERCEL_URL: ${{ secrets.NEXT_PUBLIC_VERCEL_URL}}
-  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  # Test mode configuration
+  NODE_ENV: test
+  ATLAS_TEST_MODE: true
+  USE_TEST_AUTH: true
+  MOCK_EXTERNAL_SERVICES: true
+  
+  # Test database
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
+  
+  # Mock credentials for testing (no real secrets needed)
+  NEXT_PUBLIC_PRIVY_APP_ID: test-app-id
+  PRIVY_APP_ID: test-app-id
+  PRIVY_APP_SECRET: test-app-secret
+  NEXTAUTH_SECRET: test-nextauth-secret
   NEXTAUTH_URL: "http://localhost:3000"
-  MAILCHIMP_API_KEY: ${{ secrets.MAILCHIMP_API_KEY }}
-  MAILCHIMP_SERVER_PREFIX: ${{ secrets.MAILCHIMP_SERVER_PREFIX }}
+  
+  # Disable external services in test mode
+  NEXT_PUBLIC_AGORA_API_URL: http://localhost:3000/api/mock
+  NEXT_PUBLIC_VERCEL_URL: http://localhost:3000
+  MAILCHIMP_API_KEY: test-mailchimp-key
+  MAILCHIMP_SERVER_PREFIX: test
 
 jobs:
   test:
@@ -60,12 +71,20 @@ jobs:
           cd app
           npx playwright install --with-deps
 
+      - name: Run database migrations
+        run: |
+          cd app
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
+
       - name: Run Playwright tests
         run: |
           cd app
           npx playwright test
         env:
           CI: true
+          # Test mode is already set in global env above
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
