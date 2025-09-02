@@ -698,7 +698,7 @@ export async function createOrganizationKycTeam({
     // and needs to create a new kyc team for the same stream
     // and connect all projects to the same kyc team
     let createdKycTeam: { id: string; walletAddress: string }
-    
+
     if (orgProjectWithDeletedKycTeam.length > 0) {
       createdKycTeam = await prisma.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
@@ -748,7 +748,7 @@ export async function createOrganizationKycTeam({
             },
           }),
         ])
-        
+
         return kycTeam
       })
     } else {
@@ -778,12 +778,16 @@ export async function createOrganizationKycTeam({
             },
           }),
         ])
-        
+
         return kycTeam
       })
     }
 
-    return { id: createdKycTeam.id, walletAddress: createdKycTeam.walletAddress, error: null }
+    return {
+      id: createdKycTeam.id,
+      walletAddress: createdKycTeam.walletAddress,
+      error: null,
+    }
   } catch (error: any) {
     if (error.message.includes("Unique constraint failed")) {
       return { error: "KYC team with this Wallet Address already exists" }
@@ -814,4 +818,81 @@ export async function getOrganizationKYCTeams({
       },
     },
   })
+}
+
+export async function getOrganizationWithGrantEligibility({
+  organizationId,
+}: {
+  organizationId: string
+}) {
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: organizationId,
+    },
+    include: {
+      projects: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          organization: true,
+        },
+      },
+      GrantEligibilitys: {
+        where: {
+          deletedAt: null,
+          submittedAt: {
+            not: null,
+          },
+        },
+        select: {
+          id: true,
+          submittedAt: true,
+          expiresAt: true,
+          kycTeamId: true,
+        },
+      },
+      OrganizationKYCTeams: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          team: {
+            include: {
+              team: {
+                select: {
+                  users: true,
+                },
+              },
+              rewardStreams: true,
+              projects: {
+                include: {
+                  blacklist: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  console.log({ organization })
+
+  // Check if organization has KYC team with submitted grant eligibility
+  const hasKycTeam = !!(
+    organization?.OrganizationKYCTeams &&
+    organization.OrganizationKYCTeams.length > 0
+  )
+
+  const hasSubmittedGrantEligibility = !!(
+    organization?.GrantEligibilitys && organization.GrantEligibilitys.length > 0
+  )
+
+  return {
+    organization,
+    hasKycTeam,
+    hasSubmittedGrantEligibility,
+    hasKycTeamWithSubmittedForm: hasKycTeam && hasSubmittedGrantEligibility,
+  }
 }

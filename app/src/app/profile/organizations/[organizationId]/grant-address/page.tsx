@@ -2,12 +2,17 @@ import { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
-import { getOrganization } from "@/db/organizations"
+import {
+  getOrganization,
+  getOrganizationWithGrantEligibility,
+} from "@/db/organizations"
 import KYCStatusContainer, {
   KYCStatusTitle,
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
 import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
-import { getKycTeamForProject } from "@/db/projects"
+import { getKycTeamForProject, getProject } from "@/db/projects"
+import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
+import GrantAddressForm from "./components/GrantAddressForm"
 
 export async function generateMetadata({
   params,
@@ -42,32 +47,31 @@ export default async function Page({
     redirect("/")
   }
 
-  // Fetch organization data
-  const organization = await getOrganization({ id: params.organizationId })
+  // Fetch organization data with grant eligibility status
+  const { organization, hasKycTeamWithSubmittedForm } =
+    await getOrganizationWithGrantEligibility({
+      organizationId: params.organizationId,
+    })
+
   if (!organization) {
     return notFound()
   }
 
-  // Fetch organization KYC teams
-  const organizationKycTeams = await getOrganizationKycTeamsAction({
-    organizationId: organization.id,
-  })
+  // If they have KYC team and submitted grant eligibility form, show the status container
+  if (hasKycTeamWithSubmittedForm) {
+    // Fetch organization KYC teams
+    const organizationKycTeams = await getOrganizationKycTeamsAction({
+      organizationId: organization.id,
+    })
 
-  // Flatten projects and resolve them
-  const projects = organizationKycTeams.flatMap((org) => org.team.projects)
-  const resolvedProjects = await Promise.all(
-    projects.map((project) => getKycTeamForProject({ projectId: project.id })),
-  )
+    return (
+      <div className="space-y-12">
+        <KYCStatusTitle />
+        <KYCStatusContainer organization={organization} />
+      </div>
+    )
+  }
 
-  // Pass resolved data to the client-side component
-  return (
-    <div className="space-y-12">
-      <KYCStatusTitle />
-      {/* For KYC team statuses */}
-      {resolvedProjects.map(
-        (project) =>
-          project && <KYCStatusContainer key={project.id} project={project} />,
-      )}
-    </div>
-  )
+  // Otherwise, just show the grant address form
+  return <GrantAddressForm />
 }
