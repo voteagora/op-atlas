@@ -40,12 +40,11 @@ async function getOrganizationsFn(userId: string) {
   `
 
   // Transform the raw result to match the expected structure
-  const transformed =
+  return (
     result[0]?.result.organizations.map(
       (organizationObj) => organizationObj.organization,
     ) || []
-
-  return transformed
+  )
 }
 
 export const getOrganizations = cache(getOrganizationsFn)
@@ -155,11 +154,11 @@ async function getUserProjectOrganizationsFn(
   `
 
   // Transform the raw result to match the expected structure
-  const transformed = result[0]?.result || {
-    organizations: [],
-  }
-
-  return transformed
+  return (
+    result[0]?.result || {
+      organizations: [],
+    }
+  )
 }
 
 export const getUserProjectOrganizations = cache(getUserProjectOrganizationsFn)
