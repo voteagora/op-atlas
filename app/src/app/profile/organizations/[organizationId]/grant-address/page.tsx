@@ -1,17 +1,16 @@
 import { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
+
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
+import KYCStatusContainer, {
+  KYCStatusTitle,
+} from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
 import {
   getOrganization,
   getOrganizationWithGrantEligibility,
 } from "@/db/organizations"
-import KYCStatusContainer, {
-  KYCStatusTitle,
-} from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
-import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
-import { getKycTeamForProject, getProject } from "@/db/projects"
-import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
+
 import GrantAddressForm from "./components/GrantAddressForm"
 
 export async function generateMetadata({
@@ -59,11 +58,6 @@ export default async function Page({
 
   // If they have KYC team and submitted grant eligibility form, show the status container
   if (hasKycTeamWithSubmittedForm) {
-    // Fetch organization KYC teams
-    const organizationKycTeams = await getOrganizationKycTeamsAction({
-      organizationId: organization.id,
-    })
-
     return (
       <div className="space-y-12">
         <KYCStatusTitle />
