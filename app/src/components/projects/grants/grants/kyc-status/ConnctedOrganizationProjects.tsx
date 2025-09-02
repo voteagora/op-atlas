@@ -15,7 +15,7 @@ const ConnectedOrganizationProjects = ({
   console.log({ organization })
   return (
     <KYCSubSection title="Projects">
-      <div className="space-y-4">
+      <div className="space-y-2">
         {isLoading ? (
           <Skeleton className="h-5 w-32" />
         ) : organization?.projects.length === 0 ? (
