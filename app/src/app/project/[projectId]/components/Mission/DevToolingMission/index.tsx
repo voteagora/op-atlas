@@ -34,8 +34,8 @@ export default function DevToolingMission({
   return (
     <div className="space-y-3">
       {opRewardSum > 0 && (
-        <div className="mt-6 relative w-full">
-          <div className="absolute w-full h-full z-50 bg-[#FFF0F1] rounded-xl p-20">
+        <div className="mt-4 w-full">
+          <div className="w-full bg-[#FFF0F1] rounded-xl p-8">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
                 <span className="font-extrabold text-4xl">
@@ -65,9 +65,10 @@ export default function DevToolingMission({
           </div>
         </div>
       )}
+
       <Tabs
         defaultValue={Object.values(TRANCHE_MONTHS_MAP).pop() || ""}
-        className="w-full mt-12"
+        className="w-full mt-6"
       >
         <TabsList className="bg-transparent space-x-2 flex items-center justify-between overflow-auto h-fit p-0">
           {MONTHS.map((month, index) => {
@@ -191,7 +192,9 @@ export default function DevToolingMission({
                                     className="mr-2 mt-[-2px] mb-[-2px]"
                                   />
                                 )}
-                                <span className="truncate block max-w-[220px]">{project?.name}</span>
+                                <span className="truncate block max-w-[220px]">
+                                  {project?.name}
+                                </span>
                               </li>
                             </TrackedLink>
                           )
@@ -229,7 +232,14 @@ export default function DevToolingMission({
                     <div className="h-full w-px bg-tertiary" />
                     <div className="pl-6">
                       <p className="text-secondary-foreground text-base font-normal">
-                        Rewards are determined by an <ExternalLink href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024" className="underline">evaluation algorithm</ExternalLink> powered by onchain data.
+                        Rewards are determined by an{" "}
+                        <ExternalLink
+                          href="https://gov.optimism.io/t/evolution-of-retro-funding-in-season-8/10024"
+                          className="underline"
+                        >
+                          evaluation algorithm
+                        </ExternalLink>{" "}
+                        powered by onchain data.
                       </p>
                     </div>
                   </div>

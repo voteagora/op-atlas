@@ -96,7 +96,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-riforma), ui-sans-serif, system-ui, -apple-system,
+    font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
       Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
       "Segoe UI Emoji";
   }
