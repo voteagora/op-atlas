@@ -56,6 +56,13 @@ export default function Header() {
                 ))}
               </div>
             )}
+            {(mission?.pageName === "retro-funding-dev-tooling" ||
+              mission?.pageName === "retro-funding-onchain-builders") && (
+              <p className="text-secondary-foreground">
+                Any projects enrolled in the previous season of Retro Funding
+                will automatically roll over to this season.
+              </p>
+            )}
           </div>
         </div>
       </div>

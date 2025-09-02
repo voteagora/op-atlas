@@ -323,7 +323,7 @@ const SupportedChainsMobile = () => {
 
   const renderImage = (chain: ChainInfo, index: number) => {
     return (
-      <CarouselItem key={chain.name} className="basis-1/6">
+      <CarouselItem key={chain.name} className="basis-1/6 pl-1">
         <div
           className="flex items-center justify-center h-16 cursor-pointer"
           onClick={() => handleChainClick(chain)}
