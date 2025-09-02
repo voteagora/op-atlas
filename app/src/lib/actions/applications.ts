@@ -43,13 +43,12 @@ export const publishAndSaveApplication = async ({
   round: number
   roundName?: string
 }): Promise<Application> => {
-  // Publish attestation
+  // Publish attestation (must reference an existing metadata snapshot)
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
     projectId: project.projectId,
     round: `${roundName ?? round}`,
-    // Use provided metadata snapshot if available; otherwise a zero-bytes32 ref.
-    snapshotRef: metadataSnapshotId || ZERO_BYTES32,
+    snapshotRef: metadataSnapshotId,
     ipfsUrl: "", // Skipping IPFS for S7
   })
 
@@ -125,6 +124,11 @@ const createProjectApplication = async (
     project.snapshots,
   )[0]
 
+  // Ensure a real snapshot exists; applications must reference a metadata snapshot
+  if (!latestSnapshot?.attestationId) {
+    return { error: "Project has no snapshot", applications: [] as any }
+  }
+
   const application = await publishAndSaveApplication({
     project: {
       projectId: project.id,
@@ -134,7 +138,7 @@ const createProjectApplication = async (
     },
     category,
     farcasterId,
-    metadataSnapshotId: latestSnapshot?.attestationId || ZERO_BYTES32,
+    metadataSnapshotId: latestSnapshot.attestationId,
     round,
     roundName,
   })
