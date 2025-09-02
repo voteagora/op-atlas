@@ -1,9 +1,11 @@
 "use client"
 
 import { KYCUser, Organization } from "@prisma/client"
+import { useParams } from "next/navigation"
 import { useState } from "react"
+import { ReactNode, useCallback } from "react"
 
-import TrackedLink from "@/components/common/TrackedLink"
+import ConnectedOrganizationProjects from "@/components/projects/grants/grants/kyc-status/ConnctedOrganizationProjects"
 import GrantDeliveryAddress from "@/components/projects/grants/grants/kyc-status/GrantDeliveryAddress"
 import ProjectStatus from "@/components/projects/grants/grants/kyc-status/ProjectStatus"
 import IndividualStatuses from "@/components/projects/grants/grants/kyc-status/user-status/IndividualStatuses"
@@ -14,8 +16,7 @@ import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
 import { sendKYCReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
-import ConnectedOrganizationProjects from "@/components/projects/grants/grants/kyc-status/ConnctedOrganizationProjects"
-import { ReactNode, useCallback } from "react"
+import { useAppDialogs } from "@/providers/DialogProvider"
 
 const KYCStatusContainer = ({
   project,
@@ -151,6 +152,19 @@ const KYCStatusPresenter = ({
   extraMiddleContent?: ReactNode
   showEditFooter?: boolean
 }) => {
+  const { organizationId, projectId } = useParams()
+  const { setData, setOpenDialog } = useAppDialogs()
+
+  const openDeleteKYCTeamDialog = () => {
+    setData({
+      kycTeamId,
+      projectId: projectId as string,
+      organizationId: organizationId as string,
+      hasActiveStream: false,
+    })
+    setOpenDialog("delete_kyc_team")
+  }
+
   const individualStatuses = users
     ? users.filter((u) => u.user.kycUserType === "USER")
     : []
@@ -183,15 +197,22 @@ const KYCStatusPresenter = ({
                 <p className="font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
                   Is something missing or incorrect?
                 </p>
-                <span>
-                  <TrackedLink
-                    eventName={"grant-address edit form"}
-                    href={"" /*TODO*/}
-                  >
-                    <p className="underline font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
-                      Edit form
-                    </p>
-                  </TrackedLink>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      openDeleteKYCTeamDialog()
+                    }
+                  }}
+                  onClick={openDeleteKYCTeamDialog}
+                  aria-label="Start KYC process over"
+                  className="cursor-pointer"
+                >
+                  <p className="underline font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
+                    Start over
+                  </p>
                 </span>
               </div>
             )}
