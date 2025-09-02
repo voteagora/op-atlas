@@ -71,13 +71,6 @@ jobs:
           cd app
           npx playwright install --with-deps
 
-      - name: Run database migrations
-        run: |
-          cd app
-          npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
-
       - name: Run Playwright tests
         run: |
           cd app
