@@ -27,9 +27,22 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:3000',
+    command: "pnpm dev",
+    url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 180000 : 120000, // 3 minutes for CI, 2 for local
+    env: {
+      NODE_ENV: "test",
+      ATLAS_TEST_MODE: "true",
+      USE_TEST_AUTH: "true",
+      MOCK_EXTERNAL_SERVICES: "true",
+      NEXT_PUBLIC_PRIVY_APP_ID: "test-app-id",
+      NEXT_PUBLIC_ATLAS_TEST_MODE: "true",
+      NEXT_PUBLIC_USE_TEST_AUTH: "true",
+      PRIVY_APP_ID: "test-app-id",
+      PRIVY_APP_SECRET: "test-app-secret",
+      NEXTAUTH_SECRET: "test-nextauth-secret",
+      NEXTAUTH_URL: "http://localhost:3000",
+    },
   },
 })
