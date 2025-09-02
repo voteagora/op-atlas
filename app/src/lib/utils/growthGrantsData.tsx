@@ -20,62 +20,54 @@ export const growthGrantsData: MissionData = {
     "For apps that have already deployed, looking to boost their TVL.",
   details: [
     <p key="details-1">
-      Growth Grants are for Superchain apps that have already launched and are
-      looking to scale their impact inline with the{" "}
+      Growth Grants support Superchain apps that have already launched and are
+      ready to scale their impact in alignment with the{" "}
       <ExternalLink
         href="https://gov.optimism.io/t/season-8-intent/10009"
         className="underline"
       >
         Collective Intent
       </ExternalLink>
-      . Projects submit a plan for growth, methods for measuring success, and
-      their desired capital allocation to execute their plan.
+      . Applicants are expected to submit a growth plan, outline how success
+      will be measured, and specify the capital needed to execute it.
     </p>,
     <p key="details-2">
       For Season 8, growth plans should target one following success metrics:
       <ul className="list-disc pl-4 space-y-2 text-base text-secondary-foreground">
         <li className="mt-4">
-          <span>Total Value Locked (TVL) - </span>
+          <span>Total Value Locked (TVL): </span>
           <span className="text-foreground">
-            TVL represents supply for onchain economic activity
+            A key measure of supply and economic activity onchain
           </span>
         </li>
         <li>
-          <span>Transaction Fees - </span>
+          <span>Transaction Fees: </span>
           <span className="text-foreground">
-            measure demand for transacting and willingness to pay
+            A signal of user demand and willingness to pay for onchain services
           </span>
         </li>
       </ul>
     </p>,
+    <p key="details-3">
+      Projects that are a good fit often focus on expanding Superchain utility
+      through interoperability. This might include making assets in the Interop
+      Set{" "}
+      <ExternalLink
+        href="https://specs.optimism.io/interop/overview.html"
+        className="underline"
+      >
+        interop-ready
+      </ExternalLink>
+      . Building upgrades that increase interop-enabled TVL, or shipping
+      features that drive cross-chain transactions.
+    </p>,
+    <p key="details-4">
+      Other eligible initiatives include tools that help track adoption, support
+      conversions to interop-compatible formats, or create stronger incentives
+      for ecosystem usage.
+    </p>,
   ],
   season: "8",
-  subDetails: (
-    <div>
-      <div className="">
-        <p className="text-secondary-foreground mb-4">
-          <span className="">Eligible projects look like:</span>
-        </p>
-        <ul className="list-disc pl-4 space-y-2 text-base text-secondary-foreground">
-          <li>
-            Making assets in the Interop Set{" "}
-            <ExternalLink
-              href="https://specs.optimism.io/interop/overview.html"
-              className="underline"
-            >
-              interop-ready
-            </ExternalLink>
-          </li>
-          <li>Upgrades or integrations that increase interop TVL</li>
-          <li>
-            Applications or features that generate interop-enabled transactions
-          </li>
-          <li>Moving TVL into interop-compatible formats</li>
-          <li>Tooling that tracks or increases adoption</li>
-        </ul>
-      </div>
-    </div>
-  ),
   callout: [
     <GrantInfoCallout
       key="season-budget"
