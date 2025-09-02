@@ -22,6 +22,7 @@
     "export:mailchimp": "tsx src/scripts/mailchimp-export.ts",
     "rewards": "tsx src/scripts/rewards.ts",
     "kyc": "tsx src/scripts/kyc.ts",
+    "create:kyc-users": "tsx src/scripts/create-kyc-users.ts",
     "revoke:citizenship": "tsx src/scripts/revoke-citizenship.ts",
     "prepare": "husky",
     "studio": "prisma studio",
