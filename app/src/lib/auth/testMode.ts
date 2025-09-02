@@ -119,13 +119,17 @@ export const createTestUser = (overrides: Partial<TestUser> = {}): TestUser => {
     }
   }
 
+  // Use a more unique identifier to avoid collisions
   const timestamp = Date.now()
+  const randomSuffix = Math.random().toString(36).substring(2, 8)
+  const uniqueId = `${timestamp}-${randomSuffix}`
+  
   return {
-    id: `test-user-${timestamp}`,
-    privyDid: `test-privy-did-${timestamp}`,
-    farcasterId: timestamp.toString(),
+    id: `test-user-${uniqueId}`,
+    privyDid: `test-privy-did-${uniqueId}`,
+    farcasterId: uniqueId,
     name: "Test User",
-    email: `test-${timestamp}@example.com`,
+    email: `test-${uniqueId}@example.com`,
     ...overrides,
   }
 }
