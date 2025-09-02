@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { cache } from "react"
 
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
@@ -8,6 +9,9 @@ import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 import { getProjectMetrics } from "@/lib/oso"
 import { getProjectDeployedChains } from "@/lib/oso/utils"
+
+// Cache the expensive getPublicProjectAction call to prevent duplicates
+const cachedGetPublicProject = cache(getPublicProjectAction)
 
 import {
   Contributors,
@@ -32,7 +36,11 @@ export async function generateMetadata({
     projectId: string
   }
 }): Promise<Metadata> {
-  const project = await getPublicProjectAction({ projectId: params.projectId })
+  const metadataStartTime = Date.now()
+  console.log(`[PERF] Starting generateMetadata for project: ${params.projectId}`)
+  
+  const project = await cachedGetPublicProject({ projectId: params.projectId })
+  console.log(`[PERF] generateMetadata getPublicProjectAction took: ${Date.now() - metadataStartTime}ms`)
 
   const title = `Project: ${project?.name ?? ""} - OP Atlas`
   const description = project?.description ?? ""
@@ -50,21 +58,33 @@ export async function generateMetadata({
 
 export default async function Page({ params }: PageProps) {
   const { projectId } = params
+  const startTime = Date.now()
+  console.log(`[PERF] Starting project page load for: ${projectId}`)
 
+  const parallelStartTime = Date.now()
   const [session, publicProject, projectMetrics] = await Promise.all([
     auth(),
-    getPublicProjectAction({ projectId }),
+    cachedGetPublicProject({ projectId }),
     getProjectMetrics(projectId),
   ])
+  
+  const userId = session?.user?.id
+  
+  // Run membership check in parallel if user is authenticated
+  const membershipStartTime = Date.now()
+  const membershipResult = userId ? await verifyMembership(projectId, userId) : null
+  const isMember = !!userId && !membershipResult?.error
+  
+  console.log(`[PERF] Parallel queries completed in: ${Date.now() - parallelStartTime}ms`)
+  console.log(`[PERF] - auth(): ${session ? 'authenticated' : 'not authenticated'}`)
+  console.log(`[PERF] - getPublicProjectAction(): ${publicProject ? 'found' : 'not found'}`)
+  console.log(`[PERF] - getProjectMetrics(): ${projectMetrics ? 'loaded' : 'failed'}`)
+  console.log(`[PERF] verifyMembership took: ${Date.now() - membershipStartTime}ms, result: ${isMember}`)
 
   if (!publicProject) {
+    console.log(`[PERF] Project not found, total time: ${Date.now() - startTime}ms`)
     return notFound()
   }
-
-  const userId = session?.user?.id
-
-  const isMember =
-    !!userId && !(await verifyMembership(projectId, userId))?.error
 
   const {
     eligibility,
@@ -107,6 +127,12 @@ export default async function Page({ params }: PageProps) {
     ).length > 0
 
   const enrolledInMission = enrolledInDevTooling || enrolledInOnchainBuilders
+
+  console.log(`[PERF] Data processing completed, total server time: ${Date.now() - startTime}ms`)
+  console.log(`[PERF] - deployedOn chains: ${deployedOn.length}`)
+  console.log(`[PERF] - team size: ${publicProject.team?.length || 0}`)
+  console.log(`[PERF] - applications: ${publicProject.applications?.length || 0}`)
+  console.log(`[PERF] - enrolledInMission: ${enrolledInMission}`)
 
   return (
     <div className="w-full h-full mt-6 pb-12">

@@ -21,6 +21,7 @@ import {
   getProjectsForKycTeam,
   getProjectTeam,
   getPublicProject,
+  getPublicProjectOptimized,
   getPublishedProjectContracts,
   getUserAdminProjectsWithDetail,
   getUserApplications,
@@ -566,7 +567,7 @@ export const getPublicProjectAction = async ({
 }: {
   projectId: string
 }) => {
-  const rawProject = await getPublicProject(projectId)
+  const rawProject = await getPublicProjectOptimized(projectId)
   if (!rawProject) return null
 
   return rawProject

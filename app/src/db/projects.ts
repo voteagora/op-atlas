@@ -1973,24 +1973,123 @@ export async function getProjectsForKycTeam({
   })
 }
 
-export const getPublicProject = cache(async (projectId: string) => {
-  return prisma.project.findFirst({
+// Alternative optimized version that breaks down queries to identify bottlenecks
+export const getPublicProjectOptimized = cache(async (projectId: string) => {
+  const queryStartTime = Date.now()
+  console.log(`[PERF] Starting getPublicProjectOptimized for: ${projectId}`)
+  
+  // 1. Get basic project data first (fastest)
+  const basicStartTime = Date.now()
+  const project = await prisma.project.findFirst({
     where: { id: projectId },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      category: true,
+      thumbnailUrl: true,
+      bannerUrl: true,
+      website: true,
+      farcaster: true,
+      twitter: true,
+      mirror: true,
+    },
+  })
+  console.log(`[PERF] - Basic project: ${Date.now() - basicStartTime}ms`)
+  
+  if (!project) {
+    console.log(`[PERF] Project not found, total: ${Date.now() - queryStartTime}ms`)
+    return null
+  }
+  
+  // 2. Get related data in parallel (identify slow queries)
+  const relatedStartTime = Date.now()
+  const [applications, contracts, organization, team] = await Promise.all([
+    // Applications
+    prisma.application.findMany({
+      where: { projectId, roundId: { in: ["7", "8"] } },
+      select: { roundId: true },
+    }),
+    // Contracts  
+    prisma.projectContract.findMany({
+      where: { projectId },
+      select: { contractAddress: true, chainId: true },
+    }),
+    // Organization
+    prisma.projectOrganization.findFirst({
+      where: { projectId, deletedAt: null },
+      select: {
+        organization: {
+          select: { id: true, name: true, avatarUrl: true },
+        },
+      },
+    }),
+    // Team
+    prisma.userProjects.findMany({
+      where: { projectId, deletedAt: null },
+      orderBy: { createdAt: "asc" },
+      select: {
+        user: {
+          select: { id: true, name: true, username: true, imageUrl: true },
+        },
+      },
+    }),
+  ])
+  console.log(`[PERF] - Related queries: ${Date.now() - relatedStartTime}ms`)
+  console.log(`[PERF] - Applications: ${applications.length}`)
+  console.log(`[PERF] - Contracts: ${contracts.length}`)
+  console.log(`[PERF] - Organization: ${organization ? 'found' : 'none'}`)
+  console.log(`[PERF] - Team: ${team.length}`)
+  
+  const result = {
+    ...project,
+    applications,
+    contracts,
+    organization,
+    team,
+  }
+  
+  console.log(`[PERF] getPublicProjectOptimized completed in: ${Date.now() - queryStartTime}ms`)
+  return result
+})
+
+export const getPublicProject = cache(async (projectId: string) => {
+  const queryStartTime = Date.now()
+  console.log(`[PERF] Starting getPublicProject query for: ${projectId}`)
+  
+  const result = await prisma.project.findFirst({
+    where: { id: projectId },
+    select: {
+      // Basic project fields used in the page
+      id: true,
+      name: true,
+      description: true,
+      category: true,
+      thumbnailUrl: true,
+      bannerUrl: true,
+      website: true,
+      farcaster: true,
+      twitter: true,
+      mirror: true,
+      // Only applications for rounds 7,8 (used for enrollment checks)
       applications: {
         where: {
           roundId: {
             in: ["7", "8"],
           },
         },
+        select: {
+          roundId: true,
+        },
       },
-      links: true,
-      contracts: true,
-      repos: true,
-      funding: true,
-      rewards: {
-        select: { roundId: true, amount: true },
+      // Contracts needed for deployedOn calculation
+      contracts: {
+        select: {
+          contractAddress: true,
+          chainId: true,
+        },
       },
+      // Organization data (only what's needed)
       organization: {
         select: {
           organization: {
@@ -1998,19 +2097,29 @@ export const getPublicProject = cache(async (projectId: string) => {
               id: true,
               name: true,
               avatarUrl: true,
-              team: {
-                select: { user: true },
-              },
             },
           },
         },
       },
+      // Team data (only what's needed for contributors)
       team: {
         orderBy: { createdAt: "asc" },
-        select: { user: true },
+        select: { 
+          user: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              imageUrl: true,
+            },
+          },
+        },
       },
     },
   })
+  
+  console.log(`[PERF] getPublicProject query completed in: ${Date.now() - queryStartTime}ms`)
+  return result
 })
 
 export async function getProjectsOSO(projectId: string) {
