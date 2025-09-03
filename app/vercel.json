@@ -24,10 +24,5 @@
       "path": "/api/cron/expire-claims",
       "schedule": "15 0 * * *"
     }
-  ],
-  "functions": {
-    "api/cron/persona": {
-      "maxDuration": 800
-    }
-  }
+  ]
 }
