@@ -193,11 +193,8 @@ export async function updateGrantEligibilityForm(
       })
     })
 
-    if (form.projectId) {
-      revalidatePath(`/projects/${form.projectId}/grant-eligibility/${formId}`)
-    } else if (form.organizationId) {
-      revalidatePath(`/profile/organizations/${form.organizationId}/grant-eligibility/${formId}`)
-    }
+    // Revalidate canonical wizard route
+    revalidatePath(`/grant-eligibility/${formId}`)
 
     return { form }
   } catch (error) {
@@ -448,14 +445,13 @@ export async function submitGrantEligibilityForm(params: {
 
     const emailResults = await Promise.all(emailPromises)
 
-    // Revalidate paths
+    // Revalidate related pages and canonical wizard route
     if (existingForm.projectId) {
       revalidatePath(`/projects/${existingForm.projectId}/grant-address`)
-      revalidatePath(`/projects/${existingForm.projectId}/grant-eligibility/${formId}`)
     } else if (existingForm.organizationId) {
       revalidatePath(`/profile/organizations/${existingForm.organizationId}/grant-address`)
-      revalidatePath(`/profile/organizations/${existingForm.organizationId}/grant-eligibility/${formId}`)
     }
+    revalidatePath(`/grant-eligibility/${formId}`)
 
     const failedEmails = emailResults.filter((r) => !r.success)
     if (failedEmails.length > 0) {
