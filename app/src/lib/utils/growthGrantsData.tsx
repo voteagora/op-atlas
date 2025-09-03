@@ -112,7 +112,7 @@ export const growthGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project aligns with Interop TVL or Interop TX fees
+          My project aligns with TVL or tx fees
         </p>
       ),
       type: "alignsWithInteropMetrics",
@@ -125,7 +125,7 @@ export const growthGrantsData: MissionData = {
       description:
         "Inform the council of your plan for growth, including milestones and KPIs.",
       subDetails: "Visit site",
-      subDetailsLink: "https://app.opgrants.io/programs/959/apply",
+      subDetailsLink: "https://app.opgrants.io/",
     },
     {
       number: 2,
