@@ -297,6 +297,10 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     trustedDevelopersCount,
     topProjects,
     tvlResults,
+    activeAddresses,
+    gasFees,
+    transactions,
+    tvl,
   ] = await Promise.all([
     getProjectEligibility(projectId),
     getProjectMetricsFromDB(projectId),
@@ -305,9 +309,6 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getTrustedDevelopersCount(projectId),
     getTopProjects(projectId),
     getTvl(projectId),
-  ])
-
-  const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
     queryMetrics([osoId], "activeAddresses"),
     queryMetrics([osoId], "gasFees"),
     queryMetrics([osoId], "transactions"),
