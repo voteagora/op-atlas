@@ -14,6 +14,10 @@ env:
   USE_TEST_AUTH: true
   MOCK_EXTERNAL_SERVICES: true
   
+  # Client-side test mode variables (needed for React components)
+  NEXT_PUBLIC_ATLAS_TEST_MODE: true
+  NEXT_PUBLIC_USE_TEST_AUTH: true
+  
   # Test database
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
   
@@ -27,8 +31,16 @@ env:
   # Disable external services in test mode
   NEXT_PUBLIC_AGORA_API_URL: http://localhost:3000/api/mock
   NEXT_PUBLIC_VERCEL_URL: http://localhost:3000
+  NEXT_PUBLIC_APP_DOMAIN: localhost:3000
+  NEXT_PUBLIC_VERCEL_ENV: development
+  
+  # Additional test environment variables
   MAILCHIMP_API_KEY: test-mailchimp-key
   MAILCHIMP_SERVER_PREFIX: test
+  NEXT_PUBLIC_MIXPANEL_TOKEN: test-mixpanel-token
+  NEXT_PUBLIC_POSTHOG_KEY: test-posthog-key
+  NEXT_PUBLIC_SAFE_API_KEY: test-safe-api-key
+  NEXT_PUBLIC_ENV: development
 
 jobs:
   test:
@@ -75,6 +87,13 @@ jobs:
         run: |
           cd app
           npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
+
+      - name: Wait for database to be ready
+        run: |
+          cd app
+          npx prisma db push
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
 
