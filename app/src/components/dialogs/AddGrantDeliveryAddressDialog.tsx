@@ -32,10 +32,14 @@ export function AddGrantDeliveryAddressDialog({
   open,
   onOpenChange,
 }: DialogProps<object>) {
-  const { organizationId, projectId } = useParams()
+  const params = useParams()
   const queryClient = useQueryClient()
   const { data: session } = useSession()
   const { data: grantDeliveryData } = useAppDialogs()
+  
+  // Get IDs from either URL params or dialog data (for grant eligibility flow)
+  const organizationId = params.organizationId || grantDeliveryData?.organizationId
+  const projectId = params.projectId || grantDeliveryData?.projectId
 
   const { user } = useUser({ id: session?.user?.id, enabled: true })
   const username = useUsername(user)
