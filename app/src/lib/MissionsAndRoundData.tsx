@@ -37,7 +37,6 @@ export type FundingRoundData = {
   number: number
   name: string
   details: string[] | React.ReactNode[]
-  subDetails?: React.ReactNode
   status: "open" | "upcoming" | "past" | "ongoing"
   link?: string
   resultsLink?: string
