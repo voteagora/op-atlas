@@ -52,12 +52,9 @@ export const growthGrantsData: MissionData = {
         interop-ready
       </ExternalLink>
       , building upgrades that increase TVL, or shipping features that drive
-      cross-chain transactions.
-    </p>,
-    <p key="details-4">
-      Other eligible projects may include tools that help track adoption,
-      support conversions to interop formats, or create stronger incentives for
-      ecosystem usage.
+      cross-chain transactions. Other eligible projects may include tools that
+      help track adoption, support conversions to interop formats, or create
+      stronger incentives for ecosystem usage.
     </p>,
   ],
   season: "8",
