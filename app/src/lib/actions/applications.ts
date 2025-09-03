@@ -12,7 +12,6 @@ import {
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
 
-import { ZERO_BYTES32 } from "../constants"
 import { createApplicationAttestation } from "../eas/serverOnly"
 import { CategoryWithImpact } from "../types"
 import { getProjectStatus } from "../utils"
@@ -71,7 +70,6 @@ const createProjectApplication = async (
   const userId = session?.user?.id
   if (!userId) {
     return {
-      applications: [],
       error: "Unauthorized",
     }
   }
@@ -126,7 +124,7 @@ const createProjectApplication = async (
 
   // Ensure a real snapshot exists; applications must reference a metadata snapshot
   if (!latestSnapshot?.attestationId) {
-    return { error: "Project has no snapshot", applications: [] as any }
+    return { error: "Project has no snapshot" }
   }
 
   const application = await publishAndSaveApplication({
