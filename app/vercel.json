@@ -4,7 +4,10 @@
       "path": "/api/cron/kyc",
       "schedule": "0 * * * *"
     },
-
+    {
+      "path": "/api/cron/persona",
+      "schedule": "0 * * * *"
+    },
     {
       "path": "/api/cron/tag-contacts",
       "schedule": "0 * * * *"
