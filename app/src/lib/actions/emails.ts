@@ -152,7 +152,7 @@ function getKYCEmailTemplate(kycUser: KYCUser, kycLink: string): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
-        <img src="https://atlas.optimism.io/assets/images/sunny_default.svg" alt="Sunny Logo" style="width: 120px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
     <h1 style="color: #333; text-align: center; margin-top: 0;">Retro Funding: Complete KYC to Receive Your Rewards</h1>
@@ -173,7 +173,7 @@ function getKYCEmailTemplate(kycUser: KYCUser, kycLink: string): string {
     <p>Best regards,<br>The OP Atlas Team</p>
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.svg" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
     </div>
 </div>
     `
