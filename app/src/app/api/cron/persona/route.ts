@@ -6,7 +6,7 @@ import {
   getAndProcessPersonaInquiries,
 } from "@/lib/persona"
 
-export const maxDuration = 900
+export const maxDuration = 800
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
@@ -25,5 +25,5 @@ async function handlePersonaCron(request: NextRequest) {
 
 export const GET = withCronObservability(handlePersonaCron, {
   monitorSlug: MONITOR_SLUG,
-  requireAuth: false,
+  requireAuth: true,
 })
