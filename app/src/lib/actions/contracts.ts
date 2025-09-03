@@ -167,7 +167,21 @@ export const verifyContract = async ({
       if (tx.to === null) {
         // proceed without trace
       } else {
-        return { error: "Transaction trace not found" }
+        // Additional fallback: Universal CREATE2 Factory without trace
+        const UNIVERSAL_CREATE2_FACTORY =
+          "0x4e59b44847b379578588920ca78fbf26c0b4956c"
+        if (
+          isAddressEqual(
+            tx.to,
+            getAddress(UNIVERSAL_CREATE2_FACTORY as Address),
+          ) &&
+          sentByDeployer &&
+          (tx.status as unknown as string) === "success"
+        ) {
+          // proceed without trace
+        } else {
+          return { error: "Transaction trace not found" }
+        }
       }
     } else {
       const calls = (trace as any).calls as TraceCall[]
