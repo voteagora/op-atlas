@@ -28,43 +28,36 @@ export const growthGrantsData: MissionData = {
       >
         Collective Intent
       </ExternalLink>
-      . Applicants are expected to submit a growth plan, outline how success
-      will be measured, and specify the capital needed to execute it.
+      . Applicants submit a plan for growth, methods for measuring success, and
+      their desired capital allocation to execute their plan.
     </p>,
     <p key="details-2">
-      For Season 8, growth plans should target one following success metrics:
+      For Season 8, plans should target at least one of the following success
+      metrics:
       <ul className="list-disc pl-4 space-y-2 text-base text-secondary-foreground">
         <li className="mt-4">
-          <span>Total Value Locked (TVL): </span>
-          <span className="text-foreground">
-            A key measure of supply and economic activity onchain
-          </span>
+          <span>Superchain TVL</span>
         </li>
         <li>
-          <span>Transaction Fees: </span>
-          <span className="text-foreground">
-            A signal of user demand and willingness to pay for onchain services
-          </span>
+          <span>Superchain Transaction Fees</span>
         </li>
       </ul>
     </p>,
     <p key="details-3">
-      Projects that are a good fit often focus on expanding Superchain utility
-      through interoperability. This might include making assets in the Interop
-      Set{" "}
+      Projects that are a good fit might focus on making Superchain assets{" "}
       <ExternalLink
         href="https://specs.optimism.io/interop/overview.html"
         className="underline"
       >
         interop-ready
       </ExternalLink>
-      . Building upgrades that increase interop-enabled TVL, or shipping
-      features that drive cross-chain transactions.
+      , building upgrades that increase TVL, or shipping features that drive
+      cross-chain transactions.
     </p>,
     <p key="details-4">
-      Other eligible initiatives include tools that help track adoption, support
-      conversions to interop-compatible formats, or create stronger incentives
-      for ecosystem usage.
+      Other eligible projects may include tools that help track adoption,
+      support conversions to interop formats, or create stronger incentives for
+      ecosystem usage.
     </p>,
   ],
   season: "8",
