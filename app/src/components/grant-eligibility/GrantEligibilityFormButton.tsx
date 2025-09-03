@@ -25,13 +25,9 @@ export default function GrantEligibilityFormButton({
 
   const handleButtonClick = () => {
     startTransition(async () => {
-      const basePath = projectId 
-        ? `/projects/${projectId}`
-        : `/profile/organizations/${organizationId}`
-
       // If we have an existing form, just navigate to it
       if (existingForm) {
-        router.push(`${basePath}/grant-eligibility/${existingForm.id}`)
+        router.push(`/grant-eligibility/${existingForm.id}`)
         return
       }
 
@@ -42,14 +38,17 @@ export default function GrantEligibilityFormButton({
           organizationId,
         })
 
-        if (result.error) {
+        if ("error" in result && result.error) {
           toast.error(result.error)
           return
         }
 
-        if (result.form) {
-          router.push(`${basePath}/grant-eligibility/${result.form.id}`)
+        if ("form" in result && result.form) {
+          router.push(`/grant-eligibility/${result.form.id}`)
+          return
         }
+
+        toast.error("Unexpected response while creating form")
       } catch (error) {
         console.error("Error opening grant eligibility form:", error)
         toast.error("Failed to open form. Please try again.")
