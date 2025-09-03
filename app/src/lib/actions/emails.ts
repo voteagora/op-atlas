@@ -7,18 +7,9 @@ import { createPersonaInquiryLink } from "./persona"
 
 const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!)
 
-const testingBaseUrl =
+// TODO change this to "https://atlas.optimism.io"
+const baseUrlForAssets =
   "https://op-atlas-git-kyc-1b-testing-voteagora.vercel.app"
-
-const prodBaseUrl = "https://atlas.optimism.io"
-
-// Determine if we are in production based on Vercel env (preferred) or NODE_ENV fallback
-const isProd =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "production" ||
-  process.env.VERCEL_ENV === "production" ||
-  process.env.NODE_ENV === "production"
-
-const baseUrlForAssets = isProd ? prodBaseUrl : testingBaseUrl
 
 export interface EmailData {
   to: string
