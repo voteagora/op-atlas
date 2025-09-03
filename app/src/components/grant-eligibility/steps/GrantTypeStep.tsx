@@ -123,10 +123,10 @@ export default function GrantTypeStep() {
       {/* Introduction */}
       <div className="space-y-4">
         <p className="font-semibold text-xl">
-          In this form, you'll submit a wallet address for receiving grants from
-          Optimism. You'll also report any legal entities and associated parties
-          who will act as beneficiaries or controllers of the grants you may
-          receive.
+          In this form, you&#39;ll submit a wallet address for receiving grants
+          from Optimism. You&#39;ll also report any legal entities and
+          associated parties who will act as beneficiaries or controllers of the
+          grants you may receive.
         </p>
         <p className="text-base text-secondary-foreground">
           Failure to fill out this form accurately may result in the revocation
@@ -194,9 +194,9 @@ export default function GrantTypeStep() {
         </p>
         <p className="text-base text-secondary-foreground">
           Your own information and the information of each person you identify
-          during this process is subject to the Optimism Foundation's Data
+          during this process is subject to the Optimism Foundation&#39;s Data
           Privacy Notice, which you can read{" "}
-          <a href="#" className="text-blue-600 hover:underline">
+          <a href="/todo" className="text-blue-600 hover:underline">
             here
           </a>
           .
@@ -252,8 +252,8 @@ export default function GrantTypeStep() {
           Which type of Optimism Grant were you awarded?
         </h3>
         <p className="text-base text-secondary-foreground">
-          If you're not sure, please check the original award email or ask your
-          point of contact at the Foundation.
+          If you&#39;re not sure, please check the original award email or ask
+          your point of contact at the Foundation.
         </p>
 
         <Select
