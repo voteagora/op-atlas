@@ -5,8 +5,10 @@ import { useProject } from "@/hooks/db/useProject"
 
 const ConnectedOrganizationProjects = ({
   organizationId,
+  kycTeamId,
 }: {
   organizationId: string
+  kycTeamId?: string
 }) => {
   const { data: organization, isLoading } = useOrganization({
     id: organizationId,
@@ -14,7 +16,11 @@ const ConnectedOrganizationProjects = ({
 
   console.log({ organization })
   return (
-    <KYCSubSection title="Projects">
+    <KYCSubSection
+      title="Projects"
+      kycTeamId={kycTeamId}
+      organizationId={organizationId}
+    >
       <div className="space-y-2">
         {isLoading ? (
           <Skeleton className="h-5 w-32" />
