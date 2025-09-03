@@ -1,7 +1,6 @@
 "use client"
 
 import { useUser } from "@privy-io/react-auth"
-import { isTestMode } from "@/lib/auth/testMode"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import mixpanel from "mixpanel-browser"
@@ -228,8 +227,7 @@ export function AnalyticsProvider({ children }: PropsWithChildren) {
   const previousUserId = usePrevious(session?.user?.farcasterId)
   const pathname = usePathname()
   
-  // Don't use Privy hooks in test mode
-  const privyUser = isTestMode() ? { user: null } : useUser()
+  const privyUser = useUser()
 
   const basePropsRef = useRef<BaseEventProps>({})
 
