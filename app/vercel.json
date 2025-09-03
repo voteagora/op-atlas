@@ -26,22 +26,22 @@
     }
   ],
   "functions": {
-    "api/cron/kyc": {
+    "src/app/api/cron/kyc": {
       "maxDuration": 800
     },
-    "api/cron/persona": {
+    "src/app/api/cron/persona": {
       "maxDuration": 800
     },
-    "api/cron/superfluid": {
+    "src/app/api/cron/superfluid": {
       "maxDuration": 800
     },
-    "api/cron/expire-claims": {
+    "src/app/api/cron/expire-claims": {
       "maxDuration": 800
     },
-    "api/cron/tag-contacts": {
+    "src/app/api/cron/tag-contacts": {
       "maxDuration": 800
     },
-    "api/cron/oso-map-projects": {
+    "src/app/api/cron/oso-map-projects": {
       "maxDuration": 800
     }
   }
