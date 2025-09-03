@@ -133,7 +133,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
           Are you ready to submit this form?
         </h2>
         <p className="text-base text-secondary-foreground">
-          Here's what you've told us:
+          Here&#39;s what you&#39;ve told us:
         </p>
       </div>
 
@@ -141,8 +141,14 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
       <div className="space-y-6">
         {/* Grant Type */}
         <div>
-          <label className="block text-sm font-medium mb-2">Grant type</label>
+          <label
+            htmlFor="grant-type"
+            className="block text-sm font-medium mb-2"
+          >
+            Grant type
+          </label>
           <Input
+            id="grant-type"
             type="text"
             value={form.grantType ? GRANT_TYPE_LABELS[form.grantType] : ""}
             readOnly
@@ -152,10 +158,14 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
 
         {/* Grant Delivery Address */}
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label
+            htmlFor="grant-delivery-address"
+            className="block text-sm font-medium mb-2"
+          >
             Grant delivery address
           </label>
           <Input
+            id="grant-delivery-address"
             type="text"
             value={form.walletAddress || ""}
             readOnly
@@ -166,9 +176,9 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         {/* Responsible Individuals and Signers */}
         {signers.length > 0 && (
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <p className="block text-sm font-medium mb-2">
               Responsible individuals and signers
-            </label>
+            </p>
             <div className="space-y-2">
               {signers.map((signer, index) => (
                 <Input
@@ -186,9 +196,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         {/* Legal Entities */}
         {entities.length > 0 && (
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Legal entities
-            </label>
+            <p className="block text-sm font-medium mb-2">Legal entities</p>
             <div className="space-y-2">
               {entities.map((entity, index) => (
                 <Input
@@ -252,7 +260,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               That no person or legal entity associated with your grant
               application is a resident of, or located within, any jurisdiction
               sanctioned by the United Nations, European Union, any EU nation,
-              His Majesty's (U.K.) Treasury, or the U.S. Secretary of State.
+              His Majesty&#39;s (U.K.) Treasury, or the U.S. Secretary of State.
             </label>
           </div>
 
@@ -318,9 +326,9 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               className="text-sm font-normal leading-tight cursor-pointer"
             >
               That no person or legal entity is barred from participating in the
-              Optimism Foundation's grant programs under any Terms & Conditions
-              (to which you agreed during the grant application process), or
-              under applicable law.
+              Optimism Foundation&#39;s grant programs under any Terms &
+              Conditions (to which you agreed during the grant application
+              process), or under applicable law.
             </label>
           </div>
 
