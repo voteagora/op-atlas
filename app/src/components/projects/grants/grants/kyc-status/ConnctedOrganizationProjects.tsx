@@ -2,6 +2,7 @@ import KYCSubSection from "@/components/projects/grants/grants/kyc-status/KYCSub
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
 import { useProject } from "@/hooks/db/useProject"
+import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
 
 const ConnectedOrganizationProjects = ({
   organizationId,
@@ -10,11 +11,12 @@ const ConnectedOrganizationProjects = ({
   organizationId: string
   kycTeamId?: string
 }) => {
-  const { data: organization, isLoading } = useOrganization({
-    id: organizationId,
+  const { data: kycTeamProjects, isLoading } = useOrganizationKycTeams({
+    organizationId,
   })
+  const kycTeam = kycTeamProjects?.[0]
 
-  console.log({ organization })
+  console.log({ kycTeamProjects, kycTeam, ln: kycTeam?.team.projects.length })
   return (
     <KYCSubSection
       title="Projects"
@@ -24,12 +26,12 @@ const ConnectedOrganizationProjects = ({
       <div className="space-y-2">
         {isLoading ? (
           <Skeleton className="h-5 w-32" />
-        ) : organization?.projects.length === 0 ? (
-          <div>No projects found</div>
-        ) : (
-          organization?.projects.map((project) => (
-            <ProjectRow key={project.id} projectId={project.projectId} />
+        ) : kycTeam && kycTeam?.team.projects.length > 0 ? (
+          kycTeam.team.projects.map((project) => (
+            <ProjectRow key={project.id} projectId={project.id} />
           ))
+        ) : (
+          <div>No projects selected</div>
         )}
       </div>
     </KYCSubSection>
