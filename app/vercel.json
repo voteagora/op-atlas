@@ -6,7 +6,9 @@
     },
     {
       "path": "/api/cron/persona",
-      "schedule": "0 * * * *"
+      "schedule": "0 * * * *",
+      "maxDuration": 800
+
     },
     {
       "path": "/api/cron/tag-contacts",
