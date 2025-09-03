@@ -94,7 +94,7 @@ export const growthGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project aligns with Interop TVL or Interop TX fees
+          My project aligns with TVL or tx fees
         </p>
       ),
       type: "required",
