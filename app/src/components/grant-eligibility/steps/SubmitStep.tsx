@@ -39,13 +39,15 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
   const [isPending, startTransition] = useTransition()
 
   // Parse data from form
-  const signers: Signer[] = form.data && typeof form.data === "object" && "signers" in form.data
-    ? ((form.data as any).signers || [])
-    : []
-  
-  const entities: Entity[] = form.data && typeof form.data === "object" && "entities" in form.data
-    ? ((form.data as any).entities || [])
-    : []
+  const signers: Signer[] =
+    form.data && typeof form.data === "object" && "signers" in form.data
+      ? (form.data as any).signers || []
+      : []
+
+  const entities: Entity[] =
+    form.data && typeof form.data === "object" && "entities" in form.data
+      ? (form.data as any).entities || []
+      : []
 
   // Attestation checkboxes state
   const [attestations, setAttestations] = useState({
@@ -57,7 +59,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
     submissionAuthorized: false,
   })
 
-  const allAttestationsChecked = Object.values(attestations).every(v => v)
+  const allAttestationsChecked = Object.values(attestations).every((v) => v)
 
   const handleSubmit = () => {
     if (!allAttestationsChecked) {
@@ -92,25 +94,27 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
   }
 
   useEffect(() => {
-    setStepControls({ 
-      enabled: allAttestationsChecked && !isPending, 
-      onNext: handleSubmit, 
+    setStepControls({
+      enabled: allAttestationsChecked && !isPending,
+      onNext: handleSubmit,
       nextLabel: isPending ? "Submitting" : "Submit",
-      isLoading: isPending
+      isLoading: isPending,
     })
 
     return () => {
-      setStepControls({ enabled: true, onNext: undefined, nextLabel: undefined, isLoading: false })
+      setStepControls({
+        enabled: true,
+        onNext: undefined,
+        nextLabel: undefined,
+        isLoading: false,
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attestations, isPending])
 
   // Format signer display
   const formatSignerDisplay = (signer: Signer) => {
-    const parts = [
-      `${signer.firstName} ${signer.lastName}`,
-      signer.email,
-    ]
+    const parts = [`${signer.firstName} ${signer.lastName}`, signer.email]
     if (signer.company) {
       parts.push(signer.company)
     }
@@ -125,7 +129,9 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
   return (
     <div className="space-y-8 w-full">
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Are you ready to submit this form?</h2>
+        <h2 className="text-xl font-semibold">
+          Are you ready to submit this form?
+        </h2>
         <p className="text-base text-secondary-foreground">
           Here's what you've told us:
         </p>
@@ -146,7 +152,9 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
 
         {/* Grant Delivery Address */}
         <div>
-          <label className="block text-sm font-medium mb-2">Grant delivery address</label>
+          <label className="block text-sm font-medium mb-2">
+            Grant delivery address
+          </label>
           <Input
             type="text"
             value={form.walletAddress || ""}
@@ -158,7 +166,9 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         {/* Responsible Individuals and Signers */}
         {signers.length > 0 && (
           <div>
-            <label className="block text-sm font-medium mb-2">Responsible individuals and signers</label>
+            <label className="block text-sm font-medium mb-2">
+              Responsible individuals and signers
+            </label>
             <div className="space-y-2">
               {signers.map((signer, index) => (
                 <Input
@@ -176,7 +186,9 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         {/* Legal Entities */}
         {entities.length > 0 && (
           <div>
-            <label className="block text-sm font-medium mb-2">Legal entities</label>
+            <label className="block text-sm font-medium mb-2">
+              Legal entities
+            </label>
             <div className="space-y-2">
               {entities.map((entity, index) => (
                 <Input
@@ -195,7 +207,8 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
       {/* Attestations Section */}
       <div className="space-y-4 pt-6">
         <h3 className="text-lg font-semibold mb-8">
-          By submitting this form and selecting the below, you represent and warrant on behalf of yourself and your team or organization...
+          By submitting this form and selecting the below, you represent and
+          warrant on behalf of yourself and your team or organization...
         </h3>
 
         <div className="space-y-6 text-secondary-foreground">
@@ -204,7 +217,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               id="info-complete"
               checked={attestations.informationComplete}
               onCheckedChange={(checked) =>
-                setAttestations(prev => ({ ...prev, informationComplete: checked === true }))
+                setAttestations((prev) => ({
+                  ...prev,
+                  informationComplete: checked === true,
+                }))
               }
               disabled={isPending}
             />
@@ -212,7 +228,8 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               htmlFor="info-complete"
               className="text-sm font-normal leading-tight cursor-pointer"
             >
-              That the information you provided in this form is complete and accurate.
+              That the information you provided in this form is complete and
+              accurate.
             </label>
           </div>
 
@@ -221,7 +238,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               id="no-sanctioned"
               checked={attestations.noSanctionedCountries}
               onCheckedChange={(checked) =>
-                setAttestations(prev => ({ ...prev, noSanctionedCountries: checked === true }))
+                setAttestations((prev) => ({
+                  ...prev,
+                  noSanctionedCountries: checked === true,
+                }))
               }
               disabled={isPending}
             />
@@ -229,7 +249,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               htmlFor="no-sanctioned"
               className="text-sm font-normal leading-tight cursor-pointer"
             >
-              That no person or legal entity associated with your grant application is a resident of, or located within, any jurisdiction sanctioned by the United Nations, European Union, any EU nation, His Majesty's (U.K.) Treasury, or the U.S. Secretary of State.
+              That no person or legal entity associated with your grant
+              application is a resident of, or located within, any jurisdiction
+              sanctioned by the United Nations, European Union, any EU nation,
+              His Majesty's (U.K.) Treasury, or the U.S. Secretary of State.
             </label>
           </div>
 
@@ -238,7 +261,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               id="no-prohibited"
               checked={attestations.noProhibitedRegions}
               onCheckedChange={(checked) =>
-                setAttestations(prev => ({ ...prev, noProhibitedRegions: checked === true }))
+                setAttestations((prev) => ({
+                  ...prev,
+                  noProhibitedRegions: checked === true,
+                }))
               }
               disabled={isPending}
             />
@@ -246,7 +272,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               htmlFor="no-prohibited"
               className="text-sm font-normal leading-tight cursor-pointer"
             >
-              That no person or legal entity associated with your grant application is a resident of, or located within Belarus, Cuba, Republic of Congo, Iran, North Korea, Russian Federation, Syria, the Crimea, Donetsk, and Luhansk regions of Ukraine, or Yemen.
+              That no person or legal entity associated with your grant
+              application is a resident of, or located within Belarus, Cuba,
+              Republic of Congo, Iran, North Korea, Russian Federation, Syria,
+              the Crimea, Donetsk, and Luhansk regions of Ukraine, or Yemen.
             </label>
           </div>
 
@@ -255,7 +284,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               id="no-sponsorship"
               checked={attestations.noGovernmentSponsorship}
               onCheckedChange={(checked) =>
-                setAttestations(prev => ({ ...prev, noGovernmentSponsorship: checked === true }))
+                setAttestations((prev) => ({
+                  ...prev,
+                  noGovernmentSponsorship: checked === true,
+                }))
               }
               disabled={isPending}
             />
@@ -263,7 +295,9 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               htmlFor="no-sponsorship"
               className="text-sm font-normal leading-tight cursor-pointer"
             >
-              That no person or legal entity associated with your grant has received any sponsorship, assistance, or financial contributions from any government entity or political figure.
+              That no person or legal entity associated with your grant has
+              received any sponsorship, assistance, or financial contributions
+              from any government entity or political figure.
             </label>
           </div>
 
@@ -272,7 +306,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               id="not-barred"
               checked={attestations.notBarredFromPrograms}
               onCheckedChange={(checked) =>
-                setAttestations(prev => ({ ...prev, notBarredFromPrograms: checked === true }))
+                setAttestations((prev) => ({
+                  ...prev,
+                  notBarredFromPrograms: checked === true,
+                }))
               }
               disabled={isPending}
             />
@@ -280,7 +317,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               htmlFor="not-barred"
               className="text-sm font-normal leading-tight cursor-pointer"
             >
-              That no person or legal entity is barred from participating in the Optimism Foundation's grant programs under any Terms & Conditions (to which you agreed during the grant application process), or under applicable law.
+              That no person or legal entity is barred from participating in the
+              Optimism Foundation's grant programs under any Terms & Conditions
+              (to which you agreed during the grant application process), or
+              under applicable law.
             </label>
           </div>
 
@@ -289,7 +329,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               id="authorized"
               checked={attestations.submissionAuthorized}
               onCheckedChange={(checked) =>
-                setAttestations(prev => ({ ...prev, submissionAuthorized: checked === true }))
+                setAttestations((prev) => ({
+                  ...prev,
+                  submissionAuthorized: checked === true,
+                }))
               }
               disabled={isPending}
             />
@@ -297,7 +340,10 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
               htmlFor="authorized"
               className="text-sm font-normal leading-tight cursor-pointer"
             >
-              Your submission of this form, and your assent to these and all other representations and warranties contained in this form, was duly authorized by all responsible persons, including every individual, group, and organization identified in this form.
+              Your submission of this form, and your assent to these and all
+              other representations and warranties contained in this form, was
+              duly authorized by all responsible persons, including every
+              individual, group, and organization identified in this form.
             </label>
           </div>
         </div>
