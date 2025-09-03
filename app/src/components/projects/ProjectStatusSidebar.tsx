@@ -22,7 +22,7 @@ import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
-import { DeleteProjectDialog } from "./DeleteProjectDialog"
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { project } from "ramda"
@@ -241,10 +241,15 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
       </div>
 
       {deletingProject && (
-        <DeleteProjectDialog
-          open
+        <ConfirmationDialog
+          open={deletingProject}
+          onOpenChange={(open) => setDeletingProject(open)}
           onConfirm={deleteProject}
-          onOpenChange={(open) => !open && setDeletingProject(false)}
+          title="Are you sure you want to delete this project?"
+          description="This action cannot be undone."
+          confirmText="Yes, delete this project"
+          cancelText="Cancel"
+          variant="destructive"
         />
       )}
     </div>
