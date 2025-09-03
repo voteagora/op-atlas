@@ -24,5 +24,25 @@
       "path": "/api/cron/expire-claims",
       "schedule": "15 0 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "api/cron/kyc": {
+      "maxDuration": 800
+    },
+    "api/cron/persona": {
+      "maxDuration": 800
+    },
+    "api/cron/superfluid": {
+      "maxDuration": 800
+    },
+    "api/cron/expire-claims": {
+      "maxDuration": 800
+    },
+    "api/cron/tag-contacts": {
+      "maxDuration": 800
+    },
+    "api/cron/oso-map-projects": {
+      "maxDuration": 800
+    }
+  }
 }
