@@ -4,10 +4,7 @@
       "path": "/api/cron/kyc",
       "schedule": "0 * * * *"
     },
-    {
-      "path": "/api/cron/persona",
-      "schedule": "0 * * * *"
-    },
+
     {
       "path": "/api/cron/tag-contacts",
       "schedule": "0 * * * *"
@@ -24,25 +21,5 @@
       "path": "/api/cron/expire-claims",
       "schedule": "15 0 * * *"
     }
-  ],
-  "functions": {
-    "src/app/api/cron/kyc": {
-      "maxDuration": 800
-    },
-    "src/app/api/cron/persona": {
-      "maxDuration": 800
-    },
-    "src/app/api/cron/superfluid": {
-      "maxDuration": 800
-    },
-    "src/app/api/cron/expire-claims": {
-      "maxDuration": 800
-    },
-    "src/app/api/cron/tag-contacts": {
-      "maxDuration": 800
-    },
-    "src/app/api/cron/oso-map-projects": {
-      "maxDuration": 800
-    }
-  }
+  ]
 }
