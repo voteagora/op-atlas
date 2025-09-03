@@ -73,6 +73,14 @@ export default function SignersStep() {
     return true
   }
 
+  const isSignerComplete = (signer: Signer): boolean => {
+    if (!signer.firstName.trim() || !signer.lastName.trim() || !signer.email.trim()) {
+      return false
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(signer.email)
+  }
+
   const handleNext = () => {
     if (!validateSigners()) {
       toast.error("Please fill in all required fields with valid information")
@@ -230,7 +238,7 @@ export default function SignersStep() {
           variant="secondary"
           size="sm"
           onClick={addSigner}
-          className="flex items-center gap-2 text-gray-400"
+          className={`flex items-center gap-2 ${isSignerComplete(signers[signers.length - 1]) ? "text-secondary-foreground" : "text-gray-400"}`}
         >
           <Plus className="h-4 w-4" />
           Add another signer
