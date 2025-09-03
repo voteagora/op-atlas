@@ -322,19 +322,17 @@ export default function EntitiesStep() {
           </div>
         ))}
 
-        {/* Add another entity button - only show when last entity is complete */}
-        {canShowAddButton() && (
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={addEntity}
-            className="flex items-center gap-2 text-gray-400"
-          >
-            <Plus className="h-4 w-4" />
-            Add another entity
-          </Button>
-        )}
+        {/* Add another entity button - always enabled, styled by completeness */}
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={addEntity}
+          className={`flex items-center gap-2 ${canShowAddButton() ? "text-secondary-foreground" : "text-gray-400"}`}
+        >
+          <Plus className="h-4 w-4" />
+          Add another entity
+        </Button>
       </div>
     </div>
   )
