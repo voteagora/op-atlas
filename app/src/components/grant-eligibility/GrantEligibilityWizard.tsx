@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Loader2 } from "lucide-react"
+import { Loader2, RefreshCw } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import { GrantEligibilityFormProvider, useGrantEligibilityForm } from "@/providers/GrantEligibilityFormProvider"
 import { GrantEligibility, Project, Organization, KYCTeam } from "@prisma/client"
@@ -12,6 +13,8 @@ import EntitiesStep from "./steps/EntitiesStep"
 import SubmitStep from "./steps/SubmitStep"
 import StepIndicator from "./StepIndicator"
 import GrantEligibilitySuccess from "./GrantEligibilitySuccess"
+import { clearGrantEligibilityForm } from "@/lib/actions/grantEligibility"
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
 
 type FullGrantEligibilityForm = GrantEligibility & {
   project?: Project | null
@@ -40,11 +43,23 @@ export default function GrantEligibilityWizard({
 }: GrantEligibilityWizardProps) {
   const [currentStep, setCurrentStep] = useState(form.currentStep || 1)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [showClearConfirmation, setShowClearConfirmation] = useState(false)
+  const router = useRouter()
 
   // Scroll to top when step changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [currentStep])
+
+  const handleClearForm = async () => {
+    const result = await clearGrantEligibilityForm(form.id)
+    if (result.error) {
+      throw new Error(result.error)
+    }
+    // Reset to step 1 and refresh to get updated data
+    setCurrentStep(1)
+    router.refresh()
+  }
 
   const renderStep = () => {
     switch (currentStep) {
@@ -73,8 +88,13 @@ export default function GrantEligibilityWizard({
     )
   }
 
+  // Force a remount of the provider + steps when the server form changes
+  // so local state in steps resets to the latest DB state (e.g., after clear)
+  const remountKey = `${form.id}:${new Date((form as any).updatedAt ?? Date.now()).getTime()}`
+
   return (
     <GrantEligibilityFormProvider
+      key={remountKey}
       initialForm={form}
       projectId={projectId}
       organizationId={organizationId}
@@ -110,6 +130,29 @@ export default function GrantEligibilityWizard({
             <WizardControls currentStep={currentStep} />
           </div>
         </div>
+
+        {/* Clear Form Button - Fixed Position */}
+        <button
+          type="button"
+          onClick={() => setShowClearConfirmation(true)}
+          className="fixed bottom-6 right-6 inline-flex items-center justify-center h-10 px-4 rounded-md bg-white text-black border border-gray-200 hover:bg-gray-50 transition-all"
+          aria-label="Clear form"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Clear form
+        </button>
+
+        {/* Clear Form Confirmation Dialog */}
+        <ConfirmationDialog
+          open={showClearConfirmation}
+          onOpenChange={setShowClearConfirmation}
+          onConfirm={handleClearForm}
+          title="Are you sure you want to clear the form?"
+          description="All data will be lost and you'll need to start over."
+          confirmText="Yes, clear form"
+          cancelText="Cancel"
+          variant="destructive"
+        />
       </div>
     </GrantEligibilityFormProvider>
   )

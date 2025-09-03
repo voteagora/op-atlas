@@ -573,3 +573,87 @@ export async function cancelGrantEligibilityForm(formId: string) {
     return { error: "Failed to cancel form" }
   }
 }
+
+// Clear/reset a grant eligibility form to initial state
+export async function clearGrantEligibilityForm(formId: string) {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return { error: "Unauthorized" }
+  }
+
+  try {
+    const result = await withChangelogTracking(async (tx) => {
+      const form = await tx.grantEligibility.findUnique({
+        where: { id: formId },
+        include: {
+          kycTeam: true,
+        },
+      })
+
+      if (!form) {
+        throw new Error("Form not found")
+      }
+
+      const formStatus = getGrantEligibilityFormStatus(form)
+      if (formStatus !== GrantEligibilityFormStatus.DRAFT) {
+        throw new Error("Can only clear draft forms")
+      }
+
+      // Verify permissions
+      if (form.projectId) {
+        const isInvalid = await verifyAdminStatus(form.projectId, userId)
+        if (isInvalid?.error) {
+          throw new Error(isInvalid.error)
+        }
+      } else if (form.organizationId) {
+        const isInvalid = await verifyOrganizationAdmin(form.organizationId, userId)
+        if (isInvalid?.error) {
+          throw new Error(isInvalid.error)
+        }
+      }
+
+      // Delete associated KYC team if it exists
+      if (form.kycTeamId && form.kycTeam) {
+        await tx.kYCTeam.delete({
+          where: { id: form.kycTeamId },
+        })
+      }
+
+      // Reset form to initial state
+      const clearedForm = await tx.grantEligibility.update({
+        where: { id: formId },
+        data: {
+          currentStep: 1,
+          grantType: null,
+          walletAddress: null,
+          kycTeamId: null,
+          attestations: Prisma.DbNull,
+          data: {
+            signers: [],
+            entities: [],
+          },
+        },
+      })
+
+      return clearedForm
+    })
+
+    // Revalidate paths
+    revalidatePath(`/grant-eligibility/${formId}`)
+    if (result.projectId) {
+      revalidatePath(`/projects/${result.projectId}/grant-address`)
+    } else if (result.organizationId) {
+      revalidatePath(`/profile/organizations/${result.organizationId}/grant-address`)
+    }
+
+    return { success: true, form: result }
+  } catch (error) {
+    console.error("Error clearing grant eligibility form:", error)
+    if (error instanceof Error) {
+      return { error: error.message }
+    }
+    return { error: "Failed to clear form" }
+  }
+}

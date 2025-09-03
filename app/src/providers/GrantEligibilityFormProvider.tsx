@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import { GrantEligibility, Project, Organization, KYCTeam } from "@prisma/client"
 
 type FullGrantEligibilityForm = GrantEligibility & {
@@ -58,6 +58,11 @@ export function GrantEligibilityFormProvider({
 }: GrantEligibilityFormProviderProps) {
   const [form, setForm] = useState<FullGrantEligibilityForm>(initialForm)
   const [stepControls, setStepControls] = useState<StepControls>({ enabled: true, isLoading: false })
+
+  // Sync form state when initialForm prop changes (e.g., after clearing)
+  useEffect(() => {
+    setForm(initialForm)
+  }, [initialForm])
 
   const goToNextStep = () => {
     if (currentStep < 5) {
