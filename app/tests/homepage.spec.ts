@@ -103,3 +103,4 @@ test.describe("Homepage", () => {
     expect(criticalPageErrors.length).toBeLessThan(3)
   })
 })
+
