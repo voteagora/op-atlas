@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useMembership } from "@/hooks/project/useMembership"
 import { cn, truncateString } from "@/lib/utils"
 
 interface DescriptionProps {
@@ -35,7 +36,7 @@ interface DescriptionProps {
     mirror?: string | null
   }
   projectId: string
-  isMember: boolean
+  userId?: string
 }
 
 export default function Description({
@@ -46,8 +47,10 @@ export default function Description({
   description,
   socials,
   projectId,
-  isMember,
+  userId,
 }: DescriptionProps) {
+  const { data: membershipData } = useMembership(projectId, userId)
+  const isMember = membershipData?.isMember ?? false
   if (!name) {
     return null
   }

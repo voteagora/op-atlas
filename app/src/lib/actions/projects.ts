@@ -18,6 +18,7 @@ import {
   getAllPublishedUserProjects,
   getKycTeamForProject,
   getProjectContracts,
+  getProjectMetadata,
   getProjectsForKycTeam,
   getProjectTeam,
   getPublicProject,
@@ -570,6 +571,14 @@ export const getPublicProjectAction = async ({
   if (!rawProject) return null
 
   return rawProject
+}
+
+export const getProjectMetadataAction = async ({
+  projectId,
+}: {
+  projectId: string
+}) => {
+  return await getProjectMetadata(projectId)
 }
 
 export const checkWalletAddressExistsAction = async (walletAddress: string) => {

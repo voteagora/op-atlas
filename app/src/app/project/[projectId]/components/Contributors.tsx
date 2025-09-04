@@ -1,11 +1,15 @@
 "use client"
 
-import Link from "next/link"
 import { ChevronDown } from "lucide-react"
+import Link from "next/link"
 import React from "react"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 type Contributor = {
   imageUrl?: string | null
