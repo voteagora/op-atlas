@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { getCitizen } from "@/lib/actions/citizens"
-import { getPublicProjectAction } from "@/lib/actions/projects"
+import { getProjectMetadataAction } from "@/lib/actions/projects"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { getProjectDeployedChains } from "@/lib/oso/utils"
 
@@ -24,7 +24,7 @@ export async function generateMetadata({
     projectId: string
   }
 }): Promise<Metadata> {
-  const project = await getPublicProjectAction({
+  const project = await getProjectMetadataAction({
     projectId: params.projectId,
   })
 
@@ -47,7 +47,7 @@ export default async function Page({ params }: PageProps) {
 
   const [session, project, citizen] = await Promise.all([
     auth(),
-    getPublicProjectAction({ projectId }),
+    getProjectMetadataAction({ projectId }),
     getCitizen({ type: CITIZEN_TYPES.app, id: projectId }),
   ])
 
