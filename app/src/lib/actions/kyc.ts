@@ -3,10 +3,7 @@
 import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
-import {
-  deleteKycTeam,
-  updateKYCUserStatus
-} from "@/db/kyc"
+import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
 import { getReward, updateClaim } from "@/db/rewards"
 import {
   caseStatusMap,
@@ -205,7 +202,7 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
         }
 
         const inquiry: PersonaInquiry | null =
-          await personaClient.getInquiryById(inquiryId)
+          await personaClient.getInquiryById({ inquiryId })
 
         if (!inquiry) {
           console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)

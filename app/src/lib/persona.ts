@@ -107,7 +107,11 @@ class PersonaClient {
     }
   }
 
-  async getCases(nextUrl?: string): Promise<PersonaResponse<PersonaCase>> {
+  async getCases({
+    nextUrl,
+  }: {
+    nextUrl?: string
+  }): Promise<PersonaResponse<PersonaCase>> {
     const url = `${PERSONA_API_URL}${nextUrl || "/api/v1/cases"}`
     const response = await fetch(url, {
       headers: {
@@ -118,9 +122,11 @@ class PersonaClient {
     return response.json()
   }
 
-  async getInquiries(
-    nextUrl?: string,
-  ): Promise<PersonaResponse<PersonaInquiry>> {
+  async getInquiries({
+    nextUrl,
+  }: {
+    nextUrl?: string
+  }): Promise<PersonaResponse<PersonaInquiry>> {
     const url = `${PERSONA_API_URL}${nextUrl || "/api/v1/inquiries"}`
     const response = await fetch(url, {
       headers: {
@@ -131,7 +137,11 @@ class PersonaClient {
     return response.json()
   }
 
-  async getInquiryById(inquiryId: string): Promise<PersonaInquiry | null> {
+  async getInquiryById({
+    inquiryId,
+  }: {
+    inquiryId: string
+  }): Promise<PersonaInquiry | null> {
     const apiKey = this.apiKey
     if (!apiKey) {
       console.warn("Persona API key not set")
@@ -174,9 +184,10 @@ async function* fetchGenerator<T>(
   let currentUrl = nextUrl
 
   do {
-    const response = (await client[path as keyof PersonaClient](
-      currentUrl || "",
-    )) as PersonaResponse<T>
+    const response = (await client[path as keyof PersonaClient]({
+      nextUrl: currentUrl,
+      inquiryId: "",
+    })) as PersonaResponse<T>
 
     const batch = response.data
     yield batch
