@@ -31,25 +31,11 @@ env:
   NEXT_PUBLIC_SAFE_API_KEY: "test"
   NEXT_PUBLIC_ENV: "development"
 
-  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/atlas_test"
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: atlas_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - uses: actions/checkout@v4
@@ -74,19 +60,6 @@ jobs:
           cd app
           npx playwright install --with-deps
 
-      - name: Run database migrations
-        run: |
-          cd app
-          npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
-
-      - name: Wait for database to be ready
-        run: |
-          cd app
-          npx prisma db push
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
 
       - name: Run Playwright tests
         run: |
