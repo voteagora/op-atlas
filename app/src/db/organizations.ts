@@ -895,3 +895,93 @@ export async function getOrganizationWithGrantEligibility({
     hasKycTeamWithSubmittedForm: hasKycTeam && hasSubmittedGrantEligibility,
   }
 }
+
+export async function getOrganizationWithAllGrantData({
+  organizationId,
+}: {
+  organizationId: string
+}) {
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: organizationId,
+    },
+    include: {
+      projects: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          organization: true,
+        },
+      },
+      // Get ALL grant eligibility forms (draft, submitted, expired) - not just submitted ones
+      GrantEligibilitys: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          kycTeam: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+      OrganizationKYCTeams: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          team: {
+            include: {
+              team: {
+                select: {
+                  users: true,
+                },
+              },
+              rewardStreams: true,
+              projects: {
+                include: {
+                  blacklist: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!organization) {
+    return null
+  }
+
+  // Check if there's any DRAFT grant eligibility form
+  const draftForms = organization.GrantEligibilitys.filter(form => 
+    !form.submittedAt && 
+    !form.deletedAt && 
+    form.expiresAt && 
+    new Date(form.expiresAt) > new Date()
+  )
+
+  // Get submitted forms with KYC teams
+  const submittedFormsWithKyc = organization.GrantEligibilitys.filter(form => 
+    form.submittedAt && 
+    form.kycTeam
+  )
+
+  // Check if any KYC teams have active streams
+  const kycTeamsWithStreams = organization.OrganizationKYCTeams.map(orgTeam => ({
+    ...orgTeam,
+    hasActiveStream: orgTeam.team.rewardStreams && orgTeam.team.rewardStreams.length > 0
+  }))
+
+  return {
+    organization,
+    allGrantEligibilityForms: organization.GrantEligibilitys,
+    draftForms,
+    submittedFormsWithKyc,
+    kycTeams: kycTeamsWithStreams,
+    hasDraftForm: draftForms.length > 0,
+    hasSubmittedForms: submittedFormsWithKyc.length > 0,
+  }
+}
