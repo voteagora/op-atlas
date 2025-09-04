@@ -49,9 +49,9 @@ const VoteButton = ({
 
   // Size-specific classes
   const sizeClasses = {
-    sm: "w-[60px] h-[32px] py-[8px] px-[12px] text-sm",
-    default: "w-[80px] h-[40px] py-[10px] px-[16px]",
-    lg: "w-[100px] h-[48px] py-[12px] px-[20px] text-lg",
+    sm: "w-[64px] h-[34px] py-[8px] px-[12px] text-sm md:w-[60px] md:h-[32px]",
+    default: "w-[84px] h-[42px] py-[10px] px-[16px] md:w-[80px] md:h-[40px]",
+    lg: "w-[104px] h-[50px] py-[12px] px-[20px] text-lg md:w-[100px] md:h-[48px]",
     veto: "w-[256px] h-[2.5rem] py-[10px] px-[16px]",
   }
 
@@ -68,7 +68,7 @@ const VoteButton = ({
       )}
     >
       {iconLeft && <ChevronLeft className="mr-1" size={16} />}
-      <span className="text-center text-sm">{textValue}</span>
+      <span className="text-center text-base md:text-sm">{textValue}</span>
       {iconRight && <ChevronRight className="ml-1" size={16} />}
     </Button>
   )

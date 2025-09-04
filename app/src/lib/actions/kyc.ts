@@ -3,8 +3,12 @@
 import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
-import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
-import { getReward, updateClaim } from "@/db/rewards"
+import {
+  deleteKycTeam,
+  updateKYBUserStatus,
+  updateKYCUserStatus,
+} from "@/db/kyc"
+import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import {
   caseStatusMap,
   inquiryStatusMap,
@@ -67,7 +71,17 @@ function getClaimableTimestamp() {
  * - delivered
  */
 export const processKYC = async (entries: string[]) => {
-  let counter = 0
+  let processed = 0
+  let updated = 0
+  let unchanged = 0
+  let skippedNoReward = 0
+  let skippedNoClaim = 0
+  let createdClaims = 0
+
+  const shouldBackfillMissingClaims =
+    (process.env.OP_ATLAS_KYC_BACKFILL_MISSING_CLAIMS || "false")
+      .toLowerCase()
+      .trim() === "true"
 
   for (const row of entries) {
     const fields = row.split(",")
@@ -79,7 +93,7 @@ export const processKYC = async (entries: string[]) => {
       continue
     }
 
-    counter += 1
+    processed += 1
     const [formId, projectId, rewardId, address, rawStatus] = fields
 
     const reward = rewardId ? await getReward({ id: rewardId }) : null
@@ -87,21 +101,30 @@ export const processKYC = async (entries: string[]) => {
       console.warn(
         `Reward ${rewardId} (project ${projectId}) not found, skipping`,
       )
+      skippedNoReward += 1
       continue
     }
     if (!reward.claim) {
-      console.warn(
-        `No claim found for reward ${rewardId} (project ${projectId}), skipping`,
-      )
-      continue
+      if (shouldBackfillMissingClaims) {
+        await ensureClaim(rewardId)
+        createdClaims += 1
+        // proceed to update below
+      } else {
+        console.warn(
+          `No claim found for reward ${rewardId} (project ${projectId}), skipping`,
+        )
+        skippedNoClaim += 1
+        continue
+      }
     }
 
     const status = rawStatus.trim().toLowerCase().replace("_", " ")
 
-    if (status === reward.claim.kycStatus) {
+    if (reward.claim && status === reward.claim.kycStatus) {
       console.log(
         `KYC status for reward ${rewardId} (project ${projectId}) unchanged: ${status}`,
       )
+      unchanged += 1
       continue
     }
 
@@ -131,10 +154,10 @@ export const processKYC = async (entries: string[]) => {
         `KYC status for reward ${rewardId} (project ${projectId}) now ${status}`,
       )
     }
+    updated += 1
   }
-
   console.log(
-    `Processed KYC details for ${counter} project${counter === 1 ? "" : "s"}`,
+    `KYC import: processed=${processed} updated=${updated} unchanged=${unchanged} createdClaims=${createdClaims} skippedNoReward=${skippedNoReward} skippedNoClaim=${skippedNoClaim}`,
   )
 }
 

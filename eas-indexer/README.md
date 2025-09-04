@@ -9,13 +9,11 @@ This indexer tracks EAS attestations and stores them into Postgres database. It 
 ## How it Works
 
 1. **Schema Configuration**
-
    - Schemas are defined in `schemas.config.ts` with their IDs and optional attester addresses
    - Schema parameter signatures are defined in `src/schemas.ts` for decoding attestation data
    - Database tables are defined in `ponder.schema.ts` matching the schema structures
 
 2. **Event Processing**
-
    - Listens for `Attested` events matching configured schema IDs
    - Validates attester address if specified in schema config
    - Retrieves full attestation data using `getAttestation`
@@ -40,7 +38,6 @@ This indexer tracks EAS attestations and stores them into Postgres database. It 
    ```
 
 2. Configure environment:
-
    - Copy `.env.example` to `.env`
    - Add your RPC URL for Optimism mainnet
 
@@ -76,6 +73,53 @@ yarn start
 1. Add entity configuration in `ponder.schema.ts`
 2. Add entity to `ponder.config.ts`
 3. Update `src/index.ts` to include the new entity
+
+## Redeployment
+
+**Important**: Due to Ponder's architecture, redeploying the indexer requires creating a new database schema to avoid deployment crashes. This is a necessary step for production deployments.
+
+### Pre-deployment Steps
+
+1. **Update Schema Name**: Before deploying, update the schema name in `package.json` scripts:
+
+   ```json
+   {
+     "scripts": {
+       "start": "ponder start --schema eas_indexer_3", // Increment version number
+       "db:create-views": "ponder db create-views --schema eas_indexer_3 --views-schema eas"
+     }
+   }
+   ```
+
+   **Note**: Increment the schema version number (e.g., `eas_indexer_2` → `eas_indexer_3`) for each deployment.
+
+2. **Update Ponder Config**: Ensure your `ponder.config.ts` references the new schema name.
+
+### Deployment Process
+
+1. **Deploy to Railway**: Push your changes to trigger a new Railway deployment
+2. **Wait for Deployment**: Allow the new deployment to complete and start running
+3. **Create Database Views**: After successful deployment, manually run the view creation command:
+
+   ```bash
+   yarn db:create-views
+   ```
+
+   This command creates the necessary database views in the `eas` schema that your application uses to query attestation data.
+
+### Why Separate Schemas?
+
+- **Data Integrity**: Prevents deployment crashes that can occur when trying to modify existing database structures
+- **Rollback Safety**: Allows you to quickly rollback to previous versions if needed
+- **Zero Downtime**: New deployments can start indexing while old ones continue running
+- **Ponder Best Practice**: This approach is recommended by Ponder for production environments
+
+### Post-deployment Verification
+
+1. Check that the new indexer is running and indexing data
+2. Verify that database views are accessible
+3. Test API endpoints to ensure they're returning data from the new schema
+4. Monitor logs for any indexing errors
 
 ## API Endpoints
 

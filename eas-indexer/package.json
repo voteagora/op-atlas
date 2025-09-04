@@ -5,12 +5,12 @@
   "scripts": {
     "test": "jest",
     "dev": "ponder dev",
-    "start": "ponder start --schema eas_indexer",
+    "start": "ponder start --schema eas_indexer_2",
     "codegen": "ponder codegen",
     "serve": "ponder serve",
     "lint": "eslint .",
     "typecheck": "tsc",
-    "db:create-views": "ponder db create-views --schema eas_indexer --views-schema eas"
+    "db:create-views": "ponder db create-views --schema eas_indexer_2 --views-schema eas"
   },
   "dependencies": {
     "ponder": "^0.11.23",

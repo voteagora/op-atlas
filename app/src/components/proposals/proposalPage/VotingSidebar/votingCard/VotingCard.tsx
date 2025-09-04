@@ -43,7 +43,7 @@ const CardText = ({
       const parts = text.split("Agora")
       if (parts.length === 2) {
         return (
-          <p className="text-sm text-center text-[#404454] font-weight-normal">
+          <p className="text-base leading-6 md:text-sm md:leading-5 text-center text-[#404454] font-weight-normal">
             {parts[0]}
             <a
               href={agoraLink}
@@ -61,12 +61,12 @@ const CardText = ({
 
     if (cardText.descriptionElement === "OFFCHAIN_STANDARD") {
       return (
-        <p className="text-sm text-center text-secondary-foreground">
-          This proposal requires approval from the Citizens&apos; House and
-          Token House. Read more about the voting mechanism{" "}
+        <p className="text-base leading-6 md:text-sm md:leading-5 text-center text-secondary-foreground">
+          This proposal requires approval from the Citizen&#39;s House and Token
+          House. Read more about the voting mechanism{" "}
           <a
             href="https://github.com/ethereum-optimism/OPerating-manual/blob/main/manual.md"
-            className="text-sm text-center underline"
+            className="text-base md:text-sm text-center underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -86,7 +86,7 @@ const CardText = ({
         proposalData.proposalResults as any
       ).options.filter((option: ProposalResultOption) => option.isApproved)
       return (
-        <p className="text-sm text-center text-[#404454] font-weight-normal">
+        <p className="text-base leading-6 md:text-sm md:leading-5 text-center text-[#404454] font-weight-normal">
           {candidatesElected.length} candidates were elected.
         </p>
       )
@@ -100,12 +100,12 @@ const CardText = ({
           }>,
           {
             className:
-              "text-sm text-center text-secondary-foreground font-weight-normal",
+              "text-base leading-6 md:text-sm md:leading-5 text-center text-secondary-foreground font-weight-normal",
           },
         )
       } else {
         return (
-          <p className="text-sm text-center text-secondary-foreground font-weight-normal">
+          <p className="text-base leading-6 md:text-sm md:leading-5 text-center text-secondary-foreground font-weight-normal">
             {cardText.descriptionElement}
           </p>
         )
@@ -117,7 +117,9 @@ const CardText = ({
 
   return (
     <div className="flex flex-col text-center gap-2 p-6">
-      <h4 className="text-md font-semibold">{cardText.title}</h4>
+      <h4 className="text-[20px] leading-[28px] md:text-md md:leading-5 font-semibold">
+        {cardText.title}
+      </h4>
       {renderDescription()}
     </div>
   )

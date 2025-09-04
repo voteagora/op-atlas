@@ -50,8 +50,6 @@ export default async function Page({
 
   const kycTeam = project?.kycTeam ?? undefined
 
-  console.log(project?.organization)
-
   return (
     <div className="space-y-12">
       <div className="space-y-6">

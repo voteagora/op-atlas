@@ -1,15 +1,21 @@
 "use client"
 
-import { User } from "@prisma/client"
-import { User as UserIcon } from "lucide-react"
+import Link from "next/link"
 import { ChevronDown } from "lucide-react"
 import React from "react"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { UserAvatar } from "@/components/common/UserAvatar"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+
+type Contributor = {
+  imageUrl?: string | null
+  name?: string | null
+  username?: string | null
+  id?: string
+}
 
 interface ContributorsProps {
-  contributors?: User[]
+  contributors?: Contributor[]
 }
 
 export default function Contributors({ contributors }: ContributorsProps) {
@@ -30,14 +36,26 @@ export default function Contributors({ contributors }: ContributorsProps) {
     <div className="w-full space-y-6">
       <h4 className="font-semibold text-xl">Contributors</h4>
       <div className="pl-6 w-full grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
-        {loadedContributors.map((contributor) => (
-          <div key={contributor.name} className="flex items-center space-x-4">
-            <UserAvatar imageUrl={contributor.imageUrl} size={"sm"} />
-            <span className="font-normal text-foreground">
-              {contributor.name}
-            </span>
-          </div>
-        ))}
+        {loadedContributors.map((contributor, index) => {
+          const profileHref = `/${contributor.username || contributor.id || ""}`
+          return (
+            <Tooltip key={`${contributor.name}-${index}`}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={profileHref}
+                  target="_blank"
+                  className="flex items-center space-x-4 hover:underline"
+                >
+                  <UserAvatar imageUrl={contributor.imageUrl || undefined} size={"sm"} />
+                  <span className="font-normal text-foreground truncate max-w-[200px]">
+                    {contributor.name}
+                  </span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>{contributor.name}</TooltipContent>
+            </Tooltip>
+          )
+        })}
       </div>
       {loadedContributors.length >= contributors.length ? null : (
         <button

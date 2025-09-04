@@ -6,11 +6,12 @@ import {
   Loader2,
   XCircle,
 } from "lucide-react"
+import Link from "next/link"
 import { useSession } from "next-auth/react"
 import React from "react"
 
-import { cn } from "@/lib/utils"
 import { ProposalStatus } from "@/components/proposals/proposal.types"
+import { cn } from "@/lib/utils"
 
 type ProposalCardProps = {
   children: React.ReactNode
@@ -23,28 +24,38 @@ const ProposalCard = ({
   rounded = false,
   href,
 }: ProposalCardProps) => {
-  const handleClick = () => {
-    if (href) {
-      window.location.href = href
-    }
+  const cardContent = (
+    <div className="flex flex-row gap-6 justify-between items-center pt-6 pr-6 pb-6 pl-4 md:p-6">
+      {children}
+    </div>
+  )
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cn(
+          "border-border group cursor-pointer w-full text-left bg-transparent block",
+          {
+            "border border-border rounded-t-lg": rounded,
+            "border-l border-r border-b border-border": !rounded,
+          },
+        )}
+      >
+        {cardContent}
+      </Link>
+    )
   }
 
   return (
-    <button
-      type="button"
-      className={cn(
-        "border-border group cursor-pointer w-full text-left bg-transparent p-0",
-        {
-          "border border-border rounded-t-lg": rounded,
-          "border-l border-r border-b border-border": !rounded,
-        },
-      )}
-      onClick={handleClick}
+    <div
+      className={cn("border-border w-full text-left bg-transparent", {
+        "border border-border rounded-t-lg": rounded,
+        "border-l border-r border-b border-border": !rounded,
+      })}
     >
-      <div className="flex flex-row gap-6 justify-between items-center pt-6 pr-6 pb-6 pl-4 md:p-6">
-        {children}
-      </div>
-    </button>
+      {cardContent}
+    </div>
   )
 }
 

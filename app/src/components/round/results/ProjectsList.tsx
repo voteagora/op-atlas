@@ -97,7 +97,7 @@ const ProjectsList = ({
                   height={24}
                 />
                 <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
-                  {formatNumber(Number(project?.amount), 0)}
+                  {formatNumber(Number(project?.amount), 1)}
                 </span>
               </div>
             </div>

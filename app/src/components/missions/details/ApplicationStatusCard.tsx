@@ -63,12 +63,12 @@ export const ApplicationStatusCard = ({
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
-              href: "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
+              href: "https://app.opgrants.io/programs/959/apply",
               text: "Apply",
               type: "application",
             })
             window.open(
-              "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
+              "https://app.opgrants.io/programs/959/apply",
               "_blank",
               "noopener,noreferrer",
             )
@@ -93,12 +93,12 @@ export const ApplicationStatusCard = ({
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
-              href: "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
+              href: "https://hackmd.io/@wbnns/superchain-audit-service-providers",
               text: "View ASPs",
               type: "application",
             })
             window.open(
-              "https://app.charmverse.io/op-grants/audits-hub-759373059217642",
+              "https://hackmd.io/@wbnns/superchain-audit-service-providers",
               "_blank",
               "noopener,noreferrer",
             )

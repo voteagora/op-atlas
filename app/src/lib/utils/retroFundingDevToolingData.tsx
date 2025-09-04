@@ -1,7 +1,7 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import { CalendarEventFill } from "@/components/icons/remix"
+import { CalendarEventFill, TimeFill } from "@/components/icons/remix"
 import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 import { getCutoffDate } from "@/lib/utils"
 
@@ -13,7 +13,7 @@ export const retroFundingDevToolingData: MissionData = {
   number: 7,
   roundName: "S8 Dev Tooling",
   funding: {
-    op: "Up to 3.5M",
+    op: "Up to 3.65M",
   },
   season: "8",
   details: [
@@ -36,12 +36,24 @@ export const retroFundingDevToolingData: MissionData = {
       description="Monthly deadlines"
       icon={<CalendarEventFill fill="#3374DB" />}
     />,
+    <GrantInfoCallout
+      key="season-budget"
+      title="Season budget"
+      description="Up to 3.65M"
+      icon="/assets/icons/op-icon.svg"
+    />,
+    <GrantInfoCallout
+      key="season-timeline"
+      title="Season timeline"
+      description="Jul 31 - Dec 24, 2025"
+      icon={<TimeFill fill="#3374DB" />}
+    />,
   ],
   status: "ongoing",
   resultsLink: "/round/results?rounds=7",
   iconUrl: "/assets/images/dev-tooling.png",
-  startsAt: new Date("2025-06-24T00:00:00.000Z"),
-  endsAt: new Date("2025-12-30T00:00:00.000Z"),
+  startsAt: new Date("2025-07-31T00:00:00.000Z"),
+  endsAt: new Date("2025-12-24T00:00:00.000Z"),
   applyBy: (() => {
     return getCutoffDate()
   })(),

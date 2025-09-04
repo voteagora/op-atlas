@@ -6,6 +6,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { ChevronRight } from "lucide-react"
+import Link from "next/link"
 import React from "react"
 
 interface BreadcrumbsProps {
@@ -20,16 +21,18 @@ const Breadcrumbs = ({ values, className = "" }: BreadcrumbsProps) => (
   <Breadcrumb>
     <BreadcrumbList>
       {values.map((value, index) => (
-        <>
-          <BreadcrumbItem key={index}>
-            <BreadcrumbLink href={value.href}>{value.label}</BreadcrumbLink>
+        <React.Fragment key={index}>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={value.href}>{value.label}</Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
           {index < values.length - 1 && (
             <BreadcrumbSeparator>
               <ChevronRight />
             </BreadcrumbSeparator>
           )}
-        </>
+        </React.Fragment>
       ))}
     </BreadcrumbList>
   </Breadcrumb>

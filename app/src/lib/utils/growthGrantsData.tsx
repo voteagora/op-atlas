@@ -1,12 +1,8 @@
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+import { CalendarEventFill } from "@/components/icons/remix"
+import { GrantInfoCallout } from "@/components/missions/common/callouts/GrantInfoCallout"
 
 import { MissionData } from "../MissionsAndRoundData"
 
@@ -16,108 +12,72 @@ export const growthGrantsData: MissionData = {
   number: 10,
   roundName: "Season 8 Growth Grants",
   funding: {
-    op: "9M",
+    op: "6.33M",
   },
   ogDescription:
-    "Growth Grants are distributing up to 9M OP in Season 8. If you've built a Superchain app, sign up to check if you qualify for growth funding.",
+    "Growth Grants are distributing up to 6.33M OP in Season 8. If you've built a Superchain app, sign up to check if you qualify for growth funding.",
   shortDescription:
     "For apps that have already deployed, looking to boost their TVL.",
   details: [
     <p key="details-1">
-      Growth Grants are for Superchain apps that have already launched and are
-      looking to scale their impact inline with the{" "}
+      Growth Grants support Superchain apps that have already launched and are
+      ready to scale their impact in alignment with the{" "}
       <ExternalLink
         href="https://gov.optimism.io/t/season-8-intent/10009"
         className="underline"
       >
         Collective Intent
       </ExternalLink>
-      . Projects submit a plan for growth, methods for measuring success, and
+      . Applicants submit a plan for growth, methods for measuring success, and
       their desired capital allocation to execute their plan.
     </p>,
-    "For Season 8, growth plans should target the following success metrics:",
+    <p key="details-2">
+      For Season 8, plans should target at least one of the following success
+      metrics:
+      <ul className="list-disc pl-4 space-y-2 text-base text-secondary-foreground">
+        <li className="mt-4">
+          <span>Superchain TVL</span>
+        </li>
+        <li>
+          <span>Superchain Transaction Fees</span>
+        </li>
+      </ul>
+    </p>,
+    <p key="details-3">
+      Projects that are a good fit might focus on making Superchain assets{" "}
+      <ExternalLink
+        href="https://specs.optimism.io/interop/overview.html"
+        className="underline"
+      >
+        interop-ready
+      </ExternalLink>
+      , building upgrades that increase TVL, or shipping features that drive
+      cross-chain transactions. Other eligible projects may include tools that
+      help track adoption, support conversions to interop formats, or create
+      stronger incentives for ecosystem usage.
+    </p>,
   ],
   season: "8",
-  subDetails: (
-    <div>
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="retro-funding" className="">
-          <AccordionTrigger className="text-base p-0 hover:underline text-foreground font-normal">
-            1. Interop-ready TVL
-          </AccordionTrigger>
-          <AccordionContent className="mt-6 mb-6">
-            <ul className="list-disc pl-4 space-y-1 text-base">
-              <li className="text-secondary-foreground">
-                Primary metric: TVL/AOP that is interop ready within the Interop
-                Set
-              </li>
-              <li className="text-secondary-foreground">
-                Secondary metric: Percent (%) share of TVL/AOP within the
-                Interop Set that&apos;s interop ready v.s. total TVL/AOP
-              </li>
-            </ul>
-            <p className="mt-6 text-secondary-foreground">
-              <span className="font-medium text-foreground">
-                Why this metric?
-              </span>{" "}
-              <ExternalLink
-                href="https://docs.optimism.io/interop/explainer"
-                className="underline"
-              >
-                Interop
-              </ExternalLink>{" "}
-              introduces new development and interaction patterns for
-              application developers. Growing the volume and share of
-              interop-compatible assets onchain increases the chance that
-              interop is widely adopted by application developers and users
-              alike.
-            </p>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-      <Accordion type="single" collapsible className="w-full space-y-4">
-        <AccordionItem value="retro-funding" className="">
-          <AccordionTrigger className="text-base p-0 hover:underline text-foreground font-normal">
-            2. Interop Transaction Fees
-          </AccordionTrigger>
-          <AccordionContent className="mt-6 mb-6">
-            <ul className="list-disc pl-4 space-y-1 text-base">
-              <li className="text-secondary-foreground">
-                Primary metric: X ETH / Month transaction fees generated from
-                transactions that interact with the{" "}
-                <ExternalLink
-                  href="https://docs.optimism.io/interop/message-passing"
-                  className="underline"
-                >
-                  L2ToL2CrossDomainMessenger
-                </ExternalLink>{" "}
-                contract
-              </li>
-              <li className="text-secondary-foreground">
-                Secondary metric: % share of interop transaction fees v.s.
-                non-interop
-              </li>
-            </ul>
-            <p className="mt-6 text-secondary-foreground">
-              <span className="font-medium text-foreground">
-                Why this metric?
-              </span>{" "}
-              The total fees spent on interoperable transactions maps to usage
-              of feature after launch, and is a good indicator of the net growth
-              caused by introducing the feature to the Superchain. This may not
-              may not be measurable until full interop launches in late Q4.
-            </p>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
-  ),
+  callout: [
+    <GrantInfoCallout
+      key="season-budget"
+      title="Season Budget"
+      description="6.33M OP"
+      icon="/assets/icons/op-icon.svg"
+    />,
+    <GrantInfoCallout
+      key="apply-by"
+      title="Apply by"
+      description="Dec 4, 2025"
+      icon={<CalendarEventFill fill="#3374DB" />}
+    />,
+  ],
   showSupportedNetworks: true,
   status: "ongoing",
   iconUrl: "/assets/images/onchain-builders.png",
   startsAt: new Date("2025-08-15T00:00:00.000Z"),
-  endsAt: new Date("2025-09-30T00:00:00.000Z"),
-  applyBy: new Date("2025-09-30T00:00:00.000Z"),
+  endsAt: new Date("2025-12-04T00:00:00.000Z"),
+  applyBy: new Date("2025-12-04T00:00:00.000Z"),
   evaluationMonth: 9,
   missionPageEligibility: [
     {
@@ -131,20 +91,10 @@ export const growthGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project aligns with Interop TVL or Interop TX fees
+          My project aligns with TVL or tx fees
         </p>
       ),
       type: "required",
-    },
-  ],
-  learnMoreLinks: [
-    {
-      title: "S8 Governance Fund Missions",
-      href: "https://gov.optimism.io/t/s8-governance-fund-missions/10004?u=gonna.eth",
-    },
-    {
-      title: "Collective Grant Policies",
-      href: "https://gov.optimism.io/t/collective-grant-policies/5833",
     },
   ],
   applicationPageEligibility: [
@@ -159,7 +109,7 @@ export const growthGrantsData: MissionData = {
     {
       reactNode: (
         <p className="text-secondary-foreground">
-          My project aligns with Interop TVL or Interop TX fees
+          My project aligns with TVL or tx fees
         </p>
       ),
       type: "alignsWithInteropMetrics",
@@ -172,8 +122,7 @@ export const growthGrantsData: MissionData = {
       description:
         "Inform the council of your plan for growth, including milestones and KPIs.",
       subDetails: "Visit site",
-      subDetailsLink:
-        "https://app.charmverse.io/op-grants/optimism-grants-council-8323028890716944",
+      subDetailsLink: "https://app.opgrants.io/",
     },
     {
       number: 2,
@@ -207,6 +156,34 @@ export const growthGrantsData: MissionData = {
       href: "https://atlas.optimism.io/project/0x18923b60296e26a8ce35a0b4754cd6fd5427b2820a202f82901c826794fdbc9e",
       rewardAmount: "66.9k",
       rewardIcon: "/assets/icons/op-icon.svg",
+    },
+  ],
+  supportOptions: [
+    {
+      type: "telegram",
+      title: "Telegram",
+      description: "Reach out anytime.",
+      buttonText: "Join Channel",
+      buttonLink: "https://t.me/+CCkKpqGJouk5ZjYx",
+      externalLink: true,
+    },
+    {
+      type: "office-hours",
+      title: "Office Hours",
+      description: "Bi-weekly on Tuesdays at 2:00 PM UTC.",
+      buttonText: "Join Meeting",
+      buttonLink: "https://meet.google.com/pcq-tqpt-fcm",
+      externalLink: true,
+    },
+  ],
+  learnMoreLinks: [
+    {
+      title: "S8 Governance Fund Missions",
+      href: "https://gov.optimism.io/t/s8-governance-fund-missions/10004?u=gonna.eth",
+    },
+    {
+      title: "Collective Grant Policies",
+      href: "https://gov.optimism.io/t/collective-grant-policies/5833",
     },
   ],
 }

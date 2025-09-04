@@ -21,7 +21,6 @@ const RESTRICTED_MOBILE_ROUTES = [
   "/projects",
   "/application",
   "/rewards",
-  "/round/results",
   "/projects/*",
 ]
 
