@@ -8,7 +8,7 @@ import KYCStatusContainer, {
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
 import {
   getOrganization,
-  getOrganizationWithGrantEligibility,
+  getOrganizationWithAllGrantData,
 } from "@/db/organizations"
 
 import GrantAddressForm from "./components/GrantAddressForm"
@@ -46,26 +46,26 @@ export default async function Page({
     redirect("/")
   }
 
-  // Fetch organization data with grant eligibility status
-  const { organization, hasKycTeamWithSubmittedForm } =
-    await getOrganizationWithGrantEligibility({
-      organizationId: params.organizationId,
-    })
+  // Fetch organization data with all grant eligibility information
+  const organizationData = await getOrganizationWithAllGrantData({
+    organizationId: params.organizationId,
+  })
 
-  if (!organization) {
+  if (!organizationData?.organization) {
     return notFound()
   }
 
-  // If they have KYC team and submitted grant eligibility form, show the status container
-  if (hasKycTeamWithSubmittedForm) {
-    return (
-      <div className="space-y-12">
-        <KYCStatusTitle />
-        <KYCStatusContainer organization={organization} />
-      </div>
-    )
-  }
+  const { organization, hasSubmittedForms } = organizationData
 
-  // Otherwise, just show the grant address form
-  return <GrantAddressForm />
+  return (
+    <div className="space-y-12">
+      <KYCStatusTitle />
+      {/* Show KYC status container if there are submitted forms with KYC teams */}
+      {hasSubmittedForms && (
+        <KYCStatusContainer organization={organization} />
+      )}
+      {/* Always show grant address form - variant depends on existing verified addresses */}
+      <GrantAddressForm hasExistingVerifiedAddresses={hasSubmittedForms} />
+    </div>
+  )
 }

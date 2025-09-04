@@ -14,6 +14,7 @@ import {
   CreateProjectParams,
   deleteProject,
   deleteProjectKycTeams,
+  detachProjectsFromKycTeam,
   getAllApplicationsForRound,
   getAllPublishedUserProjects,
   getKycTeamForProject,
@@ -530,6 +531,30 @@ export const deleteProjectKYCTeamsAction = async ({
   })
 
   return await deleteProjectKycTeams({ projectIds, kycTeamId })
+}
+
+export const detachProjectsFromKycTeamAction = async ({
+  projectIds,
+  kycTeamId,
+}: {
+  projectIds: string[]
+  kycTeamId: string
+}) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    throw new Error("Unauthorized")
+  }
+
+  projectIds.forEach(async (projectId) => {
+    const isInvalid = await verifyMembership(projectId, userId)
+    if (isInvalid?.error) {
+      throw new Error(isInvalid.error)
+    }
+  })
+
+  return await detachProjectsFromKycTeam({ projectIds, kycTeamId })
 }
 
 export const getProjectsForKycTeamAction = async (kycTeamId: string) => {
