@@ -49,10 +49,7 @@ export const clients = {
     ethernity,
     "https://mainnet.ethernitychain.io",
   ),
-  [Chain.Ink]: createClient(
-    ink,
-    `https://ink-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-  ),
+  [Chain.Ink]: createClient(ink, "https://rpc-qnd.inkonchain.com"),
   [Chain.Lisk]: createClient(lisk, "https://rpc.api.lisk.com"),
   [Chain.MetalL2]: createClient(metalL2, "https://rpc.metall2.com"),
   [Chain.Mint]: createClient(mint, "https://rpc.mintchain.io"),
