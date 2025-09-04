@@ -173,9 +173,6 @@ const KYCStatusPresenter = ({
     : []
   return (
     <>
-      <h4 className="font-semibold text-xl leading-6 text-text-default">
-        {status !== "completed" ? "In progress" : "Verified"}
-      </h4>
       <div className="flex flex-col max-w border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
         {isLoading ? (
           <KYCSkeleton />
@@ -274,41 +271,110 @@ const OrganizationKYCStatusContainer = ({
     isError,
   } = useOrganizationKycTeams({ organizationId: organization.id })
 
-  const kycUsers = kycOrganizations?.flatMap((org) => {
-    return org.team.team.map((team) => team.users)
+  if (isError) {
+    console.error("Error loading KYC organizations data")
+  }
+
+  if (isLoading) {
+    return <KYCSkeleton />
+  }
+
+  if (!kycOrganizations || kycOrganizations.length === 0) {
+    return null
+  }
+
+  // Group KYC organizations by status
+  const kycTeamsWithStatus = kycOrganizations.map((kycOrg) => {
+    const kycUsers = kycOrg.team.team.map((team) => team.users)
+    const hasActiveStream = !!(kycOrg.team.rewardStreams && kycOrg.team.rewardStreams.length > 0)
+    const orgStatus = (kycUsers ? resolveProjectStatus(kycUsers) : "pending") as "pending" | "completed" | "project_issue"
+    
+    return {
+      kycOrg,
+      users: kycUsers,
+      status: orgStatus,
+      hasActiveStream,
+    }
   })
 
-  // Let's just assume one organization has one team for the time being and tackle edge cases later
-  const kycOrg = kycOrganizations?.[0]
+  const verifiedTeams = kycTeamsWithStatus.filter(team => team.status === "completed")
+  const inProgressTeams = kycTeamsWithStatus.filter(team => team.status !== "completed")
 
-  const orgStatus = kycUsers ? resolveProjectStatus(kycUsers) : "pending"
+  return (
+    <div className="space-y-8">
+      {/* Verified Addresses Section */}
+      {verifiedTeams.length > 0 && (
+        <div className="space-y-6">
+          <h4 className="font-semibold text-xl leading-6 text-text-default">
+            Verified Addresses
+          </h4>
+          {verifiedTeams.map((team) => (
+            <OrganizationKYCTeamCard
+              key={team.kycOrg.kycTeamId}
+              kycOrg={team.kycOrg}
+              users={team.users}
+              status={team.status}
+              hasActiveStream={team.hasActiveStream}
+            />
+          ))}
+        </div>
+      )}
 
+      {/* In Progress Addresses Section */}
+      {inProgressTeams.length > 0 && (
+        <div className="space-y-6">
+          <h4 className="font-semibold text-xl leading-6 text-text-default">
+            In Progress
+          </h4>
+          {inProgressTeams.map((team) => (
+            <OrganizationKYCTeamCard
+              key={team.kycOrg.kycTeamId}
+              kycOrg={team.kycOrg}
+              users={team.users}
+              status={team.status}
+              hasActiveStream={team.hasActiveStream}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const OrganizationKYCTeamCard = ({
+  kycOrg,
+  users,
+  status,
+  hasActiveStream,
+}: {
+  kycOrg: any // TODO: type this properly
+  users: any[]
+  status: "pending" | "completed" | "project_issue"
+  hasActiveStream: boolean
+}) => {
   const { sendingEmailUsers, handleEmailResend } = useKYCEmailResend()
 
-  const users = kycUsers?.map((user) => ({
+  const userMappings = users.map((user) => ({
     user,
     handleEmailResend,
     emailResendBlock:
-      orgStatus === "project_issue" ||
+      status === "project_issue" ||
       user.personaStatus === "approved" ||
       user.personaStatus === "completed",
     emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
   }))
 
-  if (isError) {
-    console.error("Error loading KYC users data")
-  }
-
   return (
     <KYCStatusPresenter
-      status={orgStatus}
-      address={kycOrg?.team.walletAddress || ""}
-      users={users}
-      isLoading={isLoading}
+      status={status}
+      address={kycOrg.team.walletAddress || ""}
+      users={userMappings}
+      isLoading={false}
+      kycTeamId={kycOrg.kycTeamId}
       extraMiddleContent={
         <ConnectedOrganizationProjects
-          organizationId={organization.id}
-          kycTeamId={kycOrg?.kycTeamId}
+          kycTeam={kycOrg}
+          hasActiveStream={hasActiveStream}
         />
       }
       showEditFooter

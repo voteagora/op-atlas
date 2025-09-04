@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
 import type { GrantEligibility } from "@prisma/client"
 
 import { Button } from "@/components/ui/button"
@@ -13,12 +13,14 @@ interface GrantEligibilityFormButtonProps {
   projectId?: string
   organizationId?: string
   existingForm?: GrantEligibility
+  variant?: "default" | "add"
 }
 
 export default function GrantEligibilityFormButton({
   projectId,
   organizationId,
   existingForm,
+  variant = "default",
 }: GrantEligibilityFormButtonProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -56,16 +58,39 @@ export default function GrantEligibilityFormButton({
     })
   }
 
+  // Determine button styling based on variant and whether we're resuming a form
+  const isAddVariant = variant === "add" && !existingForm
+  const buttonVariant = isAddVariant ? "secondary" : "destructive"
+  const buttonClassName = isAddVariant 
+    ? "flex items-center gap-2 bg-gray-100 text-black hover:bg-gray-200"
+    : "flex items-center gap-2"
+
+  // Determine button text and icon
+  let buttonText: string
+  let icon: React.ReactNode = null
+
+  if (isPending) {
+    buttonText = isAddVariant ? "Adding..." : "Loading..."
+    icon = <Loader2 className="animate-spin" size={16} />
+  } else if (existingForm) {
+    buttonText = "Resume form"
+  } else if (isAddVariant) {
+    buttonText = "Add"
+    icon = <Plus size={16} />
+  } else {
+    buttonText = "Open form"
+  }
+
   return (
     <Button
-      variant="destructive"
+      variant={buttonVariant}
       size="sm"
       onClick={handleButtonClick}
       disabled={isPending}
-      className="flex items-center gap-2"
+      className={buttonClassName}
     >
-      {isPending && <Loader2 className="animate-spin" size={16} />}
-      {existingForm ? "Resume form" : "Open form"}
+      {icon}
+      {buttonText}
     </Button>
   )
 }
