@@ -9,7 +9,7 @@ import { sendKYCStartedEmail, sendKYBStartedEmail } from "./emails"
 import { getGrantEligibilityFormStatus, GrantEligibilityFormStatus } from "@/lib/utils/grantEligibilityFormStatus"
 import { withChangelogTracking } from "@/lib/utils/changelog"
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
-import { getLatestDraftForm } from "@/db/grantEligibility"
+import { getLatestDraftForm, getGrantEligibilityExpiration } from "@/db/grantEligibility"
 
 export interface CreateGrantEligibilityFormParams {
   projectId?: string
@@ -100,7 +100,7 @@ export async function createGrantEligibilityForm(
             signers: [],
             entities: []
           },
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          expiresAt: getGrantEligibilityExpiration(),
         },
       })
 
@@ -189,6 +189,7 @@ export async function updateGrantEligibilityForm(
           kycTeamId: updates.kycTeamId ?? existingForm.kycTeamId,
           attestations: attestationsValue,
           data: updatedData,
+          expiresAt: getGrantEligibilityExpiration(),
         },
       })
     })
@@ -312,6 +313,7 @@ export async function submitGrantEligibilityForm(params: {
             ...((existingForm.attestations as any) || {}),
             ...finalAttestations,
           },
+          expiresAt: getGrantEligibilityExpiration(),
         },
       })
 
@@ -634,6 +636,7 @@ export async function clearGrantEligibilityForm(formId: string) {
             signers: [],
             entities: [],
           },
+          expiresAt: getGrantEligibilityExpiration(),
         },
       })
 

@@ -1,5 +1,9 @@
 import { prisma } from "./client"
 
+export function getGrantEligibilityExpiration(): Date {
+  return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+}
+
 export async function getLatestDraftForm(params: {
   projectId?: string
   organizationId?: string
