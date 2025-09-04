@@ -62,20 +62,22 @@ export function UserProfileSidebar({
             (org) => org.team.projects,
           )
 
-          // Check if any of the resolved projects have incomplete KYC status
-          let incompleteProject = null
-          for (const project of projects) {
-            const kycUsers = await getKYCUsersByProjectId(project.id)
-            const resolvedStatus = resolveProjectStatus(kycUsers)
-            if (
-              kycUsers &&
-              (resolvedStatus === "pending" ||
-                resolvedStatus === "project_issue")
-            ) {
-              incompleteProject = project
-              break
-            }
-          }
+          // Determine organization completeness based on TAM users (across the org's KYC teams)
+          const tamUsers = organizationKycTeams.flatMap((org) =>
+            (org.team.team || []).flatMap((t: any) => t.users || []),
+          )
+          const orgResolvedStatus =
+            tamUsers && tamUsers.length > 0
+              ? resolveProjectStatus(tamUsers)
+              : "pending"
+
+          // If org TAM users indicate incomplete status, show the incomplete card by associating it with a representative project
+          // We pick the first available project as a handle for the IncompleteCard component
+          const incompleteProject =
+            orgResolvedStatus === "pending" ||
+            orgResolvedStatus === "project_issue"
+              ? projects[0] || null
+              : null
 
           return {
             organization,
