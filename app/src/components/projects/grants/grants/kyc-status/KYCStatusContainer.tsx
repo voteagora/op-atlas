@@ -285,20 +285,32 @@ const OrganizationKYCStatusContainer = ({
 
   // Group KYC organizations by status
   const kycTeamsWithStatus = kycOrganizations.map((kycOrg) => {
-    const kycUsers = kycOrg.team.team.map((team) => team.users)
-    const hasActiveStream = !!(kycOrg.team.rewardStreams && kycOrg.team.rewardStreams.length > 0)
-    const orgStatus = (kycUsers ? resolveProjectStatus(kycUsers) : "pending") as "pending" | "completed" | "project_issue"
-    
+    // We need to check TAM users (all users in the org's KYC team)
+    // Flatten all users from the organization's KYC team structure
+    const tamUsers = kycOrg.team.team.flatMap((t: any) => t.users || [])
+    const hasActiveStream =
+      kycOrg.team.rewardStreams && kycOrg.team.rewardStreams.length > 0
+
+    const orgStatus = (
+      tamUsers && tamUsers.length > 0
+        ? resolveProjectStatus(tamUsers)
+        : "pending"
+    ) as "pending" | "completed" | "project_issue"
+
     return {
       kycOrg,
-      users: kycUsers,
+      users: tamUsers,
       status: orgStatus,
       hasActiveStream,
     }
   })
 
-  const verifiedTeams = kycTeamsWithStatus.filter(team => team.status === "completed")
-  const inProgressTeams = kycTeamsWithStatus.filter(team => team.status !== "completed")
+  const verifiedTeams = kycTeamsWithStatus.filter(
+    (team) => team.status === "completed",
+  )
+  const inProgressTeams = kycTeamsWithStatus.filter(
+    (team) => team.status !== "completed",
+  )
 
   return (
     <div className="space-y-8">
