@@ -2,6 +2,8 @@
 
 import { Alignment, Fit, Layout, useRive } from "@rive-app/react-canvas-lite"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 interface GrantEligibilitySuccessProps {
   projectId?: string
@@ -13,6 +15,7 @@ export default function GrantEligibilitySuccess({
   organizationId 
 }: GrantEligibilitySuccessProps) {
   const router = useRouter()
+  const [isNavigating, setIsNavigating] = useState(false)
   
   const { RiveComponent } = useRive({
     src: "/assets/images/sunny-animation.riv",
@@ -26,6 +29,7 @@ export default function GrantEligibilitySuccess({
   })
 
   const handleCheckStatus = () => {
+    setIsNavigating(true)
     if (projectId) {
       router.push(`/projects/${projectId}/grant-address`)
     } else if (organizationId) {
@@ -64,8 +68,10 @@ export default function GrantEligibilitySuccess({
         <button
           type="button"
           onClick={handleCheckStatus}
-          className="inline-flex items-center justify-center py-3 px-4 mt-12 rounded-md bg-destructive text-white hover:bg-destructive/90 transition-colors"
+          disabled={isNavigating}
+          className="inline-flex items-center justify-center gap-2 py-3 px-4 mt-12 rounded-md bg-destructive text-white hover:bg-destructive/90 transition-colors disabled:opacity-50"
         >
+          {isNavigating && <Loader2 className="animate-spin" size={16} />}
           Check status
         </button>
       </div>

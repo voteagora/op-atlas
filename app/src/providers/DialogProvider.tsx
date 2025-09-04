@@ -20,6 +20,7 @@ type DataType = {
   hasActiveStream?: boolean
   formId?: string
   onSuccess?: (data?: any) => void
+  allOrgKycTeams?: any[]
 }
 
 type AppDialog = {
