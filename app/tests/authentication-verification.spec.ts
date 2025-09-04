@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test"
 import { setupTestMode, authenticateTestUser } from "./helpers/auth"
 import { waitForPageReady } from "./helpers"
+import "./setup"
 
 test.describe("Authentication Verification", () => {
   test("should show Sign in button when user is not authenticated", async ({

@@ -30,7 +30,7 @@ export default defineConfig({
     command: "pnpm dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: process.env.CI ? 180000 : 120000, // 3 minutes for CI, 2 for local
+    timeout: process.env.CI ? 240000 : 120000, // 4 minutes for CI, 2 for local
     env: {
       NODE_ENV: "test",
       ATLAS_TEST_MODE: "true",

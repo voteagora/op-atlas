@@ -10,19 +10,8 @@ import { Page } from "@playwright/test"
  * Set up test mode environment for a page
  */
 export const setupTestMode = async (page: Page): Promise<void> => {
-  await page.addInitScript(() => {
-    // Set test mode environment variables
-    Object.assign(process.env, {
-      NODE_ENV: "test",
-      ATLAS_TEST_MODE: "true",
-      USE_TEST_AUTH: "true",
-      MOCK_EXTERNAL_SERVICES: "true",
-      NEXT_PUBLIC_PRIVY_APP_ID: "test-app-id",
-      PRIVY_APP_ID: "test-app-id",
-      PRIVY_APP_SECRET: "test-app-secret",
-      NEXTAUTH_SECRET: "test-nextauth-secret",
-    })
-  })
+  // Environment variables are already injected from workflow + playwright.config.ts
+  // No need to set them again in the browser context
 }
 
 /**

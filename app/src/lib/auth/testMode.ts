@@ -27,14 +27,16 @@ export interface TestModeConfig {
 /**
  * Check if the application is running in test mode
  */
+const isTrue = (v?: string) => v?.toLowerCase() === "true";
+
 export const isTestMode = (): boolean => {
   return (
     process.env.NODE_ENV === "test" ||
-    process.env.ATLAS_TEST_MODE === "true" ||
-    process.env.USE_TEST_AUTH === "true" ||
-    process.env.NEXT_PUBLIC_ATLAS_TEST_MODE === "true" ||
-    process.env.NEXT_PUBLIC_USE_TEST_AUTH === "true"
-  )
+    isTrue(process.env.ATLAS_TEST_MODE) ||
+    isTrue(process.env.USE_TEST_AUTH) ||
+    isTrue(process.env.NEXT_PUBLIC_ATLAS_TEST_MODE) ||
+    isTrue(process.env.NEXT_PUBLIC_USE_TEST_AUTH)
+  );
 }
 
 /**

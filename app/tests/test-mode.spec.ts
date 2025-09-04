@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test"
 import { setupTestMode } from "./helpers/auth"
 import { waitForPageReady } from "./helpers"
+import "./setup"
 
 test.describe("Test Mode Infrastructure", () => {
   test("should load homepage in test mode", async ({ page }) => {
@@ -12,7 +13,7 @@ test.describe("Test Mode Infrastructure", () => {
     await waitForPageReady(page)
 
     // Verify the page loads without errors
-    await expect(page.locator("body")).toBeVisible()
+    await expect(page.locator("main")).toBeVisible()
 
     // Check for any console errors
     const errors: string[] = []

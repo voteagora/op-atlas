@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import { waitForPageReady, checkForConsoleErrors } from "./helpers"
+import "./setup"
 
 test.describe("Homepage", () => {
   test("should display Optimism branding", async ({ page }) => {
