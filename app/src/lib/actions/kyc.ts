@@ -3,13 +3,9 @@
 import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
-import {
-  deleteKycTeam,
-  updateKYCUserStatus
-} from "@/db/kyc"
+import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
-import { getReward, updateClaim } from "@/db/rewards"
 import {
   caseStatusMap,
   inquiryStatusMap,
