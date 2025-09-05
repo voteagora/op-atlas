@@ -1,6 +1,7 @@
+import { KYCUser } from "@prisma/client"
+
 import { KYCStreamTeam, KYCTeamWithTeam } from "../types"
 import { RecurringRewardKycTeam } from "./rewards"
-import { KYCUser } from "@prisma/client"
 
 export function isKycTeamVerified(kycTeam?: KYCTeamWithTeam) {
   return Boolean(
@@ -27,39 +28,22 @@ export function isKycStreamTeamVerified(
   )
 }
 
-export function resolveProjectStatus(users: Pick<KYCUser, "personaStatus">[]) {
+export function resolveProjectStatus(users: Pick<KYCUser, "status">[]) {
   // If any users are expired, failed, or declined, return "project_issue"
-  if (
-    users.some(
-      (user) =>
-        user.personaStatus === "expired" ||
-        user.personaStatus === "failed" ||
-        user.personaStatus === "declined",
-    )
-  ) {
+  if (users.some((user) => user.status === "REJECTED")) {
     return "project_issue"
   }
 
-  // If any users are created or pending, resolve to "pending
-  if (
-    users.some(
-      (user) =>
-        user.personaStatus === "created" || user.personaStatus === "pending",
-    )
-  ) {
-    return "pending"
+  // If any users are PENDING, resolve to "Pending"
+  if (users.some((user) => user.status === "PENDING")) {
+    return "PENDING"
   }
 
-  // If all users are completed or approved, resolve to "completed"
-  if (
-    users.every(
-      (user) =>
-        user.personaStatus === "completed" || user.personaStatus === "approved",
-    )
-  ) {
-    return "completed"
+  // If all users are APPROVED, resolve to "Approved"
+  if (users.every((user) => user.status === "APPROVED")) {
+    return "APPROVED"
   }
 
   // Default fallback
-  return "pending"
+  return "PENDING"
 }

@@ -261,7 +261,7 @@ const IncompleteCard = ({ project }: { project: Project | null }) => {
   if (!project || !project.id || !kycUsers) return null
   const projectStatus = resolveProjectStatus(kycUsers)
 
-  if (projectStatus == "completed") return null
+  if (projectStatus == "APPROVED") return null
   return (
     <div className="flex items-center justify-center bg-red-200 w-[80px] h-5 rotate-[0deg] opacity-100 rounded-full py-[2px] px-2">
       <p className="text-red-600 font-inter font-medium text-[12px] leading-[16px] tracking-[0%] text-center">
