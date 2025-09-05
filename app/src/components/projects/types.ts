@@ -34,18 +34,10 @@ export type ProjectWithKycTeam = Prisma.ProjectGetPayload<{
   }
 }>
 
-export type PersonaStatus =
-  | "created"
-  | "pending"
-  | "completed"
-  | "failed"
-  | "expired"
-  | "needs_review"
-  | "approved"
-  | "declined"
-
 // Useful to add project problems to persona status
-export type ExtendedPersonaStatus = PersonaStatus | "project_issue"
+export type ExtendedPersonaStatus =
+  | import("@prisma/client").KYCStatus
+  | "project_issue"
 
 export enum EmailState {
   NOT_SENT = "NOT_SENT",
