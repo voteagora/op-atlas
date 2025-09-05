@@ -190,8 +190,8 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
 
       await updateKYCUserStatus(
         parsedStatus,
-        new Date(updatedAt),
         status,
+        new Date(updatedAt),
         referenceId,
         inquiry.attributes["expires-at"]
           ? new Date(inquiry.attributes["expires-at"])
@@ -244,8 +244,8 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
 
           await updateKYCUserStatus(
             parsedStatus,
-            new Date(updatedAt),
             personaStatus,
+            new Date(updatedAt),
             inquiry.attributes["reference-id"],
             inquiry.attributes["expires-at"]
               ? new Date(inquiry.attributes["expires-at"])
