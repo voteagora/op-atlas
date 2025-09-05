@@ -69,12 +69,12 @@ export function UserProfileSidebar({
           const orgResolvedStatus =
             tamUsers && tamUsers.length > 0
               ? resolveProjectStatus(tamUsers)
-              : "pending"
+              : "PENDING"
 
           // If org TAM users indicate incomplete status, show the incomplete card by associating it with a representative project
           // We pick the first available project as a handle for the IncompleteCard component
           const incompleteProject =
-            orgResolvedStatus === "pending" ||
+            orgResolvedStatus === "PENDING" ||
             orgResolvedStatus === "project_issue"
               ? projects[0] || null
               : null

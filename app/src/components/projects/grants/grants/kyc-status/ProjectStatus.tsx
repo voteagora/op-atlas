@@ -33,12 +33,12 @@ const ProjectStatus = ({
     setOpenDialog("delete_kyc_team")
   }
 
-  if (status === "completed") {
+  if (status === "APPROVED") {
     return null
   }
   return (
     <div className="w-full max-w-[664px] h-[176px] rounded-[6px] p-6 gap-3 justify-center items-center flex flex-col relative">
-      {status !== "pending" && (
+      {status !== "PENDING" && (
         <div className="absolute top-2 right-2">
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -58,7 +58,7 @@ const ProjectStatus = ({
       <div className={"text-center"}>
         <StatusIcon status={status} size={6} />
       </div>
-      {status === "pending" ? (
+      {status === "PENDING" ? (
         <>
           <p className="font-[Inter] font-medium text-[14px] leading-[20px] text-center text-text-foreground">
             We are checking for verifications

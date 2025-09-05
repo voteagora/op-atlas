@@ -14,18 +14,12 @@ interface StatusIconProps {
 
 const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
   switch (status) {
-    case "created":
-    case "pending":
-    case "needs_review":
+    case "PENDING":
       return <Loader2 className={cn(`h-${size} w-${size}`, "animate-spin")} />
-    case "completed":
-    case "approved":
+    case "APPROVED":
       return <Check className={cn(`h-${size} w-${size}`, "text-green-500")} />
-    case "failed":
-    case "declined":
+    case "REJECTED":
       return <X className={cn(`h-${size} w-${size}`, "text-red-500")} />
-    case "expired":
-      return <Clock className={cn(`h-${size} w-${size}`, "text-yellow-500")} />
     case "project_issue":
       return (
         <AlertTriangle
@@ -62,14 +56,13 @@ const StatusRow = ({
         <div
           className="flex flex-row items-center gap-2"
           title={
-            user.personaStatus
-              ? // Sentence case the status and replace underscores with spaces
-                user!.personaStatus.replace(/_/g, " ").charAt(0).toUpperCase() +
-                user!.personaStatus.replace(/_/g, " ").slice(1)
+            user.status
+              ? user.status.charAt(0).toUpperCase() +
+                user.status.slice(1).toLowerCase()
               : "Pending"
           }
         >
-          <StatusIcon status={user!.personaStatus!} />
+          <StatusIcon status={user!.status as ExtendedPersonaStatus} />
           <div className="flex flex-row gap-2">
             <RowText
               values={[
@@ -80,17 +73,16 @@ const StatusRow = ({
             />
           </div>
           <div className="flex flex-row gap-2">
-            {user.personaExpiry && (
+            {user.status === "APPROVED" && user.expiry && (
               <Badge
                 // Convert expiration date to a human-readable format
-                text={`Verified until ${user.personaExpiry.toLocaleDateString(
-                  "en-US",
-                  {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  },
-                )}`}
+                text={`Verified until ${new Date(
+                  user.expiry,
+                ).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}`}
               />
             )}
           </div>
