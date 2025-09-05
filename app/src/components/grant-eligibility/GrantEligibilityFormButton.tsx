@@ -14,6 +14,7 @@ interface GrantEligibilityFormButtonProps {
   organizationId?: string
   existingForm?: GrantEligibility
   variant?: "default" | "add"
+  isAdmin?: boolean
 }
 
 export default function GrantEligibilityFormButton({
@@ -21,9 +22,21 @@ export default function GrantEligibilityFormButton({
   organizationId,
   existingForm,
   variant = "default",
+  isAdmin = true,
 }: GrantEligibilityFormButtonProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+
+  // If user is not admin, show message instead of button
+  if (!isAdmin) {
+    return (
+      <div className="p-4 bg-gray-50 border border-gray-200 rounded-md">
+        <p className="text-sm text-gray-600">
+          Only admins can fill the grant eligibility form.
+        </p>
+      </div>
+    )
+  }
 
   const handleButtonClick = () => {
     startTransition(async () => {

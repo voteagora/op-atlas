@@ -14,9 +14,11 @@ type KYCTeamWithProjects = OrganizationKYCTeam & {
 const ConnectedOrganizationProjects = ({
   kycTeam,
   hasActiveStream = false,
+  isAdmin = true,
 }: {
   kycTeam: KYCTeamWithProjects
   hasActiveStream?: boolean
+  isAdmin?: boolean
 }) => {
   console.log({ kycTeam, ln: kycTeam?.team.projects.length })
   return (
@@ -25,6 +27,7 @@ const ConnectedOrganizationProjects = ({
       kycTeamId={kycTeam?.kycTeamId}
       organizationId={kycTeam?.organizationId}
       hasActiveStream={hasActiveStream}
+      isAdmin={isAdmin}
     >
       <div className="space-y-2">
         {kycTeam && kycTeam?.team.projects.length > 0 ? (
