@@ -27,7 +27,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev",
+    command: "pnpm graphql:generate && npx prisma generate && next dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 240000 : 120000, // 4 minutes for CI, 2 for local
@@ -36,6 +36,7 @@ export default defineConfig({
       ATLAS_TEST_MODE: "true",
       USE_TEST_AUTH: "true",
       MOCK_EXTERNAL_SERVICES: "true",
+      DATABASE_URL: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/atlas_test",
       NEXT_PUBLIC_PRIVY_APP_ID: "test-app-id",
       NEXT_PUBLIC_ATLAS_TEST_MODE: "true",
       NEXT_PUBLIC_USE_TEST_AUTH: "true",
@@ -47,12 +48,15 @@ export default defineConfig({
       NEXT_PUBLIC_VERCEL_URL: "http://localhost:3000",
       NEXT_PUBLIC_APP_DOMAIN: "localhost:3000",
       NEXT_PUBLIC_VERCEL_ENV: "development",
+      NEXT_PUBLIC_APPLICATIONS_CLOSED: "false",
       MAILCHIMP_API_KEY: "test-mailchimp-key",
       MAILCHIMP_SERVER_PREFIX: "test",
       NEXT_PUBLIC_MIXPANEL_TOKEN: "test-mixpanel-token",
       NEXT_PUBLIC_POSTHOG_KEY: "test-posthog-key",
       NEXT_PUBLIC_SAFE_API_KEY: "test-safe-api-key",
       NEXT_PUBLIC_ENV: "development",
+      NEXT_PUBLIC_WORLD_APP_ID: "test-world-app-id",
+      NEXT_PUBLIC_WORLD_APP_ACTION: "test-action",
     },
   },
 })
