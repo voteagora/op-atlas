@@ -4,11 +4,13 @@ import GrantEligibilityFormButton from "@/components/grant-eligibility/GrantElig
 interface GrantDeliveryAddressSectionProps {
   projectId?: string
   organizationId?: string
+  isAdmin: boolean
 }
 
 export default async function GrantDeliveryAddressSection({
   projectId,
   organizationId,
+  isAdmin,
 }: GrantDeliveryAddressSectionProps) {
   // Get the latest draft form to resume if it exists
   const result = await getLatestDraftFormAction({
@@ -22,6 +24,7 @@ export default async function GrantDeliveryAddressSection({
       projectId={projectId}
       organizationId={organizationId}
       existingForm={latestDraftForm || undefined}
+      isAdmin={isAdmin}
     />
   )
 }

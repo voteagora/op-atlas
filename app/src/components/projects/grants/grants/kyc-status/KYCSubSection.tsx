@@ -10,6 +10,7 @@ interface KYCSubSectionProps {
   kycTeamId?: string
   organizationId?: string
   hasActiveStream?: boolean
+  isAdmin?: boolean
 }
 
 const KYCSubSection = ({
@@ -18,6 +19,7 @@ const KYCSubSection = ({
   kycTeamId,
   organizationId,
   hasActiveStream = false,
+  isAdmin = true,
 }: KYCSubSectionProps) => {
   return (
     <div className="flex flex-col gap-[8px] max-w-[664px]">
@@ -25,7 +27,7 @@ const KYCSubSection = ({
         <p className="font-[Inter] font-medium text-[14px] leading-[20px] text-text-foreground">
           {title}
         </p>
-        {kycTeamId && organizationId && (
+        {kycTeamId && organizationId && isAdmin && (
           <SelectProjectsButton
             kycTeamId={kycTeamId}
             organizationId={organizationId}

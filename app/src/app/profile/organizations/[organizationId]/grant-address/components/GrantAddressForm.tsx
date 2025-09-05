@@ -9,9 +9,10 @@ import { getLatestDraftFormAction } from "@/lib/actions/grantEligibility"
 
 interface GrantAddressFormProps {
   hasExistingVerifiedAddresses?: boolean
+  isAdmin?: boolean
 }
 
-export default function GrantAddressForm({ hasExistingVerifiedAddresses = false }: GrantAddressFormProps) {
+export default function GrantAddressForm({ hasExistingVerifiedAddresses = false, isAdmin = true }: GrantAddressFormProps) {
   const params = useParams()
   const organizationId = params.organizationId as string
   
@@ -48,6 +49,7 @@ export default function GrantAddressForm({ hasExistingVerifiedAddresses = false 
         organizationId={organizationId}
         existingForm={latestDraftForm || undefined}
         variant={buttonVariant}
+        isAdmin={isAdmin}
       />
     </div>
   )

@@ -21,9 +21,11 @@ import { useAppDialogs } from "@/providers/DialogProvider"
 const KYCStatusContainer = ({
   project,
   organization,
+  isAdmin = true,
 }: {
   project?: ProjectWithKycTeam
   organization?: Organization
+  isAdmin?: boolean
 }) => {
   if (!project && !organization) {
     return <div>Project or organization not found</div>
@@ -31,10 +33,10 @@ const KYCStatusContainer = ({
   return (
     <div className="flex flex-col w-full max-w-[712px] gap-6">
       {project ? (
-        <ProjectKYCStatusContainer project={project} />
+        <ProjectKYCStatusContainer project={project} isAdmin={isAdmin} />
       ) : (
         organization && (
-          <OrganizationKYCStatusContainer organization={organization} />
+          <OrganizationKYCStatusContainer organization={organization} isAdmin={isAdmin} />
         )
       )}
     </div>
@@ -100,7 +102,7 @@ const KYCStatusTitle = () => {
 }
 
 // Shared hook to manage resend email state/handler
-const useKYCEmailResend = () => {
+const useKYCEmailResend = (context: { projectId?: string; organizationId?: string }) => {
   const [sendingEmailUsers, setSendingEmailUsers] = useState<
     Record<string, EmailState>
   >({})
@@ -112,7 +114,7 @@ const useKYCEmailResend = () => {
       [kycUser.id]: EmailState.SENDING,
     }))
     try {
-      const response = await sendKYCReminderEmail(kycUser)
+      const response = await sendKYCReminderEmail(kycUser, context)
       console.log("Email resend success:", response)
     } catch (error) {
       console.error("Failed to send email:", error)
@@ -122,7 +124,7 @@ const useKYCEmailResend = () => {
         [kycUser.id]: EmailState.SENT,
       }))
     }
-  }, [])
+  }, [context])
 
   return { sendingEmailUsers, handleEmailResend }
 }
@@ -136,6 +138,7 @@ const KYCStatusPresenter = ({
   kycTeamId,
   extraMiddleContent,
   showEditFooter = false,
+  isAdmin = true,
 }: {
   status: "pending" | "completed" | "project_issue"
   address: string
@@ -151,6 +154,7 @@ const KYCStatusPresenter = ({
   kycTeamId?: string
   extraMiddleContent?: ReactNode
   showEditFooter?: boolean
+  isAdmin?: boolean
 }) => {
   const { organizationId, projectId } = useParams()
   const { setData, setOpenDialog } = useAppDialogs()
@@ -183,13 +187,13 @@ const KYCStatusPresenter = ({
             {extraMiddleContent}
             {users && users.length > 0 && (
               <>
-                <IndividualStatuses users={individualStatuses} />
+                <IndividualStatuses users={individualStatuses} isAdmin={isAdmin} />
                 {users.some((u) => u.user.kycUserType === "LEGAL_ENTITY") && (
-                  <LegalEntities users={legalEntitiesStatuses} />
+                  <LegalEntities users={legalEntitiesStatuses} isAdmin={isAdmin} />
                 )}
               </>
             )}
-            {showEditFooter && status !== "completed" && (
+            {showEditFooter && status !== "completed" && isAdmin && (
               <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">
                 <p className="font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
                   Is something missing or incorrect?
@@ -222,8 +226,10 @@ const KYCStatusPresenter = ({
 
 const ProjectKYCStatusContainer = ({
   project,
+  isAdmin = true,
 }: {
   project: ProjectWithKycTeam
+  isAdmin?: boolean
 }) => {
   const {
     data: kycUsers,
@@ -232,12 +238,15 @@ const ProjectKYCStatusContainer = ({
   } = useKYCProject({ projectId: project.id })
   const projectStatus = kycUsers ? resolveProjectStatus(kycUsers) : "pending"
 
-  const { sendingEmailUsers, handleEmailResend } = useKYCEmailResend()
+  const { sendingEmailUsers, handleEmailResend } = useKYCEmailResend({
+    projectId: project.id
+  })
 
   const users = kycUsers?.map((user) => ({
     user,
     handleEmailResend,
     emailResendBlock:
+      !isAdmin ||
       projectStatus === "project_issue" ||
       user.personaStatus === "approved" ||
       user.personaStatus === "completed",
@@ -256,14 +265,17 @@ const ProjectKYCStatusContainer = ({
       isLoading={isLoading}
       kycTeamId={project.kycTeam?.id}
       showEditFooter
+      isAdmin={isAdmin}
     />
   )
 }
 
 const OrganizationKYCStatusContainer = ({
   organization,
+  isAdmin = true,
 }: {
   organization: Organization
+  isAdmin?: boolean
 }) => {
   const {
     data: kycOrganizations,
@@ -327,6 +339,7 @@ const OrganizationKYCStatusContainer = ({
               users={team.users}
               status={team.status}
               hasActiveStream={team.hasActiveStream}
+              isAdmin={isAdmin}
             />
           ))}
         </div>
@@ -345,6 +358,7 @@ const OrganizationKYCStatusContainer = ({
               users={team.users}
               status={team.status}
               hasActiveStream={team.hasActiveStream}
+              isAdmin={isAdmin}
             />
           ))}
         </div>
@@ -358,18 +372,23 @@ const OrganizationKYCTeamCard = ({
   users,
   status,
   hasActiveStream,
+  isAdmin = true,
 }: {
   kycOrg: any // TODO: type this properly
   users: any[]
   status: "pending" | "completed" | "project_issue"
   hasActiveStream: boolean
+  isAdmin?: boolean
 }) => {
-  const { sendingEmailUsers, handleEmailResend } = useKYCEmailResend()
+  const { sendingEmailUsers, handleEmailResend } = useKYCEmailResend({
+    organizationId: kycOrg.organizationId
+  })
 
   const userMappings = users.map((user) => ({
     user,
     handleEmailResend,
     emailResendBlock:
+      !isAdmin ||
       status === "project_issue" ||
       user.personaStatus === "approved" ||
       user.personaStatus === "completed",
@@ -387,9 +406,11 @@ const OrganizationKYCTeamCard = ({
         <ConnectedOrganizationProjects
           kycTeam={kycOrg}
           hasActiveStream={hasActiveStream}
+          isAdmin={isAdmin}
         />
       }
       showEditFooter
+      isAdmin={isAdmin}
     />
   )
 }

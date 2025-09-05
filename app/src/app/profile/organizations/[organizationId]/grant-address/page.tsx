@@ -10,6 +10,7 @@ import {
   getOrganization,
   getOrganizationWithAllGrantData,
 } from "@/db/organizations"
+import { getUserOrganizationRole, verifyOrganizationMembership } from "@/lib/actions/utils"
 
 import GrantAddressForm from "./components/GrantAddressForm"
 
@@ -46,6 +47,18 @@ export default async function Page({
     redirect("/")
   }
 
+  const userId = session.user.id
+
+  // Check user membership - redirect non-members to homepage
+  const membershipCheck = await verifyOrganizationMembership(params.organizationId, userId)
+  if (membershipCheck?.error) {
+    redirect("/")
+  }
+
+  // Get user role
+  const userRole = await getUserOrganizationRole(params.organizationId, userId)
+  const isAdmin = userRole === "admin"
+
   // Fetch organization data with all grant eligibility information
   const organizationData = await getOrganizationWithAllGrantData({
     organizationId: params.organizationId,
@@ -62,10 +75,10 @@ export default async function Page({
       <KYCStatusTitle />
       {/* Show KYC status container if there are submitted forms with KYC teams */}
       {hasSubmittedForms && (
-        <KYCStatusContainer organization={organization} />
+        <KYCStatusContainer organization={organization} isAdmin={isAdmin} />
       )}
       {/* Always show grant address form - variant depends on existing verified addresses */}
-      <GrantAddressForm hasExistingVerifiedAddresses={hasSubmittedForms} />
+      <GrantAddressForm hasExistingVerifiedAddresses={hasSubmittedForms} isAdmin={isAdmin} />
     </div>
   )
 }
