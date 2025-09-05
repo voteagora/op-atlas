@@ -1781,6 +1781,71 @@ export async function getKycTeamForProject({
   return projectKycTeam ?? undefined
 }
 
+export async function getProjectWithGrantEligibility({
+  projectId,
+}: {
+  projectId: string
+}) {
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+    },
+    include: {
+      organization: {
+        select: {
+          organization: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
+      kycTeam: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          team: {
+            select: {
+              users: true,
+            },
+          },
+          rewardStreams: true,
+          projects: {
+            include: {
+              blacklist: true,
+            },
+          },
+          GrantEligibilitys: {
+            where: {
+              deletedAt: null,
+              submittedAt: {
+                not: null,
+              },
+            },
+            select: {
+              id: true,
+              submittedAt: true,
+              expiresAt: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // Check if project has KYC team with submitted grant eligibility
+  const hasSubmittedGrantEligibility = !!(
+    project?.kycTeam &&
+    project.kycTeam.GrantEligibilitys &&
+    project.kycTeam.GrantEligibilitys.length > 0
+  )
+
+  return {
+    project: project ?? undefined,
+    hasSubmittedGrantEligibility,
+  }
+}
 export async function addKYCTeamMembers({
   kycTeamId,
   individuals,
@@ -1916,19 +1981,22 @@ export async function createProjectKycTeams({
     where: {
       id: { in: projectIds },
     },
-    select: { 
-      id: true, 
+    select: {
+      id: true,
       name: true,
       kycTeam: {
         select: {
-          rewardStreams: true
-        }
-      }
+          rewardStreams: true,
+        },
+      },
     },
   })
 
-  const projectsWithActiveStreams = projectsToCheck.filter(project => 
-    project.kycTeam && project.kycTeam.rewardStreams && project.kycTeam.rewardStreams.length > 0
+  const projectsWithActiveStreams = projectsToCheck.filter(
+    (project) =>
+      project.kycTeam &&
+      project.kycTeam.rewardStreams &&
+      project.kycTeam.rewardStreams.length > 0,
   )
 
   if (projectsWithActiveStreams.length > 0) {
@@ -1962,19 +2030,22 @@ export async function detachProjectsFromKycTeam({
     where: {
       id: { in: projectIds },
     },
-    select: { 
-      id: true, 
+    select: {
+      id: true,
       name: true,
       kycTeam: {
         select: {
-          rewardStreams: true
-        }
-      }
+          rewardStreams: true,
+        },
+      },
     },
   })
 
-  const projectsWithActiveStreams = projectsToCheck.filter(project => 
-    project.kycTeam && project.kycTeam.rewardStreams && project.kycTeam.rewardStreams.length > 0
+  const projectsWithActiveStreams = projectsToCheck.filter(
+    (project) =>
+      project.kycTeam &&
+      project.kycTeam.rewardStreams &&
+      project.kycTeam.rewardStreams.length > 0,
   )
 
   if (projectsWithActiveStreams.length > 0) {
@@ -2010,19 +2081,22 @@ export async function deleteProjectKycTeams({
     where: {
       id: { in: projectIds },
     },
-    select: { 
-      id: true, 
+    select: {
+      id: true,
       name: true,
       kycTeam: {
         select: {
-          rewardStreams: true
-        }
-      }
+          rewardStreams: true,
+        },
+      },
     },
   })
 
-  const projectsWithActiveStreams = projectsToCheck.filter(project => 
-    project.kycTeam && project.kycTeam.rewardStreams && project.kycTeam.rewardStreams.length > 0
+  const projectsWithActiveStreams = projectsToCheck.filter(
+    (project) =>
+      project.kycTeam &&
+      project.kycTeam.rewardStreams &&
+      project.kycTeam.rewardStreams.length > 0,
   )
 
   if (projectsWithActiveStreams.length > 0) {
