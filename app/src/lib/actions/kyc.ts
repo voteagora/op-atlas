@@ -9,6 +9,7 @@ import {
 } from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
+import { getReward, updateClaim } from "@/db/rewards"
 import {
   caseStatusMap,
   inquiryStatusMap,
@@ -19,8 +20,6 @@ import {
 } from "@/lib/persona"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
-import { getUserByPrivyDid } from "@/db/users"
-import { getProject } from "@/db/projects"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -194,6 +193,9 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
         new Date(updatedAt),
         status,
         referenceId,
+        inquiry.attributes["expires-at"]
+          ? new Date(inquiry.attributes["expires-at"])
+          : null,
       )
     }),
   )
@@ -245,6 +247,9 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
             new Date(updatedAt),
             personaStatus,
             inquiry.attributes["reference-id"],
+            inquiry.attributes["expires-at"]
+              ? new Date(inquiry.attributes["expires-at"])
+              : null,
           )
         }
       }
