@@ -22,7 +22,11 @@ import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
-import { DeleteProjectDialog } from "./DeleteProjectDialog"
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
+import { resolveProjectStatus } from "@/lib/utils/kyc"
+import { useKYCProject } from "@/hooks/db/useKYCProject"
+import { project } from "ramda"
+import { Project } from "@prisma/client"
 
 // Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
@@ -83,7 +87,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   const hasNotBeenPublished = project ? project?.snapshots.length === 0 : true
 
   return (
-    <div className="sm:flex flex-col gap-4 items-start hidden">
+    <div className="sm:flex flex-col gap-4 items-start hidden md:w-full md:max-w-[228px]">
       <Button
         isLoading={dashboardLoading}
         onClick={handleGoBack}
@@ -106,7 +110,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
 
       {hasNotBeenPublished && (
         <div className="flex flex-col gap-2 pl-2">
-          <Progress value={progressPercent} className="w-[228px] h-2" />
+          <Progress value={progressPercent} className="w-[220px] h-2" />
           <p className="text-sm font-normal">{progressPercent}% complete</p>
         </div>
       )}
@@ -193,14 +197,16 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               <Link
                 className={cn([
                   {
-                    "font-medium text-foreground":
+                    "font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap":
                       currentPage === "grant-address",
                   },
                 ])}
                 href={`/projects/${project.id}/grant-address`}
               >
-                Grant Address
+                Grant Delivery Address
               </Link>
+              {/* Only shows if Project status resolves to 'PENDING' */}
+              <IncompleteCard project={project} />
             </div>
             <Separator />
           </>
@@ -235,12 +241,34 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
       </div>
 
       {deletingProject && (
-        <DeleteProjectDialog
-          open
+        <ConfirmationDialog
+          open={deletingProject}
+          onOpenChange={(open) => setDeletingProject(open)}
           onConfirm={deleteProject}
-          onOpenChange={(open) => !open && setDeletingProject(false)}
+          title="Are you sure you want to delete this project?"
+          description="This action cannot be undone."
+          confirmText="Yes, delete this project"
+          cancelText="Cancel"
+          variant="destructive"
         />
       )}
     </div>
   )
 })
+
+const IncompleteCard = ({ project }: { project: Project | null }) => {
+  const { data: kycUsers } = useKYCProject({ projectId: project?.id || "" })
+  if (!project || !project.id || !kycUsers) return null
+  const projectStatus = resolveProjectStatus(kycUsers)
+
+  if (projectStatus == "APPROVED") return null
+  return (
+    <div className="flex items-center justify-center bg-red-200 w-[80px] h-5 rotate-[0deg] opacity-100 rounded-full py-[2px] px-2">
+      <p className="text-red-600 font-inter font-medium text-[12px] leading-[16px] tracking-[0%] text-center">
+        Incomplete
+      </p>
+    </div>
+  )
+}
+
+export { IncompleteCard }

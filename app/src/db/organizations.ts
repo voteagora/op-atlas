@@ -40,12 +40,11 @@ async function getOrganizationsFn(userId: string) {
   `
 
   // Transform the raw result to match the expected structure
-  const transformed =
+  return (
     result[0]?.result.organizations.map(
       (organizationObj) => organizationObj.organization,
     ) || []
-
-  return transformed
+  )
 }
 
 export const getOrganizations = cache(getOrganizationsFn)
@@ -155,11 +154,11 @@ async function getUserProjectOrganizationsFn(
   `
 
   // Transform the raw result to match the expected structure
-  const transformed = result[0]?.result || {
-    organizations: [],
-  }
-
-  return transformed
+  return (
+    result[0]?.result || {
+      organizations: [],
+    }
+  )
 }
 
 export const getUserProjectOrganizations = cache(getUserProjectOrganizationsFn)
@@ -697,8 +696,10 @@ export async function createOrganizationKycTeam({
     // This means that user has recently stopped one of their streams
     // and needs to create a new kyc team for the same stream
     // and connect all projects to the same kyc team
+    let createdKycTeam: { id: string; walletAddress: string }
+
     if (orgProjectWithDeletedKycTeam.length > 0) {
-      await prisma.$transaction(async (tx) => {
+      createdKycTeam = await prisma.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
           data: {
             walletAddress: walletAddress.toLowerCase(),
@@ -746,9 +747,11 @@ export async function createOrganizationKycTeam({
             },
           }),
         ])
+
+        return kycTeam
       })
     } else {
-      await prisma.$transaction(async (tx) => {
+      createdKycTeam = await prisma.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
           data: {
             walletAddress: walletAddress.toLowerCase(),
@@ -774,10 +777,16 @@ export async function createOrganizationKycTeam({
             },
           }),
         ])
+
+        return kycTeam
       })
     }
 
-    return { error: null }
+    return {
+      id: createdKycTeam.id,
+      walletAddress: createdKycTeam.walletAddress,
+      error: null,
+    }
   } catch (error: any) {
     if (error.message.includes("Unique constraint failed")) {
       return { error: "KYC team with this Wallet Address already exists" }
@@ -808,4 +817,171 @@ export async function getOrganizationKYCTeams({
       },
     },
   })
+}
+
+export async function getOrganizationWithGrantEligibility({
+  organizationId,
+}: {
+  organizationId: string
+}) {
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: organizationId,
+    },
+    include: {
+      projects: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          organization: true,
+        },
+      },
+      GrantEligibilitys: {
+        where: {
+          deletedAt: null,
+          submittedAt: {
+            not: null,
+          },
+        },
+        select: {
+          id: true,
+          submittedAt: true,
+          expiresAt: true,
+          kycTeamId: true,
+        },
+      },
+      OrganizationKYCTeams: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          team: {
+            include: {
+              team: {
+                select: {
+                  users: true,
+                },
+              },
+              rewardStreams: true,
+              projects: {
+                include: {
+                  blacklist: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  console.log({ organization })
+
+  // Check if organization has KYC team with submitted grant eligibility
+  const hasKycTeam = !!(
+    organization?.OrganizationKYCTeams &&
+    organization.OrganizationKYCTeams.length > 0
+  )
+
+  const hasSubmittedGrantEligibility = !!(
+    organization?.GrantEligibilitys && organization.GrantEligibilitys.length > 0
+  )
+
+  return {
+    organization,
+    hasKycTeam,
+    hasSubmittedGrantEligibility,
+    hasKycTeamWithSubmittedForm: hasKycTeam && hasSubmittedGrantEligibility,
+  }
+}
+
+export async function getOrganizationWithAllGrantData({
+  organizationId,
+}: {
+  organizationId: string
+}) {
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: organizationId,
+    },
+    include: {
+      projects: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          organization: true,
+        },
+      },
+      // Get ALL grant eligibility forms (draft, submitted, expired) - not just submitted ones
+      GrantEligibilitys: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          kycTeam: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
+      OrganizationKYCTeams: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          team: {
+            include: {
+              team: {
+                select: {
+                  users: true,
+                },
+              },
+              rewardStreams: true,
+              projects: {
+                include: {
+                  blacklist: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!organization) {
+    return null
+  }
+
+  // Check if there's any DRAFT grant eligibility form
+  const draftForms = organization.GrantEligibilitys.filter(form => 
+    !form.submittedAt && 
+    !form.deletedAt && 
+    form.expiresAt && 
+    new Date(form.expiresAt) > new Date()
+  )
+
+  // Get submitted forms with KYC teams
+  const submittedFormsWithKyc = organization.GrantEligibilitys.filter(form => 
+    form.submittedAt && 
+    form.kycTeam
+  )
+
+  // Check if any KYC teams have active streams
+  const kycTeamsWithStreams = organization.OrganizationKYCTeams.map(orgTeam => ({
+    ...orgTeam,
+    hasActiveStream: orgTeam.team.rewardStreams && orgTeam.team.rewardStreams.length > 0
+  }))
+
+  return {
+    organization,
+    allGrantEligibilityForms: organization.GrantEligibilitys,
+    draftForms,
+    submittedFormsWithKyc,
+    kycTeams: kycTeamsWithStreams,
+    hasDraftForm: draftForms.length > 0,
+    hasSubmittedForms: submittedFormsWithKyc.length > 0,
+  }
 }

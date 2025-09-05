@@ -3,60 +3,25 @@ import { KYCUser } from "@prisma/client"
 import { prisma } from "./client"
 
 export async function updateKYCUserStatus(
-  name: string,
-  email: string,
-  status: string,
+  parsedStatus: string,
+  unparsedPersonaStatus: string,
   updatedAt: Date,
+  referenceId?: string,
+  expiresAt?: Date | string | null,
 ) {
+  if (!referenceId) {
+    throw new Error("Reference ID is required for KYC user status update")
+  }
+
   const result = await prisma.$queryRaw<KYCUser[]>`
-    WITH closest_match AS (
-      SELECT id, difference(lower(unaccent("firstName") || ' ' || unaccent("lastName")), lower(unaccent(${name}))) as name_similarity
-      FROM "KYCUser" 
-      WHERE "email" = ${email.toLowerCase()}
-      ORDER BY name_similarity DESC
-      LIMIT 1
-    )
     UPDATE "KYCUser" SET
-      "status" = ${status}::"KYCStatus",
+      "status" = ${parsedStatus}::"KYCStatus",
+      "personaStatus" = ${unparsedPersonaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
-      "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE EXISTS (
-      SELECT 1 FROM closest_match 
-      WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 2
-    )
+      "expiry" = COALESCE(${expiresAt}::timestamptz, ${updatedAt} + INTERVAL '1 year')
+    WHERE id = ${referenceId}
     RETURNING *;
   `
-
-  return result
-}
-
-export async function updateKYBUserStatus(
-  name: string,
-  email: string,
-  status: string,
-  updatedAt: Date,
-) {
-  const result = await prisma.$queryRaw<KYCUser[]>`
-    WITH closest_match AS (
-      SELECT id, difference(lower(unaccent("businessName")), lower(unaccent(${name}))) as name_similarity
-      FROM "KYCUser" 
-      WHERE "email" = ${email.toLowerCase()} AND "businessName" IS NOT NULL
-      ORDER BY name_similarity DESC
-      LIMIT 1
-    )
-    UPDATE "KYCUser" SET
-      "status" = ${status}::"KYCStatus",
-      "updatedAt" = ${updatedAt},
-      "expiry" = ${updatedAt} + INTERVAL '1 year'
-    WHERE EXISTS (
-      SELECT 1 FROM closest_match 
-      WHERE closest_match.id = "KYCUser".id
-      AND closest_match.name_similarity > 2
-    )
-    RETURNING *;
-  `
-
   return result
 }
 
@@ -218,4 +183,31 @@ export async function rejectProjectKYC(projectId: string) {
   await Promise.all(updatePromises)
 
   return kycUsers.length
+}
+
+export async function getKYCUsersByProjectId({
+  projectId,
+}: {
+  projectId: string
+}) {
+  // This query follows the SQL join logic:
+  // select * from "Project" p
+  // join "KYCUserTeams" kut on kut."kycTeamId" = p."kycTeamId"
+  // join "KYCUser" ku on ku.id = kut."kycUserId"
+  // where p.id = '...'
+  return await prisma.kYCUser.findMany({
+    where: {
+      KYCUserTeams: {
+        some: {
+          team: {
+            projects: {
+              some: {
+                id: projectId,
+              },
+            },
+          },
+        },
+      },
+    },
+  })
 }

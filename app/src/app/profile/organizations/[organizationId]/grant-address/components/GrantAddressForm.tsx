@@ -1,75 +1,56 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { PlusIcon } from "lucide-react"
 import { useParams } from "next/navigation"
 import React from "react"
 
-import { Button } from "@/components/common/Button"
-import AddGrantDeliveryAddressForm from "@/components/projects/rewards/AddGrantDeliveryAddressForm"
-import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
+import GrantEligibilityFormButton from "@/components/grant-eligibility/GrantEligibilityFormButton"
+import { getLatestDraftFormAction } from "@/lib/actions/grantEligibility"
 
-export default function GrantAddressForm() {
+interface GrantAddressFormProps {
+  hasExistingVerifiedAddresses?: boolean
+  isAdmin?: boolean
+}
+
+export default function GrantAddressForm({ hasExistingVerifiedAddresses = false, isAdmin = true }: GrantAddressFormProps) {
   const params = useParams()
   const organizationId = params.organizationId as string
-  const { data: organizationKycTeams, isLoading } = useQuery({
-    queryKey: ["kyc-teams", "organization", organizationId],
+  
+  const { data: latestDraftForm, isLoading: isLoadingDraft } = useQuery({
+    queryKey: ["grant-eligibility-draft", "organization", organizationId],
     queryFn: async () => {
       try {
-        return await getOrganizationKycTeamsAction({ organizationId })
+        const result = await getLatestDraftFormAction({ organizationId })
+        if (result.error) {
+          throw new Error(result.error)
+        }
+        return result.form || null
       } catch (error) {
-        console.error("Error fetching organization KYC teams:", error)
-        // Let queryFn handle the error
+        console.error("Error fetching latest draft form:", error)
         throw error
       }
     },
   })
 
-  const [addMoreActive, setAddMoreActive] = React.useState(false)
+  if (isLoadingDraft) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse bg-gray-200 rounded-md h-10 w-48" />
+      </div>
+    )
+  }
+
+  // Determine button variant: use "add" only if there are existing verified addresses
+  const buttonVariant = hasExistingVerifiedAddresses ? "add" : "default"
 
   return (
-    <div className="space-y-12">
-      <div className="space-y-6">
-        <h2>Grant Delivery Address</h2>
-        <p className="text-secondary-foreground font-normal">
-          Add the address(es) your rewards will be delivered to. You can do this
-          at any time, and your entry will be valid for one year.
-        </p>
-        <p className="text-secondary-foreground font-normal">
-          KYC (identity verification) is required for each address.
-        </p>
-      </div>
-      <div className="space-y-6">
-        <h3>Verified addresses</h3>
-        {isLoading ? (
-          <div className="p-6 border rounded-md space-y-6 w-full h-[356px]">
-            <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
-            <div className="space-y-4">
-              <div className="animate-pulse bg-gray-200 rounded-md h-[146px] w-full" />
-              <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
-              <div className="animate-pulse bg-gray-200 rounded-md h-8 w-full" />
-            </div>
-          </div>
-        ) : (
-          organizationKycTeams?.map((organizationKycTeam) => (
-            <AddGrantDeliveryAddressForm
-              key={organizationKycTeam.id}
-              kycTeam={organizationKycTeam.team}
-            />
-          ))
-        )}
-        {(organizationKycTeams?.length === 0 || addMoreActive) && (
-          <AddGrantDeliveryAddressForm />
-        )}
-        <Button
-          variant="secondary"
-          disabled={addMoreActive}
-          leftIcon={<PlusIcon size={16} />}
-          onClick={() => setAddMoreActive(true)}
-        >
-          Add more
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <GrantEligibilityFormButton 
+        organizationId={organizationId}
+        existingForm={latestDraftForm || undefined}
+        variant={buttonVariant}
+        isAdmin={isAdmin}
+      />
     </div>
   )
 }

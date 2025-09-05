@@ -124,6 +124,47 @@ export const verifyOrganizationAdmin = async (
   return null
 }
 
+export const getUserProjectRole = async (projectId: string, userId: string): Promise<'admin' | 'member' | null> => {
+  const [projects, userProjectOrganizations] = await Promise.all([
+    getUserProjects({ userId }),
+    getUserProjectOrganizations(userId, projectId),
+  ])
+
+  // Check direct project membership
+  const projectMembership = projects?.projects.find(
+    (item) => item.project.id === projectId,
+  )
+
+  // Check organization membership for projects belonging to organizations
+  const organizationMembership = userProjectOrganizations?.organizations.find(
+    (item) => item.organization.projects.length > 0,
+  )
+
+  // Determine role
+  if (projectMembership?.role === "admin" || organizationMembership?.role === "admin") {
+    return "admin"
+  }
+  
+  if (projectMembership || organizationMembership) {
+    return "member"
+  }
+
+  return null
+}
+
+export const getUserOrganizationRole = async (organizationId: string, userId: string): Promise<'admin' | 'member' | null> => {
+  const userOrganization = await getUserOrganizationsWithDetails(userId)
+  const membership = userOrganization?.organizations.find(
+    ({ organization }) => organization.id === organizationId,
+  )
+
+  if (!membership) {
+    return null
+  }
+
+  return membership.role === "admin" ? "admin" : "member"
+}
+
 export function parseEnumValue<E>(
   enumObj: Record<string, string>,
   value: string,

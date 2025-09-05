@@ -3,16 +3,15 @@
 import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
-import {
-  deleteKycTeam,
-  updateKYBUserStatus,
-  updateKYCUserStatus,
-} from "@/db/kyc"
+import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
+import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
 import {
   caseStatusMap,
   inquiryStatusMap,
+  mapCaseStatusToPersonaStatus,
   PersonaCase,
+  personaClient,
   PersonaInquiry,
 } from "@/lib/persona"
 
@@ -164,10 +163,8 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
     inquiries.map(async (inquiry) => {
       const {
         attributes: {
-          "email-address": email,
-          "name-first": firstName,
-          "name-last": lastName,
           "updated-at": updatedAt,
+          "reference-id": referenceId,
           status,
         },
       } = inquiry
@@ -180,16 +177,21 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
         return
       }
 
-      if (!email || !firstName || !lastName) {
-        console.warn(`Missing required fields for inquiry ${inquiry.id}`)
+      if (!referenceId) {
+        console.warn(
+          `Missing the required referecedId for inquiry ${inquiry.id}`,
+        )
         return
       }
 
       await updateKYCUserStatus(
-        `${firstName.split(" ")[0]} ${lastName}`,
-        email,
         parsedStatus,
+        status,
         new Date(updatedAt),
+        referenceId,
+        inquiry.attributes["expires-at"]
+          ? new Date(inquiry.attributes["expires-at"])
+          : null,
       )
     }),
   )
@@ -205,33 +207,48 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
 
       const {
         attributes: {
-          fields: {
-            "form-filler-email-address": { value: email },
-            "business-name": { value: businessName },
-          },
           "updated-at": updatedAt,
+          // The Case.status takes precedence over the Inquiry.status whenever the Inquiriy
+          // is associated with a Case.
           status,
+        },
+        relationships: {
+          inquiries: { data: inquiries },
         },
       } = c
 
-      if (!email || !businessName) {
-        console.warn(`Missing required fields for case ${c.id}`)
-        return
+      for (const inquiryRef of inquiries) {
+        const inquiryId = inquiryRef.id
+        if (!inquiryId) {
+          console.warn(`Missing inquiry id in case ${c.id}`)
+          continue
+        }
+
+        const inquiry: PersonaInquiry | null =
+          await personaClient.getInquiryById(inquiryId)
+
+        if (!inquiry) {
+          console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)
+          continue
+        }
+        if (inquiry.attributes["reference-id"]) {
+          const parsedStatus =
+            caseStatusMap[status as keyof typeof caseStatusMap]
+          // The persona status value of a Case is slightly different from the status value of an Inquiry.
+          // Adjust Case statues like "Waiting on UBOs" to Pending for now.
+          const personaStatus = mapCaseStatusToPersonaStatus(status)
+
+          await updateKYCUserStatus(
+            parsedStatus,
+            personaStatus,
+            new Date(updatedAt),
+            inquiry.attributes["reference-id"],
+            inquiry.attributes["expires-at"]
+              ? new Date(inquiry.attributes["expires-at"])
+              : null,
+          )
+        }
       }
-
-      const parsedStatus = caseStatusMap[status as keyof typeof caseStatusMap]
-
-      if (!parsedStatus) {
-        console.warn(`Unknown case status: ${status}`)
-        return
-      }
-
-      await updateKYBUserStatus(
-        businessName,
-        email,
-        parsedStatus,
-        new Date(updatedAt),
-      )
     }),
   )
 }
@@ -275,4 +292,20 @@ export const deleteKYCTeamAction = async ({
     kycTeamId,
     hasActiveStream,
   })
+}
+
+export const getKYCUsersByProjectId = async (projectId: string) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, userId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  return await getKYCUsersByProjId({ projectId })
 }
