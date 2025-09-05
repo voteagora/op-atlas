@@ -1,13 +1,13 @@
 import { KYCUser } from "@prisma/client"
 
 import { prisma } from "./client"
-import { string } from "zod"
 
 export async function updateKYCUserStatus(
   status: string,
   updatedAt: Date,
-  personaStatus: string,
+  _personaStatus: string,
   referenceId?: string,
+  expiresAt?: Date | string | null,
 ) {
   if (!referenceId) {
     throw new Error("Reference ID is required for KYC user status update")
@@ -16,9 +16,8 @@ export async function updateKYCUserStatus(
   const result = await prisma.$queryRaw<KYCUser[]>`
     UPDATE "KYCUser" SET
       "status" = ${status}::"KYCStatus",
-      "personaStatus" = ${personaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
-      "expiry" = ${updatedAt} + INTERVAL '1 year'
+      "expiry" = COALESCE(${expiresAt}::timestamptz, ${updatedAt} + INTERVAL '1 year')
     WHERE id = ${referenceId}
     RETURNING *;
   `
