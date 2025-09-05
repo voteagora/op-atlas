@@ -3,9 +3,9 @@ import { KYCUser } from "@prisma/client"
 import { prisma } from "./client"
 
 export async function updateKYCUserStatus(
-  status: string,
+  parsedStatus: string,
+  unparsedPersonaStatus: string,
   updatedAt: Date,
-  _personaStatus: string,
   referenceId?: string,
   expiresAt?: Date | string | null,
 ) {
@@ -15,7 +15,8 @@ export async function updateKYCUserStatus(
 
   const result = await prisma.$queryRaw<KYCUser[]>`
     UPDATE "KYCUser" SET
-      "status" = ${status}::"KYCStatus",
+      "status" = ${parsedStatus}::"KYCStatus",
+      "personaStatus" = ${unparsedPersonaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = COALESCE(${expiresAt}::timestamptz, ${updatedAt} + INTERVAL '1 year')
     WHERE id = ${referenceId}
