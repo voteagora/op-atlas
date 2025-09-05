@@ -331,7 +331,10 @@ export async function submitGrantEligibilityForm(params: {
           where: { email: signer.email.toLowerCase() },
         })
 
-        if (!kycUser) {
+        let isNewUser = false
+        
+        // If user doesn't exist or is expired, create/recreate them
+        if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
           kycUser = await tx.kYCUser.create({
             data: {
               email: signer.email.toLowerCase(),
@@ -342,6 +345,7 @@ export async function submitGrantEligibilityForm(params: {
               expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
             },
           })
+          isNewUser = true
         }
 
         const existingLink = await tx.kYCUserTeams.findFirst({
@@ -360,7 +364,10 @@ export async function submitGrantEligibilityForm(params: {
           })
         }
 
-        kycTargets.push(kycUser)
+        // Only send email if this is a new user
+        if (isNewUser) {
+          kycTargets.push(kycUser)
+        }
       }
 
       // Process entities (business KYB)
@@ -374,7 +381,10 @@ export async function submitGrantEligibilityForm(params: {
           where: { email: entity.controllerEmail.toLowerCase() },
         })
 
-        if (!kycUser) {
+        let isNewUser = false
+
+        // If user doesn't exist or is expired, create/recreate them
+        if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
           kycUser = await tx.kYCUser.create({
             data: {
               email: entity.controllerEmail.toLowerCase(),
@@ -386,6 +396,7 @@ export async function submitGrantEligibilityForm(params: {
               expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
             },
           })
+          isNewUser = true
         }
 
         const existingLink = await tx.kYCUserTeams.findFirst({
@@ -404,7 +415,10 @@ export async function submitGrantEligibilityForm(params: {
           })
         }
 
-        kybTargets.push(kycUser)
+        // Only send email if this is a new user
+        if (isNewUser) {
+          kybTargets.push(kycUser)
+        }
       }
 
       return { updatedForm: updated, kycEmailTargets: kycTargets, kybEmailTargets: kybTargets }
