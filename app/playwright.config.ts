@@ -36,7 +36,7 @@ export default defineConfig({
       ATLAS_TEST_MODE: "true",
       USE_TEST_AUTH: "true",
       MOCK_EXTERNAL_SERVICES: "true",
-      DATABASE_URL: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/atlas_test",
+      DATABASE_URL: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/atlas_test",
       NEXT_PUBLIC_PRIVY_APP_ID: "test-app-id",
       NEXT_PUBLIC_ATLAS_TEST_MODE: "true",
       NEXT_PUBLIC_USE_TEST_AUTH: "true",

@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
+import { isTestMode } from "@/lib/auth/testMode"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -193,7 +194,9 @@ const SafeWalletsMenuItems = ({
 }
 
 export const Account = () => {
-  const { user: privyUser, getAccessToken } = usePrivy()
+  const { user: privyUser, getAccessToken } = isTestMode()
+    ? { user: null, getAccessToken: () => Promise.resolve("") }
+    : usePrivy()
 
   const isLinking = useRef(false)
   const isLoggingIn = useRef(false)
@@ -218,14 +221,18 @@ export const Account = () => {
     isLoadingSafeWallets,
   } = useWallet()
 
-  const { login: privyLogin } = useLogin({
-    onComplete: (params) => {
-      onPrivyLogin(params.user)
-    },
-  })
+  const { login: privyLogin } = isTestMode() 
+    ? { login: () => {} }
+    : useLogin({
+        onComplete: (params) => {
+          onPrivyLogin(params.user)
+        },
+      })
 
   // Connect email when a new user logs in
-  const { linkEmail } = useLinkAccount({
+  const { linkEmail } = isTestMode()
+    ? { linkEmail: () => {} }
+    : useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "email" && isLinking.current) {
         toast.promise(
@@ -242,12 +249,14 @@ export const Account = () => {
     },
   })
 
-  const { logout: privyLogout } = useLogout({
-    onSuccess: () => {
-      isLoggingIn.current = false
-      signOut()
-    },
-  })
+  const { logout: privyLogout } = isTestMode()
+    ? { logout: () => {} }
+    : useLogout({
+        onSuccess: () => {
+          isLoggingIn.current = false
+          signOut()
+        },
+      })
 
   const prevAuthStatus = usePrevious(authStatus)
 
