@@ -2013,6 +2013,53 @@ export const getPublicProject = cache(async (projectId: string) => {
   })
 })
 
+export const getProjectMetadata = cache(async (projectId: string) => {
+  return prisma.project.findFirst({
+    where: { id: projectId },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      category: true,
+      thumbnailUrl: true,
+      bannerUrl: true,
+      website: true,
+      farcaster: true,
+      twitter: true,
+      mirror: true,
+      contracts: {
+        select: {
+          chainId: true,
+        },
+      },
+      organization: {
+        select: {
+          organization: {
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      },
+      team: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              imageUrl: true,
+              username: true,
+            },
+          },
+        },
+      },
+    },
+  })
+})
+
 export async function getProjectsOSO(projectId: string) {
   return await prisma.projectOSO.findFirst({
     where: {
