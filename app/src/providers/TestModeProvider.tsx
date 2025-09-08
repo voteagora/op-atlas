@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { createConfig, WagmiProvider } from "wagmi"
 import { mainnet, optimism, optimismSepolia, sepolia } from "viem/chains"
 import { http } from "wagmi"
-import { createContext, useContext } from "react"
+import { createContext, useContext, ReactNode } from "react"
 
 import type { SafeContextValue, SignerWallet } from "@/types/safe"
 import { SafeContext } from "@/providers/SafeContextProvider"
@@ -19,6 +19,45 @@ export const testWagmiConfig = createConfig({
     [optimism.id]: http(),
   },
 })
+
+// Mock Privy context for test mode
+const TestPrivyContext = createContext({
+  user: null,
+  getAccessToken: () => Promise.resolve(""),
+  login: () => {},
+  linkEmail: () => {},
+  logout: () => {},
+})
+
+// Mock Privy hooks for test mode
+export const usePrivy = () => {
+  const context = useContext(TestPrivyContext)
+  return {
+    user: context.user,
+    getAccessToken: context.getAccessToken,
+  }
+}
+
+export const useLogin = ({ onComplete }: { onComplete: (params: { user: any }) => void }) => {
+  const context = useContext(TestPrivyContext)
+  return {
+    login: context.login,
+  }
+}
+
+export const useLinkAccount = ({ onSuccess }: { onSuccess: (params: { user: any; linkMethod: string }) => void }) => {
+  const context = useContext(TestPrivyContext)
+  return {
+    linkEmail: context.linkEmail,
+  }
+}
+
+export const useLogout = ({ onSuccess }: { onSuccess: () => void }) => {
+  const context = useContext(TestPrivyContext)
+  return {
+    logout: context.logout,
+  }
+}
 
 // Test-safe version of SafeContextProvider that provides mock data
 const TestSafeContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -50,7 +89,15 @@ const TestModeProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={testWagmiConfig}>
-        <TestSafeContextProvider>{children}</TestSafeContextProvider>
+        <TestPrivyContext.Provider value={{
+          user: null,
+          getAccessToken: () => Promise.resolve(""),
+          login: () => {},
+          linkEmail: () => {},
+          logout: () => {},
+        }}>
+          <TestSafeContextProvider>{children}</TestSafeContextProvider>
+        </TestPrivyContext.Provider>
       </WagmiProvider>
     </QueryClientProvider>
   )
