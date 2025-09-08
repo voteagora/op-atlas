@@ -6,14 +6,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useFeatureFlagEnabled } from "posthog-js/react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { IncompleteCard } from "@/components/projects/ProjectStatusSidebar"
-import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
-import { resolveProjectStatus } from "@/lib/utils/kyc"
-import { getKYCUsersByProjectId } from "@/lib/actions/kyc"
+import { useOrganizationSidebarData } from "@/hooks/db/useOrganizationSidebarData"
 
 export function UserProfileSidebar({
   organizations,
@@ -26,74 +24,16 @@ export function UserProfileSidebar({
   const currentPage = pathname.split("/").slice(-1)[0]
 
   const [dashboardLoading, setDashboardLoading] = useState(false)
-  const [organizationsData, setOrganizationsData] = useState<
-    Array<{
-      organization: Organization
-      incompleteProject: any | null
-      organizationUrl: string
-      isLinkActive: boolean
-      isGrantAddressActive: boolean
-    }>
-  >([])
+  
+  const { data: organizationsData, isLoading: organizationsLoading } = useOrganizationSidebarData({
+    organizations,
+    pathname,
+  })
 
   const handleGoBack = () => {
     setDashboardLoading(true)
     router.push("/dashboard")
   }
-
-  useEffect(() => {
-    const fetchOrganizationData = async () => {
-      if (!organizations) return
-
-      const orgData = await Promise.all(
-        organizations.map(async (organization) => {
-          const organizationUrl = `profile/organizations/${organization.id}`
-          const isLinkActive = pathname.includes(organizationUrl)
-          const isGrantAddressActive = pathname.includes(
-            `${organizationUrl}/grant-address`,
-          )
-
-          // Fetch organization KYC teams
-          const organizationKycTeams = await getOrganizationKycTeamsAction({
-            organizationId: organization.id,
-          })
-
-          const projects = organizationKycTeams.flatMap(
-            (org) => org.team.projects,
-          )
-
-          // Determine organization completeness based on TAM users (across the org's KYC teams)
-          const tamUsers = organizationKycTeams.flatMap((org) =>
-            (org.team.team || []).flatMap((t: any) => t.users || []),
-          )
-          const orgResolvedStatus =
-            tamUsers && tamUsers.length > 0
-              ? resolveProjectStatus(tamUsers)
-              : "PENDING"
-
-          // If org TAM users indicate incomplete status, show the incomplete card by associating it with a representative project
-          // We pick the first available project as a handle for the IncompleteCard component
-          const incompleteProject =
-            orgResolvedStatus === "PENDING" ||
-            orgResolvedStatus === "project_issue"
-              ? projects[0] || null
-              : null
-
-          return {
-            organization,
-            incompleteProject,
-            organizationUrl,
-            isLinkActive,
-            isGrantAddressActive,
-          }
-        }),
-      )
-
-      setOrganizationsData(orgData)
-    }
-
-    fetchOrganizationData()
-  }, [organizations, pathname])
 
   return (
     <div className="flex flex-col gap-y-6 w-full max-w-[228px]">
