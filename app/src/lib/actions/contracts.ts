@@ -165,7 +165,13 @@ export const verifyContract = async ({
     if (!trace) {
       // Fallback: contract creation txs have `to === null`. If so, accept.
       if (tx.to === null) {
-        // proceed without trace
+        // proceed without trace but ensure code exists at claimed address
+        const code = await clients[chain].getBytecode({
+          address: contractAddress,
+        })
+        if (!code || code === "0x") {
+          return { error: "Contract code not found at address" }
+        }
       } else {
         // Additional fallback: Universal CREATE2 Factory without trace
         const UNIVERSAL_CREATE2_FACTORY =
@@ -178,46 +184,59 @@ export const verifyContract = async ({
           sentByDeployer &&
           (tx.status as unknown as string) === "success"
         ) {
-          // proceed without trace
+          // proceed without trace but ensure code exists at claimed address
+          const code = await clients[chain].getBytecode({
+            address: contractAddress,
+          })
+          if (!code || code === "0x") {
+            return { error: "Contract code not found at address" }
+          }
         } else {
           return { error: "Transaction trace not found" }
         }
       }
     } else {
       const calls = (trace as any).calls as TraceCall[]
-      const findCreationOrInvolvement = (
+      type Correlated = { created: boolean; createdWithDeployerPath: boolean }
+      const dfs = (
         nodes: TraceCall[],
-      ): { created: boolean; involved: boolean } => {
+        pathHasDeployer: boolean,
+      ): Correlated => {
         let created = false
-        let involved = false
+        let createdWithDeployerPath = false
         for (const node of nodes) {
-          if (
+          const currentPathHasDeployer =
+            pathHasDeployer || isAddressEqual(node.from, deployerAddress)
+
+          const isCreation =
             (node.type === "CREATE" || node.type === "CREATE2") &&
             node.to !== null &&
             isAddressEqual(node.to, contractAddress)
-          ) {
+
+          if (isCreation) {
             created = true
+            if (currentPathHasDeployer || sentByDeployer) {
+              createdWithDeployerPath = true
+            }
           }
-          if (isAddressEqual(node.from, deployerAddress)) {
-            involved = true
-          }
+
           const nested: any = (node as any).calls
           if (Array.isArray(nested) && nested.length > 0) {
-            const res = findCreationOrInvolvement(nested as TraceCall[])
+            const res = dfs(nested as TraceCall[], currentPathHasDeployer)
             created = created || res.created
-            involved = involved || res.involved
+            createdWithDeployerPath =
+              createdWithDeployerPath || res.createdWithDeployerPath
           }
         }
-        return { created, involved }
+        return { created, createdWithDeployerPath }
       }
 
-      const { created, involved } = findCreationOrInvolvement(calls)
+      const { created, createdWithDeployerPath } = dfs(calls, sentByDeployer)
       if (!created) {
         return { error: "Contract creation not found in transaction" }
       }
-      // If the deployer didn't send the tx, ensure they were involved in the call graph
-      if (!sentByDeployer && !involved) {
-        return { error: "Deployer not involved in transaction" }
+      if (!createdWithDeployerPath) {
+        return { error: "Deployer not involved in contract creation path" }
       }
     }
   }
