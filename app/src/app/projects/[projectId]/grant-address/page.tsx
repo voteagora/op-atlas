@@ -10,7 +10,7 @@ import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeli
 import KYCStatusContainer, {
   KYCStatusTitle,
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
-import { getProjectWithGrantEligibility } from "@/db/projects"
+import { getKycTeamForProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { getUserProjectRole, verifyMembership } from "@/lib/actions/utils"
 
@@ -59,10 +59,9 @@ export default async function Page({
   const userRole = await getUserProjectRole(params.projectId, userId)
   const isAdmin = userRole === "admin"
 
-  const { project, hasSubmittedGrantEligibility } = await getProjectWithGrantEligibility({ 
-    projectId: params.projectId 
-  })
+  const project = await getKycTeamForProject({ projectId: params.projectId })
   const kycTeam = project?.kycTeam ?? undefined
+  const hasKycTeam = !!kycTeam
 
   return (
     <div className="space-y-12">
@@ -79,7 +78,7 @@ export default async function Page({
           </Button>
         </>
       ) : (
-        !hasSubmittedGrantEligibility && (
+        !hasKycTeam && (
           <div className="space-y-6">
             <GrantDeliveryAddressSection 
               projectId={params.projectId}
@@ -89,7 +88,7 @@ export default async function Page({
         )
       )}
       
-      {project && hasSubmittedGrantEligibility && (
+      {project && hasKycTeam && (
         <KYCStatusContainer project={project} isAdmin={isAdmin} />
       )}
     </div>

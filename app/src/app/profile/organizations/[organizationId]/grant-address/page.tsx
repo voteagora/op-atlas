@@ -6,10 +6,7 @@ import { auth } from "@/auth"
 import KYCStatusContainer, {
   KYCStatusTitle,
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
-import {
-  getOrganization,
-  getOrganizationWithAllGrantData,
-} from "@/db/organizations"
+import { getOrganization } from "@/db/organizations"
 import { getUserOrganizationRole, verifyOrganizationMembership } from "@/lib/actions/utils"
 
 import GrantAddressForm from "./components/GrantAddressForm"
@@ -50,35 +47,30 @@ export default async function Page({
   const userId = session.user.id
 
   // Check user membership - redirect non-members to homepage
-  const membershipCheck = await verifyOrganizationMembership(params.organizationId, userId)
-  if (membershipCheck?.error) {
-    redirect("/")
-  }
-
-  // Get user role
   const userRole = await getUserOrganizationRole(params.organizationId, userId)
-  const isAdmin = userRole === "admin"
+  if (userRole === null) {
+    redirect("/")
+  }  
 
-  // Fetch organization data with all grant eligibility information
-  const organizationData = await getOrganizationWithAllGrantData({
-    organizationId: params.organizationId,
-  })
+  const isAdmin = userRole === "admin"  
 
-  if (!organizationData?.organization) {
+  // Ensure organization exists
+  const organization = await getOrganization({ id: params.organizationId })
+  if (!organization) {
     return notFound()
   }
-
-  const { organization, hasSubmittedForms } = organizationData
+  // Determine if org has any KYC teams based on lightweight include
+  const hasAnyKycTeams = (organization.OrganizationKYCTeams?.length ?? 0) > 0
 
   return (
     <div className="space-y-12">
       <KYCStatusTitle />
-      {/* Show KYC status container if there are submitted forms with KYC teams */}
-      {hasSubmittedForms && (
+      {/* Show KYC status container if there are any KYC teams (old or new flow) */}
+      {hasAnyKycTeams && (
         <KYCStatusContainer organization={organization} isAdmin={isAdmin} />
       )}
-      {/* Always show grant address form - variant depends on existing verified addresses */}
-      <GrantAddressForm hasExistingVerifiedAddresses={hasSubmittedForms} isAdmin={isAdmin} />
+      {/* Always show grant address form - use existing KYC teams to switch to "Add" variant */}
+      <GrantAddressForm hasExistingVerifiedAddresses={hasAnyKycTeams} isAdmin={isAdmin} />
     </div>
   )
 }
